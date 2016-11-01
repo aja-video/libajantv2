@@ -46,7 +46,7 @@ class CKonaIPEncoderSetup
 public:
     CKonaIPEncoderSetup();
 
-    bool setupBoard(char* pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
+    bool setupBoard(std::string pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
 
 protected:
 

@@ -54,7 +54,7 @@ CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 
 }
 
-bool CKonaIPEncoderSetup::setupBoard(char* pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
+bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
 {
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
