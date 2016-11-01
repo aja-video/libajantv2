@@ -39,13 +39,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", ".\libajant
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2", ".\libajantv2_vs12.vcxproj", "{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudaclasses", "..\..\..\ajaapi\gpustuff\cudaclasses_vs12.vcxproj", "{B0449C2A-B217-4AA3-A202-A5A013256D10}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudaclasses", "..\..\gpustuff\cudaclasses_vs12.vcxproj", "{B0449C2A-B217-4AA3-A202-A5A013256D10}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudaclassesDLL", "..\..\..\ajaapi\gpustuff\cudaclassesDLL_vs12.vcxproj", "{7A4BCA94-EC42-4330-A889-EBCA6289242D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudaclassesDLL", "..\..\gpustuff\cudaclassesDLL_vs12.vcxproj", "{7A4BCA94-EC42-4330-A889-EBCA6289242D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclasses", "..\..\..\ajaapi\gpustuff\oglclasses_vs12.vcxproj", "{54ACC959-DB5D-45C3-B0EB-A56312F8F31A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclasses", "..\..\gpustuff\oglclasses_vs12.vcxproj", "{54ACC959-DB5D-45C3-B0EB-A56312F8F31A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclassesDLL", "..\..\..\ajaapi\gpustuff\oglclassesDLL_vs12.vcxproj", "{36EAC2C3-81DB-4BD7-980E-41B238C235C3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclassesDLL", "..\..\gpustuff\oglclassesDLL_vs12.vcxproj", "{36EAC2C3-81DB-4BD7-980E-41B238C235C3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2llburn", "..\demoapps\ntv2llburn\ntv2llburn.vcxproj", "{8B5BDCA3-FA56-4DBE-B006-966EB55132BD}"
 EndProject

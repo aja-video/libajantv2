@@ -11,7 +11,7 @@
 #include "ntv2m31publicinterface.h"
 #include "ajastuff/common/options_popt.h"
 #include "ajastuff/system/systemtime.h"
-#include "../democlasses/ntv2encodehevc.h"
+#include "ntv2encodehevc.h"
 #include <signal.h>
 #include <iostream>
 #include <iomanip>

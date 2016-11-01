@@ -65,19 +65,19 @@
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>$(ProjectName)_32d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
@@ -85,7 +85,7 @@
     <TargetName>$(ProjectName)_32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\ajaapi;..\..\classes;..\..\includes;..\..\winclasses;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_DEBUG;_CRT_SECURE_NO_WARNINGS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -119,7 +119,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\ajaapi;..\..\classes;..\..\includes;..\..\winclasses;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;_CRT_SECURE_NO_WARNINGS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -141,7 +141,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\ajaapi;..\..\classes;..\..\includes;..\..\winclasses;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -167,7 +167,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\ajaapi;..\..\classes;..\..\includes;..\..\winclasses;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;_CRT_SECURE_NO_WARNINGS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -188,20 +188,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="..\..\democlasses\ntv2demohevccommon.cpp" />
-    <ClCompile Include="..\..\democlasses\ntv2encodehevcfile.cpp" />
-    <ClCompile Include="..\..\democlasses\ntv2encodehevcfileac.cpp" />
+    <ClCompile Include="..\ntv2demohevccommon.cpp" />
+    <ClCompile Include="ntv2encodehevcfile.cpp" />
+    <ClCompile Include="ntv2encodehevcfileac.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\democlasses\ntv2demohevccommon.h" />
-    <ClInclude Include="..\..\democlasses\ntv2encodehevcfile.h" />
-    <ClInclude Include="..\..\democlasses\ntv2encodehevcfileac.h" />
+    <ClInclude Include="..\ntv2demohevccommon.h" />
+    <ClInclude Include="ntv2encodehevcfile.h" />
+    <ClInclude Include="ntv2encodehevcfileac.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ajaapi\ajastuff\build\ajastuff_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\ajastuff\build\ajastuff_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\classes\classesSTATIC_vs12.vcxproj">
+    <ProjectReference Include="..\..\build\libajantv2_vs12.vcxproj">
       <Project>{5cb46d0f-27ca-4a59-ab0a-1dfbdb44caa2}</Project>
     </ProjectReference>
   </ItemGroup>

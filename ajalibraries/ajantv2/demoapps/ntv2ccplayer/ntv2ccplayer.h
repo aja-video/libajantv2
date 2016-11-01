@@ -13,7 +13,6 @@
 #include "ajastuff/system/thread.h"
 #include "ajastuff/system/lock.h"
 #include "ajacc/includes/ajacc.h"
-#include "ntv2democommon.h"
 #include <vector>
 
 #define	SIG_AJA_STOP	31		//	Our own user-defined "stop" signal
