@@ -16,7 +16,7 @@
 
 #define SAREK_REGS                  (0x100000/4)        // Base address of Sarek General Regs (expressed as regNum)
 #define SAREK_GENLOCK_SPI           (0x101000/4)
-#define SAREK_2022_6_TX_CORE_0      (0x103000/4)       // PSM t added so we can see where these are used
+#define SAREK_2022_6_TX_CORE_0      (0x103000/4)
 #define SAREK_2022_6_RX_CORE_0      (0x104000/4)
 #define SAREK_2022_6_TX_CORE_1      (0x105000/4)
 #define SAREK_2022_6_RX_CORE_1      (0x106000/4)
@@ -234,7 +234,7 @@
 /////////////////////////////////////////////////////////////////////
 
 // common
-#define kReg2022_6_rx_control                   0                      // 0x0000  // PSM t added so we can see where these are used
+#define kReg2022_6_rx_control                   0                      // 0x0000
 #define kReg2022_6_rx_reset                     1                      // 0x0004
 #define kReg2022_6_rx_channel_access            3                      // 0x000C
 

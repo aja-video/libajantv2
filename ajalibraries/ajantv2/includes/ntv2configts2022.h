@@ -197,8 +197,8 @@ public:
     bool    SetupEncodeTsTimer(const NTV2Channel channel);
     bool    SetupEncodeTsJ2KEncoder(const NTV2Channel channel);
     bool    SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsAesEncap();
-    bool    SetupEncodeTsMpegAesEncap();
+    bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
+    bool    SetupEncodeTsMpegAesEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAncEncap();
 
     // Setup individual TS decode parts
@@ -229,5 +229,66 @@ public:
     int32_t             _transactionCount;
 
 };	//	CNTV2ConfigTs2022
+
+
+struct tsSetupReg
+{
+    uint32_t reg;
+    uint32_t value;
+};
+
+static const tsSetupReg tsAesEncapTable[] =
+{
+    {0x000, 0x02},
+    {0x008, 0x1},
+};
+#define numTsAesEncapEntries (sizeof(tsAesEncapTable) / sizeof(tsSetupReg))
+
+static const tsSetupReg tsMpegAesEncapTable[] =
+{
+    {0x000, 0x47},
+    {0x001, 0x41},
+    {0x002, 0x2},
+    {0x003, 0x10},
+    {0x004, 0x0},
+    {0x005, 0x0},
+    {0x006, 0x1},
+    {0x007, 0xbd},
+    {0x008, 0x0},
+    {0x009, 0x0},
+    {0x00a, 0x80},
+    {0x00b, 0x80},
+    {0x00c, 0x5},
+    {0x00d, 0x21},
+    {0x00e, 0x0},
+    {0x00f, 0x1},
+    {0x010, 0x0},
+    {0x011, 0x1},
+    {0x012, 0x0},
+    {0x013, 0x0},
+    {0x014, 0x0},
+    {0x015, 0x10},
+
+    {0x0c0, 0x16},
+    {0x0c1, 0xd},
+    {0x0c3, 0x1000012},
+    {0x0c4, 0x1000c08},
+
+    {0x300, 0x47},               // adaptation header
+    {0x301, 0x1},
+    {0x302, 0x2},
+    {0x303, 0x30},
+    {0x304, 0x0},
+    {0x305, 0x0},
+
+    {0x3f0, 0x6},
+
+    {0x0e2, 0x102},
+    {0x0e0, 0x1},
+
+};
+#define numTsMpegAesEncapEntries (sizeof(tsMpegAesEncapTable) / sizeof(tsSetupReg))
+
+
 
 #endif // NTV2_2022CONFIGTS_H

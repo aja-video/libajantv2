@@ -201,6 +201,14 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
     if (!SetupEncodeTsMpegJ2kEncap(channel))
         return false;
 
+    // program aes encapsulator
+    if (!SetupEncodeTsAesEncap(channel))
+        return false;
+
+    // program mpeg aes encapsulator
+    if (!SetupEncodeTsMpegAesEncap(channel))
+        return false;
+
     return true;
 }
 
@@ -277,17 +285,33 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel)
 }
 
 
-bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap()
+bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 {
-    mError = "SetupEncodeTsAesEncap not yet implemented";
-    return false;
+    uint32_t addr = GetIpxTsAddr(channel);
+
+    // Program registers
+    for (uint32_t index=0; index < numTsAesEncapEntries; index++)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
+        printf("SetTsAesEncap - reg=%08x, val=%08x\n",
+               addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg*4), tsAesEncapTable[index].value);
+    }
+    return true;
 }
 
 
-bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap()
+bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap(const NTV2Channel channel)
 {
-    mError = "SetupEncodeTsMpegAesEncap not yet implemented";
-    return false;
+    uint32_t addr = GetIpxTsAddr(channel);
+
+    // Program registers
+    for (uint32_t index=0; index < numTsMpegAesEncapEntries; index++)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
+        printf("SetTsMpegAesEncap - reg=%08x, val=%08x\n",
+               addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg*4), tsMpegAesEncapTable[index].value);
+    }
+    return true;
 }
 
 
