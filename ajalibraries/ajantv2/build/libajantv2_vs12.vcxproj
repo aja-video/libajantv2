@@ -306,7 +306,6 @@
     <ClInclude Include="..\includes\xena2vidproc.h" />
     <ClInclude Include="..\includes\ntv2serialcontrol.h" />
     <ClInclude Include="..\src\win\ntv2windriverinterface.h" />
-    <ClInclude Include="..\src\win\performancecounter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

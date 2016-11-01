@@ -326,8 +326,5 @@
     <ClInclude Include="..\src\win\ntv2windriverinterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\win\performancecounter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

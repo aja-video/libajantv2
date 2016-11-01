@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaplayer", "..\qaapps\qaplayer\qaplayer.vcxproj", "{A79D09A5-2D23-42B0-B3CC-89B5B9D75361}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaplayer", "..\test\qaplayer\qaplayer.vcxproj", "{A79D09A5-2D23-42B0-B3CC-89B5B9D75361}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2} = {5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Includes", "..\includes\Includes_vs12.vcxproj", "{D50058D5-8D6E-4D8B-9E16-A513448A5DCD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Includes", "Includes_vs12.vcxproj", "{D50058D5-8D6E-4D8B-9E16-A513448A5DCD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaburn", "..\qaapps\qaburn\qaburn.vcxproj", "{EBDF52ED-7F8C-40D8-B11D-B3E5391CE093}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaburn", "..\test\qaburn\qaburn.vcxproj", "{EBDF52ED-7F8C-40D8-B11D-B3E5391CE093}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player4k", "..\demoapps\ntv2player4k\ntv2player4k.vcxproj", "{FF7020B1-2F15-4AE9-9F43-52D2FDB67E5A}"
 EndProject
@@ -18,73 +18,73 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player", "..\demoapps\n
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn", "..\demoapps\ntv2burn\ntv2burn.vcxproj", "{E3234189-BDC1-4B0E-BD9B-7C44F3B3D219}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltk", "..\..\..\..\third-party-software\fltk1.3\ide\VisualC2012\fltk.lib.vcxproj", "{E070AAFC-9D03-41A3-BC7D-30887EA0D50F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltk", "..\..\..\third-party-software\fltk1.3\ide\VisualC2012\fltk.lib.vcxproj", "{E070AAFC-9D03-41A3-BC7D-30887EA0D50F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltkgl", "..\..\..\..\third-party-software\fltk1.3\ide\VisualC2012\fltkgl.vcxproj", "{F7974A9C-C255-4385-96BC-E24EE0816F7C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltkgl", "..\..\..\third-party-software\fltk1.3\ide\VisualC2012\fltkgl.vcxproj", "{F7974A9C-C255-4385-96BC-E24EE0816F7C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2capture", "..\demoapps\ntv2capture\ntv2capture.vcxproj", "{FE87FB0C-4ECF-4F9B-B5B7-08B76A05440C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2outputtestpattern", "..\demoapps\ntv2outputtestpattern\outputtestpattern.vcxproj", "{CA542F38-1B47-4F0A-A556-37642AEFB275}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaframe", "..\qaapps\qaframe\qaframe_vs11.vcxproj", "{A7E5F096-F285-45B5-B368-B895E72522D8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qaframe", "..\test\qaframe\qaframe_vs11.vcxproj", "{A7E5F096-F285-45B5-B368-B895E72522D8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccplayer", "..\demoapps\ntv2ccplayer\ntv2ccplayer.vcxproj", "{AC7219B3-248E-4220-940A-28CD02613A9A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qatc", "..\qaapps\qatc\qatc_vs11.vcxproj", "{BCD72933-85BD-41C2-9107-E81533815259}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2", "..\src\libajantv2_vs12.vcxproj", "{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2", "libajantv2_vs12.vcxproj", "{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "..\src\libajantv2dll_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "libajantv2dll_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuff", "..\..\ajastuff\build\ajastuff_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuffdll", "..\..\ajastuff\build\ajastuffdll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32ClassLibrary", "..\..\win32classlibrary\Win32ClassLibrary.vcxproj", "{133E350E-BC43-43DF-AFD0-0BC987791078}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32ClassLibrary", "..\..\..\win32classlibrary\Win32ClassLibrary.vcxproj", "{133E350E-BC43-43DF-AFD0-0BC987791078}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinGraphLib", "..\..\wingraphlib\WinGraphLib.vcxproj", "{BC359FC2-2151-4DBA-908B-85BC707AA4C9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinGraphLib", "..\..\..\wingraphlib\WinGraphLib.vcxproj", "{BC359FC2-2151-4DBA-908B-85BC707AA4C9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pciburner", "..\commonapps\pciburner\pciburner.vcxproj", "{0753D244-8695-432F-918D-2675D4A10227}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hdmiinstatus", "..\commonapps\hdmiinstatus\hdmiinstatus.vcxproj", "{BA8378A7-803F-4882-B6CD-E8F43B1C8896}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hdmiinstatus", "..\..\..\ajaapps\crossplatform\hdmiinstatus\hdmiinstatus.vcxproj", "{BA8378A7-803F-4882-B6CD-E8F43B1C8896}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2firmwareinstaller", "..\commonapps\ntv2firmwareinstaller\ntv2firmwareinstaller.vcxproj", "{7CFC193F-66A3-4960-A8B5-510818E49982}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2firmwareinstaller", "..\..\..\ajaapps\crossplatform\ntv2firmwareinstaller\ntv2firmwareinstaller.vcxproj", "{7CFC193F-66A3-4960-A8B5-510818E49982}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interrupttimer", "..\commonapps\interrupttimer\interrupttimer.vcxproj", "{ECBB987C-EF92-4C1A-A472-DC708C468350}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interrupttimer", "..\..\..\ajaapps\crossplatform\interrupttimer\interrupttimer.vcxproj", "{ECBB987C-EF92-4C1A-A472-DC708C468350}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "regio", "..\commonapps\regio\regio.vcxproj", "{AA3100F2-D263-4A07-B99C-FA807AF715C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "regio", "..\..\..\ajaapps\crossplatform\regio\regio.vcxproj", "{AA3100F2-D263-4A07-B99C-FA807AF715C1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltkwatcher", "..\commonapps\watcher\fltkwatcher.vcxproj", "{CB159E4A-995D-42E0-AAA3-7CAFC94812C5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltkwatcher", "..\..\..\ajaapps\crossplatform\watcher\fltkwatcher.vcxproj", "{CB159E4A-995D-42E0-AAA3-7CAFC94812C5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xenacables", "..\commonapps\xenacablesfltk\xenacables.vcxproj", "{08030E2C-2622-450E-8D76-19F9DC03DCE9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xenacables", "..\..\..\ajaapps\crossplatform\xenacablesfltk\xenacables.vcxproj", "{08030E2C-2622-450E-8D76-19F9DC03DCE9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "konaburner", "..\commonapps\konaburner\konaburner.vcxproj", "{13F3DB51-DB92-465F-B042-A59C4E5A6B05}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "konaburner", "..\..\..\ajaapps\crossplatform\konaburner\konaburner.vcxproj", "{13F3DB51-DB92-465F-B042-A59C4E5A6B05}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataratecalculator", "..\commonapps\dataratecalculator\dataratecalculator.vcxproj", "{0765866D-8729-4F5C-A615-9EAA7ED20927}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dataratecalculator", "..\..\..\ajaapps\crossplatform\dataratecalculator\dataratecalculator.vcxproj", "{0765866D-8729-4F5C-A615-9EAA7ED20927}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2enumerateboards", "..\demoapps\ntv2enumerateboards\enumerateboards.vcxproj", "{7D983310-D012-4067-8051-E5F1D78FFB92}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testcrc", "..\commonapps\testcrc\testcrc.vcxproj", "{5181C40A-CF8E-4D69-878F-4D37B490F6BA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testcrc", "..\..\..\ajaapps\crossplatform\testcrc\testcrc.vcxproj", "{5181C40A-CF8E-4D69-878F-4D37B490F6BA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccgrabber", "..\demoapps\ntv2ccgrabber\ntv2ccgrabber.vcxproj", "{F8768B72-C9AE-4662-8D67-69075B81D6C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2thermo", "..\commonapps\ntv2thermo\ntv2thermo.vcxproj", "{DE049B5C-62A6-4BA0-B22E-D55ECF952252}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2thermo", "..\..\..\ajaapps\crossplatform\ntv2thermo\ntv2thermo.vcxproj", "{DE049B5C-62A6-4BA0-B22E-D55ECF952252}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qacrc", "..\qaapps\qacrc\qacrc.vcxproj", "{676FDCD9-294E-4422-9738-23322E4582DD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qacrc", "..\test\qacrc\qacrc.vcxproj", "{676FDCD9-294E-4422-9738-23322E4582DD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn4kQuadrant", "..\demoapps\ntv2burn4kquadrant\ntv2burn4k.vcxproj", "{EB93E072-3E2C-418A-A5A3-BAF8314180E3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xena2vidproc", "..\commonapps\xena2vidproc\xena2vidproc_vs12.vcxproj", "{64923F5B-A3D5-4CF0-887B-3297C999D5AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xena2vidproc", "..\..\..\ajaapps\crossplatform\xena2vidproc\xena2vidproc_vs12.vcxproj", "{64923F5B-A3D5-4CF0-887B-3297C999D5AA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procamp", "..\commonapps\procamp\procamp_vs12.vcxproj", "{0BD87003-4951-4013-B59D-3521F1730683}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procamp", "..\..\..\ajaapps\crossplatform\procamp\procamp_vs12.vcxproj", "{0BD87003-4951-4013-B59D-3521F1730683}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCIWhacker", "..\winapps\PCIWhacker\PCIWhacker_vs12.vcxproj", "{D903C3D2-2F69-452E-B497-0B6910FAD953}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCIWhacker", "..\..\..\ajaapps\win\PCIWhacker\PCIWhacker_vs12.vcxproj", "{D903C3D2-2F69-452E-B497-0B6910FAD953}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hevcmaintenance", "..\commonapps\hevcmaintenance\hevcmaintenance.vcxproj", "{7CFC193F-66A3-4960-A8B5-510818E49289}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hevcmaintenance", "..\..\..\ajaapps\crossplatform\hevcmaintenance\hevcmaintenance.vcxproj", "{7CFC193F-66A3-4960-A8B5-510818E49289}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2nub", "..\commonapps\ntv2nub\ntv2nub_vs9.vcxproj", "{B68481A4-2A1A-4A04-9875-7D4F904B91FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2nub", "..\..\..\ajaapps\crossplatform\ntv2nub\ntv2nub_vs12.vcxproj", "{B68481A4-2A1A-4A04-9875-7D4F904B91FB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s2022pdfstats", "..\commonapps\s2022pdfstats\s2022pdfstats.vcxproj", "{A094BC6E-DD67-454E-A24E-0B9A0D54220C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s2022pdfstats", "..\..\..\ajaapps\crossplatform\s2022pdfstats\s2022pdfstats.vcxproj", "{A094BC6E-DD67-454E-A24E-0B9A0D54220C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
