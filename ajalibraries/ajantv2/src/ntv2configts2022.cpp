@@ -294,7 +294,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
     {
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
         printf("SetTsAesEncap - reg=%08x, val=%08x\n",
-               addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg*4), tsAesEncapTable[index].value);
+               addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
     }
     return true;
 }
@@ -309,7 +309,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap(const NTV2Channel channel)
     {
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
         printf("SetTsMpegAesEncap - reg=%08x, val=%08x\n",
-               addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg*4), tsMpegAesEncapTable[index].value);
+               addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
     }
     return true;
 }

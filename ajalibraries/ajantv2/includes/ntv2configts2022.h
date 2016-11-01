@@ -239,7 +239,7 @@ struct tsSetupReg
 
 static const tsSetupReg tsAesEncapTable[] =
 {
-    {0x000, 0x02},
+    {0x000, 0x2},
     {0x008, 0x1},
 };
 #define numTsAesEncapEntries (sizeof(tsAesEncapTable) / sizeof(tsSetupReg))
