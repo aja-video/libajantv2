@@ -1,0 +1,29 @@
+//
+//  ntv2kona3Gservices.h
+//
+//  Copyright (c) 2011 AJA Video, Inc. All rights reserved.
+//
+
+#ifndef _Kona3GServices_
+#define _Kona3GServices_
+
+
+#include "ntv2deviceservices.h"
+
+//-------------------------------------------------------------------------------------------------------
+//	class Kona3GServices
+//-------------------------------------------------------------------------------------------------------
+class Kona3GServices : public DeviceServices
+{
+	
+public:
+	Kona3GServices();
+	~Kona3GServices() {}
+	
+	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
+	virtual void SetDeviceXPointCapture (GeneralFrameFormat format);
+	virtual void SetDeviceMiscRegisters (NTV2Mode mode);
+};
+
+
+#endif

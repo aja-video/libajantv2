@@ -1,0 +1,23 @@
+/**
+	@page	ajaklboxlh	KL-Box-LH Breakout Box
+
+	This page describes the AJA KL-Box-LH Breakout Box, which can be connected to a \ref konalheplus capture/playout board.
+
+	@par	Front Panel
+
+	@image	html	klboxlh-front-small.png
+
+	The far left side of the front panel has a group of XLR connectors for balanced analog audio input and output.
+	The left two XLRs are balanced analog audio inputs. The right two XLRs are balanced analog audio outputs.
+
+	The center of the front panel has XLR and BNC connectors for (unbalanced) AES/EBU audio inputs & outputs.
+
+	Finally, on the right are BNCs for SDI In, SDI Out 1, and SDI Out 2; BNCs for reference in & out; BNCs for analog video in & out;
+	one DB-9 connector for the RS-422 serial port; and twin RCAs for line-level audio channel 1 and 2 output.
+
+	@par	Rear Panel
+
+	@image	html	klboxlh-rear-small.png
+
+	These connectors tie the box to the \ref konalheplus board in the host computer.
+**/

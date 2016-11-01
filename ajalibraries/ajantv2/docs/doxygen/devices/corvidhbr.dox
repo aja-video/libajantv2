@@ -1,0 +1,46 @@
+/**
+	@page	corvidhbr		Corvid HB-R
+
+	This page describes the <b>Corvid HB-R</b> OEM capture board.
+
+	@image	html	corvidhbr.png
+
+	The HB-R provides a single RJ-45 HDBaseT connector that supplies power (up to 10 watts), ingests HDMI video
+	(up to 4Kp60, 8-bit 4:2:0) and audio (up to 8 embedded audio channels), and includes bi-directional VISCA/RS-232 control.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xEB18</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+
+	@par	Inputs & Outputs
+
+	-	1 x RJ-45 HDBaseT input connector
+	-	1 x HDMI 1.4b full-time looped output
+
+	@par	Frame Buffer
+
+	-	512MB SDRAM
+	-	64 x 8MB frames
+	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	1 subsystem
+	-	16 channels (max.) per subsystem
+	-	Audio subsystem's buffer memory starts 8MB before end of last frame
+
+	@par	Video Formats
+
+	-	Supports all SD, HD, 2K and 4K video formats, including 4Kp60 (no DVCPro HD or HDV).
+
+	@note	A hardware color-space converter (CSC) can convert the input YCbCr to RGB when using RGB buffer formats,
+			or input RGB to YCbCr when using YUV buffer formats.
+
+	@note	A hardware 4K down-converter can convert incoming 4K/UHD video to standard HD (1080) rasters.
+
+	@par		Firmware
+
+	(Coming Soon)
+**/

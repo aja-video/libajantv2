@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleName</key>
+	<string>ntv2qtplaycorder</string>
+	<key>CFBundleExecutable</key>
+	<string>ntv2qtplaycorder</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>com.aja.ntv2playcorder</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>PlCr</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © AJA Video Systems, Inc. 2013</string>
+	<key>CFBundleGetInfoString</key>
+	<string>0.0.0.AJA_BUILD_NUMBER Copyright © AJA Video Systems, Inc. 2013</string>
+</dict>
+</plist>

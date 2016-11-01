@@ -1,0 +1,23 @@
+/**
+	@page	ajak3gbox		K3G-Box Breakout Box
+
+	This page describes the AJA K3G-Box Breakout Box, which can be connected to a KONA 3G or KONA 4 capture/playout boards.
+
+	@par	Front Panel
+
+	@image	html	k3gboxfront-small.jpg
+
+	The left side of the front panel has BNC connectors for 16 input and output AES/EBU audio channels.
+
+	The center of the front panel has HDMI out, plus BNC connectors for each of the four SDI inputs/outputs,
+	and BNCs for analog component video output.
+
+	The far right side of the front panel has connectors for Reference in & out, LTC In, LTC Out, UART 1,
+	and RCA connectors for line-level outputs for audio channels 1 & 2.
+
+	@par	Rear Panel
+
+	@image	html	k3gboxrear-small.jpg
+
+	These connectors tie the breakout box to the KONA 3G or KONA 4 board in the host computer (cable included with the box).
+**/

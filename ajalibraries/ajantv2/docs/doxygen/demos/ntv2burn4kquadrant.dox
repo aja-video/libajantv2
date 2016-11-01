@@ -1,0 +1,18 @@
+/**
+@page	ntv2burn4kquadrant		NTV2Burn4KQuadrant Demo
+
+This command-line program captures 4K/UHD video provided to four SDI inputs of an AJA device and "burns" timecode into the video,
+then plays it out onto four SDI outputs of a second AJA device (or the same device, if it has at least 8 channels).
+The program will use the timecode embedded in the input signal if it has any; otherwise it "invents" its own timecode.
+It also embeds whatever timecode it uses into the output signal.
+
+@image	html	ntv2burn4kquadrant.png
+
+This shows a typical WFM display showing one quadrant of the output AJA device connected to a host running ntv2burn4kquadrant.
+
+The NTV2Burn4KQuadrant class demonstrates everything that NTV2Burn does, plus...
+- how to deduce 4K/UHD geometry by looking at four consecutive SDI inputs;
+- how to programmatically perform 4K/UHD signal routing;
+- how to use AutoCirculate to efficiently stream 4K/UHD video and audio, including timecode;
+- how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
+**/

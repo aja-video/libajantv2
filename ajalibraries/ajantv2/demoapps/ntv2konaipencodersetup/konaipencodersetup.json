@@ -1,0 +1,10 @@
+{
+    "parameters": {
+        "VideoFormat":"720p5994",
+        "NumBits":10,
+        "StreamType":"Standard",
+        "ChromaSampling":"422 standard",
+        "CodeBlockSize":"32x32",
+        "Mbps":200
+    }
+}

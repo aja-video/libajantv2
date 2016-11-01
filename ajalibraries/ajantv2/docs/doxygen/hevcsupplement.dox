@@ -1,0 +1,454 @@
+/**
+@page	hevcsupplement	The Corvid HEVC Supplement
+
+@section	hevcoverview	Overview
+
+The NTV2 HEVC Software Development Kit (SDK) is a suite of classes and data types which allow end-users to access and control
+nearly any NTV2-compatible AJA device using the C++ programming language.  It also provides a suite of classes and data types
+which allow end users to access and control the \ref corvidhevc device which is equipped with an MB86M31 real time HEVC/H.265
+encoder from Socionext.
+
+All of the user level code is platform-independent including the HEVC specific APIs, HEVC demo application and HEVC Monitor,
+however kernel support for the \ref corvidhevc device has only been added to the Linux and Windows drivers at this time.
+Specifically this driver has been designed to support AJA custom driver APIs to communicate with the \ref corvidhevc video and
+audio systems and also the MB86M31 real time encoder on the \ref corvidhevc.  The HEVC APIs in this SDK we designed by AJA to be
+more closely aligned with the NTV2 SDK but still provide all the functionality of the MB86M31-Evaluation Board SDK from Socionext.
+
+The purpose of the HEVC SDK is to enable third-parties to easily access and/or control the video, audio or ancillary data
+entering the \ref corvidhevc, and also provide access and control to the MB86M31 real time encoder.  The SDK provides support
+at various layers.
+
+The driver runs at the "kernel" level and handles low-level communication with the device. It is a required component of
+the SDK and provides the user-space library with the means to communicate and control the device.  HEVC support for talking
+directly to the MB86M31 real time encoder has been added to the AJA NTV2 Linux and Windows drivers.  These drivers can talk to
+both a standard AJA NTV2 device and the \ref corvidhevc equipped with an MB86M31 real time encoder using custom APIs defined in
+the user level side of the SDK.
+
+The "classes" library is the principal user-space library that an application must link with in order to access and control
+AJA devices. In this class we also provide a set of API's to access and control the \ref corvidhevc equipped with an MB86M31
+real time encoder.  It implements a suite of C++ classes which an OEM application can instantiate and use to perform various
+operations on the AJA device and the MB86M31. 
+
+At the User Application layer, the SDK provides demo applications, diagnostic tools, and common applications that can be used
+to maintain the device and allow users to update the firmware for the \ref corvidhevc and the MB86M31 real time encoder.
+
+
+@section	hevchardwareinstall		Installing the Hardware
+
+The \ref corvidhevc must be installed in appropriate PCI Express slots.  The minimum requirements are a PCI Express Gen2 x 8 lane.
+
+The \ref corvidhevc is equipped with 4 SDI inputs and a reference/LTC Input.   The first SDI input (SDI-1) is located at the
+top of the card and SDI-2 through SDI-4 follow.  The very bottom connector is for reference or LTC input.  The \ref corvidhevc
+is capable of capturing multiple channels of SD or HD video or one channel of UHD video.  In multi channel record mode the input
+video can be different formats.  
+
+It is necessary to supply external power to the \ref corvidhevc using the ATX 6-Pin connector located on the back of the card:
+@image	html	corvid88atxconnector-75.png
+
+
+@subsection		hevclinuxinstallfirmware	Installing the HEVC Firmware
+
+There is an HEVC monitor application \c qthevcmon in the \c bin directory.  Run this application and select the <b>Debug</b>
+tab to display the currently installed driver and firmware versions.  The firmware versions will be labelled as either "OK" or "Iffy".
+"OK" means that they are the same firmware version that was used for SDK testing.  "Iffy" means that the firmware has not been tested
+with this version of the SDK and should be updated.
+
+To update the HEVC firmware, navigate into the \c ntv2projects/commonapps/hevcmaintenance directory and execute the \c flash_all.sh script.
+The script will install all the codec firmware then remind you to power cycle the system when it is complete.
+After the power cycle, use the HEVC monitor application to confirm that the correct firmware is installed.
+
+@subsection		hevclinuxbuild				Building for HEVC on Linux
+
+On Linux, you can build just the parts you need for HEVC development.
+
+-#	Build and load the Linux Driver.
+	-#	<tt>cd ntv2projects/LinuxDriver</tt>
+	-#	\c make
+	-#	<tt>cd ../../bin</tt>
+	-#	<tt>sudo ./loadOEM2K</tt>
+-#	Build the "classes" library.
+	-#	<tt>cd ntv2projects/classes</tt>
+	-#	\c make
+	-#	The result will be in \c ../../lib
+-#	Build the \c ntv2firmwareinstaller program and update the NTV2 firmware.
+	-#	<tt>cd ntv2projects/ commonapps / ntv2firmwareinstaller</tt>
+	-#	\c make
+	-#	<tt>cd ../../../bin</tt>
+	-#	<tt>./ntv2firmwareinstaller –p "path to NTV2 bitfile"</tt>
+-#	Build the \c hevcmaintenance program and update the codec firmware.
+	-#	<tt>cd ntv2projects/commonapps/hevcmaintenance</tt>
+	-#	\c make
+	-#	<tt>./flash_system.sh</tt>  (flashes system file)
+	-#	<tt>./flash_mcpu.sh</tt>  (flash mcpu file)
+	-#	<tt>./flash_mode.sh</tt>  (flash single and multi mode files)
+-#	Build the HEVC Monitor application using Qt Creator.  You will find the QT pro file at \c ntv2projects/commonapps/qthevcmon/qthevcmon.pro.
+	The executable will be in the top-most \c bin directory.
+-#	Build and run the HEVC demo application:
+	-#	<tt>cd ntv2projects/demoapps/ntv2encodehevc</tt>
+	-#	\c make
+	-#	<tt>cd ../../../bin</tt>
+	-#	<tt>./ntv2encodehevc -?</tt>
+
+
+@section	hevcwindowsinstall	Installing the HEVC Windows SDK
+
+Registered OEMs are given login credentials to access AJA's SDK support site, which can be securely accessed using any
+modern web browser at <https://sdksupport.aja.com/>.
+
+@subsection	hevcwindowsinstallsdk	Installing the Windows SDK
+
+Before installing the AJA NTV2 HEVC Windows SDK remove any earlier installed AJA NTV2 SDKs or HEVC SDKs using the Windows
+control panel programs and features.  Older SDKs used a Windows MSI installer for both the SDK and the driver.  This is not
+strictly necessary but it will clean the older SDK from the system directories.  The new SDK is delivered as a .zip file
+with an included driver installer.  This means that the SDK will no longer be installed to the Windows Program Files directory. 
+
+To use the new SDK, decompress the zip file to a working directory.  At the top level you will see the following files.
+-	<b>APIandSamples</b> -- This directory contains the SDK source files described in the HEVC SDK contents section.
+-	<b>DiagnosticsAndTools</b> -- This directory contains prebuilt SDK tools.
+-	<b>Docs</b> -- This directory contains the SDK documentation.
+-	<b>Driver</b> -- This directory contains the NTV2 debug and release driver files for debugging.
+-	<b>ntv2driver-x.x.x.msi</b> -- This is the installer for the NTV2 driver.
+
+Run the "ntv2driver-x.x.x.msi" to install the NTV2 driver that was tested with this SDK.  The driver installer also
+installs the Microsoft Visual Studio runtime environment required to use the prebuilt SDK libraries and tools.
+
+@subsection	hevcwindowsbuildsdk		Building the Windows SDK
+
+To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\ntv2projects\winworkspace\ntv2_vs12.sln.
+Choose the solution platform (win32 or x64) and the configuration (debug or release) for the build and select build all. 
+This will build the libraries to the \c APIandSamples\lib directory and the binaries to the \c APIandSamples\bin directory.
+
+@subsection	hevcwindowsinstallfirmware		Installing the HEVC firmware
+
+There is an HEVC monitor application (\c qthevcmon.exe) in the \q DiagnosticsAndTools directory.
+Run this application and select the <b>Debug</b> tab to display the currently installed driver and firmware versions. 
+The firmware versions will be labelled as either "OK" or "Iffy".  "OK" means that they are the same firmware version
+that was used for SDK testing.  "Iffy" means that the firmware has not been tested with this version of the SDK and should be updated.
+
+To update the HEVC firmware, extract the \c hevcmaintenance.zip file in the \c DiagnosticsAndTools directory.
+Navigate into the \c hevcmaintenance directory and double-click on the <tt>flash_all.bat</tt> file.
+The script will install all the codec firmware then remind you to power cycle the system when it is complete.
+After the power cycle use the HEVC monitor application to confirm that the correct firmware is installed.
+
+@subsection	hevcwindowsrunencode		Running an HEVC Encode
+
+The new NTV2 HEVC encode sample application is \ref ntv2encodehevc.
+Connect a 720p50/59.94/60 or 1080p50/59.94/60 source to the SDI connector near the top of the <b>Corvid HEVC</b> board.
+Build and run the <b>ntv2encodehevc</b> application.  The output should look similar to the following:
+
+\code{.sh}
+	D:\Projects\ntv2sdk_hevc\bin\Win32>ntv2encodehevc.exe
+	Capture: M31_FILE_1920X1080_420_8_60p
+	           Capture  Capture
+	   Frames   Frames   Buffer
+	Processed  Dropped    Level
+	      721        0        1
+	Capture last frame number 840
+	Video file last frame number 840
+\endcode
+
+While the <b>ntv2encodehevc</b> application is running, you can monitor the encoding operation using the HEVC monitor application
+<b>qthevcmon.exe</b> in the \c DiagnosticsAndTools directory.
+
+Type ctrl-c to terminate the application.
+
+See \ref ntv2encodehevc for more information.
+
+
+@section	hevcimplementation	HEVC Impementation
+
+This section explores the HEVC specific APIs of the SDK.  AJA borrowed extensively from the MB86M31-Evaluation Board SDK,
+but rather than copy directly, AJA implemented its own APIs which are much closer aligned with how the NTV2 SDK works.
+The MB86M31 encoder implementation is an extension of the current NTV2 APIs, with its own classes to initialize, configure,
+control, and stream data to and from the encoder.
+
+@subsection	hevcimpl-files		The HEVC Files
+
+Since the SDK is comprised of so many files, it might be handy to point out files that are specific to HEVC support.
+Here you can find definitions, enums, structures, classes, headers, and both user and kernel level source code.
+This section includes everything --- nothing is hidden.
+
+-	ntv2linuxhevc_12_x.y.z
+	-	<b>ntv2projects</b>
+		-	<b>classes</b>
+			-	ntv2driverinterface.cpp
+			-	ntv2driverinterface.h
+		-	<b>codecs</b>
+			-	<b>hevc</b>
+				-	<b>m31</b>
+					-	ntv2m31.cpp
+					-	ntv2m31.h
+					-	ntv2m31cparam.cpp
+					-	ntv2m31cparam.h
+					-	ntv2m31ehparam.cpp
+					-	ntv2m31ehparam.h
+					-	ntv2m31vaparam.cpp
+					-	ntv2m31vaparam.h
+					-	ntv2m31vinparam.cpp
+					-	ntv2m31vinparam.h
+					-	ntv2m31viparam.cpp
+					-	ntv2m31viparam.h
+		-	<b>commonapps</b>
+			-	<b>hevcmaintenance</b>
+				-	config_common.bin
+				-	dram_init_param.bin
+				-	dram_test_all_ch.sh
+				-	dram_test_ch_a.sh
+				-	dram_test_ch_b.sh
+				-	dram_test_ch_c.sh
+				-	dram_test_ch_d.sh
+				-	flash_mcpu.sh
+				-	flash_mode.sh
+				-	flash_system.sh
+				-	<b>m31_fw</b>
+					-	hevc_enc_fw_multi.bin
+					-	hevc_enc_fw_single.bin
+					-	mcpu_fw.bin
+					-	system_fw.bin
+				-	main.cpp
+				-	Makefile
+			-	<b>qthevcmon</b>
+				-	controltab.cpp
+				-	controltab.h
+				-	debugtab.cpp
+				-	debugtab.h
+				-	main.cpp
+				-	mainwindow.cpp
+				-	mainwindow.h
+				-	mainwindow.ui
+				-	qthevcmon.pro
+				-	streamtab.cpp
+				-	streamtab.h
+		-	<b>demoapps</b>
+			-	<b>ntv2encodehevc</b>
+				-	main.cpp
+				-	Makefile
+		-	<b>democlasses</b>
+			-	ntv2encodehevc.cpp
+			-	ntv2encodehevc.h
+		-	<b>includes</b>
+			-	ntv2linuxpublicinterface.h
+			-	ntv2publicinterface.h
+			-	ntv2m31enums.h
+			-	ntv2m31publicinterface.h
+		-	<b>linuxclasses</b>
+			-	ntv2linuxdriverinterface.cpp
+			-	ntv2linuxdriverinterface.h
+		-	<b>linuxdriver</b>
+			-	driverdbg.h
+			-	hevcapi.c
+			-	hevccommand.c
+			-	hevccommand.h
+			-	hevccommon.h
+			-	hevcconstants.h
+			-	hevcdriver.c
+			-	hevcdriver.h
+			-	hevcinterrupt.c
+			-	hevcinterrupt.h
+			-	hevcparams.c
+			-	hevcparams.h
+			-	hevcpublic.h
+			-	hevcregister.c
+			-	hevcregister.h
+			-	hevcstream.c
+			-	hevcstream.h
+			-	registerio.c
+			-	registerio.h
+
+
+@subsection	hevcimpl-kernel		The Kernel Driver
+
+Five driver APIs have been added to support HEVC:
+-	<tt>bool HevcMessageGetDeviceInfo (HevcMessageInfo* pMessage);</tt>
+-	<tt>bool HevcMessageSendCommand (HevcMessageCommand* pMessage);</tt>
+-	<tt>bool HevcMessageVideoTransfer (HevcMessageTransfer* pMessage);</tt>
+-	<tt>bool HevcMessageGetStatus (HevcMessageStatus* pMessage);</tt>
+-	<tt>bool HevcMessageDebugInfo (HevcMessageDebug* pMessage);</tt>
+
+In addition the above HEVC specific functions, the standard NTV2 CNTV2Card::ReadRegister and CNTV2Card::WriteRegister functions
+have been modified to recognize register reads and writes to the MB86M31 encoder.  The PARM setup classes in <tt>ntv2projects/codecs/hevc/m31</tt>
+make extensive use of CNTV2Card::ReadRegister and CNTV2Card::WriteRegister to read and write individual PARAM fields in the MB86M31 space.
+The interface is identical to CNTV2Card::ReadRegister and CNTV2Card::WriteRegister in the NTV2 space.
+
+
+@subsection	hevcimpl-init	Initialize
+
+In order to configure and use the MB86M31 encoder, it must first be placed into the "init" state.
+One way to do this is to use the CNTV2m31 helper class, which is defined in <tt>ntv2m31.cpp</tt> and is part of the "classes" library.
+The code to perform this initialization might look something like this:
+
+\code{.cpp}
+#include "ntv2m31.h"
+
+AJAStatus InitHEVC(CNTV2Card* device)
+{
+    	// Allocate our M31 helper class 
+    	CNTV2m31 m31 = new CNTV2m31(device);
+
+    	HevcMainState   mainState;
+
+    	m31->GetMainState(&mainState);
+    	if (mainState != Hevc_MainState_Init)
+	{
+			if (!m31->Reset()) return AJA_STATUS_INITIALIZE; 
+    
+			// After a reset we should be in the boot state so lets check this
+			m31->GetMainState(&mainState);
+			if (mainState != Hevc_MainState_Boot) return AJA_STATUS_INITIALIZE;
+    
+			// Now we can go to the init state
+			if (!m31->ChangeMainState(Hevc_MainState_Init, Hevc_EncodeMode_Single))
+        		return AJA_STATUS_INITIALIZE; }
+    
+			// Make sure we got there 
+			m31->GetMainState(&mainState);
+			if (mainState != Hevc_MainState_Init) return AJA_STATUS_INITIALIZE;
+
+			// This zeros out all of the param space in the M31 for every channel
+			// It is necessary to do this the very first time you bring up 
+			// the device, otherwise when you begin param setup you will end up
+			// with uninitialized fields in the sparse registers.  The M31 does 
+			// not like this.
+			m31->ClearAllParams();
+
+    	}
+	return AJA_STATUS_SUCCESS;
+}
+\endcode
+
+
+@subsection	hevcimpl-params		Params
+
+The MB86M31 has a number of parameters that can be written to setup and configure the encoder.
+The parameters have been broken up into a number of categories.  Currently they are:
+-	<b>CParams</b>
+-	<b>VIParams</b>
+-	<b>VINParams</b>
+-	<b>VAParams</b>
+-	<b>EHParams</b>
+
+AJA has provided a set of classes to manage each of these param categories which can be found in <tt>ntv2projects/codecs/hevc/m31</tt>.
+The M31 helper class also provides a wrapper that calls each of these categories to help setup the encoder for a specific preset.
+The AJA version of the HEVC presets are a table of enums found in <tt>ntv2projects/includes/ntv2m31enums.h</tt>.
+The SDK includes both "file" and "vif" presets.  The HEVC Encode demo application uses these enums and helper class functions to set up
+the encoder to encode a specific format.  Here is an example of how to setup the encoder for a given preset:
+
+\code{.cpp}
+#include "ntv2m31.h"
+
+AJAStatus LoadAndWritePreset(CNTV2Card* device, M31VideoPreset m31Preset)
+{
+   	// Allocate our M31 helper class 
+   	CNTV2m31 m31 = new CNTV2m31(device);
+
+   	HevcMainState   mainState;
+
+	// We need to be in the init state to setup all of the encoder params 
+   	m31->GetMainState(&mainState);
+   	if (mainState == Hevc_MainState_Init)
+	{
+		// This function will load up the default parameters for a preset into
+		// structures inside of the helper class for ever param category.  This 
+		// function is channel independent.
+		if (!m31->LoadAllParams(m31Preset)) return AJA_STATUS_INITIALIZE; 
+    
+		// This function will write out all the params in the local structures to 
+		// the MB86M31 to a specific channel (in this case channel 0). 
+		if (!m31->SetAllParams(M31_CH0)) return AJA_STATUS_INITIALIZE; 
+   	}
+	return AJA_STATUS_SUCCESS;
+}
+\endcode
+
+If you need to customize the setup and do something slightly different than what the preset provides, you can do that by loading
+all default params using the closest preset, then manipulate the channel structures directly before you write them out.
+AJA recommends not trying this <i>unless</i> you have reviewed all of the parameters and have a good understanding of how to set
+up the encoder manually. There are many duplicate params spread across all of the param categories and it's easy to miss changing
+some.  Bit depth is a param used in several of the param categories, so you must change all of them. Below is an example of how
+you might change the bit depth manually:
+
+\code{.cpp}
+   	if (mainState == Hevc_MainState_Init)
+	{
+		if (!m31->LoadAllParams(m31Preset)) return AJA_STATUS_INITIALIZE; 
+
+		// Change the channel structs before you write them out...
+		m31->mVAParamsChannel.vaBitDepth = 10;
+		m31->mVInParamsChannel.vInBitDepth = 10;
+		m31->mVInParamsChannel.vInBitDepthOut = 10;
+		m31->mEHParamsChannel.eHBitDepth = 10;
+
+		if (!m31->SetAllParams(M31_CH0)) return AJA_STATUS_INITIALIZE; 
+   	}
+\endcode
+
+
+@subsection	hevcimpl-control		Control
+
+The MB86M31 is controlled by changing the state of encode and video in components, and overall main state.
+This is done using the helper class functions: 
+-	<tt>bool ChangeMainState (HevcMainState mainState, HevcEncodeMode encodeMode);</tt>
+-	<tt>bool ChangeEHState (HevcEhState ehState, uint32_t streamBits);</tt>
+-	<tt>bool ChangeVInState (HevcVinState vinState, uint32_t streamBits);</tt>
+
+To begin an encode, first initialize the HEVC, setup the encoder using an M31VideoPrest, then issue the following control commands:
+
+\code{.cpp}
+#include "ntv2m31.h"
+
+AJAStatus BeginEncoder(CNTV2Card* device, uint32_t streamBits)
+{
+	// Allocate our M31 helper class 
+    	CNTV2m31 m31 = new CNTV2m31(device);
+
+	if (!m31->ChangeMainState(Hevc_MainState_Encode, Hevc_EncodeMode_Single))
+			return AJA_STATUS_INITIALIZE; 
+
+	if (!m31->ChangeVInState(Hevc_VinState_Start, streamBits))
+			return AJA_STATUS_INITIALIZE; 
+
+	if (!m31->ChangeEhState(Hevc_EhState_Start, streamBits))
+			return AJA_STATUS_INITIALIZE; 
+
+	return AJA_STATUS_SUCCESS;
+}
+\endcode
+
+The current model used to stop the codec is to mark the last frame to be encoded, and have each thread monitor its progress
+through the pipeline.  After processing the last frame, each thread discontinues further frame processing and the pipeline starves.
+Once the last HEVC frame has been transferred from the codec, it can be moved cleanly to the stop state by doing the following:
+
+\code{.cpp}
+AJAStatus StopEncoder(CNTV2Card* device, uint32_t streamBits)
+{ 	
+	// Allocate our M31 helper class 
+   	CNTV2m31 m31 = new CNTV2m31(device);
+
+	if (!m31->ChangeEhState(Hevc_EhState_ReadyToStop, streamBits))
+			return AJA_STATUS_INITIALIZE; 
+
+	if (!m31->ChangeEhState(Hevc_EhState_Stop, streamBits))
+			return AJA_STATUS_INITIALIZE; 
+
+	if (!m31->ChangeVInState(Hevc_VinState_Stop, streamBits))
+			return AJA_STATUS_INITIALIZE; 
+
+	if (!m31->ChangeMainState(Hevc_MainState_Init, Hevc_EncodeMode_Single))
+			return AJA_STATUS_INITIALIZE; 
+
+	return AJA_STATUS_SUCCESS;
+}
+\endcode
+
+
+@subsection	hevcimpl-vidxfer		VideoTransfer
+
+Frames are sent to and from the encoder using the following APIs located in the M31 helper class:
+-	<tt>bool RawTransfer (uint8_t* pBuffer, uint32_t dataSize, bool lastFrame);</tt>
+-	<tt>bool EncTransfer (uint8_t* pBuffer, uint32_t bufferSize, uint32_t& dataSize, bool& lastFrame);</tt>
+
+Once the encoder has started, pass uncompressed YUV planar frames into the encoder using \c RawTransfer,
+and when the encoder has encoded the frame, you can get them back using \c EncTransfer.
+See the \ref ntv2encodehevc application for more details.
+
+**/

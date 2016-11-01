@@ -1,0 +1,260 @@
+/**
+@page	usingntv2watcher		The "NTV2 Watcher" Tool
+
+This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor an AJA device.
+
+@section	generaloperation	General Operation
+
+The <b>NTV2 Watcher</b> is a graphical tool that replaces the original <b>Watcher</b> utility to interactively monitor and configure any NTV2 device.
+The user interface consists of one or more windows, the main window having three panels:
+
+@image	html	watcherlayout.png
+
+@subsection	deviceselection		Device Selection
+
+@image	html	watcher-deviceselection.png
+
+A single instance of <b>NTV2 Watcher</b> monitors and/or controls one AJA device at a time.
+This panel provides the ability to choose which AJA device the tool will focus on.
+
+Choosing an item in the menu causes <b>NTV2 Watcher</b> to stop monitoring the previously-selected AJA device,
+and starts it monitoring the newly-selected AJA device. Depending on the device and its capabilities,
+the list of available inspectors may change.
+
+To monitor an NTV2 device that's running on another machine in your local network, click the <b>+</b> button and enter the machine's IP address in the dialog that appears ... then click OK.
+The devices on that machine will be added to the popup menu.
+
+To remove a remote device, be sure it's the currently selected one, then click the <b>-</b> button.
+
+@note	The "NTV2 Nub" must be running on any machine to permit its devices to be monitored remotely.
+
+@subsection	commonsettings		Common Settings
+
+@image	html	watcher-commonsettings.png
+
+There are several settings that are common to the device and apply to all inspectors:
+-	<b>Poll Device</b> -- Check the box to repeatedly poll the device, and update the Watcher's data displays. Un-check the box to "freeze" the Watcher's data displays.
+-	<b>Polling Interval</b> -- Adjusts the polling interval, from 25 milliseconds up to 2 seconds. Note that some inspectors are sync'd to an input/output/reference VBI and ignore this setting.
+-	<b>Task Mode</b> -- Indicates the device's current task mode, and allows it to be changed by choosing a different setting.
+-	<b>Multi-Format Mode</b> -- Indicates the device's "multi-format" mode, and allows it to be changed by choosing a different setting.
+-	<b>Reference</b> -- Indicates the device's current clock reference setting, and allows it to be changed by choosing a different setting.
+-	<b>FBSize</b> -- Indicates the device's current frame buffer size, and allows it to be changed by choosing a different setting.
+
+@section	inspectors	Inspectors
+
+@image	html	watcher-inspectorlist.png
+
+There are a number of inspectors shown in the list at the left side of the window, only one of which can be selected at any given time.
+This list will change as more capabilities are added to <b>NTV2 Watcher</b> in subsequent SDK releases.
+
+Each inspector has its own particular user interface that's designed to monitor and/or control a specific aspect of the AJA device.
+
+Clicking on an inspector item in the list replaces the one that was previously selected with the one that was newly selected.
+If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
+(Only when the device is changed does a new inspector get started in its default state.)
+
+@subsection	inspectorframebuffer	Frame Buffer Inspector
+
+@image	html	watcher-inspector-framebuffer.png
+
+The Frame Buffer inspector monitors the contents of frame buffer memory on the AJA device.
+
+@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher's currently selected polling rate,
+		it can interfere with any currently running video application, particularly if the additional DMAs exceed the available
+		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
+		in which the act of monitoring an AJA device affects it and the application(s) under test.
+
+Frame buffer memory contents can be displayed in four ways:
+	-	<b>Line</b> -- The full raster, line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
+	-	<b>Raw</b> -- The entire buffer in 4096-byte "lines", grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
+	-	<b>Component</b> -- The full raster, line-by-line, in component format, dictated by the frame store's frame buffer format, in hex or decimal.
+	-	<b>Image</b> -- The visible raster, as an image.
+
+When device polling is enabled, this inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
+It reads the entire buffer into host memory and compares it to what was read the last time.
+When displaying rasters, the status bar shows the number of lines in the raster that changed from the last frame.
+Except in its Image view, the raster content display always highlights changed content with a brighter color.
+
+@image	html	watcher-fbinspector-componentselection.png
+
+@par	Frame/Buffer Controls
+	-	<b>FrameStore/Channel</b> -- Selects the FrameStore/Channel of interest.
+	-	<b>On/Off</b> -- Indicates if the FrameStore/Channel is enabled or not.  It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>Auto</b> -- If checked, the frame number being monitored will automatically follow the input or output
+		(depending on frame-store mode) "current frame" register, and the frame number spin control will be disabled.
+		If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
+		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.
+	-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
+		When unavailable, indicates the frame being viewed.
+		@note	The frame's data will be interpreted with the frame buffer format of the currently selected channel or frame store.
+
+@par	Device/Channel Configuration
+	-	<b>Mode</b> -- Indicates the current mode (Input or Output) of the FrameStore/Channel. It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>Geometry</b> -- Indicates the current frame geometry of the FrameStore/Channel (and whether it's a VANC geometry or not).  It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>Format</b> -- Indicates the current pixel format of the FrameStore/Channel. It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>VFlip</b> -- Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
+		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
+		When unchecked, raster lines are read/written normally (top-to-bottom).
+
+@par	Navigation and Data Selection
+	-	<b>Scrolling</b> -- The display can be scrolled horizontally and/or vertically.
+		-	Use the vertical scroll bar to manually scroll the display up or down.
+		-	Use the horizontal scroll bar to manually scroll the display left or right.
+		-	If a scroll-wheel is available, move the cursor into the display, and roll the scroll wheel to scroll the display up or down.
+		-	When there's no current selection, use the up-arrow or down-arrow keys to scroll the display up or down.
+		-	When there's no current selection, use the left-arrow or right-arrow keys to scroll the display left or right.
+		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
+		-	Press <Home> to scroll the upper-left pixel of the current selection into view (or frame, if nothing selected).
+		-	Press <End> to scroll the bottom-right pixel of the current selection into view (or frame, if nothing selected).
+	-	<b>Vertical Ruler</b> -- This ruler identifies each line in the display.
+		-	Left-click (and optionally drag up or down) to select entire lines.
+		-	Right-click to pop up a menu to choose the <b>Units</b> to use:
+			-	<b>Line Numbers</b> -- 1-based decimal line numbers relative to the start of the frame buffer.
+			-	<b>Lines With Fields</b> -- 1-based decimal line numbers relative to the start of the field ... plus the field number (<b>F1</b> or <b>F2</b>).
+			-	<b>SMPTE Lines</b> -- Decimal SMPTE line numbers (including field numbers, if interlaced).
+			-	<b>Bytes From Top</b> -- The hexadecimal offset, in bytes, from the start of the frame buffer.
+			-	<b>Bytes From Bottom</b> -- The negative hexadecimal offset, in bytes, from the bottom of the frame buffer.
+			-	Note that the <b>Image</b> view always uses 1-based decimal line numbers relative to the start of the visible portion of the frame buffer (i.e., excludes any VANC lines).
+	-	<b>Horizontal Ruler</b> -- This ruler identifies each column in the display.
+		-	Left-click (and optionally drag left or right) to select entire pixel columns.
+		-	Right-click to pop up a menu to choose the <b>Units</b> to use:
+			-	<b>Elements From Left Edge</b> -- 0-based decimal element numbers relative to the start of each line, where an element is the natural "chunk" of pixels for a given frame buffer format.
+			-	<b>Bytes From Left Edge</b> -- The decimal offset, in bytes, from the start of each line.
+			-	<b>Bytes From Left Edge (Hex)</b> -- The hexadecimal offset, in bytes, from the start of each line.
+			-	<b>Pixels From Left Edge</b> -- 0-based decimal pixel numbers, as measured from the start of each line.
+			-	Note that the <b>Image</b> view always uses 0-based decimal pixel offsets relative to the left edge of the frame buffer.
+	-	<b>Selecting</b> -- Rectangular portions of the raster can be selected and highlighted.
+		-	Selections operate only in <b>Component</b> and <b>Image</b> views.
+		-	To cancel the current selection, press the <Esc> key, or switch to the <b>Line</b> or <b>Raw</b> view.
+		-	Left-click in the display (and optionally drag up/down/left/right) to select a rectangular raster portion line-by-line, pixel-by-pixel.
+		-	Use the up-arrow or down-arrow keys to change the current selection to a single-pixel selection to the line above or below the old selection.
+		-	Use the left-arrow or right-arrow keys to change the current selection to a single-pixel selection to the left or right of the old selection.
+		-	To extend the selection, hold down the <b>Shift</b> key, then...
+			-	Use the up-arrow or down-arrow keys to extend the selection up or down.
+			-	Use the left-arrow or right-arrow keys to extend the selection left or right.
+		-	Choose <b>Select All</b> from the <b>Edit</b> menu to select the entire raster.
+		-	Press <b>Esc</b> to cancel the current selection.
+		-	Moving the mouse cursor into the selection will cause a ToolTip to appear that describes the selection area.
+	-	<b>Right-Click Operations</b>
+		-	<b>View</b> -- Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
+		-	<b>Grouping</b> -- (Lines and Raw viewing modes only) -- Changes the radix of the component data to Hexadecimal or Decimal.
+		-	<b>Component Radix</b> -- (Component viewing mode only) -- Changes the radix of the component data to Hexadecimal or Decimal.
+		-	<b>Copy</b> -- Copies multiple representations of the selection to the Clipboard. If there's no selection, the entire raster is used.
+		-	<b>Paste</b> -- (Available only if a frame was previously Copied) -- Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
+		-	<b>Set Color...</b> -- (<b>Auto</b> mode OFF only) -- Displays a color picker.
+			Choosing a color will set the active lines of the current frame buffer to the chosen color.
+
+@subsection	inspectoraudio		Audio Inspector
+
+@image	html	watcher-inspector-audio.png
+
+The Audio inspector monitors the input or output of a selected audio engine of the AJA device, including its buffer memory
+and read or write "head" position.
+
+@note	Because this inspector reads (via DMA) the entire contents of an audio buffer at NTV2Watcher's currently selected polling rate,
+		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
+		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
+		in which the act of monitoring an AJA device affects it and the application(s) under test.
+
+Audio buffer memory contents can be displayed in three ways:
+	-	<b>Raw</b> -- The entire buffer in 4096-byte "lines", grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
+	-	<b>Waveform</b> -- A stack of waveform plots, for each audio channel that's carrying PCM data.
+	-	<b>Phase</b> -- A phase plot of one audio channel against another. Both audio channels must be carrying PCM data.
+
+When device polling is enabled, this inspector repeatedly monitors the audio system's input or output buffer.
+It reads the entire buffer into host memory and compares it to what was read the last time.
+The status bar shows the read or write head position, as well as what changed.
+The display highlights changed content with a brighter color.
+
+@par	Audio System Controls
+	-	<b>Audio System</b> -- Selects the audio system of interest.
+	-	<b>Sample Rate</b> -- Indicates the audio system's current sample rate.  It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>Buffer Size</b> -- Indicates the audio system's current buffer size.  It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>Audio Channel Count</b> -- Indicates the audio system's current channel count.  It can be changed using this menu
+		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>AutoCirculate Indicator</b> -- Indicates if the audio system is being used by AutoCirculate, and if so, which Channel.
+	-	<b>Start</b> -- Starts the audio system running.
+	-	<b>Pause/Resume</b> -- Pauses or resumes the audio system.
+	-	<b>Stop</b> -- Stops the audio system.
+	-	<b>View</b> -- Controls which part of the audio system to inspect:
+		-	<b>Input</b> -- Inspects the incoming audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
+		-	<b>Output</b> -- Inspects the outgoing audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
+	-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the new audio data nearest the audio system's read/write head.
+	-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
+		@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
+				audio should only be done with very short (less than 30 millisecond) polling intervals.
+
+@par	Navigation
+	-	<b>Scrolling</b> -- The display can be scrolled horizontally and/or vertically.
+		-	Use the vertical scroll bar to manually scroll the display up or down.
+		-	Use the horizontal scroll bar to manually scroll the display left or right.
+		-	If a scroll-wheel is available, move the cursor into the display, and roll the scroll wheel to scroll the display up or down.
+		-	Use the up-arrow or down-arrow keys to scroll the display up or down.
+		-	Use the left-arrow or right-arrow keys to scroll the display left or right.
+		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
+	-	<b>Vertical Ruler</b> -- This ruler identifies each audio channel in the display.
+	-	<b>Horizontal Ruler</b> -- This ruler identifies the position in the audio buffer.
+	-	Right-click in the display to pop up a context-sensitive menu:
+		-	<b>View</b> menu:
+			-	<b>Raw</b> -- Switch to the <b>Raw</b> view.
+			-	<b>Waveform</b> -- Switch to the <b>Waveform</b> view.
+			-	<b>Phase</b> -- Switch to the <b>Phase</b> view.
+		-	<b>Units</b> menu:
+			-	<b>Hex</b> -- Shows raw sample data as 4-byte hexadecimal values.
+			-	<b>Decimal</b> -- Shows raw sample data as decimal values.
+			-	<b>Percent</b> -- Shows raw sample data as a decimal percentage of maximum.
+			-	<b>Float</b> -- Shows samples as floating point values.
+			-	<b>dB</b> -- Shows samples in decibels.
+
+@subsection	inspectoranc		Ancillary Data Inspector
+
+@image	html	watcher-inspector-anc.png
+
+The Anc inspector monitors the ancillary data areas of a frame buffer, and the state registers of the device's Anc inserter/extractor widgets (if any).
+
+@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher's currently selected polling rate,
+		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
+		device or host data transfer budget. Thus, this inspector is not immune from "Heisenbugs" (the Heisenburg Uncertainty Principle)
+		in which the act of monitoring an AJA device affects it and the application(s) under test.
+
+The Anc inspector has four main sections:
+	-	<b>VANC</b> -- The VANC lines area will be shown if the channel (frame buffer) is configured for a VANC geometry.
+	-	<b>Anc Registers</b> -- This area is visible only for devices that have Anc inserters/extractors. When visible,
+		it shows the content of the inserter/extractor configuration registers. The register values are editable.
+	-	<b>F1 Anc</b> -- This area is visible only for devices that have Anc inserters/extractors. When visible, it displays the contents
+		of the 0x12000-byte region that starts -0x24000 bytes from the end of the frame buffer. This buffer is where the extractor
+		places packet data extracted from Field 1 of interlaced video or from progressive video. It's also where the inserter fetches packets for
+		output (for progressive video or interlaced Field 1).
+	-	<b>F2 Anc</b> -- This area is visible only for devices that have Anc inserters/extractors, and only when the channel is running interlaced video.
+		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
+		This is where the extractor places packets captured from Field 2. It's also where the inserter fetches packets for output into interlaced Field 2.
+
+A menu/combobox is provided for each of the Anc buffer display areas, to control how each area's Anc data is displayed:
+	-	<b>Raw</b> -- Displays the buffer as raw data. By right-clicking in the content area, you can change the data display's grouping
+		(1, 2, 4 or 8 bytes) and radix (binary, octal, decimal or hex). The bytes-per-row count of the VANC display is fixed by the channel's frame
+		geometry, but the F1 and F2 Anc buffer displays can be changed from 8, 16, 32, ... up to 4096 bytes per line. You can also change the
+		scale reference and/or radix by right-clicking in the column and/or row headings.
+	-	<b>Packets</b> -- Displays a list of Anc data packets parsed from the byte stream found in the buffer. For each packet found, it shows:
+		-	<b>A/D</b> -- Analog or digital.
+		-	<b>Line#</b> -- On capture, the SMPTE line number where the data was extracted;  on playout, the SMPTE line number where the data is to be inserted.
+		-	<b>HV</b> -- HANC (H) or VANC (V) area.
+		-	<b>Y/C</b> -- Luma (Y) or chroma (C) data stream.
+		-	<b>Lnk</b> -- The data link (A or B).
+		-	<b>DID</b> -- The DID of the packet. (Right-click, then choose "Name" from the "DID/SDID" menu to see a packet description instead.)
+		-	<b>SDID</b> -- The SDID of the packet.  (Right-click, then choose "Name" from the "DID/SDID" menu to see a packet description instead.)
+		-	<b>Name</b> -- A description of the packet. (Right-click, then choose "Numeric" from the "DID/SDID" menu to see the DID/SDID values instead.)
+		-	<b>DC</b> -- Data Count of the payload data, in bytes.
+		-	<b>CS</b> -- The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
+		-	<b>Data</b> -- The payload data bytes.
+
+When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
+It reads the entire buffer into host memory and compares it to what was read the last time.
+The display highlights changed content with a brighter color.
+
+**/

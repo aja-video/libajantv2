@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>libajantv2dll</ProjectName>
+    <ProjectGuid>{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}</ProjectGuid>
+    <RootNamespace>classesDLL</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\bin\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\bin\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)_64d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\bin\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\bin\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)_64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CLASSESDLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;AJADLL;AJADLL_BUILD;MSWindows;NO_PAINTLIB;NO_WGLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile />
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CLASSESDLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;AJADLL;AJADLL_BUILD;MSWindows;NO_PAINTLIB;NO_WGLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile />
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CLASSESDLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;AJADLL;AJADLL_BUILD;MSWindows;NO_PAINTLIB;NO_WGLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile />
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CLASSESDLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;AJADLL;AJADLL_BUILD;MSWindows;NO_PAINTLIB;NO_WGLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile />
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31.cpp" />
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31cparam.cpp" />
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31ehparam.cpp" />
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31vaparam.cpp" />
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31vinparam.cpp" />
+    <ClCompile Include="..\codecs\hevc\m31\ntv2m31viparam.cpp" />
+    <ClCompile Include="..\src\dllmain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\src\ntv2audio.cpp" />
+    <ClCompile Include="..\src\ntv2autocirculate.cpp" />
+    <ClCompile Include="..\src\ntv2bitfile.cpp" />
+    <ClCompile Include="..\src\ntv2card.cpp" />
+    <ClCompile Include="..\src\ntv2colorcorrection.cpp" />
+    <ClCompile Include="..\src\ntv2config2022.cpp" />
+    <ClCompile Include="..\src\ntv2configts2022.cpp" />
+    <ClCompile Include="..\src\ntv2debug.cpp" />
+    <ClCompile Include="..\src\ntv2devicefeatures.cpp" />
+    <ClCompile Include="..\src\ntv2devicescanner.cpp" />
+    <ClCompile Include="..\src\ntv2discover.cpp" />
+    <ClCompile Include="..\src\ntv2dma.cpp" />
+    <ClCompile Include="..\src\ntv2driverinterface.cpp" />
+    <ClCompile Include="..\src\ntv2hevc.cpp" />
+    <ClCompile Include="..\src\ntv2interrupts.cpp" />
+    <ClCompile Include="..\src\ntv2konaflashprogram.cpp" />
+    <ClCompile Include="..\src\ntv2mailbox.cpp" />
+    <ClCompile Include="..\src\ntv2mbcontroller.cpp" />
+    <ClCompile Include="..\src\ntv2mcsfile.cpp" />
+    <ClCompile Include="..\src\ntv2nubaccess.cpp" />
+    <ClCompile Include="..\src\ntv2nubpktcom.cpp" />
+    <ClCompile Include="..\src\ntv2procamp.cpp" />
+    <ClCompile Include="..\src\ntv2publicinterface.cpp" />
+    <ClCompile Include="..\src\ntv2register.cpp" />
+    <ClCompile Include="..\src\ntv2resample.cpp" />
+    <ClCompile Include="..\src\ntv2rp188.cpp" />
+    <ClCompile Include="..\src\ntv2rp215.cpp" />
+    <ClCompile Include="..\src\ntv2signalrouter.cpp" />
+    <ClCompile Include="..\src\ntv2status.cpp" />
+    <ClCompile Include="..\src\ntv2subscriptions.cpp" />
+    <ClCompile Include="..\src\ntv2task.cpp" />
+    <ClCompile Include="..\src\ntv2testpattern.cpp" />
+    <ClCompile Include="..\src\ntv2transcode.cpp" />
+    <ClCompile Include="..\src\ntv2tshelper.cpp" />
+    <ClCompile Include="..\src\ntv2utf8.cpp" />
+    <ClCompile Include="..\src\ntv2utils.cpp" />
+    <ClCompile Include="..\src\ntv2vidproc.cpp" />
+    <ClCompile Include="..\src\ntv2vpid.cpp" />
+    <ClCompile Include="..\src\ntv2vpidfromspec.cpp" />
+    <ClCompile Include="..\src\testpatterngen.cpp" />
+    <ClCompile Include="..\src\xena2vidproc.cpp" />
+    <ClCompile Include="..\src\ntv2serialcontrol.cpp" />
+    <ClCompile Include="..\src\win\ntv2windriverinterface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31.h" />
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31cparam.h" />
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31ehparam.h" />
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31vaparam.h" />
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31vinparam.h" />
+    <ClInclude Include="..\codecs\hevc\m31\ntv2m31viparam.h" />
+    <ClInclude Include="..\includes\ajaexport.h" />
+    <ClInclude Include="..\includes\basemachinecontrol.h" />
+    <ClInclude Include="..\includes\ntv2bitfile.h" />
+    <ClInclude Include="..\includes\ntv2card.h" />
+    <ClInclude Include="..\includes\ntv2colorcorrection.h" />
+    <ClInclude Include="..\includes\ntv2config2022.h" />
+    <ClInclude Include="..\includes\ntv2configts2022.h" />
+    <ClInclude Include="..\includes\ntv2debug.h" />
+    <ClInclude Include="..\includes\ntv2devicefeatures.h" />
+    <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
+    <ClInclude Include="..\src\ntv2devicefeatures.hpp" />
+    <ClInclude Include="..\includes\ntv2devicescanner.h" />
+    <ClInclude Include="..\includes\ntv2discover.h" />
+    <ClInclude Include="..\includes\ntv2driverinterface.h" />
+    <ClInclude Include="..\includes\ntv2fltknetprefs.h" />
+    <ClInclude Include="..\includes\ntv2konaflashprogram.h" />
+    <ClInclude Include="..\includes\ntv2mailbox.h" />
+    <ClInclude Include="..\includes\ntv2mbcontroller.h" />
+    <ClInclude Include="..\includes\ntv2mcsfile.h" />
+    <ClInclude Include="..\includes\ntv2nubaccess.h" />
+    <ClInclude Include="..\includes\ntv2nubpktcom.h" />
+    <ClInclude Include="..\includes\ntv2nubtypes.h" />
+    <ClInclude Include="..\includes\ntv2procamp.h" />
+    <ClInclude Include="..\includes\ntv2registers2022.h" />
+    <ClInclude Include="..\includes\ntv2resample.h" />
+    <ClInclude Include="..\includes\ntv2rp188.h" />
+    <ClInclude Include="..\includes\ntv2rp215.h" />
+    <ClInclude Include="..\includes\ntv2signalrouter.h" />
+    <ClInclude Include="..\includes\ntv2status.h" />
+    <ClInclude Include="..\includes\ntv2task.h" />
+    <ClInclude Include="..\includes\ntv2testpattern.h" />
+    <ClInclude Include="..\includes\ntv2tshelper.h" />
+    <ClInclude Include="..\includes\ntv2utf8.h" />
+    <ClInclude Include="..\includes\ntv2utils.h" />
+    <ClInclude Include="..\includes\ntv2vidproc.h" />
+    <ClInclude Include="..\includes\ntv2vidprocmasks.h" />
+    <ClInclude Include="..\includes\ntv2vpid.h" />
+    <ClInclude Include="..\includes\ntv2vpidfromspec.h" />
+    <ClInclude Include="..\includes\testpatterndata.h" />
+    <ClInclude Include="..\includes\testpatterngen.h" />
+    <ClInclude Include="..\includes\testpatterngendata.h" />
+    <ClInclude Include="..\includes\ntv2transcode.h" />
+    <ClInclude Include="..\includes\verticalfilter.h" />
+    <ClInclude Include="..\includes\xena2vidproc.h" />
+    <ClInclude Include="..\includes\ntv2serialcontrol.h" />
+    <ClInclude Include="..\src\win\ntv2windriverinterface.h" />
+    <ClInclude Include="..\src\win\performancecounter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

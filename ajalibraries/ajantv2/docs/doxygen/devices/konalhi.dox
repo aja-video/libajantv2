@@ -1,0 +1,59 @@
+/**
+	@page	konalhi		KONA LHi
+
+	This page describes the KONA LHi video capture/playout board.
+
+	@image	html	konalhi.png
+
+	The KONA LHi board connects (via J1) to the optional 101884 breakout cable or the KLHi-Box breakout box.
+	J2 is HDMI in, and J3 is HDMI out. J4 is SDI in, and J5 is SDI out.
+
+	@par	PCI Interface
+	-	PCI device ID: <b>0xDAFF</b>
+	-	Four-lane gen 2 PCI Express
+	-	3 DMA engines
+	-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
+
+	@par	Inputs & Outputs
+	-	1 x SDI input
+	-	1 x SDI output
+	-	1 x analog component video input
+	-	1 x analog component video output
+	-	1 x HDMI input
+	-	1 x HDMI output
+	-	1 x reference input
+	-	1 x reference output
+	-	1 x RS-422 serial port
+
+	@par	Frame Buffer
+	-	256 MB SDRAM
+	-	32 x 8MB frames
+	-	16 x 16MB frames for VANC and 2K formats
+
+	@par	Audio
+	-	1 subsystem
+	-	8 channels (max.) per subsystem
+	-	2 AES audio input and output channels
+	-	Audio subsystem's buffer memory starts at first byte of last frame
+	-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+	-	AES audio outputs
+
+	@par	Video Formats
+	-	Supports most standard video formats.
+	-	RGB is not supported.
+
+	@par	Video Processing
+	-	1 mixer/keyer, with Mix Coefficient
+	-	Compression widget
+	-	Up/Down/Cross Converter
+
+	@par		Ancillary Data
+	-	VANC geometries only
+
+	@par		External Connectivity
+	-	Optional \ref aja101884 provides access to other inputs and outputs
+	-	Optional \ref ajaklhibox provides convenient access to the board's inputs and outputs in a 1U rack-mountable chassis.
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/143/25>
+**/

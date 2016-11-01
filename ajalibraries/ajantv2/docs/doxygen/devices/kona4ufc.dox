@@ -1,0 +1,65 @@
+/**
+@page	kona4ufc		KONA 4 (UFC Mode)
+
+This page describes the KONA 4 capture/playout board in its 2-channel mode of operation.
+It can be "flashed" with different firmware to become a 4-channel device (see \ref kona4quad).
+
+@image	html	kona4.png
+
+The KONA 4 has a breakout connector on the far left, followed by the HDMI output, then the
+four SDI connectors. In UFC mode operation, SDI connectors 1 and 2 are inputs; connectors 3 and 4 are outputs.
+
+@par	PCI Interface
+
+-	PCI device ID: <b>0xEB0C</b>
+-	Four-lane gen 2 PCI Express
+-	2 DMA engines
+-	Legacy and MSI interrupt delivery supported
+
+@par	Inputs & Outputs
+
+-	2 x SDI inputs
+-	2 x SDI outputs
+-	1 x HDMI output
+-	1 x analog component video output
+-	2 x reference/LTC inputs
+-	2 x LTC outputs
+-	1 x RS-422 serial port
+
+@par	Frame Buffer
+
+-	512 MB SDRAM
+-	64 x 8MB frames
+-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+@par	Audio
+
+-	2 subsystems
+-	16 channels (max.) per subsystem
+-	16 channels (max.) of AES audio
+-	First subsystem's buffer memory starts 8MB from end of last frame
+-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+
+@par	Video Formats
+
+-	Supports all standard video formats (except 4K/UHD).
+-	Supports DVCPro HD and HDV.
+
+@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+@par		Ancillary Data
+
+-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
+-	VANC geometries
+
+@par		Video Processing
+
+-	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
+-	Can mix keys on and off
+-	Can differentiate between shaped and unshaped video
+
+@par		External Connectivity
+
+-	Optional \ref aja103226 provides access to other inputs and outputs
+-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+**/

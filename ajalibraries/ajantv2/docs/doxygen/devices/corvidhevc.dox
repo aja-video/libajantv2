@@ -1,0 +1,53 @@
+/**
+@page	corvidhevc		Corvid HEVC
+
+This page describes the <b>Corvid HEVC</b> OEM capture/playout board, which features four SDI inputs to support
+real time, low-latency HEVC encoding up to 4Kp60.
+
+@image	html	corvidhevc.png
+
+The Corvid HEVC has 4 x input SDI connectors and an LTC/reference input BNC.
+
+@par	PCI Interface
+
+-	PCI device ID: <b>0xEB15</b>
+-	Eight-lane gen 2 PCI Express
+-	2 DMA engines
+
+@par	Inputs
+
+-	4 x 3G-SDI inputs
+-	1 x LTC input
+
+@par	Frame Buffer
+
+-	1GB SDRAM
+-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+@par	Audio
+
+-	4 subsystems
+-	16 channels (max.) per subsystem
+
+@par	Video Formats
+
+-	Supports all HD, 2K and 4K video formats, including 4Kp60.
+-	Multiple, independent video formats supported (provided all in same clock family).
+-	Does not support DVCPro HD or HDV.
+-	RGB on SDI inputs/outputs supported.
+-	3GbA and 3GbB (dual-link) supported.
+-	SMPTE 425 2si mux supported
+
+@note	A hardware color-space converter (CSC) can convert input YCbCr SDI to RGB when using RGB buffer formats.
+
+@par		Ancillary Data
+
+-	Anc inserters and extractors (use \cAUTOCIRCULATE_TRANSFER)
+-	VANC geometries
+
+@par		Firmware
+TBD
+
+<b>See Also:</b>  \ref hevcsupplement
+
+**/

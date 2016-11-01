@@ -1,0 +1,39 @@
+/**
+	@page	ttap		T-Tap
+
+	This page describes the T-Tapvideo playout device.
+
+	@image	html	ttap.png
+
+	The T-Tap has one Thunderbolt-I input on the left side.
+	On the right side, it has one SDI output, and one HDMI output.
+
+	@par	PCI Interface
+	-	PCI device ID: <b>0xDB11</b>
+	-	Four-lane gen 1 PCI Express
+	-	2 DMA engines
+	-	Legacy and MSI interrupt delivery
+	-	1 x Thunderbolt I connector
+
+	@par	Inputs & Outputs
+	-	1 x SDI output
+	-	1 x HDMI output
+
+	@par	Frame Buffer
+	-	128 MB SDRAM
+	-	16 x 8MB frames
+
+	@par	Audio
+	-	1 subsystem
+	-	8 channels (max.) per subsystem
+
+	@par	Video Formats
+	-	Supports most standard SD and HD video formats up to 1080p30 and 2Kp25.
+	-	RGB is not supported.
+
+	@par		Ancillary Data
+	-	VANC geometries only
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/144/25>
+**/

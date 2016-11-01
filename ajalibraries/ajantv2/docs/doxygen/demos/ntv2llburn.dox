@@ -1,0 +1,16 @@
+/**
+@page	ntv2llburn		NTV2LLBurn Demo
+
+This command-line program is identical to the NTV2Burn demo except that it does not use AutoCirculate,
+and is specifically designed to reduce latency to the bare-minimum of 3 frames.
+
+The NTV2LLBurn class demonstrates...
+-	how to get "close to the metal" to reduce latency;
+-	how to use CNTV2Card::DMAWriteFrame and CNTV2Card::DMAReadFrame to transfer video to/from the device;
+-	how to use CNTV2Card::DMAWriteAudio and CNTV2Card::DMAReadAudio to transfer audio samples to/from the device,
+	especially how to account for wrap-around in the device's audio sample buffer;
+-	how to read input timecode (from the SDI input signal or from the device's analog LTC input);
+-	the proper acquire/release semantics for using an AJA device exclusively;
+-	programmatic device configuration and signal routing;
+-	how to "burn" timecode into a buffer containing a frame of video data.
+**/

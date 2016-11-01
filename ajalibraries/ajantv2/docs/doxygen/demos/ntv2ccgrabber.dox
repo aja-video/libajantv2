@@ -1,0 +1,33 @@
+/**
+@page	ntv2ccgrabber		NTV2CCGrabber Demo
+
+This command-line program "grabs" CEA-608 or CEA-708 closed-caption data that may be present on a video signal,
+streams it to standard output, and optionally "burns" it into the video.
+
+@image	html	ntv2ccgrabber.png
+
+This shows a screenshot of video from a device while <b>ntv2ccgrabber</b> runs with the <b>--burn</b> option.
+The status display turns red if caption data is missing or can't be decoded, green when present and being decoded
+properly, and shows other useful status information.
+
+The NTV2CCGrabber class demonstrates...
+-	how to use the CNTV2CaptionDecoder608 and CNTV2CaptionDecoder708 classes provided in the "libajacc" library
+	to decode CEA-608 or CEA-708 closed-caption data that may be present on a video stream;
+-	how to use the new custom ancillary data insertion feature of newer AJA devices (if available);
+-	how to use an NTV2 device's mixer/keyer widget to superimpose graphics with alpha (transparency) over live video;
+-	how to use AutoCirculate to efficiently stream video, and react to input signal changes, including loss of video,
+	or change of video format;
+-	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate;
+-	how to "burn" decoded captions into a frame buffer at the correct on-screen location with the proper attributes
+	(color, transparency, etc.).
+
+The demo's operation can be controlled by pressing certain keys on the keyboard while it's running.
+-	Press '1' thru '4' to display CC1 thru CC4 captions.
+-	Press '5' thru '8' to display TX1 thru TX4 captions.
+-	Press 'H' or 'h' to toggle the heads-up-display on or off
+-	Press 'V' or 'v' to toggle VANC on or off (experimental)
+-	Press 'Q' or 'q' to exit the demo
+
+@note	This demo behaves differently from the others in that it cannot be stopped using Ctrl-C.
+		Press 'q' or 'Q' to quit.
+**/

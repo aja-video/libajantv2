@@ -1,0 +1,36 @@
+{
+    "sfps":[
+    {
+            "designator":"top",
+            "IPAddress":"172.16.45.10",
+            "SubnetMask":"255.255.0.0",
+            "Router":"255.255.255.255",
+            "Enable2022_7":"false"
+    },
+    {
+            "designator":"bottom",
+            "IPAddress":"172.16.45.11",
+            "SubnetMask":"255.255.0.0",
+            "Router":"255.255.255.255",
+            "Enable2022_7":"false"
+    }
+    ],
+    "transmit":[
+    {
+            "designator":"channel1",
+            "primaryRemoteIPAddress":"239.0.45.15",
+            "primaryRemotePort":"6010",
+            "primaryLocalPort":"5010",
+            "primaryAutoMac":"true",
+            "Enable":"true"
+    },
+    {
+            "designator":"channel2",
+            "primaryRemoteIPAddress":"239.0.45.25",
+            "primaryRemotePort":"6011",
+            "primaryLocalPort":"5011",
+            "primaryAutoMac":"true",
+            "Enable":"false"
+    }
+    ]
+}

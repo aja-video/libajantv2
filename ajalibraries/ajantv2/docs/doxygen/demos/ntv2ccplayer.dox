@@ -1,0 +1,125 @@
+/**
+@page	ntv2ccplayer		NTV2CCPlayer Demo
+
+This command-line program reads text either from the standard input stream or from a built-in test document stream,
+and encodes that text into CEA-608 captions that are embedded into an outgoing SDI signal.
+
+@image	html	ntv2ccplayer.png
+
+The NTV2CCPlayer class demonstrates...
+- how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
+- how to use the CNTV2CaptionEncoder608 and CNTV2CaptionEncoder708 classes to encode caption data into SD and HD video frames;
+- how to use the custom ancillary data insertion feature of newer AJA devices (if available);
+- how to properly acquire and release an AJA device in order to use it exclusively;
+- how to use the new AutoCirculate APIs to efficiently play video.
+
+<h2>Command Line Syntax</h2>
+
+ntv2ccplayer \[<i>options</i>\] \[<i>filePath</i> \[...\]\]
+
+Plays video containing closed-caption data sourced from standard input (if "-" used as a file argument),
+or from the contents of one or more specified files, or, if no file arguments are provided, from an internal text source.
+
+...where...
+<table>
+	<tr><td><i>filePath</i> or "-"<td>Specifies a valid path to a file whose text contents are to be sent into the caption stream. A hyphen ("-") can be specified in lieu of a file path to use the contents of the standard input stream (although this can only be specified once in a single command invocation).
+	<tr><td colspan="2">...and where <i>options</i> can be any combination of the following:
+	<tr><td><tt>--device=</tt><i>indexNumber</i>	<td>A zero-based index number that specifies the AJA device to use.
+	<tr><td><tt>--channel=</tt><i>channelNum</i>	<td>A zero-based unsigned integer value that specifies the device frame store and output SDI spigot that will be used.
+
+	<tr><td><tt>--format=</tt><i>videoFormat</i>	<td>Specifies the video format to generate. Specify "list" to display all possible formats. Defaults to 1080i5994 (HD).
+	<tr><td><tt>--end=</tt><i>endAction</i>			<td>Specifies what happens when the last specified text file's contents have been queued for playout. If endAction is exit, the default action, the program will terminate after all text files have played. If <i>endAction</i> is "loop", all specified caption text files are to be replayed forever. If <i>endAction</i> is "idle", the program will play frames indefinitely, but without captions.
+	<tr><td><tt>--rate=</tt><i>charsPerMin</i>		<td>Specifies the rate at which caption text is produced, in characters per minute. Defaults to 500 characters per minute.
+	<tr><td><tt>--608mode=</tt><i>captionMode</i>	<td>Caption mode to use: "roll" or "roll4" (4-line roll-up, the default), "roll3" (3-line roll-up), "roll2" (2-line roll-up), "paint" (paint-on captions), or "pop" (pop-on captions).
+	<tr><td><tt>--608chan=</tt><i>captionChan</i>	<td>Caption channel to use: CC1...CC4, TX1...TX4. Defaults to CC1.
+	<tr><td><tt>--stats</tt>						<td>Emits statistics to stdout instead of caption text.
+	<tr><td><tt>--newline</tt>						<td>Newline characters (CR, LF, CR/LF) will start new caption rows.
+	<tr><td><tt>--vanc</tt>							<td>Forces the use of VANC frame geometries on devices that have custom ancillary data insertion capability.
+	<tr><td><tt>--noaudio</tt>						<td>Don't generate/embed audio tone.
+	<tr><td><tt>--notimecode</tt>					<td>Don't generate/embed timecode.
+	<tr><td><tt>--multiChannel</tt>					<td>Share the device with other programs, and if the device is capable of it, will be configured to allow the use of different video formats on other device channels.
+	<tr><td><tt>--noline21</tt>						<td>Don't encode/embed "analog" caption waveform into line 21 (SD only).
+</table>
+
+The NTV2CCPlayer class used in the demo app is capable of simultaneously generating and injecting captions
+into more than one NTV2Line21Channel at independent rates and NTV2Line21Modes. For example, in "main.cpp"...
+
+@code
+	//
+	//	NOTE:	This is an example of how to inject different captions into separate caption channels.
+	//
+	playerConfig.fChannelGenerators.clear ();
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_1_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Idle;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp2;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_CC1;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 1000;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_2_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Repeat;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp3;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_CC2;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 700;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_3_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Idle;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp4;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_CC3;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 500;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_4_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Repeat;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp4;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_CC4;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 300;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_text1_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Idle;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_Text1;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 200;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_text2_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Repeat;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_Text2;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 200;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_text3_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Idle;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_Text3;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 200;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+
+	generatorConfig.fFilesToPlay.clear ();
+	generatorConfig.fFilesToPlay.push_back (string ("path/to/caption_channel_text4_file.txt"));
+	generatorConfig.fEndAction			= AtEndAction_Repeat;
+	generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
+	generatorConfig.fCaptionChannel		= NTV2_CC608_Text4;
+	generatorConfig.fNewLinesAreNewRows	= true;
+	generatorConfig.fCharsPerMinute		= 200;
+	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+@endcode
+**/

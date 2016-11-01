@@ -1,0 +1,19 @@
+/**
+@page	ntv2fieldburn		NTV2FieldBurn Demo
+
+This command-line program captures interlaced SDI video into two separate host buffers, one for each field,
+"burns" timecode into each of them, then recombines and plays out the "burned" fields onto an SDI output of
+that same AJA device. The program will use the timecode embedded in the input signal if it has any; otherwise
+it "invents" a timecode of its own. It also embeds whatever timecode it used into the output signal.
+
+@image	html	ntv2fieldburn.png
+
+The NTV2FieldBurn class demonstrates...
+-	how to properly acquire and release an AJA device in order to use it exclusively;
+-	how to programmatically perform device configuration and signal routing;
+-	how to use AutoCirculate to efficiently stream video and audio, with or without timecode;
+-	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate;
+-	how to use and manipulate timecode;
+-	how to perform segmented DMAs using AutoCirculate;
+-	how to "burn" timecode into a buffer containing a frame of video data.
+**/

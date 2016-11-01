@@ -1,0 +1,354 @@
+/**
+@page	videoformats	Video Data Formats
+
+All AJA devices provide and/or accept video, audio and ancillary data to/from the host in several formats.
+This section details the video formats and device frame buffer (data) formats.
+
+@section	vidformats	Video Formats
+
+A video format describes a particular video signal, which implies a frame geometry, video standard, and frame rate.
+Each format is identified by a specific <tt>NTV2VideoFormat</tt> enumeration constant. All AJA devices support the "basic" SD-SDI
+and HD-SDI video formats that can be accommodated in a single 1.5 Gbps SDI link. Progressively newer AJA devices support 3Gbps
+dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video at 60 fps.
+
+@subsection		vidformatssd	SD Formats
+<table>
+	<tr><td><b>525i 2398</b>	<td>\c NTV2_FORMAT_525_2398
+	<tr><td><b>525i 24</b>		<td>\c NTV2_FORMAT_525_2400
+	<tr><td><b>525i 5994</b>	<td>\c NTV2_FORMAT_525_5994
+	<tr><td><b>525psf 2997</b>	<td>\c NTV2_FORMAT_525psf_2997
+	<tr><td><b>625i 50</b>		<td>\c NTV2_FORMAT_625_5000
+	<tr><td><b>625psf 2500</b>	<td>\c NTV2_FORMAT_625psf_2500
+</table>
+
+@subsection		vidformatshd	HD Formats
+<table>
+	<tr><td><b>720p 2398</b>				<td>\c NTV2_FORMAT_720p_2398
+	<tr><td><b>720p 25</b>					<td>\c NTV2_FORMAT_720p_2500
+	<tr><td><b>720p 50</b>					<td>\c NTV2_FORMAT_720p_5000
+	<tr><td><b>720p 5994</b>				<td>\c NTV2_FORMAT_720p_5994
+	<tr><td><b>720p 60</b>					<td>\c NTV2_FORMAT_720p_6000
+	<tr><td><b>1080i 50, 1080psf 25</b>		<td>\c NTV2_FORMAT_1080i_5000
+	<tr><td><b>1080i 5994, 1080psf 2997</b>	<td>\c NTV2_FORMAT_1080i_5994
+	<tr><td><b>1080i 60, 1080psf 30</b>		<td>\c NTV2_FORMAT_1080i_6000
+</table>
+
+@subsection		vidformats2k	2K Formats
+<table>
+	<tr><td><b>2K 1498</b>	<td>\c NTV2_FORMAT_2K_1498
+	<tr><td><b>2K 15</b>	<td>\c NTV2_FORMAT_2K_1500
+	<tr><td><b>2K 2398</b>	<td>\c NTV2_FORMAT_2K_2398
+	<tr><td><b>2K 24</b>	<td>\c NTV2_FORMAT_2K_2400
+	<tr><td><b>2K 25</b>	<td>\c NTV2_FORMAT_2K_2500
+	<tr><td><b>2K 2997</b>	<td>\c NTV2_FORMAT_1080p_2K_2997
+	<tr><td><b>2K 30</b>	<td>\c NTV2_FORMAT_1080p_2K_3000
+	<tr><td><b>2K 4795</b>	<td>\c NTV2_FORMAT_1080p_2K_4795  <i>new in 12.0</i>
+	<tr><td><b>2K 48</b>	<td>\c NTV2_FORMAT_1080p_2K_4800  <i>new in 12.0</i>
+	<tr><td><b>2K 50</b>	<td>\c NTV2_FORMAT_1080p_2K_5000
+	<tr><td><b>2K 5994</b>	<td>\c NTV2_FORMAT_1080p_2K_5994
+	<tr><td><b>2K 60</b>	<td>\c NTV2_FORMAT_1080p_2K_6000
+</table>
+
+@subsection		vidformats4k	4K Formats
+<table>
+	<tr><td><b>4×1920×1080psf 2398</b>	<td>\c NTV2_FORMAT_4x1920x1080psf_2398
+	<tr><td><b>4×1920×1080p 2398</b>	<td>\c NTV2_FORMAT_4x1920x1080p_2398
+	<tr><td><b>4×2048×1080psf 2398</b>	<td>\c NTV2_FORMAT_4x2048x1080psf_2398
+	<tr><td><b>4×2048×1080p 2398</b>	<td>\c NTV2_FORMAT_4x2048x1080p_2398
+	<tr><td><b>4×1920×1080psf 24</b>	<td>\c NTV2_FORMAT_4x1920x1080psf_2400
+	<tr><td><b>4×1920×1080p 24</b>		<td>\c NTV2_FORMAT_4x1920x1080p_2400
+	<tr><td><b>4×2048×1080psf 24</b>	<td>\c NTV2_FORMAT_4x2048x1080psf_2400
+	<tr><td><b>4×2048×1080p 24</b>		<td>\c NTV2_FORMAT_4x2048x1080p_2400
+	<tr><td><b>4×1920×1080psf 25</b>	<td>\c NTV2_FORMAT_4x1920x1080psf_2500
+	<tr><td><b>4×1920×1080p 25</b>		<td>\c NTV2_FORMAT_4x1920x1080p_2500
+	<tr><td><b>4×2048×1080psf 25</b>	<td>\c NTV2_FORMAT_4x2048x1080psf_2500
+	<tr><td><b>4×2048×1080p 25</b>		<td>\c NTV2_FORMAT_4x2048x1080p_2500
+	<tr><td><b>4×1920×1080p 2997</b>	<td>\c NTV2_FORMAT_4x1920x1080p_2997
+	<tr><td><b>4×2048×1080p 2997</b>	<td>\c NTV2_FORMAT_4x2048x1080p_2997
+	<tr><td><b>4×1920×1080p 30</b>		<td>\c NTV2_FORMAT_4x1920x1080p_3000
+	<tr><td><b>4×2048×1080p 30</b>		<td>\c NTV2_FORMAT_4x2048x1080p_3000
+</table>
+
+@subsection		vidformats4khfr		4K HFR Formats
+<table>
+	<tr><td><b>4×2048×1080p 4795</b>	<td>\c NTV2_FORMAT_4x2048x1080p_4795  <i>new in 12.0</i>
+	<tr><td><b>4×2048×1080p 48</b>		<td>\c NTV2_FORMAT_4x2048x1080p_4800  <i>new in 12.0</i>
+	<tr><td><b>4×1920×1080p 50</b>		<td>\c NTV2_FORMAT_4x1920x1080p_5000
+	<tr><td><b>4×2048×1080p 50</b>		<td>\c NTV2_FORMAT_4x2048x1080p_5000
+	<tr><td><b>4×1920×1080p 5994</b>	<td>\c NTV2_FORMAT_4x1920x1080p_5994
+	<tr><td><b>4×2048×1080p 5994</b>	<td>\c NTV2_FORMAT_4x2048x1080p_5994
+	<tr><td><b>4×1920×1080p 60</b>		<td>\c NTV2_FORMAT_4x1920x1080p_6000
+	<tr><td><b>4×2048×1080p 60</b>		<td>\c NTV2_FORMAT_4x2048x1080p_6000
+</table>
+
+To determine if a given device can handle a particular video format, call ::NTV2DeviceCanDoVideoFormat.
+
+@section	devicefbformats		Device Frame Buffer Formats
+
+Non-planar, uncompressed RGB and YCbCr video data in the device frame buffer is always stored full-frame.
+Interlaced video is always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the buffer,
+followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc., alternating to the end of the frame.
+(A very VERY long time ago, AJA made devices that stored all of Field 1's lines in the top half of the buffer, and all of Field 2's
+lines in the bottom half of the buffer. These devices and buffer formats are no longer supported.)
+
+The frame buffer format describes what kind of data is stored in each frame and how the data is arranged in memory.
+Each format is identified by a specific \c NTV2FrameBufferFormat enumeration constant.
+
+@note	The format of video data on the NTV2 device is identical to the format of the video data on the host,
+		whether after transferring captured frames from the device to the host, or before transferring frames to be
+		played from the host to the device.
+
+All AJA devices support these basic frame buffer formats:
+<table>
+	<tr><td><b>10-Bit YCbCr [v210]</b>	<td>\c NTV2_FBF_10BIT_YCBCR
+	<tr><td><b>8-Bit YCbCr [UYVY]</b>	<td>\c NTV2_FBF_8BIT_YCBCR
+</table>
+
+Newer AJA devices support most of these additional frame buffer formats:
+<table>
+	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>\c NTV2_FBF_ARGB
+	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>\c NTV2_FBF_RGBA
+	<tr><td><b>10-Bit RGB</b>					<td>\c NTV2_FBF_10BIT_RGB
+	<tr><td><b>Alternate 8-Bit YCbCr [YUY2]</b>	<td>\c NTV2_FBF_8BIT_YCBCR_YUY2
+	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>\c NTV2_FBF_ABGR
+	<tr><td><b>10-Bit RGB - DPX</b>				<td>\c NTV2_FBF_10BIT_DPX
+	<tr><td><b>10-Bit YCbCr - DPX</b>			<td>\c NTV2_FBF_10BIT_YCBCR_DPX
+	<tr><td><b>8-Bit DVCPro</b>					<td>\c NTV2_FBF_8BIT_DVCPRO
+	<tr><td><b>8-Bit HDV</b>					<td>\c NTV2_FBF_8BIT_HDV
+	<tr><td><b>24-Bit RGB</b>					<td>\c NTV2_FBF_24BIT_RGB
+	<tr><td><b>24-Bit BGR</b>					<td>\c NTV2_FBF_24BIT_BGR
+	<tr><td><b>10-Bit DPX little-endian</b>		<td>\c NTV2_FBF_10BIT_DPX_LITTLEENDIAN
+	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>\c NTV2_FBF_48BIT_RGB
+	<tr><td><b>10-Bit Raw YCbCr</b>				<td>\c NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
+	<tr><td><b>10-Bit Raw RGB</b>				<td>\c NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
+</table>
+
+To determine if a given device can handle a particular frame buffer format, call ::NTV2DeviceCanDoFrameBufferFormat.
+
+The remainder of this section describes how these formats are laid out in memory. Note that a hardware color-space converter
+will convert the SDI (YCbCr) input/output data to/from RGB as necessary for the RGB formats.
+
+Most AJA devices support RGB formats on SDI inputs and outputs. To determine if the device can support RGB over SDI,
+check if the device has a dual-link widget (i.e., call ::NTV2DeviceCanDoWidget, passing it \c NTV2_WgtDualLinkOut1.
+If the device can't handle RGB over SDI, RGB data from the frame buffer must be converted to YCbCr before being output.
+Similarly, when an RGB frame buffer format is desired, the incoming YCbCr data must go through a color space converter
+<i>en route</i> to the frame buffer.
+
+@subsection		fbformat8bitycbcr		8-Bit YCbCr Format
+
+This format, identified by the \c NTV2_FBF_8BIT_YCBCR enumeration constant, is used by both Windows ('UYVY') and QuickTime
+('2vuy') for 8-Bit YCbCr video. Here's the memory layout of two pixels:
+
+@image	html	fbf-8bitycbcr-75.png
+
+@subsection		fbformat10bitycbcr	10-Bit YCbCr Format
+
+This format, identified by the \c NTV2_FBF_10BIT_YCBCR enumeration constant, has twelve 10-bit unsigned components that are packed into four 32-bit little-endian words.
+(Six pixels are represented in each 16 bytes.) This is the format used by Quicktime to store 10-bit YCbCr video and is referred to (in both QuickTime and Windows)
+as the 'v210' "FourCC" format.
+
+Here are the four 32-bit words (six pixels) in increasing address order:
+
+@image	html	fbf-10bitycbcr-le-75.png
+
+Here are the same six pixels -- the four 32-bit little-endian words -- in decreasing address order:
+
+@image	html	fbf-10bitycbcr-75.png
+
+@subsection		fbformats8bitrgb		8-Bit ARGB, RGBA, ABGR Formats
+
+These formats incorporate 8-bit Red, Green, Blue and Alpha (key) components.
+The device Color Space Converter(s) will perform the proper conversion to/from 10-Bit YCbCr and Key.
+
+8-Bit ARGB, identified by the \c NTV2_FBF_ARGB enumeration constant, is used extensively on the Windows platform (and on most AJA devices can be routed
+to an SDI output for ARGB 4:4:4:4 over-the-wire):
+
+@image	html	fbf-8bitargb-75.png
+
+8-Bit BGRA, identified by the \c NTV2_FBF_RGBA enumeration constant, is used extensively on the MacOS platform:
+
+@image	html	fbf-8bitbgra-75.png
+
+8-Bit ABGR, identified by the \c NTV2_FBF_ABGR enumeration constant, is used extensively with OpenGL:
+
+@image	html	fbf-8bitabgr-75.png
+
+@subsection		fbformats10bitrgb		10-Bit RGB Format
+
+This format is identified by the \c NTV2_FBF_10BIT_RGB enumeration constant. For playout, the AJA device firmware converts the 10-bit RGB video data
+formatted as in the table below to the expected SMPTE-standard 10-Bit YCbCr output signal. Conversely, for capture/ingest, 10-bit YCbCr input video
+is converted into this 10-bit RGB pixel format:
+
+@image	html	fbf-10bitrgb-75.png
+
+The most significant two bits of each 32-bit pixel contain its alpha information:
+
+@image	html	fbf-10bitrgb-alpha-75.png
+
+@subsection		fbformats10bitrgbdpx	10-Bit RGB - DPX Format
+
+This format, identified by the \c NTV2_FBF_10BIT_DPX enumeration constant, is laid out as follows, before byte-swapping:
+
+@image	html	fbf-10bitrgbdpx-before-75.png
+
+This is the memory layout after byte-swapping:
+
+@image	html	fbf-10bitrgbdpx-after-75.png
+
+@subsection		fbformats10bitycbcrdpx	10-Bit YCbCr - DPX Format
+
+This format, identified by the \c NTV2_FBF_10BIT_YCBCR_DPX enumeration constant, is laid out as follows, before byte-swapping:
+
+@image	html	fbf-10bitycbcrdpx-before-75.png
+
+After byte-swapping:
+
+@image	html	fbf-10bitycbcrdpx-after-75.png
+
+@subsection		fbformats24bitrgb		24-Bit RGB
+
+This format, identified by the \c NTV2_FBF_24BIT_RGB enumeration constant, is laid out as follows:
+
+@image	html	fbf-24bitrgb-75.png
+
+@subsection		fbformats24bitbgr		24-Bit BGR
+
+This format, identified by the \c NTV2_FBF_24BIT_BGR enumeration constant, has this single-pixel layout:
+
+@image	html	fbf-24bitbgr-75.png
+
+@subsection		fbformats10bitdpxle	10-Bit DPX Little-Endian
+
+This format, identified by the \c NTV2_FBF_10BIT_DPX_LITTLEENDIAN enumeration constant, has this single-pixel layout:
+
+@image	html	fbf-10bitdpxle-75.png
+
+@subsection		fbformats48bitrgb		48-Bit RGB
+
+This format, identified by the \c NTV2_FBF_48BIT_RGB enumeration constant, has this single-pixel layout:
+
+@image	html	fbf-48bitrgb-75.png
+
+@note	The least-significant 4 bits of each color component in this format are zero or irrelevant.
+
+@subsection		fbformatsyuy2		Alternate 8-Bit YCbCr ('YUY2')
+
+This format, identified by the \c NTV2_FBF_8BIT_YCBCR_YUY2 enumeration constant, has this single-pixel layout:
+
+@image	html	fbf-8bityuy2-75.png
+
+@subsection		fbformats8bitdvcpro	8-Bit DVCPro
+
+This format, identified by the \c NTV2_FBF_8BIT_DVCPRO enumeration constant, is a popular lossy 4:1:1 compression scheme.
+
+@subsection		fbformats8bithdv		8-Bit HDV
+
+This format, identified by the \c NTV2_FBF_8BIT_HDV enumeration constant, is a lossy H.262/MPEG-2 (video) and MPEG-1 Layer 2 (audio) compression scheme.
+
+@subsection		fbformats10bitcion	10-Bit Raw YCbCr (CION)
+
+This format, identified by the \c NTV2_FBF_10BIT_RAW_YCBCR enumeration constant, is used for raw RGB Bayer capture from the AJA CION camera.
+Bayer pixels are 10-bit resolution stored in big-endian packed format, as required by the 'DNG' (TIFF) file specification.
+The packing cadence is 16 Bayer pixels in 20 bytes.
+
+@image	html	fbf-10bitrawcion-75.png
+
+See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/145>
+"How to Capture Raw Bayer Data from the CION Camera" for detailed information about capturing raw
+CION data using NTV2 devices. The \ref ntv2qtrawcapture demonstration app in the SDK also shows how to capture raw video into 'DNG' files.
+
+@section	fbframegeometries		Frame Buffer Geometries
+
+For each format, video is arranged differently in memory. This means that for each format, there's a different number of 32-bit words per horizontal line
+(i.e., "line pitch") for each standard.
+
+This information can be obtained programmatically from the \c NTV2FormatDescriptor structure returned by the SDK function ::GetFormatDescriptor.
+The following table has this information:
+<table>
+	<tr><td><b>Standard</b>	<td><b>Format</b>	<td><b>Pixel Count</b>	<td><b>Line Pitch</b><i>(32-bit words)</i>
+	<tr><td>525		<td>8-Bit YCbCr – UYVY				<td>720		<td>360
+	<tr><td>525		<td>8-Bit YCbCr – YUY2				<td>720		<td>360
+	<tr><td>525		<td>10-Bit YCbCr					<td>720		<td>480
+	<tr><td>525		<td>10-Bit YCbCr – DPX-compatible	<td>720		<td>480
+	<tr><td>525		<td>8-Bit BGR						<td>720		<td>540
+	<tr><td>525		<td>8-Bit RGB						<td>720		<td>540
+	<tr><td>525		<td>10-Bit RGB						<td>720		<td>720
+	<tr><td>525		<td>10-Bit RGB – DPX-compatible		<td>720		<td>720
+	<tr><td>525		<td>10-Bit RGB – DPX Little-Endian	<td>720		<td>720
+	<tr><td>525		<td>10-Bit YCbCrA					<td>720		<td>720
+	<tr><td>525		<td>8-Bit ABGR						<td>720		<td>720
+	<tr><td>525		<td>8-Bit ARGB						<td>720		<td>720
+	<tr><td>525		<td>8-Bit RGBA						<td>720		<td>720
+	<tr><td>525		<td>48-Bit RGB						<td>720		<td>1080
+	<tr><td>625		<td>8-Bit YCbCr – UYVY				<td>720		<td>360
+	<tr><td>625		<td>8-Bit YCbCr – YUY2				<td>720		<td>360
+	<tr><td>625		<td>10-Bit YCbCr					<td>720		<td>480
+	<tr><td>625		<td>10-Bit YCbCr – DPX-compatible	<td>720		<td>480
+	<tr><td>625		<td>8-Bit BGR						<td>720		<td>540
+	<tr><td>625		<td>8-Bit RGB						<td>720		<td>540
+	<tr><td>625		<td>10-Bit RGB						<td>720		<td>720
+	<tr><td>625		<td>10-Bit RGB – DPX-compatible		<td>720		<td>720
+	<tr><td>625		<td>10-Bit RGB – DPX Little-Endian	<td>720		<td>720
+	<tr><td>625		<td>10-Bit YCbCrA					<td>720		<td>720
+	<tr><td>625		<td>8-Bit ABGR						<td>720		<td>720
+	<tr><td>625		<td>8-Bit ARGB						<td>720		<td>720
+	<tr><td>625		<td>8-Bit RGBA						<td>720		<td>720
+	<tr><td>625		<td>48-Bit RGB						<td>720		<td>1080
+	<tr><td>720		<td>8-Bit YCbCr – UYVY				<td>1280	<td>640
+	<tr><td>720		<td>8-Bit YCbCr – YUY2				<td>1280	<td>640
+	<tr><td>720		<td>10-Bit YCbCr					<td>1280	<td>864
+	<tr><td>720		<td>10-Bit YCbCr – DPX-compatible	<td>1280	<td>864
+	<tr><td>720		<td>8-Bit BGR						<td>1280	<td>960
+	<tr><td>720		<td>8-Bit RGB						<td>1280	<td>960
+	<tr><td>720		<td>10-Bit RGB						<td>1280	<td>1280
+	<tr><td>720		<td>10-Bit RGB – DPX-compatible		<td>1280	<td>1280
+	<tr><td>720		<td>10-Bit RGB – DPX Little-Endian	<td>1280	<td>1280
+	<tr><td>720		<td>10-Bit YCbCrA					<td>1280	<td>1280
+	<tr><td>720		<td>8-Bit ABGR						<td>1280	<td>1280
+	<tr><td>720		<td>8-Bit ARGB						<td>1280	<td>1280
+	<tr><td>720		<td>8-Bit RGBA						<td>1280	<td>1280
+	<tr><td>720		<td>48-Bit RGB						<td>1280	<td>1920
+	<tr><td>1080	<td>8-Bit YCbCr – UYVY				<td>1920	<td>960
+	<tr><td>1080	<td>8-Bit YCbCr – YUY2				<td>1920	<td>960
+	<tr><td>1080	<td>10-Bit YCbCr					<td>1920	<td>1280
+	<tr><td>1080	<td>10-Bit YCbCr – DPX-compatible	<td>1920	<td>1280
+	<tr><td>1080	<td>8-Bit BGR						<td>1920	<td>1440
+	<tr><td>1080	<td>8-Bit RGB						<td>1920	<td>1440
+	<tr><td>1080	<td>10-Bit RGB						<td>1920	<td>1920
+	<tr><td>1080	<td>10-Bit RGB – DPX-compatible		<td>1920	<td>1920
+	<tr><td>1080	<td>10-Bit RGB – DPX Little-Endian	<td>1920	<td>1920
+	<tr><td>1080	<td>10-Bit YCbCrA					<td>1920	<td>1920
+	<tr><td>1080	<td>8-Bit ABGR						<td>1920	<td>1920
+	<tr><td>1080	<td>8-Bit ARGB						<td>1920	<td>1920
+	<tr><td>1080	<td>8-Bit RGBA						<td>1920	<td>1920
+	<tr><td>1080	<td>48-Bit RGB						<td>1920	<td>2880
+	<tr><td>1080p	<td>8-Bit YCbCr – UYVY				<td>1920	<td>960
+	<tr><td>1080p	<td>8-Bit YCbCr – YUY2				<td>1920	<td>960
+	<tr><td>1080p	<td>10-Bit YCbCr					<td>1920	<td>1280
+	<tr><td>1080p	<td>10-Bit YCbCr – DPX-compatible	<td>1920	<td>1280
+	<tr><td>1080p	<td>8-Bit BGR						<td>1920	<td>1440
+	<tr><td>1080p	<td>8-Bit RGB						<td>1920	<td>1440
+	<tr><td>1080p	<td>10-Bit RGB						<td>1920	<td>1920
+	<tr><td>1080p	<td>10-Bit RGB – DPX-compatible		<td>1920	<td>1920
+	<tr><td>1080p	<td>10-Bit RGB – DPX Little-Endian	<td>1920	<td>1920
+	<tr><td>1080p	<td>10-Bit YCbCrA					<td>1920	<td>1920
+	<tr><td>1080p	<td>8-Bit ABGR						<td>1920	<td>1920
+	<tr><td>1080p	<td>8-Bit ARGB						<td>1920	<td>1920
+	<tr><td>1080p	<td>8-Bit RGBA						<td>1920	<td>1920
+	<tr><td>1080p	<td>48-Bit RGB						<td>1920	<td>2880
+	<tr><td>2K		<td>8-Bit YCbCr – UYVY				<td>2048	<td>1024
+	<tr><td>2K		<td>8-Bit YCbCr – YUY2				<td>2048	<td>1024
+	<tr><td>2K		<td>10-Bit YCbCr					<td>2048	<td>1376
+	<tr><td>2K		<td>8-Bit BGR						<td>2048	<td>1536
+	<tr><td>2K		<td>8-Bit RGB						<td>2048	<td>1536
+	<tr><td>2K		<td>10-Bit RGB						<td>2048	<td>2048
+	<tr><td>2K		<td>10-Bit RGB – DPX-compatible		<td>2048	<td>2048
+	<tr><td>2K		<td>10-Bit RGB – DPX Little-Endian	<td>2048	<td>2048
+	<tr><td>2K		<td>10-Bit YCbCr – DPX-compatible	<td>2048	<td>2048
+	<tr><td>2K		<td>10-Bit YCbCrA					<td>2048	<td>2048
+	<tr><td>2K		<td>8-Bit ABGR						<td>2048	<td>2048
+	<tr><td>2K		<td>8-Bit ARGB						<td>2048	<td>2048
+	<tr><td>2K		<td>8-Bit RGBA						<td>2048	<td>2048
+	<tr><td>2K		<td>48-Bit RGB						<td>2048	<td>3072
+</table>
+**/

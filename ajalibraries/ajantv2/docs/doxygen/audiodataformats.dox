@@ -1,0 +1,41 @@
+/**
+@page	audioformats	Audio Data Formats
+
+AJA's NTV2-compatible devices have independent audio subsystems, each supporting up to 8 or 16 audio channels.
+(Most can be configured to support 6 channels for backward compatibility with older AJA devices.)
+For detailed information about how audio is handled in NTV2 devices, see \ref audiooperation.
+
+@section	audfmt-24bitpcm		24-bit PCM Audio
+
+Each PCM audio sample requires four bytes of storage, but only the upper (most-significant) 24 bits are used, as follows:
+
+@image	html	fbf-24bitpcmaudio-75.png
+
+@note	This format doesn't apply when PCM normalization is disabled for the audio subsystem.
+		Non-PCM audio is discussed in \ref audiooperation.
+
+@subsection		audio6chlmode		6-Channel Mode
+
+Here are This format was used on older AJA devices, and is provided for backward compatibility.
+
+@image	html	fbf-6channelaudio-75.png
+
+This format was used on older AJA devices, and is provided for backward compatibility.
+
+@subsection		audio8chlmode		8-Channel Mode
+
+The layout for two samples of 8-channel audio data is:
+
+@image	html	fbf-8channelaudio-75.png
+
+Within each 32-bit word, the 24-bit PCM audio sample is left-justified identically to that of the 6-channel format.
+
+@subsection		audio16chlmode		16-Channel Mode
+
+The layout for two samples of 16-channel audio data is:
+
+@image	html	fbf-16channelaudio-75.png
+
+Within each 32-bit word, the 24-bit PCM audio sample is left-justified identically to that of the 6-channel format.
+
+**/

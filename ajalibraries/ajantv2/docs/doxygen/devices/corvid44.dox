@@ -1,0 +1,55 @@
+/**
+	@page	corvid44		Corvid 44
+
+	This page describes the <b>Corvid 44</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
+	configured as inputs or outputs.
+
+	@image	html	corvid44.png
+
+	The Corvid44 has an RS-422 serial port, 2 x input and 2 x output SDI connectors, a reference/LTC input BNC,
+	...and a secondary LTC-only input connector on the board header.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xEB0E</b>
+	-	Eight-lane gen 2 PCI Express
+	-	2 DMA engines
+
+	@par	Inputs & Outputs
+
+	-	4 x SDI bi-directional (under software control)
+	-	1 x reference/LTC input
+	-	1 x secondary LTC-only input (2-pin Molex connector on board header)
+	-	1 x RS-422 serial port (full-height board version has DB-9 connector)
+
+	@par	Frame Buffer
+
+	-	1GB SDRAM
+	-	128 x 8MB frames
+	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	4 subsystems
+	-	16 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts 8MB before end of last frame
+
+	@par	Video Formats
+
+	-	Supports all SD, HD, 2K and 4K video formats, including 4Kp60.
+	-	Multiple, independent video formats supported (provided all in same clock family).
+	-	Does not support DVCPro HD or HDV.
+	-	RGB on SDI inputs/outputs supported.
+	-	3GbA and 3GbB (dual-link) supported.
+	-	SMPTE 425 2si mux supported
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+	@par		Ancillary Data
+
+	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
+	-	VANC geometries
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/154/25>
+**/

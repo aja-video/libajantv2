@@ -1,0 +1,17 @@
+/**
+@page	ntv2outputtestpattern		NTV2OutputTestPattern Demo
+
+This command-line program demonstrates how to "push" a single test pattern frame to an AJA device and have it play that
+video signal forever without further action needed by the host.
+
+@image	html	ntv2outputtestpattern.png
+
+Typical WFM display showing the output of an AJA device that's connected to a host running <b>ntv2outputtestpattern</b>.
+(The audio is simply playing through whatever audio happens to be embedded on the device's input signal.)
+
+The NTV2OutputTestPattern class demonstrates...
+-	how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
+-	how to transfer a single frame to an AJA device using DMA;
+-	how to programmatically perform device configuration and signal routing;
+-	how to be a "good citizen" to detect if another application is already using the device.
+**/

@@ -1,0 +1,68 @@
+/**
+@page	konaip22		KONA IP 4CH 1SFP
+
+This page describes the KONA IP 4-channel capture/playout board with 1 active SFP cage.
+It can be "flashed" with different firmware to become a quad-channel capture/playout device with 2 active SFP cages (see \ref konaip4i).
+
+@note	Information on this page is subject to change without notice.
+
+@image	html	konaip.png
+
+KONA IP has two 10GigE SFP cages for multichannel input and/or output, enabling effective reception, delivery or both.
+Work with the same high quality uncompressed 4:4:4 or 4:2:2 2K/HD/SD video and 16-Channel embedded audio you are accustomed to today.
+It's a flexible platform that can support, via future firmware upgrades, J2K (JPEG 2000) compression and advanced IP protocols including VSF TR-04, VSF TR-03 and more.
+
+@par	PCI Interface
+
+-	PCI device ID: <b>0xEB1A</b>
+-	Eight-lane gen 2 PCI Express
+-	4 DMA engines
+-	MSI interrupt delivery supported
+
+@par	Inputs & Outputs
+
+-	2 x bi-directional 10GbE SFP+ TCP/IP cages, represented in firmware as 4 x virtual 3G-SDI bi-directional SDI spigots
+-	SMPTE 2022-6 supported for input & output, up to 4 streams of SD or HD each with 16 audio channels and metadata
+-	1 x HDMI 1.4 output (8-channel embedded audio support, no HDCP support)
+-	1 x reference input
+
+@par	Frame Buffer
+
+-	512 MB SDRAM
+-	64 x 8MB frames
+-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+-	4 frame store widgets (each independently configurable for capture or playback)
+
+@par	Audio
+
+-	4 subsystems
+-	16 channels (max.) per subsystem
+-	First subsystem's buffer memory starts 8MB from end of last frame
+
+@par	Video Formats
+
+-	Supports all standard video formats, plus 2K
+-	Because SFPs are bandwidth limited, up to 3 x 3G in/out, or 4 x SD/HD in/out
+
+@note	4 x hardware color-space converters (CSC widgets) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+@par		Ancillary Data
+
+-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
+-	VANC geometries
+
+@par		Video Processing
+
+-	2 x independent Mixer/Keyer widgets, each with its own Mix Coefficient
+-	Can mix keys on and off
+-	Can differentiate between shaped and unshaped video
+-	4 x 2D LUTs
+
+@par		Configuration
+
+-	The \ref ntv2konaipjsonsetup demo application shows how to software-configure the SFPs.
+-	Note that the KONA IP has a MicroBlaze processor that must be booted when power is applied to the board,
+	so it won't respond to configuration changes for a minute or two. To detect when the MicroBlaze is running,
+	and thus when the SFPs can be configured, poll the uptime register (0x40004) until it starts incrementing.
+
+**/

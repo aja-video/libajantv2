@@ -1,0 +1,63 @@
+/**
+	@page	corvid1corvid3g		Corvid, Corvid 3G
+
+	This page describes the Corvid (sometimes called the <b>Corvid 1</b>), and the <b>Corvid 3G</b> OEM video capture/playout boards.
+
+	It has one SDI input, one SDI output, one LTC input or output, and one RS-422 port.
+	It can handle 8 or 10 bit video up to 720p60 and 1080p30.
+
+	The Corvid 3G has one SDI input, one SDI output, one LTC input, and one RS-422 port.
+	It has a video processing module (mixer/keyer), and can handle 2K and 3Gb video formats.
+
+	@image	html	corvid3g.jpeg		width=50%
+
+	The Corvid 3G Fiber looks very similar:
+
+	@image	html	corvid3gfiber.jpg	width=10cm
+
+	The connector layout is the same on all three boards: RS-422 serial on the far left; LTC in/out on the left,
+	video input in the middle, and video output on the right.
+
+
+	@par	PCI Interface
+
+	-	PCI device ID (Corvid): <b>0xDAFE</b>
+	-	PCI device ID (Corvid3G): <b>0xDB03</b>
+	-	Four-lane gen 1 PCI Express
+	-	2 DMA engines
+	-	Legacy interrupt delivery (INTA# for all interrupts) — MSI not supported
+
+	@par	Inputs & Outputs
+
+	-	1 x SDI input
+	-	1 x SDI output
+	-	1 x reference input
+	-	1 x LTC input
+	-	1 x RS-422 serial port
+
+	@par	Frame Buffer
+
+	-	256 MB SDRAM
+	-	32 x 8MB frames
+	-	16 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB (Corvid 3G only)
+
+	@par	Audio
+
+	-	1 subsystem
+	-	8 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts at first byte of last frame
+
+	@par	Video Formats
+
+	-	Supports most standard video formats.
+	-	Does not support DVCPro HD or HDV.
+	-	RGB on SDI inputs/outputs not supported.
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats (Corvid 3G only).
+
+	@par		Firmware
+
+	<b>Corvid 1:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/128/25>
+
+	<b>Corvid 3G:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/132/25>
+**/

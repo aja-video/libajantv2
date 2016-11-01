@@ -1,0 +1,33 @@
+/**
+	@file		ntv2vidprocmasks.h
+	@brief		Defines several macros used by the CNTV2VidProc class.
+	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
+
+#ifndef NTV2VIDPROCMASKS_H
+	#define NTV2VIDPROCMASKS_H
+
+	#define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
+	#define FGVCROSSPOINTSHIFT (0)
+	#define BGVCROSSPOINTMASK (BIT_4+BIT_5+BIT_6+BIT_7)
+	#define BGVCROSSPOINTSHIFT (4)
+	#define FGKCROSSPOINTMASK (BIT_8+BIT_9+BIT_10+BIT_11)
+	#define FGKCROSSPOINTSHIFT (8)
+	#define BGKCROSSPOINTMASK (BIT_12+BIT_13+BIT_14+BIT_15)
+	#define BGKCROSSPOINTSHIFT (12)
+
+	#define VIDPROCMUX1MASK (BIT_0+BIT_1)
+	#define VIDPROCMUX1SHIFT (0)
+	#define VIDPROCMUX2MASK (BIT_2+BIT_3)
+	#define VIDPROCMUX2SHIFT (2)
+	#define VIDPROCMUX3MASK (BIT_4+BIT_5)
+	#define VIDPROCMUX3SHIFT (4)
+	#define VIDPROCMUX4MASK (BIT_6+BIT_7)
+	#define VIDPROCMUX4SHIFT (6)
+	#define VIDPROCMUX5MASK (BIT_8+BIT_9)
+	#define VIDPROCMUX5SHIFT (8)
+
+	#define SPLITMODEMASK (BIT_30+BIT_31)
+	#define SPLITMODESHIFT (30)
+
+#endif	//	NTV2VIDPROCMASKS_H

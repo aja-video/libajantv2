@@ -1,0 +1,32 @@
+/**
+	@page	ajaklhibox		KLHi-Box Breakout Box
+
+	This page describes the AJA KLHi-Box Breakout Box, which can be connected to a \ref konalhi capture/playout board.
+
+	@par	Front Panel
+
+	@image	html	klhiboxfront-small.jpg
+
+	The far left side of the front panel has a group of four XLR connectors for analog audio.
+	The left two XLRs are balanced analog audio input channels. The right two XLRs are balanced analog audio output channels.
+
+	Next to the analog grouping is the AES/EBU audio group. Two XLRs are provided for two channels of AES/EBU (unbalanced) audio;
+	one (female) for input, the other (male) for output. BNCs are provided for two channels of (unbalanced) audio, one input, and
+	one output.
+
+	The center of the front panel has one HDMI input, one HDMI output, plus two BNC connectors, one for SDI input, the other for
+	SDI output.
+
+	Toward the right side, there's the Reference Loop section with two BNCs, one for Reference in, the other for Reference out.
+
+	Next to that is the analog component video BNC group, inputs on top, outputs on the bottom.
+
+	Finally, on the far right side is the DB-9 RS-422 serial connector, and two RCA output connectors for line-level audio
+	channels 1 and 2.
+
+	@par	Rear Panel
+
+	@image	html	klhiboxrear-small.jpg
+
+	These connectors tie the box to the \ref konalhi board in the host computer.
+**/

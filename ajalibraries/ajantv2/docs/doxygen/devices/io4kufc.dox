@@ -1,0 +1,61 @@
+/**
+@page	io4kufc	Io4K (UFC Mode)
+
+This page describes the Io4K capture/playout device with UFC firmware,
+which supports high frame-rate ingest or playout through a Thunderbolt II port.
+It can be "flashed" with different firmware to become a 4-channel device (see \ref io4kquad).
+
+@image	html	io4kfront.png
+@image	html	io4krear.png
+
+@par	PCI Interface
+
+-	PCI device ID: <b>0xEB07</b>
+-	Four-lane gen 2 PCI Express
+-	2 DMA engines
+-	MSI supported
+-	2 x Thunderbolt II connectors
+
+@par	Inputs & Outputs
+
+-	2 x SDI inputs
+-	2 x SDI outputs
+-	1 x SDI monitor output
+-	1 x HDMI 2.0 input
+-	1 x HDMI 2.0 output
+-	1 x Reference/LTC input
+-	1 x LTC output
+-	1 x RS-422 serial port
+
+@par	Frame Buffer
+
+-	512MB SDRAM
+-	64 x 8MB frames
+-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+@par	Audio
+
+-	2 subsystems
+-	16 channels (max.) per subsystem
+-	First subsystem's buffer memory starts 8MB before end of last frame
+
+@par	Video Formats
+
+-	Supports all SD, HD, and 2K video formats, including HFR.
+-	Supports DVCPro HD and HDV.
+-	RGB on SDI inputs/outputs supported.
+-	3GbA and 3GbB (dual-link) supported.
+-	SMPTE 425 2si mux supported
+
+@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+@par		Ancillary Data
+
+-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
+-	VANC geometries
+
+@par		Power Dissipation
+
+-	23W typical, 28W maximum
+-	Supply to Thunderbolt ports can cause power draw to reach 58W
+**/

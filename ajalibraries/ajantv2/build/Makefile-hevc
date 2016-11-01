@@ -1,0 +1,231 @@
+# NTV2 AJA Xena(TM) software for Linux Kernel Version 2.6
+#
+# All code Copyright (C) 2003, 2004, 2005, 2006 AJA Video Inc.
+# Proprietary and Confidential information.
+# Unauthorized reproduction prohibited.
+#
+# Just type "make" to make everything.
+# You can also do "make release" to make a release zipfile.
+
+# 64 bit distros have different library paths (lib64 is usually
+# involved) and we need to make sure that we're pointing at the right
+# library.  If you're building for a RedHat Enterprise Linux 4 system,
+# the RHEL kernel is rather different from the vanilla Linus kernel
+# and we need to #ifdef various functions and kerenl data structures.
+
+NTV2_ROOT ?= $(shell pwd)
+
+# this makefile fragment sets up some #defines and paths so we can
+# compile for 32 and 64 bit as well as support RedHat EL4
+include configure.mk
+
+# The following dirs contain Makefiles.
+# FLTK is a library that xenacablesfltk in commonapps depends on,
+# so it comes first.
+
+SUBDIRS =	classes \
+			$(DRIVER_DIR) \
+			commonapps \
+			demoapps \
+			linuxapps
+
+include internal.mk
+include sdkversion.mk
+
+# Release stuff.
+# Doing "make release" creates a release file containing NTV2 Linux software.
+# NOTE: "make release" does a "make clean" first.
+# NOTE: The destination directory has been moved to a new CVS module
+#       called ntv2releases.  This is to prevent remote workers with slow
+#       internet connections from waiting to download megs of unnecessary data.
+#		
+#		-- Shaun Case, 10 Dec 2003.
+
+# Path where archive will be built
+ARCHIVEPATH = ../ntv2releases/releases/linux
+
+# Name of package to release 
+PACKAGENAME = ntv2linuxhevc
+
+# Full name of release: package name + version
+RELEASENAME = $(PACKAGENAME)_$(RELEASEVER)
+
+# Name of directory archive will extract to when unpacked
+RELEASEPATH = $(PACKAGENAME)_$(RELEASEVER)
+
+# Name of archive, with extension
+ARCHIVENAME = $(RELEASENAME).zip
+
+
+# Name of driver package to release 
+DRIVERPACKAGENAME = ntv2linux-driver
+
+# Full name of driver release: package name + version
+DRIVERRELEASENAME = $(DRIVERPACKAGENAME)-$(RELEASEVER)
+
+# Name of directory archive will extract to when unpacked
+DRIVERRELEASEPATH = $(DRIVERPACKAGENAME)-$(RELEASEVER)
+
+# Name of driver archive, with extension
+DRIVERARCHIVENAME = $(DRIVERRELEASENAME).zip
+
+all: targcheck bpapatchcheck
+	@echo "Building for $(LINUX_DISTRO)"
+	@echo "CPU_ARCH environment var = $(CPU_ARCH)"
+	@echo "Using $(PATH) as the PATH"
+	@echo "Using $(NTV2_ROOT) as the root directory"
+	@echo "Using $(LIB) as the lib directory for linking"
+	@if [ -d ./demoapps ]; then echo "Building full SDK"; cp $(NTV2_ROOT)/configure.in.ntv2.fltk fltk/configure.in; $(MAKE) $(SUBDIRS); else echo "Building driver only"; $(MAKE) -C ./driver/linuxdriver; fi
+
+.PHONY: 
+
+# You must set NTV2TARGET to determine for which board you are building the
+# SDK and driver.  See readme-linux.txt for details.
+targcheck:
+ifeq ($(NTV2TARGET),)
+	$(error Environment variable NTV2TARGET is not defined)
+else
+	@echo "NTV2TARGET environment variable is $(NTV2TARGET)"
+endif
+
+# If bigphysarea patch has been applied, compileg the bigphysarea patch test module.  
+# This WILL NOT compile in bigphysarea support in the ntv2driver;
+# To do that, a #define in linuxdriver/ntv2driver.c must be uncommented.
+bpapatchcheck:
+ifeq ($(wildcard /usr/src/linux/include/linux/bigphysarea.h),/usr/src/linux/include/linux/bigphysarea.h)
+#exists
+	@echo Bigphysarea patch applied, compiling linuxbigphystest
+	SUBDIRS += linuxbigphystest
+else
+# doesn't exist
+	@echo Bigphysarea patch not applied, skipping linuxbigphystest
+endif
+
+$(SUBDIRS): FORCE
+	if [ -d $@ ]; then cd $@ ; $(MAKE); fi
+
+clean: 
+	rm -rf errors.txt; for i in $(SUBDIRS) linuxbigphystest; do ( if [ -d $$i ]; then cd $$i ; $(MAKE) $@; fi; ) ; done
+	find . -name \*~ -print | xargs rm -rf
+	find . -name core\* -print | xargs rm -rf
+	find . -name .#\* -print | xargs rm -rf
+	rm -f $(RELEASEPATH)
+
+.PHONY: cleandeps realclean
+cleandeps: 
+	for i in $(CLEANDIRS); do ( if [ -d $$i ]; then cd $$i ; $(MAKE) $@; fi; ) ; done
+
+realclean:
+	for i in $(CLEANDIRS); do ( if [ -d $$i ]; then cd $$i ; $(MAKE) $@; fi; ) ; done
+
+# Release target
+#
+# Does a "make clean"
+# 
+# Builds a link to the current directory to get a name to extract the archive into
+# then deletes it when it is finished.  
+#
+oldrelease:
+	echo "PWD: "`pwd`
+	ln -s . $(RELEASEPATH)
+	zip -9 -r $(ARCHIVEPATH)/$(ARCHIVENAME) $(RELEASEPATH)/Makefile $(RELEASEPATH)/configure.mk  $(RELEASEPATH)/oem-faqs.txt $(RELEASEPATH)/linux-faqs.txt $(RELEASEPATH)/readme-linux.txt $(RELEASEPATH)/readme-RedHatEL.txt $(RELEASEPATH)/changes-linux.txt $(RELEASEPATH)/linuxbigphystest/ $(RELEASEPATH)/bin/ $(RELEASEPATH)/classes/ $(RELEASEPATH)/docs/XenaSDK/XenaAPI.pdf $(RELEASEPATH)/docs/XenaSDK/XenaSDKUserGuide-Linux.txt $(RELEASEPATH)/docs/XenaSDK/XenaLinuxOverview.pdf $(RELEASEPATH)/docs/bigph* $(RELEASEPATH)/docs/XenaHardwareIF/Xena.pdf $(RELEASEPATH)/docs/XenaSDK/XenaLinuxOverview.pdf $(RELEASEPATH)/docs/XenaSDK/XenaLS-Linux.txt $(RELEASEPATH)/docs/XenaSDK/XenaLH-Linux-Programming-Notes.html $(RELEASEPATH)/docs/XenaHardwareIF/Xena2K*.pdf  $(RELEASEPATH)/docs/README-64bit_Linux.txt $(RELEASEPATH)/docs/linux_64bit.txt $(RELEASEPATH)/docs/opteron_iommu_dma_patch.txt  $(RELEASEPATH)/fltk/ $(RELEASEPATH)/includes/ $(RELEASEPATH)/linux*/ $(RELEASEPATH)/commonapps/ $(RELEASEPATH)/testpics/ $(RELEASEPATH)/xilinx/ -x $(RELEASEPATH)/\*CVS\* $(RELEASEPATH)/\*.vcproj $(RELEASEPATH)/\*.rc $(RELEASEPATH)/\*.dsp $(RELEASEPATH)/\*.ico $(RELEASEPATH)/\*dsp $(RELEASEPATH)/\*stdafx.cpp $(RELEASEPATH)/\*xcodeproj\* $(RELEASEPATH)/\*project.pbxproj\* $(RELEASEPATH)/\*English.lproj\* $(RELEASEPATH)/\*Info.plist\* $(RELEASEPATH)/commonapps/\*readme.txt $(RELEASEPATH)/commonapps/\*ntv2xvid/* $(RELEASEPATH)/commonapps/\*xvid2ntv2/* $(RELEASEPATH)/commonapps/\*ConvertDataToHeader/* $(RELEASEPATH)/commonapps/\*fltkblank/* $(RELEASEPATH)/commonapps/\*quickdisplay/* $(RELEASEPATH)/commonapps/\*zaxel/* $(RELEASEPATH)/commonapps/xenacablesfltk/doc/* $(RELEASEPATH)/classes\*macdriver\* $(RELEASEPATH)/includes/ntv2win\* $(RELEASEPATH)/includes/\*mac\* $(RELEASEPATH)/includes/\*apple\* $(RELEASEPATH)/linuxapps/media/\* $(RELEASEPATH)/\*tags $(RELEASEPATH)/\*.cvsignore $(RELEASEPATH)/xilinx/Io\* $(RELEASEPATH)/xilinx/klh_hd_qrz.bit $(RELEASEPATH)/xilinx/kdmac\* $(RELEASEPATH)/xilinx/kona2\* $(RELEASEPATH)/xilinx/k2\* $(RELEASEPATH)/xilinx/konax\* $(RELEASEPATH)/docs/XenaHardwareIF/ancdata.txt $(RELEASEPATH)/bin/\*.bat $(RELEASEPATH)/bin/rectest\* $(RELEASEPATH)/bin/dmatest\* $(RELEASEPATH)/\.\#*
+	zip -9 $(ARCHIVEPATH)/$(ARCHIVENAME) $(RELEASEPATH)/linuxapps/media/readme.txt
+	rm $(RELEASEPATH)
+	zipcloak $(ARCHIVEPATH)/$(ARCHIVENAME)
+
+gdcrelease: ARCHIVENAME = $(RELEASENAME)-gdc.zip
+
+gdcrelease: release
+	ln -s . $(RELEASEPATH)
+	zip -9 $(ARCHIVEPATH)/$(ARCHIVENAME) $(RELEASEPATH)/docs/XenaHardwareIF/ancdata.txt
+	rm $(RELEASEPATH)
+	zipcloak $(ARCHIVEPATH)/$(ARCHIVENAME)
+
+release:
+	rm -rf errors.txt; for i in $(SUBDIRS) linuxbigphystest; do ( if [ -d $$i ]; then cd $$i ; $(MAKE) clean; fi; ) ; done
+	find . -name \*~ -print | xargs rm -f
+	find . -name core\* -print | xargs rm -f
+	find . -name .#\* -print | xargs rm -f
+	rm -fr $(RELEASEPATH)/*
+	echo "Staging Linux SDK Release $(RELEASEVER)"
+	if [ ! -d ./$(RELEASEPATH) ] ; then mkdir ./$(RELEASEPATH); fi
+	./linuxinstall/stage_linux_release.pl ./$(RELEASEPATH)
+	sed /STRIP_FOR_RELEASE/d ./$(RELEASEPATH)/ntv2projects/commonapps/konaburner/konaburner.cpp > ./$(RELEASEPATH)/ntv2projects/commonapps/konaburner/stripped.cpp
+	mv -f ./$(RELEASEPATH)/ntv2projects/commonapps/konaburner/stripped.cpp ./$(RELEASEPATH)/ntv2projects/commonapps/konaburner/konaburner.cpp
+	tar cfvz ./$(RELEASEPATH).tar.gz ./$(RELEASEPATH)
+	zip -9   ./$(ARCHIVENAME) ./$(RELEASEPATH).tar.gz
+
+hevcrelease:
+# Cleaning causes a problem building fltk with TeamCity
+# Config is run, but we want to do that on the customer's system, not the build machine
+# Supress the clean since TeamCity uses a fresh copy from SVN anyway
+#	rm -rf errors.txt; for i in $(SUBDIRS) ; do ( if [ -d $$i ]; then cd $$i ; $(MAKE) clean; fi; ) ; done
+#	find . -name \*~ -print | xargs rm -f
+#	find . -name core\* -print | xargs rm -f
+#	find . -name .#\* -print | xargs rm -f
+#	rm -fr $(RELEASEPATH)/*
+	@echo "Staging new HEVC Linux SDK Release $(RELEASEVER)"
+	if [ ! -d ./$(RELEASEPATH) ] ; then mkdir ./$(RELEASEPATH); fi
+	./linuxinstall/stage_linux_release.pl ./$(RELEASEPATH) ./linuxinstall/hevc-linux-release-files.txt ./linuxinstall/new-linux-release-excludes.txt
+	sed -e 's/undef AJA_HEVC/define AJA_HEVC 1/' ./$(RELEASEPATH)/ntv2projects/includes/ajatypes.h > ./fooobar.h;  rm -v ./$(RELEASEPATH)/ntv2projects/includes/ajatypes.h;  mv -v ./fooobar.h ./$(RELEASEPATH)/ntv2projects/includes/ajatypes.h
+	sed /__AUTO_BUILD_REMOVE__/d ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(RELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_MAJ}/}" ./$(RELEASEPATH)/ntv2projects/includes/modenums.h > ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_MIN}/}" ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(RELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_PNT}/}" ./$(RELEASEPATH)/ntv2projects/includes/modenums.h > ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_BLD}/}" ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(RELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DATETIME_PLACEHOLDER/{s^AJA_DATETIME_PLACEHOLDER^\"${shell date +"%m/%d/%Y\ %z:%T"}\"^}" ./$(RELEASEPATH)/ntv2projects/includes/modenums.h > ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_STRING_PLACEHOLDER/{s/AJA_STRING_PLACEHOLDER/\"${SDKVER_STR}\"/}" ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(RELEASEPATH)/ntv2projects/includes/modenums.h
+	mv -f ./$(RELEASEPATH)/ntv2projects/includes/modenums.h ./$(RELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	@echo "Building end user libraries for $(RELEASEVER)"
+	if [ ! -d ./lib ] ; then mkdir ./lib; fi
+	$(MAKE) -C ../ajalibraries/ajacc/build
+	cp ../lib/libajacc.* ./$(RELEASEPATH)/lib
+	$(MAKE) -C ../ajalibraries/ajaanc/build
+	cp ../lib/libajaanc.* ./$(RELEASEPATH)/lib
+	@echo "Building ntv2watcher for $(RELEASEVER)"
+	qmake -o ../build/makefile ../build/_ntv2watcher.pro
+	mv -f includes/ntv2enums.h includes/ntv2enums.BAK.h
+	cp -f $(RELEASEPATH)/ntv2projects/includes/ntv2enums.h includes/ntv2enums.h
+	$(MAKE) -C ../build
+	mv -f includes/ntv2enums.BAK.h includes/ntv2enums.h
+	cp ../bin/ntv2watcher ./$(RELEASEPATH)/bin
+	tar cfvz ./$(RELEASEPATH).tar.gz ./$(RELEASEPATH)
+	zip -9   ./$(ARCHIVENAME) ./$(RELEASEPATH).tar.gz
+
+driverrelease:
+# Build a standalone driver
+	@echo "Staging Linux driver release $(RELEASEVER)"
+	if [ ! -d ./$(DRIVERRELEASEPATH) ] ; then mkdir ./$(DRIVERRELEASEPATH); fi
+	$(MAKE) -C commonapps/ntv2firmwareinstaller
+	$(MAKE) -C commonapps/xenacablesfltk
+	$(MAKE) -C commonapps/watcher
+	./linuxinstall/stage_driver_release.pl ./$(DRIVERRELEASEPATH) ./linuxinstall/linux-driver-files.txt ./linuxinstall/linux-driver-excludes.txt
+	sed /__AUTO_BUILD_REMOVE__/d ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_MAJ}/}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_MIN}/}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_PNT}/}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_DECIMAL_PLACEHOLDER/{s/AJA_DECIMAL_PLACEHOLDER/${SDKVER_BLD}/}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h
+	sed "0,/AJA_DATETIME_PLACEHOLDER/{s^AJA_DATETIME_PLACEHOLDER^\"${shell date +"%m/%d/%Y\ %z:%T"}\"^}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	sed "0,/AJA_STRING_PLACEHOLDER/{s/AJA_STRING_PLACEHOLDER/\"${SDKVER_STR}\"/}" ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h > ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h
+	mv -f ./$(DRIVERRELEASEPATH)/ntv2projects/includes/modenums.h ./$(DRIVERRELEASEPATH)/ntv2projects/includes/ntv2enums.h
+	tar cfvz ./$(DRIVERRELEASEPATH).tar.gz ./$(DRIVERRELEASEPATH)
+	zip -9   ./$(DRIVERARCHIVENAME) ./$(DRIVERRELEASEPATH).tar.gz
+
+dcirelease: ARCHIVENAME =  $(PACKAGENAME)-DCI-$(RELEASEVER).zip
+
+dcirelease:
+	rm -rf errors.txt; for i in $(SUBDIRS) linuxbigphystest; do ( if [ -d $$i ]; then cd $$i ; $(MAKE) clean; fi; ) ; done
+	find . -name \*~ -print | xargs rm -f
+	find . -name core\* -print | xargs rm -f
+	find . -name .#\* -print | xargs rm -f
+	rm -fr $(RELEASEPATH)/*
+	echo "Staging Linux DCI SDK Release $(RELEASEVER)"
+	if [ ! -d ./$(RELEASEPATH) ] ; then mkdir ./$(RELEASEPATH); fi
+	./linuxinstall/stage_linux_release.pl ./$(RELEASEPATH) ./linuxinstall/linux-dci-release-files.txt
+	sed /STRIP_FOR_RELEASE/d ./$(RELEASEPATH)/commonapps/konaburner/konaburner.cpp > ./$(RELEASEPATH)/commonapps/konaburner/stripped.cpp
+	mv -f ./$(RELEASEPATH)/commonapps/konaburner/stripped.cpp ./$(RELEASEPATH)/commonapps/konaburner/konaburner.cpp
+	tar cfvz  ./$(RELEASEPATH)-DCI.tar.gz ./$(RELEASEPATH)
+	zip -9 -r ./$(ARCHIVENAME) ./$(RELEASEPATH)-DCI.tar.gz
+	zipcloak  ./$(ARCHIVENAME)
+
+FORCE:

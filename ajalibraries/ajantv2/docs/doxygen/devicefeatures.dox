@@ -1,0 +1,55 @@
+/**
+	@page	ntv2devicefeatures		Discovering Device Features
+
+	The "NTV2Device..." functions describe AJA NTV2 device capabilities. All of the functions accept an \c NTV2DeviceID parameter,
+	which identifies the AJA device model of interest.
+
+	@note	A device need not be installed in or attached to the host to use these functions.
+
+	@par	'CanDo' Functions
+
+	These functions have names starting with "NTV2DeviceCanDo..." and return a \c bool value that answers Yes or No for a particular device capability.
+	Most of them accept a single \c NTV2DeviceID parameter, like \c NTV2DeviceCanDoAnalogAudio, which answers true if the device is capable of working
+	with analog audio.  A smaller set of functions accept two parameters:  the \c NTV2DeviceID parameter, and a second enumeration parameter, for determining
+	if a device is capable of working with a particular video format (e.g., \c NTV2DeviceCanDoVideoFormat) or frame buffer format (\c NTV2DeviceCanDoFrameBufferFormat), etc.
+
+	For example, to find out which Thunderbolt-connected devices support \c NTV2_FBF_10BIT_RGB, you can code the following:
+
+	@code{.cpp}
+		const NTV2DeviceIDSet  supportedDeviceIDs (::NTV2GetSupportedDevices ());
+		NTV2DeviceIDSet        deviceIDsWithThunderboltAndRGB10;
+		for (NTV2DeviceIDSetConstIter it (supportedDeviceIDs.begin ());  it != supportedDeviceIDs.end();  ++it)
+		{
+			if (::NTV2DeviceCanDoThunderbolt (*it)  &&  ::NTV2DeviceCanDoFrameBufferFormat (*it, NTV2_FBF_10BIT_RGB))
+				deviceIDsWithThunderboltAndRGB10.push_back (*it);
+		}
+	@endcode
+
+	@par	'Has' Functions
+
+	These functions are similar to the "Can Do" functions. They also return a \c bool value that answers Yes or No for a particular device capability.
+	For example, you may want to know if a device has bi-directional SDI connectors:
+
+	@code{.cpp}
+		CNTV2Card   theDevice;
+		NTV2Channel outputChannel (NTV2_CHANNEL2);
+		. . .
+		if (::NTV2DeviceHasBiDirectionalSDI (theDevice.GetDeviceID ())
+			theDevice.SetSDITransmitEnable (outputChannel, true);
+	@endcode
+
+	@par	'GetNum' Functions
+
+	These functions return a count of a particular device feature. For example, to find out which devices have at least one HDMI output:
+
+	@code{.cpp}
+		const NTV2DeviceIDSet  supportedDeviceIDs (::NTV2GetSupportedDevices ());
+		NTV2DeviceIDSet        deviceIDsWithHDMIOut;
+		for (NTV2DeviceIDSetConstIter it (supportedDeviceIDs.begin ());  it != supportedDeviceIDs.end();  ++it)
+		{
+			if (::NTV2DeviceGetNumHDMIVideoOutputs (*it) > 0)
+				deviceIDsWithHDMIOut.push_back (*it);
+		}
+	@endcode
+
+**/

@@ -1,0 +1,66 @@
+/**
+@page	kona3gquad		KONA 3G (Quad Mode)
+
+This page describes the KONA 3G capture/playout board in its 4-channel mode of operation.
+It can be "flashed" with different firmware to become a 2-channel device (see \ref kona3gufc).
+
+@image	html	kona3g.png
+
+The KONA 3G has a breakout connector on the far left, followed by the HDMI output, then the
+four SDI connectors. In quad mode operation, the SDI connectors are bidirectional, and can
+be configured as inputs or outputs under software control.
+
+@par	PCI Interface
+
+-	PCI device ID: <b>0xDB04</b>
+-	Four-lane gen 2 PCI Express
+-	2 DMA engines
+-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
+
+@par	Inputs & Outputs
+
+-	4 x SDI bi-directional (under software control)
+-	1 x HDMI output
+-	1 x analog component video output
+-	2 x reference/LTC inputs
+-	2 x LTC outputs
+-	2 x RS-422 serial ports
+
+@par	Frame Buffer
+
+-	512 MB SDRAM
+-	64 x 8MB frames
+-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+@par	Audio
+
+-	4 subsystems
+-	16 channels (max.) per subsystem
+-	16 channels (max.) of AES audio
+-	First subsystem's buffer memory starts 8MB from end of last frame
+-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+
+@par	Video Formats
+
+-	Supports all standard video formats, plus 2K and 4K formats (but not UHD, and not 4Kp60).
+
+@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+@par		Ancillary Data
+
+-	VANC geometries only
+
+@par		Video Processing
+
+-	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
+-	Can mix keys on and off
+-	Can differentiate between shaped and unshaped video
+
+@par		External Connectivity
+
+-	Optional \ref aja103226 provides access to other inputs and outputs
+-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+
+@par		Firmware
+<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/140/25>
+**/

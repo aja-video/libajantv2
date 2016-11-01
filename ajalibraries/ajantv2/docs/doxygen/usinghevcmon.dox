@@ -1,0 +1,135 @@
+/**
+@page	usinghevcmon		The HEVC Monitor Tool
+
+@section	hevcmon-about	About HEVC Monitor
+
+The NTV2 <b>HEVC Monitor</b> is a development tool that provides setup, control and state information for the \ref corvidhevc codec board,
+which is a standard NTV2 video video ingest board coupled with an HEVC hardware codec.
+The NTV2 driver controls both the NTV2 components and the HEVC codec.
+
+The <b>HEVC Monitor</b> is a window into the NTV2 driver which tracks the hardware state and video transfer queues to and from the codec.
+
+The normal NTV2 component state can be monitored using the standard <b>Watcher</b> and <b>Cables</b> applications.
+ 
+The HEVC Monitor is a <b>Qt</b> application with a tabbed presentation.
+The layout of the interface is tightly coupled to the codec hardware and control architecture.
+The HEVC codec provides encoding setup registers and 3 transaction interfaces to control state and transfer video data.
+
+The top line of the HEVC monitor contains a board selector and reset button.
+The reset button will reset the codec hardware and all driver control logic and queues.
+It should only be used when the codec is idle or has reached an irrecoverable error state.
+The result of a reset during codec operation will be random!
+The "Control" tab provides access to the codec command interface and encoding setup parameters.
+The "Stream" tab monitors the codec DMA interfaces and maintains statistics for the driver queues that stream data.
+The "Debug" tab provides driver and firmware revision information and can enable/disable driver debug output to the system log file.
+
+
+@section	hevcmon-tab-control		Control Tab
+
+The HEVC monitor control tab provides access to the codec command interface and encoding setup parameters.
+
+@image	html	hevcmon-controltab-75.png
+
+The <b>Codec Commands</b> interface allows the user to send state change commands to the codec.
+The desired state is selected for the main, video input and encoder streams using the drop down boxes.
+The send buttons sends the request to the codec.  The stream check boxes determine which streams receive the stream state commands.
+There is no filtering of the commands to insure the codec remains in an operational state.
+See the codec documentation for detailed descriptions of the codec state machine.
+
+The <b>Codec State</b> data is the current state of the codec state machine.
+The main state will indicate <b>Boot</b> after a codec reset.
+The <b>Init</b> state indicates that the codec is ready to receive encode parameters.
+The <b>Encode</b> state indicates the codec is ready to encode.
+The encode mode can be <b>Single</b> or <b>Multiple</b> which controls how many streams the codec can encode.
+The Vin and Eh states can be <b>Stop</b> or <b>Start</b>.
+In the <b>Stop</b> state the encoder can be reconfigured using the codec parameters interface.
+In the <b>Start</b> state the codec is ready to encode video frames.
+
+The <b>Codec Command Queue</b> information displays the current state of the NTV2 driver command queue.
+It contains the current count of the commands issued to the codec between resets and the current command queue level.
+
+The <b>Codec Parameters</b> interface can load and dump codec encoding parameters.
+The binary directory is used to specify a directory containing the binary parameter files provided by the codec vendor.
+The codec parameters can also be saved and loaded from a single text file.
+The file is formatted as simple 32-bit address/value pairs that can be viewed with a text editor and compared using standard
+text file comparison applications.  This can be useful in debugging encoder settings.
+There is also a parameter peek/poke interface to allow examining and changing individual parameter registers.
+
+@section	hevcmon-tab-stream	Stream Tab
+
+The <b>Stream</b> tab monitors the codec DMA interfaces and maintains statistics for the driver queues that stream data.
+
+@image	html	hevcmon-streamtab-75.png
+
+The <b>Codec DMA Queue</b> interface displays the current state of the NTV2 driver codec queues.
+There is a raw video queue and a compressed HEVC queue.
+The transfer count is the number of DMA transfers operations completed by each queue.
+The queue level is the current number of transfers in the driver queue.
+The DMA submit value is the current number of DMA transfers issued to the codec.
+The DMA Ack value is the current number of acknowledge interrupts received from the codec.
+The DMA Msg value is the current number of DMA completion message interrupts received from the codec.
+For more information concerning the codec transactions see the codec documentation.
+
+The <b>Codec Stream Statistics</b> contains counts and timing information for each of the codec streams.
+Sizes are displayed in bytes, time in microseconds and data rates in kilobytes per second.
+	-	<b>Transfer Count</b> --- The number of transfers completed for this stream.
+	-	<b>Avr Transfer Time</b> --- The average time between transfers.
+	-	<b>Min Transfer Size</b> --- The minimum size of a video transfer.
+	-	<b>Avr Transfer Size</b> --- The average size of a video transfer.
+	-	<b>Max Transfer Size</b> --- The maximum size of a video transfer.
+	-	<b>Min Copy Duration</b> --- The minimum duration of a video frame bounce buffer copy. This is the software time required to copy the video frame.
+	-	<b>Avr Copy Duration</b> --- The average duration of a video frame bounce buffer copy. This is the software time required to copy the video frame.
+	-	<b>Max Copy Duration</b> --- The maximum duration of a video frame bounce buffer copy. This is the software time required to copy the video frame.
+	-	<b>Min Enqueue Duration</b> --- The minimum time between adding a DMA transfer to the queue and sending the DMA request to the codec.
+	-	<b>Avr Enqueue Duration</b> --- The average time between adding a DMA transfer to the queue and sending the DMA request to the codec.
+	-	<b>Max Enqueue Duration</b> --- The maximum time between adding a DMA transfer to the queue and sending the DMA request to the codec.
+	-	<b>Min Send Duration</b> --- The minimum, average and maximum time between sending a DMA request to the codec and the acknowledge interrupt from the codec.
+	-	<b>Avr Send Duration</b> --- The minimum, average and maximum time between sending a DMA request to the codec and the acknowledge interrupt from the codec.
+	-	<b>Max Send Duration</b> --- The minimum, average and maximum time between sending a DMA request to the codec and the acknowledge interrupt from the codec.
+	-	<b>Min DMA Duration</b> --- The minimum time between the codec acknowledge interrupt and completion message interrupt. This is the hardware time required for the DMA transfer.
+	-	<b>Avr DMA Duration</b> --- The average time between the codec acknowledge interrupt and completion message interrupt. This is the hardware time required for the DMA transfer.
+	-	<b>Max DMA Duration</b> --- The maximum time between the codec acknowledge interrupt and completion message interrupt. This is the hardware time required for the DMA transfer.
+	-	<b>Min Dequeue Duration</b> --- The minimum time between the adding a transfer to the DMA queue and releasing the queue entry. This is the software time required for the DMA transfer.
+	-	<b>Avr Dequeue Duration</b> --- The average time between the adding a transfer to the DMA queue and releasing the queue entry. This is the software time required for the DMA transfer.
+	-	<b>Max Dequeue Duration</b> --- The maximum time between the adding a transfer to the DMA queue and releasing the queue entry. This is the software time required for the DMA transfer.
+	-	<b>Avr Total Duration</b> --- The total software time required for the video transfer.
+	-	<b>Avr DMA Rate</b> --- The average hardware DMA data rate.
+	-	<b>Avr Data Rate</b> --- The average stream data rate.
+
+The DMA duration of the HEVC stream does not reflect the actual hardware DMA time.  It appears the codec stalls this DMA operation until a frame is available.  This also affects the calculation of the HEVC stream DMA rate.
+
+There is a <b>Reset Statistics</b> button that can be used to restart the statistics tracking at any time. 
+
+
+@section	hevcmon-tab-debug	Debug Tab
+
+The <b>Debug</b> tab provides driver and firmware revision information and can enable/disable driver debug output to the system log file.
+
+
+@image	html	hevcmon-debugtab-75.png
+
+The <b>Driver Debug Output</b> check boxes enable various debug messages from the NTV2 driver.
+The messages are written to the system driver debug output log.
+In linux, messages can be monitored using:
+\code{.sh}
+$ sudo tail –f /var/log/syslog
+\endcode
+
+In Windows, use the <b>dbgview</b> application from the Microsoft Technet website. 
+
+Driver debug messages can be very useful in debugging all types of software and hardware issues.
+The driver debug information is categorized into several subsystems.
+The info messages are usually one per driver call for monitoring how the driver is being driven by the application or the operating system.
+The state messages contain more detail on how the driver performs operations.
+The error messages are warnings and errors that usually require developer attention.  
+
+The initial info, warning and error information relates mostly to driver loading and unloading.
+The interrupt category messages are reported from the interrupt routines.
+The command, <b>vei</b> (raw video) and <b>seo</b> (encodec video) information relate to the interrupt driver requests to the codec.
+The register category will log all codec register access.
+The command and stream categories are for monitoring the codec command and streaming transfer operations.
+The DMA category messages detail the setup of the DMA registers.
+There are also categories for bounce buffer allocation and driver status information requests.
+
+The debug tab also contains version information for the NTV2 codec driver and internal codec software and firmware.
+**/

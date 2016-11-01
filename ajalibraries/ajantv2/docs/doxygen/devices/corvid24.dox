@@ -1,0 +1,114 @@
+/**
+	@page	corvid24		Corvid 24
+
+	This page describes the <b>Corvid 24</b> OEM capture/playout board, which features bypass relays on each SDI
+	connector that can operate under software control or hardware control (using the built-in "watchdog" timer).
+	Its four SDI connectors can programmatically be configured as inputs or outputs.
+
+	@image	html	corvid24.png
+
+	The Corvid24 has four bi-directional SDI connectors, plus a reference input. The connector on the far left
+	is for the optional AJA 102953 breakout cable.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xDB09</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+	-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
+
+	@par	Inputs & Outputs
+
+	-	4 x SDI bi-directional inputs/outputs (under software control)
+	-	1 x reference input
+	-	2 x RS-422 serial ports
+
+	@par	Frame Buffer
+
+	-	512 MB SDRAM
+	-	64 x 8MB frames
+	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	4 subsystems
+	-	16 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts 8MB before end of last frame
+
+	@par	Video Formats
+
+	-	Supports most standard video formats.
+	-	Does not support DVCPro HD or HDV.
+	-	RGB on SDI inputs/outputs not supported.
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+	@par		Ancillary Data
+
+	-	VANC geometries only
+
+	@par		External Connectivity
+
+	-	Optional breakout cable (AJA \ref aja102953) provides access to other inputs and outputs
+
+	@par		Bypass Relays
+
+	In a typical facility a video signal may pass through many types of equipment before reaching its final destination.
+	In the event that a device in this video path should fail, the disruption of the signal can be minimized by bypassing
+	the faulty device.
+
+	The AJA Corvid24 board has relays on its SDI connectors that can perform this bypass function.  One set of relays will
+	bypass the SDI 1 and SDI 2 connectors, and the other set of relays will bypass connectors SDI 3 and SDI 4. The two sets
+	of relays are independently controllable.
+
+	The relays may be switched directly by software, or they can be put under the control of a watchdog timer. The watchdog
+	can be configured to switch the relays to bypass after a programmable time interval has elapsed. Software can prevent
+	this by writing specific values to the watchdog before the time interval expires to indicate it is still functioning properly.
+
+	Users of the bypass relay feature will want to cable their systems with SDI 1 and SDI 3 as inputs, and SDI 2 and SDI 4
+	as outputs. Note that by default the Corvid24 firmware will configure SDI 1 and SDI 2 as inputs, and SDI 3 and SDI 4 as
+	outputs. Because of this, during initialization user applications should use the SetSDITransmitEnable SDK call to set
+	the correct direction of the SDI ports before taking the relays out of bypass.
+
+	@par		Hardware Jumpers
+
+	Two jumpers on the upper left of the component side of the Corvid24 enable or disable control of the bypass relays.
+	The top jumper controls the bypass between SDI connectors 1 and 2, and the other between connectors 3 and 4.
+	When a jumper is in the leftmost position, the corresponding bypass relays are disabled, and the SDI signals are
+	connected to the logic on the board. This is the same routing as AJA boards without relays. When a jumper is in the
+	rightmost position, control of the relay state is put under firmware control. In Figure 5 below, the connector 1 and 2
+	bypass (Jumper 1) is controlled by the firmware, and the connector 3 and 4 bypass (Jumper 2) is disabled.
+
+	@image	html	corvid24jumpers.png
+
+
+	The NTV2 SDK provides several data structures and functions that can be used to query and/or control the bypass relays.
+
+	Bypass Relay Data Structures:
+	-	NTV2RelayState
+	-	NTV2SDIWatchdogState
+
+	CNTV2Card Member Functions:
+	-	CNTV2Card::GetSDIRelayManualControl12
+	-	CNTV2Card::GetSDIRelayManualControl34
+	-	CNTV2Card::GetSDIRelayPosition12
+	-	CNTV2Card::GetSDIRelayPosition34
+	-	CNTV2Card::GetSDIWatchdogEnable12
+	-	CNTV2Card::GetSDIWatchdogEnable34
+	-	CNTV2Card::GetSDIWatchdogState
+	-	CNTV2Card::GetSDIWatchdogStatus
+	-	CNTV2Card::GetSDIWatchdogTimeout
+	-	CNTV2Card::SetSDIRelayManualControl12
+	-	CNTV2Card::SetSDIRelayManualControl34
+	-	CNTV2Card::SetSDIWatchdogEnable12
+	-	CNTV2Card::SetSDIWatchdogEnable34
+	-	CNTV2Card::SetSDIWatchdogState
+	-	CNTV2Card::SetSDIWatchdogTimeout
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/131/25>
+
+	@par		Additional Topics
+
+	@subpage	aja102953
+**/

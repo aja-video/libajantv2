@@ -1,0 +1,71 @@
+/**
+	@page	demoapps		The Demonstration Applications
+
+	The SDK includes a number of demonstration applications that are designed to help new users quickly understand how to use the NTV2 SDK
+	to solve real-world problems using AJA devices.
+
+	The demonstration programs operate the same on all three supported platforms. Simply choose the target demo you're interested in,
+	build it, and run it.
+
+	Some of the demos are simple command-line programs that have no user interaction, while others provide a simple graphical user interface
+	based on the Qt cross-platform application framework. For more information about Qt, please visit http://www.qt.io/   The Qt-based demos
+	should work with Qt version 5.4 or later.
+
+	All of the demos are "future ready" and will build and run with the "NTV2_DEPRECATE" macro defined.
+
+	@note	Demos that use third-party libraries to enable direct DMA video transfers between AJA devices and third-party graphics cards
+			(e.g., to exploit the GPU) are not supported on MacOS.
+
+	@section	demobuildingapps	Building the Demo Apps
+
+	@subsection	demobuildwin	Windows:
+
+	Open the solution file located here:
+	-	NTV2SDK\\APIandSamples\\ntv2projects\\winworkspace\\ntv2_vs12.sln
+
+	@subsection	demobuildmac	MacOS:
+
+	Open the Xcode project file located here:
+	-	sdkdir/sdk/ntv2projects/demoapps/demoapps.xcodeproj
+
+	@subsection	demobuildlin	Linux:
+
+	Use the <b>Makefile</b> located here:
+	-	sdkdir/ntv2projects/demoapps
+
+	@subsection	demos			The Demo Apps, Simple to Complex
+	-	\ref	ntv2enumerateboards
+	-	\ref	ntv2konaipjsonsetup  <i>(KONA IP only)</i>
+	-	\ref	ntv2outputtestpattern
+	-	\ref	ntv2capture
+	-	\ref	ntv2player
+	-	\ref	ntv2player4k
+	-	\ref	ntv2burn
+	-	\ref	ntv2burn4kquadrant
+	-	\ref	ntv2fieldburn
+	-	\ref	ntv2ccgrabber
+	-	\ref	ntv2ccplayer
+	-	\ref	ntv2llburn
+	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
+	-	\ref	ntv2qtpreview
+	-	\ref	ntv2qtmultiinput
+	-	\ref	ntv2qtrawcapture
+
+	@subsection	demoscrvhevc	Demo Apps, Alphabetical
+	-	\ref	ntv2burn
+	-	\ref	ntv2burn4kquadrant
+	-	\ref	ntv2capture
+	-	\ref	ntv2ccgrabber
+	-	\ref	ntv2ccplayer
+	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
+	-	\ref	ntv2enumerateboards
+	-	\ref	ntv2fieldburn
+	-	\ref	ntv2konaipjsonsetup  <i>(KONA IP only)</i>
+	-	\ref	ntv2llburn
+	-	\ref	ntv2outputtestpattern
+	-	\ref	ntv2player
+	-	\ref	ntv2player4k
+	-	\ref	ntv2qtmultiinput
+	-	\ref	ntv2qtpreview
+	-	\ref	ntv2qtrawcapture
+**/

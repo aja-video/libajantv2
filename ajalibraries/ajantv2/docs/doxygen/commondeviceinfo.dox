@@ -1,0 +1,147 @@
+/**
+	@page	commondeviceinfo		Common Device Information
+
+	All AJA hardware devices that work with the NTV2 SDK support at least the following:
+	-	Play host-generated video and audio through at least one video output port.
+	-	SD video formats: 525i 59.94fps, and 625i 50fps
+	-	HD video formats: 720p 50/59.94/60, 1080i 50/59.94/60, 1080psf 23.98/24 and 1080p 23.98/24/29.97/30
+	-	8-bit YCbCr or 10-bit YCbCr frame buffer formats.
+
+	Beyond these common characteristics, AJA devices fan out into a diverse array of capabilities to suit many different applications.
+
+	@section	hardwarecharacteristics	Hardware Characteristics
+
+	@subsection	pciinterface		PCI Interface
+
+	All NTV2 devices utilize Peripheral Component Interconnect (PCI) or Peripheral Component Interconnect Express (PCIe) to communicate with the host
+	computer system (or with other PCI/PCIe peers on the same host).
+
+	@subsection	pcivendorid			PCI Vendor ID
+
+	All AJA NTV2 devices share the same PCI vendor ID.
+	-	PCI vendor ID:  <b>0xF1D0</b>
+
+	@subsection	dataxfer			Data Transfer
+
+	Direct Memory Access (DMA) is the only supported method of moving data between host memory and the hardware. All NTV2 devices have at least one DMA engine.
+	(Programmed Input/Output, a.k.a. PIO is not supported in AJA devices.)
+
+	@subsection	deviceframebuffer	Device Frame Buffer
+
+	All NTV2 devices have a fixed amount of Synchronous Dynamic Random Access Memory (SDRAM). The Xilinx is the SDRAM controller, which controls the output
+	of video from RAM, the input of video into RAM, the PCI interface to/from RAM, and RAM refresh.
+
+	@subsection	framebufferlayout	Frame Buffer Layout
+
+	The device's SDRAM is partitioned into a number of equal-sized video frames. Devices that can handle larger frame sizes
+	(e.g., 2K, 4K, and VANC modes) and/or RGB frame data will partition their RAM storage into half as many frames when those modes
+	and/or formats are in use.
+
+	Video data in the device frame buffer is always stored full-frame. Interlaced video is always stored in the frame buffer with the first line of
+	Field 1 (F1L1) at the top of the buffer, followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc., alternating to the end
+	of the frame. (A very VERY long time ago, AJA made devices that stored all of Field 1's lines in the top half of the buffer, and all of Field 2's
+	lines in the bottom half of the buffer. These devices and buffer formats are no longer supported.)
+
+	@image	html	hwref-fig1-sdramfblayout.png
+
+	This scheme has been used with AJA devices compatible with SDK 11.3 and earlier, but it has always had two major disadvantages:
+	-	It wastes a lot of device memory, especially with pixel formats and video formats that push the frame size to just over 8MB.
+		(For example, enabling VANC on a 1080p ARGB image requires 8.14 MB per frame, which wastes nearly half of each frame's 16MB of storage.)
+	-	Changing a Frame Store's pixel format from YCBCr to RGB while another channel is ingesting or playing video using AutoCirculate results
+		in at least one bad frame of video in the stream as the device's memory layout is changed. It could even cause the "start" and "end" frames
+		being AutoCirculated to refer to frames that no longer exist on the device.
+
+	A new frame buffer layout was introduced with SDK version 12.0 for use with newer devices (Io4K, KONA 4, Corvid88, etc.). The device's SDRAM
+	is divided into a fixed number of 2MB chunks. In MonoFormat mode, everything works the same as documented above. When the device is placed
+	in MultiFormat mode, however, each Frame Store (channel) gets an equal share of 2MB chunks.
+
+	@subsection	chlarchitecture		Channel Architecture
+
+	Multi-channel devices can simultaneously and independently ingest or playout video, and have independent control of which SDRAM frame(s)
+	will be read or writen as video. Thus, the device has an upper limit on the number of concurrent video accesses to SDRAM at any given time,
+	but note that <b>the host computer always has access to frame memory</b>. As a consequence, data transfers from the host to an SDRAM frame on the
+	device that was being read for the currently-playing video frame or field would probably look torn or distorted. (Likewise for the opposite -- i.e.,
+	transfers to the host from an SDRAM frame being written from the currently incoming video frame/field would have some lines containing pixel data for
+	the new, incoming frame, while the remaining lines would contain old pixel data.) Thus it's important to synchronize or gate transfers to/from the
+	host (i.e., using the vertical blanking interrupt, or the device's current line counter, etc.).
+
+	@subsection	framebufferaccess	Frame Buffer Access
+
+	Each channel also has independent PCI access from the host computer.
+
+	@note	DMA transfer speeds may be affected by the amount of video data being accessed by the device to transmit video.
+			If a channel is in display mode, it is always outputting video, and SDRAM bandwidth on the device is being consumed by this process...
+			and the amount consumed is determined by the amount of data being read from frame memory, which depends on Frame Buffer Format.
+			<b>In some cases, DMA speeds can be increased by disabling unused channels.</b> It is especially useful when using RGB Frame Buffer Formats,
+			which use significant SDRAM bandwidth to read frame data for output. In addition to the fact that more data is moved in RGBA mode
+			(than in 8-bit YCbCr), for example, the transfer of that data may also proceed at a slightly slower rate.
+
+
+	@subsection	clockingandsync		Device Clocking and Synchronization
+
+	Traditionally, AJA's NTV2 devices required all channels to have the same video standard, frame rate, and frame geometry.
+	AJA's newer devices --- e.g., \ref corvid44, \ref kona4quad, \ref io4kquad, \ref corvid88, etc. --- still retain this default behavior,
+	but can be switched into "multi-format" mode that allows different channels to use different formats (see ::NTV2DeviceCanDoMultiFormat and
+	CNTV2Card::SetMultiFormatMode).
+
+	The SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different clock sources:
+	-	the device's on-board crystal oscillator (a.k.a. "free run");
+	-	an SDI input (note that devices without video inputs can't use this);
+	-	an external timing reference signal (note that devices without an external reference input can't use this).
+
+	The SDK's CNTV2Card::SetReference function is used to specify which clock source should be used to generate timing for the device's outputs.
+	When CNTV2Card::SetReference is called with \c NTV2_REFERENCE_INPUT1, the device's outputs will be locked to the same timebase as that of input
+	channel 1. Note that the actual output will be delayed a couple of lines due to propagation delays through the device's circuitry, but the
+	important point is that the phase relationship between the input and the output will be fixed and will not drift.
+	This form of output clocking is best suited to end-to-end (E-E) routing, where an input is routed to an output, directly, or indirectly (e.g.,
+	through a Mixer/Keyer) without any mediation through a pair of Frame Stores.
+
+	However, if two inputs are feeding the device, it's probably impossible to lock to both sources.
+	Unless the sources are synced to a common timebase (often called "house reference"), then the two signals will drift over time with respect
+	to each other.  One channel may just be starting a new frame, while the other is already half way through its frame.
+	Since a client application can't lock to both signals at the same time, \c NTV2_REFERENCE_FREERUN should be used, to clock the outputs from
+	the device's own internal clock source. Note that even setting "free run" isn't technically necessary --- the application would run just as
+	well locked to an input, with the only difference being when the signals would actually come out of the BNC connectors.
+
+	If the device's output(s) must have a given timing (e.g., to feed a switcher), then applications can pass \c NTV2_REFERENCE_EXTERNAL to
+	CNTV2Card::SetReference, which will lock the device to an analog or tri-level sync signal connected to the device's external sync input.
+
+
+	@subsection	electricalspecs		Input/Output Characteristics
+
+	Unless otherwise noted, physical and electrical characteristics of inputs and outputs -- SDI, HDMI, analog video, analog audio, reference,
+	LTC, etc. -- are generally identical across all AJA devices.
+
+	<b>SDI Input(s)</b>
+	-	AC-coupled input terminated with 75 ohms to ground
+
+	<b>SDI Output(s)</b>
+	-	AC-coupled output terminated with 75 ohms to ground
+	-	<b>Output Level:</b>  800 mV peak-to-peak +/- 10%, terminated into 75 ohms
+
+	<b>Video Reference Input(s)</b>
+	-	Analog video reference, NTSC, PAL, or tri-level sync
+	-	Active loop-through, input terminated by 75 ohms to ground
+	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
+
+	<b>HDMI Input, Output</b>
+	-	Connector: Type-A (unless otherwise noted)
+
+	<b>AES Input(s)</b>
+	-	DC-coupled input terminated with 75 ohms to ground
+	-	<b>Minimum input level:</b>  100 mV peak-to-peak
+
+	<b>AES Output(s)</b>
+	-	AC-coupled output terminated with 75 ohms to ground
+	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75 ohms
+
+	<b>Analog Video Output(s)</b>
+	-	12-bit precision DAC output
+	-	<b>Luma Bandwidth:</b> 12.5 MHz (SD) or 30 MHz (HD)
+	-	<b>Chroma Bandwidth:</b> 5.8 MHz (SD) or 13.75 MHz (HD)
+
+	<b>Audio Output</b>
+	-	<b>Connector:</b>  DB-25
+	-	<b>Maximum Level, unclipped:</b>  +12dBu, +15dBu, +18dBu, +24dBu (selectable)
+
+**/

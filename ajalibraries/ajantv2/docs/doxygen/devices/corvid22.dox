@@ -1,0 +1,59 @@
+/**
+	@page	corvid22		Corvid 22
+
+	This page describes the <b>Corvid 22</b> capture/playout board.
+
+	@image	html	corvid22.png
+
+	The Corvid 22 has two SDI inputs, two SDI outputs, plus a reference input.
+	The connector on the far left is for the optional AJA 102953 breakout cable.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xDB01</b>
+	-	Four-lane gen 1 PCI Express
+	-	3 DMA engines
+	-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
+
+	@par	Inputs & Outputs
+
+	-	2 x SDI inputs
+	-	2 x SDI outputs
+	-	1 x reference input
+	-	2 x RS-422 serial ports
+
+	@par	Frame Buffer
+
+	-	512 MB SDRAM
+	-	64 x 8MB frames
+	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	2 subsystems
+	-	16 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts at first byte of last frame
+
+	@par	Video Formats
+
+	-	Supports most standard video formats.
+	-	Does not support DVCPro HD or HDV.
+	-	RGB on SDI inputs/outputs not supported.
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+	@par		Ancillary Data
+
+	-	VANC geometries only
+
+	@par		External Connectivity
+
+	-	Optional breakout cable (AJA \ref aja102953) provides access to other inputs and outputs
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/130/25>
+
+	@par		Additional Topics
+
+	@subpage	aja102953
+**/

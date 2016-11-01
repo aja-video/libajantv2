@@ -1,0 +1,175 @@
+/**
+	@page	ancillarydata	Ancillary Data
+
+	Traditionally, AJA's NTV2 devices processed active video and ancillary data using separate data paths in the hardware.
+	The SDI input hardware, for example, stripped off audio HANC packets to capture in a separate audio buffer, while SMPTE-12M
+	timecode was stripped off and routed into timecode registers. If the input signal was routed directly to an SDI output,
+	VANC was intact, and HANC packets (at least audio and SMPTE-12M) were reassembled from the output's audio source (engine)
+	and timecode registers, respectively. If the input signal was routed through a CSC, LUT, mixer or other processing widget,
+	often the ancillary data was missing or corrupted.
+
+	For application developers who needed to extract or insert their own VANC data, "tall" frame geometries were introduced as
+	a stopgap to incorporate VANC lines into the frame buffers. Unfortunately, this trick has some serious disadvantages:
+	-	The VANC data must be packed/encoded properly based on the frame buffer format, which adds a lot of complexity to client code.
+	-	The VANC data can be corrupted by any CSCs/LUTs upstream/downstream of the FrameStore (for capture/playout, respectively).
+
+	Starting in SDK 12.3, AJA introduced a new way of handling VANC data using Anc extractor/inserter widgets in device firmware.
+	During playout, an inserter widget inserts VANC data into the outgoing SDI data stream from a separate host buffer in the
+	AUTOCIRCULATE_TRANSFER struct. During capture, an extractor widget extracts VANC data from the incoming SDI data stream and copies
+	it into a separate host buffer in the AUTOCIRCULATE_TRANSFER struct. (Note that this is very similar to how AutoCirculate
+	handles audio data.) The ::NTV2DeviceCanDoCustomAnc function tells if a given device has this extractor/inserter firmware.
+	The benefits of this technique are:
+	-	The ancillary data in the separate host buffer has a simple format that closely matches the SMPTE 293 specification;
+	-	Data corruption problems introduced by CSCs, LUTs, UDCs, etc. are eliminated, since data extraction/insertion occurs
+		right at the SDI spigot.
+	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry always
+		matches the video standard.
+
+	Notes:
+	-	All NTV2 devices support the "tall" and "taller" VANC geometries.
+	-	Both new (AUTOCIRCULATE_TRANSFER) and old (AUTOCIRCULATE_TRANSFER_STRUCT) AutoCirculate APIs support VANC geometries.
+	-	Only the new AutoCirculate API (AUTOCIRCULATE_TRANSFER) supports the new Anc inserter/extractor firmware, and the
+		\c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
+		or CNTV2Card::AutoCirculateInitForOutput.
+	-	In SDK 12.4 and earlier, the new Anc inserter/extractor firmware feature works only with AutoCirculate.
+		A new API for setting up and controlling the Anc inserter/extractor firmare will be provided for non-AutoCirculate applications in a future SDK.
+
+	@section	ancembeddedaudio	Embedded Audio
+
+	To capture embedded audio from HANC into the audio input buffer, set the audio source select register, for the specific
+	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetEmbeddedAudioInput and CNTV2Card::SetAudioSystemInputSource).
+	During playout, if audio is present in the audio output buffer, it will always be written into the HANC of the output video --
+	unless the embedded audio suppress bit for that channel is set in the audio control register (see CNTV2Card::SetAudioOutputPause
+	and CNTV2Card::SetAudioOutputReset).
+
+	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
+
+	SMPTE 12M specifies the transmission of timecode in the ancillary data space. Any RP-188 data in the input video with DBB-1
+	data matching the device's current RP-188 source select filter will be stuffed into the device's RP-188 registers, and can be
+	read using CNTV2Card::GetRP188Data. When RP-188 output is enabled for a video channel (by passing \c NTV2_RP188_OUTPUT into
+	CNTV2Card::SetRP188Mode), whatever RP-188 data is in the RP-188 registers (call CNTV2Card::SetRP188Data to set it) is inserted
+	into the HANC area of the output video on the appropriate line:
+	-	720x486 -- lines 10 & 273
+	-	720x576 -- lines 7 & 320
+	-	1280x720 -- line 10
+	-	1920x1080 -- line 10
+
+	RP-188 output lines for the "extended" frame geometries (incorporating VANC) are the same as their corresponding "normal" frame
+	geometry. These output lines are listed in the tables shown in the \ref vancframegeometries section (below).
+
+	Each of the RP-188 registers is bi-directional, but should be considered as two separate registers, one of which is write-only
+	and the other read-only; i.e., the value that you read from the register will not be the last value that you wrote, but rather
+	the current value from the input video. This can be confusing if you use the <b>Watcher</b> tool to modify these registers.
+
+	If the device supports LTC I/O, LTC input can be read by calling CNTV2Card::ReadAnalogLTCInput. LTC output is driven by a
+	separate control register, or can be driven directly by the corresponding LTC input output.
+
+	@section	anccapturingwithac	Capturing Anc Packets Using AutoCirculate
+
+	For capturing Ancillary data packets (e.g., RP-215, VITC, SMPTE 334, etc.), newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc)
+	provide per-SDI-input ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
+	packet data into a separate host data buffer independent of the video buffer (see the new \c AUTOCIRCULATE_TRANSFER class).
+
+	@subsection	ancgumpformat	Anc Buffer Data Format
+	The data bytes in the buffer consist of one or more packets having the following format:
+	<table>
+		<tr><td>Byte[0]		<td>\c 0xFF (start-of-packet marker). Note that \c 0xFF can be found in packet data, so you should use the packet data count (<b>DC</b>) to find subsequent packets in the Anc buffer.
+		<tr><td>Byte[1]		<td><b>LE</b>[7:7] (MSB) -- Position information valid flag -- 0 means <b>LN</b>, <b>HV</b>, <b>A/D</b> and <b>Y/C</b> bits are invalid; 1 means they're valid.
+		<tr><td>Byte[1]		<td><b>A/D</b>[6:6] -- Packet nature is analog or digital -- 0 means digital; 1 means analog. If analog, ignore <b>DID</b>, <b>SID</b> and <b>CS</b>, which are all invalid.
+		<tr><td>Byte[1]		<td><b>Y/C</b>[5:5] -- Channel origin/destination -- 0 means C (chroma); 1 means Y (luma).
+		<tr><td>Byte[1]		<td><b>HV</b>[4:4] -- Blanking space origin/destination -- 0 means VANC; 1 means HANC.
+		<tr><td>Byte[1]		<td><b>LN</b>[3:0] -- Most significant 4 bits [10:7] of line number.
+		<tr><td>Byte[2]		<td><b>LN</b>[6:0] -- Least significant 7 bits [6:0] of line number. (MSB [7:7] is reserved for future use.)
+		<tr><td>Byte[3]		<td><b>DID</b>[7:0] -- Packet DID.
+		<tr><td>Byte[4]		<td><b>SID</b>[7:0] -- Packet SID.
+		<tr><td>Byte[5]		<td><b>DC</b>[7:0] -- Packet data count -- the total number of bytes in the <b>UDW</b>.
+		<tr><td>Byte[6]		<td><b>UDW</b> -- First packet data byte.
+		<tr><td>Byte[DC+6]	<td><b>CS</b>[7:0] -- Packet checksum.
+	</table>
+
+	Note that while the first byte of each packet is set to \c 0xFF, this is not a protected value and can legally occur within packets.
+	Software parsers must use the packet Data Count (<b>DC</b>) value to determine the length of each packet.
+
+	@section	ancplayingwithac	Playing Anc Packets Using AutoCirculate
+
+	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide per-SDI-output
+	ANC data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from a separate host buffer
+	(see the new \c AUTOCIRCULATE_TRANSFER class). The data must be packaged as specified in \ref ancgumpformat prior to calling CNTV2Card::AutoCirculateTransfer.
+
+	@note	Because the outgoing line number can be specified, it's possible to overrun a line. Be certain that the data packets to be
+			inserted on a given line will fit for the output video standard.
+
+	@section	vancframegeometries		VANC Frame Geometries
+
+	The older way of extracting or inserting ancillary data (VANC only) employs alternate frame geometries that have additional lines
+	at the top of the video frame buffer. To enable VANC capture/playout, call CNTV2Card::SetEnableVANCData.
+
+	For historical reasons, there are both "tall" and "taller" geometries. The taller ones grab some extra lines that used to be
+	omitted, but which turned out to contain useful information after all.
+
+	Note that using a VANC-enabled frame geometry will increase the size, in bytes, of the requisite host frame buffer versus the
+	equivalent non-VANC geometry. Use CNTV2Card::GetFrameBufferSize function to determine how large the host frame buffer should be.
+
+	There are some restrictions on which frame buffer formats can be used for capture or playout with VANC.
+
+	The easiest format to use is \c NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
+	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the \c NTV2_VANCDATA_8BITSHIFT_ENABLE
+	mode, VANC lines can be readily parsed for Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
+	found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
+	The CNTV2SMPTEAncData class in the \ref ajacclib has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc, etc.) to help with this.
+	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into the \ref ajaanc.
+
+	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
+	However, dual-link RGB video to/from RGB frame buffers will work.
+
+	The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
+
+	@subsection	sd525i			SD 525i
+
+	@image	html	vvi-525i-75.png
+
+	@subsection	sd525p60		SD 525p60
+
+	@image	html	vvi-525p-75.png
+
+	@subsection	sd625i			SD 625i
+
+	@image	html	vvi-625i-75.png
+
+	@subsection	sd625p			SD 625p
+
+	@image	html	vvi-625p-75.png
+
+	@subsection	hd720p			HD 720p
+
+	@image	html	vvi-720p-75.png
+
+	@subsection	hd1080p			HD 1080p
+
+	@image	html	vvi-1080p-75.png
+
+	@subsection	hd1080i			HD 1080i/psF
+
+	@image	html	vvi-1080i-75.png
+
+	@subsection	hd1080pdl		HD 1080p Dual-Link
+
+	@image	html	vvi-1080pduallink-75.png
+
+	@subsection	hd1035i60		HD 1035i60 (SMPTE 240)
+
+	@image	html	vvi-1035i-75.png
+
+	@subsection	hd2k1080p		2K: 1080p
+
+	@image	html	vvi-2k1080p-75.png
+
+	@subsection	hd2k1556psf15	2K: 1556psF @ 15fps
+
+	@image	html	vvi-2k1556psf15-75.png
+
+	@subsection	hd2k1556psf18	2K: 1556psF @ 18fps
+
+	@image	html	vvi-2k1556psf18-75.png
+
+**/

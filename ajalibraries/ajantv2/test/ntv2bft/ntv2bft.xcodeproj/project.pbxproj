@@ -1,0 +1,237 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B4A450501A9BC84B003AED85 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A4504F1A9BC84B003AED85 /* main.cpp */; };
+		B4A450591A9BE240003AED85 /* ntv2devicefeaturesbft.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A450571A9BE240003AED85 /* ntv2devicefeaturesbft.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B4A4504C1A9BC84B003AED85 /* ntv2bft */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2bft; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4A4504F1A9BC84B003AED85 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = SOURCE_ROOT; };
+		B4A450561A9BE240003AED85 /* ntv2bft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2bft.h; path = ../../includes/ntv2bft.h; sourceTree = SOURCE_ROOT; };
+		B4A450571A9BE240003AED85 /* ntv2devicefeaturesbft.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ntv2devicefeaturesbft.cpp; sourceTree = SOURCE_ROOT; };
+		B4A450581A9BE240003AED85 /* ntv2devicefeaturesbft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntv2devicefeaturesbft.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B4A450491A9BC84B003AED85 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B4A450431A9BC84B003AED85 = {
+			isa = PBXGroup;
+			children = (
+				B4A4504F1A9BC84B003AED85 /* main.cpp */,
+				B4A450561A9BE240003AED85 /* ntv2bft.h */,
+				B4A450571A9BE240003AED85 /* ntv2devicefeaturesbft.cpp */,
+				B4A450581A9BE240003AED85 /* ntv2devicefeaturesbft.h */,
+				B4A4504D1A9BC84B003AED85 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B4A4504D1A9BC84B003AED85 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4A4504C1A9BC84B003AED85 /* ntv2bft */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B4A4504B1A9BC84B003AED85 /* ntv2bft */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4A450531A9BC84B003AED85 /* Build configuration list for PBXNativeTarget "ntv2bft" */;
+			buildPhases = (
+				B4A450481A9BC84B003AED85 /* Sources */,
+				B4A450491A9BC84B003AED85 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntv2bft;
+			productName = ntv2bft;
+			productReference = B4A4504C1A9BC84B003AED85 /* ntv2bft */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B4A450441A9BC84B003AED85 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = "AJA Video Systems";
+				TargetAttributes = {
+					B4A4504B1A9BC84B003AED85 = {
+						CreatedOnToolsVersion = 6.1.1;
+					};
+				};
+			};
+			buildConfigurationList = B4A450471A9BC84B003AED85 /* Build configuration list for PBXProject "ntv2bft" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B4A450431A9BC84B003AED85;
+			productRefGroup = B4A4504D1A9BC84B003AED85 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B4A4504B1A9BC84B003AED85 /* ntv2bft */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B4A450481A9BC84B003AED85 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4A450501A9BC84B003AED85 /* main.cpp in Sources */,
+				B4A450591A9BE240003AED85 /* ntv2devicefeaturesbft.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B4A450511A9BC84B003AED85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					_DEBUG,
+					AJAMac,
+					AJA_MAC,
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../includes,
+					../../classes,
+					../../macclasses,
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
+				LIBRARY_SEARCH_PATHS = ../../../lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "-lclassesd";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B4A450521A9BC84B003AED85 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					AJAMac,
+					AJA_MAC,
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../includes,
+					../../classes,
+					../../macclasses,
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
+				LIBRARY_SEARCH_PATHS = ../../../lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "-lclasses";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B4A450541A9BC84B003AED85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B4A450551A9BC84B003AED85 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B4A450471A9BC84B003AED85 /* Build configuration list for PBXProject "ntv2bft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4A450511A9BC84B003AED85 /* Debug */,
+				B4A450521A9BC84B003AED85 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4A450531A9BC84B003AED85 /* Build configuration list for PBXNativeTarget "ntv2bft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4A450541A9BC84B003AED85 /* Debug */,
+				B4A450551A9BC84B003AED85 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B4A450441A9BC84B003AED85 /* Project object */;
+}

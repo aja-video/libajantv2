@@ -1,0 +1,64 @@
+/**
+	@page	ioxt	IoXT
+
+	This page describes the IoXT Thunderbolt-based capture/playout device.
+
+	@image	html	ioxtfront.jpg
+	@image	html	ioxtrear.jpg
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xDB06</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+	-	Legacy and MSI interrupt delivery supported
+	-	2 x Thunderbolt I connectors
+
+	@par	Inputs & Outputs
+
+	-	2 x SDI inputs
+	-	2 x SDI outputs
+	-	1 x HDMI input
+	-	1 x HDMI output
+	-	1 x analog component video output
+	-	1 x Reference/LTC input
+	-	1 x LTC output
+	-	1 x RS-422 serial port
+
+	@par	Frame Buffer
+
+	-	256MB SDRAM (64MB reserved for UFC, 192MB for frame storage)
+	-	32 x 8MB frames
+	-	16 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	2 subsystems
+	-	16 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts 8MB before end of last frame
+
+	@par	Video Formats
+
+	-	Supports most standard SD, HD, and 2K video formats.
+	-	RGB on SDI inputs/outputs not supported.
+	-	Supports DVCPro HD and HDV.
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+	@par		Ancillary Data
+
+	-	VANC geometries only
+
+	@par		Power Dissipation
+
+	-	18W typical, 22W maximum
+
+	@par	Video Processing
+
+	-	2 independent Video Processing modules, each with its own Mix Coefficient
+	-	Can mix keys on and off
+	-	Can differentiate between shaped and unshaped video
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/136/25>
+**/

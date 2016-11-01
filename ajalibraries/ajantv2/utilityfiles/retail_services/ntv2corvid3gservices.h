@@ -1,0 +1,28 @@
+//
+//  ntv2corvid3gservices.h
+//
+//  Copyright (c) 2013 AJA Video, Inc. All rights reserved.
+//
+
+#ifndef _Corvid3gServices_
+#define _Corvid3gServices_
+
+#include "ntv2deviceservices.h"
+
+//-------------------------------------------------------------------------------------------------------
+//	class Corvid3GServices
+//-------------------------------------------------------------------------------------------------------
+class Corvid3GServices : public DeviceServices
+{
+	
+public:
+	Corvid3GServices();
+	~Corvid3GServices() {}
+	
+	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
+	virtual void SetDeviceXPointCapture (GeneralFrameFormat format);
+	virtual void SetDeviceMiscRegisters (NTV2Mode mode);
+};
+
+
+#endif

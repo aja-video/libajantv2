@@ -1,0 +1,10 @@
+/**
+@page	ntv2konaipjsonsetup		NTV2 KonaIP JSON Setup Demo
+
+This Qt-based command-line program shows how to configure the network parameters for any of the KONA IP's physical SFP cages from a JSON data file.
+
+The program demonstrates...
+-	how to detect if the AJA device is an IP device;
+-	how to determine if the MicroBlaze on the device is up and running;
+-	how to set the network configuration paramters for each of the SFP cages on the device.
+**/

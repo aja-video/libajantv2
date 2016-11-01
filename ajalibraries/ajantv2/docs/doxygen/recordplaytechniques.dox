@@ -1,0 +1,272 @@
+/**
+@page	recordplaytechniques		Real-Time Capture and Playout Techniques
+
+This page describes two methods for capturing or playing real-time video, audio and ancillary data using the NTV2 SDK.
+The most popular are:
+-	<b>Ping-Pong</b>
+-	<b>AutoCirculate</b>
+
+@section	aboutpingpong	Ping-Pong
+
+The "ping-pong" method is a good choice when lower latency is required.
+The illustration shows a scenario that captures incoming video frames, alters the captured frame in some way
+(e.g., "burn" an image onto it), and then plays the altered frames.
+One thread would, at every input VBI, flip the Input Frame between 0 and 1, and transfer the just-captured frame to the host.
+The other thread would, at every output VBI, flip the Output Frame between 2 and 3, and transfer a finished frame from the
+host to the off-screen buffer on the device. This should result in a three frame latency.
+
+@image	html	pingpong.png
+
+By getting "closer to the metal" with this technique, the application designer must manage every detail ...
+making DMA transfers at the right time, keeping the audio synchronized with the video, getting/setting timecode, etc.
+
+Any unexpected delays or slow-downs in frame processing or DMA transfers will cause visual distortion.
+
+Ping-Pong Capture/Playout Demos:
+-	@subpage	ntv2llburn
+
+@section	aboutautocirculate	Using AutoCirculate
+
+AutoCirculate is an API in the CNTV2Card class which allows real-time video streaming on a non-real-time host operating system.
+Video frames are buffered between the application software and the AJA device driver, and the driver is responsible for playing
+out (or capturing) those frames at the correct time.
+
+@image	html	ac-overview.png
+
+AutoCirculate makes it easy to stream audio & video data into and out of your application.
+
+AutoCirculate can keep ancillary data such as audio and timecode synchronized with the AutoCirculating video frames,
+plus it can optionally perform other tasks on a dynamic, frame-by-frame basis:
+-	Change frame buffer format
+-	Change frame buffer orientation (i.e., vertically flip video image)
+-	Color-correction (including dynamically-changing custom LUTs)
+-	Device configuration changes (i.e., widget routing changes)
+
+The AJA device driver does the bulk of the work involved in streaming audio and video to/from the AJA hardware.
+It helps to synchronize the audio with the video, detect dropped frames while streaming, time-stamps the frame data,
+reads or writes embedded timecode, and manages many other details.
+
+The AutoCirculate API coordinates the transfer of video and audio data between the AJA driver and the host application
+as the driver circulates through its designated frame set. For recording, the driver cycles through its associated input frames,
+and on playback, the driver cycles through its associated output frames.
+
+AutoCirculate is intended for use in applications that require high reliability and that don't require low latency.
+For low latency ingest or playout applications, the application must get "closer to the metal" and use another method,
+such as the "Ping-Pong" method, documented earlier in this chapter.
+
+@subsection	autocirculatecapture	AutoCirculate Capture
+
+Here's an example of how AutoCirculate works in capture mode using 10 frame buffers:
+
+@image	html	ac-capture.png
+
+In this illustration, AutoCirculate is capturing, using 10 frame buffers.
+Here, captured frames 6, 7, 8, 9, 0 and 1 have already been transferred into host memory (in that order),
+while frame 2 is currently being transferred to the host, while frame 5 on the AJA device is currently being
+overwritten by the incoming frame.
+
+As each <b>Incoming Frame</b> streams into the AJA device, its image data (plus audio and ancillary data) is recorded
+into the <b>Active Frame</b> of the device's frame memory. 
+
+When AutoCirculate is running, frames get transferred using Direct Memory Access (DMA) from the device frame memory to host memory.
+
+The <b>Transfer Frame</b> -- the frame being transferred to the host at the host's request -- "chases" the Active Frame,
+with the gap between them called the Driver Buffer Level.
+
+To prevent "torn" or malformed images, the host application must ensure that the Transfer Frame never coincides with
+the Active Frame being recorded.
+
+Assuming a 29.97 fps full-frame rate, the AJA driver will bump the Active Frame to the next frame slot every 33 milliseconds.
+As long as the host application that's transferring frames takes less than 33 milliseconds (including the DMA transfer time) to
+consume each frame, all will be well. If the host takes longer than 33 milliseconds to consume a frame, the Transfer Frame
+will start to fall behind, and the Driver Buffer Level will increase. If this is allowed to continue, the Active Frame will
+overtake the Transfer Frame, which will result in "dropped" frames that never get transferred to the host.
+
+AutoCirculate capture demos:
+-	@subpage	ntv2capture
+-	@subpage	ntv2ccgrabber
+-	@subpage	ntv2qtpreview
+-	@subpage	ntv2qtmultiinput
+
+@subsection	autocirculateplayout	AutoCirculate Playout
+
+@image	html	ac-playout.png
+
+Here, AutoCirculate is in playout mode, using 10 frame buffers.
+Frames 6, 7, 8, 9 and 0 already played through the output jack (in that order), while frame 1 is currently being played,
+while frame 5 is being transferred from host memory to the AJA device.
+
+In playout, the AJA device firmware continually streams the video content of the <b>Active Frame</b> buffer to the output jack.
+
+When AutoCirculate is running, frames get transferred (DMA'd) from host memory to the <b>Transfer Frame</b> of the AJA device's frame memory.
+
+The Active Frame "chases" the Transfer Frame, with the frame gap between them called the Driver Buffer Level.
+
+To prevent repeated images, the host application must ensure that the Transfer Frame never collides with the Active Frame being played.
+
+Assuming a 29.97 fps full-frame rate, the AJA driver will bump the Active Frame to the next frame slot every 33 milliseconds.
+As long as the host application that's transferring frames takes less than 33 milliseconds (including the DMA transfer time)
+to produce each frame, all will be well. If the host takes longer than 33 milliseconds to produce a frame, the Transfer Frame
+will start to fall behind, and the Driver Buffer Level will decrease. If this is allowed to continue, the Active Frame will
+overtake the Transfer Frame, which will result in "dropped" frames that will end up being played more than once.
+
+AutoCirculate playout demos:
+-	@subpage	ntv2player
+-	@subpage	ntv2player4k
+-	@subpage	ntv2ccplayer
+
+@subsection	autocirculateinandout	AutoCirculate Capture and Playout
+
+Figure 32 shows an example of how this would work when simultaneously capturing from one device input,
+and playing out another device output, while still using 10 frame buffers in all.
+
+Note that for this to work, two independent "channels" must be AutoCirculated, each using its own reserved range of frame
+buffers on the device, each with its own Active Frame, and each with its own Transfer Frame (as well as the Driver Buffer Level
+that measures the gap, if any, between them).
+
+The client application would typically use two execution threads for performing the DMA transfers -- one for capture, the other for playout.
+
+AutoCirculate Capture/Playout Demos:
+-	@subpage	ntv2burn
+-	@subpage	ntv2burn4kquadrant
+-	@subpage	ntv2ccgrabber
+-	@subpage	ntv2fieldburn
+
+@subsection	autocirculateapi	AutoCirculate API Functions
+
+There are five principal member functions that comprise the AutoCirculate API in the CNTV2Card class:
+-	CNTV2Card::AutoCirculateInitForInput
+-	CNTV2Card::AutoCirculateInitForOutput
+-	CNTV2Card::AutoCirculateStart
+-	CNTV2Card::AutoCirculateStop
+-	CNTV2Card::AutoCirculateTransfer
+-	CNTV2Card::AutoCirculateGetStatus
+
+In addition, there are several special-purpose methods that are available for more specialized applications, including:
+-	CNTV2Card::AutoCirculateGetFrameStamp
+-	CNTV2Card::AutoCirculatePause
+-	CNTV2Card::AutoCirculateResume
+-	CNTV2Card::AutoCirculateFlush
+
+@subsection	autocirculateflow	Recommended Program Flow
+
+@image	html	ac-captureflowchart.png
+
+This illustrates the recommended program flow for using AutoCirculate to capture video and audio.
+For a GUI application, the "Main" flow of execution on the left would handle the user interface implementation.
+The "Wait for Quit Request" step would respond to user inputs and display capture/playout status.
+For a command-line utility, the "Wait for Quit Request" box would implement a loop that sleeps, waiting for a
+global "quit" flag to become logically "true" (and perhaps periodically emit some status information to the standard output stream).
+
+Once the device has been acquired and configured, the main thread then creates and starts the capture thread.
+
+The program flow surrounded by the dashed line is the capture thread. When it starts, CNTV2Card::AutoCirculateInitForInput
+is called to set up the AutoCirculate parameters for a specific NTV2Channel, which allocates a contiguous block of frame
+buffers on the card to be used by the AutoCirculate mechanism. At this point, it is started by calling CNTV2Card::StartAutoCirculate.
+Once started, it remains in a loop, calling CNTV2Card::AutoCirculateGetStatus to determine if AutoCirculate is in the "running" state
+and if at least one frame is ready to transfer. If so, AutoCirculateTransfer is called to transfer the captured frame to host memory;
+otherwise the thread sleeps in CNTV2Card::WaitForInputVerticalInterrupt until the next VBI occurs.
+This process continues until a global quit flag is set, at which point the thread calls CNTV2Card::AutoCirculateStop and exits.
+
+After CNTV2Card::StartAutoCirculate is called, the AJA device's Active Frame will automatically change at every VBI to cycle
+continuously from the starting frame to the ending frame and back again until CNTV2Card::AutoCirculateStop is called.
+CNTV2Card::AutoCirculateTransfer is called repeatedly to transfer a buffered video frame (plus any associated audio, timecode,
+ancillary data, etc.) between the driver and the application. The Active Frame, buffer level, etc. are advanced automatically
+by the AJA device driver.
+
+CNTV2Card::AutoCirculateGetStatus is used to determine whether a given channel is currently AutoCirculating, and if so, to
+report its current buffer level. It also supplies other data, such as its frame range (starting and ending frames) and its
+Active Frame.
+
+Because AutoCirculate is wholly implemented in the driver, and is completely independent of any CNTV2Card instance that started
+it or that could be monitoring or controlling it, there is no provision to automatically stop AutoCirculating when any/all
+CNTV2Card instances have been destroyed. The driver will continue to AutoCirculate, blissfully unaware that nobody is monitoring
+the activity. OEMs are encouraged to be good citizens and call CNTV2Card::AutoCirculateStop at exit to reduce unnecessary driver
+activity.
+
+@subsection	autocirculatechannels	AutoCirculate Channels
+
+AutoCirculate is driven by vertical blanking interrupts (VBIs), so a channel's frame store must be connected to one of the
+device's inputs (for ingest/capture) or outputs (for playout).
+
+@image	html	ac-whichinterrupt.png
+
+The NTV2Channel passed to CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AutoCirculateInitForOutput) identifies the
+Frame Store on the device that is to be clocked from an input or output VBI.
+
+A Frame Store is RAM on the AJA device that
+stores a fixed number of frames of video data (a few of which are reserved for storing audio). The maximum number of frames
+that the device's Frame Store can hold depends on the frame buffer format (e.g., 8-bit YCbCr, 10-bit RGB, etc.), the video
+format (e.g., SD, HD, 2K, 4K, etc.), and other factors.
+
+<b>HINT:</b> To obtain the optimal size of your host-based video buffer, in bytes (padded to the nearest 4K multiple),
+that will accommodate a single frame of video data, call ::GetVideoWriteSize.
+
+<b>HINT:</b> To determine the maximum number of frame buffers a given device's Frame Store can accommodate for a given frame
+geometry and buffer format, call the 3-parameter version of ::NTV2DeviceGetNumberFrameBuffers.
+
+@subsection	autocirculatepreload	Pre-Loading Frames For Playback
+
+When AutoCirculate starts in playout mode (without yet transferring frames), the device firmware immediately starts playing
+the contents of the Active Frame to the output jack, displaying whatever YCbCr/RGB data was in the device's frame buffer memory.
+
+If CNTV2Card::AutoCirculateTransfer has not been called, the Active Frame and Transfer Frame remain stuck at frame zero,
+the Driver Buffer Level remains at zero, and the Frames Dropped tally increments at the current frame rate.
+
+To prevent displaying unpredictable frame(s) at playout startup (and to prevent frame drops caused by this initial frame starvation),
+it's best to "preload" one or more frames before calling CNTV2Card::AutoCirculateStart.
+
+To do this, call CNTV2Card::AutoCirculateTransfer for each frame you wish to preload into the device frame buffer.
+After each such call, the Transfer Frame will "bump" to the next frame slot, and the Driver Buffer Level will increment.
+After preloading, you can safely call CNTV2Card::AutoCirculateStart, and continue to transfer additional frames to the device,
+with the goal of keeping the Transfer Frame ahead of the Active Frame being played by the hardware.
+
+@subsection	autocirculateinterlace	Interlaced Versus Progressive Video
+
+In capture mode, with a progressive video signal, immediately after the input VBI, the last-written video frame in the device's
+frame buffer is guaranteed to be fully-composed. With interlaced video, this is only true after every other VBI.
+The following code snippet allows this phenomenon to be visualized:
+@code{.cpp}
+. . .
+AUTOCIRCULATE_TRANSFER	xferInfo;
+while (true)
+{
+	AUTOCIRCULATE_STATUS	status;
+	mDevice.AutoCirculateGetStatus (NTV2_CHANNEL1, status);
+	if (status.IsRunning ())
+	{
+		if (status.HasAvailableInputFrame ())
+		{
+			cout << '1';
+			mDevice.AutoCirculateTransfer (NTV2_CHANNEL1, xferInfo);
+		}
+		else
+			cout << '0';
+	}	//	if A/C running
+	mDevice.WaitForInputVerticalInterrupt ();
+}	//	loop
+. . .
+@endcode
+
+With interlaced video, the standard output stream will contain a \c...010101010101... pattern, whereas progressive video
+results in a \c...111111111111... pattern.
+
+When AutoCirculating interlaced video, the driver will not "bump" the Active Frame until it has been completely composed
+(i.e., until immediately after the "Field 1" VBI occurs).
+
+It is possible (and sometimes even desireable) to transfer each field of interlaced video separately, which can be done
+by calling CNTV2Card::AutoCirculateTransfer every time through the loop (without checking the Buffer Level).
+See the NTV2FieldBurn demonstration application for more details.
+
+@subsection	autocirculatemon	Monitoring AutoCirculate Activity with "Watcher" Tool
+
+The "Watcher" tool has an "AutoCirculate" tab that shows AutoCirculate activity in near-real-time for all possible channels
+on any AJA device attached to the host.
+
+@image	html	watcher-autocirculate.png
+
+The "Command" menu at the bottom of each column can be used to control AutoCirculate activity on that channel.
+It is often handy for manually pausing and resuming AutoCirculate, or stopping AutoCirculate after a crashed application
+has left a channel running.
+
+**/

@@ -1,0 +1,14 @@
+/**
+@page	ntv2player4k		NTV2Player4K Demo
+
+This command-line program is identical to "ntv2player" except that it plays 4K/UHD video.
+
+@image	html	ntv2player4k.png
+
+This is a typical WFM display showing quadrant 4 of a 4+-channel AJA device connected to a host running <b>ntv2player4k</b>.
+Note the timecode "burned" into the video test pattern and 8 channels of audio tone.
+
+The NTV2Player4K class demonstrates everything NTV2Player does, plus...
+-	how to generate a 4K/UHD test pattern and get it into a 4K frame buffer;
+-	how to use AutoCirculate to efficiently stream 4K/UHD video with audio and timecode.
+**/

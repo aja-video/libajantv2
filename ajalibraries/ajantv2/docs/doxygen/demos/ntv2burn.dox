@@ -1,0 +1,20 @@
+/**
+@page	ntv2burn		NTV2Burn Demo
+
+This command-line program captures video provided to the input of an AJA device, "burns" timecode into the video,
+then plays it out onto an output of that same AJA device. The program will use the timecode embedded in the input signal
+if it has any; otherwise it "invents" its own timecode. It also embeds whatever timecode it used into the output signal.
+
+@image	html	ntv2burn.png
+
+The picture shows a typical WFM display showing the output of an AJA device connected to a host running NTV2Burn.
+Note the timecode "burned" into the video and embedded in the output signal.
+
+The NTV2Burn class demonstrates...
+- how to properly acquire and release an AJA device in order to use it exclusively;
+- how to programmatically perform device configuration and signal routing;
+- how to use AutoCirculate to efficiently stream video and audio, with or without timecode.
+- how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate;
+- how to use and manipulate timecode;
+- how to "burn" timecode into a buffer containing a frame of video data.
+**/

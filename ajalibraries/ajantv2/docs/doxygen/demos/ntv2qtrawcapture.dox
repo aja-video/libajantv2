@@ -1,0 +1,12 @@
+/**
+	@page	ntv2qtrawcapture		NTV2QtRawCapture Demo
+
+	This Qt-based GUI demonstration application captures (and previews) raw video from the AJA CION camera into DNG files on the host.
+
+	It demonstrates...
+	-	how to use the new NTV2_FBF_10BIT_RAW_YCBCR and NTV2_FBF_10BIT_RAW_RGB raw formats;
+	-	how to use the AJARawPreviewWidget, a reusable Qt-based GUI element that displays realtime video that's been grabbed
+		from an NTV2RawFrameGrabber object;
+	-	how to use the NTV2RawFrameGrabber class, a QThread that captures a raw video stream from the AJA CION, and uses Qt
+		signals to emit captured video frames.
+**/

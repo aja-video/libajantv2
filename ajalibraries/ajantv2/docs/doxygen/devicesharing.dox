@@ -1,0 +1,113 @@
+/**
+@page	devicesharing		Sharing AJA Devices With Other Applications
+
+If it's possible that your OEM application might coexist with another AJA-aware application on the host computer,
+it's very likely neither application will run correctly if they both attempt to use the same AJA device at the same time.
+
+Once your application has found the device it needs to use, AJA strongly recommends obtaining exclusive use of it to
+prevent collisions with other applications, including AJA's own utilities and applications.
+
+On MacOS, AJA provides an agent (<b>AJAAgent</b>) that manages device ownership and provides convenient device widget
+routing and configuration services to "retail" client applications (e.g., Adobe, Avid, etc.). On Windows, AJA provides
+an optional system service (<b>AJA System Service</b>) to perform these tasks. On Linux, the retail services and <b>AJA ControlPanel</b>
+are not supported.
+
+@note	If retail services are unsupported or not installed, it's assumed that OEM applications may operate all AJA devices
+		without considering other applications that may run on the host.
+
+@image	html	ajacontrolpanel.png
+
+The <b>AJA ControlPanel</b> application provides a user interface for end-users to set default routing, conversions and
+other device settings. It communicates configuration changes to the system service through a database stored on the host
+computer's file system.
+
+@note	AJA does not provide an API for interrogating or controlling the Control Panel settings.
+
+
+@par	Determining if an AJA Device is Being Used
+
+To determine if an AJA device is being used by another application, whether it be an OEM application, or one that uses the
+Control Panel services, application writers should call \c GetStreamingApplication.
+
+@code
+	CNTV2Card	theDevice;
+	. . .
+
+	//  Is an application using the device?
+	ULWord   appFourCC (AJA_FOURCC ('?', '?', '?', '?'));
+	int32_t  appPID    (0);
+	theDevice.GetStreamingApplication (&appFourCC, &appPID);
+
+	if (appPID)
+	{
+		cout << "Device is being used by process " << appPID << endl;
+		//	Note that the "appFourCC" typically contains a human-readable 4-character "string" that identifies the
+		//	application that's controlling the device, e.g., 'EnGr' is AJA Control Room, 'AJAT' is AJA System Test, etc.
+	}
+	else
+		cout << "Device is available" << endl;
+@endcode
+
+
+@par	Acquiring Exclusive Use of an AJA Device
+
+To acquire and release exclusive use of an AJA device, OEM application writers must call CNTV2Card::AcquireStreamForApplication
+or CNTV2Card::ReleaseStreamForApplication, respectively.
+
+@code
+	//  Give my application a unique 4-character "signature"...
+	const uint32_t kAppSignature (AJA_FOURCC ('s','i','g','n'));
+
+	//  Attempt to gain exclusive use of the AJA device...
+	const uint32_t appPID (static_cast <uint32_t> (AJAProcess::GetPid ()));
+	if (theDevice.AcquireStreamForApplication (kAppSignature, appPID))
+	{
+		//  My app now has exclusive use of the AJA device!
+		RunMyApplicationUsingDevice (theDevice);
+
+		//  I'm done, so I can relinquish my exclusive use of it...
+		theDevice.ReleaseStreamForApplication (kAppSignature, appPID);
+	}  //  if acquired ok
+@endcode
+
+
+@par	Getting Full Control Over Device Configuration
+
+In addition to ensuring that other applications won't use use the same AJA device, many applications often need to
+configure the device differently than the Control Panel settings dictate. These applications must disable the retail
+(<b>AJA ControlPanel</b>) services by running in "OEM mode", which is done by calling CNTV2Card::SetEveryFrameServices,
+passing it NTV2_OEM_TASKS. To be a good citizen, before changing this setting, the old setting should be saved (by
+calling CNTV2Card::GetEveryFrameServices) and restored when the device is released.
+
+@code
+	NTV2EveryFrameTaskMode   savedTaskMode;
+	. . .
+	theDevice.GetEveryFrameServices (&savedTaskMode);
+	theDevice.SetEveryFrameServices (NTV2_OEM_TASKS);
+
+	//  My app can now configure the AJA device any way it wants,
+	//  without any interference from the retail services!
+	RunMyApplicationUsingDevice (theDevice);
+
+	//  I'm done, so I can restore the previous task mode...
+	theDevice.GetEveryFrameServices (savedTaskMode);
+@endcode
+
+The demonstration applications all use these techniques, and can be used as "best practice" examples.
+
+
+@par	Reserving Exclusive Use of a Device by a "Process Family"
+
+Some applications may require several programs that run concurrently, all using the same AJA device.
+For example, there may be one capture or playout process instance running for each AutoCirculate channel that's
+available on the device.
+
+In this case, AJA recommends using a controlling (parent) process that does the following:
+-	Acquires the AJA device.
+-	Launches subordinate per-channel capture/playout (child) processes, including allocating AutoCirculate channels
+	and device frame buffers to child processes (and communicating these parameters to them).
+-	Detects if/when child processes terminate (or crash), including deallocating AutoCirculate channels and device
+	frame buffers.
+-	Releases the AJA device only when all child processes using it have terminated.
+
+**/

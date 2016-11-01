@@ -1,0 +1,64 @@
+/**
+	@page	konalheplus		KONA LHe Plus
+
+	This page describes the KONA LHe Plus video capture/playout board.
+
+	@image	html	konalheplus.png
+
+	The KONA LHe+ board has a breakout connector on the far left, then the reference input (J2),
+	the SDI input (J3), and the SDI output (J4).
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xDB05</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+	-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
+
+	@par	Inputs & Outputs
+
+	-	1 x SDI input
+	-	1 x SDI output
+	-	1 x analog component video input
+	-	1 x analog component video output
+	-	1 x reference/LTC input
+	-	1 x LTC output
+	-	1 x RS-422 serial port
+
+	@par	Frame Buffer
+
+	-	256 MB SDRAM
+	-	32 x 8MB frames
+
+	@par	Audio
+
+	-	1 subsystem
+	-	8 channels (max.) per subsystem
+	-	2 channels (max.) of AES audio (input and output)
+	-	Audio subsystem's buffer memory starts at first byte of last frame
+	-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+	-	AES audio outputs
+
+	@par	Video Formats
+
+	-	Supports most standard video formats.
+	-	Does not support DVCPro HD or HDV.
+	-	RGB is not supported.
+
+	@par	Video Processing
+
+	-	1 mixer/keyer, with Mix Coefficient and Wipe Generator
+	-	Compression widget
+
+	@par		Ancillary Data
+
+	-	VANC geometries only
+
+	@par		External Connectivity
+
+	-	Optional \ref aja101884 provides access to other inputs and outputs
+	-	Optional \ref ajaklboxlh provides convenient access to the board's inputs and outputs in a 1U rack-mountable chassis.
+
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/142/25>
+**/

@@ -1,0 +1,49 @@
+/**
+	@page	audiooperation		Audio System Operation
+
+	NTV2-compatible devices have a minimum of one Audio System. Each system can accommodate a minimum of 8 channels.
+	Newer AJA devices can accommodate 16 channels. For backward compatibility with older AJA devices, all audio subsystems
+	can be configured to accommodate just 6 channels.
+
+	Incoming audio is normalized into 24-bit PCM samples. Each sample is stuffed into the most significant 3 bytes of a
+	4-byte sample, with the least-significant byte set to zero. Outgoing audio is de-normalized using the reverse process -- only
+	the most significant 3 bytes of each 32-bit longword sample are used. The sample rate is fixed at 48 kHz. Each system's PCM
+	normalization can be disabled to pass through specially-encoded audio data unchanged, (e.g., Dolby-E), which would otherwise
+	be irretrievably corrupted, and impossible to decode downstream. Newer AJA devices can even disable PCM normalization on a
+	per-audio-channel-pair basis.
+
+	Generally, each Audio System's input source is selectable from any of the device's SDI inputs. For devices that support 3Gb
+	Level B inputs, the audio can be taken from data stream 1 or 2. SDI output embedders can usually be driven by any Audio System.
+
+	Each audio subsystem uses an 8 MB chunk of SDRAM in the last video frame buffer to store its audio data. The first and last 4 MB
+	of that chunk is used for audio output and audio input, respectively. Six, eight or or sixteen channels of audio are always
+	written/read to/from this memory, regardless of whether they are all used. On newer AJA devices, the last byte of the first
+	audio subsystem's buffer coincides with the last byte of the last frame buffer (and subsequent buffers stack downward from there),
+	while on older devices, the first byte of the first audio subsystem's buffer coincides with the first byte of the last frame buffer
+	(and subsequent buffers stack upward from there).
+
+	@image	html	hwref-fig2-audiobuffers.png
+
+	@section	audiocapture		Audio Capture
+
+	During capture, incoming audio data is written into the Audio Input Buffer at the address specified by the subsystem's Audio
+	Input Last Address register (i.e., the "record head" or "write head"). Audio data continues to be written into the input buffer
+	until filled, whereupon the "write head" wraps back to the start of the buffer, and writing continues.
+
+	@section	audioplayout		Audio Playout
+
+	During playout, audio data in the audio output buffer is played out at 48 kHz when the Audio Output Reset bit is cleared.
+	Unless the "embedded output suppress" control bit is set for a given SDI output, audio data is always embedded. Silence is sent
+	if the audio output is reset or paused. Channels 1 and 2 are transmitted on Embedded Group 1, channels 1 & 2. Channels 3 and 4
+	are transmitted on Embedded Group 1, channels 3 & 4. Channels 5 and 6 are transmitted on Embedded Group 2, channels 1 & 2.
+	Channels 7 and 8 (in 8-channel audio mode) are transmitted on Embedded Group 2, channels 3 & 4.
+	In 16-channel mode, the remaining 8 channels are distributed in Embedded Groups 3 and 4 in a similar fashion.
+
+	@image	html	hwref-fig3-audiorecordplay.png
+
+	The Audio Data (all channels interleaved) can be moved from the host into the Audio Output Buffer via DMA. The last address
+	written into the Audio Output Buffer (by DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
+
+	If the output hardware "Play Head" pointer catches up to the Audio Output Last Address, the buffer will wrap, and audio/video
+	synchronization will be lost.
+**/
