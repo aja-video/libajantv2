@@ -33,6 +33,8 @@
 #define	NTV2_DEPRECATED_12_7		//	Future 12.7 __declspec(deprecated)
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 
+#define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
+
 
 // Platform dependent
 

@@ -31,16 +31,14 @@
 #endif
 
 
-#if !defined (AJA_VIRTUAL)
-	#define	AJA_VIRTUAL		virtual
-#endif
-
-typedef struct {
-    std::string     buildNumber;
-    std::string     packageNumber;
-    std::string     date;
-    std::string     time;
+typedef struct
+{
+	std::string		buildNumber;
+	std::string		packageNumber;
+	std::string		date;
+	std::string		time;
 } PACKAGE_INFO_STRUCT, *PPACKAGE_INFO_STRUCT;
+
 
 /**
 	@brief	I'm the base class that undergirds the platform-specific derived classes (from which CNTV2Card is ultimately derived).
