@@ -224,14 +224,14 @@
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B4CE1DE516E5802A0092B564;
-			remoteInfo = libclasses;
+			remoteInfo = libajantv2;
 		};
 		B40D91A21A2F716600CF03EB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC09C05546B4700DB518D;
-			remoteInfo = libclasses.dylib;
+			remoteInfo = libajantv2.dylib;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -343,13 +343,13 @@
 		B4CE1CE316E53B560092B564 /* ntv2macdriverinterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2macdriverinterface.cpp; path = ../src/mac/ntv2macdriverinterface.cpp; sourceTree = SOURCE_ROOT; };
 		B4CE1CE416E53B560092B564 /* ntv2macdriverinterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2macdriverinterface.h; path = ../src/mac/ntv2macdriverinterface.h; sourceTree = SOURCE_ROOT; };
 		B4CE1CE516E53B560092B564 /* ntv2macmutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2macmutex.h; path = ../src/mac/ntv2macmutex.h; sourceTree = SOURCE_ROOT; };
-		B4CE1DE616E5802A0092B564 /* libclassesd.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libclassesd.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4CE1DE616E5802A0092B564 /* libajantv2d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libajantv2d.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4F8B2161B98D10F00257B92 /* ntv2bft.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ntv2bft.h; sourceTree = "<group>"; };
 		B4F90FAD1C485204004723C9 /* ntv2config2022.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2config2022.cpp; path = ../src/ntv2config2022.cpp; sourceTree = SOURCE_ROOT; };
 		B4F90FAE1C485204004723C9 /* ntv2config2022.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2config2022.h; path = ../includes/ntv2config2022.h; sourceTree = SOURCE_ROOT; };
 		B4FE2EDA1C7E8A7500C5627A /* ntv2vpidfromspec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2vpidfromspec.cpp; path = ../src/ntv2vpidfromspec.cpp; sourceTree = SOURCE_ROOT; };
 		B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2vpidfromspec.h; path = ../includes/ntv2vpidfromspec.h; sourceTree = SOURCE_ROOT; };
-		D2AAC09D05546B4700DB518D /* classesd.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = classesd.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC09D05546B4700DB518D /* ajantv2d.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = ajantv2d.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -375,13 +375,13 @@
 		034768DDFF38A45A11DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC09D05546B4700DB518D /* classesd.dylib */,
-				B4CE1DE616E5802A0092B564 /* libclassesd.a */,
+				D2AAC09D05546B4700DB518D /* ajantv2d.dylib */,
+				B4CE1DE616E5802A0092B564 /* libajantv2d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		0867D691FE84028FC02AAC07 /* classes */ = {
+		0867D691FE84028FC02AAC07 /* ajantv2 */ = {
 			isa = PBXGroup;
 			children = (
 				B42AA909182AA44300E0584A /* includes */,
@@ -390,7 +390,7 @@
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
 				034768DDFF38A45A11DB9C8B /* Products */,
 			);
-			name = classes;
+			name = ajantv2;
 			sourceTree = "<group>";
 		};
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
@@ -656,9 +656,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		B4CE1DE516E5802A0092B564 /* libclasses */ = {
+		B4CE1DE516E5802A0092B564 /* libajantv2 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B4CE1DF716E5803C0092B564 /* Build configuration list for PBXNativeTarget "libclasses" */;
+			buildConfigurationList = B4CE1DF716E5803C0092B564 /* Build configuration list for PBXNativeTarget "libajantv2" */;
 			buildPhases = (
 				B4CE1DE216E5802A0092B564 /* Headers */,
 				B4CE1DE316E5802A0092B564 /* Sources */,
@@ -668,14 +668,14 @@
 			);
 			dependencies = (
 			);
-			name = libclasses;
-			productName = classes.a;
-			productReference = B4CE1DE616E5802A0092B564 /* libclassesd.a */;
+			name = libajantv2;
+			productName = ajantv2.a;
+			productReference = B4CE1DE616E5802A0092B564 /* libajantv2d.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		D2AAC09C05546B4700DB518D /* libclasses.dylib */ = {
+		D2AAC09C05546B4700DB518D /* libajantv2.dylib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "libclasses.dylib" */;
+			buildConfigurationList = 1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "libajantv2.dylib" */;
 			buildPhases = (
 				D2AAC09905546B4700DB518D /* Headers */,
 				D2AAC09B05546B4700DB518D /* Frameworks */,
@@ -685,9 +685,9 @@
 			);
 			dependencies = (
 			);
-			name = libclasses.dylib;
-			productName = libclasses;
-			productReference = D2AAC09D05546B4700DB518D /* classesd.dylib */;
+			name = libajantv2.dylib;
+			productName = libajantv2;
+			productReference = D2AAC09D05546B4700DB518D /* ajantv2d.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -702,7 +702,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1DEB916408733D950010E9CD /* Build configuration list for PBXProject "classes" */;
+			buildConfigurationList = 1DEB916408733D950010E9CD /* Build configuration list for PBXProject "ajantv2" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -712,13 +712,13 @@
 				French,
 				German,
 			);
-			mainGroup = 0867D691FE84028FC02AAC07 /* classes */;
+			mainGroup = 0867D691FE84028FC02AAC07 /* ajantv2 */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D2AAC09C05546B4700DB518D /* libclasses.dylib */,
-				B4CE1DE516E5802A0092B564 /* libclasses */,
+				D2AAC09C05546B4700DB518D /* libajantv2.dylib */,
+				B4CE1DE516E5802A0092B564 /* libajantv2 */,
 				B40D919C1A2F715A00CF03EB /* BuildAll */,
 			);
 		};
@@ -836,12 +836,12 @@
 /* Begin PBXTargetDependency section */
 		B40D91A11A2F716200CF03EB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B4CE1DE516E5802A0092B564 /* libclasses */;
+			target = B4CE1DE516E5802A0092B564 /* libajantv2 */;
 			targetProxy = B40D91A01A2F716200CF03EB /* PBXContainerItemProxy */;
 		};
 		B40D91A31A2F716600CF03EB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC09C05546B4700DB518D /* libclasses.dylib */;
+			target = D2AAC09C05546B4700DB518D /* libajantv2.dylib */;
 			targetProxy = B40D91A21A2F716600CF03EB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -854,7 +854,7 @@
 					"$(inherited)",
 					AJADLL_BUILD,
 				);
-				PRODUCT_NAME = classesd;
+				PRODUCT_NAME = ajantv2d;
 				SYMROOT = ../../../bin;
 			};
 			name = Debug;
@@ -866,7 +866,7 @@
 					"$(inherited)",
 					AJADLL_BUILD,
 				);
-				PRODUCT_NAME = classes;
+				PRODUCT_NAME = ajantv2;
 				SYMROOT = ../../../bin;
 			};
 			name = Release;
@@ -979,7 +979,7 @@
 					"$(inherited)",
 					AJASTATIC,
 				);
-				PRODUCT_NAME = classesd;
+				PRODUCT_NAME = ajantv2d;
 			};
 			name = Debug;
 		};
@@ -990,14 +990,14 @@
 					"$(inherited)",
 					AJASTATIC,
 				);
-				PRODUCT_NAME = classes;
+				PRODUCT_NAME = ajantv2;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "libclasses.dylib" */ = {
+		1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "libajantv2.dylib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB916108733D950010E9CD /* Debug */,
@@ -1006,7 +1006,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB916408733D950010E9CD /* Build configuration list for PBXProject "classes" */ = {
+		1DEB916408733D950010E9CD /* Build configuration list for PBXProject "ajantv2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB916508733D950010E9CD /* Debug */,
@@ -1024,7 +1024,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B4CE1DF716E5803C0092B564 /* Build configuration list for PBXNativeTarget "libclasses" */ = {
+		B4CE1DF716E5803C0092B564 /* Build configuration list for PBXNativeTarget "libajantv2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B4CE1DE716E5802A0092B564 /* Debug */,

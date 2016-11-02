@@ -1129,7 +1129,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
-					"-lclassesd",
+					"-lajantv2d",
 					"-lajastuffd",
 				);
 				SDKROOT = macosx;
@@ -1173,7 +1173,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
-					"-lclasses",
+					"-lajantv2",
 					"-lajastuff",
 				);
 				SDKROOT = macosx;
