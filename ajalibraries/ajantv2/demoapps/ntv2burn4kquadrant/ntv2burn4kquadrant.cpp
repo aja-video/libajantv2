@@ -210,41 +210,30 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	//	Sometimes other applications disable some or all of the frame buffers, so turn them all on here...
 	switch (::NTV2DeviceGetNumFrameStores (mInputDeviceID))
 	{
-		case 8:
-			mInputDevice.EnableChannel (NTV2_CHANNEL8);
-			mInputDevice.EnableChannel (NTV2_CHANNEL7);
-			mInputDevice.EnableChannel (NTV2_CHANNEL6);
-			mInputDevice.EnableChannel (NTV2_CHANNEL5);
-		case 4:
-			mInputDevice.EnableChannel (NTV2_CHANNEL4);
-			mInputDevice.EnableChannel (NTV2_CHANNEL3);
-		case 2:
-			mInputDevice.EnableChannel (NTV2_CHANNEL2);
-		case 1:
-			mInputDevice.EnableChannel (NTV2_CHANNEL1);
-		break;
+		case 8:	mInputDevice.EnableChannel (NTV2_CHANNEL8);
+				mInputDevice.EnableChannel (NTV2_CHANNEL7);
+				mInputDevice.EnableChannel (NTV2_CHANNEL6);
+				mInputDevice.EnableChannel (NTV2_CHANNEL5);	//	Fall thru
+		case 4:	mInputDevice.EnableChannel (NTV2_CHANNEL4);
+				mInputDevice.EnableChannel (NTV2_CHANNEL3);	//	Fall thru
+		case 2:	mInputDevice.EnableChannel (NTV2_CHANNEL2);	//	Fall thru
+		case 1:	mInputDevice.EnableChannel (NTV2_CHANNEL1);
+				break;
 	}
 
-	if (!mSingleDevice)
-	{
-		//	No need to do this twice if Input and Output devices are the same device...
-		switch (::NTV2DeviceGetNumFrameStores (mInputDeviceID))
+	if (!mSingleDevice)		//	Don't do this twice if Input & Output devices are same device!
+		switch (::NTV2DeviceGetNumFrameStores (mOutputDeviceID))
 		{
-			case 8:
-				mOutputDevice.EnableChannel (NTV2_CHANNEL8);
-				mOutputDevice.EnableChannel (NTV2_CHANNEL7);
-				mOutputDevice.EnableChannel (NTV2_CHANNEL6);
-				mOutputDevice.EnableChannel (NTV2_CHANNEL5);
-			case 4:
-				mOutputDevice.EnableChannel (NTV2_CHANNEL4);
-				mOutputDevice.EnableChannel (NTV2_CHANNEL3);
-			case 2:
-				mOutputDevice.EnableChannel (NTV2_CHANNEL2);
-			case 1:
-				mOutputDevice.EnableChannel (NTV2_CHANNEL1);
-			break;
+			case 8:	mOutputDevice.EnableChannel (NTV2_CHANNEL8);
+					mOutputDevice.EnableChannel (NTV2_CHANNEL7);
+					mOutputDevice.EnableChannel (NTV2_CHANNEL6);
+					mOutputDevice.EnableChannel (NTV2_CHANNEL5);	//	Fall thru
+			case 4:	mOutputDevice.EnableChannel (NTV2_CHANNEL4);
+					mOutputDevice.EnableChannel (NTV2_CHANNEL3);	//	Fall thru
+			case 2:	mOutputDevice.EnableChannel (NTV2_CHANNEL2);	//	Fall thru
+			case 1:	mOutputDevice.EnableChannel (NTV2_CHANNEL1);
+					break;
 		}
-	}
 
 	//	Set up the video and audio...
 	status = SetupInputVideo ();
