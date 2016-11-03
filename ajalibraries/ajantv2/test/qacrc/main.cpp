@@ -103,31 +103,31 @@ int main (int argc, const char ** argv)
 		case 'g':
 			if (!pDataRange)
 			{
-				pDataRange = "04/fb";
+				pDataRange = (char*)"04/fb";
 			}
 			break;
 		case 'a':
 			if (!pAudioData)
 			{
-				pAudioData = "16";
+				pAudioData = (char*)"16";
 			}
 			break;
 		case 'e':
 			if (!pAudioLevel)
 			{
-				pAudioLevel = "100";
+				pAudioLevel = (char*)"100";
 			}
 			break;
 		case 'l':
 			if (!pLogFileName)
 			{
-				pLogFileName = "testcrc.log";
+				pLogFileName = (char*)"testcrc.log";
 			}
 			break;
 		case 'o':
 			if (!pOutputFileName)
 			{
-				pOutputFileName = "testcrcout.bin";
+				pOutputFileName = (char*)"testcrcout.bin";
 			}
 			break;
 // 		case 'r':
@@ -139,7 +139,7 @@ int main (int argc, const char ** argv)
 		case 'v':
 			if (!pVerbose)
 			{
-				pVerbose = "20";
+				pVerbose = (char*)"20";
 			}
 			break;
 		}
