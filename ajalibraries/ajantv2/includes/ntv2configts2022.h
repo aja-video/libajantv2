@@ -22,6 +22,7 @@
 #define     ENCODE_TS_AES_ENCAP             3
 #define     ENCODE_TS_MPEG_AES_ENCAP        4
 #define     ENCODE_TS_MPEG_ANC_ENCAP        6
+#define     ENCODE_TS_MPEG_PCR              7
 
 // Decoder part numbers
 #define     DECODE_TS_MPEG_J2K_DECAP        0
