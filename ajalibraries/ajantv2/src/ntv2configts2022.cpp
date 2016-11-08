@@ -19,6 +19,7 @@
 #pragma warning(disable:4800)
 #endif
 
+//#define DOAUDIO 1
 
 using namespace std;
 
@@ -230,6 +231,7 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
     if (!SetupEncodeTsMpegJ2kEncap(channel))
         return false;
 
+#if DOAUDIO
     // program TS for aes encapsulator
     if (!SetupEncodeTsAesEncap(channel))
         return false;
@@ -237,6 +239,7 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
     // program TS for mpeg aes encapsulator
     if (!SetupEncodeTsMpegAesEncap(channel))
         return false;
+#endif
 
     return true;
 }
