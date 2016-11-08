@@ -41,10 +41,39 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
         _j2kEncodeConfig[channel].j2k_codeBlocksize = kJ2KCodeBlocksize_32x32;
         _j2kEncodeConfig[channel].j2k_mbps = 200;
         _j2kEncodeConfig[channel].j2k_streamType = kJ2KStreamTypeStandard;
+        _j2kEncodeConfig[channel].j2k_pmtPid = 255;
+        _j2kEncodeConfig[channel].j2k_videoPid = 256;
+        _j2kEncodeConfig[channel].j2k_pcrPid = 257;
+        _j2kEncodeConfig[channel].j2k_audio1Pid = 258;
 
         // decode defaults
         _j2kDecodeConfig[channel].j2k_pid = 0;
     }
+}
+
+bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
+{
+    _j2kEncodeConfig[channel].j2k_videoFormat       = j2kEncodeChannel.videoFormat;
+    _j2kEncodeConfig[channel].j2k_ullMode           = j2kEncodeChannel.ullMode;
+    _j2kEncodeConfig[channel].j2k_bitDepth          = j2kEncodeChannel.bitDepth;
+    _j2kEncodeConfig[channel].j2k_chromaSubsamp     = j2kEncodeChannel.chromaSubsamp;
+    _j2kEncodeConfig[channel].j2k_codeBlocksize     = j2kEncodeChannel.codeBlocksize;
+    _j2kEncodeConfig[channel].j2k_mbps              = j2kEncodeChannel.mbps;
+    _j2kEncodeConfig[channel].j2k_streamType        = j2kEncodeChannel.streamType;
+    _j2kEncodeConfig[channel].j2k_pmtPid            = j2kEncodeChannel.pmtPid;
+    _j2kEncodeConfig[channel].j2k_videoPid          = j2kEncodeChannel.videoPid;
+    _j2kEncodeConfig[channel].j2k_pcrPid            = j2kEncodeChannel.pcrPid;
+    _j2kEncodeConfig[channel].j2k_audio1Pid         = j2kEncodeChannel.audio1Pid;
+
+    // setup the J2K encoder
+    if (!SetupJ2KEncoder(channel))
+        return false;
+
+    // setup the TS
+    if (!SetupTsForEncode(channel))
+        return false;
+
+    return true;
 }
 
 
@@ -189,23 +218,23 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder()
 
 bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 {
-    // first setup the encoder
+    // first setup TS for the encoder
     if (!SetupEncodeTsJ2KEncoder(channel))
         return false;
 
-    // program timer
+    // program TS timer
     if (!SetupEncodeTsTimer(channel))
         return false;
 
-    // program mpeg j2k encapsulator
+    // program TS for mpeg j2k encapsulator
     if (!SetupEncodeTsMpegJ2kEncap(channel))
         return false;
 
-    // program aes encapsulator
+    // program TS for aes encapsulator
     if (!SetupEncodeTsAesEncap(channel))
         return false;
 
-    // program mpeg aes encapsulator
+    // program TS for mpeg aes encapsulator
     if (!SetupEncodeTsMpegAesEncap(channel))
         return false;
 

@@ -62,6 +62,10 @@ public:
         codeBlocksize   = kJ2KCodeBlocksize_32x32;
         mbps            = 200;
         streamType      = kJ2KStreamTypeStandard;
+        pmtPid          = 255;
+        videoPid        = 256;
+        pcrPid          = 257;
+        audio1Pid       = 258;
     }
 
     bool operator != ( const j2k_encode_2022_channel &other ) {
@@ -76,7 +80,11 @@ public:
             (chromaSubsamp      == other.chromaSubsamp)     &&
             (codeBlocksize      == other.codeBlocksize)     &&
             (mbps               == other.mbps)              &&
-            (streamType         == other.streamType))
+            (streamType         == other.streamType)        &&
+            (pmtPid             == other.pmtPid)            &&
+            (videoPid           == other.videoPid)          &&
+            (pcrPid             == other.pcrPid)            &&
+            (audio1Pid          == other.audio1Pid))
         {
             return true;
         }
@@ -94,6 +102,10 @@ public:
     J2KCodeBlocksize        codeBlocksize;      ///< @brief	Specifies the code block size for J2K encode.
     uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
     J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
+    uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.
+    uint32_t                videoPid;           ///< @brief	Specifies the PID for the video.
+    uint32_t                pcrPid;             ///< @brief	Specifies the PID for the PCR.
+    uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
 };
 
 struct j2kEncodeConfig
@@ -105,6 +117,10 @@ struct j2kEncodeConfig
     J2KCodeBlocksize        j2k_codeBlocksize;
     uint32_t                j2k_mbps;
     J2KStreamType           j2k_streamType;
+    uint32_t                j2k_pmtPid;
+    uint32_t                j2k_videoPid;
+    uint32_t                j2k_pcrPid;
+    uint32_t                j2k_audio1Pid;
 };
 
 
@@ -116,7 +132,8 @@ public:
         pid     = 0;
     }
 
-    bool operator != ( const j2k_decode_2022_channel &other ) {
+    bool operator != ( const j2k_decode_2022_channel &other )
+    {
         return !(*this == other);
     }
 
@@ -171,9 +188,28 @@ public:
     void    SetJ2KEncodeStreamType(const NTV2Channel channel, const J2KStreamType streamType) {_j2kEncodeConfig[channel].j2k_streamType = streamType;}
     void    GetJ2KEncodeStreamType(const NTV2Channel channel, J2KStreamType & streamType) {streamType = _j2kEncodeConfig[channel].j2k_streamType;}
 
-    // Set/Get encode rate in MBPS for J2K setup
+    // Set/Get encode PMT PID
+    void    SetJ2KEncodePMTPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_pmtPid = pid;}
+    void    GetJ2KEncodePMTPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_pmtPid;}
+
+    // Set/Get encode Video PID
+    void    SetJ2KEncodeVideoPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_videoPid = pid;}
+    void    GetJ2KEncodeVideoPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_videoPid;}
+
+    // Set/Get encode PCR PID
+    void    SetJ2KEncodePCRPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_pcrPid = pid;}
+    void    GetJ2KEncodePCRPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_pcrPid;}
+
+    // Set/Get encode Audio PID
+    void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_audio1Pid = pid;}
+    void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_audio1Pid;}
+
+    // Set/Get decode PID
     void    SetJ2KDecodePid(const NTV2Channel channel, const uint32_t pid) {_j2kDecodeConfig[channel].j2k_pid = pid;}
     void    GetJ2KDecodePid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kDecodeConfig[channel].j2k_pid;}
+
+    // Setup both the TS and J2K encoder using the class params
+    bool    SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel);
 
     // Setup the J2K encoder
     bool    SetupJ2KEncoder(const NTV2Channel channel);
