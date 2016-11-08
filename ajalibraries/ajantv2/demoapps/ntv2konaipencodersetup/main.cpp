@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     QCommandLineParser parser;
-    parser.setApplicationDescription("Kona IP Json Setup");
+    parser.setApplicationDescription("Kona IP Encoder Setup");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption deviceOption("d", "which device to use", "device");
