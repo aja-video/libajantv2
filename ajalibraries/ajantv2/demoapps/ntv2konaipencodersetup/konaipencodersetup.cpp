@@ -73,10 +73,6 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     }
 
     CNTV2ConfigTs2022	configTs2022 (mDevice);
-    // pcs init
-    mDevice.WriteRegister(0x60140,0x00000060);
-    mDevice.WriteRegister(0x60142,0x00001140);
-    mDevice.WriteRegister(0x60141,0x01004880);
 
     configTs2022.SetJ2KEncodeVideoFormat(NTV2_CHANNEL1, pKonaIPParams->videoFormat);
     configTs2022.SetJ2KEncodeUllMode(NTV2_CHANNEL1, false);

@@ -2008,23 +2008,23 @@ bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNu
 {
 	switch (inFrameRate)
     {
-		case NTV2_FRAMERATE_12000:		outFractionNumerator = 120000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;     outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_11988:		outFractionNumerator = 120000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_6000:		outFractionNumerator = 60000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_5994:		outFractionNumerator = 60000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_5000:		outFractionNumerator = 50000;	outFractionDenominator = 1000;	break;
-		case NTV2_FRAMERATE_4800:		outFractionNumerator = 48000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;      outFractionDenominator = 1;	break;
+        case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_4795:		outFractionNumerator = 48000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_3000:		outFractionNumerator = 30000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_2997:		outFractionNumerator = 30000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_2500:		outFractionNumerator = 25000;	outFractionDenominator = 1000;	break;
-		case NTV2_FRAMERATE_2400:		outFractionNumerator = 24000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;      outFractionDenominator = 1;	break;
+        case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_2398:		outFractionNumerator = 24000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_1900:		outFractionNumerator = 19000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_1898:		outFractionNumerator = 19000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_1800:		outFractionNumerator = 18000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_1798:		outFractionNumerator = 18000;	outFractionDenominator = 1001;	break;
-		case NTV2_FRAMERATE_1500:		outFractionNumerator = 15000;	outFractionDenominator = 1000;	break;
+        case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;      outFractionDenominator = 1;	break;
 		case NTV2_FRAMERATE_1498:		outFractionNumerator = 15000;	outFractionDenominator = 1001;	break;
 
 		#if !defined (_DEBUG)
