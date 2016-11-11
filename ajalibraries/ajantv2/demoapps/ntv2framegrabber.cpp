@@ -545,6 +545,8 @@ bool NTV2FrameGrabber::SetupInput (void)
 	NTV2_ASSERT (mDeviceID != DEVICE_ID_NOTFOUND);
 
 	mChannel = ::NTV2InputSourceToChannel (mInputSource);
+	if(mChannel == NTV2_CHANNEL_INVALID)
+		mChannel = NTV2_CHANNEL1;
 	mTimeCodeSource = ::NTV2InputSourceToTimecodeIndex (mInputSource);
 
     bool waitForInput= false;
@@ -577,11 +579,11 @@ bool NTV2FrameGrabber::SetupInput (void)
 	if (NTV2_IS_VALID_VIDEO_FORMAT (mCurrentVideoFormat))
 	{
 		validInput = true;
-		mNTV2Card.SetVideoFormat (mCurrentVideoFormat, false, false, ::NTV2InputSourceToChannel (mInputSource));
+		mNTV2Card.SetVideoFormat (mCurrentVideoFormat, false, false, mChannel);
 
-		mFrameDimensions = mNTV2Card.GetActiveFrameDimensions (::NTV2InputSourceToChannel (mInputSource));
+		mFrameDimensions = mNTV2Card.GetActiveFrameDimensions (mChannel);
 		const QString vfString (::NTV2VideoFormatToString (mCurrentVideoFormat).c_str ());
-		qDebug() << "## DEBUG:  mInputSource=" << ::NTV2InputSourceToChannel (mInputSource) << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
+		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
 
  		mFormatIsProgressive = IsProgressivePicture (mCurrentVideoFormat);
 		mNTV2Card.SetReference (NTV2_REFERENCE_FREERUN);
