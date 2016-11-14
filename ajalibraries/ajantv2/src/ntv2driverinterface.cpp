@@ -750,14 +750,29 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	}
 	return false;
 }
+
 bool CNTV2DriverInterface::IsKonaIPDevice()
 {
 	ULWord val = 0;
-	ReadRegister((0x100000 + 0x80) / 4, &val);
-	if (val != 0x00000000 && val != 0xffffffff)
+	ULWord hexID = 0x0;
+	ReadRegister (kRegBoardID, &hexID);
+	switch((NTV2DeviceID)hexID)
+	{
+	case DEVICE_ID_KONA4:
+	case DEVICE_ID_KONA4UFC:
+		ReadRegister((0x100000 + 0x80) / 4, &val);
+		if (val != 0x00000000 && val != 0xffffffff)
+			return true;
+		else
+			return false;
+
+	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_4CH_2SFP:
+	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
 		return true;
-	else
+	default:
 		return false;
+	}
 }
 
 #if !defined (NTV2_DEPRECATE)

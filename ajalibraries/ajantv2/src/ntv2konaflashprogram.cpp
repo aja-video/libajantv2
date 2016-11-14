@@ -35,6 +35,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
         _mcsInfoOffset(0),
 		_soc1Offset(0),
 		_soc2Offset(0),
+		_licenseOffset(0),
 		_numSectorsMain		(0),
 		_numSectorsSOC1(0),
 		_numSectorsSOC2(0),
@@ -61,6 +62,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const boo
         _mcsInfoOffset(0),
 		_soc1Offset(0),
 		_soc2Offset(0),
+		_licenseOffset(0),
 		_numSectorsMain(0),
 		_numSectorsSOC1(0),
 		_numSectorsSOC2(0),
@@ -147,6 +149,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			_failSafeOffset = 0;// but is really 16*1024*1024;
 			_macOffset = _bankSize - (2 * _sectorSize);
 			_mcsInfoOffset = _bankSize - (3*_sectorSize);
+			_licenseOffset = _bankSize - (4* _sectorSize);
 			status = true;
 		}
 		else
@@ -162,6 +165,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			_failSafeOffset = 0;// but is really 16*1024*1024;
 			_macOffset = _bankSize - (2 * _sectorSize);
 			_mcsInfoOffset = _bankSize - (3 * _sectorSize);
+			_licenseOffset = _bankSize - (4* _sectorSize);
 			status = true;
 		}
 	}
@@ -181,6 +185,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_failSafeOffset = 0;// but is really 16*1024*1024;
 		_macOffset = _bankSize - (2 * _sectorSize);
 		_mcsInfoOffset = _bankSize - (3 * _sectorSize);
+		_licenseOffset = _bankSize - (4* _sectorSize);
 		status = true;
 	}
 	else
@@ -977,6 +982,8 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 
 bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 {
+	if(!IsKonaIPDevice())
+		return false;
 
 	uint32_t baseAddress = _macOffset;
 
@@ -1032,6 +1039,9 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 	uint32_t lo2;
 	uint32_t hi2;
 
+	if(!IsKonaIPDevice())
+		return false;
+
 	uint32_t baseAddress = GetBaseAddressForProgramming(MAC_FLASHBLOCK);
 	SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
@@ -1077,6 +1087,83 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 	mac2.mac[3] =  lo2 & 0x000000ff;
 	mac2.mac[4] = (hi2 & 0xff000000) >> 24;
 	mac2.mac[5] = (hi2 & 0x00ff0000) >> 16;
+
+	return true;
+}
+
+bool
+CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
+{
+	if(!IsKonaIPDevice())
+		return false;
+
+	EraseBlock(LICENSE_BLOCK);
+
+	SetFlashBlockIDBank(LICENSE_BLOCK);
+
+	ULWord sectorAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+
+	if ( licenseString.length() != 39 )
+		return false;
+
+	SetBankSelect(BANK_1);
+
+	for(int i = 0; i <= licenseString.size(); i+=4, sectorAddress += 4)
+	{
+		ULWord regVal = 0;
+		regVal = (licenseString.c_str()[i]<<24);
+		regVal |= (licenseString.c_str()[i+1] << 16);
+		regVal |= (licenseString.c_str()[i+2] << 8);
+		regVal |= (licenseString.c_str()[i+3]);
+		ProgramFlashValue(sectorAddress, regVal);
+	}
+
+	// Protect Device
+	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WaitForFlashNOTBusy();
+	WriteRegister(kRegXenaxFlashDIN, 0x1C);
+	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WaitForFlashNOTBusy();
+	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WaitForFlashNOTBusy();
+	WriteRegister(kRegXenaxFlashDIN, 0x9C);
+	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WaitForFlashNOTBusy();
+	SetBankSelect(BANK_0);
+
+	return true;
+}
+
+bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
+{
+	char cLicense[100];
+	int32_t licenseSize = 39;
+
+	if(!IsKonaIPDevice())
+		return false;
+
+	uint32_t baseAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+	SetFlashBlockIDBank(LICENSE_BLOCK);
+
+	for(int32_t i = 0; i < licenseSize; i += 4, baseAddress += 4)
+	{
+		WriteRegister(kRegXenaxFlashAddress,baseAddress);
+		WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
+		WaitForFlashNOTBusy();
+		uint32_t flashValue;
+		ReadRegister(kRegXenaxFlashDOUT,&flashValue);
+		flashValue = NTV2EndianSwap32(flashValue);
+
+		UWord dd = (flashValue & 0xff);
+		sprintf(&cLicense[i], "%c", dd);
+		dd = ((flashValue >> 8) & 0xff);
+		sprintf(&cLicense[i+1], "%c", dd);
+		dd = ((flashValue >> 16) & 0xff);
+		sprintf(&cLicense[i+2], "%c", dd);
+		dd = ((flashValue >> 24) & 0xff);
+		sprintf(&cLicense[i+3], "%c", dd);
+	}
+	serialString = cLicense;
 
 	return true;
 }
@@ -1665,6 +1752,7 @@ bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)
 		return SetBankSelect(BANK_1);
 	case MCS_INFO_BLOCK:
 	case MAC_FLASHBLOCK:
+	case LICENSE_BLOCK:
 		return SetBankSelect(BANK_1);
 	case SOC1_FLASHBLOCK:
 		return SetBankSelect(BANK_2);

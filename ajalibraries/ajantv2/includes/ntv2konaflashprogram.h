@@ -24,6 +24,7 @@
 
 #define MAXBITFILE_HEADERSIZE 256
 #define MAXMCSINFOSIZE 256
+#define MAXMCSLICENSESIZE 256
 #define MCS_STEPS      6
 
 typedef enum 
@@ -34,7 +35,8 @@ typedef enum
 	SOC1_FLASHBLOCK,
 	SOC2_FLASHBLOCK,
 	MAC_FLASHBLOCK,
-	MCS_INFO_BLOCK
+	MCS_INFO_BLOCK,
+	LICENSE_BLOCK,
 }FlashBlockID;
 
 typedef enum
@@ -122,6 +124,8 @@ public:
 
 	bool ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2);
 	bool ReadMACAddresses(MacAddr & mac1, MacAddr & mac2);
+	bool ProgramLicenseInfo(std::string licenseString);
+	bool ReadLicenseInfo(std::string& licenseString);
 	void DisplayData(uint32_t address, uint32_t len);
 	bool ProgramInfoFromString(std::string infoString);
 
@@ -167,6 +171,9 @@ public:
 		case MCS_INFO_BLOCK:
 			return _mcsInfoOffset;
 			break;
+		case LICENSE_BLOCK:
+			return _licenseOffset;
+			break;
 		}
 
 	}
@@ -194,6 +201,9 @@ public:
 		case MCS_INFO_BLOCK:
 			return 1;
 			break;
+		case LICENSE_BLOCK:
+			return 1;
+			break;
 		}
 
 	}
@@ -216,6 +226,7 @@ public:
 	uint32_t			  _failSafeOffset;
 	uint32_t			  _macOffset;
     uint32_t            _mcsInfoOffset;
+	uint32_t			_licenseOffset;
     uint32_t			  _soc1Offset;
     uint32_t			  _soc2Offset;
 	uint32_t			  _numSectorsMain;
