@@ -424,11 +424,11 @@ AJAStatus NTV2EncodeHEVCVif::SetupAudio (void)
 
 void NTV2EncodeHEVCVif::SetupHostBuffers (void)
 {
-    mVideoBufferSize = GetVideoActiveSize (mVideoFormat, mCapturePixelFormat, false, false);
+    mVideoBufferSize = GetVideoActiveSize (mVideoFormat, mCapturePixelFormat, NTV2_VANCMODE_OFF);
     mPicInfoBufferSize = sizeof(HevcPictureInfo)*2;
     mEncInfoBufferSize = sizeof(HevcEncodedInfo)*2;
     mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
-	mOverlayBufferSize = GetVideoActiveSize(mVideoFormat, mOverlayPixelFormat, false, false) * 4;
+	mOverlayBufferSize = GetVideoActiveSize(mVideoFormat, mOverlayPixelFormat, NTV2_VANCMODE_OFF) * 4;
 	NTV2FormatDescriptor overlayD = GetFormatDescriptor(mVideoFormat, mOverlayPixelFormat);
 	
 	// audio/video input ring

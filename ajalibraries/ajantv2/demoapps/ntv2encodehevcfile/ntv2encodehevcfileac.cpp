@@ -615,7 +615,7 @@ AJAStatus NTV2EncodeHEVCFileAc::SetupAudio (void)
 
 void NTV2EncodeHEVCFileAc::SetupHostBuffers (void)
 {
-	mVideoBufferSize = GetVideoActiveSize (mVideoFormat, mPixelFormat, false, false);
+	mVideoBufferSize = GetVideoActiveSize (mVideoFormat, mPixelFormat, NTV2_VANCMODE_OFF);
     mPicInfoBufferSize = sizeof(HevcPictureInfo)*2;
     mEncInfoBufferSize = sizeof(HevcEncodedInfo)*2;
     mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
