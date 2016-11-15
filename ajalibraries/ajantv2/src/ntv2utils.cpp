@@ -2328,7 +2328,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 }
 
 
-#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_12_6)
 	// GetVideoActiveSize: returns the number of bytes of active video (including VANC lines, if any)
 	ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const bool inTallVANC, const bool inTallerVANC)
 	{
@@ -2339,7 +2339,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	{
 		return ::GetVideoWriteSize (inVideoFormat, inFBFormat, NTV2VANCModeFromBools (inTallVANC, inTallerVANC));
 	}
-#endif	//	NTV2_DEPRECATE_12_6
+//#endif	//	NTV2_DEPRECATE_12_6
 
 ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const NTV2VANCMode inVancMode)
 {
@@ -3559,53 +3559,6 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 }	//	GetDisplayHeight
 
 
-NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					in2Kby1080,
-											const bool					inWideVANC)
-{
-	MakeInvalid ();
-	if (!NTV2_IS_VALID_STANDARD (inVideoStandard))
-		return;	//	bad standard
-	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT (inFrameBufferFormat))
-		return;	//	bad FBF
-	if (inWideVANC && !inVANCenabled)
-		return;	//	conflicting VANC params
-
-	//	The 'formatDescriptorTable' handles everything but VANC...
-	const NTV2FormatDescriptor	&	result			(formatDescriptorTable[inVideoStandard][inFrameBufferFormat]);
-	const ULWord					numActiveLines	(result.numLines);
-	*this = result;
-
-	//	Account for VANC...
-	if (inVANCenabled)
-	{
-		switch (inVideoStandard)
-		{
-			case NTV2_STANDARD_1080:
-			case NTV2_STANDARD_1080p:	numLines = inWideVANC ? 1114 : 1112;	break;
-
-			case NTV2_STANDARD_720:		numLines = 740;							break;
-
-			case NTV2_STANDARD_525:		numLines = inWideVANC ? 514 : 508;		break;
-
-			case NTV2_STANDARD_625:		numLines = inWideVANC ? 612 : 598;		break;
-
-			case NTV2_STANDARD_2K:		numLines = 1588;						break;
-
-			default:					MakeInvalid ();							return;
-		}
-	}
-	firstActiveLine = numLines - numActiveLines;
-	mStandard		= inVideoStandard;
-	mPixelFormat	= inFrameBufferFormat;
-	m2Kby1080		= in2Kby1080;
-	mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
-
-}	//	construct from NTV2Standard
-
-
 NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const NTV2VANCMode			inVancMode)
@@ -3653,27 +3606,118 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 
 NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					inWideVANC)
+											const NTV2VANCMode			inVancMode)
 {
-	NTV2FormatDescriptor	result	(::GetNTV2StandardFromVideoFormat (inVideoFormat),
-										inFrameBufferFormat,
-										inVANCenabled,
-										NTV2_IS_2K_1080_VIDEO_FORMAT (inVideoFormat) || NTV2_IS_4K_4096_VIDEO_FORMAT (inVideoFormat),
-										inWideVANC);
-	*this = result;
-	mVideoFormat = inVideoFormat;
-}	//	construct from NTV2VideoFormat
+	MakeInvalid ();
+	const NTV2Standard	inStandard	(::GetNTV2StandardFromVideoFormat (inVideoFormat));
+	if (!NTV2_IS_VALID_STANDARD (inStandard))
+		return;	//	bad standard
+	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT (inFrameBufferFormat))
+		return;	//	bad FBF
+	if (!NTV2_IS_VALID_VANCMODE (inVancMode))
+		return;	//	bad Vanc mode
 
+	*this = formatDescriptorTable[inStandard][inFrameBufferFormat];		//	The 'formatDescriptorTable' handles everything but VANC
 
-NTV2FormatDescriptor GetFormatDescriptor (	const NTV2Standard			inVideoStandard,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					in2Kby1080,
-											const bool					inWideVANC)
-{
-	return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
+	mStandard		= inStandard;
+	mPixelFormat	= inFrameBufferFormat;
+	mVancMode		= inVancMode;
+	m2Kby1080		= NTV2_IS_2K1080_STANDARD(mStandard);
+
+	//	Account for VANC...
+	if (NTV2_IS_VANCMODE_ON (inVancMode))
+	{
+		const ULWord					numActiveLines	(numLines);
+		switch (inStandard)
+		{
+			case NTV2_STANDARD_1080:
+			case NTV2_STANDARD_1080p:	numLines = NTV2_IS_VANCMODE_TALLER(inVancMode) ? 1114 : 1112;	break;
+
+			case NTV2_STANDARD_720:		numLines = 740;													break;
+
+			case NTV2_STANDARD_525:		numLines = NTV2_IS_VANCMODE_TALLER(inVancMode) ? 514 : 508;		break;
+
+			case NTV2_STANDARD_625:		numLines = NTV2_IS_VANCMODE_TALLER(inVancMode) ? 612 : 598;		break;
+
+			case NTV2_STANDARD_2K:		numLines = 1588;												break;
+
+			default:					MakeInvalid ();													return;
+		}
+		firstActiveLine = numLines - numActiveLines;
+	}
 }
+
+
+//#if !defined (NTV2_DEPRECATE_12_6)
+	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
+												const NTV2FrameBufferFormat	inFrameBufferFormat,
+												const bool					inVANCenabled,
+												const bool					in2Kby1080,
+												const bool					inWideVANC)
+	{
+		MakeInvalid ();
+		if (!NTV2_IS_VALID_STANDARD (inVideoStandard))
+			return;	//	bad standard
+		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT (inFrameBufferFormat))
+			return;	//	bad FBF
+		if (inWideVANC && !inVANCenabled)
+			return;	//	conflicting VANC params
+	
+		//	The 'formatDescriptorTable' handles everything but VANC...
+		const NTV2FormatDescriptor	&	result			(formatDescriptorTable[inVideoStandard][inFrameBufferFormat]);
+		const ULWord					numActiveLines	(result.numLines);
+		*this = result;
+	
+		//	Account for VANC...
+		if (inVANCenabled)
+		{
+			switch (inVideoStandard)
+			{
+				case NTV2_STANDARD_1080:
+				case NTV2_STANDARD_1080p:	numLines = inWideVANC ? 1114 : 1112;	break;
+	
+				case NTV2_STANDARD_720:		numLines = 740;							break;
+	
+				case NTV2_STANDARD_525:		numLines = inWideVANC ? 514 : 508;		break;
+	
+				case NTV2_STANDARD_625:		numLines = inWideVANC ? 612 : 598;		break;
+	
+				case NTV2_STANDARD_2K:		numLines = 1588;						break;
+	
+				default:					MakeInvalid ();							return;
+			}
+		}
+		firstActiveLine = numLines - numActiveLines;
+		mStandard		= inVideoStandard;
+		mPixelFormat	= inFrameBufferFormat;
+		m2Kby1080		= in2Kby1080;
+		mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
+	
+	}	//	construct from NTV2Standard
+	
+	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat,
+												const NTV2FrameBufferFormat	inFrameBufferFormat,
+												const bool					inVANCenabled,
+												const bool					inWideVANC)
+	{
+		NTV2FormatDescriptor	result	(::GetNTV2StandardFromVideoFormat (inVideoFormat),
+											inFrameBufferFormat,
+											inVANCenabled,
+											NTV2_IS_2K_1080_VIDEO_FORMAT (inVideoFormat) || NTV2_IS_4K_4096_VIDEO_FORMAT (inVideoFormat),
+											inWideVANC);
+		*this = result;
+		mVideoFormat = inVideoFormat;
+	}	//	construct from NTV2VideoFormat
+
+	NTV2FormatDescriptor GetFormatDescriptor (	const NTV2Standard			inVideoStandard,
+												const NTV2FrameBufferFormat	inFrameBufferFormat,
+												const bool					inVANCenabled,
+												const bool					in2Kby1080,
+												const bool					inWideVANC)
+	{
+		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
+	}
+//#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
 
 NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,

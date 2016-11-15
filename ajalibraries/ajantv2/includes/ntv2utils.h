@@ -233,12 +233,12 @@ AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inV
 	AJAExport NTV2V2Standard	GetHdmiV2StandardFromVideoFormat (NTV2VideoFormat videoFormat);
 #endif
 
-#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_12_6)
 	AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
 										const bool inVANCenabled = false, const bool inWideVANC = false);
 	AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
 										const bool inVANCenabled, const bool inWideVANC);
-#endif	//	NTV2_DEPRECATE_12_6
+//#endif	//	NTV2_DEPRECATE_12_6
 
 /**
 	@return		The minimum number of bytes required to store a single frame of video in the given frame buffer format
@@ -687,7 +687,7 @@ typedef struct NTV2FormatDescriptor
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
-
+//#if !defined (NTV2_DEPRECATE_12_6)
 	/**
 		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
 		@param[in]	inVideoStandard			Specifies the video standard being used.
@@ -701,6 +701,19 @@ typedef struct NTV2FormatDescriptor
 											const bool					inVANCenabled	= false,
 											const bool					in2Kby1080		= false,
 											const bool					inWideVANC		= false);
+
+	/**
+		@brief		Constructs me from the given video format, pixel format and VANC settings.
+		@param[in]	inVideoFormat			Specifies the video format being used.
+		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
+		@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
+		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
+	**/
+	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
+											const NTV2FrameBufferFormat	inFrameBufferFormat,
+											const bool					inVANCenabled	= false,
+											const bool					inWideVANC		= false);
+//#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -721,8 +734,7 @@ typedef struct NTV2FormatDescriptor
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled	= false,
-											const bool					inWideVANC		= false);
+											const NTV2VANCMode			inVancMode);
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && linePitch;}		///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}						///< @return	True if VANC geometry;  otherwise false.
@@ -848,20 +860,13 @@ typedef struct NTV2FormatDescriptor
 inline std::ostream & operator << (std::ostream & inOutStream, const NTV2FormatDescriptor & inFormatDesc)	{return inFormatDesc.Print (inOutStream);}
 
 
-/**
-	@brief		Returns a format descriptor that describes a video frame having the given video standard and pixel format.
-	@param[in]	inVideoStandard			Specifies the video standard being used.
-	@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-	@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
-	@param[in]	in2Kby1080				Specifies if a 2K format is in use or not. Defaults to false.
-	@param[in]	inWideVANC				Specifies if "wide VANC" is enabled or not. Defaults to false.
-	@return		A format descriptor that describes a video frame having the given video standard and pixel format.
-**/
-AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2Standard			inVideoStandard,
-													const NTV2FrameBufferFormat	inFrameBufferFormat,
-													const bool					inVANCenabled	= false,
-													const bool					in2Kby1080		= false,
-													const bool					inWideVANC		= false);
+//#if !defined (NTV2_DEPRECATE_12_6)
+	AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2Standard			inVideoStandard,
+														const NTV2FrameBufferFormat	inFrameBufferFormat,
+														const bool					inVANCenabled	= false,
+														const bool					in2Kby1080		= false,
+														const bool					inWideVANC		= false);
+//#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
 
 /**

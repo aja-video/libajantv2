@@ -310,6 +310,7 @@ typedef enum
 #define NTV2_IS_UHD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_3840x2160p || (__s__) == NTV2_STANDARD_3840HFR)
 #define NTV2_IS_4K_STANDARD(__s__)				((__s__) == NTV2_STANDARD_4096x2160p || (__s__) == NTV2_STANDARD_4096HFR)
 #define NTV2_IS_QUAD_STANDARD(__s__)			(NTV2_IS_UHD_STANDARD(__s__) || NTV2_IS_4K_STANDARD(__s__))
+#define NTV2_IS_2K1080_STANDARD(__s__)			((__s__) == NTV2_STANDARD_2Kx1080p || (__s__) == NTV2_STANDARD_2Kx1080i)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2Standard	NTV2V2Standard;		///< @deprecated	Use NTV2Standard instead.
