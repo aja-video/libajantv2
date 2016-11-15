@@ -474,7 +474,7 @@
 				OTHER_LDFLAGS = (
 					"-lajaanc",
 					"-lclassesd",
-					"-lajastuffd",
+					"-lajabased",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ../../../bin;
@@ -492,7 +492,7 @@
 				OTHER_LDFLAGS = (
 					"-lajaanc",
 					"-lclasses",
-					"-lajastuff",
+					"-lajabase",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ../../../bin;

@@ -1130,7 +1130,7 @@
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
 					"-lajantv2d",
-					"-lajastuffd",
+					"-lajabased",
 				);
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;
@@ -1174,7 +1174,7 @@
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
 					"-lajantv2",
-					"-lajastuff",
+					"-lajabase",
 				);
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;
