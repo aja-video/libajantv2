@@ -762,8 +762,6 @@ void QAPlayer::Route4kOutputSignal()
 			mDevice.SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceYCbCr);
 			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
 		}
-		else
-			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_DISABLE);
 	}	//	if isRGB
 	else if (mConfig.channel == NTV2_CHANNEL1)
 	{
@@ -799,8 +797,6 @@ void QAPlayer::Route4kOutputSignal()
 			mDevice.SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceYCbCr);
 			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
 		}
-		else
-			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_DISABLE);
 	}	//	else YUV
 	else if (isRGB && mConfig.channel == NTV2_CHANNEL5)
 	{
@@ -843,8 +839,6 @@ void QAPlayer::Route4kOutputSignal()
 			mDevice.SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceYCbCr);
 			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
 		}
-		else
-			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_DISABLE);
 	}
 	else
 	{
@@ -879,8 +873,6 @@ void QAPlayer::Route4kOutputSignal()
 			mDevice.SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceYCbCr);
 			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
 		}
-		else
-			mDevice.SetHDMIV2Mode(NTV2_HDMI_V2_4K_DISABLE);
 	}
 
 
