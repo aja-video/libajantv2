@@ -327,49 +327,41 @@ void NTV2FrameGrabber::run (void)
 	QImage *	images [2]	= {&imageEven, &imageOdd};
 	ULWord		framesCaptured	(0);
 
-    // Make sure all Bidirectionals are set to Inputs.
-    if (mNTV2Card.Open (mBoardNumber, false))
-    {
-        if (!mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
-        {
-            //We have not acquired the board continue until something changes
-            qDebug ("Could not acquire board number %d", GetDeviceIndex ());
-            mNTV2Card.Close ();
-            mDeviceID = DEVICE_ID_NOTFOUND;
-        }
-        else
-        {
+	// Make sure all Bidirectionals are set to Inputs.
+	if (mNTV2Card.Open (mBoardNumber, false))
+	{
+		if (!mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
+		{
+			//	We have not acquired the board continue until something changes...
+			qDebug ("Could not acquire board number %d", GetDeviceIndex ());
+			mNTV2Card.Close ();
+			mDeviceID = DEVICE_ID_NOTFOUND;
+		}
+		else
+		{
+			mNTV2Card.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
+			mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
-            mNTV2Card.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
-            mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
-
-            if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID ())	)		//	If device has bidirectional SDI connectors...
-            {
-                bool waitForInput = false;
-                for (unsigned offset (0);  offset < 8;  offset++)
-                {
-                    mNTV2Card.EnableChannel (NTV2Channel (offset));
-                    bool outputEnabled;
-                    mNTV2Card.GetSDITransmitEnable(NTV2Channel (offset),&outputEnabled);
-                    if (outputEnabled == true)
-                    {
-                        waitForInput = true;
-                        mNTV2Card.SetSDITransmitEnable(NTV2Channel (offset),false);
-                    }
-                }
-                // Only if we had to change an output to input do we need to wait.
-                if (waitForInput)
-                {
-                    for (unsigned ndx (0);  ndx < 10;  ndx++)
-                        mNTV2Card.WaitForInputVerticalInterrupt (mChannel);	//	...and give the device some time to lock to a signal
-                }
-
-            }
-        }
-
-
-    }
-
+			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID ()))		//	If device has bidirectional SDI connectors...
+			{
+				bool waitForInput = false;
+				for (unsigned offset (0);  offset < 8;  offset++)
+				{
+					mNTV2Card.EnableChannel (NTV2Channel(offset));
+					bool outputEnabled;
+					mNTV2Card.GetSDITransmitEnable (NTV2Channel(offset), &outputEnabled);
+					if (outputEnabled)
+					{
+						waitForInput = true;
+						mNTV2Card.SetSDITransmitEnable (NTV2Channel(offset), false);
+					}
+				}
+				// Only if we had to change an output to input do we need to wait.
+				if (waitForInput)
+					mNTV2Card.WaitForInputVerticalInterrupt (mChannel, 10);	//	...and give the device some time to lock to a signal
+			}
+		}
+	}
 
 	while (true)
 	{
@@ -388,10 +380,8 @@ void NTV2FrameGrabber::run (void)
 			continue;
 		}
 
-
 		if (mRestart)
 		{
-
 			gMutex.lock ();
 				StopAutoCirculate ();
 				if (mNTV2Card.IsOpen ())
@@ -403,13 +393,12 @@ void NTV2FrameGrabber::run (void)
 				}
 			gMutex.unlock ();
 
-
 			if (mNTV2Card.Open (mBoardNumber, false))
 			{
 				if (!mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
 				{
 					//We have not acquired the board continue until something changes
-					qDebug ("Could not acquire board number %d", GetDeviceIndex ());
+					qDebug() << "Could not acquire board number " << GetDeviceIndex();
 					mNTV2Card.Close ();
 					mDeviceID = DEVICE_ID_NOTFOUND;
 					msleep (500);
@@ -430,12 +419,12 @@ void NTV2FrameGrabber::run (void)
 				}
 				else if (SetupInput ())
 				{
-                    gMutex.lock ();
+					gMutex.lock ();
 						StopAutoCirculate ();
-                        ULWord numFrameBuffersAvailable = (NTV2DeviceGetNumberFrameBuffers(mDeviceID) - NTV2DeviceGetNumAudioSystems(mDeviceID));
-                        ULWord startFrameBuffer = (numFrameBuffersAvailable/NTV2DeviceGetNumFrameStores(mDeviceID))*(ULWord)mChannel;
-                        mNTV2Card.AutoCirculateInitForInput (mChannel, 8, ::NTV2ChannelToAudioSystem (mChannel),
-                                                            AUTOCIRCULATE_WITH_RP188 ,1,startFrameBuffer,(startFrameBuffer+7));
+						ULWord numFrameBuffersAvailable = (::NTV2DeviceGetNumberFrameBuffers (mDeviceID) - ::NTV2DeviceGetNumAudioSystems (mDeviceID));
+						ULWord startFrameBuffer = (numFrameBuffersAvailable / ::NTV2DeviceGetNumFrameStores (mDeviceID)) * ULWord(mChannel);
+						mNTV2Card.AutoCirculateInitForInput (mChannel, 0, ::NTV2ChannelToAudioSystem (mChannel),
+															AUTOCIRCULATE_WITH_RP188, 1, startFrameBuffer, startFrameBuffer+7);
 					gMutex.unlock ();
 					SetupAudio ();
 					if (mAudioOutput)
@@ -458,7 +447,7 @@ void NTV2FrameGrabber::run (void)
 			}	//	if board opened ok
 			else
 			{
-				qDebug () << "## WARNING:  Open failed for device " << GetDeviceIndex ();
+				qDebug() << "## WARNING:  Open failed for device " << GetDeviceIndex ();
 				msleep (200);
 				continue;
 			}
@@ -549,25 +538,24 @@ bool NTV2FrameGrabber::SetupInput (void)
 		mChannel = NTV2_CHANNEL1;
 	mTimeCodeSource = ::NTV2InputSourceToTimecodeIndex (mInputSource);
 
-    bool waitForInput= false;
-    if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID ())	)		//	If device has bidirectional SDI connectors...
-    {
+	bool waitForInput= false;
+	if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))		//	If device has bidirectional SDI connectors...
+	{
+		for (unsigned offset (0);  offset < 4;  offset++)
+		{
+			mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
+			bool outputEnabled;
+			mNTV2Card.GetSDITransmitEnable(NTV2Channel (mChannel + offset),&outputEnabled);
+			if (outputEnabled == true)
+			{
+				waitForInput = true;
+				mNTV2Card.SetSDITransmitEnable (NTV2Channel (mChannel + offset),false);
+			}
+		}
+	}
 
-        for (unsigned offset (0);  offset < 4;  offset++)
-        {
-            mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
-            bool outputEnabled;
-            mNTV2Card.GetSDITransmitEnable(NTV2Channel (mChannel + offset),&outputEnabled);
-            if (outputEnabled == true)
-            {
-                waitForInput = true;
-                mNTV2Card.SetSDITransmitEnable(NTV2Channel (mChannel + offset),false);
-            }
-        }
-    }
-
-    // Only if we had to change an output to input do we need to wait.
-    if (waitForInput)
+	// Only if we had to change an output to input do we need to wait.
+	if (waitForInput)
 	{
 		for (unsigned ndx (0);  ndx < 10;  ndx++)
 			mNTV2Card.WaitForInputVerticalInterrupt (mChannel);	//	...and give the device some time to lock to a signal
@@ -692,7 +680,7 @@ bool NTV2FrameGrabber::CheckForValidInput (void)
 
 }	//	CheckForValidInput
 
-//NTV2InputSource
+
 NTV2VideoFormat NTV2FrameGrabber::GetVideoFormatFromInputSource (void)
 {
 	NTV2VideoFormat	videoFormat	(NTV2_FORMAT_UNKNOWN);
@@ -705,9 +693,9 @@ NTV2VideoFormat NTV2FrameGrabber::GetVideoFormatFromInputSource (void)
 		case NTV2_INPUTSOURCE_SDI5:
 		{
 			const ULWord	ndx	(::GetIndexForNTV2InputSource (mInputSource));
-            videoFormat = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 0));
+			videoFormat = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 0));
 			NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (videoFormat));
-            if (mCheckFor4K  &&  (videoStandard == NTV2_STANDARD_1080p ))
+			if (mCheckFor4K  &&  (videoStandard == NTV2_STANDARD_1080p))
 			{
 				NTV2VideoFormat	videoFormatNext	(mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 1)));
 				if (videoFormatNext == videoFormat)
