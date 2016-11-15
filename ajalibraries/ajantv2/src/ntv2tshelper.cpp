@@ -68,7 +68,6 @@ CNTV2TsHelper::CNTV2TsHelper()
     gen_template.ss = 27;
     gen_template.ff = 23;
     gen_template.bcol_colcr = 0;
-    frm_cnt = 0;
     
     adaptation_template.do_pcr = 0;
     
@@ -120,8 +119,6 @@ CNTV2TsHelper::CNTV2TsHelper()
     auf2_offset = -1;
     adaptation_template_length = -1;
     payload_params = 0;
-    ts_bitrate = 80e6;
-    sys_clk = 125e6;
     ts_gen_tc = 0;
     pat_pmt_period = 0;	// don't send
     pmt_program_number = 0;
@@ -162,7 +159,6 @@ int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, uint32_t width, ui
     pmt_tables[1].stream_descriptors[0].j2k_channel_num = 0;
     pmt_tables[1].stream_descriptors[0].elementary_pid  = 0x101;
     pmt_tables[1].used = 1;
-    num_progs = 1;
     
     // Set up J2K Descriptor
     if (streamType == kJ2KStreamTypeEvertz)
@@ -271,48 +267,48 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
         pes_template.payload[w1] = 0;
     pes_template.pts = 0;
     pes_template.continuity_counter = 0;
-    
-    ts_packet_bin[0] = 0x47;
-    ts_packet_bin[1] = (uint8_t) (pes_template.transport_error << 7);
-    ts_packet_bin[1] |= (uint8_t) (pes_template.payload_unit_start << 6);
-    ts_packet_bin[1] |= (uint8_t) (pes_template.transport_priority << 5);
-    ts_packet_bin[1] |= (uint8_t) ((pes_template.pid >> 8) & 0x1f);
-    ts_packet_bin[2] = (uint8_t) (pes_template.pid & 0xff);
-    ts_packet_bin[3] = (uint8_t) (pes_template.transport_scrambling_control << 6);
-    ts_packet_bin[3] |= (uint8_t) (pes_template.adaptation_field_control << 4);
-    ts_packet_bin[3] |= (uint8_t) (pes_template.continuity_counter & 0xf);
+
+    pes_template.payload[0] = 0x47;
+    pes_template.payload[1] = (uint8_t) (pes_template.transport_error << 7);
+    pes_template.payload[1] |= (uint8_t) (pes_template.payload_unit_start << 6);
+    pes_template.payload[1] |= (uint8_t) (pes_template.transport_priority << 5);
+    pes_template.payload[1] |= (uint8_t) ((pes_template.pid >> 8) & 0x1f);
+    pes_template.payload[2] = (uint8_t) (pes_template.pid & 0xff);
+    pes_template.payload[3] = (uint8_t) (pes_template.transport_scrambling_control << 6);
+    pes_template.payload[3] |= (uint8_t) (pes_template.adaptation_field_control << 4);
+    pes_template.payload[3] |= (uint8_t) (pes_template.continuity_counter & 0xf);
     bpnt = 4;
-    
+
     // PES Header
     if (pes_template.payload_unit_start)
     {
-        ts_packet_bin[4] = (uint8_t) ((pes_template.packet_start_code_prefix >> 16) & 0xff);
-        ts_packet_bin[5] = (uint8_t) ((pes_template.packet_start_code_prefix >> 8) & 0xff);
-        ts_packet_bin[6] = (uint8_t) (pes_template.packet_start_code_prefix & 0xff);
-        ts_packet_bin[7] = (uint8_t) (pes_template.stream_id);
-        ts_packet_bin[8] = (uint8_t) ((pes_template.pes_packet_length >> 8) & 0xff);
-        ts_packet_bin[9] = (uint8_t) (pes_template.pes_packet_length & 0xff);
-        ts_packet_bin[10] = 0x80;
-        ts_packet_bin[10] |= (uint8_t) (pes_template.pes_scrambling_control << 4);
-        ts_packet_bin[10] |= (uint8_t) (pes_template.pes_priority << 3);
-        ts_packet_bin[10] |= (uint8_t) (pes_template.data_alignment_indicator << 2);
-        ts_packet_bin[10] |= (uint8_t) (pes_template.copyright << 1);
-        ts_packet_bin[10] |= (uint8_t) (pes_template.original_copy);
-        ts_packet_bin[11] = (uint8_t) (pes_template.flags_7);
-        ts_packet_bin[12] = (uint8_t) (pes_template.pes_data_header_length);
+        pes_template.payload[4] = (uint8_t) ((pes_template.packet_start_code_prefix >> 16) & 0xff);
+        pes_template.payload[5] = (uint8_t) ((pes_template.packet_start_code_prefix >> 8) & 0xff);
+        pes_template.payload[6] = (uint8_t) (pes_template.packet_start_code_prefix & 0xff);
+        pes_template.payload[7] = (uint8_t) (pes_template.stream_id);
+        pes_template.payload[8] = (uint8_t) ((pes_template.pes_packet_length >> 8) & 0xff);
+        pes_template.payload[9] = (uint8_t) (pes_template.pes_packet_length & 0xff);
+        pes_template.payload[10] = 0x80;
+        pes_template.payload[10] |= (uint8_t) (pes_template.pes_scrambling_control << 4);
+        pes_template.payload[10] |= (uint8_t) (pes_template.pes_priority << 3);
+        pes_template.payload[10] |= (uint8_t) (pes_template.data_alignment_indicator << 2);
+        pes_template.payload[10] |= (uint8_t) (pes_template.copyright << 1);
+        pes_template.payload[10] |= (uint8_t) (pes_template.original_copy);
+        pes_template.payload[11] = (uint8_t) (pes_template.flags_7);
+        pes_template.payload[12] = (uint8_t) (pes_template.pes_data_header_length);
         pts_offset = 13;
-        ts_packet_bin[13] = 0x21;
-        ts_packet_bin[14] = 0x0;
-        ts_packet_bin[15] = 0x1;
-        ts_packet_bin[16] = 0x0;
-        ts_packet_bin[17] = 0x1;
-        ts_packet_bin[13] |= (uint8_t) ((pes_template.pts >> 29) & 0xe);
-        ts_packet_bin[14] |= (uint8_t) ((pes_template.pts >> 22) & 0xff);
-        ts_packet_bin[15] |= (uint8_t) ((pes_template.pts >> 14) & 0xfe);
-        ts_packet_bin[16] |= (uint8_t) ((pes_template.pts >> 7) & 0xff);
-        ts_packet_bin[17] |= (uint8_t) ((pes_template.pts << 1) & 0xfe);
+        pes_template.payload[13] = 0x21;
+        pes_template.payload[14] = 0x0;
+        pes_template.payload[15] = 0x1;
+        pes_template.payload[16] = 0x0;
+        pes_template.payload[17] = 0x1;
+        pes_template.payload[13] |= (uint8_t) ((pes_template.pts >> 29) & 0xe);
+        pes_template.payload[14] |= (uint8_t) ((pes_template.pts >> 22) & 0xff);
+        pes_template.payload[15] |= (uint8_t) ((pes_template.pts >> 14) & 0xfe);
+        pes_template.payload[16] |= (uint8_t) ((pes_template.pts >> 7) & 0xff);
+        pes_template.payload[17] |= (uint8_t) ((pes_template.pts << 1) & 0xfe);
         bpnt = 18;
-        
+
         esh[0] = 0x65;
         esh[1] = 0x6c;
         esh[2] = 0x73;
@@ -389,21 +385,17 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
         if (pes_template.interlaced_video)
         {
             for (w5 = 0; w5 < 48; w5++)
-                ts_packet_bin[bpnt++] = esh[w5];
+                pes_template.payload[bpnt++] = esh[w5];
         }
         else
         {
             for (w5 = 0; w5 < 38; w5++)
-                ts_packet_bin[bpnt++] = esh[w5];
+                pes_template.payload[bpnt++] = esh[w5];
         }
     }
-    
-    // Move data pack to payload field
-    for (w1 = 0; w1 < 188; w1++)
-        pes_template.payload[w1] = ts_packet_bin[w1];
-    
+
     pes_template_len = bpnt;
-    
+
     return 0;
 }
 
@@ -477,41 +469,37 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
         adaptation_template.payload[w1] = 0xff;	// Stuffing
     adaptation_template.continuity_counter = 0;
     
-    ts_packet_int[0] = 0x47;
-    ts_packet_int[1] = (adaptation_template.transport_error << 7);
-    ts_packet_int[1] |= (adaptation_template.payload_unit_start << 6);
-    ts_packet_int[1] |= (adaptation_template.transport_priority << 5);
-    ts_packet_int[1] |= ((adaptation_template.pid >> 8) & 0x1f);
-    ts_packet_int[2] = (adaptation_template.pid & 0xff);
-    ts_packet_int[3] = (adaptation_template.transport_scrambling_control << 6);
-    ts_packet_int[3] |= (adaptation_template.adaptation_field_control << 4);
-    ts_packet_int[3] |= (adaptation_template.continuity_counter & 0xf);
+    adaptation_template.int_payload[0] = 0x47;
+    adaptation_template.int_payload[1] = (adaptation_template.transport_error << 7);
+    adaptation_template.int_payload[1] |= (adaptation_template.payload_unit_start << 6);
+    adaptation_template.int_payload[1] |= (adaptation_template.transport_priority << 5);
+    adaptation_template.int_payload[1] |= ((adaptation_template.pid >> 8) & 0x1f);
+    adaptation_template.int_payload[2] = (adaptation_template.pid & 0xff);
+    adaptation_template.int_payload[3] = (adaptation_template.transport_scrambling_control << 6);
+    adaptation_template.int_payload[3] |= (adaptation_template.adaptation_field_control << 4);
+    adaptation_template.int_payload[3] |= (adaptation_template.continuity_counter & 0xf);
     bpnt = 4;
-    ts_packet_int[4] = (adaptation_template.adaptation_field_length);
-    ts_packet_int[5] = (adaptation_template.discontinuity_indicator << 7);
-    ts_packet_int[5] |= (adaptation_template.random_access_indicator << 6);
-    ts_packet_int[5] |= (adaptation_template.elementery_stream_priority_indicator << 5);
-    ts_packet_int[5] |= (adaptation_template.flags_5);
+    adaptation_template.int_payload[4] = (adaptation_template.adaptation_field_length);
+    adaptation_template.int_payload[5] = (adaptation_template.discontinuity_indicator << 7);
+    adaptation_template.int_payload[5] |= (adaptation_template.random_access_indicator << 6);
+    adaptation_template.int_payload[5] |= (adaptation_template.elementery_stream_priority_indicator << 5);
+    adaptation_template.int_payload[5] |= (adaptation_template.flags_5);
     bpnt = 6;
     
     if (adaptation_template.do_pcr)
     {
-        ts_packet_int[6] = 0x800;
-        ts_packet_int[7] = 0x900;
-        ts_packet_int[8] = 0xa00;
-        ts_packet_int[9] = 0xb00;
-        ts_packet_int[10] = 0xc00;
-        ts_packet_int[11] = 0xd00;
+        adaptation_template.int_payload[6] = 0x800;
+        adaptation_template.int_payload[7] = 0x900;
+        adaptation_template.int_payload[8] = 0xa00;
+        adaptation_template.int_payload[9] = 0xb00;
+        adaptation_template.int_payload[10] = 0xc00;
+        adaptation_template.int_payload[11] = 0xd00;
         bpnt = 12;
     }
     
     for (w1 = bpnt; w1 < 188; w1++)
-        ts_packet_int[w1] = 0xff;
-    
-    // Move data pack to payload field
-    for (w1 = 0; w1 < 188; w1++)
-        adaptation_template.int_payload[w1] = ts_packet_int[w1];
-    
+        adaptation_template.int_payload[w1] = 0xff;
+        
     adaptation_template_length = bpnt;
     
     return 0;
@@ -532,9 +520,9 @@ int32_t CNTV2TsHelper::set_time_regs(void)
     double d1, d2;
     
     // First packet rate
-    d1 = ts_bitrate / 8.0 / 188.0;      // Packet Rate
+    d1 = 80000000 / 8.0 / 188.0;        // Packet Rate
     d1 = 1.0 / d1;                      // Packet Period
-    d2 = 1.0 / sys_clk;                 // Clock Period
+    d2 = 1.0 / 125000000;               // Clock Period
     d1 = d1 / d2 - 1.0;                 // One less as it counts from 0
     
     ts_gen_tc = (int32_t) d1;

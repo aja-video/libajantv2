@@ -12,10 +12,10 @@
 
 #include <stdint.h>
 
-#define MAX_PROGS                   16
-#define MAX_STREAM_DESCRIPTORS      16
-#define NUM_J2K_CHANNELS            16
-#define PID_LIST_SIZE               256
+#define MAX_PROGS                   2
+#define MAX_STREAM_DESCRIPTORS      8
+#define NUM_J2K_CHANNELS            4
+#define PID_LIST_SIZE               32
 
 typedef enum
 {
@@ -235,7 +235,6 @@ public:
     
     pat_table_type              pat_table[256];             // Up to 256 Sections
     pmt_table                   pmt_tables[MAX_PROGS];
-    int32_t                     num_progs;
     int32_t                     pmt_program_number;
     int32_t                     j2k_channel_cnt;
     j2k_vid_descriptor_type     j2k_vid_descriptors[NUM_J2K_CHANNELS];
@@ -254,12 +253,9 @@ public:
     int32_t                     fbw_total_packets;          // Packet counter
     
     double                      table_tx_period;
-    double                      ts_bitrate;                 // in bps
-    double                      sys_clk;                    // in Hz
     
     int32_t                     ts_gen_tc;                  // TS Packet Generation Period register
     int32_t                     pat_pmt_period;             // Period of transmission register
-    int32_t                     frm_cnt;
     
 private:
     
@@ -267,9 +263,6 @@ private:
     int32_t                     bytes32(uint32_t src, uint8_t *dest);
     uint32_t                    chksum_crc32(uint8_t *data, int32_t len);
     int32_t                     search_pid_list(int32_t pid);
-    
-    uint8_t                     ts_packet_bin[188];
-    int32_t                     ts_packet_int[188];
 };
 
 #endif
