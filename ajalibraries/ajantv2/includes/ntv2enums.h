@@ -921,8 +921,10 @@ typedef enum
 typedef enum
 {
 	#if defined (NTV2_DEPRECATE)
-		NTV2_INPUTSOURCE_ANALOG,
-		NTV2_INPUTSOURCE_HDMI,
+		NTV2_INPUTSOURCE_ANALOG1,
+		NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	//	Might deprecate this someday
+		NTV2_INPUTSOURCE_HDMI1,
+		NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	//	Might deprecate this someday
 		NTV2_INPUTSOURCE_SDI1,
 		NTV2_INPUTSOURCE_SDI2,
 		NTV2_INPUTSOURCE_SDI3,
@@ -3326,11 +3328,11 @@ typedef enum
 
 /**
 	@brief	These enum values are indexes into the capture/playout AutoCirculate timecode arrays
-			(see AUTOCIRCULATE_TRANSFER's GetInputTimeCode and SetOutputTimeCode methods).
+			(see AUTOCIRCULATE_TRANSFER::GetInputTimeCode and AUTOCIRCULATE_TRANSFER::SetOutputTimeCode methods).
 **/
 typedef enum
 {
-	NTV2_TCINDEX_DEFAULT,		///< @brief	The "default" timecode
+	NTV2_TCINDEX_DEFAULT,		///< @brief	The "default" timecode (mostly used by the AJA "Retail" service and Control Panel)
 	NTV2_TCINDEX_SDI1,			///< @brief	SDI 1 embedded VITC
 	NTV2_TCINDEX_SDI2,			///< @brief	SDI 2 embedded VITC
 	NTV2_TCINDEX_SDI3,			///< @brief	SDI 3 embedded VITC
