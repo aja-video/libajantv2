@@ -1645,16 +1645,17 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 {
 	NTV2RegisterValueMap	regValues;
+	uint32_t				missingTally (0);
 	if (!GetRegisterValues (regValues))
 		return false;
 	for (NTV2RegisterReadsIter it (outValues.begin());  it != outValues.end();  ++it)
 	{
 		NTV2RegValueMapConstIter	mapIter	(regValues.find (it->registerNumber));
 		if (mapIter == regValues.end())
-			return false;	//	Missing register
+			missingTally++;	//	Missing register
 		it->registerValue = mapIter->second;
 	}
-	return true;
+	return missingTally == 0;
 }
 
 

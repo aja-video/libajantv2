@@ -233,17 +233,12 @@ AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inV
 	AJAExport NTV2V2Standard	GetHdmiV2StandardFromVideoFormat (NTV2VideoFormat videoFormat);
 #endif
 
-/**
-	@return		The minimum number of bytes required to store a single frame of video in the given frame buffer format
-				having the given video format, including VANC lines, if any.
-	@param[in]	inVideoFormat	Specifies the video format.
-	@param[in]	inFBFormat		Specifies the frame buffer format.
-	@param[in]	inVANCenabled	Optionally specifies if VANC is enabled or not. Defaults to false.
-	@param[in]	inWideVANC		Optionally specifies if the "taller" VANC geometry is enabled or not.
-								(Ignored if the inVANCenabled parameter is false.) Defaults to false.
-**/
-AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
-									const bool inVANCenabled = false, const bool inWideVANC = false);
+#if !defined (NTV2_DEPRECATE_12_6)
+	AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
+										const bool inVANCenabled = false, const bool inWideVANC = false);
+	AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
+										const bool inVANCenabled, const bool inWideVANC);
+#endif	//	NTV2_DEPRECATE_12_6
 
 /**
 	@return		The minimum number of bytes required to store a single frame of video in the given frame buffer format
@@ -256,18 +251,6 @@ AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
 									const NTV2FrameBufferFormat inFBFormat,
 									const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
-/**
-	@brief		Identical to the ::GetVideoActiveSize function, except rounds the result up to the nearest 4096-byte multiple.
-	@return		The number of bytes required to store a single frame of video in the given frame buffer format
-				having the given video format, including VANC lines, if any, rounded up to the nearest 4096-byte multiple.
-	@param[in]	inVideoFormat	Specifies the video format.
-	@param[in]	inFBFormat		Specifies the frame buffer format.
-	@param[in]	inVANCenabled	Specifies if VANC is enabled or not. Defaults to false.
-	@param[in]	inWideVANC		Specifies if the "taller" VANC geometry is enabled or not.
-								(Ignored if the inVANCenabled parameter is false.) Defaults to false.
-**/
-AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
-									const bool inVANCenabled, const bool inWideVANC);
 
 /**
 	@brief		Identical to the ::GetVideoActiveSize function, except rounds the result up to the nearest 4096-byte multiple.
@@ -686,7 +669,7 @@ typedef struct NTV2FormatDescriptor
 	ULWord	numLines;			///< @brief	Height -- total number of lines
 	ULWord	numPixels;			///< @brief	Width -- total number of pixels per line
 	ULWord	linePitch;			///< @brief	Number of 32-bit words per line
-	ULWord	firstActiveLine;	///< @brief	First active line of video (0 if vanc not enabled)
+	ULWord	firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
 
 	/**
 		@brief	My default constructor initializes me in an "invalid" state.
@@ -743,6 +726,7 @@ typedef struct NTV2FormatDescriptor
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && linePitch;}		///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}						///< @return	True if VANC geometry;  otherwise false.
+	inline bool		IsPlanar (void) const				{return NTV2_IS_FBF_PLANAR (mPixelFormat);}			///< @return	True if planar format;  otherwise false.
 	inline ULWord	GetTotalRasterBytes (void) const	{return numLines * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold the raster.
 	inline ULWord	GetVisibleRasterBytes (void) const	{return (numLines - firstActiveLine) * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold only the visible raster.
 	inline ULWord	GetBytesPerRow (void) const			{return linePitch * sizeof (ULWord);}				///< @return	The number of bytes per raster row.
@@ -849,6 +833,8 @@ typedef struct NTV2FormatDescriptor
 		NTV2FrameBufferFormat	mPixelFormat;	///< @brief	My originating frame buffer format
 		NTV2VANCMode			mVancMode;		///< @brief	My originating VANC mode
 		bool					m2Kby1080;		///< @brief	My originating 2Kx1080 setting
+		ULWord					mLinePitch[4];	///< @brief	Number of 32-bit words per line for other planes
+		UWord					mNumPlanes;		///< @brief	Number of planes
 
 } NTV2FormatDescriptor;
 
@@ -1071,6 +1057,8 @@ typedef NTV2StringList::const_iterator	NTV2StringListConstIter;
 typedef std::set <std::string>			NTV2StringSet;
 typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
 
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
+
 //	Register classifier keys
 #define	kRegClass_NULL		std::string ()
 #define	kRegClass_Audio		std::string ("kRegClass_Audio")
@@ -1099,6 +1087,7 @@ typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
 #define	kRegClass_Channel8	std::string ("kRegClass_Channel8")
 #define	kRegClass_ReadOnly	std::string ("kRegClass_ReadOnly")
 #define	kRegClass_WriteOnly	std::string ("kRegClass_WriteOnly")
+#define	kRegClass_Virtual	std::string ("kRegClass_Virtual")
 
 
 AJAExport NTV2RegisterReads	FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
@@ -1147,7 +1136,12 @@ class AJAExport CNTV2RegisterExpert
 		/**
 			@return		A set of strings containing the names of all known register classes.
 		**/
-		static NTV2StringSet	GetRegisterClasses (void);
+		static NTV2StringSet	GetAllRegisterClasses (void);
+
+		/**
+			@return		A set of strings containing the names of all register classes the given register belongs to.
+		**/
+		static NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum);
 
 		/**
 			@param[in]	inClassName	Specifies the register class.
@@ -1163,11 +1157,13 @@ class AJAExport CNTV2RegisterExpert
 		static NTV2RegNumSet	GetRegistersForChannel	(const NTV2Channel inChannel);
 
 		/**
-			@param[in]	inDeviceID	Specifies a valid NTV2DeviceID.
+			@param[in]	inDeviceID			Specifies a valid NTV2DeviceID.
+			@param[in]	inIncludeVirtuals	Specify true to include virtual registers;  otherwise virtual registers
+											will be excluded (the default).
 			@return		A set of register numbers that are legal for the device having the given NTV2DeviceID.
 						Will be empty if an invalid NTV2DeviceID is specified.
 		**/
-		static NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID);
+		static NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals = false);
 
 		/**
 			@param[in]	inName			Specifies a non-empty string that contains all or part of a register name.
