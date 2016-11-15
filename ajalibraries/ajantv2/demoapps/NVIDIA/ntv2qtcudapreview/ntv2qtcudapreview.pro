@@ -123,7 +123,7 @@ unix:!macx {
 	QMAKE_LIBDIR += $$AJA_API/gpustuff/lib/linux/lib64
 	QMAKE_CLEAN += $$DESTDIR/$$TARGET $$NTV2_DIR/../bin/$$TARGET
 
-	makeextra.commands  = make -C $$AJA_API/ajastuff/build
+	makeextra.commands  = make -C $$AJA_API/ajabase/build
 	makeextra.commands += && make -f Makefile.cuda -C $$AJA_API/gpustuff
 	makeextra.commands += && make -C $$NTV2_DIR/classes
 	QMAKE_EXTRA_TARGETS += makeextra
@@ -147,8 +147,8 @@ build_pass:CONFIG(release, debug|release) {
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_CFLAGS += -g
 			QMAKE_CXXFLAGS += -g
-			LIBS += -Wl,-Bstatic -laja -lajastuffd -lcudaclassesd -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabased -lcudaclassesd -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -157,8 +157,8 @@ build_pass:CONFIG(release, debug|release) {
 			OBJECTS_DIR -= release
 			OBJECTS_DIR += debug
 		} else {
-			LIBS += -Wl,-Bstatic -laja -lajastuff -lcudaclasses -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabase -lcudaclasses -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -183,16 +183,16 @@ build_pass:CONFIG(release, debug|release) {
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_CFLAGS += -g
 			QMAKE_CXXFLAGS += -g
-			LIBS += -Wl,-Bstatic -laja -lajastuffd -lcudaclassesd -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabased -lcudaclassesd -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
 			QMAKE_EXTRA_TARGETS += makeajalib
 			PRE_TARGETDEPS += makeajalib
 		} else {
-			LIBS += -Wl,-Bstatic -laja -lajastuff -lcudaclasses -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabase -lcudaclasses -ldvp -Wl,-Bdynamic -lGLU -lGLEW -lX11 -lXext -lrt -ldl
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -220,8 +220,8 @@ RESOURCES += ntv2qtcudapreview.qrc
 
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajastuffdll_64
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajastuffdll_64d
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajabasedll_64
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajabasedll_64d
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lclassesDLL_64
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lclassesDLL_64d

@@ -8,10 +8,10 @@
 #define NTV2QtOglDPXPlayback_H
 
 #include <QtGui/QDialog>
-#include "ajastuff/common/public.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/timer.h"
+#include "ajabase/common/public.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/timer.h"
 
 #include "ntv2ogldpxreader.h"
 #include "ntv2ogloutput.h"

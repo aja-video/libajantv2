@@ -17,7 +17,7 @@
 #include <iomanip>
 #include "ntv2devicefeatures.h"
 #if defined (USE_AJALOCK)
-	#include "ajastuff/system/lock.h"
+	#include "ajabase/system/lock.h"
 	typedef AJALock		PMutex;
 	typedef AJAAutoLock	PThreadLocker;
 #else

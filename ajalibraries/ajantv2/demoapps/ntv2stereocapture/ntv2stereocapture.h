@@ -18,13 +18,13 @@
 #include "ntv2devicescanner.h"
 #include "ntv2task.h"
 #include "ntv2utils.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/videotypes.h"
-#include "ajastuff/common/buffer.h"
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/common/buffer.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 
 
 /**

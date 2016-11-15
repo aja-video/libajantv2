@@ -12,10 +12,10 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/testpatterngen.h"
-#include "ajastuff/common/videotypes.h"
-#include "ajastuff/system/process.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/testpatterngen.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/system/process.h"
 
 
 /**

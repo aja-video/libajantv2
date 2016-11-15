@@ -11,7 +11,7 @@
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include "audiodefines.h"
-#include "ajastuff/common/circularbuffer.h"
+#include "ajabase/common/circularbuffer.h"
 
 #include "ntv2texture.h"
 #include "ntv2rendertotexture.h"

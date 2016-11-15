@@ -10,7 +10,7 @@
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ajaexport.h"
-#include "ajastuff/common/common.h"
+#include "ajabase/common/common.h"
 #include <sstream>
 
 

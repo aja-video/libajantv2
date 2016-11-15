@@ -7,8 +7,8 @@
 
 
 //	Includes
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/options_popt.h"
 #include "ntv2outputtestpattern.h"
 #include <iostream>
 #include <iomanip>

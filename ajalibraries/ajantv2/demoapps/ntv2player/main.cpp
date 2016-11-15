@@ -8,12 +8,12 @@
 //	Includes
 #include "ajatypes.h"
 #include "ntv2utils.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include "ntv2player.h"
 #include <signal.h>
 #include <iostream>
 #include <iomanip>
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/systemtime.h"
 
 
 //	Globals

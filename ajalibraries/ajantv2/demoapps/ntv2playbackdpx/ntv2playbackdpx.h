@@ -3,8 +3,8 @@
 
 
 
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/buffer.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/buffer.h"
 
 #include "ntv2enums.h"
 #include "ntv2card.h"

@@ -128,7 +128,7 @@
     <ClInclude Include="AJA_Logo_Small.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ajaapi\ajastuff\build\ajastuffdll_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\ajaapi\ajabase\build\ajabasedll_vs12.vcxproj">
       <Project>{733755c5-1cf3-489b-81d5-ecd353029782}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\classes\classesDLL_vs12.vcxproj">

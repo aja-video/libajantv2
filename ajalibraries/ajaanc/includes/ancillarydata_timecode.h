@@ -7,8 +7,8 @@
 #ifndef AJA_ANCILLARYDATA_TIMECODE_H
 #define AJA_ANCILLARYDATA_TIMECODE_H
 
-#include "ajastuff/common/timecode.h"
-#include "ajastuff/common/timebase.h"
+#include "ajabase/common/timecode.h"
+#include "ajabase/common/timebase.h"
 #include "ancillarydatafactory.h"
 #include "ancillarydata.h"
 

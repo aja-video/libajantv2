@@ -10,8 +10,8 @@
 
 //	Includes
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/options_popt.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2ccplayer.h"
 #include <signal.h>
 #include <iostream>

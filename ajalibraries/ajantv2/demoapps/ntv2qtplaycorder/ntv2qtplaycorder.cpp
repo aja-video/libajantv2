@@ -18,9 +18,9 @@
 
 #include <QtDebug>
 
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/system/thread.h"
 #include "ajapreviewwidget.h"
 #include "ntv2playcorder.h"		// The worker class
 #include "ntv2qtplaycorder.h"	// The UI

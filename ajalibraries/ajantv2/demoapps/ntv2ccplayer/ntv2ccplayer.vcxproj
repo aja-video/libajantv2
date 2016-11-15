@@ -203,7 +203,7 @@
     <ClInclude Include="ntv2ccplayer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ajastuff\build\ajastuff_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\ajabase\build\ajabase_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\build\libajantv2_vs12.vcxproj">

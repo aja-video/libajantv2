@@ -9,8 +9,8 @@
 #include "ntv2encodehevcvif.h"
 #include "ntv2utils.h"
 #include "ntv2devicefeatures.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 
 #define NTV2_AUDIOSIZE_MAX		(401 * 1024)
 

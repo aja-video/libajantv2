@@ -15,7 +15,7 @@
 #include "ntv2card.h"
 #include "ntv2devicescanner.h"
 #include "ntv2framegrabber.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 
 
 const uint32_t kInvalidBoardIndexNumber	(9999);

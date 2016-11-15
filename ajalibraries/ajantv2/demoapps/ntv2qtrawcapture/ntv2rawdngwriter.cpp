@@ -8,8 +8,8 @@
 //	Includes
 #include <stdio.h>
 #include "ntv2rawdngwriter.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
 #if defined(MSWindows) || defined(AJAWindows)
 #define snprintf _snprintf
 #endif

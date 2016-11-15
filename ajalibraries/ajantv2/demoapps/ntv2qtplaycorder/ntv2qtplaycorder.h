@@ -16,7 +16,7 @@
 #endif
 #include <vector>
 
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 #include "ajapreviewwidget.h"
 #include "iplaycorder.h"
 

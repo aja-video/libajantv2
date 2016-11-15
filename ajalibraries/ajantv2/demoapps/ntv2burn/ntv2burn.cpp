@@ -7,10 +7,10 @@
 #include "ntv2burn.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/memory.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 #include <iostream>
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)

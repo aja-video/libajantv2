@@ -165,9 +165,9 @@ build_pass:CONFIG(release, debug|release) {
         QMAKE_LIBDIR += $$DESTDIR
 
         contains(QMAKE_TARGET.arch, x86_64) {
-            LIBS += -lajastuffdll_64 -lclassesdll_64
+            LIBS += -lajabasedll_64 -lclassesdll_64
         } else {
-            LIBS += -lajastuffdll -lclassesdll
+            LIBS += -lajabasedll -lclassesdll
         }
     }
 
@@ -178,12 +178,12 @@ build_pass:CONFIG(release, debug|release) {
 
         QMAKE_LIBDIR += ../../../li
 		contains(AJA_MACDEV, "Yes") {
-			include($$AJA_API/ajastuff/ajastuff_mac.pri)
+            include($$AJA_API/ajabase/ajabase_mac.pri)
 			include($$NTV2_DIR/macdriver5/build_scripts/classes_mac.pri)
 		}
 		else {
 			LIBS += -lclassesd
-			LIBS += -lajastuffd
+			LIBS += -lajabased
 		}
     }
 
@@ -192,8 +192,8 @@ build_pass:CONFIG(release, debug|release) {
         contains( DEBUG_TEST_FLAG, 1 ) {
             QMAKE_CFLAGS += -g
             QMAKE_CXXFLAGS += -g
-            LIBS += -Wl,-Bstatic -laja -lajastuffd -Wl,-Bdynamic -lrt
-            makestufflib.commands = make -C $$AJA_API/ajastuff/build
+            LIBS += -Wl,-Bstatic -laja -lajabased -Wl,-Bdynamic -lrt
+            makestufflib.commands = make -C $$AJA_API/ajabase/build
             QMAKE_EXTRA_TARGETS += makestufflib
             PRE_TARGETDEPS += makestufflib
             makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -202,8 +202,8 @@ build_pass:CONFIG(release, debug|release) {
             OBJECTS_DIR -= release
             OBJECTS_DIR += debug
         } else {
-            LIBS += -Wl,-Bstatic -laja -lajastuff -Wl,-Bdynamic -lrt
-            makestufflib.commands = make -C $$AJA_API/ajastuff/build
+            LIBS += -Wl,-Bstatic -laja -lajabase -Wl,-Bdynamic -lrt
+            makestufflib.commands = make -C $$AJA_API/ajabase/build
             QMAKE_EXTRA_TARGETS += makestufflib
             PRE_TARGETDEPS += makestufflib
             makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -226,9 +226,9 @@ else {
         QMAKE_LIBDIR += $$DESTDIR
 
         contains(QMAKE_TARGET.arch, x86_64) {
-            LIBS += -lajastuffdll_64d -lclassesdll_64d
+            LIBS += -lajabasedll_64d -lclassesdll_64d
         } else {
-            LIBS += -lajastuffdlld -lclassesdlld
+            LIBS += -lajabasedlld -lclassesdlld
         }
     }
 
@@ -239,12 +239,12 @@ else {
 
         QMAKE_LIBDIR += ../../../lib
 		contains(AJA_MACDEV, "Yes") {
-			include($$AJA_API/ajastuff/ajastuff_mac.pri)
+            include($$AJA_API/ajabase/ajabase_mac.pri)
 			include($$NTV2_DIR/macdriver5/build_scripts/classes_mac.pri)
 		}
 		else {
 			LIBS += -lclassesd
-			LIBS += -lajastuffd
+			LIBS += -lajabased
 		}
     }
 
@@ -253,16 +253,16 @@ else {
         contains( DEBUG_TEST_FLAG, 1 ) {
             QMAKE_CFLAGS += -g
             QMAKE_CXXFLAGS += -g
-            LIBS += -Wl,-Bstatic -laja -lajastuffd -Wl,-Bdynamic -lrt
-            makestufflib.commands = make -C $$AJA_API/ajastuff/build
+            LIBS += -Wl,-Bstatic -laja -lajabased -Wl,-Bdynamic -lrt
+            makestufflib.commands = make -C $$AJA_API/ajabase/build
             QMAKE_EXTRA_TARGETS += makestufflib
             PRE_TARGETDEPS += makestufflib
             makeajalib.commands = make -C $$NTV2_DIR/classes
             QMAKE_EXTRA_TARGETS += makeajalib
             PRE_TARGETDEPS += makeajalib
         } else {
-            LIBS += -Wl,-Bstatic -laja -lajastuff -Wl,-Bdynamic -lrt
-            makestufflib.commands = make -C $$AJA_API/ajastuff/build
+            LIBS += -Wl,-Bstatic -laja -lajabase -Wl,-Bdynamic -lrt
+            makestufflib.commands = make -C $$AJA_API/ajabase/build
             QMAKE_EXTRA_TARGETS += makestufflib
             PRE_TARGETDEPS += makestufflib
             makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -290,13 +290,13 @@ HEADERS += $$NTV2_DIR/democlasses/ajapreviewwidget.h
 SOURCES += $$NTV2_DIR/democlasses/ajapreviewwidget.cpp
 HEADERS += $$NTV2_DIR/democlasses/ntv2democommon.h
 
-HEADERS += $$AJA_API/ajastuff/common/circularbuffer.h
-HEADERS += $$AJA_API/ajastuff/common/types.h
-HEADERS += $$AJA_API/ajastuff/system/file_io.h
-HEADERS += $$AJA_API/ajastuff/system/memory.h
-HEADERS += $$AJA_API/ajastuff/system/process.h
-HEADERS += $$AJA_API/ajastuff/system/systemtime.h
-HEADERS += $$AJA_API/ajastuff/system/thread.h
+HEADERS += $$AJA_API/ajabase/common/circularbuffer.h
+HEADERS += $$AJA_API/ajabase/common/types.h
+HEADERS += $$AJA_API/ajabase/system/file_io.h
+HEADERS += $$AJA_API/ajabase/system/memory.h
+HEADERS += $$AJA_API/ajabase/system/process.h
+HEADERS += $$AJA_API/ajabase/system/systemtime.h
+HEADERS += $$AJA_API/ajabase/system/thread.h
 
 #resources
 RESOURCES += $$PWD/ntv2qtrawcapture.qrc

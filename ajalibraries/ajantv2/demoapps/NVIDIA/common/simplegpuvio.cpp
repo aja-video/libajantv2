@@ -1,6 +1,6 @@
 #include "simplegpuvio.h"
 #include "ntv2signalrouter.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2vpid.h"
 
 static int s_iIndexFirstSource = 0;									// source board first frame buffer index

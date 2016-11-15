@@ -7,8 +7,8 @@
 #include "ntv2firmwareinstallerthread.h"
 #include "ntv2bitfile.h"
 #include "ntv2utils.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2konaflashprogram.h"
 
 using namespace std;

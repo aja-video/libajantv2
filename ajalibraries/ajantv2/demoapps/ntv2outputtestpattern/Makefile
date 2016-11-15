@@ -25,10 +25,10 @@ VPATH 	 := $(SRCDIR) $(NTV2_ROOT)/../democlasses $(AJA_API_ROOT)
 INCLUDES = -I$(NTV2_INCLUDES) -I$(NTV2_CLASSES) -I$(NTV2_ROOT)/../democlasses -I$(AJA_API_ROOT)
 
 ifeq ($(AJA_DEBUG),1)
-  AJA_STUFF_LIB = ajastuffd
+  AJA_STUFF_LIB = ajabased
   RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
 else
-  AJA_STUFF_LIB = ajastuff
+  AJA_STUFF_LIB = ajabase
   RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
 endif
 
@@ -61,7 +61,7 @@ $(LIBCLASSES): $(SDK_SRCS)
 
 .PHONY : $(AJA_STUFF_LIB)
 $(AJA_STUFF_LIB).a:
-	$(MAKE) -C $(AJA_API_ROOT)/ajastuff
+	$(MAKE) -C $(AJA_API_ROOT)/ajabase
 
 $(NTV2_APP): $(OBJS) $(LIBCLASSES) Makefile
 	$(LD) $(LDFLAGS) $(LIBDIRS) $(OBJS) -o $(NTV2_APP) $(LIBS)

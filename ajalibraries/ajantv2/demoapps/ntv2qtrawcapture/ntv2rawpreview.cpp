@@ -5,8 +5,8 @@
 **/
 
 #include <stdio.h>
-#include "ajastuff/system/memory.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2rawframegrabber.h"
 #include "ntv2rawpreview.h"
 #include "ntv2rp188.h"

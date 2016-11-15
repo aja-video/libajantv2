@@ -30,7 +30,7 @@
 		#undef FixedToFloat
 	#endif
 	#if !defined (FixedTrunc)
-		//	Conflicts with FixedTrunc function in AJAStuff's videoutilities.h
+        //	Conflicts with FixedTrunc function in AJABase's videoutilities.h
 		#define FixedTrunc(__x__) ((__x__)>>16)
 	#endif
 	#define FixedRound(__x__)					(((__x__) < 0) ? (-((-(__x__)+0x8000)>>16)) :  (((__x__) + 0x8000)>>16))

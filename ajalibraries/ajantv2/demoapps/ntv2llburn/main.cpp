@@ -8,7 +8,7 @@
 
 //	Includes
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include "ntv2llburn.h"
 #include <signal.h>
 #include <iostream>

@@ -88,7 +88,7 @@
 
 	@subpage	ajaanc
 
-	@subpage	ajastuff
+    @subpage	ajabase
 **/
 
 
@@ -550,7 +550,7 @@ typedef enum
 //		Add a corresponding case to NTV2BoardGetVideoFormatFromState_Ex in sdkgen/*.csv for ntv2devicefeatures.cpp
 //		Consider adding a new test case to commonapps/hi5_4k_diag/main.cpp
 //		Add a corresponding case to AJAVideoFormatNTV2Table in commonclasses/ntv2videoformataja.cpp
-//			(If the format is really new, videotypes.h in ajastuff/common may need updating)
+//			(If the format is really new, videotypes.h in ajabase/common may need updating)
 //		Update the #defines following this enum
 
 /**

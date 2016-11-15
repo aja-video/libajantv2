@@ -195,7 +195,7 @@
     <ClInclude Include="..\..\democlasses\ntv2capture4k.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ajaapi\ajastuff\build\ajastuff_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\ajaapi\ajabase\build\ajabase_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\classes\classesSTATIC_vs12.vcxproj">

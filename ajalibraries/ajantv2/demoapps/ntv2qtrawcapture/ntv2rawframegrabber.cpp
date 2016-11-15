@@ -6,10 +6,10 @@
 
 
 #include <ostream>
-#include "ajastuff/system/lock.h"
-#include "ajastuff/system/memory.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/system/lock.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/thread.h"
 #include "ajapreviewwidget.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"

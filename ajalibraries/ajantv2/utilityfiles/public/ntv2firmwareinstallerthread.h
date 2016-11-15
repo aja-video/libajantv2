@@ -8,7 +8,7 @@
 
 #include "ntv2card.h"
 #include "ntv2devicescanner.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/system/thread.h"
 
 
 const int		kFirmwareUpdateCheckFailed	(999);

@@ -3,7 +3,7 @@
 // Proprietary and Confidential information.
 //
 #include "ntv2gpucircularbuffer.h"
-#include "ajastuff/common/circularbuffer.h"
+#include "ajabase/common/circularbuffer.h"
 #define NTV2_AUDIOSIZE_MAX (0x100000)
 #include <assert.h>
 

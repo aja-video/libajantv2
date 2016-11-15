@@ -8,8 +8,8 @@
 //	Includes
 #include "ntv2utils.h"
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/options_popt.h"
+#include "ajabase/system/systemtime.h"
 #include "../democlasses/ntv2capture4k.h"
 #include <signal.h>
 #include <iostream>

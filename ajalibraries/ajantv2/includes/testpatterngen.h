@@ -43,7 +43,7 @@ enum AJATestPatternSelectEx
 
 /**
 	@brief	Another NTV2 test pattern generator. "Ex" was added to differentiate this
-			generator from the one in 'ajastuff'.
+            generator from the one in 'ajabase'.
 **/
 class AJAExport AJATestPatternGenEx
 {

@@ -12,9 +12,9 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ajastuff/common/videotypes.h"
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/system/thread.h"
 
 
 /**

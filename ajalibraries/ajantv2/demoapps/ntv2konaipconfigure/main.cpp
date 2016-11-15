@@ -12,7 +12,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2config2022.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 
 #define MICROBLAZE_UPTIME_REGISTER (0x40004)
 

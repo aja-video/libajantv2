@@ -136,8 +136,8 @@ RESOURCES += ntv2qtcudapreview.qrc
 
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajastuffdll_64
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajastuffdll_64d
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajabasedll_64
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lajabasedll_64d
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lclassesDLL_64
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/x64/ -lclassesDLL_64d

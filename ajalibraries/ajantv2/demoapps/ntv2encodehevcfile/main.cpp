@@ -9,8 +9,8 @@
 #include "ntv2utils.h"
 #include "ajatypes.h"
 #include "ntv2m31publicinterface.h"
-#include "ajastuff/common/options_popt.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/options_popt.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2encodehevcfile.h"
 #include <signal.h>
 #include <iostream>

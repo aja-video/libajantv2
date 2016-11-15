@@ -11,7 +11,7 @@
 
 #if defined(AJALinux)
 
-#if !defined(AJA_LINUX)  // Sleep is in ajastuff
+#if !defined(AJA_LINUX)  // Sleep is in ajabase
 #define Sleep(x) usleep(x*1000)
 #endif
 #define odprintf printf

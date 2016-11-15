@@ -7,10 +7,10 @@
 #include "ntv2fieldburn.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/memory.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2democommon.h"
 #include <iostream>
 

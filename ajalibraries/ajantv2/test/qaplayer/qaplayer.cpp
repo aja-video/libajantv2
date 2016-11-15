@@ -7,10 +7,10 @@
 #include "qaplayer.h"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
-#include "ajastuff/common/testpatterngen.h"
-#include "ajastuff/common/timecode.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/system/process.h"
+#include "ajabase/common/testpatterngen.h"
+#include "ajabase/common/timecode.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/system/process.h"
 
 
 /**

@@ -1,0 +1,121 @@
+# Linux Makefile for AJA video API stuff (common utilities and system dependent, well, stuff)
+#
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 AJA Video Systems, Inc.  
+# Proprietary and Confidential information.
+#
+
+AJA_API_ROOT	?= $(shell pwd)/../..
+
+ifeq (,$(filter _%,$(notdir $(CURDIR))))
+  include $(AJA_API_ROOT)/targets.mk
+else
+
+# Including targets.mk has moved AJA_API_ROOT down a level into the object directory.
+# Paths defined from here on must take this into account.
+
+CPP =   g++
+
+AJA_STUFF_COMMON_DIR = $(AJA_API_ROOT)/../ajabase/common
+AJA_STUFF_SYSTEM_DIR = $(AJA_API_ROOT)/../ajabase/system
+
+VPATH := $(AJA_STUFF_COMMON_DIR):$(AJA_STUFF_SYSTEM_DIR):$(AJA_STUFF_SYSTEM_DIR)/linux
+
+INCLUDES = -I$(AJA_API_ROOT)/..
+
+DEFINES := -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+CPPFLAGS  	= -c -fPIC -pipe -Wall -pedantic -error -Wno-long-long -Wwrite-strings -Wno-variadic-macros $(DBG)
+
+AJA_STUFF_SRCS =	atomic.cpp \
+					debug.cpp \
+					event.cpp \
+					eventimpl.cpp \
+					lock.cpp \
+					lockimpl.cpp \
+					memory.cpp \
+					refobject.cpp \
+					systemtime.cpp \
+					thread.cpp \
+					threadimpl.cpp \
+					timebase.cpp \
+					timer.cpp
+
+AJA_STUFF_INCS =	atomic.h \
+					common.h \
+					debug.h \
+					debugshare.h \
+					event.h \
+					evenimpl.h \
+					export.h \
+					lock.h \
+					lockimpl.h \
+					memory.h \
+					public.h \
+					refobject.h \
+					refptr.h \
+					system.h \
+					systemtime.h \
+					thread.h \
+					threadimpl.h \
+					timebase.h \
+					timer.h \
+					types.h
+
+OBJFILES = $(patsubst %.cpp,%.o,$(notdir $(AJA_STUFF_SRCS)))
+
+ifeq ($(AJA_DEBUG),1)
+  AJA_STUFF_LIBNAME = libajabased
+else
+  AJA_STUFF_LIBNAME = libajabase
+endif
+
+ifeq ($(CPU_ARCH),x86_64)
+  AJA_STUFF_LIBDIR    := $(AJA_API_ROOT)/../lib64
+else
+  AJA_STUFF_LIBDIR    := $(AJA_API_ROOT)/../lib32
+endif
+
+LIBCMD 		:= ar crsv
+LIBCMD_SO	:= ar crsv
+
+# rule to generate . d files that list the dependencies for a given .cpp file
+%.d: %.cpp
+	$(CPP) -M $(INCLUDES) $(CPPFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.o: %.cpp
+	$(CPP) $(CPPFLAGS) $(DEFINES) $(INCLUDES) -o $@ $<
+
+all: $(AJA_STUFF_LIBDIR)/$(AJA_STUFF_LIBNAME).a
+
+# Don't bother rebuilding the .d files if we are cleaning
+ifeq ($(patsubst %clean,%clean,$(MAKECMDGOALS)),)
+-include $(patsubst %.cpp,%.d,$(AJA_STUFF_SRCS))
+endif
+
+$(AJA_STUFF_LIBDIR)/$(AJA_STUFF_LIBNAME).a: $(OBJFILES) Makefile
+	+@[ -d $(AJA_STUFF_LIBDIR) ] || mkdir -p $(AJA_STUFF_LIBDIR)
+	$(LIBCMD) $@ $(OBJFILES)
+
+$(AJA_STUFF_LIBDIR)/$(AJA_STUFF_LIBNAME).so: $(OBJFILES) Makefile
+	+@[ -d $(AJA_STUFF_LIBDIR) ] || mkdir -p $(AJA_STUFF_LIBDIR)
+	@echo
+	@echo "WARNING: this is a FAKE target and shared object libraries are not in use (yet)"
+	@echo
+	$(LIBCMD_SO) $@ $(OBJFILES)
+
+Makefile:
+
+.PHONY: clean cleandeps realclean
+
+realclean: clean cleandeps
+
+clean:
+	rm -f *.o
+	rm -f $(AJA_STUFF_LIBDIR)/$(AJA_STUFF_LIBNAME).a	
+
+cleandeps:
+	rm -f *.d
+
+endif
+

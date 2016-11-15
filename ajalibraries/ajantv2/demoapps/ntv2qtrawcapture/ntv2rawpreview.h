@@ -8,9 +8,9 @@
 #ifndef _NTV2RAWPREVIEW_H
 #define _NTV2RAWPREVIEW_H
 
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/thread.h"
 #include "ntv2enums.h"
 #include "ntv2democommon.h"
 

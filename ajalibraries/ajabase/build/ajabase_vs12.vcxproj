@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>ajabase</ProjectName>
+    <ProjectGuid>{96CFF836-474A-4AE8-85C8-5BB85697E9AA}</ProjectGuid>
+    <RootNamespace>ajabase</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\..\lib\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\..\lib\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_64d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\lib\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\..\lib\</OutDir>
+    <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;AJA_DEBUG;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <AdditionalDependencies>Shlwapi.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+    </Lib>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN64;_DEBUG;_LIB;AJA_DEBUG;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <AdditionalDependencies>rpcrt4.lib</AdditionalDependencies>
+    </Lib>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Lib>
+      <AdditionalDependencies>Shlwapi.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+    </Lib>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <AdditionalDependencies>rpcrt4.lib</AdditionalDependencies>
+    </Lib>
+    <PostBuildEvent>
+      <Command />
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\audioutilities.cpp" />
+    <ClCompile Include="..\common\buffer.cpp" />
+    <ClCompile Include="..\common\cli_utils.cpp" />
+    <ClCompile Include="..\common\dpx_hdr.cpp" />
+    <ClCompile Include="..\common\dpxfileio.cpp" />
+    <ClCompile Include="..\common\guid.cpp" />
+    <ClCompile Include="..\common\options_popt.cpp" />
+    <ClCompile Include="..\common\pixelformat.cpp" />
+    <ClCompile Include="..\common\testpatterngen.cpp" />
+    <ClCompile Include="..\common\timebase.cpp" />
+    <ClCompile Include="..\common\timecode.cpp" />
+    <ClCompile Include="..\common\timecodeburn.cpp" />
+    <ClCompile Include="..\common\timer.cpp" />
+    <ClCompile Include="..\common\videoutilities.cpp" />
+    <ClCompile Include="..\common\wavewriter.cpp" />
+    <ClCompile Include="..\system\atomic.cpp" />
+    <ClCompile Include="..\system\debug.cpp" />
+    <ClCompile Include="..\system\diskstatus.cpp" />
+    <ClCompile Include="..\system\event.cpp" />
+    <ClCompile Include="..\system\windows\eventimpl.cpp" />
+    <ClCompile Include="..\system\windows\file_io.cpp" />
+    <ClCompile Include="..\system\ip_socket.cpp" />
+    <ClCompile Include="..\system\lock.cpp" />
+    <ClCompile Include="..\system\windows\lockimpl.cpp" />
+    <ClCompile Include="..\system\log.cpp" />
+    <ClCompile Include="..\system\memory.cpp" />
+    <ClCompile Include="..\pnp\pnp.cpp" />
+    <ClCompile Include="..\pnp\windows\pnpimpl.cpp" />
+    <ClCompile Include="..\system\process.cpp" />
+    <ClCompile Include="..\system\windows\processimpl.cpp" />
+    <ClCompile Include="..\system\systemtime.cpp" />
+    <ClCompile Include="..\system\thread.cpp" />
+    <ClCompile Include="..\system\windows\threadimpl.cpp" />
+    <ClCompile Include="..\system\udp_socket.cpp" />
+    <ClCompile Include="..\persistence\persistence.cpp" />
+    <ClCompile Include="..\persistence\sqlite3.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\audioutilities.h" />
+    <ClInclude Include="..\common\buffer.h" />
+    <ClInclude Include="..\common\circularbuffer.h" />
+    <ClInclude Include="..\common\cli_utils.h" />
+    <ClInclude Include="..\common\common.h" />
+    <ClInclude Include="..\common\dpx_hdr.h" />
+    <ClInclude Include="..\common\dpxfileio.h" />
+    <ClInclude Include="..\common\export.h" />
+    <ClInclude Include="..\common\guid.h" />
+    <ClInclude Include="..\common\options_popt.h" />
+    <ClInclude Include="..\common\pixelformat.h" />
+    <ClInclude Include="..\common\public.h" />
+    <ClInclude Include="..\common\testpatterndata.h" />
+    <ClInclude Include="..\common\testpatterngen.h" />
+    <ClInclude Include="..\common\timebase.h" />
+    <ClInclude Include="..\common\timecode.h" />
+    <ClInclude Include="..\common\timecodeburn.h" />
+    <ClInclude Include="..\common\timecodeburndata.h" />
+    <ClInclude Include="..\common\timer.h" />
+    <ClInclude Include="..\common\types.h" />
+    <ClInclude Include="..\common\videoutilities.h" />
+    <ClInclude Include="..\common\wavewriter.h" />
+    <ClInclude Include="..\system\atomic.h" />
+    <ClInclude Include="..\system\debug.h" />
+    <ClInclude Include="..\system\debugshare.h" />
+    <ClInclude Include="..\system\diskstatus.h" />
+    <ClInclude Include="..\system\event.h" />
+    <ClInclude Include="..\system\windows\eventimpl.h" />
+    <ClInclude Include="..\system\file_io.h" />
+    <ClInclude Include="..\system\ip_socket.h" />
+    <ClInclude Include="..\system\lock.h" />
+    <ClInclude Include="..\system\windows\lockimpl.h" />
+    <ClInclude Include="..\system\log.h" />
+    <ClInclude Include="..\system\memory.h" />
+    <ClInclude Include="..\pnp\pnp.h" />
+    <ClInclude Include="..\pnp\windows\pnpimpl.h" />
+    <ClInclude Include="..\system\process.h" />
+    <ClInclude Include="..\system\windows\processimpl.h" />
+    <ClInclude Include="..\system\system.h" />
+    <ClInclude Include="..\system\systemtime.h" />
+    <ClInclude Include="..\system\thread.h" />
+    <ClInclude Include="..\system\windows\threadimpl.h" />
+    <ClInclude Include="..\system\udp_socket.h" />
+    <ClInclude Include="..\persistence\persistence.h" />
+    <ClInclude Include="..\persistence\sqlite3.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -10,9 +10,9 @@
 
 
 #include <string>
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/videotypes.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/videotypes.h"
 
 class IPlaycorder
 {

@@ -9,8 +9,8 @@
 #include "ntv2encodehevcfile.h"
 #include "ntv2utils.h"
 #include "ntv2devicefeatures.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 
 static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
 

@@ -5,10 +5,10 @@
 #include <QGLWidget>
 #include <QtOpenGL>
 #include <GL\glu.h>
-#include "ajastuff/common/public.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/buffer.h"
-#include "ajastuff/common/videotypes.h"
+#include "ajabase/common/public.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/buffer.h"
+#include "ajabase/common/videotypes.h"
 #include "time.h"
 #include <ctime>
 

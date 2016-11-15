@@ -3,13 +3,13 @@
 
 
 
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 #include "ntv4/driver/types.h"
 
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/common/buffer.h"
-#include "ajastuff/common/dpx_hdr.h"
-#include "ajastuff/common/wavewriter.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/common/buffer.h"
+#include "ajabase/common/dpx_hdr.h"
+#include "ajabase/common/wavewriter.h"
 
 #include "time.h"
 #include <ctime>

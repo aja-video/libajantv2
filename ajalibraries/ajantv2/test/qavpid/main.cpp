@@ -14,8 +14,8 @@
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
 
-#include "ajastuff/common/options_popt.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/options_popt.h"
+#include "ajabase/system/systemtime.h"
 
 #include "testentry.h"
 #include "tests.h"

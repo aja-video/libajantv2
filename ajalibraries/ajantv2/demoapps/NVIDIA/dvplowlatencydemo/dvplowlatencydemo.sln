@@ -8,7 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dvplowlatencydemo", "dvplow
 		{733755C5-1CF3-489B-81D5-ECD353029782} = {733755C5-1CF3-489B-81D5-ECD353029782}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuffdll", "..\..\..\..\ajaapi\ajastuff\build\ajastuffdll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabasedll", "..\..\..\..\ajaapi\ajabase\build\ajabasedll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "classesDLL", "..\..\..\classes\classesDLL_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
 EndProject

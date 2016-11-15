@@ -9,10 +9,10 @@
 #include <string>
 #include <sstream>
 
-#include "ajastuff/common/dpx_hdr.h"
-#include "ajastuff/common/dpxfileio.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/dpx_hdr.h"
+#include "ajabase/common/dpxfileio.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
 
 #include "ajapreviewwidget.h"
 #include "ntv2capture.h"

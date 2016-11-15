@@ -15,12 +15,12 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/common/timecodeburn.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/common/timecodeburn.h"
 #include "ntv2rp188.h"
 #include "../demoapps/ntv2democommon.h"
-#include "ajastuff/common/buffer.h"
+#include "ajabase/common/buffer.h"
 
 using namespace std;
 

@@ -158,9 +158,9 @@ build_pass:CONFIG(release, debug|release) {
         QMAKE_LIBDIR += $$DESTDIR
 
         contains(QMAKE_TARGET.arch, x86_64) {
-            LIBS += -lajastuffdll_64 -lclassesdll_64
+            LIBS += -lajabasedll_64 -lclassesdll_64
         } else {
-            LIBS += -lajastuffdll -lclassesdll
+            LIBS += -lajabasedll -lclassesdll
         }
 	}
 
@@ -171,7 +171,7 @@ build_pass:CONFIG(release, debug|release) {
 
 		QMAKE_LIBDIR += ../../../bin
 		LIBS += -lclasses
-		LIBS += -lajastuff
+		LIBS += -lajabase
 	}
 
 	unix:!macx {
@@ -179,8 +179,8 @@ build_pass:CONFIG(release, debug|release) {
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_CFLAGS += -g
 			QMAKE_CXXFLAGS += -g
-			LIBS += -Wl,-Bstatic -lajastuffd -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabased -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -189,8 +189,8 @@ build_pass:CONFIG(release, debug|release) {
 			OBJECTS_DIR -= release
 			OBJECTS_DIR += debug
 		} else {
-			LIBS += -Wl,-Bstatic -lajastuff -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabase -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -213,9 +213,9 @@ else {
         QMAKE_LIBDIR += $$DESTDIR
 
         contains(QMAKE_TARGET.arch, x86_64) {
-            LIBS += -lajastuffdll_64 -lclassesdll_64
+            LIBS += -lajabasedll_64 -lclassesdll_64
         } else {
-            LIBS += -lajastuffdll -lclassesdll
+            LIBS += -lajabasedll -lclassesdll
         }
 	}
 
@@ -226,7 +226,7 @@ else {
 
 		QMAKE_LIBDIR += ../../../bin
 		LIBS += -lclassesd
-		LIBS += -lajastuffd
+		LIBS += -lajabased
 	}
 
 	unix:!macx {
@@ -234,8 +234,8 @@ else {
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_CFLAGS += -g
 			QMAKE_CXXFLAGS += -g
-			LIBS += -Wl,-Bstatic -lajastuffd -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabased -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -243,8 +243,8 @@ else {
 			PRE_TARGETDEPS += makeajalib
 		} else {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib
-			LIBS += -Wl,-Bstatic -lajastuff -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabase -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -275,10 +275,10 @@ SOURCES += $$NTV2_DIR/democlasses/ntv2playcorder.cpp
 HEADERS += $$NTV2_DIR/democlasses/ntv2player.h
 SOURCES += $$NTV2_DIR/democlasses/ntv2player.cpp
 
-HEADERS += $$AJA_API/ajastuff/common/dpx_hdr.h
-SOURCES += $$AJA_API/ajastuff/common/dpx_hdr.cpp
-HEADERS += $$AJA_API/ajastuff/common/wavewriter.h
-SOURCES += $$AJA_API/ajastuff/common/wavewriter.cpp
+HEADERS += $$AJA_API/ajabase/common/dpx_hdr.h
+SOURCES += $$AJA_API/ajabase/common/dpx_hdr.cpp
+HEADERS += $$AJA_API/ajabase/common/wavewriter.h
+SOURCES += $$AJA_API/ajabase/common/wavewriter.cpp
 
 
 #resources

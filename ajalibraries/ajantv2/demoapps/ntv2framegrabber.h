@@ -20,8 +20,8 @@
 #include "ntv2enums.h"
 #include "ntv2task.h"
 #include "ntv2rp188.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/process.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/process.h"
 #if defined (INCLUDE_AJACC)
 	#include "ajacc/includes/ntv2captiondecoder608.h"
 	#include "ajacc/includes/ntv2captiondecoder708.h"

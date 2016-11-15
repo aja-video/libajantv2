@@ -5,7 +5,7 @@
 **/
 
 #include "ntv2burn4kquadrant.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 #include <iostream>
 
 

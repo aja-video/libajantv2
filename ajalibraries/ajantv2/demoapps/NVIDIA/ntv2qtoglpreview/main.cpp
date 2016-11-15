@@ -1,5 +1,5 @@
 #include "ntv2qtoglpreview.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include <QtCore>
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     #include <QtWidgets>

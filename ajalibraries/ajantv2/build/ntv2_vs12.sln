@@ -49,9 +49,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclassesDLL", "..\..\gpus
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2llburn", "..\demoapps\ntv2llburn\ntv2llburn.vcxproj", "{8B5BDCA3-FA56-4DBE-B006-966EB55132BD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuff", "..\..\ajastuff\build\ajastuff_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabase", "..\..\ajabase\build\ajabase_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuffdll", "..\..\ajastuff\build\ajastuffdll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabasedll", "..\..\ajabase\build\ajabasedll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevc", "..\demoapps\ntv2encodehevc\ntv2encodehevc.vcxproj", "{58B1D7AA-F148-43DD-8CB9-8C5DAFBABD42}"
 EndProject

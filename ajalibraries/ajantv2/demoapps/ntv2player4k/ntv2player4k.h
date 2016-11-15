@@ -12,7 +12,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ajastuff/common/circularbuffer.h"
+#include "ajabase/common/circularbuffer.h"
 
 
 class AJAThread;

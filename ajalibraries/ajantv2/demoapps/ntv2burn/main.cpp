@@ -8,9 +8,9 @@
 
 //	Includes
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include "ntv2burn.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/systemtime.h"
 #include <signal.h>
 #include <iostream>
 #include <iomanip>

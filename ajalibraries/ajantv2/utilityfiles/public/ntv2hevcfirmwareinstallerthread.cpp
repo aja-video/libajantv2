@@ -7,9 +7,9 @@
 #include "ntv2hevcfirmwareinstallerthread.h"
 #include "ntv2bitfile.h"
 #include "ntv2utils.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/timer.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/timer.h"
 
 #include <sys/stat.h>
 

@@ -11,8 +11,8 @@
 #define _NTV2DEMOHEVCCOMMON_H
 
 #include "ntv2rp188.h"
-#include "ajastuff/common/videotypes.h"
-#include "ajastuff/common/circularbuffer.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/common/circularbuffer.h"
 
 #include "ntv2m31enums.h"
 #include "ntv2m31.h"

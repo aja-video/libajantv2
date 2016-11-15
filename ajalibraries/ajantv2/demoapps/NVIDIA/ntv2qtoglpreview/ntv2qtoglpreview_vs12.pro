@@ -128,8 +128,8 @@ SOURCES += $$AJA_API/gpustuff/utility/oglcaptureviewer.cpp
 RESOURCES += ntv2qtoglpreview.qrc
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/ -lajastuffdll_64
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/ -lajastuffdll_64d
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/ -lajabasedll_64
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/ -lajabasedll_64d
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../bin/ -lclassesDLL_64
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../bin/ -lclassesDLL_64d

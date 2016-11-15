@@ -19,7 +19,7 @@
 #include "ajapreviewwidget.h"
 #include "ntv2framegrabber.h"
 #include "ntv2devicescanner.h"
-#include "ajastuff/pnp/pnp.h"
+#include "ajabase/pnp/pnp.h"
 
 
 /**

@@ -4,10 +4,10 @@
 //	Copyright (C) 2012 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 //---------------------------------------------------------------------------------------------------------------------
 #include "ntv2ogldpxreader.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/videoutilities.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/common/dpx_hdr.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/videoutilities.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/common/dpx_hdr.h"
 #include "ntv2boardscan.h"
 #include "ntv2utils.h"
 

@@ -21,8 +21,8 @@
 
 
 //	Includes
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/common/types.h"
 #include "ntv2card.h"
 #include "ntv2democommon.h"
 

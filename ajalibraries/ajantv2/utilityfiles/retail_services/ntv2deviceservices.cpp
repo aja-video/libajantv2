@@ -30,7 +30,7 @@
 #include "ntv2corvid88services.h"
 #endif
 
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/systemtime.h"
 
 
 //-------------------------------------------------------------------------------------------------------

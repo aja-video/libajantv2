@@ -1,0 +1,39 @@
+/**
+	@file		tcp_socket.h
+	@copyright	Copyright (C) 2011-2016 AJA Video Systems, Inc.  All rights reserved.
+	@brief		Declares the AJATCPSocket class.
+**/
+
+#ifndef AJA_TCP_SOCKET_H
+#define AJA_TCP_SOCKET_H
+
+/////////////////////////////
+// Includes
+/////////////////////////////
+#include "ajabase/system/ip_socket.h"
+
+
+/////////////////////////////
+// Declarations
+/////////////////////////////
+class AJA_EXPORT AJATCPSocket : public AJAIPSocket
+{
+	public:
+		AJATCPSocket(void);
+		virtual ~AJATCPSocket(void);
+
+		AJAStatus Open(const std::string& ipAddress, uint16_t port);
+
+		AJAStatus Connect(const std::string& ipAddress, uint16_t port);
+		AJAStatus Listen(void);
+		int       Accept(void);
+
+		uint32_t Read(uint8_t* pData, uint32_t dataLength);
+		uint32_t Write(const uint8_t* pData, uint32_t dataLength);
+
+	private:
+		// None
+};
+
+
+#endif	//	AJA_TCP_SOCKET_H

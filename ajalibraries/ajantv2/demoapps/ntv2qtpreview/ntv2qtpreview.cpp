@@ -14,7 +14,7 @@
 
 #include "ntv2qtpreview.h"
 #include "ntv2devicefeatures.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 #include "ntv2utils.h"
 
 

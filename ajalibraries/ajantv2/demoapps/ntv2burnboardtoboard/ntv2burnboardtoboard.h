@@ -10,11 +10,11 @@
 #include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2democommon.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/lock.h"
-#include "ajastuff/common/timecodeburn.h"
+#include "ajabase/common/types.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/lock.h"
+#include "ajabase/common/timecodeburn.h"
 
 
 /**

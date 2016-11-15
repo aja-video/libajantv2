@@ -8,8 +8,8 @@
 
 //	Includes
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
-#include "ajastuff/pnp/pnp.h"
+#include "ajabase/common/options_popt.h"
+#include "ajabase/pnp/pnp.h"
 #include "ntv2ccgrabber.h"
 #include "ntv2utils.h"
 #include <signal.h>

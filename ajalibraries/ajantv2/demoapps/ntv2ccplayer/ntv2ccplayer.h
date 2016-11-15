@@ -10,8 +10,8 @@
 
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/lock.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/lock.h"
 #include "ajacc/includes/ajacc.h"
 #include <vector>
 

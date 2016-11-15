@@ -14,7 +14,7 @@
 
 //	Includes
 #include "ajapreviewwidget.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2qtrawcapture.h"
 #include "ntv2rawframegrabber.h"

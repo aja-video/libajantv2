@@ -8,12 +8,12 @@
 #include "ntv2utils.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2debug.h"
-#include "ajastuff/common/testpatterngen.h"
-#include "ajastuff/common/timecode.h"
-#include "ajastuff/system/memory.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/common/testpatterngen.h"
+#include "ajabase/common/timecode.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
 
 /**
 	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of

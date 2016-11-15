@@ -4,8 +4,8 @@
 //	Copyright (C) 2012 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 //---------------------------------------------------------------------------------------------------------------------
 #include "ntv2oglcapture.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/videoutilities.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/videoutilities.h"
 #include "ntv2boardfeatures.h"
 #include "ntv2boardscan.h"
 #include "ntv2utils.h"

@@ -15,12 +15,12 @@
 
 #include "ntv2m31enums.h"
 
-#include "ajastuff/common/videotypes.h"
-#include "ajastuff/common/circularbuffer.h"
-#include "ajastuff/common/timebase.h"
-#include "ajastuff/common/timecode.h"
-#include "ajastuff/common/timecodeburn.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/common/circularbuffer.h"
+#include "ajabase/common/timebase.h"
+#include "ajabase/common/timecode.h"
+#include "ajabase/common/timecodeburn.h"
+#include "ajabase/system/thread.h"
 
 #include "ntv2m31.h"
 

@@ -8,7 +8,7 @@
 
 #include "ntv2card.h"
 #include "ntv2devicescanner.h"
-#include "ajastuff/system/thread.h"
+#include "ajabase/system/thread.h"
 
 // Bar offsets
 #define BAR0_OFFSET						(0xF1E00000)

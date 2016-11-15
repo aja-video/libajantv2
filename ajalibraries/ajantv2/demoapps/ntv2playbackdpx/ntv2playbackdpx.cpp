@@ -5,11 +5,11 @@
 //---------------------------------------------------------------------------------------------------------------------
 #include <QtGlobal>
 #include "ntv2playbackdpx.h"
-#include "ajastuff/common/timer.h"
-#include "ajastuff/system/file_io.h"
-#include "ajastuff/common/dpx_hdr.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/common/videoutilities.h"
+#include "ajabase/common/timer.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/common/dpx_hdr.h"
+#include "ajabase/system/process.h"
+#include "ajabase/common/videoutilities.h"
 #include "ntv2utils.h"
 ////#include "ntv4/common/videoformatinfo.h"
 ////#include "ntv4/common/pixelformatinfo.h"

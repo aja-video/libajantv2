@@ -6,10 +6,10 @@
 
 
 //	Includes
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/process.h"
-#include "ajastuff/common/testpatterngen.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/process.h"
+#include "ajabase/common/testpatterngen.h"
+#include "ajabase/common/options_popt.h"
 #include "ntv2card.h"
 #include "ntv2outputtestpattern.h"
 #include "ntv2utils.h"

@@ -15,11 +15,11 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QMessageBox>
-#include "ajastuff/common/public.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/timer.h"
-#include "ajastuff/system/process.h"
+#include "ajabase/common/public.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/timer.h"
+#include "ajabase/system/process.h"
 
 #include "ntv2cudacapture.h"
 #include "gpustuff/utility/cudacaptureviewer.h"

@@ -157,15 +157,15 @@ build_pass:CONFIG(release, debug|release) {
 
 		QMAKE_LIBDIR += ../../../bin
 		LIBS += -lclasses
-		LIBS += -lajastuff
+		LIBS += -lajabase
 	}
 
 	unix:!macx {
 		# Ignore build_pass an use environment to choose debug or release
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib-DEBUG
-			LIBS += -Wl,-Bstatic -laja -lajastuffd -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabased -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -175,8 +175,8 @@ build_pass:CONFIG(release, debug|release) {
 			OBJECTS_DIR += debug
 		} else {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib
-			LIBS += -Wl,-Bstatic -laja -lajastuff -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabase -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -209,15 +209,15 @@ else {
 
 		QMAKE_LIBDIR += ../../../bin
 		LIBS += -lclassesd
-		LIBS += -lajastuffd
+		LIBS += -lajabased
 	}
 
 	unix:!macx {
 		# Ignore build_pass an use environment to choose debug or release
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib-DEBUG
-			LIBS += -Wl,-Bstatic -laja -lajastuffd -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabased -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -225,8 +225,8 @@ else {
 			PRE_TARGETDEPS += makeajalib
 		} else {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib
-			LIBS += -Wl,-Bstatic -laja -lajastuff -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -laja -lajabase -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes

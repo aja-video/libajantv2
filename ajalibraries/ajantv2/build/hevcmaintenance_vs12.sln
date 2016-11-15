@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Includes", "..\includes\Inc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "classesSTATIC", "..\classes\classesSTATIC_vs12.vcxproj", "{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuff", "..\..\ajaapi\ajastuff\build\ajastuff_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabase", "..\..\ajaapi\ajabase\build\ajabase_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32ClassLibrary", "..\..\win32classlibrary\Win32ClassLibrary.vcxproj", "{133E350E-BC43-43DF-AFD0-0BC987791078}"
 EndProject

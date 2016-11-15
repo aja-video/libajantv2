@@ -11,7 +11,7 @@
 
 #include <string>
 #include <sstream>
-#include <ajastuff/system/systemtime.h>
+#include <ajabase/system/systemtime.h>
 #include "ntv2dpxplayer.h"
 
 bool doesDirectoryExist(QString path);

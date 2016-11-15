@@ -164,8 +164,8 @@ build_pass:CONFIG(release, debug|release) {
 		# Ignore build_pass an use environment to choose debug or release
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib-DEBUG
-			LIBS += -Wl,-Bstatic -lajastuffd -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabased -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -175,8 +175,8 @@ build_pass:CONFIG(release, debug|release) {
 			OBJECTS_DIR += debug
 		} else {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib
-			LIBS += -Wl,-Bstatic -lajastuff -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabase -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -212,8 +212,8 @@ else {
 		# Ignore build_pass an use environment to choose debug or release
 		contains( DEBUG_TEST_FLAG, 1 ) {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib-DEBUG
-			LIBS += -Wl,-Bstatic -lajastuffd -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabased -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes
@@ -221,8 +221,8 @@ else {
 			PRE_TARGETDEPS += makeajalib
 		} else {
 			QMAKE_LIBDIR += $$NTV2_DIR/lib
-			LIBS += -Wl,-Bstatic -lajastuff -laja -Wl,-Bdynamic
-			makestufflib.commands = make -C $$AJA_API/ajastuff/build
+			LIBS += -Wl,-Bstatic -lajabase -laja -Wl,-Bdynamic
+			makestufflib.commands = make -C $$AJA_API/ajabase/build
 			QMAKE_EXTRA_TARGETS += makestufflib
 			PRE_TARGETDEPS += makestufflib
 			makeajalib.commands = make -C $$NTV2_DIR/classes

@@ -6,7 +6,7 @@
 
 
 #include "ntv2stereocapture.h"
-#include "ajastuff/common/types.h"
+#include "ajabase/common/types.h"
 
 
 NTV2StereoCapture::NTV2StereoCapture (uint16_t boardNumber)

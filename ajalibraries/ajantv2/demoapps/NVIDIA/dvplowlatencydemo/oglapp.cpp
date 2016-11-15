@@ -11,9 +11,9 @@ oglapp:
 #define _CRT_SECURE_NO_WARNINGS 1
 #include "ajatypes.h"
 
-#include "ajastuff/system/event.h"
-#include "ajastuff/system/thread.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/event.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/systemtime.h"
 
 #include <math.h>
 #include <iostream>

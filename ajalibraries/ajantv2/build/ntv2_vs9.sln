@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuff", "..\..\ajastuff\build\ajastuff_vs9.vcproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabase", "..\..\ajabase\build\ajabase_vs9.vcproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn", "..\demoapps\ntv2burn\ntv2burn.vcproj", "{EBDF52ED-7F8C-40D8-B11D-B3E5391CE093}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,7 +19,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "..\src\lib
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2", "..\src\libajantv2_vs9.vcproj", "{B8991107-356F-496D-B892-19CA8A4E0616}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajastuffdll", "..\..\ajastuff\build\ajastuffdll_vs9.vcproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabasedll", "..\..\ajabase\build\ajabasedll_vs9.vcproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccgrabber", "..\demoapps\ntv2ccgrabber\ntv2ccgrabber.vcproj", "{F8768B72-C9AE-4662-8D67-69075B81D6C7}"
 	ProjectSection(ProjectDependencies) = postProject

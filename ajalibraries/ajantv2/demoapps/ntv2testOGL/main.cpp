@@ -5,7 +5,7 @@
 
 //	Includes
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include "../democlasses/ntv2capture.h"
 #include <signal.h>
 #include <iostream>

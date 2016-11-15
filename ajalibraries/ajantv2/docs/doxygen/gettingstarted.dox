@@ -311,7 +311,7 @@ Note that JSON output is not supported when turning the fan on or off.
 The SDK distribution comes with the following libraries:
 -	<b>ajacc</b> --- AJA's library for encoding/decoding closed-captions.
 -	<b>ajaanc</b> --- AJA's library to aid ancillary data insertion/extraction.
--	<b>ajastuff</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
+-	<b>ajabase</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
 -	<b>classes</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
@@ -320,7 +320,7 @@ These can be built using the provided Visual Studio project files.
 On Linux, except for the proprietary libraries, pre-built versions of the static libraries are not provided.
 They must be built using the provided Makefiles. Follow the instructions below ("Building the Libraries on Linux").
 
-While it's possible to incorporate the NTV2 and "ajastuff" source code directly into your own projects, AJA recommends linking with the
+While it's possible to incorporate the NTV2 and "ajabase" source code directly into your own projects, AJA recommends linking with the
 provided libraries, and using the source code when necessary as a debugging aid.
 
 @note	Please avoid deriving subclasses from AJA-provided classes.
@@ -492,9 +492,9 @@ Look for the new <b>classesd.a</b> library in the <tt>sdk/lib</tt> folder.
 		\code{.sh}
 		$ xcrun xcodebuild -project ntv2projects/classes/classes.xcodeproj  -target libclasses  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
 		\endcode
-		If you also use the "ajastuff" library (e.g., for the demo apps), you'll need to rebuild the "ajastuff" library as well:
+		If you also use the "ajabase" library (e.g., for the demo apps), you'll need to rebuild the "ajabase" library as well:
 		\code{.sh}
-		$ xcrun xcodebuild -project ajaapi/ajastuff/build/ajastuff.xcodeproj  -target ajastuff  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
+		$ xcrun xcodebuild -project ajaapi/ajabase/build/ajabase.xcodeproj  -target ajabase  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
 		\endcode
 		If you use the "ajaanc" and/or "ajacc" libraries, AJA supplies libc++-compatible versions of these libraries in the "libc++11" folder inside the "lib" folder.
 
@@ -553,7 +553,7 @@ XCode build parameters must be set:
 	-	<b>sdkdir/ntv2projects/includes</b>
 	-	<b>sdkdir/ntv2projects/classes</b>
 	-	<b>sdkdir/ntv2projects/macclasses</b>
-	-	<b>sdkdir/ajaapi</b> (only if "ajastuff" is needed)
+	-	<b>sdkdir/ajaapi</b> (only if "ajabase" is needed)
 	-	<b>sdkdir/ajalibraries/ajacc</b> (only if the AJA Captioning Library is needed)
 	-	<b>sdkdir/ajalibraries/ajaanc</b> (only if the AJA ancillary data library is needed)
 -	It is not necessary to always search "user" header paths.
@@ -562,7 +562,7 @@ XCode build parameters must be set:
 	-	<b>sdkdir/lib</b>
 -	Add the following to the "Other Linker Flags" setting:
 	-	<b>-lclasses</b> (Release) or <b>-lclassesd</b> (Debug)
-	-	<b>-lajastuff</b> (Release) or <b>-lajastuffd</b> (Debug), if needed
+	-	<b>-lajabase</b> (Release) or <b>-lajabased</b> (Debug), if needed
 	-	<b>-lajacc</b>, if the AJA captioning library is needed
 	-	<b>-lajaanc</b>, if the AJA ancillary data library is needed
 
@@ -586,7 +586,7 @@ Many OEM developers choose to create their own solution and project files "from 
 	-	<b>sdkdir\\ntv2projects\\includes</b>
 	-	<b>sdkdir\\ntv2projects\\classes</b>
 	-	<b>sdkdir\\ntv2projects\\winclasses</b>
-	-	<b>sdkdir\\ajaapi</b> (only if "ajastuff" is needed)
+	-	<b>sdkdir\\ajaapi</b> (only if "ajabase" is needed)
 	-	<b>sdkdir\\ajalibraries\\ajacc</b> (only if the AJA Captioning Library is needed)
 	-	<b>sdkdir\\ajalibraries\\ajaanc</b> (only if the AJA ancillary data library is needed)
 -	The preprocessor should always search "user" header paths.

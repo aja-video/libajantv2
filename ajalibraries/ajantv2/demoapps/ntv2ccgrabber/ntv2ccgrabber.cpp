@@ -9,8 +9,8 @@
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_cea608_line21.h"
 #include "ntv2debug.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/memory.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/memory.h"
 #include <iostream>
 #include <iomanip>
 

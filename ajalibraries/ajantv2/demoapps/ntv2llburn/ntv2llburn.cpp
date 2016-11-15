@@ -5,8 +5,8 @@
 **/
 
 #include "ntv2llburn.h"
-#include "ajastuff/common/types.h"
-#include "ajastuff/system/memory.h"
+#include "ajabase/common/types.h"
+#include "ajabase/system/memory.h"
 #include <iostream>
 
 

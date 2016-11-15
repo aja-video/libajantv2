@@ -9,9 +9,9 @@
 //	Includes
 #define _WINSOCKAPI_
 #include "ajatypes.h"
-#include "ajastuff/common/options_popt.h"
+#include "ajabase/common/options_popt.h"
 #include "../democlasses/ntv2burnboardtoboard.h"
-#include "ajastuff/system/systemtime.h"
+#include "ajabase/system/systemtime.h"
 #include <signal.h>
 #include <iostream>
 #include <iomanip>

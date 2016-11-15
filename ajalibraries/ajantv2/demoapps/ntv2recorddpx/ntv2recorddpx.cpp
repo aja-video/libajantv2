@@ -5,11 +5,11 @@
 //---------------------------------------------------------------------------------------------------------------------
 #include "ntv2recorddpx.h"
 
-#include "ajastuff/system/systemtime.h"
-#include "ajastuff/common/videoutilities.h"
-#include "ajastuff/common/timer.h"
-#include "ajastuff/common/pixelformat.h"
-#include "ajastuff/common/testpatterngen.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/common/videoutilities.h"
+#include "ajabase/common/timer.h"
+#include "ajabase/common/pixelformat.h"
+#include "ajabase/common/testpatterngen.h"
 
 ////#include "ntv4/common/videoformatinfo.h"
 ////#include "ntv4/common/pixelformatinfo.h"
