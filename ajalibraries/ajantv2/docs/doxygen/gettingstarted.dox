@@ -39,40 +39,52 @@ This section explores the contents of the SDK, which is nearly identical on all 
 
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- This is the folder that resulted after extracting the .zip file.
 	-	<b>sdk</b>
-		-	<b>ajaapi</b>
-			-	<b>ajastuff</b>
-			-	<b>gpustuff   </b><i>(Linux & Windows only)</i>
+		-	<b>ajaapps</b>
+			-	<b>crossplatform  </b>
+				-	<b>demoapps</b>
+			-	<b>lin  </b><i>(Linux only)</i>
+			-	<b>mac  </b><i>(MacOS only)</i>
+			-	<b>win  </b><i>(Windows only)</i>
+		-	<b>ajadriver</b>
+			-	<b>linux  </b><i>(Linux only)</i>
 		-	<b>ajalibraries</b>
 			-	<b>ajaanc</b>
+			-	<b>ajabase</b>
 			-	<b>ajacc</b>
+			-	<b>ajantv2</b>
+				-	<b>build  </b><i>(MacOS & Windows only)</i>
+				-	<b>codecs  </b><i>(Corvid HEVC only)</i>
+				-	<b>includes</b>
+				-	<b>src</b>
+					-	<b>lin  </b><i>(Linux only)</i>
+					-	<b>mac  </b><i>(MacOS only)</i>
+					-	<b>win  </b><i>(Windows only)</i>
+			-	<b>gpustuff   </b><i>(Linux & Windows only)</i>
 		-	<b>bin</b>
 		-	<b>docs</b>
 		-	<b>lib</b>
-		-	<b>ntv2projects</b>
-			-	<b>classes</b>
-			-	<b>codecs  </b><i>(Corvid HEVC only)</i>
-			-	<b>commonapps  </b><i>(Linux only)</i>
-			-	<b>demoapps</b>
-			-	<b>democlasses</b>
-			-	<b>driver  </b><i>(Linux only)</i>
-			-	<b>fltk  </b><i>(Linux only)</i>
-			-	<b>includes</b>
-			-	<b>linuxapps  </b><i>(Linux only)</i>
-			-	<b>linuxclasses  </b><i>(Linux only)</i>
-			-	<b>macclasses  </b><i>(MacOS only)</i>
-			-	<b>winclasses  </b><i>(Windows only)</i>
-			-	<b>winworkspace  </b><i>(Windows only)</i>
-		-	<b>qtbuild  </b><i>(MacOS only)</i>
+		-	<b>qtbuild  </b>
 	-	<b>tools</b>
 
-@subsection		gs-contents-ajaapi	ajaapi
+@subsection		gs-contents-ajaapps	ajaapps
 
-This directory contains the "ajastuff" directory, which has several platform-independent utility classes for threading, locking, etc.
+This directory contains sources used to build applications and tools.
+
+@subsection		gs-contents-ajadriver	ajadriver
+
+This directory contains sources used to build the device driver(s).
 
 @subsection		gs-contents-ajalibraries	ajalibraries
 
-This directory contains the "ajacc" directory, which contains the \ref ajacclib, handy for encoding and decoding CEA-608/708 captions.
-It also contains the \ref ajaanc, which is handy for parsing and manipulating ancillary data.
+This directory contains...
+-	the "ajabase" directory, which contains the \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
+-	the \ref ajaanc, which is handy for parsing and manipulating ancillary data.
+-	the "ajacc" directory, which contains the \ref ajacclib, handy for encoding and decoding CEA-608/708 captions.
+-	the "ajantv2" directory, which contains the sources for the NTV2 class library. It has several sub-directories of interest:
+	-	<b>build</b> -- Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
+	-	<b>codecs</b> -- The principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
+	-	<b>includes</b> -- The SDK header/include files.
+	-	<b>src</b> -- The SDK implementation source files, with platform-specific subdirectories.
 
 @subsection		gs-contents-bin		bin
 
@@ -81,23 +93,6 @@ This is the destination directory for all executable files and the dynamically-l
 @subsection		gs-contents-lib		lib
 
 This is the destination directory for all static libraries.
-
-@subsection		gs-contents-ntv2projects	ntv2projects
-
-This directory contains the NTV2 SDK, which has several sub-directories of interest:
--	<b>classes</b> -- The principal NTV2 classes and header files.
--	<b>codecs</b> -- The principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
--	<b>commonapps</b> -- Source files for the <b>Cables</b> and <b>Watcher</b> tools (Linux only).
--	<b>demoapps</b> -- Source files, make files and project files that build the NTV2 demonstration applications, which employ the “democlasses”.
--	<b>democlasses</b> -- Source files for the NTV2 demonstration classes used by the demonstration applications.
--	<b>driver</b> -- Source files for the Linux driver.
--	<b>fltk</b> -- A lightweight GUI library used to build the <b>Cables</b> and <b>Watcher</b> tools (Linux only).
--	<b>includes</b> -- The NTV2 header files.
--	<b>linuxapps</b> -- Source code and makefiles for Linux-specific utilities and test programs.
--	<b>linuxclasses</b> -- Source code for Linux-specific classes.
--	<b>macclasses</b> -- Source code for Mac-specific classes.
--	<b>winclasses</b> -- Source code for Windows-specific classes.
--	<b>winworkspace</b> -- Solution (.sln) files for building Windows tools and demo applications.
 
 @subsection		gs-contents-qtbuild		qtbuild
 
@@ -162,13 +157,7 @@ This tool measures your host system's storage read/write performance and the DMA
 
 @subsubsection		gs-tools-dataratecalc	Data Rate Calculator
 
-This handy tool is used to calculate the bandwidth and storage requirements for various video/audio data formats and frame rates.
--	On <b>Windows</b>, this tool is called <b>dataratecalculator</b>, and is located here:
-	-	<tt>installdir\NTV2SDK\DiagnosticsAndTools</tt>
--	On <b>Linux</b>, this tool is also called dataratecalculator, and, once built, is located here:
-	-	<tt>installdir/ntv2projects/bin</tt>
--	On <b>MacOS</b>, this tool, called <b>AJA DataCalc</b>, is not included in the SDK, but is installed with the retail software,
-	and can be found in the <b>AJA Utilities</b> folder (inside the <b>Applications</b> folder).
+The Data Rate Calculator is now online at https://www.aja.com/PUT_URL_TO_DATACALC_HERE.
 
 
 @subsubsection		gs-tools-supportlog		Support Log
@@ -519,6 +508,11 @@ However, the NTV2 "classes" library source code is provided, and the libraries c
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
 -#	Build the <b>classes</b> library.
 Look for the <b>.DLL</b> in <tt>APIandSamples\\bin</tt>, or the <b>.LIB</b> in <tt>APIandSamples\\lib</tt>.
+
+@subsection		gs-qtbuild	Building the Libraries --- Qt Creator
+
+Qt Creator is a feature-rich integrated development environment that works identically on Linux, MacOS and Windows.
+FINISH THIS.
 
 
 @section	gs-newprojects	Creating New Projects With the SDK
