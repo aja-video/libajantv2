@@ -176,7 +176,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
 		_numSectorsMain = _flashSize / _sectorSize / 4;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 3;
+		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 4;
 		_numSectorsSOC1 = _flashSize / _sectorSize / 4;
 		_numSectorsSOC2 = _flashSize / _sectorSize / 4;
 		_mainOffset = 0;
