@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajantv2\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_DEBUG;_CRT_SECURE_NO_WARNINGS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -119,7 +119,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajantv2\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;_CRT_SECURE_NO_WARNINGS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -141,7 +141,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajantv2\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -167,7 +167,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\includes;..\..\src;..\..\src\win;..\;..\..\..\;..\..\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajantv2\codecs\hevc\m31;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;_CRT_SECURE_NO_WARNINGS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -198,10 +198,10 @@
     <ClInclude Include="ntv2encodehevcvifac.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ajabase\build\ajabase_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\ajalibraries\ajabase\build\ajabase_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\build\libajantv2_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\ajalibraries\ajantv2\build\libajantv2_vs12.vcxproj">
       <Project>{5cb46d0f-27ca-4a59-ab0a-1dfbdb44caa2}</Project>
     </ProjectReference>
   </ItemGroup>
