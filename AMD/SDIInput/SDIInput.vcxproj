@@ -67,26 +67,26 @@
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)_32d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)_32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\..\..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)</TargetName>
@@ -94,7 +94,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\classes;..\..\..\winclasses;..\..\..\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;DEBUG;_DEBUG;_WINDOWS;AJA_WINDOWS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -120,7 +120,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>./;../common;../SDICommon;..\..\..\classes;..\..\..\winclasses;..\..\..\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -144,7 +144,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\classes;..\..\..\winclasses;..\..\..\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;NDEBUG;_WINDOWS;AJA_WINDOWS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -172,7 +172,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>./;../common;../SDICommon;..\..\..\classes;..\..\..\winclasses;..\..\..\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -221,10 +221,10 @@
     <ResourceCompile Include="SDIInput.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ajaapi\ajabase\build\ajabase_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajabase\build\ajabase_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\classes\classesSTATIC_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2_vs12.vcxproj">
       <Project>{5cb46d0f-27ca-4a59-ab0a-1dfbdb44caa2}</Project>
     </ProjectReference>
   </ItemGroup>
