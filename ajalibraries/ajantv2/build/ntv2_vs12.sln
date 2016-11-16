@@ -9,31 +9,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMD", "AMD", "{954E7173-B54
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NVIDIA", "NVIDIA", "{F89AB575-179F-4694-B6E3-939C56BC5F46}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn", "..\demoapps\ntv2burn\ntv2burn.vcxproj", "{E3234189-BDC1-4B0E-BD9B-7C44F3B3D219}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn", "..\..\..\ajaapps\crossplatform\demoapps\ntv2burn\ntv2burn.vcxproj", "{E3234189-BDC1-4B0E-BD9B-7C44F3B3D219}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player", "..\demoapps\ntv2player\ntv2player.vcxproj", "{CC01A355-CABB-4ACD-82BD-0E62236CF32C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player", "..\..\..\ajaapps\crossplatform\demoapps\ntv2player\ntv2player.vcxproj", "{CC01A355-CABB-4ACD-82BD-0E62236CF32C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccgrabber", "..\demoapps\ntv2ccgrabber\ntv2ccgrabber.vcxproj", "{F8768B72-C9AE-4662-8D67-69075B81D6C7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccgrabber", "..\..\..\ajaapps\crossplatform\demoapps\ntv2ccgrabber\ntv2ccgrabber.vcxproj", "{F8768B72-C9AE-4662-8D67-69075B81D6C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2capture", "..\demoapps\ntv2capture\ntv2capture.vcxproj", "{FE87FB0C-4ECF-4F9B-B5B7-08B76A05440C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2capture", "..\..\..\ajaapps\crossplatform\demoapps\ntv2capture\ntv2capture.vcxproj", "{FE87FB0C-4ECF-4F9B-B5B7-08B76A05440C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2enumerateboards", "..\demoapps\ntv2enumerateboards\enumerateboards.vcxproj", "{7D983310-D012-4067-8051-E5F1D78FFB92}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2enumerateboards", "..\..\..\ajaapps\crossplatform\demoapps\ntv2enumerateboards\enumerateboards.vcxproj", "{7D983310-D012-4067-8051-E5F1D78FFB92}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2outputtestpattern", "..\demoapps\ntv2outputtestpattern\outputtestpattern.vcxproj", "{CA542F38-1B47-4F0A-A556-37642AEFB275}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2outputtestpattern", "..\..\..\ajaapps\crossplatform\demoapps\ntv2outputtestpattern\outputtestpattern.vcxproj", "{CA542F38-1B47-4F0A-A556-37642AEFB275}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2fieldburn", "..\demoapps\ntv2fieldburn\ntv2fieldburn.vcxproj", "{6F1196AE-A8EF-4439-8847-29FA3061B59A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2fieldburn", "..\..\..\ajaapps\crossplatform\demoapps\ntv2fieldburn\ntv2fieldburn.vcxproj", "{6F1196AE-A8EF-4439-8847-29FA3061B59A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccplayer", "..\demoapps\ntv2ccplayer\ntv2ccplayer.vcxproj", "{AC7219B3-248E-4220-940A-28CD02613A9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2ccplayer", "..\..\..\ajaapps\crossplatform\demoapps\ntv2ccplayer\ntv2ccplayer.vcxproj", "{AC7219B3-248E-4220-940A-28CD02613A9A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMDSDIOutput", "..\demoapps\AMD\SDIOutput\SDIOutput.vcxproj", "{642C5E75-C462-4C12-B18D-6523E30716C8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMDSDIOutput", "..\..\..\ajaapps\crossplatform\demoapps\AMD\SDIOutput\SDIOutput.vcxproj", "{642C5E75-C462-4C12-B18D-6523E30716C8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Includes", ".\Includes_vs12.vcxproj", "{D50058D5-8D6E-4D8B-9E16-A513448A5DCD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMDSDIInput", "..\demoapps\AMD\SDIInput\SDIInput.vcxproj", "{99E98E73-676D-48FE-B7FB-1B847D46C3C2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMDSDIInput", "..\..\..\ajaapps\crossplatform\demoapps\AMD\SDIInput\SDIInput.vcxproj", "{99E98E73-676D-48FE-B7FB-1B847D46C3C2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn4kQuadrant", "..\demoapps\ntv2burn4kquadrant\ntv2burn4k.vcxproj", "{EB93E072-3E2C-418A-A5A3-BAF8314180E3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2burn4kQuadrant", "..\..\..\ajaapps\crossplatform\demoapps\ntv2burn4kquadrant\ntv2burn4k.vcxproj", "{EB93E072-3E2C-418A-A5A3-BAF8314180E3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player4k", "..\demoapps\ntv2player4k\ntv2player4k.vcxproj", "{FF7020B1-2F15-4AE9-9F43-52D2FDB67E5A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2player4k", "..\..\..\ajaapps\crossplatform\demoapps\ntv2player4k\ntv2player4k.vcxproj", "{FF7020B1-2F15-4AE9-9F43-52D2FDB67E5A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", ".\libajantv2dll_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
 EndProject
@@ -47,17 +47,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclasses", "..\..\gpustuf
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oglclassesDLL", "..\..\gpustuff\oglclassesDLL_vs12.vcxproj", "{36EAC2C3-81DB-4BD7-980E-41B238C235C3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2llburn", "..\demoapps\ntv2llburn\ntv2llburn.vcxproj", "{8B5BDCA3-FA56-4DBE-B006-966EB55132BD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2llburn", "..\..\..\ajaapps\crossplatform\demoapps\ntv2llburn\ntv2llburn.vcxproj", "{8B5BDCA3-FA56-4DBE-B006-966EB55132BD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabase", "..\..\ajabase\build\ajabase_vs12.vcxproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabasedll", "..\..\ajabase\build\ajabasedll_vs12.vcxproj", "{733755C5-1CF3-489B-81D5-ECD353029782}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevc", "..\demoapps\ntv2encodehevc\ntv2encodehevc.vcxproj", "{58B1D7AA-F148-43DD-8CB9-8C5DAFBABD42}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevc", "..\..\..\ajaapps\crossplatform\demoapps\ntv2encodehevc\ntv2encodehevc.vcxproj", "{58B1D7AA-F148-43DD-8CB9-8C5DAFBABD42}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevcfile", "..\demoapps\ntv2encodehevcfile\ntv2encodehevcfile.vcxproj", "{13A99E80-4EE4-4116-AF97-9CCA52027CE4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevcfile", "..\..\..\ajaapps\crossplatform\demoapps\ntv2encodehevcfile\ntv2encodehevcfile.vcxproj", "{13A99E80-4EE4-4116-AF97-9CCA52027CE4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevcvif", "..\demoapps\ntv2encodehevcvif\ntv2encodehevcvif.vcxproj", "{A770F0A5-FBAD-4F43-8263-9A0B05F329AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntv2encodehevcvif", "..\..\..\ajaapps\crossplatform\demoapps\ntv2encodehevcvif\ntv2encodehevcvif.vcxproj", "{A770F0A5-FBAD-4F43-8263-9A0B05F329AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

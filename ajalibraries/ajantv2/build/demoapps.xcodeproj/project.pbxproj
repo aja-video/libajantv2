@@ -218,53 +218,53 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
-		B439717616F2BB7900A53B64 /* ntv2outputtestpattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2outputtestpattern.h; path = ../demoapps/ntv2outputtestpattern/ntv2outputtestpattern.h; sourceTree = SOURCE_ROOT; };
+        B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
+		B439717616F2BB7900A53B64 /* ntv2outputtestpattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2outputtestpattern.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.h; sourceTree = SOURCE_ROOT; };
 		B43C7CAA17259A490030A94E /* ntv2ccplayer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2ccplayer; sourceTree = BUILT_PRODUCTS_DIR; };
-		B43C7CB517259D840030A94E /* ntv2ccplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2ccplayer.cpp; path = ../demoapps/ntv2ccplayer/ntv2ccplayer.cpp; sourceTree = SOURCE_ROOT; };
-		B43C7CBA17259F420030A94E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2ccplayer/main.cpp; sourceTree = SOURCE_ROOT; };
-		B43C7CBF1725A1670030A94E /* ntv2ccplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2ccplayer.h; path = ../demoapps/ntv2ccplayer/ntv2ccplayer.h; sourceTree = SOURCE_ROOT; };
-		B44AB185183541C900EA60ED /* ntv2democommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2democommon.h; path = ../demoapps/ntv2democommon.h; sourceTree = SOURCE_ROOT; };
+		B43C7CB517259D840030A94E /* ntv2ccplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2ccplayer.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccplayer/ntv2ccplayer.cpp; sourceTree = SOURCE_ROOT; };
+		B43C7CBA17259F420030A94E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccplayer/main.cpp; sourceTree = SOURCE_ROOT; };
+		B43C7CBF1725A1670030A94E /* ntv2ccplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2ccplayer.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccplayer/ntv2ccplayer.h; sourceTree = SOURCE_ROOT; };
+		B44AB185183541C900EA60ED /* ntv2democommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2democommon.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2democommon.h; sourceTree = SOURCE_ROOT; };
 		B44C0B0C1B61C25100D7F59A /* ntv2llburn */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2llburn; sourceTree = BUILT_PRODUCTS_DIR; };
-		B44C0B101B61C2D400D7F59A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2llburn/main.cpp; sourceTree = SOURCE_ROOT; };
-		B44C0B121B61C2EC00D7F59A /* ntv2llburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2llburn.cpp; path = ../demoapps/ntv2llburn/ntv2llburn.cpp; sourceTree = SOURCE_ROOT; };
-		B44C0B131B61C2EC00D7F59A /* ntv2llburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2llburn.h; path = ../demoapps/ntv2llburn/ntv2llburn.h; sourceTree = SOURCE_ROOT; };
-		B45183D51935341F00F3D8E9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2player4k/main.cpp; sourceTree = SOURCE_ROOT; };
-		B45183D61935342E00F3D8E9 /* ntv2player4k.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2player4k.cpp; path = ../demoapps/ntv2player4k/ntv2player4k.cpp; sourceTree = SOURCE_ROOT; };
-		B45183D71935342E00F3D8E9 /* ntv2player4k.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2player4k.h; path = ../demoapps/ntv2player4k/ntv2player4k.h; sourceTree = SOURCE_ROOT; };
+		B44C0B101B61C2D400D7F59A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2llburn/main.cpp; sourceTree = SOURCE_ROOT; };
+		B44C0B121B61C2EC00D7F59A /* ntv2llburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2llburn.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2llburn/ntv2llburn.cpp; sourceTree = SOURCE_ROOT; };
+		B44C0B131B61C2EC00D7F59A /* ntv2llburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2llburn.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2llburn/ntv2llburn.h; sourceTree = SOURCE_ROOT; };
+		B45183D51935341F00F3D8E9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k/main.cpp; sourceTree = SOURCE_ROOT; };
+		B45183D61935342E00F3D8E9 /* ntv2player4k.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2player4k.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k/ntv2player4k.cpp; sourceTree = SOURCE_ROOT; };
+		B45183D71935342E00F3D8E9 /* ntv2player4k.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2player4k.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k/ntv2player4k.h; sourceTree = SOURCE_ROOT; };
 		B45183E31935348C00F3D8E9 /* ntv2player4k */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2player4k; sourceTree = BUILT_PRODUCTS_DIR; };
 		B46B5F8C1729AD2F004E84C3 /* ntv2fieldburn */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2fieldburn; sourceTree = BUILT_PRODUCTS_DIR; };
-		B46B5F9A1729AF7D004E84C3 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2fieldburn/main.cpp; sourceTree = SOURCE_ROOT; };
-		B46B5FA31729B06D004E84C3 /* ntv2fieldburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2fieldburn.cpp; path = ../demoapps/ntv2fieldburn/ntv2fieldburn.cpp; sourceTree = SOURCE_ROOT; };
-		B46B5FA41729B06D004E84C3 /* ntv2fieldburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2fieldburn.h; path = ../demoapps/ntv2fieldburn/ntv2fieldburn.h; sourceTree = SOURCE_ROOT; };
-		B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2democommon.cpp; path = ../demoapps/ntv2democommon.cpp; sourceTree = SOURCE_ROOT; };
-		B4A700C8167947C8001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2player/main.cpp; sourceTree = SOURCE_ROOT; };
+		B46B5F9A1729AF7D004E84C3 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn/main.cpp; sourceTree = SOURCE_ROOT; };
+		B46B5FA31729B06D004E84C3 /* ntv2fieldburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2fieldburn.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn/ntv2fieldburn.cpp; sourceTree = SOURCE_ROOT; };
+		B46B5FA41729B06D004E84C3 /* ntv2fieldburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2fieldburn.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn/ntv2fieldburn.h; sourceTree = SOURCE_ROOT; };
+		B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2democommon.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2democommon.cpp; sourceTree = SOURCE_ROOT; };
+		B4A700C8167947C8001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2player/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4A700F716794E9A001D4AA8 /* ntv2player */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2player; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A70132167950CA001D4AA8 /* ntv2outputtestpattern */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2outputtestpattern; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4A70137167950FC001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2outputtestpattern/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4A70137167950FC001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4A7048C16829C4A001D4AA8 /* ntv2ccgrabber */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2ccgrabber; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4A7049216829C9D001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2ccgrabber/main.cpp; sourceTree = SOURCE_ROOT; };
-		B4A704A216829E2C001D4AA8 /* ntv2ccgrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2ccgrabber.cpp; path = ../demoapps/ntv2ccgrabber/ntv2ccgrabber.cpp; sourceTree = SOURCE_ROOT; };
-		B4A704A316829E2C001D4AA8 /* ntv2ccgrabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2ccgrabber.h; path = ../demoapps/ntv2ccgrabber/ntv2ccgrabber.h; sourceTree = SOURCE_ROOT; };
+		B4A7049216829C9D001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccgrabber/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4A704A216829E2C001D4AA8 /* ntv2ccgrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2ccgrabber.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccgrabber/ntv2ccgrabber.cpp; sourceTree = SOURCE_ROOT; };
+		B4A704A316829E2C001D4AA8 /* ntv2ccgrabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2ccgrabber.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccgrabber/ntv2ccgrabber.h; sourceTree = SOURCE_ROOT; };
 		B4A7F8C31677FC15001D4AA8 /* ntv2enumerateboards */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2enumerateboards; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4A7F8D11678186E001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2enumerateboards/main.cpp; sourceTree = SOURCE_ROOT; };
-		B4A7F8DA16781B57001D4AA8 /* ntv2burn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn.cpp; path = ../demoapps/ntv2burn/ntv2burn.cpp; sourceTree = SOURCE_ROOT; };
-		B4A7F8DB16781B57001D4AA8 /* ntv2burn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2burn.h; path = ../demoapps/ntv2burn/ntv2burn.h; sourceTree = SOURCE_ROOT; };
-		B4A7F8DC16781B57001D4AA8 /* ntv2enumerateboards.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2enumerateboards.cpp; path = ../demoapps/ntv2enumerateboards/ntv2enumerateboards.cpp; sourceTree = SOURCE_ROOT; };
-		B4A7F8DD16781B57001D4AA8 /* ntv2enumerateboards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2enumerateboards.h; path = ../demoapps/ntv2enumerateboards/ntv2enumerateboards.h; sourceTree = SOURCE_ROOT; };
-		B4A7F8E016781B57001D4AA8 /* ntv2player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2player.cpp; path = ../demoapps/ntv2player/ntv2player.cpp; sourceTree = SOURCE_ROOT; };
-		B4A7F8E116781B57001D4AA8 /* ntv2player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2player.h; path = ../demoapps/ntv2player/ntv2player.h; sourceTree = SOURCE_ROOT; };
+		B4A7F8D11678186E001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2enumerateboards/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4A7F8DA16781B57001D4AA8 /* ntv2burn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn/ntv2burn.cpp; sourceTree = SOURCE_ROOT; };
+		B4A7F8DB16781B57001D4AA8 /* ntv2burn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2burn.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn/ntv2burn.h; sourceTree = SOURCE_ROOT; };
+		B4A7F8DC16781B57001D4AA8 /* ntv2enumerateboards.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2enumerateboards.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2enumerateboards/ntv2enumerateboards.cpp; sourceTree = SOURCE_ROOT; };
+		B4A7F8DD16781B57001D4AA8 /* ntv2enumerateboards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2enumerateboards.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2enumerateboards/ntv2enumerateboards.h; sourceTree = SOURCE_ROOT; };
+		B4A7F8E016781B57001D4AA8 /* ntv2player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2player.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2player/ntv2player.cpp; sourceTree = SOURCE_ROOT; };
+		B4A7F8E116781B57001D4AA8 /* ntv2player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2player.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2player/ntv2player.h; sourceTree = SOURCE_ROOT; };
 		B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		B4A7FD7B167915A7001D4AA8 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
-		B4A7FD94167916D7001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2burn/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4A7FD94167916D7001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4A7FD981679171B001D4AA8 /* ntv2burn */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2burn; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
-		B4CADABD180F00F6004C9057 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../demoapps/ntv2burn4kquadrant/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4CADABD180F00F6004C9057 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4CADAC2180F0134004C9057 /* ntv2burn4kquadrant */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2burn4kquadrant; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn4kquadrant.cpp; path = ../demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.cpp; sourceTree = SOURCE_ROOT; };
-		B4CADACD180F0321004C9057 /* ntv2burn4kquadrant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2burn4kquadrant.h; path = ../demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.h; sourceTree = SOURCE_ROOT; };
-		B4E76F3B16AA180300473DBD /* ntv2capture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2capture.cpp; path = ../demoapps/ntv2capture/ntv2capture.cpp; sourceTree = SOURCE_ROOT; };
-		B4E76F3C16AA180300473DBD /* ntv2capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2capture.h; path = ../demoapps/ntv2capture/ntv2capture.h; sourceTree = SOURCE_ROOT; };
+		B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn4kquadrant.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.cpp; sourceTree = SOURCE_ROOT; };
+		B4CADACD180F0321004C9057 /* ntv2burn4kquadrant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2burn4kquadrant.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.h; sourceTree = SOURCE_ROOT; };
+		B4E76F3B16AA180300473DBD /* ntv2capture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2capture.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture/ntv2capture.cpp; sourceTree = SOURCE_ROOT; };
+		B4E76F3C16AA180300473DBD /* ntv2capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2capture.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture/ntv2capture.h; sourceTree = SOURCE_ROOT; };
 		B4E76F4B16AA186B00473DBD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B4E76F5116AA1AC900473DBD /* ntv2capture */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2capture; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -390,7 +390,7 @@
 				B43C7CBF1725A1670030A94E /* ntv2ccplayer.h */,
 			);
 			name = ntv2ccplayer;
-			path = ../demoapps/ntv2ccplayer;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2ccplayer;
 			sourceTree = SOURCE_ROOT;
 		};
 		B44C0B0F1B61C2B300D7F59A /* ntv2llburn */ = {
@@ -401,7 +401,7 @@
 				B44C0B131B61C2EC00D7F59A /* ntv2llburn.h */,
 			);
 			name = ntv2llburn;
-			path = ../demoapps/ntv2llburn;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2llburn;
 			sourceTree = SOURCE_ROOT;
 		};
 		B45183D4193533FF00F3D8E9 /* ntv2player4k */ = {
@@ -412,7 +412,7 @@
 				B45183D71935342E00F3D8E9 /* ntv2player4k.h */,
 			);
 			name = ntv2player4k;
-			path = ../demoapps/ntv2player4k;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k;
 			sourceTree = SOURCE_ROOT;
 		};
 		B46B5F981729AF3E004E84C3 /* ntv2fieldburn */ = {
@@ -423,7 +423,7 @@
 				B46B5FA41729B06D004E84C3 /* ntv2fieldburn.h */,
 			);
 			name = ntv2fieldburn;
-			path = ../demoapps/ntv2fieldburn;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A700C71679479D001D4AA8 /* ntv2player */ = {
@@ -434,7 +434,7 @@
 				B4A7F8E116781B57001D4AA8 /* ntv2player.h */,
 			);
 			name = ntv2player;
-			path = ../demoapps/ntv2player;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2player;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A7012E167950A3001D4AA8 /* ntv2outputtestpattern */ = {
@@ -445,7 +445,7 @@
 				B439717616F2BB7900A53B64 /* ntv2outputtestpattern.h */,
 			);
 			name = ntv2outputtestpattern;
-			path = ../demoapps/ntv2outputtestpattern;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A7048816829C07001D4AA8 /* ntv2ccgrabber */ = {
@@ -456,7 +456,7 @@
 				B4A704A316829E2C001D4AA8 /* ntv2ccgrabber.h */,
 			);
 			name = ntv2ccgrabber;
-			path = ../demoapps/ntv2ccgrabber;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2ccgrabber;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A7F8B51677FB4C001D4AA8 = {
@@ -494,7 +494,7 @@
 				B4A7F8DD16781B57001D4AA8 /* ntv2enumerateboards.h */,
 			);
 			name = ntv2enumerateboards;
-			path = ../demoapps/ntv2enumerateboards;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2enumerateboards;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A7F8D616781B19001D4AA8 /* demoapps */ = {
@@ -515,7 +515,7 @@
 				B45183D4193533FF00F3D8E9 /* ntv2player4k */,
 			);
 			name = demoapps;
-			path = ../demoapps;
+			path = ../../../ajaapps/crossplatform/demoapps;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4A7FC431679155A001D4AA8 /* Frameworks */ = {
@@ -536,7 +536,7 @@
 				B4A7F8DB16781B57001D4AA8 /* ntv2burn.h */,
 			);
 			name = ntv2burn;
-			path = ../demoapps/ntv2burn;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2burn;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4CADABC180F0049004C9057 /* ntv2burn4kquadrant */ = {
@@ -547,7 +547,7 @@
 				B4CADACD180F0321004C9057 /* ntv2burn4kquadrant.h */,
 			);
 			name = ntv2burn4kquadrant;
-			path = ../demoapps/ntv2burn4kquadrant;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4E76F4616AA181B00473DBD /* ntv2capture */ = {
@@ -558,7 +558,7 @@
 				B4E76F3C16AA180300473DBD /* ntv2capture.h */,
 			);
 			name = ntv2capture;
-			path = ../demoapps/ntv2capture;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2capture;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
@@ -1122,7 +1122,7 @@
 				HEADER_SEARCH_PATHS = (
 					../includes,
 					../src/mac,
-					../demoapps,
+					../../../ajaapps/crossplatform/demoapps,
 					../..,
 				);
 				LIBRARY_SEARCH_PATHS = ../../../lib;
@@ -1166,7 +1166,7 @@
 				HEADER_SEARCH_PATHS = (
 					../includes,
 					../src/mac,
-					../demoapps,
+					../../../ajaapps/crossplatform/demoapps,
 					../..,
 				);
 				LIBRARY_SEARCH_PATHS = ../../../lib;
