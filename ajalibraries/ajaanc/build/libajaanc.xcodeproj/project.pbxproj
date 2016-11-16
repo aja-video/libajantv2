@@ -473,7 +473,7 @@
 				LIBRARY_SEARCH_PATHS = ../../../lib;
 				OTHER_LDFLAGS = (
 					"-lajaanc",
-					"-lclassesd",
+					"-lajantv2d",
 					"-lajabased",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -491,7 +491,7 @@
 				LIBRARY_SEARCH_PATHS = ../../../lib;
 				OTHER_LDFLAGS = (
 					"-lajaanc",
-					"-lclasses",
+					"-lajantv2",
 					"-lajabase",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
