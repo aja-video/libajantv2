@@ -83,6 +83,7 @@
 
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
+#define kRegSarekLicenseStatus      38
 
 #define kRegSarekRx1Drops           40
 #define kRegSarekRx2Drops           41
@@ -117,6 +118,9 @@
 #define SAREK_Fractional_2			BIT(17)
 #define SAREK_Fractional_3			BIT(18)
 #define SAREK_Fractional_4			BIT(19)
+
+#define SAREK_LICENSE_PRESENT       BIT(31)
+#define SAREK_LICENSE_VALID         BIT(30)
 
 /////////////////////////////////////////////////////////////////////
 //
