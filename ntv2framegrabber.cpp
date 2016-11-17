@@ -491,6 +491,11 @@ void NTV2FrameGrabber::run (void)
 			if (mTransferStruct.acTransferStatus.acFrameStamp.GetInputTimeCodes (tcValues) && (size_t) mTimeCodeSource < tcValues.size ())
 			{
 				CRP188	tc	(tcValues.at (mTimeCodeSource));
+				if (!tcValues.at (mTimeCodeSource).IsValid ())
+				{
+					//	If the requested timecode was invalid, check for embedded LTC
+					tc.SetRP188 (tcValues.at (::NTV2InputSourceToTimecodeIndex (mInputSource, true)));
+				}
 				tc.GetRP188Str (mTimeCode);
 			}
 
