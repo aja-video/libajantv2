@@ -1298,17 +1298,17 @@ bool  CNTV2Config2022::ConfigurePTP (eSFP port, string localIPAddress)
     addr = NTV2EndianSwap32(addr);
 
 	// configure pll
-    WriteChannelRegister(kRegPll_Clock_Port_Low + SAREK_PLL, macLo | 0x0191);
-    WriteChannelRegister(kRegPll_Clock_Port_High + SAREK_PLL, macHi);
+    WriteChannelRegister(kRegPll_PTP_LclMacLo   + SAREK_PLL, macLo | 0x0191);
+    WriteChannelRegister(kRegPll_PTP_LclMacHi   + SAREK_PLL, macHi);
 
-    WriteChannelRegister(kRegPll_UDP_Port + SAREK_PLL, 0x0140013f);
-    WriteChannelRegister(kRegPll_MultiCast_Address + SAREK_PLL, 0xe0000181);
-    WriteChannelRegister(kRegPll_IP_Address + SAREK_PLL, addr);
+    WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0140013f);
+    WriteChannelRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
+    WriteChannelRegister(kRegPll_PTP_MstrIP     + SAREK_PLL, addr);
 
-    WriteChannelRegister(kRegPll_Clock_Identity_Low + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
-    WriteChannelRegister(kRegPll_Clock_Identity_High + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
+    WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
+    WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
 
-	return true;
+    return true;
 }
 
 string CNTV2Config2022::getLastError()

@@ -623,13 +623,25 @@
 #define kRegPll_Correction                      15              // 0x003c
 
 
-#define kRegPll_Clock_Port_Low                  16              // 0x0040
-#define kRegPll_Clock_Port_High                 17              // 0x0044
-#define kRegPll_UDP_Port                        18              // 0x0048
-#define kRegPll_MultiCast_Address               20              // 0x0050
-#define kRegPll_IP_Address                      21              // 0x0054
-#define kRegPll_Clock_Identity_Low              22              // 0x0058
-#define kRegPll_Clock_Identity_High             23              // 0x005C
+#define kRegPll_PTP_PDF_Binthresh               0x10
+#define kRegPll_PTP_PDF_Binaddr                 0x11
+#define kRegPll_PTP_PDF_Bindata                 0x12
+#define kRegPll_PTP_Gain                        0x13
+#define kRegPll_PTP_LclMacLo                    0x14
+#define kRegPll_PTP_LclMacHi                    0x15
+#define kRegPll_PTP_LclIP                       0x16
+#define kRegPll_PTP_LclUdp                      0x17
+#define kRegPll_PTP_MstrIP                      0x18
+#define kRegPll_PTP_MstrMcast                   0x19
+#define kRegPll_PTP_EventUdp                    0x1a
+#define kRegPll_PTP_GenUdp                      0x1b
+#define kRegPll_PTP_Match                       0x1c
+#define kRegPll_PTP_LclClkIdLo                  0x1d
+#define kRegPll_PTP_LclClkIdHi                  0x1e
+#define kRegPll_PTP_PhaseError                  0x1f
+#define kRegPll_PTP_Correction                  0x20
+
+
 
 /////////////////////////////////////////////////////////////////////
 //
