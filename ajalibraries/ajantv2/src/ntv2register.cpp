@@ -8193,6 +8193,10 @@ bool CNTV2Card::SetLTCInputEnable(bool value)
 		if(source == NTV2_REFERENCE_EXTERNAL)
 			SetReference(NTV2_REFERENCE_FREERUN);
 	}
+	if(GetDeviceID() == DEVICE_ID_CORVID24)
+	{
+		value = !value;
+	}
 	WriteRegister (kRegFS1ReferenceSelect, value, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect);
 	return WriteRegister (kRegFS1ReferenceSelect, value? 0 : 1, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
 }
@@ -8206,6 +8210,10 @@ bool CNTV2Card::SetLTCOnReference(bool value)
 		GetReference(source);
 		if(source == NTV2_REFERENCE_EXTERNAL)
 			SetReference(NTV2_REFERENCE_FREERUN);
+	}
+	if(GetDeviceID() == DEVICE_ID_CORVID24)
+	{
+		value = !value;
 	}
 	WriteRegister (kRegFS1ReferenceSelect, value, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect);
 	return WriteRegister (kRegFS1ReferenceSelect, value? 0 : 1, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
