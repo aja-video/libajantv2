@@ -121,6 +121,7 @@
 
 #define SAREK_LICENSE_PRESENT       BIT(31)
 #define SAREK_LICENSE_VALID         BIT(30)
+#define SAREK_LICENSE_J2K           BIT(1)
 
 /////////////////////////////////////////////////////////////////////
 //
