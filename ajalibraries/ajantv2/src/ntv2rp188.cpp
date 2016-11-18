@@ -1868,7 +1868,7 @@ void CRP188::writeV210Pixel (char **pBytePtr, int x, int c, int y)
 }
 
 
-bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, LWord frameCount, bool bDisplay60_50fpsAs30_25)
+bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount, bool bDisplay60_50fpsAs30_25)
 {
 	int val, char1, char2, trailingChar = kMaxTCChars;
 	int charSizeBytes = _charWidthBytes * _charHeightLines;
@@ -1960,28 +1960,30 @@ bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode bur
 
 		else	// display frame count
 		{
-				// we have two possible formats: if we the user DOESN'T pass in a frameCount, we calculate the frame count
-				// from the current timecode. Since it can be (at most) 7 digits in size, we display 7 digits with 2 spaces
-				// on either side. If the user DOES pass in a frame count it could be larger in size (we're going to allow
-				// up to 9 digits plus a sign), so we're going to display 9 digits with one space on either side.
+			// we have two possible formats: if we the user DOESN'T pass in a frameCount, we calculate the frame count
+			// from the current timecode. Since it can be (at most) 7 digits in size, we display 7 digits with 2 spaces
+			// on either side. If the user DOES pass in a frame count it could be larger in size (we're going to allow
+			// up to 9 digits plus a sign), so we're going to display 9 digits with one space on either side.
 
-			LWord count = frameCount;				// use passed-in frame count (allows for values outside the range of normal 24-hr timecode)
-			LWord scale = 1000000000;				// 9 digit max
+			int64_t count = frameCount;				// use passed-in frame count (allows for values outside the range of normal 24-hr timecode)
+			int64_t scale = 1000000000;				// 9 digit max
 			int maxDigits = 9;
 			int numSpaces = 1;						// 1 + 9 + 1 = 11
 			int i;
 			if (count == kDefaultFrameCount)
 			{
-				GetFrameCount((ULWord &)count);		// default = get current frame count
+				ULWord	tmpCount (0);
+				GetFrameCount(tmpCount);		// default = get current frame count
+				count = tmpCount;
 				scale = 10000000;					// 7 digit max
 				maxDigits = 7;
 				numSpaces = 2;						// 2 + 7 + 2 = 11
 			}
 
-				// 1 or 2 pre-spaces
+			// 1 or 2 pre-spaces
 			for (i = 0; i < numSpaces; i++)
 			{
-					// check for sign
+				// check for sign
 				if (i == numSpaces-1)
 				{
 					if (count >= 0)
@@ -2014,8 +2016,7 @@ bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode bur
 				count -= (scale * char1);		// get remainder
 			}
 
-
-				// 1 or 2 post-spaces
+			// 1 or 2 post-spaces
 			for ( i = 0; i < numSpaces; i++)
 			{
 				CopyDigit ( (_pCharRenderMap + (kDigSpace * charSizeBytes)), _charWidthBytes, _charHeightLines, pFrameBuff, rowBytes);
@@ -2024,7 +2025,7 @@ bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode bur
 		}
 	}
 
-	return (_bInitialized & _bRendered);
+	return _bInitialized & _bRendered;
 }
 
 void CRP188::CopyDigit (char *pDigit, int digitWidth, int digitHeight, char *pFrameBuff, int fbRowBytes)

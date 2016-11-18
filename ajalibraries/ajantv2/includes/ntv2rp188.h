@@ -47,7 +47,7 @@ typedef enum
 } TimecodeBurnMode;
 
 
-const LWord kDefaultFrameCount = 0x80000000;
+const int64_t kDefaultFrameCount = 0x80000000;
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ public:
     // Modifiers
 	bool				InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimensions frameDimensions, LWord percentY = 0);
 	void				writeV210Pixel (char **pBytePtr, int x, int c, int y);
-	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, LWord frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
+	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
 	void				CopyDigit (char *pDigit, int digitWidth, int digitHeight, char *pFrameBuff, int fbRowBytes);
 	string				GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
 	
