@@ -1303,7 +1303,7 @@ bool  CNTV2Config2022::ConfigurePTP (eSFP port, string localIPAddress)
 
     WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0140013f);
     WriteChannelRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
-    WriteChannelRegister(kRegPll_PTP_MstrIP     + SAREK_PLL, addr);
+    WriteChannelRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
 
     WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
     WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
