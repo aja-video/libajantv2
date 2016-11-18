@@ -11,6 +11,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
+#include "ntv2registers2022.h"
 
 #include <string.h>
 #include <assert.h>
@@ -737,7 +738,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	if (IsKonaIPDevice())
 	{
 		uint32_t val;
-		ReadRegister((0x100000 + 0x14) / 4, &val);
+		ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
 		if (val != 0x01)
 		{
 			//MB not ready
