@@ -14,7 +14,6 @@
 #include "ntv2tshelper.h"
 #include <string.h>
 
-
 // Encoder part numbers
 #define     ENCODE_TS_TIMER                 0
 #define     ENCODE_TS_J2K_ENCODER           1

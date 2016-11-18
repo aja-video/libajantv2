@@ -458,36 +458,43 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 
 bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channel channel)
 {
-    NTV2VideoFormat videoFormat;
-    J2KStreamType   streamType;
-    uint32_t        width;
-    uint32_t        height;
-    uint32_t        fpsNum;
-    uint32_t        fpsDen;
-    bool            interlaced;
+    NTV2VideoFormat     videoFormat;
+    //J2KStreamType       streamType;
+    //bool                interlaced;
 
-    int32_t         j2kTsReg;
-    int32_t         w1;
+    int32_t             j2kTsReg;
+    int32_t             w1;
+
+    TsEncapStreamData   streamData;
 
     printf("CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap\n");
 
     // Get our variable user params
     GetJ2KEncodeVideoFormat(channel, videoFormat);
-    GetJ2KEncodeStreamType(channel, streamType);
+    GetJ2KEncodeStreamType(channel, streamData.j2kStreamType);
 
-    interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat);
+    streamData.interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat);
 
     // Calculate height and width based on video format
     NTV2Standard standard = GetNTV2StandardFromVideoFormat(videoFormat);
     NTV2FormatDescriptor fd = GetFormatDescriptor(standard,NTV2_FBF_10BIT_YCBCR,false,false,false);
-    width = fd.GetRasterWidth();
-    height = fd.GetVisibleRasterHeight();
+    streamData.width = fd.GetRasterWidth();
+    streamData.height = fd.GetVisibleRasterHeight();
 
     // Calculate framerate based on video format
     NTV2FrameRate   frameRate = GetNTV2FrameRateFromVideoFormat(videoFormat);
-    GetFramesPerSecond (frameRate, fpsNum, fpsDen);
+    GetFramesPerSecond (frameRate, streamData.numFrameRate, streamData.denFrameRate);
 
-    if (_tsHelper.setup_tables(streamType, width, height, fpsDen, fpsNum, interlaced))
+    // set the PIDs for all streams
+    GetJ2KEncodePMTPid(channel, streamData.programPid);
+    GetJ2KEncodeVideoPid(channel, streamData.videoPid);
+    GetJ2KEncodePCRPid(channel, streamData.pcrPid);
+    GetJ2KEncodeAudio1Pid(channel, streamData.audio1Pid);
+    streamData.doPCR = false;
+
+    _tsHelper.init(streamData);
+
+    if (_tsHelper.setup_tables(streamData.j2kStreamType, streamData.width, streamData.height, streamData.denFrameRate, streamData.numFrameRate, streamData.interlaced))
     {
         return false;
     }
@@ -525,7 +532,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     // This is for Evertz compatibility for now we just write the PES_HDR id and set the length to 4
     // otherwise we use the generated table
     int32_t pesHDRLength = 4;
-    if (streamType == kJ2KStreamTypeStandard)
+    if (streamData.j2kStreamType == kJ2KStreamTypeStandard)
     {
         pesHDRLength = _tsHelper.pes_template_len;
     }
@@ -542,7 +549,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     }
     printf("\n\n");
 
-    if (streamType == kJ2KStreamTypeEvertz)
+    if (streamData.j2kStreamType == kJ2KStreamTypeEvertz)
     {
         printf("PTS Offset = 0x%02x, J2K TS Offset = 0x%02x, auf1 offset = 0x%02x, auf2 offset = 0x%02x\n\n",
                0xff, 0xff, 0xff, 0xff);

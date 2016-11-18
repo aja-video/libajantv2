@@ -16,6 +16,7 @@
 #define MAX_STREAM_DESCRIPTORS      8
 #define NUM_J2K_CHANNELS            4
 #define PID_LIST_SIZE               32
+#define PAT_TABLE_SIZE              32
 
 typedef enum
 {
@@ -38,6 +39,22 @@ typedef enum
     kJ2KCodeBlocksize_64x64,
     kJ2KCodeBlocksize_128x32 = 12
 } J2KCodeBlocksize;
+
+typedef struct TsEncapStreamData
+{
+    J2KStreamType   j2kStreamType;
+    uint32_t        width;
+    uint32_t        height;
+    uint32_t        denFrameRate;
+    uint32_t        numFrameRate;
+    uint32_t        programPid;
+    uint32_t        videoPid;
+    uint32_t        pcrPid;
+    uint32_t        audio1Pid;
+    bool            interlaced;
+    bool            doPCR;
+} TsEncapStreamData;
+
 
 
 // Need NULL packet generation
@@ -91,12 +108,6 @@ typedef struct ts_packet_tds
     int32_t         ss;
     int32_t         ff;
     int32_t         bcol_colcr;
-    int32_t         payload_start;
-    int32_t         frame_payload_offset;
-    int32_t         frm_auf1_offset;
-    int32_t         frm_auf2_offset;
-    int32_t         frm_pts_offset;
-    int32_t         frm_j2k_ts_offset;
     uint8_t         payload[188];
     int32_t         int_payload[188];
 } ts_packet;
@@ -207,7 +218,10 @@ public:
     
     CNTV2TsHelper ();  // class constructor
     ~CNTV2TsHelper (); // class destructor
-    
+
+    void        init(TsEncapStreamData streamData);
+
+
     int32_t     setup_tables(J2KStreamType streamType, uint32_t width, uint32_t height, int32_t denFrameRate, int32_t numFrameRate, bool interlaced);
     int32_t     build_all_tables(void);
     int32_t     build_j2k_descriptor(int32_t desc_num);
@@ -233,7 +247,7 @@ public:
     
     int32_t                     adaptation_template_length;
     
-    pat_table_type              pat_table[256];             // Up to 256 Sections
+    pat_table_type              pat_table[PAT_TABLE_SIZE];
     pmt_table                   pmt_tables[MAX_PROGS];
     int32_t                     pmt_program_number;
     int32_t                     j2k_channel_cnt;
@@ -257,6 +271,8 @@ public:
     int32_t                     ts_gen_tc;                  // TS Packet Generation Period register
     int32_t                     pat_pmt_period;             // Period of transmission register
     
+    TsEncapStreamData           tsStreamData;
+
 private:
     
     int32_t                     bytes16(int32_t src, uint8_t *dest);

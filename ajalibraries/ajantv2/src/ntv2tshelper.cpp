@@ -70,41 +70,9 @@ CNTV2TsHelper::CNTV2TsHelper()
     gen_template.bcol_colcr = 0;
     
     adaptation_template.do_pcr = 0;
-    
-    for (w1 = 0; w1 < 256; w1++)
-    {
-        pat_table[w1].used = 0;
-        pat_table[w1].errs_done = 0;
-        pat_table[w1].different_pat_cnt = 0;
-    }
-    
-    for (w1 = 0; w1 < MAX_PROGS; w1++)
-    {
-        pmt_tables[w1].used = 0;
-        pmt_tables[w1].errs_done = 0;
-        pmt_tables[w1].different_pmt_cnt = 0;
-    }
-    
-    for (w1 = 0; w1 < PID_LIST_SIZE; w1++)
-    {
-        prog_pid_list[w1].used = 0;
-        prog_pid_list[w1].pcr_pid = 0;
-        prog_pid_list[w1].j2k_stream = 0;
-        prog_pid_list[w1].non_j2k_stream = 0;
-        prog_pid_list[w1].pat_table = 0;
-        prog_pid_list[w1].pmt_table = 0;
-        prog_pid_list[w1].cont_cnt = -1;
-        prog_pid_list[w1].found = 0;
-        prog_pid_list[w1].pcr_pid_check = 0;
-        prog_pid_list[w1].j2k_stream_check = 0;
-        prog_pid_list[w1].stream_check = 0;
-    }
-    
-    pid_list_cnt = 0;
-    j2k_channel_cnt = 0;
-    for (w1 = 0; w1 < NUM_J2K_CHANNELS; w1++)
-        j2k_vid_descriptors[w1].used = 0;
-    
+
+    clear_tables();
+        
     // 90ms - to make sure it is at least 100ms
     table_tx_period = 90e-3;
     
@@ -129,6 +97,17 @@ CNTV2TsHelper::CNTV2TsHelper()
 CNTV2TsHelper::~CNTV2TsHelper()
 {
 }
+
+void CNTV2TsHelper::init(TsEncapStreamData streamData)
+{
+    tsStreamData = streamData;
+
+    gen_template.transport_error = 0;
+    gen_template.payload_unit_start = 0;
+    gen_template.transport_priority = 0;
+}
+
+
 
 
 int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, uint32_t width, uint32_t height, int32_t denFrameRate, int32_t numFrameRate, bool interlaced)
@@ -210,7 +189,6 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.transport_error = gen_template.transport_error;
     pes_template.payload_unit_start = gen_template.payload_unit_start;
     pes_template.transport_priority = gen_template.transport_priority;
-    pes_template.pid = gen_template.pid;
     pes_template.transport_scrambling_control = gen_template.transport_scrambling_control;
     pes_template.adaptation_field_control = gen_template.adaptation_field_control;
     pes_template.continuity_counter = gen_template.continuity_counter;
@@ -409,7 +387,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.transport_error = gen_template.transport_error;
     adaptation_template.payload_unit_start = gen_template.payload_unit_start;
     adaptation_template.transport_priority = gen_template.transport_priority;
-    adaptation_template.pid = gen_template.pid;
     adaptation_template.transport_scrambling_control = gen_template.transport_scrambling_control;
     adaptation_template.adaptation_field_control = gen_template.adaptation_field_control;
     adaptation_template.continuity_counter = gen_template.continuity_counter;
@@ -581,7 +558,7 @@ int32_t CNTV2TsHelper::clear_tables(void)
 {
     int32_t w1;
     
-    for (w1 = 0; w1 < 256; w1++)
+    for (w1 = 0; w1 < PAT_TABLE_SIZE; w1++)
     {
         pat_table[w1].used = 0;
         pat_table[w1].errs_done = 0;
@@ -634,7 +611,7 @@ int32_t CNTV2TsHelper::build_all_tables(void)
     
     // First do PAT Table, and build a list of PMT table prog/pid pairs for PMT generation
     w2 = 0;
-    for (w1 = 0; w1 < 256; w1++)
+    for (w1 = 0; w1 < PAT_TABLE_SIZE; w1++)
     {
         if (pat_table[w1].used)
         {
