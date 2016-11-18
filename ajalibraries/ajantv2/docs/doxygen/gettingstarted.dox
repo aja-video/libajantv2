@@ -312,7 +312,7 @@ The SDK distribution comes with the following libraries:
 -	<b>ajacc</b> --- AJA's library for encoding/decoding closed-captions.
 -	<b>ajaanc</b> --- AJA's library to aid ancillary data insertion/extraction.
 -	<b>ajabase</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
--	<b>classes</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
+-	<b>ajantv2</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
 These can be built using the provided Visual Studio project files.
@@ -527,13 +527,11 @@ the SDK was built.
 
 Many OEM developers choose to create their own NTV2-based projects "from scratch." At a minimum, you'll need to do the following:
 -	Linux makefiles employ the environment variable $NTV2_ROOT. If your new project is placed outside of the SDK tree, then it must
-	be defined (e.g., export NTV2_ROOT=<path_to_ntv2projects>).
+	be defined (e.g., \c export NTV2_ROOT=path/to/ajalibraries/ajantv2).
 -	Be sure to define '<b>AJALinux</b>'
--	To define the <b>NTV2_DEPRECATE</b> macro, before building the driver and SDK, be sure to export an environment variable named '<b>NTV2_DEPRECATE</b>'
-	after setting it to '1'.
 -	If you need to be able to debug and step into SDK functions, you will need to build a debug version of the SDK, this time setting a
 	special environment variable: <b>export AJA_DEBUG=1</b>. The resulting libraries will have the same names, but will appear in the
-	directory "ntv2projects/lib-DEBUG".
+	directory "ajalibraries/ajantv2/lib-DEBUG".
 
 
 @subsection	gs-newmacprojects	Mac OS X
@@ -548,20 +546,18 @@ XCode build parameters must be set:
 -	Use a "Mac OS X Deployment Target of 10.8 or later. (Applications built with this SDK should run on Mac OS X 10.6 "Snow Leopard" or later.)
 -	Use Intel 32 or 64-bit architectures (or both). (AJA does not support the PowerPC architecture.)
 -	Define both preprocessor macros "AJAMac" and "AJA_MAC" as "1".
--	Define the "NTV2_DEPRECATE" macro. This will ensure you're using the latest APIs -- and nothing that's going to be obsolete.
 -	Add the following header search paths:
-	-	<b>sdkdir/ntv2projects/includes</b>
-	-	<b>sdkdir/ntv2projects/classes</b>
-	-	<b>sdkdir/ntv2projects/macclasses</b>
-	-	<b>sdkdir/ajaapi</b> (only if "ajabase" is needed)
+	-	<b>sdkdir/ajalibraries/ajantv2/includes</b>
+	-	<b>sdkdir/ajalibraries/ajantv2/src/mac</b>
+	-	<b>sdkdir/ajalibraries/ajabase</b> (only if "ajabase" is needed)
 	-	<b>sdkdir/ajalibraries/ajacc</b> (only if the AJA Captioning Library is needed)
 	-	<b>sdkdir/ajalibraries/ajaanc</b> (only if the AJA ancillary data library is needed)
 -	It is not necessary to always search "user" header paths.
--	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in #include statements.
+-	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	Add the following library search paths:
 	-	<b>sdkdir/lib</b>
 -	Add the following to the "Other Linker Flags" setting:
-	-	<b>-lclasses</b> (Release) or <b>-lclassesd</b> (Debug)
+	-	<b>-lajantv2</b> (Release) or <b>-lajantv2d</b> (Debug)
 	-	<b>-lajabase</b> (Release) or <b>-lajabased</b> (Debug), if needed
 	-	<b>-lajacc</b>, if the AJA captioning library is needed
 	-	<b>-lajaanc</b>, if the AJA ancillary data library is needed
@@ -571,22 +567,20 @@ XCode build parameters must be set:
 
 Windows builds are structured with projects (.vcproj files) grouped into a solution (.sln file).
 The solution files for building the entire SDK can be found here:
--	sdkdir\\ntv2projects\\winworkspace\\ntv2_vs12.sln		(for VS2013+)
--	sdkdir\\ntv2projects\\winworkspace\\ntv2_vs9.sln		(for all others)
-@endcode
+-	sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln		(for VS2013+)
+-	sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs9.sln		(for all others)
+
 Choose "build all" to build all of the SDK libraries and the demo applications that use the libraries.
 
 Many OEM developers choose to create their own solution and project files "from scratch." Here are the essential requirements:
 -	Choose whether to use AJA's pre-built NTV2 dynamic libraries (.DLL's) or static libraries (.LIB's). There are advantages and disadvantages to both.
 -	Define the preprocessor macros "WIN32", "_WINDOWS", "MSWindows" and "AJA_WINDOWS".
--	Define the "NTV2_DEPRECATE" macro. This will ensure you're using the latest APIs -- and nothing that's going to be obsolete.
 -	For Release builds, define the preprocessor macro "NDEBUG". For Debug builds, define both "_DEBUG" and "AJA_DEBUG".
 -	If you use AJA's pre-built DLLs, define the preprocessor macro "AJA_NO_AUTOIMPORT".
 -	Add the following header search paths:
-	-	<b>sdkdir\\ntv2projects\\includes</b>
-	-	<b>sdkdir\\ntv2projects\\classes</b>
-	-	<b>sdkdir\\ntv2projects\\winclasses</b>
-	-	<b>sdkdir\\ajaapi</b> (only if "ajabase" is needed)
+	-	<b>sdkdir\\ajalibraries\\ajantv2\\includes</b>
+	-	<b>sdkdir\\ajalibraries\\ajantv2\\src\\win</b>
+	-	<b>sdkdir\\ajalibraries\\ajabase</b> (only if "ajabase" is needed)
 	-	<b>sdkdir\\ajalibraries\\ajacc</b> (only if the AJA Captioning Library is needed)
 	-	<b>sdkdir\\ajalibraries\\ajaanc</b> (only if the AJA ancillary data library is needed)
 -	The preprocessor should always search "user" header paths.

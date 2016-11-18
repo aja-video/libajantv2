@@ -150,9 +150,9 @@ device) or the output channel (if multiformat).
 Right-clicking on an SDI output widget pops up a menu for configuring the SDI output:
 -	<b>SDI Output Standard</b> -- If selected, pops up a list of video output standards that are supported by the device’s SDI output. If one of those standards is clicked, the output standard for the SDI output is changed. (Note that the output standard should agree with the format of the video signal being routed to the output.)
 -	<b>Enable Output</b> -- If the device supports bi-directional SDI connectors, this checkbox will be visible in the popup menu. It is both an indicator and a controller. If it’s checked, the SDI connector is an output; otherwise, the SDI connector is an input. Clicking on the checkbox will toggle it, and switch the connector from an input to an output, or vice-versa.
--	<b>Enable 3Ga->3Gb</b> -- If the device supports automatic 3G Level A to B… this checkbox will be shown in the popup menu. <<…DESCRIBE…>>
--	<b>3G Enabled</b> -- If the device’s SDI port supports 3Gbps data rates, this checkbox will be shown in the popup menu. <<…DESCRIBE…>>
--	<b>3Gb Enabled</b> -- If the device’s SDI port supports 3Gbps Level B (dual link), this checkbox will be shown in the popup menu. <<…DESCRIBE…>>
+-	<b>Enable 3Ga->3Gb</b> -- If the device supports automatic 3G Level A to B… this checkbox will be shown in the popup menu. <i>FINISH</i>
+-	<b>3G Enabled</b> -- If the device’s SDI port supports 3Gbps data rates, this checkbox will be shown in the popup menu. <i>FINISH</i>
+-	<b>3Gb Enabled</b> -- If the device’s SDI port supports 3Gbps Level B (dual link), this checkbox will be shown in the popup menu. <i>FINISH</i>
 
 Right-clicking on an HDMI output widget pops up a menu for configuring the HDMI output:
 -	<b>HDMI Output Standard</b> -- If selected, pops up a list of HDMI video output standards that are supported by the device's HDMI output.

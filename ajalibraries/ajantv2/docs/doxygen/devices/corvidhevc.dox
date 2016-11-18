@@ -42,7 +42,7 @@ The Corvid HEVC has 4 x input SDI connectors and an LTC/reference input BNC.
 
 @par		Ancillary Data
 
--	Anc inserters and extractors (use \cAUTOCIRCULATE_TRANSFER)
+-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
 -	VANC geometries
 
 @par		Firmware

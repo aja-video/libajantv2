@@ -248,8 +248,8 @@ while (true)
 . . .
 @endcode
 
-With interlaced video, the standard output stream will contain a \c...010101010101... pattern, whereas progressive video
-results in a \c...111111111111... pattern.
+With interlaced video, the standard output stream will contain a \c ...010101010101... pattern, whereas progressive video
+results in a \c ...111111111111... pattern.
 
 When AutoCirculating interlaced video, the driver will not "bump" the Active Frame until it has been completely composed
 (i.e., until immediately after the "Field 1" VBI occurs).

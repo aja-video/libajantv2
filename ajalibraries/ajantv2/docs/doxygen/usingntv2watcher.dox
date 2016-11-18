@@ -108,8 +108,8 @@ Except in its Image view, the raster content display always highlights changed c
 		-	When there's no current selection, use the up-arrow or down-arrow keys to scroll the display up or down.
 		-	When there's no current selection, use the left-arrow or right-arrow keys to scroll the display left or right.
 		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
-		-	Press <Home> to scroll the upper-left pixel of the current selection into view (or frame, if nothing selected).
-		-	Press <End> to scroll the bottom-right pixel of the current selection into view (or frame, if nothing selected).
+		-	Press <b>Home</b> to scroll the upper-left pixel of the current selection into view (or frame, if nothing selected).
+		-	Press <b>End</b> to scroll the bottom-right pixel of the current selection into view (or frame, if nothing selected).
 	-	<b>Vertical Ruler</b> -- This ruler identifies each line in the display.
 		-	Left-click (and optionally drag up or down) to select entire lines.
 		-	Right-click to pop up a menu to choose the <b>Units</b> to use:
@@ -129,7 +129,7 @@ Except in its Image view, the raster content display always highlights changed c
 			-	Note that the <b>Image</b> view always uses 0-based decimal pixel offsets relative to the left edge of the frame buffer.
 	-	<b>Selecting</b> -- Rectangular portions of the raster can be selected and highlighted.
 		-	Selections operate only in <b>Component</b> and <b>Image</b> views.
-		-	To cancel the current selection, press the <Esc> key, or switch to the <b>Line</b> or <b>Raw</b> view.
+		-	To cancel the current selection, press the <b>Esc</b> key, or switch to the <b>Line</b> or <b>Raw</b> view.
 		-	Left-click in the display (and optionally drag up/down/left/right) to select a rectangular raster portion line-by-line, pixel-by-pixel.
 		-	Use the up-arrow or down-arrow keys to change the current selection to a single-pixel selection to the line above or below the old selection.
 		-	Use the left-arrow or right-arrow keys to change the current selection to a single-pixel selection to the left or right of the old selection.

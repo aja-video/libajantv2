@@ -3,9 +3,73 @@
 
 	The AJA 101884 Breakout Cable is designed to connect to the \ref konalheplus and \ref konalhi ingest/playout boards.
 
-	@image	html	aja101884-75.png
+	@image	html	aja101884p1.png
 
 
-	@image	html	aja101884-150.png
+	@image	html	aja101884p2.png
+
+	<table>
+		<caption id="pinmap">Pin Map</caption>
+		<tr><td><th>Pin (LFH-60)</b>	<th>Function		<th>Pin, Connector
+		<tr><td><b>1</b>			<td>GND				<td>shield, BNC3
+		<tr><td><b>2</b>			<td>Y/G/CVBS Out	<td>center conductor, BNC3
+		<tr><td><b>3</b>			<td>GND				<td>shield, BNC2
+		<tr><td><b>4</b>			<td>Pb/B/Y Out		<td>center conductor, BNC2
+		<tr><td><b>5</b>			<td>GND				<td>shield, BNC1
+		<tr><td><b>6</b>			<td>Pr/R/C Out		<td>center conductor, BNC1
+		<tr><td><b>7</b>			<td>GND				<td>shield, BNC6
+		<tr><td><b>8</b>			<td>Y/CVBS In		<td>center conductor, BNC6
+		<tr><td><b>9</b>			<td>GND				<td>shield, BNC5
+		<tr><td><b>10</b>			<td>Pb/Y In			<td>center conductor, BNC5
+		<tr><td><b>11</b>			<td>GND				<td>shield, BNC4
+		<tr><td><b>12</b>			<td>Pr/C In			<td>center conductor, BNC4
+		<tr><td><b>13</b>			<td>GND				<td>shield, BNC7
+		<tr><td><b>14</b>			<td>Reference In	<td>center conductor, BNC7
+		<tr><td><b>15</b>			<td>+5V				<td>no connection
+		<tr><td><b>16</b>			<td>+5V				<td>no connection
+		<tr><td><b>17</b>			<td>NC				<td>no connection
+		<tr><td><b>18</b>			<td>GND				<td>1+4+6+9, DB-9
+		<tr><td><b>19</b>			<td>GND				<td>1, XLR5 & XLR6
+		<tr><td><b>20</b>			<td>S5				<td>no connection
+		<tr><td><b>21</b>			<td>GND				<td>1, XLR3 & XLR4
+		<tr><td><b>22</b>			<td>S4				<td>no connection
+		<tr><td><b>23</b>			<td>GND				<td>no connection
+		<tr><td><b>24</b>			<td>S3				<td>no connection
+		<tr><td><b>25</b>			<td>GND				<td>1, XLR2
+		<tr><td><b>26</b>			<td>S2				<td>no connection
+		<tr><td><b>27</b>			<td>GND				<td>no connection
+		<tr><td><b>28</b>			<td>S1				<td>no connection
+		<tr><td><b>29</b>			<td>GND				<td>1, XLR1
+		<tr><td><b>30</b>			<td>S0				<td>no connection
+		<tr><td><b>31</b>			<td>AES Out 1/2+	<td>2, XLR1
+		<tr><td><b>32</b>			<td>AES Out 3/4+	<td>no connection
+		<tr><td><b>33</b>			<td>AES Out 5/6+	<td>no connection
+		<tr><td><b>34</b>			<td>AES Out 7/8+	<td>no connection
+		<tr><td><b>35</b>			<td>AES In 1/2+		<td>2, XLR2
+		<tr><td><b>36</b>			<td>AES In 3/4+		<td>no connection
+		<tr><td><b>37</b>			<td>AES In 5/6+		<td>no connection
+		<tr><td><b>38</b>			<td>AES In 7/8+		<td>no connection
+		<tr><td><b>39</b>			<td>Analog Out 1+	<td>2, XLR3
+		<tr><td><b>40</b>			<td>Analog Out 2+	<td>2, XLR4
+		<tr><td><b>41</b>			<td>Analog In 1+	<td>2, XLR5
+		<tr><td><b>42</b>			<td>Analog In 2+	<td>2, XLR6
+		<tr><td><b>43</b>			<td>RS-422 Tx+		<td>3, DB-9
+		<tr><td><b>44</b>			<td>RS-422 Rx+		<td>7, DB-9
+		<tr><td><b>45</b>			<td>S6				<td>no connection
+		<tr><td><b>46</b>			<td>S7				<td>no connection
+		<tr><td><b>47</b>			<td>RS-422 Rx-		<td>2, DB-9
+		<tr><td><b>48</b>			<td>RS-422 Tx-		<td>8, DB-9
+		<tr><td><b>49</b>			<td>Analog In 2-	<td>3, XLR6
+		<tr><td><b>50</b>			<td>Analog In 1-	<td>3, XLR5
+		<tr><td><b>51</b>			<td>Analog Out 2-	<td>3, XLR4
+		<tr><td><b>52</b>			<td>Analog Out 1-	<td>3, XLR3
+		<tr><td><b>53</b>			<td>AES In 7/8-		<td>no connection
+		<tr><td><b>54</b>			<td>AES In 5/6-		<td>no connection
+		<tr><td><b>55</b>			<td>AES In 3/4-		<td>no connection
+		<tr><td><b>56</b>			<td>AES In 1/2-		<td>3, XLR2
+		<tr><td><b>57</b>			<td>AES Out 7/8-	<td>no connection
+		<tr><td><b>58</b>			<td>AES Out 5/6-	<td>no connection
+		<tr><td><b>59</b>			<td>AES Out 3/4-	<td>no connection
+	</table>
 
 **/

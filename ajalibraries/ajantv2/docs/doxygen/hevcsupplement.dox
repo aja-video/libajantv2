@@ -53,7 +53,7 @@ tab to display the currently installed driver and firmware versions.  The firmwa
 "OK" means that they are the same firmware version that was used for SDK testing.  "Iffy" means that the firmware has not been tested
 with this version of the SDK and should be updated.
 
-To update the HEVC firmware, navigate into the \c ntv2projects/commonapps/hevcmaintenance directory and execute the \c flash_all.sh script.
+To update the HEVC firmware, navigate into the \c ajaapps/crossplatform/hevcmaintenance directory and execute the \c flash_all.sh script.
 The script will install all the codec firmware then remind you to power cycle the system when it is complete.
 After the power cycle, use the HEVC monitor application to confirm that the correct firmware is installed.
 
@@ -62,29 +62,29 @@ After the power cycle, use the HEVC monitor application to confirm that the corr
 On Linux, you can build just the parts you need for HEVC development.
 
 -#	Build and load the Linux Driver.
-	-#	<tt>cd ntv2projects/LinuxDriver</tt>
+	-#	<tt>cd ajadriver/linux</tt>
 	-#	\c make
 	-#	<tt>cd ../../bin</tt>
 	-#	<tt>sudo ./loadOEM2K</tt>
--#	Build the "classes" library.
-	-#	<tt>cd ntv2projects/classes</tt>
+-#	Build the "ajantv2" library.
+	-#	<tt>cd ajalibraries/ajantv2</tt>
 	-#	\c make
 	-#	The result will be in \c ../../lib
 -#	Build the \c ntv2firmwareinstaller program and update the NTV2 firmware.
-	-#	<tt>cd ntv2projects/ commonapps / ntv2firmwareinstaller</tt>
+	-#	<tt>cd ajaapps/crossplatform/ntv2firmwareinstaller</tt>
 	-#	\c make
 	-#	<tt>cd ../../../bin</tt>
-	-#	<tt>./ntv2firmwareinstaller –p "path to NTV2 bitfile"</tt>
+	-#	<tt>./ntv2firmwareinstaller –p path/to/ntv2/bitfile.bit</tt>
 -#	Build the \c hevcmaintenance program and update the codec firmware.
-	-#	<tt>cd ntv2projects/commonapps/hevcmaintenance</tt>
+	-#	<tt>cd ajaapps/crossplatform/hevcmaintenance</tt>
 	-#	\c make
 	-#	<tt>./flash_system.sh</tt>  (flashes system file)
 	-#	<tt>./flash_mcpu.sh</tt>  (flash mcpu file)
 	-#	<tt>./flash_mode.sh</tt>  (flash single and multi mode files)
--#	Build the HEVC Monitor application using Qt Creator.  You will find the QT pro file at \c ntv2projects/commonapps/qthevcmon/qthevcmon.pro.
+-#	Build the HEVC Monitor application using Qt Creator.  The .pro file is at \c ajaapps/crossplatform/qthevcmon/qthevcmon.pro.
 	The executable will be in the top-most \c bin directory.
 -#	Build and run the HEVC demo application:
-	-#	<tt>cd ntv2projects/demoapps/ntv2encodehevc</tt>
+	-#	<tt>cd ajaapps/crossplatform/demoapps/ntv2encodehevc</tt>
 	-#	\c make
 	-#	<tt>cd ../../../bin</tt>
 	-#	<tt>./ntv2encodehevc -?</tt>
@@ -114,13 +114,13 @@ installs the Microsoft Visual Studio runtime environment required to use the pre
 
 @subsection	hevcwindowsbuildsdk		Building the Windows SDK
 
-To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\ntv2projects\winworkspace\ntv2_vs12.sln.
+To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln.
 Choose the solution platform (win32 or x64) and the configuration (debug or release) for the build and select build all. 
-This will build the libraries to the \c APIandSamples\lib directory and the binaries to the \c APIandSamples\bin directory.
+This will build the libraries to the \c APIandSamples\\lib directory and the binaries to the \c APIandSamples\\bin directory.
 
 @subsection	hevcwindowsinstallfirmware		Installing the HEVC firmware
 
-There is an HEVC monitor application (\c qthevcmon.exe) in the \q DiagnosticsAndTools directory.
+There is an HEVC monitor application (\c qthevcmon.exe) in the \c DiagnosticsAndTools directory.
 Run this application and select the <b>Debug</b> tab to display the currently installed driver and firmware versions. 
 The firmware versions will be labelled as either "OK" or "Iffy".  "OK" means that they are the same firmware version
 that was used for SDK testing.  "Iffy" means that the firmware has not been tested with this version of the SDK and should be updated.
@@ -169,7 +169,7 @@ Here you can find definitions, enums, structures, classes, headers, and both use
 This section includes everything --- nothing is hidden.
 
 -	ntv2linuxhevc_12_x.y.z
-	-	<b>ntv2projects</b>
+	-	<b>ajantv2</b>
 		-	<b>classes</b>
 			-	ntv2driverinterface.cpp
 			-	ntv2driverinterface.h
@@ -266,7 +266,7 @@ Five driver APIs have been added to support HEVC:
 -	<tt>bool HevcMessageDebugInfo (HevcMessageDebug* pMessage);</tt>
 
 In addition the above HEVC specific functions, the standard NTV2 CNTV2Card::ReadRegister and CNTV2Card::WriteRegister functions
-have been modified to recognize register reads and writes to the MB86M31 encoder.  The PARM setup classes in <tt>ntv2projects/codecs/hevc/m31</tt>
+have been modified to recognize register reads and writes to the MB86M31 encoder.  The PARM setup classes in <tt>ajalibraries/ajantv2/codecs/hevc/m31</tt>
 make extensive use of CNTV2Card::ReadRegister and CNTV2Card::WriteRegister to read and write individual PARAM fields in the MB86M31 space.
 The interface is identical to CNTV2Card::ReadRegister and CNTV2Card::WriteRegister in the NTV2 space.
 
@@ -327,9 +327,9 @@ The parameters have been broken up into a number of categories.  Currently they 
 -	<b>VAParams</b>
 -	<b>EHParams</b>
 
-AJA has provided a set of classes to manage each of these param categories which can be found in <tt>ntv2projects/codecs/hevc/m31</tt>.
+AJA has provided a set of classes to manage each of these param categories which can be found in <tt>ajalibraries/ajantv2/codecs/hevc/m31</tt>.
 The M31 helper class also provides a wrapper that calls each of these categories to help setup the encoder for a specific preset.
-The AJA version of the HEVC presets are a table of enums found in <tt>ntv2projects/includes/ntv2m31enums.h</tt>.
+The AJA version of the HEVC presets are a table of enums found in <tt>ajalibraries/ajantv2/includes/ntv2m31enums.h</tt>.
 The SDK includes both "file" and "vif" presets.  The HEVC Encode demo application uses these enums and helper class functions to set up
 the encoder to encode a specific format.  Here is an example of how to setup the encoder for a given preset:
 

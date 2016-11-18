@@ -14,6 +14,22 @@
 #include <sstream>
 
 
+/**
+	@page	ajaanc		The AJA Ancillary Data Library
+
+	The AJA Ancillary Data Library (AJAAncLib) is a suite of classes and data types which allow end-users to easily encode or decode
+	ancillary data using nearly any NTV2-compatible AJA device using the C++ programming language.
+	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
+
+	The purpose of the library is to enable third-parties to easily access and/or control the ancillary data entering or leaving
+	an AJA NTV2 device. The library currently supports is very focused on CEA-608. AJA is interested in learning from its OEM developers
+	what kind of captioning support they're interesting in having added to the library (e.g., "full/native" CEA-708, Teletext, OP-42/47, etc.).
+
+	For examples on how to use this library, please see the \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications.
+
+**/
+
+
 // Default Packet IDs used when building "analog" packets
 // NOTE: there is NO guarantee that the Anc Extractor hardware will use these codes - nor does the
 //       Anc Inserter hardware care. If you want to know whether a given packet is "analog" or

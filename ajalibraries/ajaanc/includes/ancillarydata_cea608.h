@@ -52,26 +52,41 @@ public:
 	virtual inline AJAAncillaryData_Cea608 *	Clone (void) const	{return new AJAAncillaryData_Cea608 (this);}	///< @return	A clone of myself.
 
 	/**
-		@brief		Set/Get the CEA608 payload bytes. Assumes caller has already added parity.
+		@brief		Set the CEA608 payload bytes.
+		@note		This function assumes the caller has already added parity.
 		@param[in]	inByte1		Specifies the first byte of the pair.
 		@param[in]	inByte2		Specifies the second byte of the pair.
-		@param[in]	bRcvdData	true if returned data is valid
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus				SetCEA608Bytes (const uint8_t  byte1, const uint8_t  byte2);
-	virtual AJAStatus				GetCEA608Bytes (uint8_t & byte1, uint8_t & byte2, bool & bRcvdData) const;
+	virtual AJAStatus				SetCEA608Bytes (const uint8_t  inByte1, const uint8_t  inByte2);
+
+	/**
+		@brief		Answers with the CEA608 payload bytes.
+		@param[in]	outByte1		Receives the first byte of the pair (includes parity).
+		@param[in]	outByte2		Receives the second byte of the pair (includes parity).
+		@param[in]	outIsValid		Receives 'true' if returned data is valid.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus				GetCEA608Bytes (uint8_t & outByte1, uint8_t & outByte2, bool & outIsValid) const;
 
 
 	/**
-		@brief		Set/Get the CEA608 payload characters. Uses the least significant 7 bits of
-					of the input values and adds/clears odd parity.
-		@param[in]	char1		1st character of pair
-		@param[in]	char2		2nd character of pair
-		@param[in]	bRcvdData	true if returned data is valid
+		@brief		Sets the CEA608 payload characters. Uses the least significant 7 bits of the input values
+					and adds odd parity.
+		@param[in]	inChar1		Specifies the first character of the pair.
+		@param[in]	inChar2		Specifies the second character of the pair.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus				SetCEA608Characters (const uint8_t  char1, const uint8_t  char2);
-	virtual AJAStatus				GetCEA608Characters (uint8_t & char1, uint8_t & char2, bool & bRcvdData) const;
+	virtual AJAStatus				SetCEA608Characters (const uint8_t  inChar1, const uint8_t  inChar2);
+
+	/**
+		@brief		Answers with the CEA608 payload characters.
+		@param[in]	outChar1	Receives the first character of the pair (after stripping odd parity).
+		@param[in]	outChar2	Receives the second character of the pair (after stripping odd parity).
+		@param[in]	outIsValid	Receives 'true' if the returned characters are valid;  otherwise 'false'.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus				GetCEA608Characters (uint8_t & outChar1, uint8_t & outChar2, bool & outIsValid) const;
 
 	/**
 		@brief		Set/Clear bit 7 of a byte to make odd parity.
