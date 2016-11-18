@@ -541,7 +541,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     _transactionTable[_transactionCount++][1] = pesHDRLength;
     for (w1 = 0; w1 < pesHDRLength; w1++)
     {
-        printf("0x%02x, ", _tsHelper.pes_template.payload[w1]);
+        printf("0x%02x ", _tsHelper.pes_template.payload[w1]);
         if (!((w1 + 1) % 16))
             printf("\n");
         _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
@@ -551,7 +551,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
 
     if (streamData.j2kStreamType == kJ2KStreamTypeEvertz)
     {
-        printf("PTS Offset = 0x%02x, J2K TS Offset = 0x%02x, auf1 offset = 0x%02x, auf2 offset = 0x%02x\n\n",
+        printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
                0xff, 0xff, 0xff, 0xff);
         _transactionTable[_transactionCount][0] = PTS_OFFSET;
         _transactionTable[_transactionCount++][1] = 0xff;
@@ -564,7 +564,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     }
     else
     {
-        printf("PTS Offset = 0x%02x, J2K TS Offset = 0x%02x, auf1 offset = 0x%02x, auf2 offset = 0x%02x\n\n",
+        printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
                _tsHelper.pts_offset, _tsHelper.j2k_ts_offset, _tsHelper.auf1_offset, _tsHelper.auf2_offset);
         _transactionTable[_transactionCount][0] = PTS_OFFSET;
         _transactionTable[_transactionCount++][1] = _tsHelper.pts_offset;
@@ -583,13 +583,13 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     {
         if (w1 < _tsHelper.adaptation_template_length)
         {
-            printf("0x%02x, ", _tsHelper.adaptation_template.int_payload[w1]);
+            printf("0x%02x ", _tsHelper.adaptation_template.int_payload[w1]);
             _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
             _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template.int_payload[w1];
         }
         else
         {
-            printf("0x%02x, ", (w1 - _tsHelper.adaptation_template_length) | 0x8000);
+            printf("0x%02x ", (w1 - _tsHelper.adaptation_template_length) | 0x8000);
 
             _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
             _transactionTable[_transactionCount++][1] = ((w1 - _tsHelper.adaptation_template_length) << 8) | 0x800;
@@ -598,24 +598,43 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
         if (!((w1 + 1) % 16))
             printf("\n");
     }    
-    printf("\n\n");
-    printf("PAT Table:\n");
+
+    PATGen pat;
+    pat._progNumToPID[1] = streamData.programPid;
+    pat.makePacket();
+
+    printf("\n\nPAT Table:\n");
+    pat.dump();
+
+    // Copy over the PAT table into the transaction table
     for (w1 = 0; w1 < 188; w1++)
     {
-        printf("0x%02x, ", _tsHelper.pat_table[0].payload[w1]);
-        if (!((w1 + 1) % 16))
-            printf("\n");
         _transactionTable[_transactionCount][0] = PAT_TABLE_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = _tsHelper.pat_table[0].payload[w1];
+        _transactionTable[_transactionCount++][1] = pat._pkt[w1];
     }
+
+    PMTGen pmt;
+    pmt._progNumToPID[1] = streamData.programPid;
+    pmt._elemNumToPID[1] = streamData.videoPid;
+    pmt._pcrNumToPID[1] = streamData.pcrPid;
+    pmt._audioNumToPID[1] = streamData.audio1Pid;
+    pmt._videoStreamData.j2kStreamType = streamData.j2kStreamType;
+    pmt._videoStreamData.width = streamData.width;
+    pmt._videoStreamData.height = streamData.height;
+    pmt._videoStreamData.denFrameRate = streamData.denFrameRate;
+    pmt._videoStreamData.numFrameRate = streamData.numFrameRate;
+    pmt._videoStreamData.interlaced = streamData.interlaced;
+    pmt._videoStreamData.doPcr = streamData.doPCR;
+    pmt.makePacket();
+
     printf("\n\nPMT Table:\n");
+    pmt.dump();
+
+    // Copy over the PMT table into the transaction table
     for (w1 = 0; w1 < 188; w1++)
     {
-        printf("0x%02x, ", _tsHelper.pmt_tables[_tsHelper.pmt_program_number].payload[w1]);
-        if (!((w1 + 1) % 16))
-            printf("\n");
         _transactionTable[_transactionCount][0] = PMT_TABLE_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = _tsHelper.pmt_tables[_tsHelper.pmt_program_number].payload[w1];
+        _transactionTable[_transactionCount++][1] = pmt._pkt[w1];
     }
     printf("\n\n");
 
@@ -624,9 +643,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     _transactionTable[_transactionCount][0] = HOST_EN;
     _transactionTable[_transactionCount++][1] = 1;
 
-
     return true;
-
 }
 
 uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)

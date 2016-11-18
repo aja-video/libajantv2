@@ -392,9 +392,9 @@ class TSGenerator
             for (int i=0; i<188; i++)
             {
                 if (i % 16 == 15)
-                    printf("%02x\n", _pkt[i]);
+                    printf("0x%02x\n", _pkt[i]);
                 else
-                    printf("%02x ", _pkt[i]);
+                    printf("0x%02x ", _pkt[i]);
             }
             printf("\n");
         }
