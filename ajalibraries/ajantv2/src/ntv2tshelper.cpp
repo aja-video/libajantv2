@@ -115,25 +115,11 @@ int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, uint32_t width, ui
     int32_t err;
     
     // Set up default PAT Table
-    pat_table[0].payload_unit_start     = 1;
-    pat_table[0].transport_stream_id    = 1;
-    pat_table[0].version_number         = 0;
-    pat_table[0].current_next           = 1;
-    pat_table[0].section_num            = 0;
-    pat_table[0].last_section_num       = 0;
-    pat_table[0].number_of_progs        = 1;
     pat_table[0].program_num[0]         = 1;
     pat_table[0].program_pid[0]         = 0x100;
     pat_table[0].used                   = 1;
     
     // There is a single program.  Set up the PMT for this program
-    pmt_tables[1].payload_unit_start                    = 1;
-    pmt_tables[1].program_num                           = 1;
-    pmt_tables[1].version_number                        = 0;
-    pmt_tables[1].current_next                          = 1;
-    pmt_tables[1].pcr_pid                               = 0x101;	// J2K Stream PID
-    pmt_tables[1].prog_info_length                      = 0;
-    pmt_tables[1].num_streams                           = 1;
     pmt_tables[1].stream_descriptors[0].j2k_stream      = 1;
     pmt_tables[1].stream_descriptors[0].j2k_channel_num = 0;
     pmt_tables[1].stream_descriptors[0].elementary_pid  = 0x101;
@@ -534,25 +520,6 @@ int32_t CNTV2TsHelper::bytes32(uint32_t src, uint8_t *dest)
 }
 
 
-// Searches the PID list for a PID.  Returns 1 if it is already there, 0 if not.
-int32_t CNTV2TsHelper::search_pid_list(int32_t pid)
-{
-    int32_t w2, w3;
-    
-    w3 = 0;
-    if (pid_list_cnt)
-    {
-        for (w2 = 0; w2 < pid_list_cnt; w2++)
-        {
-            if (prog_pid_list[w2].used && (prog_pid_list[w2].pid == pid))
-                w3 = 1;
-        }
-    }
-    
-    return w3;
-}
-
-
 // Clears PID List, PAT Tables, and PMT Tables
 int32_t CNTV2TsHelper::clear_tables(void)
 {
@@ -561,33 +528,14 @@ int32_t CNTV2TsHelper::clear_tables(void)
     for (w1 = 0; w1 < PAT_TABLE_SIZE; w1++)
     {
         pat_table[w1].used = 0;
-        pat_table[w1].errs_done = 0;
-        pat_table[w1].different_pat_cnt = 0;
     }
     
     for (w1 = 0; w1 < MAX_PROGS; w1++)
     {
         pmt_tables[w1].used = 0;
-        pmt_tables[w1].errs_done = 0;
-        pmt_tables[w1].different_pmt_cnt = 0;
     }
     
-    for (w1 = 0; w1 < PID_LIST_SIZE; w1++)
-    {
-        prog_pid_list[w1].used = 0;
-        prog_pid_list[w1].pcr_pid = 0;
-        prog_pid_list[w1].j2k_stream = 0;
-        prog_pid_list[w1].non_j2k_stream = 0;
-        prog_pid_list[w1].pat_table = 0;
-        prog_pid_list[w1].pmt_table = 0;
-        prog_pid_list[w1].cont_cnt = -1;
-        prog_pid_list[w1].found = 0;
-        prog_pid_list[w1].pcr_pid_check = 0;
-        prog_pid_list[w1].j2k_stream_check = 0;
-        prog_pid_list[w1].stream_check = 0;
-    }
     
-    pid_list_cnt = 0;
     j2k_channel_cnt = 0;
     for (w1 = 0; w1 < NUM_J2K_CHANNELS; w1++)
         j2k_vid_descriptors[w1].used = 0;
@@ -623,20 +571,17 @@ int32_t CNTV2TsHelper::build_all_tables(void)
             }
             else
             {
-                if (pat_table[w1].number_of_progs)
+                for (w3 = 0; w3 < 1; w3++)
                 {
-                    for (w3 = 0; w3 < pat_table[w1].number_of_progs; w3++)
+                    pmt_progs[prog_cnt] = pat_table[w1].program_num[w3];
+                    pmt_pids[prog_cnt] = pat_table[w1].program_pid[w3];
+                    prog_cnt++;
+                    if (prog_cnt >= MAX_PROGS)
                     {
-                        pmt_progs[prog_cnt] = pat_table[w1].program_num[w3];
-                        pmt_pids[prog_cnt] = pat_table[w1].program_pid[w3];
-                        prog_cnt++;
-                        if (prog_cnt >= MAX_PROGS)
-                        {
-                            printf("ERROR: Number of programs limited to %i.  More than that number are defined in the PAT descriptor.\n", MAX_PROGS);
-                            err = 1;
-                            prog_cnt = 0;
-                            w3 = pat_table[w1].number_of_progs;
-                        }
+                        printf("ERROR: Number of programs limited to %i.  More than that number are defined in the PAT descriptor.\n", MAX_PROGS);
+                        err = 1;
+                        prog_cnt = 0;
+                        w3 = 1;
                     }
                 }
             }
@@ -865,34 +810,26 @@ int32_t CNTV2TsHelper::build_pat(int32_t section)
     
     // First build TS Header
     pat_table[section].payload[0] = 0x47; 	// Sync byte
-    pat_table[section].payload[1] = (uint8_t) (pat_table[section].payload_unit_start << 6);
+    pat_table[section].payload[1] = (uint8_t) (1 << 6);
     pat_table[section].payload[2] = 0;		// PID for PAT
     pat_table[section].payload[3] = 0x10;	// NOTE: Continuity Counter must increment when transmitted
+    pat_table[section].payload[4] = 0;
+    pnt = 5;
     
     // Now build PAT Table
-    if (pat_table[section].payload_unit_start)
-    {
-        pat_table[section].payload[4] = 0;
-        pnt = 5;
-    }
-    else
-        pnt = 4;
-    
     crc_start = pnt;
-    pat_table[section].table_id = 0;
-    pat_table[section].payload[pnt++] = pat_table[section].table_id;
+    pat_table[section].payload[pnt++] = 0;
     pat_table[section].payload[pnt] = 0xb0;
-    pat_table[section].section_length = 9 + 4 * pat_table[section].number_of_progs;
-    pat_table[section].payload[pnt++] |= (uint8_t) ((pat_table[section].section_length >> 8) & 0x3);
-    pat_table[section].payload[pnt++] = (uint8_t) (pat_table[section].section_length & 0xff);
-    bytes16(pat_table[section].transport_stream_id, &pat_table[section].payload[pnt]);
+    pat_table[section].payload[pnt++] |= (uint8_t) (((9 + 4 * 1) >> 8) & 0x3);
+    pat_table[section].payload[pnt++] = (uint8_t) ((9 + 4 * 1) & 0xff);
+    bytes16(1, &pat_table[section].payload[pnt]);
     pnt += 2;
     pat_table[section].payload[pnt] = 0xc0;
-    pat_table[section].payload[pnt] |= (uint8_t) (pat_table[section].version_number & 0x1f);
-    pat_table[section].payload[pnt++] |= (uint8_t) (pat_table[section].current_next);
-    pat_table[section].payload[pnt++] = (uint8_t) pat_table[section].section_num;
-    pat_table[section].payload[pnt++] = (uint8_t) pat_table[section].last_section_num;
-    for (w1 = 0; w1 < pat_table[section].number_of_progs; w1++)
+    pat_table[section].payload[pnt] |= 0;
+    pat_table[section].payload[pnt++] |= 1;
+    pat_table[section].payload[pnt++] = 0;
+    pat_table[section].payload[pnt++] = 0;
+    for (w1 = 0; w1 < 1; w1++)
     {
         bytes16(pat_table[section].program_num[w1], &pat_table[section].payload[pnt]);
         pnt += 2;
@@ -901,20 +838,11 @@ int32_t CNTV2TsHelper::build_pat(int32_t section)
         pnt += 2;
     }
     crc_res = chksum_crc32(&pat_table[section].payload[crc_start], pnt - crc_start);
-    pat_table[section].crc = crc_res;
     bytes32(crc_res, &pat_table[section].payload[pnt]);
     pnt += 4;
     for (w1 = pnt; w1 < 188; w1++)
         pat_table[section].payload[pnt++] = 0xff;
     
-    // If there is no error, add the PAT to the PID list if it isn't there
-    if (!err && !search_pid_list(0))
-    {
-        prog_pid_list[pid_list_cnt].used = 1;
-        prog_pid_list[pid_list_cnt].pid = 0;
-        prog_pid_list[pid_list_cnt].pat_table = 1;
-        pid_list_cnt++;
-    }
     return err;
 }
 
@@ -939,54 +867,36 @@ int32_t CNTV2TsHelper::build_pmt(int32_t prog, int32_t pid)
     
     // First build TS Header
     pmt_tables[prog].payload[0] = 0x47; 	// Sync byte
-    pmt_tables[prog].payload[1] = (uint8_t) (pmt_tables[prog].payload_unit_start << 6); 
+    pmt_tables[prog].payload[1] = (uint8_t) (1 << 6);
     pmt_tables[prog].payload[1] |= (uint8_t) ((pid >> 8) & 0x1f);
     pmt_tables[prog].payload[2] = (uint8_t) (pid & 0xff);		
     pmt_tables[prog].payload[3] = 0x10;	// NOTE: Continuity Counter must increment when transmitted
+    pmt_tables[prog].payload[4] = 0;
+    pnt = 5;
     
     // Now build PMT Table
-    if (pmt_tables[prog].payload_unit_start)
-    {
-        pmt_tables[prog].payload[4] = 0;
-        pnt = 5;	
-    }
-    else
-        pnt = 4;
-    
     crc_start = pnt;
-    pmt_tables[prog].table_id = 2;
-    pmt_tables[prog].payload[pnt++] = pmt_tables[prog].table_id;
+    pmt_tables[prog].payload[pnt++] = 2;
     pmt_tables[prog].payload[pnt] = 0xb0; 
     pnt++;
     section_length_psn = pnt;	// Have to fill in section length later
     pnt++;
-    bytes16(pmt_tables[prog].program_num, &pmt_tables[prog].payload[pnt]);
+    bytes16(1, &pmt_tables[prog].payload[pnt]);
     pnt += 2;
     pmt_tables[prog].payload[pnt] = 0xc0;
-    pmt_tables[prog].payload[pnt] |= (uint8_t) (pmt_tables[prog].version_number & 0x1f);
-    pmt_tables[prog].payload[pnt++] |= (uint8_t) (pmt_tables[prog].current_next);
+    pmt_tables[prog].payload[pnt] |= (uint8_t) (0);
+    pmt_tables[prog].payload[pnt++] |= (uint8_t) (1);
     pmt_tables[prog].payload[pnt++] = 0;
     pmt_tables[prog].payload[pnt++] = 0;
-    bytes16(pmt_tables[prog].pcr_pid, &pmt_tables[prog].payload[pnt]);
+    bytes16(0x101, &pmt_tables[prog].payload[pnt]);
     pmt_tables[prog].payload[pnt] |= 0xe0;	// Set reserved bits
     pnt += 2;
-    bytes16(pmt_tables[prog].prog_info_length, &pmt_tables[prog].payload[pnt]);
+    bytes16(0, &pmt_tables[prog].payload[pnt]);
     pmt_tables[prog].payload[pnt] |= 0xf0;	// Set reserved bits
     pnt += 2;
-    if (pmt_tables[prog].prog_info_length > 128)
-    {
-        printf("ERROR: PMT Program Descriptor length limited to 128 - %i requested.\n", pmt_tables[prog].prog_info_length);
-        pmt_tables[prog].prog_info_length = 0;
-        err = 1;
-    }
-    if (pmt_tables[prog].prog_info_length)
-    {
-        for (w1 = 0; w1 < pmt_tables[prog].prog_info_length; w1++)
-            pmt_tables[prog].payload[pnt++] = pmt_tables[prog].prog_descriptor[w1];
-    }
     
     // Now do the streams
-    for (w1 = 0; w1 < pmt_tables[prog].num_streams; w1++)
+    for (w1 = 0; w1 < 1; w1++)
     {
         if (pmt_tables[prog].stream_descriptors[w1].j2k_stream) // Build and get the J2K stream if applicable
         {
@@ -997,18 +907,10 @@ int32_t CNTV2TsHelper::build_pmt(int32_t prog, int32_t pid)
             j2k_vid_descriptors[w2].associated_pmt_pid = pid;
             j2k_vid_descriptors[w2].associated_pid = pmt_tables[prog].stream_descriptors[w1].elementary_pid;
             
-            if (build_j2k_descriptor(w2))
-            {
-                printf("ERROR: Can't build PMT table due to error in J2K Descriptor build.\n");
-                pmt_tables[prog].stream_descriptors[w1].es_info_length = 0;
-                err = 1;
-            }
-            else
-            {
-                pmt_tables[prog].stream_descriptors[w1].es_info_length = j2k_vid_descriptors[pmt_tables[prog].stream_descriptors[w1].j2k_channel_num].descriptor_length + 2;
-                for (w2 = 0; w2 < pmt_tables[prog].stream_descriptors[w1].es_info_length; w2++)
-                    pmt_tables[prog].stream_descriptors[w1].es_descriptor[w2] = j2k_vid_descriptors[pmt_tables[prog].stream_descriptors[w1].j2k_channel_num].payload[w2];	
-            }
+            build_j2k_descriptor(w2);
+            pmt_tables[prog].stream_descriptors[w1].es_info_length = j2k_vid_descriptors[pmt_tables[prog].stream_descriptors[w1].j2k_channel_num].descriptor_length + 2;
+            for (w2 = 0; w2 < pmt_tables[prog].stream_descriptors[w1].es_info_length; w2++)
+                pmt_tables[prog].stream_descriptors[w1].es_descriptor[w2] = j2k_vid_descriptors[pmt_tables[prog].stream_descriptors[w1].j2k_channel_num].payload[w2];
         }
         pmt_tables[prog].payload[pnt++] = (uint8_t) pmt_tables[prog].stream_descriptors[w1].stream_type;	
         bytes16(pmt_tables[prog].stream_descriptors[w1].elementary_pid, &pmt_tables[prog].payload[pnt]);
@@ -1030,53 +932,13 @@ int32_t CNTV2TsHelper::build_pmt(int32_t prog, int32_t pid)
         }
     }
     
-    pmt_tables[prog].section_length = pnt - section_length_psn - 1 + 4;	// Section field starts 1 byte after len field psn (hence -1), +4 is CRC
-    pmt_tables[prog].payload[section_length_psn] = (uint8_t) pmt_tables[prog].section_length;
+    pmt_tables[prog].payload[section_length_psn] = (uint8_t) pnt - section_length_psn - 1 + 4;
     
     crc_res = chksum_crc32(&pmt_tables[prog].payload[crc_start], pnt - crc_start);
-    pmt_tables[prog].crc = crc_res;
     bytes32(crc_res, &pmt_tables[prog].payload[pnt]);
     pnt += 4;
     for (w1 = pnt; w1 < 188; w1++)
         pmt_tables[prog].payload[pnt++] = 0xff;
-    
-    // If there is no error, add the PMT to the PID list if it isn't there.  Warn if it is already in the PID list
-    if (search_pid_list(pid))
-        printf("WARNING: PID for PMT Table already in PID list.\n");
-    
-    if (!err && !search_pid_list(pid))
-    {
-        prog_pid_list[pid_list_cnt].used = 1;
-        prog_pid_list[pid_list_cnt].pid = pid;
-        prog_pid_list[pid_list_cnt].pmt_table = 1;
-        prog_pid_list[pid_list_cnt].assoc_prog_number = prog;
-        pid_list_cnt++;	
-    }
-    
-    // Now add TS Streams included in this PMT to the PID list
-    if (!err)
-    {
-        for (w1 = 0; w1 < pmt_tables[prog].num_streams; w1++)
-        {
-            if (search_pid_list(pmt_tables[prog].stream_descriptors[w1].elementary_pid))
-                printf("WARNING: PID List for Stream %i in PMT %i (PMT PID = %i) already in PID list.", w1, prog, pid);
-            else
-            {
-                prog_pid_list[pid_list_cnt].used = 1;
-                prog_pid_list[pid_list_cnt].pid = pmt_tables[prog].stream_descriptors[w1].elementary_pid;
-                if (pmt_tables[prog].stream_descriptors[w1].elementary_pid == pmt_tables[prog].pcr_pid)
-                    prog_pid_list[pid_list_cnt].pcr_pid = 1;
-                if (pmt_tables[prog].stream_descriptors[w1].j2k_stream)
-                    prog_pid_list[pid_list_cnt].j2k_stream = 1;
-                else
-                    prog_pid_list[pid_list_cnt].non_j2k_stream = 1;
-                
-                prog_pid_list[pid_list_cnt].assoc_prog_number = prog;
-                prog_pid_list[pid_list_cnt].assoc_stream_number = w1;	
-                pid_list_cnt++;
-            }
-        }
-    }
-    
+        
     return err;
 }
