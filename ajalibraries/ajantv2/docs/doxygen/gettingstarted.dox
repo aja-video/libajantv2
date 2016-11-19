@@ -122,48 +122,37 @@ Contains a number of pre-built tools and utilities for Windows and MacOS that ar
 applications and for diagnosing problems that may arise while doing so.
 (On Linux, the tools are built from the provided source code, and thus, will appear in the "bin" directory.)
 
+@subsubsection		gs-tools-prune		prune.py
 
-@subsubsection		gs-tools-watcher	Watcher
+This is a Python command that will prune all files from the SDK directory that are extraneous or unnecessary for
+the host's platform. For example, if the SDK was downloaded and unzipped on a Windows host, the script will remove
+all Linux-specific files (e.g., <tt>ajadriver</tt>, <tt>lin</tt> and <tt>linux</tt> folders, etc.) and Mac-specific
+files (e.g., Xcode project files, etc.) from the unzipped SDK.
 
-The <b>Watcher</b> is a utility that shows the inner workings of most any AJA device. It provides the following capabilities:
--	the ability to "watch" all registers on the device, in near-real-time or on-demand;
--	the ability to see a register's status information in a meaningful, human-readable form by hovering the mouse pointer over a register value;
--	the ability to "poke" new values into writable registers;
--	the ability to "freeze" the register display when a designated register matches a specific value;
--	the ability to watch the AJA device driver's AutoCirculate state in near-real-time;
--	the ability to capture the AJA device state into a register dump file that can be sent to AJA's OEM SDK support team for analysis.
+@subsubsection		gs-tools-ntv2watcher	NTV2Watcher
 
-@image	html	gs-watcher-75.png
-
-@subsubsection		gs-tools-cables		Cables
-
-The <b>Cables</b> utility provides the ability to:
--	graphically view the device widget routing, to easily see how signals are routed between the various on-device widgets;
--	view or change the device widget routing;
--	view or change the configuration of device widgets;
--	view or change the routing configuration in code terms (e.g., as CNTV2Card::Connect calls).
-
-@image	html	gs-cables-75.png
-
-See also:  \ref usingcables
+\ref usingntv2watcher is a very handy debugging utility that shows the inner workings of NTV2 devices.
 
 
 @subsubsection		gs-tools-systemtest		AJA System Test
 
-This tool measures your host system's storage read/write performance and the DMA performance of any attached AJA device.
+This tool measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
 
 @image	html	gs-systemtest-75.png
 
 
 @subsubsection		gs-tools-dataratecalc	Data Rate Calculator
 
-The Data Rate Calculator is now online at https://www.aja.com/PUT_URL_TO_DATACALC_HERE.
+The platform-specific Data Rate Calculator host applications are no longer supplied in the SDK.
+AJA DataCalc is available for Android and iOS mobile devices.
+Available for iOS here: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
+Available for Android here: https://play.google.com/store/apps/details?id=com.aja.datacalc
 
 
 @subsubsection		gs-tools-supportlog		Support Log
 
 Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
-This log file can be generated using either the <b>supportlog</b> command line tool or the <b>Watcher</b> utility application.
+This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
 Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
 
 
