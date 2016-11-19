@@ -17,7 +17,6 @@
 #define MAX_PROGS                   2
 #define MAX_STREAM_DESCRIPTORS      8
 #define NUM_J2K_CHANNELS            4
-#define PAT_TABLE_SIZE              32
 
 typedef enum
 {
@@ -113,13 +112,6 @@ typedef struct ts_packet_tds
     int32_t         int_payload[188];
 } ts_packet;
 
-typedef struct pat_table_tds
-{
-    bool            used;
-    int32_t         program_num[MAX_PROGS];
-    int32_t         program_pid[MAX_PROGS];
-    uint8_t         payload[256];           // IMPORTANT NOTE: MUST include the TS Header so that payload_unit_start can be extracted
-} pat_table_type;
 
 typedef struct stream_descriptor_tds
 {
@@ -131,23 +123,11 @@ typedef struct stream_descriptor_tds
     uint8_t         es_descriptor[256];
 } stream_descriptor;
 
-// NOTE: Current limitation is 1 section per program
-typedef struct pmt_table_tds
-{
-    bool            used;
-    stream_descriptor stream_descriptors[MAX_STREAM_DESCRIPTORS];
-    uint8_t         payload[256];           // IMPORTANT NOTE: MUST include the TS Header so that payload_unit_start can be extracted
-} pmt_table;
 
 typedef struct j2k_vid_descriptor_tds
 {
     bool            used;
     int32_t         associated_pid;
-    int32_t         associated_pmt_pid;
-    int32_t         associated_pmt_prog;
-    int32_t         associated_pmt_stream;
-    int32_t         descriptor_tag;
-    int32_t         descriptor_length;
     int32_t         profile_level;
     uint32_t        horizontal_size;
     uint32_t        vertical_size;
@@ -159,9 +139,6 @@ typedef struct j2k_vid_descriptor_tds
     J2KStreamType   stream_type;
     bool            still_mode;
     bool            interlaced_video;
-    int32_t         private_data_len;
-    uint8_t         private_data[256];
-    uint8_t         payload[300];
 } j2k_vid_descriptor_type;
 
 class CNTV2TsHelper
@@ -174,15 +151,10 @@ public:
     void        init(TsEncapStreamData streamData);
 
     int32_t     setup_tables(J2KStreamType streamType, uint32_t width, uint32_t height, int32_t denFrameRate, int32_t numFrameRate, bool interlaced);
-    int32_t     build_all_tables(void);
-    int32_t     build_j2k_descriptor(int32_t desc_num);
-    int32_t     build_pat(int32_t section);
-    int32_t     build_pmt(int32_t prog, int32_t pid);
     int32_t     gen_pes_lookup(void);
     int32_t     gen_adaptation_lookup(void);
     int32_t     set_payload_params(void);
     int32_t     set_time_regs(void);
-    int32_t     clear_tables(void);
     
     ts_packet                   gen_template;
     ts_packet                   pes_template;
@@ -198,23 +170,12 @@ public:
     
     int32_t                     adaptation_template_length;
     
-    pat_table_type              pat_table[PAT_TABLE_SIZE];
-    pmt_table                   pmt_tables[MAX_PROGS];
     int32_t                     pmt_program_number;
-    int32_t                     j2k_channel_cnt;
     j2k_vid_descriptor_type     j2k_vid_descriptors[NUM_J2K_CHANNELS];
     uint64_t                    start_time;
     double                      fps;
     double                      total_time;
-    
-    // Variables used for generating fixed bandwidth streams
-    bool                        generate_fbw;               // Default 1 - enables NULL insertion for fixed bandwidth generation
-    double                      fbw_bandwidth;              // This is the total bandwidth of the TS stream to be generated (default 80 Mbps)
-    double                      fbw_frame_rate;
-    double                      fbw_pkts_per_frame;
-    int32_t                     fbw_total_frames;           // Frame counter
-    int32_t                     fbw_total_packets;          // Packet counter
-    
+        
     double                      table_tx_period;
     
     int32_t                     ts_gen_tc;                  // TS Packet Generation Period register
@@ -222,11 +183,6 @@ public:
     
     TsEncapStreamData           tsStreamData;
 
-private:
-    
-    int32_t                     bytes16(int32_t src, uint8_t *dest);
-    int32_t                     bytes32(uint32_t src, uint8_t *dest);
-    uint32_t                    chksum_crc32(uint8_t *data, int32_t len);
 };
 
 typedef struct TsVideoStreamData
