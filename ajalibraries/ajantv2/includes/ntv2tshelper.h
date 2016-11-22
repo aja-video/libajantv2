@@ -79,18 +79,11 @@ typedef struct ts_packet_tds
     bool            pcr_flag;
     uint64_t        pcr_base;
     int32_t         pcr_extension;
-    bool            opcr_flag;
-    bool            splicing_point_flag;
-    bool            transport_private_data_flag;
     bool            adaptation_field_extension_flag;
     int32_t         stream_id;
     bool            pes_header_present;
     int32_t         pes_packet_length;
     int32_t         pes_scrambling_control;
-    bool            pes_priority;
-    bool            data_alignment_indicator;
-    bool            copyright;
-    bool            original_copy;
     int32_t         flags_7;
     int32_t         pes_data_header_length;
     uint64_t        pts;
@@ -107,7 +100,6 @@ typedef struct ts_packet_tds
     int32_t         mm;
     int32_t         ss;
     int32_t         ff;
-    int32_t         bcol_colcr;
     uint8_t         payload[188];
     int32_t         int_payload[188];
 } ts_packet;
@@ -128,16 +120,9 @@ typedef struct j2k_vid_descriptor_tds
 {
     bool            used;
     int32_t         associated_pid;
-    int32_t         profile_level;
-    uint32_t        horizontal_size;
-    uint32_t        vertical_size;
-    uint32_t        max_bit_rate;
-    uint32_t        max_buffer_size;
     int32_t         den_frame_rate;
     int32_t         num_frame_rate;
-    int32_t         color_spec;
     J2KStreamType   stream_type;
-    bool            still_mode;
     bool            interlaced_video;
 } j2k_vid_descriptor_type;
 
@@ -150,10 +135,9 @@ public:
 
     void        init(TsEncapStreamData streamData);
 
-    int32_t     setup_tables(J2KStreamType streamType, uint32_t width, uint32_t height, int32_t denFrameRate, int32_t numFrameRate, bool interlaced);
+    int32_t     setup_tables(J2KStreamType streamType, int32_t denFrameRate, int32_t numFrameRate, bool interlaced);
     int32_t     gen_pes_lookup(void);
     int32_t     gen_adaptation_lookup(void);
-    int32_t     set_payload_params(void);
     int32_t     set_time_regs(void);
     
     ts_packet                   gen_template;
@@ -296,7 +280,7 @@ class TSGenerator
                 if (i % 16 == 15)
                     printf("0x%02x\n", _pkt[i]);
                 else
-                    printf("0x%02x ", _pkt[i]);
+                    printf("0x%02x, ", _pkt[i]);
             }
             printf("\n");
         }

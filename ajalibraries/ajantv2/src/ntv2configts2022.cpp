@@ -321,8 +321,8 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
     for (uint32_t index=0; index < numTsAesEncapEntries; index++)
     {
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
-        printf("SetTsAesEncap - reg=%08x, val=%08x\n",
-               addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
+        //printf("SetTsAesEncap - reg=%08x, val=%08x\n",
+        //       addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
     }
     return true;
 }
@@ -336,8 +336,8 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap(const NTV2Channel channel)
     for (uint32_t index=0; index < numTsMpegAesEncapEntries; index++)
     {
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
-        printf("SetTsMpegAesEncap - reg=%08x, val=%08x\n",
-               addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
+        //printf("SetTsMpegAesEncap - reg=%08x, val=%08x\n",
+        //       addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
     }
     return true;
 }
@@ -459,12 +459,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channel channel)
 {
     NTV2VideoFormat     videoFormat;
-    //J2KStreamType       streamType;
-    //bool                interlaced;
-
-    int32_t             j2kTsReg;
     int32_t             w1;
-
     TsEncapStreamData   streamData;
 
     printf("CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap\n");
@@ -492,20 +487,22 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     GetJ2KEncodeAudio1Pid(channel, streamData.audio1Pid);
     streamData.doPCR = false;
 
+    printf("Program PID     = 0x%02x\n", streamData.programPid);
+    printf("Video PID       = 0x%02x\n", streamData.videoPid);
+    printf("PCR PID         = 0x%02x\n", streamData.pcrPid);
+    printf("Audio 1 PID     = 0x%02x\n\n", streamData.audio1Pid);
+
     _tsHelper.init(streamData);
 
-    if (_tsHelper.setup_tables(streamData.j2kStreamType, streamData.width, streamData.height, streamData.denFrameRate, streamData.numFrameRate, streamData.interlaced))
+    if (_tsHelper.setup_tables(streamData.j2kStreamType, streamData.denFrameRate, streamData.numFrameRate, streamData.interlaced))
     {
         return false;
     }
 
     _tsHelper.gen_pes_lookup();
     _tsHelper.gen_adaptation_lookup();
-    _tsHelper.set_payload_params();
     _tsHelper.set_time_regs();
-    j2kTsReg = (_tsHelper.gen_template.hh & 0xff) << 16;
-    j2kTsReg |= (_tsHelper.gen_template.mm & 0xff) << 8;
-    j2kTsReg |= _tsHelper.gen_template.hh & 0xff;
+
     _transactionCount = 0;
 
     printf("Set HOST_EN to 7\n\n");
@@ -513,21 +510,25 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     _transactionTable[_transactionCount++][1] = 7;
 
     printf("Host Register Settings:\n\n");
-    printf("Payload Parameters = 0x%x\n", _tsHelper.payload_params);
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
-    _transactionTable[_transactionCount++][1] = _tsHelper.payload_params;
-    printf("Interlaced Video = %i\n", _tsHelper.j2k_vid_descriptors[0].interlaced_video);
+    _transactionTable[_transactionCount++][1] = streamData.videoPid;
+    printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = INTERLACED_VIDEO;
     _transactionTable[_transactionCount++][1] = _tsHelper.j2k_vid_descriptors[0].interlaced_video;
-    printf("TS Packet Generation TC value = %i (0x%x)\n", _tsHelper.ts_gen_tc, _tsHelper.ts_gen_tc);
+    printf("Interlaced Video = %i\n", _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = TS_GEN_TC;
     _transactionTable[_transactionCount++][1] = _tsHelper.ts_gen_tc;
-    printf("PAT/PMT Transmission Period = %i (0x%x)\n", _tsHelper.pat_pmt_period, _tsHelper.pat_pmt_period);
+    printf("TS Packet Generation TC value = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = PAT_PMT_PERIOD;
     _transactionTable[_transactionCount++][1] = _tsHelper.pat_pmt_period | 0x01000000;
-    printf("J2K TimeStamp = 0x%x\n\n", j2kTsReg);
+    printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = J2K_TS_LOAD;
-    _transactionTable[_transactionCount++][1] = j2kTsReg;
+    _transactionTable[_transactionCount++][1] = 0x10311b;
+    printf("J2K TimeStamp = 0x%x\n\n", _transactionTable[_transactionCount-1][1]);
 
     // This is for Evertz compatibility for now we just write the PES_HDR id and set the length to 4
     // otherwise we use the generated table
@@ -541,7 +542,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     _transactionTable[_transactionCount++][1] = pesHDRLength;
     for (w1 = 0; w1 < pesHDRLength; w1++)
     {
-        printf("0x%02x ", _tsHelper.pes_template.payload[w1]);
+        printf("0x%02x, ", _tsHelper.pes_template.payload[w1]);
         if (!((w1 + 1) % 16))
             printf("\n");
         _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
@@ -583,13 +584,13 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     {
         if (w1 < _tsHelper.adaptation_template_length)
         {
-            printf("0x%02x ", _tsHelper.adaptation_template.int_payload[w1]);
+            printf("0x%02x, ", _tsHelper.adaptation_template.int_payload[w1]);
             _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
             _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template.int_payload[w1];
         }
         else
         {
-            printf("0x%02x ", (w1 - _tsHelper.adaptation_template_length) | 0x8000);
+            printf("0x%02x, ", (w1 - _tsHelper.adaptation_template_length) | 0x8000);
 
             _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
             _transactionTable[_transactionCount++][1] = ((w1 - _tsHelper.adaptation_template_length) << 8) | 0x800;

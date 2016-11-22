@@ -59,10 +59,6 @@ CNTV2TsHelper::CNTV2TsHelper()
     gen_template.stream_id = 0xbd;
     gen_template.pes_packet_length = 0;
     gen_template.pes_scrambling_control = 0;
-    gen_template.pes_priority = 0;
-    gen_template.data_alignment_indicator = 1;
-    gen_template.copyright = 0;
-    gen_template.original_copy = 0;
     gen_template.flags_7 = 0x80;
     gen_template.pes_data_header_length = 5;
     gen_template.pts = start_time;
@@ -80,7 +76,6 @@ CNTV2TsHelper::CNTV2TsHelper()
     gen_template.mm = 49;
     gen_template.ss = 27;
     gen_template.ff = 23;
-    gen_template.bcol_colcr = 0;
     
     adaptation_template.do_pcr = 0;
         
@@ -114,37 +109,14 @@ void CNTV2TsHelper::init(TsEncapStreamData streamData)
 }
 
 
-int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, uint32_t width, uint32_t height, int32_t denFrameRate, int32_t numFrameRate, bool interlaced)
+int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, int32_t denFrameRate, int32_t numFrameRate, bool interlaced)
 {
     int32_t err = 0;
 
-    // Set up J2K Descriptor
-    if (streamType == kJ2KStreamTypeEvertz)
-    {
-        j2k_vid_descriptors[0].profile_level    = 0x101;
-        j2k_vid_descriptors[0].max_bit_rate     = 213000000;
-    }
-    else
-    {
-        j2k_vid_descriptors[0].profile_level    = 0x102;
-        j2k_vid_descriptors[0].max_bit_rate     = 160000000;
-    }
 
-    j2k_vid_descriptors[0].horizontal_size  = width;
-    if (interlaced)
-    {
-        j2k_vid_descriptors[0].vertical_size    = height/2;
-    }
-    else
-    {
-        j2k_vid_descriptors[0].vertical_size    = height;
-    }
-
-    j2k_vid_descriptors[0].max_buffer_size  = 1250000;
+    j2k_vid_descriptors[0].associated_pid   = tsStreamData.videoPid;
     j2k_vid_descriptors[0].den_frame_rate   = denFrameRate;
     j2k_vid_descriptors[0].num_frame_rate   = numFrameRate;
-    j2k_vid_descriptors[0].color_spec       = 3;
-    j2k_vid_descriptors[0].still_mode       = 0;
     j2k_vid_descriptors[0].interlaced_video = interlaced;
     j2k_vid_descriptors[0].stream_type      = streamType;
     j2k_vid_descriptors[0].used             = 1;
@@ -175,10 +147,6 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.stream_id = gen_template.stream_id;
     pes_template.pes_packet_length = gen_template.pes_packet_length;
     pes_template.pes_scrambling_control = gen_template.pes_scrambling_control;
-    pes_template.pes_priority = gen_template.pes_priority;
-    pes_template.data_alignment_indicator = gen_template.data_alignment_indicator;
-    pes_template.copyright = gen_template.copyright;
-    pes_template.original_copy = gen_template.original_copy;
     pes_template.flags_7 = gen_template.flags_7;
     pes_template.pes_data_header_length = gen_template.pes_data_header_length;
     pes_template.pts = gen_template.pts;
@@ -196,14 +164,12 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.mm = gen_template.mm;
     pes_template.ss = gen_template.ss;
     pes_template.ff = gen_template.ff;
-    pes_template.bcol_colcr = gen_template.bcol_colcr;
     
     // Setup template fields based on tables
     pes_template.pid = j2k_vid_descriptors[0].associated_pid;
     pes_template.frat_denominator = j2k_vid_descriptors[0].den_frame_rate;
     pes_template.frat_numerator = j2k_vid_descriptors[0].num_frame_rate;
     pes_template.interlaced_video = j2k_vid_descriptors[0].interlaced_video;
-    pes_template.bcol_colcr = j2k_vid_descriptors[0].color_spec;
     
     pes_template.auf1 = 0;
     pes_template.auf2 = 0;
@@ -242,10 +208,10 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
         pes_template.payload[9] = (uint8_t) (pes_template.pes_packet_length & 0xff);
         pes_template.payload[10] = 0x80;
         pes_template.payload[10] |= (uint8_t) (pes_template.pes_scrambling_control << 4);
-        pes_template.payload[10] |= (uint8_t) (pes_template.pes_priority << 3);
-        pes_template.payload[10] |= (uint8_t) (pes_template.data_alignment_indicator << 2);
-        pes_template.payload[10] |= (uint8_t) (pes_template.copyright << 1);
-        pes_template.payload[10] |= (uint8_t) (pes_template.original_copy);
+        pes_template.payload[10] |= (uint8_t) (0 << 3);
+        pes_template.payload[10] |= (uint8_t) (1 << 2);
+        pes_template.payload[10] |= (uint8_t) (0 << 1);
+        pes_template.payload[10] |= (uint8_t) (0);
         pes_template.payload[11] = (uint8_t) (pes_template.flags_7);
         pes_template.payload[12] = (uint8_t) (pes_template.pes_data_header_length);
         pts_offset = 13;
@@ -313,7 +279,7 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
             esh[43] = 0x63;
             esh[44] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
             esh[45] = 0x6c;
-            esh[46] = (uint8_t) (pes_template.bcol_colcr & 0xff);
+            esh[46] = 3;
             esh[47] = 0x0;
         }
         else
@@ -331,7 +297,7 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
             esh[33] = 0x63;
             esh[34] = 0x6f;
             esh[35] = 0x6c;
-            esh[36] = (uint8_t) (pes_template.bcol_colcr & 0xff);
+            esh[36] = 3;
             esh[37] = 0xff;
         }
         if (pes_template.interlaced_video)
@@ -373,10 +339,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.stream_id = gen_template.stream_id;
     adaptation_template.pes_packet_length = gen_template.pes_packet_length;
     adaptation_template.pes_scrambling_control = gen_template.pes_scrambling_control;
-    adaptation_template.pes_priority = gen_template.pes_priority;
-    adaptation_template.data_alignment_indicator = gen_template.data_alignment_indicator;
-    adaptation_template.copyright = gen_template.copyright;
-    adaptation_template.original_copy = gen_template.original_copy;
     adaptation_template.flags_7 = gen_template.flags_7;
     adaptation_template.pes_data_header_length = gen_template.pes_data_header_length;
     adaptation_template.pts = gen_template.pts;
@@ -394,14 +356,12 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.mm = gen_template.mm;
     adaptation_template.ss = gen_template.ss;
     adaptation_template.ff = gen_template.ff;
-    adaptation_template.bcol_colcr = gen_template.bcol_colcr;
     
     // Setup template fields based on tables
     adaptation_template.pid = j2k_vid_descriptors[0].associated_pid;
     adaptation_template.frat_denominator = j2k_vid_descriptors[0].den_frame_rate;
     adaptation_template.frat_numerator = j2k_vid_descriptors[0].num_frame_rate;
     adaptation_template.interlaced_video = j2k_vid_descriptors[0].interlaced_video;
-    adaptation_template.bcol_colcr = j2k_vid_descriptors[0].color_spec;
     
     adaptation_template.auf1 = 0;
     adaptation_template.auf2 = 0;
@@ -453,14 +413,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
         
     adaptation_template_length = bpnt;
     
-    return 0;
-}
-
-
-// Sets payload parameter register based on RTL requirements
-int32_t CNTV2TsHelper::set_payload_params(void)
-{
-    payload_params = j2k_vid_descriptors[0].associated_pid;
     return 0;
 }
 
