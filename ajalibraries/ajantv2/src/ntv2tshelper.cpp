@@ -43,8 +43,6 @@ CNTV2TsHelper::CNTV2TsHelper()
     d1 = d1 - (double) w1;
     */
 
-    gen_template.adaptation_field_control = 1;
-    gen_template.continuity_counter = 3;
     gen_template.adaptation_field_length = 0;
     gen_template.discontinuity_indicator = 0;
     gen_template.random_access_indicator = 0;
@@ -99,8 +97,6 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     int32_t w1, w5;
     int32_t bpnt;
     
-    pes_template.adaptation_field_control = gen_template.adaptation_field_control;
-    pes_template.continuity_counter = gen_template.continuity_counter;
     pes_template.adaptation_field_length = gen_template.adaptation_field_length;
     pes_template.discontinuity_indicator = gen_template.discontinuity_indicator;
     pes_template.random_access_indicator = gen_template.random_access_indicator;
@@ -134,7 +130,6 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     for (w1 = 0; w1 < 170; w1++)
         pes_template.payload[w1] = 0;
     pes_template.pts = 0;
-    pes_template.continuity_counter = 0;
 
     pes_template.payload[0] = 0x47;
     pes_template.payload[1] = (uint8_t) (0 << 7);                   // transport_error
@@ -142,9 +137,7 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.payload[1] |= (uint8_t) (0 << 5);                  // transport_priority
     pes_template.payload[1] |= (uint8_t) ((tsStreamData.videoPid >> 8) & 0x1f);
     pes_template.payload[2] = (uint8_t) (tsStreamData.videoPid & 0xff);
-    pes_template.payload[3] = (uint8_t) (0 << 6);                   // transport_scrambling_control
-    pes_template.payload[3] |= (uint8_t) (pes_template.adaptation_field_control << 4);
-    pes_template.payload[3] |= (uint8_t) (pes_template.continuity_counter & 0xf);
+    pes_template.payload[3] |= (uint8_t) (1 << 4);
     bpnt = 4;
 
     // PES Header
@@ -271,8 +264,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     int32_t w1;
     int32_t bpnt;
     
-    adaptation_template.adaptation_field_control = gen_template.adaptation_field_control;
-    adaptation_template.continuity_counter = gen_template.continuity_counter;
     adaptation_template.adaptation_field_length = gen_template.adaptation_field_length;
     adaptation_template.discontinuity_indicator = gen_template.discontinuity_indicator;
     adaptation_template.random_access_indicator = gen_template.random_access_indicator;
@@ -303,13 +294,10 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.ff = 0;
     
     adaptation_template.pts = 0;
-    adaptation_template.continuity_counter = 0;
     
-    adaptation_template.adaptation_field_control = 3;
     adaptation_template.adaptation_field_length = 0;
     for (w1 = 0; w1 < 188; w1++)
         adaptation_template.payload[w1] = 0xff;	// Stuffing
-    adaptation_template.continuity_counter = 0;
     
     adaptation_template.int_payload[0] = 0x47;
     adaptation_template.int_payload[1] = (0 << 7);                      // transport_error
@@ -317,9 +305,7 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.int_payload[1] |= (0 << 5);                     // transport_priority
     adaptation_template.int_payload[1] |= ((tsStreamData.videoPid >> 8) & 0x1f);
     adaptation_template.int_payload[2] = (tsStreamData.videoPid & 0xff);
-    adaptation_template.int_payload[3] = (0 << 6);                      // transport_scrambling_control
-    adaptation_template.int_payload[3] |= (adaptation_template.adaptation_field_control << 4);
-    adaptation_template.int_payload[3] |= (adaptation_template.continuity_counter & 0xf);
+    adaptation_template.int_payload[3] |= (3 << 4);
     bpnt = 4;
     adaptation_template.int_payload[4] = (adaptation_template.adaptation_field_length);
     adaptation_template.int_payload[5] = (adaptation_template.discontinuity_indicator << 7);

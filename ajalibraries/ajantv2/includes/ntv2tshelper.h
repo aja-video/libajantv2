@@ -56,8 +56,7 @@ typedef struct TsEncapStreamData
 
 typedef struct ts_packet_tds
 {
-    int32_t         adaptation_field_control;
-    int32_t         continuity_counter;
+    //int32_t         continuity_counter;
     int32_t         adaptation_field_length;
     bool            discontinuity_indicator;
     bool            random_access_indicator;

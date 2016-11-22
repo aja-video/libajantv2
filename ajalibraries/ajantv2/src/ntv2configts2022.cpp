@@ -485,7 +485,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     GetJ2KEncodeVideoPid(channel, streamData.videoPid);
     GetJ2KEncodePCRPid(channel, streamData.pcrPid);
     GetJ2KEncodeAudio1Pid(channel, streamData.audio1Pid);
-    streamData.doPCR = false;
+    streamData.doPCR = true;
 
     printf("Program PID     = 0x%02x\n", streamData.programPid);
     printf("Video PID       = 0x%02x\n", streamData.videoPid);
@@ -571,25 +571,14 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
         _transactionTable[_transactionCount++][1] = _tsHelper.auf2_offset;
     }
 
-    printf("Adaptation Template Length = %i, Data:\n", _tsHelper.adaptation_template_length + 6);
+    printf("Adaptation Template Length = %i, Data:\n", _tsHelper.adaptation_template_length);
     _transactionTable[_transactionCount][0] = ADAPTATION_HDR_LENGTH;
-    _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template_length + 6;
-    for (w1 = 0; w1 < _tsHelper.adaptation_template_length + 6; w1++)
+    _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template_length;
+    for (w1 = 0; w1 < _tsHelper.adaptation_template_length; w1++)
     {
-        if (w1 < _tsHelper.adaptation_template_length)
-        {
-            printf("0x%02x, ", _tsHelper.adaptation_template.int_payload[w1]);
-            _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
-            _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template.int_payload[w1];
-        }
-        else
-        {
-            printf("0x%02x, ", (w1 - _tsHelper.adaptation_template_length) | 0x8000);
-
-            _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
-            _transactionTable[_transactionCount++][1] = ((w1 - _tsHelper.adaptation_template_length) << 8) | 0x800;
-
-        }
+        printf("0x%02x, ", _tsHelper.adaptation_template.int_payload[w1]);
+        _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
+        _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template.int_payload[w1];
         if (!((w1 + 1) % 16))
             printf("\n");
     }    
