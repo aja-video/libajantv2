@@ -14,10 +14,6 @@
 #include <map>
 #include <stdio.h>
 
-#define MAX_PROGS                   2
-#define MAX_STREAM_DESCRIPTORS      8
-#define NUM_J2K_CHANNELS            4
-
 typedef enum
 {
     kJ2KStreamTypeStandard,
@@ -56,41 +52,25 @@ typedef struct TsEncapStreamData
 } TsEncapStreamData;
 
 
-
 // Need NULL packet generation
 
 typedef struct ts_packet_tds
 {
-    bool            transport_error;
-    bool            payload_unit_start;
-    bool            transport_priority;
-    int32_t         pid;
-    int32_t         transport_scrambling_control;
     int32_t         adaptation_field_control;
     int32_t         continuity_counter;
-    int32_t         packet_start_code_prefix;
-    bool            adaptation_field_present;
     int32_t         adaptation_field_length;
     bool            discontinuity_indicator;
     bool            random_access_indicator;
     bool            elementery_stream_priority_indicator;
     int32_t         flags_5;
-    bool            do_pcr;
     bool            pcr_flag;
     uint64_t        pcr_base;
-    int32_t         pcr_extension;
-    bool            adaptation_field_extension_flag;
-    int32_t         stream_id;
-    bool            pes_header_present;
     int32_t         pes_packet_length;
     int32_t         pes_scrambling_control;
     int32_t         flags_7;
     int32_t         pes_data_header_length;
     uint64_t        pts;
     bool            j2k_esh;
-    int32_t         frat_denominator;
-    int32_t         frat_numerator;
-    bool            interlaced_video;
     uint32_t        max_br;
     uint32_t        auf1;
     uint32_t        auf2;
@@ -105,27 +85,6 @@ typedef struct ts_packet_tds
 } ts_packet;
 
 
-typedef struct stream_descriptor_tds
-{
-    int32_t         stream_type;
-    bool            j2k_stream;
-    int32_t         j2k_channel_num;
-    int32_t         elementary_pid;
-    int32_t         es_info_length;
-    uint8_t         es_descriptor[256];
-} stream_descriptor;
-
-
-typedef struct j2k_vid_descriptor_tds
-{
-    bool            used;
-    int32_t         associated_pid;
-    int32_t         den_frame_rate;
-    int32_t         num_frame_rate;
-    J2KStreamType   stream_type;
-    bool            interlaced_video;
-} j2k_vid_descriptor_type;
-
 class CNTV2TsHelper
 {
 public:
@@ -135,7 +94,6 @@ public:
 
     void        init(TsEncapStreamData streamData);
 
-    int32_t     setup_tables(J2KStreamType streamType, int32_t denFrameRate, int32_t numFrameRate, bool interlaced);
     int32_t     gen_pes_lookup(void);
     int32_t     gen_adaptation_lookup(void);
     int32_t     set_time_regs(void);
@@ -155,7 +113,6 @@ public:
     int32_t                     adaptation_template_length;
     
     int32_t                     pmt_program_number;
-    j2k_vid_descriptor_type     j2k_vid_descriptors[NUM_J2K_CHANNELS];
     uint64_t                    start_time;
     double                      fps;
     double                      total_time;

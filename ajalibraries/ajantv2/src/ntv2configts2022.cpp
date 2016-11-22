@@ -493,12 +493,6 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     printf("Audio 1 PID     = 0x%02x\n\n", streamData.audio1Pid);
 
     _tsHelper.init(streamData);
-
-    if (_tsHelper.setup_tables(streamData.j2kStreamType, streamData.denFrameRate, streamData.numFrameRate, streamData.interlaced))
-    {
-        return false;
-    }
-
     _tsHelper.gen_pes_lookup();
     _tsHelper.gen_adaptation_lookup();
     _tsHelper.set_time_regs();
@@ -515,7 +509,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = INTERLACED_VIDEO;
-    _transactionTable[_transactionCount++][1] = _tsHelper.j2k_vid_descriptors[0].interlaced_video;
+    _transactionTable[_transactionCount++][1] = _tsHelper.tsStreamData.interlaced;
     printf("Interlaced Video = %i\n", _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = TS_GEN_TC;

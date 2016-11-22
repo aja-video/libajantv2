@@ -43,30 +43,19 @@ CNTV2TsHelper::CNTV2TsHelper()
     d1 = d1 - (double) w1;
     */
 
-    gen_template.transport_error = 0;
-    gen_template.payload_unit_start = 0;
-    gen_template.transport_priority = 0;
-    gen_template.pid = 57;
-    gen_template.transport_scrambling_control = 0;
     gen_template.adaptation_field_control = 1;
     gen_template.continuity_counter = 3;
-    gen_template.packet_start_code_prefix = 1;
     gen_template.adaptation_field_length = 0;
     gen_template.discontinuity_indicator = 0;
     gen_template.random_access_indicator = 0;
     gen_template.elementery_stream_priority_indicator = 0;
     gen_template.flags_5 = 0x10;
-    gen_template.stream_id = 0xbd;
     gen_template.pes_packet_length = 0;
     gen_template.pes_scrambling_control = 0;
     gen_template.flags_7 = 0x80;
     gen_template.pes_data_header_length = 5;
     gen_template.pts = start_time;
-    gen_template.interlaced_video = 0;
     gen_template.j2k_esh = 0;
-    gen_template.frat_denominator = 1000;
-    gen_template.frat_numerator = 60000;
-    gen_template.interlaced_video = 0;
     gen_template.max_br = 75000000;
     gen_template.auf1 = 0;
     gen_template.auf2 = 0;
@@ -76,9 +65,7 @@ CNTV2TsHelper::CNTV2TsHelper()
     gen_template.mm = 49;
     gen_template.ss = 27;
     gen_template.ff = 23;
-    
-    adaptation_template.do_pcr = 0;
-        
+            
     // 90ms - to make sure it is at least 100ms
     table_tx_period = 90e-3;
     
@@ -103,27 +90,7 @@ void CNTV2TsHelper::init(TsEncapStreamData streamData)
 {
     tsStreamData = streamData;
 
-    gen_template.transport_error = 0;
-    gen_template.payload_unit_start = 0;
-    gen_template.transport_priority = 0;
 }
-
-
-int32_t CNTV2TsHelper::setup_tables(J2KStreamType streamType, int32_t denFrameRate, int32_t numFrameRate, bool interlaced)
-{
-    int32_t err = 0;
-
-
-    j2k_vid_descriptors[0].associated_pid   = tsStreamData.videoPid;
-    j2k_vid_descriptors[0].den_frame_rate   = denFrameRate;
-    j2k_vid_descriptors[0].num_frame_rate   = numFrameRate;
-    j2k_vid_descriptors[0].interlaced_video = interlaced;
-    j2k_vid_descriptors[0].stream_type      = streamType;
-    j2k_vid_descriptors[0].used             = 1;
-
-    return (err);
-}
-
 
 // Generates a lookup table for PES packets
 int32_t CNTV2TsHelper::gen_pes_lookup(void)
@@ -132,29 +99,19 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     int32_t w1, w5;
     int32_t bpnt;
     
-    pes_template.transport_error = gen_template.transport_error;
-    pes_template.payload_unit_start = gen_template.payload_unit_start;
-    pes_template.transport_priority = gen_template.transport_priority;
-    pes_template.transport_scrambling_control = gen_template.transport_scrambling_control;
     pes_template.adaptation_field_control = gen_template.adaptation_field_control;
     pes_template.continuity_counter = gen_template.continuity_counter;
-    pes_template.packet_start_code_prefix = gen_template.packet_start_code_prefix;
     pes_template.adaptation_field_length = gen_template.adaptation_field_length;
     pes_template.discontinuity_indicator = gen_template.discontinuity_indicator;
     pes_template.random_access_indicator = gen_template.random_access_indicator;
     pes_template.elementery_stream_priority_indicator = gen_template.elementery_stream_priority_indicator;
     pes_template.flags_5 = gen_template.flags_5;
-    pes_template.stream_id = gen_template.stream_id;
     pes_template.pes_packet_length = gen_template.pes_packet_length;
     pes_template.pes_scrambling_control = gen_template.pes_scrambling_control;
     pes_template.flags_7 = gen_template.flags_7;
     pes_template.pes_data_header_length = gen_template.pes_data_header_length;
     pes_template.pts = gen_template.pts;
-    pes_template.interlaced_video = gen_template.interlaced_video;
     pes_template.j2k_esh = gen_template.j2k_esh;
-    pes_template.frat_denominator = gen_template.frat_denominator;
-    pes_template.frat_numerator = gen_template.frat_numerator;
-    pes_template.interlaced_video = gen_template.interlaced_video;
     pes_template.max_br = gen_template.max_br;
     pes_template.auf1 = gen_template.auf1;
     pes_template.auf2 = gen_template.auf2;
@@ -165,21 +122,14 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.ss = gen_template.ss;
     pes_template.ff = gen_template.ff;
     
-    // Setup template fields based on tables
-    pes_template.pid = j2k_vid_descriptors[0].associated_pid;
-    pes_template.frat_denominator = j2k_vid_descriptors[0].den_frame_rate;
-    pes_template.frat_numerator = j2k_vid_descriptors[0].num_frame_rate;
-    pes_template.interlaced_video = j2k_vid_descriptors[0].interlaced_video;
-    
+    // Setup template fields based on tables    
     pes_template.auf1 = 0;
     pes_template.auf2 = 0;
     pes_template.hh = 0;
     pes_template.mm = 0;
     pes_template.ss = 0;
     pes_template.ff = 0;
-    
-    pes_template.payload_unit_start = 1;
-    
+        
     // Copy in payload
     for (w1 = 0; w1 < 170; w1++)
         pes_template.payload[w1] = 0;
@@ -187,129 +137,126 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
     pes_template.continuity_counter = 0;
 
     pes_template.payload[0] = 0x47;
-    pes_template.payload[1] = (uint8_t) (pes_template.transport_error << 7);
-    pes_template.payload[1] |= (uint8_t) (pes_template.payload_unit_start << 6);
-    pes_template.payload[1] |= (uint8_t) (pes_template.transport_priority << 5);
-    pes_template.payload[1] |= (uint8_t) ((pes_template.pid >> 8) & 0x1f);
-    pes_template.payload[2] = (uint8_t) (pes_template.pid & 0xff);
-    pes_template.payload[3] = (uint8_t) (pes_template.transport_scrambling_control << 6);
+    pes_template.payload[1] = (uint8_t) (0 << 7);                   // transport_error
+    pes_template.payload[1] |= (uint8_t) (1 << 6);                  // payload_unit_start
+    pes_template.payload[1] |= (uint8_t) (0 << 5);                  // transport_priority
+    pes_template.payload[1] |= (uint8_t) ((tsStreamData.videoPid >> 8) & 0x1f);
+    pes_template.payload[2] = (uint8_t) (tsStreamData.videoPid & 0xff);
+    pes_template.payload[3] = (uint8_t) (0 << 6);                   // transport_scrambling_control
     pes_template.payload[3] |= (uint8_t) (pes_template.adaptation_field_control << 4);
     pes_template.payload[3] |= (uint8_t) (pes_template.continuity_counter & 0xf);
     bpnt = 4;
 
     // PES Header
-    if (pes_template.payload_unit_start)
-    {
-        pes_template.payload[4] = (uint8_t) ((pes_template.packet_start_code_prefix >> 16) & 0xff);
-        pes_template.payload[5] = (uint8_t) ((pes_template.packet_start_code_prefix >> 8) & 0xff);
-        pes_template.payload[6] = (uint8_t) (pes_template.packet_start_code_prefix & 0xff);
-        pes_template.payload[7] = (uint8_t) (pes_template.stream_id);
-        pes_template.payload[8] = (uint8_t) ((pes_template.pes_packet_length >> 8) & 0xff);
-        pes_template.payload[9] = (uint8_t) (pes_template.pes_packet_length & 0xff);
-        pes_template.payload[10] = 0x80;
-        pes_template.payload[10] |= (uint8_t) (pes_template.pes_scrambling_control << 4);
-        pes_template.payload[10] |= (uint8_t) (0 << 3);
-        pes_template.payload[10] |= (uint8_t) (1 << 2);
-        pes_template.payload[10] |= (uint8_t) (0 << 1);
-        pes_template.payload[10] |= (uint8_t) (0);
-        pes_template.payload[11] = (uint8_t) (pes_template.flags_7);
-        pes_template.payload[12] = (uint8_t) (pes_template.pes_data_header_length);
-        pts_offset = 13;
-        pes_template.payload[13] = 0x21;
-        pes_template.payload[14] = 0x0;
-        pes_template.payload[15] = 0x1;
-        pes_template.payload[16] = 0x0;
-        pes_template.payload[17] = 0x1;
-        pes_template.payload[13] |= (uint8_t) ((pes_template.pts >> 29) & 0xe);
-        pes_template.payload[14] |= (uint8_t) ((pes_template.pts >> 22) & 0xff);
-        pes_template.payload[15] |= (uint8_t) ((pes_template.pts >> 14) & 0xfe);
-        pes_template.payload[16] |= (uint8_t) ((pes_template.pts >> 7) & 0xff);
-        pes_template.payload[17] |= (uint8_t) ((pes_template.pts << 1) & 0xfe);
-        bpnt = 18;
+    pes_template.payload[4] = (uint8_t) ((1 >> 16) & 0xff);             // packet_start_code_prefix
+    pes_template.payload[5] = (uint8_t) ((1 >> 8) & 0xff);
+    pes_template.payload[6] = (uint8_t) (1 & 0xff);
+    pes_template.payload[7] = (uint8_t) (0xbd);
+    pes_template.payload[8] = (uint8_t) ((pes_template.pes_packet_length >> 8) & 0xff);
+    pes_template.payload[9] = (uint8_t) (pes_template.pes_packet_length & 0xff);
+    pes_template.payload[10] = 0x80;
+    pes_template.payload[10] |= (uint8_t) (pes_template.pes_scrambling_control << 4);
+    pes_template.payload[10] |= (uint8_t) (0 << 3);
+    pes_template.payload[10] |= (uint8_t) (1 << 2);
+    pes_template.payload[10] |= (uint8_t) (0 << 1);
+    pes_template.payload[10] |= (uint8_t) (0);
+    pes_template.payload[11] = (uint8_t) (pes_template.flags_7);
+    pes_template.payload[12] = (uint8_t) (pes_template.pes_data_header_length);
+    pts_offset = 13;
+    pes_template.payload[13] = 0x21;
+    pes_template.payload[14] = 0x0;
+    pes_template.payload[15] = 0x1;
+    pes_template.payload[16] = 0x0;
+    pes_template.payload[17] = 0x1;
+    pes_template.payload[13] |= (uint8_t) ((pes_template.pts >> 29) & 0xe);
+    pes_template.payload[14] |= (uint8_t) ((pes_template.pts >> 22) & 0xff);
+    pes_template.payload[15] |= (uint8_t) ((pes_template.pts >> 14) & 0xfe);
+    pes_template.payload[16] |= (uint8_t) ((pes_template.pts >> 7) & 0xff);
+    pes_template.payload[17] |= (uint8_t) ((pes_template.pts << 1) & 0xfe);
+    bpnt = 18;
 
-        esh[0] = 0x65;
-        esh[1] = 0x6c;
-        esh[2] = 0x73;
-        esh[3] = 0x6d;
-        esh[4] = 0x66;
-        esh[5] = 0x72;
-        esh[6] = 0x61;
-        esh[7] = 0x74;
-        esh[8] = (uint8_t) ((pes_template.frat_denominator >> 8) & 0xff);
-        esh[9] = (uint8_t) (pes_template.frat_denominator & 0xff);
-        esh[10] = (uint8_t) ((pes_template.frat_numerator >> 8) & 0xff);
-        esh[11] = (uint8_t) (pes_template.frat_numerator & 0xff);
-        esh[12] = 0x62;
-        esh[13] = 0x72;
-        esh[14] = 0x61;
-        esh[15] = 0x74;
-        esh[16] = (uint8_t) (pes_template.max_br >> 24);
-        esh[17] = (uint8_t) ((pes_template.max_br >> 16) & 0xff);
-        esh[18] = (uint8_t) ((pes_template.max_br >> 8) & 0xff);
-        esh[19] = (uint8_t) (pes_template.max_br & 0xff);
-        auf1_offset = 20 + bpnt;
-        auf2_offset = 0xff;
-        esh[20] = (uint8_t) (pes_template.auf1 >> 24);
-        esh[21] = (uint8_t) ((pes_template.auf1 >> 16) & 0xff);
-        esh[22] = (uint8_t) ((pes_template.auf1 >> 8) & 0xff);
-        esh[23] = (uint8_t) (pes_template.auf1 & 0xff);
-        if (pes_template.interlaced_video)
-        {
-            auf2_offset = 24 + bpnt;
-            esh[24] = (uint8_t) (pes_template.auf2 >> 24);
-            esh[25] = (uint8_t) ((pes_template.auf2 >> 16) & 0xff);
-            esh[26] = (uint8_t) ((pes_template.auf2 >> 8) & 0xff);
-            esh[27] = (uint8_t) (pes_template.auf2 & 0xff);
-            esh[28] = 0x66;
-            esh[29] = 0x69;
-            esh[30] = 0x65;
-            esh[31] = 0x6c;
-            esh[32] = (uint8_t) (pes_template.fic & 0xff);
-            esh[33] = (uint8_t) (pes_template.fio & 0xff);
-            esh[34] = 0x74;
-            esh[35] = 0x63;
-            esh[36] = 0x6f;
-            esh[37] = 0x64;
-            j2k_ts_offset = 38 + bpnt;
-            esh[38] = (uint8_t) (pes_template.hh & 0xff);
-            esh[39] = (uint8_t) (pes_template.mm & 0xff);
-            esh[40] = (uint8_t) (pes_template.ss & 0xff);
-            esh[41] = (uint8_t) (pes_template.ff & 0xff);
-            esh[42] = 0x62;
-            esh[43] = 0x63;
-            esh[44] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
-            esh[45] = 0x6c;
-            esh[46] = 3;
-            esh[47] = 0x0;
-        }
-        else
-        {
-            esh[24] = 0x74;
-            esh[25] = 0x63;
-            esh[26] = 0x6f;
-            esh[27] = 0x64;
-            j2k_ts_offset = 28 + bpnt;
-            esh[28] = (uint8_t) (pes_template.hh & 0xff);
-            esh[29] = (uint8_t) (pes_template.mm & 0xff);
-            esh[30] = (uint8_t) (pes_template.ss & 0xff);
-            esh[31] = (uint8_t) (pes_template.ff & 0xff);
-            esh[32] = 0x62;
-            esh[33] = 0x63;
-            esh[34] = 0x6f;
-            esh[35] = 0x6c;
-            esh[36] = 3;
-            esh[37] = 0xff;
-        }
-        if (pes_template.interlaced_video)
-        {
-            for (w5 = 0; w5 < 48; w5++)
-                pes_template.payload[bpnt++] = esh[w5];
-        }
-        else
-        {
-            for (w5 = 0; w5 < 38; w5++)
-                pes_template.payload[bpnt++] = esh[w5];
-        }
+    esh[0] = 0x65;
+    esh[1] = 0x6c;
+    esh[2] = 0x73;
+    esh[3] = 0x6d;
+    esh[4] = 0x66;
+    esh[5] = 0x72;
+    esh[6] = 0x61;
+    esh[7] = 0x74;
+    esh[8] = (uint8_t) ((tsStreamData.denFrameRate >> 8) & 0xff);
+    esh[9] = (uint8_t) (tsStreamData.denFrameRate & 0xff);
+    esh[10] = (uint8_t) ((tsStreamData.numFrameRate >> 8) & 0xff);
+    esh[11] = (uint8_t) (tsStreamData.numFrameRate & 0xff);
+    esh[12] = 0x62;
+    esh[13] = 0x72;
+    esh[14] = 0x61;
+    esh[15] = 0x74;
+    esh[16] = (uint8_t) (pes_template.max_br >> 24);
+    esh[17] = (uint8_t) ((pes_template.max_br >> 16) & 0xff);
+    esh[18] = (uint8_t) ((pes_template.max_br >> 8) & 0xff);
+    esh[19] = (uint8_t) (pes_template.max_br & 0xff);
+    auf1_offset = 20 + bpnt;
+    auf2_offset = 0xff;
+    esh[20] = (uint8_t) (pes_template.auf1 >> 24);
+    esh[21] = (uint8_t) ((pes_template.auf1 >> 16) & 0xff);
+    esh[22] = (uint8_t) ((pes_template.auf1 >> 8) & 0xff);
+    esh[23] = (uint8_t) (pes_template.auf1 & 0xff);
+    if (tsStreamData.interlaced)
+    {
+        auf2_offset = 24 + bpnt;
+        esh[24] = (uint8_t) (pes_template.auf2 >> 24);
+        esh[25] = (uint8_t) ((pes_template.auf2 >> 16) & 0xff);
+        esh[26] = (uint8_t) ((pes_template.auf2 >> 8) & 0xff);
+        esh[27] = (uint8_t) (pes_template.auf2 & 0xff);
+        esh[28] = 0x66;
+        esh[29] = 0x69;
+        esh[30] = 0x65;
+        esh[31] = 0x6c;
+        esh[32] = (uint8_t) (pes_template.fic & 0xff);
+        esh[33] = (uint8_t) (pes_template.fio & 0xff);
+        esh[34] = 0x74;
+        esh[35] = 0x63;
+        esh[36] = 0x6f;
+        esh[37] = 0x64;
+        j2k_ts_offset = 38 + bpnt;
+        esh[38] = (uint8_t) (pes_template.hh & 0xff);
+        esh[39] = (uint8_t) (pes_template.mm & 0xff);
+        esh[40] = (uint8_t) (pes_template.ss & 0xff);
+        esh[41] = (uint8_t) (pes_template.ff & 0xff);
+        esh[42] = 0x62;
+        esh[43] = 0x63;
+        esh[44] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
+        esh[45] = 0x6c;
+        esh[46] = 3;
+        esh[47] = 0x0;
+    }
+    else
+    {
+        esh[24] = 0x74;
+        esh[25] = 0x63;
+        esh[26] = 0x6f;
+        esh[27] = 0x64;
+        j2k_ts_offset = 28 + bpnt;
+        esh[28] = (uint8_t) (pes_template.hh & 0xff);
+        esh[29] = (uint8_t) (pes_template.mm & 0xff);
+        esh[30] = (uint8_t) (pes_template.ss & 0xff);
+        esh[31] = (uint8_t) (pes_template.ff & 0xff);
+        esh[32] = 0x62;
+        esh[33] = 0x63;
+        esh[34] = 0x6f;
+        esh[35] = 0x6c;
+        esh[36] = 3;
+        esh[37] = 0xff;
+    }
+    if (tsStreamData.interlaced)
+    {
+        for (w5 = 0; w5 < 48; w5++)
+            pes_template.payload[bpnt++] = esh[w5];
+    }
+    else
+    {
+        for (w5 = 0; w5 < 38; w5++)
+            pes_template.payload[bpnt++] = esh[w5];
     }
 
     pes_template_len = bpnt;
@@ -324,29 +271,19 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     int32_t w1;
     int32_t bpnt;
     
-    adaptation_template.transport_error = gen_template.transport_error;
-    adaptation_template.payload_unit_start = gen_template.payload_unit_start;
-    adaptation_template.transport_priority = gen_template.transport_priority;
-    adaptation_template.transport_scrambling_control = gen_template.transport_scrambling_control;
     adaptation_template.adaptation_field_control = gen_template.adaptation_field_control;
     adaptation_template.continuity_counter = gen_template.continuity_counter;
-    adaptation_template.packet_start_code_prefix = gen_template.packet_start_code_prefix;
     adaptation_template.adaptation_field_length = gen_template.adaptation_field_length;
     adaptation_template.discontinuity_indicator = gen_template.discontinuity_indicator;
     adaptation_template.random_access_indicator = gen_template.random_access_indicator;
     adaptation_template.elementery_stream_priority_indicator = gen_template.elementery_stream_priority_indicator;
     adaptation_template.flags_5 = gen_template.flags_5;
-    adaptation_template.stream_id = gen_template.stream_id;
     adaptation_template.pes_packet_length = gen_template.pes_packet_length;
     adaptation_template.pes_scrambling_control = gen_template.pes_scrambling_control;
     adaptation_template.flags_7 = gen_template.flags_7;
     adaptation_template.pes_data_header_length = gen_template.pes_data_header_length;
     adaptation_template.pts = gen_template.pts;
-    adaptation_template.interlaced_video = gen_template.interlaced_video;
     adaptation_template.j2k_esh = gen_template.j2k_esh;
-    adaptation_template.frat_denominator = gen_template.frat_denominator;
-    adaptation_template.frat_numerator = gen_template.frat_numerator;
-    adaptation_template.interlaced_video = gen_template.interlaced_video;
     adaptation_template.max_br = gen_template.max_br;
     adaptation_template.auf1 = gen_template.auf1;
     adaptation_template.auf2 = gen_template.auf2;
@@ -358,11 +295,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.ff = gen_template.ff;
     
     // Setup template fields based on tables
-    adaptation_template.pid = j2k_vid_descriptors[0].associated_pid;
-    adaptation_template.frat_denominator = j2k_vid_descriptors[0].den_frame_rate;
-    adaptation_template.frat_numerator = j2k_vid_descriptors[0].num_frame_rate;
-    adaptation_template.interlaced_video = j2k_vid_descriptors[0].interlaced_video;
-    
     adaptation_template.auf1 = 0;
     adaptation_template.auf2 = 0;
     adaptation_template.hh = 0;
@@ -370,7 +302,6 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.ss = 0;
     adaptation_template.ff = 0;
     
-    adaptation_template.payload_unit_start = 0;
     adaptation_template.pts = 0;
     adaptation_template.continuity_counter = 0;
     
@@ -381,12 +312,12 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.continuity_counter = 0;
     
     adaptation_template.int_payload[0] = 0x47;
-    adaptation_template.int_payload[1] = (adaptation_template.transport_error << 7);
-    adaptation_template.int_payload[1] |= (adaptation_template.payload_unit_start << 6);
-    adaptation_template.int_payload[1] |= (adaptation_template.transport_priority << 5);
-    adaptation_template.int_payload[1] |= ((adaptation_template.pid >> 8) & 0x1f);
-    adaptation_template.int_payload[2] = (adaptation_template.pid & 0xff);
-    adaptation_template.int_payload[3] = (adaptation_template.transport_scrambling_control << 6);
+    adaptation_template.int_payload[1] = (0 << 7);                      // transport_error
+    adaptation_template.int_payload[1] |= (0 << 6);                     // payload_unit_start
+    adaptation_template.int_payload[1] |= (0 << 5);                     // transport_priority
+    adaptation_template.int_payload[1] |= ((tsStreamData.videoPid >> 8) & 0x1f);
+    adaptation_template.int_payload[2] = (tsStreamData.videoPid & 0xff);
+    adaptation_template.int_payload[3] = (0 << 6);                      // transport_scrambling_control
     adaptation_template.int_payload[3] |= (adaptation_template.adaptation_field_control << 4);
     adaptation_template.int_payload[3] |= (adaptation_template.continuity_counter & 0xf);
     bpnt = 4;
@@ -397,7 +328,7 @@ int32_t CNTV2TsHelper::gen_adaptation_lookup(void)
     adaptation_template.int_payload[5] |= (adaptation_template.flags_5);
     bpnt = 6;
     
-    if (adaptation_template.do_pcr)
+    if (tsStreamData.doPCR)
     {
         adaptation_template.int_payload[6] = 0x800;
         adaptation_template.int_payload[7] = 0x900;
