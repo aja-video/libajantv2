@@ -250,7 +250,7 @@ public:
     void                J2kSetMode(const NTV2Channel channel, uint32_t tier, uint32_t mode);
     uint32_t            GetFeatures();
 
-    bool                GenerateTransactionTableForMpegJ2kEncap(const NTV2Channel channel);
+    bool                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 

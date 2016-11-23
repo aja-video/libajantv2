@@ -42,19 +42,13 @@ CNTV2TsHelper::CNTV2TsHelper()
     w1 = (int32_t) d1;
     d1 = d1 - (double) w1;
     */
-            
-    // 90ms - to make sure it is at least 100ms
-    table_tx_period = 90e-3;
-    
+                
     pes_template_len = -1;
     pts_offset = -1;
     j2k_ts_offset = -1;
     auf1_offset = -1;
     auf2_offset = -1;
-    adaptation_template_length = -1;
-    payload_params = 0;
     ts_gen_tc = 0;
-    pmt_program_number = 0;
 }
 
 
@@ -81,12 +75,10 @@ int32_t CNTV2TsHelper::gen_pes_lookup(void)
         pes_template.payload[w1] = 0;
 
     pes_template.payload[0] = 0x47;
-    pes_template.payload[1] = (uint8_t) (0 << 7);                   // transport_error
-    pes_template.payload[1] |= (uint8_t) (1 << 6);                  // payload_unit_start
-    pes_template.payload[1] |= (uint8_t) (0 << 5);                  // transport_priority
+    pes_template.payload[1] = (uint8_t) (1 << 6);                  // payload_unit_start
     pes_template.payload[1] |= (uint8_t) ((tsStreamData.videoPid >> 8) & 0x1f);
     pes_template.payload[2] = (uint8_t) (tsStreamData.videoPid & 0xff);
-    pes_template.payload[3] |= (uint8_t) (1 << 4);
+    pes_template.payload[3] = (uint8_t) (1 << 4);
     bpnt = 4;
 
     // PES Header
@@ -220,7 +212,7 @@ int32_t CNTV2TsHelper::set_time_regs(void)
     ts_gen_tc = (int32_t) d1;
     
     // Next PAT / PMT Transmission Rate
-    d1 = table_tx_period / d2 - 1.0;
+    d1 = 90e-3 / d2 - 1.0;
     pat_pmt_period = (int32_t) d1;
     
     return 0;

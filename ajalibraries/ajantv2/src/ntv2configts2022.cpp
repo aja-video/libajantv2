@@ -296,7 +296,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel)
 
     printf("CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap\n");
 
-    if (!GenerateTransactionTableForMpegJ2kEncap(channel))
+    if (!GenerateTableForMpegJ2kEncap(channel))
     {
         mError = "SetupEncodeTsMpegJ2kEncap could not generate transaction table";
         return false;
@@ -456,7 +456,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 }
 
 
-bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channel channel)
+bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
 {
     NTV2VideoFormat     videoFormat;
     int32_t             w1;
@@ -485,7 +485,6 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     GetJ2KEncodeVideoPid(channel, streamData.videoPid);
     GetJ2KEncodePCRPid(channel, streamData.pcrPid);
     GetJ2KEncodeAudio1Pid(channel, streamData.audio1Pid);
-    streamData.doPCR = true;
 
     printf("Program PID     = 0x%02x\n", streamData.programPid);
     printf("Video PID       = 0x%02x\n", streamData.videoPid);
@@ -572,13 +571,7 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
 
     ADPGen adp;
     adp._elemNumToPID[1] = streamData.videoPid;
-    adp._videoStreamData.j2kStreamType = streamData.j2kStreamType;
-    adp._videoStreamData.width = streamData.width;
-    adp._videoStreamData.height = streamData.height;
-    adp._videoStreamData.denFrameRate = streamData.denFrameRate;
-    adp._videoStreamData.numFrameRate = streamData.numFrameRate;
-    adp._videoStreamData.interlaced = streamData.interlaced;
-    adp._videoStreamData.doPcr = streamData.doPCR;
+    adp._doPcr = true;
     int length = adp.makePacket();
 
     printf("Adaptation Template Length = %i, Data:\n", length);
@@ -614,7 +607,6 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     pmt._videoStreamData.denFrameRate = streamData.denFrameRate;
     pmt._videoStreamData.numFrameRate = streamData.numFrameRate;
     pmt._videoStreamData.interlaced = streamData.interlaced;
-    pmt._videoStreamData.doPcr = streamData.doPCR;
     length = pmt.makePacket();
 
     printf("PMT Template Length = %i, Data:\n", length);
