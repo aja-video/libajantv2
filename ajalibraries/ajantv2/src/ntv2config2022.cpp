@@ -1294,19 +1294,22 @@ bool  CNTV2Config2022::ConfigurePTP (eSFP port, string localIPAddress)
     macAddressRegister++;
     mDevice.ReadRegister(macAddressRegister, &macLo);
 
+    uint32_t alignedMACHi = macHi >> 16;
+    uint32_t alignedMACLo = (macLo >> 16) | ( (macHi & 0xffff) << 16);
+
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
 
 	// configure pll
-    WriteChannelRegister(kRegPll_PTP_LclMacLo   + SAREK_PLL, macLo | 0x0191);
-    WriteChannelRegister(kRegPll_PTP_LclMacHi   + SAREK_PLL, macHi);
+    WriteChannelRegister(kRegPll_PTP_LclMacLo   + SAREK_PLL, alignedMACLo);
+    WriteChannelRegister(kRegPll_PTP_LclMacHi   + SAREK_PLL, alignedMACHi);
 
-    WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0140013f);
+    WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
     WriteChannelRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
     WriteChannelRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
 
-    WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
-    WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
+    //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
+    //WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
 
     return true;
 }
