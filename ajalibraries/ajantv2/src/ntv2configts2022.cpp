@@ -494,7 +494,6 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
 
     _tsHelper.init(streamData);
     _tsHelper.gen_pes_lookup();
-    _tsHelper.gen_adaptation_lookup();
     _tsHelper.set_time_regs();
 
     _transactionCount = 0;
@@ -571,31 +570,38 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
         _transactionTable[_transactionCount++][1] = _tsHelper.auf2_offset;
     }
 
-    printf("Adaptation Template Length = %i, Data:\n", _tsHelper.adaptation_template_length);
+    ADPGen adp;
+    adp._elemNumToPID[1] = streamData.videoPid;
+    adp._videoStreamData.j2kStreamType = streamData.j2kStreamType;
+    adp._videoStreamData.width = streamData.width;
+    adp._videoStreamData.height = streamData.height;
+    adp._videoStreamData.denFrameRate = streamData.denFrameRate;
+    adp._videoStreamData.numFrameRate = streamData.numFrameRate;
+    adp._videoStreamData.interlaced = streamData.interlaced;
+    adp._videoStreamData.doPcr = streamData.doPCR;
+    int length = adp.makePacket();
+
+    printf("Adaptation Template Length = %i, Data:\n", length);
     _transactionTable[_transactionCount][0] = ADAPTATION_HDR_LENGTH;
-    _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template_length;
-    for (w1 = 0; w1 < _tsHelper.adaptation_template_length; w1++)
+    _transactionTable[_transactionCount++][1] = length;
+    for (w1 = 0; w1 < 188; w1++)
     {
-        printf("0x%02x, ", _tsHelper.adaptation_template.int_payload[w1]);
         _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = _tsHelper.adaptation_template.int_payload[w1];
-        if (!((w1 + 1) % 16))
-            printf("\n");
-    }    
+        _transactionTable[_transactionCount++][1] = adp._pkt32[w1];
+    }
+    adp.dump32();
 
     PATGen pat;
     pat._progNumToPID[1] = streamData.programPid;
-    pat.makePacket();
+    length = pat.makePacket();
 
-    printf("\n\nPAT Table:\n");
-    pat.dump();
-
-    // Copy over the PAT table into the transaction table
+    printf("PAT Template Length = %i, Data:\n", length);
     for (w1 = 0; w1 < 188; w1++)
     {
         _transactionTable[_transactionCount][0] = PAT_TABLE_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = pat._pkt[w1];
+        _transactionTable[_transactionCount++][1] = pat._pkt8[w1];
     }
+    pat.dump8();
 
     PMTGen pmt;
     pmt._progNumToPID[1] = streamData.programPid;
@@ -609,18 +615,15 @@ bool CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap(const NTV2Channe
     pmt._videoStreamData.numFrameRate = streamData.numFrameRate;
     pmt._videoStreamData.interlaced = streamData.interlaced;
     pmt._videoStreamData.doPcr = streamData.doPCR;
-    pmt.makePacket();
+    length = pmt.makePacket();
 
-    printf("\n\nPMT Table:\n");
-    pmt.dump();
-
-    // Copy over the PMT table into the transaction table
+    printf("PMT Template Length = %i, Data:\n", length);
     for (w1 = 0; w1 < 188; w1++)
     {
         _transactionTable[_transactionCount][0] = PMT_TABLE_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = pmt._pkt[w1];
+        _transactionTable[_transactionCount++][1] = pmt._pkt8[w1];
     }
-    printf("\n\n");
+    pmt.dump8();
 
     // Last entry is HOST_EN to on
     printf("Set HOST_EN to 1\n\n");

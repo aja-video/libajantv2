@@ -56,29 +56,6 @@ typedef struct TsEncapStreamData
 
 typedef struct ts_packet_tds
 {
-    //int32_t         continuity_counter;
-    int32_t         adaptation_field_length;
-    bool            discontinuity_indicator;
-    bool            random_access_indicator;
-    bool            elementery_stream_priority_indicator;
-    int32_t         flags_5;
-    bool            pcr_flag;
-    uint64_t        pcr_base;
-    int32_t         pes_packet_length;
-    int32_t         pes_scrambling_control;
-    int32_t         flags_7;
-    int32_t         pes_data_header_length;
-    uint64_t        pts;
-    bool            j2k_esh;
-    uint32_t        max_br;
-    uint32_t        auf1;
-    uint32_t        auf2;
-    int32_t         fic;
-    int32_t         fio;
-    int32_t         hh;
-    int32_t         mm;
-    int32_t         ss;
-    int32_t         ff;
     uint8_t         payload[188];
     int32_t         int_payload[188];
 } ts_packet;
@@ -94,7 +71,6 @@ public:
     void        init(TsEncapStreamData streamData);
 
     int32_t     gen_pes_lookup(void);
-    int32_t     gen_adaptation_lookup(void);
     int32_t     set_time_regs(void);
     
     ts_packet                   gen_template;
@@ -144,7 +120,8 @@ class TSGenerator
         uint8_t _version;
 
         // Generated packet
-        uint8_t _pkt[188];
+        uint8_t     _pkt8[188];
+        uint32_t    _pkt32[188];
 
     public:
         TSGenerator()
@@ -167,7 +144,8 @@ class TSGenerator
         {
             for ( int i = 0; i < 188; i++ )
             {
-                _pkt[i] = 0xff;
+                _pkt8[i] = 0xff;
+                _pkt32[i] = 0xffff;
             }
         }
 
@@ -229,31 +207,43 @@ class TSGenerator
             return crc;
         }
 
-        void dump()
+        void dump8()
         {
             for (int i=0; i<188; i++)
             {
                 if (i % 16 == 15)
-                    printf("0x%02x\n", _pkt[i]);
+                    printf("0x%02x\n", _pkt8[i]);
                 else
-                    printf("0x%02x, ", _pkt[i]);
+                    printf("0x%02x, ", _pkt8[i]);
             }
-            printf("\n");
+            printf("\n\n");
+        }
+
+        void dump32()
+        {
+            for (int i=0; i<188; i++)
+            {
+                if (i % 16 == 15)
+                    printf("0x%04x\n", _pkt32[i]);
+                else
+                    printf("0x%04x ", _pkt32[i]);
+            }
+            printf("\n\n");
         }
 
     protected:
         void put16( uint16_t val, int &pos )
         {
-            _pkt[pos++] = (uint8_t)(val>>8);
-            _pkt[pos++] = val;
+            _pkt8[pos++] = (uint8_t)(val>>8);
+            _pkt8[pos++] = val;
         }
 
         void put32( uint32_t val, int &pos )
         {
-            _pkt[pos++] = (uint8_t)(val>>24);
-            _pkt[pos++] = (uint8_t)(val>>16);
-            _pkt[pos++] = (uint8_t)(val>>8);
-            _pkt[pos++] = val;
+            _pkt8[pos++] = (uint8_t)(val>>24);
+            _pkt8[pos++] = (uint8_t)(val>>16);
+            _pkt8[pos++] = (uint8_t)(val>>8);
+            _pkt8[pos++] = val;
         }
 };
 
@@ -278,28 +268,28 @@ class PATGen : public TSGenerator
             _progNumToPID.clear();
         }
 
-        bool makePacket()
+        int makePacket()
         {
             initPacket();
             int pos = 0;
 
             // Header
-            _pkt[pos++] = 0x47;         // sync byte
-            _pkt[pos++] = 1<<6;         // payload unit start indicator
-            _pkt[pos++] = 0;            // PID for PAT = 0
-            _pkt[pos++] = 0x10;         // Continuity Counter must increment when transmitted
-            _pkt[pos++] = 0;            // pointer
+            _pkt8[pos++] = 0x47;                                // sync byte
+            _pkt8[pos++] = 1<<6;                                // payload unit start indicator
+            _pkt8[pos++] = 0;                                   // PID for PAT = 0
+            _pkt8[pos++] = 0x10;                                // Continuity Counter must increment when transmitted
+            _pkt8[pos++] = 0;                                   // pointer
 
             int crcStart = pos;
 
-            _pkt[pos++] = 0; // table id = 0
+            _pkt8[pos++] = 0;                                   // table id = 0
 
             int length = 9 + (4*_progNumToPID.size());
-            put16( (uint16_t)0xb000 + (length & 0x3ff), pos); // syntax indicator, reserved, length
+            put16( (uint16_t)0xb000 + (length & 0x3ff), pos);   // syntax indicator, reserved, length
             put16( _tsId, pos );
 
-            _pkt[pos++] = 0xc1 + ((_version & 0x1f)<< 1); // version, current/next
-            put16( 0, pos ); // section number = last section number = 0
+            _pkt8[pos++] = 0xc1 + ((_version & 0x1f)<< 1);      // version, current/next
+            put16( 0, pos );                                    // section number = last section number = 0
 
             std::map <uint16_t, uint16_t>::const_iterator it = _progNumToPID.begin();
             while (it != _progNumToPID.end())
@@ -310,9 +300,9 @@ class PATGen : public TSGenerator
             }
             int crcEnd = pos - 1;
 
-            int crc = chksum_crc32(_pkt + crcStart, crcEnd - crcStart + 1 );
+            int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
-            return true;
+            return pos;
         }
 };
 
@@ -343,81 +333,81 @@ class PMTGen : public TSGenerator
             _audioNumToPID.clear();
         }
 
-        bool makePacket()
+        int makePacket()
         {
             initPacket();
             int pos = 0;
             int len, lengthPos, j2kLengthPos, audioLengthPos;
 
             // Header
-            _pkt[pos++] = 0x47;                                             // sync byte
-            _pkt[pos] = 1<<6;                                               // payload unit start indicator
-            _pkt[pos++] |= (uint8_t) ((_progNumToPID[1] >> 8) & 0x1f);      // PID for PMT
-            _pkt[pos++] =  (uint8_t) (_progNumToPID[1] & 0xff);             // PID for PMT
-            _pkt[pos++] = 0x10;                                             // Continuity Counter must increment when transmitted
-            _pkt[pos++] = 0;                                                // pointer
+            _pkt8[pos++] = 0x47;                                            // sync byte
+            _pkt8[pos] = 1<<6;                                              // payload unit start indicator
+            _pkt8[pos++] |= (uint8_t) ((_progNumToPID[1] >> 8) & 0x1f);     // PID for PMT
+            _pkt8[pos++] =  (uint8_t) (_progNumToPID[1] & 0xff);            // PID for PMT
+            _pkt8[pos++] = 0x10;                                            // Continuity Counter must increment when transmitted
+            _pkt8[pos++] = 0;                                               // pointer
 
             int crcStart = pos;
 
-            _pkt[pos++] = 2;                                                // table id = 0
+            _pkt8[pos++] = 2;                                               // table id = 0
             lengthPos = pos;                                                // need to come back and fill in length so save position (assume < 256)
-            _pkt[pos++] = 0xb0;
+            _pkt8[pos++] = 0xb0;
             pos++;
 
             put16(0x01, pos);                                               // program number
 
-            _pkt[pos++] = 0xc1 + ((_version & 0x1f)<< 1);                   // version, current/next
+            _pkt8[pos++] = 0xc1 + ((_version & 0x1f)<< 1);                  // version, current/next
             put16( 0, pos );                                                // section number = last section number = 0
 
-            _pkt[pos] = 0xe0;                                               // PCR pid and reserved bits
-            _pkt[pos++] |= (uint8_t) ((_pcrNumToPID[1] >> 8) & 0x1f);
-            _pkt[pos++] =  (uint8_t) (_pcrNumToPID[1] & 0xff);
+            _pkt8[pos] = 0xe0;                                              // PCR pid and reserved bits
+            _pkt8[pos++] |= (uint8_t) ((_pcrNumToPID[1] >> 8) & 0x1f);
+            _pkt8[pos++] =  (uint8_t) (_pcrNumToPID[1] & 0xff);
 
-            _pkt[pos++] = 0xf0;                                             // reserved bits and program info length
-            _pkt[pos++] = 0x00;                                             // reserved bits and program info length
+            _pkt8[pos++] = 0xf0;                                            // reserved bits and program info length
+            _pkt8[pos++] = 0x00;                                            // reserved bits and program info length
 
             // Do the streams
 
             // J2K
-            _pkt[pos++] = 0x21;                                             // J2K Type
-            _pkt[pos] = 0xe0;                                               // elementary pid and reserved bits
-            _pkt[pos++] |= (uint8_t) ((_elemNumToPID[1] >> 8) & 0x1f);
-            _pkt[pos++] =  (uint8_t) (_elemNumToPID[1] & 0xff);
+            _pkt8[pos++] = 0x21;                                            // J2K Type
+            _pkt8[pos] = 0xe0;                                              // elementary pid and reserved bits
+            _pkt8[pos++] |= (uint8_t) ((_elemNumToPID[1] >> 8) & 0x1f);
+            _pkt8[pos++] =  (uint8_t) (_elemNumToPID[1] & 0xff);
 
             j2kLengthPos = pos;                                             // need to come back and fill in descriptor length so save position
             pos+=2;
 
             len = makeJ2kDescriptor(pos);                                   // generate the J2K descriptor
 
-            _pkt[j2kLengthPos] = 0xf0;                                      // fill in the length and reserved bits now
-            _pkt[j2kLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
-            _pkt[j2kLengthPos] =  (uint8_t) (len & 0xff);
+            _pkt8[j2kLengthPos] = 0xf0;                                     // fill in the length and reserved bits now
+            _pkt8[j2kLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
+            _pkt8[j2kLengthPos] =  (uint8_t) (len & 0xff);
 
             // Audio
-            _pkt[pos++] = 0x06;                                             // Audio Type
-            _pkt[pos] = 0xe0;                                               // audio pid and reserved bits
-            _pkt[pos++] |= (uint8_t) ((_audioNumToPID[1] >> 8) & 0x1f);
-            _pkt[pos++] =  (uint8_t) (_audioNumToPID[1] & 0xff);
+            _pkt8[pos++] = 0x06;                                            // Audio Type
+            _pkt8[pos] = 0xe0;                                              // audio pid and reserved bits
+            _pkt8[pos++] |= (uint8_t) ((_audioNumToPID[1] >> 8) & 0x1f);
+            _pkt8[pos++] =  (uint8_t) (_audioNumToPID[1] & 0xff);
 
             audioLengthPos = pos;                                           // need to come back and fill in descriptor length so save position
             pos+=2;
 
             len = makeAudioDescriptor(pos);                                 // generate the audio descriptor
 
-            _pkt[audioLengthPos] = 0xf0;                                    // fill in the length and reserved bits now
-            _pkt[audioLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
-            _pkt[audioLengthPos] =  (uint8_t) (len & 0xff);
+            _pkt8[audioLengthPos] = 0xf0;                                   // fill in the length and reserved bits now
+            _pkt8[audioLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
+            _pkt8[audioLengthPos] =  (uint8_t) (len & 0xff);
 
             // now we know the length so fill that in
-            _pkt[lengthPos] = 0xb0;
-            _pkt[lengthPos++] |= (uint8_t) (((pos-crcStart+1) >> 8) & 0x1f);
-            _pkt[lengthPos] =  (uint8_t) ((pos-crcStart+1) & 0xff);
+            _pkt8[lengthPos] = 0xb0;
+            _pkt8[lengthPos++] |= (uint8_t) (((pos-crcStart+1) >> 8) & 0x1f);
+            _pkt8[lengthPos] =  (uint8_t) ((pos-crcStart+1) & 0xff);
 
             int crcEnd = pos - 1;
 
-            int crc = chksum_crc32(_pkt + crcStart, crcEnd - crcStart + 1 );
+            int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
-            return true;
+            return pos;
         }
 
         int makeJ2kDescriptor(int &pos)
@@ -442,8 +432,8 @@ class PMTGen : public TSGenerator
             else height = _videoStreamData.height;
 
             // Header
-            _pkt[pos++] = 0x32;                                             // descriptor tag
-            _pkt[pos++] = 24;                                               // descriptor length
+            _pkt8[pos++] = 0x32;                                            // descriptor tag
+            _pkt8[pos++] = 24;                                              // descriptor length
             put16( profileLevel, pos );                                     // profile level
 
             if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
@@ -455,8 +445,8 @@ class PMTGen : public TSGenerator
                 put32( 1250000, pos );                                      // max buffer size (constant for now)
                 put16( _videoStreamData.denFrameRate, pos );                // frame rate
                 put16( _videoStreamData.numFrameRate, pos );
-                _pkt[pos++] = 3;                                            // color spec
-                _pkt[pos++] = _videoStreamData.interlaced <<6;              // interlaced and still mode
+                _pkt8[pos++] = 3;                                           // color spec
+                _pkt8[pos++] = _videoStreamData.interlaced <<6;             // interlaced and still mode
             }
             else
             {
@@ -469,14 +459,14 @@ class PMTGen : public TSGenerator
                 else
                     put16( 0, pos );                                        // otherwise nothing
                 put32( maxBitRate, pos );                                   // max bit rate (constant for now)
-                _pkt[pos++] = 0;
-                _pkt[pos++] = 0;
-                _pkt[pos++] = 0x05;
-                _pkt[pos++] = 0x33;
+                _pkt8[pos++] = 0;
+                _pkt8[pos++] = 0;
+                _pkt8[pos++] = 0x05;
+                _pkt8[pos++] = 0x33;
                 put16( _videoStreamData.denFrameRate, pos );                // frame rate
                 put16( _videoStreamData.numFrameRate, pos );
-                _pkt[pos++] = 0;
-                _pkt[pos++] = 0;
+                _pkt8[pos++] = 0;
+                _pkt8[pos++] = 0;
             }
 
             return pos-startPos;
@@ -487,24 +477,72 @@ class PMTGen : public TSGenerator
             int         startPos = pos;
 
             // Header
-            _pkt[pos++] = 0x0a;                                             // descriptor tag
-            _pkt[pos++] = 4;                                                // descriptor length
-            _pkt[pos++] = 0x45;                                             // "E"
-            _pkt[pos++] = 0x4e;                                             // "N"
-            _pkt[pos++] = 0x47;                                             // "G"
-            _pkt[pos++] = 0;
+            _pkt8[pos++] = 0x0a;                                            // descriptor tag
+            _pkt8[pos++] = 4;                                               // descriptor length
+            _pkt8[pos++] = 0x45;                                            // "E"
+            _pkt8[pos++] = 0x4e;                                            // "N"
+            _pkt8[pos++] = 0x47;                                            // "G"
+            _pkt8[pos++] = 0;
 
-            _pkt[pos++] = 0x05;                                             // descriptor tag
-            _pkt[pos++] = 6;                                                // length
-            _pkt[pos++] = 0x42;                                             // "B"
-            _pkt[pos++] = 0x53;                                             // "S"
-            _pkt[pos++] = 0x53;                                             // "S"
-            _pkt[pos++] = 0x44;                                             // "D"
-            _pkt[pos++] = 0;
-            _pkt[pos++] = 0x20;
+            _pkt8[pos++] = 0x05;                                            // descriptor tag
+            _pkt8[pos++] = 6;                                               // length
+            _pkt8[pos++] = 0x42;                                            // "B"
+            _pkt8[pos++] = 0x53;                                            // "S"
+            _pkt8[pos++] = 0x53;                                            // "S"
+            _pkt8[pos++] = 0x44;                                            // "D"
+            _pkt8[pos++] = 0;
+            _pkt8[pos++] = 0x20;
 
             return pos-startPos;
         }
+};
+
+class ADPGen : public TSGenerator
+{
+public:
+    TsVideoStreamData   _videoStreamData;
+    std::map <uint16_t, uint16_t> _elemNumToPID;
+
+public:
+    ADPGen()
+    {
+        initLocal();
+    }
+
+    ~ADPGen()
+    {
+    }
+
+    void initLocal()
+    {
+        _elemNumToPID.clear();
+    }
+
+    int makePacket()
+    {
+        initPacket();
+        int pos = 0;
+
+        // Header
+        _pkt32[pos++] = 0x47;                                           // sync byte
+        _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for Video
+        _pkt32[pos++] = (_elemNumToPID[1] & 0xff);
+        _pkt32[pos++] = (3 << 4);                                       // Continuity Counter must increment when transmitted
+        _pkt32[pos++] = 0;                                              // pointer
+
+        _pkt32[pos++] = 0x10;                                           // pointer
+
+        if (_videoStreamData.doPcr)
+        {
+            _pkt32[pos++] = 0x800;
+            _pkt32[pos++] = 0x900;
+            _pkt32[pos++] = 0xa00;
+            _pkt32[pos++] = 0xb00;
+            _pkt32[pos++] = 0xc00;
+            _pkt32[pos++] = 0xd00;
+        }
+        return pos;
+    }
 };
 
 #endif
