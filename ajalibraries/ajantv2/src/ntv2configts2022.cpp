@@ -491,11 +491,19 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     printf("PCR PID         = 0x%02x\n", streamData.pcrPid);
     printf("Audio 1 PID     = 0x%02x\n\n", streamData.audio1Pid);
 
-    _tsHelper.init(streamData);
-    _tsHelper.gen_pes_lookup();
-    _tsHelper.set_time_regs();
-
     _transactionCount = 0;
+
+    PESGen pes;
+    pes._progNumToPID[1] = streamData.programPid;
+    pes._elemNumToPID[1] = streamData.videoPid;
+    pes._pcrNumToPID[1] = streamData.pcrPid;
+    pes._audioNumToPID[1] = streamData.audio1Pid;
+    pes._videoStreamData.j2kStreamType = streamData.j2kStreamType;
+    pes._videoStreamData.width = streamData.width;
+    pes._videoStreamData.height = streamData.height;
+    pes._videoStreamData.denFrameRate = streamData.denFrameRate;
+    pes._videoStreamData.numFrameRate = streamData.numFrameRate;
+    pes._videoStreamData.interlaced = streamData.interlaced;
 
     printf("Set HOST_EN to 7\n\n");
     _transactionTable[_transactionCount][0] = HOST_EN;
@@ -507,72 +515,46 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = INTERLACED_VIDEO;
-    _transactionTable[_transactionCount++][1] = _tsHelper.tsStreamData.interlaced;
+    _transactionTable[_transactionCount++][1] = streamData.interlaced;
     printf("Interlaced Video = %i\n", _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = TS_GEN_TC;
-    _transactionTable[_transactionCount++][1] = _tsHelper.ts_gen_tc;
+    _transactionTable[_transactionCount++][1] = pes.calcTsGenTc();
     printf("TS Packet Generation TC value = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = PAT_PMT_PERIOD;
-    _transactionTable[_transactionCount++][1] = _tsHelper.pat_pmt_period | 0x01000000;
+    _transactionTable[_transactionCount++][1] = pes.calcPatPmtPeriod() | 0x01000000;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
     _transactionTable[_transactionCount][0] = J2K_TS_LOAD;
     _transactionTable[_transactionCount++][1] = 0x10311b;
     printf("J2K TimeStamp = 0x%x\n\n", _transactionTable[_transactionCount-1][1]);
 
-    // This is for Evertz compatibility for now we just write the PES_HDR id and set the length to 4
-    // otherwise we use the generated table
-    int32_t pesHDRLength = 4;
-    if (streamData.j2kStreamType == kJ2KStreamTypeStandard)
-    {
-        pesHDRLength = _tsHelper.pes_template_len;
-    }
-    printf("PES Template Length = %i, Data:\n", pesHDRLength);
-    _transactionTable[_transactionCount][0] = PES_HDR_LEN;
-    _transactionTable[_transactionCount++][1] = pesHDRLength;
-    for (w1 = 0; w1 < pesHDRLength; w1++)
-    {
-        printf("0x%02x, ", _tsHelper.pes_template.payload[w1]);
-        if (!((w1 + 1) % 16))
-            printf("\n");
-        _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
-        _transactionTable[_transactionCount++][1] = _tsHelper.pes_template.payload[w1];
-    }
-    printf("\n\n");
+    int length = pes.makePacket();
 
-    if (streamData.j2kStreamType == kJ2KStreamTypeEvertz)
+    printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
+               pes._ptsOffset, pes._j2kTsOffset, pes._auf1Offset, pes._auf2Offset);
+    _transactionTable[_transactionCount][0] = PTS_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._ptsOffset;
+    _transactionTable[_transactionCount][0] = J2K_TS_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._j2kTsOffset;
+    _transactionTable[_transactionCount][0] = AUF1_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._auf1Offset;
+    _transactionTable[_transactionCount][0] = AUF2_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._auf2Offset;
+
+    printf("PES Template Length = %i, Data:\n", length);
+    for (w1 = 0; w1 < 188; w1++)
     {
-        printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
-               0xff, 0xff, 0xff, 0xff);
-        _transactionTable[_transactionCount][0] = PTS_OFFSET;
-        _transactionTable[_transactionCount++][1] = 0xff;
-        _transactionTable[_transactionCount][0] = J2K_TS_OFFSET;
-        _transactionTable[_transactionCount++][1] = 0xff;
-        _transactionTable[_transactionCount][0] = AUF1_OFFSET;
-        _transactionTable[_transactionCount++][1] = 0xff;
-        _transactionTable[_transactionCount][0] = AUF2_OFFSET;
-        _transactionTable[_transactionCount++][1] = 0xff;
+        _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
+        _transactionTable[_transactionCount++][1] = pes._pkt8[w1];
     }
-    else
-    {
-        printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
-               _tsHelper.pts_offset, _tsHelper.j2k_ts_offset, _tsHelper.auf1_offset, _tsHelper.auf2_offset);
-        _transactionTable[_transactionCount][0] = PTS_OFFSET;
-        _transactionTable[_transactionCount++][1] = _tsHelper.pts_offset;
-        _transactionTable[_transactionCount][0] = J2K_TS_OFFSET;
-        _transactionTable[_transactionCount++][1] = _tsHelper.j2k_ts_offset;
-        _transactionTable[_transactionCount][0] = AUF1_OFFSET;
-        _transactionTable[_transactionCount++][1] = _tsHelper.auf1_offset;
-        _transactionTable[_transactionCount][0] = AUF2_OFFSET;
-        _transactionTable[_transactionCount++][1] = _tsHelper.auf2_offset;
-    }
+    pes.dump8();
 
     ADPGen adp;
     adp._elemNumToPID[1] = streamData.videoPid;
     adp._doPcr = true;
-    int length = adp.makePacket();
+    length = adp.makePacket();
 
     printf("Adaptation Template Length = %i, Data:\n", length);
     _transactionTable[_transactionCount][0] = ADAPTATION_HDR_LENGTH;

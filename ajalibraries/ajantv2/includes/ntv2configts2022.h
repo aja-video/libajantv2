@@ -254,7 +254,6 @@ public:
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 
-    CNTV2TsHelper       _tsHelper;
     bool                _is2022_6;
     bool                _is2022_2;
 
