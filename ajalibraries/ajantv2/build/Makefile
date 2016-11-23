@@ -79,7 +79,6 @@ CPPFILES = ntv2audio.cpp \
 		ntv2testpattern.cpp \
 		ntv2tonegenerator.cpp \
 		ntv2transcode.cpp \
-		ntv2tshelper.cpp \
 		ntv2utf8.cpp \
 		ntv2utils.cpp \
 		ntv2verticalfilter.cpp \
