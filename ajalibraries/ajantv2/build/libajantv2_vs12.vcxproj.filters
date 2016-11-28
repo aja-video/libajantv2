@@ -162,9 +162,6 @@
     <ClCompile Include="..\src\ntv2configts2022.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ntv2tshelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\win\ntv2windriverinterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -117,9 +117,6 @@
     <ClCompile Include="..\src\win\ntv2windriverinterface.cpp">
       <Filter>winclasses</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\win\performancecounter.cpp">
-      <Filter>winclasses</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ntv2audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -166,9 +163,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ntv2mcsfile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ntv2tshelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ntv2configts2022.cpp">

@@ -250,7 +250,6 @@
     <ClCompile Include="..\src\ntv2task.cpp" />
     <ClCompile Include="..\src\ntv2testpattern.cpp" />
     <ClCompile Include="..\src\ntv2transcode.cpp" />
-    <ClCompile Include="..\src\ntv2tshelper.cpp" />
     <ClCompile Include="..\src\ntv2utf8.cpp" />
     <ClCompile Include="..\src\ntv2utils.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
