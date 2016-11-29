@@ -527,6 +527,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionCount = 0;
 
     PESGen pes;
+    pes._tsEncapType = kTsEncapTypeJ2k;
     pes._progNumToPID[1] = streamData.programPid;
     pes._elemNumToPID[1] = streamData.videoPid;
     pes._pcrNumToPID[1] = streamData.pcrPid;
@@ -588,6 +589,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     pes.dump8();
 
     ADPGen adp;
+    adp._tsEncapType = kTsEncapTypeJ2k;
     adp._elemNumToPID[1] = streamData.videoPid;
     adp._doPcr = false;
     length = adp.makePacket();
@@ -603,6 +605,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     adp.dump32();
 
     PATGen pat;
+    pat._tsEncapType = kTsEncapTypeJ2k;
     pat._progNumToPID[1] = streamData.programPid;
     length = pat.makePacket();
 
@@ -615,6 +618,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     pat.dump8();
 
     PMTGen pmt;
+    pmt._tsEncapType = kTsEncapTypeJ2k;
     pmt._progNumToPID[1] = streamData.programPid;
     pmt._elemNumToPID[1] = streamData.videoPid;
     pmt._pcrNumToPID[1] = streamData.pcrPid;
@@ -680,6 +684,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     _transactionCount = 0;
 
     PESGen pes;
+    pes._tsEncapType = kTsEncapTypePcr;
     pes._progNumToPID[1] = streamData.programPid;
     pes._elemNumToPID[1] = streamData.videoPid;
     pes._pcrNumToPID[1] = streamData.pcrPid;
@@ -741,6 +746,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     pes.dump8();
 
     ADPGen adp;
+    adp._tsEncapType = kTsEncapTypePcr;
     adp._elemNumToPID[1] = streamData.videoPid;
     adp._doPcr = true;
     length = adp.makePacket();
@@ -756,6 +762,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     adp.dump32();
 
     PATGen pat;
+    pat._tsEncapType = kTsEncapTypePcr;
     pat._progNumToPID[1] = streamData.programPid;
     length = pat.makePacket();
 
@@ -768,6 +775,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     pat.dump8();
 
     PMTGen pmt;
+    pmt._tsEncapType = kTsEncapTypePcr;
     pmt._progNumToPID[1] = streamData.programPid;
     pmt._elemNumToPID[1] = streamData.videoPid;
     pmt._pcrNumToPID[1] = streamData.pcrPid;
@@ -833,6 +841,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     _transactionCount = 0;
 
     PESGen pes;
+    pes._tsEncapType = kTsEncapTypeAes;
     pes._progNumToPID[1] = streamData.programPid;
     pes._elemNumToPID[1] = streamData.videoPid;
     pes._pcrNumToPID[1] = streamData.pcrPid;
@@ -894,6 +903,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     pes.dump8();
 
     ADPGen adp;
+    adp._tsEncapType = kTsEncapTypeAes;
     adp._elemNumToPID[1] = streamData.videoPid;
     adp._doPcr = false;
     length = adp.makePacket();
@@ -909,6 +919,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     adp.dump32();
 
     PATGen pat;
+    pat._tsEncapType = kTsEncapTypeAes;
     pat._progNumToPID[1] = streamData.programPid;
     length = pat.makePacket();
 
@@ -921,6 +932,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     pat.dump8();
 
     PMTGen pmt;
+    pmt._tsEncapType = kTsEncapTypeAes;
     pmt._progNumToPID[1] = streamData.programPid;
     pmt._elemNumToPID[1] = streamData.videoPid;
     pmt._pcrNumToPID[1] = streamData.pcrPid;

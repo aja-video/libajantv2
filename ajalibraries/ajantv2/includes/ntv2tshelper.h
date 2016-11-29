@@ -36,6 +36,13 @@ typedef enum
     kJ2KCodeBlocksize_128x32 = 12
 } J2KCodeBlocksize;
 
+typedef enum
+{
+    kTsEncapTypeJ2k,
+    kTsEncapTypePcr,
+    kTsEncapTypeAes
+} TsEncapType;
+
 typedef struct TsEncapStreamData
 {
     J2KStreamType   j2kStreamType;
@@ -69,6 +76,7 @@ class TSGenerator
         uint16_t    _tsId;
         uint8_t     _version;
         uint32_t    _tableLength;
+        TsEncapType _tsEncapType;
 
         // Generated packet
         uint8_t     _pkt8[188];
@@ -90,6 +98,7 @@ class TSGenerator
             _tsId = 1;
             _version = 1;
             _tableLength = 0;
+            _tsEncapType = kTsEncapTypeJ2k;
         }
 
         void initPacket()
