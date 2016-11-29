@@ -5,6 +5,7 @@
 **/
 
 #include "ntv2config2022.h"
+#include "ntv2configts2022.h"
 #include "ntv2endian.h"
 #include "ntv2card.h"
 #include <sstream>
@@ -433,11 +434,13 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     // matching
     WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, rxConfig.primaryRxMatch);
 
-    // playout delay in 27mhz clocks
-    WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, rxConfig.playoutDelay*27000);
+    // playout delay in 27MHz clocks or 90kHz clocks
+    uint32_t delay = (_is2022_2) ? rxConfig.playoutDelay * 90 : rxConfig.playoutDelay * 27000;
+    WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, delay);
 
-    // network path differential in 27mhz clocks
-    WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, rxConfig.networkPathDiff*27000);
+    // network path differential in 27MHz or 90kHz clocks
+    delay = (_is2022_2) ? rxConfig.networkPathDiff * 90 : rxConfig.networkPathDiff * 27000;
+    WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, delay);
 
     // some constants
     WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x0000ffff);
@@ -446,6 +449,13 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
+
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        tsConfig.SetupTsForDecode();
+        tsConfig.SetupJ2KDecoder();
+    }
 
     // if already enabled, make sure IGMP subscriptions are updated
     bool enabled = false;
@@ -541,11 +551,11 @@ bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_c
 
     // playout delay in ms
     ReadChannelRegister(kReg2022_6_rx_playout_delay + baseAddr,  &val);
-    rxConfig.playoutDelay = val/27000;
+    rxConfig.playoutDelay = (_is2022_2) ? val/90 : val/27000;
 
     // network path differential in ms
     ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
-    rxConfig.networkPathDiff = val/27000;
+    rxConfig.playoutDelay = (_is2022_2) ? val/90 : val/27000;
 
     return true;
 }
