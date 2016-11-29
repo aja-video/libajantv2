@@ -21,7 +21,7 @@
 #define     ENCODE_TS_AES_ENCAP             3
 #define     ENCODE_TS_MPEG_AES_ENCAP        4
 #define     ENCODE_TS_MPEG_ANC_ENCAP        6
-#define     ENCODE_TS_MPEG_PCR              7
+#define     ENCODE_TS_MPEG_PCR_ENCAP        7
 
 // Decoder part numbers
 #define     DECODE_TS_MPEG_J2K_DECAP        0
@@ -233,9 +233,10 @@ public:
     bool    SetupEncodeTsTimer(const NTV2Channel channel);
     bool    SetupEncodeTsJ2KEncoder(const NTV2Channel channel);
     bool    SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
+    bool    SetupEncodeTsMpegPcrEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAesEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsMpegAncEncap();
+    bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
+    bool    SetupEncodeTsMpegAncEncap(const NTV2Channel channel);
 
     // Setup individual TS decode parts
     bool    SetupDecodeTsMpegJ2kDecap();
@@ -250,7 +251,9 @@ public:
     void                J2kSetMode(const NTV2Channel channel, uint32_t tier, uint32_t mode);
     uint32_t            GetFeatures();
 
-    bool                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegPcrEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegAesEncap(const NTV2Channel channel);
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 
