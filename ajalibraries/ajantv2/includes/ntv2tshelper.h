@@ -66,8 +66,9 @@ class TSGenerator
 {
     public:
         // Input
-        uint16_t _tsId;
-        uint8_t _version;
+        uint16_t    _tsId;
+        uint8_t     _version;
+        uint32_t    _tableLength;
 
         // Generated packet
         uint8_t     _pkt8[188];
@@ -88,6 +89,7 @@ class TSGenerator
         {
             _tsId = 1;
             _version = 1;
+            _tableLength = 0;
         }
 
         void initPacket()
@@ -159,7 +161,7 @@ class TSGenerator
 
         void dump8()
         {
-            for (int i=0; i<188; i++)
+            for (int i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%02x\n", _pkt8[i]);
@@ -171,7 +173,7 @@ class TSGenerator
 
         void dump32()
         {
-            for (int i=0; i<188; i++)
+            for (int i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%04x\n", _pkt32[i]);
@@ -363,6 +365,7 @@ public:
             }
         }
 
+        _tableLength = pos;
         return pos;
     }
 
@@ -444,6 +447,8 @@ class PATGen : public TSGenerator
 
             int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
+
+            _tableLength = pos;
             return pos;
         }
 };
@@ -549,6 +554,8 @@ class PMTGen : public TSGenerator
 
             int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
+
+            _tableLength = pos;
             return pos;
         }
 
@@ -683,6 +690,8 @@ public:
             _pkt32[pos++] = 0xc00;
             _pkt32[pos++] = 0xd00;
         }
+
+        _tableLength = pos;
         return pos;
     }
 };
