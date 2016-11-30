@@ -66,7 +66,6 @@ typedef struct TsVideoStreamData
     uint32_t        denFrameRate;
     uint32_t        numFrameRate;
     bool            interlaced;
-    bool            doPcr;
 } TsVideoStreamData;
 
 class TSGenerator
@@ -170,7 +169,7 @@ class TSGenerator
 
         void dump8()
         {
-            for (int i=0; i<_tableLength; i++)
+            for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%02x\n", _pkt8[i]);
@@ -182,7 +181,7 @@ class TSGenerator
 
         void dump32()
         {
-            for (int i=0; i<_tableLength; i++)
+            for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%04x\n", _pkt32[i]);
@@ -212,10 +211,7 @@ class PESGen : public TSGenerator
 {
 public:
     TsVideoStreamData   _videoStreamData;
-    std::map <uint16_t, uint16_t> _progNumToPID;
-    std::map <uint16_t, uint16_t> _pcrNumToPID;
     std::map <uint16_t, uint16_t> _elemNumToPID;
-    std::map <uint16_t, uint16_t> _audioNumToPID;
     uint64_t _pts;                              // these can be passed in and will be initialized to reaonsable values
     int32_t _auf1;
     int32_t _auf2;
@@ -242,10 +238,7 @@ public:
 
     void initLocal()
     {
-        _progNumToPID.clear();
-        _pcrNumToPID.clear();
         _elemNumToPID.clear();
-        _audioNumToPID.clear();
         _pts = 0;
         _auf1 = 0;
         _auf2 = 0;
@@ -272,108 +265,134 @@ public:
         _pkt8[pos++] =  (uint8_t) (_elemNumToPID[1] & 0xff);            // PID for Video
         _pkt8[pos++] = 0x10;                                            // Continuity Counter must increment when transmitted
 
-        // generate the full PES data for standard streams, for Evertz just do the header
-        if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+        // generate PES data for AES streams
+        if (_tsEncapType == kTsEncapTypeAes)
         {
-            _pkt8[pos++] = (uint8_t) ((1 >> 16) & 0xff);                    // packet_start_code_prefix
-            _pkt8[pos++] = (uint8_t) ((1 >> 8) & 0xff);
+            _pkt8[pos++] = 0;                                           // packet_start_code_prefix
+            _pkt8[pos++] = 0;
             _pkt8[pos++] = (uint8_t) (1 & 0xff);
             _pkt8[pos++] = (uint8_t) (0xbd);
 
-            _pkt8[pos++] = 0;                                               // 8
-            _pkt8[pos++] = 0;                                               // 9
-            _pkt8[pos] = 0x80;                                              // 10
-            _pkt8[pos++] |= (uint8_t) (1 << 2);
-            _pkt8[pos++] = 0x80;                                            // 11
-            _pkt8[pos++] = 5;                                               // 12
+            _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
+            _pkt8[pos++] = 0;                                           // packet_length & 0xff
+            _pkt8[pos++] = 0x80;                                        // 10
+            _pkt8[pos++] = 0x80;                                        // 11
+            _pkt8[pos++] = 5;                                           // 12
 
             _ptsOffset = pos;
 
-            _pkt8[pos] = 0x21;                                              // 13
+            _pkt8[pos] = 0x21;                                          // 13
             _pkt8[pos++] |= (uint8_t) ((_pts >> 29) & 0xe);
-            _pkt8[pos] = 0x0;                                               // 14
+            _pkt8[pos] = 0x0;                                           // 14
             _pkt8[pos++] |= (uint8_t) ((_pts >> 22) & 0xff);
-            _pkt8[pos] = 0x1;                                               // 15
+            _pkt8[pos] = 0x1;                                           // 15
             _pkt8[pos++] |= (uint8_t) ((_pts >> 14) & 0xfe);
-            _pkt8[pos] = 0x0;                                               // 16
+            _pkt8[pos] = 0x0;                                           // 16
             _pkt8[pos++] |= (uint8_t) ((_pts >> 7) & 0xff);
-            _pkt8[pos] = 0x1;                                               // 17
+            _pkt8[pos] = 0x1;                                           // 17
             _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
 
-            put32('elsm', pos );                                            // 18
+            _pkt8[pos++] = 0x0;                                         // 18
+            _pkt8[pos++] = 0x0;
+            _pkt8[pos++] = 0x0;
+            _pkt8[pos++] = 0x10;
 
-            put32('frat', pos );
-            _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
+            _auf1Offset = 0x1000012;
+            _auf2Offset = 0x1000c08;
 
-            put32('brat', pos );
-            _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                      // 34
-            _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_bitRate & 0xff);
-
-            _auf1Offset = pos;
-
-            _pkt8[pos++] = (uint8_t) (_auf1 >> 24);                         // 38
-            _pkt8[pos++] = (uint8_t) ((_auf1 >> 16) & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_auf1 >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_auf1 & 0xff);
-
-            if (_videoStreamData.interlaced)
+        }
+        else
+        {
+            // generate PES data for standard streams, for Evertz just do the header
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
             {
-                _auf2Offset = pos;
-
-                _pkt8[pos++] = (uint8_t) (_auf2 >> 24);                    // 42
-                _pkt8[pos++] = (uint8_t) ((_auf2 >> 16) & 0xff);
-                _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
-                _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
-
-                put32('fiel', pos );
-                _pkt8[pos++] = (uint8_t) (2 & 0xff);
+                _pkt8[pos++] = 0;                                           // packet_start_code_prefix
+                _pkt8[pos++] = 0;
                 _pkt8[pos++] = (uint8_t) (1 & 0xff);
+                _pkt8[pos++] = (uint8_t) (0xbd);
 
-                put32('tcod', pos );
-                _j2kTsOffset = pos;
-                _pkt8[pos++] = (uint8_t) (_hh & 0xff);
-                _pkt8[pos++] = (uint8_t) (_mm & 0xff);
-                _pkt8[pos++] = (uint8_t) (_ss & 0xff);
-                _pkt8[pos++] = (uint8_t) (_ff & 0xff);
+                _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
+                _pkt8[pos++] = 0;                                           // packet_length & 0xff
+                _pkt8[pos++] = 0x80;                                        // 10
+                _pkt8[pos++] = 0x80;                                        // 11
+                _pkt8[pos++] = 5;                                           // 12
 
-                put32('bcol', pos );
-                _pkt8[pos++] = 3;
-                _pkt8[pos++] = 0x0;
-            }
-            else
-            {
-                put32('tcod', pos );
-                _j2kTsOffset = pos;
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // hh
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // mm
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ss
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ff
+                _ptsOffset = pos;
 
-                put32('bcol', pos );
-                _pkt8[pos++] = 3;
-                _pkt8[pos++] = 0xff;
+                _pkt8[pos] = 0x21;                                          // 13
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 29) & 0xe);
+                _pkt8[pos] = 0x0;                                           // 14
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 22) & 0xff);
+                _pkt8[pos] = 0x1;                                           // 15
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 14) & 0xfe);
+                _pkt8[pos] = 0x0;                                           // 16
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 7) & 0xff);
+                _pkt8[pos] = 0x1;                                           // 17
+                _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
+
+                put32('elsm', pos );                                        // 18
+
+                put32('frat', pos );
+                _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
+
+                put32('brat', pos );
+                _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                  // 34
+                _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_bitRate & 0xff);
+
+                _auf1Offset = pos;
+
+                _pkt8[pos++] = (uint8_t) (_auf1 >> 24);                     // 38
+                _pkt8[pos++] = (uint8_t) ((_auf1 >> 16) & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_auf1 >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_auf1 & 0xff);
+
+                if (_videoStreamData.interlaced)
+                {
+                    _auf2Offset = pos;
+
+                    _pkt8[pos++] = (uint8_t) (_auf2 >> 24);                 // 42
+                    _pkt8[pos++] = (uint8_t) ((_auf2 >> 16) & 0xff);
+                    _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
+
+                    put32('fiel', pos );
+                    _pkt8[pos++] = (uint8_t) (2 & 0xff);
+                    _pkt8[pos++] = (uint8_t) (1 & 0xff);
+
+                    put32('tcod', pos );
+                    _j2kTsOffset = pos;
+                    _pkt8[pos++] = (uint8_t) (_hh & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_mm & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_ss & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_ff & 0xff);
+
+                    put32('bcol', pos );
+                    _pkt8[pos++] = 3;
+                    _pkt8[pos++] = 0x0;
+                }
+                else
+                {
+                    put32('tcod', pos );
+                    _j2kTsOffset = pos;
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // hh
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // mm
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ss
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ff
+
+                    put32('bcol', pos );
+                    _pkt8[pos++] = 3;
+                    _pkt8[pos++] = 0xff;
+                }
             }
         }
 
         _tableLength = pos;
         return pos;
-    }
-
-    int32_t calcTsGenTc()
-    {
-        double d1, d2;
-
-        // First packet rate
-        d1 = 80000000 / 8.0 / 188.0;        // Packet Rate
-        d1 = 1.0 / d1;                      // Packet Period
-        d2 = 1.0 / 125000000;               // Clock Period
-        d1 = d1 / d2 - 1.0;                 // One less as it counts from 0
-        return (int32_t) d1;
     }
 
     int32_t calcPatPmtPeriod()
@@ -641,8 +660,7 @@ class PMTGen : public TSGenerator
 class ADPGen : public TSGenerator
 {
 public:
-    bool    _doPcr;
-    std::map <uint16_t, uint16_t> _pid;
+    std::map <uint16_t, uint16_t> _elemNumToPID;
 
 public:
     ADPGen()
@@ -656,7 +674,7 @@ public:
 
     void initLocal()
     {
-        _pid.clear();
+        _elemNumToPID.clear();
     }
 
     int makePacket()
@@ -666,14 +684,14 @@ public:
 
         // Header
         _pkt32[pos++] = 0x47;                                           // sync byte
-        _pkt32[pos++] = ((_pid[1] >> 8) & 0x1f);                        // PID for stream
-        _pkt32[pos++] = (_pid[1] & 0xff);
+        _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for stream
+        _pkt32[pos++] = (_elemNumToPID[1] & 0xff);
         _pkt32[pos++] = (3 << 4);                                       // Continuity Counter must increment when transmitted
         _pkt32[pos++] = 0;                                              // pointer
 
         _pkt32[pos++] = 0x10;                                           // pointer
 
-        if (_doPcr)
+        if (_tsEncapType == kTsEncapTypePcr)
         {
             _pkt32[pos++] = 0x800;
             _pkt32[pos++] = 0x900;
