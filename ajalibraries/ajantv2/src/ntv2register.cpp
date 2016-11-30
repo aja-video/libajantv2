@@ -1974,11 +1974,19 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		sparseValue = 1;
 		value = (NTV2ReferenceSource)3;
 		break;
+	case NTV2_REFERENCE_SFP1:
+		sparseValue = 1;
+		value = (NTV2ReferenceSource)4;
+		break;
+	case NTV2_REFERENCE_SFP2:
+		sparseValue = 1;
+		value = (NTV2ReferenceSource)5;
+		break;
 	default:
 		break;
 	}
 
-	if(::NTV2DeviceGetNumVideoChannels(_boardID) > 4)
+	if (value >= NTV2_REFERENCE_INPUT5)
 		WriteRegister (kRegGlobalControl2,
 			sparseValue,
 			kRegMaskRefSource2,
@@ -2001,7 +2009,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 
 	outValue = static_cast <NTV2ReferenceSource> (returnVal);
 
-	if (::NTV2DeviceGetNumVideoChannels (_boardID) > 4)
+	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
 	{
 		ULWord	sparseValue	(0);
 		ReadRegister (kRegGlobalControl2,  &sparseValue,  kRegMaskRefSource2,  kRegShiftRefSource2);
@@ -2012,6 +2020,8 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				case 1:		outValue = NTV2_REFERENCE_INPUT6;	break;
 				case 2:		outValue = NTV2_REFERENCE_INPUT7;	break;
 				case 3:		outValue = NTV2_REFERENCE_INPUT8;	break;
+				case 4:		outValue = NTV2_REFERENCE_SFP1;		break;
+				case 5:		outValue = NTV2_REFERENCE_SFP2;		break;
 				default:										break;
 			}
 	}
