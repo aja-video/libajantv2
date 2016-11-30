@@ -25,6 +25,7 @@ class CKonaIpEncoderJsonReader
 public:
     CKonaIpEncoderJsonReader();
     bool openJson(QString fileName);
+    void printVideoFormatMap();
 
     KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
 

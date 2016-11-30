@@ -13,31 +13,42 @@ int main(int argc, char *argv[])
     parser.addOption(deviceOption);
     const QCommandLineOption boardOption("b", "which device to use", "board");
     parser.addOption(boardOption);
+    const QCommandLineOption listOption("l", "list video formats", "");
+    parser.addOption(listOption);
+
     parser.addPositionalArgument("InputJsonFile", QCoreApplication::translate("main", "Json File to Open."));
 
     parser.process(a);
 
-    QString device = "0";
-    if (parser.isSet(deviceOption))
-    {
-         device = parser.value(deviceOption);
-    }
-
-    if (parser.isSet(boardOption))
-    {
-         device = parser.value(boardOption);
-    }
-    std::string devStr = device.toUtf8().constData();
-
-    const QStringList args = parser.positionalArguments();
-    if ( args.size() == 1 )
+    if (parser.isSet(listOption))
     {
         CKonaIpEncoderJsonReader readJson;
-        readJson.openJson(args.at(0));
-        CKonaIPEncoderSetup ipBoardSetup;
-        ipBoardSetup.setupBoard(devStr.c_str(),readJson.getKonaIParams());
+        readJson.printVideoFormatMap();
     }
     else
-        parser.showHelp();
+    {
+        QString device = "0";
+        if (parser.isSet(deviceOption))
+        {
+            device = parser.value(deviceOption);
+        }
+
+        if (parser.isSet(boardOption))
+        {
+            device = parser.value(boardOption);
+        }
+        std::string devStr = device.toUtf8().constData();
+
+        const QStringList args = parser.positionalArguments();
+        if ( args.size() == 1 )
+        {
+            CKonaIpEncoderJsonReader readJson;
+            readJson.openJson(args.at(0));
+            CKonaIPEncoderSetup ipBoardSetup;
+            ipBoardSetup.setupBoard(devStr.c_str(),readJson.getKonaIParams());
+        }
+        else
+            parser.showHelp();
+    }
 
 }

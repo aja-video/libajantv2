@@ -1,6 +1,6 @@
 {
     "parameters": {
-        "VideoFormat":"720p5994",
+        "VideoFormat":"720p 59.94",
         "NumBits":10,
         "StreamType":"Standard",
         "ChromaSampling":"422 standard",
