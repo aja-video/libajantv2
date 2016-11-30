@@ -224,6 +224,11 @@ public:
     int32_t _j2kTsOffset;
     int32_t _auf1Offset;
     int32_t _auf2Offset;
+    int32_t _hh;
+    int32_t _mm;
+    int32_t _ss;
+    int32_t _ff;
+
 
 public:
     PESGen()
@@ -245,6 +250,10 @@ public:
         _auf1 = 0;
         _auf2 = 0;
         _bitRate = 75000000;
+        _hh = 0;
+        _mm = 0;
+        _ss = 0;
+        _ff = 0;
     }
 
     int makePacket()
@@ -291,23 +300,15 @@ public:
             _pkt8[pos] = 0x1;                                               // 17
             _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
 
-            _pkt8[pos++] = 0x65;                                            // 18
-            _pkt8[pos++] = 0x6c;
-            _pkt8[pos++] = 0x73;
-            _pkt8[pos++] = 0x6d;
-            _pkt8[pos++] = 0x66;
-            _pkt8[pos++] = 0x72;
-            _pkt8[pos++] = 0x61;
-            _pkt8[pos++] = 0x74;
+            put32('elsm', pos );                                            // 18
+
+            put32('frat', pos );
             _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
             _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
             _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
             _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
-            _pkt8[pos++] = 0x62;
-            _pkt8[pos++] = 0x72;
-            _pkt8[pos++] = 0x61;
-            _pkt8[pos++] = 0x74;
 
+            put32('brat', pos );
             _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                      // 34
             _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
             _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
@@ -328,47 +329,32 @@ public:
                 _pkt8[pos++] = (uint8_t) ((_auf2 >> 16) & 0xff);
                 _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
                 _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
-                _pkt8[pos++] = 0x66;
-                _pkt8[pos++] = 0x69;
-                _pkt8[pos++] = 0x65;
-                _pkt8[pos++] = 0x6c;
+
+                put32('fiel', pos );
                 _pkt8[pos++] = (uint8_t) (2 & 0xff);
                 _pkt8[pos++] = (uint8_t) (1 & 0xff);
-                _pkt8[pos++] = 0x74;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;
-                _pkt8[pos++] = 0x64;
 
+                put32('tcod', pos );
                 _j2kTsOffset = pos;
+                _pkt8[pos++] = (uint8_t) (_hh & 0xff);
+                _pkt8[pos++] = (uint8_t) (_mm & 0xff);
+                _pkt8[pos++] = (uint8_t) (_ss & 0xff);
+                _pkt8[pos++] = (uint8_t) (_ff & 0xff);
 
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // hh
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // mm
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ss
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ff
-                _pkt8[pos++] = 0x62;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
-                _pkt8[pos++] = 0x6c;
+                put32('bcol', pos );
                 _pkt8[pos++] = 3;
                 _pkt8[pos++] = 0x0;
             }
             else
             {
-                _pkt8[pos++] = 0x74;                                        // 42
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;
-                _pkt8[pos++] = 0x64;
-
+                put32('tcod', pos );
                 _j2kTsOffset = pos;
-
                 _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // hh
                 _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // mm
                 _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ss
                 _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ff
-                _pkt8[pos++] = 0x62;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
-                _pkt8[pos++] = 0x6c;
+
+                put32('bcol', pos );
                 _pkt8[pos++] = 3;
                 _pkt8[pos++] = 0xff;
             }
@@ -644,10 +630,7 @@ class PMTGen : public TSGenerator
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
             _pkt8[pos++] = 6;                                               // length
-            _pkt8[pos++] = 0x42;                                            // "B"
-            _pkt8[pos++] = 0x53;                                            // "S"
-            _pkt8[pos++] = 0x53;                                            // "S"
-            _pkt8[pos++] = 0x44;                                            // "D"
+            put32('BSSD', pos );
             _pkt8[pos++] = 0;
             _pkt8[pos++] = 0x20;
 
@@ -659,7 +642,7 @@ class ADPGen : public TSGenerator
 {
 public:
     bool    _doPcr;
-    std::map <uint16_t, uint16_t> _elemNumToPID;
+    std::map <uint16_t, uint16_t> _pid;
 
 public:
     ADPGen()
@@ -673,7 +656,7 @@ public:
 
     void initLocal()
     {
-        _elemNumToPID.clear();
+        _pid.clear();
     }
 
     int makePacket()
@@ -683,8 +666,8 @@ public:
 
         // Header
         _pkt32[pos++] = 0x47;                                           // sync byte
-        _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for Video
-        _pkt32[pos++] = (_elemNumToPID[1] & 0xff);
+        _pkt32[pos++] = ((_pid[1] >> 8) & 0x1f);                        // PID for stream
+        _pkt32[pos++] = (_pid[1] & 0xff);
         _pkt32[pos++] = (3 << 4);                                       // Continuity Counter must increment when transmitted
         _pkt32[pos++] = 0;                                              // pointer
 
