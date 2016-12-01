@@ -3211,8 +3211,8 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 	"1080p 50.00a",				//	NTV2_FORMAT_1080p_5000_A				//	23
 	"1080p 59.94a",				//	NTV2_FORMAT_1080p_5994_A				//	24
 	"1080p 60.00a",				//	NTV2_FORMAT_1080p_6000_A				//	25
-	"1080p 2K 25",				//	NTV2_FORMAT_1080p_2K_2500				//	26
-	"1080psf 2K 25",			//	NTV2_FORMAT_1080psf_2K_2500				//	27
+    "2048x1080p 25.00",         //	NTV2_FORMAT_1080p_2K_2500				//	26
+    "2048x1080psf 25.00",       //	NTV2_FORMAT_1080psf_2K_2500				//	27
 	"1080psf 25",				//	NTV2_FORMAT_1080psf_2500_2				//	28
 	"1080psf 29.97",			//	NTV2_FORMAT_1080psf_2997_2				//	29
 	"1080psf 30",				//	NTV2_FORMAT_1080psf_3000_2				//	30
