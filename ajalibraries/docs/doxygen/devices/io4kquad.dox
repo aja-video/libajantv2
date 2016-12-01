@@ -49,16 +49,26 @@ It can be "flashed" with different firmware to become a 2-channel device (see \r
 
 @note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-@par		Ancillary Data
+@par	Ancillary Data
 
 -	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
 -	VANC geometries
 
-@par		Power Dissipation
+@par	Physical
 
--	23W typical, 28W maximum
--	Supply to Thunderbolt ports can cause power draw to reach 58W
+-	Size (W x D x H):  8.74" x 7.09" x 1.65" (222mm × 180mm × 42mm)
+-	Weight:	3.1 lb (1.5 kg)
+-	Power: 23W (typ), 28W (max)
+-	NOTE:  Power supply to Thunderbolt ports can cause power draw to reach 58W
 
-@par		Firmware
+@par	Environment
+
+-	Operating Temperature: 0 to 35 degrees Celcius (32 to 95 degrees Fahrenheit)
+-	Operating Relative Humidity: 10-90% non-condensing
+-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+
+
+@par	Firmware
 <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/134/25>
 **/
