@@ -36,6 +36,13 @@ typedef enum
     kJ2KCodeBlocksize_128x32 = 12
 } J2KCodeBlocksize;
 
+typedef enum
+{
+    kTsEncapTypeJ2k,
+    kTsEncapTypePcr,
+    kTsEncapTypeAes
+} TsEncapType;
+
 typedef struct TsEncapStreamData
 {
     J2KStreamType   j2kStreamType;
@@ -59,15 +66,16 @@ typedef struct TsVideoStreamData
     uint32_t        denFrameRate;
     uint32_t        numFrameRate;
     bool            interlaced;
-    bool            doPcr;
 } TsVideoStreamData;
 
 class TSGenerator
 {
     public:
         // Input
-        uint16_t _tsId;
-        uint8_t _version;
+        uint16_t    _tsId;
+        uint8_t     _version;
+        uint32_t    _tableLength;
+        TsEncapType _tsEncapType;
 
         // Generated packet
         uint8_t     _pkt8[188];
@@ -88,6 +96,8 @@ class TSGenerator
         {
             _tsId = 1;
             _version = 1;
+            _tableLength = 0;
+            _tsEncapType = kTsEncapTypeJ2k;
         }
 
         void initPacket()
@@ -159,7 +169,7 @@ class TSGenerator
 
         void dump8()
         {
-            for (int i=0; i<188; i++)
+            for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%02x\n", _pkt8[i]);
@@ -171,7 +181,7 @@ class TSGenerator
 
         void dump32()
         {
-            for (int i=0; i<188; i++)
+            for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
                     printf("0x%04x\n", _pkt32[i]);
@@ -201,10 +211,7 @@ class PESGen : public TSGenerator
 {
 public:
     TsVideoStreamData   _videoStreamData;
-    std::map <uint16_t, uint16_t> _progNumToPID;
-    std::map <uint16_t, uint16_t> _pcrNumToPID;
     std::map <uint16_t, uint16_t> _elemNumToPID;
-    std::map <uint16_t, uint16_t> _audioNumToPID;
     uint64_t _pts;                              // these can be passed in and will be initialized to reaonsable values
     int32_t _auf1;
     int32_t _auf2;
@@ -213,6 +220,11 @@ public:
     int32_t _j2kTsOffset;
     int32_t _auf1Offset;
     int32_t _auf2Offset;
+    int32_t _hh;
+    int32_t _mm;
+    int32_t _ss;
+    int32_t _ff;
+
 
 public:
     PESGen()
@@ -226,14 +238,15 @@ public:
 
     void initLocal()
     {
-        _progNumToPID.clear();
-        _pcrNumToPID.clear();
         _elemNumToPID.clear();
-        _audioNumToPID.clear();
         _pts = 0;
         _auf1 = 0;
         _auf2 = 0;
         _bitRate = 75000000;
+        _hh = 0;
+        _mm = 0;
+        _ss = 0;
+        _ff = 0;
     }
 
     int makePacket()
@@ -252,130 +265,134 @@ public:
         _pkt8[pos++] =  (uint8_t) (_elemNumToPID[1] & 0xff);            // PID for Video
         _pkt8[pos++] = 0x10;                                            // Continuity Counter must increment when transmitted
 
-        // generate the full PES data for standard streams, for Evertz just do the header
-        if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+        // generate PES data for AES streams
+        if (_tsEncapType == kTsEncapTypeAes)
         {
-            _pkt8[pos++] = (uint8_t) ((1 >> 16) & 0xff);                    // packet_start_code_prefix
-            _pkt8[pos++] = (uint8_t) ((1 >> 8) & 0xff);
+            _pkt8[pos++] = 0;                                           // packet_start_code_prefix
+            _pkt8[pos++] = 0;
             _pkt8[pos++] = (uint8_t) (1 & 0xff);
             _pkt8[pos++] = (uint8_t) (0xbd);
 
-            _pkt8[pos++] = 0;                                               // 8
-            _pkt8[pos++] = 0;                                               // 9
-            _pkt8[pos] = 0x80;                                              // 10
-            _pkt8[pos++] |= (uint8_t) (1 << 2);
-            _pkt8[pos++] = 0x80;                                            // 11
-            _pkt8[pos++] = 5;                                               // 12
+            _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
+            _pkt8[pos++] = 0;                                           // packet_length & 0xff
+            _pkt8[pos++] = 0x80;                                        // 10
+            _pkt8[pos++] = 0x80;                                        // 11
+            _pkt8[pos++] = 5;                                           // 12
 
             _ptsOffset = pos;
 
-            _pkt8[pos] = 0x21;                                              // 13
+            _pkt8[pos] = 0x21;                                          // 13
             _pkt8[pos++] |= (uint8_t) ((_pts >> 29) & 0xe);
-            _pkt8[pos] = 0x0;                                               // 14
+            _pkt8[pos] = 0x0;                                           // 14
             _pkt8[pos++] |= (uint8_t) ((_pts >> 22) & 0xff);
-            _pkt8[pos] = 0x1;                                               // 15
+            _pkt8[pos] = 0x1;                                           // 15
             _pkt8[pos++] |= (uint8_t) ((_pts >> 14) & 0xfe);
-            _pkt8[pos] = 0x0;                                               // 16
+            _pkt8[pos] = 0x0;                                           // 16
             _pkt8[pos++] |= (uint8_t) ((_pts >> 7) & 0xff);
-            _pkt8[pos] = 0x1;                                               // 17
+            _pkt8[pos] = 0x1;                                           // 17
             _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
 
-            _pkt8[pos++] = 0x65;                                            // 18
-            _pkt8[pos++] = 0x6c;
-            _pkt8[pos++] = 0x73;
-            _pkt8[pos++] = 0x6d;
-            _pkt8[pos++] = 0x66;
-            _pkt8[pos++] = 0x72;
-            _pkt8[pos++] = 0x61;
-            _pkt8[pos++] = 0x74;
-            _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
-            _pkt8[pos++] = 0x62;
-            _pkt8[pos++] = 0x72;
-            _pkt8[pos++] = 0x61;
-            _pkt8[pos++] = 0x74;
+            _pkt8[pos++] = 0x0;                                         // 18
+            _pkt8[pos++] = 0x0;
+            _pkt8[pos++] = 0x0;
+            _pkt8[pos++] = 0x10;
 
-            _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                      // 34
-            _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_bitRate & 0xff);
+            _auf1Offset = 0x1000012;
+            _auf2Offset = 0x1000c08;
 
-            _auf1Offset = pos;
-
-            _pkt8[pos++] = (uint8_t) (_auf1 >> 24);                         // 38
-            _pkt8[pos++] = (uint8_t) ((_auf1 >> 16) & 0xff);
-            _pkt8[pos++] = (uint8_t) ((_auf1 >> 8) & 0xff);
-            _pkt8[pos++] = (uint8_t) (_auf1 & 0xff);
-
-            if (_videoStreamData.interlaced)
+        }
+        else
+        {
+            // generate PES data for standard streams, for Evertz just do the header
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
             {
-                _auf2Offset = pos;
-
-                _pkt8[pos++] = (uint8_t) (_auf2 >> 24);                    // 42
-                _pkt8[pos++] = (uint8_t) ((_auf2 >> 16) & 0xff);
-                _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
-                _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
-                _pkt8[pos++] = 0x66;
-                _pkt8[pos++] = 0x69;
-                _pkt8[pos++] = 0x65;
-                _pkt8[pos++] = 0x6c;
-                _pkt8[pos++] = (uint8_t) (2 & 0xff);
+                _pkt8[pos++] = 0;                                           // packet_start_code_prefix
+                _pkt8[pos++] = 0;
                 _pkt8[pos++] = (uint8_t) (1 & 0xff);
-                _pkt8[pos++] = 0x74;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;
-                _pkt8[pos++] = 0x64;
+                _pkt8[pos++] = (uint8_t) (0xbd);
 
-                _j2kTsOffset = pos;
+                _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
+                _pkt8[pos++] = 0;                                           // packet_length & 0xff
+                _pkt8[pos++] = 0x80;                                        // 10
+                _pkt8[pos++] = 0x80;                                        // 11
+                _pkt8[pos++] = 5;                                           // 12
 
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // hh
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // mm
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ss
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ff
-                _pkt8[pos++] = 0x62;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
-                _pkt8[pos++] = 0x6c;
-                _pkt8[pos++] = 3;
-                _pkt8[pos++] = 0x0;
-            }
-            else
-            {
-                _pkt8[pos++] = 0x74;                                        // 42
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;
-                _pkt8[pos++] = 0x64;
+                _ptsOffset = pos;
 
-                _j2kTsOffset = pos;
+                _pkt8[pos] = 0x21;                                          // 13
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 29) & 0xe);
+                _pkt8[pos] = 0x0;                                           // 14
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 22) & 0xff);
+                _pkt8[pos] = 0x1;                                           // 15
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 14) & 0xfe);
+                _pkt8[pos] = 0x0;                                           // 16
+                _pkt8[pos++] |= (uint8_t) ((_pts >> 7) & 0xff);
+                _pkt8[pos] = 0x1;                                           // 17
+                _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
 
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // hh
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // mm
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ss
-                _pkt8[pos++] = (uint8_t) (0 & 0xff);                        // ff
-                _pkt8[pos++] = 0x62;
-                _pkt8[pos++] = 0x63;
-                _pkt8[pos++] = 0x6f;	// NOTE: Type in Rec. ITU-T H.222.0 standard shows this as 0x68
-                _pkt8[pos++] = 0x6c;
-                _pkt8[pos++] = 3;
-                _pkt8[pos++] = 0xff;
+                put32('elsm', pos );                                        // 18
+
+                put32('frat', pos );
+                _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
+
+                put32('brat', pos );
+                _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                  // 34
+                _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_bitRate & 0xff);
+
+                _auf1Offset = pos;
+
+                _pkt8[pos++] = (uint8_t) (_auf1 >> 24);                     // 38
+                _pkt8[pos++] = (uint8_t) ((_auf1 >> 16) & 0xff);
+                _pkt8[pos++] = (uint8_t) ((_auf1 >> 8) & 0xff);
+                _pkt8[pos++] = (uint8_t) (_auf1 & 0xff);
+
+                if (_videoStreamData.interlaced)
+                {
+                    _auf2Offset = pos;
+
+                    _pkt8[pos++] = (uint8_t) (_auf2 >> 24);                 // 42
+                    _pkt8[pos++] = (uint8_t) ((_auf2 >> 16) & 0xff);
+                    _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
+
+                    put32('fiel', pos );
+                    _pkt8[pos++] = (uint8_t) (2 & 0xff);
+                    _pkt8[pos++] = (uint8_t) (1 & 0xff);
+
+                    put32('tcod', pos );
+                    _j2kTsOffset = pos;
+                    _pkt8[pos++] = (uint8_t) (_hh & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_mm & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_ss & 0xff);
+                    _pkt8[pos++] = (uint8_t) (_ff & 0xff);
+
+                    put32('bcol', pos );
+                    _pkt8[pos++] = 3;
+                    _pkt8[pos++] = 0x0;
+                }
+                else
+                {
+                    put32('tcod', pos );
+                    _j2kTsOffset = pos;
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // hh
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // mm
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ss
+                    _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ff
+
+                    put32('bcol', pos );
+                    _pkt8[pos++] = 3;
+                    _pkt8[pos++] = 0xff;
+                }
             }
         }
 
+        _tableLength = pos;
         return pos;
-    }
-
-    int32_t calcTsGenTc()
-    {
-        double d1, d2;
-
-        // First packet rate
-        d1 = 80000000 / 8.0 / 188.0;        // Packet Rate
-        d1 = 1.0 / d1;                      // Packet Period
-        d2 = 1.0 / 125000000;               // Clock Period
-        d1 = d1 / d2 - 1.0;                 // One less as it counts from 0
-        return (int32_t) d1;
     }
 
     int32_t calcPatPmtPeriod()
@@ -444,6 +461,8 @@ class PATGen : public TSGenerator
 
             int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
+
+            _tableLength = pos;
             return pos;
         }
 };
@@ -549,6 +568,8 @@ class PMTGen : public TSGenerator
 
             int crc = chksum_crc32(_pkt8 + crcStart, crcEnd - crcStart + 1 );
             put32( crc, pos );
+
+            _tableLength = pos;
             return pos;
         }
 
@@ -628,10 +649,7 @@ class PMTGen : public TSGenerator
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
             _pkt8[pos++] = 6;                                               // length
-            _pkt8[pos++] = 0x42;                                            // "B"
-            _pkt8[pos++] = 0x53;                                            // "S"
-            _pkt8[pos++] = 0x53;                                            // "S"
-            _pkt8[pos++] = 0x44;                                            // "D"
+            put32('BSSD', pos );
             _pkt8[pos++] = 0;
             _pkt8[pos++] = 0x20;
 
@@ -642,7 +660,6 @@ class PMTGen : public TSGenerator
 class ADPGen : public TSGenerator
 {
 public:
-    bool    _doPcr;
     std::map <uint16_t, uint16_t> _elemNumToPID;
 
 public:
@@ -667,14 +684,14 @@ public:
 
         // Header
         _pkt32[pos++] = 0x47;                                           // sync byte
-        _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for Video
+        _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for stream
         _pkt32[pos++] = (_elemNumToPID[1] & 0xff);
         _pkt32[pos++] = (3 << 4);                                       // Continuity Counter must increment when transmitted
         _pkt32[pos++] = 0;                                              // pointer
 
         _pkt32[pos++] = 0x10;                                           // pointer
 
-        if (_doPcr)
+        if (_tsEncapType == kTsEncapTypePcr)
         {
             _pkt32[pos++] = 0x800;
             _pkt32[pos++] = 0x900;
@@ -683,6 +700,8 @@ public:
             _pkt32[pos++] = 0xc00;
             _pkt32[pos++] = 0xd00;
         }
+
+        _tableLength = pos;
         return pos;
     }
 };

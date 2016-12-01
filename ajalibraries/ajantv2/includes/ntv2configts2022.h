@@ -21,7 +21,7 @@
 #define     ENCODE_TS_AES_ENCAP             3
 #define     ENCODE_TS_MPEG_AES_ENCAP        4
 #define     ENCODE_TS_MPEG_ANC_ENCAP        6
-#define     ENCODE_TS_MPEG_PCR              7
+#define     ENCODE_TS_MPEG_PCR_ENCAP        7
 
 // Decoder part numbers
 #define     DECODE_TS_MPEG_J2K_DECAP        0
@@ -37,8 +37,6 @@
 #define     J2K_TS_OFFSET                   0xc2
 #define     AUF1_OFFSET                     0xc3
 #define     AUF2_OFFSET                     0xc4
-#define     J2K_TS_LOAD                     0xd0
-#define     TS_GEN_TC                       0xd1
 #define     HOST_EN                         0xe0
 #define     INTERLACED_VIDEO                0xe1
 #define     PAYLOAD_PARAMS                  0xe2
@@ -233,9 +231,10 @@ public:
     bool    SetupEncodeTsTimer(const NTV2Channel channel);
     bool    SetupEncodeTsJ2KEncoder(const NTV2Channel channel);
     bool    SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
+    bool    SetupEncodeTsMpegPcrEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAesEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsMpegAncEncap();
+    bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
+    bool    SetupEncodeTsMpegAncEncap(const NTV2Channel channel);
 
     // Setup individual TS decode parts
     bool    SetupDecodeTsMpegJ2kDecap();
@@ -250,7 +249,9 @@ public:
     void                J2kSetMode(const NTV2Channel channel, uint32_t tier, uint32_t mode);
     uint32_t            GetFeatures();
 
-    bool                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegPcrEncap(const NTV2Channel channel);
+    void                GenerateTableForMpegAesEncap(const NTV2Channel channel);
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 
@@ -278,52 +279,6 @@ static const tsSetupReg tsAesEncapTable[] =
     {0x008, 0x1},
 };
 #define numTsAesEncapEntries (sizeof(tsAesEncapTable) / sizeof(tsSetupReg))
-
-static const tsSetupReg tsMpegAesEncapTable[] =
-{
-    {0x000, 0x47},
-    {0x001, 0x41},
-    {0x002, 0x2},
-    {0x003, 0x10},
-    {0x004, 0x0},
-    {0x005, 0x0},
-    {0x006, 0x1},
-    {0x007, 0xbd},
-    {0x008, 0x0},
-    {0x009, 0x0},
-    {0x00a, 0x80},
-    {0x00b, 0x80},
-    {0x00c, 0x5},
-    {0x00d, 0x21},
-    {0x00e, 0x0},
-    {0x00f, 0x1},
-    {0x010, 0x0},
-    {0x011, 0x1},
-    {0x012, 0x0},
-    {0x013, 0x0},
-    {0x014, 0x0},
-    {0x015, 0x10},
-
-    {0x0c0, 0x16},
-    {0x0c1, 0xd},
-    {0x0c3, 0x1000012},
-    {0x0c4, 0x1000c08},
-
-    {0x300, 0x47},               // adaptation header
-    {0x301, 0x1},
-    {0x302, 0x2},
-    {0x303, 0x30},
-    {0x304, 0x0},
-    {0x305, 0x0},
-
-    {0x3f0, 0x6},
-
-    {0x0e2, 0x102},
-    {0x0e0, 0x1},
-
-};
-#define numTsMpegAesEncapEntries (sizeof(tsMpegAesEncapTable) / sizeof(tsSetupReg))
-
 
 
 #endif // NTV2_2022CONFIGTS_H

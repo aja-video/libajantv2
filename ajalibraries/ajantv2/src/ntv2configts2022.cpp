@@ -230,12 +230,16 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
     if (!SetupEncodeTsMpegJ2kEncap(channel))
         return false;
 
-    // program TS for aes encapsulator
-    if (!SetupEncodeTsAesEncap(channel))
+    // program TS for mpeg pcr encapsulator
+    if (!SetupEncodeTsMpegPcrEncap(channel))
         return false;
 
     // program TS for mpeg aes encapsulator
     if (!SetupEncodeTsMpegAesEncap(channel))
+        return false;
+
+    // program TS for aes encapsulator
+    if (!SetupEncodeTsAesEncap(channel))
         return false;
 
     return true;
@@ -297,11 +301,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel)
 
     printf("CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap\n");
 
-    if (!GenerateTableForMpegJ2kEncap(channel))
-    {
-        mError = "SetupEncodeTsMpegJ2kEncap could not generate transaction table";
-        return false;
-    }
+    GenerateTableForMpegJ2kEncap(channel);
 
     // Program Transaction Table
     for (int32_t index=0; index < _transactionCount; index++)
@@ -309,6 +309,44 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegJ2kEncap(const NTV2Channel channel)
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_J2K_ENCAP) + (_transactionTable[index][0]), _transactionTable[index][1]);
         //printf("SetupEncodeTsMpegJ2kEncap - addr=%08x, val=%08x\n",
         //       addr + (0x800*ENCODE_TS_MPEG_J2K_ENCAP) + (_transactionTable[index][0]),  _transactionTable[index][1]);
+    }
+    return true;
+}
+
+
+bool CNTV2ConfigTs2022::SetupEncodeTsMpegPcrEncap(const NTV2Channel channel)
+{
+    uint32_t addr = GetIpxTsAddr(channel);
+
+    printf("CNTV2ConfigTs2022::SetupEncodeTsMpegPcrEncap\n");
+
+    GenerateTableForMpegPcrEncap(channel);
+
+    // Program Transaction Table
+    for (int32_t index=0; index < _transactionCount; index++)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_PCR_ENCAP) + (_transactionTable[index][0]), _transactionTable[index][1]);
+        //printf("SetupEncodeTsMpegPcrEncap - addr=%08x, val=%08x\n",
+        //       addr + (0x800*ENCODE_TS_MPEG_PCR_ENCAP) + (_transactionTable[index][0]),  _transactionTable[index][1]);
+    }
+    return true;
+}
+
+
+bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap(const NTV2Channel channel)
+{
+    uint32_t addr = GetIpxTsAddr(channel);
+
+    printf("CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap\n");
+
+    GenerateTableForMpegAesEncap(channel);
+
+    // Program Transaction Table
+    for (int32_t index=0; index < _transactionCount; index++)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (_transactionTable[index][0]), _transactionTable[index][1]);
+        //printf("SetupEncodeTsMpegAesEncap - addr=%08x, val=%08x\n",
+        //       addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (_transactionTable[index][0]),  _transactionTable[index][1]);
     }
     return true;
 }
@@ -329,22 +367,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 }
 
 
-bool CNTV2ConfigTs2022::SetupEncodeTsMpegAesEncap(const NTV2Channel channel)
-{
-    uint32_t addr = GetIpxTsAddr(channel);
-
-    // Program registers
-    for (uint32_t index=0; index < numTsMpegAesEncapEntries; index++)
-    {
-        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
-        //printf("SetTsMpegAesEncap - reg=%08x, val=%08x\n",
-        //       addr + (0x800*ENCODE_TS_MPEG_AES_ENCAP) + (tsMpegAesEncapTable[index].reg), tsMpegAesEncapTable[index].value);
-    }
-    return true;
-}
-
-
-bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap()
+bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap(const NTV2Channel channel)
 {
     mError = "SetupEncodeTsMpegAncEncap not yet implemented";
     return false;
@@ -457,7 +480,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 }
 
 
-bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
+void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
 {
     NTV2VideoFormat     videoFormat;
     int32_t             w1;
@@ -495,20 +518,14 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionCount = 0;
 
     PESGen pes;
-    pes._progNumToPID[1] = streamData.programPid;
+    pes._tsEncapType = kTsEncapTypeJ2k;
     pes._elemNumToPID[1] = streamData.videoPid;
-    pes._pcrNumToPID[1] = streamData.pcrPid;
-    pes._audioNumToPID[1] = streamData.audio1Pid;
     pes._videoStreamData.j2kStreamType = streamData.j2kStreamType;
     pes._videoStreamData.width = streamData.width;
     pes._videoStreamData.height = streamData.height;
     pes._videoStreamData.denFrameRate = streamData.denFrameRate;
     pes._videoStreamData.numFrameRate = streamData.numFrameRate;
     pes._videoStreamData.interlaced = streamData.interlaced;
-
-    printf("Set HOST_EN to 7\n\n");
-    _transactionTable[_transactionCount][0] = HOST_EN;
-    _transactionTable[_transactionCount++][1] = 7;
 
     printf("Host Register Settings:\n\n");
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
@@ -519,17 +536,9 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = streamData.interlaced;
     printf("Interlaced Video = %i\n", _transactionTable[_transactionCount-1][1]);
 
-    _transactionTable[_transactionCount][0] = TS_GEN_TC;
-    _transactionTable[_transactionCount++][1] = pes.calcTsGenTc();
-    printf("TS Packet Generation TC value = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
-
     _transactionTable[_transactionCount][0] = PAT_PMT_PERIOD;
     _transactionTable[_transactionCount++][1] = pes.calcPatPmtPeriod() | 0x01000000;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
-
-    _transactionTable[_transactionCount][0] = J2K_TS_LOAD;
-    _transactionTable[_transactionCount++][1] = 0x10311b;
-    printf("J2K TimeStamp = 0x%x\n\n", _transactionTable[_transactionCount-1][1]);
 
     int length = pes.makePacket();
 
@@ -545,16 +554,19 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = pes._auf2Offset;
 
     printf("PES Template Length = %i, Data:\n", length);
+    _transactionTable[_transactionCount][0] = PES_HDR_LEN;
+    _transactionTable[_transactionCount++][1] = length;
+
     for (w1 = 0; w1 < 188; w1++)
     {
         _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
         _transactionTable[_transactionCount++][1] = pes._pkt8[w1];
-    }
+    }             
     pes.dump8();
 
     ADPGen adp;
+    adp._tsEncapType = kTsEncapTypeJ2k;
     adp._elemNumToPID[1] = streamData.videoPid;
-    adp._doPcr = true;
     length = adp.makePacket();
 
     printf("Adaptation Template Length = %i, Data:\n", length);
@@ -568,6 +580,7 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     adp.dump32();
 
     PATGen pat;
+    pat._tsEncapType = kTsEncapTypeJ2k;
     pat._progNumToPID[1] = streamData.programPid;
     length = pat.makePacket();
 
@@ -580,6 +593,7 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     pat.dump8();
 
     PMTGen pmt;
+    pmt._tsEncapType = kTsEncapTypeJ2k;
     pmt._progNumToPID[1] = streamData.programPid;
     pmt._elemNumToPID[1] = streamData.videoPid;
     pmt._pcrNumToPID[1] = streamData.pcrPid;
@@ -604,9 +618,113 @@ bool CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     printf("Set HOST_EN to 1\n\n");
     _transactionTable[_transactionCount][0] = HOST_EN;
     _transactionTable[_transactionCount++][1] = 1;
-
-    return true;
 }
+
+
+void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
+{
+    int32_t             w1;
+    uint32_t            pcrPid;
+
+    printf("CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap\n");
+
+    // Get the PCR pid
+    GetJ2KEncodePCRPid(channel, pcrPid);
+    printf("PCR PID         = 0x%02x\n", pcrPid);
+
+    _transactionCount = 0;
+
+    _transactionTable[_transactionCount][0] = PAT_PMT_PERIOD;
+    _transactionTable[_transactionCount++][1] = 0;
+    printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
+    ADPGen adp;
+    adp._tsEncapType = kTsEncapTypePcr;
+    adp._elemNumToPID[1] = pcrPid;
+    uint32_t length = adp.makePacket();
+
+    printf("Adaptation Template Length = %i, Data:\n", length);
+    _transactionTable[_transactionCount][0] = ADAPTATION_HDR_LENGTH;
+    _transactionTable[_transactionCount++][1] = length;
+    for (w1 = 0; w1 < 188; w1++)
+    {
+        _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
+        _transactionTable[_transactionCount++][1] = adp._pkt32[w1];
+    }
+    adp.dump32();
+
+    // Last entry is HOST_EN to on
+    printf("Set HOST_EN to 1\n\n");
+    _transactionTable[_transactionCount][0] = HOST_EN;
+    _transactionTable[_transactionCount++][1] = 1;
+}
+
+
+void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
+{
+    int32_t             w1;
+    uint32_t            audioPid;
+
+    printf("CNTV2ConfigTs2022::GenerateTableForMpegAesEncap\n");
+
+    // Get the Audio pid
+    GetJ2KEncodeAudio1Pid(channel, audioPid);
+    printf("Audio 1 PID     = 0x%02x\n\n", audioPid);
+
+    _transactionCount = 0;
+
+    PESGen pes;
+    pes._tsEncapType = kTsEncapTypeAes;
+    pes._elemNumToPID[1] = audioPid;
+
+    printf("Host Register Settings:\n\n");
+    _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
+    _transactionTable[_transactionCount++][1] = audioPid;
+    printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
+
+    int length = pes.makePacket();
+
+    printf("PTS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
+               pes._ptsOffset, pes._auf1Offset, pes._auf2Offset);
+    _transactionTable[_transactionCount][0] = PTS_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._ptsOffset;
+    _transactionTable[_transactionCount][0] = AUF1_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._auf1Offset;
+    _transactionTable[_transactionCount][0] = AUF2_OFFSET;
+    _transactionTable[_transactionCount++][1] = pes._auf2Offset;
+
+    printf("PES Template Length = %i, Data:\n", length);
+    _transactionTable[_transactionCount][0] = PES_HDR_LEN;
+    _transactionTable[_transactionCount++][1] = length;
+
+    for (w1 = 0; w1 < 188; w1++)
+    {
+        _transactionTable[_transactionCount][0] = PES_HDR_LOOKUP + w1;
+        _transactionTable[_transactionCount++][1] = pes._pkt8[w1];
+    }
+    pes.dump8();
+
+    ADPGen adp;
+    adp._tsEncapType = kTsEncapTypeAes;
+    adp._elemNumToPID[1] = audioPid;
+    length = adp.makePacket();
+
+    printf("Adaptation Template Length = %i, Data:\n", length);
+    _transactionTable[_transactionCount][0] = ADAPTATION_HDR_LENGTH;
+    _transactionTable[_transactionCount++][1] = length;
+    for (w1 = 0; w1 < 188; w1++)
+    {
+        _transactionTable[_transactionCount][0] = ADAPTATION_LOOKUP + w1;
+        _transactionTable[_transactionCount++][1] = adp._pkt32[w1];
+    }
+    adp.dump32();
+
+    // Last entry is HOST_EN to on
+    printf("Set HOST_EN to 1\n\n");
+    _transactionTable[_transactionCount][0] = HOST_EN;
+    _transactionTable[_transactionCount++][1] = 1;
+}
+
 
 uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)
 {
