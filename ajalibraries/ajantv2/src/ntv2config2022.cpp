@@ -146,6 +146,7 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     _is2022_6   = ((features & SAREK_2022_6) != 0);
     _is2022_2   = ((features & SAREK_2022_2) != 0);
     _is2022_7   = ((features & SAREK_2022_7) != 0);
+    _is_txTop34 = ((features & SAREK_TX_TOP34) != 0);
 
     _biDirectionalChannels = false;
 }
@@ -191,57 +192,42 @@ bool  CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress
     uint32_t boardHi2 = (macHi & 0xffff0000) >>16;
     uint32_t boardLo2 = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
 
+    uint32_t core6;
+    uint32_t core2;
+
     if (port == SFP_TOP)
     {
-        // initialise constants
-        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf + SAREK_2022_6_TX_CORE_0, 0x04);
-        mDevice.WriteRegister(kReg2022_6_tx_hitless_config + SAREK_2022_6_TX_CORE_0, 0x01); // disable
-
-        // source ip address
-        mDevice.WriteRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_0,addr);
-
-        if (_is2022_6)
-        {
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo);
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi);
-
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo2);
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi2);
-        }
-        else
-        {
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_2_TX_CORE_0,boardLo);
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_2_TX_CORE_0,boardHi);
-
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_2_TX_CORE_0,boardLo2);
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_2_TX_CORE_0,boardHi2);
-        }
+        core6 = (_is_txTop34) ? SAREK_2022_6_TX_CORE_1 : SAREK_2022_6_TX_CORE_0;
+        core2 = SAREK_2022_2_TX_CORE_0;
     }
     else
     {
+        core6 = (_is_txTop34) ? SAREK_2022_6_TX_CORE_0 : SAREK_2022_6_TX_CORE_1;
+        core2 = SAREK_2022_2_TX_CORE_1;
+    }
+
+    if (_is2022_6)
+    {
         // initialise constants
-        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf + SAREK_2022_6_TX_CORE_1, 0x04);
-        mDevice.WriteRegister(kReg2022_6_tx_hitless_config + SAREK_2022_6_TX_CORE_1, 0x01); // disable
+        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + core6, 0x04);
+        mDevice.WriteRegister(kReg2022_6_tx_hitless_config   + core6, 0x01); // disable
 
         // source ip address
-        mDevice.WriteRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_1,addr);
+        mDevice.WriteRegister(kReg2022_6_tx_src_ip_addr      + core6,addr);
 
-        if (_is2022_6)
-        {
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_6_TX_CORE_1,boardLo);
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_6_TX_CORE_1,boardHi);
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + core6,boardLo);
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + core6,boardHi);
 
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_6_TX_CORE_1,boardLo2);
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_6_TX_CORE_1,boardHi2);
-        }
-        else
-        {
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_2_TX_CORE_1,boardLo);
-            mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_2_TX_CORE_1,boardHi);
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + core6,boardLo2);
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core6,boardHi2);
+    }
+    else
+    {
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + core2,boardLo);
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + core2,boardHi);
 
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_2_TX_CORE_1,boardLo2);
-            mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_2_TX_CORE_1,boardHi2);
-        }
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + core2,boardLo2);
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
     }
 
     bool rv = AcquireMailbox();
@@ -1188,13 +1174,27 @@ eSFP  CNTV2Config2022::GetRxPort(NTV2Channel chan)
 
 eSFP  CNTV2Config2022::GetTxPort(NTV2Channel chan)
 {
-    if ((uint32_t)chan >= _numTx0Chans)
+    if (!_is_txTop34)
     {
-        return SFP_BOTTOM;
+        if ((uint32_t)chan >= _numTx0Chans)
+        {
+            return SFP_BOTTOM;
+        }
+        else
+        {
+            return SFP_TOP;
+        }
     }
     else
     {
-        return SFP_TOP;
+        if ((uint32_t)chan >= _numTx0Chans)
+        {
+            return SFP_TOP;
+        }
+        else
+        {
+            return SFP_BOTTOM;
+        }
     }
 }
 

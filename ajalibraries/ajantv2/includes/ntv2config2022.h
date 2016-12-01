@@ -320,6 +320,7 @@ private:
     bool        _is2022_2;
     bool        _is2022_7;
     bool        _biDirectionalChannels;             // logically bi-directional channels
+    bool        _is_txTop34;
 
 };	//	CNTV2Config2022
 

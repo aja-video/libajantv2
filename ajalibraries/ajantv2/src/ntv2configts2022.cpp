@@ -210,8 +210,9 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
 
 bool CNTV2ConfigTs2022::SetupJ2KDecoder()
 {
-    mError = "SetupJ2KDecoder not yet implemented";
-    return false;
+    mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPrpMainCsr, 0x10);   // prp mode play
+    mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPopMainCsr, 0x12);   // pop mode play once
+    return true;
 }
 
 
