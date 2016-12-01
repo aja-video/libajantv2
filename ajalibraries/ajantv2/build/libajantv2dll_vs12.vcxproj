@@ -230,6 +230,7 @@
     <ClCompile Include="..\src\ntv2discover.cpp" />
     <ClCompile Include="..\src\ntv2dma.cpp" />
     <ClCompile Include="..\src\ntv2driverinterface.cpp" />
+    <ClCompile Include="..\src\ntv2formatdescriptor.cpp" />
     <ClCompile Include="..\src\ntv2hevc.cpp" />
     <ClCompile Include="..\src\ntv2interrupts.cpp" />
     <ClCompile Include="..\src\ntv2konaflashprogram.cpp" />
@@ -241,6 +242,7 @@
     <ClCompile Include="..\src\ntv2procamp.cpp" />
     <ClCompile Include="..\src\ntv2publicinterface.cpp" />
     <ClCompile Include="..\src\ntv2register.cpp" />
+    <ClCompile Include="..\src\ntv2registerexpert.cpp" />
     <ClCompile Include="..\src\ntv2resample.cpp" />
     <ClCompile Include="..\src\ntv2rp188.cpp" />
     <ClCompile Include="..\src\ntv2rp215.cpp" />
@@ -280,6 +282,8 @@
     <ClInclude Include="..\includes\ntv2debug.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
+    <ClInclude Include="..\includes\ntv2formatdescriptor.h" />
+    <ClInclude Include="..\includes\ntv2registerexpert.h" />
     <ClInclude Include="..\src\ntv2devicefeatures.hpp" />
     <ClInclude Include="..\includes\ntv2devicescanner.h" />
     <ClInclude Include="..\includes\ntv2discover.h" />
