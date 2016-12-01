@@ -3198,10 +3198,10 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 	"1080p 25.00",				//	NTV2_FORMAT_1080p_2500					//	10
 	"1080p 23.98",				//	NTV2_FORMAT_1080p_2398					//	11
 	"1080p 24.00",				//	NTV2_FORMAT_1080p_2400					//	12
-	"1080p 2K 23.98",			//	NTV2_FORMAT_1080p_2K_2398				//	13
-	"1080p 2K 24.00",			//	NTV2_FORMAT_1080p_2K_2400				//	14
-	"1080psf 2K 23.98",			//	NTV2_FORMAT_1080psf_2K_2398				//	15
-	"1080psf 2K 24.00",			//	NTV2_FORMAT_1080psf_2K_2400				//	16
+    "2048x1080p 23.98",			//	NTV2_FORMAT_1080p_2K_2398				//	13
+    "2048x1080p 24.00",			//	NTV2_FORMAT_1080p_2K_2400				//	14
+    "2048x1080psf 23.98",       //	NTV2_FORMAT_1080psf_2K_2398				//	15
+    "2048x1080psf 24.00",		//	NTV2_FORMAT_1080psf_2K_2400				//	16
 	"720p 50",					//	NTV2_FORMAT_720p_5000					//	17
 	"1080p 50.00b",				//	NTV2_FORMAT_1080p_5000					//	18
 	"1080p 59.94b",				//	NTV2_FORMAT_1080p_5994					//	19
@@ -3249,11 +3249,11 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 	"",							//											//	61		// not used
 	"",							//											//	62		// not used
 	"",							//											//	63		// not used
-	"1556psf 2K 14.98",			//	NTV2_FORMAT_2K_1498						//	64
-	"1556psf 2K 15.00",			//	NTV2_FORMAT_2K_1500						//	65
-	"1556psf 2K 23.98",			//	NTV2_FORMAT_2K_2398						//	66
-	"1556psf 2K 24.00",			//	NTV2_FORMAT_2K_2400						//	67
-	"1556psf 2K 25.00",			//	NTV2_FORMAT_2K_2500						//	68
+    "2048x1556psf 14.98",		//	NTV2_FORMAT_2K_1498						//	64
+    "2048x1556psf 15.00",		//	NTV2_FORMAT_2K_1500						//	65
+    "2048x1556psf 23.98",		//	NTV2_FORMAT_2K_2398						//	66
+    "2048x1556psf 24.00",		//	NTV2_FORMAT_2K_2400						//	67
+    "2048x1556psf 25.00",		//	NTV2_FORMAT_2K_2500						//	68
 	"",							//	NTV2_FORMAT_END_2K_DEF_FORMATS			//	69		// not used
 	"",							//											//	70		// not used
 	"",							//											//	71		// not used
