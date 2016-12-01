@@ -6,6 +6,7 @@
 
 #include "ntv2player.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2debug.h"
 #include "ajabase/common/testpatterngen.h"
 #include "ajabase/common/timecode.h"
@@ -61,9 +62,8 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mPixelFormat				(inPixelFormat),
 		mSavedTaskMode				(NTV2_DISABLE_TASKS),
 		mAudioSystem				(NTV2_AUDIOSYSTEM_1),
+		mVancMode					(NTV2_VANCMODE_OFF),
 		mWithAudio					(inWithAudio),
-		mVancEnabled				(false),
-		mWideVanc					(false),
 		mEnableVanc					(inEnableVanc),
 		mGlobalQuit					(false),
 		mDoLevelConversion			(inLevelConversion),
@@ -196,10 +196,8 @@ AJAStatus NTV2Player::Init (void)
 	RouteOutputSignal ();
 	SetUpOutputAutoCirculate ();
 
-	//	This is for the timecode that we will burn onto the image...
-	NTV2FormatDescriptor	fd	(::GetFormatDescriptor (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc));
-
 	//	Lastly, prepare my AJATimeCodeBurn instance...
+	const NTV2FormatDescriptor	fd (mVideoFormat, mPixelFormat, mVancMode);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), fd.numPixels, fd.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -298,10 +296,8 @@ void NTV2Player::SetUpHostBuffers ()
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	//	Calculate the size of the video buffer, which depends on video format, pixel format, and whether VANC is included or not...
-	mVancEnabled = false;
-	mWideVanc = false;
-	mDevice.GetEnableVANCData (&mVancEnabled, &mWideVanc);
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc);
+	mDevice.GetVANCMode (mVancMode);
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 
 	//	Calculate the size of the audio buffer, which mostly depends on the sample rate...
 	NTV2AudioRate	audioRate	(NTV2_AUDIO_48K);
@@ -521,11 +517,7 @@ AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
 		//	Use a convenient AJA test pattern generator object to populate an AJATestPatternBuffer with test pattern data...
 		AJATestPatternBuffer	testPatternBuffer;
 		AJATestPatternGen		testPatternGen;
-
-		NTV2FormatDescriptor	formatDesc	(GetFormatDescriptor (mVideoFormat,
-																mPixelFormat,
-																mVancEnabled,
-																mWideVanc));
+		NTV2FormatDescriptor	formatDesc		(mVideoFormat, mPixelFormat, mVancMode);
 
 		if (!testPatternGen.DrawTestPattern (testPatternTypes [testPatternIndex],
 											formatDesc.numPixels,

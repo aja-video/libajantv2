@@ -6,6 +6,7 @@
 
 #include "ntv2player4k.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2debug.h"
 #include "ajabase/common/testpatterngen.h"
@@ -161,13 +162,8 @@ AJAStatus NTV2Player4K::Init (void)
 	RouteOutputSignal ();
 	SetUpTestPatternVideoBuffers ();
 
-	//	This is for the timecode that we will burn onto the image...
-	NTV2FormatDescriptor fd = GetFormatDescriptor (	mVideoFormat,
-													mPixelFormat,
-													mVancEnabled,
-													mWideVanc);
-
 	//	Lastly, prepare my AJATimeCodeBurn instance...
+	NTV2FormatDescriptor fd (mVideoFormat, mPixelFormat, mVancMode);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), fd.numPixels, fd.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -282,9 +278,7 @@ void NTV2Player4K::SetUpHostBuffers ()
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	//	Calculate the size of the video buffer, which depends on video format, pixel format, and whether VANC is included or not...
-	mVancEnabled = false;
-	mWideVanc = false;
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc);
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 	mAudioBufferSize = AUDIOBYTES_MAX_48K;
 
 	//	Allocate my buffers...
@@ -962,7 +956,7 @@ void NTV2Player4K::SetUpTestPatternVideoBuffers (void)
 		//	Use a convenient AJA test pattern generator object to populate an AJATestPatternBuffer with test pattern data...
 		AJATestPatternBuffer	testPatternBuffer;
 		AJATestPatternGen		testPatternGen;
-		NTV2FormatDescriptor	formatDesc	(::GetFormatDescriptor (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc));
+		NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, mVancMode);
 
 		testPatternGen.DrawTestPattern (testPatternTypes [testPatternIndex],
 										formatDesc.numPixels,

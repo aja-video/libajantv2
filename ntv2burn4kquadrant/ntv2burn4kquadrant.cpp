@@ -5,6 +5,7 @@
 **/
 
 #include "ntv2burn4kquadrant.h"
+#include "ntv2formatdescriptor.h"
 #include "ajabase/common/types.h"
 #include <iostream>
 
@@ -260,7 +261,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	SetupOutputAutoCirculate ();
 
 	//	Lastly, prepare my timecode burner instance...
-	NTV2FormatDescriptor	fd	(::GetFormatDescriptor (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc));
+	NTV2FormatDescriptor	fd	(mVideoFormat, mPixelFormat, mVancMode);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), fd.numPixels, fd.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -486,8 +487,8 @@ void NTV2Burn4KQuadrant::SetupHostBuffers (void)
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	mInputDevice.GetEnableVANCData (&mVancEnabled, &mWideVanc);
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc);
+	mInputDevice.GetVANCMode (mVancMode);
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...

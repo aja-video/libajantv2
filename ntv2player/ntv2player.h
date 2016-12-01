@@ -221,9 +221,8 @@ class NTV2Player
 		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
 		NTV2EveryFrameTaskMode		mSavedTaskMode;				///< @brief	Used to restore the prior task mode
 		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
+		NTV2VANCMode				mVancMode;					///< @brief	VANC mode
 		const bool					mWithAudio;					///< @brief	Playout audio?
-		bool						mVancEnabled;				///< @brief	VANC enabled?
-		bool						mWideVanc;					///< @brief	Wide VANC?
 		bool						mEnableVanc;				///< @brief	Enable VANC?
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion

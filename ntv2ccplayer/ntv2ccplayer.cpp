@@ -32,8 +32,7 @@ using namespace std;
 
 
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
-static const bool		kTallVANC		(true);		//	Used only with VANC
-static const bool		kTallerVANC		(false);	//	Used only with VANC
+static const NTV2VANCMode	kDefaultVANCMode		(NTV2_VANCMODE_TALL);		//	Used only with VANC
 static const uint32_t	kAppSignature	(AJA_FOURCC ('C','C','P','L'));
 
 
@@ -651,8 +650,7 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 		mPixelFormat			(inConfigData.fPixelFormat),
 		mFrameRate				(NTV2_FRAMERATE_UNKNOWN),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
-		mTallVANC				(kTallVANC),
-		mTallerVANC				(kTallerVANC),
+		mVancMode				(kDefaultVANCMode),
 		mPlayerQuit				(false),
 		mCaptionGeneratorQuit	(false),
 		mpVideoBuffer(NULL)
@@ -660,7 +658,6 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 	::memset (mGeneratorThreads, 0, sizeof (mGeneratorThreads));
 
 	NTV2_ASSERT (!inConfigData.fChannelGenerators.empty ());
-	NTV2_ASSERT (!(!mTallVANC && mTallerVANC));		//	taller VANC true and tall VANC false doesn't make sense
 	gApp = this;
 
 }	//	constructor
@@ -791,7 +788,7 @@ AJAStatus NTV2CCPlayer::Init (void)
 		if (!DeviceAncExtractorIsAvailable ())		//	and anc extractor isn't available...
 			mConfig.fForceVanc = true;				//	then force Vanc anyway
 	if (!mConfig.fForceVanc)
-		mTallVANC = mTallerVANC = false;
+		mVancMode = NTV2_VANCMODE_OFF;
 
 	//	Set up the device video config...
 	status = SetUpOutputVideo ();
@@ -818,7 +815,7 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	//	Generate the test pattern...
 	AJATestPatternBuffer		testPatternBuffer;
 	AJATestPatternGen			testPatternGen;
-	const NTV2FormatDescriptor	formatDesc	(::GetFormatDescriptor (mVideoFormat, mPixelFormat, mTallVANC, mTallerVANC));
+	const NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, mVancMode);
 
 	if (!testPatternGen.DrawTestPattern (AJA_TestPatt_FlatField,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
 										CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), testPatternBuffer))
@@ -919,19 +916,13 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	}
 
 	//	Enable VANC only if device has no Anc insertion capability, or if --vanc specified...
-	if (mTallVANC)
+	NTV2FrameGeometry	geometry	(NTV2_FG_INVALID);
+	mDevice.GetFrameGeometry (geometry);
+	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mVideoFormat), geometry, mOutputChannel);
+	if (NTV2_IS_VANCMODE_ON (mVancMode))
 	{
-		mDevice.SetEnableVANCData (mTallVANC, mTallerVANC, mOutputChannel);
 		if (::Is8BitFrameBufferFormat (mPixelFormat))
-		{
 			mDevice.SetVANCShiftMode (mOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
-			if (NTV2_IS_QUAD_FRAME_FORMAT (mVideoFormat))
-			{
-				mDevice.SetVANCShiftMode (NTV2Channel (mOutputChannel + 1), NTV2_VANCDATA_8BITSHIFT_ENABLE);
-				mDevice.SetVANCShiftMode (NTV2Channel (mOutputChannel + 2), NTV2_VANCDATA_8BITSHIFT_ENABLE);
-				mDevice.SetVANCShiftMode (NTV2Channel (mOutputChannel + 3), NTV2_VANCDATA_8BITSHIFT_ENABLE);
-			}
-		}
 	}
 
 	//	Create our caption encoders...
@@ -951,7 +942,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		mDevice.SubscribeOutputVerticalEvent (NTV2Channel (mOutputChannel + 3));
 	}
 
-	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, mTallVANC, mTallerVANC);
+	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 	mDevice.GetFrameRate (mFrameRate);
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString (mVideoFormat) << "' using " << (mConfig.fForceVanc ? "VANC" : "device Anc inserter")
@@ -1280,7 +1271,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 														4735.39376902,	6313.85835869,	8418.47781159,	11224.63708211};
 	const TimecodeFormat		tcFormat			(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (mFrameRate));
 	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat (mVideoFormat));
-	const NTV2FormatDescriptor	formatDesc			(::GetFormatDescriptor (standard, mPixelFormat, mTallVANC, Is2KFormat (mVideoFormat), mTallerVANC));
+	const NTV2FormatDescriptor	formatDesc			(mVideoFormat, mPixelFormat, mVancMode);
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow ());
 	const ULWord				vancLineNum			(CNTV2SMPTEAncData::GetVancLineOffset (formatDesc, ::GetSmpteLineNumber (standard),
 																							CNTV2SMPTEAncData::GetCaptionAncLineNumber (mVideoFormat)));
@@ -1386,7 +1377,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 
 			if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat) && !mConfig.fSuppressLine21)
 			{
-				const ULWord	kLine21F1RowNum		(mTallVANC && mTallerVANC  ?  29  :  (mTallVANC  ?  23  :  1));
+				const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
 				const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
 				UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
 				UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));

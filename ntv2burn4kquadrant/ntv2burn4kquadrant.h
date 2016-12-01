@@ -199,8 +199,7 @@ class NTV2Burn4KQuadrant
 		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
 		NTV2EveryFrameTaskMode		mInputSavedTaskMode;	///< @brief	For restoring the input device's prior task mode
 		NTV2EveryFrameTaskMode		mOutputSavedTaskMode;	///< @brief	For restoring the output device's prior task mode
-		bool						mVancEnabled;			///< @brief	VANC enabled?
-		bool						mWideVanc;				///< @brief	Wide VANC?
+		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
 		NTV2AudioSystem				mInputAudioSystem;		///< @brief	The input audio system I'm using
 		NTV2AudioSystem				mOutputAudioSystem;		///< @brief	The output audio system I'm using
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop

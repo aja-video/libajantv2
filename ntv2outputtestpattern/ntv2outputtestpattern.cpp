@@ -13,6 +13,7 @@
 #include "ntv2card.h"
 #include "ntv2outputtestpattern.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2democommon.h"
 #include <signal.h>
 #include <iostream>
