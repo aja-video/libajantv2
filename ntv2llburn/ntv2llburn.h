@@ -151,8 +151,7 @@ class NTV2LLBurn
 		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Previous task mode to restore
-		bool						mVancEnabled;			///< @brief	VANC enabled?
-		bool						mWideVanc;				///< @brief	Wide VANC?
+		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
 		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
 		bool						mDoMultiChannel;		///< @brief	Set the board up for multi-format
 

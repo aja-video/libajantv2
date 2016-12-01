@@ -40,8 +40,7 @@ NTV2FieldBurn::NTV2FieldBurn (const string &				inDeviceSpecifier,
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat		(inPixelFormat),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
-		mVancEnabled		(false),
-		mWideVanc			(false),
+		mVancMode			(NTV2_VANCMODE_OFF),
 		mAudioSystem		(inWithAudio ? ::NTV2InputSourceToAudioSystem (inInputSource) : NTV2_AUDIOSYSTEM_INVALID),
 		mGlobalQuit			(false),
 		mDoMultiChannel		(inDoMultiFormat),
@@ -271,21 +270,19 @@ AJAStatus NTV2FieldBurn::SetupVideo (void)
 
 	//	Now that newer AJA devices can capture/play anc data from separate buffers,
 	//	there's no need to enable VANC frame geometries...
-	mDevice.SetEnableVANCData (false);
-	mDevice.GetEnableVANCData (&mVancEnabled, &mWideVanc);
+	NTV2FrameGeometry	geometry	(NTV2_FG_INVALID);
+	mDevice.GetFrameGeometry (geometry, mInputChannel);
+	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mVideoFormat), geometry, mInputChannel);
+	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mVideoFormat), geometry, mOutputChannel);
 	if (::Is8BitFrameBufferFormat (mPixelFormat))
 	{
 		//	8-bit FBFs require bit shift for VANC geometries, or no shift for normal geometries...
-		mDevice.SetVANCShiftMode (mInputChannel, (mVancEnabled || mWideVanc) ? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
-		mDevice.SetVANCShiftMode (mOutputChannel, (mVancEnabled || mWideVanc) ? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
+		mDevice.SetVANCShiftMode (mInputChannel, NTV2_IS_VANCMODE_ON(mVancMode) ? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
+		mDevice.SetVANCShiftMode (mOutputChannel, NTV2_IS_VANCMODE_ON(mVancMode) ? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
 	}
 
 	//	Now that the video is set up, get information about the current frame geometry...
-	mFormatDescriptor = GetFormatDescriptor (::GetNTV2StandardFromVideoFormat (mVideoFormat),
-											mPixelFormat,
-											mVancEnabled,
-											Is2KFormat (mVideoFormat),
-											mWideVanc);
+	mFormatDescriptor = NTV2FormatDescriptor (mVideoFormat, mPixelFormat, mVancMode);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
@@ -332,7 +329,7 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	//  Divide by two to make the buffers the size of a video field (half of a full frame)...
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc) / 2;
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode) / 2;
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable.
 	//	Note that DMA performance can be accelerated slightly by using page-aligned video buffers...

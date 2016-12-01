@@ -5,6 +5,7 @@
 **/
 
 #include "ntv2llburn.h"
+#include "ntv2formatdescriptor.h"
 #include "ajabase/common/types.h"
 #include "ajabase/system/memory.h"
 #include <iostream>
@@ -34,8 +35,7 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 		mVideoFormat			(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat			(inPixelFormat),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
-		mVancEnabled			(false),
-		mWideVanc				(false),
+		mVancMode				(NTV2_VANCMODE_OFF),
 		mAudioSystem			(NTV2_AUDIOSYSTEM_1),
 		mDoMultiChannel			(inDoMultiChannel),
 		mGlobalQuit				(false),
@@ -166,15 +166,8 @@ AJAStatus NTV2LLBurn::Init (void)
 	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mTimecodeIndex))
 		mDevice.SetLTCInputEnable(true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 
-
-	//	This is for the timecode that we will burn onto the image...
-	NTV2FormatDescriptor fd = GetFormatDescriptor (GetNTV2StandardFromVideoFormat (mVideoFormat),
-													mPixelFormat,
-													mVancEnabled,
-													Is2KFormat (mVideoFormat),
-													mWideVanc);
-
 	//	Lastly, prepare my AJATimeCodeBurn instance...
+	const NTV2FormatDescriptor fd (mVideoFormat, mPixelFormat, mVancMode);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), fd.numPixels, fd.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -295,7 +288,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 			mDevice.SetVANCShiftMode (mOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
 		}
 	}	//	if not SD video
-	mDevice.GetEnableVANCData (&mVancEnabled, &mWideVanc);
+	mDevice.GetVANCMode (mVancMode, mInputChannel);
 
 	//	Tell the hardware which buffers to use until the main worker thread runs
 	mDevice.SetInputFrame	(mInputChannel,  0);
@@ -352,7 +345,7 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 
 AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 {
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc);
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
 
 	//	Allocate and add each in-host buffer to my member variables.

@@ -9,6 +9,7 @@
 
 #include "ntv2card.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/types.h"
 #include "ajabase/common/circularbuffer.h"
@@ -168,8 +169,7 @@ class NTV2FieldBurn
 		NTV2FrameBufferFormat		mPixelFormat;		///< @brief	My pixel format
 		NTV2FormatDescriptor		mFormatDescriptor;	///< @brief	Description of the board's frame geometry
 		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	We will restore the previous state
-		bool						mVancEnabled;		///< @brief	VANC enabled?
-		bool						mWideVanc;			///< @brief	Wide VANC?
+		NTV2VANCMode				mVancMode;			///< @brief	VANC mode
 		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
 		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		bool						mDoMultiChannel;	///< @brief	Set the board up for multi-format

@@ -242,8 +242,7 @@ class NTV2CCPlayer
 		NTV2FrameBufferFormat		mPixelFormat;						///< @brief	My pixel format
 		NTV2FrameRate				mFrameRate;							///< @brief	My video frame rate
 		NTV2EveryFrameTaskMode		mSavedTaskMode;						///< @brief	Used to restore the previous state
-		bool						mTallVANC;							///< @brief	Using "tall" VANC frame geometry?
-		bool						mTallerVANC;						///< @brief	Using "taller" VANC frame geometry?
+		NTV2VANCMode				mVancMode;							///< @brief	VANC mode
 
 		bool						mPlayerQuit;						///< @brief	Set "true" to terminate player
 		bool						mCaptionGeneratorQuit;				///< @brief	Set "true" to terminate caption generator(s)

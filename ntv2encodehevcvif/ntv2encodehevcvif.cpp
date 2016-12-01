@@ -8,6 +8,7 @@
 
 #include "ntv2encodehevcvif.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
