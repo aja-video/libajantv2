@@ -20,15 +20,33 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
 {
     QJsonObject pjson = json["parameters"].toObject();
     QString vf =  pjson["VideoFormat"].toString();
-    QString st =  pjson["StreamType"].toString();
-    QString css =  pjson["ChromaSampling"].toString();
-    QString cbs =  pjson["CodeBlockSize"].toString();
     mKonaIPParams.videoFormat = videoFormatMap[vf];
+    std::cout << "VideoFormat    " << vf.toStdString().c_str() << std::endl;
+
+    QString st =  pjson["StreamType"].toString();
     mKonaIPParams.streamType = streamTypeMap[st];
+    std::cout << "StreamType     " << st.toStdString().c_str() << std::endl;
+
+    QString css =  pjson["ChromaSampling"].toString();
     mKonaIPParams.chromaSubSampling = chromaSubSamplingMap[css];
+    std::cout << "ChromaSampling " << css.toStdString().c_str() << std::endl;
+
+    QString cbs =  pjson["CodeBlockSize"].toString();
     mKonaIPParams.codeBlockSize = codeBlockSizeMap[cbs];
-    mKonaIPParams.numBits = pjson["NumBits"].toDouble();
-    mKonaIPParams.Mbps = pjson["Mbps"].toDouble();
+    std::cout << "CodeBlockSize  " << cbs.toStdString().c_str() << std::endl;
+
+    mKonaIPParams.numBits = pjson["NumBits"].toInt();
+    std::cout << "NumBits        " << mKonaIPParams.numBits << std::endl;
+    mKonaIPParams.mbps = pjson["Mbps"].toInt();
+    std::cout << "Mbps           " << mKonaIPParams.mbps << std::endl;
+    mKonaIPParams.programPid = pjson["ProgramPid"].toInt();
+    std::cout << "ProgramPid     " << mKonaIPParams.programPid << std::endl;
+    mKonaIPParams.videoPid = pjson["VideoPid"].toInt();
+    std::cout << "VideoPid       " << mKonaIPParams.videoPid << std::endl;
+    mKonaIPParams.pcrPid = pjson["PcrPid"].toInt();
+    std::cout << "PcrPid         " << mKonaIPParams.pcrPid << std::endl;
+    mKonaIPParams.audio1Pid = pjson["Audio1Pid"].toInt();
+    std::cout << "Audio1Pid      " << mKonaIPParams.audio1Pid << std::endl << std::endl;
     mKonaIPParams.ullMode = false;
     return true;
 }
@@ -57,7 +75,6 @@ void CKonaIpEncoderJsonReader::printVideoFormatMap()
         std::cout << str.toStdString() << std::endl;
     }
 }
-
 
 CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 {
@@ -89,15 +106,16 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     configTs2022.SetJ2KEncodeBitDepth(NTV2_CHANNEL1, pKonaIPParams->numBits);
     configTs2022.SetJ2KEncodeChromaSubsamp(NTV2_CHANNEL1, (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling );
     configTs2022.SetJ2KEncodeCodeBlocksize(NTV2_CHANNEL1, (J2KCodeBlocksize)pKonaIPParams->codeBlockSize);
-    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL1, pKonaIPParams->Mbps);
+    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL1, pKonaIPParams->mbps);
+    configTs2022.SetJ2KEncodePMTPid(NTV2_CHANNEL1, pKonaIPParams->programPid);
+    configTs2022.SetJ2KEncodeVideoPid(NTV2_CHANNEL1, pKonaIPParams->videoPid);
+    configTs2022.SetJ2KEncodePCRPid(NTV2_CHANNEL1, pKonaIPParams->pcrPid);
+    configTs2022.SetJ2KEncodeAudio1Pid(NTV2_CHANNEL1, pKonaIPParams->audio1Pid);
     configTs2022.SetJ2KEncodeStreamType(NTV2_CHANNEL1, (J2KStreamType)pKonaIPParams->streamType);
 
-    // Setup the J2K encoder
+    // Now setup the J2K encoder and TS encapsulator for ch1
     bool rv = configTs2022.SetupJ2KEncoder(NTV2_CHANNEL1);
-
-    // Setup the TS part
     rv = configTs2022.SetupTsForEncode(NTV2_CHANNEL1);
-    std::cerr << "## NOTE:  Device is ready d" << std::endl;
 
     // Same Setup for Channel 2
     configTs2022.SetJ2KEncodeVideoFormat(NTV2_CHANNEL2, pKonaIPParams->videoFormat);
@@ -105,10 +123,14 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     configTs2022.SetJ2KEncodeBitDepth(NTV2_CHANNEL2, pKonaIPParams->numBits);
     configTs2022.SetJ2KEncodeChromaSubsamp(NTV2_CHANNEL2, (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling );
     configTs2022.SetJ2KEncodeCodeBlocksize(NTV2_CHANNEL2, (J2KCodeBlocksize)pKonaIPParams->codeBlockSize);
-    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL2, pKonaIPParams->Mbps);
+    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL2, pKonaIPParams->mbps);
+    configTs2022.SetJ2KEncodePMTPid(NTV2_CHANNEL2, pKonaIPParams->programPid);
+    configTs2022.SetJ2KEncodeVideoPid(NTV2_CHANNEL2, pKonaIPParams->videoPid);
+    configTs2022.SetJ2KEncodePCRPid(NTV2_CHANNEL2, pKonaIPParams->pcrPid);
+    configTs2022.SetJ2KEncodeAudio1Pid(NTV2_CHANNEL2, pKonaIPParams->audio1Pid);
     configTs2022.SetJ2KEncodeStreamType(NTV2_CHANNEL2, (J2KStreamType)pKonaIPParams->streamType);
 
-    // Now setup the J2K encoder
+    // Now setup the J2K encoder and TS encapsulator for ch2
     rv = configTs2022.SetupJ2KEncoder(NTV2_CHANNEL2);
     rv = configTs2022.SetupTsForEncode(NTV2_CHANNEL2);
 

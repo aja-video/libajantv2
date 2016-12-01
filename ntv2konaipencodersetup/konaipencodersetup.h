@@ -15,7 +15,11 @@ typedef  struct {
     uint32_t streamType;
     uint32_t chromaSubSampling;
     uint32_t codeBlockSize;
-    uint32_t Mbps;
+    uint32_t mbps;
+    uint32_t programPid;
+    uint32_t videoPid;
+    uint32_t pcrPid;
+    uint32_t audio1Pid;
     bool ullMode;
 } KonaIPParamSetupStruct;
 
