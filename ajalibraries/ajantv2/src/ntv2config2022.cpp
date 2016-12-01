@@ -421,11 +421,11 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, rxConfig.primaryRxMatch);
 
     // playout delay in 27MHz clocks or 90kHz clocks
-    uint32_t delay = (_is2022_2) ? rxConfig.playoutDelay * 90 : rxConfig.playoutDelay * 27000;
+    uint32_t delay = (_is2022_2) ? (rxConfig.playoutDelay * 90) << 9 : rxConfig.playoutDelay * 27000;
     WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, delay);
 
     // network path differential in 27MHz or 90kHz clocks
-    delay = (_is2022_2) ? rxConfig.networkPathDiff * 90 : rxConfig.networkPathDiff * 27000;
+    delay = (_is2022_2) ? (rxConfig.networkPathDiff * 90) << 9 : rxConfig.networkPathDiff * 27000;
     WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, delay);
 
     // some constants
@@ -537,11 +537,11 @@ bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_c
 
     // playout delay in ms
     ReadChannelRegister(kReg2022_6_rx_playout_delay + baseAddr,  &val);
-    rxConfig.playoutDelay = (_is2022_2) ? val/90 : val/27000;
+    rxConfig.playoutDelay = (_is2022_2) ? (val >>9)/90 : val/27000;
 
     // network path differential in ms
     ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
-    rxConfig.playoutDelay = (_is2022_2) ? val/90 : val/27000;
+    rxConfig.playoutDelay = (_is2022_2) ? (val>>9)/90 : val/27000;
 
     return true;
 }
