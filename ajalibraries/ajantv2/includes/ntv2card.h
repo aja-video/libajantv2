@@ -3941,13 +3941,12 @@ public:
 	///@{
 	/**
 		@brief		Assuming the device has bi-directional SDI connectors, this function determines whether
-					a given SDI channel will behave as an input or an output.
+					a given SDI connector will behave as an input or an output.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the channel to be affected, which must be one of NTV2_CHANNEL1,
-									NTV2_CHANNEL2, NTV2_CHANNEL3, or NTV2_CHANNEL4.
+		@param[in]	inChannel		Specifies the SDI connector to be affected.
 		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
 									If false, specifies it's to be used as an input.
-		@note		After switching a bidirectional SDI spigot from output to input (i.e., inEnable = false),
+		@note		After switching a bidirectional SDI connector from output to input (i.e., inEnable = false),
 					it may take the hardware on the device up to approximately 10 frames to synchronize with
 					the input signal such that the device can accurately report the video format seen at the
 					input.

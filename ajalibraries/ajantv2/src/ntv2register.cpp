@@ -7,6 +7,7 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ntv2registerexpert.h"
 #include "ntv2endian.h"
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"

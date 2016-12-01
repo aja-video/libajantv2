@@ -53,6 +53,9 @@ Clicking on an inspector item in the list replaces the one that was previously s
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
+
+
+
 @subsection	inspectorframebuffer	Frame Buffer Inspector
 
 @image	html	watcher-inspector-framebuffer.png
@@ -148,6 +151,9 @@ Except in its Image view, the raster content display always highlights changed c
 		-	<b>Set Color...</b> -- (<b>Auto</b> mode OFF only) -- Displays a color picker.
 			Choosing a color will set the active lines of the current frame buffer to the chosen color.
 
+
+
+
 @subsection	inspectoraudio		Audio Inspector
 
 @image	html	watcher-inspector-audio.png
@@ -212,6 +218,9 @@ The display highlights changed content with a brighter color.
 			-	<b>Float</b> -- Shows samples as floating point values.
 			-	<b>dB</b> -- Shows samples in decibels.
 
+
+
+
 @subsection	inspectoranc		Ancillary Data Inspector
 
 @image	html	watcher-inspector-anc.png
@@ -246,9 +255,9 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		-	<b>HV</b> -- HANC (H) or VANC (V) area.
 		-	<b>Y/C</b> -- Luma (Y) or chroma (C) data stream.
 		-	<b>Lnk</b> -- The data link (A or B).
-		-	<b>DID</b> -- The DID of the packet. (Right-click, then choose "Name" from the "DID/SDID" menu to see a packet description instead.)
-		-	<b>SDID</b> -- The SDID of the packet.  (Right-click, then choose "Name" from the "DID/SDID" menu to see a packet description instead.)
-		-	<b>Name</b> -- A description of the packet. (Right-click, then choose "Numeric" from the "DID/SDID" menu to see the DID/SDID values instead.)
+		-	<b>DID</b> -- The DID of the packet.
+		-	<b>SDID</b> -- The SDID of the packet.
+		-	<b>Name</b> -- A description of the packet.
 		-	<b>DC</b> -- Data Count of the payload data, in bytes.
 		-	<b>CS</b> -- The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
 		-	<b>Data</b> -- The payload data bytes.
@@ -256,5 +265,22 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
 It reads the entire buffer into host memory and compares it to what was read the last time.
 The display highlights changed content with a brighter color.
+
+
+
+
+@subsection	inspectorac		AutoCirculate Inspector
+
+@image	html	watcher-inspector-ac.png
+
+The AutoCirculate inspector monitors AutoCirculate status for every channel on the device.
+
+The inspector shows the following:
+	-	<b>Streaming Application</b> -- Shows the process ID and four-CC "signature" of the application that called CNTV2Card::SetStreamingApplication.
+	-	<b>AutoCirculate Status</b> -- Formats and displays \c AUTOCIRCULATE_STATUS information pulled from the CNTV2Card::AutoCirculateGetStatus function call for each \c NTV2Channel.
+	-	<b>Timecodes</b> -- This area shows the contents of the \c NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp for each AutoCirculate frame buffer.
+							Use the <b>Timecodes</b> popup menu to control which channel to display (or "Hide" to not display timecodes).
+
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
 
 **/

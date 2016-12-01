@@ -7,6 +7,7 @@
 #include "ntv2testpattern.h"
 //#include "testpatterndata.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2transcode.h"
 #include "ntv2resample.h"
 #include "ntv2devicefeatures.h"

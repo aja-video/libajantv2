@@ -8,26 +8,11 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include <iomanip>
+#include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
 #include <string.h>		//	For memset, et al.
 #include "ntv2rp188.h"
 using namespace std;
-
-
-NTV2_RP188::NTV2_RP188 (const ULWord inDBB, const ULWord inLow, const ULWord inHigh)
-	:	fDBB	(inDBB),
-		fLo		(inLow),
-		fHi		(inHigh)
-{
-}
-
-
-NTV2_RP188::NTV2_RP188 (const RP188_STRUCT & inOldRP188)
-	:	fDBB	(inOldRP188.DBB),
-		fLo		(inOldRP188.Low),
-		fHi		(inOldRP188.High)
-{
-}
 
 
 NTV2SDIInputStatus::NTV2SDIInputStatus ()
@@ -1201,6 +1186,23 @@ NTV2Channel AUTOCIRCULATE_STATUS::GetChannel (void) const
 }
 
 
+struct ThousandsSeparator : std::numpunct <char>
+{
+	virtual inline	char			do_thousands_sep() const	{return ',';}
+	virtual inline	std::string		do_grouping() const			{return "\03";}
+};
+
+
+template <class T> string CommaStr (const T & inNum)
+{
+	ostringstream	oss;
+	const locale	loc	(oss.getloc(), new ThousandsSeparator);
+	oss.imbue (loc);
+	oss << inNum;
+	return oss.str();
+}	//	CommaStr
+
+
 string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 {
 	ostringstream	oss;
@@ -1209,31 +1211,28 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 	else if (!IsStopped())
 		switch (inIndexNum)
 		{
-			case 1:		oss << dec << acStartFrame;					break;
-			case 2:		oss << dec << acEndFrame;					break;
-			case 3:		oss << dec << acActiveFrame;				break;
-			case 4:		oss << dec << acRDTSCStartTime;				break;
-			case 5:		oss << dec << acAudioClockStartTime;		break;
-			case 6:		oss << dec << acRDTSCCurrentTime;			break;
-			case 7:		oss << dec << acAudioClockCurrentTime;		break;
-			case 8:		oss << dec << acFramesProcessed;			break;
-			case 9:		oss << dec << acFramesDropped;				break;
-			case 10:	oss << dec << acBufferLevel;				break;
-			case 11:	if (NTV2_IS_VALID_AUDIO_SYSTEM (acAudioSystem))
-							oss << ::NTV2AudioSystemToString (acAudioSystem, true);
-						else
-							oss << "NoAudio";
-						break;
-			case 12:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_RP188			? "Yes" : "No");	break;
-			case 13:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "Yes" : "No");	break;
-			case 14:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE		? "Yes" : "No");	break;
-			case 15:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? "Yes" : "No");	break;
-			case 16:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
-			case 17:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
-			case 18:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
+			case 1:		oss << dec << acStartFrame;								break;
+			case 2:		oss << dec << acEndFrame;								break;
+			case 3:		oss << dec << acEndFrame - acStartFrame + 1;			break;
+			case 4:		oss << dec << acActiveFrame;							break;
+			case 5:		oss << xHEX0N(acRDTSCStartTime,16);						break;
+			case 6:		oss << xHEX0N(acAudioClockStartTime,16);				break;
+			case 7:		oss << dec << acRDTSCCurrentTime;						break;
+			case 8:		oss << dec << acAudioClockCurrentTime;					break;
+			case 9:		oss << CommaStr (acFramesProcessed);					break;
+			case 10:	oss << CommaStr (acFramesDropped);						break;
+			case 11:	oss << dec << acBufferLevel;							break;
+			case 12:	oss << ::NTV2AudioSystemToString (acAudioSystem, true);	break;
+			case 13:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_RP188			? "Yes" : "No");	break;
+			case 14:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "Yes" : "No");	break;
+			case 15:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE		? "Yes" : "No");	break;
+			case 16:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? "Yes" : "No");	break;
+			case 17:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
+			case 18:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
+			case 19:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
 			default:																						break;
 		}
-	else if (inIndexNum < 19)
+	else if (inIndexNum < 20)
 		oss << "---";
 	return oss.str();
 }
@@ -1331,7 +1330,7 @@ AUTOCIRCULATE_TRANSFER::AUTOCIRCULATE_TRANSFER ()
 		acReserved001				(0),
 		acPeerToPeerFlags			(0),
 		acFrameRepeatCount			(1),
-		acDesiredFrame				(0xFFFFFFFF),
+		acDesiredFrame				(-1),
 		acRP188						(),
 		acCrosspoint				(NTV2CROSSPOINT_INVALID)
 {
@@ -1362,7 +1361,7 @@ AUTOCIRCULATE_TRANSFER::AUTOCIRCULATE_TRANSFER (ULWord * pInVideoBuffer, const U
 		acReserved001				(0),
 		acPeerToPeerFlags			(0),
 		acFrameRepeatCount			(1),
-		acDesiredFrame				(0xFFFFFFFF),
+		acDesiredFrame				(-1),
 		acRP188						(),
 		acCrosspoint				(NTV2CROSSPOINT_INVALID)
 {
