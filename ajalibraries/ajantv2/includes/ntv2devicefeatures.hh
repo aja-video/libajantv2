@@ -506,7 +506,7 @@ AJAExport bool NTV2DeviceHasHEVCM30 (const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceCanDoVITC2 (const NTV2DeviceID inDeviceID);
 
 /**
-	@brief		Returns true of the device support HDMI HDR output
+	@brief		Returns true if the device having the given ID supports HDMI HDR output.
 	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
 **/
 AJAExport bool NTV2DeviceCanDoHDMIHDROut (const NTV2DeviceID inDeviceID);

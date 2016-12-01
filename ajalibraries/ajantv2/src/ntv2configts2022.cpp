@@ -8,6 +8,7 @@
 #include "ntv2endian.h"
 #include "ntv2card.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #include <sstream>
 
 #if defined (AJALinux) || defined (AJAMac)

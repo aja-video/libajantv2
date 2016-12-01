@@ -766,7 +766,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 
 	if ( frameFormat == NTV2_FBF_48BIT_RGB )
 	{
-		divisor = 2;
+		divisor *= 2;
 	}
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)

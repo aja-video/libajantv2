@@ -5,6 +5,7 @@
 #include "ntv2signalrouter.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
+#include "ntv2registerexpert.h"
 #include <memory.h>
 #include <stdio.h>
 #include <assert.h>

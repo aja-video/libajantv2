@@ -7,7 +7,7 @@ NTV2DeviceCanDo3GLevelConversion,Returns true if the device having the given ID 
 NTV2DeviceCanDoRGBLevelAConversion,Returns true if the device having the given ID can do RGB over 3G Level A.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,,-,X,X,X
 NTV2DeviceCanDo425Mux,Returns true if the device having the given ID supports SMPTE 425 mux control.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,X,-,X,X,-,-,-,-
 NTV2DeviceCanDo4KVideo,Returns true if the device having the given ID can handle 4K/UHD video.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,X,X,-,-,-
-NTV2DeviceCanDoAESAudioIn,Returns true if the device having the given ID has at least one AES/EBU audio input.,-,-,-,X,X,X,X,-,X,X,-,-,-,X,X,-,X,X,-,-,X,-,-,-
+NTV2DeviceCanDoAESAudioIn,Returns true if the device having the given ID has at least one AES/EBU audio input.,-,-,-,X,X,X,X,-,X,X,-,-,-,-,-,-,X,X,-,-,X,-,-,-
 NTV2DeviceCanDoAnalogAudio,Returns true if the device having the given ID has at least one analog audio input or output.,-,-,-,X,X,X,X,-,X,X,-,X,-,X,X,-,X,X,-,-,-,-,-,-
 NTV2DeviceCanDoAnalogVideoIn,Returns true if the device having the given ID has at least one analog video input.,-,-,-,X,X,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoAnalogVideoOut,Returns true if the device having the given ID has at least one analog video output.,-,-,-,X,X,X,X,-,X,X,-,X,-,-,-,-,X,X,-,-,-,-,-,-
@@ -76,5 +76,5 @@ NTV2DeviceCanThermostat,Returns true if the fan on the device having the given I
 NTV2DeviceHasHEVCM31,Returns true if the device having the given ID has an HEVC M31 encoder.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,-,-
 NTV2DeviceHasHEVCM30,Returns true if the device having the given ID has an HEVC M30 encoder/decoder.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoVITC2,Returns true if the device having the given ID can insert and/or extract RP-188/VITC2.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X
-NTV2DeviceCanDoHDMIHDROut,Returns true of the device support HDMI HDR output,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,X,X,X
+NTV2DeviceCanDoHDMIHDROut,Returns true if the device having the given ID supports HDMI HDR output.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,X,X,X
 NTV2DeviceCanDoJ2K,Returns true if the device supports the JPEG 2000 codec,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X

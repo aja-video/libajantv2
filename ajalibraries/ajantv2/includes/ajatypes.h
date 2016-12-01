@@ -7,6 +7,17 @@
 #ifndef AJATYPES_H
 #define AJATYPES_H
 
+//#define	NTV2_USE_STDINT
+#define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
+#define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
+#define	NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
+#undef	NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
+#define	NTV2_DEPRECATED_12_7		//	Future 12.7 __declspec(deprecated)
+#define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
+
+#define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
+
+
 #if defined (NTV2_USE_STDINT)
 	#include <stdint.h>
 	typedef int16_t					LWord;
@@ -25,16 +36,6 @@
 	typedef unsigned char  			UByte;
 	typedef char           			SByte;
 #endif
-
-#define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-#define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-#define	NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-#undef	NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-#define	NTV2_DEPRECATED_12_7		//	Future 12.7 __declspec(deprecated)
-#define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
-
-#define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
-
 
 // Platform dependent
 
