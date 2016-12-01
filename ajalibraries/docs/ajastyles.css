@@ -1,0 +1,46 @@
+/* ajastyles.css  --- Overrides some default doxygen styles */
+
+span.keyword {
+	color: #0000FF
+}
+
+span.keywordtype {
+	color: #0000FF
+}
+
+span.keywordflow {
+	color: #0000FF
+}
+
+span.comment {
+	color: #009900;
+	font-style: italic
+}
+
+span.preprocessor {
+	color: #0000FF
+}
+
+span.stringliteral {
+	color: #800000
+}
+
+span.charliteral {
+	color: #800000
+}
+
+span.vhdldigit { 
+	color: #ff00ff 
+}
+
+span.vhdlchar { 
+	color: #000000 
+}
+
+span.vhdlkeyword { 
+	color: #700070 
+}
+
+span.vhdllogic { 
+	color: #ff0000 
+}
