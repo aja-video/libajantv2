@@ -68,6 +68,10 @@
 		B40806741A3776A5002C35ED /* ntv2devicescanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B408066D1A3776A5002C35ED /* ntv2devicescanner.cpp */; };
 		B40806751A3776A5002C35ED /* ntv2devicescanner.h in Headers */ = {isa = PBXBuildFile; fileRef = B408066E1A3776A5002C35ED /* ntv2devicescanner.h */; };
 		B40806761A3776A5002C35ED /* ntv2devicescanner.h in Headers */ = {isa = PBXBuildFile; fileRef = B408066E1A3776A5002C35ED /* ntv2devicescanner.h */; };
+		B411E9411DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */; };
+		B411E9421DDBD9FF00B9E206 /* ntv2registerexpert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B411E9401DDBD9FF00B9E206 /* ntv2registerexpert.cpp */; };
+		B411E9431DDBDA0900B9E206 /* ntv2formatdescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */; };
+		B411E9441DDBDA0900B9E206 /* ntv2registerexpert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B411E9401DDBD9FF00B9E206 /* ntv2registerexpert.cpp */; };
 		B4146ABB1CE0F43800FDF78D /* ntv2tshelper.h in Headers */ = {isa = PBXBuildFile; fileRef = B4146AB81CE0F43700FDF78D /* ntv2tshelper.h */; };
 		B4146ABC1CE0F43800FDF78D /* ntv2tshelper.h in Headers */ = {isa = PBXBuildFile; fileRef = B4146AB81CE0F43700FDF78D /* ntv2tshelper.h */; };
 		B41B5E1B16E5330C00A9E0DC /* ajaexport.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DB416E5330C00A9E0DC /* ajaexport.h */; };
@@ -258,6 +262,10 @@
 		B408066D1A3776A5002C35ED /* ntv2devicescanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2devicescanner.cpp; path = ../src/ntv2devicescanner.cpp; sourceTree = SOURCE_ROOT; };
 		B408066E1A3776A5002C35ED /* ntv2devicescanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2devicescanner.h; path = ../includes/ntv2devicescanner.h; sourceTree = SOURCE_ROOT; };
 		B40DB00C1ACDC69D007697DF /* fixed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fixed.h; sourceTree = "<group>"; };
+		B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2formatdescriptor.h; path = ../includes/ntv2formatdescriptor.h; sourceTree = SOURCE_ROOT; };
+		B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2registerexpert.h; path = ../includes/ntv2registerexpert.h; sourceTree = SOURCE_ROOT; };
+		B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2formatdescriptor.cpp; path = ../src/ntv2formatdescriptor.cpp; sourceTree = SOURCE_ROOT; };
+		B411E9401DDBD9FF00B9E206 /* ntv2registerexpert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2registerexpert.cpp; path = ../src/ntv2registerexpert.cpp; sourceTree = SOURCE_ROOT; };
 		B4146AB81CE0F43700FDF78D /* ntv2tshelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2tshelper.h; path = ../includes/ntv2tshelper.h; sourceTree = SOURCE_ROOT; };
 		B41B5DB416E5330C00A9E0DC /* ajaexport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ajaexport.h; path = ../includes/ajaexport.h; sourceTree = SOURCE_ROOT; };
 		B41B5DB516E5330C00A9E0DC /* basemachinecontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basemachinecontrol.h; path = ../includes/basemachinecontrol.h; sourceTree = SOURCE_ROOT; };
@@ -419,6 +427,7 @@
 				B41B5DD416E5330C00A9E0DC /* ntv2driverinterface.cpp */,
 				B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */,
 				B41B5DDA16E5330C00A9E0DC /* ntv2fltknetprefs.cpp */,
+				B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */,
 				B480B6431C6291E1003210EE /* ntv2hevc.cpp */,
 				B41B5DDE16E5330C00A9E0DC /* ntv2interrupts.cpp */,
 				B40064E41CC9409400389528 /* ntv2konaflashprogram.cpp */,
@@ -430,6 +439,7 @@
 				B41B5DEA16E5330C00A9E0DC /* ntv2procamp.cpp */,
 				B407BBA51D2583FF00099DDA /* ntv2publicinterface.cpp */,
 				B41B5DEC16E5330C00A9E0DC /* ntv2register.cpp */,
+				B411E9401DDBD9FF00B9E206 /* ntv2registerexpert.cpp */,
 				B4CC230F1C5AE48A00171CB6 /* ntv2resample.cpp */,
 				B41B5DED16E5330C00A9E0DC /* ntv2rp188.cpp */,
 				B41B5DEF16E5330C00A9E0DC /* ntv2rp215.cpp */,
@@ -481,6 +491,7 @@
 				B4ACCA8F1C47226D00655C50 /* ntv2enhancedcsc.h */,
 				B42AA904182AA42500E0584A /* ntv2enums.h */,
 				B41B5DDB16E5330C00A9E0DC /* ntv2fltknetprefs.h */,
+				B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */,
 				B40064E51CC9409400389528 /* ntv2konaflashprogram.h */,
 				A49A335D1C7252FD0082D491 /* ntv2mailbox.h */,
 				A49A335F1C7252FD0082D491 /* ntv2mbcontroller.h */,
@@ -490,6 +501,7 @@
 				B41B5DE516E5330C00A9E0DC /* ntv2nubtypes.h */,
 				B41B5DEB16E5330C00A9E0DC /* ntv2procamp.h */,
 				B42AA906182AA42500E0584A /* ntv2publicinterface.h */,
+				B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */,
 				B40064DD1CC9401000389528 /* ntv2registers2022.h */,
 				B4CC23101C5AE48A00171CB6 /* ntv2resample.h */,
 				B41B5DEE16E5330C00A9E0DC /* ntv2rp188.h */,
@@ -747,6 +759,7 @@
 				B40064E71CC9409400389528 /* ntv2konaflashprogram.cpp in Sources */,
 				B4CC23151C5AE48A00171CB6 /* ntv2resample.cpp in Sources */,
 				B4CE1E2016E582A10092B564 /* ntv2rp188.cpp in Sources */,
+				B411E9431DDBDA0900B9E206 /* ntv2formatdescriptor.cpp in Sources */,
 				B4ACCA971C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
 				B4CE1E2116E582A10092B564 /* ntv2rp215.cpp in Sources */,
 				B4CE1E2216E582A10092B564 /* ntv2status.cpp in Sources */,
@@ -769,6 +782,7 @@
 				B4CE1E3316E582A10092B564 /* xena2vidproc.cpp in Sources */,
 				B4CE1E3416E582A10092B564 /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1E3516E582A10092B564 /* ntv2macdriverinterface.cpp in Sources */,
+				B411E9441DDBDA0900B9E206 /* ntv2registerexpert.cpp in Sources */,
 				A49A33611C7252FD0082D491 /* ntv2mailbox.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -799,6 +813,7 @@
 				B40064E61CC9409400389528 /* ntv2konaflashprogram.cpp in Sources */,
 				B4CC23141C5AE48A00171CB6 /* ntv2resample.cpp in Sources */,
 				B41B5E5416E5330C00A9E0DC /* ntv2rp188.cpp in Sources */,
+				B411E9411DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp in Sources */,
 				B4ACCA961C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
 				B41B5E5616E5330C00A9E0DC /* ntv2rp215.cpp in Sources */,
 				B41B5E5816E5330C00A9E0DC /* ntv2status.cpp in Sources */,
@@ -821,6 +836,7 @@
 				B41B5E7E16E5330C00A9E0DC /* xena2vidproc.cpp in Sources */,
 				B41B5E8016E5330C00A9E0DC /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1CE616E53B560092B564 /* ntv2macdriverinterface.cpp in Sources */,
+				B411E9421DDBD9FF00B9E206 /* ntv2registerexpert.cpp in Sources */,
 				A49A33601C7252FD0082D491 /* ntv2mailbox.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

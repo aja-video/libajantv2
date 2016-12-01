@@ -4075,16 +4075,16 @@ typedef struct
 
 typedef enum _AutoCircCommand_
 {
-	eInitAutoCirc, 
-	eStartAutoCirc, 
-	eStopAutoCirc, 
-	ePauseAutoCirc, 
+	eInitAutoCirc,
+	eStartAutoCirc,
+	eStopAutoCirc,
+	ePauseAutoCirc,
 	eGetAutoCirc,
-	eGetFrameStamp, 
-	eFlushAutoCirculate, 
+	eGetFrameStamp,
+	eFlushAutoCirculate,
 	ePrerollAutoCirculate,
-	eTransferAutoCirculate, 
-	eAbortAutoCirc , 
+	eTransferAutoCirculate,
+	eAbortAutoCirc,
 	eStartAutoCircAtTime,
 	eTransferAutoCirculateEx,
 	eTransferAutoCirculateEx2,
@@ -4093,7 +4093,7 @@ typedef enum _AutoCircCommand_
 	eSetActiveFrame,
 	AUTO_CIRC_NUM_COMMANDS,
 	AUTO_CIRC_COMMAND_INVALID	= AUTO_CIRC_NUM_COMMANDS
-} AUTO_CIRC_COMMAND;
+} NTV2AutoCirculateCommand,	NTV2AutoCircCmd, AUTO_CIRC_COMMAND;
 
 
 /**
@@ -5144,7 +5144,7 @@ typedef enum
 
 
 		//	NTV2_POINTER FLAGS
-		#define	NTV2_POINTER_ALLOCATED			BIT(0)			///< @brief	Allocated using Allocate function?
+		#define	NTV2_POINTER_ALLOCATED				BIT(0)		///< @brief	Allocated using Allocate function?
 
 
 		//	AUTOCIRCULATE OPTION FLAGS
@@ -5180,6 +5180,21 @@ typedef enum
 				#define	NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
 				#define	NTV2_ASSERT_STRUCT_VALID
 			#endif
+
+			#define	HEX(__x__)				std::hex << std::uppercase << (__x__) << std::dec << std::nouppercase
+			#define	xHEX(__x__)				"0x" << HEX(__x__)
+			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << (__x__) << std::dec << std::nouppercase
+			#define	xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
+			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
+			#define	xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
+			#define	DEC(__x__)				std::dec << (__x__)
+			#define	DECN(__x__,__n__)		std::dec << std::setw(__n__) << (__x__)
+			#define	DEC0N(__x__,__n__)		std::dec << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	bBIN032(__x__)			"b"	<< std::bitset<8>(((__x__)&0xFF000000)>>24) << "."		\
+												<< std::bitset<8>(((__x__)&0x00FF0000)>>16) << "."		\
+												<< std::bitset<8>(((__x__)&0x0000FF00)>>8) << "."		\
+												<< std::bitset<8>( (__x__)&0x000000FF)
 		#else
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
 			#define	NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
@@ -5499,13 +5514,13 @@ typedef enum
 					@param[in]	inHigh	Specifies the "high" field, which contains hours and minutes.
 					@note	If no parameters are specified, a default "invalid" structure is created.
 				**/
-				explicit			NTV2_RP188 (const ULWord inDBB = 0xFFFFFFFF, const ULWord inLow = 0xFFFFFFFF, const ULWord inHigh = 0xFFFFFFFF);
+				inline explicit		NTV2_RP188 (const ULWord inDBB = 0xFFFFFFFF, const ULWord inLow = 0xFFFFFFFF, const ULWord inHigh = 0xFFFFFFFF)	:	fDBB (inDBB), fLo (inLow), fHi (inHigh)	{}
 
 				/**
 					@brief	Constructs an NTV2_RP188 from the given RP188_STRUCT.
 					@param[in]	inOldRP188	Specifies the RP188_STRUCT to copy.
 				**/
-				explicit			NTV2_RP188 (const RP188_STRUCT & inOldRP188);
+				inline explicit		NTV2_RP188 (const RP188_STRUCT & inOldRP188)	:	fDBB (inOldRP188.DBB), fLo (inOldRP188.Low), fHi (inOldRP188.High)	{}
 
 				/**
 					@brief	Answers true if I'm valid, or false if I'm not valid.
@@ -5518,6 +5533,12 @@ typedef enum
 					@return		A non-constant reference to myself.
 				**/
 				inline NTV2_RP188 &	operator = (const RP188_STRUCT & inRHS)			{fDBB = inRHS.DBB;  fLo = inRHS.Low;  fHi = inRHS.High;  return *this;}
+
+				/**
+					@param[in]	inRHS	The RP188_STRUCT to compare with me.
+					@return		True if the right-hand-size argument is not equal to me.
+				**/
+				inline bool			operator != (const RP188_STRUCT & inRHS) const	{return fDBB != inRHS.DBB  ||  fLo != inRHS.Low  ||  fHi != inRHS.High;}
 
 				/**
 					@brief	Sets my fields from the given DBB, low and high ULWord components.
@@ -5835,7 +5856,7 @@ typedef enum
 				/**
 					@return		The number of frames being auto-circulated.
 				**/
-				inline ULWord			GetFrameCount (void) const							{return acEndFrame >= acStartFrame ? ULWord (acEndFrame - acStartFrame + 1) : 0;}
+				inline ULWord			GetFrameCount (void) const							{return IsStopped() ? 0 : ULWord (acEndFrame - acStartFrame + 1);}
 
 				/**
 					@return		The total number of frames dropped since AutoCirculateStart called.
@@ -5871,6 +5892,16 @@ typedef enum
 					@return		The current active frame number.
 				**/
 				inline LWord			GetActiveFrame (void) const							{return acActiveFrame;}
+
+				/**
+					@return		The first frame number.
+				**/
+				inline uint16_t			GetStartFrame (void) const							{return uint16_t(acStartFrame);}
+
+				/**
+					@return		The last frame number.
+				**/
+				inline uint16_t			GetEndFrame (void) const							{return uint16_t(acEndFrame);}
 
 				/**
 					@return		My current state.

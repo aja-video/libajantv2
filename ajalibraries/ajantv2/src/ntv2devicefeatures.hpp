@@ -3644,8 +3644,6 @@ bool NTV2DeviceCanDoAESAudioIn (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_KONA3G:
 		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
 		case DEVICE_ID_KONA4:
 		case DEVICE_ID_KONA4UFC:
 		case DEVICE_ID_CORVIDHBR:
@@ -5590,7 +5588,7 @@ bool NTV2DeviceCanDoVITC2 (const NTV2DeviceID inDeviceID)
 
 /**
 	NTV2DeviceCanDoHDMIHDROut
-	Returns true of the device support HDMI HDR output
+	Returns true if the device having the given ID supports HDMI HDR output.
 **/
 bool NTV2DeviceCanDoHDMIHDROut (const NTV2DeviceID inDeviceID)
 {
@@ -6204,7 +6202,7 @@ UWord NTV2DeviceGetNumAESAudioInputChannels (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONA4UFC:	return 16;
 		case DEVICE_ID_CORVID44:	return 0;
 		case DEVICE_ID_CORVIDHEVC:	return 0;
-		case DEVICE_ID_CORVIDHBR:	return 0;
+		case DEVICE_ID_CORVIDHBR:	return 2;
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return 0;
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return 0;
 		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	return 0;

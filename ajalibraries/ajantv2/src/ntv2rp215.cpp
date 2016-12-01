@@ -7,6 +7,7 @@
 #include "ntv2rp215.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
+#include "ntv2formatdescriptor.h"
 #ifndef MSWindows
 	using namespace std;
 #endif
