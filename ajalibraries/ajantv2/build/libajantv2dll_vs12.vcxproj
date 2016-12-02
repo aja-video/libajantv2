@@ -242,7 +242,10 @@
     <ClCompile Include="..\src\ntv2procamp.cpp" />
     <ClCompile Include="..\src\ntv2publicinterface.cpp" />
     <ClCompile Include="..\src\ntv2register.cpp" />
-    <ClCompile Include="..\src\ntv2registerexpert.cpp" />
+    <ClCompile Include="..\src\ntv2registerexpert.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2resample.cpp" />
     <ClCompile Include="..\src\ntv2rp188.cpp" />
     <ClCompile Include="..\src\ntv2rp215.cpp" />
@@ -254,8 +257,8 @@
     <ClCompile Include="..\src\ntv2transcode.cpp" />
     <ClCompile Include="..\src\ntv2utf8.cpp" />
     <ClCompile Include="..\src\ntv2utils.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
     <ClCompile Include="..\src\ntv2vidproc.cpp" />
     <ClCompile Include="..\src\ntv2vpid.cpp" />
