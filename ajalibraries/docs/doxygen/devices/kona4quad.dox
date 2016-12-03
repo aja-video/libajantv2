@@ -20,7 +20,7 @@ be configured as inputs or outputs under software control.
 @par	Inputs & Outputs
 
 -	4 x SDI bi-directional (under software control)
--	1 x HDMI 2.0 output
+-	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR and UHD/4K@60 4:2:0 YUV)
 -	1 x analog component video output
 -	2 x reference/LTC inputs
 -	2 x LTC outputs

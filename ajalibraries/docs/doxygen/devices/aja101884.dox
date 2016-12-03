@@ -10,7 +10,7 @@
 
 	<table>
 		<caption id="pinmap">Pin Map</caption>
-		<tr><td><th>Pin (LFH-60)</b>	<th>Function		<th>Pin, Connector
+		<tr><td><th>Pin (LFH-60)	<th>Function		<th>Pin, Connector
 		<tr><td><b>1</b>			<td>GND				<td>shield, BNC3
 		<tr><td><b>2</b>			<td>Y/G/CVBS Out	<td>center conductor, BNC3
 		<tr><td><b>3</b>			<td>GND				<td>shield, BNC2
