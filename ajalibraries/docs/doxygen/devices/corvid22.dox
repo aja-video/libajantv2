@@ -53,6 +53,18 @@
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/130/25>
 
+	@par	Physical
+
+	-	Size (W x D x H):  0.708" x 6.57" x 3.86" (18mm × 167mm × 98mm)
+	-	Power: 12w (typ), 15w (max)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+
 	@par		Additional Topics
 
 	@subpage	aja102953

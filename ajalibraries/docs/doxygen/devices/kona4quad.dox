@@ -46,22 +46,35 @@ be configured as inputs or outputs under software control.
 
 @note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-@par		Ancillary Data
+@par	Ancillary Data
 
 -	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
 -	VANC geometries
 
-@par		Video Processing
+@par	Video Processing
 
 -	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
 -	Can mix keys on and off
 -	Can differentiate between shaped and unshaped video
 
-@par		External Connectivity
+@par	External Connectivity
 
 -	Optional \ref aja103226 provides access to other inputs and outputs
 -	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
 
-@par		Firmware
+@par	Firmware
 <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
+
+@par	Physical
+
+-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+-	Weight: 0.7 lb (0.4 kg)
+
+@par	Environment
+
+-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+-	Operating Relative Humidity: 10-90% non-condensing
+-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+
 **/

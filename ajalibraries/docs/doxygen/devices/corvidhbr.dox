@@ -43,4 +43,18 @@
 	@par		Firmware
 
 	(Coming Soon)
+
+	@par	Physical
+
+	-	Size, without bracket (W x D x H):  0.7" x 6.7" x 2.7" (18mm × 170mm × 69mm)
+	-	Bracket is standard full-height PCIe card size
+	-	Conforms to PCIe Card Electromechanical Specification Rev 1.0A low-profile add-in card
+	-	Power: 10-20V, 10W (typical, card only), 16W (typical, when powering RovoCam), 18W (max)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 **/

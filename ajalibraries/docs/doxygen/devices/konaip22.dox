@@ -46,23 +46,36 @@ It's a flexible platform that can support, via future firmware upgrades, J2K (JP
 
 @note	4 x hardware color-space converters (CSC widgets) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-@par		Ancillary Data
+@par	Ancillary Data
 
 -	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
 -	VANC geometries
 
-@par		Video Processing
+@par	Video Processing
 
 -	2 x independent Mixer/Keyer widgets, each with its own Mix Coefficient
 -	Can mix keys on and off
 -	Can differentiate between shaped and unshaped video
 -	4 x 2D LUTs
 
-@par		Configuration
+@par	Configuration
 
 -	The \ref ntv2konaipjsonsetup demo application shows how to software-configure the SFPs.
 -	Note that the KONA IP has a MicroBlaze processor that must be booted when power is applied to the board,
 	so it won't respond to configuration changes for a minute or two. To detect when the MicroBlaze is running,
 	and thus when the SFPs can be configured, poll the uptime register (0x40004) until it starts incrementing.
+
+@par	Physical
+
+-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+-	Weight: 0.7 lb (0.4 kg)
+-	Power:  25W (typ), 27W (max)
+
+@par	Environment
+
+-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+-	Operating Relative Humidity: 10-90% non-condensing
+-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
 **/
