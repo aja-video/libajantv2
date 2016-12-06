@@ -126,7 +126,7 @@ Code could be added to modify these codec parameters before processing starts to
 Encode HEVC uses a simple threading model to move the captured SDI video from the NTV2 frame buffer to system buffers,
 the HEVC codec, and finally the output file.  The threads move data to and from the HEVC board using DMA.
 
-The video input thread uses CNTV2Card::TransferWithAutoCirculate to move each captured video frame from the FPGA
+The video input thread uses CNTV2Card::AutoCirculateTransfer to move each captured video frame from the FPGA
 frame buffer to the video input system memory ring.
 
 The video process thread represents some arbitrary video processing controlled by the application.

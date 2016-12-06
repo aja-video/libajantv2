@@ -374,16 +374,16 @@ The biggest changes you'll notice are as follows:
 
 @subsubsection	gs-newacapis	New AutoCirculate APIs
 
-The 12.3 SDK introduced new AutoCirculate APIs that will eventually replace the originals.
--	CNTV2Card::AutoCirculateInitForInput (replaces CNTV2Card::InitAutoCirculate)
--	CNTV2Card::AutoCirculateInitForOutput (replaces CNTV2Card::InitAutoCirculate)
--	CNTV2Card::AutoCirculateTransfer (replaces CNTV2Card::TransferWithAutoCirculate, CNTV2Card::TransferWithAutoCirculateEx, CNTV2Card::TransferWithAutoCirculateEx2 and CNTV2Card::SetAutoCirculateCaptureTask)
--	CNTV2Card::AutoCirculatePause and CNTV2Card::AutoCirculateResume (replace CNTV2Card::PauseAutoCirculate)
--	CNTV2Card::AutoCirculateStart (replaces CNTV2Card::StartAutoCirculate)
--	CNTV2Card::AutoCirculateStop (replaces CNTV2Card::StopAutoCirculate and CNTV2Card::AbortAutoCirculate)
+The 12.3 SDK introduced new AutoCirculate APIs to replace the originals:
+-	CNTV2Card::AutoCirculateInitForInput (replaced CNTV2Card::InitAutoCirculate)
+-	CNTV2Card::AutoCirculateInitForOutput (replaced CNTV2Card::InitAutoCirculate)
+-	CNTV2Card::AutoCirculateTransfer (replaced CNTV2Card::TransferWithAutoCirculate, CNTV2Card::TransferWithAutoCirculateEx, CNTV2Card::TransferWithAutoCirculateEx2 and CNTV2Card::SetAutoCirculateCaptureTask)
+-	CNTV2Card::AutoCirculatePause and CNTV2Card::AutoCirculateResume (replaced CNTV2Card::PauseAutoCirculate)
+-	CNTV2Card::AutoCirculateStart (replaced CNTV2Card::StartAutoCirculate)
+-	CNTV2Card::AutoCirculateStop (replaced CNTV2Card::StopAutoCirculate and CNTV2Card::AbortAutoCirculate)
 -	...etc...
 
-You must code to these new APIs to use the Ancillary data insertion/extraction feature.
+You must code to these new APIs to use the firmware Ancillary data insertion/extraction feature.
 The new APIs also eliminate old hacks introduced long ago, such as <b>NTV2Tasks</b>, size limits on register changes, etc.
 These are now much more easily accomplished using simple, high-level C++ STL constructs.
 
