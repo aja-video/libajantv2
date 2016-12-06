@@ -5,6 +5,10 @@
         "StreamType":"Standard",
         "ChromaSampling":"422 standard",
         "CodeBlockSize":"32x32",
-        "Mbps":200
+        "Mbps":100,
+        "ProgramPid":256,
+        "VideoPid":257,
+        "PcrPid":258,
+        "Audio1Pid":259
     }
 }
