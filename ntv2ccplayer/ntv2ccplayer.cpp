@@ -32,8 +32,8 @@ using namespace std;
 
 
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
-static const NTV2VANCMode	kDefaultVANCMode		(NTV2_VANCMODE_TALL);		//	Used only with VANC
-static const uint32_t	kAppSignature	(AJA_FOURCC ('C','C','P','L'));
+static const NTV2VANCMode	kDefaultVANCMode	(NTV2_VANCMODE_TALL);		//	Used only with VANC
+static const uint32_t		kAppSignature		(AJA_FOURCC ('C','C','P','L'));
 
 
 /**
@@ -109,7 +109,9 @@ static const string gBuiltInCaptions ("IN CONGRESS, July 4, 1776.\n"
 	@brief	The global built-in caption data input stream.
 **/
 static istringstream	gBuiltInStream (gBuiltInCaptions);
-
+static AJALock			gLogLock;	//	Prevent interleaving cerr messages from multiple threads
+#define	LOGLOCKSTART	{AJAAutoLock _tmplock(&gLogLock);
+#define	LOGLOCKEND		}
 
 #if defined (MEASURE_ACCURACY)
 
@@ -126,7 +128,8 @@ static istringstream	gBuiltInStream (gBuiltInCaptions);
 											Defaults to 20.
 			**/
 			Speedometer (const size_t inNumSamples = 20)
-				:	mMaxNumSamples	(inNumSamples)
+				:	mMaxNumSamples		(inNumSamples),
+					mSampleCallTally	(0)
 			{
 				mTimespanSamples.push_back (10);	//	Initial seed of 10 millisec
 				mWhenLastSampleCall = AJATime::GetSystemMilliseconds ();
@@ -143,10 +146,11 @@ static istringstream	gBuiltInStream (gBuiltInCaptions);
 				const uint64_t	now	(AJATime::GetSystemMilliseconds ());
 				mTimespanSamples.push_back (now - mWhenLastSampleCall);
 				mWhenLastSampleCall = now;
+				mSampleCallTally++;
 			}
 
 			/**
-				@brief	Returns the average time between Sample calls, in milliseconds.
+				@return	The average time between Sample calls, in milliseconds.
 			**/
 			virtual double	GetAvgMilliSecsBetweenSamples (void) const
 			{
@@ -157,7 +161,7 @@ static istringstream	gBuiltInStream (gBuiltInCaptions);
 			}
 
 			/**
-				@brief	Returns the average number of Sample calls per second.
+				@return	The average number of Sample calls per second.
 			**/
 			virtual double	GetAvgSamplesPerSecond (void) const
 			{
@@ -167,23 +171,18 @@ static istringstream	gBuiltInStream (gBuiltInCaptions);
 				return double (mTimespanSamples.size ()) * 1000.0 / double (sum);
 			}
 
-			/**
-				@brief	Returns the average number of Sample calls per minute.
-			**/
-			virtual inline double	GetAvgSamplesPerMinute (void) const		{return GetAvgSamplesPerSecond () * 60.0;}
-
-			/**
-				@brief	Returns the number of measurements currently in my queue.
-			**/
-			virtual inline size_t	GetSampleCount (void) const				{return mTimespanSamples.size ();}
+			virtual inline double	GetAvgSamplesPerMinute (void) const		{return GetAvgSamplesPerSecond () * 60.0;}	///< @return	The average number of Sample calls per minute.
+			virtual inline size_t	GetSampleCount (void) const				{return mTimespanSamples.size ();}			///< @return	The number of measurements currently in my queue.
+			virtual inline uint64_t	GetSampleCountTally (void) const		{return mSampleCallTally;}					///< @return	The number of times Sample was called.
 
 		private:
 			typedef std::deque <uint64_t>		SampleQueue;
 			typedef	SampleQueue::const_iterator	SampleQueueConstIter;
 
-			SampleQueue		mTimespanSamples;		///	My queue of timespan samples
-			const size_t	mMaxNumSamples;			///	My maximum queue size
-			uint64_t		mWhenLastSampleCall;	///	The last time Sample was called
+			SampleQueue		mTimespanSamples;		///< @brief	Queue of timespan samples
+			const size_t	mMaxNumSamples;			///< @brief	Stipulates my maximum queue size
+			uint64_t		mWhenLastSampleCall;	///< @brief	When Sample method was last called
+			uint64_t		mSampleCallTally;		///< @brief	Tally of number of times Sample method was called
 
 	};	//	Speedometer
 
@@ -247,7 +246,8 @@ class CaptionSource
 				mFinished			(false),
 				mDeleteInputStream	(inDeleteInputStream),
 				mIsTextMode			(false),
-				mMilliSecsPerChar	(0.0)
+				mMilliSecsPerChar	(0.0),
+				mCaptionChannel		(NTV2_CC608_ChannelInvalid)
 		{
 			NTV2_ASSERT (mpInputStream);							//	Must be non-NULL pointer
 			NTV2_ASSERT (mCharsPerMinute > 0.0);					//	Must be greater than zero
@@ -268,7 +268,10 @@ class CaptionSource
 				mpInputStream = NULL;
 			}
 			#if defined (MEASURE_ACCURACY)
-				cerr << "## DEBUG:  Final chars: " << mCharSpeed << endl;
+				LOGLOCKSTART
+					cerr	<< "## DEBUG:  CaptionSource::~CaptionSource:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+							<< ": " << mCharSpeed.GetSampleCountTally() << " final chars: " << mCharSpeed << endl;
+				LOGLOCKEND
 			#endif	//	MEASURE_ACCURACY
 		}
 
@@ -296,11 +299,18 @@ class CaptionSource
 					resultChar = string (1, rawBytes [0]);
 			}
 			else if (rawBytes [0] < 0xC0)	//	invalid
-				cerr << "## WARNING:  GetNextCaptionCharacter:  Invalid UTF8 byte value read from input stream:  0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+				LOGLOCKSTART
+					cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+							<< ": Invalid UTF8 value read from input stream:  "
+							<< "0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+				LOGLOCKEND
 			else if (rawBytes [0] < 0xE0)	//	2-byte code
 			{
 				if (IsFinished ())
-					cerr << "## WARNING:  GetNextCaptionCharacter:  EOF on input stream before reading byte 2 of 2-byte UTF8 character" << endl;
+					LOGLOCKSTART
+						cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+								<< ": EOF on input stream before reading byte 2 of 2-byte UTF8 character" << endl;
+					LOGLOCKEND
 				else
 				{
 					resultChar = string (1, rawBytes [0]);
@@ -318,7 +328,10 @@ class CaptionSource
 				{
 					if (IsFinished ())
 					{
-						cerr << "## WARNING:  GetNextCaptionCharacter:  EOF on input stream before reading byte " << (ndx + 1) << " of 3-byte UTF8 character" << endl;
+						LOGLOCKSTART
+							cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+									<< ": EOF on input stream before reading byte " << (ndx + 1) << " of 3-byte UTF8 character" << endl;
+						LOGLOCKEND
 						resultChar = "";
 						break;
 					}
@@ -336,7 +349,10 @@ class CaptionSource
 				{
 					if (IsFinished ())
 					{
-						cerr << "## WARNING:  GetNextCaptionCharacter:  EOF on input stream before reading byte " << (ndx + 1) << " of 4-byte UTF8 character" << endl;
+						LOGLOCKSTART
+							cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+									<< "; EOF on input stream before reading byte " << (ndx + 1) << " of 4-byte UTF8 character" << endl;
+						LOGLOCKEND
 						resultChar = "";
 						break;
 					}
@@ -348,7 +364,10 @@ class CaptionSource
 				if (!IsFinished ())	NTV2_ASSERT (resultChar.length () == 4);
 			}
 			else
-				cerr << "## WARNING:  GetNextCaptionCharacter:  UTF8 byte value not handled:  0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+				LOGLOCKSTART
+					cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+							<< ": UTF8 byte value not handled:  0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+				LOGLOCKEND
 
 			#if defined (MEASURE_ACCURACY)
 				if (!resultChar.empty ())
@@ -359,10 +378,14 @@ class CaptionSource
 					//	Once per second, see how far off I am from the target character rate, and adjust the sleep time as needed...
 					const double	avg		(mCharSpeed.GetAvgMilliSecsBetweenSamples ());
 					const double	diff	(avg - mMilliSecsPerChar);
-					milliSecsPerChar -= diff;
+					milliSecsPerChar = milliSecsPerChar - diff;
 					if (milliSecsPerChar < 0.0)
 						milliSecsPerChar = mMilliSecsPerChar;
-					cerr << "## DEBUG:  chars: " << mCharSpeed << "     " << milliSecsPerChar << "    " << avg << " - " << mMilliSecsPerChar << " = " << diff << "diff" << endl;
+					LOGLOCKSTART
+						cerr	<< "## DEBUG:  " << mCharSpeed.GetSampleCountTally() << " " << ::NTV2Line21ChannelToStr(mCaptionChannel)
+								<< " chars:  " << mCharSpeed << "     " << milliSecsPerChar << "ms/Char    " << avg << "avg - "
+								<< mMilliSecsPerChar << " => " << diff << "diff" << endl;
+					LOGLOCKEND
 					gWhenLastDisplay = AJATime::GetSystemMilliseconds ();
 				}
 			#endif	//	MEASURE_ACCURACY
@@ -503,9 +526,9 @@ class CaptionSource
 		}	//	GetNextCaptionRow
 
 
-		virtual bool IsFinished (void) const	{return mFinished;}		///< @brief	Returns true if I'm finished -- i.e., if I've delivered my last word.
-
-		virtual void SetFinished (void)			{mFinished = true;}		///< @brief	Sets my "finished" flag.
+		virtual inline bool IsFinished (void) const		{return mFinished;}		///< @brief	Returns true if I'm finished -- i.e., if I've delivered my last word.
+		virtual inline void SetFinished (void)			{mFinished = true;}		///< @brief	Sets my "finished" flag.
+		virtual inline void	SetCaptionChannel (const NTV2Line21Channel inCCChannel)	{mCaptionChannel = inCCChannel;}	///< @brief	Sets my caption channel (for tagging debug output)
 
 
 		/**
@@ -513,8 +536,7 @@ class CaptionSource
 			@param[in]	inIsTextMode	Specify true if I'm supplying caption data to a text channel (Tx1, Tx2, Tx3 or Tx4).
 										Specify false if I'm supplying caption data to a normal caption channel (CC1, CC2, CC3, or CC4).
 		**/
-		virtual void SetTextMode (const bool inIsTextMode)	{mIsTextMode = inIsTextMode;}
-
+		virtual inline void SetTextMode (const bool inIsTextMode)	{mIsTextMode = inIsTextMode;}
 
 	//	Private Instance Methods
 	private:
@@ -524,16 +546,17 @@ class CaptionSource
 
 	//	Instance Data
 	private:
-		istream *		mpInputStream;		///< @brief	My current input file stream.
-		double			mCharsPerMinute;	///< @brief	My character emission rate, in characters per minute.
-		string			mLeftoverRowText;	///< @brief	My row text accumulator.
-		size_t			mMaxRowCharWidth;	///< @brief	My maximum row width, in characters.
-		bool			mFinished;			///< @brief	True if I've delivered everything I can.
-		const bool		mDeleteInputStream;	///< @brief	True if I'm responsible for deleting the input stream.
-		bool			mIsTextMode;		///< @brief	True if I'm generating Text Mode caption data instead of normal Captions.
-		double			mMilliSecsPerChar;	///< @brief	Delay between emitting successive characters, in milliseconds.
+		istream *			mpInputStream;		///< @brief	My current input file stream.
+		double				mCharsPerMinute;	///< @brief	My character emission rate, in characters per minute.
+		string				mLeftoverRowText;	///< @brief	My row text accumulator.
+		size_t				mMaxRowCharWidth;	///< @brief	My maximum row width, in characters.
+		bool				mFinished;			///< @brief	True if I've delivered everything I can.
+		const bool			mDeleteInputStream;	///< @brief	True if I'm responsible for deleting the input stream.
+		bool				mIsTextMode;		///< @brief	True if I'm generating Text Mode caption data instead of normal Captions.
+		double				mMilliSecsPerChar;	///< @brief	Delay between emitting successive characters, in milliseconds.
+		NTV2Line21Channel	mCaptionChannel;	///< @brief	Used to tag debug output only
 		#if defined (MEASURE_ACCURACY)
-			Speedometer		mCharSpeed;		///< @brief	This is used to measure/adjust the rate at which I generate captions.
+			Speedometer		mCharSpeed;			///< @brief	Used to measure/adjust the rate at which I generate captions.
 		#endif	//	MEASURE_ACCURACY
 
 
@@ -1136,7 +1159,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 	const UWord					paintPopMaxNumRows	(15 - paintPopTopRow + 1);				//	PaintOn/PopOn only:	number of rows to fill to bottom
 	UWord						lineTally			(0);									//	PaintOn/PopOn only:	used to calculate display row
 
-	//cerr << "## DEBUG:  Starting " << NTV2Line21ChannelToStr (inCCChannel) << " generator thread" << endl;
+	LOGLOCKSTART	cerr << "## DEBUG:  Starting " << NTV2Line21ChannelToStr (inCCChannel) << " generator thread" << endl;	LOGLOCKEND
 	if (IsLine21TextChannel (inCCChannel) || !IsLine21RollUpMode (captionMode))
 		linesWanted = 1;
 	while (!mCaptionGeneratorQuit)
@@ -1148,6 +1171,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 			captionSources.pop_front ();
 
 			captionSource->SetTextMode (IsLine21TextChannel (inCCChannel));		//	Set CaptionSource to Text Mode if caption channel is TX1/TX2/TX3/TX4
+			captionSource->SetCaptionChannel (inCCChannel);
 
 			while (!mCaptionGeneratorQuit && !captionSource->IsFinished ())
 			{
@@ -1193,6 +1217,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 				else
 					AJATime::Sleep (1000);
 			}	//	loop til captionSource is finished (or mCaptionGeneratorQuit)
+			captionSource->SetCaptionChannel (NTV2_CC608_ChannelInvalid);
 		}	//	for each captionSource
 
 		switch (endAction)
@@ -1221,7 +1246,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 	//	Let's be nice, and inject an EDM (Erase Displayed Memory) control message.
 	//	This will prevent frozen, on-screen captions from remaining in/on downstream decoders/monitors...
 	m608Encoder->Erase (inCCChannel);
-	//cerr << "## DEBUG:  " << ::NTV2Line21ChannelToStr (inCCChannel) << " generator thread exit" << endl;
+	LOGLOCKSTART	cerr << "## DEBUG:  NTV2CCPlayer::GenerateCaptions:  " << ::NTV2Line21ChannelToStr (inCCChannel) << " generator thread exit" << endl;	LOGLOCKEND
 
 }	//	GenerateCaptions
 

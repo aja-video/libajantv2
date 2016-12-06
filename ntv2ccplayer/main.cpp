@@ -63,6 +63,31 @@ static string GetLine21ChannelNames (string inDelimiterStr = "|")
 }	//	GetLine21ChannelNames
 
 
+static StringList Split (string inStr, const string inDelimiter = string(","))
+{
+	StringList	result;
+	size_t	pos	(inStr.find (inDelimiter));
+	while (pos != string::npos)
+	{
+		const string	piece	(inStr.substr (0, pos));
+		result.push_back (piece);
+		inStr.erase (0, pos+1);
+		pos = inStr.find (inDelimiter);
+	}
+	result.push_back (inStr);
+	return result;
+}
+
+static void PrintStringList (const StringList & inStrList)
+{
+	for (StringListConstIter it (inStrList.begin());  it != inStrList.end();  )
+	{
+		cerr << *it;
+		if (++it != inStrList.end ())
+			cerr << ", ";
+	}
+}
+
 
 /**
 	@brief	Plays out video containing closed-captions generated internally (no file arguments) or from
@@ -74,29 +99,29 @@ static string GetLine21ChannelNames (string inDelimiterStr = "|")
 **/
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);
-	char *			pDeviceSpec		(NULL);				//	Which device?
-	char *			pCaptionChannel	(NULL);				//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
-	char *			pMode			(NULL);				//	Kind of 608 display (roll, paint, pop)?
-	char *			pVideoFormat	(NULL);				//	Video format (525, 625, etc.)?
-	char *			pPixelFormat	(NULL);				//	Pixel format (2vuy, argb, etc.?
-	char *			pEndAction		(NULL);				//	End action (quit, repeat, idle)?
-	int				noAudio			(0);				//	Disable audio tone?
-	int				noTimecode		(0);				//	Disable timecode?
-	int				doMultiChannel	(0);				//	Enable multi-format?
-	uint32_t		channelNumber	(1);				//	Number of the channel to use
-	uint32_t		charsPerMinute	(500);				//	Desired character enqueue rate, in characters per minute
-	int				bEmitStats		(0);				//	Emit stats while running?
-	int				bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
-	int				bForceVanc		(0);				//	Force use of Vanc?
-	int				bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
-	StringList		pathList;							//	List of text files (paths) to "play"
-	poptContext		optionsContext; 					//	Context for parsing command line arguments
-	CCGeneratorConfig	generatorConfig;
+	AJAStatus			status			(AJA_STATUS_SUCCESS);
+	char *				pDeviceSpec		(NULL);				//	Which device?
+	char *				pCaptionChannel	(NULL);				//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *				pMode			(NULL);				//	Kind of 608 display (roll, paint, pop)?
+	char *				pVideoFormat	(NULL);				//	Video format (525, 625, etc.)?
+	char *				pPixelFormat	(NULL);				//	Pixel format (2vuy, argb, etc.?
+	char *				pEndAction		(NULL);				//	End action (quit, repeat, idle)?
+	char *				pCaptionRate	(NULL);				//	Caption rate (chars/min)
+	int					noAudio			(0);				//	Disable audio tone?
+	int					noTimecode		(0);				//	Disable timecode?
+	int					doMultiChannel	(0);				//	Enable multi-format?
+	uint32_t			channelNumber	(1);				//	Number of the channel to use
+	int					bEmitStats		(0);				//	Emit stats while running?
+	int					bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
+	int					bForceVanc		(0);				//	Force use of Vanc?
+	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
+	StringList			pathList;							//	List of text files (paths) to "play"
+	poptContext			optionsContext; 					//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
+		//	Device config options...
 		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"device channel to use",		"1..8"},
@@ -106,14 +131,17 @@ int main (int argc, const char ** argv)
 		{"notimecode",	0,		POPT_ARG_NONE,		&noTimecode,		0,	"disable timecode?",			NULL},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		NULL},
 
-		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle"},
-		{"rate",		'r',	POPT_ARG_INT,		&charsPerMinute,	0,	"caption rate",					"chars/min"},
-		{"608mode",		0,		POPT_ARG_STRING,	&pMode,				0,	"608 caption mode",				"roll|roll4|roll3|roll2|paint|pop"},
-		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption channel",			::GetLine21ChannelNames ().c_str ()},
+		//	CCPlayer global config options...
 		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			NULL},
-		{"newline",		0,		POPT_ARG_NONE,		&bBreakNewLines,	0,	"newlines break rows?",			NULL},
 		{"vanc",		'v',	POPT_ARG_NONE,		&bForceVanc,		0,	"force use of vanc",			NULL},
 		{"noline21",	'n',	POPT_ARG_NONE,		&bSuppressLine21,	0,	"disable line 21 wvfrm?",		NULL},
+
+		//	Per-caption-channel options -- specify more than one by separating with comma (e.g., --end loop,idle,idle,loop  --608chan cc1,cc2,tx3,tx4)
+		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle,..."},
+		{"rate",		'r',	POPT_ARG_STRING,	&pCaptionRate,		0,	"caption rate",					"chars/min,..."},
+		{"608mode",		0,		POPT_ARG_STRING,	&pMode,				0,	"608 caption mode",				"roll|roll4|roll3|roll2|paint|pop,..."},
+		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption channel",			::GetLine21ChannelNames ().c_str ()},
+		{"newline",		0,		POPT_ARG_NONE,		&bBreakNewLines,	0,	"newlines break rows?",			NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -125,180 +153,144 @@ int main (int argc, const char ** argv)
 	const char * pStr	(::poptGetArg (optionsContext));
 	while (pStr)
 	{
-		generatorConfig.fFilesToPlay.push_back (string (pStr));
+		pathList.push_back (string (pStr));
 		pStr = ::poptGetArg (optionsContext);
 	}	//	for each file path argument
 	optionsContext = ::poptFreeContext (optionsContext);
 
-	CCPlayerConfig		playerConfig	(pDeviceSpec ? string (pDeviceSpec) : "0");
+	//	Board/Device
+	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
 
-	const string		deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
-	const string		videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
-	playerConfig.fVideoFormat = NTV2_FORMAT_1080i_5994;
-	if (!videoFormatStr.empty ())
-	{
-		if (CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, false) != NTV2_FORMAT_UNKNOWN)
-			playerConfig.fVideoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, false);
-		else if (CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, true) != NTV2_FORMAT_UNKNOWN)
-			playerConfig.fVideoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, true);
-	}
+	//	Channel
+	NTV2Channel				channel			(NTV2_CHANNEL1);			//	Default to channel 1
+	if (channelNumber > 0 && channelNumber < 9)
+		channel = NTV2Channel (channelNumber - 1);
+	else
+		{cerr << "## ERROR:  Bad channel number '" << channelNumber << "'" << endl;	return 1;}
+
+	//	Video Format
+	NTV2VideoFormat			videoFormat		(NTV2_FORMAT_1080i_5994);	//	Default to 1080i5994
+	NTV2FrameBufferFormat	pixelFormat		(NTV2_FBF_10BIT_YCBCR);		//	Default to 10bitYUV
+	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	if (videoFormatStr == "?" || videoFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetVideoFormatStrings (BOTH_VIDEO_FORMATS, deviceSpec) << endl;  return 0;}
-	else if (!videoFormatStr.empty () && playerConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
+	if (!videoFormatStr.empty ())
+	{
+		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, false);
+		if (!NTV2_IS_VALID_VIDEO_FORMAT (videoFormat))
+			videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, true);
+	}
+	else if (!videoFormatStr.empty ()  &&  !NTV2_IS_VALID_VIDEO_FORMAT (videoFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings (BOTH_VIDEO_FORMATS, deviceSpec) << endl;
 		return 2;
 	}
-	if (bSuppressLine21 && !NTV2_IS_SD_VIDEO_FORMAT (playerConfig.fVideoFormat))
-		cerr	<< "## WARNING:  '--noline21' (-n) option specified with non-SD video format '" << ::NTV2VideoFormatToString (playerConfig.fVideoFormat) << "'" << endl;
+	if (bSuppressLine21 && !NTV2_IS_SD_VIDEO_FORMAT (videoFormat))
+		cerr	<< "## WARNING:  '--noline21' (-n) option specified with non-SD video format '" << ::NTV2VideoFormatToString (videoFormat) << "'" << endl;
 
-	const string				pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
-	playerConfig.fPixelFormat  =  pixelFormatStr.empty ()  ?  NTV2_FBF_10BIT_YCBCR  :  CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr);
+	//	Pixel Format
+	const string	pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
+	pixelFormat  =  pixelFormatStr.empty ()  ?  NTV2_FBF_10BIT_YCBCR  :  CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr);
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (playerConfig.fPixelFormat))
+	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
 
-	if (channelNumber > 0 && channelNumber < 9)
-		playerConfig.fOutputChannel = NTV2Channel (channelNumber - 1);
-	else
-		{cerr << "## ERROR:  Bad channel number '" << channelNumber << "'" << endl;	return 1;}
+	//	Configure the player...
+	CCPlayerConfig		playerConfig	(pDeviceSpec ? string (pDeviceSpec) : "0");
+	playerConfig.fVideoFormat		= videoFormat;
+	playerConfig.fPixelFormat		= pixelFormat;
+	playerConfig.fOutputChannel		= channel;
+	playerConfig.fEmitStats			= bEmitStats		? true : false;
+	playerConfig.fDoMultiFormat		= doMultiChannel	? true : false;
+	playerConfig.fForceVanc			= bForceVanc		? true : false;
+	playerConfig.fSuppressLine21	= bSuppressLine21	? true : false;
+	playerConfig.fSuppressAudio		= noAudio			? true : false;
+	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 
-	const string	sCaptionMode	(CNTV2DemoCommon::ToLower (pMode ? pMode : ""));
-	if (sCaptionMode.empty () || sCaptionMode == "roll" || sCaptionMode == "roll4")
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp4;
-	else if (sCaptionMode == "roll3")
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp3;
-	else if (sCaptionMode == "roll2")
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp2;
-	else if (sCaptionMode == "paint")
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModePaintOn;
-	else if (sCaptionMode == "pop")
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModePopOn;
-	else
-		{cerr << "## ERROR:  Bad '608mode' parameter '" << sCaptionMode << "'" << endl;	return 1;}
+	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString (videoFormat) << "', " << ::NTV2FrameBufferFormatToString (pixelFormat)
+			<< ", NTV2_CHANNEL" << (channel+1) << ", stats=" << (bEmitStats?"Y":"N") << ", multiChan=" << (doMultiChannel?"Y":"N")
+			<< ", forceVANC=" << (bForceVanc?"Y":"N") << ", noLine21=" << (bSuppressLine21?"Y":"N") << ", noAudio=" << (noAudio?"Y":"N")
+			<< ", noTC=" << (noTimecode?"Y":"N") << endl;
 
-	const string	sEndAction		(CNTV2DemoCommon::ToLower (pEndAction ? pEndAction : ""));
-	if (sEndAction.empty () || sEndAction == "quit" || sEndAction == "exit" || sEndAction == "terminate" || sEndAction == "end")
-		generatorConfig.fEndAction = AtEndAction_Quit;
-	else if (sEndAction == "loop" || sEndAction == "repeat")
-		generatorConfig.fEndAction = AtEndAction_Repeat;
-	else if (sEndAction == "sleep" || sEndAction == "idle" || sEndAction == "rest")
-		generatorConfig.fEndAction = AtEndAction_Idle;
-	else
-		{cerr << "## ERROR:  Bad 'end' parameter '" << sEndAction << "' -- expected 'loop|repeat | rest|sleep|idle | quit|end|exit|terminate'" << endl;	return 1;}
+	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels:
+	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4		\
+	//						--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200						\
+	//						--end idle,loop,idle,loop,idle,loop,idle,loop										\
+	//						English.txt  Spanish.txt  French.txt  German.txt  txt1  txt2  txt3  txt4
 
-	generatorConfig.fCaptionChannel = (pCaptionChannel ? ::StrToNTV2Line21Channel (string (pCaptionChannel)) : NTV2_CC608_CC1);
-	if (!IsValidLine21Channel (generatorConfig.fCaptionChannel) || IsLine21XDSChannel (generatorConfig.fCaptionChannel))
-		{cerr << "## ERROR:  Bad '608chan' value '" << pCaptionChannel << "' -- expected '" << ::GetLine21ChannelNames () << "'" << endl;	return 1;}
+	//	Users can play one or more caption channels by specifying more than one, separating each with a comma:		--608chan cc2,cc4,tx1,tx2
+	//	You can vary the mode, end-action and rate for each caption channel in the same way:						--608mode pop,paint,roll  --rate 1500,800,300,600
+	const StringList	sCaptionChannels	(::Split (CNTV2DemoCommon::ToLower (pCaptionChannel	? pCaptionChannel	: "CC1")));
+	const StringList	sCaptionModes		(::Split (CNTV2DemoCommon::ToLower (pMode			? pMode				: "roll4")));
+	const StringList	sEndActions			(::Split (CNTV2DemoCommon::ToLower (pEndAction		? pEndAction		: "exit")));
+	const StringList	sCaptionRates		(::Split (CNTV2DemoCommon::ToLower (pCaptionRate	? pCaptionRate		: "500")));
+	size_t				ndx					(0);
+	size_t				fileNdx				(0);
 
-	if (IsLine21TextChannel (generatorConfig.fCaptionChannel))
+	for (StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
-		generatorConfig.fCaptionMode = NTV2_CC608_CapModeUnknown;
-		if (pMode)
-			cerr	<< "## WARNING:  Caption mode '" << sCaptionMode << "' reset to 'unknown' for '"
-					<< ::NTV2Line21ChannelToStr (generatorConfig.fCaptionChannel) << "'" << endl;
-	}
+		CCGeneratorConfig	generatorConfig;
 
-	generatorConfig.fNewLinesAreNewRows = bBreakNewLines ? true : false;
-	if (IsLine21TextChannel (generatorConfig.fCaptionChannel))
-		generatorConfig.fNewLinesAreNewRows = true;
+		generatorConfig.fCaptionChannel = ::StrToNTV2Line21Channel (*iter);
+		if (!IsValidLine21Channel (generatorConfig.fCaptionChannel) || IsLine21XDSChannel (generatorConfig.fCaptionChannel))
+			{cerr << "## ERROR:  Bad '608chan' value '" << pCaptionChannel << "' -- expected '" << ::GetLine21ChannelNames () << "'" << endl;	return 1;}
 
-	generatorConfig.fCharsPerMinute = static_cast <double> (charsPerMinute);
+		const string	sCaptionMode	(ndx < sCaptionModes.size() ? sCaptionModes.at(ndx) : sCaptionModes.back());
+		if (sCaptionMode == "")				generatorConfig.fCaptionMode = NTV2_CC608_CapModeUnknown;
+		else if (sCaptionMode == "pop")		generatorConfig.fCaptionMode = NTV2_CC608_CapModePopOn;
+		else if (sCaptionMode == "paint")	generatorConfig.fCaptionMode = NTV2_CC608_CapModePaintOn;
+		else if (sCaptionMode == "roll2")	generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp2;
+		else if (sCaptionMode == "roll3")	generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp3;
+		else if (sCaptionMode == "roll" || sCaptionMode == "roll4")	generatorConfig.fCaptionMode = NTV2_CC608_CapModeRollUp4;
+		else	{cerr << "## ERROR:  Bad '608mode' parameter '" << sCaptionMode << "'" << endl;	return 1;}
+	
+		if (IsLine21TextChannel (generatorConfig.fCaptionChannel))
+			generatorConfig.fCaptionMode = NTV2_CC608_CapModeUnknown;	//	Must use unknown caption mode for TX caption channels
+	
+		generatorConfig.fNewLinesAreNewRows = bBreakNewLines ? true : false;
+		if (IsLine21TextChannel (generatorConfig.fCaptionChannel))
+			generatorConfig.fNewLinesAreNewRows = true;	//	Tx1/Tx2/Tx3/Tx4 always break rows on newLine chars
 
-	playerConfig.fEmitStats = bEmitStats ? true : false;
-	playerConfig.fDoMultiFormat = doMultiChannel ? true : false;
-	playerConfig.fForceVanc = bForceVanc ? true : false;
-	playerConfig.fSuppressLine21 = bSuppressLine21 ? true : false;
-	playerConfig.fSuppressAudio = noAudio ? true : false;
-	playerConfig.fSuppressTimecode = noTimecode ? true : false;
-	playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+		const string	sEndAction	(ndx < sEndActions.size() ? sEndActions.at(ndx) : sEndActions.back());
+		if (sEndAction.empty () || sEndAction == "quit" || sEndAction == "exit" || sEndAction == "terminate" || sEndAction == "end")
+			generatorConfig.fEndAction = AtEndAction_Quit;
+		else if (sEndAction == "loop" || sEndAction == "repeat")
+			generatorConfig.fEndAction = AtEndAction_Repeat;
+		else if (sEndAction == "sleep" || sEndAction == "idle" || sEndAction == "rest")
+			generatorConfig.fEndAction = AtEndAction_Idle;
+		else
+			{cerr << "## ERROR:  Bad 'end' parameter '" << sEndAction << "' -- expected 'loop|repeat | rest|sleep|idle | quit|end|exit|terminate'" << endl;	return 1;}
 
-	/*
-		//
-		//	NOTE:	This is an example of how to inject different captions into separate caption channels.
-		//
-		playerConfig.fChannelGenerators.clear ();
+		const string	sCaptionRate	(ndx < sCaptionRates.size() ? sCaptionRates.at(ndx) : sCaptionRates.back());
+		istringstream iss(sCaptionRate);
+		uint32_t	charsPerMin;
+		iss >> charsPerMin;
+		generatorConfig.fCharsPerMinute = static_cast <double> (charsPerMin);
 
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("CEA608English.txt"));
-		generatorConfig.fEndAction			= AtEndAction_Idle;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp2;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_CC1;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 1000;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+		if (!pathList.empty())
+		{
+			generatorConfig.fFilesToPlay.push_back (fileNdx < pathList.size() ? pathList.at(fileNdx) : pathList.back());
+			++fileNdx;
+			if ((ndx+1) == sCaptionChannels.size())
+				while (fileNdx < pathList.size())
+					generatorConfig.fFilesToPlay.push_back (pathList.at (fileNdx++));
+		}
+		cerr	<< *iter << ":  mode=" << sCaptionMode << ", newLinesAreNewRows=" << (generatorConfig.fNewLinesAreNewRows?"Y":"N")
+				<< ", endAction=" << sEndAction << ", rate=" << charsPerMin << ", " << generatorConfig.fFilesToPlay.size() << " file(s):  ";
+		PrintStringList (generatorConfig.fFilesToPlay);
+		cerr	<< endl;
 
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("CEA608Spanish.txt"));
-		generatorConfig.fEndAction			= AtEndAction_Repeat;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp3;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_CC2;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 700;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
+		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;	//	Add this generator to the player configuration
+	}	//	for each specified caption channel
 
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("CEA608French.txt"));
-		generatorConfig.fEndAction			= AtEndAction_Idle;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp4;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_CC3;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 500;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
 
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("CEA608German.txt"));
-		generatorConfig.fEndAction			= AtEndAction_Repeat;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeRollUp4;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_CC4;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 300;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
-
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("txt1"));
-		generatorConfig.fEndAction			= AtEndAction_Idle;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_Text1;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 200;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
-
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("txt2"));
-		generatorConfig.fEndAction			= AtEndAction_Repeat;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_Text2;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 200;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
-
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("txt3"));
-		generatorConfig.fEndAction			= AtEndAction_Idle;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_Text3;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 200;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
-
-		generatorConfig.fFilesToPlay.clear ();
-		generatorConfig.fFilesToPlay.push_back (string ("txt4"));
-		generatorConfig.fEndAction			= AtEndAction_Repeat;
-		generatorConfig.fCaptionMode		= NTV2_CC608_CapModeUnknown;
-		generatorConfig.fCaptionChannel		= NTV2_CC608_Text4;
-		generatorConfig.fNewLinesAreNewRows	= true;
-		generatorConfig.fCharsPerMinute		= 200;
-		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;
-	*/
-
-	//	Instantiate the CC player object...
+	//	Instantiate the CC player object, and pass it the config object...
 	NTV2CCPlayer	player (playerConfig);
 
 	::signal (SIGINT, ::SignalHandler);
