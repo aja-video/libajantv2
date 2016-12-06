@@ -13,6 +13,9 @@
 using namespace std;
 
 
+//	#define	AJA_NTV2_CLEAR_ANC_BUFFER_AFTER_CAPTURE_XFER
+
+
 #if !defined (NTV2_DEPRECATE_12_6)
 static const NTV2Channel gCrosspointToChannel [] = {	/* NTV2CROSSPOINT_CHANNEL1	==>	*/	NTV2_CHANNEL1,
 														/* NTV2CROSSPOINT_CHANNEL2	==>	*/	NTV2_CHANNEL2,
@@ -912,7 +915,32 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 				pArray[NTV2_TCINDEX_DEFAULT] = tcValue;
 		}
 	}	//	if NTV2Message OK && retail mode && capturing
+	#if defined (AJA_NTV2_CLEAR_ANC_BUFFER_AFTER_CAPTURE_XFER)
+		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
+		{
+			static NTV2_POINTER	gClearAncBuffer;
+			const LWord		xferFrame	(inOutXferInfo.GetTransferFrameNumber());
+			ULWord			ancOffset	(0);
+			NTV2Framesize	fbSize		(NTV2_FRAMESIZE_INVALID);
+			ReadRegister(kVRegAncField1Offset, &ancOffset);
+			GetFrameBufferSize(inChannel, fbSize);
+			const ULWord	fbByteCount	(::NTV2FramesizeToByteCount(fbSize));
+			NTV2_ASSERT (xferFrame != -1);
+			if (gClearAncBuffer.IsNULL() || (gClearAncBuffer.GetByteCount() != (ancOffset * 2)))
+			{
+				gClearAncBuffer.Allocate(ancOffset * 2);	//	Allocate it
+				gClearAncBuffer.Fill (ULWord(0));			//	Clear it
+			}
+			if (xferFrame != -1  &&  fbByteCount  &&  !gClearAncBuffer.IsNULL())
+				DMAWriteSegments (xferFrame,
+								(ULWord *) gClearAncBuffer.GetHostPointer(),	//	host buffer
+								fbByteCount - ancOffset,			//	device memory offset, in bytes
+								gClearAncBuffer.GetByteCount(),		//	total number of bytes to xfer
+								1,									//	numSegments -- one chunk of 'ancOffset'
+								gClearAncBuffer.GetByteCount(),		//	segmentHostPitch
+								gClearAncBuffer.GetByteCount());	//	segmentCardPitch
+		}
+	#endif	//	AJA_NTV2_CLEAR_ANC_BUFFER_AFTER_CAPTURE_XFER
 	return result;
 
 }	//	AutoCirculateTransfer
-

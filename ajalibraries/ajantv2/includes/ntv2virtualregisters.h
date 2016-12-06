@@ -11,13 +11,15 @@
 #define	MAX_NUM_VIRTUAL_REGISTERS	1024	//	Starting in SDK 12.6, there's room for 1024 virtual registers
 
 /**
-	@brief	Virtual registers are used to pass 32-bit values to/from the device driver, and aren't associated
-			with hardware registers.
+	@brief	Virtual registers are used to pass 32-bit values to/from the device driver, and aren't always
+			associated with hardware registers.
 
-	@note	Drivers starting with SDK 12.6 all allocate a 4K page for storing an array of 1024
-			4-byte integers. OEM applications can safely store values in slots kVRegFirstOEM thru kVRegLast,
-			inclusive. We recommend storing at kVRegLast, kVRegLast-1, kVRegLast-2, etc., being careful
+	@note	Drivers after SDK 12.5.x all allocate a 4K page for storing an array of 1024 x 4-byte integers.
+			OEM applications can store values in slots kVRegFirstOEM thru kVRegLast, inclusive.
+			AJA recommends storing at kVRegLast, kVRegLast-1, kVRegLast-2, etc., being careful
 			to never store anything below kVRegFirstOEM.
+
+	@note	AJA does not reserve virtual registers for OEMs, and thus, collisions may occur with other OEM applications.
 **/
 typedef enum
 {
@@ -111,9 +113,6 @@ typedef enum
 	kVRegDSKForegroundMode					= VIRTUALREG_START+126,
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,
-#if !defined (NTV2_DEPRECATE)
-	kVRegPanMode							= VIRTUALREG_START+129,
-#endif	//	!defined (NTV2_DEPRECATE)
 
 	kVReg2XTransferMode						= VIRTUALREG_START+130,
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
@@ -126,10 +125,6 @@ typedef enum
 	kVRegFrameBuffer1RGBRange				= VIRTUALREG_START+138,
 	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
 
-#if !defined (NTV2_DEPRECATE)
-	kVRegPanModeOffsetH						= VIRTUALREG_START+140,
-	kVRegPanModeOffsetV						= VIRTUALREG_START+141,
-#endif	//	!defined (NTV2_DEPRECATE)
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,

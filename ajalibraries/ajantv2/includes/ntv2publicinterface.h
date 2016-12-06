@@ -5181,6 +5181,12 @@ typedef enum
 				#define	NTV2_ASSERT_STRUCT_VALID
 			#endif
 
+			#define	Hex(__x__)				std::hex << (__x__) << std::dec
+			#define	xHex(__x__)				"0x" << HEX(__x__)
+			#define	HexN(__x__,__n__)		std::hex << std::setw(__n__) << (__x__) << std::dec
+			#define	xHexN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
+			#define	Hex0N(__x__,__n__)		std::hex << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	xHex0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
 			#define	HEX(__x__)				std::hex << std::uppercase << (__x__) << std::dec << std::nouppercase
 			#define	xHEX(__x__)				"0x" << HEX(__x__)
 			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << (__x__) << std::dec << std::nouppercase
@@ -5190,11 +5196,27 @@ typedef enum
 			#define	DEC(__x__)				std::dec << (__x__)
 			#define	DECN(__x__,__n__)		std::dec << std::setw(__n__) << (__x__)
 			#define	DEC0N(__x__,__n__)		std::dec << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	oOCT(__x__)				"o" << std::oct << (__x__) << std::dec
 			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
-			#define	bBIN032(__x__)			"b"	<< std::bitset<8>(((__x__)&0xFF000000)>>24) << "."		\
-												<< std::bitset<8>(((__x__)&0x00FF0000)>>16) << "."		\
-												<< std::bitset<8>(((__x__)&0x0000FF00)>>8) << "."		\
-												<< std::bitset<8>( (__x__)&0x000000FF)
+			#define	BIN064(__x__)			std::bitset<8>((uint64_t(__x__)&0xFF00000000000000)>>56) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x00FF000000000000)>>48) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x0000FF0000000000)>>40) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x000000FF00000000)>>32) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x00000000FF000000)>>24) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x0000000000FF0000)>>16) << "."		\
+												<< std::bitset<8>((uint64_t(__x__)&0x000000000000FF00)>>8) << "."		\
+												<< std::bitset<8>( uint64_t(__x__)&0x00000000000000FF)
+			#define	BIN032(__x__)			std::bitset<8>((uint32_t(__x__)&0xFF000000)>>24) << "."				\
+												<< std::bitset<8>((uint32_t(__x__)&0x00FF0000)>>16) << "."				\
+												<< std::bitset<8>((uint32_t(__x__)&0x0000FF00)>>8) << "."				\
+												<< std::bitset<8>( uint32_t(__x__)&0x000000FF)
+			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."					\
+												<< std::bitset<8>( uint16_t(__x__)&0x00FF)
+			#define	BIN08(__x__)			std::bitset<8>(uint8_t(__x__))
+			#define	bBIN064(__x__)			"b"	<< BIN064(__x__)
+			#define	bBIN032(__x__)			"b"	<< BIN032(__x__)
+			#define	bBIN016(__x__)			"b"	<< BIN016(__x__)
+			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
 		#else
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
 			#define	NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
@@ -6750,6 +6772,11 @@ typedef enum
 					@return		My current frame buffer format.
 				**/
 				inline NTV2FrameBufferFormat			GetFrameBufferFormat (void) const						{return acFrameBufferFormat;}
+
+				/**
+					@return		The frame number that was transferred (or -1 if failed).
+				**/
+				inline LWord							GetTransferFrameNumber (void) const						{return acTransferStatus.acTransferFrame;}
 				///@}
 
 				/**
