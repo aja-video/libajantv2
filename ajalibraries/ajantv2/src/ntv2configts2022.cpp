@@ -39,12 +39,12 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
         _j2kEncodeConfig[channel].j2k_bitDepth = 8;
         _j2kEncodeConfig[channel].j2k_chromaSubsamp = kJ2KChromaSubSamp_422_Standard;
         _j2kEncodeConfig[channel].j2k_codeBlocksize = kJ2KCodeBlocksize_32x32;
-        _j2kEncodeConfig[channel].j2k_mbps = 200;
+        _j2kEncodeConfig[channel].j2k_mbps = 100;
         _j2kEncodeConfig[channel].j2k_streamType = kJ2KStreamTypeStandard;
-        _j2kEncodeConfig[channel].j2k_pmtPid = 255;
-        _j2kEncodeConfig[channel].j2k_videoPid = 256;
-        _j2kEncodeConfig[channel].j2k_pcrPid = 257;
-        _j2kEncodeConfig[channel].j2k_audio1Pid = 258;
+        _j2kEncodeConfig[channel].j2k_pmtPid = 256;
+        _j2kEncodeConfig[channel].j2k_videoPid = 257;
+        _j2kEncodeConfig[channel].j2k_pcrPid = 258;
+        _j2kEncodeConfig[channel].j2k_audio1Pid = 259;
 
         // decode defaults
         _j2kDecodeConfig[channel].j2k_pid = 0;
