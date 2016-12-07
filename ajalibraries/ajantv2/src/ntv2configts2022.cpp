@@ -33,19 +33,6 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
     // init config structs
     for (int channel = NTV2_CHANNEL1; channel < NTV2_MAX_NUM_CHANNELS; channel++)
     {
-        // encode defaults
-        _j2kEncodeConfig[channel].j2k_videoFormat = NTV2_FORMAT_UNKNOWN;  // an indication channel has not been configured yet
-        _j2kEncodeConfig[channel].j2k_ullMode = false;
-        _j2kEncodeConfig[channel].j2k_bitDepth = 8;
-        _j2kEncodeConfig[channel].j2k_chromaSubsamp = kJ2KChromaSubSamp_422_Standard;
-        _j2kEncodeConfig[channel].j2k_codeBlocksize = kJ2KCodeBlocksize_32x32;
-        _j2kEncodeConfig[channel].j2k_mbps = 100;
-        _j2kEncodeConfig[channel].j2k_streamType = kJ2KStreamTypeStandard;
-        _j2kEncodeConfig[channel].j2k_pmtPid = 256;
-        _j2kEncodeConfig[channel].j2k_videoPid = 257;
-        _j2kEncodeConfig[channel].j2k_pcrPid = 258;
-        _j2kEncodeConfig[channel].j2k_audio1Pid = 259;
-
         // decode defaults
         _j2kDecodeConfig[channel].j2k_pid = 0;
     }
@@ -53,17 +40,17 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
 {
-    _j2kEncodeConfig[channel].j2k_videoFormat       = j2kEncodeChannel.videoFormat;
-    _j2kEncodeConfig[channel].j2k_ullMode           = j2kEncodeChannel.ullMode;
-    _j2kEncodeConfig[channel].j2k_bitDepth          = j2kEncodeChannel.bitDepth;
-    _j2kEncodeConfig[channel].j2k_chromaSubsamp     = j2kEncodeChannel.chromaSubsamp;
-    _j2kEncodeConfig[channel].j2k_codeBlocksize     = j2kEncodeChannel.codeBlocksize;
-    _j2kEncodeConfig[channel].j2k_mbps              = j2kEncodeChannel.mbps;
-    _j2kEncodeConfig[channel].j2k_streamType        = j2kEncodeChannel.streamType;
-    _j2kEncodeConfig[channel].j2k_pmtPid            = j2kEncodeChannel.pmtPid;
-    _j2kEncodeConfig[channel].j2k_videoPid          = j2kEncodeChannel.videoPid;
-    _j2kEncodeConfig[channel].j2k_pcrPid            = j2kEncodeChannel.pcrPid;
-    _j2kEncodeConfig[channel].j2k_audio1Pid         = j2kEncodeChannel.audio1Pid;
+    SetJ2KEncodeVideoFormat(channel, j2kEncodeChannel.videoFormat);
+    SetJ2KEncodeUllMode(channel, j2kEncodeChannel.ullMode);
+    SetJ2KEncodeBitDepth(channel, j2kEncodeChannel.bitDepth);
+    SetJ2KEncodeChromaSubsamp(channel, j2kEncodeChannel.chromaSubsamp);
+    SetJ2KEncodeCodeBlocksize(channel, j2kEncodeChannel.codeBlocksize);
+    SetJ2KEncodeMbps(channel, j2kEncodeChannel.mbps);
+    SetJ2KEncodeStreamType(channel, j2kEncodeChannel.streamType);
+    SetJ2KEncodePMTPid(channel, j2kEncodeChannel.pmtPid);
+    SetJ2KEncodeVideoPid(channel, j2kEncodeChannel.videoPid);
+    SetJ2KEncodePCRPid(channel, j2kEncodeChannel.pcrPid);
+    SetJ2KEncodeAudio1Pid(channel, j2kEncodeChannel.audio1Pid);
 
     // setup the J2K encoder
     if (!SetupJ2KEncoder(channel))
@@ -80,7 +67,7 @@ bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_enco
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
 {
     NTV2VideoFormat         videoFormat;
-    bool                    ullMode;
+    uint32_t                ullMode;
     uint32_t                bitDepth;
     J2KChromaSubSampling    subSamp;
     J2KCodeBlocksize        codeBlocksize;
@@ -596,7 +583,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     PMTGen pmt;
     pmt._tsEncapType = kTsEncapTypeJ2k;
     pmt._progNumToPID[1] = streamData.programPid;
-    pmt._elemNumToPID[1] = streamData.videoPid;
+    pmt._videoNumToPID[1] = streamData.videoPid;
     pmt._pcrNumToPID[1] = streamData.pcrPid;
     pmt._audioNumToPID[1] = streamData.audio1Pid;
     pmt._videoStreamData.j2kStreamType = streamData.j2kStreamType;
@@ -750,5 +737,39 @@ uint32_t CNTV2ConfigTs2022::GetIpxTsAddr(const NTV2Channel channel)
     return addr;
 }
 
+
+bool CNTV2ConfigTs2022::WriteJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg, const uint32_t value)
+{
+    bool rv = false;
+
+    // only support 4 channels at this time
+    if (channel <= NTV2_CHANNEL4)
+    {
+        rv = mDevice.WriteRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
+    }
+    else
+        mError = "Invalid channel";
+
+    //printf("CNTV2ConfigTs2022::WriteJ2KConfigVReg vreg = %d %d\n", vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
+    return rv;
+
+}
+
+
+bool CNTV2ConfigTs2022::ReadJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg,  uint32_t & value)
+{
+    bool rv = false;
+
+    // only support 4 channels at this time
+    if (channel <= NTV2_CHANNEL4)
+    {
+        rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), (ULWord*)&value);
+    }
+    else
+        mError = "Invalid channel";
+
+    //printf("CNTV2ConfigTs2022::ReadJ2KConfigVReg vreg = %d %d\n", vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
+    return rv;
+}
 
 

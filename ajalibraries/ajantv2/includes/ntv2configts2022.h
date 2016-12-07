@@ -158,48 +158,48 @@ public:
     CNTV2ConfigTs2022 (CNTV2Card & device);
 
     // Set/Get NTV2 video format for TS and J2K setup
-    void    SetJ2KEncodeVideoFormat(const NTV2Channel channel, const NTV2VideoFormat format) {_j2kEncodeConfig[channel].j2k_videoFormat = format;}
-    void    GetJ2KEncodeVideoFormat(const NTV2Channel channel, NTV2VideoFormat & format) {format = _j2kEncodeConfig[channel].j2k_videoFormat;}
+    void    SetJ2KEncodeVideoFormat(const NTV2Channel channel, const NTV2VideoFormat format) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) format);}
+    void    GetJ2KEncodeVideoFormat(const NTV2Channel channel, NTV2VideoFormat & format) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t &) format);}
 
     // Set/Get ULL mode for J2K setup
-    void    SetJ2KEncodeUllMode(const NTV2Channel channel, const bool ull) {_j2kEncodeConfig[channel].j2k_ullMode = ull;}
-    void    GetJ2KEncodeUllMode(const NTV2Channel channel, bool & ull) {ull = _j2kEncodeConfig[channel].j2k_ullMode;}
+    void    SetJ2KEncodeUllMode(const NTV2Channel channel, const uint32_t ull) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
+    void    GetJ2KEncodeUllMode(const NTV2Channel channel, uint32_t & ull) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
 
     // Set/Get bit depth for J2K setup
-    void    SetJ2KEncodeBitDepth(const NTV2Channel channel, const uint32_t bitDepth) {_j2kEncodeConfig[channel].j2k_bitDepth = bitDepth;}
-    void    GetJ2KEncodeBitDepth(const NTV2Channel channel, uint32_t & bitDepth) {bitDepth = _j2kEncodeConfig[channel].j2k_bitDepth;}
+    void    SetJ2KEncodeBitDepth(const NTV2Channel channel, const uint32_t bitDepth) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
+    void    GetJ2KEncodeBitDepth(const NTV2Channel channel, uint32_t & bitDepth) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
 
     // Set/Get chroma sub sampling for J2K setup
-    void    SetJ2KEncodeChromaSubsamp(const NTV2Channel channel, const J2KChromaSubSampling subSamp) {_j2kEncodeConfig[channel].j2k_chromaSubsamp = subSamp;}
-    void    GetJ2KEncodeChromaSubsamp(const NTV2Channel channel, J2KChromaSubSampling & subSamp) {subSamp = _j2kEncodeConfig[channel].j2k_chromaSubsamp;}
+    void    SetJ2KEncodeChromaSubsamp(const NTV2Channel channel, const J2KChromaSubSampling subSamp) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t) subSamp);}
+    void    GetJ2KEncodeChromaSubsamp(const NTV2Channel channel, J2KChromaSubSampling & subSamp) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t &) subSamp);}
 
     // Set/Get code block size for J2K setup
-    void    SetJ2KEncodeCodeBlocksize(const NTV2Channel channel, const J2KCodeBlocksize codeBlocksize) {_j2kEncodeConfig[channel].j2k_codeBlocksize = codeBlocksize;}
-    void    GetJ2KEncodeCodeBlocksize(const NTV2Channel channel, J2KCodeBlocksize & codeBlocksize) {codeBlocksize = _j2kEncodeConfig[channel].j2k_codeBlocksize;}
+    void    SetJ2KEncodeCodeBlocksize(const NTV2Channel channel, const J2KCodeBlocksize codeBlocksize) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t) codeBlocksize);}
+    void    GetJ2KEncodeCodeBlocksize(const NTV2Channel channel, J2KCodeBlocksize & codeBlocksize) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t &) codeBlocksize);}
 
     // Set/Get encode rate in MBPS for J2K setup
-    void    SetJ2KEncodeMbps(const NTV2Channel channel, const uint32_t mbps) {_j2kEncodeConfig[channel].j2k_mbps = mbps;}
-    void    GetJ2KEncodeMbps(const NTV2Channel channel, uint32_t & mbps) {mbps = _j2kEncodeConfig[channel].j2k_mbps;}
+    void    SetJ2KEncodeMbps(const NTV2Channel channel, const uint32_t mbps) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
+    void    GetJ2KEncodeMbps(const NTV2Channel channel, uint32_t & mbps) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
 
     // Set/Get stream type for J2K setup
-    void    SetJ2KEncodeStreamType(const NTV2Channel channel, const J2KStreamType streamType) {_j2kEncodeConfig[channel].j2k_streamType = streamType;}
-    void    GetJ2KEncodeStreamType(const NTV2Channel channel, J2KStreamType & streamType) {streamType = _j2kEncodeConfig[channel].j2k_streamType;}
+    void    SetJ2KEncodeStreamType(const NTV2Channel channel, const J2KStreamType streamType) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t) streamType);}
+    void    GetJ2KEncodeStreamType(const NTV2Channel channel, J2KStreamType & streamType) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t &) streamType);}
 
     // Set/Get encode PMT PID
-    void    SetJ2KEncodePMTPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_pmtPid = pid;}
-    void    GetJ2KEncodePMTPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_pmtPid;}
+    void    SetJ2KEncodePMTPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
+    void    GetJ2KEncodePMTPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
 
     // Set/Get encode Video PID
-    void    SetJ2KEncodeVideoPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_videoPid = pid;}
-    void    GetJ2KEncodeVideoPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_videoPid;}
+    void    SetJ2KEncodeVideoPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
+    void    GetJ2KEncodeVideoPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
 
     // Set/Get encode PCR PID
-    void    SetJ2KEncodePCRPid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_pcrPid = pid;}
-    void    GetJ2KEncodePCRPid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_pcrPid;}
+    void    SetJ2KEncodePCRPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
+    void    GetJ2KEncodePCRPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
 
     // Set/Get encode Audio PID
-    void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {_j2kEncodeConfig[channel].j2k_audio1Pid = pid;}
-    void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kEncodeConfig[channel].j2k_audio1Pid;}
+    void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
+    void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
 
     // Set/Get decode PID
     void    SetJ2KDecodePid(const NTV2Channel channel, const uint32_t pid) {_j2kDecodeConfig[channel].j2k_pid = pid;}
@@ -255,10 +255,13 @@ public:
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 
+    bool                WriteJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg, const uint32_t value);
+    bool                ReadJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg,  uint32_t & value);
+
     bool                _is2022_6;
     bool                _is2022_2;
 
-    j2kEncodeConfig     _j2kEncodeConfig[NTV2_MAX_NUM_CHANNELS];
+    //j2kEncodeConfig     _j2kEncodeConfig[NTV2_MAX_NUM_CHANNELS];
     j2kDecodeConfig     _j2kDecodeConfig[NTV2_MAX_NUM_CHANNELS];
 
     int32_t             _transactionTable[1024][2];

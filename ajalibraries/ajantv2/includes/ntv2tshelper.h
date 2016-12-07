@@ -473,7 +473,7 @@ class PMTGen : public TSGenerator
         TsVideoStreamData   _videoStreamData;
         std::map <uint16_t, uint16_t> _progNumToPID;
         std::map <uint16_t, uint16_t> _pcrNumToPID;
-        std::map <uint16_t, uint16_t> _elemNumToPID;
+        std::map <uint16_t, uint16_t> _videoNumToPID;
         std::map <uint16_t, uint16_t> _audioNumToPID;
 
     public:
@@ -490,7 +490,7 @@ class PMTGen : public TSGenerator
         {
             _progNumToPID.clear();
             _pcrNumToPID.clear();
-            _elemNumToPID.clear();
+            _videoNumToPID.clear();
             _audioNumToPID.clear();
         }
 
@@ -529,35 +529,41 @@ class PMTGen : public TSGenerator
 
             // Do the streams
 
-            // J2K
-            _pkt8[pos++] = 0x21;                                            // J2K Type
-            _pkt8[pos] = 0xe0;                                              // elementary pid and reserved bits
-            _pkt8[pos++] |= (uint8_t) ((_elemNumToPID[1] >> 8) & 0x1f);
-            _pkt8[pos++] =  (uint8_t) (_elemNumToPID[1] & 0xff);
+            if (_videoNumToPID[1] != 0)
+            {
+                // J2K
+                _pkt8[pos++] = 0x21;                                            // J2K Type
+                _pkt8[pos] = 0xe0;                                              // elementary pid and reserved bits
+                _pkt8[pos++] |= (uint8_t) ((_videoNumToPID[1] >> 8) & 0x1f);
+                _pkt8[pos++] =  (uint8_t) (_videoNumToPID[1] & 0xff);
 
-            j2kLengthPos = pos;                                             // need to come back and fill in descriptor length so save position
-            pos+=2;
+                j2kLengthPos = pos;                                             // need to come back and fill in descriptor length so save position
+                pos+=2;
 
-            len = makeJ2kDescriptor(pos);                                   // generate the J2K descriptor
+                len = makeJ2kDescriptor(pos);                                   // generate the J2K descriptor
 
-            _pkt8[j2kLengthPos] = 0xf0;                                     // fill in the length and reserved bits now
-            _pkt8[j2kLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
-            _pkt8[j2kLengthPos] =  (uint8_t) (len & 0xff);
+                _pkt8[j2kLengthPos] = 0xf0;                                     // fill in the length and reserved bits now
+                _pkt8[j2kLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
+                _pkt8[j2kLengthPos] =  (uint8_t) (len & 0xff);
+            }
 
-            // Audio
-            _pkt8[pos++] = 0x06;                                            // Audio Type
-            _pkt8[pos] = 0xe0;                                              // audio pid and reserved bits
-            _pkt8[pos++] |= (uint8_t) ((_audioNumToPID[1] >> 8) & 0x1f);
-            _pkt8[pos++] =  (uint8_t) (_audioNumToPID[1] & 0xff);
+            if (_audioNumToPID[1] != 0)
+            {
+                // Audio
+                _pkt8[pos++] = 0x06;                                            // Audio Type
+                _pkt8[pos] = 0xe0;                                              // audio pid and reserved bits
+                _pkt8[pos++] |= (uint8_t) ((_audioNumToPID[1] >> 8) & 0x1f);
+                _pkt8[pos++] =  (uint8_t) (_audioNumToPID[1] & 0xff);
 
-            audioLengthPos = pos;                                           // need to come back and fill in descriptor length so save position
-            pos+=2;
+                audioLengthPos = pos;                                           // need to come back and fill in descriptor length so save position
+                pos+=2;
 
-            len = makeAudioDescriptor(pos);                                 // generate the audio descriptor
+                len = makeAudioDescriptor(pos);                                 // generate the audio descriptor
 
-            _pkt8[audioLengthPos] = 0xf0;                                   // fill in the length and reserved bits now
-            _pkt8[audioLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
-            _pkt8[audioLengthPos] =  (uint8_t) (len & 0xff);
+                _pkt8[audioLengthPos] = 0xf0;                                   // fill in the length and reserved bits now
+                _pkt8[audioLengthPos++] |= (uint8_t) ((len >> 8) & 0x1f);
+                _pkt8[audioLengthPos] =  (uint8_t) (len & 0xff);
+            }
 
             // now we know the length so fill that in
             _pkt8[lengthPos] = 0xb0;
@@ -686,19 +692,25 @@ public:
         _pkt32[pos++] = 0x47;                                           // sync byte
         _pkt32[pos++] = ((_elemNumToPID[1] >> 8) & 0x1f);               // PID for stream
         _pkt32[pos++] = (_elemNumToPID[1] & 0xff);
-        _pkt32[pos++] = (3 << 4);                                       // Continuity Counter must increment when transmitted
-        _pkt32[pos++] = 0;                                              // pointer
-
-        _pkt32[pos++] = 0x10;                                           // pointer
 
         if (_tsEncapType == kTsEncapTypePcr)
         {
-            _pkt32[pos++] = 0x800;
+            _pkt32[pos++] = (2 << 4);                                   // Continuity Counter must increment when transmitted
+            _pkt32[pos++] = 0;                                          // pointer
+            _pkt32[pos++] = 0x10;                                       // pointer
+
+            _pkt32[pos++] = 0x800;                                      // PCR
             _pkt32[pos++] = 0x900;
             _pkt32[pos++] = 0xa00;
             _pkt32[pos++] = 0xb00;
             _pkt32[pos++] = 0xc00;
             _pkt32[pos++] = 0xd00;
+        }
+        else
+        {
+            _pkt32[pos++] = (3 << 4);                                   // Continuity Counter must increment when transmitted
+            _pkt32[pos++] = 0;                                          // pointer
+            _pkt32[pos++] = 0;                                          // pointer
         }
 
         _tableLength = pos;
