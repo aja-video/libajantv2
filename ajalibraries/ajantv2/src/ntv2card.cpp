@@ -738,6 +738,14 @@ bool CNTV2Card::GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2Reg
 }
 
 
+bool CNTV2Card::GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo)
+{
+	(void) inParamID;
+	outRegInfo.MakeInvalid();
+	return false;	//	Needs implementation
+}
+
+
 ///////////	Stream Operators
 
 ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
