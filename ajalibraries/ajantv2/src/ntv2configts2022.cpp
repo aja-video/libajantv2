@@ -344,13 +344,11 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 {
     uint32_t addr = GetIpxTsAddr(channel);
 
-    // Program registers
-    for (uint32_t index=0; index < numTsAesEncapEntries; index++)
-    {
-        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
-        //printf("SetTsAesEncap - reg=%08x, val=%08x\n",
-        //       addr + (0x800*ENCODE_TS_AES_ENCAP) + (tsAesEncapTable[index].reg), tsAesEncapTable[index].value);
-    }
+    // Number of channels - 1 (actually have one stereo pair so this is considered 1 channel)
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x0));
+    // Enable this device
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapHostEn, (0x1));
+
     return true;
 }
 

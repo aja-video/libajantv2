@@ -269,19 +269,4 @@ public:
 
 };	//	CNTV2ConfigTs2022
 
-
-struct tsSetupReg
-{
-    uint32_t reg;
-    uint32_t value;
-};
-
-static const tsSetupReg tsAesEncapTable[] =
-{
-    {0x000, 0x2},
-    {0x008, 0x1},
-};
-#define numTsAesEncapEntries (sizeof(tsAesEncapTable) / sizeof(tsSetupReg))
-
-
 #endif // NTV2_2022CONFIGTS_H
