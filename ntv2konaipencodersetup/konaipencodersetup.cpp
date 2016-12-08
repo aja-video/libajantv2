@@ -144,6 +144,9 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
 void CKonaIpEncoderJsonReader::initMaps()
 {
 
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_525_5994, false))] = NTV2_FORMAT_525_5994;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_625_5000, false))] = NTV2_FORMAT_625_5000;
+
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_5000, false))] = NTV2_FORMAT_1080i_5000;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_5994, false))] = NTV2_FORMAT_1080i_5994;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_6000, false))] = NTV2_FORMAT_1080i_6000;
