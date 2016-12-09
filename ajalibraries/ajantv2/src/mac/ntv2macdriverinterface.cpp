@@ -12,7 +12,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <assert.h>
 #include <map>
 #include <iomanip>
 #include "ntv2devicefeatures.h"
@@ -166,10 +165,14 @@ class DeviceMap
 {
 	public:
 		DeviceMap ()
-			:	mStopping		(false),
+			:	//mIOConnections,
+				//mRecheckTally,
+				//mMutex,
+				mMasterPort		(0),
+				mStopping		(false),
 				mDriverVersion	(0)
 		{
-			assert (gnBoardMaps == 0  &&  "Attempt to create more than one DeviceMap");
+			NTV2_ASSERT (gnBoardMaps == 0  &&  "Attempt to create more than one DeviceMap");
 			gnBoardMaps++;
 			::memset (&mIOConnections, 0, sizeof (mIOConnections));
 			::memset (&mRecheckTally, 0, sizeof (mRecheckTally));
@@ -181,7 +184,7 @@ class DeviceMap
 				MDIFAIL (KR(error) << "Unable to get master port");
 				return;
 			}
-			assert (mMasterPort && "No MasterPort!");
+			NTV2_ASSERT (mMasterPort && "No MasterPort!");
 			MDINOTEIF (kMacDeviceMapDebugLog_DeviceMapLifespan, "DeviceMap singleton created");
 		}
 
@@ -196,7 +199,7 @@ class DeviceMap
 		}
 
 
-		void Reset (void)
+		void Reset (const bool inResetMasterPort = false)
 		{
 			PThreadLocker autoLock (&mMutex);
 			//	Clear the device map...
@@ -210,6 +213,14 @@ class DeviceMap
 					MDINOTEIF (kMacDeviceMapDebugLog_ConnectionClose, "Device " << ndx << " connection " << HEX8 (connection) << " closed");
 				}
 			}	//	for each connection in the map
+			if (inResetMasterPort)
+			{
+				IOReturn	error	(OS_IOMasterPort (MACH_PORT_NULL, &mMasterPort));
+				if (error != kIOReturnSuccess)
+					MDIFAIL (KR(error) << "Unable to reset master port");
+				else
+					MDINOTEIF (kMacDeviceMapDebugLog_DeviceMapLifespan, "reset mMasterPort=" << HEX8 (mMasterPort));
+			}
 		}
 
 
@@ -263,7 +274,7 @@ class DeviceMap
 			io_object_t		ioObject	(0);
 			io_connect_t	ioConnect	(0);
 
-			assert (mMasterPort && "No MasterPort!");
+			NTV2_ASSERT (mMasterPort && "No MasterPort!");
 
 			//	Create an iterator to search for our driver...
 			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching (CNTV2MacDriverInterface::GetIOServiceName ()), &ioIterator);
@@ -534,9 +545,14 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 		if (!ReadRegister (kRegBoardID, reinterpret_cast<ULWord*>(&_boardID)))
 		{
 			MDIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
-			_boardNumber = 0;
-			_boardOpened = false;
-			return false;
+			if (!ReadRegister (kRegBoardID, reinterpret_cast<ULWord*>(&_boardID)))
+			{
+				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
+				_boardNumber = 0;
+				_boardOpened = false;
+				return false;
+			}
+			MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 		}
 		if (legalDeviceIDs.find (_boardID) == legalDeviceIDs.end ())
 		{
@@ -816,7 +832,7 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 		{
 			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
 											<< " -- reg=" << registerNumber << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift) << ", WILL RESET DEVICE MAP");
-			gDeviceMap.Reset ();
+			gDeviceMap.Reset (kernResult == MACH_SEND_INVALID_DEST);	//	Reset masterPort for MACH_SEND_INVALID_DEST failures
 			SleepMs (30);
 			return false;
 		}
@@ -1815,6 +1831,7 @@ bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
 			case eFlushAutoCirculate:
 			case ePrerollAutoCirculate:
 			case eSetActiveFrame:
+            case eStartAutoCircAtTime:
 			{
 				// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
 				// members of the structure based on the the command contained within it.
@@ -2630,6 +2647,7 @@ static const char * GetKernErrStr (const kern_return_t inError)
 		case kIOReturnIsoTooOld:		return "isochronous I/O request for distant past!";
 		case kIOReturnIsoTooNew:		return "isochronous I/O request for distant future";
 		case kIOReturnNotFound:			return "data was not found";
+		case MACH_SEND_INVALID_DEST:	return "MACH_SEND_INVALID_DEST";
 		case kNTV2DriverBadDMA:			return "bad dma engine num";
 		case kNTV2DriverDMABusy:		return "dma engine busy, or none available";
 		case kNTV2DriverParamErr:		return "bad aja parameter (out of range)";
