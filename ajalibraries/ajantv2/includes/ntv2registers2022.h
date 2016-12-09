@@ -27,6 +27,7 @@
 #define SAREK_2022_2_RX_CORE_0      (0x10b000/4)
 #define SAREK_2022_2_TX_CORE_1      (0x10c000/4)
 #define SAREK_2022_2_RX_CORE_1      (0x10d000/4)
+#define SAREK_REGS2                 (0x10e000/4)
 
 #define SAREK_10G_EMAC_0            (0x180000/4)
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
@@ -35,7 +36,6 @@
 #define SAREK_TS_ENCODER_1          (0x150000/4)
 #define SAREK_J2K_ENCODER_2         (0x1C0000/4)
 #define SAREK_TS_ENCODER_2          (0x1D0000/4)
-#define SAREK_REGS2                 (0x1E0000/4)
 
 #define SAREK_IPX_J2K_DECODER_1     (0x160000/4)
 #define SAREK_IPX_TS_DECODER_1      (0x170000/4)
@@ -93,17 +93,20 @@
 
 // second block
 
-#define kRegSarekProgramPID         0
-#define kRegSraekPCRPID             1
-#define kRegSarekVideoPID           2
-#define kRegSarekAudioPID           3
-#define kRegSarekActiveProgramNum   4
-#define kRegSarekActiveAudioNum     5
-#define kRegSarekMBSeqNum           6
-#define kRegSarekModeSelect         7    // set by host
-#define kRegSarekProgNumSelect      8    // set by host
-#define kRegSarekAudioNumSelect     9    // set by host
-#define kRegSarekHostSeqNum         10   // set by host
+#define kRegSarekMBSeqNum           0
+#define kRegSarekActProgramNum      1
+#define kRegSarekActProgramPID      2
+#define kRegSarekActVideoPID        3
+#define kRegSarekActAudioPID        4
+#define kRegSraekActPCRPID          5
+#define kRegSarekAudioNumChans      6
+#define kRegSarekAudioBitDepth      7
+
+#define kRegSarekHostSeqNum         12    // set by host
+#define kRegSarekModeSelect         13    // set by host
+#define kRegSarekProgNumSelect      14    // set by host
+#define kRegSarekProgPIDSelect      15    // set by host
+#define kRegSarekAudioNumSelect     16    // set by host
 
 /////////////////////////////////////////////////////////////////////
 //
