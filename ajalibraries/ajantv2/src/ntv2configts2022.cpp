@@ -236,6 +236,7 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 
 bool CNTV2ConfigTs2022::SetupTsForDecode()
 {
+    // setu
     mError = "SetupTsForDecode not yet implemented";
     return false;
 }

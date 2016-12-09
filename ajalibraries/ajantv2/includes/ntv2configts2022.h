@@ -47,6 +47,16 @@
 #define     ADAPTATION_LOOKUP               0x300
 #define     ADAPTATION_HDR_LENGTH           0x3f0
 
+typedef enum {
+    eProgSel_Off,
+    eProgSel_AutoFirstProg,
+    eProgSel_LowestProgNum,
+    eProgSel_SpecificProgNum,
+    eProgSel_SpecificProgPID,
+    eProgSel_Default = eProgSel_AutoFirstProg,
+} eProgSelMode_t;
+
+
 class j2k_encode_2022_channel
 {
 public:
