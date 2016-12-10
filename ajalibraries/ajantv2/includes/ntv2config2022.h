@@ -175,7 +175,26 @@ public:
     bool        txc_secondaryAutoMac;
 };
 
+typedef enum {
+    eProgSel_Off,
+    eProgSel_AutoFirstProg,
+    eProgSel_LowestProgNum,
+    eProgSel_SpecificProgNum,
+    eProgSel_SpecificProgPID,
+    eProgSel_Default = eProgSel_AutoFirstProg,
+} eProgSelMode_t;
 
+class j2kDecoderConfig
+{
+public:
+    j2kDecoderConfig() {init();}
+    void init();
+
+    eProgSelMode_t  selectionMode;
+    uint32_t        programNumber;
+    uint32_t        programPID;
+    uint32_t        audioNumber;
+};
 
 /**
     @brief	The CNTV2Config2022 class is the interface to Kona-IP network I/O using SMPTE 2022
@@ -185,6 +204,7 @@ class AJAExport CNTV2Config2022 : public CNTV2MBController
 {
 public:
     CNTV2Config2022 (CNTV2Card & device);
+    ~CNTV2Config2022();
 
     bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
     bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
@@ -208,6 +228,8 @@ public:
     bool        SetTxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7);
     bool        GetTxChannelEnable(NTV2Channel channel, bool & enabled);
 
+    bool        SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
+    bool        GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -233,6 +255,8 @@ public:
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
+
+    class CNTV2ConfigTs2022 * _tstreamConfig;
 
     uint32_t    GetFeatures();
     eSFP        GetRxPort(NTV2Channel chan);

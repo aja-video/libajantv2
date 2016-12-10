@@ -230,7 +230,19 @@ void tx2022Config::init()
     }
 }
 
+void j2kDecoderConfig::init()
+{
+    selectionMode = eProgSel_Default;
+    programNumber = 1;
+    programPID    = 0;
+    audioNumber   = 1;
+}
 
+//////////////////////////////////////////////////////////////////////////////////
+//
+//  CNTV2Config2022
+//
+//////////////////////////////////////////////////////////////////////////////////
 
 CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
 {
@@ -250,6 +262,20 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     _is_txTop34 = ((features & SAREK_TX_TOP34) != 0);
 
     _biDirectionalChannels = false;
+
+    _tstreamConfig = NULL;
+    if (_is2022_2)
+    {
+        _tstreamConfig = new CNTV2ConfigTs2022(device);
+    }
+}
+
+CNTV2Config2022::~CNTV2Config2022()
+{
+    if (_is2022_2)
+    {
+        delete _tstreamConfig;
+    }
 }
 
 bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig)
@@ -536,13 +562,6 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
-
-    if (_is2022_2)
-    {
-        CNTV2ConfigTs2022 tsConfig(mDevice);
-        tsConfig.SetupTsForDecode();
-        tsConfig.SetupJ2KDecoder();
-    }
 
     // if already enabled, make sure IGMP subscriptions are updated
     bool enabled = false;
@@ -1246,6 +1265,21 @@ bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
     return true;
 }
 
+bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
+        return rv;
+    }
+    return false;
+}
+
+bool CNTV2Config2022::GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+{
+    return false;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 //

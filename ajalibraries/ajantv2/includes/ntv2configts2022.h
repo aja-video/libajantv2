@@ -12,6 +12,7 @@
 #include "ntv2registers2022.h"
 #include "ntv2mbcontroller.h"
 #include "ntv2tshelper.h"
+#include "ntv2config2022.h"
 #include <string.h>
 
 // Encoder part numbers
@@ -46,16 +47,6 @@
 #define     PMT_TABLE_LOOKUP                0x200
 #define     ADAPTATION_LOOKUP               0x300
 #define     ADAPTATION_HDR_LENGTH           0x3f0
-
-typedef enum {
-    eProgSel_Off,
-    eProgSel_AutoFirstProg,
-    eProgSel_LowestProgNum,
-    eProgSel_SpecificProgNum,
-    eProgSel_SpecificProgPID,
-    eProgSel_Default = eProgSel_AutoFirstProg,
-} eProgSelMode_t;
-
 
 class j2k_encode_2022_channel
 {
@@ -222,13 +213,11 @@ public:
     bool    SetupJ2KEncoder(const NTV2Channel channel);
 
     // Setup the J2K decoder
-    bool    SetupJ2KDecoder();
+    bool    SetupJ2KDecoder(const  j2kDecoderConfig & config);
+    bool    ReadbackJ2KDecoder(j2kDecoderConfig &config);
 
     // Setup the TS encode parts
     bool    SetupTsForEncode(const NTV2Channel channel);
-
-    // Setup the TS decode parts
-    bool    SetupTsForDecode();
 
     // If method returns false call this to get details
     std::string getLastError();
