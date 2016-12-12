@@ -80,7 +80,8 @@ def main ():
 
     print "## NOTE:  Starting Pre-Check"
     stuff_to_check =	{	'name':	'Pre-Check',		'must-exist': [	'ntv2sdkmac_*.zip',		'ntv2sdkwin_*.zip',		'ntv2sdklinux_*.zip',
-    																	'config.doxy',			'doxygen',				'installers/pythonlib' ]	}
+    																	'config.doxy',			'doxygen',				'installers/pythonlib',
+    																	'ajaapps/crossplatform/demoapps' ]	}
     result_code = aja.utils.check (stuff_to_check)
     if result_code <> 0:
         print "## NOTE:  Unzip Phase skipped due to error(s)"

@@ -667,8 +667,9 @@ INPUT                  =	ajalibraries/ajantv2/includes			\
 							ajalibraries/ajantv2/src/mac			\
 							ajalibraries/ajantv2/src/win			\
 							ajaapps/crossplatform/demoapps			\
-							ajalibraries/ajantv2/democlasses		\
-							ajalibraries/ajabase					\
+							ajalibraries/ajabase/common				\
+							ajalibraries/ajabase/pnp				\
+							ajalibraries/ajabase/system				\
 							ajalibraries/ajaanc/includes			\
 							ajalibraries/ajacc/includes				\
 							doxygen
@@ -721,9 +722,8 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                =	ajalibraries/ajabase/persistence/sqlite3.c						\
-                            ajalibraries/ajabase/persistence/sqlite3.h						\
-							ajalibraries/ajantv2/classes/dllmain.cpp						\
+EXCLUDE                =	ajalibraries/ajabase/persistence								\
+							ajalibraries/ajantv2/src/dllmain.cpp							\
 							ajaapps/crossplatform/demoapps/dpxplayer						\
 							ajaapps/crossplatform/demoapps/ntv2dpxplayer					\
 							ajaapps/crossplatform/demoapps/ntv2playcorder					\
@@ -1601,7 +1601,15 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH           = ntv2projects/classes	ntv2projects/includes	ntv2projects/macclasses
+INCLUDE_PATH           =	ajalibraries/ajantv2/includes		\
+							ajaapps/crossplatform/demoapps		\
+							ajalibraries/ajacc/includes			\
+							ajalibraries/ajaanc/includes		\
+							ajalibraries/ajabase/common			\
+							ajalibraries/ajabase/pnp			\
+							ajalibraries/ajabase/pnp/mac		\
+							ajalibraries/ajabase/system			\
+							ajalibraries/ajabase/system/mac
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
