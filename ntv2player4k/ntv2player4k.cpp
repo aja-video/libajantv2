@@ -47,6 +47,7 @@ NTV2Player4K::NTV2Player4K (const Player4KConfig & config)
 		mChannel					(config.fChannel),
 		mVideoFormat				(config.fVideoFormat),
 		mPixelFormat				(config.fPixelFormat),
+		mVancMode					(NTV2_VANCMODE_OFF),
 		mAudioSystem				(NTV2_AUDIOSYSTEM_1),
 		mDoMultiChannel				(config.fDoMultiChannel),
 		mDoTsiRouting				(config.fDoTsiRouting),
