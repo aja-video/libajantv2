@@ -46,7 +46,7 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kRegSarekResetMB            0
+#define kRegSarekControl            0
 #define kRegSarekPma                1
 #define kRegSarekSpiSelect          2
 #define kRegSarekRxReset            3
@@ -113,6 +113,18 @@
 // 2022 Sarek General Registers Bit Definitions
 //
 /////////////////////////////////////////////////////////////////////
+
+#define RESET_MB                    BIT(0)
+#define VIRTUAL_UART                BIT(4)
+#define ENCODER_1_ENABLE            BIT(16)
+#define ENCODER_1_MD_ENABLE         BIT(17)
+#define ENCODER_1_SF_ENABLE         BIT(18)
+#define DECODER_1_NON_ELSM          BIT(19)
+#define ENCODER_1_CFG_NUM           (BIT(20) + BIT(21) + BIT(22))
+#define ENCODER_2_ENABLE            BIT(24)
+#define ENCODER_2_MD_ENABLE         BIT(25)
+#define ENCODER_2_SF_ENABLE         BIT(26)
+#define DECODER_2_NON_ELSM          (BIT(28) + BIT(29() + BIT(30))
 
 #define SAREK_2022_6                BIT(0)
 #define SAREK_2022_2                BIT(1)
