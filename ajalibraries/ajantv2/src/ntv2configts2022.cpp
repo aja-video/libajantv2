@@ -196,13 +196,33 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
 }
 
 
-bool CNTV2ConfigTs2022::SetupJ2KDecoder()
+bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
 {
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPrpMainCsr, 0x10);   // prp mode play
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPopMainCsr, 0x12);   // pop mode play once
+
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekModeSelect,(uint32_t) config.selectionMode);
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  config.programNumber);
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  config.programPID);
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, config.audioNumber);
+
+    uint32_t seqNum;
+    mDevice.ReadRegister( SAREK_REGS2 + kRegSarekHostSeqNum, &seqNum);
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekHostSeqNum, ++seqNum);
+
     return true;
 }
 
+bool CNTV2ConfigTs2022::ReadbackJ2KDecoder(j2kDecoderConfig &config)
+{
+
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, (uint32_t*)&config.selectionMode);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  &config.programNumber);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  &config.programPID);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, &config.audioNumber);
+
+    return true;
+}
 
 bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 {
@@ -233,12 +253,6 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
     return true;
 }
 
-
-bool CNTV2ConfigTs2022::SetupTsForDecode()
-{
-    mError = "SetupTsForDecode not yet implemented";
-    return false;
-}
 
 // Private functions
 

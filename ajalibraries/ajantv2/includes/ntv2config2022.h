@@ -38,57 +38,14 @@ typedef struct
 class tx_2022_channel
 {
 public:
-    tx_2022_channel()
-    {
-        primaryLocalPort  = 0;
-        primaryRemoteIP.erase();
-        primaryRemotePort = 0;
-        primaryAutoMAC = false;
-        memset(primaryRemoteMAC.mac, 0, sizeof(MACAddr));
-        secondaryLocalPort  = 0;
-        secondaryRemoteIP.erase();
-        secondaryRemotePort = 0;
-        secondaryAutoMAC = false;
-        memset(secondaryRemoteMAC.mac, 0, sizeof(MACAddr));
-    }
-    
-    bool eq_MACAddr(const MACAddr& a)
-    {
-        if ( memcmp(primaryRemoteMAC.mac, a.mac, 6) == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
-    bool operator != ( const tx_2022_channel &other ) {
-        return !(*this == other);
-    }
-    
-    bool operator == ( const tx_2022_channel &other )
-    {
-        if ((primaryLocalPort       == other.primaryLocalPort)      &&
-            (primaryRemoteIP        == other.primaryRemoteIP)       &&
-            (primaryRemotePort      == other.primaryRemotePort)     &&
-            (primaryAutoMAC         == other.primaryAutoMAC)        &&
-            (eq_MACAddr(other.primaryRemoteMAC))                    &&
+    tx_2022_channel() { init(); }
 
-            (secondaryLocalPort     == other.secondaryLocalPort)    &&
-            (secondaryRemoteIP      == other.secondaryRemoteIP)     &&
-            (secondaryRemotePort    == other.secondaryRemotePort)   &&
-            (secondaryAutoMAC       == other.secondaryAutoMAC)      &&
-            (eq_MACAddr(other.secondaryRemoteMAC)))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    void init();
+
+    bool eq_MACAddr(const MACAddr& a);
+    
+    bool operator != ( const tx_2022_channel &other );
+    bool operator == ( const tx_2022_channel &other );
     
 public:
     uint32_t	primaryLocalPort;		///< @brief	Specifies the local (source) port number.
@@ -111,56 +68,12 @@ public:
 class rx_2022_channel
 {
 public:
-    rx_2022_channel()
-    {
-        primaryRxMatch  = 0;
-        primarySourceIP.erase();
-        primaryDestIP.erase();
-        primarySourcePort = 0;
-        primaryDestPort = 0;
-        primarySsrc = 0;
-        primaryVlan = 0;
-        secondaryRxMatch  = 0;
-        secondarySourceIP.erase();
-        secondaryDestIP.erase();
-        secondarySourcePort = 0;
-        secondaryDestPort = 0;
-        secondarySsrc = 0;
-        secondaryVlan = 0;
-        networkPathDiff = 50;
-        playoutDelay = 50;
-    }
-    
-    bool operator != ( const rx_2022_channel &other ) {
-        return !(*this == other);
-    }
-    
-    bool operator == ( const rx_2022_channel &other )
-{
-        if ((primaryRxMatch        == other.primaryRxMatch)       &&
-            (primarySourceIP       == other.primarySourceIP)      &&
-            (primaryDestIP         == other.primaryDestIP)        &&
-            (primarySourcePort     == other.primarySourcePort)    &&
-            (primaryDestPort       == other.primaryDestPort)      &&
-            (primarySsrc           == other.primarySsrc)          &&
-            (primaryVlan           == other.primaryVlan)          &&
-            (secondaryRxMatch      == other.secondaryRxMatch)     &&
-            (secondarySourceIP     == other.secondarySourceIP)    &&
-            (secondaryDestIP       == other.secondaryDestIP)      &&
-            (secondarySourcePort   == other.secondarySourcePort)  &&
-            (secondaryDestPort     == other.secondaryDestPort)    &&
-            (secondarySsrc         == other.secondarySsrc)        &&
-            (secondaryVlan         == other.secondaryVlan)        &&
-            (networkPathDiff       == other.networkPathDiff)      &&
-            (playoutDelay          == other.playoutDelay))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    rx_2022_channel() { init(); }
+
+    void init();
+
+    bool operator != ( const rx_2022_channel &other );
+    bool operator == ( const rx_2022_channel &other );
     
 public:
     uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
@@ -186,8 +99,16 @@ public:
 };
 
 
-struct IPVNetConfig
+class IPVNetConfig
 {
+public:
+    IPVNetConfig() { init(); }
+
+    void init();
+
+    bool operator == ( const IPVNetConfig &other );
+    bool operator != ( const IPVNetConfig &other );
+
     uint32_t    ipc_ip;
     uint32_t    ipc_subnet;
     uint32_t    ipc_gateway;
@@ -196,8 +117,17 @@ struct IPVNetConfig
 
 // These structs are used internally be retail services
 
-struct rx2022Config
+class rx2022Config
 {
+public:
+
+    rx2022Config() { init(); }
+
+    void init();
+
+    bool operator == ( const rx2022Config &other );
+    bool operator != ( const rx2022Config &other );
+
     bool        rxc_enable;
     
     uint32_t    rxc_primaryRxMatch;
@@ -220,8 +150,17 @@ struct rx2022Config
     uint32_t	rxc_playoutDelay;
  };
 
-struct tx2022Config
+class tx2022Config
 {
+public:
+
+    tx2022Config() { init(); }
+
+    void init();
+
+    bool operator == ( const tx2022Config &other );
+    bool operator != ( const tx2022Config &other );
+
     bool        txc_enable;
     
     uint32_t    txc_primaryLocalPort;
@@ -239,15 +178,26 @@ struct tx2022Config
     bool        txc_secondaryAutoMac;
 };
 
+typedef enum {
+    eProgSel_Off,
+    eProgSel_AutoFirstProg,
+    eProgSel_LowestProgNum,
+    eProgSel_SpecificProgNum,
+    eProgSel_SpecificProgPID,
+    eProgSel_Default = eProgSel_AutoFirstProg,
+} eProgSelMode_t;
 
-AJAExport void reset_tx2022Config(tx2022Config& structure);
-AJAExport void reset_rx2022Config(rx2022Config& structure);
-AJAExport void reset_IPVNetConfig(IPVNetConfig& structure);
+class j2kDecoderConfig
+{
+public:
+    j2kDecoderConfig() {init();}
+    void init();
 
-AJAExport bool equal_tx2022Config(const tx2022Config& a, const tx2022Config& b);
-AJAExport bool equal_rx2022Config(const rx2022Config& a, const rx2022Config& b);
-AJAExport bool equal_IPVNetConfig(const IPVNetConfig& a, const IPVNetConfig& b);
-
+    eProgSelMode_t  selectionMode;
+    uint32_t        programNumber;
+    uint32_t        programPID;
+    uint32_t        audioNumber;
+};
 
 /**
     @brief	The CNTV2Config2022 class is the interface to Kona-IP network I/O using SMPTE 2022
@@ -257,6 +207,7 @@ class AJAExport CNTV2Config2022 : public CNTV2MBController
 {
 public:
     CNTV2Config2022 (CNTV2Card & device);
+    ~CNTV2Config2022();
 
     bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
     bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
@@ -280,6 +231,8 @@ public:
     bool        SetTxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7);
     bool        GetTxChannelEnable(NTV2Channel channel, bool & enabled);
 
+    bool        SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
+    bool        GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -305,6 +258,8 @@ public:
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
+
+    class CNTV2ConfigTs2022 * _tstreamConfig;
 
     uint32_t    GetFeatures();
     eSFP        GetRxPort(NTV2Channel chan);
