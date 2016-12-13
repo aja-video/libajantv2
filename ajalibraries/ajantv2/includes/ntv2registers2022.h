@@ -27,6 +27,7 @@
 #define SAREK_2022_2_RX_CORE_0      (0x10b000/4)
 #define SAREK_2022_2_TX_CORE_1      (0x10c000/4)
 #define SAREK_2022_2_RX_CORE_1      (0x10d000/4)
+#define SAREK_REGS2                 (0x10e000/4)
 
 #define SAREK_10G_EMAC_0            (0x180000/4)
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
@@ -45,7 +46,7 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kRegSarekResetMB            0
+#define kRegSarekControl            0
 #define kRegSarekPma                1
 #define kRegSarekSpiSelect          2
 #define kRegSarekRxReset            3
@@ -90,11 +91,40 @@
 #define kRegSarekRx3Drops           42
 #define kRegSarekRx4Drops           43
 
+// second block
+
+#define kRegSarekMBSeqNum           0
+#define kRegSarekActProgramNum      1
+#define kRegSarekActProgramPID      2
+#define kRegSarekActVideoPID        3
+#define kRegSarekActAudioPID        4
+#define kRegSraekActPCRPID          5
+#define kRegSarekAudioNumChans      6
+#define kRegSarekAudioBitDepth      7
+
+#define kRegSarekHostSeqNum         12    // set by host
+#define kRegSarekModeSelect         13    // set by host
+#define kRegSarekProgNumSelect      14    // set by host
+#define kRegSarekProgPIDSelect      15    // set by host
+#define kRegSarekAudioNumSelect     16    // set by host
+
 /////////////////////////////////////////////////////////////////////
 //
 // 2022 Sarek General Registers Bit Definitions
 //
 /////////////////////////////////////////////////////////////////////
+
+#define RESET_MB                    BIT(0)
+#define VIRTUAL_UART                BIT(4)
+#define ENCODER_1_ENABLE            BIT(16)
+#define ENCODER_1_MD_ENABLE         BIT(17)
+#define ENCODER_1_SF_ENABLE         BIT(18)
+#define DECODER_1_NON_ELSM          BIT(19)
+#define ENCODER_1_CFG_NUM           (BIT(20) + BIT(21) + BIT(22))
+#define ENCODER_2_ENABLE            BIT(24)
+#define ENCODER_2_MD_ENABLE         BIT(25)
+#define ENCODER_2_SF_ENABLE         BIT(26)
+#define DECODER_2_NON_ELSM          (BIT(28) + BIT(29() + BIT(30))
 
 #define SAREK_2022_6                BIT(0)
 #define SAREK_2022_2                BIT(1)

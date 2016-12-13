@@ -12,6 +12,7 @@
 #include "ntv2registers2022.h"
 #include "ntv2mbcontroller.h"
 #include "ntv2tshelper.h"
+#include "ntv2config2022.h"
 #include <string.h>
 
 // Encoder part numbers
@@ -212,13 +213,11 @@ public:
     bool    SetupJ2KEncoder(const NTV2Channel channel);
 
     // Setup the J2K decoder
-    bool    SetupJ2KDecoder();
+    bool    SetupJ2KDecoder(const  j2kDecoderConfig & config);
+    bool    ReadbackJ2KDecoder(j2kDecoderConfig &config);
 
     // Setup the TS encode parts
     bool    SetupTsForEncode(const NTV2Channel channel);
-
-    // Setup the TS decode parts
-    bool    SetupTsForDecode();
 
     // If method returns false call this to get details
     std::string getLastError();
