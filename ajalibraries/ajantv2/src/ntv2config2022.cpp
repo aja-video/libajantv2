@@ -17,69 +17,45 @@
 	#include <arpa/inet.h>
 #endif
 
-
 using namespace std;
 
-void reset_rx2022Config(rx2022Config& structure)
+void tx_2022_channel::init()
 {
-    structure.rxc_enable  = 0;
-    structure.rxc_primaryRxMatch = 0;
-    structure.rxc_primarySourceIp = 0;
-    structure.rxc_primaryDestIp = 0;
-    structure.rxc_primarySourcePort = 0;
-    structure.rxc_primaryDestPort  = 0;
-    structure.rxc_primarySsrc = 0;
-    structure.rxc_primaryVlan = 0;
-    structure.rxc_secondaryRxMatch = 0;
-    structure.rxc_secondarySourceIp = 0;
-    structure.rxc_secondaryDestIp = 0;
-    structure.rxc_secondarySourcePort = 0;
-    structure.rxc_secondaryDestPort  = 0;
-    structure.rxc_secondarySsrc = 0;
-    structure.rxc_secondaryVlan = 0;
-    structure.rxc_networkPathDiff = 50;
-    structure.rxc_playoutDelay = 50;
+    primaryLocalPort    = 0;
+    primaryRemoteIP.erase();
+    primaryRemotePort   = 0;
+    primaryAutoMAC      = false;
+    memset(primaryRemoteMAC.mac, 0, sizeof(MACAddr));
+    secondaryLocalPort  = 0;
+    secondaryRemoteIP.erase();
+    secondaryRemotePort = 0;
+    secondaryAutoMAC    = false;
+    memset(secondaryRemoteMAC.mac, 0, sizeof(MACAddr));
 }
 
-void reset_tx2022Config(tx2022Config& structure)
+bool tx_2022_channel::eq_MACAddr(const MACAddr& a)
 {
-    structure.txc_enable  = 0;
-    structure.txc_primaryLocalPort = 0;
-    structure.txc_primaryRemoteIp = 0;
-    structure.txc_primaryRemotePort = 0;
-    structure.txc_primaryRemoteMAC_lo = 0;
-    structure.txc_primaryRemoteMAC_hi  = 0;
-    structure.txc_primaryAutoMac = 0;
-    structure.txc_secondaryLocalPort = 0;
-    structure.txc_secondaryRemoteIp = 0;
-    structure.txc_secondaryRemotePort = 0;
-    structure.txc_secondaryRemoteMAC_lo = 0;
-    structure.txc_secondaryRemoteMAC_hi = 0;
-    structure.txc_secondaryAutoMac  = 0;
+    return (memcmp(primaryRemoteMAC.mac, a.mac, 6) == 0);
 }
 
-void reset_IPVNetConfig(IPVNetConfig &structure)
+bool tx_2022_channel::operator != ( const tx_2022_channel &other )
 {
-    structure.ipc_gateway = 0;
-    structure.ipc_ip = 0;
-    structure.ipc_subnet = 0;
+    return !(*this == other);
 }
 
-AJAExport bool equal_tx2022Config(const tx2022Config& a, const tx2022Config& b)
+bool tx_2022_channel::operator == ( const tx_2022_channel &other )
 {
-    if ((a.txc_enable                   == b.txc_enable)                &&
-        (a.txc_primaryLocalPort         == b.txc_primaryLocalPort)      &&
-        (a.txc_primaryRemoteIp          == b.txc_primaryRemoteIp)       &&
-        (a.txc_primaryRemotePort        == b.txc_primaryRemotePort)     &&
-        (a.txc_primaryRemoteMAC_lo      == b.txc_primaryRemoteMAC_lo)   &&
-        (a.txc_primaryRemoteMAC_hi      == b.txc_primaryRemoteMAC_hi)   &&
-        (a.txc_primaryAutoMac           == b.txc_primaryAutoMac)        &&
-        (a.txc_secondaryLocalPort       == b.txc_secondaryLocalPort)    &&
-        (a.txc_secondaryRemoteIp        == b.txc_secondaryRemoteIp)     &&
-        (a.txc_secondaryRemotePort      == b.txc_secondaryRemotePort)   &&
-        (a.txc_secondaryRemoteMAC_lo    == b.txc_secondaryRemoteMAC_lo) &&
-        (a.txc_secondaryRemoteMAC_hi    == b.txc_secondaryRemoteMAC_hi) &&
-        (a.txc_secondaryAutoMac         == b.txc_secondaryAutoMac))
+    if ((primaryLocalPort       == other.primaryLocalPort)      &&
+        (primaryRemoteIP        == other.primaryRemoteIP)       &&
+        (primaryRemotePort      == other.primaryRemotePort)     &&
+        (primaryAutoMAC         == other.primaryAutoMAC)        &&
+        (eq_MACAddr(other.primaryRemoteMAC))                    &&
+
+        (secondaryLocalPort     == other.secondaryLocalPort)    &&
+        (secondaryRemoteIP      == other.secondaryRemoteIP)     &&
+        (secondaryRemotePort    == other.secondaryRemotePort)   &&
+        (secondaryAutoMAC       == other.secondaryAutoMAC)      &&
+        (eq_MACAddr(other.secondaryRemoteMAC)))
     {
         return true;
     }
@@ -89,25 +65,49 @@ AJAExport bool equal_tx2022Config(const tx2022Config& a, const tx2022Config& b)
     }
 }
 
-AJAExport bool equal_rx2022Config(const rx2022Config& a, const rx2022Config& b)
+void rx_2022_channel::init()
 {
-    if ((a.rxc_enable                   == b.rxc_enable)                &&
-        (a.rxc_primaryRxMatch           == b.rxc_primaryRxMatch)        &&
-        (a.rxc_primarySourceIp          == b.rxc_primarySourceIp)       &&
-        (a.rxc_primaryDestIp            == b.rxc_primaryDestIp)         &&
-        (a.rxc_primarySourcePort        == b.rxc_primarySourcePort)     &&
-        (a.rxc_primaryDestPort          == b.rxc_primaryDestPort)       &&
-        (a.rxc_primarySsrc              == b.rxc_primarySsrc)           &&
-        (a.rxc_primaryVlan              == b.rxc_primaryVlan)           &&
-        (a.rxc_secondaryRxMatch         == b.rxc_secondaryRxMatch)      &&
-        (a.rxc_secondarySourceIp        == b.rxc_secondarySourceIp)     &&
-        (a.rxc_secondaryDestIp          == b.rxc_secondaryDestIp)       &&
-        (a.rxc_secondarySourcePort      == b.rxc_secondarySourcePort)   &&
-        (a.rxc_secondaryDestPort        == b.rxc_secondaryDestPort)     &&
-        (a.rxc_secondarySsrc            == b.rxc_secondarySsrc)         &&
-        (a.rxc_secondaryVlan            == b.rxc_secondaryVlan)         &&
-        (a.rxc_networkPathDiff          == b.rxc_networkPathDiff)       &&
-        (a.rxc_playoutDelay             == b.rxc_playoutDelay))
+    primaryRxMatch  = 0;
+    primarySourceIP.erase();
+    primaryDestIP.erase();
+    primarySourcePort = 0;
+    primaryDestPort = 0;
+    primarySsrc = 0;
+    primaryVlan = 0;
+    secondaryRxMatch  = 0;
+    secondarySourceIP.erase();
+    secondaryDestIP.erase();
+    secondarySourcePort = 0;
+    secondaryDestPort = 0;
+    secondarySsrc = 0;
+    secondaryVlan = 0;
+    networkPathDiff = 50;
+    playoutDelay = 50;
+}
+
+bool rx_2022_channel::operator != ( const rx_2022_channel &other )
+{
+    return !(*this == other);
+}
+
+bool rx_2022_channel::operator == ( const rx_2022_channel &other )
+{
+    if ((primaryRxMatch        == other.primaryRxMatch)       &&
+        (primarySourceIP       == other.primarySourceIP)      &&
+        (primaryDestIP         == other.primaryDestIP)        &&
+        (primarySourcePort     == other.primarySourcePort)    &&
+        (primaryDestPort       == other.primaryDestPort)      &&
+        (primarySsrc           == other.primarySsrc)          &&
+        (primaryVlan           == other.primaryVlan)          &&
+        (secondaryRxMatch      == other.secondaryRxMatch)     &&
+        (secondarySourceIP     == other.secondarySourceIP)    &&
+        (secondaryDestIP       == other.secondaryDestIP)      &&
+        (secondarySourcePort   == other.secondarySourcePort)  &&
+        (secondaryDestPort     == other.secondaryDestPort)    &&
+        (secondarySsrc         == other.secondarySsrc)        &&
+        (secondaryVlan         == other.secondaryVlan)        &&
+        (networkPathDiff       == other.networkPathDiff)      &&
+        (playoutDelay          == other.playoutDelay))
     {
         return true;
     }
@@ -117,11 +117,23 @@ AJAExport bool equal_rx2022Config(const rx2022Config& a, const rx2022Config& b)
     }
 }
 
-bool equal_IPVNetConfig(const IPVNetConfig& a, const IPVNetConfig& b)
+void IPVNetConfig::init()
 {
-    if ((a.ipc_gateway  == b.ipc_gateway)   &&
-        (a.ipc_ip       == b.ipc_ip)        &&
-        (a.ipc_subnet   == b.ipc_subnet))
+    ipc_gateway = 0;
+    ipc_ip = 0;
+    ipc_subnet = 0;
+}
+
+bool IPVNetConfig::operator != ( const IPVNetConfig &other )
+{
+    return (!(*this == other));
+}
+
+bool IPVNetConfig::operator == ( const IPVNetConfig &other )
+{
+    if ((ipc_gateway  == other.ipc_gateway)   &&
+        (ipc_ip       == other.ipc_ip)        &&
+        (ipc_subnet   == other.ipc_subnet))
     {
         return true;
     }
@@ -130,6 +142,120 @@ bool equal_IPVNetConfig(const IPVNetConfig& a, const IPVNetConfig& b)
         return false;
     }
 }
+
+void rx2022Config::init()
+{
+    rxc_enable  = 0;
+    rxc_primaryRxMatch = 0;
+    rxc_primarySourceIp = 0;
+    rxc_primaryDestIp = 0;
+    rxc_primarySourcePort = 0;
+    rxc_primaryDestPort  = 0;
+    rxc_primarySsrc = 0;
+    rxc_primaryVlan = 0;
+    rxc_secondaryRxMatch = 0;
+    rxc_secondarySourceIp = 0;
+    rxc_secondaryDestIp = 0;
+    rxc_secondarySourcePort = 0;
+    rxc_secondaryDestPort  = 0;
+    rxc_secondarySsrc = 0;
+    rxc_secondaryVlan = 0;
+    rxc_networkPathDiff = 50;
+    rxc_playoutDelay = 50;
+}
+
+void tx2022Config::init()
+{
+    txc_enable  = 0;
+    txc_primaryLocalPort = 0;
+    txc_primaryRemoteIp = 0;
+    txc_primaryRemotePort = 0;
+    txc_primaryRemoteMAC_lo = 0;
+    txc_primaryRemoteMAC_hi  = 0;
+    txc_primaryAutoMac = 0;
+    txc_secondaryLocalPort = 0;
+    txc_secondaryRemoteIp = 0;
+    txc_secondaryRemotePort = 0;
+    txc_secondaryRemoteMAC_lo = 0;
+    txc_secondaryRemoteMAC_hi = 0;
+    txc_secondaryAutoMac  = 0;
+}
+
+
+bool tx2022Config::operator != ( const tx2022Config &other )
+{
+    return (!(*this == other));
+}
+
+bool tx2022Config::operator == ( const tx2022Config &other )
+{
+    if ((txc_enable                   == other.txc_enable)                &&
+        (txc_primaryLocalPort         == other.txc_primaryLocalPort)      &&
+        (txc_primaryRemoteIp          == other.txc_primaryRemoteIp)       &&
+        (txc_primaryRemotePort        == other.txc_primaryRemotePort)     &&
+        (txc_primaryRemoteMAC_lo      == other.txc_primaryRemoteMAC_lo)   &&
+        (txc_primaryRemoteMAC_hi      == other.txc_primaryRemoteMAC_hi)   &&
+        (txc_primaryAutoMac           == other.txc_primaryAutoMac)        &&
+        (txc_secondaryLocalPort       == other.txc_secondaryLocalPort)    &&
+        (txc_secondaryRemoteIp        == other.txc_secondaryRemoteIp)     &&
+        (txc_secondaryRemotePort      == other.txc_secondaryRemotePort)   &&
+        (txc_secondaryRemoteMAC_lo    == other.txc_secondaryRemoteMAC_lo) &&
+        (txc_secondaryRemoteMAC_hi    == other.txc_secondaryRemoteMAC_hi) &&
+        (txc_secondaryAutoMac         == other.txc_secondaryAutoMac))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+bool rx2022Config::operator != ( const rx2022Config &other )
+{
+    return (!(*this == other));
+}
+
+bool rx2022Config::operator == ( const rx2022Config &other )
+{
+    if ((rxc_enable                   == other.rxc_enable)                &&
+        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
+        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
+        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
+        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
+        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
+        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
+        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
+        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
+        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
+        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
+        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
+        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
+        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
+        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
+        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
+        (rxc_playoutDelay             == other.rxc_playoutDelay))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void j2kDecoderConfig::init()
+{
+    selectionMode = eProgSel_Default;
+    programNumber = 1;
+    programPID    = 0;
+    audioNumber   = 1;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//
+//  CNTV2Config2022
+//
+//////////////////////////////////////////////////////////////////////////////////
 
 CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
 {
@@ -149,6 +275,20 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     _is_txTop34 = ((features & SAREK_TX_TOP34) != 0);
 
     _biDirectionalChannels = false;
+
+    _tstreamConfig = NULL;
+    if (_is2022_2)
+    {
+        _tstreamConfig = new CNTV2ConfigTs2022(device);
+    }
+}
+
+CNTV2Config2022::~CNTV2Config2022()
+{
+    if (_is2022_2)
+    {
+        delete _tstreamConfig;
+    }
 }
 
 bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig)
@@ -435,13 +575,6 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
-
-    if (_is2022_2)
-    {
-        CNTV2ConfigTs2022 tsConfig(mDevice);
-        tsConfig.SetupTsForDecode();
-        tsConfig.SetupJ2KDecoder();
-    }
 
     // if already enabled, make sure IGMP subscriptions are updated
     bool enabled = false;
@@ -1145,6 +1278,21 @@ bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
     return true;
 }
 
+bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
+        return rv;
+    }
+    return false;
+}
+
+bool CNTV2Config2022::GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+{
+    return false;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 //

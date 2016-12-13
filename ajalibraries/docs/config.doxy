@@ -666,7 +666,7 @@ INPUT                  =	ajalibraries/ajantv2/includes			\
 							ajalibraries/ajantv2/src/lin			\
 							ajalibraries/ajantv2/src/mac			\
 							ajalibraries/ajantv2/src/win			\
-							ajalibraries/ajantv2/demoapps			\
+							ajaapps/crossplatform/demoapps			\
 							ajalibraries/ajantv2/democlasses		\
 							ajalibraries/ajabase					\
 							ajalibraries/ajaanc/includes			\
