@@ -28,7 +28,7 @@
 **/
 typedef enum _NTV2BoolParamID
 {
-	kDeviceCanChangeEmbeddedAudioClock,			///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
+//	kDeviceCanChangeEmbeddedAudioClock,			///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
 	kDeviceCanChangeFrameBufferSize,			///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device does not have fixed frame buffer sizes.
 	kDeviceCanDisableUFC,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one UFC, and it can be disabled.
 	kDeviceCanDo2KVideo,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is capable of handling 2Kx1556 video.
@@ -40,24 +40,24 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoAnalogAudio,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog audio input or output.
 	kDeviceCanDoAnalogVideoIn,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video input.
 	kDeviceCanDoAnalogVideoOut,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video output.
-	kDeviceCanDoAudio2Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 2 audio channels.
-	kDeviceCanDoAudio6Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 6 audio channels.
-	kDeviceCanDoAudio8Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 8 audio channels.
-	kDeviceCanDoAudio96K,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device can be set to a 96kHz sample rate.
-	kDeviceCanDoAudioDelay,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device have an adjustable delay.
+//	kDeviceCanDoAudio2Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 2 audio channels.
+//	kDeviceCanDoAudio6Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 6 audio channels.
+//	kDeviceCanDoAudio8Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 8 audio channels.
+//	kDeviceCanDoAudio96K,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device can be set to a 96kHz sample rate.
+//	kDeviceCanDoAudioDelay,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device have an adjustable delay.
 	kDeviceCanDoBreakoutBox,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can be connected to an AJA breakout box.
 	kDeviceCanDoCapture,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can capture (ingest) video.
-	kDeviceCanDoColorCorrection,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable LUT.
-	kDeviceCanDoCustomAnc,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports ANC insertion/extraction.
-	kDeviceCanDoDSKOpacity,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has a mixer/keyer whose opacity is adjustable.
-	kDeviceCanDoDualLink,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can input/output 10-bit RGB over 2-wire SDI.
-	kDeviceCanDoDVCProHD,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
-	kDeviceCanDoEnhancedCSC,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has enhanced color space converter capability.
-	kDeviceCanDoFrameStore1Display,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can display video from frame store 1.
-	kDeviceCanDoFreezeOutput,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can freeze output video.
-	kDeviceCanDoHDMIOutStereo,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle 3D-stereo video output over HDMI.
-	kDeviceCanDoHDV,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080 and 1440x1080.
-	kDeviceCanDoHDVideo,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle HD (High Definition) video.
+//	kDeviceCanDoColorCorrection,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable LUT.
+//	kDeviceCanDoCustomAnc,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports ANC insertion/extraction.
+//	kDeviceCanDoDSKOpacity,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has a mixer/keyer whose opacity is adjustable.
+//	kDeviceCanDoDualLink,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can input/output 10-bit RGB over 2-wire SDI.
+//	kDeviceCanDoDVCProHD,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
+//	kDeviceCanDoEnhancedCSC,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has enhanced color space converter capability.
+//	kDeviceCanDoFrameStore1Display,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can display video from frame store 1.
+//	kDeviceCanDoFreezeOutput,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can freeze output video.
+//	kDeviceCanDoHDMIOutStereo,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle 3D-stereo video output over HDMI.
+//	kDeviceCanDoHDV,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080 and 1440x1080.
+//	kDeviceCanDoHDVideo,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle HD (High Definition) video.
 	kDeviceCanDoIsoConvert,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can do ISO conversion.
 	kDeviceCanDoLTC,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can take in LTC (Linear TimeCode) from one of its inputs.
 	kDeviceCanDoLTCInOnRefPort,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
@@ -65,41 +65,41 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoMultiFormat,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
 	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.
 	kDeviceCanDoPCMDetection,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
-	kDeviceCanDoPIO,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
+//	kDeviceCanDoPIO,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
 	kDeviceCanDoPlayback,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can output (play) video.
 	kDeviceCanDoProgrammableCSC,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable color space converter widget.
 	kDeviceCanDoProgrammableRS422,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
 	kDeviceCanDoProRes,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can can accommodate Apple ProRes-compressed video in its frame buffers.
 	kDeviceCanDoQREZ,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle QRez.
 	kDeviceCanDoQuarterExpand,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
-	kDeviceCanDoRateConvert,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can do frame rate conversion.
-	kDeviceCanDoRGBPlusAlphaOut,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
-	kDeviceCanDoRP188,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC.
-	kDeviceCanDoSDVideo,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle SD (Standard Definition) video.
+//	kDeviceCanDoRateConvert,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can do frame rate conversion.
+//	kDeviceCanDoRGBPlusAlphaOut,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
+//	kDeviceCanDoRP188,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC.
+//	kDeviceCanDoSDVideo,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can handle SD (Standard Definition) video.
 	kDeviceCanDoSDIErrorChecks,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can perform SDI error checking.
-	kDeviceCanDoStackedAudio,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device uses a "stacked" arrangement of its audio buffers.
-	kDeviceCanDoStereoIn,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video input over dual-stream SDI.
-	kDeviceCanDoStereoOut,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video output over dual-stream SDI.
+//	kDeviceCanDoStackedAudio,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device uses a "stacked" arrangement of its audio buffers.
+//	kDeviceCanDoStereoIn,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video input over dual-stream SDI.
+//	kDeviceCanDoStereoOut,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video output over dual-stream SDI.
 	kDeviceCanDoThunderbolt,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device connects to the host using a Thunderbolt cable.
 	kDeviceCanDoVideoProcessing,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can do video processing.
 	kDeviceCanMeasureTemperature,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can measure its temperature.
 	kDeviceCanReportFrameSize,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can report its frame size.
 	kDeviceHasBiDirectionalSDI,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device SDI connectors are bi-directional.
-	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has a CSC on channel 2.
+//	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has a CSC on channel 2.
 	kDeviceHasNWL,								///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
 	kDeviceHasPCIeGen2,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports 2nd-generation PCIe.
 	kDeviceHasRetailSupport,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can be configured and controlled by the retail services and AJA ControlPanel.
 	kDeviceHasSDIRelays,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has bypass relays on its SDI connectors.
-	kDeviceHasSPIFlash,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has SPI flash hardware.
-	kDeviceHasSPIFlashSerial,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has serial SPI flash hardware.
+//	kDeviceHasSPIFlash,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has SPI flash hardware.
+//	kDeviceHasSPIFlashSerial,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has serial SPI flash hardware.
 	kDeviceHasSPIv2,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device uses version 2 SPI hardware.
 	kDeviceHasSPIv3,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device uses version 3 SPI hardware.
 	kDeviceHasSPIv4,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device uses version 4 SPI hardware.
-	kDeviceIs64Bit,								///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is 64-bit addressable.
-	kDeviceIsDirectAddressable,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is direct addressable.
+//	kDeviceIs64Bit,								///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is 64-bit addressable.
+//	kDeviceIsDirectAddressable,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is direct addressable.
 	kDeviceIsExternalToHost,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device connects to the host with a cable.
 	kDeviceIsSupported,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device is supported by this SDK.
-	kDeviceNeedsRoutingSetup,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device widget routing can be queried and/or changed.
+//	kDeviceNeedsRoutingSetup,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device widget routing can be queried and/or changed.
 	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device frame buffer size can be changed.
 	kDeviceCanThermostat,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the fan on the device can be thermostatically controlled.
 	kDeviceHasHEVCM31,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M31 encoder.
