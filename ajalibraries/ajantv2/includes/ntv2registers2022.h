@@ -101,6 +101,8 @@
 #define kRegSraekActPCRPID          5
 #define kRegSarekAudioNumChans      6
 #define kRegSarekAudioBitDepth      7
+#define kRegSarekVideoBitrate       8
+#define kRegSarekAudioBitrate       9
 
 #define kRegSarekHostSeqNum         12    // set by host
 #define kRegSarekModeSelect         13    // set by host
