@@ -124,6 +124,11 @@ void IPVNetConfig::init()
     ipc_subnet = 0;
 }
 
+bool IPVNetConfig::operator != ( const IPVNetConfig &other )
+{
+    return (!(*this == other));
+}
+
 bool IPVNetConfig::operator == ( const IPVNetConfig &other )
 {
     if ((ipc_gateway  == other.ipc_gateway)   &&
@@ -177,8 +182,12 @@ void tx2022Config::init()
 }
 
 
+bool tx2022Config::operator != ( const tx2022Config &other )
+{
+    return (!(*this == other));
+}
 
- bool tx2022Config::operator == ( const tx2022Config &other )
+bool tx2022Config::operator == ( const tx2022Config &other )
 {
     if ((txc_enable                   == other.txc_enable)                &&
         (txc_primaryLocalPort         == other.txc_primaryLocalPort)      &&
@@ -201,8 +210,12 @@ void tx2022Config::init()
         return false;
     }
 }
+bool rx2022Config::operator != ( const rx2022Config &other )
+{
+    return (!(*this == other));
+}
 
- bool rx2022Config::operator == ( const rx2022Config &other )
+bool rx2022Config::operator == ( const rx2022Config &other )
 {
     if ((rxc_enable                   == other.rxc_enable)                &&
         (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&

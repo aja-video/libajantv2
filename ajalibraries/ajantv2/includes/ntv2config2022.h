@@ -107,6 +107,7 @@ public:
     void init();
 
     bool operator == ( const IPVNetConfig &other );
+    bool operator != ( const IPVNetConfig &other );
 
     uint32_t    ipc_ip;
     uint32_t    ipc_subnet;
@@ -125,6 +126,7 @@ public:
     void init();
 
     bool operator == ( const rx2022Config &other );
+    bool operator != ( const rx2022Config &other );
 
     bool        rxc_enable;
     
@@ -157,6 +159,7 @@ public:
     void init();
 
     bool operator == ( const tx2022Config &other );
+    bool operator != ( const tx2022Config &other );
 
     bool        txc_enable;
     
