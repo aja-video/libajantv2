@@ -136,6 +136,7 @@ AJAThreadImpl::Active()
 	if (returnCode == WAIT_OBJECT_0)
 	{
 		// the thread has terminated, so clear the handle
+		CloseHandle(mhThreadHandle);
 		mhThreadHandle = 0;
 
 		return false;
