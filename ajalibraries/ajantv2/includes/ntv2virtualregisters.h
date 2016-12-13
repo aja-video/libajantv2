@@ -805,22 +805,50 @@ typedef enum
 	#define	kRegMailBoxRelease					kVRegMailBoxRelease
 	#define	kRegMailBoxAbort					kVRegMailBoxAbort
 	#define	kRegMailBoxTimeoutNS				kVRegMailBoxTimeoutNS
-	#define	kReg2022_2EncodeVideoFormatCh1		kVReg2022_2EncodeVideoFormatCh1
-	#define	kReg2022_2EncodeUllModeCh1			kVReg2022_2EncodeUllModeCh1
-	#define	kReg2022_2EncodeBitDepthCh1			kVReg2022_2EncodeBitDepthCh1
-	#define	kReg2022_2EncodeChromaSubSampCh1	kVReg2022_2EncodeChromaSubSampCh1
-	#define	kReg2022_2EncodeCodeBlockSizeCh1	kVReg2022_2EncodeCodeBlockSizeCh1
-	#define	kReg2022_2EncodeMbpsCh1				kVReg2022_2EncodeMbpsCh1
-	#define	kReg2022_2EncodePidCh1				kVReg2022_2EncodePidCh1
-	#define	kReg2022_2EncodeStreamTypeCh1		kVReg2022_2EncodeStreamTypeCh1
-	#define	kReg2022_2EncodeVideoFormatCh2		kVReg2022_2EncodeVideoFormatCh2
-	#define	kReg2022_2EncodeUllModeCh2			kVReg2022_2EncodeUllModeCh2
-	#define	kReg2022_2EncodeBitDepthCh2			kVReg2022_2EncodeBitDepthCh2
-	#define	kReg2022_2EncodeChromaSubSampCh2	kVReg2022_2EncodeChromaSubSampCh2
-	#define	kReg2022_2EncodeCodeBlockSizeCh2	kVReg2022_2EncodeCodeBlockSizeCh2
-	#define	kReg2022_2EncodeMbpsCh2				kVReg2022_2EncodeMbpsCh2
-	#define	kReg2022_2EncodePidCh2				kVReg2022_2EncodePidCh2
-	#define	kReg2022_2EncodeStreamTypeCh2		kVReg2022_2EncodeStreamTypeCh2
+    #define	kRegTxc_2EncodeVideoFormat1         kVRegTxc_2EncodeVideoFormat1
+    #define	kRegTxc_2EncodeUllMode1             kVRegTxc_2EncodeUllMode1
+    #define	kRegTxc_2EncodeBitDepth1            kVRegTxc_2EncodeBitDepth1
+    #define	kRegTxc_2EncodeChromaSubSamp1       kVRegTxc_2EncodeChromaSubSamp1
+    #define	kRegTxc_2EncodeCodeBlockSize1       kVRegTxc_2EncodeCodeBlockSize1
+    #define	kRegTxc_2EncodeMbps1                kVRegTxc_2EncodeMbps1
+    #define	kRegTxc_2EncodeStreamType1          kVRegTxc_2EncodeStreamType1
+    #define	kRegTxc_2EncodeProgramPid1          kVRegTxc_2EncodeProgramPid1
+    #define	kRegTxc_2EncodeVideoPid1            kVRegTxc_2EncodeVideoPid1
+    #define	kRegTxc_2EncodePcrPid1              kVRegTxc_2EncodePcrPid1
+    #define	kRegTxc_2EncodeAudio1Pid1           kVRegTxc_2EncodeAudio1Pid1
+    #define	kRegTxc_2EncodeVideoFormat2         kVRegTxc_2EncodeVideoFormat2
+    #define	kRegTxc_2EncodeUllMode2             kVRegTxc_2EncodeUllMode2
+    #define	kRegTxc_2EncodeBitDepth2            kVRegTxc_2EncodeBitDepth2
+    #define	kRegTxc_2EncodeChromaSubSamp2       kVRegTxc_2EncodeChromaSubSamp2
+    #define	kRegTxc_2EncodeCodeBlockSize2       kVRegTxc_2EncodeCodeBlockSize2
+    #define	kRegTxc_2EncodeMbps2                kVRegTxc_2EncodeMbps2
+    #define	kRegTxc_2EncodeStreamType2          kVRegTxc_2EncodeStreamType2
+    #define	kRegTxc_2EncodeProgramPid2          kVRegTxc_2EncodeProgramPid2
+    #define	kRegTxc_2EncodeVideoPid2            kVRegTxc_2EncodeVideoPid2
+    #define	kRegTxc_2EncodePcrPid2              kVRegTxc_2EncodePcrPid2
+    #define	kRegTxc_2EncodeAudio1Pid2           kVRegTxc_2EncodeAudio1Pid2
+    #define	kRegTxc_2EncodeVideoFormat3         kVRegTxc_2EncodeVideoFormat3
+    #define	kRegTxc_2EncodeUllMode3             kVRegTxc_2EncodeUllMode3
+    #define	kRegTxc_2EncodeBitDepth3            kVRegTxc_2EncodeBitDepth3
+    #define	kRegTxc_2EncodeChromaSubSamp3       kVRegTxc_2EncodeChromaSubSamp3
+    #define	kRegTxc_2EncodeCodeBlockSize3       kVRegTxc_2EncodeCodeBlockSize3
+    #define	kRegTxc_2EncodeMbps3                kVRegTxc_2EncodeMbps3
+    #define	kRegTxc_2EncodeStreamType3          kVRegTxc_2EncodeStreamType3
+    #define	kRegTxc_2EncodeProgramPid3          kVRegTxc_2EncodeProgramPid3
+    #define	kRegTxc_2EncodeVideoPid3            kVRegTxc_2EncodeVideoPid3
+    #define	kRegTxc_2EncodePcrPid3              kVRegTxc_2EncodePcrPid3
+    #define	kRegTxc_2EncodeAudio1Pid3           kVRegTxc_2EncodeAudio1Pid3
+    #define	kRegTxc_2EncodeVideoFormat4         kVRegTxc_2EncodeVideoFormat4
+    #define	kRegTxc_2EncodeUllMode4             kVRegTxc_2EncodeUllMode4
+    #define	kRegTxc_2EncodeBitDepth4            kVRegTxc_2EncodeBitDepth4
+    #define	kRegTxc_2EncodeChromaSubSamp4       kVRegTxc_2EncodeChromaSubSamp4
+    #define	kRegTxc_2EncodeCodeBlockSize4       kVRegTxc_2EncodeCodeBlockSize4
+    #define	kRegTxc_2EncodeMbps4                kVRegTxc_2EncodeMbps4
+    #define	kRegTxc_2EncodeStreamType4          kVRegTxc_2EncodeStreamType4
+    #define	kRegTxc_2EncodeProgramPid4          kVRegTxc_2EncodeProgramPid4
+    #define	kRegTxc_2EncodeVideoPid4            kVRegTxc_2EncodeVideoPid4
+    #define	kRegTxc_2EncodePcrPid4              kVRegTxc_2EncodePcrPid4
+    #define	kRegTxc_2EncodeAudio1Pid4           kVRegTxc_2EncodeAudio1Pid4
 	#define	kReg2022_7Enable					kVReg2022_7Enable
 	#define	kRegUserDefinedDBB					kVRegUserDefinedDBB
 	#define	kRegHDMIOutAudioChannels			kVRegHDMIOutAudioChannels
