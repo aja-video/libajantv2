@@ -215,6 +215,7 @@ public:
     // Setup the J2K decoder
     bool    SetupJ2KDecoder(const  j2kDecoderConfig & config);
     bool    ReadbackJ2KDecoder(j2kDecoderConfig &config);
+    bool    GetJ2KDecoderStatus(j2kDecoderStatus &status);
 
     // Setup the TS encode parts
     bool    SetupTsForEncode(const NTV2Channel channel);

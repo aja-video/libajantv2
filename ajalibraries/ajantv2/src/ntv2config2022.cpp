@@ -251,6 +251,16 @@ void j2kDecoderConfig::init()
     audioNumber   = 1;
 }
 
+void j2kDecoderStatus::init()
+{
+    numAvailablePrograms = 0;
+    numAvailableAudios       = 0;
+    availableProgramNumbers.clear();
+    availableProgramPIDs.clear();
+    availableAudioPIDs.clear();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////
 //
 //  CNTV2Config2022
@@ -1289,10 +1299,28 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
     return false;
 }
 
-bool CNTV2Config2022::GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
 {
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
+        return rv;
+    }
     return false;
 }
+
+bool CNTV2Config2022::GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.GetJ2KDecoderStatus(j2kStatus);
+        return rv;
+    }
+    return false;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////
 //

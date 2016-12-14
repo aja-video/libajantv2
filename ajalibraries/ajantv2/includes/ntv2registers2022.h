@@ -110,6 +110,13 @@
 #define kRegSarekProgPIDSelect      15    // set by host
 #define kRegSarekAudioNumSelect     16    // set by host
 
+#define kRegSarekNumPGMs            20
+#define kRegSarekNumAudios          21
+
+#define kRegSarekPGMNums            24
+#define kRegSarekPGMPIDs            40
+#define kRegSarekAudioPIDs          56
+
 /////////////////////////////////////////////////////////////////////
 //
 // 2022 Sarek General Registers Bit Definitions
