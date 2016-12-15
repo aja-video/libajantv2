@@ -215,11 +215,34 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
 
 bool CNTV2ConfigTs2022::ReadbackJ2KDecoder(j2kDecoderConfig &config)
 {
-
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, (uint32_t*)&config.selectionMode);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  &config.programNumber);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  &config.programPID);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, &config.audioNumber);
+
+    return true;
+}
+
+bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
+{
+    status.init();
+
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumPGMs,   &status.numAvailablePrograms);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumAudios, &status.numAvailableAudios);
+    for (int i=0; i < status.numAvailablePrograms; i++)
+    {
+        uint32_t val;
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMNums + i, &val);
+        status.availableProgramNumbers.push_back(val);
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMPIDs + i, &val);
+        status.availableProgramPIDs.push_back(val);
+    }
+    for (int i=0; i < status.numAvailableAudios; i++)
+    {
+        uint32_t val;
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioPIDs + i, &val);
+        status.availableAudioPIDs.push_back(val);
+    }
 
     return true;
 }

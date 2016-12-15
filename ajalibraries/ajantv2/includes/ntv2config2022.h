@@ -199,6 +199,19 @@ public:
     uint32_t        audioNumber;
 };
 
+class j2kDecoderStatus
+{
+public:
+    j2kDecoderStatus() {init();}
+    void init();
+
+    uint32_t              numAvailablePrograms;
+    uint32_t              numAvailableAudios;
+    std::vector<uint32_t> availableProgramNumbers;
+    std::vector<uint32_t> availableProgramPIDs;
+    std::vector<uint32_t> availableAudioPIDs;
+};
+
 /**
     @brief	The CNTV2Config2022 class is the interface to Kona-IP network I/O using SMPTE 2022
 **/
@@ -232,7 +245,9 @@ public:
     bool        GetTxChannelEnable(NTV2Channel channel, bool & enabled);
 
     bool        SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
-    bool        GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
+    bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
+    bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
+
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
