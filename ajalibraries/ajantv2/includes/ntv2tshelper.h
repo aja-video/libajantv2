@@ -330,15 +330,26 @@ public:
                 _pkt8[pos] = 0x1;                                           // 17
                 _pkt8[pos++] |= (uint8_t) ((_pts << 1) & 0xfe);
 
-                put32('elsm', pos );                                        // 18
+                _pkt8[pos++] = 0x65;                                        // "e"
+                _pkt8[pos++] = 0x6c;                                        // "l"
+                _pkt8[pos++] = 0x73;                                        // "s"
+                _pkt8[pos++] = 0x6D;                                        // "m"
 
-                put32('frat', pos );
+                _pkt8[pos++] = 0x66;                                        // "f"
+                _pkt8[pos++] = 0x72;                                        // "r"
+                _pkt8[pos++] = 0x61;                                        // "a"
+                _pkt8[pos++] = 0x74;                                        // "t"
+
                 _pkt8[pos++] = (uint8_t) ((_videoStreamData.denFrameRate >> 8) & 0xff);
                 _pkt8[pos++] = (uint8_t) (_videoStreamData.denFrameRate & 0xff);
                 _pkt8[pos++] = (uint8_t) ((_videoStreamData.numFrameRate >> 8) & 0xff);
                 _pkt8[pos++] = (uint8_t) (_videoStreamData.numFrameRate & 0xff);
 
-                put32('brat', pos );
+                _pkt8[pos++] = 0x62;                                        // "b"
+                _pkt8[pos++] = 0x72;                                        // "r"
+                _pkt8[pos++] = 0x61;                                        // "a"
+                _pkt8[pos++] = 0x74;                                        // "t"
+
                 _pkt8[pos++] = (uint8_t) (_bitRate >> 24);                  // 34
                 _pkt8[pos++] = (uint8_t) ((_bitRate >> 16) & 0xff);
                 _pkt8[pos++] = (uint8_t) ((_bitRate >> 8) & 0xff);
@@ -360,31 +371,51 @@ public:
                     _pkt8[pos++] = (uint8_t) ((_auf2 >> 8) & 0xff);
                     _pkt8[pos++] = (uint8_t) (_auf2 & 0xff);
 
-                    put32('fiel', pos );
+                    _pkt8[pos++] = 0x66;                                    // "f"
+                    _pkt8[pos++] = 0x69;                                    // "i"
+                    _pkt8[pos++] = 0x65;                                    // "e"
+                    _pkt8[pos++] = 0x6c;                                    // "l"
+
                     _pkt8[pos++] = (uint8_t) (2 & 0xff);
                     _pkt8[pos++] = (uint8_t) (1 & 0xff);
 
-                    put32('tcod', pos );
+                    _pkt8[pos++] = 0x74;                                    // "t"
+                    _pkt8[pos++] = 0x63;                                    // "c"
+                    _pkt8[pos++] = 0x6f;                                    // "o"
+                    _pkt8[pos++] = 0x64;                                    // "d"
+
                     _j2kTsOffset = pos;
                     _pkt8[pos++] = (uint8_t) (_hh & 0xff);
                     _pkt8[pos++] = (uint8_t) (_mm & 0xff);
                     _pkt8[pos++] = (uint8_t) (_ss & 0xff);
                     _pkt8[pos++] = (uint8_t) (_ff & 0xff);
 
-                    put32('bcol', pos );
+                    _pkt8[pos++] = 0x62;                                    // "b"
+                    _pkt8[pos++] = 0x63;                                    // "c"
+                    _pkt8[pos++] = 0x6f;                                    // "o"
+                    _pkt8[pos++] = 0x6c;                                    // "l"
+
                     _pkt8[pos++] = 3;
                     _pkt8[pos++] = 0x0;
                 }
                 else
                 {
-                    put32('tcod', pos );
+                    _pkt8[pos++] = 0x74;                                    // "t"
+                    _pkt8[pos++] = 0x63;                                    // "c"
+                    _pkt8[pos++] = 0x6f;                                    // "o"
+                    _pkt8[pos++] = 0x64;                                    // "d"
+
                     _j2kTsOffset = pos;
                     _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // hh
                     _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // mm
                     _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ss
                     _pkt8[pos++] = (uint8_t) (0 & 0xff);                    // ff
 
-                    put32('bcol', pos );
+                    _pkt8[pos++] = 0x62;                                    // "b"
+                    _pkt8[pos++] = 0x63;                                    // "c"
+                    _pkt8[pos++] = 0x6f;                                    // "o"
+                    _pkt8[pos++] = 0x6c;                                    // "l"
+
                     _pkt8[pos++] = 3;
                     _pkt8[pos++] = 0xff;
                 }
@@ -655,7 +686,10 @@ class PMTGen : public TSGenerator
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
             _pkt8[pos++] = 6;                                               // length
-            put32('BSSD', pos );
+            _pkt8[pos++] = 0x42;                                            // "B"
+            _pkt8[pos++] = 0x53;                                            // "S"
+            _pkt8[pos++] = 0x53;                                            // "S"
+            _pkt8[pos++] = 0x44;                                            // "D"
             _pkt8[pos++] = 0;
             _pkt8[pos++] = 0x20;
 
