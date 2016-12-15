@@ -254,7 +254,7 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 	case DEVICE_ID_KONA4:
 	case DEVICE_ID_CORVID88:
 	case DEVICE_ID_CORVID44:
-    case DEVICE_ID_CORVIDHEVC:
+	case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
@@ -300,11 +300,11 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_KONA4UFC:
 		case DEVICE_ID_CORVID88:
 		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
 		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
-            return true;
+			return true;
 		default:
 			return false;
 		}
@@ -323,11 +323,11 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_KONA4UFC:
 		case DEVICE_ID_CORVID88:
 		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
 		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
-            return true;
+			return true;
 		default:
 			return false;
 		}
@@ -344,11 +344,11 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_KONA4UFC:
 		case DEVICE_ID_CORVID88:
 		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
 		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
-            return true;
+			return true;
 		default:
 			return false;
 		}
@@ -359,7 +359,7 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_IO4KUFC:
 		case DEVICE_ID_CORVID88:
-        case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_CORVIDHEVC:
 			return true;
 		default:
 			return false;
@@ -372,7 +372,7 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		switch (boardID)
 		{
 		case DEVICE_ID_CORVID88:
-        case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_CORVIDHEVC:
 			return true;
 		default:
 			return false;
