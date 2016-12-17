@@ -22,17 +22,16 @@
 	-	The ancillary data in the separate host buffer has a simple format that closely matches the SMPTE 293 specification;
 	-	Data corruption problems introduced by CSCs, LUTs, UDCs, etc. are eliminated, since data extraction/insertion occurs
 		right at the SDI spigot.
-	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry always
-		matches the video standard.
+	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry now can
+		match the video standard.
 
 	Notes:
 	-	All NTV2 devices support the "tall" and "taller" VANC geometries.
-	-	Both new (AUTOCIRCULATE_TRANSFER) and old (AUTOCIRCULATE_TRANSFER_STRUCT) AutoCirculate APIs support VANC geometries.
-	-	Only the new AutoCirculate API (AUTOCIRCULATE_TRANSFER) supports the new Anc inserter/extractor firmware, and the
-		\c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
-		or CNTV2Card::AutoCirculateInitForOutput.
-	-	In SDK 12.4 and earlier, the new Anc inserter/extractor firmware feature works only with AutoCirculate.
-		A new API for setting up and controlling the Anc inserter/extractor firmare will be provided for non-AutoCirculate applications in a future SDK.
+	-	Both AUTOCIRCULATE_TRANSFER and AUTOCIRCULATE_TRANSFER_STRUCT -based AutoCirculate APIs support VANC geometries.
+	-	Only AUTOCIRCULATE_TRANSFER supports the new Anc inserter/extractor firmware, and \c AUTOCIRCULATE_WITH_ANC must be
+		specified in the call to CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
+	-	The new Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for setting up and controlling
+		the Anc inserter/extractor firmare will be provided for non-AutoCirculate applications in a future SDK.
 
 	@section	ancembeddedaudio	Embedded Audio
 
