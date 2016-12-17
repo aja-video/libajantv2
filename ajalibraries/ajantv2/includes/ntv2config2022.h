@@ -187,6 +187,12 @@ typedef enum {
     eProgSel_Default = eProgSel_AutoFirstProg,
 } eProgSelMode_t;
 
+typedef enum {
+    eIGMPVersion_2,
+    eIGMPVersion_3,
+    eIGMPVersion_Default = eIGMPVersion_3
+} eIGMPVersion_t;
+
 class j2kDecoderConfig
 {
 public:
@@ -259,6 +265,9 @@ public:
     bool        SetIGMPDisable(eSFP port, bool disable);
     bool        GetIGMPDisable(eSFP port, bool & disabled);
 
+    bool        SetIGMPVersion(eIGMPVersion_t version);
+    bool        GetIGMPVersion(eIGMPVersion_t & version);
+
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
@@ -276,7 +285,6 @@ private:
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
-    uint32_t    GetFeatures();
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
 

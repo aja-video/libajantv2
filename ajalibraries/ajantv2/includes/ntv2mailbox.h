@@ -69,6 +69,7 @@ protected:
     bool    rxReady();
 
     uint32_t getStatus();
+    uint32_t getFeatures();
 
     CNTV2Card  &mDevice;
 
@@ -84,7 +85,6 @@ private:
 
     uint32_t    nextSeqNum() {if (++_seqNum > SEQNUM_MAX) return SEQNUM_MIN; else return _seqNum;}
     uint32_t    currentSeqNum() {return _seqNum;}
-    uint32_t    getFeatures();
 
     uint32_t    chanOffset;
     uint32_t    chanNumber;

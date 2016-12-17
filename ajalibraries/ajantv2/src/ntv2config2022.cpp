@@ -269,7 +269,7 @@ void j2kDecoderStatus::init()
 
 CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
 {
-    uint32_t features    = GetFeatures();
+    uint32_t features    = getFeatures();
 
     _numTx0Chans = (features & (SAREK_TX0_MASK)) >> 28;
     _numRx0Chans = (features & (SAREK_RX0_MASK)) >> 24;
@@ -1288,6 +1288,29 @@ bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
     return true;
 }
 
+bool CNTV2Config2022::SetIGMPVersion(eIGMPVersion_t version)
+{
+    uint32_t mbversion;
+    switch (version)
+    {
+    case eIGMPVersion_2:
+        mbversion = 2;
+        break;
+    case eIGMPVersion_3:
+        mbversion = 3;
+        break;
+    default:
+        mError = "Invalid IGMP version";
+        return false;
+    }
+    return CNTV2MBController::SetIGMPVersion(mbversion);
+}
+
+bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
+{
+    return mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,(uint32_t*)&version);
+}
+
 bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
 {
     if (_is2022_2)
@@ -1327,14 +1350,6 @@ bool CNTV2Config2022::GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus)
 //
 //
 /////////////////////////////////////////////////////////////////////////////////
-
-uint32_t CNTV2Config2022::GetFeatures()
-{
-    uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
-    return val;
-}
-
 
 eSFP  CNTV2Config2022::GetRxPort(NTV2Channel chan)
 {

@@ -13,7 +13,6 @@ CNTV2MBController::CNTV2MBController(CNTV2Card &device) : CNTV2MailBox(device)
 
 bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, string netmask, string gateway)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -57,7 +56,6 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
 
 bool CNTV2MBController::JoinIGMPGroup(eSFP port, NTV2Channel channel, string ipaddr)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -99,7 +97,6 @@ bool CNTV2MBController::JoinIGMPGroup(eSFP port, NTV2Channel channel, string ipa
 
 bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, string ipaddr)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -139,9 +136,49 @@ bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, string ip
         return true;
 }
 
+bool CNTV2MBController::SetIGMPVersion(uint32_t version)
+{
+    uint32_t features = getFeatures();
+    if (features & SAREK_MB_PRESENT)
+    {
+        sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
+        bool rv = sendMsg(250);
+        if (!rv)
+        {
+            return false;
+        }
+
+        string response;
+        getResponse(response);
+        vector<string> msg;
+        splitResponse(response, msg);
+        if (msg.size() >=1)
+        {
+            string status;
+            rv = getString(msg[0],"status",status);
+            if (rv && (status == "OK"))
+            {
+                return true;
+            }
+            else if (rv && (status == "FAIL"))
+            {
+                if (msg.size() >= 3)
+                {
+                    rv = getString(msg[2],"error",mError);
+                    return false;
+                }
+            }
+         }
+
+         mError = "Invalid response from MB";
+         return false;
+    }
+    else
+         return true;
+}
+
 bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACaddress)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -187,7 +224,6 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACa
 
 eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, string & MACaddress)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -243,7 +279,6 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
 
 bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress)
 {
-    // If no MB do nothing, this is for Cochrane
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
@@ -336,12 +371,5 @@ bool CNTV2MBController::getString(const std::string & resp, const std::string & 
         return true;
     }
     return false;   // not found
-}
-
-uint32_t CNTV2MBController::getFeatures()
-{
-    uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
-    return val;
 }
 

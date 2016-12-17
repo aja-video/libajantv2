@@ -55,6 +55,7 @@
 #define kRegSarekMBBuildNum         6
 #define kRegSarekSerialLow          7
 #define kRegSarekSerialHi           8
+#define kRegSarekIGMPVersion        9
 
 #define kRegSarekTxAutoMAC          11
 #define kRegSarekIGMP4              12
