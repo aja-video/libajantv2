@@ -1308,7 +1308,10 @@ bool CNTV2Config2022::SetIGMPVersion(eIGMPVersion_t version)
 
 bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
 {
-    return mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,(uint32_t*)&version);
+    uint32_t version32;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,&version32);
+    version =  (version32 == 2) ? eIGMPVersion_2 : eIGMPVersion_3;
+    return rv;
 }
 
 bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
