@@ -17,7 +17,7 @@
 typedef enum
 {
     kJ2KStreamTypeStandard,
-    kJ2KStreamTypeEvertz
+    kJ2KStreamTypeNonElsm
 } J2KStreamType;
 
 typedef enum
@@ -253,7 +253,7 @@ public:
     {
         initPacket();
         int pos = 0;
-        _ptsOffset = 0xff;                                              // For evertz streams these are all 0xff
+        _ptsOffset = 0xff;                                              // For non-elsm streams these are all 0xff
         _j2kTsOffset = 0xff;                                            // for standard streams they will be filled in accordingly
         _auf1Offset = 0xff;
         _auf2Offset = 0xff;
@@ -294,8 +294,18 @@ public:
 
             _pkt8[pos++] = 0x0;                                         // 18
             _pkt8[pos++] = 0x0;
-            _pkt8[pos++] = 0x0;
-            _pkt8[pos++] = 0x10;
+
+            // These two bytes are defined in Table 1 of ST302 spec starting with num channels
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+            {
+                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x10;                                    // two bits of channel ID, 20 bits per sample, alignment 0 reserved
+            }
+            else
+            {
+                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x20;                                    // two bits of channel ID, 24 bits per sample, alignment 0 reserved
+            }
 
             _auf1Offset = 0x1000012;
             _auf2Offset = 0x1000c08;
@@ -303,7 +313,7 @@ public:
         }
         else
         {
-            // generate PES data for standard streams, for Evertz just do the header
+            // generate PES data for standard streams, for non-elsm just do the header
             if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
             {
                 _pkt8[pos++] = 0;                                           // packet_start_code_prefix
@@ -650,7 +660,7 @@ class PMTGen : public TSGenerator
             }
             else
             {
-                // Evertz stream
+                // Non-elsm stream
                 put16( 0x0100, pos );
                 put16( _videoStreamData.width, pos );                       // width
                 put16( height, pos );                                       // height
@@ -690,8 +700,18 @@ class PMTGen : public TSGenerator
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x44;                                            // "D"
-            _pkt8[pos++] = 0;
-            _pkt8[pos++] = 0x20;
+
+            // These two bytes are defined in Table 1 of ST302 spec starting with num channels
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+            {
+                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x10;                                    // two bits of channel ID, 20 bits per sample, alignment 0 reserved
+            }
+            else
+            {
+                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x20;                                    // two bits of channel ID, 24 bits per sample, alignment 0 reserved
+            }
 
             return pos-startPos;
         }

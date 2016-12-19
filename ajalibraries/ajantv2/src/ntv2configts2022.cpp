@@ -381,8 +381,19 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 {
     uint32_t addr = GetIpxTsAddr(channel);
 
-    // Number of channels - 1 (actually have one stereo pair so this is considered 1 channel)
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x0));
+    J2KStreamType       streamType;
+    GetJ2KEncodeStreamType(channel, streamType);
+
+    // Write number of channels 0 is actually 1 stereo pair and set bit 4 for non elsm streams to indicate 24 bit audio
+    if (streamType == kJ2KStreamTypeNonElsm)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x10));
+    }
+    else
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x00));
+    }
+
     // Enable this device
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapHostEn, (0x1));
 
