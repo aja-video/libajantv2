@@ -229,7 +229,7 @@ bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
 
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumPGMs,   &status.numAvailablePrograms);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumAudios, &status.numAvailableAudios);
-    for (int i=0; i < status.numAvailablePrograms; i++)
+    for (uint32_t i=0; i < status.numAvailablePrograms; i++)
     {
         uint32_t val;
         mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMNums + i, &val);
@@ -237,7 +237,7 @@ bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
         mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMPIDs + i, &val);
         status.availableProgramPIDs.push_back(val);
     }
-    for (int i=0; i < status.numAvailableAudios; i++)
+    for (uint32_t i=0; i < status.numAvailableAudios; i++)
     {
         uint32_t val;
         mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioPIDs + i, &val);
@@ -403,6 +403,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 
 bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap(const NTV2Channel channel)
 {
+    #pragma unused (channel)
     mError = "SetupEncodeTsMpegAncEncap not yet implemented";
     return false;
 }
