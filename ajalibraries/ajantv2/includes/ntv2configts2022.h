@@ -144,11 +144,6 @@ public:
     uint32_t                pid;                ///< @brief	Specifies the pid for J2K decode.
 };
 
-struct j2kDecodeConfig
-{
-    uint32_t                j2k_pid;
-};
-
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips
 **/
@@ -201,10 +196,6 @@ public:
     // Set/Get encode Audio PID
     void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
     void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
-
-    // Set/Get decode PID
-    void    SetJ2KDecodePid(const NTV2Channel channel, const uint32_t pid) {_j2kDecodeConfig[channel].j2k_pid = pid;}
-    void    GetJ2KDecodePid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kDecodeConfig[channel].j2k_pid;}
 
     // Setup both the TS and J2K encoder using the class params
     bool    SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel);
@@ -260,9 +251,6 @@ public:
 
     bool                _is2022_6;
     bool                _is2022_2;
-
-    //j2kEncodeConfig     _j2kEncodeConfig[NTV2_MAX_NUM_CHANNELS];
-    j2kDecodeConfig     _j2kDecodeConfig[NTV2_MAX_NUM_CHANNELS];
 
     int32_t             _transactionTable[1024][2];
     int32_t             _transactionCount;
