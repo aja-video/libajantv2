@@ -227,13 +227,6 @@ public:
     bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAncEncap(const NTV2Channel channel);
 
-    // Setup individual TS decode parts
-    bool    SetupDecodeTsMpegJ2kDecap();
-    bool    SetupDecodeTsJ2KDecoder();
-    bool    SetupDecodeTsMpegAesDecap();
-    bool    SetupDecodeTsAesDecap();
-    bool    SetupDecodeTsMpegAncDecap();
-    
     // Routines to talk to the J2K part
     bool                J2kCanAcceptCmd(const NTV2Channel channel);
     void                J2kSetParam(const NTV2Channel channel, uint32_t config, uint32_t param, uint32_t value);
