@@ -586,6 +586,16 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
 
+    if (_is2022_2)
+    {
+        // setup PLL
+       mDevice.WriteRegister(kRegPll_SrcIp   + SAREK_PLL, sourceIp);
+       mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.primarySourcePort);
+       mDevice.WriteRegister(kRegPll_DstIp   + SAREK_PLL, destIp);
+       mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.primaryDestPort);
+       mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, rxConfig.primaryRxMatch);
+    }
+
     // if already enabled, make sure IGMP subscriptions are updated
     bool enabled = false;
     GetRxChannelEnable(channel,enabled);
