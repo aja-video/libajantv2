@@ -589,11 +589,20 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     if (_is2022_2)
     {
         // setup PLL
+       mDevice.WriteRegister(kRegPll_Config  + SAREK_PLL, PLL_CONFIG_PCR,PLL_CONFIG_PCR);
        mDevice.WriteRegister(kRegPll_SrcIp   + SAREK_PLL, sourceIp);
        mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.primarySourcePort);
        mDevice.WriteRegister(kRegPll_DstIp   + SAREK_PLL, destIp);
        mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.primaryDestPort);
-       mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, rxConfig.primaryRxMatch);
+
+       uint32_t rxMatch  = rxConfig.primaryRxMatch;
+       uint32_t pllMatch = 0;
+       if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
+       if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
+       if (rxMatch & RX_MATCH_DEST_PORT)   pllMatch |= PLL_MATCH_DEST_PORT;
+       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
+       pllMatch |= PLL_MATCH_ES_PID;
+       mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
     }
 
     // if already enabled, make sure IGMP subscriptions are updated
