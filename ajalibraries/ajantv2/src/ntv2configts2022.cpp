@@ -22,20 +22,12 @@
 
 using namespace std;
 
-
 CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(device)
 {
     uint32_t features    = GetFeatures();
 
     _is2022_6   = (bool)(features & SAREK_2022_6);
     _is2022_2   = (bool)(features & SAREK_2022_2);
-
-    // init config structs
-    for (int channel = NTV2_CHANNEL1; channel < NTV2_MAX_NUM_CHANNELS; channel++)
-    {
-        // decode defaults
-        _j2kDecodeConfig[channel].j2k_pid = 0;
-    }
 }
 
 bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
@@ -407,43 +399,6 @@ bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap(const NTV2Channel channel)
     mError = "SetupEncodeTsMpegAncEncap not yet implemented";
     return false;
 }
-
-
-// Setup individual TS decode parts
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegJ2kDecap()
-{
-    mError = "SetupDecodeTsMpegJ2kDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsJ2KDecoder()
-{
-    mError = "SetupDecodeTsJ2KDecoder not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegAesDecap()
-{
-    mError = "SetupDecodeTsMpegAesDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsAesDecap()
-{
-    mError = "SetupDecodeTsAesDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegAncDecap()
-{
-    mError = "SetupDecodeTsMpegAncDecap not yet implemented";
-    return false;
-}
-
 
 uint32_t CNTV2ConfigTs2022::GetFeatures()
 {
