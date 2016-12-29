@@ -641,7 +641,7 @@ bool NTV2CCGrabber::DeviceAncExtractorIsAvailable (void)
 	UWord	majorVersion (0),	minorVersion (0),	pointVersion (0),	buildNumber (0);
 	mDevice.GetDriverVersionComponents (majorVersion, minorVersion, pointVersion, buildNumber);
 	//	Device Anc extraction requires driver version 12.3 minimum  (or 0.0.0.0 for internal development)...
-	if ((majorVersion >= 12 && minorVersion >= 3) || (majorVersion == 0 && minorVersion == 0 && pointVersion == 0 && buildNumber == 0))
+	if ((majorVersion > 12) || (majorVersion == 12 && minorVersion >= 3) || (majorVersion == 0 && minorVersion == 0 && pointVersion == 0 && buildNumber == 0))
 		//	The device must also support it...
 		if (::NTV2DeviceCanDoCustomAnc (mDeviceID))
 			//	And perhaps even do firmware version/date checks??
