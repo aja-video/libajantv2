@@ -654,18 +654,21 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
 {
     int32_t             w1;
     uint32_t            audioPid;
+    J2KStreamType       j2kStreamType;
 
     printf("CNTV2ConfigTs2022::GenerateTableForMpegAesEncap\n");
 
     // Get the Audio pid
     GetJ2KEncodeAudio1Pid(channel, audioPid);
     printf("Audio 1 PID     = 0x%02x\n\n", audioPid);
-
+    GetJ2KEncodeStreamType(channel, j2kStreamType);
     _transactionCount = 0;
 
     PESGen pes;
     pes._tsEncapType = kTsEncapTypeAes;
     pes._elemNumToPID[1] = audioPid;
+    // For Aes PES generator the streamType is the only thing we need to pass in the videoStreamData struct
+    pes._videoStreamData.j2kStreamType = j2kStreamType;
 
     printf("Host Register Settings:\n\n");
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
