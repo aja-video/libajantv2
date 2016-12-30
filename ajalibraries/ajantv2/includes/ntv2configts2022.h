@@ -38,6 +38,7 @@
 #define     J2K_TS_OFFSET                   0xc2
 #define     AUF1_OFFSET                     0xc3
 #define     AUF2_OFFSET                     0xc4
+#define     PACKET_RATE                     0xc8
 #define     HOST_EN                         0xe0
 #define     INTERLACED_VIDEO                0xe1
 #define     PAYLOAD_PARAMS                  0xe2

@@ -530,6 +530,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = pes.calcPatPmtPeriod() | 0x01000000;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     int length = pes.makePacket();
 
     printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
@@ -628,6 +632,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = 0;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     ADPGen adp;
     adp._tsEncapType = kTsEncapTypePcr;
     adp._elemNumToPID[1] = pcrPid;
@@ -671,6 +679,11 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     pes._videoStreamData.j2kStreamType = j2kStreamType;
 
     printf("Host Register Settings:\n\n");
+
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0x10000;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
     _transactionTable[_transactionCount++][1] = audioPid;
     printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
