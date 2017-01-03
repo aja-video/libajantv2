@@ -4275,7 +4275,7 @@ typedef struct
 	//! The frame requested or -1 if not available
 	ULWord				frame;
 
-	//! 48kHz clock (in reg 28, extened to 64 bits) at time of play or record.
+	//! 48kHz clock (in reg 28, extended to 64 bits) at time of play or record.
 	ULWord64			audioClockTimeStamp;    // Register 28 with Wrap Logic
 
 	//! The address that was used to transfer
@@ -4323,7 +4323,7 @@ typedef struct
 	//! Vertical blank start of current frame
 	LWord64			    currentFrameTime;
 
-	//! 48kHz clock in reg 28 extened to 64 bits
+	//! 48kHz clock in reg 28 extended to 64 bits
 	ULWord64			audioClockCurrentTime;      // Register 28 with Wrap Logic
 	                                           // audioClockCurrentTime (from 48 kHz on-board clock) is consistent and accurate!
                                                // but is not available on the XenaSD-22.
@@ -6229,7 +6229,7 @@ typedef enum
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains NTV2Channel of interest, but only for new API \c FRAME_STAMP message.
 					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (\c FRAME_STAMP message).
-					ULWord64			acAudioClockTimeStamp;			///< @brief	48kHz clock (in reg 28, extened to 64 bits) at time of play or record.
+					ULWord64			acAudioClockTimeStamp;			///< @brief	48kHz clock (in reg 28, extended to 64 bits) at time of play or record.
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
 					ULWord				acAudioInStartAddress;			///< @brief	For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
 					ULWord				acAudioInStopAddress;			///< @brief	For record - end position (exclusive) in buffer of audio (includes base offset) -- AudioInAddress at the Frame AFTER this Frame was stamped
