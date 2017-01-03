@@ -54,7 +54,9 @@
 	@par		Secondary LTC Input
 
 	The secondary LTC input connector is a 2-pin Molex (part number 22-05-3021) located on the top of the board next to the fan.
-	It allows the input of analog LTC while the Reference/LTC input is connected to a reference source.
+	It allows the input of analog LTC while the Reference/LTC input is connected to a reference source. When looking at the top
+	edge of the board, the pin closest to the front (toward the SDI connectors) is electrical ground. The pin closest to the back
+	of the board should carry the LTC signal.
 
 	@image	html	corvid88ltc2.png
 
