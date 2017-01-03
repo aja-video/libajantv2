@@ -22,11 +22,23 @@
 	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
 
 	The purpose of the library is to enable third-parties to easily access and/or control the ancillary data entering or leaving
-	an AJA NTV2 device. The library currently supports is very focused on CEA-608. AJA is interested in learning from its OEM developers
-	what kind of captioning support they're interesting in having added to the library (e.g., "full/native" CEA-708, Teletext, OP-42/47, etc.).
+	an AJA NTV2 device. The library currently is very focused on CEA-608.
 
 	For examples on how to use this library, please see the \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications.
 
+	<b>Principal Classes</b>
+	- AJAAncillaryData:  Container that holds a single Anc packet (or scan line of "analog" anc data).
+		- AJAAncillaryData_Cea608:  A CEA-608 data packet.
+			- AJAAncillaryData_Cea608_Line21:  An "analog" CEA-608 data packet (decoded from or encoded to line 21).
+			- AJAAncillaryData_Cea608_Vanc:  A CEA-608 data packet sourced from or destined to a frame buffer using a tall (or taller) frame geometry.
+		- AJAAncillaryData_Cea708:  Container that holds a single CEA-708 SMPTE 334 packet.
+		- AJAAncillaryData_Timecode:  Container that holds a single timecode packet.
+			- AJAAncillaryData_Timecode_ATC:  An "analog" (ATC) timecode packet.
+			- AJAAncillaryData_Timecode_VITC:  A VITC timecode packet.
+		- AJAAncillaryData_FrameStatusInfo524D:  A "524D" frame status info packet.
+		- AJAAncillaryData_FrameStatusInfo5251:  A "5251" frame status info packet.
+	- AJAAncillaryDataFactory:  Provides AJAAncillaryDataFactory::Create and AJAAncillaryDataFactory::GuessAncillaryDataType class methods.
+	- AJAAncillaryList:  An ordered collection of AJAAncillaryData packets.
 **/
 
 

@@ -9,8 +9,6 @@
 
 #include "ancillarydata.h"
 
-//class AJAAncillaryData;	// the base class common to all
-
 
 /**
 	@brief	Use my GuessAncillaryDataType method to determine what kind of ancillary data is being held by
