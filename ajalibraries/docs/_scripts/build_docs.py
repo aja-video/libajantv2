@@ -60,9 +60,6 @@ def make_redirect_html (platform_name, dest_url, major, minor, point, build_num,
 
 
 def main ():
-    """
-    IMPORTANT:  The current directory must contain ajaapi, installers, ntv2projects, etc.
-    """
     args = aja.installer.parse_args ("require_version")
     result_code = 0
 
@@ -79,10 +76,8 @@ def main ():
     print "## NOTE:  Platform node is '%s'" % (platform.node())
 
     print "## NOTE:  Starting Pre-Check"
-    stuff_to_check =	{	'name':	'Pre-Check',		'must-exist': [	'ntv2sdkmac_*.zip',		'ntv2sdkwin_*.zip',		'ntv2sdklinux_*.zip',
-    																	'config.doxy',			'doxygen',				'installers/pythonlib',
-    																	'ajaapps/crossplatform/demoapps' ]	}
-    result_code = aja.utils.check (stuff_to_check)
+    result_code = aja.utils.check ({'name':	'Pre-Check',	'must-exist': [	'ntv2sdkmac_*.zip',		'ntv2sdkwin_*.zip',		'ntv2sdklinux_*.zip',
+    																		'config.doxy',			'doxygen',				'installers/pythonlib'	] })
     if result_code <> 0:
         print "## NOTE:  Unzip Phase skipped due to error(s)"
         return result_code
@@ -108,23 +103,19 @@ def main ():
     						{'name': 'LinSDK',	'rename': 'ntv2sdklinux_*.zip',					'to': 'ntv2linux.zip'												},
     						{'name': 'LinSDK',	'unzip':  'ntv2linux.zip',						'to': ''															},
     						{'name': 'LinSDK',	'delete': 'ntv2linux.zip',						'to': ''															},
-    						{'name': 'LinSDK',	'rename': 'ntv2sdklinux_*.tar.gz',				'to': 'ntv2linux.tar.gz'											},
-    						{'name': 'LinSDK',	'untar':  'ntv2linux.tar.gz',					'to': ''															},
-    						{'name': 'LinSDK',	'delete': 'ntv2linux.tar.gz',					'to': ''															},
     						{'name': 'LinSDK',	'rename': 'ntv2sdklinux_*',						'to': 'AJALinuxSDK'													},
-    						{'name': 'LinSDK',	'move':   'linuxclasses',						'from': 'AJALinuxSDK/ntv2projects',						'to': ''	},
-    						{'name': 'LinSDK',	'move':   'linux',								'from': 'AJALinuxSDK/ajaapi/ajastuff/pnp',				'to': ''	},
+    						{'name': 'LinSDK',	'move':   'lin',								'from': 'AJALinuxSDK/ajalibraries/ajantv2/src',			'to': ''	},
+    						{'name': 'LinSDK',	'move':   'linux',								'from': 'AJALinuxSDK/ajalibraries/ajabase/pnp',			'to': ''	},
     						{'name': 'LinSDK',	'rename': 'linux',								'to': 'linuxpnp'													},
-    						{'name': 'LinSDK',	'move':   'linux',								'from': 'AJALinuxSDK/ajaapi/ajastuff/system',			'to': ''	},
+    						{'name': 'LinSDK',	'move':   'linux',								'from': 'AJALinuxSDK/ajalibraries/ajabase/system',		'to': ''	},
     						{'name': 'LinSDK',	'rename': 'linux',								'to': 'linuxsystem'													},
-    						{'name': 'LinSDK',	'move':   'ntv2enums.h',						'from': 'AJALinuxSDK/ntv2projects/includes',			'to': ''	},
+    						{'name': 'LinSDK',	'move':   'ntv2enums.h',						'from': 'AJALinuxSDK/ajalibraries/ajantv2/includes',	'to': ''	},
     						{'name': 'LinSDK',	'rename': 'ntv2enums.h',						'to': 'linntv2enums.h'												},
     						{'name': 'LinSDK',	'delete': 'AJALinuxSDK',						'to': ''															},
 
     						{'name': 'Doxy',	'rename': 'config.doxy',						'to': 'patched_config.doxy'											},
     						{'name': 'MacSDK',	'move':   'ajalibraries',						'from': 'AJAMacSDK/sdk',	'to': ''								},
     						{'name': 'MacSDK',	'delete': 'AJAMacSDK',														'to': ''								},
-    						{'name': 'LinSDK',	'rename': 'linuxclasses',						'from': '',					'to': 'lin'								},
     						{'name': 'LinSDK',	'move':   'lin',								'from': '',					'to': 'ajalibraries/ajantv2/src'		},
     						{'name': 'LinSDK',	'rename': 'linuxpnp',														'to': 'linux'							},
     						{'name': 'LinSDK',	'move':   'linux',								'from': '',					'to': 'ajalibraries/ajabase/pnp'		},
