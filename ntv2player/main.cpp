@@ -2,7 +2,7 @@
 	@file		ntv2player/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout frames to SDI output
 				generated in host memory containing test pattern and timecode, including audio tone.
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 //	Includes

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2burn.cpp
 	@brief		Implementation of NTV2Burn demonstration class.
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2burn.h"

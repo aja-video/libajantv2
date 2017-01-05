@@ -2,7 +2,7 @@
 	@file		ntv2outputtestpattern/main.cpp
 	@brief		Demonstration application to display test patterns on an AJA device's output using
 				direct DMA (i.e., without using AutoCirculate).
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

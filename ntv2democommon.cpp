@@ -1,7 +1,7 @@
 /**
 	@file		ntv2democommon.cpp
 	@brief		Common implementation code used by many of the demo applications.
-	@copyright	Copyright (C) 2013-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2democommon.h"
