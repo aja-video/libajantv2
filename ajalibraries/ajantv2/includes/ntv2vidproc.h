@@ -1,7 +1,7 @@
 /**
 	@file		ntv2vidproc.h
 	@brief		Declares the CNTV2VidProc class.
-	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2VIDPROC_H

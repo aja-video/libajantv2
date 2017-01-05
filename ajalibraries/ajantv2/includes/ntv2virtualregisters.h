@@ -1,6 +1,6 @@
 /**
 	@file		ntv2virtualregisters.h
-	@copyright	Copyright (C) 2011-2016 AJA Video Systems, Inc.All rights reserved.
+	@copyright	Copyright (C) 2011-2017 AJA Video Systems, Inc.All rights reserved.
 	@brief		Declares enums for virtual registers used in all platform drivers and the SDK.
 **/
 

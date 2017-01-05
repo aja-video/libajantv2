@@ -2,7 +2,7 @@
 	@file		ntv2autocirculate.cpp
 	@brief		Implements the CNTV2Card AutoCirculate API functions and most of the ostream operators
 				for structs, lists and sets used by AutoCirculate and CNTV2Card.
-	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"

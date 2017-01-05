@@ -1,6 +1,6 @@
 /**
 	@file		log.h
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJATimeLog class.
 **/
 

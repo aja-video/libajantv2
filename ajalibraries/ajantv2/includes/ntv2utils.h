@@ -1,7 +1,7 @@
 /**
 	@file		ntv2utils.h
 	@brief		Declares numerous NTV2 utility functions.
-	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2UTILS_H

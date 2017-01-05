@@ -1,7 +1,7 @@
 /**
 	@file		xena2vidproc.cpp
 	@brief		Implements the CXena2VidProc class.
-	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "xena2vidproc.h"

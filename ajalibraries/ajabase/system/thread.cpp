@@ -1,6 +1,6 @@
 /**
 	@file		thread.cpp
-	@copyright	Copyright (C) 2009-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2017 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJAThread class.
 **/
 

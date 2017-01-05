@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydatafactory.h
 	@brief		Declaration of the AJAAncillaryDataFactory class.
-	@copyright	(C) 2010-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef AJA_ANCILLARYDATAFACTORY_H

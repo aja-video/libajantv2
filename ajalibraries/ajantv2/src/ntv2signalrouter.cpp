@@ -1,6 +1,6 @@
 /**
 	@brief		CNTV2SignalRouter implementation.
-	@copyright	(C) 2014-2016 AJA Video Systems, Inc.	Proprietary and confidential.
+	@copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential.
 **/
 #include "ntv2signalrouter.h"
 #include "ntv2debug.h"

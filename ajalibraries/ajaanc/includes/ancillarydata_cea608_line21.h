@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_cea608_line21.h
 	@brief		Declares the AJAAncillaryData_Cea608_line21 class.
-	@copyright	(C) 2010-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef AJA_ANCILLARYDATA_CEA608_LINE21_H

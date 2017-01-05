@@ -1,7 +1,7 @@
 /**
 	@file		ntv2diskio.h
 	@brief		Declares and implements the CXenaFile class.
-	@copyright	Copyright 2004-2016 AJA Video Systems, Inc. All rights reserved.
+	@copyright	Copyright 2004-2017 AJA Video Systems, Inc. All rights reserved.
 **/
 #ifndef __NTV2__DISKIO__
 #define __NTV2__DISKIO__

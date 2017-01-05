@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata.cpp
 	@brief		Implementation of the AJAAncillaryData class.
-	@copyright	(C) 2010-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata.h"

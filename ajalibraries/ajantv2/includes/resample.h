@@ -1,7 +1,7 @@
 /**
 	@file		resample.h
 	@deprecated	Include 'ntv2resample.h' instead.
-	@copyright	(C) 2004-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #ifndef RESAMPLE_H
 	#define RESAMPLE_H

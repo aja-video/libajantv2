@@ -1,7 +1,7 @@
 /**
 	@file		ntv2procamp.cpp
 	@brief		Implements the CNTV2ProcAmp class, intended for devices having analog inputs.
-	@copyright	(C) 2005-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2005-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2procamp.h"

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2procamp.h
 	@brief		Declares the CNTV2ProcAmp class.
-	@copyright	(C) 2005-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2005-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2ProcAmp_H

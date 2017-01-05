@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_framestatusinfo524D.cpp
 	@brief		Implements the AJAAncillaryData_FrameStatusInfo524D class.
-	@copyright	(C) 2012-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2012-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata_framestatusinfo524D.h"

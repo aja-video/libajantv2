@@ -1,7 +1,7 @@
 /**
 	@file		ntv2videofile.cpp
 	@brief		Implements the CNTV2VideoFile class.
-	@copyright	(C) 2011-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2011-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2diskio.h"

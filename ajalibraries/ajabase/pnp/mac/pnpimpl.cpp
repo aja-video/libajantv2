@@ -1,6 +1,6 @@
 /**
 	@file		pnp/mac/pnpimpl.cpp
-	@copyright	Copyright (C) 2011-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2011-2017 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJAPnpImpl class on the Mac platform.
 **/
 

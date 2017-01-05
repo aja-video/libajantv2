@@ -1,7 +1,7 @@
 /**
 	@file		ntv2task.cpp
 	@brief		Implements the CNTV2Task class.
-	@copyright	(C) 2008-2016 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2task.h"
