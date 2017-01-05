@@ -2532,6 +2532,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 				{
 				case DEVICE_ID_LHI:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+					break;
 				case DEVICE_ID_IO4KUFC:
 				case DEVICE_ID_IOXT:
 				default:

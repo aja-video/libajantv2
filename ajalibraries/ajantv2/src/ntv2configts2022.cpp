@@ -22,20 +22,12 @@
 
 using namespace std;
 
-
 CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(device)
 {
     uint32_t features    = GetFeatures();
 
     _is2022_6   = (bool)(features & SAREK_2022_6);
     _is2022_2   = (bool)(features & SAREK_2022_2);
-
-    // init config structs
-    for (int channel = NTV2_CHANNEL1; channel < NTV2_MAX_NUM_CHANNELS; channel++)
-    {
-        // decode defaults
-        _j2kDecodeConfig[channel].j2k_pid = 0;
-    }
 }
 
 bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
@@ -215,11 +207,34 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
 
 bool CNTV2ConfigTs2022::ReadbackJ2KDecoder(j2kDecoderConfig &config)
 {
-
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, (uint32_t*)&config.selectionMode);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  &config.programNumber);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  &config.programPID);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, &config.audioNumber);
+
+    return true;
+}
+
+bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
+{
+    status.init();
+
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumPGMs,   &status.numAvailablePrograms);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumAudios, &status.numAvailableAudios);
+    for (uint32_t i=0; i < status.numAvailablePrograms; i++)
+    {
+        uint32_t val;
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMNums + i, &val);
+        status.availableProgramNumbers.push_back(val);
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMPIDs + i, &val);
+        status.availableProgramPIDs.push_back(val);
+    }
+    for (uint32_t i=0; i < status.numAvailableAudios; i++)
+    {
+        uint32_t val;
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioPIDs + i, &val);
+        status.availableAudioPIDs.push_back(val);
+    }
 
     return true;
 }
@@ -358,8 +373,19 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 {
     uint32_t addr = GetIpxTsAddr(channel);
 
-    // Number of channels - 1 (actually have one stereo pair so this is considered 1 channel)
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x0));
+    J2KStreamType       streamType;
+    GetJ2KEncodeStreamType(channel, streamType);
+
+    // Write number of channels 0 is actually 1 stereo pair and set bit 4 for non elsm streams to indicate 24 bit audio
+    if (streamType == kJ2KStreamTypeNonElsm)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x10));
+    }
+    else
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x00));
+    }
+
     // Enable this device
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapHostEn, (0x1));
 
@@ -369,46 +395,10 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 
 bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap(const NTV2Channel channel)
 {
+    #pragma unused (channel)
     mError = "SetupEncodeTsMpegAncEncap not yet implemented";
     return false;
 }
-
-
-// Setup individual TS decode parts
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegJ2kDecap()
-{
-    mError = "SetupDecodeTsMpegJ2kDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsJ2KDecoder()
-{
-    mError = "SetupDecodeTsJ2KDecoder not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegAesDecap()
-{
-    mError = "SetupDecodeTsMpegAesDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsAesDecap()
-{
-    mError = "SetupDecodeTsAesDecap not yet implemented";
-    return false;
-}
-
-
-bool CNTV2ConfigTs2022::SetupDecodeTsMpegAncDecap()
-{
-    mError = "SetupDecodeTsMpegAncDecap not yet implemented";
-    return false;
-}
-
 
 uint32_t CNTV2ConfigTs2022::GetFeatures()
 {
@@ -540,6 +530,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = pes.calcPatPmtPeriod() | 0x01000000;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     int length = pes.makePacket();
 
     printf("PTS Offset = 0x%02x J2K TS Offset = 0x%02x auf1 offset = 0x%02x auf2 offset = 0x%02x\n\n",
@@ -638,6 +632,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     _transactionTable[_transactionCount++][1] = 0;
     printf("PAT/PMT Transmission Period = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     ADPGen adp;
     adp._tsEncapType = kTsEncapTypePcr;
     adp._elemNumToPID[1] = pcrPid;
@@ -664,20 +662,28 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
 {
     int32_t             w1;
     uint32_t            audioPid;
+    J2KStreamType       j2kStreamType;
 
     printf("CNTV2ConfigTs2022::GenerateTableForMpegAesEncap\n");
 
     // Get the Audio pid
     GetJ2KEncodeAudio1Pid(channel, audioPid);
     printf("Audio 1 PID     = 0x%02x\n\n", audioPid);
-
+    GetJ2KEncodeStreamType(channel, j2kStreamType);
     _transactionCount = 0;
 
     PESGen pes;
     pes._tsEncapType = kTsEncapTypeAes;
     pes._elemNumToPID[1] = audioPid;
+    // For Aes PES generator the streamType is the only thing we need to pass in the videoStreamData struct
+    pes._videoStreamData.j2kStreamType = j2kStreamType;
 
     printf("Host Register Settings:\n\n");
+
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0x10000;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
+
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
     _transactionTable[_transactionCount++][1] = audioPid;
     printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);

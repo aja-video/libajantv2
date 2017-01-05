@@ -13,7 +13,8 @@ enum eMBCmd
     MB_CMD_STOP_IGMP    = 2,
     MB_CMD_GET_MAC_FROM_ARP_TABLE = 3,
     MB_CMD_SEND_ARP_REQ = 4,
-    MB_CMD_UNKNOWN      = 5
+    MB_CMD_UNKNOWN      = 5,
+    MB_CMD_SET_IGMP_VERSION = 6
 };
 
 enum eSFP
@@ -35,13 +36,15 @@ class AJAExport CNTV2MBController : public CNTV2MailBox
 public:
     CNTV2MBController(CNTV2Card & device);
 
+protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
     bool JoinIGMPGroup( eSFP port, NTV2Channel channel, std::string ipaddr);
     bool LeaveIGMPGroup(eSFP port, NTV2Channel channel,std::string ipaddr);
     bool GetRemoteMAC(std::string remote_IPAddress, std::string & MACaddress);
+    bool SetIGMPVersion(uint32_t version);
 
-protected:
+private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, std::string & MACaddress);
     bool SendArpRequest(std::string remote_IPAddress);
 
@@ -51,8 +54,6 @@ protected:
     bool getString(const std::string & resp, const std::string & parm, std::string & result);
 
 private:
-    uint32_t getFeatures();
-
 };
 
 #endif // NTV2MBCONTROLLER_H

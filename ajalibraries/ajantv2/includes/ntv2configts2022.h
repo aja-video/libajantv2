@@ -38,6 +38,7 @@
 #define     J2K_TS_OFFSET                   0xc2
 #define     AUF1_OFFSET                     0xc3
 #define     AUF2_OFFSET                     0xc4
+#define     PACKET_RATE                     0xca
 #define     HOST_EN                         0xe0
 #define     INTERLACED_VIDEO                0xe1
 #define     PAYLOAD_PARAMS                  0xe2
@@ -144,11 +145,6 @@ public:
     uint32_t                pid;                ///< @brief	Specifies the pid for J2K decode.
 };
 
-struct j2kDecodeConfig
-{
-    uint32_t                j2k_pid;
-};
-
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips
 **/
@@ -202,10 +198,6 @@ public:
     void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
     void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
 
-    // Set/Get decode PID
-    void    SetJ2KDecodePid(const NTV2Channel channel, const uint32_t pid) {_j2kDecodeConfig[channel].j2k_pid = pid;}
-    void    GetJ2KDecodePid(const NTV2Channel channel, uint32_t & pid) {pid = _j2kDecodeConfig[channel].j2k_pid;}
-
     // Setup both the TS and J2K encoder using the class params
     bool    SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel);
 
@@ -215,6 +207,7 @@ public:
     // Setup the J2K decoder
     bool    SetupJ2KDecoder(const  j2kDecoderConfig & config);
     bool    ReadbackJ2KDecoder(j2kDecoderConfig &config);
+    bool    GetJ2KDecoderStatus(j2kDecoderStatus &status);
 
     // Setup the TS encode parts
     bool    SetupTsForEncode(const NTV2Channel channel);
@@ -235,13 +228,6 @@ public:
     bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAncEncap(const NTV2Channel channel);
 
-    // Setup individual TS decode parts
-    bool    SetupDecodeTsMpegJ2kDecap();
-    bool    SetupDecodeTsJ2KDecoder();
-    bool    SetupDecodeTsMpegAesDecap();
-    bool    SetupDecodeTsAesDecap();
-    bool    SetupDecodeTsMpegAncDecap();
-    
     // Routines to talk to the J2K part
     bool                J2kCanAcceptCmd(const NTV2Channel channel);
     void                J2kSetParam(const NTV2Channel channel, uint32_t config, uint32_t param, uint32_t value);
@@ -259,9 +245,6 @@ public:
 
     bool                _is2022_6;
     bool                _is2022_2;
-
-    //j2kEncodeConfig     _j2kEncodeConfig[NTV2_MAX_NUM_CHANNELS];
-    j2kDecodeConfig     _j2kDecodeConfig[NTV2_MAX_NUM_CHANNELS];
 
     int32_t             _transactionTable[1024][2];
     int32_t             _transactionCount;

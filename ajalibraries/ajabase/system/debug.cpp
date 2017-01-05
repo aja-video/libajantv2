@@ -636,7 +636,7 @@ AJADebug::ReadGroupFile(char* pFileName)
 {
 	FILE* pGroup = NULL;
 	char Label[256];
-	int32_t index = 0;
+    int32_t index = 0;
 
 	// must have a file name
 	if(pFileName == NULL)
@@ -657,7 +657,7 @@ AJADebug::ReadGroupFile(char* pFileName)
 		while(true)
 		{
 			// parse a group label
-			if(fscanf(pGroup, " #%d %s", (int32_t*)index, Label) != 2)
+            if(fscanf(pGroup, " #%d %s", (int32_t *)&index, Label) != 2)
 			{
 				break;
 			}

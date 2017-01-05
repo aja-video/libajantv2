@@ -55,6 +55,7 @@
 #define kRegSarekMBBuildNum         6
 #define kRegSarekSerialLow          7
 #define kRegSarekSerialHi           8
+#define kRegSarekIGMPVersion        9
 
 #define kRegSarekTxAutoMAC          11
 #define kRegSarekIGMP4              12
@@ -109,6 +110,13 @@
 #define kRegSarekProgNumSelect      14    // set by host
 #define kRegSarekProgPIDSelect      15    // set by host
 #define kRegSarekAudioNumSelect     16    // set by host
+
+#define kRegSarekNumPGMs            20
+#define kRegSarekNumAudios          21
+
+#define kRegSarekPGMNums            24
+#define kRegSarekPGMPIDs            40
+#define kRegSarekAudioPIDs          56
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -565,6 +573,7 @@
 #define kRegTsMpeg2EncapJ2kTsOffset             194             //0x00C2
 #define kRegTsMpeg2EncapAuf1Offset              195             //0x00C3
 #define kRegTsMpeg2EncapAuf2Offset              196             //0x00C4
+#define kRegTsMpeg2EncapPacketRate              202             //0x00CA
 #define kRegTsMpeg2EncapPesMax                  201             //0x00C9
 #define kRegTsMpeg2EncapTsTxHostEn              224             //0x00E0
 #define kRegTsMpeg2EncapInterlacedVideo         225             //0x00E1

@@ -30,6 +30,14 @@ typedef struct
 #define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
 #define VOIP_SECONDARY_ENABLE           0x80000000
 
+#define PLL_MATCH_SOURCE_IP             BIT(0)
+#define PLL_MATCH_DEST_IP               BIT(1)
+#define PLL_MATCH_SOURCE_PORT           BIT(2)
+#define PLL_MATCH_DEST_PORT             BIT(3)
+#define PLL_MATCH_ES_PID                BIT(4)
+
+#define PLL_CONFIG_PCR                  BIT(0)
+
 
 /**
     @brief	Configures a SMPTE 2022 Transmit Channel.
@@ -187,6 +195,12 @@ typedef enum {
     eProgSel_Default = eProgSel_AutoFirstProg,
 } eProgSelMode_t;
 
+typedef enum {
+    eIGMPVersion_2,
+    eIGMPVersion_3,
+    eIGMPVersion_Default = eIGMPVersion_3
+} eIGMPVersion_t;
+
 class j2kDecoderConfig
 {
 public:
@@ -197,6 +211,19 @@ public:
     uint32_t        programNumber;
     uint32_t        programPID;
     uint32_t        audioNumber;
+};
+
+class j2kDecoderStatus
+{
+public:
+    j2kDecoderStatus() {init();}
+    void init();
+
+    uint32_t              numAvailablePrograms;
+    uint32_t              numAvailableAudios;
+    std::vector<uint32_t> availableProgramNumbers;
+    std::vector<uint32_t> availableProgramPIDs;
+    std::vector<uint32_t> availableAudioPIDs;
 };
 
 /**
@@ -232,7 +259,9 @@ public:
     bool        GetTxChannelEnable(NTV2Channel channel, bool & enabled);
 
     bool        SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
-    bool        GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
+    bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
+    bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
+
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -243,6 +272,9 @@ public:
     **/
     bool        SetIGMPDisable(eSFP port, bool disable);
     bool        GetIGMPDisable(eSFP port, bool & disabled);
+
+    bool        SetIGMPVersion(eIGMPVersion_t version);
+    bool        GetIGMPVersion(eIGMPVersion_t & version);
 
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
@@ -261,7 +293,6 @@ private:
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
-    uint32_t    GetFeatures();
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
 

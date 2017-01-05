@@ -988,15 +988,18 @@ void Io4KUfcServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		if ( (inputFormat == frameBufferFormat) &&												 // formats are same
 			!(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
-		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
-		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
+			if (inputFormatSelect == NTV2_RGBSelect)
+			{
+				mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
+			}
+			else
+			{
+				mCard->Connect(NTV2_XptFrameBuffer1Input, inputXptYUV1);
+			}
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptConversionModule);
+			mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_XptConversionModule);
 			bEanbleConverter = true;
 		}
 	}

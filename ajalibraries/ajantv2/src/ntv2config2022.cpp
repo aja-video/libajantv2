@@ -251,6 +251,16 @@ void j2kDecoderConfig::init()
     audioNumber   = 1;
 }
 
+void j2kDecoderStatus::init()
+{
+    numAvailablePrograms = 0;
+    numAvailableAudios       = 0;
+    availableProgramNumbers.clear();
+    availableProgramPIDs.clear();
+    availableAudioPIDs.clear();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////
 //
 //  CNTV2Config2022
@@ -259,7 +269,7 @@ void j2kDecoderConfig::init()
 
 CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
 {
-    uint32_t features    = GetFeatures();
+    uint32_t features    = getFeatures();
 
     _numTx0Chans = (features & (SAREK_TX0_MASK)) >> 28;
     _numRx0Chans = (features & (SAREK_RX0_MASK)) >> 24;
@@ -575,6 +585,25 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
+
+    if (_is2022_2)
+    {
+        // setup PLL
+       mDevice.WriteRegister(kRegPll_Config  + SAREK_PLL, PLL_CONFIG_PCR,PLL_CONFIG_PCR);
+       mDevice.WriteRegister(kRegPll_SrcIp   + SAREK_PLL, sourceIp);
+       mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.primarySourcePort);
+       mDevice.WriteRegister(kRegPll_DstIp   + SAREK_PLL, destIp);
+       mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.primaryDestPort);
+
+       uint32_t rxMatch  = rxConfig.primaryRxMatch;
+       uint32_t pllMatch = 0;
+       if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
+       if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
+       if (rxMatch & RX_MATCH_DEST_PORT)   pllMatch |= PLL_MATCH_DEST_PORT;
+       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
+       pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
+       mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
+    }
 
     // if already enabled, make sure IGMP subscriptions are updated
     bool enabled = false;
@@ -1278,6 +1307,32 @@ bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
     return true;
 }
 
+bool CNTV2Config2022::SetIGMPVersion(eIGMPVersion_t version)
+{
+    uint32_t mbversion;
+    switch (version)
+    {
+    case eIGMPVersion_2:
+        mbversion = 2;
+        break;
+    case eIGMPVersion_3:
+        mbversion = 3;
+        break;
+    default:
+        mError = "Invalid IGMP version";
+        return false;
+    }
+    return CNTV2MBController::SetIGMPVersion(mbversion);
+}
+
+bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
+{
+    uint32_t version32;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,&version32);
+    version =  (version32 == 2) ? eIGMPVersion_2 : eIGMPVersion_3;
+    return rv;
+}
+
 bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
 {
     if (_is2022_2)
@@ -1289,24 +1344,34 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
     return false;
 }
 
-bool CNTV2Config2022::GetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
+bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
 {
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
+        return rv;
+    }
     return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//
-//
-//
-/////////////////////////////////////////////////////////////////////////////////
-
-uint32_t CNTV2Config2022::GetFeatures()
+bool CNTV2Config2022::GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus)
 {
-    uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
-    return val;
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.GetJ2KDecoderStatus(j2kStatus);
+        return rv;
+    }
+    return false;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
 
 eSFP  CNTV2Config2022::GetRxPort(NTV2Channel chan)
 {
