@@ -546,12 +546,13 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 	VPIDSpec vpidSpec;
 	::memset ((void *)&vpidSpec, 0, sizeof (vpidSpec));
 	
+	bool is372						= NTV2_IS_372_DUALLINK_FORMAT(inOutputFormat);
 	vpidSpec.videoFormat			= inOutputFormat;
 	vpidSpec.isRGBOnWire			= inIsDualLinkRGB;
-	vpidSpec.isOutputLevelA			= NTV2_IS_3G_FORMAT(inOutputFormat) && ! inOutputIs3Gb;
+	vpidSpec.isOutputLevelA			= NTV2_IS_3G_FORMAT(inOutputFormat) && !inOutputIs3Gb && !is372;
 	vpidSpec.isOutputLevelB			= inOutputIs3Gb;
 	vpidSpec.isDualLink				= inIsDualLinkRGB ||
-									  (NTV2_IS_372_DUALLINK_FORMAT(inOutputFormat) && !vpidSpec.isOutputLevelA);
+									  (is372 && !vpidSpec.isOutputLevelA);
 	vpidSpec.isTwoSampleInterleave	= inIsSMPTE425;
 	vpidSpec.useChannel				= inUseChannel;
 	vpidSpec.vpidChannel			= inChannel;
