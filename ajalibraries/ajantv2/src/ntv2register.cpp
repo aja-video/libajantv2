@@ -1957,6 +1957,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
 	ULWord sparseValue = 0;
+	NTV2ReferenceSource originalSelect = value;
 	switch(value)
 	{
 	case NTV2_REFERENCE_INPUT5:
@@ -1987,7 +1988,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		break;
 	}
 
-	if (value >= NTV2_REFERENCE_INPUT5)
+	if (originalSelect >= NTV2_REFERENCE_INPUT5)
 		WriteRegister (kRegGlobalControl2,
 			sparseValue,
 			kRegMaskRefSource2,
