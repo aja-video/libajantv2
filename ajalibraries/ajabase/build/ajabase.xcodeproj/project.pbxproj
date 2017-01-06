@@ -92,10 +92,6 @@
 		B4CADAF4180F10B1004C9057 /* dpx_hdr.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CADAF0180F10B1004C9057 /* dpx_hdr.h */; };
 		B4CADAF5180F10B1004C9057 /* dpxfileio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADAF1180F10B1004C9057 /* dpxfileio.cpp */; };
 		B4CADAF6180F10B1004C9057 /* dpxfileio.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CADAF2180F10B1004C9057 /* dpxfileio.h */; };
-		B4CBDA5817E369F300C2EAA1 /* ajadevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CBDA5417E369F300C2EAA1 /* ajadevice.cpp */; };
-		B4CBDA5A17E369F300C2EAA1 /* ajadevicescanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CBDA5617E369F300C2EAA1 /* ajadevicescanner.cpp */; };
-		B4CBDA6317E36A1F00C2EAA1 /* ajadevicemac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CBDA5C17E36A1F00C2EAA1 /* ajadevicemac.cpp */; };
-		B4CBDA6617E36A1F00C2EAA1 /* deviceclasslistener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CBDA5F17E36A1F00C2EAA1 /* deviceclasslistener.cpp */; };
 		B4CBDA6817E36A1F00C2EAA1 /* masterport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CBDA6117E36A1F00C2EAA1 /* masterport.cpp */; };
 		B4CE1FB016E802460092B564 /* options_popt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FAE16E802460092B564 /* options_popt.cpp */; };
 		B4CE1FB116E802460092B564 /* options_popt.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FAF16E802460092B564 /* options_popt.h */; };
@@ -197,15 +193,6 @@
 		B4CADAF1180F10B1004C9057 /* dpxfileio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dpxfileio.cpp; path = ../common/dpxfileio.cpp; sourceTree = SOURCE_ROOT; };
 		B4CADAF2180F10B1004C9057 /* dpxfileio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dpxfileio.h; path = ../common/dpxfileio.h; sourceTree = SOURCE_ROOT; };
 		B4CBDA5317E3695600C2EAA1 /* ajarefptr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ajarefptr.h; path = ../common/ajarefptr.h; sourceTree = SOURCE_ROOT; };
-		B4CBDA5417E369F300C2EAA1 /* ajadevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ajadevice.cpp; path = ../pnp/ajadevice.cpp; sourceTree = SOURCE_ROOT; };
-		B4CBDA5517E369F300C2EAA1 /* ajadevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ajadevice.h; path = ../pnp/ajadevice.h; sourceTree = SOURCE_ROOT; };
-		B4CBDA5617E369F300C2EAA1 /* ajadevicescanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ajadevicescanner.cpp; path = ../pnp/ajadevicescanner.cpp; sourceTree = SOURCE_ROOT; };
-		B4CBDA5717E369F300C2EAA1 /* ajadevicescanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ajadevicescanner.h; path = ../pnp/ajadevicescanner.h; sourceTree = SOURCE_ROOT; };
-		B4CBDA5C17E36A1F00C2EAA1 /* ajadevicemac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ajadevicemac.cpp; path = ../pnp/mac/ajadevicemac.cpp; sourceTree = SOURCE_ROOT; };
-		B4CBDA5D17E36A1F00C2EAA1 /* ajadevicemac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ajadevicemac.h; path = ../pnp/mac/ajadevicemac.h; sourceTree = SOURCE_ROOT; };
-		B4CBDA5E17E36A1F00C2EAA1 /* ajadevicescannermacimpl.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ajadevicescannermacimpl.hpp; path = ../pnp/mac/ajadevicescannermacimpl.hpp; sourceTree = SOURCE_ROOT; };
-		B4CBDA5F17E36A1F00C2EAA1 /* deviceclasslistener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = deviceclasslistener.cpp; path = ../pnp/mac/deviceclasslistener.cpp; sourceTree = SOURCE_ROOT; };
-		B4CBDA6017E36A1F00C2EAA1 /* deviceclasslistener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = deviceclasslistener.h; path = ../pnp/mac/deviceclasslistener.h; sourceTree = SOURCE_ROOT; };
 		B4CBDA6117E36A1F00C2EAA1 /* masterport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterport.cpp; path = ../pnp/mac/masterport.cpp; sourceTree = SOURCE_ROOT; };
 		B4CBDA6217E36A1F00C2EAA1 /* masterport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterport.h; path = ../pnp/mac/masterport.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FAE16E802460092B564 /* options_popt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = options_popt.cpp; path = ../common/options_popt.cpp; sourceTree = SOURCE_ROOT; };
@@ -371,10 +358,6 @@
 			isa = PBXGroup;
 			children = (
 				B47188FD17C8102F00015586 /* mac */,
-				B4CBDA5417E369F300C2EAA1 /* ajadevice.cpp */,
-				B4CBDA5517E369F300C2EAA1 /* ajadevice.h */,
-				B4CBDA5617E369F300C2EAA1 /* ajadevicescanner.cpp */,
-				B4CBDA5717E369F300C2EAA1 /* ajadevicescanner.h */,
 				B47188F917C8101400015586 /* pnp.cpp */,
 				B47188FA17C8101400015586 /* pnp.h */,
 			);
@@ -385,11 +368,6 @@
 		B47188FD17C8102F00015586 /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				B4CBDA5C17E36A1F00C2EAA1 /* ajadevicemac.cpp */,
-				B4CBDA5D17E36A1F00C2EAA1 /* ajadevicemac.h */,
-				B4CBDA5E17E36A1F00C2EAA1 /* ajadevicescannermacimpl.hpp */,
-				B4CBDA5F17E36A1F00C2EAA1 /* deviceclasslistener.cpp */,
-				B4CBDA6017E36A1F00C2EAA1 /* deviceclasslistener.h */,
 				B41148C31DC1562C00A7D6E1 /* devicenotifier.cpp */,
 				B41148C41DC1562C00A7D6E1 /* devicenotifier.h */,
 				B4CBDA6117E36A1F00C2EAA1 /* masterport.cpp */,
@@ -560,10 +538,6 @@
 				A4B58E521770C6820077542D /* wavewriter.cpp in Sources */,
 				B47188FB17C8101400015586 /* pnp.cpp in Sources */,
 				B471890017C810F600015586 /* pnpimpl.cpp in Sources */,
-				B4CBDA5817E369F300C2EAA1 /* ajadevice.cpp in Sources */,
-				B4CBDA5A17E369F300C2EAA1 /* ajadevicescanner.cpp in Sources */,
-				B4CBDA6317E36A1F00C2EAA1 /* ajadevicemac.cpp in Sources */,
-				B4CBDA6617E36A1F00C2EAA1 /* deviceclasslistener.cpp in Sources */,
 				B4CBDA6817E36A1F00C2EAA1 /* masterport.cpp in Sources */,
 				B4CADAF3180F10B1004C9057 /* dpx_hdr.cpp in Sources */,
 				B4CADAF5180F10B1004C9057 /* dpxfileio.cpp in Sources */,
