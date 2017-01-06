@@ -2,7 +2,7 @@
 	@file		ntv2llburn/main.cpp
 	@brief		Demonstration application that "burns" timecode into frames captured from SDI input,
 				and playout those modified frames to SDI output.
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

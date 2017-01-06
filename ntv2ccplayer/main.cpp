@@ -4,7 +4,7 @@
 				generated in host memory that contain CEA-608 (SD) or CEA-708 (HD) captions.
 				The caption text can be self-generated, piped in from standard input, or read from
 				any number of text files specified in the command line.
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

@@ -1,7 +1,7 @@
 /**
 	@file	ntv2burnboardtoboard.h
 	@brief	Header file for the NTV2BurnBoardToBoard demonstration class.
-	@copyright	Copyright (C) 2012-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2BURNBOARDTOBOARD_H

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2enumerateboards.h
 	@brief		Header file that defines the NTV2EnumerateDevices class
-	@copyright	Copyright (C) 2013-2016 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2_ENUMERATE_BOARDS_CLASS

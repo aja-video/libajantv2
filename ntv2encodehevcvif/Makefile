@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004-2016 AJA Video Systems, Inc.
+# Copyright (C) 2004-2017 AJA Video Systems, Inc.
 # Proprietary and Confidential information.  All Rights Reserved
 #
 
