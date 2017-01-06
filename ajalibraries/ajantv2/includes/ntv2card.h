@@ -5096,7 +5096,19 @@ private:
 	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void);	///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
+	/**
+		@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
+		@param[in]	inParamID		Specifies the device features parameter of interest.
+		@param[out]	outRegInfo		Receives the associated NTV2RegInfo.
+		@return		True if successful; otherwise false.
+	**/
 	AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo);
+	/**
+		@brief		Answers with the NTV2RegInfo of the register associated with the given numeric (i.e., "Get Num") device feature.
+		@param[in]	inParamID		Specifies the device features parameter of interest.
+		@param[out]	outRegInfo		Receives the associated NTV2RegInfo.
+		@return		True if successful; otherwise false.
+	**/
 	AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
 
 };	//	CNTV2Card

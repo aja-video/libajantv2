@@ -39,138 +39,56 @@ This section explores the contents of the SDK, which is nearly identical on all 
 
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- This is the folder that resulted after extracting the .zip file.
 	-	<b>sdk</b>
-		-	<b>ajaapps</b>
+		-	<b>ajaapps</b> -- Contains sources used to build applications and tools.
 			-	<b>crossplatform  </b>
 				-	<b>demoapps</b>
 			-	<b>lin  </b><i>(Linux only)</i>
 			-	<b>mac  </b><i>(MacOS only)</i>
 			-	<b>win  </b><i>(Windows only)</i>
 		-	<b>ajadriver</b>
-			-	<b>linux  </b><i>(Linux only)</i>
+			-	<b>linux</b> -- Device driver source code <i>(Linux only)</i>.
 		-	<b>ajalibraries</b>
-			-	<b>ajaanc</b>
-			-	<b>ajabase</b>
-			-	<b>ajacc</b>
-			-	<b>ajantv2</b>
-				-	<b>build  </b><i>(MacOS & Windows only)</i>
-				-	<b>codecs  </b><i>(Corvid HEVC only)</i>
-				-	<b>includes</b>
-				-	<b>src</b>
-					-	<b>lin  </b><i>(Linux only)</i>
-					-	<b>mac  </b><i>(MacOS only)</i>
-					-	<b>win  </b><i>(Windows only)</i>
-			-	<b>gpustuff   </b><i>(Linux & Windows only)</i>
-		-	<b>bin</b>
-		-	<b>docs</b>
-		-	<b>lib</b>
-		-	<b>qtbuild  </b>
-	-	<b>tools</b>
+			-	<b>ajabase</b> -- Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
+			-	<b>ajaanc</b> -- Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
+			-	<b>ajacc</b> -- Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
+			-	<b>ajantv2</b> -- Contains source code for the "libajantv2" library:
+				-	<b>build</b> -- <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
+				-	<b>codecs</b> -- Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
+				-	<b>includes</b> -- SDK header/include files.
+				-	<b>src</b> -- SDK implementation source files (with platform-specific subdirectories).
+		-	<b>bin</b> -- Destination directory for all executable files and the dynamically-loaded libraries they need to run.
+		-	<b>lib</b> -- Destination directory for all static libraries.
+		-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
+		-	<b>qtbuild</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. It contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
+			-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
+			-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
+			-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
+			-	<b>_*.pro</b> -- "Meta" build files that handle building requisite libraries, similar to a solution file (for those familiar with Visual Studio or Xcode).
+	-	<b>tools</b> -- Contains a number of pre-built tools and utilities for Windows and MacOS that are useful in developing video
+		applications and for diagnosing problems that may arise while doing so.
+		(On Linux, the tools are built from the provided source code, and thus appear in the <b>bin</b> directory.)
+		-	<b>prune.py</b> -- A Python command that prunes files and folders from the SDK directory that are extraneous
+			or unnecessary for the host's platform. For example, if the SDK was downloaded and unzipped on a Windows host, the script will remove
+			all Linux-specific files (e.g., <tt>ajadriver</tt>, <tt>lin</tt> and <tt>linux</tt> folders, etc.) and Mac-specific
+			files (e.g., Xcode project files, etc.) from the unzipped SDK.
 
-@subsection		gs-contents-ajaapps	ajaapps
-
-This directory contains sources used to build applications and tools.
-
-@subsection		gs-contents-ajadriver	ajadriver
-
-This directory contains sources used to build the device driver(s).
-
-@subsection		gs-contents-ajalibraries	ajalibraries
-
-This directory contains...
--	the "ajabase" directory, which contains the \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
--	the \ref ajaanc, which is handy for parsing and manipulating ancillary data.
--	the "ajacc" directory, which contains the \ref ajacclib, handy for encoding and decoding CEA-608/708 captions.
--	the "ajantv2" directory, which contains the sources for the NTV2 class library. It has several sub-directories of interest:
-	-	<b>build</b> -- Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
-	-	<b>codecs</b> -- The principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
-	-	<b>includes</b> -- The SDK header/include files.
-	-	<b>src</b> -- The SDK implementation source files, with platform-specific subdirectories.
-
-@subsection		gs-contents-bin		bin
-
-This is the destination directory for all executable files and the dynamically-loaded libraries they need to run.
-
-@subsection		gs-contents-lib		lib
-
-This is the destination directory for all static libraries.
-
-@subsection		gs-contents-qtbuild		qtbuild
-
-If present, this directory is provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. It contains a complete <b>qmake</b> build structure
-that will build the NTV2 libraries and all demo applications.
-
-<b>config.pri</b>
-
-This is starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the "Uber" <b>bin</b> and <b>lib</b> directories.
-
-<b>libs.pri</b>
-
-This is a helper .pri used by most of the .pro's to simplify adding libraries and library dependencies.
-
-<b>local_config.pri</b>
-
-This is an optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It is provided as an example to show how to produce Debug builds by default.
-
-<b>_*.pro</b>
-
-These are "meta" build files that handle building any requisite libraries, similar to a solution file (for those familiar with Visual Studio or Xcode).
-
-
-@subsection		gs-contents-tools	tools
-
-Contains a number of pre-built tools and utilities for Windows and MacOS that are useful in developing video
-applications and for diagnosing problems that may arise while doing so.
-(On Linux, the tools are built from the provided source code, and thus, will appear in the "bin" directory.)
-
-@subsubsection		gs-tools-prune		prune.py
-
-This is a Python command that will prune all files from the SDK directory that are extraneous or unnecessary for
-the host's platform. For example, if the SDK was downloaded and unzipped on a Windows host, the script will remove
-all Linux-specific files (e.g., <tt>ajadriver</tt>, <tt>lin</tt> and <tt>linux</tt> folders, etc.) and Mac-specific
-files (e.g., Xcode project files, etc.) from the unzipped SDK.
-
-@subsubsection		gs-tools-ntv2watcher	NTV2Watcher
-
-\ref usingntv2watcher is a very handy debugging utility that shows the inner workings of NTV2 devices.
-
-
-@subsubsection		gs-tools-systemtest		AJA System Test
-
-This tool measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
-
+		-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
+		-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
 @image	html	gs-systemtest-75.png
-
-
-@subsubsection		gs-tools-dataratecalc	Data Rate Calculator
-
-The platform-specific Data Rate Calculator host applications are no longer supplied in the SDK.
-AJA DataCalc is available for Android and iOS mobile devices.
-Available for iOS here: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
-Available for Android here: https://play.google.com/store/apps/details?id=com.aja.datacalc
-
-
-@subsubsection		gs-tools-supportlog		Support Log
-
-Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
-This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
-Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
-
-
-@subsubsection		gs-tools-firmwareinstaller		ntv2firmwareinstaller
-
-This is a command-line tool that's used to "flash" new firmware into a connected AJA device. The command usage is documented in
-the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
-
-This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
-and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
-
-@note	<b>Corvid HEVC:</b> --- This device has a somewhat different procedure for checking and updating its firmware.
-		See \ref  hevcsupplement for more information.
-
-
-@subsubsection		gs-tools-ntv2thermo		ntv2thermo
-
-This is a command-line tool that's used to interrogate and/or control temperature-related parameters of connected AJA devices.
+		-	<b>Data Rate Calculator</b> -- The platform-specific Data Rate Calculator host applications are no longer supplied in the SDK.
+			AJA DataCalc is available for Android and iOS mobile devices.
+			Available for iOS here: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
+			Available for Android here: https://play.google.com/store/apps/details?id=com.aja.datacalc
+		-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
+			This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
+			Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
+		-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
+			the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
+			This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
+			and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
+			@note	<b>Corvid HEVC:</b> --- This device has a somewhat different procedure for checking and updating its firmware.
+			See \ref  hevcsupplement for more information.
+		-	<b>ntv2thermo</b> -- A command-line tool that interrogates and/or controls temperature-related parameters of connected AJA devices.
 
 <b>Synopsis</b><br>
 \code{.sh}
@@ -298,19 +216,16 @@ Note that JSON output is not supported when turning the fan on or off.
 @subsection		gs-contents-libs	SDK Libraries
 
 The SDK distribution comes with the following libraries:
--	<b>ajacc</b> --- AJA's library for encoding/decoding closed-captions.
--	<b>ajaanc</b> --- AJA's library to aid ancillary data insertion/extraction.
--	<b>ajabase</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
--	<b>ajantv2</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
+-	<b>libajacc</b> --- AJA's library for encoding/decoding closed-captions.
+-	<b>libajaanc</b> --- AJA's library to aid ancillary data insertion/extraction.
+-	<b>libajabase</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
+-	<b>libajantv2</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
 These can be built using the provided Visual Studio project files.
 
 On Linux, except for the proprietary libraries, pre-built versions of the static libraries are not provided.
 They must be built using the provided Makefiles. Follow the instructions below ("Building the Libraries on Linux").
-
-While it's possible to incorporate the NTV2 and "ajabase" source code directly into your own projects, AJA recommends linking with the
-provided libraries, and using the source code when necessary as a debugging aid.
 
 @note	Please avoid deriving subclasses from AJA-provided classes.
 		AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
