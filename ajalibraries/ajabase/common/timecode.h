@@ -160,6 +160,7 @@ public:
 	 *	@param[in]	dbb
 	 *	@param[in]	low
  	 *	@param[in]	high
+ 	 *	@param[in]	timeBase                   Specifies the time base to use.
 	 */
 	void                SetRP188(uint32_t dbb, uint32_t low, uint32_t high, const AJATimeBase& timeBase);
 	
@@ -185,23 +186,19 @@ public:
 	/**
 	 *	Query string showing timecode for current frame count given the passed parameters.
 	 *
-	 *	@param[out]	bool					    'true' if drop frame style timecode, false otherwise.
 	 *	@param[in]	pString                     character string with timecode
 	 */
 	static bool			QueryIsDropFrame(const wchar_t *pString);
 	static bool			QueryIsDropFrame(const char    *pString);
 	
 	/**
-	 *	Query string size needed for query string commands
-	 *
-	 *	@param[out]	int					    number of bytes need to store string
+	 *	@return	Query string size needed for query string commands.
 	 */
 	static int 			QueryStringSize(void);
 	
 	/**
 	 *	Query if rp188 data is drop frame or not
 	 *
-	 *	@param[out]	bool					    'true' if RP188 data is drop frame, false otherwise.
 	 *	@param[in]	dbb
 	 *	@param[in]	low
  	 *	@param[in]	high

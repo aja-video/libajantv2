@@ -91,8 +91,7 @@ typedef struct NTV2FormatDescriptor
 		@brief		Constructs me from the given video format, pixel format and VANC settings.
 		@param[in]	inVideoFormat			Specifies the video format being used.
 		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-		@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
-		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
+		@param[in]	inVancMode				Specifies the VANC mode.
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,

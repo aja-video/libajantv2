@@ -5268,7 +5268,7 @@ typedef enum
 								. . .
 							}	//  The memory is freed automatically when foo goes out of scope
 						@endcode
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_POINTER)
 			NTV2_BEGIN_PRIVATE
@@ -5606,7 +5606,7 @@ typedef enum
 		/**
 			@brief	For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
 					this struct reports SDI input error status information.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SDIInputStatus)
 			UWord			mCRCTallyA;				///< @brief	The number of lines having a CRC error was detected in the "B" stream of the SDI link
@@ -5646,7 +5646,7 @@ typedef enum
 
 		/**
 			@brief	All new NTV2 structs start with this common header.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_HEADER)
 			NTV2_BEGIN_PRIVATE
@@ -5691,7 +5691,7 @@ typedef enum
 
 		/**
 			@brief	All new NTV2 structs end with this common trailer.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_TRAILER)
 				ULWord		fTrailerVersion;	///< @brief	Spare longwords reserved for future use
@@ -5720,7 +5720,7 @@ typedef enum
 							entire frame in host memory, and \c acSegmentDevicePitch to the rowBytes of the entire frame in device memory.
 			@note	IMPORTANT:  For segmented DMAs, the AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment byte count (i.e.,
 								the number of bytes to transfer per segment.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 			@todo	Create a new field in the NTV2SegmentedDMAInfo structure to eliminate the necessity of setting AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to
 					store the segmented transfer's bytes-per-segment value.
 			@note	Setting \c acNumSegments to 0 or 1 defaults to normal non-segmented DMA behavior (i.e. DMA one complete, packed frame).
@@ -5779,7 +5779,7 @@ typedef enum
 
 		/**
 			@brief	Color correction data used with AUTOCIRCULATE_WITH_COLORCORRECT option.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2ColorCorrectionData)
 			NTV2ColorCorrectionMode		ccMode;					///< @brief	My mode (off, RGB, YCbCr, or 3-way)
@@ -5833,7 +5833,7 @@ typedef enum
 
 		/**
 			@brief	This is returned from the CNTV2Card::AutoCirculateGetStatus function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_STATUS)
 				NTV2_HEADER				acHeader;					///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6002,7 +6002,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::ReadRegisters function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadRegisters function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2GetRegisters)		//	AUTOCIRCULATE_TYPE_GETREGS
 			NTV2_BEGIN_PRIVATE
@@ -6081,7 +6081,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::WriteRegisters function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's WriteRegisters function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SetRegisters)		//	AUTOCIRCULATE_TYPE_SETREGS
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6134,7 +6134,7 @@ typedef enum
 
 		/**
 			@brief	This is used to atomically perform bank-selected register reads or writes.
-			@note	This struct uses its constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6178,7 +6178,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::ReadSDIStatistics function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.
-			@note	This struct uses its constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SDIInStatistics)		//	AUTOCIRCULATE_TYPE_SDISTATS
 			NTV2_BEGIN_PRIVATE
@@ -6222,7 +6222,7 @@ typedef enum
 			@brief	This is returned by the CNTV2Card::AutoCirculateGetFrameStamp function, and is also embedded in the AUTOCIRCULATE_TRANSFER struct
 					returned from CNTV2Card::AutoCirculateTransfer. If used as its own NTV2Message (the new API version of the old \c GetFrameStamp call),
 					pass the NTV2Channel in the least significant byte of \c acFrameTime, and the requested frame in \c acRequestedFrame.
-			@note	This struct uses its constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (FRAME_STAMP)
 				NTV2_HEADER			acHeader;						///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6345,7 +6345,7 @@ typedef enum
 
 		/**
 			@brief	This is embedded in the AUTOCIRCULATE_TRANSFER struct that's returned from the CNTV2Card::AutoCirculateTransfer function.
-			@note	This struct uses its constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)
 				NTV2_HEADER				acHeader;				///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6389,7 +6389,7 @@ typedef enum
 
 		/**
 			@brief	This is used in the CNTV2Card::AutoCirculateTransfer function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use ::memset or ::bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)
 				NTV2_HEADER						acHeader;					///< @brief	The common structure header -- ALWAYS FIRST!
