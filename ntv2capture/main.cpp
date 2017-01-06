@@ -99,11 +99,11 @@ int main (int argc, const char ** argv)
 			<< "Processed  Dropped    Level" << endl;
 	//	Poll its status until stopped...
 	do
-	{
+	{/*
 		ULWord	framesProcessed, framesDropped, bufferLevel;
 		capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
 		cout << setw (9) << framesProcessed << setw (9) << framesDropped << setw (9) << bufferLevel << "\r" << flush;
-		AJATime::Sleep (2000);
+		*/AJATime::Sleep (2000);
 	} while (!gGlobalQuit);	//	loop til quit time
 
 	cout << endl;
