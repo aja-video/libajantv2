@@ -113,7 +113,7 @@ AJAStatus NTV2OutputTestPattern::SetUpVideo (void)
 
 void NTV2OutputTestPattern::RouteOutputSignal (void)
 {
-	const NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
+	const NTV2Standard				videoStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
 	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt (::NTV2ChannelToOutputDestination (mOutputChannel)));
 	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel, ::IsRGBFormat (mPixelFormat)));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
