@@ -122,29 +122,6 @@ struct j2kEncodeConfig
     uint32_t                j2k_audio1Pid;
 };
 
-
-class j2k_decode_2022_channel
-{
-public:
-    j2k_decode_2022_channel()
-    {
-        pid     = 0;
-    }
-
-    bool operator != ( const j2k_decode_2022_channel &other )
-    {
-        return !(*this == other);
-    }
-
-    bool operator == ( const j2k_decode_2022_channel &other )
-    {
-        return pid == other.pid;
-    }
-
-public:
-    uint32_t                pid;                ///< @brief	Specifies the pid for J2K decode.
-};
-
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips
 **/
@@ -153,50 +130,6 @@ class AJAExport CNTV2ConfigTs2022 : public CNTV2MBController
 {
 public:
     CNTV2ConfigTs2022 (CNTV2Card & device);
-
-    // Set/Get NTV2 video format for TS and J2K setup
-    void    SetJ2KEncodeVideoFormat(const NTV2Channel channel, const NTV2VideoFormat format) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) format);}
-    void    GetJ2KEncodeVideoFormat(const NTV2Channel channel, NTV2VideoFormat & format) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t &) format);}
-
-    // Set/Get ULL mode for J2K setup
-    void    SetJ2KEncodeUllMode(const NTV2Channel channel, const uint32_t ull) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
-    void    GetJ2KEncodeUllMode(const NTV2Channel channel, uint32_t & ull) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
-
-    // Set/Get bit depth for J2K setup
-    void    SetJ2KEncodeBitDepth(const NTV2Channel channel, const uint32_t bitDepth) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
-    void    GetJ2KEncodeBitDepth(const NTV2Channel channel, uint32_t & bitDepth) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
-
-    // Set/Get chroma sub sampling for J2K setup
-    void    SetJ2KEncodeChromaSubsamp(const NTV2Channel channel, const J2KChromaSubSampling subSamp) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t) subSamp);}
-    void    GetJ2KEncodeChromaSubsamp(const NTV2Channel channel, J2KChromaSubSampling & subSamp) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t &) subSamp);}
-
-    // Set/Get code block size for J2K setup
-    void    SetJ2KEncodeCodeBlocksize(const NTV2Channel channel, const J2KCodeBlocksize codeBlocksize) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t) codeBlocksize);}
-    void    GetJ2KEncodeCodeBlocksize(const NTV2Channel channel, J2KCodeBlocksize & codeBlocksize) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t &) codeBlocksize);}
-
-    // Set/Get encode rate in MBPS for J2K setup
-    void    SetJ2KEncodeMbps(const NTV2Channel channel, const uint32_t mbps) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
-    void    GetJ2KEncodeMbps(const NTV2Channel channel, uint32_t & mbps) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
-
-    // Set/Get stream type for J2K setup
-    void    SetJ2KEncodeStreamType(const NTV2Channel channel, const J2KStreamType streamType) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t) streamType);}
-    void    GetJ2KEncodeStreamType(const NTV2Channel channel, J2KStreamType & streamType) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t &) streamType);}
-
-    // Set/Get encode PMT PID
-    void    SetJ2KEncodePMTPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
-    void    GetJ2KEncodePMTPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
-
-    // Set/Get encode Video PID
-    void    SetJ2KEncodeVideoPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
-    void    GetJ2KEncodeVideoPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
-
-    // Set/Get encode PCR PID
-    void    SetJ2KEncodePCRPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
-    void    GetJ2KEncodePCRPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
-
-    // Set/Get encode Audio PID
-    void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
-    void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
 
     // Setup both the TS and J2K encoder using the class params
     bool    SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel);
@@ -217,7 +150,51 @@ public:
 
 
  private:
-    // These routines are used to setup all the individual TS parts for encode and decode
+    // Set/Get individual J2K encode high level params (currently stored in virtual registers)
+
+    // Encode Video Format
+    void    SetJ2KEncodeVideoFormat(const NTV2Channel channel, const NTV2VideoFormat format) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) format);}
+    void    GetJ2KEncodeVideoFormat(const NTV2Channel channel, NTV2VideoFormat & format) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t &) format);}
+
+    // Encode ULL mode
+    void    SetJ2KEncodeUllMode(const NTV2Channel channel, const uint32_t ull) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
+    void    GetJ2KEncodeUllMode(const NTV2Channel channel, uint32_t & ull) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, ull);}
+
+    // Encode Bit depth
+    void    SetJ2KEncodeBitDepth(const NTV2Channel channel, const uint32_t bitDepth) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
+    void    GetJ2KEncodeBitDepth(const NTV2Channel channel, uint32_t & bitDepth) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, bitDepth);}
+
+    // Encode Chroma sub sampling
+    void    SetJ2KEncodeChromaSubsamp(const NTV2Channel channel, const J2KChromaSubSampling subSamp) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t) subSamp);}
+    void    GetJ2KEncodeChromaSubsamp(const NTV2Channel channel, J2KChromaSubSampling & subSamp) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t &) subSamp);}
+
+    // Encode Code block size
+    void    SetJ2KEncodeCodeBlocksize(const NTV2Channel channel, const J2KCodeBlocksize codeBlocksize) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t) codeBlocksize);}
+    void    GetJ2KEncodeCodeBlocksize(const NTV2Channel channel, J2KCodeBlocksize & codeBlocksize) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t &) codeBlocksize);}
+
+    // Encode rate in MBPS
+    void    SetJ2KEncodeMbps(const NTV2Channel channel, const uint32_t mbps) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
+    void    GetJ2KEncodeMbps(const NTV2Channel channel, uint32_t & mbps) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, mbps);}
+
+    // Encode Stream type
+    void    SetJ2KEncodeStreamType(const NTV2Channel channel, const J2KStreamType streamType) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t) streamType);}
+    void    GetJ2KEncodeStreamType(const NTV2Channel channel, J2KStreamType & streamType) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t &) streamType);}
+
+    // Encode PMT PID
+    void    SetJ2KEncodePMTPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
+    void    GetJ2KEncodePMTPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, pid);}
+
+    // Encode Video PID
+    void    SetJ2KEncodeVideoPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
+    void    GetJ2KEncodeVideoPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, pid);}
+
+    // Encode PCR PID
+    void    SetJ2KEncodePCRPid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
+    void    GetJ2KEncodePCRPid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, pid);}
+
+    // Encode Audio PID
+    void    SetJ2KEncodeAudio1Pid(const NTV2Channel channel, const uint32_t pid) {WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
+    void    GetJ2KEncodeAudio1Pid(const NTV2Channel channel, uint32_t & pid) {ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, pid);}
 
     // Setup individual TS encode parts
     bool    SetupEncodeTsTimer(const NTV2Channel channel);
