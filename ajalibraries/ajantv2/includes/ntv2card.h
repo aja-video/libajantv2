@@ -272,6 +272,7 @@ public:
 		@param[in]	pInHostName		If non-NULL, must be a valid pointer to a character buffer that
 									contains the name of a host that has one or more AJA devices.
 									Defaults to NULL (the local host).
+		@nosubgrouping
 	**/
 	explicit							CNTV2Card ( const UWord		inDeviceIndex,
 													const bool		inDisplayError	= false,
