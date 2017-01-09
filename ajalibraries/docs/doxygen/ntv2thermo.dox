@@ -1,0 +1,130 @@
+/**
+@page		ntv2thermo		'ntv2thermo' Command-Line Utility
+
+<b>Description</b>
+A command-line tool that interrogates and/or controls temperature-related parameters of connected AJA devices.
+
+<b>Synopsis</b>
+
+\code{.sh}
+	ntv2thermo [OPTION...]
+	  -d, --device=index#|serial#|model      which device to use
+	  -f, --format=brief|verbose|json        desired format
+	  -s, --scale=celsius|fahrenheit         desired scale
+	      --fan=read|off|on|lo|med|hi|auto   desired fan setting
+	Help options:
+	  -?, --help                             Show this help message
+	      --usage                            Show brief usage message
+\endcode
+
+-	Anything after a command line option switch is case insensitive (e.g., <tt>cElSiUs == Celsius</tt>).
+-	If you have more than one device attached to your host, use the <tt>-d</tt> switch to pick one of them.
+	You can specify a zero-based index number, the serial number of a specific device, or a model name (e.g., <b>io4k</b>).
+-	Use the <tt>--format</tt> option to specify the output format:  <tt>brief</tt> (minimal), <tt>verbose</tt> (english sentence),
+	or <tt>json</tt> (something a computer would appreciate). JSON formats always include a date/time stamp (in local time),
+	the device name, and the device index number … plus the requested fan state or temperature (and temperature units).
+-	Use the <tt>--scale</tt> option to specify the temperature unit scale to use:  <tt>celsius</tt> (or <tt>c</tt>, the default),
+	<tt>fahrenheit</tt> (or <tt>f</tt>), <tt>kelvin</tt> (or <tt>k</tt>) or <tt>rankine</tt> (or <tt>r</tt>).
+-	Use the <tt>--fan</tt> option to inquire/control the fan. Follow it with <tt>read</tt> to report the current fan state,
+	<tt>on</tt> to turn it on, or <tt>off</tt> to turn it off. Use <tt>auto</tt> to enable automatic fan control (assuming the
+	device and/or driver supports it).
+
+@note	On devices for which automatic fan control is supported, using <b>on</b>, <b>off</b>, <b>lo</b>, <b>med</b>, or <b>hi</b> will
+		override and disable the automatic fan control.
+
+@note	<b>CAUTION!</b>	Turning the fan "off" or disabling a device's automatic fan control can cause the device to overheat,
+		and result in permanent damage to the device!
+
+<b>Temperature Measurement</b>
+
+To read the temperature:
+\code{.sh}
+$ ./bin/ntv2thermo -b1
+'Io4K - 1' die temperature is 72.8406 degrees Celsius
+\endcode
+
+Note that it defaults to verbose format and Celsius units.
+To show just the numeric temperature reading in Fahrenheit:
+\code{.sh}
+$ ./bin/ntv2thermo -b1 -s=fahrenheit -f=brief
+161.341
+\endcode
+
+To output the temperature in the Rankine scale in JSON format:
+\code{.sh}
+$ ./bin/ntv2thermo -b1 -s=rankine -f=json
+{"timestamp": "Wed Oct 21 12:18:53 2015", "name": "Io4K - 1", "deviceIndex": 1, "temperature": 621.011, "temperatureScale": "rankine"}
+\endcode
+
+To show the temperature in Kelvin:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --scale kelvin
+'Io4K - 1' die temperature is 344.514 degrees Kelvin
+\endcode
+
+<b>Logging</b>
+
+By specifying the <tt>--log</tt> command line switch, the tool enters "logging" mode, which periodically writes temperature and fan
+state until interrupted (using Ctrl-C). The argument to the <tt>--log</tt> switch is an unsigned decimal integer that specifies the
+number of seconds between each line in the report:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --log 5 --scale=f -f=json
+{"timestamp": "Wed Oct 21 12:14:32 2015", "name": "Io4K - 2",
+"deviceIndex": 2, "temperature": 173.744, "temperatureScale": "f"}
+{"timestamp": "Wed Oct 21 12:14:37 2015", "name": "Io4K - 2",
+"deviceIndex": 2, "temperature": 172.858, "temperatureScale": "f"}
+{"timestamp": "Wed Oct 21 12:14:42 2015", "name": "Io4K - 2",
+"deviceIndex": 2, "temperature": 172.858, "temperatureScale": "f"}
+^C
+\endcode
+
+<b>"Fan" Mode</b>
+
+By specifying the <tt>--fan</tt> command line switch, the tool enters "fan" mode, which overrides its temperature measurement functionality.
+
+To show the fan status:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --fan read
+'Io4K - 1' fan is ON
+\endcode
+
+To output the fan status as a number:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --fan read --format brief
+1
+\endcode
+
+To output the fan status in JSON:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --fan read --format json
+{"name": "Io4K - 1", "deviceIndex": 1, "fanIsOn": true}
+\endcode
+
+To turn on the fan:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --fan on
+Fan turned ON on 'Io4K - 1'
+\endcode
+
+To turn off the fan with minimal output:
+\code{.sh}
+$ ./bin/ntv2thermo --device io4k --fan off -f b
+0
+\endcode
+
+It's not an error to turn on the fan when it's already on, nor is it an error to turn off the fan when it's already off.
+
+JSON output is not supported when turning the fan on or off.
+
+<b>Exit Codes</b>
+-	0	Success. No errors encountered. The tool did what it was asked to do.
+-	1	An illegal command line parameter was specified.
+-	2	No such device (e.g., specifying <tt>-b io4k</tt> when there's no Io4K attached).
+-	3	The tool failed to successfully communicate with the device driver, or an API call failed.
+
+<b>Output File Streams</b>
+
+-	<b>stdout</b> --- Normal output (e.g., brief, verbose or JSON output) is directed to this stream.
+-	<b>stderr</b> --- Warning and error messages are directed to this stream, usually followed by the tool exiting with a non-zero exit code.
+
+**/
