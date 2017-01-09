@@ -30,19 +30,19 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
     _is2022_2   = (bool)(features & SAREK_2022_2);
 }
 
-bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
+bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2kEncoderConfig &j2kEncoderCfg)
 {
-    SetJ2KEncodeVideoFormat(channel, j2kEncodeChannel.videoFormat);
-    SetJ2KEncodeUllMode(channel, j2kEncodeChannel.ullMode);
-    SetJ2KEncodeBitDepth(channel, j2kEncodeChannel.bitDepth);
-    SetJ2KEncodeChromaSubsamp(channel, j2kEncodeChannel.chromaSubsamp);
-    SetJ2KEncodeCodeBlocksize(channel, j2kEncodeChannel.codeBlocksize);
-    SetJ2KEncodeMbps(channel, j2kEncodeChannel.mbps);
-    SetJ2KEncodeStreamType(channel, j2kEncodeChannel.streamType);
-    SetJ2KEncodePMTPid(channel, j2kEncodeChannel.pmtPid);
-    SetJ2KEncodeVideoPid(channel, j2kEncodeChannel.videoPid);
-    SetJ2KEncodePCRPid(channel, j2kEncodeChannel.pcrPid);
-    SetJ2KEncodeAudio1Pid(channel, j2kEncodeChannel.audio1Pid);
+    SetJ2KEncodeVideoFormat(channel, j2kEncoderCfg.videoFormat);
+    SetJ2KEncodeUllMode(channel, j2kEncoderCfg.ullMode);
+    SetJ2KEncodeBitDepth(channel, j2kEncoderCfg.bitDepth);
+    SetJ2KEncodeChromaSubsamp(channel, j2kEncoderCfg.chromaSubsamp);
+    SetJ2KEncodeCodeBlocksize(channel, j2kEncoderCfg.codeBlocksize);
+    SetJ2KEncodeMbps(channel, j2kEncoderCfg.mbps);
+    SetJ2KEncodeStreamType(channel, j2kEncoderCfg.streamType);
+    SetJ2KEncodePMTPid(channel, j2kEncoderCfg.pmtPid);
+    SetJ2KEncodeVideoPid(channel, j2kEncoderCfg.videoPid);
+    SetJ2KEncodePCRPid(channel, j2kEncoderCfg.pcrPid);
+    SetJ2KEncodeAudio1Pid(channel, j2kEncoderCfg.audio1Pid);
 
     // setup the J2K encoder
     if (!SetupJ2KEncoder(channel))

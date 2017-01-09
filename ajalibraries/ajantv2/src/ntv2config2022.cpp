@@ -164,6 +164,39 @@ void rx2022Config::init()
     rxc_playoutDelay = 50;
 }
 
+bool rx2022Config::operator != ( const rx2022Config &other )
+{
+    return (!(*this == other));
+}
+
+bool rx2022Config::operator == ( const rx2022Config &other )
+{
+    if ((rxc_enable                   == other.rxc_enable)                &&
+        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
+        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
+        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
+        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
+        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
+        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
+        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
+        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
+        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
+        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
+        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
+        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
+        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
+        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
+        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
+        (rxc_playoutDelay             == other.rxc_playoutDelay))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void tx2022Config::init()
 {
     txc_enable  = 0;
@@ -180,7 +213,6 @@ void tx2022Config::init()
     txc_secondaryRemoteMAC_hi = 0;
     txc_secondaryAutoMac  = 0;
 }
-
 
 bool tx2022Config::operator != ( const tx2022Config &other )
 {
@@ -210,30 +242,40 @@ bool tx2022Config::operator == ( const tx2022Config &other )
         return false;
     }
 }
-bool rx2022Config::operator != ( const rx2022Config &other )
+
+void j2kEncoderConfig::init()
+{
+    videoFormat     = NTV2_FORMAT_720p_5994;
+    ullMode         = false;
+    bitDepth        = 10;
+    chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
+    codeBlocksize   = kJ2KCodeBlocksize_32x32;
+    mbps            = 200;
+    streamType      = kJ2KStreamTypeStandard;
+    pmtPid          = 255;
+    videoPid        = 256;
+    pcrPid          = 257;
+    audio1Pid       = 258;
+}
+
+bool j2kEncoderConfig::operator != ( const j2kEncoderConfig &other )
 {
     return (!(*this == other));
 }
 
-bool rx2022Config::operator == ( const rx2022Config &other )
+bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
 {
-    if ((rxc_enable                   == other.rxc_enable)                &&
-        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
-        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
-        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
-        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
-        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
-        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
-        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
-        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
-        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
-        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
-        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
-        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
-        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
-        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
-        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
-        (rxc_playoutDelay             == other.rxc_playoutDelay))
+    if ((videoFormat        == other.videoFormat)       &&
+        (ullMode            == other.ullMode)           &&
+        (bitDepth           == other.bitDepth)          &&
+        (chromaSubsamp      == other.chromaSubsamp)     &&
+        (codeBlocksize      == other.codeBlocksize)     &&
+        (mbps               == other.mbps)              &&
+        (streamType         == other.streamType)        &&
+        (pmtPid             == other.pmtPid)            &&
+        (videoPid           == other.videoPid)          &&
+        (pcrPid             == other.pcrPid)            &&
+        (audio1Pid          == other.audio1Pid))
     {
         return true;
     }

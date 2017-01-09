@@ -11,6 +11,7 @@
 #include "ntv2enums.h"
 #include "ntv2registers2022.h"
 #include "ntv2mbcontroller.h"
+#include "ntv2tshelper.h"
 #include <string.h>
 
 typedef struct
@@ -186,7 +187,31 @@ public:
     bool        txc_secondaryAutoMac;
 };
 
-typedef enum {
+class j2kEncoderConfig
+{
+public:
+    j2kEncoderConfig() { init(); }
+
+    void init();
+
+    bool operator == ( const j2kEncoderConfig &other );
+    bool operator != ( const j2kEncoderConfig &other );
+
+    NTV2VideoFormat         videoFormat;        ///< @brief	Specifies the video format for J2K encode.
+    bool                    ullMode;            ///< @brief	Specifies the ull mode for J2K encode.
+    uint32_t                bitDepth;           ///< @brief	Specifies the bit depth for J2K encode.
+    J2KChromaSubSampling    chromaSubsamp;      ///< @brief	Specifies the chroma sub sampling for J2K encode.
+    J2KCodeBlocksize        codeBlocksize;      ///< @brief	Specifies the code block size for J2K encode.
+    uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
+    J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
+    uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.
+    uint32_t                videoPid;           ///< @brief	Specifies the PID for the video.
+    uint32_t                pcrPid;             ///< @brief	Specifies the PID for the PCR.
+    uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
+};
+
+typedef enum
+{
     eProgSel_Off,
     eProgSel_AutoFirstProg,
     eProgSel_LowestProgNum,
@@ -195,7 +220,8 @@ typedef enum {
     eProgSel_Default = eProgSel_AutoFirstProg,
 } eProgSelMode_t;
 
-typedef enum {
+typedef enum
+{
     eIGMPVersion_2,
     eIGMPVersion_3,
     eIGMPVersion_Default = eIGMPVersion_3

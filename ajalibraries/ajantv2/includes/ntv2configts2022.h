@@ -49,78 +49,6 @@
 #define     ADAPTATION_LOOKUP               0x300
 #define     ADAPTATION_HDR_LENGTH           0x3f0
 
-class j2k_encode_2022_channel
-{
-public:
-    j2k_encode_2022_channel()
-    {
-        videoFormat     = NTV2_FORMAT_720p_5994;
-        ullMode         = false;
-        bitDepth        = 10;
-        chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
-        codeBlocksize   = kJ2KCodeBlocksize_32x32;
-        mbps            = 200;
-        streamType      = kJ2KStreamTypeStandard;
-        pmtPid          = 255;
-        videoPid        = 256;
-        pcrPid          = 257;
-        audio1Pid       = 258;
-    }
-
-    bool operator != ( const j2k_encode_2022_channel &other ) {
-        return !(*this == other);
-    }
-
-    bool operator == ( const j2k_encode_2022_channel &other )
-    {
-        if ((videoFormat        == other.videoFormat)       &&
-            (ullMode            == other.ullMode)           &&
-            (bitDepth           == other.bitDepth)          &&
-            (chromaSubsamp      == other.chromaSubsamp)     &&
-            (codeBlocksize      == other.codeBlocksize)     &&
-            (mbps               == other.mbps)              &&
-            (streamType         == other.streamType)        &&
-            (pmtPid             == other.pmtPid)            &&
-            (videoPid           == other.videoPid)          &&
-            (pcrPid             == other.pcrPid)            &&
-            (audio1Pid          == other.audio1Pid))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-public:
-    NTV2VideoFormat         videoFormat;        ///< @brief	Specifies the video format for J2K encode.
-    bool                    ullMode;            ///< @brief	Specifies the ull mode for J2K encode.
-    uint32_t                bitDepth;           ///< @brief	Specifies the bit depth for J2K encode.
-    J2KChromaSubSampling    chromaSubsamp;      ///< @brief	Specifies the chroma sub sampling for J2K encode.
-    J2KCodeBlocksize        codeBlocksize;      ///< @brief	Specifies the code block size for J2K encode.
-    uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
-    J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
-    uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.
-    uint32_t                videoPid;           ///< @brief	Specifies the PID for the video.
-    uint32_t                pcrPid;             ///< @brief	Specifies the PID for the PCR.
-    uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
-};
-
-struct j2kEncodeConfig
-{
-    NTV2VideoFormat         j2k_videoFormat;
-    bool                    j2k_ullMode;
-    uint32_t                j2k_bitDepth;
-    J2KChromaSubSampling    j2k_chromaSubsamp;
-    J2KCodeBlocksize        j2k_codeBlocksize;
-    uint32_t                j2k_mbps;
-    J2KStreamType           j2k_streamType;
-    uint32_t                j2k_pmtPid;
-    uint32_t                j2k_videoPid;
-    uint32_t                j2k_pcrPid;
-    uint32_t                j2k_audio1Pid;
-};
 
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips
@@ -132,7 +60,7 @@ public:
     CNTV2ConfigTs2022 (CNTV2Card & device);
 
     // Setup both the TS and J2K encoder using the class params
-    bool    SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel);
+    bool    SetupForEncode(const NTV2Channel channel, const j2kEncoderConfig &j2kEncodeChannel);
 
     // Setup the J2K encoder
     bool    SetupJ2KEncoder(const NTV2Channel channel);
