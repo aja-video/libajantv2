@@ -2692,7 +2692,7 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 
 NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 {
-	NTV2FrameRate frameRate = NTV2_FRAMERATE_2997;
+    NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
 	switch ( videoFormat )
 	{
 	case NTV2_FORMAT_1080i_5000:
