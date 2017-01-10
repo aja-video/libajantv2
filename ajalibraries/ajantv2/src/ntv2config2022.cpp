@@ -358,7 +358,7 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
     return true;
 }
 
-bool  CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
@@ -431,7 +431,7 @@ bool  CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress
     return rv;
 }
 
-bool  CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
+bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
                                                 string localIPAddress1, string netmask1, string gateway1)
 {
 
@@ -441,7 +441,7 @@ bool  CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string n
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     GetNetworkConfiguration(port, ip, subnet, gateway);
@@ -453,7 +453,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConf
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress, string & subnetMask, string & gateway)
 {
     struct in_addr addr;
 
@@ -490,7 +490,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddres
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
+bool CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                                std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1)
 {
 
@@ -500,7 +500,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, st
     return true;
 }
 
-bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_2022_channel &rxConfig)
+bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2022_channel &rxConfig)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -664,7 +664,7 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     return rv;
 }
 
-bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_channel & rxConfig)
+bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -750,7 +750,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_c
     return true;
 }
 
-bool  CNTV2Config2022::SetRxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -856,7 +856,7 @@ bool  CNTV2Config2022::SetRxChannelEnable(NTV2Channel channel, bool enable, bool
     return rv;
 }
 
-bool CNTV2Config2022::GetRxChannelEnable(NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabled)
 {
     uint32_t baseAddr;
 
@@ -874,7 +874,7 @@ bool CNTV2Config2022::GetRxChannelEnable(NTV2Channel channel, bool & enabled)
     return rv;
 }
 
-bool  CNTV2Config2022::SetTxChannelConfiguration(NTV2Channel channel, const tx_2022_channel & txConfig)
+bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -1131,7 +1131,7 @@ bool  CNTV2Config2022::SetTxChannelConfiguration(NTV2Channel channel, const tx_2
     return rv;
 }
 
-bool  CNTV2Config2022::GetTxChannelConfiguration(NTV2Channel channel, tx_2022_channel & txConfig)
+bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -1209,7 +1209,7 @@ bool  CNTV2Config2022::GetTxChannelConfiguration(NTV2Channel channel, tx_2022_ch
     return true;
 }
 
-bool CNTV2Config2022::SetTxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -1303,7 +1303,7 @@ bool CNTV2Config2022::SetTxChannelEnable(NTV2Channel channel, bool enable, bool 
     return true;
 }
 
-bool  CNTV2Config2022::GetTxChannelEnable(NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled)
 {
     uint32_t baseAddr;
 
@@ -1332,7 +1332,7 @@ bool CNTV2Config2022::SetIGMPDisable(eSFP port, bool disable)
     return true;
 }
 
-bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
+bool CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
 {
     uint32_t val;
     if (port == SFP_TOP )
@@ -1373,6 +1373,28 @@ bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
     bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,&version32);
     version =  (version32 == 2) ? eIGMPVersion_2 : eIGMPVersion_3;
     return rv;
+}
+
+bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, const j2kEncoderConfig & j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
+        return rv;
+    }
+    return false;
+}
+
+bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kEncoderConfig &j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
+        return rv;
+    }
+    return false;
 }
 
 bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)
