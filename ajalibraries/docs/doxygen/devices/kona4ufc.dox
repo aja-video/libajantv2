@@ -20,7 +20,7 @@ four SDI connectors. In UFC mode operation, SDI connectors 1 and 2 are inputs; c
 
 -	2 x SDI inputs
 -	2 x SDI outputs
--	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR and UHD/4K@60 4:2:0 YUV)
+-	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
 -	1 x analog component video output
 -	2 x reference/LTC inputs
 -	2 x LTC outputs
