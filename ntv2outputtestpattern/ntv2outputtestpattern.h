@@ -19,9 +19,9 @@
 
 
 /**
-	@brief	I DMA a test pattern into an AJA device's frame store for steady-state playout.
+	@brief	I transfer a test pattern into an AJA device's frame buffer for steady-state playout.
 			This demonstrates how to perform direct DMA from a host frame buffer.
-	@note	I do not use AutoCirculate to transfer frame data to the device.
+	@note	I do not use the AutoCirculate API to transfer frame data to the device.
 **/
 
 class NTV2OutputTestPattern
@@ -41,8 +41,8 @@ class NTV2OutputTestPattern
 		~NTV2OutputTestPattern (void);
 
 		/**
-			@brief	Initializes me and prepares me to Run.
-			@return	AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+			@brief		Initializes me and prepares me to Run.
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 		**/
 		AJAStatus		Init (void);
 
@@ -50,7 +50,7 @@ class NTV2OutputTestPattern
 			@brief		Displays the requested test pattern on the output.
 			@param[in]	testPatternIndex	Specifies which test pattern to display.
 											Defaults to 0 (100% color bars).
-			@return	AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 			@note		Do not call this method without first calling my Init method.
 		**/
 		AJAStatus		EmitPattern (const UWord testPatternIndex = 0);
@@ -59,8 +59,8 @@ class NTV2OutputTestPattern
 	//	Protected Instance Methods
 	protected:
 		/**
-			@brief	Sets up my AJA device to play video.
-			@return	AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+			@brief		Sets up my AJA device to play video.
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 		**/
 		AJAStatus		SetUpVideo (void);
 
