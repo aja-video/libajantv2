@@ -99,43 +99,28 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
             std::cerr << "## NOTE:  Device is ready" << std::endl;
     }
 
-    CNTV2ConfigTs2022	configTs2022 (mDevice);
+    CNTV2Config2022     config2022 (mDevice);
+    j2kEncoderConfig *  encoderCfg = new(j2kEncoderConfig);
 
-    configTs2022.SetJ2KEncodeVideoFormat(NTV2_CHANNEL1, pKonaIPParams->videoFormat);
-    configTs2022.SetJ2KEncodeUllMode(NTV2_CHANNEL1, false);
-    configTs2022.SetJ2KEncodeBitDepth(NTV2_CHANNEL1, pKonaIPParams->numBits);
-    configTs2022.SetJ2KEncodeChromaSubsamp(NTV2_CHANNEL1, (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling );
-    configTs2022.SetJ2KEncodeCodeBlocksize(NTV2_CHANNEL1, (J2KCodeBlocksize)pKonaIPParams->codeBlockSize);
-    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL1, pKonaIPParams->mbps);
-    configTs2022.SetJ2KEncodePMTPid(NTV2_CHANNEL1, pKonaIPParams->programPid);
-    configTs2022.SetJ2KEncodeVideoPid(NTV2_CHANNEL1, pKonaIPParams->videoPid);
-    configTs2022.SetJ2KEncodePCRPid(NTV2_CHANNEL1, pKonaIPParams->pcrPid);
-    configTs2022.SetJ2KEncodeAudio1Pid(NTV2_CHANNEL1, pKonaIPParams->audio1Pid);
-    configTs2022.SetJ2KEncodeStreamType(NTV2_CHANNEL1, (J2KStreamType)pKonaIPParams->streamType);
+    // retrieve encode params
+    encoderCfg->videoFormat     = (NTV2VideoFormat)pKonaIPParams->videoFormat;
+    encoderCfg->ullMode         = 0;
+    encoderCfg->bitDepth        = pKonaIPParams->numBits;
+    encoderCfg->chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
+    encoderCfg->codeBlocksize   = (J2KCodeBlocksize)pKonaIPParams->codeBlockSize;
+    encoderCfg->streamType      = (J2KStreamType)pKonaIPParams->streamType;
+    encoderCfg->mbps            = pKonaIPParams->mbps;
+    encoderCfg->pmtPid          = pKonaIPParams->programPid;
+    encoderCfg->videoPid        = pKonaIPParams->videoPid;
+    encoderCfg->pcrPid          = pKonaIPParams->pcrPid;
+    encoderCfg->audio1Pid       = pKonaIPParams->audio1Pid;
 
-    // Now setup the J2K encoder and TS encapsulator for ch1
-    bool rv = configTs2022.SetupJ2KEncoder(NTV2_CHANNEL1);
-    rv = configTs2022.SetupTsForEncode(NTV2_CHANNEL1);
+    // Now setup the J2K encoder with these params
+    bool rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, *encoderCfg);
 
     // Same Setup for Channel 2
-    configTs2022.SetJ2KEncodeVideoFormat(NTV2_CHANNEL2, pKonaIPParams->videoFormat);
-    configTs2022.SetJ2KEncodeUllMode(NTV2_CHANNEL2, false);
-    configTs2022.SetJ2KEncodeBitDepth(NTV2_CHANNEL2, pKonaIPParams->numBits);
-    configTs2022.SetJ2KEncodeChromaSubsamp(NTV2_CHANNEL2, (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling );
-    configTs2022.SetJ2KEncodeCodeBlocksize(NTV2_CHANNEL2, (J2KCodeBlocksize)pKonaIPParams->codeBlockSize);
-    configTs2022.SetJ2KEncodeMbps(NTV2_CHANNEL2, pKonaIPParams->mbps);
-    configTs2022.SetJ2KEncodePMTPid(NTV2_CHANNEL2, pKonaIPParams->programPid);
-    configTs2022.SetJ2KEncodeVideoPid(NTV2_CHANNEL2, pKonaIPParams->videoPid);
-    configTs2022.SetJ2KEncodePCRPid(NTV2_CHANNEL2, pKonaIPParams->pcrPid);
-    configTs2022.SetJ2KEncodeAudio1Pid(NTV2_CHANNEL2, pKonaIPParams->audio1Pid);
-    configTs2022.SetJ2KEncodeStreamType(NTV2_CHANNEL2, (J2KStreamType)pKonaIPParams->streamType);
+    rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, *encoderCfg);
 
-    // Now setup the J2K encoder and TS encapsulator for ch2
-    rv = configTs2022.SetupJ2KEncoder(NTV2_CHANNEL2);
-    rv = configTs2022.SetupTsForEncode(NTV2_CHANNEL2);
-
-    // Start Encoders
-    mDevice.WriteRegister(0x40000,0x01010000);
     std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
 
     return true;
