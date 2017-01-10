@@ -100,26 +100,26 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     }
 
     CNTV2Config2022     config2022 (mDevice);
-    j2kEncoderConfig *  encoderCfg = new(j2kEncoderConfig);
+    j2kEncoderConfig    encoderCfg;
 
     // retrieve encode params
-    encoderCfg->videoFormat     = (NTV2VideoFormat)pKonaIPParams->videoFormat;
-    encoderCfg->ullMode         = 0;
-    encoderCfg->bitDepth        = pKonaIPParams->numBits;
-    encoderCfg->chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
-    encoderCfg->codeBlocksize   = (J2KCodeBlocksize)pKonaIPParams->codeBlockSize;
-    encoderCfg->streamType      = (J2KStreamType)pKonaIPParams->streamType;
-    encoderCfg->mbps            = pKonaIPParams->mbps;
-    encoderCfg->pmtPid          = pKonaIPParams->programPid;
-    encoderCfg->videoPid        = pKonaIPParams->videoPid;
-    encoderCfg->pcrPid          = pKonaIPParams->pcrPid;
-    encoderCfg->audio1Pid       = pKonaIPParams->audio1Pid;
+    encoderCfg.videoFormat     = (NTV2VideoFormat)pKonaIPParams->videoFormat;
+    encoderCfg.ullMode         = 0;
+    encoderCfg.bitDepth        = pKonaIPParams->numBits;
+    encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
+    encoderCfg.codeBlocksize   = (J2KCodeBlocksize)pKonaIPParams->codeBlockSize;
+    encoderCfg.streamType      = (J2KStreamType)pKonaIPParams->streamType;
+    encoderCfg.mbps            = pKonaIPParams->mbps;
+    encoderCfg.pmtPid          = pKonaIPParams->programPid;
+    encoderCfg.videoPid        = pKonaIPParams->videoPid;
+    encoderCfg.pcrPid          = pKonaIPParams->pcrPid;
+    encoderCfg.audio1Pid       = pKonaIPParams->audio1Pid;
 
     // Now setup the J2K encoder with these params
-    bool rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, *encoderCfg);
+    bool rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
 
     // Same Setup for Channel 2
-    rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, *encoderCfg);
+    rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
 
     std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
 
