@@ -164,6 +164,39 @@ void rx2022Config::init()
     rxc_playoutDelay = 50;
 }
 
+bool rx2022Config::operator != ( const rx2022Config &other )
+{
+    return (!(*this == other));
+}
+
+bool rx2022Config::operator == ( const rx2022Config &other )
+{
+    if ((rxc_enable                   == other.rxc_enable)                &&
+        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
+        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
+        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
+        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
+        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
+        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
+        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
+        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
+        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
+        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
+        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
+        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
+        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
+        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
+        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
+        (rxc_playoutDelay             == other.rxc_playoutDelay))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void tx2022Config::init()
 {
     txc_enable  = 0;
@@ -180,7 +213,6 @@ void tx2022Config::init()
     txc_secondaryRemoteMAC_hi = 0;
     txc_secondaryAutoMac  = 0;
 }
-
 
 bool tx2022Config::operator != ( const tx2022Config &other )
 {
@@ -210,30 +242,40 @@ bool tx2022Config::operator == ( const tx2022Config &other )
         return false;
     }
 }
-bool rx2022Config::operator != ( const rx2022Config &other )
+
+void j2kEncoderConfig::init()
+{
+    videoFormat     = NTV2_FORMAT_720p_5994;
+    ullMode         = false;
+    bitDepth        = 10;
+    chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
+    codeBlocksize   = kJ2KCodeBlocksize_32x32;
+    mbps            = 200;
+    streamType      = kJ2KStreamTypeStandard;
+    pmtPid          = 255;
+    videoPid        = 256;
+    pcrPid          = 257;
+    audio1Pid       = 258;
+}
+
+bool j2kEncoderConfig::operator != ( const j2kEncoderConfig &other )
 {
     return (!(*this == other));
 }
 
-bool rx2022Config::operator == ( const rx2022Config &other )
+bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
 {
-    if ((rxc_enable                   == other.rxc_enable)                &&
-        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
-        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
-        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
-        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
-        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
-        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
-        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
-        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
-        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
-        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
-        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
-        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
-        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
-        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
-        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
-        (rxc_playoutDelay             == other.rxc_playoutDelay))
+    if ((videoFormat        == other.videoFormat)       &&
+        (ullMode            == other.ullMode)           &&
+        (bitDepth           == other.bitDepth)          &&
+        (chromaSubsamp      == other.chromaSubsamp)     &&
+        (codeBlocksize      == other.codeBlocksize)     &&
+        (mbps               == other.mbps)              &&
+        (streamType         == other.streamType)        &&
+        (pmtPid             == other.pmtPid)            &&
+        (videoPid           == other.videoPid)          &&
+        (pcrPid             == other.pcrPid)            &&
+        (audio1Pid          == other.audio1Pid))
     {
         return true;
     }
@@ -316,7 +358,7 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
     return true;
 }
 
-bool  CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
@@ -389,7 +431,7 @@ bool  CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress
     return rv;
 }
 
-bool  CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
+bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
                                                 string localIPAddress1, string netmask1, string gateway1)
 {
 
@@ -399,7 +441,7 @@ bool  CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string n
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     GetNetworkConfiguration(port, ip, subnet, gateway);
@@ -411,7 +453,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConf
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress, string & subnetMask, string & gateway)
 {
     struct in_addr addr;
 
@@ -448,7 +490,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddres
     return true;
 }
 
-bool  CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
+bool CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                                std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1)
 {
 
@@ -458,7 +500,7 @@ bool  CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, st
     return true;
 }
 
-bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_2022_channel &rxConfig)
+bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2022_channel &rxConfig)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -622,7 +664,7 @@ bool  CNTV2Config2022::SetRxChannelConfiguration(NTV2Channel channel,const rx_20
     return rv;
 }
 
-bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_channel & rxConfig)
+bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -708,7 +750,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration( NTV2Channel channel, rx_2022_c
     return true;
 }
 
-bool  CNTV2Config2022::SetRxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -814,7 +856,7 @@ bool  CNTV2Config2022::SetRxChannelEnable(NTV2Channel channel, bool enable, bool
     return rv;
 }
 
-bool CNTV2Config2022::GetRxChannelEnable(NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabled)
 {
     uint32_t baseAddr;
 
@@ -832,7 +874,7 @@ bool CNTV2Config2022::GetRxChannelEnable(NTV2Channel channel, bool & enabled)
     return rv;
 }
 
-bool  CNTV2Config2022::SetTxChannelConfiguration(NTV2Channel channel, const tx_2022_channel & txConfig)
+bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -1089,7 +1131,7 @@ bool  CNTV2Config2022::SetTxChannelConfiguration(NTV2Channel channel, const tx_2
     return rv;
 }
 
-bool  CNTV2Config2022::GetTxChannelConfiguration(NTV2Channel channel, tx_2022_channel & txConfig)
+bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -1167,7 +1209,7 @@ bool  CNTV2Config2022::GetTxChannelConfiguration(NTV2Channel channel, tx_2022_ch
     return true;
 }
 
-bool CNTV2Config2022::SetTxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -1261,7 +1303,7 @@ bool CNTV2Config2022::SetTxChannelEnable(NTV2Channel channel, bool enable, bool 
     return true;
 }
 
-bool  CNTV2Config2022::GetTxChannelEnable(NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled)
 {
     uint32_t baseAddr;
 
@@ -1290,7 +1332,7 @@ bool CNTV2Config2022::SetIGMPDisable(eSFP port, bool disable)
     return true;
 }
 
-bool  CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
+bool CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
 {
     uint32_t val;
     if (port == SFP_TOP )
@@ -1331,6 +1373,28 @@ bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
     bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,&version32);
     version =  (version32 == 2) ? eIGMPVersion_2 : eIGMPVersion_3;
     return rv;
+}
+
+bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, const j2kEncoderConfig & j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
+        return rv;
+    }
+    return false;
+}
+
+bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kEncoderConfig &j2kConfig)
+{
+    if (_is2022_2)
+    {
+        CNTV2ConfigTs2022 tsConfig(mDevice);
+        bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
+        return rv;
+    }
+    return false;
 }
 
 bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig)

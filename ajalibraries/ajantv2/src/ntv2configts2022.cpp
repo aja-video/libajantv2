@@ -30,33 +30,67 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
     _is2022_2   = (bool)(features & SAREK_2022_2);
 }
 
-bool CNTV2ConfigTs2022::SetupForEncode(const NTV2Channel channel, const j2k_encode_2022_channel &j2kEncodeChannel)
+bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
-    SetJ2KEncodeVideoFormat(channel, j2kEncodeChannel.videoFormat);
-    SetJ2KEncodeUllMode(channel, j2kEncodeChannel.ullMode);
-    SetJ2KEncodeBitDepth(channel, j2kEncodeChannel.bitDepth);
-    SetJ2KEncodeChromaSubsamp(channel, j2kEncodeChannel.chromaSubsamp);
-    SetJ2KEncodeCodeBlocksize(channel, j2kEncodeChannel.codeBlocksize);
-    SetJ2KEncodeMbps(channel, j2kEncodeChannel.mbps);
-    SetJ2KEncodeStreamType(channel, j2kEncodeChannel.streamType);
-    SetJ2KEncodePMTPid(channel, j2kEncodeChannel.pmtPid);
-    SetJ2KEncodeVideoPid(channel, j2kEncodeChannel.videoPid);
-    SetJ2KEncodePCRPid(channel, j2kEncodeChannel.pcrPid);
-    SetJ2KEncodeAudio1Pid(channel, j2kEncodeChannel.audio1Pid);
+    uint32_t    val;
+    uint32_t    encoderBit;
+
+    // Turn off the encoder
+    if (channel == NTV2_CHANNEL2)
+        encoderBit = ENCODER_2_ENABLE;
+    else
+        encoderBit = ENCODER_1_ENABLE;
+
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val &= ~encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, config.bitDepth);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t) config.chromaSubsamp);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t) config.codeBlocksize);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, config.mbps);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t) config.streamType);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, config.pmtPid);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, config.videoPid);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, config.pcrPid);
+    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, config.audio1Pid);
 
     // setup the J2K encoder
-    if (!SetupJ2KEncoder(channel))
+    if (!SetupJ2KForEncode(channel))
         return false;
 
     // setup the TS
     if (!SetupTsForEncode(channel))
         return false;
 
+    // Turn on the encoder
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val |= encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
     return true;
 }
 
+bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoderConfig &config)
+{
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &config.videoFormat);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &config.ullMode);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &config.bitDepth);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &config.chromaSubsamp);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t *) &config.codeBlocksize);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &config.mbps);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &config.streamType);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, &config.pmtPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, &config.videoPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, &config.pcrPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &config.audio1Pid);
 
-bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
+    return true;
+}
+
+bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
 {
     NTV2VideoFormat         videoFormat;
     uint32_t                ullMode;
@@ -93,12 +127,13 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
     uint32_t                QS_C2[8] =      {12, 13, 14, 15, 16, 16, 16, 16};
 
     // Get our variable user params
-    GetJ2KEncodeVideoFormat(channel, videoFormat);
-    GetJ2KEncodeUllMode(channel, ullMode);
-    GetJ2KEncodeBitDepth(channel, bitDepth);
-    GetJ2KEncodeChromaSubsamp(channel, subSamp);
-    GetJ2KEncodeCodeBlocksize(channel, codeBlocksize);
-    GetJ2KEncodeMbps(channel, mbps);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &videoFormat);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &ullMode);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &bitDepth);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &subSamp);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t *) &codeBlocksize);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &mbps);
+
 
     // Calculate height and width based on video format
     NTV2Standard standard = GetNTV2StandardFromVideoFormat(videoFormat);
@@ -119,7 +154,7 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel)
     if (! NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat))
         fieldsPerSec*=2;
 
-    printf("CNTV2ConfigTs2022::SetupJ2KEncoder width=%d, height=%d fpsNum=%d,\n", width, height, fieldsPerSec);
+    printf("CNTV2ConfigTs2022::SetupJ2KForEncode width=%d, height=%d fpsNum=%d,\n", width, height, fieldsPerSec);
 
     if (ullMode)
     {
@@ -279,7 +314,9 @@ bool CNTV2ConfigTs2022::SetupEncodeTsTimer(const NTV2Channel channel)
     printf("CNTV2ConfigTs2022::SetupEncodeTsTimer\n");
 
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsLoad, (0x103110));
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x3aa));
+    // This will give us about 255mbps so it will handle a 200mbps encoded stream
+    // (former value was 0x3aa which resulted in choppy video with 200mbps encoded streams)
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x300));
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x1));
 
     return true;
@@ -293,7 +330,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsJ2KEncoder(const NTV2Channel channel)
 
     printf("CNTV2ConfigTs2022::SetupEncodeTsJ2KEncoder\n");
 
-    GetJ2KEncodeVideoFormat(channel, videoFormat);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &videoFormat);
     if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat))
     {
         // progressive format
@@ -374,7 +411,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
     uint32_t addr = GetIpxTsAddr(channel);
 
     J2KStreamType       streamType;
-    GetJ2KEncodeStreamType(channel, streamType);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &streamType);
 
     // Write number of channels 0 is actually 1 stereo pair and set bit 4 for non elsm streams to indicate 24 bit audio
     if (streamType == kJ2KStreamTypeNonElsm)
@@ -479,8 +516,8 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     printf("CNTV2ConfigTs2022::GenerateTransactionTableForMpegJ2kEncap\n");
 
     // Get our variable user params
-    GetJ2KEncodeVideoFormat(channel, videoFormat);
-    GetJ2KEncodeStreamType(channel, streamData.j2kStreamType);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &videoFormat);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &streamData.j2kStreamType);
 
     streamData.interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat);
 
@@ -495,10 +532,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     GetFramesPerSecond (frameRate, streamData.numFrameRate, streamData.denFrameRate);
 
     // set the PIDs for all streams
-    GetJ2KEncodePMTPid(channel, streamData.programPid);
-    GetJ2KEncodeVideoPid(channel, streamData.videoPid);
-    GetJ2KEncodePCRPid(channel, streamData.pcrPid);
-    GetJ2KEncodeAudio1Pid(channel, streamData.audio1Pid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, &streamData.programPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, &streamData.videoPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, &streamData.pcrPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &streamData.audio1Pid);
 
     printf("Program PID     = 0x%02x\n", streamData.programPid);
     printf("Video PID       = 0x%02x\n", streamData.videoPid);
@@ -623,7 +660,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     printf("CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap\n");
 
     // Get the PCR pid
-    GetJ2KEncodePCRPid(channel, pcrPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, &pcrPid);
     printf("PCR PID         = 0x%02x\n", pcrPid);
 
     _transactionCount = 0;
@@ -667,9 +704,9 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     printf("CNTV2ConfigTs2022::GenerateTableForMpegAesEncap\n");
 
     // Get the Audio pid
-    GetJ2KEncodeAudio1Pid(channel, audioPid);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &audioPid);
     printf("Audio 1 PID     = 0x%02x\n\n", audioPid);
-    GetJ2KEncodeStreamType(channel, j2kStreamType);
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &j2kStreamType);
     _transactionCount = 0;
 
     PESGen pes;
@@ -774,14 +811,14 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigVReg(const NTV2Channel channel, const uint
 }
 
 
-bool CNTV2ConfigTs2022::ReadJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg,  uint32_t & value)
+bool CNTV2ConfigTs2022::ReadJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg,  uint32_t * value)
 {
     bool rv = false;
 
     // only support 4 channels at this time
     if (channel <= NTV2_CHANNEL4)
     {
-        rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), (ULWord*)&value);
+        rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     }
     else
         mError = "Invalid channel";

@@ -11,6 +11,7 @@
 #include "ntv2enums.h"
 #include "ntv2registers2022.h"
 #include "ntv2mbcontroller.h"
+#include "ntv2tshelper.h"
 #include <string.h>
 
 typedef struct
@@ -186,7 +187,31 @@ public:
     bool        txc_secondaryAutoMac;
 };
 
-typedef enum {
+class j2kEncoderConfig
+{
+public:
+    j2kEncoderConfig() { init(); }
+
+    void init();
+
+    bool operator == ( const j2kEncoderConfig &other );
+    bool operator != ( const j2kEncoderConfig &other );
+
+    NTV2VideoFormat         videoFormat;        ///< @brief	Specifies the video format for J2K encode.
+    uint32_t                ullMode;            ///< @brief	Specifies the ull mode for J2K encode.
+    uint32_t                bitDepth;           ///< @brief	Specifies the bit depth for J2K encode.
+    J2KChromaSubSampling    chromaSubsamp;      ///< @brief	Specifies the chroma sub sampling for J2K encode.
+    J2KCodeBlocksize        codeBlocksize;      ///< @brief	Specifies the code block size for J2K encode.
+    uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
+    J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
+    uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.
+    uint32_t                videoPid;           ///< @brief	Specifies the PID for the video.
+    uint32_t                pcrPid;             ///< @brief	Specifies the PID for the PCR.
+    uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
+};
+
+typedef enum
+{
     eProgSel_Off,
     eProgSel_AutoFirstProg,
     eProgSel_LowestProgNum,
@@ -195,7 +220,8 @@ typedef enum {
     eProgSel_Default = eProgSel_AutoFirstProg,
 } eProgSelMode_t;
 
-typedef enum {
+typedef enum
+{
     eIGMPVersion_2,
     eIGMPVersion_3,
     eIGMPVersion_Default = eIGMPVersion_3
@@ -246,19 +272,22 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(NTV2Channel channel, const rx_2022_channel & rxConfig);
-    bool        GetRxChannelConfiguration( NTV2Channel channel, rx_2022_channel & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2022_channel & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig);
 
-    bool        SetRxChannelEnable (NTV2Channel channel, bool enable, bool enable2022_7);
-    bool        GetRxChannelEnable (NTV2Channel channel, bool & enabled);
+    bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
+    bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(NTV2Channel channel, const tx_2022_channel & txConfig);
-    bool        GetTxChannelConfiguration(NTV2Channel channel, tx_2022_channel & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig);
 
-    bool        SetTxChannelEnable(NTV2Channel channel, bool enable, bool enable2022_7);
-    bool        GetTxChannelEnable(NTV2Channel channel, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
+    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kConfig);
+    bool        SetJ2KEncoderConfiguration(const NTV2Channel channel, const j2kEncoderConfig & j2kConfig);
+    bool        GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kEncoderConfig &j2kConfig);
+
+    bool        SetJ2KDecoderConfiguration(const j2kDecoderConfig & j2kConfig);
     bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
     bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
 
