@@ -2780,10 +2780,13 @@ public:
 										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
+		@param[in]		inClearDropCount	Specify 'true' to clear the AUTOCIRCULATE_STATUS::acFramesDropped counter; otherwise
+											leaves it unchanged. Defaults to 'false' (don't clear it).
+
 		@details	When resuming, if the channel is in the "paused" state, it will be changed to "running", and at the next VBI, the
 					driver will restart audio AutoCirculate.
 	**/
-	AJA_VIRTUAL bool	AutoCirculateResume (const NTV2Channel inChannel);
+	AJA_VIRTUAL bool	AutoCirculateResume (const NTV2Channel inChannel, const bool inClearDropCount = false);
 
 	/**
 		@brief		Flushes AutoCirculate for the given channel.

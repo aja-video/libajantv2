@@ -718,7 +718,7 @@ bool CNTV2Card::AutoCirculatePause (const NTV2Channel inChannel)
 {
 	//	Use the old A/C driver call...
 	AUTOCIRCULATE_DATA	autoCircData (ePauseAutoCirc);
-	autoCircData.bVal1		 = false;
+	autoCircData.bVal1		= false;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
 	return AutoCirculate (autoCircData);
@@ -726,11 +726,12 @@ bool CNTV2Card::AutoCirculatePause (const NTV2Channel inChannel)
 }	//	AutoCirculatePause
 
 
-bool CNTV2Card::AutoCirculateResume (const NTV2Channel inChannel)
+bool CNTV2Card::AutoCirculateResume (const NTV2Channel inChannel, const bool inClearDropCount)
 {
 	//	Use the old A/C driver call...
 	AUTOCIRCULATE_DATA	autoCircData (ePauseAutoCirc);
 	autoCircData.bVal1 = true;
+	autoCircData.bVal2 = inClearDropCount;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
 	return AutoCirculate (autoCircData);
