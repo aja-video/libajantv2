@@ -32,6 +32,19 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
+    uint32_t    val;
+    uint32_t    encoderBit;
+
+    // Turn off the encoder
+    if (channel == NTV2_CHANNEL2)
+        encoderBit = ENCODER_2_ENABLE;
+    else
+        encoderBit = ENCODER_1_ENABLE;
+
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val &= ~encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, config.bitDepth);
@@ -51,6 +64,11 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     // setup the TS
     if (!SetupTsForEncode(channel))
         return false;
+
+    // Turn on the encoder
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val |= encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
 
     return true;
 }
@@ -296,7 +314,9 @@ bool CNTV2ConfigTs2022::SetupEncodeTsTimer(const NTV2Channel channel)
     printf("CNTV2ConfigTs2022::SetupEncodeTsTimer\n");
 
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsLoad, (0x103110));
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x3aa));
+    // This will give us about 255mbps so it will handle a 200mbps encoded stream
+    // (former value was 0x3aa which resulted in choppy video with 200mbps encoded streams)
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x300));
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x1));
 
     return true;
