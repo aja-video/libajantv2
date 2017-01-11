@@ -484,7 +484,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
     uint32_t val;
     uint32_t addr = GetIpxJ2KAddr(channel);
 
-    //printf("J2kSetParam - ch=%d config=0x%08x param=0x%08x value=0x%08x\n", channel, config, param, value);
+    printf("J2kSetParam - ch=%d config=0x%08x param=0x%08x value=0x%08x\n", channel, config, param, value);
 
     while(!J2kCanAcceptCmd(channel))
     {
@@ -493,8 +493,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 
     val = 0x70000000 + (param<<16) + (config&0x7)*0x2000 + param;
     mDevice.WriteRegister(addr + kRegJ2kT0CmdFIFO, val);
-
-    //printf("J2kSetParam - wrote 0x%08x to CMD FIFO\n", val);
+    printf("J2kSetParam - wrote 0x%08x to CMD FIFO\n", val);
 
     while(!J2kCanAcceptCmd(channel))
     {
@@ -503,7 +502,7 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
 
     val = 0x7f000000 + (param<<16) + value;
     mDevice.WriteRegister(addr + kRegJ2kT0CmdFIFO, val);
-    //printf("J2kSetParam - wrote 0x%08x to CMD FIFO\n", val);
+    printf("J2kSetParam - wrote 0x%08x to CMD FIFO\n", val);
 }
 
 
