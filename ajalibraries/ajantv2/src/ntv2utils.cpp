@@ -7011,6 +7011,8 @@ string NTV2ReferenceSourceToString (const NTV2ReferenceSource inValue, const boo
 		case NTV2_REFERENCE_INPUT6:			return inForRetailDisplay ? "Input 6"		: "NTV2_REFERENCE_INPUT6";
 		case NTV2_REFERENCE_INPUT7:			return inForRetailDisplay ? "Input 7"		: "NTV2_REFERENCE_INPUT7";
 		case NTV2_REFERENCE_INPUT8:			return inForRetailDisplay ? "Input 8"		: "NTV2_REFERENCE_INPUT8";
+		case NTV2_REFERENCE_SFP1:			return inForRetailDisplay ? "SFP 1"			: "NTV2_REFERENCE_SFP1";
+		case NTV2_REFERENCE_SFP2:			return inForRetailDisplay ? "SFP 2"			: "NTV2_REFERENCE_SFP2";
 		case NTV2_NUM_REFERENCE_INPUTS:		break;
 	}
 	return string ();
