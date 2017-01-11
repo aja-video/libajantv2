@@ -739,10 +739,11 @@ bool CNTV2Card::AutoCirculateResume (const NTV2Channel inChannel, const bool inC
 }	//	AutoCirculateResume
 
 
-bool CNTV2Card::AutoCirculateFlush (const NTV2Channel inChannel)
+bool CNTV2Card::AutoCirculateFlush (const NTV2Channel inChannel, const bool inClearDropCount)
 {
 	//	Use the old A/C driver call...
 	AUTOCIRCULATE_DATA	autoCircData	(eFlushAutoCirculate);
+    autoCircData.bVal1 = inClearDropCount;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
 	return AutoCirculate (autoCircData);

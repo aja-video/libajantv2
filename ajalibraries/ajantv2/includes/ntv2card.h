@@ -2797,6 +2797,9 @@ public:
 										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
+        @param[in]		inClearDropCount	Specify 'true' to clear the AUTOCIRCULATE_STATUS::acFramesDropped counter; otherwise
+                                            leaves it unchanged. Defaults to 'false' (don't clear it).
+
 		@details	On capture, flushes all recorded frames that haven't yet been transferred to the host.
 					On playout, all queued frames that have already been transferred to the device (that haven't yet played)
 					are discarded.
@@ -2804,7 +2807,7 @@ public:
 					or played by the device hardware at the moment the function was called).
 					The NTV2AutoCirculateState ("running", etc.) for the given channel will remain unchanged.
 	**/
-	AJA_VIRTUAL bool	AutoCirculateFlush (const NTV2Channel inChannel);
+    AJA_VIRTUAL bool	AutoCirculateFlush (const NTV2Channel inChannel, const bool inClearDropCount = false);
 
 	/**
 		@brief		Tells AutoCirculate how many frames to skip before playout starts for the given channel.
