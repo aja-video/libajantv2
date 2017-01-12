@@ -201,6 +201,14 @@ ostream & operator << (std::ostream & inOutStream, const NTV2TCIndexes & inObj)
 }
 
 
+NTV2TCIndexes & operator += (NTV2TCIndexes & inOutSet, const NTV2TCIndexes & inSet)
+{
+	for (NTV2TCIndexesConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+		inOutSet.insert (*iter);
+	return inOutSet;
+}
+
+
 ostream & operator << (ostream & inOutStream, const FRAME_STAMP & inObj)
 {
 	return inOutStream	<< inObj.acHeader
@@ -423,7 +431,7 @@ ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 }	//	operator <<
 
 
-NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet inSet)
+NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet)
 {
 	for (NTV2InputSourceSetConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
 		inOutSet.insert (*iter);

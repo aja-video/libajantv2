@@ -368,8 +368,15 @@ typedef enum
 	NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
 } NTV2FrameBufferFormat;
 
+typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2FrameBufferFormat.
+
 
 #define	NTV2_IS_VALID_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) != NTV2_FBF_UNUSED_23	\
+																					  &&  (__s__) != NTV2_FBF_UNUSED_26	\
+																					  &&  (__s__) != NTV2_FBF_UNUSED_27	\
+																					  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
+
+#define	NTV2_IS_VALID_FBF(__s__)					((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) != NTV2_FBF_UNUSED_23	\
 																					  &&  (__s__) != NTV2_FBF_UNUSED_26	\
 																					  &&  (__s__) != NTV2_FBF_UNUSED_27	\
 																					  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
@@ -3380,6 +3387,8 @@ typedef enum
 
 #define	NTV2_IS_ATC_VITC1_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI1 && (__x__) <= NTV2_TCINDEX_SDI4	)	\
 															||  (__x__) >= NTV2_TCINDEX_SDI5 && (__x__) <= NTV2_TCINDEX_SDI8	)
+
+#define	NTV2_IS_ATC_VITC2_TIMECODE_INDEX(__x__)			(	(__x__) >= NTV2_TCINDEX_SDI1_2 && (__x__) <= NTV2_TCINDEX_SDI8_2	)
 
 #define	NTV2_IS_ATC_LTC_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI3_LTC && (__x__) <= NTV2_TCINDEX_SDI8_LTC	)	\
 															||  (__x__) == NTV2_TCINDEX_SDI1_LTC											\
