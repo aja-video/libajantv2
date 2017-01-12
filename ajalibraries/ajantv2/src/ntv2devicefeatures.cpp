@@ -1125,8 +1125,8 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
 
 bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex)
 {
-	const UWord	maxNumLTCs	(MAX_OF(::NTV2DeviceGetNumLTCInputs(inDeviceID), ::NTV2DeviceGetNumLTCOutputs(inDeviceID)));
-	const UWord	maxNumSDIs	(MAX_OF(::NTV2DeviceGetNumVideoInputs(inDeviceID), ::NTV2DeviceGetNumVideoOutputs(inDeviceID)));
+	UWord	maxNumLTCs	= MAX_OF(NTV2DeviceGetNumLTCInputs(inDeviceID), NTV2DeviceGetNumLTCOutputs(inDeviceID));
+	UWord	maxNumSDIs	= MAX_OF(NTV2DeviceGetNumVideoInputs(inDeviceID), NTV2DeviceGetNumVideoOutputs(inDeviceID));
 	switch (inTCIndex)
 	{
 		case NTV2_TCINDEX_DEFAULT:		return true;	//	All devices support this index
