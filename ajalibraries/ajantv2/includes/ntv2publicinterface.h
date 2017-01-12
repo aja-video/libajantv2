@@ -6828,7 +6828,6 @@ typedef enum
 			typedef std::set <NTV2InputSource>					NTV2InputSourceSet;					///< @brief	A set of distinct NTV2InputSource values.
 			typedef NTV2InputSourceSet::const_iterator			NTV2InputSourceSetConstIter;		///< @brief	A handy const interator for iterating over an NTV2InputSourceSet.
 
-
 			/**
 				@return		A string that contains the human-readable representation of the given NTV2AutoCirculateState value.
 				@param[in]	inState		Specifies the NTV2AutoCirculateState of interest.
@@ -6891,7 +6890,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
 			**/
-			AJAExport NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet inSet);
+			AJAExport NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet);
 
 
 			/**
@@ -6949,6 +6948,14 @@ typedef enum
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2TCIndexes & inObj);
+
+			/**
+				@brief		Appends the given NTV2TCIndexes' contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2TCIndexes & operator += (NTV2TCIndexes & inOutSet, const NTV2TCIndexes & inSet);
 
 			/**
 				@brief	Streams the given FRAME_STAMP to the specified ostream in a human-readable format.
