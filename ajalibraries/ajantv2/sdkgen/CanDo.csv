@@ -39,7 +39,7 @@ NTV2DeviceCanDoPCMDetection,Returns true if the device having the given ID has p
 NTV2DeviceCanDoPIO,Returns true if the device having the given ID supports Programmed I/O.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoPlayback,Returns true if the device having the given ID can output (play) video.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X
 NTV2DeviceCanDoProgrammableCSC,Returns true if the device having the given ID has at least one programmable color space converter widget.,-,-,X,X,X,X,-,X,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,X
-NTV2DeviceCanDoProgrammableRS422,"Returns true if the device having the given ID has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).",-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,X,-,X,-,-,-,-,-
+NTV2DeviceCanDoProgrammableRS422,"Returns true if the device having the given ID has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).",-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,-,-,-
 NTV2DeviceCanDoProRes,Returns true if the device having the given ID can can accommodate Apple ProRes-compressed video in its frame buffers.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoQREZ,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoQuarterExpand,"Returns true if the device having the given ID can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).",-,-,X,X,X,X,X,-,X,X,-,X,X,X,X,X,X,X,X,-,-,X,X,X
