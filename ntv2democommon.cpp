@@ -530,6 +530,14 @@ char CNTV2DemoCommon::ReadCharacterPress (void)
 }
 
 
+void CNTV2DemoCommon::WaitForEnterKeyPress (void)
+{
+	cout << "## Press Enter/Return key to exit: ";
+	cout.flush();
+	cin.get();
+}
+
+
 TimecodeFormat CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (const NTV2FrameRate inFrameRate)
 {
 	TimecodeFormat	result	(kTCFormatUnknown);

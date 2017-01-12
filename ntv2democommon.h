@@ -241,6 +241,11 @@ class CNTV2DemoCommon
 		static char							ReadCharacterPress (void);
 
 		/**
+			@brief	Prompts the user (via stdout) to press the Return or Enter key, then waits until he does so.
+		**/
+		static void							WaitForEnterKeyPress (void);
+
+		/**
 		@return		The equivalent TimecodeFormat for a given NTV2FrameRate.
 		@param[in]	inFrameRate		Specifies the NTV2FrameRate to be converted into an equivalent TimecodeFormat.
 		**/
