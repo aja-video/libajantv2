@@ -20,6 +20,10 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
 {
     QJsonObject pjson = json["parameters"].toObject();
     QString vf =  pjson["VideoFormat"].toString();
+
+    mKonaIPParams.channels = pjson["Channels"].toInt();
+    std::cout << "Channels       " << vf.toStdString().c_str() << std::endl;
+
     mKonaIPParams.videoFormat = videoFormatMap[vf];
     std::cout << "VideoFormat    " << vf.toStdString().c_str() << std::endl;
 
@@ -35,8 +39,8 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
     mKonaIPParams.codeBlockSize = codeBlockSizeMap[cbs];
     std::cout << "CodeBlockSize  " << cbs.toStdString().c_str() << std::endl;
 
-    mKonaIPParams.numBits = pjson["NumBits"].toInt();
-    std::cout << "NumBits        " << mKonaIPParams.numBits << std::endl;
+    mKonaIPParams.bitDepth = pjson["BitDepth"].toInt();
+    std::cout << "BitDepth       " << mKonaIPParams.bitDepth << std::endl;
     mKonaIPParams.mbps = pjson["Mbps"].toInt();
     std::cout << "Mbps           " << mKonaIPParams.mbps << std::endl;
     mKonaIPParams.programPid = pjson["ProgramPid"].toInt();
@@ -76,6 +80,16 @@ void CKonaIpEncoderJsonReader::printVideoFormatMap()
     }
 }
 
+void CKonaIpEncoderJsonReader::printCodeBlockSizeMap()
+{
+    QMap<QString, uint32_t>::iterator i;
+    for (i = codeBlockSizeMap.begin(); i != codeBlockSizeMap.end(); ++i)
+    {
+        QString str = i.key();
+        std::cout << str.toStdString() << std::endl;
+    }
+}
+
 CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 {
 
@@ -83,6 +97,7 @@ CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 
 bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
 {
+    bool rv;
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
     if (!mDevice.IsOpen())
@@ -105,7 +120,7 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     // retrieve encode params
     encoderCfg.videoFormat     = (NTV2VideoFormat)pKonaIPParams->videoFormat;
     encoderCfg.ullMode         = 0;
-    encoderCfg.bitDepth        = pKonaIPParams->numBits;
+    encoderCfg.bitDepth        = pKonaIPParams->bitDepth;
     encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
     encoderCfg.codeBlocksize   = (J2KCodeBlocksize)pKonaIPParams->codeBlockSize;
     encoderCfg.streamType      = (J2KStreamType)pKonaIPParams->streamType;
@@ -115,11 +130,15 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     encoderCfg.pcrPid          = pKonaIPParams->pcrPid;
     encoderCfg.audio1Pid       = pKonaIPParams->audio1Pid;
 
-    // Now setup the J2K encoder with these params
-    bool rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
+    if (pKonaIPParams->channels & 1)
+    {
+        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
+    }
 
-    // Same Setup for Channel 2
-    rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
+    if (pKonaIPParams->channels & 2)
+    {
+        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
+    }
 
     std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
 
@@ -161,10 +180,10 @@ void CKonaIpEncoderJsonReader::initMaps()
 
     chromaSubSamplingMap["444"] = 0;
     chromaSubSamplingMap["422-444"] = 1;
-    chromaSubSamplingMap["422 standard"] = 2;
+    chromaSubSamplingMap["422-Standard"] = 2;
 
     streamTypeMap["Standard"] = 0;
-    streamTypeMap["Evertz"] = 1;
+    streamTypeMap["Non-elsm"] = 1;
 
     codeBlockSizeMap["32x32"] = 0;
     codeBlockSizeMap["32x64"] = 1;

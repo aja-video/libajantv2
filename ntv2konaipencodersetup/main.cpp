@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     parser.addOption(boardOption);
     const QCommandLineOption listOption("l", "list video formats", "");
     parser.addOption(listOption);
+    const QCommandLineOption cbOption("c", "list code block sizes", "");
+    parser.addOption(cbOption);
 
     parser.addPositionalArgument("InputJsonFile", QCoreApplication::translate("main", "Json File to Open."));
 
@@ -24,6 +26,11 @@ int main(int argc, char *argv[])
     {
         CKonaIpEncoderJsonReader readJson;
         readJson.printVideoFormatMap();
+    }
+    else if (parser.isSet(cbOption))
+    {
+        CKonaIpEncoderJsonReader readJson;
+        readJson.printCodeBlockSizeMap();
     }
     else
     {

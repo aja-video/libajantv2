@@ -10,8 +10,9 @@
 
 
 typedef  struct {
+    uint32_t channels;
     NTV2VideoFormat videoFormat;
-    uint32_t numBits;
+    uint32_t bitDepth;
     uint32_t streamType;
     uint32_t chromaSubSampling;
     uint32_t codeBlockSize;
@@ -30,6 +31,7 @@ public:
     CKonaIpEncoderJsonReader();
     bool openJson(QString fileName);
     void printVideoFormatMap();
+    void printCodeBlockSizeMap();
 
     KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
 
