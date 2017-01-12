@@ -138,13 +138,13 @@ int main (int argc, const char ** argv)
 	char *			pDeviceSpec		(NULL);						//	Which device to use
 	char *			pVidSource		(NULL);						//	Video input source string
 	char *			pTcSource		(NULL);						//	Time code source string
-	int				noAudio			(0);						//	Disable audio?
-	int				useRGB			(0);						//	Use 10-bit RGB instead of 8-bit YCbCr?
-	poptContext		optionsContext;								//	Context for parsing command line arguments
 	NTV2InputSource	vidSource		(NTV2_INPUTSOURCE_SDI1);	//	Video source
 	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);		//	Time code source
+	int				noAudio			(0);						//	Disable audio?
+	int				useRGB			(0);						//	Use 10-bit RGB instead of 8-bit YCbCr?
 	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
 	int				doAnc			(0);						//	Use the Anc Extractor/Inserter
+	poptContext		optionsContext;								//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
@@ -169,23 +169,26 @@ int main (int argc, const char ** argv)
 		return 1;
 	}
 	optionsContext = ::poptFreeContext (optionsContext);
+	const string	deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
+	const string	vidSourceStr	(pVidSource ? CNTV2DemoCommon::ToLower (pVidSource) : "");
 
 	//	Select video source...
+	if (vidSourceStr == "?" || vidSourceStr == "list")
+		{cout << CNTV2DemoCommon::GetInputSourceStrings (INPUT_SOURCES_ALL, deviceSpec) << endl;  return 0;}
 	if (pVidSource)
 	{
-		const string	videoSource	(CNTV2DemoCommon::ToLower (pVidSource));
-		if (gSourceMap.find (videoSource) == gSourceMap.end ())
-			{cerr << "## ERROR:  Video source '" << videoSource << "' not one of these: " << gSourceMap << endl;	return 1;}
-		vidSource = gSourceMap [videoSource];
+		if (gSourceMap.find (vidSourceStr) == gSourceMap.end ())
+			{cerr << "## ERROR:  Video source '" << vidSourceStr << "' not one of these: " << gSourceMap << endl;	return 1;}
+		vidSource = gSourceMap [vidSourceStr];
 	}	//	if video source specified
 
 	//	Select time code source...
 	if (pTcSource)
 	{
-		const string	timecodeSource	(CNTV2DemoCommon::ToLower (pTcSource));
-		if (gTCSourceMap.find (timecodeSource) == gTCSourceMap.end ())
-			{cerr << "## ERROR:  Timecode source '" << timecodeSource << "' not one of these: " << gTCSourceMap << endl;	return 1;}
-		tcSource = gTCSourceMap [timecodeSource];
+		const string	tcSourceStr	(CNTV2DemoCommon::ToLower (pTcSource));
+		if (gTCSourceMap.find (tcSourceStr) == gTCSourceMap.end ())
+			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these: " << gTCSourceMap << endl;	return 1;}
+		tcSource = gTCSourceMap [tcSourceStr];
 	}
 
 	//	Instantiate the NTV2Burn object...
@@ -205,38 +208,31 @@ int main (int argc, const char ** argv)
 
 	//	Initialize the NTV2Burn instance...
 	status = burner.Init ();
-	if (AJA_SUCCESS (status))
-	{
-		ULWord	totalFrames (0),  captureDrops (0),  playoutDrops (0),  captureBufferLevel (0), playoutBufferLevel (0);
-
-		//	Start the burner's capture and playout threads...
-		burner.Run ();
-
-		cout	<< "           Capture  Playout  Capture  Playout" << endl
-				<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
-				<< "Processed  Dropped  Dropped    Level    Level" << endl;
-
-		//	Loop until told to stop...
-		while (!gGlobalQuit)
-		{
-			burner.GetStatus (totalFrames, captureDrops, playoutDrops, captureBufferLevel, playoutBufferLevel);
-
-			cout	<< setw (9) << totalFrames
-					<< setw (9) << captureDrops
-					<< setw (9) << playoutDrops
-					<< setw (9) << captureBufferLevel
-					<< setw (9) << playoutBufferLevel
-					<< "\r" << flush;
-
-			AJATime::Sleep (2000);
-
-		}	//	loop until signaled
-
-		cout << endl;
-
-	}	//	if Init succeeded
-	else
+	if (!AJA_SUCCESS (status))
 		cout << "## ERROR:  Initialization failed, status=" << status << endl;
+
+	//	Start the burner's capture and playout threads...
+	burner.Run ();
+
+	//	Loop until told to stop...
+	cout	<< "           Capture  Playout  Capture  Playout" << endl
+			<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
+			<< "Processed  Dropped  Dropped    Level    Level" << endl;
+	do
+	{
+		ULWord	totalFrames (0),  captureDrops (0),  playoutDrops (0),  captureBufferLevel (0),  playoutBufferLevel (0);
+		burner.GetStatus (totalFrames, captureDrops, playoutDrops, captureBufferLevel, playoutBufferLevel);
+
+		cout	<< setw (9) << totalFrames
+				<< setw (9) << captureDrops
+				<< setw (9) << playoutDrops
+				<< setw (9) << captureBufferLevel
+				<< setw (9) << playoutBufferLevel
+				<< "\r" << flush;
+		AJATime::Sleep (2000);
+	} while (!gGlobalQuit);	//	loop until signaled
+
+	cout << endl;
 
 	return AJA_SUCCESS (status) ? 0 : 2;	//	Return zero upon success -- otherwise 2
 
