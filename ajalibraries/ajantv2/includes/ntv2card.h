@@ -1409,6 +1409,26 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
+    /**
+        @brief		Enables or disables 20 bit mode for the audio engine.
+        @return		True if successful; otherwise false.
+        @param[in]	inAudioSystem	Specifies the audio system on the device to be affected.
+        @param[in]	inEnable		If true,  audio samples will be in 20 bit mode.
+                                    If false, audio sample will be in 20 bit mode.
+        @note		This is only used by Kona IP.
+    **/
+    AJA_VIRTUAL bool	SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+
+    /**
+        @brief		Answers whether or not the device's audio system is currently operating in 20 bit
+                    mode.  Normally the audio system is in 24 bit mode.
+        @return		True if successful; otherwise false.
+        @param[in]	inAudioSystem		Specifies the audio system of interest.
+        @param[in]	outEnable			Receives 'true' if the audio system is in 20 bit moe, or 'false'
+                                        if audio is in 24 bit mode.  This is only used by Kona IP.
+    **/
+    AJA_VIRTUAL bool	GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+
 	/**
 		@brief		Enables or disables the output of audio samples and advancment of the audio buffer
 					pointer ("play head") of the given audio engine.

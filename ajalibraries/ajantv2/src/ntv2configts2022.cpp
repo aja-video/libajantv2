@@ -67,6 +67,23 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     if (!SetupTsForEncode(channel))
         return false;
 
+    // Need to set 20 or 24 bit audio in NTV2 audio control reg.  For now we are doing this on
+    // a global basis and setting all audio engines to the same value.
+    J2KStreamType       streamType;
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &streamType);
+    bool    do20Bit = true;
+
+    // Set PTS_MUX depending on streamtype
+    if (streamType == kJ2KStreamTypeNonElsm)
+    {
+        do20Bit = false;
+    }
+
+    for (uint32_t i = NTV2_AUDIOSYSTEM_1; i<NTV2_MAX_NUM_AudioSystemEnums; i++)
+    {
+        mDevice.SetAudio20BitMode ((NTV2AudioSystem)i, do20Bit);
+    }
+
     // Turn on the encoder
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
     val |= encoderBit;
@@ -319,7 +336,19 @@ bool CNTV2ConfigTs2022::SetupEncodeTsTimer(const NTV2Channel channel)
     // This will give us about 255mbps so it will handle a 200mbps encoded stream
     // (former value was 0x3aa which resulted in choppy video with 200mbps encoded streams)
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x300));
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x1));
+
+    J2KStreamType       streamType;
+    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &streamType);
+
+    // Set PTS_MUX depending on streamtype
+    if (streamType == kJ2KStreamTypeNonElsm)
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x4));
+    }
+    else
+    {
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x1));
+    }
 
     return true;
 }

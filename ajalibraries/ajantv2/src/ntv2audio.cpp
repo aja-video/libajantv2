@@ -826,6 +826,27 @@ bool CNTV2Card::GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool &
 }
 
 
+bool CNTV2Card::SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable)
+{
+    if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
+        return false;
+
+    return WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], inEnable ? 1 : 0, kRegMask20BitMode, kRegShift20BitMode);
+}
+
+
+bool CNTV2Card::GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable)
+{
+    if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
+        return false;
+
+    ULWord		tempVal	(0);
+    const bool	result	(ReadRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], &tempVal, kRegMask20BitMode, kRegShift20BitMode));
+    outEnable = static_cast <bool> (tempVal);
+    return result;
+}
+
+
 bool CNTV2Card::SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inEnable)
 {
 	if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
