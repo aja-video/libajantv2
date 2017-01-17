@@ -18,6 +18,8 @@
 
 using namespace std;
 
+typedef NTV2TCIndexes							NTV2TCIndexSet;				///< @brief	An alias to NTV2TCIndexes.
+typedef NTV2TCIndexesConstIter					NTV2TCIndexSetConstIter;	///< @brief	An alias to NTV2TCIndexesConstIter.
 
 typedef	map <string, NTV2VideoFormat>			String2VideoFormatMap;
 typedef	String2VideoFormatMap::const_iterator	String2VideoFormatMapConstIter;
@@ -30,6 +32,10 @@ typedef	String2AudioSystemMap::const_iterator	String2AudioSystemMapConstIter;
 
 typedef	map <string, NTV2InputSource>			String2InputSourceMap;
 typedef	String2InputSourceMap::const_iterator	String2InputSourceMapConstIter;
+
+typedef	map <string, NTV2TCIndex>				String2TCIndexMap;
+typedef	pair <string, NTV2TCIndex>				String2TCIndexPair;
+typedef	String2TCIndexMap::const_iterator		String2TCIndexMapConstIter;
 
 static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
@@ -50,6 +56,14 @@ static String2VideoFormatMap	gString2VideoFormatMap;
 static String2PixelFormatMap	gString2PixelFormatMap;
 static String2AudioSystemMap	gString2AudioSystemMap;
 static String2InputSourceMap	gString2InputSourceMap;
+static NTV2TCIndexSet			gTCIndexes;
+static NTV2TCIndexSet			gTCIndexesSDI;
+static NTV2TCIndexSet			gTCIndexesHDMI;
+static NTV2TCIndexSet			gTCIndexesAnalog;
+static NTV2TCIndexSet			gTCIndexesATCLTC;
+static NTV2TCIndexSet			gTCIndexesVITC1;
+static NTV2TCIndexSet			gTCIndexesVITC2;
+static String2TCIndexMap		gString2TCIndexMap;
 
 
 class DemoCommonInitializer
@@ -252,6 +266,26 @@ class DemoCommonInitializer
 			gInputSourcesAnalog.insert (NTV2_INPUTSOURCE_ANALOG);
 			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, false), NTV2_INPUTSOURCE_ANALOG));
 			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, true)), NTV2_INPUTSOURCE_ANALOG));
+
+			//	TCIndexes...
+			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
+			{
+				const NTV2TCIndex	tcIndex	(static_cast<NTV2TCIndex>(ndx));
+				gTCIndexes.insert (tcIndex);
+				gString2TCIndexMap.insert (String2TCIndexPair(ULWordToString(ndx), tcIndex));
+				gString2TCIndexMap.insert (String2TCIndexPair(::NTV2TCIndexToString(tcIndex, false), tcIndex));
+				gString2TCIndexMap.insert (String2TCIndexPair(CNTV2DemoCommon::ToLower(::NTV2TCIndexToString(tcIndex, true)), tcIndex));
+				if (NTV2_IS_ANALOG_TIMECODE_INDEX(tcIndex))
+					gTCIndexesAnalog.insert (tcIndex);
+				else
+					gTCIndexesSDI.insert (tcIndex);
+				if (NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcIndex))
+					gTCIndexesATCLTC.insert (tcIndex);
+				if (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcIndex))
+					gTCIndexesVITC1.insert (tcIndex);
+				if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcIndex))
+					gTCIndexesVITC2.insert (tcIndex);
+			}
 		}	//	constructor
 	private:
 		string ULWordToString (const ULWord inNum)
@@ -260,7 +294,7 @@ class DemoCommonInitializer
 			oss << inNum;
 			return oss.str ();
 		}
-};
+};	//	constructor
 
 static const DemoCommonInitializer	gInitializer;
 
@@ -436,6 +470,65 @@ NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr)
 }
 
 
+const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKinds inKinds)
+{
+	if (inKinds == TC_INDEXES_ALL)
+		return gTCIndexes;
+
+	NTV2TCIndexes	result;
+
+	if (inKinds & TC_INDEXES_SDI)
+		result += gTCIndexesSDI;
+	if (inKinds & TC_INDEXES_ANALOG)
+		result += gTCIndexesAnalog;
+	if (inKinds & TC_INDEXES_ATCLTC)
+		result += gTCIndexesATCLTC;
+	if (inKinds & TC_INDEXES_VITC1)
+		result += gTCIndexesVITC1;
+	if (inKinds & TC_INDEXES_VITC2)
+		result += gTCIndexesVITC2;
+
+	return result;
+}
+
+string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
+											const string inDeviceSpecifier)
+{
+	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes (inKinds));
+	ostringstream			oss;
+	CNTV2Card				theDevice;
+	if (!inDeviceSpecifier.empty ())
+		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
+
+	oss	<< setw (25) << left << "Timecode Index"			<< "\t" << setw (16) << left << "Legal Values    " << endl
+		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
+	for (NTV2TCIndexesConstIter iter (tcIndexes.begin ());  iter != tcIndexes.end ();  ++iter)
+	{
+		string	tcNdxName	(::NTV2TCIndexToString (*iter));
+		for (String2TCIndexMapConstIter it (gString2TCIndexMap.begin ());  it != gString2TCIndexMap.end ();  ++it)
+			if (*iter == it->second)
+			{
+				oss << setw (25) << left << tcNdxName << "\t" << setw (16) << left << it->first;
+				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ()  &&  !::NTV2DeviceCanDoTCIndex (theDevice.GetDeviceID(), *iter))
+					oss << "\t## Incompatible with " << theDevice.GetDisplayName ();
+				oss << endl;
+				tcNdxName.clear ();
+			}
+		oss << endl;
+	}
+	return oss.str ();
+}
+
+
+NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr)
+{
+	String2TCIndexMapConstIter	iter	(gString2TCIndexMap.find (inStr));
+	if (iter == gString2TCIndexMap.end ())
+		return NTV2_TCINDEX_INVALID;
+	return iter->second;
+}
+
+
 string CNTV2DemoCommon::GetAudioSystemStrings (const string inDeviceSpecifier)
 {
 	NTV2DeviceID	deviceID	(DEVICE_ID_NOTFOUND);
@@ -527,6 +620,14 @@ char CNTV2DemoCommon::ReadCharacterPress (void)
 		}
 	#endif
 	return result;
+}
+
+
+void CNTV2DemoCommon::WaitForEnterKeyPress (void)
+{
+	cout << "## Press Enter/Return key to exit: ";
+	cout.flush();
+	cin.get();
 }
 
 

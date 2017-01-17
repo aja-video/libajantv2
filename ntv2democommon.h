@@ -134,6 +134,18 @@ typedef enum _NTV2InputSourceKinds
 } NTV2InputSourceKinds;
 
 
+typedef enum _NTV2TCIndexKinds
+{
+	TC_INDEXES_ALL		= 0xFF,
+	TC_INDEXES_SDI		= 1,
+	TC_INDEXES_ANALOG	= 2,
+	TC_INDEXES_ATCLTC	= 4,
+	TC_INDEXES_VITC1	= 8,
+	TC_INDEXES_VITC2	= 16,
+	TC_INDEXES_NONE		= 0
+} NTV2TCIndexKinds;
+
+
 
 class CNTV2DemoCommon
 {
@@ -199,11 +211,33 @@ class CNTV2DemoCommon
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief	Returns the NTV2InputSource that matches the given string.
+			@brief		Returns the NTV2InputSource that matches the given string.
 			@param[in]	inStr	Specifies the string to be converted to an NTV2InputSource.
 			@return		The given string converted to an NTV2InputSource, or NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
 		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr);
+
+		/**
+			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
+			@return		The supported NTV2TCIndexes set.
+		**/
+		static const NTV2TCIndexes			GetSupportedTCIndexes (const NTV2TCIndexKinds inKinds);
+
+		/**
+			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
+			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+											warns if the timecode index is incompatible with that device.
+			@return		A string that can be printed to show the available timecode indexes (or those that are supported by a given device).
+		**/
+		static std::string					GetTCIndexStrings (const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
+																const std::string inDeviceSpecifier = std::string ());
+
+		/**
+			@brief		Returns the NTV2TCIndex that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an NTV2TCIndex.
+			@return		The given string converted to an NTV2TCIndex, or NTV2_TCINDEX_INVALID if there's no match.
+		**/
+		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr);
 
 		/**
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
@@ -239,6 +273,11 @@ class CNTV2DemoCommon
 					without waiting for Enter or Return to be pressed.
 		**/
 		static char							ReadCharacterPress (void);
+
+		/**
+			@brief	Prompts the user (via stdout) to press the Return or Enter key, then waits until he does so.
+		**/
+		static void							WaitForEnterKeyPress (void);
 
 		/**
 		@return		The equivalent TimecodeFormat for a given NTV2FrameRate.
