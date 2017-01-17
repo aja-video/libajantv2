@@ -29,36 +29,53 @@ typedef enum
 } AJAPnpMessage;
 
 
-typedef void (*AJAPnpCallback)(AJAPnpMessage message, void * refcon);
+/** 
+	@brief		If installed (see AJAPnp::Install) in an AJAPnp instance, this function is called when
+				an AJA device is attached/detached, powered on/off, etc.
+	@param[in]	inMessage	Specifies the message (i.e., added, removed, etc.).
+	@param[in]	inRefCon	Specifies the reference cookie that was passed to AJAPnp::Install.
+**/
+typedef void (*AJAPnpCallback)(AJAPnpMessage inMessage, void * inRefCon);
 
 
 // forward declarations.
 class AJAPnpImpl;
 
 /** 
- *	System independent plug-n-play class notifying client when AJA devices are
- *	added, removed, going to sleep or waking up.
- *	@ingroup AJAGroupPnp
- */
+	@brief		This is a platform-agnostic plug-and-play class that notifies a client when AJA devices are
+				attached/detached, powered on/off, sleep/wake, etc.
+	@ingroup	AJAGroupPnp
+	@bug		This class has no Linux implementation.
+**/
 class AJA_EXPORT AJAPnp
 {
 public:	//	INSTANCE METHODS
 
 	/**
-	 *	Constructor create.
-	 *
-	 *	Plug-n-play object constructor. 
-	 *
+	 *	@brief	Default constructor.
 	 */
 	AJAPnp();
+
+	/**
+	 *	@brief	Default destructor.
+	 */
 	virtual ~AJAPnp();
 
 	/**
-	 *  Install plug-n-play notifier(s). Previous installs are automatically uninstalled.
+	 *  @brief		Installs the given plug-n-play notification callback function, replacing any callback function that
+	 *				may have been installed previously. If any matching devices are attached to the host, the callback
+	 *				function is immediately called for each attached device with the AJA_Pnp_DeviceAdded message.
 	 *
-	 *	@param[in]	callback		client defined callback used for plug-n-play notification. May be NULL.
-	 *	@param[in]	refCon			reference cookie returned to client in callback.
-	 *	@param[in]	devices			bitfield indicating which type of AJA device(s) are applicable (see AJAPnpDevice).
+	 *	@param[in]	callback		Specifies a pointer to a client-defined function to be called when AJA devices
+	 *								sleep/wake or are attached/detached to/from the host. If non-NULL, must be valid.
+	 *	@param[in]	refCon			Specifies a pointer-sized reference cookie that gets passed to the callback function.
+	 *								Defaults to NULL.
+	 *	@param[in]	devices			Specifies a bit mask that filters which devices to include/ignore (see implementation).
+	 *								Use zero (the default) to see all possible devices.
+	 *
+	 *	@bug		The current Windows implementation doesn't automatically invoke the callback for each attached device.
+	 *				As a workaround, the caller must explicitly enumerate the devices immediately before or after calling
+	 *				this function.
 	 *
 	 *	@return		AJA_STATUS_SUCCESS		Install succeeded
 	 *				AJA_STATUS_FAIL			Install failed
@@ -66,37 +83,31 @@ public:	//	INSTANCE METHODS
 	virtual AJAStatus Install(AJAPnpCallback callback, void* refCon= NULL, uint32_t devices = 0);
 
 	/**
-	 *	Return the currently installed callback.
-	 *
-	 *	@return		AJAPnpCallback			Currently installed callback, may be null
+	 *	@return		the address of the currently-installed callback (NULL if none installed).
 	 */
-	virtual AJAPnpCallback GetCallback();
+	virtual AJAPnpCallback GetCallback() const;
 
 	/**
-	 *	Uninstall plug-n-play callback notifier(s).
+	 *	@brief		Uninstalls any previously-installed callback notifier.
 	 *	@return		AJA_STATUS_SUCCESS		Uninstall succeeded
 	 *				AJA_STATUS_FAIL			Uninstall failed
 	 */
 	virtual AJAStatus Uninstall();
 
 	/**
-	 *	Return the currently installed reference cookie.
-	 *
-	 *	@return		void*					Currently installed reference cookie
+	 *	@return		the currently installed reference cookie.
 	 */
-	virtual void* GetRefCon();
+	virtual void* GetRefCon() const;
 
 	/**
-	 *	Return bitfield of devices currently installed (see AJAPnpDevice)
-	 *
-	 *	@return		uint32_t				Currently installed Or'd bitfield of pnp devices (AJAPnpDevice)
+	 *	@return		the current bit mask that filters which devices to include or ignore (see implementation).
 	 */
-	virtual uint32_t GetPnpDevices();
+	virtual uint32_t GetPnpDevices() const;
 
 
 private:	//	INSTANCE METHODS
 	/**
-	 *	Hidden copy constructor.
+	 *	@brief		Hidden copy constructor.
 	 *
 	 *	@param[in]	inObjToCopy		Specifies the object to be copied.
 	**/
@@ -104,7 +115,7 @@ private:	//	INSTANCE METHODS
 
 
 	/**
-	 *	Hidden assignment operator.
+	 *	@brief		Hidden assignment operator.
 	 *
 	 *	@param[in]	inObjToCopy		Specifies the object to be copied.
 	**/
@@ -112,7 +123,7 @@ private:	//	INSTANCE METHODS
 
 
 private:	//	INSTANCE DATA
-	AJAPnpImpl *	mpImpl;	///	My AJAPnpImpl platform-specific implementation object
+	AJAPnpImpl *	mpImpl;		///< @brief	My platform-specific implementation object
 
 };	//	AJAPnp
 

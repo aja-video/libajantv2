@@ -48,21 +48,21 @@ AJAPnp::Uninstall()
 
 
 AJAPnpCallback 
-AJAPnp::GetCallback()
+AJAPnp::GetCallback() const
 {
 	return mpImpl->GetCallback();
 }
 
 
 void* 
-AJAPnp::GetRefCon()
+AJAPnp::GetRefCon() const
 {
 	return mpImpl->GetRefCon();
 }
 
 
 uint32_t
-AJAPnp::GetPnpDevices()
+AJAPnp::GetPnpDevices() const
 {
 	return mpImpl->GetPnpDevices();
 }
