@@ -4763,6 +4763,8 @@ bool IsMultiFormatCompatible (const NTV2FrameRate inFrameRate1, const NTV2FrameR
 
 AJAExport bool IsMultiFormatCompatible (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2)
 {
+	if (inFormat1 == NTV2_FORMAT_UNKNOWN || inFormat2 == NTV2_FORMAT_UNKNOWN)
+		return false;
 	return ::IsMultiFormatCompatible (::GetNTV2FrameRateFromVideoFormat (inFormat1), ::GetNTV2FrameRateFromVideoFormat (inFormat2));
 
 }	//	IsMultiFormatCompatible (NTV2VideoFormat)
