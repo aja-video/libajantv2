@@ -150,7 +150,39 @@ Except in its Image view, the raster content display always highlights changed c
 		-	<b>Paste</b> -- (Available only if a frame was previously Copied) -- Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
 		-	<b>Set Color...</b> -- (<b>Auto</b> mode OFF only) -- Displays a color picker.
 			Choosing a color will set the active lines of the current frame buffer to the chosen color.
+		-	<b>Fill...</b> -- (<b>Auto</b> mode OFF only) -- Displays the <b>Fill Frame Buffer</b> dialog.
+			-	<b>Numeric Values</b> -- Fills one or more buffers with any numeric value.
+			-	<b>Component Values</b> -- Fills one or more buffers with any desired component values.
+			-	<b>Video Pattern</b> -- Fills one or more buffers with any of several AJA test patterns.
 
+@par	Data Operations
+	-	<b>Save As...</b> -- Saves the frame buffer contents to a file.
+		-	The <b>Auto</b> checkbox must be un-checked.
+		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
+		-	Click in the <b>File</b> menu, then choose <b>Save As...</b>.
+		-	A standard file-save dialog box appears. Navigate to the folder on your local host where you want the file to be saved, and give it a name.
+		-	<b>IMPORTANT:</b> The format of the data written to the file is View-dependent:
+			-	<b>Lines</b> and <b>Image</b> -- Writes a human-readable formatted dump of the raster selection, or, if there's no selection, the full raster.
+			-	<b>Components</b> -- Writes a human-readable formatted dump of the raster selection, or, if there's no selection, the full raster.
+			-	<b>Raw</b> -- Writes a raw dump of the entire frame buffer (8MB or 16MB). AJA recommends giving the file an extension of ".raw".
+	-	<b>Drag and Drop</b>
+		-	The <b>Auto</b> checkbox must be un-checked.
+		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
+		-	Drag operations cannot be started from the Frame Buffer inspector view.
+		-	Supported Drop Operations:
+			-	For file drops, drop only one file at a time. Multiple files are not supported.
+			-	<b>Image Files</b> -- The frame's visible raster is replaced with the image.
+				-	If the image dimensions differ from the frame geometry, the image is scaled to fit.
+				-	Only <b>PNG</b> or <b>JPG</b> files are currently supported.
+			-	<b>Raw Data Files</b> -- The frame's buffer content is replaced byte-for-byte with the raw data from the file.
+				-	The file name must end with the <b>".raw"</b> name extension.
+				-	If the raw file is smaller than the frame buffer, only the bytes from the file will overwrite the frame buffer.
+					All subsequent content in the buffer will remain unchanged.
+				-	If the raw file is larger than the frame buffer, only the currently selected frame buffer on the device will be changed.
+					No memory on the device past the currently selected frame buffer will be touched.
+			-	<b>Image Data</b> -- The frame's visible raster is replaced with the dropped image.
+				-	If the image dimensions differ from the frame geometry, the image is scaled to fit.
+				-	Only <b>PNG</b> or <b>JPG</b> image data is currently supported.
 
 
 
@@ -277,9 +309,10 @@ The AutoCirculate inspector monitors AutoCirculate status for every channel on t
 
 The inspector shows the following:
 	-	<b>Streaming Application</b> -- Shows the process ID and four-CC "signature" of the application that called CNTV2Card::SetStreamingApplication.
-	-	<b>AutoCirculate Status</b> -- Formats and displays \c AUTOCIRCULATE_STATUS information pulled from the CNTV2Card::AutoCirculateGetStatus function call for each \c NTV2Channel.
-	-	<b>Timecodes</b> -- This area shows the contents of the \c NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp for each AutoCirculate frame buffer.
-							Use the <b>Timecodes</b> popup menu to control which channel to display (or "Hide" to not display timecodes).
+	-	<b>AutoCirculate Status</b> -- Formats and displays \c AUTOCIRCULATE_STATUS information pulled from the CNTV2Card::AutoCirculateGetStatus function
+		call for each \c NTV2Channel.
+	-	<b>Timecodes</b> -- This area shows the contents of the \c NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp
+		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or "Hide" to not display timecodes).
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
 

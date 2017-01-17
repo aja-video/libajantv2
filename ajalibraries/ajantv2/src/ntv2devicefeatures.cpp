@@ -1127,6 +1127,10 @@ bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex in
 {
 	UWord	maxNumLTCs	= MAX_OF(NTV2DeviceGetNumLTCInputs(inDeviceID), NTV2DeviceGetNumLTCOutputs(inDeviceID));
 	UWord	maxNumSDIs	= MAX_OF(NTV2DeviceGetNumVideoInputs(inDeviceID), NTV2DeviceGetNumVideoOutputs(inDeviceID));
+
+	if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(inTCIndex)  &&  !NTV2DeviceCanDoVITC2(inDeviceID))
+		return false;	//	Can't do VITC2
+
 	switch (inTCIndex)
 	{
 		case NTV2_TCINDEX_DEFAULT:		return true;	//	All devices support this index
