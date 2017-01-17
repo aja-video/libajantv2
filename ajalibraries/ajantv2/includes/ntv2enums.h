@@ -51,7 +51,7 @@
 	@details	The device driver runs at the kernel level and handles low-level communication with the device. It is a required component
 				of the SDK and provides the user-space library with the means to communicate and control the device.
 
-				The "ajantv2" library (formerly 'classes.lib') is the principal user-space library that
+				The "ajantv2" library ('libajantv2.lib' on Windows, or 'libajantv2.a' on Linux and MacOS) is the principal user-space library that
 				an application must link with in order to access and control AJA devices. It implements a suite of C++ classes which an
 				application can instantiate and use to perform various operations on an AJA device. This library contains many functions that
 				are useful for interrogating and controlling AJA devices.

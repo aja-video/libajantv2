@@ -263,32 +263,32 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 @subsection		gs-macsdkbuild	Building the Libraries --- MacOS
 
 On MacOS, the device driver is normally provided from the AJA Software installer, while the libraries are provided pre-built in the <tt>sdk/lib</tt> folder.
-The NTV2 "classes" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
+The NTV2 "ajantv2" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Xcode</b> and open the <b>classes.xcodeproj</b> project file that's inside the <tt>sdk/ntv2projects/classes</tt> folder.
 -#	Select the <b>libclasses</b> or <b>BuildAll</b> targets as the current target.
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
-Look for the new <b>classesd.a</b> library in the <tt>sdk/lib</tt> folder.
-@note	The "classes" library included in the SDK is built to link with the traditional, non-C++11 standard library.
-		If your application uses C++11, you must rebuild the "classes" library to reference the LLVM C++11 standard library:
+Look for the new <b>libajantv2d.a</b> library in the <tt>sdk/lib</tt> folder.
+@note	The "ajantv2" library included in the SDK is built to link with the traditional, non-C++11 standard library.
+		If your application uses C++11, you must rebuild the "ajantv2" library to reference the LLVM C++11 standard library:
 		\code{.sh}
-		$ xcrun xcodebuild -project ntv2projects/classes/classes.xcodeproj  -target libclasses  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
 		\endcode
 		If you also use the "ajabase" library (e.g., for the demo apps), you'll need to rebuild the "ajabase" library as well:
 		\code{.sh}
-		$ xcrun xcodebuild -project ajaapi/ajabase/build/ajabase.xcodeproj  -target ajabase  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
 		\endcode
 		If you use the "ajaanc" and/or "ajacc" libraries, AJA supplies libc++-compatible versions of these libraries in the "libc++11" folder inside the "lib" folder.
 
 @subsection		gs-winsdkbuild	Building the Libraries --- Windows
 
-On Windows, the device driver is normally installed from the provided <tt>.msi</tt>, and the libraries are provided pre-built in the <tt>APIandSamples\\lib</tt> folder.
-However, the NTV2 "classes" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
+On Windows, the device driver is normally installed from the provided \c .msi, and the libraries are provided pre-built in the \c sdk\\lib folder.
+However, the NTV2 "ajantv2" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Visual Studio</b> and do one of the following:
-	-	open the <b>ntv2_vs12.sln</b> solution file that's inside the <tt>APIandSamples\\ntv2projects\\winworkspace</tt> folder, or...
-	-	drag one of <b>classesDLL_vs12.vcxproj</b> or <b>classesSTATIC_vs12.vcxproj</b> project files into your own solution
+	-	open the <b>ntv2_vs12.sln</b> solution file that's inside the \c sdk\\ajalibraries\\ajantv2\\build folder, or...
+	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs12.vcxproj</b> project files into your own solution
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
--#	Build the <b>classes</b> library.
-Look for the <b>.DLL</b> in <tt>APIandSamples\\bin</tt>, or the <b>.LIB</b> in <tt>APIandSamples\\lib</tt>.
+-#	Build the <b>ajantv2</b> library.
+Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
 
 @subsection		gs-qtbuild	Building the Libraries --- Qt Creator
 

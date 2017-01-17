@@ -24,7 +24,7 @@ directly to the MB86M31 real time encoder has been added to the AJA NTV2 Linux a
 both a standard AJA NTV2 device and the \ref corvidhevc equipped with an MB86M31 real time encoder using custom APIs defined in
 the user level side of the SDK.
 
-The "classes" library is the principal user-space library that an application must link with in order to access and control
+The "ajantv2" library is the principal user-space library that an application must link with in order to access and control
 AJA devices. In this class we also provide a set of API's to access and control the \ref corvidhevc equipped with an MB86M31
 real time encoder.  It implements a suite of C++ classes which an OEM application can instantiate and use to perform various
 operations on the AJA device and the MB86M31. 
@@ -274,7 +274,7 @@ The interface is identical to CNTV2Card::ReadRegister and CNTV2Card::WriteRegist
 @subsection	hevcimpl-init	Initialize
 
 In order to configure and use the MB86M31 encoder, it must first be placed into the "init" state.
-One way to do this is to use the CNTV2m31 helper class, which is defined in <tt>ntv2m31.cpp</tt> and is part of the "classes" library.
+One way to do this is to use the CNTV2m31 helper class, which is defined in \c ntv2m31.cpp and is part of the "ajantv2" library.
 The code to perform this initialization might look something like this:
 
 \code{.cpp}
