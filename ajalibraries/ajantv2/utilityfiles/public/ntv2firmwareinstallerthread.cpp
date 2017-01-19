@@ -56,7 +56,7 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 	CNTV2MCSfile	mcsFile;
 
 	outReason.clear ();
-	if (device.IsOpen ())
+	if (device.IsOpen () && device.IsDeviceReady())
 	{
 		if (firmwarePath.find(".mcs") != std::string::npos)
 		{
