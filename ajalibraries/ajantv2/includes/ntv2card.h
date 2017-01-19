@@ -1342,7 +1342,7 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		For the given NTV2Channel, specifies the byte offset in the device's output audio buffer
+		@brief		For the given audio system, specifies the byte offset in the device's output audio buffer
 					where its audio embedder will fetch the next 128-byte audio sample. This essentially moves
 					the "play head" for audio output.
 		@param[in]	inValue		Specifies the new byte offset into the device's output audio buffer.
@@ -1352,7 +1352,7 @@ public:
 	AJA_VIRTUAL bool	WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		For the given NTV2Channel, answers with the byte offset of the last 128-byte audio sample
+		@brief		For the given audio system, answers with the byte offset of the last 128-byte audio sample
 					read by the device's output audio embedder. This is essentially the position of the "play
 					"head" during audio output.
 		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample read by the device's output audio
@@ -1364,7 +1364,7 @@ public:
 	AJA_VIRTUAL bool	ReadAudioLastOut (ULWord * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? ReadAudioLastOut (*pOutValue, inChannel) : false;}
 
 	/**
-		@brief		For the given NTV2Channel, answers with the byte offset of the last 128-byte audio sample
+		@brief		For the given audio system, answers with the byte offset of the last 128-byte audio sample
 					written by the device's input audio de-embedder. This is essentially the position of the
 					"write head" during audio capture.
 		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample written by the device's input audio
