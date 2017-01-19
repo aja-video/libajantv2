@@ -178,6 +178,10 @@ class RegisterExpert
 			DefineRegister (kRegAud6SourceSelect,	"",	mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel6,	kRegClass_NULL);
 			DefineRegister (kRegAud7SourceSelect,	"",	mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel7,	kRegClass_NULL);
 			DefineRegister (kRegAud8SourceSelect,	"",	mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel8,	kRegClass_NULL);
+			DefineRegister (kRegPCMControl4321,		"",	mDecodePCMControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegister (kRegPCMControl8765,		"",	mDecodePCMControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel5,	kRegClass_Channel6);
+			DefineRegClass (kRegPCMControl4321, kRegClass_Channel3);	DefineRegClass (kRegPCMControl4321, kRegClass_Channel4);
+			DefineRegClass (kRegPCMControl8765, kRegClass_Channel7);	DefineRegClass (kRegPCMControl8765, kRegClass_Channel8);
 
 			//	VidProc/Mixer/Keyer
 			DefineRegister	(kRegVidProc1Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
@@ -1107,7 +1111,6 @@ public:
 		{
 			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 			{
-				(void) inRegNum;
 				(void) inDeviceID;
 				ostringstream	oss;
 				switch (inRegNum)
@@ -1181,6 +1184,33 @@ public:
 				return oss.str();
 			}
 		}	mDecodeAudSourceSelectReg;
+
+		struct DecodePCMControlReg : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inDeviceID;
+				ostringstream	oss;
+				const UWord		startAudioSystem (inRegNum == kRegPCMControl4321  ?  1  :  5);
+				for (uint8_t audChan (0);  audChan < 4;  audChan++)
+				{
+					oss << "Audio System " << (startAudioSystem + audChan) << ": ";
+					const uint8_t	pcmBits	(uint32_t(inRegValue >> (audChan * 8)) & 0x000000FF);
+					if (pcmBits == 0x00)
+						oss << "normal";
+					else
+					{
+						oss << "non-PCM channels";
+						for (uint8_t chanPair (0);  chanPair < 8;  chanPair++)
+							if (pcmBits & (0x01 << chanPair))
+								oss << "  " << (chanPair*2+1) << "-" << (chanPair*2+2);
+					}
+					if (audChan < 3)
+						oss << endl;
+				}
+				return oss.str();
+			}
+		}	mDecodePCMControlReg;
 
 		struct DecodeAncExtControlReg : public Decoder
 		{
