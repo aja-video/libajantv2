@@ -1041,27 +1041,38 @@ bool CNTV2Card::GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const N
 
 bool CNTV2Card::GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outNonPCMChannelPairs)
 {
+	ULWord	numAudioChannels	(0);
+	bool	isNonPCM			(false);
+
 	outNonPCMChannelPairs.clear ();
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
-		return false;
-	if (!::NTV2DeviceCanDoPCMControl (_boardID))
+		return false;	//	invalid audio system #
+	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;	//	no such audio system on this device
+	if (!GetNumberAudioChannels (numAudioChannels, inAudioSystem))
+		return false;	//	fail
+
+	const NTV2AudioChannelPair	maxPair	(NTV2AudioChannelPair(numAudioChannels/2));
+	if (!GetAudioPCMControl (inAudioSystem, isNonPCM))
+		return false;	//	fail
+
+	if (isNonPCM)	//	this global mode overrides per-channel PCM control
 	{
-		bool	isNonPCM	(false);
-		if (!GetAudioPCMControl (inAudioSystem, isNonPCM))
-			return false;
-		if (isNonPCM)
-			for (unsigned chPair (0);  NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16 (chPair);  chPair++)
-				outNonPCMChannelPairs.insert (NTV2AudioChannelPair (chPair));
-		return true;
+		for (UWord chPair (0);  chPair <= maxPair;  chPair++)
+			outNonPCMChannelPairs.insert (NTV2AudioChannelPair (chPair));
+		return true;	//	done
 	}
 
-	ULWord		regVal	(0);
-	const bool	result	(ReadRegister (inAudioSystem < NTV2_AUDIOSYSTEM_5 ? kRegPCMControl4321 : kRegPCMControl8765, &regVal));
-	if (result)
+	if (::NTV2DeviceCanDoPCMControl(_boardID))
+	{
+		ULWord	regVal	(0);
+		if (!ReadRegister (inAudioSystem < NTV2_AUDIOSYSTEM_5 ? kRegPCMControl4321 : kRegPCMControl8765, &regVal))
+			return false;
 		for (NTV2AudioChannelPair chanPair (NTV2_AudioChannel1_2);  NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16 (chanPair);  chanPair = NTV2AudioChannelPair (chanPair + 1))
 			if (regVal & BIT(inAudioSystem * 8 + chanPair))
 				outNonPCMChannelPairs.insert (chanPair);
-	return result;
+	}
+	return true;
 }
 
 
