@@ -353,9 +353,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	mEveryFrameTaskFilter	= everyFrameTaskFilter;
 
 	//	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
-	uint32_t	clock	(0);
-	mCard->ReadRegister(kRegAud1Counter, &clock);
-	mCard->WriteRegister(kVRegAgentCheck, clock);
+	uint32_t	count	(0);
+	mCard->ReadRegister(kVRegAgentCheck, &count);
+	count++;
+	mCard->WriteRegister(kVRegAgentCheck, count);
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
