@@ -1,25 +1,25 @@
 //
-//  ntv2konaip22services.h
+//  ntv2konaipj2kservices.h
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
 //
 
-#ifndef _KonaIP22Services_
-#define _KonaIP22Services_
+#ifndef _KonaIPJ2kServices_
+#define _KonaIPJ2kServices_
 
 
 #include "ntv2deviceservices.h"
 #include "ntv2config2022.h"
 
 //-------------------------------------------------------------------------------------------------------
-//	class KonaIP22Services
+//	class KonaIPJ2kServices
 //-------------------------------------------------------------------------------------------------------
-class KonaIP22Services : public DeviceServices
+class KonaIPJ2kServices : public DeviceServices
 {
 	
 public:
-    KonaIP22Services();
-    ~KonaIP22Services();
+    KonaIPJ2kServices();
+    ~KonaIPJ2kServices();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);

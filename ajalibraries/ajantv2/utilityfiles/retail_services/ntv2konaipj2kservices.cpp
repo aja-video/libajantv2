@@ -1,10 +1,10 @@
 //
-//  ntv2konaip22services.cpp
+//  ntv2konaipj2kservices.cpp
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
 //
 
-#include "ntv2konaip22services.h"
+#include "ntv2konaipj2kservices.h"
 #if defined (AJALinux) || defined (AJAMac)
 	#include <stdlib.h>
 	#include <sys/socket.h>
@@ -16,15 +16,15 @@ using namespace std;
 
 
 //-------------------------------------------------------------------------------------------------------
-//	class KonaIP22Services
+//	class KonaIPJ2kServices
 //-------------------------------------------------------------------------------------------------------
 
-KonaIP22Services::KonaIP22Services()
+KonaIPJ2kServices::KonaIPJ2kServices()
 {
    target = NULL;
 }
 
- KonaIP22Services::~KonaIP22Services()
+ KonaIPJ2kServices::~KonaIPJ2kServices()
  {
      if (target)
      {
@@ -36,7 +36,7 @@ KonaIP22Services::KonaIP22Services()
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
 //-------------------------------------------------------------------------------------------------------
-void KonaIP22Services::UpdateAutoState (void)
+void KonaIPJ2kServices::UpdateAutoState (void)
 {
 	// auto mode from transport
 	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
@@ -53,7 +53,7 @@ void KonaIP22Services::UpdateAutoState (void)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
@@ -1382,7 +1382,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
@@ -2415,6 +2415,7 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	}
 }
 
+#if 0
 //-------------------------------------------------------------------------------------------------------
 //	some operators
 //-------------------------------------------------------------------------------------------------------
@@ -2433,11 +2434,12 @@ bool operator != (const MACAddr & lhs, const MACAddr & rhs)
 {
     return !(lhs == rhs);
 }
+#endif
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
+void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 {
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters(mode);
@@ -3245,8 +3247,10 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
 
-
-void  KonaIP22Services::setNetConfig(eSFP  port)
+//-------------------------------------------------------------------------------------------------------
+//	Support Routines
+//-------------------------------------------------------------------------------------------------------
+void  KonaIPJ2kServices::setNetConfig(eSFP  port)
 {
     printf("set NetConfig port=%d\n",(int)port);
 
@@ -3276,7 +3280,7 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
     target->SetNetworkConfiguration(port,ip,sub,gate);
 }
 
-void   KonaIP22Services::setRxConfig(NTV2Channel channel)
+void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 {
     printf("set RxConfig chn=%d\n",(int)channel);
     
@@ -3344,7 +3348,7 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
     target->SetRxChannelEnable(channel,enable,m2022_7Mode);
 }
 
-void  KonaIP22Services::setTxConfig(NTV2Channel channel)
+void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 {
     printf("set TxConfig chn=%d\n",(int)channel);
     tx_2022_channel chan;
@@ -3419,7 +3423,7 @@ void  KonaIP22Services::setTxConfig(NTV2Channel channel)
     target->SetTxChannelEnable(channel,enable,m2022_7Mode);
 }
 
-bool  KonaIP22Services::notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
 {
     uint32_t addr;
     
@@ -3436,7 +3440,7 @@ bool  KonaIP22Services::notEqualPrimary(const rx_2022_channel & hw_channel, cons
     return false;
 }
 
-bool  KonaIP22Services::notEqualSecondary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqualSecondary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
 {
     uint32_t addr;
     
@@ -3454,7 +3458,7 @@ bool  KonaIP22Services::notEqualSecondary(const rx_2022_channel & hw_channel, co
 }
 
 
-bool  KonaIP22Services::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
     uint32_t addr;
     if (virtual_config.txc_primaryLocalPort    != hw_channel.primaryLocalPort)  return true;
@@ -3474,7 +3478,7 @@ bool  KonaIP22Services::notEqualPrimary(const tx_2022_channel & hw_channel, cons
     return false;
 }
 
-bool  KonaIP22Services::notEqualSecondary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqualSecondary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
     uint32_t addr;
     if (virtual_config.txc_secondaryLocalPort    != hw_channel.secondaryLocalPort)  return true;
@@ -3495,7 +3499,7 @@ bool  KonaIP22Services::notEqualSecondary(const tx_2022_channel & hw_channel, co
 }
 
 
-bool  KonaIP22Services::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr)
+bool  KonaIPJ2kServices::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr)
 {
     if (macaddr.mac[0]   != ((hi >> 8 ) & 0xff)) return true;
     if (macaddr.mac[1]   != ( hi        & 0xff)) return true;

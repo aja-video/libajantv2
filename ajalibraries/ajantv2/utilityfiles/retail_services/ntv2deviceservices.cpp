@@ -45,7 +45,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
-        case DEVICE_ID_KONAIP_2IN_2OUT:
+        case DEVICE_ID_KONAIP_4CH_1SFP:
             pDeviceServices = new KonaIP22Services();
             break;
         case DEVICE_ID_KONA4:
