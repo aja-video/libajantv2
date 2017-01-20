@@ -23,6 +23,7 @@
 #include "ntv2kona4quadservices.h"
 #include "ntv2kona4ufcservices.h"
 #include "ntv2konaip22services.h"
+#include "ntv2konaipj2kservices.h"
 #include "ntv2vpidfromspec.h"
 
 //#define CORVID88_SUPPORT
@@ -48,6 +49,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
         case DEVICE_ID_KONAIP_4CH_1SFP:
             pDeviceServices = new KonaIP22Services();
             break;
+		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+			pDeviceServices = new KonaIPJ2kServices();
+			break;
         case DEVICE_ID_KONA4:
             pDeviceServices = new Kona4QuadServices();
 			break;
