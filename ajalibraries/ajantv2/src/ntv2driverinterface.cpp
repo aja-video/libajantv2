@@ -472,31 +472,32 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 			bitFileInfo.bitFileType = 0;
 			switch (_boardID)
 			{
-				case DEVICE_ID_CORVID1:		bitFileInfo.bitFileType = NTV2_BITFILE_CORVID1_MAIN;	break;
-				case DEVICE_ID_CORVID22:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVID22_MAIN;	break;
-				case DEVICE_ID_CORVID24:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVID24_MAIN;	break;
-				case DEVICE_ID_CORVID3G:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVID3G_MAIN;	break;
-				case DEVICE_ID_CORVID44:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44;		break;
-				case DEVICE_ID_CORVID88:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVID88;		break;
-				case DEVICE_ID_CORVIDHEVC:	bitFileInfo.bitFileType = NTV2_BITFILE_CORVIDHEVC;		break;
-				case DEVICE_ID_IO4K:		bitFileInfo.bitFileType = NTV2_BITFILE_IO4K_MAIN;		break;
-				case DEVICE_ID_IO4KUFC:		bitFileInfo.bitFileType = NTV2_BITFILE_IO4KUFC_MAIN;	break;
-				case DEVICE_ID_IOEXPRESS:	bitFileInfo.bitFileType = NTV2_BITFILE_IOEXPRESS_MAIN;	break;
-				case DEVICE_ID_IOXT:		bitFileInfo.bitFileType = NTV2_BITFILE_IOXT_MAIN;		break;
-				case DEVICE_ID_KONA3G:		bitFileInfo.bitFileType = NTV2_BITFILE_KONA3G_MAIN;		break;
-				case DEVICE_ID_KONA3GQUAD:	bitFileInfo.bitFileType = NTV2_BITFILE_KONA3G_QUAD;		break;
-				case DEVICE_ID_KONA4:		bitFileInfo.bitFileType = NTV2_BITFILE_KONA4_MAIN;		break;
-				case DEVICE_ID_KONA4UFC:	bitFileInfo.bitFileType = NTV2_BITFILE_KONA4UFC_MAIN;	break;
-				case DEVICE_ID_KONALHEPLUS:	bitFileInfo.bitFileType = NTV2_BITFILE_KONALHE_PLUS;	break;
-				case DEVICE_ID_KONALHI:		bitFileInfo.bitFileType = NTV2_BITFILE_LHI_MAIN;		break;
-				case DEVICE_ID_TTAP:		bitFileInfo.bitFileType = NTV2_BITFILE_TTAP_MAIN;		break;
+				case DEVICE_ID_CORVID1:						bitFileInfo.bitFileType = NTV2_BITFILE_CORVID1_MAIN;				break;
+				case DEVICE_ID_CORVID22:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID22_MAIN;				break;
+				case DEVICE_ID_CORVID24:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID24_MAIN;				break;
+				case DEVICE_ID_CORVID3G:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID3G_MAIN;				break;
+				case DEVICE_ID_CORVID44:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44;					break;
+				case DEVICE_ID_CORVID88:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID88;					break;
+				case DEVICE_ID_CORVIDHEVC:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVIDHEVC;					break;
+				case DEVICE_ID_IO4K:						bitFileInfo.bitFileType = NTV2_BITFILE_IO4K_MAIN;					break;
+				case DEVICE_ID_IO4KUFC:						bitFileInfo.bitFileType = NTV2_BITFILE_IO4KUFC_MAIN;				break;
+				case DEVICE_ID_IOEXPRESS:					bitFileInfo.bitFileType = NTV2_BITFILE_IOEXPRESS_MAIN;				break;
+				case DEVICE_ID_IOXT:						bitFileInfo.bitFileType = NTV2_BITFILE_IOXT_MAIN;					break;
+				case DEVICE_ID_KONA3G:						bitFileInfo.bitFileType = NTV2_BITFILE_KONA3G_MAIN;					break;
+				case DEVICE_ID_KONA3GQUAD:					bitFileInfo.bitFileType = NTV2_BITFILE_KONA3G_QUAD;					break;
+				case DEVICE_ID_KONA4:						bitFileInfo.bitFileType = NTV2_BITFILE_KONA4_MAIN;					break;
+				case DEVICE_ID_KONA4UFC:					bitFileInfo.bitFileType = NTV2_BITFILE_KONA4UFC_MAIN;				break;
+				case DEVICE_ID_KONALHEPLUS:					bitFileInfo.bitFileType = NTV2_BITFILE_KONALHE_PLUS;				break;
+				case DEVICE_ID_KONALHI:						bitFileInfo.bitFileType = NTV2_BITFILE_LHI_MAIN;					break;
+				case DEVICE_ID_TTAP:						bitFileInfo.bitFileType = NTV2_BITFILE_TTAP_MAIN;					break;
 
-				case DEVICE_ID_KONALHIDVI:	bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;	break;
-				case DEVICE_ID_KONAIP_4CH_1SFP:	bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_1SFP;       break;
-				case DEVICE_ID_KONAIP_4CH_2SFP:	bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_2SFP;	break;
-				case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_1SFP_J2K;       break;
-				case DEVICE_ID_CORVIDHBR:	bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;	break;
-				case DEVICE_ID_NOTFOUND:	bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;	break;
+				case DEVICE_ID_KONALHIDVI:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
+				case DEVICE_ID_KONAIP_4CH_1SFP:				bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_1SFP;				break;
+				case DEVICE_ID_KONAIP_4CH_2SFP:				bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_2SFP;				break;
+				case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1IN_1OUT_1SFP_J2K;	break;
+				case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:		bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2OUT_1SFP_J2K;		break;
+				case DEVICE_ID_CORVIDHBR:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
+				case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 			#if !defined (_DEBUG)
 				default:					break;
 			#endif
@@ -769,7 +770,8 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 		return true;
 	default:
 		return false;

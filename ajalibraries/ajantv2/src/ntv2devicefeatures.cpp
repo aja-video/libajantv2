@@ -257,7 +257,8 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 	case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
 		switch (inStandard)
 		{
@@ -303,7 +304,8 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 			return true;
 		default:
 			return false;
@@ -326,7 +328,8 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 			return true;
 		default:
 			return false;
@@ -347,7 +350,8 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 			return true;
 		default:
 			return false;
@@ -416,7 +420,8 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
         case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
             return true;
 		default:
 			return false;
@@ -438,7 +443,8 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
         case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
             return true;
 		default:
 			return false;
@@ -457,7 +463,8 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
         case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
             return true;
 		default:
 			return false;
@@ -517,7 +524,8 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
@@ -577,7 +585,8 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -675,7 +684,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -731,7 +741,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
     case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_KONAIP_4CH_1SFP:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_4CH_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
         switch (inFrameGeometry)
 		{

@@ -3859,7 +3859,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVIDHEVC:  return inForRetailDisplay ?	"Corvid HEVC"			: "CorvidHEVC";
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return inForRetailDisplay ? "KONA IP 4CH 1SFP"	: "KonaIP4Ch1SFP";
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return inForRetailDisplay ? "KONA IP 4CH 2SFP"	: "KonaIP4Ch2SFP";
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 4CH 1SFP J2K" : "KonaIP4Ch1SFPJ2K";
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1IN 1OUT 1SFP J2K" : "KonaIP1In1Out1SFPJ2K";
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2OUT 1SFP J2K" : "KonaIP2Out1SFPJ2K";
 
 		case DEVICE_ID_CORVIDHBR:	return inForRetailDisplay ? "Corvid HB-R"			: "CorvidHBR";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
@@ -7110,29 +7111,30 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	#if defined (MSWindows)
 		switch (inBoardID)
 		{
-			case DEVICE_ID_NOTFOUND:	break;
-			case DEVICE_ID_CORVID1:		return "corvid1_pcie.bit";
-			case DEVICE_ID_CORVID22:	return "corvid22_pcie.bit";
-			case DEVICE_ID_CORVID24:	return "corvid24_pcie.bit";
-			case DEVICE_ID_CORVID3G:	return "corvid3G_pcie.bit";
-			case DEVICE_ID_CORVID44:	return "corvid_44_pcie.bit";
-			case DEVICE_ID_CORVID88:	return "corvid_88_pcie.bit";
-			case DEVICE_ID_CORVIDHEVC:  return "corvid_hevc.bit";
-			case DEVICE_ID_IO4K:		return "io4k_pcie.bit";
-			case DEVICE_ID_IO4KUFC:		return "io4k_ufc_pcie.bit";
-			case DEVICE_ID_IOEXPRESS:	return "ioexpress_pcie.bit";
-			case DEVICE_ID_IOXT:		return "ioxt_pcie.bit";
-			case DEVICE_ID_KONA3G:		return "kona3g_pcie.bit";
-			case DEVICE_ID_KONA3GQUAD:	return "kona3g_quad_pcie.bit";
-			case DEVICE_ID_KONA4:		return "kona4_pcie.bit";
-			case DEVICE_ID_KONA4UFC:	return "kona4_ufc_pcie.bit";
-			case DEVICE_ID_KONAIP_4CH_1SFP:	return "s2022_56_4ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_4CH_2SFP:	return "s2022_56_2p2ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	return "s2022_56_4ch_rxtx_j2k.mcs";
-			case DEVICE_ID_LHE_PLUS:	return "lheplus_pcie.bit";
-			case DEVICE_ID_LHI:			return "lhi_pcie.bit";
-			case DEVICE_ID_TTAP:		return "ttap_pcie.bit";
-			default:					return "";
+			case DEVICE_ID_NOTFOUND:					break;
+			case DEVICE_ID_CORVID1:						return "corvid1_pcie.bit";
+			case DEVICE_ID_CORVID22:					return "corvid22_pcie.bit";
+			case DEVICE_ID_CORVID24:					return "corvid24_pcie.bit";
+			case DEVICE_ID_CORVID3G:					return "corvid3G_pcie.bit";
+			case DEVICE_ID_CORVID44:					return "corvid_44_pcie.bit";
+			case DEVICE_ID_CORVID88:					return "corvid_88_pcie.bit";
+			case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc.bit";
+			case DEVICE_ID_IO4K:						return "io4k_pcie.bit";
+			case DEVICE_ID_IO4KUFC:						return "io4k_ufc_pcie.bit";
+			case DEVICE_ID_IOEXPRESS:					return "ioexpress_pcie.bit";
+			case DEVICE_ID_IOXT:						return "ioxt_pcie.bit";
+			case DEVICE_ID_KONA3G:						return "kona3g_pcie.bit";
+			case DEVICE_ID_KONA3GQUAD:					return "kona3g_quad_pcie.bit";
+			case DEVICE_ID_KONA4:						return "kona4_pcie.bit";
+			case DEVICE_ID_KONA4UFC:					return "kona4_ufc_pcie.bit";
+			case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx.mcs";
+			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
+			case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	return "s2022_12_1rx_1tx.mcs";
+			case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:		return "s2022_12_2ch_tx.mcs";
+			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
+			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
+			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
+			default:									return "";
 		}
 	#else
 		switch (inBoardID)
@@ -7184,29 +7186,30 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case BOARD_ID_LHI_DVI:
 			case BOARD_ID_LHI_T:
 		#endif	//	!defined (NTV2_DEPRECATE)
-			case DEVICE_ID_NOTFOUND:	break;
-			case DEVICE_ID_CORVID1:		return "corvid1pcie.bit";
-			case DEVICE_ID_CORVID22:	return "Corvid22.bit";
-			case DEVICE_ID_CORVID24:	return "corvid24_quad.bit";
-			case DEVICE_ID_CORVID3G:	return "corvid1_3gpcie.bit";
-			case DEVICE_ID_CORVID44:	return "corvid_44.bit";
-			case DEVICE_ID_CORVID88:	return "corvid_88.bit";
-			case DEVICE_ID_CORVIDHEVC:  return "corvid_hevc.bit";
-			case DEVICE_ID_IO4K:		return "IO_XT_4K.bit";
-			case DEVICE_ID_IO4KUFC:		return "IO_XT_4K_UFC.bit";
-			case DEVICE_ID_IOEXPRESS:	return "chekov_00_pcie.bit";
-			case DEVICE_ID_IOXT:		return "top_io_tx.bit";
-			case DEVICE_ID_KONA3G:		return "k3g_top.bit";
-			case DEVICE_ID_KONA3GQUAD:	return "k3g_quad.bit";
-			case DEVICE_ID_KONA4:		return "kona_4_quad.bit";
-			case DEVICE_ID_KONA4UFC:	return "kona_4_ufc.bit";
-			case DEVICE_ID_KONAIP_4CH_1SFP:	return "s2022_56_4ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_4CH_2SFP:	return "s2022_56_2p2ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	return "s2022_56_4ch_rxtx_j2k.mcs";
-			case DEVICE_ID_LHE_PLUS:	return "lhe_12_pcie.bit";
-			case DEVICE_ID_LHI:			return "top_pike.bit";
-			case DEVICE_ID_TTAP:		return "t_tap_top.bit";
-			default:					return "";
+			case DEVICE_ID_NOTFOUND:					break;
+			case DEVICE_ID_CORVID1:						return "corvid1pcie.bit";
+			case DEVICE_ID_CORVID22:					return "Corvid22.bit";
+			case DEVICE_ID_CORVID24:					return "corvid24_quad.bit";
+			case DEVICE_ID_CORVID3G:					return "corvid1_3gpcie.bit";
+			case DEVICE_ID_CORVID44:					return "corvid_44.bit";
+			case DEVICE_ID_CORVID88:					return "corvid_88.bit";
+			case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc.bit";
+			case DEVICE_ID_IO4K:						return "IO_XT_4K.bit";
+			case DEVICE_ID_IO4KUFC:						return "IO_XT_4K_UFC.bit";
+			case DEVICE_ID_IOEXPRESS:					return "chekov_00_pcie.bit";
+			case DEVICE_ID_IOXT:						return "top_io_tx.bit";
+			case DEVICE_ID_KONA3G:						return "k3g_top.bit";
+			case DEVICE_ID_KONA3GQUAD:					return "k3g_quad.bit";
+			case DEVICE_ID_KONA4:						return "kona_4_quad.bit";
+			case DEVICE_ID_KONA4UFC:					return "kona_4_ufc.bit";
+			case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx.mcs";
+			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
+			case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	return "s2022_12_1rx_1tx.mcs";
+			case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:		return "s2022_12_2ch_tx.mcs";
+			case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie.bit";
+			case DEVICE_ID_LHI:							return "top_pike.bit";
+			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
+			default:									return "";
 		}
 	#endif	//	else not MSWindows
 	return "";
@@ -7294,7 +7297,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONA4UFC,
 														DEVICE_ID_KONAIP_4CH_1SFP,
 														DEVICE_ID_KONAIP_4CH_2SFP,
-														DEVICE_ID_KONAIP_4CH_1SFP_J2K,
+														DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K,
+														DEVICE_ID_KONAIP_2OUT_1SFP_J2K,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,

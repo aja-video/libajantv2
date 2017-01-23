@@ -74,33 +74,34 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		case BOARD_ID_FORGE:			break;
 
 		//case BOARD_ID_KONA3:
-        case BOARD_ID_XENA2:                return "BOARD_ID_KONA3";                    break;
-        case BOARD_ID_LHI_T:                return "BOARD_ID_LHI_T";                    break;
+        case BOARD_ID_XENA2:						return "BOARD_ID_KONA3";						break;
+        case BOARD_ID_LHI_T:						return "BOARD_ID_LHI_T";						break;
 	#endif	//	!defined (NTV2_DEPRECATE)
-        case DEVICE_ID_KONALHI:             return "DEVICE_ID_KONALHI";                 break;
-        case DEVICE_ID_KONALHIDVI:          return "DEVICE_ID_KONALHIDVI";              break;
-        case DEVICE_ID_IOEXPRESS:           return "DEVICE_ID_IOEXPRESS";               break;
-        case DEVICE_ID_CORVID1:             return "DEVICE_ID_CORVID1";                 break;
-        case DEVICE_ID_CORVID22:            return "DEVICE_ID_CORVID22";                break;
-        case DEVICE_ID_CORVID3G:            return "DEVICE_ID_CORVID3G";                break;
-        case DEVICE_ID_KONA3G:              return "DEVICE_ID_KONA3G";                  break;
-        case DEVICE_ID_KONA3GQUAD:          return "DEVICE_ID_KONA3GQUAD";              break;
-        case DEVICE_ID_KONALHEPLUS:         return "DEVICE_ID_KONALHEPLUS";             break;
-        case DEVICE_ID_IOXT:                return "DEVICE_ID_IOXT";                    break;
-        case DEVICE_ID_CORVID24:            return "DEVICE_ID_CORVID24";                break;
-        case DEVICE_ID_TTAP:                return "DEVICE_ID_TTAP";                    break;
-        case DEVICE_ID_IO4K:                return "DEVICE_ID_IO4K";                    break;
-        case DEVICE_ID_IO4KUFC:             return "DEVICE_ID_IO4KUFC";                 break;
-        case DEVICE_ID_KONA4:               return "DEVICE_ID_KONA4";                   break;
-        case DEVICE_ID_KONA4UFC:            return "DEVICE_ID_KONA4UFC";                break;
-        case DEVICE_ID_CORVID88:            return "DEVICE_ID_CORVID88";                break;
-        case DEVICE_ID_CORVID44:            return "DEVICE_ID_CORVID44";                break;
-        case DEVICE_ID_CORVIDHEVC:          return "DEVICE_ID_CORVIDHEVC";              break;
-        case DEVICE_ID_CORVIDHBR:           return "DEVICE_ID_CORVIDHBR";               break;
-        case DEVICE_ID_KONAIP_4CH_1SFP:     return "DEVICE_ID_KONAIP_4CH_1SFP";         break;
-        case DEVICE_ID_KONAIP_4CH_2SFP:     return "DEVICE_ID_KONAIP_4CH_2SFP";         break;
-        case DEVICE_ID_KONAIP_4CH_1SFP_J2K: return "DEVICE_ID_KONAIP_4CH_1SFP_J2K";     break;
-        case DEVICE_ID_NOTFOUND:            return "DEVICE_ID_NOTFOUND";                break;
+        case DEVICE_ID_KONALHI:						return "DEVICE_ID_KONALHI";						break;
+        case DEVICE_ID_KONALHIDVI:					return "DEVICE_ID_KONALHIDVI";					break;
+        case DEVICE_ID_IOEXPRESS:					return "DEVICE_ID_IOEXPRESS";					break;
+        case DEVICE_ID_CORVID1:						return "DEVICE_ID_CORVID1";						break;
+        case DEVICE_ID_CORVID22:					return "DEVICE_ID_CORVID22";					break;
+        case DEVICE_ID_CORVID3G:					return "DEVICE_ID_CORVID3G";					break;
+        case DEVICE_ID_KONA3G:						return "DEVICE_ID_KONA3G";						break;
+        case DEVICE_ID_KONA3GQUAD:					return "DEVICE_ID_KONA3GQUAD";					break;
+        case DEVICE_ID_KONALHEPLUS:					return "DEVICE_ID_KONALHEPLUS";					break;
+        case DEVICE_ID_IOXT:						return "DEVICE_ID_IOXT";						break;
+        case DEVICE_ID_CORVID24:					return "DEVICE_ID_CORVID24";					break;
+        case DEVICE_ID_TTAP:						return "DEVICE_ID_TTAP";						break;
+        case DEVICE_ID_IO4K:						return "DEVICE_ID_IO4K";						break;
+        case DEVICE_ID_IO4KUFC:						return "DEVICE_ID_IO4KUFC";						break;
+        case DEVICE_ID_KONA4:						return "DEVICE_ID_KONA4";						break;
+        case DEVICE_ID_KONA4UFC:					return "DEVICE_ID_KONA4UFC";					break;
+        case DEVICE_ID_CORVID88:					return "DEVICE_ID_CORVID88";					break;
+        case DEVICE_ID_CORVID44:					return "DEVICE_ID_CORVID44";					break;
+        case DEVICE_ID_CORVIDHEVC:					return "DEVICE_ID_CORVIDHEVC";					break;
+        case DEVICE_ID_CORVIDHBR:					return "DEVICE_ID_CORVIDHBR";					break;
+        case DEVICE_ID_KONAIP_4CH_1SFP:				return "DEVICE_ID_KONAIP_4CH_1SFP";				break;
+        case DEVICE_ID_KONAIP_4CH_2SFP:				return "DEVICE_ID_KONAIP_4CH_2SFP";				break;
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	return "DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K";	break;
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:		return "DEVICE_ID_KONAIP_2OUT_1SFP_J2K";		break;
+        case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";					break;
 	}
 	return "";
 }
@@ -154,33 +155,34 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case BOARD_ID_FORGE:			break;
 
 		//case BOARD_ID_KONA3:
-		case BOARD_ID_XENA2:			return "Kona3";			break;
-		case BOARD_ID_LHI_T:			return "KonaLHiT";		break;
+		case BOARD_ID_XENA2:						return "Kona3";						break;
+		case BOARD_ID_LHI_T:						return "KonaLHiT";					break;
 	#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_KONALHI:			return "KonaLHi";		break;
-		case DEVICE_ID_KONALHIDVI:		return "KonaLHiDVI";	break;
-		case DEVICE_ID_IOEXPRESS:		return "IoExpress";		break;
-		case DEVICE_ID_CORVID1:			return "Corvid1";		break;
-		case DEVICE_ID_CORVID22:		return "Corvid22";		break;
-		case DEVICE_ID_CORVID3G:		return "Corvid3G";		break;
-		case DEVICE_ID_KONA3G:			return "Kona3G";		break;
-		case DEVICE_ID_KONA3GQUAD:		return "Kona3GQuad";	break;
-		case DEVICE_ID_KONALHEPLUS:		return "KonaLHePlus";	break;
-		case DEVICE_ID_IOXT:			return "IoXT";			break;
-		case DEVICE_ID_CORVID24:		return "Corvid24";		break;
-		case DEVICE_ID_TTAP:			return "TTap";			break;
-		case DEVICE_ID_IO4K:			return "Io4K";			break;
-		case DEVICE_ID_IO4KUFC:			return "Io4KUfc";		break;
-		case DEVICE_ID_KONA4:			return "Kona4";			break;
-		case DEVICE_ID_KONA4UFC:		return "Kona4Ufc";		break;
-		case DEVICE_ID_CORVID88:		return "Corvid88";		break;
-		case DEVICE_ID_CORVID44:		return "Corvid44";		break;
-		case DEVICE_ID_CORVIDHEVC:      return "CorvidHEVC";    break;
-		case DEVICE_ID_CORVIDHBR:		return "CorvidHBR";		break;
-		case DEVICE_ID_KONAIP_4CH_1SFP:	return "KonaIP_4ch_1sfp";		break;
-		case DEVICE_ID_KONAIP_4CH_2SFP:	return "KonaIP_4ch_2sfp";		break;
-		case DEVICE_ID_KONAIP_4CH_1SFP_J2K:	return "KonaIP_4ch_1sfp_j2k";		break;
-		case DEVICE_ID_NOTFOUND:		return "Unknown";		break;
+		case DEVICE_ID_KONALHI:						return "KonaLHi";					break;
+		case DEVICE_ID_KONALHIDVI:					return "KonaLHiDVI";				break;
+		case DEVICE_ID_IOEXPRESS:					return "IoExpress";					break;
+		case DEVICE_ID_CORVID1:						return "Corvid1";					break;
+		case DEVICE_ID_CORVID22:					return "Corvid22";					break;
+		case DEVICE_ID_CORVID3G:					return "Corvid3G";					break;
+		case DEVICE_ID_KONA3G:						return "Kona3G";					break;
+		case DEVICE_ID_KONA3GQUAD:					return "Kona3GQuad";				break;
+		case DEVICE_ID_KONALHEPLUS:					return "KonaLHePlus";				break;
+		case DEVICE_ID_IOXT:						return "IoXT";						break;
+		case DEVICE_ID_CORVID24:					return "Corvid24";					break;
+		case DEVICE_ID_TTAP:						return "TTap";						break;
+		case DEVICE_ID_IO4K:						return "Io4K";						break;
+		case DEVICE_ID_IO4KUFC:						return "Io4KUfc";					break;
+		case DEVICE_ID_KONA4:						return "Kona4";						break;
+		case DEVICE_ID_KONA4UFC:					return "Kona4Ufc";					break;
+		case DEVICE_ID_CORVID88:					return "Corvid88";					break;
+		case DEVICE_ID_CORVID44:					return "Corvid44";					break;
+		case DEVICE_ID_CORVIDHEVC:					return "CorvidHEVC";				break;
+		case DEVICE_ID_CORVIDHBR:					return "CorvidHBR";					break;
+		case DEVICE_ID_KONAIP_4CH_1SFP:				return "KonaIP_4ch_1sfp";			break;
+		case DEVICE_ID_KONAIP_4CH_2SFP:				return "KonaIP_4ch_2sfp";			break;
+		case DEVICE_ID_KONAIP_1IN_1OUT_1SFP_J2K:	return "KonaIP_1In_1Out_1sfp_j2k";	break;
+		case DEVICE_ID_KONAIP_2OUT_1SFP_J2K:		return "KonaIP_2Out_1sfp_j2k";		break;
+		case DEVICE_ID_NOTFOUND:					return "Unknown";					break;
 	}
 
 	return "";
