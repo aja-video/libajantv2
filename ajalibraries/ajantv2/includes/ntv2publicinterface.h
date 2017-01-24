@@ -1233,6 +1233,7 @@ typedef enum
 
 	// Global Control 2
 	kRegMaskRefSource2			= BIT(0),
+	kRegMaskPCRReferenceEnable	= BIT(2),
 	kRegMaskQuadMode			= BIT(3),
 	kRegMaskAud1PlayCapMode		= BIT(4),
 	kRegMaskAud2PlayCapMode		= BIT(5),
@@ -2299,6 +2300,7 @@ typedef enum
 
 	// Global Control 2
 	kRegShiftRefSource2					= 0,
+	kRegShiftPCRReferenceEnable			= 2,
 	kRegShiftQuadMode					= 3,
 	kRegShiftAud1PlayCapMode			= 4,
 	kRegShiftAud2PlayCapMode			= 5,

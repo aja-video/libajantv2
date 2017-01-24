@@ -7013,8 +7013,10 @@ string NTV2ReferenceSourceToString (const NTV2ReferenceSource inValue, const boo
 		case NTV2_REFERENCE_INPUT6:			return inForRetailDisplay ? "Input 6"		: "NTV2_REFERENCE_INPUT6";
 		case NTV2_REFERENCE_INPUT7:			return inForRetailDisplay ? "Input 7"		: "NTV2_REFERENCE_INPUT7";
 		case NTV2_REFERENCE_INPUT8:			return inForRetailDisplay ? "Input 8"		: "NTV2_REFERENCE_INPUT8";
-		case NTV2_REFERENCE_SFP1:			return inForRetailDisplay ? "SFP 1"			: "NTV2_REFERENCE_SFP1";
-		case NTV2_REFERENCE_SFP2:			return inForRetailDisplay ? "SFP 2"			: "NTV2_REFERENCE_SFP2";
+		case NTV2_REFERENCE_SFP1_PCR:		return inForRetailDisplay ? "SFP 1 PCR"		: "NTV2_REFERENCE_SFP1 PCR";
+		case NTV2_REFERENCE_SFP1_PTP:		return inForRetailDisplay ? "SFP 1 PTP"		: "NTV2_REFERENCE_SFP1 PTP";
+		case NTV2_REFERENCE_SFP2_PCR:		return inForRetailDisplay ? "SFP 2 PCR"		: "NTV2_REFERENCE_SFP2 PCR";
+		case NTV2_REFERENCE_SFP2_PTP:		return inForRetailDisplay ? "SFP 2 PTP"		: "NTV2_REFERENCE_SFP2 PTP";
 		case NTV2_NUM_REFERENCE_INPUTS:		break;
 	}
 	return string ();
