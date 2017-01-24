@@ -5,14 +5,17 @@
 		Generates a .hpp and corresponding .hh file that contains "device features" code from tables (CSV files).
 
 	SYNTAX:
-		ntv2devicefeatures.py   [--verbose|-v]   [--output|-o  outputFolder]  [--csv|-c  pathToCSVs]
+		ntv2devicefeatures.py   [--verbose|-v]   [--ohh  hhOutputFolder]   [-ohpp  hppOutputFolder]  [--csv|-c  pathToCSVs]
 
 	REQUIRED PARAMETERS:
 		none
 
 	OPTIONAL PARAMETERS:
-		[--output  outputFolder]	Optionally specifies folder path into which .hpp & .hh files are written.
-									If not specified, .hpp & .hh files are written into current directory.
+		[--ohh  outputFolder]		Optionally specifies folder path into which .hh file is written.
+									If not specified, .hh file is written into current directory.
+
+		[--ohpp  outputFolder]		Optionally specifies folder path into which .hpp file is written.
+									If not specified, .hpp file is written into current directory.
 
 		[--csv  folderPath]			Optionally specifies folder path to look for .csv files.
 									If not specified, looks in current directory.
@@ -34,7 +37,8 @@ def parse_args ():
     """ Parse the command line arguments """
     parser = argparse.ArgumentParser (description = "Generates device features code from tables (CSV files)")
     parser.add_argument ('-c', '--csv',				help = """path to folder in which to look for .csv files""")
-    parser.add_argument ('-o', '--output',			help = """path to folder into which .hpp & .hh files are written""")
+    parser.add_argument ('--ohh',					help = """path to folder into which .hh file is written""")
+    parser.add_argument ('--ohpp',					help = """path to folder into which .hpp file is written""")
     parser.add_argument ('-v', '--verbose',			help = """Use verbose output.""",									action = 'store_true')
     parser.add_argument ('-f', '--failwarnings',	help = """Treat warnings as errors.""",								action = 'store_true')
     return parser.parse_args ()
@@ -463,7 +467,8 @@ def main ():
     hppName				= "ntv2devicefeatures.hpp"
     hName				= "ntv2devicefeatures.hh"
 
-    outputDir = ""
+    hhOutputDir = ""
+    hppOutputDir = ""
     csvDir = ""
 
     args = parse_args ()
@@ -486,17 +491,27 @@ def main ():
             print "## ERROR:  CSV file '%s' is a folder, not a file" % (csvPath)
             return 404
 
-    if args.output:
-        outputDir = os.path.join (args.output)
-        if not os.path.exists (outputDir) or not os.path.isdir (outputDir):
-            print "## ERROR:  Output folder '%s' not found or not a folder" % (args.output)
+    if args.ohh:
+        hhOutputDir = os.path.join (args.ohh)
+        if not os.path.exists (hhOutputDir) or not os.path.isdir (hhOutputDir):
+            print "## ERROR:  '.hh' output folder '%s' not found or not a folder" % (args.ohh)
             return 404
         if args.verbose:
-            print "## NOTE:  Will write .hpp & .hh files into folder '%s'" % (args.output)
+            print "## NOTE:  Will write '.hh' file into folder '%s'" % (args.ohh)
     else:
-        outputDir = os.getcwd ()
+        hhOutputDir = os.getcwd ()
 
-    hppPath = os.path.join (outputDir, hppName)
+    if args.ohpp:
+        hppOutputDir = os.path.join (args.ohpp)
+        if not os.path.exists (hppOutputDir) or not os.path.isdir (hppOutputDir):
+            print "## ERROR:  '.hpp' output folder '%s' not found or not a folder" % (args.ohpp)
+            return 404
+        if args.verbose:
+            print "## NOTE:  Will write '.hpp' file into folder '%s'" % (args.ohpp)
+    else:
+        hppOutputDir = os.getcwd ()
+
+    hppPath = os.path.join (hppOutputDir, hppName)
     if os.path.exists (hppPath):
         if os.path.isdir (hppPath):
             print "## ERROR:  Output HPP file '%s' is a folder" % (hppPath)
@@ -504,7 +519,7 @@ def main ():
         if args.verbose:
             print "## NOTE:  Will overwrite existing .hpp file '%s'" % (hppPath)
 
-    hPath = os.path.join (outputDir, hName)
+    hPath = os.path.join (hhOutputDir, hName)
     if os.path.exists (hPath):
         if os.path.isdir (hPath):
             print "## ERROR:  Output HH file '%s' is a folder" % (hPath)
