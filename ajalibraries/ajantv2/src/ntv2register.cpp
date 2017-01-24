@@ -1956,48 +1956,58 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord sparseValue = 0;
-	NTV2ReferenceSource originalSelect = value;
+	ULWord refControl1 = (ULWord)value, refControl2 = 0, pcrControl = 0;
 	switch(value)
 	{
 	case NTV2_REFERENCE_INPUT5:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)0;
+		refControl1 = 0;
+		refControl2 = 1;
 		break;
 	case NTV2_REFERENCE_INPUT6:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)1;
+		refControl1 = 1;
+		refControl2 = 1;
 		break;
 	case NTV2_REFERENCE_INPUT7:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)2;
+		refControl1 = 2;
+		refControl2 = 1;
 		break;
 	case NTV2_REFERENCE_INPUT8:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)3;
+		refControl1 = 3;
+		refControl2 = 1;
 		break;
-	case NTV2_REFERENCE_SFP1:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)4;
+	case NTV2_REFERENCE_SFP1_PCR:
+		refControl1 = 4;
+		refControl2 = 1;
+		pcrControl = 1;
 		break;
-	case NTV2_REFERENCE_SFP2:
-		sparseValue = 1;
-		value = (NTV2ReferenceSource)5;
+	case NTV2_REFERENCE_SFP1_PTP:
+		refControl1 = 4;
+		refControl2 = 1;
+		break;
+	case NTV2_REFERENCE_SFP2_PCR:
+		refControl1 = 5;
+		refControl2 = 1;
+		pcrControl = 1;
+		break;
+	case NTV2_REFERENCE_SFP2_PTP:
+		refControl1 = 5;
+		refControl2 = 1;
 		break;
 	default:
 		break;
 	}
 
-	if (originalSelect >= NTV2_REFERENCE_INPUT5)
-		WriteRegister (kRegGlobalControl2,
-			sparseValue,
-			kRegMaskRefSource2,
-			kRegShiftRefSource2);
+	if(IsKonaIPDevice())
+	{
+		WriteRegister(kRegGlobalControl2, pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+	}
+
+	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
+	{
+		WriteRegister (kRegGlobalControl2, refControl2,	kRegMaskRefSource2, kRegShiftRefSource2);
+	}
 		
-	return WriteRegister (kRegGlobalControl,
-		value,
-		kRegMaskRefSource,
-		kRegShiftRefSource);
+	return WriteRegister (kRegGlobalControl, refControl1, kRegMaskRefSource, kRegShiftRefSource);
 }
 
 
@@ -2006,25 +2016,46 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 // Output: NONE
 bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 {
-	ULWord	returnVal	(0);
-	bool	result		(ReadRegister (kRegGlobalControl, &returnVal, kRegMaskRefSource, kRegShiftRefSource));
+	ULWord	refControl1 = 0, refControl2 = 0, pcrControl = 0;
+	bool	result		(ReadRegister (kRegGlobalControl, &refControl1, kRegMaskRefSource, kRegShiftRefSource));
 
-	outValue = static_cast <NTV2ReferenceSource> (returnVal);
+	outValue = static_cast <NTV2ReferenceSource> (refControl1);
 
 	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
 	{
-		ULWord	sparseValue	(0);
-		ReadRegister (kRegGlobalControl2,  &sparseValue,  kRegMaskRefSource2,  kRegShiftRefSource2);
-		if (sparseValue)
+		ReadRegister (kRegGlobalControl2,  &refControl2,  kRegMaskRefSource2,  kRegShiftRefSource2);
+		if (refControl2)
 			switch (outValue)
 			{
-				case 0:		outValue = NTV2_REFERENCE_INPUT5;	break;
-				case 1:		outValue = NTV2_REFERENCE_INPUT6;	break;
-				case 2:		outValue = NTV2_REFERENCE_INPUT7;	break;
-				case 3:		outValue = NTV2_REFERENCE_INPUT8;	break;
-				case 4:		outValue = NTV2_REFERENCE_SFP1;		break;
-				case 5:		outValue = NTV2_REFERENCE_SFP2;		break;
-				default:										break;
+			case 0:
+				outValue = NTV2_REFERENCE_INPUT5;
+			break;
+			case 1:
+				outValue = NTV2_REFERENCE_INPUT6;
+				break;
+			case 2:
+				outValue = NTV2_REFERENCE_INPUT7;
+				break;
+			case 3:
+				outValue = NTV2_REFERENCE_INPUT8;
+				break;
+			case 4:
+				if(IsKonaIPDevice())
+				{
+					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+				}
+				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_SFP1_PCR;
+				break;
+			case 5:
+				if(IsKonaIPDevice())
+				{
+					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+				}
+				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP2_PTP : NTV2_REFERENCE_SFP2_PCR;
+				break;
+				break;
+			default:
+				break;
 			}
 	}
 	return result;
