@@ -433,29 +433,25 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
+                    designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+                    designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
 					designName == "s2022_56_2p2ch_rxtx_mb" ||
-					designName == "s2022_56_4ch_rxtx_fec");
+                    designName == "s2022_12_2ch_tx_mb" ||
+                    designName == "s2022_56_4ch_rxtx_fec");
 		else
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC));
 	}
 	case DEVICE_ID_KONAIP_4CH_1SFP:
-		return (designName == GetPrimaryDesignName(inDeviceID) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-				designName == "s2022_56_2p2ch_rxtx_mb" ||
-				designName == "s2022_56_4ch_rxtx_fec");
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-		return (designName == GetPrimaryDesignName(inDeviceID) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
-				designName == "s2022_56_2p2ch_rxtx_mb" ||
-				designName == "s2022_56_4ch_rxtx_fec");
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		return (designName == GetPrimaryDesignName(inDeviceID) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) || 
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP));
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		return (designName == GetPrimaryDesignName(inDeviceID) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP));
+    case DEVICE_ID_KONAIP_4CH_2SFP:
+    case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+    case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+        return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
+                designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
+                designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+                designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+                designName == "s2022_56_2p2ch_rxtx_mb" ||
+                designName == "s2022_12_2ch_tx_mb" ||
+                designName == "s2022_56_4ch_rxtx_fec");
 	default: break;
 	}
 	return false;
@@ -485,8 +481,8 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_TTAP:						return "t_tap_top";                 //	t_tap_top.ncd
         case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx";         //	konaip22
         case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_56_4ch_rxtx_j2k";		//  these are wrong, should be changed
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_56_4ch_rxtx_j2k";
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx_mb";
 		default: return "";
 	}
 }
