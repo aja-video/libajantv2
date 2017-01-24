@@ -3860,7 +3860,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return inForRetailDisplay ? "KONA IP 4CH 1SFP"	: "KonaIP4Ch1SFP";
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return inForRetailDisplay ? "KONA IP 4CH 2SFP"	: "KonaIP4Ch2SFP";
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
 
 		case DEVICE_ID_CORVIDHBR:	return inForRetailDisplay ? "Corvid HB-R"			: "CorvidHBR";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
