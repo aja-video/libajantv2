@@ -39,7 +39,7 @@ static string GetFirmwarePath (const NTV2DeviceID inDeviceID)
 		resultPath = firmwareFolder + "\\" + bitfileName;
 	#elif defined (AJALinux)
 		resultPath = firmwareFolder + "/" + bitfileName;	//	Linux platform-specific location of latest bitfile
-		NTV2_ASSERT (false && "Unimplemented Linux method");
+        //NTV2_ASSERT (false && "Unimplemented Linux method");
 	#endif
 
 	return resultPath;
