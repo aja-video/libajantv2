@@ -59,11 +59,7 @@ This section explores the contents of the SDK, which is nearly identical on all 
 		-	<b>bin</b> -- Destination directory for all executable files and the dynamically-loaded libraries they need to run.
 		-	<b>lib</b> -- Destination directory for all static libraries.
 		-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
-		-	<b>qtbuild</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. It contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
-			-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
-			-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
-			-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
-			-	<b>_*.pro</b> -- "Meta" build files that handle building requisite libraries, similar to a solution file (for those familiar with Visual Studio or Xcode).
+		-	<b>qtbuild</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. See \ref gs-qtbuild.
 	-	<b>tools</b> -- Contains a number of pre-built tools and utilities for Windows and MacOS that are useful in developing video
 		applications and for diagnosing problems that may arise while doing so.
 		(On Linux, the tools are built from the provided source code, and thus appear in the <b>bin</b> directory.)
@@ -290,10 +286,48 @@ However, the NTV2 "ajantv2" library source code is provided, and the libraries c
 -#	Build the <b>ajantv2</b> library.
 Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
 
-@subsection		gs-qtbuild	Building the Libraries --- Qt Creator
+@subsection		gs-qtbuild	Building With Qt
 
-Qt Creator is a feature-rich integrated development environment that works identically on Linux, MacOS and Windows.
-FINISH THIS.
+Qt is a cross-platform application framework used for developing applications that run on Linux, MacOS and Windows with little or no change in the underlying codebase,
+while retaining native capabilities and speed.
+
+Qt Creator is a feature-rich integrated development environment (IDE) that works identically on Linux, MacOS and Windows.
+
+The NTV2 SDK now makes it easy to develop NTV2 applications with Qt's <b>qmake</b> facility or with the <b>Qt Creator</b> IDE. To get started, look for the <b>qtbuild</b> folder in the SDK:
+
+-	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- The extracted SDK folder.
+	-	<b>sdk</b> -- The folder that contains the SDK.
+		-	<b>qtbuild</b> -- This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
+			-	<b>_ntv2demos.pro</b> -- This is the "solution file" or "project file" that builds everything -- the libraries and the demonstration applications.
+			-	<b>ajaanc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
+			-	<b>ajabase</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
+			-	<b>ajacc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
+			-	<b>ajantv2</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
+			-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
+			-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
+			-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
+			-	<b>ntv2demos</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
+
+<b>Building libraries and demos with qmake/make:</b>
+
+Assuming at least one version of Qt is already installed:
+
+-#	Change the current directory to \c sdk/qtbuild.
+-#	Type \c path/to/qmake \c _ntv2demos.pro
+-#	\c make
+
+<b>Building libraries and demos with Qt Creator:</b>
+
+Assuming <b>Qt Creator</b> is installed...
+
+-#	Double-click <b>_ntv2demos.pro</b> (or open it from inside <b>Qt Creator</b>.
+-#	Assign it a kit.
+-#	Build the project.
+
+The built libraries will be placed into the <b>lib</b> directory (a peer to <b>sdk</b>).
+
+The built executables will be placed into the <b>bin</b> directory (a peer to <b>lib</b>).
+
 
 
 @section	gs-newprojects	Creating New Projects With the SDK
@@ -324,7 +358,7 @@ for any of its libraries on the MacOS platform.
 Many OEM developers choose to create their own NTV2-based Xcode projects "from scratch." At a minimum, the following
 XCode build parameters must be set:
 -	Use the "Latest Mac OS X" SDK. (This SDK can be built against MacOS SDK 10.6 or later.)
--	Use a "Mac OS X Deployment Target of 10.8 or later. (Applications built with this SDK should run on Mac OS X 10.6 "Snow Leopard" or later.)
+-	Use a "Mac OS X Deployment Target of 10.9 ("Mountain Lion") or later.
 -	Use Intel 32 or 64-bit architectures (or both). (AJA does not support the PowerPC architecture.)
 -	Define both preprocessor macros "AJAMac" and "AJA_MAC" as "1".
 -	Add the following header search paths:
@@ -342,6 +376,11 @@ XCode build parameters must be set:
 	-	<b>-lajabase</b> (Release) or <b>-lajabased</b> (Debug), if needed
 	-	<b>-lajacc</b>, if the AJA captioning library is needed
 	-	<b>-lajaanc</b>, if the AJA ancillary data library is needed
+
+@note	The libraries shipped with the SDK for MacOS are built without referencing C++11 standard library support.
+		The Xcode build setting that controls this is "CLANG_CXX_LIBRARY" (a.k.a. "C++ Standard Library").
+		This build setting must match for all compilands passed to the linker -- otherwise "undefined symbols" errors will result.
+		See \ref gs-macsdkbuild for more information.
 
 
 @subsection	gs-newwinprojects	Windows
