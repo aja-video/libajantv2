@@ -218,20 +218,18 @@ public:
 	 *	Is the destination index active.
 	 *
 	 *	@param[in]	index					Query active for this index.
-	 *	@return		AJA_STATUS_TRUE			Destination enabled
-	 *				AJA_STATUS_FALSE		Destination disabled
-	 *				AJA_STATUS_OPEN			Debug system not open
-	 *				AJA_STATUS_RANGE		Index out of range
+     *	@return		true                    Destination enabled
+     *				false                   Destination disabled, Debug system not open, or Index out of range
 	 */
-	static AJAStatus IsActive(int32_t index);
+    static bool IsActive(int32_t index);
 
 	/** 
 	 *	Is this class built with AJA_DEBUG defined. 
 	 *
-	 *	@return		AJA_STATUS_TRUE			Debug build
-	 *				AJA_STATUS_FALSE		Release build
+     *	@return		true                    Debug build
+     *				false                   Release build
 	 */
-	static AJAStatus IsDebugBuild();
+    static bool IsDebugBuild();
 
 	/**
 	 *	Report debug message to the specified destination index.

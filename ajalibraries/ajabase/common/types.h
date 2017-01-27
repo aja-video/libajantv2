@@ -274,8 +274,8 @@
  *	Standard api return code
  */
 
-#define AJA_SUCCESS(_status_) (_status_ > 0)
-#define AJA_FAILURE(_status_) (_status_ <= 0)
+#define AJA_SUCCESS(_status_) (_status_ >= 0)
+#define AJA_FAILURE(_status_) (_status_ <  0)
 
 /**
 	@defgroup	AJAGroupStatus	AJA_STATUS
@@ -284,11 +284,10 @@
 ///@{
 typedef enum
 {
-	AJA_STATUS_SUCCESS 			=2,		/**< Function succeeded */
-	AJA_STATUS_TRUE				=1,		/**< Result was true */
-	AJA_STATUS_FALSE			=0,		/**< Result was false */
-	AJA_STATUS_UNKNOWN			=-1,	/**< Unknown status */
-	AJA_STATUS_FAIL				=-2,	/**< Function failed */
+    AJA_STATUS_TRUE				= 1,	/**< Result was true */
+    AJA_STATUS_SUCCESS 			= 0,	/**< Function succeeded */
+    AJA_STATUS_FAIL				=-1,	/**< Function failed */
+    AJA_STATUS_UNKNOWN			=-2,	/**< Unknown status */
 	AJA_STATUS_TIMEOUT			=-3,	/**< A wait timed out */
 	AJA_STATUS_RANGE			=-4,	/**< A parameter was out of range */
 	AJA_STATUS_INITIALIZE		=-5,	/**< The object has not been initialized */
@@ -318,7 +317,11 @@ typedef enum
 	AJA_STATUS_BADBUFFERSIZE	=-105,	/**< Buffer size out of bounds */
 	AJA_STATUS_STREAMCONFLICT	=-106,	/**< Another stream is using resources */
 	AJA_STATUS_NOTINITIALIZED	=-107,	/**< Streams not initialized */
-	AJA_STATUS_STREAMRUNNING	=-108	/**< Streams is running, should be stopped */
+    AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
+
+// Other
+    AJA_STATUS_REBOOT           = 100   /**< Device requires reboot */
+
 } AJAStatus;
 ///@}
 
