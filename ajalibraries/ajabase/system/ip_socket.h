@@ -46,15 +46,15 @@ class AJA_EXPORT AJAIPSocket
 		AJAIPSocket(void);
 		virtual ~AJAIPSocket(void);
 
-		AJAStatus Initialize(void);
-		AJAStatus Deinitialize(void);
+		bool Initialize(void);
+		bool Deinitialize(void);
 
-		virtual AJAStatus Open(const std::string& ipAddress, uint16_t port);
+		virtual bool Open(const std::string& ipAddress, uint16_t port);
 		bool              IsOpen(void);
 
-		AJAStatus Shutdown(int how);
-		AJAStatus Close(void);
-		AJAStatus SetSocketOption(int option, const void* pValue);
+		bool Shutdown(int how);
+		bool Close(void);
+		bool SetSocketOption(int option, const void* pValue);
 
 		bool GetHostIPAddresses(
 				IPAddressContainerType& ipv4AddressContainer,
