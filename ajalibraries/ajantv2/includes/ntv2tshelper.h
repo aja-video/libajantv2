@@ -275,7 +275,7 @@ public:
 
             _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
             _pkt8[pos++] = 0;                                           // packet_length & 0xff
-            _pkt8[pos++] = 0x80;                                        // 10
+            _pkt8[pos++] = 0x80;                                        // alignment
             _pkt8[pos++] = 0x80;                                        // 11
             _pkt8[pos++] = 5;                                           // 12
 
@@ -323,7 +323,7 @@ public:
 
                 _pkt8[pos++] = 0;                                           // (packet_length >> 8) & 0xff
                 _pkt8[pos++] = 0;                                           // packet_length & 0xff
-                _pkt8[pos++] = 0x80;                                        // 10
+                _pkt8[pos++] = 0x84;                                        // alignment
                 _pkt8[pos++] = 0x80;                                        // 11
                 _pkt8[pos++] = 5;                                           // 12
 
