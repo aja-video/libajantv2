@@ -7273,6 +7273,8 @@ string NTV2GetFirmwareFolderPath (void)
 				return string (lpData);
 		RegCloseKey (hKey);
 		return "";
+    #elif defined (AJALinux)
+        return "/opt/aja/firmware";
 	#else
 		return "";
 	#endif

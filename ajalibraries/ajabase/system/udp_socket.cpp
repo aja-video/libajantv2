@@ -47,7 +47,7 @@ AJAUDPSocket::~AJAUDPSocket(void)
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 {
 	if ((true == IsInstantiated()) && (-1 == mSocket))
@@ -76,7 +76,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 					<< ": Socket created and bound"
 					<< endl;
 #endif
-				return (AJA_STATUS_SUCCESS);
+				return true;
 			}
 
 #if DEBUG_UDP_OPERATION
@@ -99,7 +99,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 #endif
 		}
 	}
-	return (AJA_STATUS_FAIL);
+	return false;
 }
 
 

@@ -22,7 +22,7 @@ class AJA_EXPORT AJAUDPSocket : public AJAIPSocket
 		AJAUDPSocket(void);
 		virtual ~AJAUDPSocket(void);
 
-		AJAStatus Open(const std::string& ipAddress, uint16_t port);
+		bool Open(const std::string& ipAddress, uint16_t port);
 
 		uint32_t Poll(
 					uint8_t*            pData,
