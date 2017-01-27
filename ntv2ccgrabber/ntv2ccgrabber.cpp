@@ -846,10 +846,12 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			if (ULWord (chan) >= numVideoOutputs)
 				break;
-			if (chan == mInputChannel)
-				continue;	//	Skip the input
 			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
+			{
+				if (chan == mInputChannel)
+					continue;	//	Skip the input
 				mDevice.SetSDITransmitEnable (chan, true);
+			}
 			if (::NTV2DeviceCanDoWidget (mDeviceID, g3GSDIOutputs [chan]) || ::NTV2DeviceCanDoWidget (mDeviceID, gSDIOutputs [chan]))
 			{
 				mDevice.Connect (::GetSDIOutputInputXpt (chan), mixerOutputYUV);
