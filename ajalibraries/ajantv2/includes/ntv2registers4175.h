@@ -19,7 +19,7 @@
 #define kReg4175_pkt_ctrl                       (0x0000/4)
 #define kReg4175_pkt_width                      (0x0010/4)
 #define kReg4175_pkt_height                     (0x0018/4)
-#define kReg4175_pkt_Vid_fmt                    (0x0020/4)
+#define kReg4175_pkt_vid_fmt                    (0x0020/4)
 #define kReg4175_pkt_pkts_per_line              (0x0028/4)
 #define kReg4175_pkt_payload_len                (0x0030/4)
 #define kReg4175_pkt_payload_len_last           (0x0038/4)
@@ -31,11 +31,11 @@
 #define kReg4175_pkt_tx_pkt_cnt_valid           (0x0064/4)
 #define kReg4175_pkt_pix_per_pkt                (0x0068/4)
 #define kReg4175_pkt_stat_reset                 (0x0070/4)
-#define kReg4175_pkt__interlace_ctrl            (0x0078/4)
+#define kReg4175_pkt_interlace_ctrl             (0x0078/4)
 
 /////////////////////////////////////////////////////////////////////
 //
-// 4175 Deppacketizer
+// 4175 Depacketizer
 //
 /////////////////////////////////////////////////////////////////////
 
