@@ -63,7 +63,7 @@
 #define kRegFramer_sys_config           (0x000c/4)
 #define kRegFramer_version              (0x0010/4)
 #define kRegFramer_src_mac_lo           (0x0014/4)
-#define kRegFramer_src_mac_ho           (0x0018/4)
+#define kRegFramer_src_mac_hi           (0x0018/4)
 #define kRegFramer_peak_buf_level       (0x001c/4)
 #define kRegFramer_rx_pkt_cnt           (0x0020/4)
 #define kRegFramer_drop_pkt_cnt         (0x0024/4)
@@ -109,7 +109,7 @@
 
 //channel
 #define kRegDecap_chan_ctrl                 (0x0080/4)
-#define kRegDecap_chan_teimout              (0x0084/4)
+#define kRegDecap_chan_timeout              (0x0084/4)
 #define kRegDecap_ip_hdr_param              (0x0088/4)
 #define kRegDecap_match_vlan                (0x0090/4)
 #define kRegDecap_match_dst_ip0             (0x0094/4)
