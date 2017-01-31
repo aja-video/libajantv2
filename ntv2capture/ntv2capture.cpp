@@ -9,9 +9,6 @@
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
-#include <iostream>
-#include <iomanip>
-#include "ajabase/system/debug.h"
 
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
@@ -47,7 +44,6 @@ NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
 		mVideoBufferSize	(0)
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
-	AJADebug::Open();
 
 }	//	constructor
 
@@ -335,34 +331,6 @@ void NTV2Capture::ConsumeFrames (void)
 		AVDataBuffer *	pFrameData	(mAVCircularBuffer.StartConsumeNextBuffer ());
 		if (pFrameData)
 		{
-
-			const uint8_t *	pAncBuff = reinterpret_cast <const uint8_t *> (pFrameData->fAncBuffer);
-			bool	has4107	= false;
-			for (unsigned ndx (0);  ndx < pFrameData->fAncBufferSize;  ndx++)
-			{
-				if (pAncBuff[ndx] == 0x41 && pAncBuff[ndx+1] == 0x07)
-				{
-					has4107 = true;
-					break;
-				}
-			}
-			if (true)
-			{
-				std::stringstream output;
-				output << hex << setw(2) << setfill('0') << pFrameData->fAncBufferSize << dec << " ";
-				if(has4107)
-				{
-					output << " Has 4107 ";
-				}
-				for (unsigned ndx (0);  ndx < 0x5d;  ndx++)
-				{
-					output << dec << " " << hex << setw(2) << setfill('0') << uint16_t(pAncBuff[ndx]);
-				}
-				output << endl;
-				AJA_PRINT("%s", output.str().c_str());
-				has4107 = false;
-			}
-
 			//	Do something useful with the frame data...
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
@@ -407,7 +375,7 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
-	ULWord					acOptions	(AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC);
+	ULWord					acOptions	(AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
 
 	//	Tell capture AutoCirculate to use 7 frame buffers on the device...
 	mDevice.AutoCirculateStop (mInputChannel);
@@ -436,13 +404,11 @@ void NTV2Capture::CaptureFrames (void)
 			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
 				inputXfer.SetAudioBuffer (captureData->fAudioBuffer, captureData->fAudioBufferSize);
 			if (mWithAnc)
-				inputXfer.SetAncBuffers (captureData->fAncBuffer, NTV2_ANCSIZE_MAX);
+				inputXfer.SetAncBuffers (captureData->fAncBuffer, captureData->fAncBufferSize);
 
 			//	Do the transfer from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
 			captureData->fAudioBufferSize = inputXfer.GetCapturedAudioByteCount();
-			captureData->fAncBufferSize		= mWithAnc  ?  inputXfer.GetAncByteCount (false/*F1*/)  :  0;
-			captureData->fAncF2BufferSize	= mWithAnc  ?  inputXfer.GetAncByteCount ( true/*F2*/)  :  0;
 
 			NTV2SDIInStatistics	sdiStats;
 			mDevice.ReadSDIStatistics (sdiStats);
