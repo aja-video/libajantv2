@@ -453,7 +453,7 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 
 	uint32_t			pktByteCount	(0);
 	AJAAncillaryData	newAncData;
-	status = newAncData.InitWithReceivedData (pPacketBytes, inPacketWords.size(), defaultLoc, pktByteCount);
+	status = newAncData.InitWithReceivedData (pPacketBytes, uint32_t(inPacketWords.size()), defaultLoc, pktByteCount);
 	delete [] pPacketBytes;
 	if (AJA_SUCCESS (status))
 	{

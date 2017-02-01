@@ -1108,7 +1108,7 @@ public:
 			{
 				(void) inRegNum;
 				(void) inDeviceID;
-				const bool		isOn	(inRegValue & (1 << 29));
+				const bool		isOn	((inRegValue & (1 << 29)) != 0);
 				const uint16_t	format	((inRegValue >> 15) & 0x1F);
 				ostringstream	oss;
 				oss << "\t" << OnOff(isOn) << endl
@@ -1123,8 +1123,8 @@ public:
 			{
 				(void) inRegNum;
 				(void) inDeviceID;
-				const bool		is16x9	(inRegValue & (1 << 31));
-				const bool		isMono	(inRegValue & (1 << 30));
+				const bool		is16x9	((inRegValue & (1 << 31)) != 0);
+				const bool		isMono	((inRegValue & (1 << 30)) != 0);
 				ostringstream	oss;
 				oss << "\tAspect Ratio: " << (is16x9 ? "16x9" : "4x3") << endl
 					<< "\tDepth: " << (isMono ? "Monochrome" : "Color");
