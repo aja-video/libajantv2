@@ -19,8 +19,32 @@
 
 
 #if defined (NTV2_USE_STDINT)
-	#include <stdint.h>
-	typedef int16_t					LWord;
+	#if defined (MSWindows)
+		#if (_MSC_VER < 1300)
+		   typedef signed char       int8_t;
+		   typedef signed short      int16_t;
+		   typedef signed int        int32_t;
+		   typedef unsigned char     uint8_t;
+		   typedef unsigned short    uint16_t;
+		   typedef unsigned int      uint32_t;
+		#else
+           #if defined (NTV2_BUILDING_DRIVER)
+               typedef signed __int8     int8_t;
+               typedef signed __int16    int16_t;
+               typedef signed __int32    int32_t;
+               typedef unsigned __int8   uint8_t;
+               typedef unsigned __int16  uint16_t;
+               typedef unsigned __int32  uint32_t;
+           #else
+               #include <stdint.h>
+           #endif
+		#endif
+		typedef signed __int64       int64_t;
+		typedef unsigned __int64     uint64_t;
+	#else
+		#include <stdint.h>
+	#endif
+	typedef int32_t					LWord;
 	typedef uint32_t				ULWord;
 	typedef uint32_t *				PULWord;
 	typedef int16_t					Word;
@@ -28,13 +52,13 @@
 	typedef uint8_t					UByte;
 	typedef int8_t					SByte;
 #else
-	typedef int            			LWord;
-	typedef unsigned int   			ULWord;
-	typedef unsigned int * 			PULWord;
-	typedef short          			Word;
-	typedef unsigned short 			UWord;
-	typedef unsigned char  			UByte;
-	typedef char           			SByte;
+    typedef int            			LWord;
+    typedef unsigned int   			ULWord;
+    typedef unsigned int * 			PULWord;
+    typedef short          			Word;
+    typedef unsigned short 			UWord;
+    typedef unsigned char  			UByte;
+    typedef char           			SByte;
 #endif
 
 // Platform dependent
