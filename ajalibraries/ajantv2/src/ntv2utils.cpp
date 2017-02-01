@@ -3815,54 +3815,55 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	switch (inValue)
 	{
 	#if defined (AJAMac) || defined (MSWindows)
-		#if !defined (NTV2_DEPRECATE)	//						Retail Name				  Nickname (for dev purposes)
-		case BOARD_ID_XENA2:		return inForRetailDisplay ?	"KONA 3"				: "Kona3";
+        #if !defined (NTV2_DEPRECATE)	//                          Retail Name                 Nickname (for dev purposes)
+        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"KONA 3"                    : "Kona3";
 		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_LHI:			return inForRetailDisplay ?	"KONA LHi"				: "KonaLHi";
-		case DEVICE_ID_KONALHIDVI:	return inForRetailDisplay ?	"KONA LHi DVI"			: "KonaLHiDVI";
+        case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "KonaLHi";
+        case DEVICE_ID_KONALHIDVI:              return inForRetailDisplay ?	"KONA LHi DVI"              : "KonaLHiDVI";
 	#endif
 	#if defined (AJAMac)
-		case DEVICE_ID_IOEXPRESS:	return inForRetailDisplay ?	"IoExpress"				: "IoExpress";
+        case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "IoExpress";
 	#elif defined (MSWindows)
-		case DEVICE_ID_IOEXPRESS:	return inForRetailDisplay ?	"KONA IoExpress"		: "IoExpress";
+        case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"KONA IoExpress"            : "IoExpress";
 	#else
 		#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_XENA2:		return inForRetailDisplay ?	"Kona3"					: "OEM 2K";
-		case BOARD_ID_XENALH:		return inForRetailDisplay ?	"Xena LH"				: "OEM LH";
-		case BOARD_ID_XENALS:		return inForRetailDisplay ?	"Xena LS"				: "OEM LS";
-		case BOARD_ID_XENAHS:		return inForRetailDisplay ?	"Xena HS"				: "OEM HS";
-		case BOARD_ID_XENAHS2:		return inForRetailDisplay ?	"Xena HS2"				: "OEM HS2";
+        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"Kona3"                     : "OEM 2K";
+        case BOARD_ID_XENALH:                   return inForRetailDisplay ?	"Xena LH"                   : "OEM LH";
+        case BOARD_ID_XENALS:                   return inForRetailDisplay ?	"Xena LS"                   : "OEM LS";
+        case BOARD_ID_XENAHS:                   return inForRetailDisplay ?	"Xena HS"                   : "OEM HS";
+        case BOARD_ID_XENAHS2:                  return inForRetailDisplay ?	"Xena HS2"                  : "OEM HS2";
 		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_LHI:			return inForRetailDisplay ?	"KONA LHi"				: "OEM LHi";
-		case DEVICE_ID_LHI_DVI:		return inForRetailDisplay ?	"KONA LHi DVI"			: "OEM LHi DVI";
-		case DEVICE_ID_IOEXPRESS:	return inForRetailDisplay ?	"IoExpress"				: "OEM IoExpress";
+        case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
+        case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
+        case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
-		case DEVICE_ID_NOTFOUND:	return inForRetailDisplay ?	"DEVICE NOT FOUND"		: "(Not Found)";
-		case DEVICE_ID_CORVID1:		return inForRetailDisplay ?	"Corvid 1"				: "Corvid";
-		case DEVICE_ID_CORVID22:	return inForRetailDisplay ?	"Corvid 22"				: "Corvid22";
-		case DEVICE_ID_CORVID3G:	return inForRetailDisplay ?	"Corvid 3G"				: "Corvid3G";
-		case DEVICE_ID_KONA3G:		return inForRetailDisplay ?	"KONA 3G"				: "Kona3G";
-		case DEVICE_ID_KONA3GQUAD:	return inForRetailDisplay ?	"KONA 3G QUAD"			: "Kona3GQuad";	//	Used to be "KONA 3G" for retail display
-		case DEVICE_ID_LHE_PLUS:	return inForRetailDisplay ?	"KONA LHe+"				: "KonaLHe+";
-		case DEVICE_ID_IOXT:		return inForRetailDisplay ?	"IoXT"					: "IoXT";
-		case DEVICE_ID_CORVID24:	return inForRetailDisplay ?	"Corvid 24"				: "Corvid24";
-		case DEVICE_ID_TTAP:		return inForRetailDisplay ?	"T-Tap"					: "TTap";
+        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"DEVICE NOT FOUND"          : "(Not Found)";
+        case DEVICE_ID_CORVID1:                 return inForRetailDisplay ?	"Corvid 1"                  : "Corvid";
+        case DEVICE_ID_CORVID22:                return inForRetailDisplay ?	"Corvid 22"                 : "Corvid22";
+        case DEVICE_ID_CORVID3G:                return inForRetailDisplay ?	"Corvid 3G"                 : "Corvid3G";
+        case DEVICE_ID_KONA3G:                  return inForRetailDisplay ?	"KONA 3G"                   : "Kona3G";
+        case DEVICE_ID_KONA3GQUAD:              return inForRetailDisplay ?	"KONA 3G QUAD"              : "Kona3GQuad";	//	Used to be "KONA 3G" for retail display
+        case DEVICE_ID_LHE_PLUS:                return inForRetailDisplay ?	"KONA LHe+"                 : "KonaLHe+";
+        case DEVICE_ID_IOXT:                    return inForRetailDisplay ?	"IoXT"                      : "IoXT";
+        case DEVICE_ID_CORVID24:                return inForRetailDisplay ?	"Corvid 24"                 : "Corvid24";
+        case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-Tap"                     : "TTap";
 		#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_LHI_T:		return inForRetailDisplay ?	"KONA LHi T"			: "KonaLHiT";
+        case BOARD_ID_LHI_T:                    return inForRetailDisplay ?	"KONA LHi T"                : "KonaLHiT";
 		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_IO4K:		return inForRetailDisplay ?	"Io4K"					: "Io4K";
-		case DEVICE_ID_IO4KUFC:		return inForRetailDisplay ?	"Io4K UFC"				: "Io4KUfc";
-		case DEVICE_ID_KONA4:		return inForRetailDisplay ?	"KONA 4"				: "Kona4";
-		case DEVICE_ID_KONA4UFC:	return inForRetailDisplay ?	"KONA 4 UFC"			: "Kona4Ufc";
-		case DEVICE_ID_CORVID88:	return inForRetailDisplay ?	"Corvid 88"				: "Corvid88";
-		case DEVICE_ID_CORVID44:	return inForRetailDisplay ?	"Corvid 44"				: "Corvid44";
-		case DEVICE_ID_CORVIDHEVC:  return inForRetailDisplay ?	"Corvid HEVC"			: "CorvidHEVC";
-		case DEVICE_ID_KONAIP_4CH_1SFP:	return inForRetailDisplay ? "KONA IP 4CH 1SFP"	: "KonaIP4Ch1SFP";
-		case DEVICE_ID_KONAIP_4CH_2SFP:	return inForRetailDisplay ? "KONA IP 4CH 2SFP"	: "KonaIP4Ch2SFP";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
+        case DEVICE_ID_IO4K:                    return inForRetailDisplay ?	"Io4K"                      : "Io4K";
+        case DEVICE_ID_IO4KUFC:                 return inForRetailDisplay ?	"Io4K UFC"                  : "Io4KUfc";
+        case DEVICE_ID_KONA4:                   return inForRetailDisplay ?	"KONA 4"                    : "Kona4";
+        case DEVICE_ID_KONA4UFC:                return inForRetailDisplay ?	"KONA 4 UFC"                : "Kona4Ufc";
+        case DEVICE_ID_CORVID88:                return inForRetailDisplay ?	"Corvid 88"                 : "Corvid88";
+        case DEVICE_ID_CORVID44:                return inForRetailDisplay ?	"Corvid 44"                 : "Corvid44";
+        case DEVICE_ID_CORVIDHEVC:              return inForRetailDisplay ?	"Corvid HEVC"               : "CorvidHEVC";
+        case DEVICE_ID_KONAIP_4CH_1SFP:         return inForRetailDisplay ? "KONA IP 4CH 1SFP"          : "KonaIP4Ch1SFP";
+        case DEVICE_ID_KONAIP_4CH_2SFP:         return inForRetailDisplay ? "KONA IP 4CH 2SFP"          : "KonaIP4Ch2SFP";
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K"  : "KonaIP1Rx1Tx1SFPJ2K";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K"      : "KonaIP2Tx1SFPJ2K";
+        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
 
-		case DEVICE_ID_CORVIDHBR:	return inForRetailDisplay ? "Corvid HB-R"			: "CorvidHBR";
+        case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
 //	    default:					break;
 #else

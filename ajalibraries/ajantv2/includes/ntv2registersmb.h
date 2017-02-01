@@ -127,6 +127,7 @@
 #define SAREK_2022_7                BIT(4)
 #define SAREK_PTP_PLL				BIT(5)
 #define SAREK_TX_TOP34              BIT(6)
+#define SAREK_2110                  BIT(7)
 
 #define SAREK_TX0_MASK              (BIT(31) + BIT(30) + BIT(29) + BIT(28))
 #define SAREK_RX0_MASK              (BIT(27) + BIT(26) + BIT(25) + BIT(24))

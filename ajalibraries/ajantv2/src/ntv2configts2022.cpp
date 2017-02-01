@@ -574,6 +574,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
 
     _transactionCount = 0;
 
+    // Start with enable off
+    _transactionTable[_transactionCount][0] = HOST_EN;
+    _transactionTable[_transactionCount++][1] = 0;
+
     PESGen pes;
     pes._tsEncapType = kTsEncapTypeJ2k;
     pes._elemNumToPID[1] = streamData.videoPid;
@@ -675,8 +679,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     }
     pmt.dump8();
 
-    // Last entry is HOST_EN to on
-    printf("Set HOST_EN to 1\n\n");
+    // On last entry enable is on
     _transactionTable[_transactionCount][0] = HOST_EN;
     _transactionTable[_transactionCount++][1] = 1;
 }
@@ -694,6 +697,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     printf("PCR PID         = 0x%02x\n", pcrPid);
 
     _transactionCount = 0;
+
+    // Start with enable off
+    _transactionTable[_transactionCount][0] = HOST_EN;
+    _transactionTable[_transactionCount++][1] = 0;
 
     _transactionTable[_transactionCount][0] = PAT_PMT_PERIOD;
     _transactionTable[_transactionCount++][1] = 0;
@@ -718,8 +725,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegPcrEncap(const NTV2Channel channel)
     }
     adp.dump32();
 
-    // Last entry is HOST_EN to on
-    printf("Set HOST_EN to 1\n\n");
+    // On last entry enable is on
     _transactionTable[_transactionCount][0] = HOST_EN;
     _transactionTable[_transactionCount++][1] = 1;
 }
@@ -737,7 +743,16 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &audioPid);
     printf("Audio 1 PID     = 0x%02x\n\n", audioPid);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &j2kStreamType);
+
     _transactionCount = 0;
+
+    // Start with enable off
+    _transactionTable[_transactionCount][0] = HOST_EN;
+    _transactionTable[_transactionCount++][1] = 0;
+
+    // First we must set this to zero while disabled later we will set this same register to the proper value.
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0;
 
     PESGen pes;
     pes._tsEncapType = kTsEncapTypeAes;
@@ -747,13 +762,13 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
 
     printf("Host Register Settings:\n\n");
 
-    _transactionTable[_transactionCount][0] = PACKET_RATE;
-    _transactionTable[_transactionCount++][1] = 0x10000;
-    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
-
     _transactionTable[_transactionCount][0] = PAYLOAD_PARAMS;
     _transactionTable[_transactionCount++][1] = audioPid;
     printf("Payload Parameters = 0x%x\n", _transactionTable[_transactionCount-1][1]);
+
+    _transactionTable[_transactionCount][0] = PACKET_RATE;
+    _transactionTable[_transactionCount++][1] = 0x10000;
+    printf("Packet Rate = %i (0x%x)\n", _transactionTable[_transactionCount-1][1], _transactionTable[_transactionCount-1][1]);
 
     int length = pes.makePacket();
 
@@ -792,8 +807,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
     }
     adp.dump32();
 
-    // Last entry is HOST_EN to on
-    printf("Set HOST_EN to 1\n\n");
+    // On last entry enable is on
     _transactionTable[_transactionCount][0] = HOST_EN;
     _transactionTable[_transactionCount++][1] = 1;
 }

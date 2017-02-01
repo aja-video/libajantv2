@@ -25,9 +25,6 @@
 #define SAREK_2022_2_TX_CORE_1      (0x10c000/4)
 #define SAREK_2022_2_RX_CORE_1      (0x10d000/4)
 
-#define SAREK_10G_EMAC_0            (0x180000/4)
-#define SAREK_10G_EMAC_1            (0x1a0000/4)
-
 #define SAREK_J2K_ENCODER_1         (0x140000/4)
 #define SAREK_TS_ENCODER_1          (0x150000/4)
 #define SAREK_J2K_ENCODER_2         (0x1C0000/4)

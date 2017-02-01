@@ -4,52 +4,61 @@
 	@copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
-#ifndef REGISTERS_4175_H
-#define REGISTERS_4175_H
+#ifndef REGISTERS_2110_H
+#define REGISTERS_2110_H
 
 #include "ntv2registersmb.h"
 
+#define SAREK_2110_TX_CORE_0      (0x203000/4)
+#define SAREK_2110_RX_CORE_0      (0x204000/4)
+#define SAREK_2110_TX_CORE_1      (0x205000/4)
+#define SAREK_2110_RX_CORE_1      (0x206000/4)
+
+#define SAREK_2110_DECAPSULATOR_CORE_0  (0x207000/4)
+#define SAREK_2110_FRAMER_CORE_0        (0x208000/4)
+#define SAREK_2110_DECAPSULATOR_CORE_1  (0x209000/4)
+#define SAREK_2110_FRAMER_CORE_1        (0x20a000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
-// 4175 Packeteizer
+// 2110 Packeteizer
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg4175_pkt_ctrl                       (0x0000/4)
-#define kReg4175_pkt_width                      (0x0010/4)
-#define kReg4175_pkt_height                     (0x0018/4)
-#define kReg4175_pkt_Vid_fmt                    (0x0020/4)
-#define kReg4175_pkt_pkts_per_line              (0x0028/4)
-#define kReg4175_pkt_payload_len                (0x0030/4)
-#define kReg4175_pkt_payload_len_last           (0x0038/4)
-#define kReg4175_pkt_ssrc                       (0x0040/4)
-#define kReg4175_pkt_payload_type               (0x0048/4)
-#define kReg4175_pkt_bpc_reg                    (0x0050/4)
-#define kReg4175_pkt_chan_num                   (0x0058/4)
-#define kReg4175_pkt_tx_pkt_cnt                 (0x0060/4)
-#define kReg4175_pkt_tx_pkt_cnt_valid           (0x0064/4)
-#define kReg4175_pkt_pix_per_pkt                (0x0068/4)
-#define kReg4175_pkt_stat_reset                 (0x0070/4)
-#define kReg4175_pkt__interlace_ctrl            (0x0078/4)
+#define kReg2110_pkt_ctrl                       (0x0000/4)
+#define kReg2110_pkt_width                      (0x0010/4)
+#define kReg2110_pkt_height                     (0x0018/4)
+#define kReg2110_pkt_vid_fmt                    (0x0020/4)
+#define kReg2110_pkt_pkts_per_line              (0x0028/4)
+#define kReg2110_pkt_payload_len                (0x0030/4)
+#define kReg2110_pkt_payload_len_last           (0x0038/4)
+#define kReg2110_pkt_ssrc                       (0x0040/4)
+#define kReg2110_pkt_payload_type               (0x0048/4)
+#define kReg2110_pkt_bpc_reg                    (0x0050/4)
+#define kReg2110_pkt_chan_num                   (0x0058/4)
+#define kReg2110_pkt_tx_pkt_cnt                 (0x0060/4)
+#define kReg2110_pkt_tx_pkt_cnt_valid           (0x0064/4)
+#define kReg2110_pkt_pix_per_pkt                (0x0068/4)
+#define kReg2110_pkt_stat_reset                 (0x0070/4)
+#define kReg2110_pkt_interlace_ctrl             (0x0078/4)
 
 /////////////////////////////////////////////////////////////////////
 //
-// 4175 Deppacketizer
+// 2110 Depacketizer
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg4175_depkt_control                  (0x0000/4)
-#define kReg4175_depkt_width                    (0x0010/4)
-#define kReg4175_depkt_height                   (0x0018/4)
-#define kReg4175_depkt_vid_fmt                  (0x0020/4)
-#define kReg4175_depkt_pkts_per_line            (0x0028/4)
-#define kReg4175_depkt_payload_len              (0x0030/4)
-#define kReg4175_depkt_payload_len_last         (0x0038/4)
-#define kReg4175_depkt_bpc_reg                  (0x0040/4)
-#define kReg4175_depkt_rx_pkt_cnt               (0x0048/4)
-#define kReg4175_depkt_rx_pkt_cnt_valid         (0x0050/4)
-#define kReg4175_depkt_stat_reset               (0x0054/4)
+#define kReg2110_depkt_control                  (0x0000/4)
+#define kReg2110_depkt_width                    (0x0010/4)
+#define kReg2110_depkt_height                   (0x0018/4)
+#define kReg2110_depkt_vid_fmt                  (0x0020/4)
+#define kReg2110_depkt_pkts_per_line            (0x0028/4)
+#define kReg2110_depkt_payload_len              (0x0030/4)
+#define kReg2110_depkt_payload_len_last         (0x0038/4)
+#define kReg2110_depkt_bpc_reg                  (0x0040/4)
+#define kReg2110_depkt_rx_pkt_cnt               (0x0048/4)
+#define kReg2110_depkt_rx_pkt_cnt_valid         (0x0050/4)
+#define kReg2110_depkt_stat_reset               (0x0054/4)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -63,7 +72,7 @@
 #define kRegFramer_sys_config           (0x000c/4)
 #define kRegFramer_version              (0x0010/4)
 #define kRegFramer_src_mac_lo           (0x0014/4)
-#define kRegFramer_src_mac_ho           (0x0018/4)
+#define kRegFramer_src_mac_hi           (0x0018/4)
 #define kRegFramer_peak_buf_level       (0x001c/4)
 #define kRegFramer_rx_pkt_cnt           (0x0020/4)
 #define kRegFramer_drop_pkt_cnt         (0x0024/4)
@@ -109,7 +118,7 @@
 
 //channel
 #define kRegDecap_chan_ctrl                 (0x0080/4)
-#define kRegDecap_chan_teimout              (0x0084/4)
+#define kRegDecap_chan_timeout              (0x0084/4)
 #define kRegDecap_ip_hdr_param              (0x0088/4)
 #define kRegDecap_match_vlan                (0x0090/4)
 #define kRegDecap_match_dst_ip0             (0x0094/4)
@@ -134,4 +143,4 @@
 #define kRegDecap_int_clear                 (0x00f8/4)
 
 
-#endif // REGISTERS_4175_H
+#endif // REGISTERS_2110_H
