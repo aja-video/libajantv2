@@ -14,7 +14,9 @@
 #ifdef AJA_LINUX
 #include <string.h>
 #include <stdint.h>
+#ifndef UINT32_C
 #define UINT32_C(x) x##U
+#endif
 #endif
 
 const int sizeOf_riff   = 12;
