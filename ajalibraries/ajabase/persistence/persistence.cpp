@@ -93,10 +93,18 @@ std::string storagePath(bool bSharedPrefFile)
 #endif
 	
 #if defined(AJA_LINUX)
-	// want ~/.AJA/
+    // want ~/.aja/config
 	
-	path.append(getenv("HOME"));
-	path.append("/.AJA/");
+    char *home = getenv("HOME");
+    if (home)
+    {
+        path.append(home);
+        path.append("/.aja/config");
+    }
+    else
+    {
+        path.append("/opt/aja/config");
+    }
 #endif	
 	
 #if defined(AJA_MAC) || defined(AJA_LINUX)
