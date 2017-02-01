@@ -3850,20 +3850,20 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		#if !defined (NTV2_DEPRECATE)
         case BOARD_ID_LHI_T:                    return inForRetailDisplay ?	"KONA LHi T"                : "KonaLHiT";
 		#endif	//	!defined (NTV2_DEPRECATE)
-        case DEVICE_ID_IO4K:                    return inForRetailDisplay ?	"Io4K"                      : "Io4K";
-        case DEVICE_ID_IO4KUFC:                 return inForRetailDisplay ?	"Io4K UFC"                  : "Io4KUfc";
-        case DEVICE_ID_KONA4:                   return inForRetailDisplay ?	"KONA 4"                    : "Kona4";
-        case DEVICE_ID_KONA4UFC:                return inForRetailDisplay ?	"KONA 4 UFC"                : "Kona4Ufc";
-        case DEVICE_ID_CORVID88:                return inForRetailDisplay ?	"Corvid 88"                 : "Corvid88";
-        case DEVICE_ID_CORVID44:                return inForRetailDisplay ?	"Corvid 44"                 : "Corvid44";
-        case DEVICE_ID_CORVIDHEVC:              return inForRetailDisplay ?	"Corvid HEVC"               : "CorvidHEVC";
-        case DEVICE_ID_KONAIP_4CH_1SFP:         return inForRetailDisplay ? "KONA IP 4CH 1SFP"          : "KonaIP4Ch1SFP";
-        case DEVICE_ID_KONAIP_4CH_2SFP:         return inForRetailDisplay ? "KONA IP 4CH 2SFP"          : "KonaIP4Ch2SFP";
-        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K"  : "KonaIP1Rx1Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K"      : "KonaIP2Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
-
-        case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
+		case DEVICE_ID_IO4K:		return inForRetailDisplay ?	"Io4K"					: "Io4K";
+		case DEVICE_ID_IO4KUFC:		return inForRetailDisplay ?	"Io4K UFC"				: "Io4KUfc";
+		case DEVICE_ID_KONA4:		return inForRetailDisplay ?	"KONA 4"				: "Kona4";
+		case DEVICE_ID_KONA4UFC:	return inForRetailDisplay ?	"KONA 4 UFC"			: "Kona4Ufc";
+		case DEVICE_ID_CORVID88:	return inForRetailDisplay ?	"Corvid 88"				: "Corvid88";
+		case DEVICE_ID_CORVID44:	return inForRetailDisplay ?	"Corvid 44"				: "Corvid44";
+		case DEVICE_ID_CORVIDHEVC:  return inForRetailDisplay ?	"Corvid HEVC"			: "CorvidHEVC";
+		case DEVICE_ID_KONAIP_4CH_1SFP:	return inForRetailDisplay ? "KONA IP 4CH 1SFP"	: "KonaIP4Ch1SFP";
+		case DEVICE_ID_KONAIP_4CH_2SFP:	return inForRetailDisplay ? "KONA IP 4CH 2SFP"	: "KonaIP4Ch2SFP";
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
+		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
+		case DEVICE_ID_IO4KIP:		return "Io4KIP";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
 //	    default:					break;
 #else
@@ -7137,6 +7137,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
 			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
+			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
+			case DEVICE_ID_IO4KIP:						return "io4kip_pcie.bit";
 			default:									return "";
 		}
 	#else

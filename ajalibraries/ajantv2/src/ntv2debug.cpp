@@ -91,6 +91,8 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
         case DEVICE_ID_TTAP:						return "DEVICE_ID_TTAP";						break;
         case DEVICE_ID_IO4K:						return "DEVICE_ID_IO4K";						break;
         case DEVICE_ID_IO4KUFC:						return "DEVICE_ID_IO4KUFC";						break;
+		case DEVICE_ID_IO4KPLUS:					return "DEVICE_ID_IO4KPLUS";					break;
+		case DEVICE_ID_IO4KIP:						return "DEVICE_ID_IO4KIP";						break;
         case DEVICE_ID_KONA4:						return "DEVICE_ID_KONA4";						break;
         case DEVICE_ID_KONA4UFC:					return "DEVICE_ID_KONA4UFC";					break;
         case DEVICE_ID_CORVID88:					return "DEVICE_ID_CORVID88";					break;
