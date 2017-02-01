@@ -196,6 +196,8 @@ class RegisterExpert
 			DefineRegister (kRegHDMIInputStatus,	"",	mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 			//DefineRegister (kRegHDMIInputControl,	"",	mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 
+			SetupSDIError();
+
 			//	Virtuals
 			SetupVRegs();
 
@@ -414,6 +416,23 @@ private:
 				DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlandField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			}
 		}	//	SetupAncInsExt
+
+		void SetupSDIError(void)
+		{
+			static const ULWord	baseNum[]	=	{kRegRXSDI1Status,		kRegRXSDI2Status,	kRegRXSDI3Status,	kRegRXSDI4Status,	kRegRXSDI5Status,	kRegRXSDI6Status,	kRegRXSDI7Status,	kRegRXSDI8Status};
+			static const string	suffixes []	=	{"Status",   "CRCErrorCount",  "FrameCountLow",   "FrameCountHigh",  "FrameRefCountLow",    "FrameRefCountHigh"};
+			static const int	perms []	=	{READWRITE,  READWRITE,      READWRITE,         READONLY,          READONLY,              READONLY};
+			for (ULWord chan (0);  chan < 8;  chan++)
+				for (UWord ndx(0);  ndx < 6;  ndx++)
+				{
+					ostringstream	ossName;	ossName << "kRegRXSDI" << (chan+1) << suffixes[ndx];
+					DefineRegister (baseNum[chan] + ndx,  ossName.str(),
+									ndx ? (ndx == 1 ? mSDIErrorCountRegDecoder : mDefaultRegDecoder) : mSDIErrorStatusRegDecoder,
+									perms[ndx],  kRegClass_SDIError,  gChlClasses[chan],  kRegClass_Input);
+				}
+			DefineRegister (kRegRXSDIFreeRunningClockLow, "kRegRXSDIFreeRunningClockLow", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
+			DefineRegister (kRegRXSDIFreeRunningClockHigh, "kRegRXSDIFreeRunningClockHigh", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
+		}	//	SetupSDIError
 
 		void SetupVRegs(void)
 		{
@@ -838,6 +857,12 @@ public:
 			if (::NTV2DeviceCanDoCustomAnc (inDeviceID))
 			{
 				const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_Anc));
+				for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
+					result.insert (*it);
+			}
+			if (::NTV2DeviceCanDoSDIErrorChecks (inDeviceID))
+			{
+				const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_SDIError));
 				for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
 					result.insert (*it);
 			}
@@ -1620,6 +1645,35 @@ public:
 				return oss.str();
 			}
 		}	mFlatMatteValueRegDecoder;
+
+		struct DecodeSDIErrorStatus : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inRegNum;
+				(void) inDeviceID;
+				ostringstream	oss;
+				oss	<< "Lock Count: "			<< DEC(inRegValue & 0x7FFF)		<< endl
+					<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
+					<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
+					<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl
+					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
+				return oss.str();
+			}
+		}	mSDIErrorStatusRegDecoder;
+
+		struct DecodeSDIErrorCount : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inRegNum;
+				(void) inDeviceID;
+				ostringstream	oss;
+				oss	<< "Link A: "		<< DEC(inRegValue & 0x0000FFFF)			<< endl
+					<< "Link B: "		<< DEC((inRegValue & 0xFFFF0000) >> 16);
+				return oss.str();
+			}
+		}	mSDIErrorCountRegDecoder;
 
 		static const int	NOREADWRITE	=	0;
 		static const int	READONLY	=	1;

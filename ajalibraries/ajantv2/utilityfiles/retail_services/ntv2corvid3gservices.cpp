@@ -23,8 +23,6 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
-	NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
-
 	NTV2FrameBufferFormat fbFormatCh1;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	bool bCh1RGB = IsFrameBufferFormatRGB(fbFormatCh1);
@@ -41,7 +39,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(frameBufferVideoFormat);
+	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
@@ -427,10 +425,9 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
-	NTV2VideoFormat				frameBufferFormat	= GetFrameBufferVideoFormat();
-	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull; 
+	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
-	bool						bLevelBFormat		= IsVideoFormatB(frameBufferFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bCh1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
@@ -438,12 +435,12 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 													  
 	NTV2CrosspointID	inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID	inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2VideoFormat				inputFormat			= frameBufferFormat;	// Input source selected format
+	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;	// Input source selected format
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
@@ -470,7 +467,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// Compression Module
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		mCard->Connect (NTV2_XptCompressionModInput, inputXptYUV1);
 	}
@@ -483,7 +480,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// CSC 1
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 		}
@@ -551,7 +548,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	}
 	else 
 	{
-		if ( (inputFormat == frameBufferFormat) &&	// formats are same
+		if ( (inputFormat == mFb1VideoFormat) &&	// formats are same
 			 !(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
@@ -623,14 +620,13 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
-	NTV2VideoFormat			frameBufferFormat = GetFrameBufferVideoFormat();
 	
 	// VPID
 	bool					b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(frameBufferFormat) ||
+												  IsVideoFormatB(mFb1VideoFormat) ||
 												  bRGBOut;
 											  
 	const bool				kNot48Bit = false;
@@ -645,7 +641,7 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	//
@@ -663,15 +659,15 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(frameBufferFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 	
 	// Set VPID
-	vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(frameBufferFormat);
-	SetVPIDData(vpidOut1a, frameBufferFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
+	vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
+	SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
 	if (bDualStreamOut && b3GbTransportOut)
-		SetVPIDData(vpidOut1b, frameBufferFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
+		SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	
 	
 	// Finish VPID for SDI 1 Out / SDI 2 Out 
