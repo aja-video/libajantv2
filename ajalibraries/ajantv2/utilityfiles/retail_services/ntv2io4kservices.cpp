@@ -24,8 +24,7 @@ void Io4KServices::UpdateAutoState (void)
 	// auto mode from transport
 	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
 	{
-		NTV2VideoFormat	fbVideoFormat = GetFrameBufferVideoFormat();
-		if (IsVideoFormatA(fbVideoFormat))
+		if (IsVideoFormatA(mFb1VideoFormat))
 			mDualStreamTransportType = NTV2_SDITransport_3Ga;
 		else
 			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
@@ -98,10 +97,9 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
 	
-	NTV2VideoFormat				fbVideoFormat		= GetFrameBufferVideoFormat();
-	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(fbVideoFormat);
-	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(fbVideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(fbVideoFormat);
+	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -144,7 +142,7 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(fbVideoFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1547,14 +1545,13 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 	
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat				fbVideoFormat		= GetFrameBufferVideoFormat();
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
-	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(fbVideoFormat);
-	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(fbVideoFormat);
+	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						bHdmiIn             = (mVirtualInputSelect == NTV2_Input5Select);
-	bool						bLevelBFormat		= IsVideoFormatB(fbVideoFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2wire4k            = (b4K && !b4kHfr 
 		                                               &&  ( (mVirtualInputSelect == NTV2_DualLink2xSdi4k) 
 															|| (bHdmiIn && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire)));
@@ -1573,7 +1570,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(fbVideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	bool levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
 
 	// input 1 select
@@ -1780,7 +1777,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else if (inputFormatSelect != NTV2_RGBSelect)
 	{
-		if (inputFormat == fbVideoFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 		}
@@ -2070,7 +2067,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptHDMIIn);
 		}
 	}
-	else if (inputFormat == fbVideoFormat)
+	else if (inputFormat == mFb1VideoFormat)
 	{
 		if (bHdmiIn && bRGBOut4K)
 		{
@@ -2655,7 +2652,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (IsVideoFormatB(fbVideoFormat) ||											// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||				// Stereo 3D
 			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -2754,7 +2751,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (IsVideoFormatB(fbVideoFormat) ||											// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 			 mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||				// Stereo 3D
 			 mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -2828,7 +2825,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (IsVideoFormatB(fbVideoFormat) ||											// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 			 mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||				// Stereo 3D
 			 mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -2997,21 +2994,20 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 	
 	//GeneralFrameFormat	genFormat			= GetGeneralFrameFormat(primaryPixelFormat);
-	NTV2VideoFormat			primaryVideoFormat	= GetFrameBufferVideoFormat();
 	const bool				kNot48Bit			= false;
 	
 	// VPID
 	bool					bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
-	bool					bLevelA             = IsVideoFormatA(primaryVideoFormat);
-	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(primaryVideoFormat);
-	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(primaryVideoFormat);
-	bool					bHfr				= NTV2_IS_3G_FORMAT(primaryVideoFormat);
+	bool					bLevelA             = IsVideoFormatA(mFb1VideoFormat);
+	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	//bool					vpid16x9			= ! NTV2_IS_SD_VIDEO_FORMAT(primaryVideoFormat);
 
 	VPIDChannel				vpidChannela;
 	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b, vpidOut5a, vpidOut5b;
-	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (primaryVideoFormat);
+	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat			= NTV2_FORMAT_UNKNOWN;
 	
 	// single wire 3Gb out
@@ -3021,7 +3017,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 							 (bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-							 (IsVideoFormatB(primaryVideoFormat) == true)  );
+							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
 	bool b2wire4kOut = (    ((mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
 		                 || ((mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
@@ -3119,8 +3115,8 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	else
 	{
 		// set standard / mode
-		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(primaryVideoFormat);
-		NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(primaryVideoFormat);
+		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
+		NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 		
 		if (b4K && mode == NTV2_MODE_CAPTURE && bHdmiIn)
 		{
@@ -3257,13 +3253,13 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 			
 			mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(primaryVideoFormat));
+			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		else
 		{	
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(primaryVideoFormat));
+			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		
 		// color space sample rate
@@ -3373,7 +3369,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	
 	
 	// 4K Down Converter
-	bool bPsf = IsPSF(primaryVideoFormat);
+	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);
 	mCard->Enable4KPSFOutMode(bPsf);
 
@@ -3386,7 +3382,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(primaryVideoFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 			
 			
 	//
@@ -3417,10 +3413,10 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Set VPID 1
 	if (b4K)
 	{
-		SetVPIDData(vpidOut1a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
+		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
 		if (b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut1b, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
 		}
 	}
 	
@@ -3451,12 +3447,12 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut2a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
+			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
+			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
 		}
 		else
 		{
-			SetVPIDData(vpidOut2a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
 		}
 	}
 	
@@ -3488,20 +3484,20 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_5);
-			SetVPIDData(vpidOut3b, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_6);
+			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_5);
+			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_6);
 		}
 		else
 		{
-			SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
+			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
 		}
 	}
 	else
 	{
         bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
-        SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
+        SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
         if (b3gb)
-	        SetVPIDData(vpidOut3b, primaryVideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+	        SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 	}
 	
 	
@@ -3531,12 +3527,12 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_7);
-			SetVPIDData(vpidOut4b, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_8);
+			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_7);
+			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_8);
 		}
 		else
 		{
-			SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
+			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
 		}
 	}
 	else
@@ -3552,17 +3548,17 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 			{
 				vpidChannela = VPIDChannel_1;
 			}
-			SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, vpidChannela, true);
+			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, vpidChannela, true);
 			if (b3GbTransportOut)
 			{
-				SetVPIDData(vpidOut4b, primaryVideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+				SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
 			}
 		}
 		else
 		{
             // is TSI  low frame rate 2-wire
-            SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, true, b2pi, VPIDChannel_3);
-			SetVPIDData(vpidOut4b, primaryVideoFormat, bRGBOut, kNot48Bit, true, b2pi, VPIDChannel_4);
+            SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, true, b2pi, VPIDChannel_3);
+			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, true, b2pi, VPIDChannel_4);
 		}
 	}
 	
@@ -3616,7 +3612,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		if (bHfr)
 		{
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
-			sdi5_3GbTransportOut = IsVideoFormatB(primaryVideoFormat)
+			sdi5_3GbTransportOut = IsVideoFormatB(mFb1VideoFormat)
 				|| (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
@@ -3634,20 +3630,20 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (sdi5_3GbTransportOut)
 		{
-			SetVPIDData(vpidOut5a, primaryVideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
-			SetVPIDData(vpidOut5b, primaryVideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut5a, mFb1VideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+			SetVPIDData(vpidOut5b, mFb1VideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
 		}
 		else
 		{
-			SetVPIDData(vpidOut5a, primaryVideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+			SetVPIDData(vpidOut5a, mFb1VideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
 		}
 	}
 	else
 	{
-		SetVPIDData(vpidOut5a, primaryVideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+		SetVPIDData(vpidOut5a, mFb1VideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
 		if (sdi5_3GbTransportOut)
 		{
-			SetVPIDData(vpidOut5b, primaryVideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut5b, mFb1VideoFormat, bRGBOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
 		}
 	}
 	

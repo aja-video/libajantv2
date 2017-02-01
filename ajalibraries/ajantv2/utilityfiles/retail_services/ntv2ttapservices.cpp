@@ -96,8 +96,7 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 
-	NTV2VideoFormat			frameBufferFormat = GetFrameBufferVideoFormat();
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (frameBufferFormat);
+	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
 	
 	// HDMI output - initialization sequence
@@ -213,9 +212,7 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		
 		// generate vpid register value
         // get video format
-        NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
-
-		SetVPIDData(vpidOut1a, frameBufferVideoFormat, kRGBOut, kNot48Bit, kNot3Gb, false, VPIDChannel_1);
+		SetVPIDData(vpidOut1a, mFb1VideoFormat, kRGBOut, kNot48Bit, kNot3Gb, false, VPIDChannel_1);
 		
 		// write VPID for SDI 1
 		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);

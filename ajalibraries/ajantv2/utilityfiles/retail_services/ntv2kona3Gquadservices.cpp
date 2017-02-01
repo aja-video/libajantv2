@@ -32,10 +32,9 @@ void Kona3GQuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
 
-	NTV2VideoFormat				fbVideoFormat		= GetFrameBufferVideoFormat();
-	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(fbVideoFormat);
-	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(fbVideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(fbVideoFormat);
+	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -71,7 +70,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 	}
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(fbVideoFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	// input 1 select
@@ -973,12 +972,11 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat				fbVideoFormat		= GetFrameBufferVideoFormat();
-	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull; 
+	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(fbVideoFormat);
-	bool						b4kHfr           	= NTV2_IS_4K_HFR_VIDEO_FORMAT(fbVideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(fbVideoFormat);
+	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b4kHfr           	= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2wire4k         	= (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						bStereoIn			= false;
 	int							bCh1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
@@ -995,7 +993,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(fbVideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	
 	// input 1 select
@@ -1115,7 +1113,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 	}
 	else if (inputFormatSelect != NTV2_RGBSelect)
 	{
-		if (inputFormat == fbVideoFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 		}
@@ -1320,7 +1318,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 
 
 	// Dual Link Out 1
-	if (inputFormat == fbVideoFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		// Input is NOT secondary
 	
@@ -1592,7 +1590,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 		mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptSDIIn1DS2);
 	}
-	else if (IsVideoFormatB(fbVideoFormat) ||												// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
@@ -1634,7 +1632,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 		mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn2);
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn2DS2);
 	}
-	else if (IsVideoFormatB(fbVideoFormat) ||												// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
@@ -1723,23 +1721,22 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
-	NTV2VideoFormat			primaryVideoFormat = GetFrameBufferVideoFormat();
 	const bool				kNot48Bit = false;
 	
 	// VPID
-	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(primaryVideoFormat);
-	bool					b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(primaryVideoFormat);
+	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool 					b2wire4kOut 		= (mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool 					b2wire4kIn 			= (mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
 	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(primaryVideoFormat) ||
+												  IsVideoFormatB(mFb1VideoFormat) ||
 												  bRGBOut || b2wire4kIn || b2wire4kOut;
 	bool					b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bRGBOut) || b2wire4kOut || b2wire4kIn;
 	VPIDChannel				vpidChannela;
 	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (primaryVideoFormat);
+	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
@@ -1884,7 +1881,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(primaryVideoFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	//
@@ -1903,7 +1900,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetLHIVideoDACStandard (&curr2Standard);
 
 	// Select DAC mode from framebufferformat
-	new2Mode = GetLHIVideoDACMode (primaryVideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
+	new2Mode = GetLHIVideoDACMode (mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
 	new2Standard = primaryStandard;
 	
 	// write it only if the new value is different
@@ -1932,17 +1929,17 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(primaryVideoFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 	
 	// Set VPID 1
 	if (b4K)
 	{
-		SetVPIDData(vpidOut1a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
+		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut1b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 		}
 	}
 	
@@ -1963,7 +1960,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(primaryVideoFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
 	
@@ -1972,12 +1969,12 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut2a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
+			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
+			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
 		}
 		else
 		{
-			SetVPIDData(vpidOut2a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 		}
 	}
 	
@@ -1998,7 +1995,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, IsVideoFormatA(primaryVideoFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
 	}
 
@@ -2008,20 +2005,20 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_5);
-			SetVPIDData(vpidOut3b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_6);
+			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_5);
+			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_6);
 		}
 		else
 		{
-			SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
+			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
 		}
 	}
 	else
 	{
-		SetVPIDData(vpidOut3a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
+		SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut3b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 		}
 	}
 
@@ -2041,7 +2038,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, IsVideoFormatA(primaryVideoFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
 	}
 	
@@ -2050,21 +2047,21 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_7);
-			SetVPIDData(vpidOut4b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_8);
+			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_7);
+			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_8);
 		}
 		else
 		{
-			SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
+			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
 		}
 	}
 	else 
 	{
 		vpidChannela = (bDualStreamOut && !b3GbTransportOut) ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOut4a, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, vpidChannela, true);
+		SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, vpidChannela, true);
 		if (bDualStreamOut && b3GbTransportOut)
 		{
-			SetVPIDData(vpidOut4b, primaryVideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
+			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 		}
 	}
 	

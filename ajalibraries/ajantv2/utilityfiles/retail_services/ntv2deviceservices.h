@@ -213,8 +213,7 @@ public:
 
 	void SetCard (CNTV2VidProc* card)
 		{ mCard = card; }
-	NTV2VideoFormat GetFrameBufferVideoFormat()
-		{ return mFb1VideoFormat; }
+	
 };
 
 #endif
