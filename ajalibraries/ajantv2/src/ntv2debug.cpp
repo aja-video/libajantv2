@@ -91,8 +91,6 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
         case DEVICE_ID_TTAP:						return "DEVICE_ID_TTAP";						break;
         case DEVICE_ID_IO4K:						return "DEVICE_ID_IO4K";						break;
         case DEVICE_ID_IO4KUFC:						return "DEVICE_ID_IO4KUFC";						break;
-		case DEVICE_ID_IO4KPLUS:					return "DEVICE_ID_IO4KPLUS";					break;
-		case DEVICE_ID_IO4KIP:						return "DEVICE_ID_IO4KIP";						break;
         case DEVICE_ID_KONA4:						return "DEVICE_ID_KONA4";						break;
         case DEVICE_ID_KONA4UFC:					return "DEVICE_ID_KONA4UFC";					break;
         case DEVICE_ID_CORVID88:					return "DEVICE_ID_CORVID88";					break;
@@ -104,6 +102,8 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K";		break;
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "DEVICE_ID_KONAIP_2TX_1SFP_J2K";			break;
         case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			return "DEVICE_ID_KONAIP_2RX_1SFP_J2K";			break;
+		case DEVICE_ID_IO4KPLUS:					return "DEVICE_ID_IO4KPLUS";					break;
+		case DEVICE_ID_IO4KIP:						return "DEVICE_ID_IO4KIP";						break;
         case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";					break;
 	}
 	return "";
@@ -186,6 +186,8 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "KonaIP_1Rx_1Tx_1sfp_j2k";	break;
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "KonaIP_2Tx_1sfp_j2k";		break;
         case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			return "KonaIP_2Rx_1sfp_j2k";		break;
+		case DEVICE_ID_IO4KPLUS:						return "Io4KPLUS";						break;
+		case DEVICE_ID_IO4KIP:						return "Io4KIP";						break;
         case DEVICE_ID_NOTFOUND:					return "Unknown";					break;
 	}
 
