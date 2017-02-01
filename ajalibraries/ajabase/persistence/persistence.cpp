@@ -99,11 +99,11 @@ std::string storagePath(bool bSharedPrefFile)
     if (home)
     {
         path.append(home);
-        path.append("/.aja/config");
+        path.append("/.aja/config/");
     }
     else
     {
-        path.append("/opt/aja/config");
+        path.append("/opt/aja/config/");
     }
 #endif	
 	
