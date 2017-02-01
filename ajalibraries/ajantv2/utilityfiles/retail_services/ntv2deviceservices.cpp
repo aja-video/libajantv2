@@ -50,6 +50,8 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
             pDeviceServices = new KonaIP22Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 			pDeviceServices = new KonaIPJ2kServices();
 			break;
         case DEVICE_ID_KONA4:
