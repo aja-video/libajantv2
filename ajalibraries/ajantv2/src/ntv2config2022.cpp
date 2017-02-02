@@ -249,7 +249,6 @@ void j2kEncoderConfig::init()
     ullMode         = false;
     bitDepth        = 10;
     chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
-    codeBlocksize   = kJ2KCodeBlocksize_32x32;
     mbps            = 200;
     streamType      = kJ2KStreamTypeStandard;
     pmtPid          = 255;
@@ -269,7 +268,6 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
         (ullMode            == other.ullMode)           &&
         (bitDepth           == other.bitDepth)          &&
         (chromaSubsamp      == other.chromaSubsamp)     &&
-        (codeBlocksize      == other.codeBlocksize)     &&
         (mbps               == other.mbps)              &&
         (streamType         == other.streamType)        &&
         (pmtPid             == other.pmtPid)            &&

@@ -51,7 +51,6 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, config.bitDepth);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t) config.chromaSubsamp);
-    WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t) config.codeBlocksize);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, config.mbps);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t) config.streamType);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, config.pmtPid);
@@ -98,7 +97,6 @@ bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoder
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &config.ullMode);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &config.bitDepth);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &config.chromaSubsamp);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t *) &config.codeBlocksize);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &config.mbps);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &config.streamType);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, &config.pmtPid);
@@ -115,7 +113,6 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
     uint32_t                ullMode;
     uint32_t                bitDepth;
     J2KChromaSubSampling    subSamp;
-    J2KCodeBlocksize        codeBlocksize;
     uint32_t                mbps;
 
     uint32_t                bitRateMsb;
@@ -127,6 +124,7 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
     uint32_t                sb_rmv_c0 = 0;
     uint32_t                sb_rmv_c1 = 0;
     uint32_t                sb_rmv_c2 = 0;
+    J2KCodeBlocksize        codeBlocksize = kJ2KCodeBlocksize_32x32;
 
     uint32_t                regulator_type = 0;
     uint32_t                Rsiz = 258;
@@ -150,7 +148,6 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &ullMode);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &bitDepth);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &subSamp);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeCodeBlockSize1, (uint32_t *) &codeBlocksize);
     ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &mbps);
 
 
