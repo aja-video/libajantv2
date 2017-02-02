@@ -28,11 +28,6 @@
 **/
 typedef struct NTV2FormatDescriptor
 {
-	ULWord	numLines;			///< @brief	Height -- total number of lines
-	ULWord	numPixels;			///< @brief	Width -- total number of pixels per line
-	ULWord	linePitch;			///< @brief	Number of 32-bit words per line
-	ULWord	firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
-
 	/**
 		@brief	My default constructor initializes me in an "invalid" state.
 	**/
@@ -97,13 +92,14 @@ typedef struct NTV2FormatDescriptor
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const NTV2VANCMode			inVancMode);
 
-	inline bool		IsValid (void) const				{return numLines && numPixels && linePitch;}		///< @return	True if valid;  otherwise false.
+	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}						///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return NTV2_IS_FBF_PLANAR (mPixelFormat);}			///< @return	True if planar format;  otherwise false.
-	inline ULWord	GetTotalRasterBytes (void) const	{return numLines * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold the raster.
-	inline ULWord	GetVisibleRasterBytes (void) const	{return (numLines - firstActiveLine) * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold only the visible raster.
-	inline ULWord	GetBytesPerRow (void) const			{return linePitch * sizeof (ULWord);}				///< @return	The number of bytes per raster row.
+	inline bool		IsPlanar (void) const				{return mNumPlanes > 0 || NTV2_IS_FBF_PLANAR (mPixelFormat);}			///< @return	True if planar format;  otherwise false.
+	inline ULWord	GetTotalRasterBytes (const UWord inPlane = 0) const	{return numLines * mLinePitch[inPlane];}///< @return	The total number of bytes required to hold the raster.
+	inline ULWord	GetVisibleRasterBytes (const UWord inPlane = 0) const	{return (numLines - firstActiveLine) * mLinePitch[inPlane];}	///< @return	The total number of bytes required to hold only the visible raster.
+	inline ULWord	GetBytesPerRow (const UWord inPlane = 0) const	{return inPlane < 4 ? mLinePitch[inPlane] : 0;}		///< @return	The number of bytes per raster row.
 	inline ULWord	GetRasterWidth (void) const			{return numPixels;}									///< @return	The width of the raster, in pixels.
+	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}								///< @return	The number of planes in the raster.
 
 	/**
 		@return	The height of the raster, in lines.
@@ -197,17 +193,25 @@ typedef struct NTV2FormatDescriptor
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
 
-	void							MakeInvalid (void);		///< @brief	Resets me into an invalid (NULL) state.
+	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
-	//	Private Member Data
 	private:
-		NTV2Standard			mStandard;		///< @brief	My originating video standard
-		NTV2VideoFormat			mVideoFormat;	///< @brief	My originating video format (if known)
-		NTV2FrameBufferFormat	mPixelFormat;	///< @brief	My originating frame buffer format
-		NTV2VANCMode			mVancMode;		///< @brief	My originating VANC mode
-		bool					m2Kby1080;		///< @brief	My originating 2Kx1080 setting
-		ULWord					mLinePitch[4];	///< @brief	Number of 32-bit words per line for other planes
-		UWord					mNumPlanes;		///< @brief	Number of planes
+		void						FinalizePlanar (void);			///< @brief	Finishes initialization for planar formats
+
+	//	Member Data
+	public:
+		ULWord					numLines;			///< @brief	Height -- total number of lines
+		ULWord					numPixels;			///< @brief	Width -- total number of pixels per line
+		ULWord					linePitch;			///< @brief	Number of 32-bit words per line. Shadows mLinePitch[0] * sizeof(ULWord).
+		ULWord					firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
+	private:
+		NTV2Standard			mStandard;			///< @brief	My originating video standard
+		NTV2VideoFormat			mVideoFormat;		///< @brief	My originating video format (if known)
+		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
+		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
+		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
+		ULWord					mLinePitch[4];		///< @brief	Number of bytes per line (per-plane)
+		UWord					mNumPlanes;			///< @brief	Number of planes
 
 } NTV2FormatDescriptor;
 
