@@ -23,8 +23,6 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
-
-	NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
 	
 	NTV2FrameBufferFormat fbFormatCh1;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
@@ -42,7 +40,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(frameBufferVideoFormat);
+	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 	
@@ -239,7 +237,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	}
 	else if (   (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)		// if our output is "Primary"
 		     || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
-				 && (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+				 && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				 && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
@@ -292,7 +290,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	}
 	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
 			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
-			      && (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
@@ -332,7 +330,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// HDMI Out
 	if (   (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)					// if our output is "Primary"
 		|| (   (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptHDMIOutInput, frameSync1YUV);
@@ -351,7 +349,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// Analog Out
 	if (   (mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptAnalogOutInput, frameSync1YUV);
@@ -614,10 +612,9 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
-	NTV2VideoFormat				frameBufferFormat	= GetFrameBufferVideoFormat();
-	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull; 
+	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
-	bool						bLevelBFormat		= IsVideoFormatB(frameBufferFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	bool						bEanbleConverter	= false;
@@ -626,12 +623,12 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 													  
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2VideoFormat				inputFormat			= frameBufferFormat;	// Input source selected format
+	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
@@ -670,7 +667,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		frameSync1YUV = inputXptYUV1;
 	}
-	else if (inputFormat == frameBufferFormat && !ISO_CONVERT_FMT(inputFormat))
+	else if (inputFormat == mFb1VideoFormat && !ISO_CONVERT_FMT(inputFormat))
 	{
 		frameSync1YUV = inputXptYUV1;
 	}
@@ -687,7 +684,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		frameSync2YUV = inputXptYUV2;
 	}
-	else if (inputFormat == frameBufferFormat && !ISO_CONVERT_FMT(inputFormat))
+	else if (inputFormat == mFb1VideoFormat && !ISO_CONVERT_FMT(inputFormat))
 	{
 		frameSync2YUV = NTV2_XptConversionModule;
 		bEanbleConverter = true;
@@ -719,9 +716,8 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptBlack);
 
 
-
 	// Compression Module
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		mCard->Connect (NTV2_XptCompressionModInput, inputXptYUV1);
 	}
@@ -739,7 +735,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// CSC 1
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 		}
@@ -791,7 +787,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 
 
 	// Dual Link Out 1
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		// Input is NOT secondary
 	
@@ -859,7 +855,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else 
 	{
-		if ( (inputFormat == frameBufferFormat) &&	// formats are same
+		if ( (inputFormat == mFb1VideoFormat) &&	// formats are same
 			 !(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
@@ -924,7 +920,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else if (   (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
 		|| (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
@@ -972,7 +968,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			      && (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
@@ -993,7 +989,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// HDMI Out
 	if (   (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)						// if our output is "Primary"
 		|| (   (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)				// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		if (inputFormatSelect == NTV2_RGBSelect)
@@ -1014,7 +1010,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// Analog Out
 	if (   (mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect)					// if our output is "Primary"
 		|| (   (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)				// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		if (inputFormatSelect == NTV2_RGBSelect)
@@ -1053,7 +1049,7 @@ void Kona3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
-	NTV2VideoFormat			frameBufferFormat = GetFrameBufferVideoFormat();
+	NTV2VideoFormat			frameBufferFormat = mFb1VideoFormat;
 	
 	// VPID
 	bool					b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);

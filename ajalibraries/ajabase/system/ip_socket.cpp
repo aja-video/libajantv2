@@ -68,7 +68,7 @@ AJAIPSocket::~AJAIPSocket(void)
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::Initialize(void)
 {
 	mMutex.Lock();
@@ -115,7 +115,7 @@ AJAIPSocket::Initialize(void)
 #endif
 
 	mMutex.Unlock();
-	return (0 != mInstantiationCount) ? AJA_STATUS_TRUE : AJA_STATUS_FALSE;
+	return (0 != mInstantiationCount) ? true : false;
 }
 
 
@@ -123,7 +123,7 @@ AJAIPSocket::Initialize(void)
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::Deinitialize(void)
 {
 	mMutex.Lock();
@@ -148,17 +148,17 @@ AJAIPSocket::Deinitialize(void)
 
 	}
 	mMutex.Unlock();
-	return (AJA_STATUS_SUCCESS);
+	return true;
 }
 
 
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::Open(const string& ipAddress, uint16_t port)
 {
-	return (AJA_STATUS_FAIL);
+	return false;
 }
 
 
@@ -177,14 +177,14 @@ bool AJAIPSocket::IsOpen(void)
 //   SHUT_WR
 //   SHUT_RDWR
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::Shutdown(int how)
 {
 	if (-1 != mSocket)
 	{
 		if (0 == shutdown(mSocket, how))
 		{
-			return (AJA_STATUS_SUCCESS);
+			return true;
 		}
 #if DEBUG_SOCKET_OPERATION
 		cout << __FUNCTION__
@@ -193,33 +193,33 @@ AJAIPSocket::Shutdown(int how)
 			<< endl;
 #endif
 	}
-	return (AJA_STATUS_FAIL);
+	return false;
 }
 
 
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::Close(void)
 {
 	if (-1 != mSocket)
 	{
 		CLOSE_SOCKET(mSocket);
 		mSocket = -1;
-		return (AJA_STATUS_SUCCESS);
+		return true;
 	}
-	return (AJA_STATUS_FAIL);
+	return false;
 }
 
 
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJAStatus
+bool
 AJAIPSocket::SetSocketOption(int option, const void* pValue)
 {
-	AJAStatus status = AJA_STATUS_FAIL;
+	bool status = false;
 
 	if ((-1 != mSocket) && (NULL != pValue))
 	{
@@ -242,7 +242,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 #endif
 							sizeof(int)))
 				{
-					status = AJA_STATUS_SUCCESS;
+					status = true;
 				}
 			}
 
@@ -259,7 +259,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 #endif
 							sizeof(struct linger)))
 				{
-					status = AJA_STATUS_SUCCESS;
+					status = true;
 				}
 			}
 
@@ -277,7 +277,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 #endif
 							sizeof(struct ip_mreq)))
 				{
-					status = AJA_STATUS_SUCCESS;
+					status = true;
 				}
 			}
 
@@ -290,7 +290,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 				break;
 		}
 
-		if (AJA_STATUS_SUCCESS != status)
+		if (true != status)
 		{
 #if DEBUG_SOCKET_OPTION
 			cout << __FUNCTION__

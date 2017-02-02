@@ -50,6 +50,8 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
             pDeviceServices = new KonaIP22Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 			pDeviceServices = new KonaIPJ2kServices();
 			break;
         case DEVICE_ID_KONA4:
@@ -399,7 +401,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	// Get display/capture mode and call routines to setup XPoint
 	NTV2Mode mode = GetCh1Mode();
-	NTV2VideoFormat currentVideoFormat = GetFrameBufferVideoFormat();
 
 	if (mode == NTV2_MODE_DISPLAY)
 	{
@@ -414,7 +415,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		if (mFollowInputFormat)
 		{
 			NTV2VideoFormat lockedInputFormat = GetLockedInputVideoFormat();
-			if (currentVideoFormat != lockedInputFormat)
+			if (mFb1VideoFormat != lockedInputFormat)
 			{
 				mCard->WriteRegister(kRegDefaultVideoFormat, lockedInputFormat);
 				mCard->SetVideoFormat(lockedInputFormat);
@@ -1857,7 +1858,6 @@ bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 {
 	bool bResult = true;
 	NTV2DeviceID	deviceID = mCard->GetDeviceID();
-	NTV2VideoFormat videoFormat = GetFrameBufferVideoFormat();
 	
 	// if the board doesn't have LUTs, bail
 	if ( !::NTV2DeviceCanDoProgrammableCSC(deviceID) )
@@ -1880,7 +1880,7 @@ bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 		
 		// Auto-switch between SD (Rec 601) and HD (Rec 709)
 		case NTV2_ColorSpaceTypeAuto:
-			if (NTV2_IS_SD_VIDEO_FORMAT(videoFormat) )
+			if (NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
 				matrix = NTV2_Rec601Matrix;
 			else
 				matrix = NTV2_Rec709Matrix;
@@ -1924,7 +1924,6 @@ bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
 	NTV2DeviceID	deviceID = mCard->GetDeviceID();
-	NTV2VideoFormat videoFormat = GetFrameBufferVideoFormat();
 	
 	NTV2FrameBufferFormat frameBufferFormat;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &frameBufferFormat);
@@ -1953,7 +1952,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 	
 		// Auto-switch between SD (Rec 601) and HD (Rec 709)
 		case NTV2_GammaAuto:		
-			if (NTV2_IS_SD_VIDEO_FORMAT(videoFormat) )
+			if (NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
 				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
 			else
 				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
@@ -2004,7 +2003,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 		mCard->ReadRegister(kRegLUT5Type, &lut5Type);
 	
 	// test for special use of LUT2 for E-to-E rgb range conversion
-	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(videoFormat) == false) && (mode == NTV2_MODE_CAPTURE);
+	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == false) && (mode == NTV2_MODE_CAPTURE);
 	
 	// what LUT function is CURRENTLY loaded into hardware?
 	if ((wantedLUT != NTV2_LUTCustom) &&
@@ -2489,10 +2488,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 	mCard->ReadRegister(kRegAudioInputSelect, &audioInputSelect);
 	SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
-
-	NTV2VideoFormat fbVideoFormat = GetFrameBufferVideoFormat();
-
-	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(fbVideoFormat);
+	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	NTV2DeviceID deviceID = mCard->GetDeviceID();
 	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
 
@@ -2653,7 +2649,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 		mCard->SetReference(NTV2_REFERENCE_FREERUN);
 		break;
 	case kReferenceIn:
-		if (IsCompatibleWithReference(GetFrameBufferVideoFormat()))
+		if (IsCompatibleWithReference(mFb1VideoFormat))
 			mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
 		else
 			mCard->SetReference(NTV2_REFERENCE_FREERUN);
@@ -2880,7 +2876,6 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	// Reference
 	// If it's a video input, make sure it matches our current selection
 	ReferenceSelect refSelect = mDisplayReferenceSelect;
-	NTV2VideoFormat	fbVideoFormat = GetFrameBufferVideoFormat();
 	switch (refSelect)
 	{
 		default:
@@ -2888,7 +2883,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 			mCard->SetReference(NTV2_REFERENCE_FREERUN);
 			break;
 		case kReferenceIn:
-			if (IsCompatibleWithReference(fbVideoFormat))
+			if (IsCompatibleWithReference(mFb1VideoFormat))
 				mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
 			else
 				mCard->SetReference(NTV2_REFERENCE_FREERUN);

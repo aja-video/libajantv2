@@ -58,10 +58,8 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(format);
-
-	NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
 	
-	bool bDualStreamFB = IsVideoFormatB(frameBufferVideoFormat);
+	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 
 	NTV2FrameBufferFormat fbFormatCh1;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
@@ -306,7 +304,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	}
 	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			      && (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -348,7 +346,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	}
 	else if (   (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
 		     || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-				 && (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+				 && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				 && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -374,7 +372,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// Set HDMI output input (reg 141, bits 16-23)
 	if (   (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -390,7 +388,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// Set (Analog Out) input (reg 138, bits 7-0)
 	if (   (mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == frameBufferVideoFormat)
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -673,14 +671,13 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(format);
 
-	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat				frameBufferFormat = GetFrameBufferVideoFormat();
+	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID	inputSelectPrimary = NTV2_XptBlack; 
 	NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
-	bool						bDualStreamFB = IsVideoFormatB(frameBufferFormat);
+	bool				bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 														
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 
 	
 	// This is done all over so do it once here so we have the value
@@ -711,7 +708,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 
 
 	// Set compression module input (reg 136, bits 31-24)
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		mCard->Connect (NTV2_XptCompressionModInput, inputSelectPrimary);
 	}
@@ -729,7 +726,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set color space converter input (reg 136, bits 15-8)
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			// Select input 1 (0x01)
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
@@ -742,7 +739,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			// Select input 2 (0x17)
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptHDMIIn);
@@ -755,7 +752,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else if (mVirtualInputSelect == NTV2_Input3Select)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			// Select input 3 (0x16)
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptAnalogIn);
@@ -791,7 +788,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 
 
 	// Set DualLink output input (reg 137, bits 31-24) Note: same logic as Frame Buffer RGB input
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		// Input is Primary format
 		if ((mVirtualInputSelect == NTV2_Input1Select) ||
@@ -836,7 +833,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 		// Select input 2 (0x02)
 		mCard->Connect (NTV2_XptFrameSync2Input, NTV2_XptSDIIn2);
 	}
-	else if (inputFormat == frameBufferFormat && !ISO_CONVERT_FMT(inputFormat))
+	else if (inputFormat == mFb1VideoFormat && !ISO_CONVERT_FMT(inputFormat))
 	{
 		// Select Up/Down converter (0x06)
 		mCard->Connect (NTV2_XptFrameSync2Input, NTV2_XptConversionModule);
@@ -853,7 +850,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 		// Select input 1 (0x01)
 		mCard->Connect (NTV2_XptFrameSync1Input, NTV2_XptSDIIn1);
 	}
-	else if (inputFormat == frameBufferFormat && !ISO_CONVERT_FMT(inputFormat))
+	else if (inputFormat == mFb1VideoFormat && !ISO_CONVERT_FMT(inputFormat))
 	{
 		mCard->Connect (NTV2_XptFrameSync1Input, inputSelectPrimary);
 	}
@@ -872,7 +869,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else if  (format == FORMAT_RGB)
 	{
-		if (inputFormat == frameBufferFormat)
+		if (inputFormat == mFb1VideoFormat)
 		{
 			if ((mVirtualInputSelect == NTV2_Input1Select) ||
 				(mVirtualInputSelect == NTV2_Input2Select) ||
@@ -912,7 +909,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else 
 	{
-		if ( (inputFormat == frameBufferFormat) &&	// formats are same
+		if ( (inputFormat == mFb1VideoFormat) &&	// formats are same
 			 !(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, inputSelectPrimary);
@@ -947,7 +944,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			      && (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -968,7 +965,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set SDI output 1 input (reg 138, bits 15-8)
 	if (   (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -988,7 +985,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set HDMI output input (reg 141, bits 16-23)
 	if (   (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -1004,7 +1001,7 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set analog output input (reg 138, bits 7-0)
 	if (   (mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -1043,11 +1040,10 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat			frameBufferFormat = GetFrameBufferVideoFormat();
 	
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (frameBufferFormat);
+	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2FrameRate			secondardFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
-	bool					bDualStreamFB = IsVideoFormatB(frameBufferFormat);
+	bool					bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 	
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)
@@ -1161,7 +1157,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	//
@@ -1297,7 +1293,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	else
 	{
 		// Select DAC mode from framebufferformat
-		new2Mode = GetLHIVideoDACMode (frameBufferFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
+		new2Mode = GetLHIVideoDACMode (mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
 		new2Standard = primaryStandard;
 	}
 	
@@ -1321,7 +1317,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		// Select primary standard
 		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
 		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(frameBufferFormat));
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
 	}
 
 
@@ -1345,21 +1341,21 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
-		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(frameBufferFormat,mVirtualSecondaryFormatSelect) );
+		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
 		mCard->SetConverterOutStandard(secondaryStandard);			// so converter output = secondary format
 	}
 	else														// capture mode: converter may be on input or output
 	{
-		if (inputFormat == frameBufferFormat)					
+		if (inputFormat == mFb1VideoFormat)
 		{
 			// no input conversion needed - put converter on output
-			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(frameBufferFormat,mVirtualSecondaryFormatSelect) );
+			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
 			mCard->SetConverterOutStandard(secondaryStandard);				
 		}
 		else
 		{
 			// input conversion needed - need converter on input
-			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mVirtualSecondaryFormatSelect, frameBufferFormat) );
+			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mVirtualSecondaryFormatSelect, mFb1VideoFormat) );
 			mCard->SetConverterOutStandard(primaryStandard);			
 		}
 	}
@@ -1370,7 +1366,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	else														// capture mode: converter may be on input or output
 	{
-		if (inputFormat == frameBufferFormat)					// no input conversion needed - put converter on output
+		if (inputFormat == mFb1VideoFormat)					// no input conversion needed - put converter on output
 			mCard->SetConverterInStandard(primaryStandard);
 		else
 			mCard->SetConverterInStandard(secondaryStandard);		// input conversion needed - need converter on input

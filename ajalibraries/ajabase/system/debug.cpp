@@ -217,19 +217,19 @@ AJADebug::GetDestination(int32_t index, uint32_t* pDestination)
 }
 
 
-AJAStatus 
+bool
 AJADebug::IsActive(int32_t index)
 {
 	// check for open
 	if (spShare == NULL)
 	{
-		return AJA_STATUS_FALSE;
+        return false;
 	}
 
 	// check for valid index
 	if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
 	{
-		return AJA_STATUS_FALSE;
+        return false;
 	}
 
 	try
@@ -237,22 +237,22 @@ AJADebug::IsActive(int32_t index)
 		// if no destination return false
 		if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
 		{
-			return AJA_STATUS_FALSE;
+            return false;
 		}
 	}
 	catch(...)
 	{
-		return AJA_STATUS_FAIL;
+        return false;
 	}
 
-	return AJA_STATUS_TRUE;
+    return true;
 }
 
 
-AJAStatus 
+bool
 AJADebug::IsDebugBuild()
 {
-	return sDebug? AJA_STATUS_TRUE : AJA_STATUS_FALSE;
+    return sDebug;
 }
 
 
