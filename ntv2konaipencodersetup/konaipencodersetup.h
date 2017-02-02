@@ -15,7 +15,6 @@ typedef  struct {
     uint32_t bitDepth;
     uint32_t streamType;
     uint32_t chromaSubSampling;
-    uint32_t codeBlockSize;
     uint32_t mbps;
     uint32_t programPid;
     uint32_t videoPid;
@@ -31,7 +30,6 @@ public:
     CKonaIpEncoderJsonReader();
     bool openJson(QString fileName);
     void printVideoFormatMap();
-    void printCodeBlockSizeMap();
 
     KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
 
@@ -44,7 +42,6 @@ protected:
     QMap<QString, NTV2VideoFormat> videoFormatMap;
     QMap<QString, uint32_t> streamTypeMap;
     QMap<QString, uint32_t> chromaSubSamplingMap;
-    QMap<QString, uint32_t> codeBlockSizeMap;
 
 };
 
