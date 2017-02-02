@@ -201,7 +201,6 @@ public:
     uint32_t                ullMode;            ///< @brief	Specifies the ull mode for J2K encode.
     uint32_t                bitDepth;           ///< @brief	Specifies the bit depth for J2K encode.
     J2KChromaSubSampling    chromaSubsamp;      ///< @brief	Specifies the chroma sub sampling for J2K encode.
-    J2KCodeBlocksize        codeBlocksize;      ///< @brief	Specifies the code block size for J2K encode.
     uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
     J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
     uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.

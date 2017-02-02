@@ -418,49 +418,50 @@ typedef enum
     kVRegTxc_2EncodeUllMode1				= VIRTUALREG_START+480,
 	kVRegTxc_2EncodeBitDepth1               = VIRTUALREG_START+481,
 	kVRegTxc_2EncodeChromaSubSamp1          = VIRTUALREG_START+482,
-	kVRegTxc_2EncodeCodeBlockSize1          = VIRTUALREG_START+483,
-	kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+484,
-    kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+485,
-    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+486,
-    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+487,
-    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+488,
-    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+489,
+    kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+483,
+    kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+484,
+    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+485,
+    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+486,
+    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+487,
+    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+488,
     
-    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+490,
-    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+491,
-    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+492,
-    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+493,
-    kVRegTxc_2EncodeCodeBlockSize2          = VIRTUALREG_START+494,
-    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+495,
-    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+496,
-    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+497,
-    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+498,
-    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+499,
-    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+500,
+    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+489,
+    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+490,
+    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+491,
+    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+492,
+    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+493,
+    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+494,
+    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+495,
+    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+496,
+    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+497,
+    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+498,
 
-    kVRegTxc_2EncodeVideoFormat3            = VIRTUALREG_START+501,
-    kVRegTxc_2EncodeUllMode3				= VIRTUALREG_START+502,
-    kVRegTxc_2EncodeBitDepth3               = VIRTUALREG_START+503,
-    kVRegTxc_2EncodeChromaSubSamp3          = VIRTUALREG_START+504,
-    kVRegTxc_2EncodeCodeBlockSize3          = VIRTUALREG_START+505,
-    kVRegTxc_2EncodeMbps3                   = VIRTUALREG_START+506,
-    kVRegTxc_2EncodeStreamType3             = VIRTUALREG_START+507,
-    kVRegTxc_2EncodeProgramPid3             = VIRTUALREG_START+508,
-    kVRegTxc_2EncodeVideoPid3               = VIRTUALREG_START+509,
-    kVRegTxc_2EncodePcrPid3					= VIRTUALREG_START+510,
-    kVRegTxc_2EncodeAudio1Pid3              = VIRTUALREG_START+511,
+    kVRegTxc_2EncodeVideoFormat3            = VIRTUALREG_START+499,
+    kVRegTxc_2EncodeUllMode3				= VIRTUALREG_START+500,
+    kVRegTxc_2EncodeBitDepth3               = VIRTUALREG_START+501,
+    kVRegTxc_2EncodeChromaSubSamp3          = VIRTUALREG_START+502,
+    kVRegTxc_2EncodeMbps3                   = VIRTUALREG_START+503,
+    kVRegTxc_2EncodeStreamType3             = VIRTUALREG_START+504,
+    kVRegTxc_2EncodeProgramPid3             = VIRTUALREG_START+505,
+    kVRegTxc_2EncodeVideoPid3               = VIRTUALREG_START+506,
+    kVRegTxc_2EncodePcrPid3					= VIRTUALREG_START+507,
+    kVRegTxc_2EncodeAudio1Pid3              = VIRTUALREG_START+508,
 
-    kVRegTxc_2EncodeVideoFormat4            = VIRTUALREG_START+512,
-    kVRegTxc_2EncodeUllMode4				= VIRTUALREG_START+513,
-    kVRegTxc_2EncodeBitDepth4               = VIRTUALREG_START+514,
-    kVRegTxc_2EncodeChromaSubSamp4          = VIRTUALREG_START+515,
-    kVRegTxc_2EncodeCodeBlockSize4          = VIRTUALREG_START+516,
-    kVRegTxc_2EncodeMbps4                   = VIRTUALREG_START+517,
-    kVRegTxc_2EncodeStreamType4             = VIRTUALREG_START+518,
-    kVRegTxc_2EncodeProgramPid4             = VIRTUALREG_START+519,
-    kVRegTxc_2EncodeVideoPid4               = VIRTUALREG_START+520,
-    kVRegTxc_2EncodePcrPid4					= VIRTUALREG_START+521,
-    kVRegTxc_2EncodeAudio1Pid4              = VIRTUALREG_START+522,
+    kVRegTxc_2EncodeVideoFormat4            = VIRTUALREG_START+509,
+    kVRegTxc_2EncodeUllMode4				= VIRTUALREG_START+510,
+    kVRegTxc_2EncodeBitDepth4               = VIRTUALREG_START+511,
+    kVRegTxc_2EncodeChromaSubSamp4          = VIRTUALREG_START+512,
+    kVRegTxc_2EncodeMbps4                   = VIRTUALREG_START+513,
+    kVRegTxc_2EncodeStreamType4             = VIRTUALREG_START+514,
+    kVRegTxc_2EncodeProgramPid4             = VIRTUALREG_START+515,
+    kVRegTxc_2EncodeVideoPid4               = VIRTUALREG_START+516,
+    kVRegTxc_2EncodePcrPid4					= VIRTUALREG_START+517,
+    kVRegTxc_2EncodeAudio1Pid4              = VIRTUALREG_START+518,
+
+    kVRegJ2K_Placeholder1                   = VIRTUALREG_START+519,
+    kVRegJ2K_Placeholder2                   = VIRTUALREG_START+520,
+    kVRegJ2K_Placeholder3                   = VIRTUALREG_START+521,
+    kVRegJ2K_Placeholder4                   = VIRTUALREG_START+522,
 
 	kVReg2022_7Enable						= VIRTUALREG_START+523,
 	
@@ -809,7 +810,6 @@ typedef enum
     #define	kRegTxc_2EncodeUllMode1             kVRegTxc_2EncodeUllMode1
     #define	kRegTxc_2EncodeBitDepth1            kVRegTxc_2EncodeBitDepth1
     #define	kRegTxc_2EncodeChromaSubSamp1       kVRegTxc_2EncodeChromaSubSamp1
-    #define	kRegTxc_2EncodeCodeBlockSize1       kVRegTxc_2EncodeCodeBlockSize1
     #define	kRegTxc_2EncodeMbps1                kVRegTxc_2EncodeMbps1
     #define	kRegTxc_2EncodeStreamType1          kVRegTxc_2EncodeStreamType1
     #define	kRegTxc_2EncodeProgramPid1          kVRegTxc_2EncodeProgramPid1
@@ -820,7 +820,6 @@ typedef enum
     #define	kRegTxc_2EncodeUllMode2             kVRegTxc_2EncodeUllMode2
     #define	kRegTxc_2EncodeBitDepth2            kVRegTxc_2EncodeBitDepth2
     #define	kRegTxc_2EncodeChromaSubSamp2       kVRegTxc_2EncodeChromaSubSamp2
-    #define	kRegTxc_2EncodeCodeBlockSize2       kVRegTxc_2EncodeCodeBlockSize2
     #define	kRegTxc_2EncodeMbps2                kVRegTxc_2EncodeMbps2
     #define	kRegTxc_2EncodeStreamType2          kVRegTxc_2EncodeStreamType2
     #define	kRegTxc_2EncodeProgramPid2          kVRegTxc_2EncodeProgramPid2
@@ -831,7 +830,6 @@ typedef enum
     #define	kRegTxc_2EncodeUllMode3             kVRegTxc_2EncodeUllMode3
     #define	kRegTxc_2EncodeBitDepth3            kVRegTxc_2EncodeBitDepth3
     #define	kRegTxc_2EncodeChromaSubSamp3       kVRegTxc_2EncodeChromaSubSamp3
-    #define	kRegTxc_2EncodeCodeBlockSize3       kVRegTxc_2EncodeCodeBlockSize3
     #define	kRegTxc_2EncodeMbps3                kVRegTxc_2EncodeMbps3
     #define	kRegTxc_2EncodeStreamType3          kVRegTxc_2EncodeStreamType3
     #define	kRegTxc_2EncodeProgramPid3          kVRegTxc_2EncodeProgramPid3
@@ -842,7 +840,6 @@ typedef enum
     #define	kRegTxc_2EncodeUllMode4             kVRegTxc_2EncodeUllMode4
     #define	kRegTxc_2EncodeBitDepth4            kVRegTxc_2EncodeBitDepth4
     #define	kRegTxc_2EncodeChromaSubSamp4       kVRegTxc_2EncodeChromaSubSamp4
-    #define	kRegTxc_2EncodeCodeBlockSize4       kVRegTxc_2EncodeCodeBlockSize4
     #define	kRegTxc_2EncodeMbps4                kVRegTxc_2EncodeMbps4
     #define	kRegTxc_2EncodeStreamType4          kVRegTxc_2EncodeStreamType4
     #define	kRegTxc_2EncodeProgramPid4          kVRegTxc_2EncodeProgramPid4
