@@ -22,8 +22,6 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
-
-	NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
 	
 	NTV2FrameBufferFormat fbFormatCh1;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
@@ -41,7 +39,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(frameBufferVideoFormat);
+	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
@@ -434,9 +432,8 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat				frameBufferFormat = GetFrameBufferVideoFormat();
 	bool						bStereoIn			= false;
-	bool						bLevelBFormat		= IsVideoFormatB(frameBufferFormat);
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bCh1Disable = 0;				// Assume Channel 1 is NOT disabled by default
 	int							bCh2Disable = 1;				// Assume Channel 2 IS disabled by default
@@ -446,7 +443,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	NTV2SDIInputFormatSelect	inputFormatSelect = mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	// is stereo in?
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
@@ -542,7 +539,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// SDI Out 1
-	if (IsVideoFormatB(frameBufferFormat) ||											// Dual Stream - p60b
+	if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
@@ -564,7 +561,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// SDI Out 2
-	if (IsVideoFormatB(frameBufferFormat) ||											// Dual Stream - p60b
+	if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{

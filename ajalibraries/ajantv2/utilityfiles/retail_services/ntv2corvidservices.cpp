@@ -49,8 +49,6 @@ void CorvidServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
-	NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	int bCh1Disable = 0;							// Assume Channel 1 is NOT disabled
 	int bCh2Disable = 1;							// Assume Channel 2 IS disabled
 	

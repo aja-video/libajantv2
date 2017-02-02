@@ -21,7 +21,6 @@ public:
     KonaIPJ2kServices();
     ~KonaIPJ2kServices();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
 	virtual void SetDeviceXPointCapture (GeneralFrameFormat format);
 	virtual void SetDeviceMiscRegisters (NTV2Mode mode);
