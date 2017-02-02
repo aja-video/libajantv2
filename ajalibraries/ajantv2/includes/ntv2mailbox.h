@@ -51,7 +51,7 @@ public:
     bool    ReadChannelRegister  (const ULWord inReg, ULWord & outValue, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0x0);
     inline bool    ReadChannelRegister  (ULWord inReg, ULWord *pOutValue, ULWord mask = 0xFFFFFFFF, ULWord shift = 0x0)	{return pOutValue ? ReadChannelRegister (inReg, *pOutValue, mask, shift) : false;}
 
-    void    SetChannel(ULWord channelOffset, ULWord channelNumber, ULWord channelPS);
+    void    SetChannel(ULWord channelOffset, ULWord channelNumber);
 
     bool    AcquireMailbox();
     void    ReleaseMailbox();
@@ -88,7 +88,6 @@ private:
 
     uint32_t    chanOffset;
     uint32_t    chanNumber;
-    uint32_t    chanPS;
 
     uint32_t    bOffset;             // base offset
     uint32_t    txBuf[FIFO_SIZE+1];
