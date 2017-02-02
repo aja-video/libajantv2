@@ -2524,6 +2524,16 @@ typedef enum
 	NTV2_Wgt425Mux2,
 	NTV2_Wgt425Mux3,
 	NTV2_Wgt425Mux4,
+	NTV2_Wgt12GSDIIn1,
+	NTV2_Wgt12GSDIIn2,
+	NTV2_Wgt12GSDIIn3,
+	NTV2_Wgt12GSDIIn4,
+	NTV2_Wgt12GSDIOut1,
+	NTV2_Wgt12GSDIOut2,
+	NTV2_Wgt12GSDIOut3,
+	NTV2_Wgt12GSDIOut4,
+	NTV2_WgtHDMIIn1v4,
+	NTV2_WgtHDMIOut1v4,
 	NTV2_WgtModuleTypeCount,// always last
 	NTV2_WgtUndefined = NTV2_WgtModuleTypeCount,
 	NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
