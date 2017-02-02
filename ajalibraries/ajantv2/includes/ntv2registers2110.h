@@ -88,7 +88,6 @@
 #define kRegFramer_peak_buf_level       (0x001c/4)
 #define kRegFramer_rx_pkt_cnt           (0x0020/4)
 #define kRegFramer_drop_pkt_cnt         (0x0024/4)
-
 #define kRegFramer_stat_reset           (0x0030/4)
 
 // channel
@@ -98,11 +97,9 @@
 #define kRegFramer_vlan_tag_info        (0x008c/4)
 #define kRegFramer_ip_hdr_media         (0x0090/4)
 #define kRegFramer_ip_hdr_fec           (0x0094/4)
-#define kRegFramer_src_ip_lo            (0x0098/4)
-
-#define kRegFramer_dst_ip_lo            (0x00a8/4)
+#define kRegFramer_src_ip               (0x0098/4)
+#define kRegFramer_dst_ip               (0x00a8/4)
 #define kRegFramer_udp_src_port         (0x00b8/4)
-
 #define kRegFramer_udp_dst_port         (0x00bc/4)
 #define kRegFramer_tk_pkt_cnt           (0x00c0/4)
 #define kRegFramer_chan_stat_reset      (0x00c4/4)
