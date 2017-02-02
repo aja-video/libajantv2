@@ -1515,10 +1515,10 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex);
 
     return true;
 }
@@ -1560,10 +1560,10 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex);
 
     return true;
 }

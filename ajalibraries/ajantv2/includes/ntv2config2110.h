@@ -172,19 +172,13 @@ public:
 
     bool        txc_enable;
     
-    uint32_t    txc_primaryLocalPort;
-    uint32_t    txc_primaryRemoteIp;
-    uint32_t    txc_primaryRemotePort;
-    uint32_t    txc_primaryRemoteMAC_lo;
-    uint32_t    txc_primaryRemoteMAC_hi;
-    bool        txc_primaryAutoMac;
-    
-    uint32_t    txc_secondaryLocalPort;
-    uint32_t    txc_secondaryRemoteIp;
-    uint32_t    txc_secondaryRemotePort;
-    uint32_t    txc_secondaryRemoteMAC_lo;
-    uint32_t    txc_secondaryRemoteMAC_hi;
-    bool        txc_secondaryAutoMac;
+    uint32_t    txc_2110channel;
+    uint32_t    txc_localPort;
+    uint32_t    txc_remoteIp;
+    uint32_t    txc_remotePort;
+    uint32_t    txc_remoteMAC_lo;
+    uint32_t    txc_remoteMAC_hi;
+    bool        txc_autoMac;
 };
 
 typedef enum
@@ -220,11 +214,11 @@ public:
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2110_channel & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2110_channel & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_channel & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_channel & txConfig);
 
-    bool        SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
-    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t channle2100, bool enable);
+    bool        GetTxChannelEnable(const NTV2Channel channel, uint32_t channle2100, bool & enabled);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -244,16 +238,18 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
     bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
+    bool        SelectTxChannel(NTV2Channel channel, uint32_t channel_2110, uint32_t & baseAddrFramer);
 
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
 	// If method returns false call this to get details
     std::string getLastError();
-	
+
+protected:
+
 private:
-    void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
-    void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
+    void        AcquireFramerControlAccess(uint32_t baseAddr);
+    void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
