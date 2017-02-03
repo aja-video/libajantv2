@@ -93,13 +93,31 @@ typedef struct NTV2FormatDescriptor
 											const NTV2VANCMode			inVancMode);
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
-	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}						///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return mNumPlanes > 0 || NTV2_IS_FBF_PLANAR (mPixelFormat);}			///< @return	True if planar format;  otherwise false.
-	inline ULWord	GetTotalRasterBytes (const UWord inPlane = 0) const	{return numLines * mLinePitch[inPlane];}///< @return	The total number of bytes required to hold the raster.
-	inline ULWord	GetVisibleRasterBytes (const UWord inPlane = 0) const	{return (numLines - firstActiveLine) * mLinePitch[inPlane];}	///< @return	The total number of bytes required to hold only the visible raster.
-	inline ULWord	GetBytesPerRow (const UWord inPlane = 0) const	{return inPlane < 4 ? mLinePitch[inPlane] : 0;}		///< @return	The number of bytes per raster row.
-	inline ULWord	GetRasterWidth (void) const			{return numPixels;}									///< @return	The width of the raster, in pixels.
-	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}								///< @return	The number of planes in the raster.
+	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
+	inline bool		IsPlanar (void) const				{return mNumPlanes > 0 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
+
+	/**
+		@return		The total number of bytes required to hold the raster.
+		@note		To determine the byte count of all planes of a planar format, call GetNumPlanes,
+					then sum the byte counts for each plane.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? numLines * mLinePitch[inPlaneIndex0] : 0;}
+
+	/**
+		@return		The total number of bytes required to hold the visible raster.
+		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? ((numLines - firstActiveLine) * mLinePitch[inPlaneIndex0]) : 0;}
+
+	/**
+		@return		The number of bytes per row/line of the raster.
+		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetBytesPerRow (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? mLinePitch[inPlaneIndex0] : 0;}
+
+	inline ULWord	GetRasterWidth (void) const			{return numPixels;}			///< @return	The width of the raster, in pixels.
+	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}		///< @return	The number of planes in the raster.
 
 	/**
 		@return	The height of the raster, in lines.
@@ -127,8 +145,9 @@ typedef struct NTV2FormatDescriptor
 					(using my description of the buffer contents).
 		@param[in]	pInStartAddress		A pointer to the raster buffer.
 		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	inline const void *	GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0) const	{const UByte *	pStart ((const UByte *) pInStartAddress); return inRowIndex0 < numLines ? pStart + inRowIndex0 * GetBytesPerRow () : NULL;}
+	const void *	GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0, const UWord inPlaneIndex0 = 0) const;
 
 	/**
 		@return		A pointer to the start of the first visible row in the given buffer, or NULL if invalid
@@ -210,7 +229,7 @@ typedef struct NTV2FormatDescriptor
 		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
 		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
 		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
-		ULWord					mLinePitch[4];		///< @brief	Number of bytes per line (per-plane)
+		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
 		UWord					mNumPlanes;			///< @brief	Number of planes
 
 } NTV2FormatDescriptor;
