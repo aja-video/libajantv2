@@ -44,6 +44,7 @@
 #define	kRegClass_AES		std::string ("kRegClass_AES")
 #define	kRegClass_HDMI		std::string ("kRegClass_HDMI")
 #define	kRegClass_VPID		std::string ("kRegClass_VPID")
+#define	kRegClass_SDIError	std::string ("kRegClass_SDIError")
 #define	kRegClass_Timing	std::string ("kRegClass_Timing")
 #define	kRegClass_Channel1	std::string ("kRegClass_Channel1")
 #define	kRegClass_Channel2	std::string ("kRegClass_Channel2")

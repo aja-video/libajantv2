@@ -10,8 +10,10 @@
 
 	For application developers who needed to extract or insert their own VANC data, "tall" frame geometries were introduced as
 	a stopgap to incorporate VANC lines into the frame buffers. Unfortunately, this trick has some serious disadvantages:
-	-	The VANC data must be packed/encoded properly based on the frame buffer format, which adds a lot of complexity to client code.
+	-	The VANC data must be packed/encoded properly based on the frame buffer pixel format, which adds a lot of complexity to client code.
 	-	The VANC data can be corrupted by any CSCs/LUTs upstream/downstream of the FrameStore (for capture/playout, respectively).
+	-	There's no HANC support.
+	-	The frame buffer geometry doesn't match the video standard -- again, more code complexity.
 
 	Starting in SDK 12.3, AJA introduced a new way of handling VANC data using Anc extractor/inserter widgets in device firmware.
 	During playout, an inserter widget inserts VANC data into the outgoing SDI data stream from a separate host buffer in the
@@ -101,7 +103,7 @@
 	@section	vancframegeometries		VANC Frame Geometries
 
 	The older way of extracting or inserting ancillary data (VANC only) employs alternate frame geometries that have additional lines
-	at the top of the video frame buffer. To enable VANC capture/playout, call CNTV2Card::SetEnableVANCData.
+	at the top of the video frame buffer. To enable VANC capture/playout, call CNTV2Card::SetEnableVANCData or CNTV2Card::SetVANCMode.
 
 	For historical reasons, there are both "tall" and "taller" geometries. The taller ones grab some extra lines that used to be
 	omitted, but which turned out to contain useful information after all.
@@ -115,7 +117,7 @@
 	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the \c NTV2_VANCDATA_8BITSHIFT_ENABLE
 	mode, VANC lines can be readily parsed for Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
 	found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
-	The CNTV2SMPTEAncData class in the \ref ajacclib has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc, etc.) to help with this.
+	The CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc, etc.) to help with this.
 	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into the \ref ajaanc.
 
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.

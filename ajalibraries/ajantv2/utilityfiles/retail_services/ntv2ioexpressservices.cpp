@@ -53,8 +53,6 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(format);
-
-	NTV2VideoFormat frameBufferFormat = GetFrameBufferVideoFormat();
 	
 	// Turn off LTC loopback during playback
 	mCard->WriteRegister (kRegFS1ReferenceSelect, 0, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
@@ -114,7 +112,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// Set SDI output 1 input (reg 138, bits 15-8)
 	if (	(mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect) ||			// if our output is "Primary"
 			((mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect) &&		// or if "Secondary" AND Secondary == Primary and not SD format
-			 (mVirtualSecondaryFormatSelect == frameBufferFormat)))
+			 (mVirtualSecondaryFormatSelect == mFb1VideoFormat)))
 	{
 		// Select frame sync 1 output (0x09)
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptFrameSync1YUV);
@@ -134,7 +132,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// Set HDMI output input (reg 141, bits 16-23)
 	if (	(mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect) ||			// if our output is "Primary"
 			((mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect) &&		// or if "Secondary" AND Secondary == Primary and not SD format
-			 (mVirtualSecondaryFormatSelect == frameBufferFormat)))
+			 (mVirtualSecondaryFormatSelect == mFb1VideoFormat)))
 	{
 		// Select frame sync 1 output (0x09)
 		mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptFrameSync1YUV);
@@ -154,7 +152,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// Set (Analog Out) input (reg 138, bits 7-0)
 	if (	(mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect) ||			// if our output is "Primary"
 			((mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect) &&		// or if "Secondary" AND Secondary == Primary and not SD format
-			 (mVirtualSecondaryFormatSelect == frameBufferFormat)))
+			 (mVirtualSecondaryFormatSelect == mFb1VideoFormat)))
 	{
 		// Select frame sync 1 output (0x09)
 		mCard->Connect (NTV2_XptAnalogOutInput, NTV2_XptFrameSync1YUV);
@@ -192,7 +190,6 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	DeviceServices::SetDeviceXPointCapture(format);
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat				frameBufferFormat = GetFrameBufferVideoFormat();
 	NTV2CrosspointID			inputSelectPrimary = NTV2_XptSDIIn1;
 	NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
 	
@@ -202,7 +199,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	mCard->WriteRegister (kRegFS1ReferenceSelect, enabled, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	// This is done all over so do it once here so we have the value
@@ -223,7 +220,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	mCard->Connect (NTV2_XptConversionModInput, inputSelectPrimary);
 
 	// Set compression module input (reg 136, bits 31-24)
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		mCard->Connect (NTV2_XptCompressionModInput, inputSelectPrimary);
 	}
@@ -234,7 +231,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	
 	// Set frame sync 2 input (reg 137, bits 23-16)
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		// Select Up/Down converter (0x06)
 		mCard->Connect (NTV2_XptFrameSync2Input, NTV2_XptConversionModule);
@@ -245,7 +242,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 
 	// Set frame sync 1 input (reg 137, bits 15-8)
-	if (inputFormat == frameBufferFormat)
+	if (inputFormat == mFb1VideoFormat)
 	{
 		mCard->Connect (NTV2_XptFrameSync1Input, inputSelectPrimary);
 	}
@@ -264,7 +261,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	}
 	else 
 	{
-		if ( (inputFormat == frameBufferFormat) &&	// formats are same
+		if ( (inputFormat == mFb1VideoFormat) &&	// formats are same
 			 !(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, inputSelectPrimary);
@@ -279,7 +276,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set SDI 1 input (reg 138, bits 15-8)
 	if (   (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -294,7 +291,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set HDMI output input (reg 141, bits 16-23)
 	if (   (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)					// if our output is "Primary"
 		|| (   (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -309,7 +306,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	// Set analog output input (reg 138, bits 7-0)
 	if (   (mVirtualAnalogOutputSelect == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
 		|| (   (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)			// or if "Secondary" AND Secondary == Primary and not SD format
-			&& (mVirtualSecondaryFormatSelect == GetFrameBufferVideoFormat())
+			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		// Select frame sync 1 output (0x09)
@@ -343,9 +340,8 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
-	NTV2VideoFormat			frameBufferFormat = GetFrameBufferVideoFormat();
 	
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (frameBufferFormat);
+	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2FrameRate			secondardFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	
@@ -453,7 +449,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	//
 	// Analog-In locking state machine
@@ -519,7 +515,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	else
 	{
 		// Select DAC mode from framebufferformat
-		new2Mode = GetLHIVideoDACMode (frameBufferFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
+		new2Mode = GetLHIVideoDACMode (mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
 		new2Standard = primaryStandard;
 	}
 	
@@ -562,21 +558,21 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
-		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(frameBufferFormat,mVirtualSecondaryFormatSelect) );
+		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
 		mCard->SetConverterOutStandard(secondaryStandard);			// so converter output = secondary format
 	}
 	else														// capture mode: converter may be on input or output
 	{
-		if (inputFormat == frameBufferFormat)					
+		if (inputFormat == mFb1VideoFormat)
 		{
 			// no input conversion needed - put converter on output
-			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(frameBufferFormat,mVirtualSecondaryFormatSelect) );
+			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
 			mCard->SetConverterOutStandard(secondaryStandard);
 		}
 		else
 		{
 			// input conversion needed - need converter on input
-			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mVirtualSecondaryFormatSelect, frameBufferFormat) );
+			mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mVirtualSecondaryFormatSelect, mFb1VideoFormat) );
 			mCard->SetConverterOutStandard(primaryStandard);
 		}
 	}
@@ -587,7 +583,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	else														// capture mode: converter may be on input or output
 	{
-		if (inputFormat == frameBufferFormat)					// no input conversion needed - put converter on output
+		if (inputFormat == mFb1VideoFormat)					// no input conversion needed - put converter on output
 			mCard->SetConverterInStandard(primaryStandard);
 		else
 			mCard->SetConverterInStandard(secondaryStandard);		// input conversion needed - need converter on input
