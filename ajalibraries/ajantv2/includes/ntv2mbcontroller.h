@@ -31,6 +31,33 @@ enum eArpState
     ARP_NOT_FOUND
 };
 
+typedef enum
+{
+    eIGMPVersion_2,
+    eIGMPVersion_3,
+    eIGMPVersion_Default = eIGMPVersion_3
+} eIGMPVersion_t;
+
+typedef struct
+{
+    uint8_t	mac[6];
+} MACAddr;
+
+class IPVNetConfig
+{
+public:
+    IPVNetConfig() { init(); }
+
+    void init();
+
+    bool operator == ( const IPVNetConfig &other );
+    bool operator != ( const IPVNetConfig &other );
+
+    uint32_t    ipc_ip;
+    uint32_t    ipc_subnet;
+    uint32_t    ipc_gateway;
+};
+
 class AJAExport CNTV2MBController : public CNTV2MailBox
 {
 public:

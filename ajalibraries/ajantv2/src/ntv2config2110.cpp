@@ -18,43 +18,33 @@
 
 using namespace std;
 
-void tx_2110_channel::init()
+void tx_2110_stream::init()
 {
-    primaryLocalPort    = 0;
-    primaryRemoteIP.erase();
-    primaryRemotePort   = 0;
-    primaryAutoMAC      = false;
-    memset(primaryRemoteMAC.mac, 0, sizeof(MACAddr));
-    secondaryLocalPort  = 0;
-    secondaryRemoteIP.erase();
-    secondaryRemotePort = 0;
-    secondaryAutoMAC    = false;
-    memset(secondaryRemoteMAC.mac, 0, sizeof(MACAddr));
+    localPort    = 0;
+    remoteIP.erase();
+    remotePort   = 0;
+    autoMAC      = false;
+    memset(remoteMAC.mac, 0, sizeof(MACAddr));
 }
 
-bool tx_2110_channel::eq_MACAddr(const MACAddr& a)
+bool tx_2110_stream::eq_MACAddr(const MACAddr& a)
 {
-    return (memcmp(primaryRemoteMAC.mac, a.mac, 6) == 0);
+    return (memcmp(remoteMAC.mac, a.mac, 6) == 0);
 }
 
-bool tx_2110_channel::operator != ( const tx_2110_channel &other )
+bool tx_2110_stream::operator != ( const tx_2110_stream &other )
 {
     return !(*this == other);
 }
 
-bool tx_2110_channel::operator == ( const tx_2110_channel &other )
+bool tx_2110_stream::operator == ( const tx_2110_stream &other )
 {
-    if ((primaryLocalPort       == other.primaryLocalPort)      &&
-            (primaryRemoteIP        == other.primaryRemoteIP)       &&
-            (primaryRemotePort      == other.primaryRemotePort)     &&
-            (primaryAutoMAC         == other.primaryAutoMAC)        &&
-            (eq_MACAddr(other.primaryRemoteMAC))                    &&
+    if ((localPort       == other.localPort)      &&
+        (remoteIP        == other.remoteIP)       &&
+        (remotePort      == other.remotePort)     &&
+        (autoMAC         == other.autoMAC)        &&
+        (eq_MACAddr(other.remoteMAC)))
 
-            (secondaryLocalPort     == other.secondaryLocalPort)    &&
-            (secondaryRemoteIP      == other.secondaryRemoteIP)     &&
-            (secondaryRemotePort    == other.secondaryRemotePort)   &&
-            (secondaryAutoMAC       == other.secondaryAutoMAC)      &&
-            (eq_MACAddr(other.secondaryRemoteMAC)))
     {
         return true;
     }
@@ -64,7 +54,7 @@ bool tx_2110_channel::operator == ( const tx_2110_channel &other )
     }
 }
 
-void rx_2110_channel::init()
+void rx_2110_stream::init()
 {
     primaryRxMatch  = 0;
     primarySourceIP.erase();
@@ -84,12 +74,12 @@ void rx_2110_channel::init()
     playoutDelay = 50;
 }
 
-bool rx_2110_channel::operator != ( const rx_2110_channel &other )
+bool rx_2110_stream::operator != ( const rx_2110_stream &other )
 {
     return !(*this == other);
 }
 
-bool rx_2110_channel::operator == ( const rx_2110_channel &other )
+bool rx_2110_stream::operator == ( const rx_2110_stream &other )
 {
     if ((primaryRxMatch        == other.primaryRxMatch)       &&
             (primarySourceIP       == other.primarySourceIP)      &&
@@ -107,32 +97,6 @@ bool rx_2110_channel::operator == ( const rx_2110_channel &other )
             (secondaryVlan         == other.secondaryVlan)        &&
             (networkPathDiff       == other.networkPathDiff)      &&
             (playoutDelay          == other.playoutDelay))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void IPVNetConfig::init()
-{
-    ipc_gateway = 0;
-    ipc_ip = 0;
-    ipc_subnet = 0;
-}
-
-bool IPVNetConfig::operator != ( const IPVNetConfig &other )
-{
-    return (!(*this == other));
-}
-
-bool IPVNetConfig::operator == ( const IPVNetConfig &other )
-{
-    if ((ipc_gateway  == other.ipc_gateway)   &&
-            (ipc_ip       == other.ipc_ip)        &&
-            (ipc_subnet   == other.ipc_subnet))
     {
         return true;
     }
@@ -389,7 +353,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2110_channel &rxConfig)
+bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2110_stream &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -492,7 +456,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const 
     return false;
 }
 
-bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_channel & rxConfig)
+bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_stream & rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -709,7 +673,7 @@ bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     return false;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_channel & txConfig)
+bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_stream & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    val;
@@ -729,20 +693,20 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     AcquireFramerControlAccess(baseAddrFramer);
 
     // dest ip address
-    destIp = inet_addr(txConfig.primaryRemoteIP.c_str());
+    destIp = inet_addr(txConfig.remoteIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
     WriteChannelRegister(kRegFramer_dst_ip + baseAddrFramer,destIp);
 
     // source port
-    WriteChannelRegister(kRegFramer_udp_src_port + baseAddrFramer,txConfig.primaryLocalPort);
+    WriteChannelRegister(kRegFramer_udp_src_port + baseAddrFramer,txConfig.localPort);
 
     // dest port
-    WriteChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,txConfig.primaryRemotePort);
+    WriteChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,txConfig.remotePort);
 
     // auto MAC setting
     uint32_t autoMacReg;
     mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&autoMacReg);
-    if (txConfig.primaryAutoMAC)
+    if (txConfig.autoMAC)
     {
         autoMacReg |= (1 << channel);
     }
@@ -753,7 +717,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     mDevice.WriteRegister(kRegSarekTxAutoMAC + SAREK_REGS,autoMacReg);
 
     // dest MAC
-    if (txConfig.primaryAutoMAC)
+    if (txConfig.autoMAC)
     {
         // is remote address muticast
         ip0 = (destIp & 0xff000000)>> 24;
@@ -784,7 +748,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
             rv = AcquireMailbox();
             if (rv)
             {
-                rv = GetRemoteMAC(txConfig.primaryRemoteIP,macAddr);
+                rv = GetRemoteMAC(txConfig.remoteIP,macAddr);
                 ReleaseMailbox();
             }
             if (!rv)
@@ -814,13 +778,13 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     else
     {
         // use supplied MAC
-        hi  = txConfig.primaryRemoteMAC.mac[0]  << 8;
-        hi += txConfig.primaryRemoteMAC.mac[1];
+        hi  = txConfig.remoteMAC.mac[0]  << 8;
+        hi += txConfig.remoteMAC.mac[1];
 
-        lo  = txConfig.primaryRemoteMAC.mac[2] << 24;
-        lo += txConfig.primaryRemoteMAC.mac[3] << 16;
-        lo += txConfig.primaryRemoteMAC.mac[4] << 8;
-        lo += txConfig.primaryRemoteMAC.mac[5];
+        lo  = txConfig.remoteMAC.mac[2] << 24;
+        lo += txConfig.remoteMAC.mac[3] << 16;
+        lo += txConfig.remoteMAC.mac[4] << 8;
+        lo += txConfig.remoteMAC.mac[5];
     }
 
     WriteChannelRegister(kRegFramer_dest_mac_lo  + baseAddrFramer,lo);
@@ -832,7 +796,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     return rv;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_channel & txConfig)
+bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_stream & txConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -906,14 +870,14 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint3
     txConfig.primaryRemoteMAC.mac[5] =  lo        & 0xff;
 
     mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
-    txConfig.primaryAutoMAC = ((val & (1 << channel)) != 0);
+    txConfig.autoMAC = ((val & (1 << channel)) != 0);
 
     return true;
 #endif
     return false;
 }
 
-bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t channel2100, bool enable)
+bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -926,13 +890,13 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t cha
         if (rxEnabled)
         {
             // disable rx channel
-            SetRxChannelEnable(channel,channel2100,false);
+            SetRxChannelEnable(channel,stream,false);
         }
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
     // select channel
-    rv = SelectTxChannel(channel, channel2100, baseAddr);
+    rv = SelectTxChannel(channel, stream, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
@@ -965,9 +929,8 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t cha
     return true;
 }
 
-bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, uint32_t channel2100, bool & enabled)
+bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool & enabled)
 {
-#if 0
     uint32_t baseAddr;
 
     // select primary channel
@@ -975,12 +938,10 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, uint32_t cha
     if (!rv) return false;
 
     uint32_t val;
-    ReadChannelRegister(kReg2110_6_tx_chan_enable + baseAddr, &val);
+    ReadChannelRegister(kRegFramer_chan_ctrl + baseAddr, &val);
     enabled = (val == 0x01);
 
     return true;
-#endif
-    return false;
 }
 
 bool CNTV2Config2110::SetIGMPDisable(eSFP port, bool disable)
@@ -1117,7 +1078,7 @@ bool CNTV2Config2110::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
     return true;
 }
 
-bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t channel_2110, uint32_t & baseAddrFramer)
+bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t stream, uint32_t & baseAddrFramer)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1137,7 +1098,7 @@ bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t channel_2110
     }
 
     // select channel
-    SetChannel(kRegFramer_channel_access + baseAddrFramer, channel_2110);
+    SetChannel(kRegFramer_channel_access + baseAddrFramer, stream);
 
     return true;
 }
@@ -1188,6 +1149,7 @@ void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
 {
     uint32_t val;
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x00);
+    // DAC TODO - wait for access
 
 }
 

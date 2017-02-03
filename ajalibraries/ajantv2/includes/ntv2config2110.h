@@ -14,10 +14,7 @@
 #include "ntv2tshelper.h"
 #include <string.h>
 
-typedef struct
-{
-	uint8_t	mac[6];
-} MACAddr;
+
 
 #define RX_MATCH_VLAN                   BIT(0)
 #define RX_MATCH_SOURCE_IP              BIT(1)
@@ -39,50 +36,46 @@ typedef struct
 
 #define PLL_CONFIG_PCR                  BIT(0)
 
-
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
-class tx_2110_channel
+class tx_2110_stream
 {
 public:
-    tx_2110_channel() { init(); }
+    tx_2110_stream() { init(); }
 
     void init();
 
     bool eq_MACAddr(const MACAddr& a);
     
-    bool operator != ( const tx_2110_channel &other );
-    bool operator == ( const tx_2110_channel &other );
+    bool operator != ( const tx_2110_stream &other );
+    bool operator == ( const tx_2110_stream &other );
     
 public:
-    uint32_t	primaryLocalPort;		///< @brief	Specifies the local (source) port number.
-    std::string	primaryRemoteIP;        ///< @brief	Specifies remote (destination) IP address.
-    uint32_t	primaryRemotePort;		///< @brief	Specifies the remote (destination) port number.
-    bool		primaryAutoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr		primaryRemoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
-
-    uint32_t	secondaryLocalPort;		///< @brief	Specifies the local (source) port number.
-    std::string	secondaryRemoteIP;      ///< @brief	Specifies remote (destination) IP address.
-    uint32_t	secondaryRemotePort;	///< @brief	Specifies the remote (destination) port number.
-    bool		secondaryAutoMAC;       ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr		secondaryRemoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
+    uint32_t    stream;
+    uint32_t	localPort;		///< @brief	Specifies the local (source) port number.
+    std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
+    uint32_t	remotePort;		///< @brief	Specifies the remote (destination) port number.
+    bool		autoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
+    MACAddr     remoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
+    NTV2VideoFormat fmt;
+    VPIDSampling sampling;
 };
 
 /**
     @brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
-class rx_2110_channel
+class rx_2110_stream
 {
 public:
-    rx_2110_channel() { init(); }
+    rx_2110_stream() { init(); }
 
     void init();
 
-    bool operator != ( const rx_2110_channel &other );
-    bool operator == ( const rx_2110_channel &other );
+    bool operator != ( const rx_2110_stream &other );
+    bool operator == ( const rx_2110_stream &other );
     
 public:
     uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
@@ -108,20 +101,7 @@ public:
 };
 
 
-class IPVNetConfig
-{
-public:
-    IPVNetConfig() { init(); }
 
-    void init();
-
-    bool operator == ( const IPVNetConfig &other );
-    bool operator != ( const IPVNetConfig &other );
-
-    uint32_t    ipc_ip;
-    uint32_t    ipc_subnet;
-    uint32_t    ipc_gateway;
-};
 
 
 // These structs are used internally be retail services
@@ -181,12 +161,7 @@ public:
     bool        txc_autoMac;
 };
 
-typedef enum
-{
-    eIGMPVersion_2,
-    eIGMPVersion_3,
-    eIGMPVersion_Default = eIGMPVersion_3
-} eIGMPVersion_t;
+
 
 /**
     @brief	The CNTV2Config2110 class is the interface to Kona-IP network I/O using SMPTE 2110
@@ -208,17 +183,17 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110_channel & rxConfig);
-    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_channel & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110_stream & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_stream & rxConfig);
 
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_channel & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_channel & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_stream & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_stream & txConfig);
 
-    bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t channle2100, bool enable);
-    bool        GetTxChannelEnable(const NTV2Channel channel, uint32_t channle2100, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable);
+    bool        GetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool & enabled);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -238,7 +213,7 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
     bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, uint32_t channel_2110, uint32_t & baseAddrFramer);
+    bool        SelectTxChannel(NTV2Channel channel, uint32_t stream, uint32_t & baseAddrFramer);
 
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
