@@ -1,5 +1,9 @@
+/**
+@file		AMDSDIInput/main.cpp
+@brief		Demonstration application to capture frames from SDI to GPU using GMA.
+@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
+**/
 
-#include <windows.h>
 #include <string>
 
 #include <GL/glew.h>
@@ -15,14 +19,14 @@ PFNGLWRITEMARKERAMDPROC         glWriteMarkerAMD;
 PFNGLMAKEBUFFERSRESIDENTAMDPROC glMakeBuffersResidentAMD;
 PFNGLBUFFERBUSADDRESSAMDPROC    glBufferBusAddressAMD;
 
-#define NUM_BUFFERS 4
+#define NUM_BUFFERS 3
 
 HWND			g_hWnd;
 HDC				g_hDC;
 
 // Define initial window size
-int g_nWidth  = 800;
-int g_nHeight = 600;
+int g_nWidth  = 960;
+int g_nHeight = 540;
 
 GLSink*         g_pSink     = NULL;
 AJA_SDIInOut*   g_pSDIInOut = NULL;
@@ -77,10 +81,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     if (!g_pSDIInOut->openCard(NUM_BUFFERS, bUseAutoCirculate, bUseP2P))
         bDone = false;
 
-    // Create first sdi input channel. This one will have the id 0
+//	NTV2FrameBufferFormat fbFormat = NTV2_FBF_24BIT_RGB;
+	NTV2FrameBufferFormat fbFormat = NTV2_FBF_ABGR;
+	bool bQuad = true;
+	
+	// Create first sdi input channel. This one will have the id 0
     // 0:                   Use SDI In 1
     // NTV2_FBF_24BIT_RGB:  RGB8 FB
-    if (!g_pSDIInOut->setupInputChannel(0, NTV2_FBF_24BIT_RGB))
+    if (!g_pSDIInOut->setupInputChannel(0, fbFormat, bQuad))
     {
          MessageBox(NULL, "No Input signal on SDI Input 1!", cWindowName, MB_OK | MB_ICONERROR);
          return WM_QUIT;
@@ -99,6 +107,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     // Set window size according to SDI input signal
     g_nWidth  = uiFBWidth;
     g_nHeight = uiFBHeight;
+
+	if (g_nWidth > 1500)
+	{
+		g_nWidth /= 2;
+		g_nHeight /= 2;
+	}
+	if (g_nWidth > 1500)
+	{
+		g_nWidth /= 2;
+		g_nHeight /= 2;
+	}
 
     // Open window and create GL context
     if (!OpenWindow(cClassName, cWindowName))

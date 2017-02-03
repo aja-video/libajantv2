@@ -137,7 +137,7 @@ bool GLSource::createUpStream(unsigned int uiNumBuffers, unsigned int w, unsigne
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(m_fFieldOfView, (float)m_uiBufferWidth/(float)m_uiBufferHeight, 0.1f, 1000.0f);
+	gluPerspective(m_fFieldOfView, (float)m_uiBufferWidth/(float)m_uiBufferHeight, 0.1f, 1000.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -238,7 +238,6 @@ void GLSource::draw()
 
         // Mark the buffer as ready to be consumed
         m_pSyncBuffer->releaseReadBuffer();
-
     }
     else
     {
@@ -253,7 +252,6 @@ void GLSource::draw()
         glReadPixels(0, 0, m_uiBufferWidth, m_uiBufferHeight, m_nExtFormat, m_nType, NULL);
 
         PackFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-
     }
 
     m_pRenderTarget[m_uiRTIndex]->unbind();

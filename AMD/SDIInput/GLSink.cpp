@@ -99,7 +99,8 @@ void GLSink::resize(unsigned int w, unsigned int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(-(double)w/(double)h*0.5, (double)w/(double)h*0.5, 0.5, -0.5, -1.0, 1.0);
+//    glOrtho(-(double)w/(double)h*0.5, (double)w/(double)h*0.5, 0.5, -0.5, -1.0, 1.0);  // frame buffer bottom up
+    glOrtho(-(double)w/(double)h*0.5, (double)w/(double)h*0.5, -0.5, 0.5, -1.0, 1.0);  // frame buffer top down
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

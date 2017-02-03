@@ -1,11 +1,10 @@
 #pragma once
 
-
 #include "defines.h"
 #include "ntv2card.h"
-#include "ntv2boardscan.h"
+#include "ntv2devicescanner.h"
 #include "ntv2utils.h"
-#include "ntv2boardfeatures.h"
+#include "ntv2devicefeatures.h"
 
 #include "Thread.h"
 
@@ -36,7 +35,7 @@ public:
     bool            stop();
 
     // Configure channel uiSDIChannel as input channel
-    bool            setupInputChannel (unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat);
+    bool            setupInputChannel (unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat, bool bQuad);
     // Configure channel uiSDIChannel as output channel
     bool            setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat, NTV2VideoFormat VideoFormat);
 
@@ -87,10 +86,9 @@ private:
         unsigned int                            uiSDIChannel;
         NTV2FrameBufferFormat                   FBFormat;
         NTV2Channel                             SDIChannel;
-        AUTOCIRCULATE_TRANSFER_STRUCT           TransferStruct;
-        AUTOCIRCULATE_TRANSFER_STATUS_STRUCT    TransferStatus;
-        NTV2Crosspoint                          ChannelSpec;
-        LWord                                   MinFrame;
+		AUTOCIRCULATE_TRANSFER                  TransferStruct;
+		unsigned int							uiTransferSize;
+		LWord                                   MinFrame;
         LWord                                   MaxFrame;
         ULWord64*                               pVideoBusAddress;
         ULWord64*                               pMarkerBusAddress;
@@ -119,16 +117,15 @@ private:
     bool                        m_bRunning;
     bool                        m_bClearRouting;
   
-    CNTV2BoardScan              m_ntv2BoardScan;
+    CNTV2DeviceScanner          m_ntv2BoardScan;
     CNTV2Card                   m_ntv2Card;
+	NTV2EveryFrameTaskMode		m_savedTaskMode;
     UWord                       m_uwBoardNumber;
-    NTV2BoardID                 m_BoardID;
-    NTV2BoardType               m_BoardType;
+    NTV2DeviceID                m_DeviceID;
     NTV2ReferenceSource         m_ReferenceSource;
     NTV2VideoFormat             m_VideoFormat;
-    CXena2Routing               m_Router;
 
-    VERTICALEVENTFUNC           m_pWaitForVerticalInputEvent;
+    NTV2Channel                 m_WaitChannel;
  
     unsigned int                m_uiBoardNumber;
     unsigned int                m_uiNumBuffers;

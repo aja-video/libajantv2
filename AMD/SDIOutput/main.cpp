@@ -1,5 +1,9 @@
+/**
+@file		AMDSDIOutput/main.cpp
+@brief		Demonstration application to playback frames from GPU to SDI using GMA.
+@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
+**/
 
-#include <windows.h>
 #include <string>
 
 #include <GL/glew.h>
@@ -16,7 +20,7 @@ PFNGLMAKEBUFFERSRESIDENTAMDPROC glMakeBuffersResidentAMD;
 PFNGLBUFFERBUSADDRESSAMDPROC    glBufferBusAddressAMD;
 
 
-#define NUM_BUFFERS 4
+#define NUM_BUFFERS 3
 
 HWND			g_hWnd = NULL;
 HDC				g_hDC  = NULL;
@@ -71,7 +75,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     bool bUseP2P = true;
 
     // Indicate if AutoCirculate is to be used
-    bool bUseAutoCirculate = false;
+    bool bUseAutoCirculate = true;
 
     // Create Interface class to AJA SDI board 0
     g_pSDIInOut = new AJA_SDIInOut(0);
@@ -79,15 +83,24 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     // open SDI board 0
     if (!g_pSDIInOut->openCard(NUM_BUFFERS, bUseAutoCirculate, bUseP2P))
         bDone = true;
+
+//	NTV2VideoFormat vidFormat = NTV2_FORMAT_720p_5994;
+//	NTV2VideoFormat vidFormat = NTV2_FORMAT_1080p_2398;
+	NTV2VideoFormat vidFormat = NTV2_FORMAT_4x1920x1080p_2398;
+//	NTV2VideoFormat vidFormat = NTV2_FORMAT_1080p_5994_A;
+
+//	NTV2FrameBufferFormat fbFormat = NTV2_FBF_24BIT_RGB;
+	NTV2FrameBufferFormat fbFormat = NTV2_FBF_ABGR;
    
     // Create sdi output channel. This one will have the id 0
     // 0:                   Use SDI Out 1
     // NTV2_FBF_24BIT_RGB:  RGB8 FB
-    if (!g_pSDIInOut->setupOutputChannel(0, NTV2_FBF_24BIT_RGB, NTV2_FORMAT_720p_5994))
-    {
-        bDone = true;
-        MessageBox(NULL, "Could not configure SDI output!", cWindowName, MB_OK | MB_ICONERROR);
-    }
+
+	if (!g_pSDIInOut->setupOutputChannel(0, fbFormat, vidFormat))
+	{
+		bDone = true;
+		MessageBox(NULL, "Could not configure SDI output!", cWindowName, MB_OK | MB_ICONERROR);
+	}
 
     // Get information on FB configuratiomn of channel 0 of the SDI board. 
     int          nIntFormat = g_pSDIInOut->getIntFormat(0);
@@ -99,6 +112,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     // indicate that the window size will match the size of the SDI FB
     g_nWidth  = uiFBWidth;
     g_nHeight = uiFBHeight;
+
+	if (g_nWidth > 1500)
+	{
+		g_nWidth /= 2;
+		g_nHeight /= 2;
+	}
+	if (g_nWidth > 1500)
+	{
+		g_nWidth /= 2;
+		g_nHeight /= 2;
+	}
 
     if (!OpenWindow(cClassName, cWindowName))
         bDone = true;
@@ -126,7 +150,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
             MessageBox(NULL, "Could not create output buffer!", cWindowName, MB_OK | MB_ICONERROR);
         }
 
-        // Pass the output buffer of the viewer to SDI
+		g_pSource->resize(g_nWidth, g_nHeight);
+
+		// Pass the output buffer of the viewer to SDI
         g_pSDIInOut->setSyncBuffer(0, g_pSource->getOutputBuffer());
 
         if (bUseP2P)

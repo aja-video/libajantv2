@@ -71,6 +71,9 @@
     <ClInclude Include="..\common\Thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\os_include.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="AMDIcon.ico">
