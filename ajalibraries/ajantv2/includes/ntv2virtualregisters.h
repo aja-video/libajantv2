@@ -458,10 +458,10 @@ typedef enum
     kVRegTxc_2EncodePcrPid4					= VIRTUALREG_START+517,
     kVRegTxc_2EncodeAudio1Pid4              = VIRTUALREG_START+518,
 
-    kVRegJ2K_Placeholder1                   = VIRTUALREG_START+519,
-    kVRegJ2K_Placeholder2                   = VIRTUALREG_START+520,
-    kVRegJ2K_Placeholder3                   = VIRTUALREG_START+521,
-    kVRegJ2K_Placeholder4                   = VIRTUALREG_START+522,
+    kVRegRxc_2DecodeSelectionMode           = VIRTUALREG_START+519,
+    kVRegRxc_2DecodeProgramNumber           = VIRTUALREG_START+520,
+    kVRegRxc_2DecodeProgramPID              = VIRTUALREG_START+521,
+    kVRegRxc_2DecodeAudioNumber             = VIRTUALREG_START+522,
 
 	kVReg2022_7Enable						= VIRTUALREG_START+523,
 	
