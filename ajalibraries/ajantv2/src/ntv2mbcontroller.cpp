@@ -7,6 +7,32 @@
 
 using namespace std;
 
+void IPVNetConfig::init()
+{
+    ipc_gateway = 0;
+    ipc_ip = 0;
+    ipc_subnet = 0;
+}
+
+bool IPVNetConfig::operator != ( const IPVNetConfig &other )
+{
+    return (!(*this == other));
+}
+
+bool IPVNetConfig::operator == ( const IPVNetConfig &other )
+{
+    if ((ipc_gateway  == other.ipc_gateway)   &&
+            (ipc_ip       == other.ipc_ip)        &&
+            (ipc_subnet   == other.ipc_subnet))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 CNTV2MBController::CNTV2MBController(CNTV2Card &device) : CNTV2MailBox(device)
 {
 }

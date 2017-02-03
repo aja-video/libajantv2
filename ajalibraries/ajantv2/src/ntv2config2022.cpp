@@ -117,32 +117,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
     }
 }
 
-void IPVNetConfig::init()
-{
-    ipc_gateway = 0;
-    ipc_ip = 0;
-    ipc_subnet = 0;
-}
-
-bool IPVNetConfig::operator != ( const IPVNetConfig &other )
-{
-    return (!(*this == other));
-}
-
-bool IPVNetConfig::operator == ( const IPVNetConfig &other )
-{
-    if ((ipc_gateway  == other.ipc_gateway)   &&
-        (ipc_ip       == other.ipc_ip)        &&
-        (ipc_subnet   == other.ipc_subnet))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void rx2022Config::init()
 {
     rxc_enable  = 0;

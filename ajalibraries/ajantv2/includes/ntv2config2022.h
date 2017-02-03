@@ -14,11 +14,6 @@
 #include "ntv2tshelper.h"
 #include <string.h>
 
-typedef struct
-{
-	uint8_t	mac[6];
-} MACAddr;
-
 #define RX_MATCH_VLAN                   BIT(0)
 #define RX_MATCH_SOURCE_IP              BIT(1)
 #define RX_MATCH_DEST_IP                BIT(2)
@@ -105,22 +100,6 @@ public:
 
     uint32_t	networkPathDiff;        ///< @brief	Specifies the max accepted delay in milliseconds between 2 steams in hitless operation (0-150).
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
-};
-
-
-class IPVNetConfig
-{
-public:
-    IPVNetConfig() { init(); }
-
-    void init();
-
-    bool operator == ( const IPVNetConfig &other );
-    bool operator != ( const IPVNetConfig &other );
-
-    uint32_t    ipc_ip;
-    uint32_t    ipc_subnet;
-    uint32_t    ipc_gateway;
 };
 
 
@@ -219,13 +198,6 @@ typedef enum
     eProgSel_SpecificProgPID,
     eProgSel_Default = eProgSel_AutoFirstProg,
 } eProgSelMode_t;
-
-typedef enum
-{
-    eIGMPVersion_2,
-    eIGMPVersion_3,
-    eIGMPVersion_Default = eIGMPVersion_3
-} eIGMPVersion_t;
 
 class j2kDecoderConfig
 {
