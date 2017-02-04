@@ -59,8 +59,8 @@ public:
     uint32_t	remotePort;		///< @brief	Specifies the remote (destination) port number.
     bool		autoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
     MACAddr     remoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
-    NTV2VideoFormat fmt;
-    VPIDSampling sampling;
+    NTV2VideoFormat videoFormat;
+    VPIDSampling videoSamples;
 };
 
 /**
@@ -189,7 +189,7 @@ public:
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_stream & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110_stream & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_stream & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable);
