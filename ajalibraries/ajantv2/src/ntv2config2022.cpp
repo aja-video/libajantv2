@@ -1379,6 +1379,7 @@ bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, cons
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1390,6 +1391,7 @@ bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kE
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1401,6 +1403,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1412,6 +1415,7 @@ bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
