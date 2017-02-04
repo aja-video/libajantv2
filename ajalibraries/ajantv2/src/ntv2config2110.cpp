@@ -7,6 +7,7 @@
 #include "ntv2config2110.h"
 #include "ntv2endian.h"
 #include "ntv2card.h"
+#include "ntv2formatdescriptor.h"
 #include <sstream>
 
 #if defined (AJALinux) || defined (AJAMac)
@@ -673,7 +674,21 @@ bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     return false;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, const tx_2110_stream & txConfig)
+int _lcm(int a,int b)
+{
+    int m = a;
+    int n = b;
+    while (m != n)
+    {
+        if (m < n)
+            m += a;
+        else
+            n +=b;
+    }
+    return m;
+}
+
+bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110_stream & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    val;
@@ -686,9 +701,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     bool        rv;
 
     // select channel
-    rv = SelectTxChannel(channel, channel2100, baseAddrFramer);
+    rv = SelectTxChannel(channel, stream, baseAddrFramer);
     if (!rv) return false;
 
+    // setup framer
     // hold off access while we update channel regs
     AcquireFramerControlAccess(baseAddrFramer);
 
@@ -793,6 +809,92 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     // enable  register updates
     ReleaseFramerControlAccess(baseAddrFramer);
 
+    // end framer setup
+
+    // setup 4175 packetizer
+
+    uint32_t baseAddrPacketizer = SAREK_4175_TX_PACKETIZER_1 + (0x1000 * (int)channel);
+    NTV2VideoFormat fmt = txConfig.videoFormat;
+    bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
+    NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
+
+    // width
+    uint32_t width = fd.GetRasterWidth();
+    mDevice.WriteRegister(kReg2110_pkt_width + baseAddrPacketizer,width);
+
+    // height
+    uint32_t height = fd.GetRasterHeight();
+    mDevice.WriteRegister(kReg2110_pkt_height + baseAddrPacketizer,height);
+
+    // video format = sampling
+    int vf;
+    int componentsPerPixel;
+    int componentsPerUnit;
+
+    VPIDSampling vs = txConfig.videoSamples;
+    switch(vs)
+    {
+    case VPIDSampling_GBR_444:
+        vf = 0;
+        componentsPerPixel = 3;
+        componentsPerUnit  = 3;
+        break;
+    case VPIDSampling_YUV_444:
+        vf = 1;
+        componentsPerPixel = 3;
+        componentsPerUnit  = 3;
+        break;
+    default:
+    case VPIDSampling_YUV_422:
+        componentsPerPixel = 2;
+        componentsPerUnit  = 4;
+
+        vf = 2;
+        break;
+    }
+    mDevice.WriteRegister(kReg2110_pkt_vid_fmt + baseAddrPacketizer,vf);
+
+    const int bitsPerComponent = 10;
+    const int pixelsPerClock = 1;
+    int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
+    int activeLineLength   = activeLine_root/8;
+    int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
+    int pixelGroupSize     = pixelGroup_root/8;
+    int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
+    int bytesPerCycle      = bytesPerCycle_root/8;
+    int lcm                = _lcm(pixelGroup_root,bytesPerCycle_root)/8;
+    int payloadLength_root =  min(activeLineLength,1376)/lcm;
+    int payloadLength      = payloadLength_root * lcm;
+    float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
+    int ipktsPerLine       = (int)ceil(pktsPerLine);
+    int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
+
+    // pkts per line
+    mDevice.WriteRegister(kReg2110_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
+
+    // payload length
+    mDevice.WriteRegister(kReg2110_pkt_payload_len + baseAddrPacketizer,payloadLength);
+
+    // payload length last
+    mDevice.WriteRegister(kReg2110_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
+
+    // payload type
+    mDevice.WriteRegister(kReg2110_pkt_payload_type + baseAddrPacketizer,0x08);
+    // DAC TODO - Jeff thinks this should be 0x60;
+
+    // channel/stream number
+    mDevice.WriteRegister(kReg2110_pkt_chan_num + baseAddrPacketizer,stream);
+
+    // pix per pkt
+    int ppp = payloadLength/pixelGroupSize;
+    mDevice.WriteRegister(kReg2110_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
+    // DAC TODO  - Jeff thinks this should be 550 (0x226) for 720p
+
+    // interlace
+    int ilace = (interlaced) ? 0x01 : 0x00;
+    mDevice.WriteRegister(kReg2110_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
+
+    // end setup 4175 packetizer
     return rv;
 }
 
