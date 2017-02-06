@@ -40,17 +40,17 @@
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
-class tx_2110_stream
+class tx_2110Config_stream
 {
 public:
-    tx_2110_stream() { init(); }
+    tx_2110Config_stream() { init(); }
 
     void init();
 
     bool eq_MACAddr(const MACAddr& a);
     
-    bool operator != ( const tx_2110_stream &other );
-    bool operator == ( const tx_2110_stream &other );
+    bool operator != ( const tx_2110Config_stream &other );
+    bool operator == ( const tx_2110Config_stream &other );
     
 public:
     uint32_t    stream;
@@ -67,15 +67,15 @@ public:
     @brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
-class rx_2110_stream
+class rx_2110Config_stream
 {
 public:
-    rx_2110_stream() { init(); }
+    rx_2110Config_stream() { init(); }
 
     void init();
 
-    bool operator != ( const rx_2110_stream &other );
-    bool operator == ( const rx_2110_stream &other );
+    bool operator != ( const rx_2110Config_stream &other );
+    bool operator == ( const rx_2110Config_stream &other );
     
 public:
     uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
@@ -183,14 +183,14 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110_stream & rxConfig);
-    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_stream & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config_stream & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config_stream & rxConfig);
 
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110_stream & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_stream & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110Config_stream & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110Config_stream & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable);
     bool        GetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool & enabled);

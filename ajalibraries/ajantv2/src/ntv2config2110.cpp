@@ -19,7 +19,7 @@
 
 using namespace std;
 
-void tx_2110_stream::init()
+void tx_2110Config_stream::init()
 {
     localPort    = 0;
     remoteIP.erase();
@@ -28,17 +28,17 @@ void tx_2110_stream::init()
     memset(remoteMAC.mac, 0, sizeof(MACAddr));
 }
 
-bool tx_2110_stream::eq_MACAddr(const MACAddr& a)
+bool tx_2110Config_stream::eq_MACAddr(const MACAddr& a)
 {
     return (memcmp(remoteMAC.mac, a.mac, 6) == 0);
 }
 
-bool tx_2110_stream::operator != ( const tx_2110_stream &other )
+bool tx_2110Config_stream::operator != ( const tx_2110Config_stream &other )
 {
     return !(*this == other);
 }
 
-bool tx_2110_stream::operator == ( const tx_2110_stream &other )
+bool tx_2110Config_stream::operator == ( const tx_2110Config_stream &other )
 {
     if ((localPort       == other.localPort)      &&
         (remoteIP        == other.remoteIP)       &&
@@ -55,7 +55,7 @@ bool tx_2110_stream::operator == ( const tx_2110_stream &other )
     }
 }
 
-void rx_2110_stream::init()
+void rx_2110Config_stream::init()
 {
     primaryRxMatch  = 0;
     primarySourceIP.erase();
@@ -75,12 +75,12 @@ void rx_2110_stream::init()
     playoutDelay = 50;
 }
 
-bool rx_2110_stream::operator != ( const rx_2110_stream &other )
+bool rx_2110Config_stream::operator != ( const rx_2110Config_stream &other )
 {
     return !(*this == other);
 }
 
-bool rx_2110_stream::operator == ( const rx_2110_stream &other )
+bool rx_2110Config_stream::operator == ( const rx_2110Config_stream &other )
 {
     if ((primaryRxMatch        == other.primaryRxMatch)       &&
             (primarySourceIP       == other.primarySourceIP)      &&
@@ -354,7 +354,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2110_stream &rxConfig)
+bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2110Config_stream &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -457,7 +457,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const 
     return false;
 }
 
-bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110_stream & rxConfig)
+bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config_stream & rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -688,7 +688,7 @@ int _lcm(int a,int b)
     return m;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110_stream & txConfig)
+bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110Config_stream & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    val;
@@ -879,16 +879,14 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     mDevice.WriteRegister(kReg2110_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
 
     // payload type
-    mDevice.WriteRegister(kReg2110_pkt_payload_type + baseAddrPacketizer,0x08);
-    // DAC TODO - Jeff thinks this should be 0x60;
+    mDevice.WriteRegister(kReg2110_pkt_payload_type + baseAddrPacketizer,100);
 
     // channel/stream number
     mDevice.WriteRegister(kReg2110_pkt_chan_num + baseAddrPacketizer,stream);
 
     // pix per pkt
-    int ppp = payloadLength/pixelGroupSize;
+    int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
     mDevice.WriteRegister(kReg2110_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
-    // DAC TODO  - Jeff thinks this should be 550 (0x226) for 720p
 
     // interlace
     int ilace = (interlaced) ? 0x01 : 0x00;
@@ -898,7 +896,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     return rv;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110_stream & txConfig)
+bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110Config_stream & txConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -1036,7 +1034,7 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, uint32_t str
     uint32_t baseAddr;
 
     // select primary channel
-    bool rv = SelectTxChannel(channel, true, baseAddr);
+    bool rv = SelectTxChannel(channel, stream, baseAddr);
     if (!rv) return false;
 
     uint32_t val;
