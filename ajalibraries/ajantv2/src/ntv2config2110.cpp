@@ -803,7 +803,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
         lo += txConfig.remoteMAC.mac[5];
     }
 
-    WriteChannelRegister(kRegFramer_dest_mac_lo  + baseAddrFramer,lo);
+    WriteChannelRegister(kRegFramer_udp_dst_port  + baseAddrFramer,lo);
     WriteChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer,hi);
 
     // enable  register updates
@@ -896,85 +896,46 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     return rv;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110Config_stream & txConfig)
+bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, tx_2110Config_stream & txConfig)
 {
-#if 0
-    uint32_t    baseAddr;
+    uint32_t    baseAddrFramer;
     uint32_t    val;
     bool        rv;
 
-    if (_is2110_7)
-    {
-        // select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
-        if (!rv) return false;
-
-        // dest ip address
-        ReadChannelRegister(kReg2110_6_tx_dest_ip_addr + baseAddr,&val);
-        struct in_addr in;
-        in.s_addr = NTV2EndianSwap32(val);
-        char * ip = inet_ntoa(in);
-        txConfig.secondaryRemoteIP = ip;
-
-        // source port
-        ReadChannelRegister(kReg2110_6_tx_udp_src_port + baseAddr,&txConfig.secondaryLocalPort);
-
-        // dest port
-        ReadChannelRegister(kReg2110_6_tx_udp_dest_port + baseAddr,&txConfig.secondaryRemotePort);
-
-        // dest MAC
-        uint32_t hi;
-        uint32_t lo;
-        ReadChannelRegister(kReg2110_6_tx_dest_mac_low_addr + baseAddr, &lo);
-        ReadChannelRegister(kReg2110_6_tx_dest_mac_hi_addr  + baseAddr, &hi);
-
-        txConfig.secondaryRemoteMAC.mac[0] = (hi >> 8) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[1] =  hi        & 0xff;
-        txConfig.secondaryRemoteMAC.mac[2] = (lo >> 24) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[3] = (lo >> 16) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[4] = (lo >> 8)  & 0xff;
-        txConfig.secondaryRemoteMAC.mac[5] =  lo        & 0xff;
-
-        mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
-        txConfig.secondaryAutoMAC = ((val & (1 << channel)) != 0);
-    }
-
-    // Select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
+    // Select channel
+    rv = SelectTxChannel(channel, stream, baseAddrFramer);
     if (!rv) return false;
 
     // dest ip address
-    ReadChannelRegister(kReg2110_6_tx_dest_ip_addr + baseAddr,&val);
+    ReadChannelRegister(kRegFramer_dst_ip + baseAddrFramer,&val);
     struct in_addr in;
     in.s_addr = NTV2EndianSwap32(val);
     char * ip = inet_ntoa(in);
-    txConfig.primaryRemoteIP = ip;
+    txConfig.remoteIP = ip;
 
     // source port
-    ReadChannelRegister(kReg2110_6_tx_udp_src_port + baseAddr,&txConfig.primaryLocalPort);
+    ReadChannelRegister(kRegFramer_udp_src_port + baseAddrFramer,&txConfig.localPort);
 
     // dest port
-    ReadChannelRegister(kReg2110_6_tx_udp_dest_port + baseAddr,&txConfig.primaryRemotePort);
+    ReadChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,&txConfig.remotePort);
 
     // dest MAC
     uint32_t hi;
     uint32_t lo;
-    ReadChannelRegister(kReg2110_6_tx_dest_mac_low_addr + baseAddr, &lo);
-    ReadChannelRegister(kReg2110_6_tx_dest_mac_hi_addr  + baseAddr, &hi);
+    ReadChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer, &lo);
+    ReadChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer, &hi);
 
-    txConfig.primaryRemoteMAC.mac[0] = (hi >> 8) & 0xff;
-    txConfig.primaryRemoteMAC.mac[1] =  hi        & 0xff;
-    txConfig.primaryRemoteMAC.mac[2] = (lo >> 24) & 0xff;
-    txConfig.primaryRemoteMAC.mac[3] = (lo >> 16) & 0xff;
-    txConfig.primaryRemoteMAC.mac[4] = (lo >> 8)  & 0xff;
-    txConfig.primaryRemoteMAC.mac[5] =  lo        & 0xff;
+    txConfig.remoteMAC.mac[0] = (hi >> 8) & 0xff;
+    txConfig.remoteMAC.mac[1] =  hi        & 0xff;
+    txConfig.remoteMAC.mac[2] = (lo >> 24) & 0xff;
+    txConfig.remoteMAC.mac[3] = (lo >> 16) & 0xff;
+    txConfig.remoteMAC.mac[4] = (lo >> 8)  & 0xff;
+    txConfig.remoteMAC.mac[5] =  lo        & 0xff;
 
     mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
     txConfig.autoMAC = ((val & (1 << channel)) != 0);
 
     return true;
-#endif
-    return false;
 }
 
 bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable)
@@ -1189,12 +1150,12 @@ bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t stream, uint
     if (iChannel >= _numTx0Chans)
     {
         channelIndex = iChannel - _numTx0Chans;
-        baseAddrFramer  = SAREK_2110_FRAMER_1_TOP;
+        baseAddrFramer  = SAREK_2110_FRAMER_2_BOT;
     }
     else
     {
         channelIndex = iChannel;
-        baseAddrFramer  = SAREK_2110_FRAMER_2_BOT;
+        baseAddrFramer  = SAREK_2110_FRAMER_1_TOP;
     }
 
     // select channel
