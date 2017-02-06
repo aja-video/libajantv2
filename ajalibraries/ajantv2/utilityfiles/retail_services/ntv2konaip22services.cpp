@@ -2537,16 +2537,16 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 {
                     uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
                     uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kRegTxcPrimaryRemoteMAC_lo3, lo);
-                    mCard->WriteRegister(kRegTxcPrimaryRemoteMAC_hi3, hi);
+                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo3, lo);
+                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi3, hi);
                 }
                 
                 if (mTx2022Config3.txc_secondaryAutoMac)
                 {
                     uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
                     uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kRegTxcSecondaryRemoteMAC_lo3, lo);
-                    mCard->WriteRegister(kRegTxcSecondaryRemoteMAC_hi3, hi);
+                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo3, lo);
+                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi3, hi);
                 }
             }
         }
@@ -2568,16 +2568,16 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 {
                     uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
                     uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kRegTxcPrimaryRemoteMAC_lo4, lo);
-                    mCard->WriteRegister(kRegTxcPrimaryRemoteMAC_hi4, hi);
+                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo4, lo);
+                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi4, hi);
                 }
                 
                 if (mTx2022Config4.txc_secondaryAutoMac)
                 {
                     uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
                     uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kRegTxcSecondaryRemoteMAC_lo4, lo);
-                    mCard->WriteRegister(kRegTxcSecondaryRemoteMAC_hi4, hi);
+                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo4, lo);
+                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi4, hi);
                 }
            }
         }
