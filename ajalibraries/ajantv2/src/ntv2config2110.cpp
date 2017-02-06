@@ -820,11 +820,11 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
 
     // width
     uint32_t width = fd.GetRasterWidth();
-    mDevice.WriteRegister(kReg2110_pkt_width + baseAddrPacketizer,width);
+    mDevice.WriteRegister(kReg4175_pkt_width + baseAddrPacketizer,width);
 
     // height
     uint32_t height = fd.GetRasterHeight();
-    mDevice.WriteRegister(kReg2110_pkt_height + baseAddrPacketizer,height);
+    mDevice.WriteRegister(kReg4175_pkt_height + baseAddrPacketizer,height);
 
     // video format = sampling
     int vf;
@@ -852,7 +852,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
         vf = 2;
         break;
     }
-    mDevice.WriteRegister(kReg2110_pkt_vid_fmt + baseAddrPacketizer,vf);
+    mDevice.WriteRegister(kReg4175_pkt_vid_fmt + baseAddrPacketizer,vf);
 
     const int bitsPerComponent = 10;
     const int pixelsPerClock = 1;
@@ -870,27 +870,27 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
     // pkts per line
-    mDevice.WriteRegister(kReg2110_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
+    mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
 
     // payload length
-    mDevice.WriteRegister(kReg2110_pkt_payload_len + baseAddrPacketizer,payloadLength);
+    mDevice.WriteRegister(kReg4175_pkt_payload_len + baseAddrPacketizer,payloadLength);
 
     // payload length last
-    mDevice.WriteRegister(kReg2110_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
+    mDevice.WriteRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
 
     // payload type
-    mDevice.WriteRegister(kReg2110_pkt_payload_type + baseAddrPacketizer,100);
+    mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
 
     // channel/stream number
-    mDevice.WriteRegister(kReg2110_pkt_chan_num + baseAddrPacketizer,stream);
+    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer,stream);
 
     // pix per pkt
     int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
-    mDevice.WriteRegister(kReg2110_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
+    mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
 
     // interlace
     int ilace = (interlaced) ? 0x01 : 0x00;
-    mDevice.WriteRegister(kReg2110_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
+    mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
     // end setup 4175 packetizer
     return rv;
