@@ -11,7 +11,6 @@
 #include "ntv2enums.h"
 #include "ntv2registers2110.h"
 #include "ntv2mbcontroller.h"
-#include "ntv2tshelper.h"
 #include <string.h>
 
 
@@ -36,6 +35,16 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 
+
+enum e2110Stream
+{
+  VIDEO_2110  = 0,
+  AUDIO1_2110 = 1,
+  AUDIO2_2110 = 2,
+  META_2100   = 3,
+  NUM_2100_STREAMS = 4
+};
+
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
@@ -53,7 +62,7 @@ public:
     bool operator == ( const tx_2110Config_stream &other );
     
 public:
-    uint32_t    stream;
+    e2110Stream stream;
     uint32_t	localPort;		///< @brief	Specifies the local (source) port number.
     std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
     uint32_t	remotePort;		///< @brief	Specifies the remote (destination) port number.
@@ -186,14 +195,14 @@ public:
     bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config_stream & rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config_stream & rxConfig);
 
-    bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7);
-    bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
+    bool        SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
+    bool        GetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110Config_stream & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, uint32_t channel2100, tx_2110Config_stream & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config_stream & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config_stream & txConfig);
 
-    bool        SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable);
-    bool        GetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
+    bool        GetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -213,9 +222,11 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
     bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, uint32_t stream, uint32_t & baseAddrFramer);
+    bool        SelectTxChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer);
 
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+
+    static uint32_t  get2110TxStream(NTV2Channel ch,e2110Stream scch );
 
 	// If method returns false call this to get details
     std::string getLastError();

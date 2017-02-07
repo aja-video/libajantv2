@@ -19,6 +19,12 @@
 
 using namespace std;
 
+static const int tx2100Streams[SAREK_MAX_CHANS][NUM_2100_STREAMS] = {
+    {   VIDEO_2110,        AUDIO1_2110,         AUDIO2_2110,        META_2100},
+    {   VIDEO_2110 * 0x10, AUDIO1_2110 * 0x10 , AUDIO2_2110 * 0x10, META_2100 * 0x10},
+    {   VIDEO_2110 * 0x20, AUDIO1_2110 * 0x20 , AUDIO2_2110 * 0x20, META_2100 * 0x20},
+    {   VIDEO_2110 * 0x30, AUDIO1_2110 * 0x30 , AUDIO2_2110 * 0x30, META_2100 * 0x30}};
+
 void tx_2110Config_stream::init()
 {
     localPort    = 0;
@@ -546,7 +552,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     return false;
 }
 
-bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2110_7)
+bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable)
 {
 #if 0
     uint32_t    baseAddr;
@@ -654,7 +660,7 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, bool enable,
     return false;
 }
 
-bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, bool & enabled)
+bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel,e2110Stream stream, bool & enabled)
 {
 #if 0
     uint32_t baseAddr;
@@ -688,10 +694,9 @@ int _lcm(int a,int b)
     return m;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, const tx_2110Config_stream & txConfig)
+bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config_stream & txConfig)
 {
     uint32_t    baseAddrFramer;
-    uint32_t    val;
     uint32_t    hi;
     uint32_t    lo;
     MACAddr     macaddr;
@@ -882,7 +887,8 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
 
     // channel/stream number
-    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer,stream);
+    uint32_t iStream = get2110TxStream(channel,stream);
+    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer,iStream);
 
     // pix per pkt
     int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
@@ -896,7 +902,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, uint3
     return rv;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint32_t stream, tx_2110Config_stream & txConfig)
+bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config_stream & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    val;
@@ -938,7 +944,7 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, uint3
     return true;
 }
 
-bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool enable)
+bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -947,7 +953,7 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t str
     if (enable && _biDirectionalChannels)
     {
         bool rxEnabled;
-        GetRxChannelEnable(channel,rxEnabled);
+        GetRxChannelEnable(channel,stream, rxEnabled);
         if (rxEnabled)
         {
             // disable rx channel
@@ -990,7 +996,7 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, uint32_t str
     return true;
 }
 
-bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, uint32_t stream, bool & enabled)
+bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled)
 {
     uint32_t baseAddr;
 
@@ -1139,7 +1145,7 @@ bool CNTV2Config2110::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
     return true;
 }
 
-bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t stream, uint32_t & baseAddrFramer)
+bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1159,7 +1165,8 @@ bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, uint32_t stream, uint
     }
 
     // select channel
-    SetChannel(kRegFramer_channel_access + baseAddrFramer, stream);
+    uint32_t iStream = get2110TxStream(channel,stream);
+    SetChannel(kRegFramer_channel_access + baseAddrFramer, iStream);
 
     return true;
 }
@@ -1219,3 +1226,7 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x02);
 }
 
+uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,e2110Stream esc )
+{
+    return tx2100Streams[ch][esc];
+}
