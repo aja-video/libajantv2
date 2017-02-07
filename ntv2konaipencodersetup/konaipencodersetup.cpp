@@ -141,14 +141,14 @@ void CKonaIpEncoderJsonReader::initMaps()
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_5994, false))] = NTV2_FORMAT_1080i_5994;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_6000, false))] = NTV2_FORMAT_1080i_6000;
 
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2398, false))] = NTV2_FORMAT_1080p_2398;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2400, false))] = NTV2_FORMAT_1080p_2400;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2500, false))] = NTV2_FORMAT_1080p_2500;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2997, false))] = NTV2_FORMAT_1080p_2997;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_3000, false))] = NTV2_FORMAT_1080p_3000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5000, false))] = NTV2_FORMAT_1080p_5000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5994, false))] = NTV2_FORMAT_1080p_5994;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_6000, false))] = NTV2_FORMAT_1080p_6000;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2398,   false))] = NTV2_FORMAT_1080p_2398;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2400,   false))] = NTV2_FORMAT_1080p_2400;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2500,   false))] = NTV2_FORMAT_1080p_2500;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2997,   false))] = NTV2_FORMAT_1080p_2997;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_3000,   false))] = NTV2_FORMAT_1080p_3000;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5000_A, false))] = NTV2_FORMAT_1080p_5000_A;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5994_A, false))] = NTV2_FORMAT_1080p_5994_A;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_6000_A, false))] = NTV2_FORMAT_1080p_6000_A;
 
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_720p_2398, false))] = NTV2_FORMAT_720p_2398;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_720p_2500, false))] = NTV2_FORMAT_720p_2500;
