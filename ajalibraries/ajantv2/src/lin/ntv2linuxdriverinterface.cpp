@@ -67,7 +67,7 @@ CNTV2LinuxDriverInterface::Open(
 		_boardType = GetCompileFlag ();
 	}
 #else
-	// All the old boards are now depricated. Open only with the oem2k driver.
+    // All the old boards are now depricated. Open only with the ajantv2 driver.
 	_boardType = DEVICETYPE_NTV2;
 #endif
 
@@ -91,7 +91,7 @@ CNTV2LinuxDriverInterface::Open(
 		s = "ksd";
 		break;
 	case BOARDTYPE_AJAXENA2:
-		s = "oem2k";
+        s = "ajantv2";
 		break;
 	case BOARDTYPE_FS1:
 		s = "fs1";
@@ -121,7 +121,7 @@ CNTV2LinuxDriverInterface::Open(
 		return false;
 	#endif	//	!defined (NTV2_DEPRECATE)
 	case DEVICETYPE_NTV2:
-		s = "oem2k";
+        s = "ajantv2";
 		break;
 	case DEVICETYPE_UNKNOWN:
 		if ( _displayErrorMessage )
