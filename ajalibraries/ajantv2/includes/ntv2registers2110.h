@@ -33,44 +33,89 @@
 
 /////////////////////////////////////////////////////////////////////
 //
-// 2110 Packeteizer
+// 4175 Packeteizer
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg2110_pkt_ctrl                       (0x0000/4)
-#define kReg2110_pkt_width                      (0x0010/4)
-#define kReg2110_pkt_height                     (0x0018/4)
-#define kReg2110_pkt_vid_fmt                    (0x0020/4)
-#define kReg2110_pkt_pkts_per_line              (0x0028/4)
-#define kReg2110_pkt_payload_len                (0x0030/4)
-#define kReg2110_pkt_payload_len_last           (0x0038/4)
-#define kReg2110_pkt_ssrc                       (0x0040/4)
-#define kReg2110_pkt_payload_type               (0x0048/4)
-#define kReg2110_pkt_bpc_reg                    (0x0050/4)
-#define kReg2110_pkt_chan_num                   (0x0058/4)
-#define kReg2110_pkt_tx_pkt_cnt                 (0x0060/4)
-#define kReg2110_pkt_tx_pkt_cnt_valid           (0x0064/4)
-#define kReg2110_pkt_pix_per_pkt                (0x0068/4)
-#define kReg2110_pkt_stat_reset                 (0x0070/4)
-#define kReg2110_pkt_interlace_ctrl             (0x0078/4)
+#define kReg4175_pkt_ctrl                       (0x0000/4)
+#define kReg4175_pkt_width                      (0x0010/4)
+#define kReg4175_pkt_height                     (0x0018/4)
+#define kReg4175_pkt_vid_fmt                    (0x0020/4)
+#define kReg4175_pkt_pkts_per_line              (0x0028/4)
+#define kReg4175_pkt_payload_len                (0x0030/4)
+#define kReg4175_pkt_payload_len_last           (0x0038/4)
+#define kReg4175_pkt_ssrc                       (0x0040/4)
+#define kReg4175_pkt_payload_type               (0x0048/4)
+#define kReg4175_pkt_bpc_reg                    (0x0050/4)
+#define kReg4175_pkt_chan_num                   (0x0058/4)
+#define kReg4175_pkt_tx_pkt_cnt                 (0x0060/4)
+#define kReg4175_pkt_tx_pkt_cnt_valid           (0x0064/4)
+#define kReg4175_pkt_pix_per_pkt                (0x0068/4)
+#define kReg4175_pkt_stat_reset                 (0x0070/4)
+#define kReg4175_pkt_interlace_ctrl             (0x0078/4)
 
 /////////////////////////////////////////////////////////////////////
 //
-// 2110 Depacketizer
+// 4175 Depacketizer
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg2110_depkt_control                  (0x0000/4)
-#define kReg2110_depkt_width                    (0x0010/4)
-#define kReg2110_depkt_height                   (0x0018/4)
-#define kReg2110_depkt_vid_fmt                  (0x0020/4)
-#define kReg2110_depkt_pkts_per_line            (0x0028/4)
-#define kReg2110_depkt_payload_len              (0x0030/4)
-#define kReg2110_depkt_payload_len_last         (0x0038/4)
-#define kReg2110_depkt_bpc_reg                  (0x0040/4)
-#define kReg2110_depkt_rx_pkt_cnt               (0x0048/4)
-#define kReg2110_depkt_rx_pkt_cnt_valid         (0x0050/4)
-#define kReg2110_depkt_stat_reset               (0x0054/4)
+#define kReg4175_depkt_control                  (0x0000/4)
+#define kReg4175_depkt_width                    (0x0010/4)
+#define kReg4175_depkt_height                   (0x0018/4)
+#define kReg4175_depkt_vid_fmt                  (0x0020/4)
+#define kReg4175_depkt_pkts_per_line            (0x0028/4)
+#define kReg4175_depkt_payload_len              (0x0030/4)
+#define kReg4175_depkt_payload_len_last         (0x0038/4)
+#define kReg4175_depkt_bpc_reg                  (0x0040/4)
+#define kReg4175_depkt_rx_pkt_cnt               (0x0048/4)
+#define kReg4175_depkt_rx_pkt_cnt_valid         (0x0050/4)
+#define kReg4175_depkt_stat_reset               (0x0054/4)
+
+/////////////////////////////////////////////////////////////////////
+//
+// 3190 Packeteizer
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kReg3190_pkt_ctrl                       (0x0000/4)
+#define kReg3190_pkt_num_samples                (0x0010/4)
+#define kReg3190_pkt_num_audio_channels         (0x0018/4)
+#define kReg3190_pkt_payload_len                (0x0020/4)
+#define kReg3190_pkt_chan_num                   (0x0028/4)
+#define kReg3190_pkt_payload_type               (0x0030/4)
+#define kReg3190_pkt_ssrc                       (0x0038/4)
+
+/////////////////////////////////////////////////////////////////////
+//
+// 3190 Depacketizer
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kReg3190_depkt_control                  (0x0000/4)
+#define kReg3190_depkt_num_samples              (0x0010/4)
+#define kReg3190_depkt_num_audio_chans          (0x0018/4)
+#define kReg3190_depkt_pkt_type                 (0x0020/4)
+#define kReg3190_depkt_pkt_type_valid           (0x0024/4)
+#define kReg3190_depkt_chan_num                 (0x0028/4)
+#define kReg3190_depkt_chan_num_valid           (0x002c/4)
+#define kReg3190_depkt_pkt_len                  (0x0030/4)
+#define kReg3190_depkt_pkt_len_valid            (0x0034/4)
+#define kReg3190_depkt_payload_type             (0x0038/4)
+#define kReg3190_depkt_payload_type_valid       (0x003c/4)
+#define kReg3190_depkt_chan_status_0            (0x0048/4)
+#define kReg3190_depkt_chan_status_1            (0x0050/4)
+#define kReg3190_depkt_chan_status_2            (0x0058/4)
+#define kReg3190_depkt_chan_status_3            (0x0060/4)
+#define kReg3190_depkt_chan_status_4            (0x0068/4)
+#define kReg3190_depkt_chan_status_5            (0x0070/4)
+#define kReg3190_depkt_user_data_0              (0x0078/4)
+#define kReg3190_depkt_user_data_1              (0x0080/4)
+#define kReg3190_depkt_user_data_2              (0x0088/4)
+#define kReg3190_depkt_user_data_3              (0x0090/4)
+#define kReg3190_depkt_user_data_4              (0x0098/4)
+#define kReg3190_depkt_user_data_5              (0x00a0/4)
+#define kReg3190_depkt_stat_reset               (0x00b0/4)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -88,7 +133,6 @@
 #define kRegFramer_peak_buf_level       (0x001c/4)
 #define kRegFramer_rx_pkt_cnt           (0x0020/4)
 #define kRegFramer_drop_pkt_cnt         (0x0024/4)
-
 #define kRegFramer_stat_reset           (0x0030/4)
 
 // channel
@@ -98,11 +142,9 @@
 #define kRegFramer_vlan_tag_info        (0x008c/4)
 #define kRegFramer_ip_hdr_media         (0x0090/4)
 #define kRegFramer_ip_hdr_fec           (0x0094/4)
-#define kRegFramer_src_ip_lo            (0x0098/4)
-
-#define kRegFramer_dst_ip_lo            (0x00a8/4)
+#define kRegFramer_src_ip               (0x0098/4)
+#define kRegFramer_dst_ip               (0x00a8/4)
 #define kRegFramer_udp_src_port         (0x00b8/4)
-
 #define kRegFramer_udp_dst_port         (0x00bc/4)
 #define kRegFramer_tk_pkt_cnt           (0x00c0/4)
 #define kRegFramer_chan_stat_reset      (0x00c4/4)

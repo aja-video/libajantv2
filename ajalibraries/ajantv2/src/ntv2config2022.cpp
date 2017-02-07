@@ -117,32 +117,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
     }
 }
 
-void IPVNetConfig::init()
-{
-    ipc_gateway = 0;
-    ipc_ip = 0;
-    ipc_subnet = 0;
-}
-
-bool IPVNetConfig::operator != ( const IPVNetConfig &other )
-{
-    return (!(*this == other));
-}
-
-bool IPVNetConfig::operator == ( const IPVNetConfig &other )
-{
-    if ((ipc_gateway  == other.ipc_gateway)   &&
-        (ipc_ip       == other.ipc_ip)        &&
-        (ipc_subnet   == other.ipc_subnet))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void rx2022Config::init()
 {
     rxc_enable  = 0;
@@ -1515,10 +1489,10 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex);
 
     return true;
 }
@@ -1560,10 +1534,10 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex);
 
     return true;
 }
