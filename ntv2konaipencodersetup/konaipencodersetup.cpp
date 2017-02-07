@@ -115,15 +115,15 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     encoderCfg.pcrPid          = pKonaIPParams->pcrPid;
     encoderCfg.audio1Pid       = pKonaIPParams->audio1Pid;
 
-    // For the J2K encoder we only configure output channels NTV2_CHANNEL3 and NTV2_CHANNEL4
+    // For the J2K encoder we only configure output channels NTV2_CHANNEL1 and NTV2_CHANNEL2
     if (pKonaIPParams->channels & 1)
     {
-        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL3, encoderCfg);
+        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
     }
 
     if (pKonaIPParams->channels & 2)
     {
-        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL4, encoderCfg);
+        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
     }
 
     std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
