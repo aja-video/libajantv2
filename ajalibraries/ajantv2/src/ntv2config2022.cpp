@@ -249,7 +249,6 @@ void j2kEncoderConfig::init()
     ullMode         = false;
     bitDepth        = 10;
     chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
-    codeBlocksize   = kJ2KCodeBlocksize_32x32;
     mbps            = 200;
     streamType      = kJ2KStreamTypeStandard;
     pmtPid          = 255;
@@ -269,7 +268,6 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
         (ullMode            == other.ullMode)           &&
         (bitDepth           == other.bitDepth)          &&
         (chromaSubsamp      == other.chromaSubsamp)     &&
-        (codeBlocksize      == other.codeBlocksize)     &&
         (mbps               == other.mbps)              &&
         (streamType         == other.streamType)        &&
         (pmtPid             == other.pmtPid)            &&
@@ -1381,6 +1379,7 @@ bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, cons
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1392,6 +1391,7 @@ bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kE
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1403,6 +1403,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1414,6 +1415,7 @@ bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;

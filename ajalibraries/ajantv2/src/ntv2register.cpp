@@ -3164,6 +3164,7 @@ bool CNTV2Card::SupportsP2PTransfer (void)
 		{
 			case 0xDB07:  // Kona3G + P2P
 			case 0xDB08:  // Kona3G Quad + P2P
+			case 0xEB0B:  // Kona4quad
 			case 0xEB0C:  // Kona4ufc
 			case 0xEB0E:  // Corvid 44
 			case 0xEB0D:  // Corvid 88
