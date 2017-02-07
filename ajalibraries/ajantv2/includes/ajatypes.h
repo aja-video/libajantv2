@@ -7,7 +7,7 @@
 #ifndef AJATYPES_H
 #define AJATYPES_H
 
-#define	NTV2_USE_STDINT
+//#define	NTV2_USE_STDINT
 #define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
 #define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
 #define	NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
