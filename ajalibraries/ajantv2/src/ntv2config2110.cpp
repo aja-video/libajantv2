@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <math.h>
 #endif
 
 using namespace std;
@@ -873,7 +874,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
     int payloadLength_root =  min(activeLineLength,1376)/lcm;
     int payloadLength      = payloadLength_root * lcm;
     float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
-    int ipktsPerLine       = (int)ceil(pktsPerLine);
+    int ipktsPerLine       = (int)::ceil(pktsPerLine);
     int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
     // pkts per line
