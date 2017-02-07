@@ -37,10 +37,10 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     printf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
 
-    // Turn off the encoder and check for a proper channnel (we only configure NTV2_CHANNEL3 and NTV2_CHANNEL4)
-    if (channel == NTV2_CHANNEL4)
+    // Turn off the encoder and check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
+    if (channel == NTV2_CHANNEL2)
         encoderBit = ENCODER_2_ENABLE;
-    else if (channel == NTV2_CHANNEL3)
+    else if (channel == NTV2_CHANNEL1)
         encoderBit = ENCODER_1_ENABLE;
     else
     {
@@ -98,7 +98,7 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
 bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoderConfig &config)
 {
-    if ((channel == NTV2_CHANNEL3) || (channel == NTV2_CHANNEL4))
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
         ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &config.videoFormat);
         ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &config.ullMode);
@@ -825,10 +825,10 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
 
 uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)
 {
-    // Only NTV2_CHANNEL3 and NTV2_CHANNEL4 are valid.
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
     uint32_t addr = SAREK_J2K_ENCODER_1;
     
-    if (channel == NTV2_CHANNEL4)
+    if (channel == NTV2_CHANNEL2)
     {
         addr = SAREK_J2K_ENCODER_2;
     }
@@ -838,10 +838,10 @@ uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)
 
 uint32_t CNTV2ConfigTs2022::GetIpxTsAddr(const NTV2Channel channel)
 {
-    // Only NTV2_CHANNEL3 and NTV2_CHANNEL4 are valid.
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
     uint32_t addr = SAREK_TS_ENCODER_1;
     
-    if (channel == NTV2_CHANNEL4)
+    if (channel == NTV2_CHANNEL2)
     {
         addr = SAREK_TS_ENCODER_2;
     }
@@ -853,10 +853,10 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigVReg(const NTV2Channel channel, const uint
 {
     bool rv = false;
 
-    // Only NTV2_CHANNEL3 and NTV2_CHANNEL4 are valid.
-    if ((channel == NTV2_CHANNEL3) || (channel == NTV2_CHANNEL4))
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
-        rv = mDevice.WriteRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * (channel-NTV2_CHANNEL3)), value);
+        rv = mDevice.WriteRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     }
     else
         mError = "Invalid channel";
@@ -870,10 +870,10 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigVReg(const NTV2Channel channel, const uint3
 {
     bool rv = false;
 
-    // Only NTV2_CHANNEL3 and NTV2_CHANNEL4 are valid.
-    if ((channel == NTV2_CHANNEL3) || (channel == NTV2_CHANNEL4))
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
-        rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * (channel-NTV2_CHANNEL3)), value);
+        rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     }
     else
         mError = "Invalid channel";
