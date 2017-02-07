@@ -221,9 +221,6 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer);
-
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
     static uint32_t  get2110TxStream(NTV2Channel ch,e2110Stream scch );
@@ -232,6 +229,9 @@ public:
     std::string getLastError();
 
 protected:
+    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
+    bool        SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer);
+    bool        SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrPacketizer);
 
 private:
     void        AcquireFramerControlAccess(uint32_t baseAddr);

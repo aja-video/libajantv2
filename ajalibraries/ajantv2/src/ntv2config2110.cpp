@@ -706,7 +706,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
     bool        rv;
 
     // select channel
-    rv = SelectTxChannel(channel, stream, baseAddrFramer);
+    rv = SelectTxFramerChannel(channel, stream, baseAddrFramer);
     if (!rv) return false;
 
     // setup framer
@@ -808,7 +808,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
         lo += txConfig.remoteMAC.mac[5];
     }
 
-    WriteChannelRegister(kRegFramer_udp_dst_port  + baseAddrFramer,lo);
+    WriteChannelRegister(kRegFramer_dest_mac_lo  + baseAddrFramer,lo);
     WriteChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer,hi);
 
     // enable  register updates
@@ -817,8 +817,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
     // end framer setup
 
     // setup 4175 packetizer
+    // channel/stream number
+    uint32_t baseAddrPacketizer = SAREK_4175_TX_PACKETIZER_1;
+    SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
 
-    uint32_t baseAddrPacketizer = SAREK_4175_TX_PACKETIZER_1 + (0x1000 * (int)channel);
     NTV2VideoFormat fmt = txConfig.videoFormat;
     bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
     NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
@@ -886,10 +888,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
     // payload type
     mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
 
-    // channel/stream number
-    uint32_t iStream = get2110TxStream(channel,stream);
-    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer,iStream);
-
     // pix per pkt
     int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
     mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
@@ -909,7 +907,7 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110
     bool        rv;
 
     // Select channel
-    rv = SelectTxChannel(channel, stream, baseAddrFramer);
+    rv = SelectTxFramerChannel(channel, stream, baseAddrFramer);
     if (!rv) return false;
 
     // dest ip address
@@ -963,7 +961,7 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, e2110Stream 
     }
 
     // select channel
-    rv = SelectTxChannel(channel, stream, baseAddr);
+    rv = SelectTxFramerChannel(channel, stream, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
@@ -1001,7 +999,7 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, e2110Stream 
     uint32_t baseAddr;
 
     // select primary channel
-    bool rv = SelectTxChannel(channel, stream, baseAddr);
+    bool rv = SelectTxFramerChannel(channel, stream, baseAddr);
     if (!rv) return false;
 
     uint32_t val;
@@ -1145,28 +1143,43 @@ bool CNTV2Config2110::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
     return true;
 }
 
-bool CNTV2Config2110::SelectTxChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer)
+bool CNTV2Config2110::SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer)
 {
     uint32_t iChannel = (uint32_t) channel;
-    uint32_t channelIndex = iChannel;
 
     if (iChannel > _numTxChans)
         return false;
 
     if (iChannel >= _numTx0Chans)
     {
-        channelIndex = iChannel - _numTx0Chans;
         baseAddrFramer  = SAREK_2110_FRAMER_2_BOT;
     }
     else
     {
-        channelIndex = iChannel;
         baseAddrFramer  = SAREK_2110_FRAMER_1_TOP;
     }
 
     // select channel
     uint32_t iStream = get2110TxStream(channel,stream);
     SetChannel(kRegFramer_channel_access + baseAddrFramer, iStream);
+
+    return true;
+}
+
+bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrPacketizer)
+{
+    static uint32_t packetizers[4] = {SAREK_4175_RX_DEPACKETIZER_1,SAREK_4175_RX_DEPACKETIZER_2,SAREK_4175_RX_DEPACKETIZER_3,SAREK_4175_RX_DEPACKETIZER_4};
+
+    uint32_t iChannel = (uint32_t) channel;
+
+    if (iChannel > _numTxChans)
+        return false;
+
+    baseAddrPacketizer  = packetizers[iChannel];
+
+    // select channel
+    uint32_t iStream = get2110TxStream(channel,stream);
+    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, iStream);
 
     return true;
 }
