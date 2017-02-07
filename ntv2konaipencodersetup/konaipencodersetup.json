@@ -15,9 +15,6 @@
 		"_comment_ChromaSampling_":"Valid values are 444 422-444 422-Standard",
         "ChromaSampling":"422-Standard",
 		
-		"_comment_CodeBlockSize_":"For a list of code block sizes use -c option",
-        "CodeBlockSize":"32x32",
-		
 		"_comment_Mbps_":"Encoder bit rate (10-200)",
         "Mbps":100,
 

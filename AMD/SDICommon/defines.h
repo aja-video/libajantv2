@@ -3,6 +3,7 @@
 
 #ifdef WIN32
 #include <GL/glew.h>
+#define APIENTRY    WINAPI
 #endif
 
 #ifdef LINUX
