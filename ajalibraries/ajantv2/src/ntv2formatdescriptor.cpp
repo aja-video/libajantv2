@@ -754,13 +754,20 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 
 ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetailed) const
 {
+	UWord	plane	(0);
 	if (!IsValid ())
 		inOutStream << "INVALID: ";
 	inOutStream	<< GetFullRasterHeight() << " lines, "
-				<< GetRasterWidth() << " pix/line, "
-				<< GetNumPlanes() << " plane(s), "
-				<< mLinePitch[0]/4 << " ULWords/line ("
-				<< GetBytesPerRow() << " bytes/line), 1stAct=" << firstActiveLine;
+				<< GetRasterWidth() << " pixels/line";
+	if (GetNumPlanes() > 0)
+		inOutStream << ", " << GetNumPlanes() << " plane(s)";
+	do
+	{
+		if (GetNumPlanes() > 0)
+			inOutStream << ", PL" << plane << ": ";
+		inOutStream << GetBytesPerRow(plane) << " bytes/line";
+	} while (++plane < GetNumPlanes());
+	inOutStream << ", 1stAct=" << firstActiveLine;
 	if (inDetailed)
 	{
 		inOutStream	<< " (";
