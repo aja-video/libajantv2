@@ -926,7 +926,7 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110
     // dest MAC
     uint32_t hi;
     uint32_t lo;
-    ReadChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer, &lo);
+    ReadChannelRegister(kRegFramer_dest_mac_lo + baseAddrFramer, &lo);
     ReadChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer, &hi);
 
     txConfig.remoteMAC.mac[0] = (hi >> 8) & 0xff;
