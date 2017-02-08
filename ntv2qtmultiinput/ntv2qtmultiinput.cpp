@@ -29,7 +29,7 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 {
 	ULWord				initialBoardIndex	(0);
 	CNTV2DeviceScanner	deviceScanner;
-	const ULWord		numDevicesFound		(deviceScanner.GetNumDevices ());
+	const ULWord		numDevicesFound		(ULWord(deviceScanner.GetNumDevices()));
 
 	::memset (mDeviceInputCounts, 0, sizeof (mDeviceInputCounts));
 	::memset (mFrameGrabbers, 0, sizeof (mFrameGrabbers));

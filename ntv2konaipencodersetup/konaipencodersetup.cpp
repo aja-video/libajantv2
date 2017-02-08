@@ -35,10 +35,6 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
     mKonaIPParams.chromaSubSampling = chromaSubSamplingMap[css];
     std::cout << "ChromaSampling " << css.toStdString().c_str() << std::endl;
 
-    QString cbs =  pjson["CodeBlockSize"].toString();
-    mKonaIPParams.codeBlockSize = codeBlockSizeMap[cbs];
-    std::cout << "CodeBlockSize  " << cbs.toStdString().c_str() << std::endl;
-
     mKonaIPParams.bitDepth = pjson["BitDepth"].toInt();
     std::cout << "BitDepth       " << mKonaIPParams.bitDepth << std::endl;
     mKonaIPParams.mbps = pjson["Mbps"].toInt();
@@ -80,16 +76,6 @@ void CKonaIpEncoderJsonReader::printVideoFormatMap()
     }
 }
 
-void CKonaIpEncoderJsonReader::printCodeBlockSizeMap()
-{
-    QMap<QString, uint32_t>::iterator i;
-    for (i = codeBlockSizeMap.begin(); i != codeBlockSizeMap.end(); ++i)
-    {
-        QString str = i.key();
-        std::cout << str.toStdString() << std::endl;
-    }
-}
-
 CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 {
 
@@ -122,7 +108,6 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     encoderCfg.ullMode         = 0;
     encoderCfg.bitDepth        = pKonaIPParams->bitDepth;
     encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
-    encoderCfg.codeBlocksize   = (J2KCodeBlocksize)pKonaIPParams->codeBlockSize;
     encoderCfg.streamType      = (J2KStreamType)pKonaIPParams->streamType;
     encoderCfg.mbps            = pKonaIPParams->mbps;
     encoderCfg.pmtPid          = pKonaIPParams->programPid;
@@ -130,6 +115,7 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     encoderCfg.pcrPid          = pKonaIPParams->pcrPid;
     encoderCfg.audio1Pid       = pKonaIPParams->audio1Pid;
 
+    // For the J2K encoder we only configure output channels NTV2_CHANNEL1 and NTV2_CHANNEL2
     if (pKonaIPParams->channels & 1)
     {
         rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
@@ -155,14 +141,14 @@ void CKonaIpEncoderJsonReader::initMaps()
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_5994, false))] = NTV2_FORMAT_1080i_5994;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080i_6000, false))] = NTV2_FORMAT_1080i_6000;
 
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2398, false))] = NTV2_FORMAT_1080p_2398;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2400, false))] = NTV2_FORMAT_1080p_2400;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2500, false))] = NTV2_FORMAT_1080p_2500;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2997, false))] = NTV2_FORMAT_1080p_2997;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_3000, false))] = NTV2_FORMAT_1080p_3000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5000, false))] = NTV2_FORMAT_1080p_5000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5994, false))] = NTV2_FORMAT_1080p_5994;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_6000, false))] = NTV2_FORMAT_1080p_6000;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2398,   false))] = NTV2_FORMAT_1080p_2398;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2400,   false))] = NTV2_FORMAT_1080p_2400;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2500,   false))] = NTV2_FORMAT_1080p_2500;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2997,   false))] = NTV2_FORMAT_1080p_2997;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_3000,   false))] = NTV2_FORMAT_1080p_3000;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5000_A, false))] = NTV2_FORMAT_1080p_5000_A;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_5994_A, false))] = NTV2_FORMAT_1080p_5994_A;
+    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_6000_A, false))] = NTV2_FORMAT_1080p_6000_A;
 
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_720p_2398, false))] = NTV2_FORMAT_720p_2398;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_720p_2500, false))] = NTV2_FORMAT_720p_2500;
@@ -184,12 +170,6 @@ void CKonaIpEncoderJsonReader::initMaps()
 
     streamTypeMap["Standard"] = 0;
     streamTypeMap["Non-elsm"] = 1;
-
-    codeBlockSizeMap["32x32"] = 0;
-    codeBlockSizeMap["32x64"] = 1;
-    codeBlockSizeMap["64x32"] = 4;
-    codeBlockSizeMap["64x64"] = 5;
-    codeBlockSizeMap["128x32"] = 12;
 
 }
 

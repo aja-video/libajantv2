@@ -204,6 +204,7 @@
     <ClCompile Include="..\common\Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\os_include.h" />
     <ClInclude Include="..\SDICommon\AJA_SDIInOut.h" />
     <ClInclude Include="..\SDICommon\defines.h" />
     <ClInclude Include="..\common\FormatInfo.h" />

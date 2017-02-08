@@ -121,7 +121,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.\;..\common;..\SDICommon;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;MSWindows;WIN32;DEBUG;_DEBUG;_WINDOWS;AJA_WINDOWS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

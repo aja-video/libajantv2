@@ -3,10 +3,15 @@
 
 #include "GL/glew.h"
 
+#include "ntv2formatdescriptor.h"
 #include "SyncedBuffer.h"
 #include "AJA_SDIInOut.h"
 
- 
+#define FCC(a,b,c,d)  \
+( (((uint32_t)(a)) << 24)  + \
+  (((uint32_t)(b)) << 16)  + \
+  (((uint32_t)(c)) <<  8)  + \
+  (((uint32_t)(d)) <<  0) ) 
  
 struct AJA_FormatInfo
 {
@@ -15,7 +20,6 @@ struct AJA_FormatInfo
     int                     GL_ExtFormat;
     int                     GL_Type;
 };
-
 
 
 // A list of supported formats with the corresponding formats that can be used
@@ -30,26 +34,21 @@ struct AJA_FormatInfo AJA_FormatTable[] =
 };
 
 
-
 AJA_SDIInOut::AJA_SDIInOut(unsigned int uiBoardNumber)
 {
     m_bClearRouting = true;
     m_bRunning      = false;
 
-    m_bUseP2P           = false;
-    m_bUseAutoCirculate = true;
+    m_bUseP2P           = true;
+    m_bUseAutoCirculate = false;
    
     m_uiBoardNumber     = uiBoardNumber;
-    m_BoardID           = BOARD_ID_KONA3G;
-    m_BoardType         = BOARDTYPE_UNKNOWN;
 
     m_uiNumBuffers      = 8;
 
     m_VideoFormat = NTV2_FORMAT_UNKNOWN;
 
-    ZeroMemory((void*)m_pChannels, MAX_CHANNELS*sizeof(Channel));
-    
-    m_pWaitForVerticalInputEvent = NULL;
+	m_WaitChannel = NTV2_CHANNEL1;
 
     m_uiNumChannels = 0;
     m_uiNumThreads  = 0;
@@ -62,7 +61,6 @@ AJA_SDIInOut::AJA_SDIInOut(unsigned int uiBoardNumber)
     // in AutoCirculate buffer before flushing the buffer to catch up.
     m_uiMaxAllowedBufferLevel = 8;
 }
-
 
 
 AJA_SDIInOut::~AJA_SDIInOut(void)
@@ -83,34 +81,35 @@ AJA_SDIInOut::~AJA_SDIInOut(void)
 }
 
 
-
 unsigned int AJA_SDIInOut::getNumBoards()
 {
-    CNTV2BoardScan ntv2BoardScan;
+    CNTV2DeviceScanner ntv2BoardScan;
 
-    return ntv2BoardScan.GetNumBoards();
+    return (unsigned int)ntv2BoardScan.GetNumDevices();
 }
 
 
 bool AJA_SDIInOut::openCard(unsigned int uiNumBuffers, bool bUseAutoCirculate, bool bUseP2P)
 {
     
-    CNTV2BoardScan ntv2BoardScan;
+    CNTV2DeviceScanner ntv2BoardScan;
 
-    if (m_uiBoardNumber >= ntv2BoardScan.GetNumBoards())
+    if (m_uiBoardNumber >= ntv2BoardScan.GetNumDevices())
     {
         return false;
     }
 
-    BoardInfoList list = ntv2BoardScan.GetBoardList();
-
-    OurBoardInfo	info = list[m_uiBoardNumber];
-
-    if (!m_ntv2Card.Open((UWord)m_uiBoardNumber, true, info.boardType))
+    if (!m_ntv2Card.Open((UWord)m_uiBoardNumber))
         return false;
 
-    // verify the board can be a p2p target
-    m_BoardID = m_ntv2Card.GetBoardID();
+	if (!m_ntv2Card.AcquireStreamForApplication (FCC('D', 'E', 'M', 'O'), static_cast <uint32_t> (GetCurrentProcessId ())))
+		return false;		//	Device is in use by another app -- fail
+
+	m_ntv2Card.GetEveryFrameServices (&m_savedTaskMode);	//	Save the current service level
+	m_ntv2Card.SetEveryFrameServices(NTV2_OEM_TASKS);	
+
+	// verify the board can be a p2p target
+    m_DeviceID = m_ntv2Card.GetDeviceID();
 
     // define if the AutoCirculate Interface should be used
     m_bUseAutoCirculate = bUseAutoCirculate;
@@ -125,33 +124,33 @@ bool AJA_SDIInOut::openCard(unsigned int uiNumBuffers, bool bUseAutoCirculate, b
 }
 
 
-
-
 void AJA_SDIInOut::closeCard()
 {
-    if (m_ntv2Card.BoardOpened())
+    if (m_ntv2Card.IsOpen())
     {
         if (m_bUseAutoCirculate)
         {
-            m_ntv2Card.StopAutoCirculate(NTV2CROSSPOINT_INPUT1);
-            m_ntv2Card.StopAutoCirculate(NTV2CROSSPOINT_INPUT2);
-            m_ntv2Card.StopAutoCirculate(NTV2CROSSPOINT_CHANNEL1);
-            m_ntv2Card.StopAutoCirculate(NTV2CROSSPOINT_CHANNEL2);
+            m_ntv2Card.AutoCirculateStop(NTV2_CHANNEL1);
+			m_ntv2Card.AutoCirculateStop(NTV2_CHANNEL2);
         }
 
         m_ntv2Card.ClearRouting();
-        m_ntv2Card.Close();
 
         m_uiNumChannels = 0;
-    }
+
+		m_ntv2Card.SetEveryFrameServices (m_savedTaskMode);			//	Restore the previously saved service level
+		m_ntv2Card.ReleaseStreamForApplication (FCC('D', 'E', 'M', 'O'), static_cast <uint32_t> (GetCurrentProcessId ()));	//	Release the device
+
+        m_ntv2Card.Close();
+	}
 }
 
 
-bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat)
+bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat, bool bQuad)
 {
     NTV2VideoFormat VideoFormat;
 
-    if (!m_ntv2Card.BoardOpened())
+    if (!m_ntv2Card.IsOpen())
         return false;
 
     if (m_uiNumChannels >= MAX_CHANNELS)
@@ -159,23 +158,61 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 
     m_pChannels[m_uiNumChannels].uiSDIChannel = uiSDIChannel;
 
-    if (uiSDIChannel == 0)
+	if (uiSDIChannel == 0)
     {
         // Use SDI 1 (IN 1) 
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL1;
-        m_pChannels[m_uiNumChannels].ChannelSpec = NTV2CROSSPOINT_INPUT1;
+
+		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		{
+			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
+			Sleep(500);
+		}
 
         // Get video format on input 1
-        VideoFormat = m_ntv2Card.GetInput1VideoFormat();
+        VideoFormat = m_ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1);
     }
     else if (uiSDIChannel == 1)
     {
         // Use SDI 2 (IN 2)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL2;
-        m_pChannels[m_uiNumChannels].ChannelSpec = NTV2CROSSPOINT_INPUT2;
+
+		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		{
+			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
+			Sleep(500);
+		}
 
         // Get video format on input 2
-        VideoFormat = m_ntv2Card.GetInput2VideoFormat();
+        VideoFormat = m_ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI2);
+    }
+    else if (uiSDIChannel == 2)
+    {
+        // Use SDI 2 (IN 2)
+        m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL3;
+
+		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		{
+			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
+			Sleep(500);
+		}
+
+        // Get video format on input 2
+        VideoFormat = m_ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI3);
+    }
+    else if (uiSDIChannel == 3)
+    {
+        // Use SDI 2 (IN 2)
+        m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL4;
+
+		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		{
+			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
+			Sleep(500);
+		}
+
+        // Get video format on input 2
+        VideoFormat = m_ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI4);
     }
     else
     {
@@ -186,61 +223,119 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
     if (VideoFormat == NTV2_FORMAT_UNKNOWN)
         return false;
 
-    m_pChannels[m_uiNumChannels].MinFrame = m_uiNumChannels * m_uiNumBuffers;
-    m_pChannels[m_uiNumChannels].MaxFrame = m_uiNumChannels * m_uiNumBuffers + m_uiNumBuffers - 1;
+	// Get quad format
+	if (bQuad)
+	{
+		VideoFormat = ::GetQuadSizedVideoFormat(VideoFormat);
+	}
+    if (VideoFormat == NTV2_FORMAT_UNKNOWN)
+    return false;
 
+	// Adapt video format to the format detected on the input
+	if (!m_ntv2Card.SetVideoFormat(VideoFormat))
+		return false;
+
+	m_VideoFormat = VideoFormat;
+
+	m_pChannels[m_uiNumChannels].MinFrame = m_uiNumChannels * m_uiNumBuffers;
+    m_pChannels[m_uiNumChannels].MaxFrame = m_uiNumChannels * m_uiNumBuffers + m_uiNumBuffers - 1;
+    m_pChannels[m_uiNumChannels].FBFormat = FBFormat;
+	
     if (m_bClearRouting)
         m_ntv2Card.ClearRouting();
 
     m_bClearRouting = false;
 
-    // Adapt video format to the format detected on the input
-    if (!m_ntv2Card.SetVideoFormat(VideoFormat))
-        return false;
+	if (NTV2_IS_QUAD_FRAME_FORMAT(VideoFormat))
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			// disable transmitter
+			if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+			{
+				m_ntv2Card.SetSDITransmitEnable ((NTV2Channel)i, false);
+			}
 
-    m_VideoFormat = VideoFormat;
+			// frame buffer pixel format
+			if (!m_ntv2Card.SetFrameBufferFormat((NTV2Channel)i, FBFormat))
+				return false;
 
-    if (!m_ntv2Card.SetFrameBufferFormat(m_pChannels[m_uiNumChannels].SDIChannel, FBFormat))
-        return false;
+			// frame buffer capture mode
+			if (!m_ntv2Card.SetMode((NTV2Channel)i, NTV2_MODE_CAPTURE))
+				return false;
 
-    m_pChannels[m_uiNumChannels].FBFormat = FBFormat;
+			if (!m_ntv2Card.EnableChannel((NTV2Channel)i))
+				return false;
 
-    if (NTV2BoardNeedsRoutingSetup(m_BoardID))
-    {
-        // Build router as follow
-        // convert  = false
-        // withKey  = false
-        // lut      = false
-        // duallink = false
-        // EtoE     = false
-        BuildRoutingTableForInput(m_Router, m_pChannels[m_uiNumChannels].SDIChannel,  FBFormat, false, false, false, false, false);
+			// cross point routing
+			if (NTV2BoardNeedsRoutingSetup(m_DeviceID))
+			{
+				if(isRGBFormat(FBFormat))
+				{
+					m_ntv2Card.Connect (::GetCSCInputXptFromChannel ((NTV2Channel)i), 
+						::GetSDIInputOutputXptFromChannel ((NTV2Channel)i));
+					m_ntv2Card.Connect (::GetFrameBufferInputXptFromChannel ((NTV2Channel)i), 
+						::GetCSCOutputXptFromChannel ((NTV2Channel)i, false, true));
+					m_ntv2Card.SetColorSpaceMakeAlphaFromKey(0, (NTV2Channel)i);
+				}
+				else
+				{
+					m_ntv2Card.Connect (::GetFrameBufferInputXptFromChannel ((NTV2Channel)i), 
+						::GetSDIInputOutputXptFromChannel ((NTV2Channel)i));
+				}
+			}
+		}
+	}
+	else
+	{
+		// frame buffer pixel format
+		if (!m_ntv2Card.SetFrameBufferFormat(m_pChannels[m_uiNumChannels].SDIChannel, FBFormat))
+			return false;
 
-        // Output routing table
-        m_ntv2Card.OutputRoutingTable(m_Router);
-    }
+		// frame buffer capture mode
+		if (!m_ntv2Card.SetMode(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_MODE_CAPTURE))
+			return false;
+
+		if (!m_ntv2Card.EnableChannel(m_pChannels[m_uiNumChannels].SDIChannel))
+			return false;
+
+		// cross point routing
+		if (NTV2BoardNeedsRoutingSetup(m_DeviceID))
+		{
+			if(isRGBFormat(FBFormat))
+			{
+				m_ntv2Card.Connect (::GetCSCInputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel), 
+					::GetSDIInputOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel));
+				m_ntv2Card.Connect (::GetFrameBufferInputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel), 
+					::GetCSCOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel, false, true));
+				m_ntv2Card.SetColorSpaceMakeAlphaFromKey(0, m_pChannels[m_uiNumChannels].SDIChannel);
+			}
+			else
+			{
+				m_ntv2Card.Connect (::GetFrameBufferInputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel), 
+					::GetSDIInputOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel));
+			}
+		}
+	}
     
-
     m_pChannels[m_uiNumChannels].ioMode = SDI_INPUT;
     
-    NTV2Standard standard;
+	NTV2FormatDescriptor fd = GetFormatDescriptor(VideoFormat, m_pChannels[m_uiNumChannels].FBFormat);
 
-    m_ntv2Card.GetStandard(&standard);
-    NTV2FormatDescriptor fd = GetFormatDescriptor(standard, m_pChannels[m_uiNumChannels].FBFormat, false, false , false);
+	m_pChannels[m_uiNumChannels].uiFBWidth   = fd.numPixels;       // FB width in Pixel
+	m_pChannels[m_uiNumChannels].uiFBHeight  = fd.numLines;        // number of lines
+	m_pChannels[m_uiNumChannels].uiLinePitch = fd.linePitch;       // size of one line in 32 Bit DWORDS
 
-    m_pChannels[m_uiNumChannels].uiFBWidth   = fd.numPixels;       // FB width in Pixel
-    m_pChannels[m_uiNumChannels].uiFBHeight  = fd.numLines;        // number of lines
-    m_pChannels[m_uiNumChannels].uiLinePitch = fd.linePitch;       // size of one line in 32 Bit DWORDS
+//	m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP);
+	m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
-    m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP);
-
-    if (m_bUseAutoCirculate)
+	if (m_bUseAutoCirculate)
     {
         if (!initAutoCirculate(m_uiNumChannels))
             return false;
     }
     else
     {
-        m_ntv2Card.SetMode(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_MODE_CAPTURE);
         m_ntv2Card.SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
     }
 
@@ -250,11 +345,9 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 }
 
 
-
-
 bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBufferFormat FBFormat, NTV2VideoFormat VideoFormat)
 {
-    if (!m_ntv2Card.BoardOpened())
+    if (!m_ntv2Card.IsOpen())
         return false;
 
     if (m_uiNumChannels >= MAX_CHANNELS)
@@ -264,15 +357,23 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
 
     if (uiSDIChannel == 0)
     {
-        // Use SDI 3 (Out 1)
+        // Use SDI 1/3 (Out 1)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL1;
-        m_pChannels[m_uiNumChannels].ChannelSpec = NTV2CROSSPOINT_CHANNEL1;
     }
     else if (uiSDIChannel == 1)
     {
-        // Use SDI 4 (Out 2)
+        // Use SDI 2/4 (Out 2)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL2;
-        m_pChannels[m_uiNumChannels].ChannelSpec = NTV2CROSSPOINT_CHANNEL2;
+    }
+    else if (uiSDIChannel == 2)
+    {
+        // Use SDI 3 (Out 3)
+        m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL3;
+    }
+    else if (uiSDIChannel == 3)
+    {
+        // Use SDI 4 (Out 4)
+        m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL4;
     }
     else
     {
@@ -281,34 +382,76 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
 
     m_pChannels[m_uiNumChannels].MinFrame = m_uiNumChannels * m_uiNumBuffers;
     m_pChannels[m_uiNumChannels].MaxFrame = m_uiNumChannels * m_uiNumBuffers + m_uiNumBuffers - 1;
+    m_pChannels[m_uiNumChannels].FBFormat = FBFormat;
 
     if (m_bClearRouting)
         m_ntv2Card.ClearRouting();
 
     m_bClearRouting = false;
 
-    if (!m_ntv2Card.SetFrameBufferFormat(m_pChannels[m_uiNumChannels].SDIChannel, FBFormat))
-        return false;
-
-    m_pChannels[m_uiNumChannels].FBFormat = FBFormat;
-
-    // route video
-	if(m_pChannels[m_uiNumChannels].SDIChannel == NTV2_CHANNEL1)
+	if (NTV2_IS_QUAD_FRAME_FORMAT(VideoFormat))
 	{
-		m_ntv2Card.SetK2Xpt3SDIOut1InputSelect(NTV2K2_XptFrameBuffer1YUV);					   // sdi out 1 <-- frame buffer 1 yuv
-		if(isRGBFormat(FBFormat))															   // route through csc 1 if rgb
+		for (int i = 0; i < 4; i++)
 		{
-			m_ntv2Card.SetK2Xpt3SDIOut1InputSelect(NTV2K2_XptCSC1VidYUV);						// sdi out 1 <-- csc 1 yuv
-			m_ntv2Card.SetK2Xpt1ColorSpaceConverterInputSelect(NTV2K2_XptFrameBuffer1RGB);	    // csc 1 <-- frame buffer 1 rgb
+			// frame buffer pixel format
+			if (!m_ntv2Card.SetFrameBufferFormat((NTV2Channel)i, FBFormat))
+				return false;
+			
+			// frame buffer display mode
+			if (!m_ntv2Card.SetMode((NTV2Channel)i, NTV2_MODE_DISPLAY))
+				return false;
+
+			if (!m_ntv2Card.EnableChannel((NTV2Channel)i))
+				return false;
+
+			// enable transmitter
+			if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+				m_ntv2Card.SetSDITransmitEnable ((NTV2Channel)i, true);
+
+			// route video
+			if(isRGBFormat(FBFormat))
+			{
+				m_ntv2Card.Connect (::GetCSCInputXptFromChannel ((NTV2Channel)i, false),  
+					::GetFrameBufferOutputXptFromChannel ((NTV2Channel)i,  true,  false));
+				m_ntv2Card.Connect (::GetSDIOutputInputXpt ((NTV2Channel)i, false),  
+					::GetCSCOutputXptFromChannel ((NTV2Channel)i,  false,  false));
+			}
+			else
+			{
+				m_ntv2Card.Connect (::GetSDIOutputInputXpt ((NTV2Channel)i, false),  
+					::GetFrameBufferOutputXptFromChannel ((NTV2Channel)i,  false,  false));
+			}
 		}
 	}
 	else
 	{
-		m_ntv2Card.SetK2Xpt3SDIOut2InputSelect(NTV2K2_XptFrameBuffer2YUV);					// sdi out 2 <-- frame buffer 2 yuv
-		if(isRGBFormat(FBFormat))															// route through csc 2 if rgb
+		// frame buffer pixel format
+	    if (!m_ntv2Card.SetFrameBufferFormat(m_pChannels[m_uiNumChannels].SDIChannel, FBFormat))
+			return false;
+
+		// frame buffer display mode
+		if (!m_ntv2Card.SetMode(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_MODE_DISPLAY))
+			return false;
+
+		if (!m_ntv2Card.EnableChannel(m_pChannels[m_uiNumChannels].SDIChannel))
+			return false;
+
+		// enable transmitter
+		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, true);
+
+		// route video
+		if(isRGBFormat(FBFormat))
 		{
-			m_ntv2Card.SetK2Xpt3SDIOut2InputSelect(NTV2K2_XptCSC2VidYUV);						// sdi out 2 <-- csc2 yuv
-			m_ntv2Card.SetK2Xpt5CSC2VidInputSelect(NTV2K2_XptFrameBuffer2RGB);				// csc 2 <-- frame buffer 1 rgb
+			m_ntv2Card.Connect (::GetCSCInputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel, false),  
+				::GetFrameBufferOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel,  true,  false));
+			m_ntv2Card.Connect (::GetSDIOutputInputXpt (m_pChannels[m_uiNumChannels].SDIChannel, false),  
+				::GetCSCOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel,  false,  false));
+		}
+		else
+		{
+			m_ntv2Card.Connect (::GetSDIOutputInputXpt (m_pChannels[m_uiNumChannels].SDIChannel, false),  
+				::GetFrameBufferOutputXptFromChannel (m_pChannels[m_uiNumChannels].SDIChannel,  false,  false));
 		}
 	}
 
@@ -323,17 +466,21 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
     }
 
     m_pChannels[m_uiNumChannels].ioMode = SDI_OUTPUT;
-    
-    NTV2Standard standard;
 
-    m_ntv2Card.GetStandard(&standard);
-    NTV2FormatDescriptor fd = GetFormatDescriptor(standard, m_pChannels[m_uiNumChannels].FBFormat, false, false , false);
+	NTV2FormatDescriptor fd = GetFormatDescriptor(VideoFormat, m_pChannels[m_uiNumChannels].FBFormat);
 
-    m_pChannels[m_uiNumChannels].uiFBWidth   = fd.numPixels;       // FB width in Pixel
-    m_pChannels[m_uiNumChannels].uiFBHeight  = fd.numLines;        // number of lines
-    m_pChannels[m_uiNumChannels].uiLinePitch = fd.linePitch;       // size of one line in 32 Bit DWORDS
+	m_pChannels[m_uiNumChannels].uiFBWidth = fd.numPixels;       // FB width in Pixel
+	m_pChannels[m_uiNumChannels].uiFBHeight = fd.numLines;        // number of lines
+	m_pChannels[m_uiNumChannels].uiLinePitch = fd.linePitch;       // size of one line in 32 Bit DWORDS
+	if (NTV2_IS_QUAD_FRAME_FORMAT(VideoFormat))
+	{
+	    m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);  // quad only topdown for now
+	}
+	else
+	{
+	    m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP);
+	}
 
-    m_ntv2Card.SetFrameBufferOrientation(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP);
 
     if (m_bUseAutoCirculate)
     {
@@ -342,7 +489,6 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
     }
     else
     {
-        m_ntv2Card.SetMode(m_pChannels[m_uiNumChannels].SDIChannel, NTV2_MODE_DISPLAY);
         m_ntv2Card.SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
 
         if (m_bUseP2P)
@@ -376,24 +522,25 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
 }
 
 
-
 bool AJA_SDIInOut::initAutoCirculate(unsigned int uiChannel)
 {
-    m_ntv2Card.StopAutoCirculate(m_pChannels[uiChannel].ChannelSpec);
+	m_ntv2Card.AutoCirculateStop(m_pChannels[uiChannel].SDIChannel);
 
-    m_pChannels[uiChannel].TransferStruct.channelSpec               = m_pChannels[uiChannel].ChannelSpec;
-    m_pChannels[uiChannel].TransferStruct.videoBuffer               = NULL;
-    m_pChannels[uiChannel].TransferStruct.videoBufferSize           = (m_pChannels[uiChannel].uiFBHeight * m_pChannels[uiChannel].uiLinePitch*4);
-    m_pChannels[uiChannel].TransferStruct.videoDmaOffset            = 0;
-    m_pChannels[uiChannel].TransferStruct.frameBufferFormat         = m_pChannels[uiChannel].FBFormat;
-    m_pChannels[uiChannel].TransferStruct.audioBuffer               = NULL;
-    m_pChannels[uiChannel].TransferStruct.audioBufferSize           = 0;
-    m_pChannels[uiChannel].TransferStruct.bDisableExtraAudioInfo    = true;
-    m_pChannels[uiChannel].TransferStruct.desiredFrame              = -1;
-    m_pChannels[uiChannel].TransferStruct.frameRepeatCount          =  1;
+	m_pChannels[uiChannel].uiTransferSize = (m_pChannels[uiChannel].uiFBHeight * m_pChannels[uiChannel].uiLinePitch * 4);
 
-    if (!m_ntv2Card.InitAutoCirculate(m_pChannels[uiChannel].ChannelSpec, m_pChannels[uiChannel].MinFrame, m_pChannels[uiChannel].MaxFrame))
-        return false;
+	m_pChannels[uiChannel].TransferStruct.SetVideoBuffer(NULL, m_pChannels[uiChannel].uiTransferSize);
+	m_pChannels[uiChannel].TransferStruct.SetAudioBuffer(NULL, 0);
+
+	if (m_pChannels[uiChannel].ioMode == SDI_INPUT)
+	{
+		if (!m_ntv2Card.AutoCirculateInitForInput(m_pChannels[uiChannel].SDIChannel, 0, NTV2_AUDIOSYSTEM_1, 0, 1, m_pChannels[uiChannel].MinFrame, m_pChannels[uiChannel].MaxFrame))
+			return false;
+	}
+	else
+	{
+		if (!m_ntv2Card.AutoCirculateInitForOutput(m_pChannels[uiChannel].SDIChannel, 0, NTV2_AUDIOSYSTEM_1, 0, 1, m_pChannels[uiChannel].MinFrame, m_pChannels[uiChannel].MaxFrame))
+			return false;
+	}
 
     if (m_bUseP2P && m_pChannels[uiChannel].ioMode == SDI_OUTPUT)
     {
@@ -405,15 +552,14 @@ bool AJA_SDIInOut::initAutoCirculate(unsigned int uiChannel)
         m_pChannels[uiChannel].pVideoBusAddress  = new ULWord64[uiNumBuffers];
         m_pChannels[uiChannel].pMarkerBusAddress = new ULWord64[uiNumBuffers];
 
-        m_ntv2Card.FlushAutoCirculate(m_pChannels[uiChannel].ChannelSpec);
+        m_ntv2Card.AutoCirculateFlush(m_pChannels[uiChannel].SDIChannel);
 
         for (unsigned int i = 0; i < uiNumBuffers; i++)
         {
-            m_pChannels[uiChannel].TransferStruct.videoBuffer       = (ULWord*)(&p2pBuffer);
-            m_pChannels[uiChannel].TransferStruct.desiredFrame      = -1;
-            m_pChannels[uiChannel].TransferStruct.transferFlags     = kTransferFlagP2PTarget;
+			m_pChannels[uiChannel].TransferStruct.SetVideoBuffer((ULWord*)(&p2pBuffer), 0);
+            m_pChannels[uiChannel].TransferStruct.acPeerToPeerFlags = AUTOCIRCULATE_P2P_TARGET;
 
-            if(m_ntv2Card.TransferWithAutoCirculate(&m_pChannels[uiChannel].TransferStruct, &m_pChannels[uiChannel].TransferStatus))
+			if (m_ntv2Card.AutoCirculateTransfer(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].TransferStruct))
 	        {
 		        m_pChannels[uiChannel].pVideoBusAddress[i]  = p2pBuffer.videoBusAddress;
                 m_pChannels[uiChannel].pMarkerBusAddress[i] = p2pBuffer.messageBusAddress;
@@ -421,11 +567,10 @@ bool AJA_SDIInOut::initAutoCirculate(unsigned int uiChannel)
         }
     }
 
-    m_ntv2Card.FlushAutoCirculate(m_pChannels[uiChannel].ChannelSpec);
+	m_ntv2Card.AutoCirculateFlush(m_pChannels[uiChannel].SDIChannel);
         
     return true;
 }
-
 
 
 unsigned int AJA_SDIInOut::getBusAddresses(unsigned int uiChannel, unsigned long long* &outVideoBusAddress, unsigned long long* &outMarkerBusAddress)
@@ -446,7 +591,6 @@ unsigned int AJA_SDIInOut::getBusAddresses(unsigned int uiChannel, unsigned long
 
     return 0;
 }
-
 
 
 // Connect a SDI channel with a synchronize buffer to exchange data with
@@ -474,7 +618,6 @@ unsigned int AJA_SDIInOut::getSDIChannelIndex(unsigned int uiSDIChannel)
 
     return m_uiNumChannels;
 }
-
 
 
 void AJA_SDIInOut::deleteChannels()
@@ -511,7 +654,7 @@ bool AJA_SDIInOut::start()
         // Start AutoCirculate on each channel
         for (unsigned int i = 0; i < m_uiNumChannels; ++i)
         {
-            if (!m_ntv2Card.StartAutoCirculate(m_pChannels[i].ChannelSpec))
+            if (!m_ntv2Card.AutoCirculateStart(m_pChannels[i].SDIChannel))
                 return false;
         }
     }
@@ -523,13 +666,13 @@ bool AJA_SDIInOut::start()
             // Select the vertical event to which the input channels subscribes
             if (m_pChannels[0].SDIChannel == NTV2_CHANNEL1)
             {
-                m_ntv2Card.SubscribeInput1VerticalEvent();
-                m_pWaitForVerticalInputEvent = (VERTICALEVENTFUNC)&CNTV2Card::WaitForInput1FieldID;
+                m_ntv2Card.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
+                m_WaitChannel = NTV2_CHANNEL1;
             }
             else if (m_pChannels[0].SDIChannel == NTV2_CHANNEL2)
             {
-                m_ntv2Card.SubscribeInput2VerticalEvent();
-                m_pWaitForVerticalInputEvent = (VERTICALEVENTFUNC)&CNTV2Card::WaitForInput2FieldID;
+                m_ntv2Card.SubscribeInputVerticalEvent(NTV2_CHANNEL2);
+                m_WaitChannel = NTV2_CHANNEL2;
             }
 
             // start thread to capture data
@@ -556,10 +699,9 @@ bool AJA_SDIInOut::start()
         {
             // In case of 2 inputs, input 1 is used as reference. In this case the input needs
             // to subscrive to the vertical event of channel 1.
-            m_ntv2Card.SetReferenceSource(NTV2_REFERENCE_INPUT1);
-            m_ntv2Card.SubscribeInput1VerticalEvent();
-
-            m_pWaitForVerticalInputEvent = (VERTICALEVENTFUNC)&CNTV2Card::WaitForInput1FieldID;
+            m_ntv2Card.SetReference(NTV2_REFERENCE_INPUT1);
+            m_ntv2Card.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
+            m_WaitChannel = NTV2_CHANNEL1;
 
             // In case of 2 inputs, we create only one thread than handles both inputs
             m_pThread[0].create((THREAD_PROC)AJA_SDIInOut::inputThread, this);
@@ -581,18 +723,16 @@ bool AJA_SDIInOut::start()
             // define vertical interrupt on which the input waits
             if (m_pChannels[uiInputIdx].SDIChannel == NTV2_CHANNEL1)
             {
-                m_ntv2Card.SetReferenceSource(NTV2_REFERENCE_INPUT1);
-                m_ntv2Card.SubscribeInput1VerticalEvent();
-                m_pWaitForVerticalInputEvent = (VERTICALEVENTFUNC)&CNTV2Card::WaitForInput1FieldID;
+                m_ntv2Card.SetReference(NTV2_REFERENCE_INPUT1);
+                m_ntv2Card.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
+                m_WaitChannel = NTV2_CHANNEL1;
             }
             else
             {
-                m_ntv2Card.SetReferenceSource(NTV2_REFERENCE_INPUT2);
-                m_ntv2Card.SubscribeInput2VerticalEvent();
-                m_pWaitForVerticalInputEvent = (VERTICALEVENTFUNC)&CNTV2Card::WaitForInput2FieldID;
+                m_ntv2Card.SetReference(NTV2_REFERENCE_INPUT2);
+                m_ntv2Card.SubscribeInputVerticalEvent(NTV2_CHANNEL2);
+                m_WaitChannel = NTV2_CHANNEL2;
             }
-
-            m_ntv2Card.SubscribeOutputVerticalEvent();
 
             m_pThread[0].create((THREAD_PROC)AJA_SDIInOut::inputThread,  this);
             m_pThread[1].create((THREAD_PROC)AJA_SDIInOut::outputThread, this);
@@ -624,7 +764,6 @@ void AJA_SDIInOut::halt()
 }
 
 
-
 bool AJA_SDIInOut::stop()
 {
     m_bRunning = false;
@@ -639,13 +778,12 @@ bool AJA_SDIInOut::stop()
     {
         for (unsigned int i = 0; i < m_uiNumChannels; i++)
         {
-            m_ntv2Card.StopAutoCirculate(m_pChannels[i].ChannelSpec);
+            m_ntv2Card.AutoCirculateStop(m_pChannels[i].SDIChannel);
         }
     }
 
     return true;
 }
-
 
 
 DWORD WINAPI AJA_SDIInOut::inputThread(void *pArg)
@@ -660,6 +798,7 @@ DWORD WINAPI AJA_SDIInOut::inputThread(void *pArg)
     return 0;
 }
 
+
 DWORD WINAPI AJA_SDIInOut::outputThread(void *pArg)
 {
     if (pArg)
@@ -673,16 +812,15 @@ DWORD WINAPI AJA_SDIInOut::outputThread(void *pArg)
 }
 
 
-
 void AJA_SDIInOut::transferWithAutoCirculateToGPU(unsigned int uiChannel, unsigned int uiTransferId)
 {
     TransferFrame*                  pFrame;
     AUTOCIRCULATE_P2P_STRUCT        p2pBuffer;
-    AUTOCIRCULATE_STATUS_STRUCT     ActStatus;
+    AUTOCIRCULATE_STATUS            ActStatus;
     
-    m_ntv2Card.GetAutoCirculate(m_pChannels[uiChannel].ChannelSpec, &ActStatus);
+	m_ntv2Card.AutoCirculateGetStatus(m_pChannels[uiChannel].SDIChannel, ActStatus);
 
-    if (ActStatus.state == NTV2_AUTOCIRCULATE_RUNNING && ActStatus.bufferLevel > 0 && ActStatus.bufferLevel < m_uiMaxAllowedBufferLevel)
+	if (ActStatus.GetState() == NTV2_AUTOCIRCULATE_RUNNING && ActStatus.GetBufferLevel() > 0 && ActStatus.GetBufferLevel() < m_uiMaxAllowedBufferLevel)
     {
         if (m_bUseP2P)
         {
@@ -696,7 +834,7 @@ void AJA_SDIInOut::transferWithAutoCirculateToGPU(unsigned int uiChannel, unsign
             if (pFrame)
             {
                 p2pBuffer.videoBusAddress   = pFrame->uiGfxBufferBusAddress;
-                p2pBuffer.videoBusSize      = m_pChannels[uiChannel].TransferStruct.videoBufferSize;
+                p2pBuffer.videoBusSize      = m_pChannels[uiChannel].uiTransferSize;
                 p2pBuffer.messageBusAddress = pFrame->uiGfxMarkerBusAddress;
                 p2pBuffer.messageData       = uiTransferId;
                 p2pBuffer.p2pflags          = 0;
@@ -710,14 +848,11 @@ void AJA_SDIInOut::transferWithAutoCirculateToGPU(unsigned int uiChannel, unsign
             // by calling glWaitMarkerAMD.
             m_pChannels[uiChannel].pSyncBuffer->releaseWriteBuffer();
 
-            m_pChannels[uiChannel].TransferStruct.videoBuffer   = (ULWord*) &p2pBuffer;
-            m_pChannels[uiChannel].TransferStruct.transferFlags = kTransferFlagP2PTransfer;
+			m_pChannels[uiChannel].TransferStruct.SetVideoBuffer((ULWord*)&p2pBuffer, m_pChannels[uiChannel].uiTransferSize);
+            m_pChannels[uiChannel].TransferStruct.acPeerToPeerFlags = AUTOCIRCULATE_P2P_TRANSFER;
 
-            if (m_pChannels[uiChannel].TransferStruct.videoBuffer)
-            {
-                // Transfer frame to gpu. This call will transfer the data and write the marker to indicate end of transfer
-                m_ntv2Card.TransferWithAutoCirculate(&m_pChannels[uiChannel].TransferStruct, &m_pChannels[uiChannel].TransferStatus);
-            }
+            // Transfer frame to gpu. This call will transfer the data and write the marker to indicate end of transfer
+			m_ntv2Card.AutoCirculateTransfer(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].TransferStruct);
             
             ++uiTransferId;
         }
@@ -731,53 +866,49 @@ void AJA_SDIInOut::transferWithAutoCirculateToGPU(unsigned int uiChannel, unsign
 
             if (pFrame)
             {
-                m_pChannels[uiChannel].TransferStruct.videoBuffer = (ULWord*)(pFrame->pData);
-            }
+				m_pChannels[uiChannel].TransferStruct.SetVideoBuffer((ULWord*)(pFrame->pData), m_pChannels[uiChannel].uiTransferSize);
 
-            if (m_pChannels[uiChannel].TransferStruct.videoBuffer)
-            {
-                // Read current frame into DMA buffer
-                m_ntv2Card.TransferWithAutoCirculate(&m_pChannels[uiChannel].TransferStruct, &m_pChannels[uiChannel].TransferStatus);
-            }
-            
+				if (pFrame->pData)
+		        {
+			        // Read current frame into DMA buffer
+					m_ntv2Card.AutoCirculateTransfer(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].TransferStruct);
+				}
+			}
+
             // Unblock rendering with new buffer content
             m_pChannels[uiChannel].pSyncBuffer->releaseWriteBuffer();
         }
     }
-    else if (ActStatus.state == NTV2_AUTOCIRCULATE_RUNNING && ActStatus.bufferLevel > 0)
+    else if (ActStatus.GetState() == NTV2_AUTOCIRCULATE_RUNNING && ActStatus.GetBufferLevel() > 0)
     {
         // Max buffer level reached -> flush the buffer to catch up
-        m_ntv2Card.FlushAutoCirculate(m_pChannels[uiChannel].ChannelSpec);
+		m_ntv2Card.AutoCirculateFlush(m_pChannels[uiChannel].SDIChannel);
     }
 }
-
 
 
 void AJA_SDIInOut::transferWithAutoCirculateToSDI(unsigned int uiChannel)
 {
     TransferFrame*              pFrame = NULL;
-    AUTOCIRCULATE_STATUS_STRUCT ActStatus;
     AUTOCIRCULATE_P2P_STRUCT    p2pBuffer;
-   
-    m_ntv2Card.GetAutoCirculate(m_pChannels[uiChannel].ChannelSpec, &ActStatus);
+	AUTOCIRCULATE_STATUS        ActStatus;
 
-    if ((ActStatus.state == NTV2_AUTOCIRCULATE_RUNNING || ActStatus.state == NTV2_AUTOCIRCULATE_STARTING) && (ActStatus.bufferLevel < (m_uiNumBuffers -1)))
+    m_ntv2Card.AutoCirculateGetStatus(m_pChannels[uiChannel].SDIChannel, ActStatus);
+
+    if ((ActStatus.GetState() == NTV2_AUTOCIRCULATE_RUNNING || ActStatus.GetState() == NTV2_AUTOCIRCULATE_STARTING) && (ActStatus.GetBufferLevel() < (m_uiNumBuffers -1)))
     {
         if (m_bUseP2P)
         {
             /////////////////////////////////////////////////////////////
             // P2P transfer
             /////////////////////////////////////////////////////////////                   
-            m_pChannels[uiChannel].TransferStruct.videoBuffer       = (ULWord*)(&p2pBuffer);
-            m_pChannels[uiChannel].TransferStruct.videoBufferSize   = 0;
-            m_pChannels[uiChannel].TransferStruct.audioBuffer       = NULL;
-            m_pChannels[uiChannel].TransferStruct.audioBufferSize   = 0;
-            m_pChannels[uiChannel].TransferStruct.desiredFrame      = -1;
-            m_pChannels[uiChannel].TransferStruct.transferFlags     = kTransferFlagP2PTarget;
+			m_pChannels[uiChannel].TransferStruct.SetVideoBuffer((ULWord*)(&p2pBuffer), 0);
+            m_pChannels[uiChannel].TransferStruct.SetAudioBuffer(NULL, 0);
+            m_pChannels[uiChannel].TransferStruct.acPeerToPeerFlags = AUTOCIRCULATE_P2P_TARGET;
 
             // Just retreive the information on an empty buffer into which the data can be written by
             // the render thread.
-            m_ntv2Card.TransferWithAutoCirculate(&m_pChannels[uiChannel].TransferStruct, &m_pChannels[uiChannel].TransferStatus);
+			m_ntv2Card.AutoCirculateTransfer(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].TransferStruct);
 
             // Now allow the GPU to copy into the buffer specified in p2pBuffer
             // Request frame data in whcih the addresses of the sdi buffer is written
@@ -801,16 +932,18 @@ void AJA_SDIInOut::transferWithAutoCirculateToSDI(unsigned int uiChannel)
 
             if (pFrame)
             {
-                m_pChannels[uiChannel].TransferStruct.videoBuffer = (ULWord*)pFrame->pData;
+				m_pChannels[uiChannel].TransferStruct.SetVideoBuffer((ULWord*)pFrame->pData, m_pChannels[uiChannel].uiTransferSize);
 
-                m_ntv2Card.TransferWithAutoCirculate(&m_pChannels[uiChannel].TransferStruct, &m_pChannels[uiChannel].TransferStatus);
+				if (pFrame->pData)
+				{
+					m_ntv2Card.AutoCirculateTransfer(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].TransferStruct);
+				}
             }
 
             m_pChannels[uiChannel].pSyncBuffer->releaseReadBuffer();
         }
     }
 }
-
 
 
 void AJA_SDIInOut::transferToGPU(unsigned int uiChannel, unsigned int uiFrame, unsigned int uiTransferId)
@@ -860,7 +993,7 @@ void AJA_SDIInOut::transferToGPU(unsigned int uiChannel, unsigned int uiFrame, u
 
         if (pFrame)
         {
-            m_ntv2Card.DmaReadFrame(NTV2_DMA_FIRST_AVAILABLE, m_pChannels[uiChannel].MinFrame + uiFrame, (ULWord*)pFrame->pData, uiFrameSize);
+            m_ntv2Card.DMAReadFrame(m_pChannels[uiChannel].MinFrame + uiFrame, (ULWord*)pFrame->pData, uiFrameSize);
         }
 
         // Unblock rendering with new buffer content
@@ -868,9 +1001,7 @@ void AJA_SDIInOut::transferToGPU(unsigned int uiChannel, unsigned int uiFrame, u
     }
 
     m_ntv2Card.SetInputFrame(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].MinFrame + uiFrame);
-
 }
-
 
 
 void AJA_SDIInOut::transferToSDI(unsigned int uiChannel, unsigned int uiFrame)
@@ -907,15 +1038,13 @@ void AJA_SDIInOut::transferToSDI(unsigned int uiChannel, unsigned int uiFrame)
 
         if (pFrame)
         {
-            m_ntv2Card.DmaWriteFrame(NTV2_DMA_FIRST_AVAILABLE, m_pChannels[uiChannel].MinFrame + uiFrame, (ULWord*)pFrame->pData, uiFrameSize);
+            m_ntv2Card.DMAWriteFrame(m_pChannels[uiChannel].MinFrame + uiFrame, (ULWord*)pFrame->pData, uiFrameSize);
             m_ntv2Card.SetOutputFrame(m_pChannels[uiChannel].SDIChannel, m_pChannels[uiChannel].MinFrame + uiFrame);
         }
 
         m_pChannels[uiChannel].pSyncBuffer->releaseReadBuffer();
     }
 }
-
-
 
 
 // input loop will run continuously and capture data on the input channel.
@@ -951,17 +1080,15 @@ void AJA_SDIInOut::inputLoop()
             uiFrameNumber = 0;
         }
 
-        if (m_pWaitForVerticalInputEvent)
-            (m_ntv2Card.*m_pWaitForVerticalInputEvent)(NTV2_FIELD0);
+		m_ntv2Card.WaitForInputFieldID (NTV2_FIELD0, m_WaitChannel);
     } 
 }
-
 
 
 // Output loop will run continuously and copy data to the SDI framebuffer for output
 void AJA_SDIInOut::outputLoop()
 {
-    m_ntv2Card.SubscribeOutputVerticalEvent();
+    m_ntv2Card.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
 
     unsigned int uiFrameNumber = 0;
    
@@ -989,10 +1116,9 @@ void AJA_SDIInOut::outputLoop()
             uiFrameNumber = 0;
         }
         
-        m_ntv2Card.WaitForVerticalInterrupt();
+        m_ntv2Card.WaitForOutputVerticalInterrupt();
     }
 }
-
 
 
 
@@ -1004,7 +1130,6 @@ unsigned int AJA_SDIInOut::getBytesPerPixel(unsigned int uiChannel)
    
     return nBPP;
 }
-
 
 
 int AJA_SDIInOut::getExtFormat(unsigned int uiChannel)
@@ -1033,7 +1158,6 @@ int AJA_SDIInOut::getIntFormat(unsigned int uiChannel)
 
     return 0;
 }
-
 
 
 int AJA_SDIInOut::getType(unsigned int uiChannel)

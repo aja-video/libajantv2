@@ -1377,7 +1377,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				{
 					uint32_t					pktSizeInBytes	(0);
 					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), m708Encoder->GetSMPTE334Size (), kCEA708Location);
+					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
 					pkt.Calculate8BitChecksum ();
 					doVanc = AJA_FAILURE (pkt.GenerateTransmitData (pF1AncBuffer, sizeof (pF1AncBuffer), pktSizeInBytes));
 				}
@@ -1392,7 +1392,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				{
 					uint32_t					pktSizeInBytes	(0);
 					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), m708Encoder->GetSMPTE334Size (), kCEA708Location);
+					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
 					pkt.Calculate8BitChecksum ();
 					doVanc = AJA_FAILURE (pkt.GenerateTransmitData (pF2AncBuffer, sizeof (pF2AncBuffer), pktSizeInBytes));
 				}
