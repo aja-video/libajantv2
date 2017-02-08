@@ -816,87 +816,113 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
 
     // end framer setup
 
-    // setup 4175 packetizer
-    // channel/stream number
-    uint32_t baseAddrPacketizer = SAREK_4175_TX_PACKETIZER_1;
-    SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
-
-    NTV2VideoFormat fmt = txConfig.videoFormat;
-    bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
-    NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
-
-    // width
-    uint32_t width = fd.GetRasterWidth();
-    mDevice.WriteRegister(kReg4175_pkt_width + baseAddrPacketizer,width);
-
-    // height
-    uint32_t height = fd.GetRasterHeight();
-    mDevice.WriteRegister(kReg4175_pkt_height + baseAddrPacketizer,height);
-
-    // video format = sampling
-    int vf;
-    int componentsPerPixel;
-    int componentsPerUnit;
-
-    VPIDSampling vs = txConfig.videoSamples;
-    switch(vs)
+    if (stream == VIDEO_2110)
     {
-    case VPIDSampling_GBR_444:
-        vf = 0;
-        componentsPerPixel = 3;
-        componentsPerUnit  = 3;
-        break;
-    case VPIDSampling_YUV_444:
-        vf = 1;
-        componentsPerPixel = 3;
-        componentsPerUnit  = 3;
-        break;
-    default:
-    case VPIDSampling_YUV_422:
-        componentsPerPixel = 2;
-        componentsPerUnit  = 4;
+        // setup 4175 packetizer
+        // channel/stream number
+        uint32_t baseAddrPacketizer = SAREK_4175_TX_PACKETIZER_1;
+        SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
 
-        vf = 2;
-        break;
+        NTV2VideoFormat fmt = txConfig.videoFormat;
+        bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
+        NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
+
+        // width
+        uint32_t width = fd.GetRasterWidth();
+        mDevice.WriteRegister(kReg4175_pkt_width + baseAddrPacketizer,width);
+
+        // height
+        uint32_t height = fd.GetRasterHeight();
+        mDevice.WriteRegister(kReg4175_pkt_height + baseAddrPacketizer,height);
+
+        // video format = sampling
+        int vf;
+        int componentsPerPixel;
+        int componentsPerUnit;
+
+        VPIDSampling vs = txConfig.videoSamples;
+        switch(vs)
+        {
+        case VPIDSampling_GBR_444:
+            vf = 0;
+            componentsPerPixel = 3;
+            componentsPerUnit  = 3;
+            break;
+        case VPIDSampling_YUV_444:
+            vf = 1;
+            componentsPerPixel = 3;
+            componentsPerUnit  = 3;
+            break;
+        default:
+        case VPIDSampling_YUV_422:
+            componentsPerPixel = 2;
+            componentsPerUnit  = 4;
+
+            vf = 2;
+            break;
+        }
+        mDevice.WriteRegister(kReg4175_pkt_vid_fmt + baseAddrPacketizer,vf);
+
+        const int bitsPerComponent = 10;
+        const int pixelsPerClock = 1;
+        int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
+        int activeLineLength   = activeLine_root/8;
+        int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
+        int pixelGroupSize     = pixelGroup_root/8;
+        int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
+        int bytesPerCycle      = bytesPerCycle_root/8;
+        int lcm                = _lcm(pixelGroup_root,bytesPerCycle_root)/8;
+        int payloadLength_root =  min(activeLineLength,1376)/lcm;
+        int payloadLength      = payloadLength_root * lcm;
+        float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
+        int ipktsPerLine       = (int)ceil(pktsPerLine);
+        int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
+
+        // pkts per line
+        mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
+
+        // payload length
+        mDevice.WriteRegister(kReg4175_pkt_payload_len + baseAddrPacketizer,payloadLength);
+
+        // payload length last
+        mDevice.WriteRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
+
+        // payload type
+        mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
+
+        // pix per pkt
+        int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
+        mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
+
+        // interlace
+        int ilace = (interlaced) ? 0x01 : 0x00;
+        mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
+
+        // end setup 4175 packetizer
     }
-    mDevice.WriteRegister(kReg4175_pkt_vid_fmt + baseAddrPacketizer,vf);
+    else if (stream == AUDIO1_2110)
+    {
+        // setup 4175 packetizer
+        // channel/stream number
+        uint32_t baseAddrPacketizer = SAREK_3190_TX_PACKETIZER_1;
+        SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
 
-    const int bitsPerComponent = 10;
-    const int pixelsPerClock = 1;
-    int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
-    int activeLineLength   = activeLine_root/8;
-    int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-    int pixelGroupSize     = pixelGroup_root/8;
-    int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-    int bytesPerCycle      = bytesPerCycle_root/8;
-    int lcm                = _lcm(pixelGroup_root,bytesPerCycle_root)/8;
-    int payloadLength_root =  min(activeLineLength,1376)/lcm;
-    int payloadLength      = payloadLength_root * lcm;
-    float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
-    int ipktsPerLine       = (int)ceil(pktsPerLine);
-    int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
+        // num samples
+        mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer,48);
 
-    // pkts per line
-    mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
+        // audio channels
+        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer,8);
 
-    // payload length
-    mDevice.WriteRegister(kReg4175_pkt_payload_len + baseAddrPacketizer,payloadLength);
+        // payload length
+        mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer,1152);
 
-    // payload length last
-    mDevice.WriteRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
+        // payload type
+        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer,101);
 
-    // payload type
-    mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
+        // ssrc
+        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
 
-    // pix per pkt
-    int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
-    mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
-
-    // interlace
-    int ilace = (interlaced) ? 0x01 : 0x00;
-    mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
-
-    // end setup 4175 packetizer
+    }
     return rv;
 }
 
@@ -944,10 +970,6 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110
 
 bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable)
 {
-    uint32_t    baseAddr;
-    bool        rv;
-    uint32_t    localIp;
-
     if (enable && _biDirectionalChannels)
     {
         bool rxEnabled;
@@ -960,15 +982,19 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, e2110Stream 
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
-    // select channel
-    rv = SelectTxFramerChannel(channel, stream, baseAddr);
-    if (!rv) return false;
+    // ** Framer
 
     // hold off access while we update channel regs
-    AcquireFramerControlAccess(baseAddr);
+    uint32_t    framerBaseAddr;
+    AcquireFramerControlAccess(framerBaseAddr);
+
+    // select channel
+    bool rv = SelectTxFramerChannel(channel, stream, framerBaseAddr);
+    if (!rv) return false;
 
     if (enable)
     {
+        uint32_t    localIp;
         if (GetTxPort(channel) == SFP_TOP)
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
@@ -977,20 +1003,38 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, e2110Stream 
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
         }
-        WriteChannelRegister(kRegFramer_src_ip + baseAddr,NTV2EndianSwap32(localIp));
+
+        WriteChannelRegister(kRegFramer_src_ip + framerBaseAddr,NTV2EndianSwap32(localIp));
 
         // enable
-        WriteChannelRegister(kRegFramer_chan_ctrl   + baseAddr,0x01);  // enables tx over mac1/mac2
+        WriteChannelRegister(kRegFramer_chan_ctrl   + framerBaseAddr,0x01);  // enables tx over mac1/mac2
     }
     else
     {
         // disable
-        WriteChannelRegister(kRegFramer_chan_ctrl    + baseAddr,0x0);   // disables channel
+        WriteChannelRegister(kRegFramer_chan_ctrl    + framerBaseAddr,0x0);   // disables channel
     }
 
     // enable  register updates
-    ReleaseFramerControlAccess(baseAddr);
+    ReleaseFramerControlAccess(framerBaseAddr);
 
+    // ** Framer end
+
+    // ** Packetizer
+    uint32_t packetizerBaseAddr;
+    SetTxPacketizerChannel(channel,stream,packetizerBaseAddr);
+
+    // this works for 4174 and 3190, the pkt_ctrl reg is 0x0
+    if (enable)
+    {
+        mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
+        mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x80);
+        mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x81);
+    }
+    else
+    {
+        mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
+    }
     return true;
 }
 
@@ -1168,18 +1212,26 @@ bool CNTV2Config2110::SelectTxFramerChannel(NTV2Channel channel, e2110Stream str
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrPacketizer)
 {
-    static uint32_t packetizers[4] = {SAREK_4175_RX_DEPACKETIZER_1,SAREK_4175_RX_DEPACKETIZER_2,SAREK_4175_RX_DEPACKETIZER_3,SAREK_4175_RX_DEPACKETIZER_4};
+    static uint32_t v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
+    static uint32_t a_packetizers[4] = {SAREK_3190_TX_PACKETIZER_1,SAREK_3190_TX_PACKETIZER_2,SAREK_3190_TX_PACKETIZER_3,SAREK_3190_TX_PACKETIZER_4};
 
     uint32_t iChannel = (uint32_t) channel;
 
     if (iChannel > _numTxChans)
         return false;
 
-    baseAddrPacketizer  = packetizers[iChannel];
-
-    // select channel
     uint32_t iStream = get2110TxStream(channel,stream);
-    mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, iStream);
+
+    if (stream == VIDEO_2110)
+    {
+        baseAddrPacketizer  = v_packetizers[iChannel];
+        mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, iStream);
+    }
+    else if (stream == AUDIO1_2110)
+    {
+        baseAddrPacketizer  = v_packetizers[iChannel];
+        mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
+    }
 
     return true;
 }
