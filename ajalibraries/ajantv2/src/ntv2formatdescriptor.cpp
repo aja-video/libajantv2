@@ -758,12 +758,12 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 	if (!IsValid ())
 		inOutStream << "INVALID: ";
 	inOutStream	<< GetFullRasterHeight() << " lines, "
-				<< GetRasterWidth() << " pixels/line";
-	if (GetNumPlanes() > 0)
-		inOutStream << ", " << GetNumPlanes() << " plane(s)";
+				<< GetRasterWidth() << " pixels/line, ";
+	if (IsPlanar())
+		inOutStream << GetNumPlanes() << " plane(s)";
 	do
 	{
-		if (GetNumPlanes() > 0)
+		if (IsPlanar())
 			inOutStream << ", PL" << plane << ": ";
 		inOutStream << GetBytesPerRow(plane) << " bytes/line";
 	} while (++plane < GetNumPlanes());

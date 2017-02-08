@@ -94,7 +94,7 @@ typedef struct NTV2FormatDescriptor
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return mNumPlanes > 0 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
+	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
 		@return		The total number of bytes required to hold the raster.
