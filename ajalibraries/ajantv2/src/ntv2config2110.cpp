@@ -22,9 +22,9 @@ using namespace std;
 
 static const int tx2100Streams[SAREK_MAX_CHANS][NUM_2100_STREAMS] = {
     {   VIDEO_2110,        AUDIO1_2110,         AUDIO2_2110,        META_2100},
-    {   VIDEO_2110 * 0x10, AUDIO1_2110 * 0x10 , AUDIO2_2110 * 0x10, META_2100 * 0x10},
-    {   VIDEO_2110 * 0x20, AUDIO1_2110 * 0x20 , AUDIO2_2110 * 0x20, META_2100 * 0x20},
-    {   VIDEO_2110 * 0x30, AUDIO1_2110 * 0x30 , AUDIO2_2110 * 0x30, META_2100 * 0x30}};
+    {   VIDEO_2110 + 0x10, AUDIO1_2110 + 0x10 , AUDIO2_2110 + 0x10, META_2100 + 0x10},
+    {   VIDEO_2110 + 0x20, AUDIO1_2110 + 0x20 , AUDIO2_2110 + 0x20, META_2100 + 0x20},
+    {   VIDEO_2110 + 0x30, AUDIO1_2110 + 0x30 , AUDIO2_2110 + 0x30, META_2100 + 0x30}};
 
 void tx_2110Config_stream::init()
 {
