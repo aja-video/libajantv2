@@ -569,7 +569,7 @@ bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 	{
 		if (!ReadRegister (regInfo.registerNumber, &regValue, regInfo.registerMask, regInfo.registerShift))
 			return false;
-		outValue = static_cast <bool> (regValue);
+		outValue = static_cast <bool> (regValue != 0);
 		return true;
 	}
 
@@ -672,7 +672,7 @@ bool CNTV2Card::GetNumericParam (const NTV2NumericParamID inParamID, uint32_t & 
 	{
 		if (!ReadRegister (regInfo.registerNumber, &regValue, regInfo.registerMask, regInfo.registerShift))
 			return false;
-		outValue = static_cast <bool> (regValue);
+		outValue = static_cast <bool> (regValue != 0);
 		return true;
 	}
 

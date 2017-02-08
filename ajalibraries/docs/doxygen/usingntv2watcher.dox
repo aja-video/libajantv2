@@ -144,8 +144,10 @@ Except in its Image view, the raster content display always highlights changed c
 		-	Moving the mouse cursor into the selection will cause a ToolTip to appear that describes the selection area.
 	-	<b>Right-Click Operations</b>
 		-	<b>View</b> -- Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
-		-	<b>Grouping</b> -- (Lines and Raw viewing modes only) -- Changes the radix of the component data to Hexadecimal or Decimal.
-		-	<b>Component Radix</b> -- (Component viewing mode only) -- Changes the radix of the component data to Hexadecimal or Decimal.
+		-	<b>Grouping</b> -- (<b>Lines</b> and <b>Raw</b> views only) -- Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
+		-	<b>Component Radix</b> -- (<b>Components</b> view only) -- Changes the radix of the component data to Hexadecimal or Decimal.
+		-	<b>Show Components</b> -- (<b>Components</b> view only) -- Enables/disables the display of the Luma/Cb/Cr/A or R/G/B/A components.
+		-	<b>Show Fields</b> -- (<b>Lines</b> and <b>Components</b> views only) -- Enables/disables the display of lines F1, F2 or both.
 		-	<b>Copy</b> -- Copies multiple representations of the selection to the Clipboard. If there's no selection, the entire raster is used.
 		-	<b>Paste</b> -- (Available only if a frame was previously Copied) -- Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
 		-	<b>Set Color...</b> -- (<b>Auto</b> mode OFF only) -- Displays a color picker.
@@ -162,9 +164,9 @@ Except in its Image view, the raster content display always highlights changed c
 		-	Click in the <b>File</b> menu, then choose <b>Save As...</b>.
 		-	A standard file-save dialog box appears. Navigate to the folder on your local host where you want the file to be saved, and give it a name.
 		-	<b>IMPORTANT:</b> The format of the data written to the file is View-dependent:
-			-	<b>Lines</b> and <b>Image</b> -- Writes a human-readable formatted dump of the raster selection, or, if there's no selection, the full raster.
-			-	<b>Components</b> -- Writes a human-readable formatted dump of the raster selection, or, if there's no selection, the full raster.
-			-	<b>Raw</b> -- Writes a raw dump of the entire frame buffer (8MB or 16MB). AJA recommends giving the file an extension of ".raw".
+			-	<b>Lines</b>, <b>Components</b>, and <b>Image</b> -- Writes a human-readable formatted dump of the raster selection, or, if there's no selection, the full raster.
+			-	<b>Raw</b> -- Writes a raw, binary data file containing the contents of the entire frame buffer (8MB or 16MB).
+				If given a name extension of ".raw", it can be dropped into the Frame Buffer inspector view to set the contents of a frame buffer at any time thereafter.
 	-	<b>Drag and Drop</b>
 		-	The <b>Auto</b> checkbox must be un-checked.
 		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.

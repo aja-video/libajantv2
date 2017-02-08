@@ -78,7 +78,7 @@ public:
 	**/
 	inline unsigned int GetNumFrames (void) const
 	{
-		return mFrames.size ();
+		return (unsigned int) mFrames.size ();
 	}
 
 	
