@@ -144,7 +144,7 @@ Except in its Image view, the raster content display always highlights changed c
 		-	Moving the mouse cursor into the selection will cause a ToolTip to appear that describes the selection area.
 	-	<b>Right-Click Operations</b>
 		-	<b>View</b> -- Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
-		-	<b>Grouping</b> -- (<b>Lines</b> and <b>Raw</b> views only) -- Changes the radix of the component data to Hexadecimal or Decimal.
+		-	<b>Grouping</b> -- (<b>Lines</b> and <b>Raw</b> views only) -- Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
 		-	<b>Component Radix</b> -- (<b>Components</b> view only) -- Changes the radix of the component data to Hexadecimal or Decimal.
 		-	<b>Show Components</b> -- (<b>Components</b> view only) -- Enables/disables the display of the Luma/Cb/Cr/A or R/G/B/A components.
 		-	<b>Show Fields</b> -- (<b>Lines</b> and <b>Components</b> views only) -- Enables/disables the display of lines F1, F2 or both.
