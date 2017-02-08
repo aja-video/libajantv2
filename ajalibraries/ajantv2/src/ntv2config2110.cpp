@@ -1229,7 +1229,7 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, e2110Stream st
     }
     else if (stream == AUDIO1_2110)
     {
-        baseAddrPacketizer  = v_packetizers[iChannel];
+        baseAddrPacketizer  = a_packetizers[iChannel];
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
     }
 
