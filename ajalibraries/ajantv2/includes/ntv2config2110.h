@@ -13,8 +13,6 @@
 #include "ntv2mbcontroller.h"
 #include <string.h>
 
-
-
 #define RX_MATCH_VLAN                   BIT(0)
 #define RX_MATCH_SOURCE_IP              BIT(1)
 #define RX_MATCH_DEST_IP                BIT(2)
@@ -34,7 +32,6 @@
 #define PLL_MATCH_ES_PID                BIT(4)
 
 #define PLL_CONFIG_PCR                  BIT(0)
-
 
 enum e2110Stream
 {
@@ -63,11 +60,11 @@ public:
     
 public:
     e2110Stream stream;
-    uint32_t	localPort;		///< @brief	Specifies the local (source) port number.
+    uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
-    uint32_t	remotePort;		///< @brief	Specifies the remote (destination) port number.
+    uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
     bool		autoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr     remoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
+    MACAddr     remoteMAC;		 ///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
 };
