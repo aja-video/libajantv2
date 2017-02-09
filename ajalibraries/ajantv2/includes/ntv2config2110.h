@@ -147,13 +147,15 @@ public:
 
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    static uint32_t  get2110TxStream(NTV2Channel ch,e2110Stream scch );
+    static uint32_t  get2110Stream(NTV2Channel ch,e2110Stream scch );
 
 	// If method returns false call this to get details
     std::string getLastError();
 
 protected:
-    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
+    bool        SelectRxDecapsulatorChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrDecapsulator);
+    bool        SetRxDepacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrDepacketizer);
+
     bool        SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer);
     bool        SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrPacketizer);
 
@@ -161,8 +163,13 @@ private:
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
+    void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
+    void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
+
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
+
+    int         LeastCommonMultiple(int a,int b);
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;
