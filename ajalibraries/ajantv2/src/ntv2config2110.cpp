@@ -20,38 +20,42 @@
 
 using namespace std;
 
-static const int tx2100Streams[SAREK_MAX_CHANS][NUM_2100_STREAMS] = {
+static const int rxtx2110Streams[SAREK_MAX_CHANS][NUM_2100_STREAMS] = {
     {   VIDEO_2110,        AUDIO1_2110,         AUDIO2_2110,        META_2100},
     {   VIDEO_2110 + 0x10, AUDIO1_2110 + 0x10 , AUDIO2_2110 + 0x10, META_2100 + 0x10},
     {   VIDEO_2110 + 0x20, AUDIO1_2110 + 0x20 , AUDIO2_2110 + 0x20, META_2100 + 0x20},
     {   VIDEO_2110 + 0x30, AUDIO1_2110 + 0x30 , AUDIO2_2110 + 0x30, META_2100 + 0x30}};
 
-void tx_2110Config_stream::init()
+void tx_2110Config::init()
 {
     localPort    = 0;
-    remoteIP.erase();
     remotePort   = 0;
+    remoteIP.erase();
     autoMAC      = false;
     memset(remoteMAC.mac, 0, sizeof(MACAddr));
+    videoFormat  = NTV2_FORMAT_UNKNOWN;
+    videoSamples = VPIDSampling_YUV_422;
 }
 
-bool tx_2110Config_stream::eq_MACAddr(const MACAddr& a)
+bool tx_2110Config::eq_MACAddr(const MACAddr& a)
 {
     return (memcmp(remoteMAC.mac, a.mac, 6) == 0);
 }
 
-bool tx_2110Config_stream::operator != ( const tx_2110Config_stream &other )
+bool tx_2110Config::operator != ( const tx_2110Config &other )
 {
     return !(*this == other);
 }
 
-bool tx_2110Config_stream::operator == ( const tx_2110Config_stream &other )
+bool tx_2110Config::operator == ( const tx_2110Config &other )
 {
     if ((localPort       == other.localPort)      &&
-        (remoteIP        == other.remoteIP)       &&
         (remotePort      == other.remotePort)     &&
+        (remoteIP        == other.remoteIP)       &&
         (autoMAC         == other.autoMAC)        &&
-        (eq_MACAddr(other.remoteMAC)))
+        (eq_MACAddr(other.remoteMAC))             &&
+        (videoFormat     == other.videoFormat)    &&
+        (videoSamples    == other.videoSamples))
 
     {
         return true;
@@ -62,103 +66,36 @@ bool tx_2110Config_stream::operator == ( const tx_2110Config_stream &other )
     }
 }
 
-void rx_2110Config_stream::init()
+void rx_2110Config::init()
 {
-    primaryRxMatch  = 0;
-    primarySourceIP.erase();
-    primaryDestIP.erase();
-    primarySourcePort = 0;
-    primaryDestPort = 0;
-    primarySsrc = 0;
-    primaryVlan = 0;
-    secondaryRxMatch  = 0;
-    secondarySourceIP.erase();
-    secondaryDestIP.erase();
-    secondarySourcePort = 0;
-    secondaryDestPort = 0;
-    secondarySsrc = 0;
-    secondaryVlan = 0;
-    networkPathDiff = 50;
-    playoutDelay = 50;
+    RxMatch     = 0;
+    SourceIP    = "";
+    DestIP      = "";
+    SourcePort  = 0;
+    DestPort    = 0;
+    SSRC        = 0;
+    VLAN        = 0;
+    videoFormat   = NTV2_FORMAT_UNKNOWN;
+    videoSamples  = VPIDSampling_YUV_422;
+
 }
 
-bool rx_2110Config_stream::operator != ( const rx_2110Config_stream &other )
-{
-    return !(*this == other);
-}
-
-bool rx_2110Config_stream::operator == ( const rx_2110Config_stream &other )
-{
-    if ((primaryRxMatch        == other.primaryRxMatch)       &&
-            (primarySourceIP       == other.primarySourceIP)      &&
-            (primaryDestIP         == other.primaryDestIP)        &&
-            (primarySourcePort     == other.primarySourcePort)    &&
-            (primaryDestPort       == other.primaryDestPort)      &&
-            (primarySsrc           == other.primarySsrc)          &&
-            (primaryVlan           == other.primaryVlan)          &&
-            (secondaryRxMatch      == other.secondaryRxMatch)     &&
-            (secondarySourceIP     == other.secondarySourceIP)    &&
-            (secondaryDestIP       == other.secondaryDestIP)      &&
-            (secondarySourcePort   == other.secondarySourcePort)  &&
-            (secondaryDestPort     == other.secondaryDestPort)    &&
-            (secondarySsrc         == other.secondarySsrc)        &&
-            (secondaryVlan         == other.secondaryVlan)        &&
-            (networkPathDiff       == other.networkPathDiff)      &&
-            (playoutDelay          == other.playoutDelay))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void rx2110Config::init()
-{
-    rxc_enable  = 0;
-    rxc_primaryRxMatch = 0;
-    rxc_primarySourceIp = 0;
-    rxc_primaryDestIp = 0;
-    rxc_primarySourcePort = 0;
-    rxc_primaryDestPort  = 0;
-    rxc_primarySsrc = 0;
-    rxc_primaryVlan = 0;
-    rxc_secondaryRxMatch = 0;
-    rxc_secondarySourceIp = 0;
-    rxc_secondaryDestIp = 0;
-    rxc_secondarySourcePort = 0;
-    rxc_secondaryDestPort  = 0;
-    rxc_secondarySsrc = 0;
-    rxc_secondaryVlan = 0;
-    rxc_networkPathDiff = 50;
-    rxc_playoutDelay = 50;
-}
-
-bool rx2110Config::operator != ( const rx2110Config &other )
+bool rx_2110Config::operator != ( const rx_2110Config &other )
 {
     return (!(*this == other));
 }
 
-bool rx2110Config::operator == ( const rx2110Config &other )
+bool rx_2110Config::operator == ( const rx_2110Config &other )
 {
-    if ((rxc_enable                   == other.rxc_enable)                &&
-            (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
-            (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
-            (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
-            (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
-            (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
-            (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
-            (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
-            (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
-            (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
-            (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
-            (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
-            (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
-            (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
-            (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
-            (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
-            (rxc_playoutDelay             == other.rxc_playoutDelay))
+    if (    (RxMatch           == other.RxMatch)        &&
+            (SourceIP          == other.SourceIP)       &&
+            (DestIP            == other.DestIP)         &&
+            (SourcePort        == other.SourcePort)     &&
+            (DestPort          == other.DestPort)       &&
+            (SSRC              == other.SSRC)           &&
+            (VLAN              == other.VLAN)           &&
+            (videoFormat       == other.videoFormat)    &&
+            (videoSamples      == other.videoSamples))
     {
         return true;
     }
@@ -168,39 +105,6 @@ bool rx2110Config::operator == ( const rx2110Config &other )
     }
 }
 
-void tx2110Config::init()
-{
-    txc_enable       = 0;
-    txc_localPort    = 0;
-    txc_remoteIp     = 0;
-    txc_remotePort   = 0;
-    txc_remoteMAC_lo = 0;
-    txc_remoteMAC_hi = 0;
-    txc_autoMac      = 0;
-}
-
-bool tx2110Config::operator != ( const tx2110Config &other )
-{
-    return (!(*this == other));
-}
-
-bool tx2110Config::operator == ( const tx2110Config &other )
-{
-    if ((txc_enable                == other.txc_enable)         &&
-            (txc_localPort         == other.txc_localPort)      &&
-            (txc_remoteIp          == other.txc_remoteIp)       &&
-            (txc_remotePort        == other.txc_remotePort)     &&
-            (txc_remoteMAC_lo      == other.txc_remoteMAC_lo)   &&
-            (txc_remoteMAC_hi      == other.txc_remoteMAC_hi)   &&
-            (txc_autoMac           == other.txc_autoMac))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 //
@@ -361,7 +265,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2110Config_stream &rxConfig)
+bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -464,7 +368,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel,const 
     return false;
 }
 
-bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config_stream & rxConfig)
+bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -695,7 +599,7 @@ int _lcm(int a,int b)
     return m;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config_stream & txConfig)
+bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    hi;
@@ -927,7 +831,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, e2110
     return rv;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config_stream & txConfig)
+bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config & txConfig)
 {
     uint32_t    baseAddrFramer;
     uint32_t    val;
@@ -1294,5 +1198,5 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
 
 uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,e2110Stream esc )
 {
-    return tx2100Streams[ch][esc];
+    return rxtx2110Streams[ch][esc];
 }

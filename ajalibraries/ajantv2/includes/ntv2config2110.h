@@ -46,20 +46,19 @@ enum e2110Stream
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
-class tx_2110Config_stream
+class tx_2110Config
 {
 public:
-    tx_2110Config_stream() { init(); }
+    tx_2110Config() { init(); }
 
     void init();
 
     bool eq_MACAddr(const MACAddr& a);
     
-    bool operator != ( const tx_2110Config_stream &other );
-    bool operator == ( const tx_2110Config_stream &other );
+    bool operator != ( const tx_2110Config &other );
+    bool operator == ( const tx_2110Config &other );
     
 public:
-    e2110Stream stream;
     uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
     uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
@@ -73,100 +72,28 @@ public:
     @brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
-class rx_2110Config_stream
+class rx_2110Config
 {
 public:
-    rx_2110Config_stream() { init(); }
+    rx_2110Config() { init(); }
 
     void init();
 
-    bool operator != ( const rx_2110Config_stream &other );
-    bool operator == ( const rx_2110Config_stream &other );
+    bool operator != ( const rx_2110Config &other );
+    bool operator == ( const rx_2110Config &other );
     
 public:
-    uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
-    std::string	primarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
-                                        ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-    std::string	primaryDestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	primarySourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	primaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
-    uint32_t	primarySsrc;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
-    uint16_t	primaryVlan;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
-
-    uint32_t	secondaryRxMatch;       ///< @brief	Bitmap of rxMatch criteria used
-    std::string	secondarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
-                                        ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-    std::string	secondaryDestIP;        ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	secondarySourcePort;	///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	secondaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
-    uint32_t	secondarySsrc;          ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
-    uint16_t	secondaryVlan;          ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
-
-    uint32_t	networkPathDiff;        ///< @brief	Specifies the max accepted delay in milliseconds between 2 steams in hitless operation (0-150).
-    uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
+    uint32_t	RxMatch;         ///< @brief	Bitmap of rxMatch criteria used
+    std::string	SourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
+                                 ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
+    std::string	DestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
+    uint32_t	SourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
+    uint32_t	DestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
+    uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
+    uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
+    NTV2VideoFormat videoFormat;
+    VPIDSampling    videoSamples;
 };
-
-
-
-
-
-// These structs are used internally be retail services
-
-class rx2110Config
-{
-public:
-
-    rx2110Config() { init(); }
-
-    void init();
-
-    bool operator == ( const rx2110Config &other );
-    bool operator != ( const rx2110Config &other );
-
-    bool        rxc_enable;
-    
-    uint32_t    rxc_primaryRxMatch;
-    uint32_t    rxc_primarySourceIp;
-    uint32_t    rxc_primaryDestIp;
-    uint32_t    rxc_primarySourcePort;
-    uint32_t    rxc_primaryDestPort;
-    uint32_t    rxc_primarySsrc;
-    uint32_t    rxc_primaryVlan;
-    
-    uint32_t    rxc_secondaryRxMatch;
-    uint32_t    rxc_secondarySourceIp;
-    uint32_t    rxc_secondaryDestIp;
-    uint32_t    rxc_secondarySourcePort;
-    uint32_t    rxc_secondaryDestPort;
-    uint32_t    rxc_secondarySsrc;
-    uint32_t    rxc_secondaryVlan;
-
-    uint32_t	rxc_networkPathDiff;
-    uint32_t	rxc_playoutDelay;
- };
-
-class tx2110Config
-{
-public:
-
-    tx2110Config() { init(); }
-
-    void init();
-
-    bool operator == ( const tx2110Config &other );
-    bool operator != ( const tx2110Config &other );
-
-    bool        txc_enable;
-    
-    uint32_t    txc_2110channel;
-    uint32_t    txc_localPort;
-    uint32_t    txc_remoteIp;
-    uint32_t    txc_remotePort;
-    uint32_t    txc_remoteMAC_lo;
-    uint32_t    txc_remoteMAC_hi;
-    bool        txc_autoMac;
-};
-
 
 
 /**
@@ -189,14 +116,14 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config_stream & rxConfig);
-    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config_stream & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config & rxConfig);
 
     bool        SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config_stream & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config_stream & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
     bool        GetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
