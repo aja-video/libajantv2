@@ -265,7 +265,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config &rxConfig)
+bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const rx_2110Config &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;
@@ -368,7 +368,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, const
     return false;
 }
 
-bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config &rxConfig)
+bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, rx_2110Config &rxConfig)
 {
 #if 0
     uint32_t    baseAddr;

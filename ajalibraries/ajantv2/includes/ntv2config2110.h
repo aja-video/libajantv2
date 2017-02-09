@@ -116,8 +116,8 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2110Config & rxConfig);
-    bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2110Config & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const rx_2110Config & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, rx_2110Config & rxConfig);
 
     bool        SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
