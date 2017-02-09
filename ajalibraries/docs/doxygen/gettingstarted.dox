@@ -250,7 +250,7 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	Enter the \c make command. This will build all libraries, tools, utilities, demo applications, and the device driver.
 	The built executables will appear in the "../bin" directory (a peer to <b>ntv2projects</b>).
 -#	Load the device driver:
-	<tt>$ sudo ../bin/loadOEM2K</tt>
+    <tt>$ sudo ../bin/load_ajantv2</tt>
 -#	Verify that the driver is installed by issuing the \c lsmod command, and looking for "XENA2" in the list.
 
 @note	On CentOS (and possibly other Linux variants), the DVP demo app 'dvplowlatencydemo' won't run unless the 'libdvp.so'
