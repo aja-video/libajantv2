@@ -44,7 +44,7 @@ typedef struct NTV2FormatDescriptor
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
-//#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_13_0)
 	/**
 		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
 		@param[in]	inVideoStandard			Specifies the video standard being used.
@@ -70,7 +70,7 @@ typedef struct NTV2FormatDescriptor
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const bool					inVANCenabled	= false,
 											const bool					inWideVANC		= false);
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
+//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -94,7 +94,7 @@ typedef struct NTV2FormatDescriptor
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return mNumPlanes > 0 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
+	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
 		@return		The total number of bytes required to hold the raster.
@@ -202,6 +202,13 @@ typedef struct NTV2FormatDescriptor
 		@return		The output stream I was handed.
 	**/
 	std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
+
+	/**
+		@brief		Writes the given frame buffer line offset as a formatted SMPTE line number into the given output stream.
+		@param[in]	inLineOffset	Specifies the zero-based line offset in the frame buffer.
+		@return		The output stream I was handed.
+	**/
+	std::ostream &					PrintSMPTELineNumber (std::ostream & inOutStream, const ULWord inLineOffset) const;
 
 	inline NTV2Standard				GetVideoStandard (void) const	{return mStandard;}							///< @return	The video standard I was created with.
 	inline NTV2VideoFormat			GetVideoFormat (void) const		{return mVideoFormat;}						///< @return	The video format I was created with.

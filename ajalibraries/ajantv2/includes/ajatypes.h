@@ -7,7 +7,7 @@
 #ifndef AJATYPES_H
 #define AJATYPES_H
 
-#if !defined (MSWindows)
+#if defined (AJAMac)
 	#define	NTV2_USE_STDINT
 #endif	//	if not MSWindows
 #define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
@@ -236,10 +236,10 @@
 	typedef long				HANDLE;
 	// this is what is is in Windows:
 	// typedef void *				HANDLE;
-//	typedef unsigned long long	ULWord64;
-//	typedef unsigned long long	Pointer64;
+	typedef unsigned long long	ULWord64;
+	typedef unsigned long long	Pointer64;
 	typedef unsigned long long	__int64;
-//	typedef signed long long	LWord64;
+	typedef signed long long	LWord64;
 	typedef void * 				PVOID;
 	typedef void * 				LPVOID;
 	typedef LWord				Fixed_;

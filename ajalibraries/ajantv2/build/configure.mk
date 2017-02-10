@@ -41,14 +41,7 @@ OBJDIR := $(OBJ)
 
 DRIVER_DIR = driver/linuxdriver
 
-NTV2TARGET ?= XENA2
-
-ifeq ($(NTV2TARGET),FS1)
-  DRIVER_DIR := linuxdriver
-endif
-ifeq ($(NTV2TARGET),BORG)
-  DRIVER_DIR := linuxdriver
-endif
+NTV2TARGET ?= ajantv2
 
 NTV2_INCLUDES	   	:= $(NTV2_ROOT)/includes
 NTV2_CLASSES       	:= $(NTV2_ROOT)/classes

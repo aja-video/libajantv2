@@ -4,22 +4,12 @@
 	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2formatdescriptor.h"
-//#include "ntv2utils.h"
-//#include "videodefines.h"
-//#include "audiodefines.h"
-//#include "ntv2endian.h"
-//#include "ntv2transcode.h"
-//#include "ntv2debug.h"
-//#include "ntv2devicefeatures.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
 	#include <stdint.h>
-
 #endif
-//#include <algorithm>
 #include <sstream>
 #include <iomanip>
-//#include <map>
 
 
 using namespace std;
@@ -502,10 +492,10 @@ void NTV2FormatDescriptor::FinalizePlanar (void)
 	mNumPlanes = 2;		//	For now, all support planar formats have two planes
 	switch (mPixelFormat)
 	{
-		case NTV2_FBF_10BIT_YCBCR_420PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;		break;
-		case NTV2_FBF_10BIT_YCBCR_422PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;		break;
-		case NTV2_FBF_8BIT_YCBCR_420PL:		mLinePitch[0] = numPixels;	mLinePitch[1] = 960;	break;
-		case NTV2_FBF_8BIT_YCBCR_422PL:		mLinePitch[0] = 20;			mLinePitch[1] = 20;		break;
+		case NTV2_FBF_10BIT_YCBCR_420PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
+		case NTV2_FBF_10BIT_YCBCR_422PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
+		case NTV2_FBF_8BIT_YCBCR_420PL:		mLinePitch[0] = numPixels;	mLinePitch[1] = numPixels / 2;	break;
+		case NTV2_FBF_8BIT_YCBCR_422PL:		mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
 		default:							MakeInvalid ();
 	}
 }
@@ -557,7 +547,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 }	//	construct from NTV2VideoFormat & NTV2VANCMode
 
 
-//#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_13_0)
 	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
 												const NTV2FrameBufferFormat	inFrameBufferFormat,
 												const bool					inVANCenabled,
@@ -628,7 +618,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	{
 		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
 	}
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
+//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
@@ -758,12 +748,12 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 	if (!IsValid ())
 		inOutStream << "INVALID: ";
 	inOutStream	<< GetFullRasterHeight() << " lines, "
-				<< GetRasterWidth() << " pixels/line";
-	if (GetNumPlanes() > 0)
-		inOutStream << ", " << GetNumPlanes() << " plane(s)";
+				<< GetRasterWidth() << " pixels/line, ";
+	if (IsPlanar())
+		inOutStream << GetNumPlanes() << " plane(s)";
 	do
 	{
-		if (GetNumPlanes() > 0)
+		if (IsPlanar())
 			inOutStream << ", PL" << plane << ": ";
 		inOutStream << GetBytesPerRow(plane) << " bytes/line";
 	} while (++plane < GetNumPlanes());
@@ -782,4 +772,45 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 		inOutStream << ")";
 	}
 	return inOutStream;
+}
+
+
+//	NTV2_VANCMODE_OFF							1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
+static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		0,			0,			0,			0,			0	};
+//	NTV2_VANCMODE_TALL
+static const ULWord	LineNumbersF1t []	=	{	5,		6,		10,		12,		10,		211,	10,			5,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			568,		0,			0,			0,			0,			0	};
+//	NTV2_VANCMODE_TALLER
+static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		0,			0,			0,			0,			0	};
+
+ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
+{
+	const bool		is525i		(mStandard == NTV2_STANDARD_525);
+	const bool		isF2		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  false  :  (inLineOffset & 1  ?  !is525i  :  is525i));
+	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  1  :  2);
+	ULWord			smpteLine	(0);
+
+	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
+		inOutStream << "F" << (isF2 ? "2" : "1") << " ";
+	switch (mVancMode)
+	{
+		case NTV2_VANCMODE_OFF:		smpteLine =  isF2  ?  LineNumbersF2[mStandard]   :  LineNumbersF1[mStandard];	break;
+		case NTV2_VANCMODE_TALL:	smpteLine =  isF2  ?  LineNumbersF2t[mStandard]  :  LineNumbersF1t[mStandard];	break;
+		case NTV2_VANCMODE_TALLER:	smpteLine =  isF2  ?  LineNumbersF2tt[mStandard] :  LineNumbersF1tt[mStandard];	break;
+		default:					break;
+	}
+	inOutStream << "L" << dec << (inLineOffset/divisor + smpteLine);
+	return inOutStream;
+}
+
+
+//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?!
+//	IMPLEMENTATION MOVED HERE TO USE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
+
+NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
+{
+	NTV2_ASSERT (inStandard < sizeof(LineNumbersF1) / sizeof(ULWord));
+	*this = NTV2SmpteLineNumber (LineNumbersF1[inStandard],  LineNumbersF2[inStandard],  inStandard != NTV2_STANDARD_525,  inStandard);
 }
