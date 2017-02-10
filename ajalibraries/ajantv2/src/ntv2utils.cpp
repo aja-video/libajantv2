@@ -3136,14 +3136,9 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 }	//	GetDisplayHeight
 
 
-NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
-{
-	//												1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
-	static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			0,			0,			0,			0,			0	};
-	static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		0,			0,			0,			0,			0	};
-	NTV2_ASSERT (inStandard < sizeof(LineNumbersF1) / sizeof(ULWord));
-	*this = NTV2SmpteLineNumber (LineNumbersF1[inStandard],  LineNumbersF2[inStandard],  inStandard != NTV2_STANDARD_525,  inStandard);
-}
+//	NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
+//	IMPLEMENTATION MOVED INTO 'ntv2formatdescriptor.cpp'
+//	SO AS TO USE SAME LineNumbersF1/LineNumbersF2 TABLES
 
 
 ULWord NTV2SmpteLineNumber::GetFirstActiveLine (const NTV2FieldID inFieldID) const

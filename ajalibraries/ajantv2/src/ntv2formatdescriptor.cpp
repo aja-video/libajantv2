@@ -4,22 +4,12 @@
 	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2formatdescriptor.h"
-//#include "ntv2utils.h"
-//#include "videodefines.h"
-//#include "audiodefines.h"
-//#include "ntv2endian.h"
-//#include "ntv2transcode.h"
-//#include "ntv2debug.h"
-//#include "ntv2devicefeatures.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
 	#include <stdint.h>
-
 #endif
-//#include <algorithm>
 #include <sstream>
 #include <iomanip>
-//#include <map>
 
 
 using namespace std;
@@ -557,7 +547,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 }	//	construct from NTV2VideoFormat & NTV2VANCMode
 
 
-//#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_13_0)
 	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
 												const NTV2FrameBufferFormat	inFrameBufferFormat,
 												const bool					inVANCenabled,
@@ -628,7 +618,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	{
 		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
 	}
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
+//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
@@ -798,8 +788,8 @@ static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567
 ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
 {
 	const bool		is525i		(mStandard == NTV2_STANDARD_525);
-	const bool		isF2		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard) ? false : (inLineOffset & 1  ?  !is525i  :  is525i));
-	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard) ? 1 : 2);
+	const bool		isF2		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  false  :  (inLineOffset & 1  ?  !is525i  :  is525i));
+	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  1  :  2);
 	ULWord			smpteLine	(0);
 
 	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
@@ -813,4 +803,14 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 	}
 	inOutStream << "L" << dec << (inLineOffset/divisor + smpteLine);
 	return inOutStream;
+}
+
+
+//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?!
+//	IMPLEMENTATION MOVED HERE TO USE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
+
+NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
+{
+	NTV2_ASSERT (inStandard < sizeof(LineNumbersF1) / sizeof(ULWord));
+	*this = NTV2SmpteLineNumber (LineNumbersF1[inStandard],  LineNumbersF2[inStandard],  inStandard != NTV2_STANDARD_525,  inStandard);
 }
