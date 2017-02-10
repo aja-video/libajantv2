@@ -27,8 +27,8 @@
 #define SAREK_3190_RX_DEPACKETIZER_4    (0x20f000/4)
 
 #define SAREK_2110_FRAMER_1_TOP             (0x210000/4)
-#define SAREK_2110_FRAMER_2_BOT             (0x211000/4)
-#define SAREK_2110_DECAPSULATOR_1_TOP       (0x212000/4)
+#define SAREK_2110_DECAPSULATOR_1_TOP       (0x211000/4)
+#define SAREK_2110_FRAMER_2_BOT             (0x212000/4)
 #define SAREK_2110_DECAPSULATOR_2_BOT       (0x213000/4)
 
 /////////////////////////////////////////////////////////////////////
