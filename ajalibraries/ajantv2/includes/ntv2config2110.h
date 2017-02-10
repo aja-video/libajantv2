@@ -153,19 +153,20 @@ public:
     std::string getLastError();
 
 protected:
-    bool        SelectRxDecapsulatorChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrDecapsulator);
-    bool        SetRxDepacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrDepacketizer);
-
-    bool        SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrFramer);
-    bool        SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddrPacketizer);
-
-private:
+    uint32_t    GetFramerAddress(NTV2Channel channel, e2110Stream stream);
+    void        SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t baseAddr);
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
+    uint32_t    GetDecapulatorAddress(NTV2Channel channel, e2110Stream stream);
+    void        SelectRxDecapsulatorChannel(NTV2Channel channel, e2110Stream stream, uint32_t baseAddr);
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
+    bool        SetRxDepacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddr);
+    bool        SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t  & baseAddr);
+
+private:
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
 
