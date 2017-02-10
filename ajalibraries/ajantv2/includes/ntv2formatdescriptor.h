@@ -203,6 +203,13 @@ typedef struct NTV2FormatDescriptor
 	**/
 	std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
 
+	/**
+		@brief		Writes the given frame buffer line offset as a formatted SMPTE line number into the given output stream.
+		@param[in]	inLineOffset	Specifies the zero-based line offset in the frame buffer.
+		@return		The output stream I was handed.
+	**/
+	std::ostream &					PrintSMPTELineNumber (std::ostream & inOutStream, const ULWord inLineOffset) const;
+
 	inline NTV2Standard				GetVideoStandard (void) const	{return mStandard;}							///< @return	The video standard I was created with.
 	inline NTV2VideoFormat			GetVideoFormat (void) const		{return mVideoFormat;}						///< @return	The video format I was created with.
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
