@@ -314,12 +314,10 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, e2110
     // matching
     WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.RxMatch);
 
-#if 0
+
     // some constants
-    WriteChannelRegister(kReg2110_6_rx_chan_timeout        + decapBaseAddr, 0x0000ffff);
-    WriteChannelRegister(kReg2110_6_rx_media_pkt_buf_size  + decapBaseAddr, 0x0000ffff);
-    WriteChannelRegister(kReg2110_6_rx_media_buf_base_addr + decapBaseAddr, 0x10000000 * channel);
-#endif
+    WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
+
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
 
