@@ -440,93 +440,52 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, e2110
     return rv;
 }
 
-bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, rx_2110Config &rxConfig)
+bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, rx_2110Config & rxConfig)
 {
-#if 0
-    uint32_t    baseAddr;
     uint32_t    val;
     bool        rv;
 
-    if (_is2110_7)
-    {
-        // Select secondary channel
-        rv = SelectRxChannel(channel, false, baseAddr);
-        if (!rv) return false;
+    // get address
+    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel,stream);
 
-        // source ip address
-        ReadChannelRegister(kReg2110_6_rx_match_src_ip_addr + baseAddr, &val);
-        struct in_addr in;
-        in.s_addr = NTV2EndianSwap32(val);
-        char * ip = inet_ntoa(in);
-        rxConfig.secondarySourceIP = ip;
-
-        // dest ip address
-        ReadChannelRegister(kReg2110_6_rx_match_dest_ip_addr + baseAddr, &val);
-        in.s_addr = NTV2EndianSwap32(val);
-        ip = inet_ntoa(in);
-        rxConfig.secondaryDestIP = ip;
-
-        // source port
-        ReadChannelRegister(kReg2110_6_rx_match_src_port + baseAddr, &rxConfig.secondarySourcePort);
-
-        // dest port
-        ReadChannelRegister(kReg2110_6_rx_match_dest_port + baseAddr, &rxConfig.secondaryDestPort);
-
-        // ssrc
-        ReadChannelRegister(kReg2110_6_rx_match_ssrc + baseAddr, &rxConfig.secondarySsrc);       // PSM fix this, this is a shared reg
-
-        // vlan
-        ReadChannelRegister(kReg2110_6_rx_match_vlan + baseAddr, &val);
-        rxConfig.secondaryVlan = val & 0xffff;
-
-        // matching
-        ReadChannelRegister(kReg2110_6_rx_match_sel + baseAddr, &rxConfig.secondaryRxMatch);
-    }
-
-    // select primary channel
-    rv = SelectRxChannel(channel, true, baseAddr);
-    if (!rv) return false;
+    // select channel
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
     // source ip address
-    ReadChannelRegister(kReg2110_6_rx_match_src_ip_addr + baseAddr, &val);
+    ReadChannelRegister(kRegDecap_match_src_ip0 + decapBaseAddr, &val);
     struct in_addr in;
     in.s_addr = NTV2EndianSwap32(val);
     char * ip = inet_ntoa(in);
-    rxConfig.primarySourceIP = ip;
+    rxConfig.SourceIP = ip;
 
     // dest ip address
-    ReadChannelRegister(kReg2110_6_rx_match_dest_ip_addr + baseAddr, &val);
+    ReadChannelRegister(kRegDecap_match_dst_ip0 + decapBaseAddr, &val);
     in.s_addr = NTV2EndianSwap32(val);
     ip = inet_ntoa(in);
-    rxConfig.primaryDestIP = ip;
+    rxConfig.DestIP = ip;
 
     // source port
-    ReadChannelRegister(kReg2110_6_rx_match_src_port + baseAddr, &rxConfig.primarySourcePort);
+    ReadChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.SourcePort);
 
     // dest port
-    ReadChannelRegister(kReg2110_6_rx_match_dest_port + baseAddr, &rxConfig.primaryDestPort);
+    ReadChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.DestPort);
 
     // ssrc
-    ReadChannelRegister(kReg2110_6_rx_match_ssrc + baseAddr, &rxConfig.primarySsrc);
+    ReadChannelRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
 
     // vlan
-    ReadChannelRegister(kReg2110_6_rx_match_vlan + baseAddr, &val);
-    rxConfig.primaryVlan = val & 0xffff;
+    ReadChannelRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
+    rxConfig.VLAN = val & 0xffff;
 
     // matching
-    ReadChannelRegister(kReg2110_6_rx_match_sel + baseAddr, &rxConfig.primaryRxMatch);
+    ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.RxMatch);
 
-    // playout delay in ms
-    ReadChannelRegister(kReg2110_6_rx_playout_delay + baseAddr,  &val);
-    rxConfig.playoutDelay = (_is2110_2) ? (val >>9)/90 : val/27000;
-
-    // network path differential in ms
-    ReadChannelRegister(kReg2110_6_rx_network_path_differential + baseAddr, &val);
-    rxConfig.playoutDelay = (_is2110_2) ? (val>>9)/90 : val/27000;
+    if (stream == VIDEO_2110)
+    {
+        // DAC TODO - video format and sampling
+    }
 
     return true;
-#endif
-    return false;
 }
 
 bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable)
@@ -940,6 +899,11 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, e2110
 
     mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
     txConfig.autoMAC = ((val & (1 << channel)) != 0);
+
+    if (stream == VIDEO_2110)
+    {
+        // DAC TODO - video format and sampling
+    }
 
     return true;
 }
