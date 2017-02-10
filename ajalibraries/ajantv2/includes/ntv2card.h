@@ -5112,7 +5112,6 @@ public:
     AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
-	AJA_VIRTUAL bool GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 	///@}
 
 protected:
@@ -5130,6 +5129,7 @@ private:
 													NTV2FrameBufferFormat format);
 	AJA_VIRTUAL bool	IsBufferSizeChangeRequired(NTV2Channel channel, NTV2FrameGeometry geometry,
 									NTV2FrameBufferFormat currentFormat, NTV2FrameBufferFormat newFormat);
+	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void);	///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	/**
