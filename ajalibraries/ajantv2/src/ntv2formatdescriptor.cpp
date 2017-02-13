@@ -4,22 +4,12 @@
 	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2formatdescriptor.h"
-//#include "ntv2utils.h"
-//#include "videodefines.h"
-//#include "audiodefines.h"
-//#include "ntv2endian.h"
-//#include "ntv2transcode.h"
-//#include "ntv2debug.h"
-//#include "ntv2devicefeatures.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
 	#include <stdint.h>
-
 #endif
-//#include <algorithm>
 #include <sstream>
 #include <iomanip>
-//#include <map>
 
 
 using namespace std;
@@ -37,8 +27,8 @@ using namespace std;
 
 
 const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
-{	//																	inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
-	{/////	NTV2_STANDARD_1080
+{
+	{/////	NTV2_STANDARD_1080											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_YCBCRLINEPITCH_1080,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080,				AJA_FD_END,
@@ -69,10 +59,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_720
+	{/////	NTV2_STANDARD_720											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_720,			HD_NUMCOMPONENTPIXELS_720,			HD_YCBCRLINEPITCH_720,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_720,			HD_NUMCOMPONENTPIXELS_720,			HD_NUMCOMPONENTPIXELS_720*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_720,			HD_NUMCOMPONENTPIXELS_720,			HD_NUMCOMPONENTPIXELS_720,				AJA_FD_END,
@@ -103,10 +93,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_720,			HD_NUMCOMPONENTPIXELS_720,			HD_NUMCOMPONENTPIXELS_720/4,			AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_525
+	{/////	NTV2_STANDARD_525											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			NUMACTIVELINES_525,				NUMCOMPONENTPIXELS,					YCBCRLINEPITCH_SD,						AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			NUMACTIVELINES_525,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS*2/4,					AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			NUMACTIVELINES_525,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS,						AJA_FD_END,
@@ -137,10 +127,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			NUMACTIVELINES_525,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS/4,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_625
+	{/////	NTV2_STANDARD_625											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			NUMACTIVELINES_625,				NUMCOMPONENTPIXELS,					YCBCRLINEPITCH_SD,						AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			NUMACTIVELINES_625,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS*2/4,					AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			NUMACTIVELINES_625,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS,						AJA_FD_END,
@@ -171,10 +161,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			NUMACTIVELINES_625,				NUMCOMPONENTPIXELS,					NUMCOMPONENTPIXELS/4,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_1080p
+	{/////	NTV2_STANDARD_1080p											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_YCBCRLINEPITCH_1080,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080,				AJA_FD_END,
@@ -205,10 +195,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_2K
+	{/////	NTV2_STANDARD_2K											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_2K,			HD_NUMCOMPONENTPIXELS_2K,			HD_YCBCRLINEPITCH_2K,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_2K,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_2K,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K,				AJA_FD_END,
@@ -239,10 +229,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_2K,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_2Kx1080p
+	{/////	NTV2_STANDARD_2Kx1080p										inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_YCBCRLINEPITCH_2K,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K,				AJA_FD_END,
@@ -273,10 +263,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_2Kx1080i
+	{/////	NTV2_STANDARD_2Kx1080i										inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_YCBCRLINEPITCH_2K,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K,				AJA_FD_END,
@@ -307,7 +297,7 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_2K,			HD_NUMCOMPONENTPIXELS_2K/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
 	{/////	NTV2_STANDARD_3840x2160p									inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
@@ -341,10 +331,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_QUADHD,		HD_NUMCOMPONENTPIXELS_QUADHD/4,			AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_4096x2160p
+	{/////	NTV2_STANDARD_4096x2160p									inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_YCBCRLINEPITCH_4K,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K,				AJA_FD_END,
@@ -375,10 +365,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_3840HFR
+	{/////	NTV2_STANDARD_3840HFR										inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_QUADHD,		HD_YCBCRLINEPITCH_3840,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_QUADHD,		HD_NUMCOMPONENTPIXELS_QUADHD*2/4,		AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_QUADHD,		HD_NUMCOMPONENTPIXELS_QUADHD,			AJA_FD_END,
@@ -409,10 +399,10 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_QUADHD,		HD_NUMCOMPONENTPIXELS_QUADHD/4,			AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	},
-	{/////	NTV2_STANDARD_4096HFR
+	{/////	NTV2_STANDARD_4096HFR										inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_YCBCRLINEPITCH_4K,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K,				AJA_FD_END,
@@ -443,7 +433,7 @@ const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STAN
 		/* NTV2_FBF_UNUSED_27 */				AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_420PL */		AJA_FD_NOTSUPPORTED,
 		/* NTV2_FBF_10BIT_YCBCR_422PL */		AJA_FD_NOTSUPPORTED,
-		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_NOTSUPPORTED,
+		/* NTV2_FBF_8BIT_YCBCR_420PL */			AJA_FD_BEGIN			HD_NUMLINES_4K,					HD_NUMCOMPONENTPIXELS_4K,			HD_NUMCOMPONENTPIXELS_4K/4,				AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR_422PL */			AJA_FD_NOTSUPPORTED
 	}
 };	//	formatDescriptorTable
@@ -490,9 +480,25 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
+	if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
+		FinalizePlanar();
 
 }	//	construct from NTV2Standard & NTV2VANCMode
 
+
+void NTV2FormatDescriptor::FinalizePlanar (void)
+{
+	NTV2_ASSERT (NTV2_IS_FBF_PLANAR (mPixelFormat));
+	mNumPlanes = 2;		//	For now, all support planar formats have two planes
+	switch (mPixelFormat)
+	{
+		case NTV2_FBF_10BIT_YCBCR_420PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
+		case NTV2_FBF_10BIT_YCBCR_422PL:	mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
+		case NTV2_FBF_8BIT_YCBCR_420PL:		mLinePitch[0] = numPixels;	mLinePitch[1] = numPixels / 2;	break;
+		case NTV2_FBF_8BIT_YCBCR_422PL:		mLinePitch[0] = 20;			mLinePitch[1] = 20;				break;
+		default:							MakeInvalid ();
+	}
+}
 
 NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
@@ -535,10 +541,13 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
-}
+	if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
+		FinalizePlanar();
+
+}	//	construct from NTV2VideoFormat & NTV2VANCMode
 
 
-//#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_13_0)
 	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
 												const NTV2FrameBufferFormat	inFrameBufferFormat,
 												const bool					inVANCenabled,
@@ -582,9 +591,11 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		mPixelFormat	= inFrameBufferFormat;
 		m2Kby1080		= in2Kby1080;
 		mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
+		if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
+			FinalizePlanar();
 	
 	}	//	construct from NTV2Standard
-	
+
 	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat,
 												const NTV2FrameBufferFormat	inFrameBufferFormat,
 												const bool					inVANCenabled,
@@ -607,7 +618,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	{
 		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
 	}
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
+//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
@@ -635,9 +646,10 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWor
 		mPixelFormat	(NTV2_FBF_INVALID),
 		mVancMode		(NTV2_VANCMODE_INVALID),
 		m2Kby1080		(false),
-		mNumPlanes		(0)
+		mNumPlanes		(1)
 {
-	mLinePitch[0] = mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
+	mLinePitch[0] = inLinePitch * 4;	//	mLinePitch is in bytes, inLinePitch is in 32-bit longwords
+	mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
 }
 
 
@@ -659,7 +671,27 @@ void NTV2FormatDescriptor::MakeInvalid (void)
 
 bool NTV2FormatDescriptor::operator == (const NTV2FormatDescriptor & inRHS) const
 {
-	return numLines == inRHS.numLines  &&  numPixels == inRHS.numPixels  &&  linePitch == inRHS.linePitch  &&  firstActiveLine == inRHS.firstActiveLine;
+	return numLines == inRHS.numLines  &&  numPixels == inRHS.numPixels
+			&&  mNumPlanes == inRHS.mNumPlanes  &&  firstActiveLine == inRHS.firstActiveLine
+			&&  mLinePitch[0] == inRHS.mLinePitch[0];
+}
+
+
+const void * NTV2FormatDescriptor::GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0, const UWord inPlaneIndex0) const
+{
+	if (inRowIndex0 >= numLines)
+		return NULL;
+	if (inPlaneIndex0 >= mNumPlanes)
+		return NULL;
+
+	const UByte *	pStart ((const UByte *) pInStartAddress);
+	if (inPlaneIndex0 > 0)
+		pStart += GetTotalRasterBytes(0);
+	if (inPlaneIndex0 > 1)
+		pStart += GetTotalRasterBytes(1);
+	if (inPlaneIndex0 > 2)
+		pStart += GetTotalRasterBytes(2);
+	return pStart + inRowIndex0 * GetBytesPerRow (inPlaneIndex0);
 }
 
 
@@ -675,6 +707,7 @@ bool NTV2FormatDescriptor::GetFirstChangedRow (const void * pInStartAddress1, co
 	if (!IsValid ())
 		return false;	//	invalid
 
+//	TODO:	COMPARE OTHER PLANES
 	for (outFirstChangedRowNum = 0;  outFirstChangedRowNum < GetFullRasterHeight ();  outFirstChangedRowNum++)
 		if (::memcmp (GetRowAddress ((UByte *) pInStartAddress1, outFirstChangedRowNum), GetRowAddress (pInStartAddress2, outFirstChangedRowNum), GetBytesPerRow ()))
 			return true;	//	Success
@@ -701,7 +734,7 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 	ULWord	maxLines	(inMaxLines ? inMaxLines : GetFullRasterHeight ());
 	if (maxLines > GetFullRasterHeight())
 		maxLines = GetFullRasterHeight();
-
+//	TODO:	FIX PLANAR
 	for (ULWord rowOffset (0);  rowOffset < maxLines;  rowOffset++)
 		if (::memcmp (GetRowAddress (pStartAddress1, rowOffset), GetRowAddress (pStartAddress2, rowOffset), GetBytesPerRow ()))
 			outDiffs.push_back (rowOffset);
@@ -711,12 +744,20 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 
 ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetailed) const
 {
+	UWord	plane	(0);
 	if (!IsValid ())
 		inOutStream << "INVALID: ";
 	inOutStream	<< GetFullRasterHeight() << " lines, "
-				<< GetRasterWidth() << " pix/line, "
-				<< linePitch << " ULWords/line ("
-				<< GetBytesPerRow() << " bytes/line), 1stAct=" << firstActiveLine;
+				<< GetRasterWidth() << " pixels/line, ";
+	if (IsPlanar())
+		inOutStream << GetNumPlanes() << " plane(s)";
+	do
+	{
+		if (IsPlanar())
+			inOutStream << ", PL" << plane << ": ";
+		inOutStream << GetBytesPerRow(plane) << " bytes/line";
+	} while (++plane < GetNumPlanes());
+	inOutStream << ", 1stAct=" << firstActiveLine;
 	if (inDetailed)
 	{
 		inOutStream	<< " (";
@@ -731,4 +772,45 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 		inOutStream << ")";
 	}
 	return inOutStream;
+}
+
+
+//	NTV2_VANCMODE_OFF							1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
+static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		0,			0,			0,			0,			0	};
+//	NTV2_VANCMODE_TALL
+static const ULWord	LineNumbersF1t []	=	{	5,		6,		10,		12,		10,		211,	10,			5,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			568,		0,			0,			0,			0,			0	};
+//	NTV2_VANCMODE_TALLER
+static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		0,			0,			0,			0,			0	};
+
+ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
+{
+	const bool		is525i		(mStandard == NTV2_STANDARD_525);
+	const bool		isF2		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  false  :  (inLineOffset & 1  ?  !is525i  :  is525i));
+	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  1  :  2);
+	ULWord			smpteLine	(0);
+
+	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
+		inOutStream << "F" << (isF2 ? "2" : "1") << " ";
+	switch (mVancMode)
+	{
+		case NTV2_VANCMODE_OFF:		smpteLine =  isF2  ?  LineNumbersF2[mStandard]   :  LineNumbersF1[mStandard];	break;
+		case NTV2_VANCMODE_TALL:	smpteLine =  isF2  ?  LineNumbersF2t[mStandard]  :  LineNumbersF1t[mStandard];	break;
+		case NTV2_VANCMODE_TALLER:	smpteLine =  isF2  ?  LineNumbersF2tt[mStandard] :  LineNumbersF1tt[mStandard];	break;
+		default:					break;
+	}
+	inOutStream << "L" << dec << (inLineOffset/divisor + smpteLine);
+	return inOutStream;
+}
+
+
+//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?!
+//	IMPLEMENTATION MOVED HERE TO USE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
+
+NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
+{
+	NTV2_ASSERT (inStandard < sizeof(LineNumbersF1) / sizeof(ULWord));
+	*this = NTV2SmpteLineNumber (LineNumbersF1[inStandard],  LineNumbersF2[inStandard],  inStandard != NTV2_STANDARD_525,  inStandard);
 }

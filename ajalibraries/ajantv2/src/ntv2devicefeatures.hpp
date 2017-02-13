@@ -2800,13 +2800,7 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_WgtLUT1:
 				case NTV2_WgtLUT2:
 				case NTV2_Wgt3GSDIIn1:
-				case NTV2_Wgt3GSDIIn2:
-				case NTV2_Wgt3GSDIIn3:
-				case NTV2_Wgt3GSDIIn4:
 				case NTV2_Wgt3GSDIOut1:
-				case NTV2_Wgt3GSDIOut2:
-				case NTV2_Wgt3GSDIOut3:
-				case NTV2_Wgt3GSDIOut4:
 				case NTV2_WgtMixer1:
 				case NTV2_WgtGenLock:
 				case NTV2_WgtHDMIOut1v3:
@@ -2829,8 +2823,6 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_WgtLUT2:
 				case NTV2_Wgt3GSDIOut1:
 				case NTV2_Wgt3GSDIOut2:
-				case NTV2_Wgt3GSDIOut3:
-				case NTV2_Wgt3GSDIOut4:
 				case NTV2_WgtMixer1:
 				case NTV2_WgtGenLock:
 				case NTV2_WgtHDMIOut1v3:
@@ -2853,8 +2845,6 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_WgtLUT2:
 				case NTV2_Wgt3GSDIIn1:
 				case NTV2_Wgt3GSDIIn2:
-				case NTV2_Wgt3GSDIIn3:
-				case NTV2_Wgt3GSDIIn4:
 				case NTV2_WgtMixer1:
 				case NTV2_WgtGenLock:
 				case NTV2_WgtHDMIOut1v3:
@@ -4512,7 +4502,6 @@ bool NTV2DeviceCanDoCapture (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IO4KIP:
@@ -5683,9 +5672,6 @@ bool NTV2DeviceHasBiDirectionalSDI (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVID44:
 		case DEVICE_ID_KONAIP_4CH_1SFP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IO4KIP:
 			return true;
@@ -6849,9 +6835,9 @@ ULWord NTV2DeviceGetNumVideoChannels (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVIDHBR:	return 4;
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return 4;
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return 4;
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 4;
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 4;
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 4;
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 2;
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 2;
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 2;
 		case DEVICE_ID_IO4KPLUS:	return 8;
 		case DEVICE_ID_IO4KIP:		return 8;
 	#if !defined (NTV2_DEPRECATE)
@@ -7401,9 +7387,9 @@ UWord NTV2DeviceGetNumCSCs (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVIDHBR:	return 4;
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return 5;
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return 5;
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 4;
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 4;
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 4;
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 2;
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 2;
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 2;
 		case DEVICE_ID_IO4KPLUS:	return 5;
 		case DEVICE_ID_IO4KIP:		return 5;
 	#if !defined (NTV2_DEPRECATE)
@@ -8183,9 +8169,9 @@ UWord NTV2DeviceGetNumVideoInputs (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVIDHBR:	return 0;
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return 4;
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return 4;
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 4;
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 1;
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 0;
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 4;
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 2;
 		case DEVICE_ID_IO4KPLUS:	return 4;
 		case DEVICE_ID_IO4KIP:		return 4;
 	#if !defined (NTV2_DEPRECATE)
@@ -8229,8 +8215,8 @@ UWord NTV2DeviceGetNumVideoOutputs (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVIDHBR:	return 0;
 		case DEVICE_ID_KONAIP_4CH_1SFP:	return 4;
 		case DEVICE_ID_KONAIP_4CH_2SFP:	return 4;
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 4;
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 4;
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return 1;
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return 2;
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:	return 0;
 		case DEVICE_ID_IO4KPLUS:	return 5;
 		case DEVICE_ID_IO4KIP:		return 5;

@@ -7,7 +7,9 @@
 #ifndef AJATYPES_H
 #define AJATYPES_H
 
-//#define	NTV2_USE_STDINT
+#if defined (AJAMac)
+	#define	NTV2_USE_STDINT
+#endif	//	if not MSWindows
 #define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
 #define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
 #define	NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
@@ -19,22 +21,49 @@
 
 
 #if defined (NTV2_USE_STDINT)
-	#include <stdint.h>
-	typedef int16_t					LWord;
-	typedef uint32_t				ULWord;
-	typedef uint32_t *				PULWord;
-	typedef int16_t					Word;
-	typedef uint16_t				UWord;
+	#if defined (MSWindows)
+		#if (_MSC_VER < 1300)
+			typedef signed char				int8_t;
+			typedef signed short			int16_t;
+			typedef signed int				int32_t;
+			typedef unsigned char			uint8_t;
+			typedef unsigned short			uint16_t;
+			typedef unsigned int			uint32_t;
+		#else
+			#if defined (NTV2_BUILDING_DRIVER)
+				typedef signed __int8		int8_t;
+				typedef signed __int16		int16_t;
+				typedef signed __int32		int32_t;
+				typedef unsigned __int8		uint8_t;
+				typedef unsigned __int16	uint16_t;
+				typedef unsigned __int32	uint32_t;
+			#else
+				#include <stdint.h>
+			#endif
+		#endif
+		typedef signed __int64		int64_t;
+		typedef unsigned __int64	uint64_t;
+	#else
+		#include <stdint.h>
+	#endif
 	typedef uint8_t					UByte;
 	typedef int8_t					SByte;
+	typedef int16_t					Word;
+	typedef uint16_t				UWord;
+	typedef int32_t					LWord;
+	typedef uint32_t				ULWord;
+	typedef uint32_t *				PULWord;
+	typedef int64_t					LWord64;
+	typedef uint64_t				ULWord64;
+	typedef uint64_t				Pointer64;
 #else
-	typedef int            			LWord;
-	typedef unsigned int   			ULWord;
-	typedef unsigned int * 			PULWord;
-	typedef short          			Word;
-	typedef unsigned short 			UWord;
-	typedef unsigned char  			UByte;
-	typedef char           			SByte;
+	typedef int						LWord;
+	typedef unsigned int			ULWord;
+	typedef unsigned int *			PULWord;
+	typedef short					Word;
+	typedef unsigned short			UWord;
+	typedef unsigned char			UByte;
+	typedef char					SByte;
 #endif
 
 // Platform dependent
@@ -71,6 +100,8 @@
 	#if defined (NTV2_BUILDING_DRIVER)
 		#define	NTV2_DEPRECATED
 		#define	NTV2_DEPRECATED_12_5
+		#define	NTV2_DEPRECATED_12_6
+		#define	NTV2_DEPRECATED_13_0
 	#else
 		#if defined (NTV2_DEPRECATE)
 			#define	NTV2_DEPRECATED
@@ -89,15 +120,18 @@
 		#else
 			#define	NTV2_DEPRECATED_12_6	__declspec(deprecated)
 		#endif
+
+		#if defined (NTV2_DEPRECATE_13_0)
+			#define	NTV2_DEPRECATED_13_0
+		#else
+			#define	NTV2_DEPRECATED_13_0	__declspec(deprecated)
+		#endif
 	#endif
 
 #elif defined (AJAMac)				///////////////MAC OS X//////////////////////////
 
 	#include <stdint.h>
 	typedef short					HANDLE;
-	typedef int64_t					LWord64;	//	formerly:	long long int			LWord64;
-	typedef uint64_t				ULWord64;	//	formerly:	unsigned long long int 	ULWord64;
-	typedef uint64_t				Pointer64;	//	formerly:	unsigned long long int  Pointer64;
 	typedef void*					PVOID;
 	typedef unsigned int			BOOL_;
 	typedef ULWord					UWord_;
@@ -132,6 +166,8 @@
 	#if defined (NTV2_BUILDING_DRIVER)
 		#define	NTV2_DEPRECATED
 		#define	NTV2_DEPRECATED_12_5
+		#define	NTV2_DEPRECATED_12_6
+		#define	NTV2_DEPRECATED_13_0
 	#else
 		#if defined (NTV2_DEPRECATE)
 			#define	NTV2_DEPRECATED
@@ -166,6 +202,18 @@
 				#define	NTV2_DEPRECATED_12_6	//	__declspec broken in Xcode 7.3
 			#else
 				#define	NTV2_DEPRECATED_12_6	__declspec(deprecated)
+			#endif
+		#endif
+
+		#if defined (NTV2_DEPRECATE_13_0)
+			#define	NTV2_DEPRECATED_13_0
+		#else
+			#if !defined (__clang__)
+				#define	NTV2_DEPRECATED_13_0	//	__declspec unavailable until Xcode 5
+			#elif __clang_major__ == 7  &&  __clang_minor__ == 3
+				#define	NTV2_DEPRECATED_13_0	//	__declspec broken in Xcode 7.3
+			#else
+				#define	NTV2_DEPRECATED_13_0	__declspec(deprecated)
 			#endif
 		#endif
 	#endif
@@ -229,6 +277,13 @@
 			#define	NTV2_DEPRECATED_12_6		//	Disable deprecate warnings (for now)
 		#else
 			#define	NTV2_DEPRECATED_12_6
+		#endif
+
+		#if defined (NTV2_DEPRECATE_13_0)
+			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
+			#define	NTV2_DEPRECATED_13_0		//	Disable deprecate warnings (for now)
+		#else
+			#define	NTV2_DEPRECATED_13_0
 		#endif
 	#endif
 
@@ -299,14 +354,6 @@
 **/
 typedef struct NTV2FrameDimensions
 {
-	#if defined (NTV2_DEPRECATE)	//	A clean break with the past...
-		#define	NTV2FRAMEDIMENSION_WIDTH_NAME	mWidth
-		#define	NTV2FRAMEDIMENSION_HEIGHT_NAME	mHeight
-	#else							//	...otherwise retain the Windows SIZE-based names for legacy support
-		#define	NTV2FRAMEDIMENSION_WIDTH_NAME	cx
-		#define	NTV2FRAMEDIMENSION_HEIGHT_NAME	cy
-	#endif
-
 	#if !defined (NTV2_BUILDING_DRIVER)
 		//	Member Functions
 
@@ -316,25 +363,25 @@ typedef struct NTV2FrameDimensions
 			@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
 		**/
 		inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
-		inline ULWord					GetWidth (void) const		{return NTV2FRAMEDIMENSION_WIDTH_NAME;}		///< @return	My width, in pixels.
-		inline ULWord					GetHeight (void) const		{return NTV2FRAMEDIMENSION_HEIGHT_NAME;}	///< @return	My height, in lines/rows.
-		inline ULWord					Width (void) const			{return NTV2FRAMEDIMENSION_WIDTH_NAME;}		///< @return	My width, in pixels.
-		inline ULWord					Height (void) const			{return NTV2FRAMEDIMENSION_HEIGHT_NAME;}	///< @return	My height, in lines/rows.
-		inline bool						IsValid (void) const		{return Width() && Height();}				///< @return	True if both my width and height are non-zero.
+		inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
+		inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
+		inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
+		inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
+		inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
 
 		/**
 			@brief		Sets my width dimension.
 			@param[in]	inValue		Specifies the new width dimension, in pixels.
 			@return		A non-constant reference to me.
 		**/
-		inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{NTV2FRAMEDIMENSION_WIDTH_NAME = inValue; return *this;}
+		inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
 
 		/**
 			@brief		Sets my height dimension.
 			@param[in]	inValue		Specifies the new height dimension, in lines.
 			@return		A non-constant reference to me.
 		**/
-		inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{NTV2FRAMEDIMENSION_HEIGHT_NAME = inValue; return *this;}
+		inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
 
 		/**
 			@brief		Sets my dimension values.
@@ -349,14 +396,12 @@ typedef struct NTV2FrameDimensions
 			@return		A non-constant reference to me.
 		**/
 		inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
-	#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
-	//	Member Variables
-	#if !defined (NTV2_BUILDING_DRIVER) && defined (NTV2_DEPRECATE)
-		private:	//	Private member data only if not building driver and deprecating old APIs
+		private:	//	Private member data only if not building driver
 	#endif	//	!defined (NTV2_BUILDING_DRIVER)
-	ULWord	NTV2FRAMEDIMENSION_WIDTH_NAME;	///< @brief	The horizontal dimension, in pixels.
-	ULWord	NTV2FRAMEDIMENSION_HEIGHT_NAME;	///< @brief	The vertical dimension, in lines.
+	//	Member Variables
+	ULWord	mWidth;		///< @brief	The horizontal dimension, in pixels.
+	ULWord	mHeight;	///< @brief	The vertical dimension, in lines.
 } NTV2FrameDimensions;
 
 

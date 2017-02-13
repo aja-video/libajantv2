@@ -230,7 +230,7 @@ uint32_t CNTV2MailBox::getStatus()
 bool CNTV2MailBox::ReadChannelRegister (const ULWord inReg, ULWord & outValue, const ULWord inMask, const ULWord inShift)
 {
     NTV2RegInfo	regInfo	(inReg, 0, inMask, inShift);
-    bool rv = mDevice.BankSelectReadRegister (NTV2RegInfo (chanOffset, chanNumber | chanPS), regInfo);
+    bool rv = mDevice.BankSelectReadRegister (NTV2RegInfo (chanOffset, chanNumber), regInfo);
     if (rv)
         outValue = regInfo.registerValue;
     return rv;
@@ -238,14 +238,13 @@ bool CNTV2MailBox::ReadChannelRegister (const ULWord inReg, ULWord & outValue, c
 
 bool CNTV2MailBox::WriteChannelRegister(ULWord reg, ULWord value, ULWord mask, ULWord shift)
 {
-    return mDevice.BankSelectWriteRegister (NTV2RegInfo (chanOffset, chanNumber | chanPS), NTV2RegInfo (reg, value, mask, shift));
+    return mDevice.BankSelectWriteRegister (NTV2RegInfo (chanOffset, chanNumber), NTV2RegInfo (reg, value, mask, shift));
 }
 
-void CNTV2MailBox::SetChannel(ULWord channelOffset, ULWord channelNumber, ULWord channelPS)
+void CNTV2MailBox::SetChannel(ULWord channelOffset, ULWord channelNumber)
 {
     chanOffset  = channelOffset;
     chanNumber  = channelNumber;
-    chanPS      = channelPS;
 }
 
 void CNTV2MailBox::getError(std::string & error)

@@ -3586,13 +3586,22 @@ public:
 	///@{
 
 	/**
-		@brief		Answers with the current NTV2OutputCrosspointID for the given NTV2InputCrosspointID.
+		@brief		Answers with the currently connected NTV2OutputCrosspointID for the given NTV2InputCrosspointID.
 		@param[in]	inInputXpt		Specifies the input (signal sink) of interest.
 		@param[out]	outOutputXpt	Receives the output (signal source) the given input is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt);
+
+	/**
+		@brief		Answers with the currently connected NTV2InputCrosspointID for the given NTV2OutputCrosspointID.
+		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
+		@param[out]	outInputXpt		Receives the input (signal sink) the given output is connected to (if connected),
+									or NTV2_XptBlack if not connected.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointID & outInputXpt);
 
 	/**
 		@brief		Connects the given widget signal input (sink) to the given widget signal output (source).
@@ -5103,7 +5112,6 @@ public:
     AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
-	AJA_VIRTUAL bool GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 	///@}
 
 protected:
@@ -5121,6 +5129,7 @@ private:
 													NTV2FrameBufferFormat format);
 	AJA_VIRTUAL bool	IsBufferSizeChangeRequired(NTV2Channel channel, NTV2FrameGeometry geometry,
 									NTV2FrameBufferFormat currentFormat, NTV2FrameBufferFormat newFormat);
+	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void);	///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	/**

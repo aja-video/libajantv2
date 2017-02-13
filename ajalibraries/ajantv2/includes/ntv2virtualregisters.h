@@ -413,64 +413,47 @@ typedef enum
 	kVRegMailBoxRelease						= VIRTUALREG_START+476,
 	kVRegMailBoxAbort						= VIRTUALREG_START+477,
 	kVRegMailBoxTimeoutNS					= VIRTUALREG_START+478,		//	Units are 100 ns, not nanoseconds!
-	
-    kVRegTxc_2EncodeVideoFormat1            = VIRTUALREG_START+479,
-    kVRegTxc_2EncodeUllMode1				= VIRTUALREG_START+480,
-	kVRegTxc_2EncodeBitDepth1               = VIRTUALREG_START+481,
-	kVRegTxc_2EncodeChromaSubSamp1          = VIRTUALREG_START+482,
-    kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+483,
-    kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+484,
-    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+485,
-    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+486,
-    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+487,
-    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+488,
+
+    kVRegRxc_2DecodeSelectionMode1          = VIRTUALREG_START+479,
+    kVRegRxc_2DecodeProgramNumber1          = VIRTUALREG_START+480,
+    kVRegRxc_2DecodeProgramPID1             = VIRTUALREG_START+481,
+    kVRegRxc_2DecodeAudioNumber1            = VIRTUALREG_START+482,
+
+    kVRegRxc_2DecodeSelectionMode2          = VIRTUALREG_START+483,
+    kVRegRxc_2DecodeProgramNumber2          = VIRTUALREG_START+484,
+    kVRegRxc_2DecodeProgramPID2             = VIRTUALREG_START+485,
+    kVRegRxc_2DecodeAudioNumber2            = VIRTUALREG_START+486,
+
+    kVRegTxc_2EncodeVideoFormat1            = VIRTUALREG_START+487,
+    kVRegTxc_2EncodeUllMode1				= VIRTUALREG_START+488,
+    kVRegTxc_2EncodeBitDepth1               = VIRTUALREG_START+489,
+    kVRegTxc_2EncodeChromaSubSamp1          = VIRTUALREG_START+490,
+    kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+491,
+    kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+492,
+    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+493,
+    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+494,
+    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+495,
+    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+496,
     
-    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+489,
-    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+490,
-    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+491,
-    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+492,
-    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+493,
-    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+494,
-    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+495,
-    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+496,
-    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+497,
-    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+498,
+    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+497,
+    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+498,
+    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+499,
+    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+500,
+    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+501,
+    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+502,
+    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+503,
+    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+504,
+    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+505,
+    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+506,
 
-    kVRegTxc_2EncodeVideoFormat3            = VIRTUALREG_START+499,
-    kVRegTxc_2EncodeUllMode3				= VIRTUALREG_START+500,
-    kVRegTxc_2EncodeBitDepth3               = VIRTUALREG_START+501,
-    kVRegTxc_2EncodeChromaSubSamp3          = VIRTUALREG_START+502,
-    kVRegTxc_2EncodeMbps3                   = VIRTUALREG_START+503,
-    kVRegTxc_2EncodeStreamType3             = VIRTUALREG_START+504,
-    kVRegTxc_2EncodeProgramPid3             = VIRTUALREG_START+505,
-    kVRegTxc_2EncodeVideoPid3               = VIRTUALREG_START+506,
-    kVRegTxc_2EncodePcrPid3					= VIRTUALREG_START+507,
-    kVRegTxc_2EncodeAudio1Pid3              = VIRTUALREG_START+508,
-
-    kVRegTxc_2EncodeVideoFormat4            = VIRTUALREG_START+509,
-    kVRegTxc_2EncodeUllMode4				= VIRTUALREG_START+510,
-    kVRegTxc_2EncodeBitDepth4               = VIRTUALREG_START+511,
-    kVRegTxc_2EncodeChromaSubSamp4          = VIRTUALREG_START+512,
-    kVRegTxc_2EncodeMbps4                   = VIRTUALREG_START+513,
-    kVRegTxc_2EncodeStreamType4             = VIRTUALREG_START+514,
-    kVRegTxc_2EncodeProgramPid4             = VIRTUALREG_START+515,
-    kVRegTxc_2EncodeVideoPid4               = VIRTUALREG_START+516,
-    kVRegTxc_2EncodePcrPid4					= VIRTUALREG_START+517,
-    kVRegTxc_2EncodeAudio1Pid4              = VIRTUALREG_START+518,
-
-    kVRegJ2K_Placeholder1                   = VIRTUALREG_START+519,
-    kVRegJ2K_Placeholder2                   = VIRTUALREG_START+520,
-    kVRegJ2K_Placeholder3                   = VIRTUALREG_START+521,
-    kVRegJ2K_Placeholder4                   = VIRTUALREG_START+522,
-
-	kVReg2022_7Enable						= VIRTUALREG_START+523,
+    kVReg2022_7Enable						= VIRTUALREG_START+507,
 	
-	kVRegUserDefinedDBB						= VIRTUALREG_START+524,
+    kVRegUserDefinedDBB						= VIRTUALREG_START+508,
 
-	kVRegHDMIOutAudioChannels				= VIRTUALREG_START+525,
-	kVRegHDMIOutRGBRange					= VIRTUALREG_START+526,
+    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+509,
+    kVRegHDMIOutRGBRange					= VIRTUALREG_START+510,
 
-	kVRegLastAJA							= VIRTUALREG_START+527,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+511,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
@@ -736,117 +719,6 @@ typedef enum
 	#define	kRegVideoFormatCh6					kVRegVideoFormatCh6
 	#define	kRegVideoFormatCh7					kVRegVideoFormatCh7
 	#define	kRegVideoFormatCh8					kVRegVideoFormatCh8
-	#define	kRegIPAddrEth0						kVRegIPAddrEth0
-	#define	kRegSubnetEth0						kVRegSubnetEth0
-	#define	kRegGatewayEth0						kVRegGatewayEth0
-	#define	kRegIPAddrEth1						kVRegIPAddrEth1
-	#define	kRegSubnetEth1						kVRegSubnetEth1
-	#define	kRegGatewayEth1						kVRegGatewayEth1
-	#define	kRegRxcEnable1						kVRegRxcEnable1
-	#define	kRegRxcPrimaryRxMatch1				kVRegRxcPrimaryRxMatch1
-	#define	kRegRxcPrimarySourceIp1				kVRegRxcPrimarySourceIp1
-	#define	kRegRxcPrimaryDestIp1				kVRegRxcPrimaryDestIp1
-	#define	kRegRxcPrimarySourcePort1			kVRegRxcPrimarySourcePort1
-	#define	kRegRxcPrimaryDestPort1				kVRegRxcPrimaryDestPort1
-	#define	kRegRxcPrimarySsrc1					kVRegRxcPrimarySsrc1
-	#define	kRegRxcPrimaryVlan1					kVRegRxcPrimaryVlan1
-	#define	kRegRxcSecondaryRxMatch1			kVRegRxcSecondaryRxMatch1
-	#define	kRegRxcSecondarySourceIp1			kVRegRxcSecondarySourceIp1
-	#define	kRegRxcSecondaryDestIp1				kVRegRxcSecondaryDestIp1
-	#define	kRegRxcSecondarySourcePort1			kVRegRxcSecondarySourcePort1
-	#define	kRegRxcSecondaryDestPort1			kVRegRxcSecondaryDestPort1
-	#define	kRegRxcSecondarySsrc1				kVRegRxcSecondarySsrc1
-	#define	kRegRxcSecondaryVlan1				kVRegRxcSecondaryVlan1
-	#define	kRegRxcNetworkPathDiff1				kVRegRxcNetworkPathDiff1
-	#define	kRegRxcPlayoutDelay1				kVRegRxcPlayoutDelay1
-	#define	kRegRxcEnable2						kVRegRxcEnable2
-	#define	kRegRxcPrimaryRxMatch2				kVRegRxcPrimaryRxMatch2
-	#define	kRegRxcPrimarySourceIp2				kVRegRxcPrimarySourceIp2
-	#define	kRegRxcPrimaryDestIp2				kVRegRxcPrimaryDestIp2
-	#define	kRegRxcPrimarySourcePort2			kVRegRxcPrimarySourcePort2
-	#define	kRegRxcPrimaryDestPort2				kVRegRxcPrimaryDestPort2
-	#define	kRegRxcPrimarySsrc2					kVRegRxcPrimarySsrc2
-	#define	kRegRxcPrimaryVlan2					kVRegRxcPrimaryVlan2
-	#define	kRegRxcSecondaryRxMatch2			kVRegRxcSecondaryRxMatch2
-	#define	kRegRxcSecondarySourceIp2			kVRegRxcSecondarySourceIp2
-	#define	kRegRxcSecondaryDestIp2				kVRegRxcSecondaryDestIp2
-	#define	kRegRxcSecondarySourcePort2			kVRegRxcSecondarySourcePort2
-	#define	kRegRxcSecondaryDestPort2			kVRegRxcSecondaryDestPort2
-	#define	kRegRxcSecondarySsrc2				kVRegRxcSecondarySsrc2
-	#define	kRegRxcSecondaryVlan2				kVRegRxcSecondaryVlan2
-	#define	kRegRxcNetworkPathDiff2				kVRegRxcNetworkPathDiff2
-	#define	kRegRxcPlayoutDelay2				kVRegRxcPlayoutDelay2
-	#define	kRegTxcEnable3						kVRegTxcEnable3
-	#define	kRegTxcPrimaryLocalPort3			kVRegTxcPrimaryLocalPort3
-	#define	kRegTxcPrimaryRemoteIp3				kVRegTxcPrimaryRemoteIp3
-	#define	kRegTxcPrimaryRemotePort3			kVRegTxcPrimaryRemotePort3
-	#define	kRegTxcPrimaryRemoteMAC_lo3			kVRegTxcPrimaryRemoteMAC_lo3
-	#define	kRegTxcPrimaryRemoteMAC_hi3			kVRegTxcPrimaryRemoteMAC_hi3
-	#define	kRegTxcPrimaryAutoMac3				kVRegTxcPrimaryAutoMac3
-	#define	kRegTxcSecondaryLocalPort3			kVRegTxcSecondaryLocalPort3
-	#define	kRegTxcSecondaryRemoteIp3			kVRegTxcSecondaryRemoteIp3
-	#define	kRegTxcSecondaryRemotePort3			kVRegTxcSecondaryRemotePort3
-	#define	kRegTxcSecondaryRemoteMAC_lo3		kVRegTxcSecondaryRemoteMAC_lo3
-	#define	kRegTxcSecondaryRemoteMAC_hi3		kVRegTxcSecondaryRemoteMAC_hi3
-	#define	kRegTxcSecondaryAutoMac3			kVRegTxcSecondaryAutoMac3
-	#define	kRegTxcEnable4						kVRegTxcEnable4
-	#define	kRegTxcPrimaryLocalPort4			kVRegTxcPrimaryLocalPort4
-	#define	kRegTxcPrimaryRemoteIp4				kVRegTxcPrimaryRemoteIp4
-	#define	kRegTxcPrimaryRemotePort4			kVRegTxcPrimaryRemotePort4
-	#define	kRegTxcPrimaryRemoteMAC_lo4			kVRegTxcPrimaryRemoteMAC_lo4
-	#define	kRegTxcPrimaryRemoteMAC_hi4			kVRegTxcPrimaryRemoteMAC_hi4
-	#define	kRegTxcPrimaryAutoMac4				kVRegTxcPrimaryAutoMac4
-	#define	kRegTxcSecondaryLocalPort4			kVRegTxcSecondaryLocalPort4
-	#define	kRegTxcSecondaryRemoteIp4			kVRegTxcSecondaryRemoteIp4
-	#define	kRegTxcSecondaryRemotePort4			kVRegTxcSecondaryRemotePort4
-	#define	kRegTxcSecondaryRemoteMAC_lo4		kVRegTxcSecondaryRemoteMAC_lo4
-	#define	kRegTxcSecondaryRemoteMAC_hi4		kVRegTxcSecondaryRemoteMAC_hi4
-	#define	kRegTxcSecondaryAutoMac4			kVRegTxcSecondaryAutoMac4
-	#define	kRegMailBoxAcquire					kVRegMailBoxAcquire
-	#define	kRegMailBoxRelease					kVRegMailBoxRelease
-	#define	kRegMailBoxAbort					kVRegMailBoxAbort
-	#define	kRegMailBoxTimeoutNS				kVRegMailBoxTimeoutNS
-    #define	kRegTxc_2EncodeVideoFormat1         kVRegTxc_2EncodeVideoFormat1
-    #define	kRegTxc_2EncodeUllMode1             kVRegTxc_2EncodeUllMode1
-    #define	kRegTxc_2EncodeBitDepth1            kVRegTxc_2EncodeBitDepth1
-    #define	kRegTxc_2EncodeChromaSubSamp1       kVRegTxc_2EncodeChromaSubSamp1
-    #define	kRegTxc_2EncodeMbps1                kVRegTxc_2EncodeMbps1
-    #define	kRegTxc_2EncodeStreamType1          kVRegTxc_2EncodeStreamType1
-    #define	kRegTxc_2EncodeProgramPid1          kVRegTxc_2EncodeProgramPid1
-    #define	kRegTxc_2EncodeVideoPid1            kVRegTxc_2EncodeVideoPid1
-    #define	kRegTxc_2EncodePcrPid1              kVRegTxc_2EncodePcrPid1
-    #define	kRegTxc_2EncodeAudio1Pid1           kVRegTxc_2EncodeAudio1Pid1
-    #define	kRegTxc_2EncodeVideoFormat2         kVRegTxc_2EncodeVideoFormat2
-    #define	kRegTxc_2EncodeUllMode2             kVRegTxc_2EncodeUllMode2
-    #define	kRegTxc_2EncodeBitDepth2            kVRegTxc_2EncodeBitDepth2
-    #define	kRegTxc_2EncodeChromaSubSamp2       kVRegTxc_2EncodeChromaSubSamp2
-    #define	kRegTxc_2EncodeMbps2                kVRegTxc_2EncodeMbps2
-    #define	kRegTxc_2EncodeStreamType2          kVRegTxc_2EncodeStreamType2
-    #define	kRegTxc_2EncodeProgramPid2          kVRegTxc_2EncodeProgramPid2
-    #define	kRegTxc_2EncodeVideoPid2            kVRegTxc_2EncodeVideoPid2
-    #define	kRegTxc_2EncodePcrPid2              kVRegTxc_2EncodePcrPid2
-    #define	kRegTxc_2EncodeAudio1Pid2           kVRegTxc_2EncodeAudio1Pid2
-    #define	kRegTxc_2EncodeVideoFormat3         kVRegTxc_2EncodeVideoFormat3
-    #define	kRegTxc_2EncodeUllMode3             kVRegTxc_2EncodeUllMode3
-    #define	kRegTxc_2EncodeBitDepth3            kVRegTxc_2EncodeBitDepth3
-    #define	kRegTxc_2EncodeChromaSubSamp3       kVRegTxc_2EncodeChromaSubSamp3
-    #define	kRegTxc_2EncodeMbps3                kVRegTxc_2EncodeMbps3
-    #define	kRegTxc_2EncodeStreamType3          kVRegTxc_2EncodeStreamType3
-    #define	kRegTxc_2EncodeProgramPid3          kVRegTxc_2EncodeProgramPid3
-    #define	kRegTxc_2EncodeVideoPid3            kVRegTxc_2EncodeVideoPid3
-    #define	kRegTxc_2EncodePcrPid3              kVRegTxc_2EncodePcrPid3
-    #define	kRegTxc_2EncodeAudio1Pid3           kVRegTxc_2EncodeAudio1Pid3
-    #define	kRegTxc_2EncodeVideoFormat4         kVRegTxc_2EncodeVideoFormat4
-    #define	kRegTxc_2EncodeUllMode4             kVRegTxc_2EncodeUllMode4
-    #define	kRegTxc_2EncodeBitDepth4            kVRegTxc_2EncodeBitDepth4
-    #define	kRegTxc_2EncodeChromaSubSamp4       kVRegTxc_2EncodeChromaSubSamp4
-    #define	kRegTxc_2EncodeMbps4                kVRegTxc_2EncodeMbps4
-    #define	kRegTxc_2EncodeStreamType4          kVRegTxc_2EncodeStreamType4
-    #define	kRegTxc_2EncodeProgramPid4          kVRegTxc_2EncodeProgramPid4
-    #define	kRegTxc_2EncodeVideoPid4            kVRegTxc_2EncodeVideoPid4
-    #define	kRegTxc_2EncodePcrPid4              kVRegTxc_2EncodePcrPid4
-    #define	kRegTxc_2EncodeAudio1Pid4           kVRegTxc_2EncodeAudio1Pid4
-	#define	kReg2022_7Enable					kVReg2022_7Enable
 	#define	kRegUserDefinedDBB					kVRegUserDefinedDBB
 	#define	kRegHDMIOutAudioChannels			kVRegHDMIOutAudioChannels
 	#define	kRegHDMIOutRGBRange					kVRegHDMIOutRGBRange

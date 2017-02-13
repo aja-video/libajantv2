@@ -37,11 +37,16 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     printf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
 
-    // Turn off the encoder
+    // Turn off the encoder and check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
     if (channel == NTV2_CHANNEL2)
         encoderBit = ENCODER_2_ENABLE;
-    else
+    else if (channel == NTV2_CHANNEL1)
         encoderBit = ENCODER_1_ENABLE;
+    else
+    {
+        mError = "Invalid channel";
+        return false;
+    }
 
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
     val &= ~encoderBit;
@@ -93,18 +98,26 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
 bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoderConfig &config)
 {
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &config.videoFormat);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &config.ullMode);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &config.bitDepth);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &config.chromaSubsamp);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &config.mbps);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &config.streamType);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, &config.pmtPid);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, &config.videoPid);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, &config.pcrPid);
-    ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &config.audio1Pid);
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
+    {
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t*) &config.videoFormat);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, &config.ullMode);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, &config.bitDepth);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeChromaSubSamp1, (uint32_t *) &config.chromaSubsamp);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeMbps1, &config.mbps);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeStreamType1, (uint32_t *) &config.streamType);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeProgramPid1, &config.pmtPid);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, &config.videoPid);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, &config.pcrPid);
+        ReadJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, &config.audio1Pid);
 
-    return true;
+        return true;
+    }
+    else
+    {
+        mError = "Invalid channel";
+        return false;
+    }
 }
 
 bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
@@ -812,6 +825,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegAesEncap(const NTV2Channel channel)
 
 uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)
 {
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
     uint32_t addr = SAREK_J2K_ENCODER_1;
     
     if (channel == NTV2_CHANNEL2)
@@ -824,6 +838,7 @@ uint32_t CNTV2ConfigTs2022::GetIpxJ2KAddr(const NTV2Channel channel)
 
 uint32_t CNTV2ConfigTs2022::GetIpxTsAddr(const NTV2Channel channel)
 {
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
     uint32_t addr = SAREK_TS_ENCODER_1;
     
     if (channel == NTV2_CHANNEL2)
@@ -838,8 +853,8 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigVReg(const NTV2Channel channel, const uint
 {
     bool rv = false;
 
-    // only support 4 channels at this time
-    if (channel <= NTV2_CHANNEL4)
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
         rv = mDevice.WriteRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     }
@@ -848,7 +863,6 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigVReg(const NTV2Channel channel, const uint
 
     //printf("CNTV2ConfigTs2022::WriteJ2KConfigVReg vreg = %d %d\n", vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     return rv;
-
 }
 
 
@@ -856,8 +870,8 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigVReg(const NTV2Channel channel, const uint3
 {
     bool rv = false;
 
-    // only support 4 channels at this time
-    if (channel <= NTV2_CHANNEL4)
+    // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
+    if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
         rv = mDevice.ReadRegister(vreg + ((kVRegTxc_2EncodeAudio1Pid1-kVRegTxc_2EncodeVideoFormat1+1) * channel), value);
     }

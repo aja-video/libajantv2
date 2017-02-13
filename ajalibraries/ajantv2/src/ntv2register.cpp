@@ -3164,6 +3164,7 @@ bool CNTV2Card::SupportsP2PTransfer (void)
 		{
 			case 0xDB07:  // Kona3G + P2P
 			case 0xDB08:  // Kona3G Quad + P2P
+			case 0xEB0B:  // Kona4quad
 			case 0xEB0C:  // Kona4ufc
 			case 0xEB0E:  // Corvid 44
 			case 0xEB0D:  // Corvid 88
@@ -6242,6 +6243,7 @@ bool CNTV2Card::GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 
+	outOutputXpt = NTV2_OUTPUT_CROSSPOINT_INVALID;
 	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (inInputXpt, regNum, ndx))
 		return false;
 
@@ -6255,6 +6257,22 @@ bool CNTV2Card::GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2
 	return ReadRegister (regNum, (ULWord *) &outOutputXpt, sMasks[ndx], sShifts[ndx]);
 
 }	//	GetConnectedOutput
+
+
+bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointID & outInputXpt)
+{
+	for (outInputXpt = NTV2_FIRST_INPUT_CROSSPOINT;
+		outInputXpt <= NTV2_LAST_INPUT_CROSSPOINT;
+		outInputXpt = NTV2InputCrosspointID(outInputXpt+1))
+	{
+		NTV2OutputCrosspointID	tmpOutputXpt	(NTV2_OUTPUT_CROSSPOINT_INVALID);
+		if (GetConnectedOutput (outInputXpt, tmpOutputXpt))
+			if (tmpOutputXpt == inOutputXpt)
+				return true;
+	}
+	outInputXpt = NTV2_INPUT_CROSSPOINT_INVALID;
+	return true;
+}
 
 
 bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)

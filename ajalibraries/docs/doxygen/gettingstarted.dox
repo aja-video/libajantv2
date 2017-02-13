@@ -231,7 +231,11 @@ page and/or the device firmware page in the Knowledgebase.
 @subsection		gs-linuxsdkbuild	Building the Libraries & Demo Apps --- Linux
 
 On Linux, the libraries and device drivers are not pre-built, and must be compiled and linked on the host they are expected to run on.
--#	Be sure you have the requisite third-party software packages installed: <tt>g++</tt>, <tt>libasound2</tt>, <tt>libsound2-dev</tt>, and <tt>libncurses5-dev</tt>.
+-#	Be sure you have the requisite third-party software packages installed:
+	-	<tt>g++</tt>
+	-	<tt>libasound2</tt>
+	-	<tt>libsound2-dev</tt>
+	-	<tt>libncurses5-dev</tt>.
 	Refer to your Linux distro's documentation for the correct utility for managing packages.
 	Note that package managers often install dependent packages, so it may not be necessary to explicitly load all the packages
 	in the aforementioned list. (The Knowledgebase article from which the SDK was downloaded is the authoritative source for this information.)
@@ -239,8 +243,8 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 	-	If your Linux distro's package manager can't get it, AJA recommends downloading and building <b>Qt</b> directly from sources.
 	-	For more information about <b>Qt</b>, visit <http://qt.digia.com/>.
 	-	Be sure the path to <b>Qt</b>'s "bin" directory is in the current path.
--#	Using a terminal, change to the \c ntv2projects directory in the SDK:
-	<tt>$ cd ntv2projects</tt>
+-#	Using a terminal, change to the \c ntv2libraries/ajantv2/build directory in the SDK:
+	<tt>$ cd sdk/ntv2libraries/ajantv2/build</tt>
 -#	<b>Corvid HEVC Only:</b>  Export the environment variable <tt>AJA_HEVC=MB31</tt> to include the HEVC API:
 	<tt>$ export AJA_HEVC=MB31</tt>
 -#	<b>Optional:</b> Export the environment variable <tt>NTV2_DEPRECATE=1</tt> to build everything without the old, deprecated functions and APIs:
@@ -248,10 +252,12 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	<b>Optional:</b> Export the environment variable <tt>AJA_DEBUG=1</tt> if a debug build is required:
 	<tt>$ export AJA_DEBUG=1</tt>
 -#	Enter the \c make command. This will build all libraries, tools, utilities, demo applications, and the device driver.
-	The built executables will appear in the "../bin" directory (a peer to <b>ntv2projects</b>).
+	The built executables will appear in the "../bin" directory (a peer to <b>ntv2libraries</b>).
 -#	Load the device driver:
-	<tt>$ sudo ../bin/loadOEM2K</tt>
--#	Verify that the driver is installed by issuing the \c lsmod command, and looking for "XENA2" in the list.
+    <tt>$ sudo ../bin/load_ajantv2</tt>
+-#	Verify that the driver is installed by ...
+	-	issuing an \c lsmod, and look for "ajantv2" in the list;
+	-	look inside \c /dev/proc and look for devices with "ajantv2" in the name.
 
 @note	On CentOS (and possibly other Linux variants), the DVP demo app 'dvplowlatencydemo' won't run unless the 'libdvp.so'
 		shared library is copied into '/usr/lib64'.

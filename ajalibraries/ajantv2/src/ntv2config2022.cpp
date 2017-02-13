@@ -117,32 +117,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
     }
 }
 
-void IPVNetConfig::init()
-{
-    ipc_gateway = 0;
-    ipc_ip = 0;
-    ipc_subnet = 0;
-}
-
-bool IPVNetConfig::operator != ( const IPVNetConfig &other )
-{
-    return (!(*this == other));
-}
-
-bool IPVNetConfig::operator == ( const IPVNetConfig &other )
-{
-    if ((ipc_gateway  == other.ipc_gateway)   &&
-        (ipc_ip       == other.ipc_ip)        &&
-        (ipc_subnet   == other.ipc_subnet))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void rx2022Config::init()
 {
     rxc_enable  = 0;
@@ -1379,6 +1353,7 @@ bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, cons
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1390,6 +1365,7 @@ bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kE
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1401,6 +1377,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1412,6 +1389,7 @@ bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
+        mError = tsConfig.getLastError();
         return rv;
     }
     return false;
@@ -1511,10 +1489,10 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_rx_channel_access + baseAddr, channelIndex);
 
     return true;
 }
@@ -1556,10 +1534,10 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
 
     uint32_t channelPS = 0;
     if (!primaryChannel)
-        channelPS = 0x80000000;
+        channelIndex |= 0x80000000;
 
     // select channel
-    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex, channelPS);
+    SetChannel(kReg2022_6_tx_channel_access + baseAddr, channelIndex);
 
     return true;
 }

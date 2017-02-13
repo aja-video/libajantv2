@@ -1920,6 +1920,7 @@ typedef enum
     NTV2_4kTransport_Quadrants_2wire,        // square division
 	NTV2_4kTransport_Quadrants_4wire,        // square division
     NTV2_4kTransport_PixelInterleave,		 // SMPTE 425-5 & 425-3
+    NTV2_4kTransport_Quarter_1wire,          // quarter size
     NTV2_MAX_NUM_4kTransportTypes
 } NTV24kTransportType;
 

@@ -28,11 +28,6 @@
 **/
 typedef struct NTV2FormatDescriptor
 {
-	ULWord	numLines;			///< @brief	Height -- total number of lines
-	ULWord	numPixels;			///< @brief	Width -- total number of pixels per line
-	ULWord	linePitch;			///< @brief	Number of 32-bit words per line
-	ULWord	firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
-
 	/**
 		@brief	My default constructor initializes me in an "invalid" state.
 	**/
@@ -49,7 +44,7 @@ typedef struct NTV2FormatDescriptor
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
-//#if !defined (NTV2_DEPRECATE_12_6)
+//#if !defined (NTV2_DEPRECATE_13_0)
 	/**
 		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
 		@param[in]	inVideoStandard			Specifies the video standard being used.
@@ -75,7 +70,7 @@ typedef struct NTV2FormatDescriptor
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const bool					inVANCenabled	= false,
 											const bool					inWideVANC		= false);
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
+//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -97,13 +92,32 @@ typedef struct NTV2FormatDescriptor
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const NTV2VANCMode			inVancMode);
 
-	inline bool		IsValid (void) const				{return numLines && numPixels && linePitch;}		///< @return	True if valid;  otherwise false.
-	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}						///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return NTV2_IS_FBF_PLANAR (mPixelFormat);}			///< @return	True if planar format;  otherwise false.
-	inline ULWord	GetTotalRasterBytes (void) const	{return numLines * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold the raster.
-	inline ULWord	GetVisibleRasterBytes (void) const	{return (numLines - firstActiveLine) * linePitch * sizeof (ULWord);}	///< @return	The total number of bytes required to hold only the visible raster.
-	inline ULWord	GetBytesPerRow (void) const			{return linePitch * sizeof (ULWord);}				///< @return	The number of bytes per raster row.
-	inline ULWord	GetRasterWidth (void) const			{return numPixels;}									///< @return	The width of the raster, in pixels.
+	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
+	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
+	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
+
+	/**
+		@return		The total number of bytes required to hold the raster.
+		@note		To determine the byte count of all planes of a planar format, call GetNumPlanes,
+					then sum the byte counts for each plane.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? numLines * mLinePitch[inPlaneIndex0] : 0;}
+
+	/**
+		@return		The total number of bytes required to hold the visible raster.
+		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? ((numLines - firstActiveLine) * mLinePitch[inPlaneIndex0]) : 0;}
+
+	/**
+		@return		The number of bytes per row/line of the raster.
+		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
+	**/
+	inline ULWord	GetBytesPerRow (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? mLinePitch[inPlaneIndex0] : 0;}
+
+	inline ULWord	GetRasterWidth (void) const			{return numPixels;}			///< @return	The width of the raster, in pixels.
+	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}		///< @return	The number of planes in the raster.
 
 	/**
 		@return	The height of the raster, in lines.
@@ -131,8 +145,9 @@ typedef struct NTV2FormatDescriptor
 					(using my description of the buffer contents).
 		@param[in]	pInStartAddress		A pointer to the raster buffer.
 		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	inline const void *	GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0) const	{const UByte *	pStart ((const UByte *) pInStartAddress); return inRowIndex0 < numLines ? pStart + inRowIndex0 * GetBytesPerRow () : NULL;}
+	const void *	GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0, const UWord inPlaneIndex0 = 0) const;
 
 	/**
 		@return		A pointer to the start of the first visible row in the given buffer, or NULL if invalid
@@ -188,6 +203,13 @@ typedef struct NTV2FormatDescriptor
 	**/
 	std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
 
+	/**
+		@brief		Writes the given frame buffer line offset as a formatted SMPTE line number into the given output stream.
+		@param[in]	inLineOffset	Specifies the zero-based line offset in the frame buffer.
+		@return		The output stream I was handed.
+	**/
+	std::ostream &					PrintSMPTELineNumber (std::ostream & inOutStream, const ULWord inLineOffset) const;
+
 	inline NTV2Standard				GetVideoStandard (void) const	{return mStandard;}							///< @return	The video standard I was created with.
 	inline NTV2VideoFormat			GetVideoFormat (void) const		{return mVideoFormat;}						///< @return	The video format I was created with.
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
@@ -197,17 +219,25 @@ typedef struct NTV2FormatDescriptor
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
 
-	void							MakeInvalid (void);		///< @brief	Resets me into an invalid (NULL) state.
+	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
-	//	Private Member Data
 	private:
-		NTV2Standard			mStandard;		///< @brief	My originating video standard
-		NTV2VideoFormat			mVideoFormat;	///< @brief	My originating video format (if known)
-		NTV2FrameBufferFormat	mPixelFormat;	///< @brief	My originating frame buffer format
-		NTV2VANCMode			mVancMode;		///< @brief	My originating VANC mode
-		bool					m2Kby1080;		///< @brief	My originating 2Kx1080 setting
-		ULWord					mLinePitch[4];	///< @brief	Number of 32-bit words per line for other planes
-		UWord					mNumPlanes;		///< @brief	Number of planes
+		void						FinalizePlanar (void);			///< @brief	Finishes initialization for planar formats
+
+	//	Member Data
+	public:
+		ULWord					numLines;			///< @brief	Height -- total number of lines
+		ULWord					numPixels;			///< @brief	Width -- total number of pixels per line
+		ULWord					linePitch;			///< @brief	Number of 32-bit words per line. Shadows mLinePitch[0] * sizeof(ULWord).
+		ULWord					firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
+	private:
+		NTV2Standard			mStandard;			///< @brief	My originating video standard
+		NTV2VideoFormat			mVideoFormat;		///< @brief	My originating video format (if known)
+		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
+		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
+		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
+		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
+		UWord					mNumPlanes;			///< @brief	Number of planes
 
 } NTV2FormatDescriptor;
 
