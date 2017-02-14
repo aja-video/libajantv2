@@ -190,7 +190,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFramesPerVertical, (ULWord *) &mRegFramesPerVertical);
 	mCard->ReadRegister(kVReg4kOutputTransportSelection, (ULWord *)&m4kTransportOutSelection);
 	
-	mCard->ReadRegister(kRegSDIInput1FormatSelect, (ULWord *) &mSDIInput1FormatSelect);
+	mCard->ReadRegister(kVRegSDIInput1FormatSelect, (ULWord *) &mSDIInput1FormatSelect);
 	//mCard->ReadRegister(kRegSDIInput2FormatSelect, (ULWord *) &mSDIInput2FormatSelect);
 	mSDIInput2FormatSelect = mSDIInput1FormatSelect;	// for now
 	
@@ -417,7 +417,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			NTV2VideoFormat lockedInputFormat = GetLockedInputVideoFormat();
 			if (mFb1VideoFormat != lockedInputFormat)
 			{
-				mCard->WriteRegister(kRegDefaultVideoFormat, lockedInputFormat);
+				mCard->WriteRegister(kVRegDefaultVideoFormat, lockedInputFormat);
 				mCard->SetVideoFormat(lockedInputFormat);
 			}
 		}
@@ -430,7 +430,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	//Setup the analog LTC stuff
 	RP188SourceSelect TimecodeSource;
-	mCard->ReadRegister(kRP188SourceSelect, (ULWord*)&TimecodeSource);
+	mCard->ReadRegister(kVRegRP188SourceSelect, (ULWord*)&TimecodeSource);
 	if (NTV2DeviceGetNumLTCInputs(mCard->GetDeviceID()) && TimecodeSource == kRP188SourceLTCPort)
 	{
 		mCard->SetLTCInputEnable(true);
@@ -493,7 +493,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, NTV2_AUDIOSYSTEM_1);
 
 		NTV2HDMIRange range = NTV2_MAX_NUM_HDMIRanges;
-		mCard->ReadRegister(kRegHDMIOutRGBRange, (ULWord*)&range);
+		mCard->ReadRegister(kVRegHDMIOutRGBRange, (ULWord*)&range);
 		mCard->SetHDMIOutRange(range);
 	}
 
@@ -516,15 +516,15 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mHDMIStartupCountDown = kHDMIStartupPhase0;
 
 		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT1))
-			mCard->WriteRegister(kLUTType, NTV2_LUTUnknown);
+			mCard->WriteRegister(kVRegLUTType, NTV2_LUTUnknown);
 		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT2))
-			mCard->WriteRegister(kRegLUT2Type, NTV2_LUTUnknown);
+			mCard->WriteRegister(kVRegLUT2Type, NTV2_LUTUnknown);
 		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT3))
-			mCard->WriteRegister(kRegLUT3Type, NTV2_LUTUnknown);
+			mCard->WriteRegister(kVRegLUT3Type, NTV2_LUTUnknown);
 		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT4))
-			mCard->WriteRegister(kRegLUT4Type, NTV2_LUTUnknown);
+			mCard->WriteRegister(kVRegLUT4Type, NTV2_LUTUnknown);
 		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT5))
-			mCard->WriteRegister(kRegLUT5Type, NTV2_LUTUnknown);
+			mCard->WriteRegister(kVRegLUT5Type, NTV2_LUTUnknown);
 	}
 	// Set misc registers
 	SetDeviceMiscRegisters(mode);
@@ -894,7 +894,7 @@ void DeviceServices::SetMacDebugOption(int item)
     if ( mCard->IsOpen() )
     {
 		ULWord regVal = 0;
-		mCard->ReadRegister( kRegDebug1, &regVal );
+		mCard->ReadRegister( kVRegDebug1, &regVal );
 		switch(item)
 		{
 			case 0:	// disable every frame
@@ -911,7 +911,7 @@ void DeviceServices::SetMacDebugOption(int item)
 				break;
 		}
 		
-		mCard->WriteRegister( kRegDebug1, regVal );
+		mCard->WriteRegister( kVRegDebug1, regVal );
     }
 }
 
@@ -1994,13 +1994,13 @@ bool DeviceServices::UpdateK2LUTSelect()
 	
 	ULWord lut2Type = mLUTType, lut3Type = mLUTType, lut4Type = mLUTType, lut5Type = mLUTType;
 	if (bLut2)
-		mCard->ReadRegister(kRegLUT2Type, &lut2Type);
+		mCard->ReadRegister(kVRegLUT2Type, &lut2Type);
 	if (bLut3)
-		mCard->ReadRegister(kRegLUT3Type, &lut3Type);
+		mCard->ReadRegister(kVRegLUT3Type, &lut3Type);
 	if (bLut4)
-		mCard->ReadRegister(kRegLUT4Type, &lut4Type);
+		mCard->ReadRegister(kVRegLUT4Type, &lut4Type);
 	if (bLut5)
-		mCard->ReadRegister(kRegLUT5Type, &lut5Type);
+		mCard->ReadRegister(kVRegLUT5Type, &lut5Type);
 	
 	// test for special use of LUT2 for E-to-E rgb range conversion
 	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == false) && (mode == NTV2_MODE_CAPTURE);
@@ -2052,19 +2052,19 @@ bool DeviceServices::UpdateK2LUTSelect()
 		mCard->DownloadLUTToHW(table, NTV2_CHANNEL2, kLUTBank_SMPTE2FULL);
 		mCard->GenerateGammaTable(NTV2_LUTRGBRangeFull_SMPTE, kLUTBank_FULL2SMPTE, table);
 		mCard->DownloadLUTToHW(table, NTV2_CHANNEL2, kLUTBank_FULL2SMPTE);
-		mCard->WriteRegister(kRegLUT2Type, NTV2_LUTRGBRangeFull_SMPTE);
+		mCard->WriteRegister(kVRegLUT2Type, NTV2_LUTRGBRangeFull_SMPTE);
 	}
 	
 	// write LUT type reg
-	mCard->WriteRegister(kLUTType, wantedLUT);
+	mCard->WriteRegister(kVRegLUTType, wantedLUT);
 	if (bLut2 && bE2ERangeConversion == false)
-		mCard->WriteRegister(kRegLUT2Type, wantedLUT);
+		mCard->WriteRegister(kVRegLUT2Type, wantedLUT);
 	if (bLut3)
-		mCard->WriteRegister(kRegLUT3Type, wantedLUT);
+		mCard->WriteRegister(kVRegLUT3Type, wantedLUT);
 	if (bLut4)
-		mCard->WriteRegister(kRegLUT4Type, wantedLUT);
+		mCard->WriteRegister(kVRegLUT4Type, wantedLUT);
 	if (bLut5)
-		mCard->WriteRegister(kRegLUT5Type, wantedLUT);
+		mCard->WriteRegister(kVRegLUT5Type, wantedLUT);
 	
 	return bResult;
 }
@@ -2485,7 +2485,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
 
 	uint32_t audioInputSelect;
-	mCard->ReadRegister(kRegAudioInputSelect, &audioInputSelect);
+	mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
 	SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -2601,7 +2601,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		if (selectedAncInput >= numSdiInputs)
 			selectedAncInput = 0;
 
-		mCard->WriteRegister(kRegCustomAncInputSelect, selectedAncInput);
+		mCard->WriteRegister(kVRegCustomAncInputSelect, selectedAncInput);
 	}
 
 }

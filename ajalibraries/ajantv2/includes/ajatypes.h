@@ -13,8 +13,8 @@
 #define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
 #define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
 #define	NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-#undef	NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-#define	NTV2_DEPRECATED_12_7		//	Future 12.7 __declspec(deprecated)
+#define	NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
+//#define	NTV2_DEPRECATE_13_0			//	First deprecated in SDK 13.0
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -121,6 +121,12 @@
 			#define	NTV2_DEPRECATED_12_6	__declspec(deprecated)
 		#endif
 
+		#if defined (NTV2_DEPRECATE_12_7)
+			#define	NTV2_DEPRECATED_12_7
+		#else
+			#define	NTV2_DEPRECATED_12_7	__declspec(deprecated)
+		#endif
+
 		#if defined (NTV2_DEPRECATE_13_0)
 			#define	NTV2_DEPRECATED_13_0
 		#else
@@ -205,6 +211,18 @@
 			#endif
 		#endif
 
+		#if defined (NTV2_DEPRECATE_12_7)
+			#define	NTV2_DEPRECATED_12_7
+		#else
+			#if !defined (__clang__)
+				#define	NTV2_DEPRECATED_12_7	//	__declspec unavailable until Xcode 5
+			#elif __clang_major__ == 7  &&  __clang_minor__ == 3
+				#define	NTV2_DEPRECATED_12_7	//	__declspec broken in Xcode 7.3
+			#else
+				#define	NTV2_DEPRECATED_12_7	__declspec(deprecated)
+			#endif
+		#endif
+
 		#if defined (NTV2_DEPRECATE_13_0)
 			#define	NTV2_DEPRECATED_13_0
 		#else
@@ -277,6 +295,13 @@
 			#define	NTV2_DEPRECATED_12_6		//	Disable deprecate warnings (for now)
 		#else
 			#define	NTV2_DEPRECATED_12_6
+		#endif
+
+		#if defined (NTV2_DEPRECATE_12_7)
+			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
+			#define	NTV2_DEPRECATED_12_7		//	Disable deprecate warnings (for now)
+		#else
+			#define	NTV2_DEPRECATED_12_7
 		#endif
 
 		#if defined (NTV2_DEPRECATE_13_0)

@@ -547,7 +547,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 }	//	construct from NTV2VideoFormat & NTV2VANCMode
 
 
-//#if !defined (NTV2_DEPRECATE_13_0)
+#if !defined (NTV2_DEPRECATE_13_0)
 	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
 												const NTV2FrameBufferFormat	inFrameBufferFormat,
 												const bool					inVANCenabled,
@@ -618,7 +618,6 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	{
 		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
 	}
-//#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
@@ -628,6 +627,7 @@ NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 {
 	return NTV2FormatDescriptor (inVideoFormat, inFrameBufferFormat, inVANCenabled, inWideVANC);
 }
+#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor::NTV2FormatDescriptor ()

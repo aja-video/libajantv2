@@ -1233,7 +1233,7 @@ void Io4KUfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		if (mVirtualHDMIOutputSelect != NTV2_PrimaryOutputSelect &&
 			mVirtualHDMIOutputSelect != NTV2_SecondaryOutputSelect)
 		{
-			mCard->WriteRegister(kK2RegHDMIOutputSelect, NTV2_PrimaryOutputSelect);
+			mCard->WriteRegister(kVRegHDMIOutputSelect, NTV2_PrimaryOutputSelect);
 		}
 	
 		// Set HDMI Out Std / FPS
@@ -1617,13 +1617,13 @@ void Io4KUfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
