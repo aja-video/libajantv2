@@ -783,7 +783,7 @@ static const ULWord	gChannelToRXSDIStatusRegs []			= {	kRegRXSDI1Status,				kReg
 
 static const ULWord	gChannelToRXSDICRCErrorCountRegs[] = { kRegRXSDI1CRCErrorCount, kRegRXSDI2CRCErrorCount, kRegRXSDI3CRCErrorCount, kRegRXSDI4CRCErrorCount, kRegRXSDI5CRCErrorCount, kRegRXSDI6CRCErrorCount, kRegRXSDI7CRCErrorCount, kRegRXSDI8CRCErrorCount, 0 };
 
-static const ULWord	gChannelToSmpte372RegisterNum []		= {	kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,
+static const ULWord	gChannelToSmpte372RegisterNum []		= {	kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
 																kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			0};
 static const ULWord	gChannelToSmpte372Masks []				= {	kRegMaskSmpte372Enable,		kRegMaskSmpte372Enable,		kRegMaskSmpte372Enable4,	kRegMaskSmpte372Enable4,
 																kRegMaskSmpte372Enable6,	kRegMaskSmpte372Enable6,	kRegMaskSmpte372Enable8,	kRegMaskSmpte372Enable8,	0};
@@ -1457,6 +1457,10 @@ bool CNTV2Card::IsProgressiveStandard (bool & outIsProgressive, NTV2Channel inCh
 	ULWord			smpte372Enabled	(0);
 	NTV2Standard	standard		(NTV2_STANDARD_INVALID);
 	outIsProgressive = false;
+
+	if (!IsMultiFormatActive())
+		inChannel = NTV2_CHANNEL1;
+
 	if (GetStandard (standard, inChannel) && GetSmpte372 (smpte372Enabled, inChannel))
 	{	
 		if (standard == NTV2_STANDARD_720 || standard == NTV2_STANDARD_1080p || smpte372Enabled)
@@ -1473,6 +1477,10 @@ bool CNTV2Card::IsSDStandard (bool & outIsStandardDef, NTV2Channel inChannel)
 {
 	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
 	outIsStandardDef = false;
+
+	if (!IsMultiFormatActive())
+		inChannel = NTV2_CHANNEL1;
+
 	if (GetStandard (standard, inChannel))
 	{
 		if (standard == NTV2_STANDARD_525 || standard == NTV2_STANDARD_625)
@@ -1680,6 +1688,10 @@ bool CNTV2Card::SetSmpte372 (ULWord inValue, NTV2Channel inChannel)
 {
 	// Set true (1) to put card in SMPTE 372 dual-link mode (used for 1080p60, 1080p5994, 1080p50)
 	// Set false (0) to disable this mode
+
+	if (!IsMultiFormatActive())
+		inChannel = NTV2_CHANNEL1;
+
 	return WriteRegister (gChannelToSmpte372RegisterNum [inChannel], inValue, gChannelToSmpte372Masks [inChannel], gChannelToSmpte372Shifts [inChannel]);
 }
 
@@ -1688,6 +1700,9 @@ bool CNTV2Card::GetSmpte372 (ULWord & outValue, NTV2Channel inChannel)
 {
 	// Return true (1) if card in SMPTE 372 dual-link mode (used for 1080p60, 1080p5994, 1080p50)
 	// Return false (0) if this mode is disabled
+	if (!IsMultiFormatActive())
+		inChannel = NTV2_CHANNEL1;
+
 	return ReadRegister (gChannelToSmpte372RegisterNum [inChannel], &outValue, gChannelToSmpte372Masks [inChannel], gChannelToSmpte372Shifts [inChannel]);
 }
 

@@ -403,6 +403,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FBF_ABGR:
 	case NTV2_FBF_8BIT_YCBCR:
 	case NTV2_FBF_8BIT_YCBCR_YUY2:
+	case NTV2_FBF_24BIT_BGR:
+	case NTV2_FBF_24BIT_RGB:
 		byte4 |= VPIDBitDepth_8;
 		break;
 
