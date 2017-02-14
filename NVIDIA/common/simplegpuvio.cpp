@@ -263,8 +263,8 @@ CGpuVideoIO::Capture()
 	// Wait for frame interrupt
 	mBoard->WaitForInputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
 	ULWord loval, hival;
-	mBoard->ReadRegister(kRegTimeStampLastInput1VerticalLo,&loval);
-	mBoard->ReadRegister(kRegTimeStampLastInput1VerticalHi, &hival);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo,&loval);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, &hival);
 
 	// Get pointer to next GPU buffer
 	AVTextureBuffer* frameData = mGPUCircularBuffer->StartProduceNextBuffer();
@@ -340,8 +340,8 @@ CGpuVideoIO::Playout()
 	mGPUCircularBuffer->EndConsumeNextBuffer();
 
 	ULWord loval, hival;
-	mBoard->ReadRegister(kRegTimeStampLastInput1VerticalLo, &loval);
-	mBoard->ReadRegister(kRegTimeStampLastInput1VerticalHi, &hival);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, &loval);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, &hival);
 //	uint64_t currentTime = ((uint64_t)hival << 32) + loval;
 //	odprintf("Latency Time %llu ", currentTime - frameData->currentTime);
 
