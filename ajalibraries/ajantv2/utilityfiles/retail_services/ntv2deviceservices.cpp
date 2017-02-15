@@ -191,7 +191,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVReg4kOutputTransportSelection, (ULWord *)&m4kTransportOutSelection);
 	
 	mCard->ReadRegister(kVRegSDIInput1FormatSelect, (ULWord *) &mSDIInput1FormatSelect);
-	//mCard->ReadRegister(kRegSDIInput2FormatSelect, (ULWord *) &mSDIInput2FormatSelect);
+	//mCard->ReadRegister(kVRegSDIInput2FormatSelect, (ULWord *) &mSDIInput2FormatSelect);
 	mSDIInput2FormatSelect = mSDIInput1FormatSelect;	// for now
 	
 	// read primary HW registers (primary same as Channel1)
