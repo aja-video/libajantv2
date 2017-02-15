@@ -44,7 +44,7 @@ typedef struct NTV2FormatDescriptor
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
-//#if !defined (NTV2_DEPRECATE_13_0)
+#if !defined (NTV2_DEPRECATE_13_0)
 	/**
 		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
 		@param[in]	inVideoStandard			Specifies the video standard being used.
@@ -70,7 +70,7 @@ typedef struct NTV2FormatDescriptor
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const bool					inVANCenabled	= false,
 											const bool					inWideVANC		= false);
-//#endif	//	!defined (NTV2_DEPRECATE_13_0)
+#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -90,7 +90,11 @@ typedef struct NTV2FormatDescriptor
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const NTV2VANCMode			inVancMode);
+											const NTV2VANCMode			inVancMode
+#if defined (NTV2_DEPRECATE_13_0)
+											= NTV2_VANCMODE_OFF
+#endif	//	NTV2_DEPRECATE_13_0
+											);
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
