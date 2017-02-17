@@ -22,7 +22,7 @@
 
 // structure to track shared memory allocations
 struct SharedData
-{
+{    
 	std::string	shareName;
 	void*		pMemory;
 	size_t		memorySize;
@@ -32,27 +32,26 @@ struct SharedData
 #else
 	int			fileDescriptor;
 #endif
-};
 
-void shareddata_init(SharedData& data)
-{
-    data.pMemory = NULL;
-    data.memorySize = 0;
-    data.refCount = 0;
+    SharedData()
+    {
+        shareName = "";
+        pMemory = NULL;
+        memorySize = 0;
+        refCount = 0;
 #if defined(AJA_WINDOWS)
-    data.fileMapHandle = NULL;
+        fileMapHandle = NULL;
 #else
-    data.fileDescriptor = 0;
+        fileDescriptor = 0;
 #endif
-}
+    }
+};
 
 // lock for shared memory allocation/free
 static AJALock sSharedLock;
 
 // list of allocated shared memory
 static std::list<SharedData> sSharedList;
-
-
 
 AJAMemory::AJAMemory()
 {
@@ -220,7 +219,6 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 	}
 
 	SharedData newData;
-    shareddata_init(newData);
 
 	// allocate new share
 #if defined(AJA_WINDOWS)
@@ -283,6 +281,8 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
         bool needsTruncate = false;
 #if defined(AJA_LINUX)
         needsTruncate = true;
+        // on Linux shm_open() doesn't set S_IROTH|S_IWOTH, so use fchmod()
+        fchmod(newData.fileDescriptor, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 #else
         // need this on Mac, see:
         // http://stackoverflow.com/questions/25502229/ftruncate-not-working-on-posix-shared-memory-in-mac-os-x#25510361
