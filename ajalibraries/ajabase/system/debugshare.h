@@ -151,7 +151,7 @@ typedef enum _AJADebugUnit
 #define AJA_DEBUG_MESSAGE_MAX_SIZE		512					/**< Maximum size of a message */
 #define AJA_DEBUG_MESSAGE_RING_SIZE		4096				/**< Size of the message ring */
 #define AJA_DEBUG_FILE_NAME_MAX_SIZE	256					/**< Maximum size of a file name */
-#define AJA_DEBUG_SHARE_NAME			"AJADebugShare"		/**< Name of the shared memory for the debug messages */
+#define AJA_DEBUG_SHARE_NAME            "aja-shm-debug"     /**< Name of the shared memory for the debug messages */
 #define AJA_DEBUG_TICK_RATE				1000000				/**< Resolution of debug time in ticks/second */
 #define AJA_DEBUG_STATE_FILE_VERSION	500					/**< Version number of the state file format */
 ///@}

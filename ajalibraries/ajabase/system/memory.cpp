@@ -5,25 +5,20 @@
 **/
 
 #if defined(AJA_LINUX) || defined(AJA_MAC)
-	#include <sys/types.h>
-	#include <sys/mman.h>
-	#include <fcntl.h>
-	#include <stdlib.h>
-	#include <errno.h>
-	#include <unistd.h>
+    #include <errno.h>
+    #include <fcntl.h>
+    #include <stdlib.h>
+    #include <syslog.h>
+    #include <sys/mman.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <unistd.h>
 #endif
 
 #include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/lock.h"
-#if defined(AJA_LINUX) || defined(AJA_MAC)
-#include <syslog.h>
-#include <sys/stat.h>
-// Define this here to avoid an include from the ntv4 directory
-// Must have the same value as in ntv4/driver/lindriver.h
-#define DEBUG_SHARE_LOCATION "/dev/ntv4debugshare"
-#endif
 
 // structure to track shared memory allocations
 struct SharedData
@@ -190,8 +185,17 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// look for share with the same name
 	size_t size = (*pMemorySize + AJA_PAGE_SIZE - 1) / AJA_PAGE_SIZE * AJA_PAGE_SIZE;
-	std::string name = "Global\\";
+
+    std::string name;
+#if defined(AJA_WINDOWS)
+    name = "Global\\";
 	name += pShareName;
+#else //Mac and Linux
+    // Docs say to start name with a slash
+    name = "/";
+    name += pShareName;
+#endif
+
 	std::list<SharedData>::iterator shareIter;
 
 	for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); shareIter++)
@@ -256,48 +260,10 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// In User Mode: Global\somename
 	// In Kernel Mode: \BaseNamedObjects\somename
-#endif
-
-#if defined(AJA_LINUX) || defined(AJA_MAC)
-
-	// Special handling for the Linux debugger shared memory
-#if defined(AJA_LINUX)
-	if (*pMemorySize == sizeof(AJADebugShare))
+#else
+    // Mac and Linux
 	{
-		int file;
-
-		// Try to open the shared memory kernel module
-		file = open(DEBUG_SHARE_LOCATION, 0666);
-		if (file < 0)
-		{
-			int saveErr = errno;
-			syslog(LOG_ERR, "AJAMemory::AllocateShared open failed, err %d\n", saveErr);
-			return NULL;
-		}
-
-		// Now try to get a pointer to the kernel module's buffer
-		newData.pMemory = (void*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
-		if ((long int)newData.pMemory < 0)
-		{
-			int saveErr = errno;
-			newData.pMemory = NULL;
-			syslog(LOG_ERR, "AJAMemory::AllocateShared mmap failed, err %d\n", saveErr);
-			return NULL;
-		}
-		// DON'T memset the new mapping. Others may have already logged messages.
-
-		// Close the driver.  The map stays active.
-		close(file);
-	}
-	else
-#endif //AJA_LINUX
-	{
-		// Docs say to start name with a slash
-		std::string fileName = "/" + name;  // For portability considerations
-
-		newData.fileDescriptor = shm_open(fileName.c_str(),
-											O_CREAT | O_RDWR,
-											0666);
+        newData.fileDescriptor = shm_open(name.c_str(), O_CREAT | O_RDWR, 0666);
 		if (newData.fileDescriptor < 0)
 		{
 			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  shm_open failed");
@@ -305,16 +271,14 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 		}
 		// Despite 0666 above, write permissions for others was not set.  Force it.
 		{
-			int rc;
-
-			fileName = "/dev/shm" + name;
-			rc       = chmod(fileName.c_str(), 0666);
+            std::string devFileName = "/dev/shm" + name;
+            int rc = chmod(devFileName.c_str(), 0666);
 
 			if (rc < 0)
 			{
 				#if !defined(AJA_MAC)
-				int saveErrno = errno;
-				syslog(LOG_ERR, "AJAMemory::AllocateShared chmod failed, err = %d\n", saveErrno);
+                    int saveErrno = errno;
+                    syslog(LOG_ERR, "AJAMemory::AllocateShared chmod failed, err = %d\n", saveErrno);
 				#endif
 			}
 		}
