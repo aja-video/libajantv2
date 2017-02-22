@@ -11,6 +11,7 @@
 
 NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
+MACAddr toMAC(QString mac);
 
 CKonaIpBoardJsonReader::CKonaIpBoardJsonReader()
 {
@@ -106,6 +107,9 @@ bool CKonaIpBoardJsonReader::readJson(const QJsonObject &json)
         transmitStruct.mPrimaryRemotePort = transmitChannelObject["primaryRemotePort"].toString();
         std::cout << "PrimaryRemotePort " << transmitStruct.mPrimaryRemotePort.toStdString().c_str() << std::endl;
 
+        transmitStruct.mPrimaryRemoteMac = transmitChannelObject["primaryRemoteMac"].toString();
+        std::cout << "PrimaryRemoteMac " << transmitStruct.mPrimaryRemoteMac.toStdString().c_str() << std::endl;
+
         transmitStruct.mPrimaryAutoMac = transmitChannelObject["primaryAutoMac"].toString();
         std::cout << "PrimaryAutoMac " << transmitStruct.mPrimaryAutoMac.toStdString().c_str() << std::endl;
 
@@ -117,6 +121,9 @@ bool CKonaIpBoardJsonReader::readJson(const QJsonObject &json)
 
         transmitStruct.mSecondaryRemotePort = transmitChannelObject["secondaryRemotePort"].toString();
         std::cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString().c_str() << std::endl;
+
+        transmitStruct.mSecondaryRemoteMac = transmitChannelObject["secondaryRemoteMac"].toString();
+        std::cout << "SecondaryRemoteMac " << transmitStruct.mSecondaryRemoteMac.toStdString().c_str() << std::endl;
 
         transmitStruct.mSecondaryAutoMac = transmitChannelObject["secondaryAutoMac"].toString();
         std::cout << "SecondaryAutoMac " << transmitStruct.mSecondaryAutoMac.toStdString().c_str() << std::endl;
@@ -177,7 +184,6 @@ bool CKonaIPEncoderSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStru
         {std::cerr << "## ERROR:  Need To Specify at Least 1 SFP" << std::endl;  return false;}
     }
 
-
     QListIterator<SFPStruct> sfpIter(pKonaIPParams->mSFPs);
     while (sfpIter.hasNext())
     {
@@ -219,7 +225,6 @@ bool CKonaIPEncoderSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStru
         config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
         config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable),enable2022_7);
     }
-
     std::cerr << "## transmitIter" << std::endl;
 
     QListIterator<TransmitStruct> transmitIter(pKonaIPParams->mTransmitChannels);
@@ -234,11 +239,14 @@ bool CKonaIPEncoderSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStru
         txChannelConfig.primaryLocalPort = transmit.mPrimaryLocalPort.toUInt();
         txChannelConfig.primaryRemoteIP = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.primaryRemotePort = transmit.mPrimaryRemotePort.toUInt();
+        txChannelConfig.primaryRemoteMAC =  toMAC(transmit.mPrimaryRemoteMac);
         txChannelConfig.primaryAutoMAC =  getEnable(transmit.mPrimaryAutoMac);
         txChannelConfig.secondaryLocalPort = transmit.mSecondaryLocalPort.toUInt();
         txChannelConfig.secondaryRemoteIP = transmit.mSecondaryRemoteIPAddress.toStdString();
         txChannelConfig.secondaryRemotePort = transmit.mSecondaryRemotePort.toUInt();
+        txChannelConfig.secondaryRemoteMAC =  toMAC(transmit.mSecondaryRemoteMac);
         txChannelConfig.secondaryAutoMAC =  getEnable(transmit.mSecondaryAutoMac);
+
 
         config2022.SetTxChannelConfiguration (channel, txChannelConfig);
         config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable),enable2022_7);
@@ -268,4 +276,21 @@ bool getEnable(QString enableBoolString)
         enable = true;
 
     return enable;
+}
+
+MACAddr toMAC(QString mac)
+{
+    MACAddr MAC;
+
+    QStringList mlist = mac.split(':');
+    int numBytes = mlist.size();
+    if (numBytes > 6) numBytes = 6;
+
+    for (int i=0; i< numBytes; i++)
+    {
+        bool ok;
+        MAC.mac[i] = mlist[i].toUShort(&ok,16);
+    }
+
+    return MAC;
 }
