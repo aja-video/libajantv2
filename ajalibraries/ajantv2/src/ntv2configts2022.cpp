@@ -39,9 +39,9 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     // Turn off the encoder and check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
     if (channel == NTV2_CHANNEL2)
-        encoderBit = ENCODER_2_ENABLE;
+        encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;
     else if (channel == NTV2_CHANNEL1)
-        encoderBit = ENCODER_1_ENABLE;
+        encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;
     else
     {
         mError = "Invalid channel";
@@ -51,6 +51,9 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
     val &= ~encoderBit;
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    // Wait some time fo the encoder to stop
+    mDevice.WaitForOutputVerticalInterrupt(channel, 10);
 
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
@@ -86,6 +89,22 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     for (uint32_t i = NTV2_AUDIOSYSTEM_1; i<NTV2_MAX_NUM_AudioSystemEnums; i++)
     {
         mDevice.SetAudio20BitMode ((NTV2AudioSystem)i, do20Bit);
+    }
+
+    if (channel == NTV2_CHANNEL2)
+    {
+        if (config.streamType == kJ2KStreamTypeNonElsm)
+            encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;
+        else
+            encoderBit = ENCODER_2_ENABLE;
+    }
+    // assume this must be channel 1
+    else
+    {
+        if (config.streamType == kJ2KStreamTypeNonElsm)
+            encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;
+        else
+            encoderBit = ENCODER_1_ENABLE;
     }
 
     // Turn on the encoder
