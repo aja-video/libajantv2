@@ -208,34 +208,20 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACa
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
-        switch (as)
-        {
-        case ARP_VALID:
-            return true;
-        case ARP_ERROR:
-            return false;
-            break;
-        default:
-            break;
-        }
-
-        int count = 60;
+        int count = 30;
         do
         {
             SendArpRequest(remote_IPAddress);
-            mDevice.WaitForOutputVerticalInterrupt();
-            as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
+            mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
+            eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
             switch (as)
             {
             case ARP_VALID:
                 return true;
             case ARP_ERROR:
                 return false;
-                break;
-            case ARP_INCOMPLETE:
-                return false;
             default:
+            case ARP_INCOMPLETE:
             case ARP_NOT_FOUND:
                break;
             }
