@@ -101,7 +101,7 @@
          #include <endian.h>
          #include <stdint.h>  // Pull in userland defines
 
-        #ifdef x86_64
+        #ifdef __x86_64__
            #define AJA_OS_64
         #else
            #define AJA_OS_32
