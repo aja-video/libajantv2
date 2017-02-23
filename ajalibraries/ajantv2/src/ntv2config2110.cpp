@@ -317,6 +317,8 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, e2110
 
     // some constants
     WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
+    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
+    WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000);
 
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
@@ -566,17 +568,6 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, e2110Stream 
         }
     }
 
-    if (enable)
-    {
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x01);
-    }
-    else
-    {
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x0);
-    }
-    // enable  register updates
-    ReleaseDecapsulatorControlAccess(decapBaseAddr);
-
     // ** Depacketizer
     uint32_t depacketizerBaseAddr;
     SetRxDepacketizerChannel(channel,stream,depacketizerBaseAddr);
@@ -584,18 +575,22 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, e2110Stream 
     // this works for 4174 and 3190, the pkt_ctrl reg is 0x0
     if (enable)
     {
+        // order is important
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x01);
     }
     else
     {
+        // order is important
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x0);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
     }
+    // enable  register updates
+    ReleaseDecapsulatorControlAccess(decapBaseAddr);
+
     return true;
-
-
-    return rv;
 }
 
 bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled)
