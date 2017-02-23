@@ -12,8 +12,6 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 else
 include $(DIR)/../../../configure.mk
 
-AJA_AJABASE_ROOT = $(AJALIB_DIR)/ajabase
-
 # yes this is redundant
 ifeq ($(AJA_DEBUG),1)
   AJA_AJABASE_LIBNAME = ajabased
@@ -24,16 +22,12 @@ endif
 LIBNAME = lib$(AJA_AJABASE_LIBNAME)
 LIBTARGET = $(LIBNAME)
 
-VPATH    = $(AJA_AJABASE_ROOT)/common:$(AJA_AJABASE_ROOT)/system:$(AJA_AJABASE_ROOT)/system/linux:$(AJA_AJABASE_ROOT)/pnp:$(AJA_AJABASE_ROOT)/pnp/linux:$(AJA_AJABASE_ROOT)/persistence
-INCLUDES = -I$(AJALIB_DIR)
+VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence
+INCLUDES = -I$(A_LIBRARIES_PATH)
 
 CPP =   g++
 CPPFLAGS += -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 			-pedantic -Wall -Wno-long-long  -Wwrite-strings -c -pipe -fPIC $(DBG)
-
-
-LIBCMD 		:= ar crsv
-LIBCMD_SO	:= ar crsv
 
 SRCS =\
 	atomic.cpp \
@@ -94,24 +88,24 @@ OBJS += $(patsubst %.c,%.o,$(C_SRCS))
 	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
 
 
-$(NTV2_LIB_DIR)/$(LIBNAME).a: $(OBJS)
-	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
-	$(LIBCMD) $@ $(OBJS)
+$(A_UBER_LIB)/$(LIBNAME).a: $(OBJS)
+	+@[ -d $(A_UBER_LIB) ] || mkdir -p $(A_UBER_LIB)
+	$(A_LIBCMD) $@ $(OBJS)
 
-all: $(NTV2_LIB_DIR)/$(LIBNAME).a 
+all: $(A_UBER_LIB)/$(LIBNAME).a
 
 .PHONY: clean subclean cleandeps
 clean:
 	rm -f *.o
-	rm -f $(NTV2_LIB_DIR)/$(LIBNAME).a
+	rm -f $(A_UBER_LIB)/$(LIBNAME).a
 
 cleandeps:
 	rm -f *.d
 
 subclean:
 	rm -f $(LIBTARGET).a $(LIBTARGET).so *.o 
-	rm -f $(AJA_API_LIBDIR)/$(LIBNAME).a
-	rm -f $(AJA_API_LIBDIR)/$(LIBNAME).so
+	rm -f $(A_UBER_LIB)/$(LIBNAME).a
+	rm -f $(A_UBER_LIB)/$(LIBNAME).so
 
 endif
 

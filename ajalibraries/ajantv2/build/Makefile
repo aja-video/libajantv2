@@ -19,20 +19,17 @@ KERNEL_INCLUDES 	:= /lib/modules/$(shell uname -r)/build
 
 PYTHON_DEV	:= /usr/include/python2.4
 
-VPATH 	 := $(NTV2_SRC):$(NTV2_LINUX_SRC):$(NTV2_INCLUDES):$(AJABASE_DIR):$(KERNEL_INCLUDES):$(SRCDIR)
+VPATH 	 := $(A_LIB_NTV2_SRC):$(A_LIB_NTV2_SRC_LINUX):$(A_LIB_NTV2_INC):$(A_LIB_BASE_PATH):$(KERNEL_INCLUDES):$(SRCDIR)
 
 DEFINES := -D_REENTRANT -DAJALinux -DAJASTATIC -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS  	= -c -fPIC -pipe -Wall -pedantic -Wno-long-long -Wwrite-strings $(DBG)
-INCLUDES	= -I$(NTV2_INCLUDES) -I$(NTV2_SRC) -I$(NTV2_LINUX_SRC) -I$(AJABASE_DIR) -I$(KERNEL_INCLUDES) -I$(QTDIR)/include -I$(PYTHON_DEV)
+INCLUDES	= -I$(A_LIB_NTV2_INC) -I$(A_LIB_NTV2_SRC) -I$(A_LIB_NTV2_SRC_LINUX) -I$(A_LIB_BASE_PATH) -I$(KERNEL_INCLUDES) -I$(QTDIR)/include -I$(PYTHON_DEV)
 LIBS    	=
 LIBDIRS 	=
 
 ifeq ($(AJA_DEBUG),1)
 	DEFINES += -DAJA_DEBUG
 endif
-
-LIBCMD 		:= ar crsv
-LIBCMD_SO	:= ar crsv
 
 CPP = g++
 CPPFLAGS = $(CFLAGS)
@@ -89,12 +86,12 @@ CPPFILES = ntv2audio.cpp \
 		ntv2task.cpp \
 		testpatterngen.cpp \
 		xena2vidproc.cpp \
-		$(M31_ROOT)/ntv2m31.cpp \
-		$(M31_ROOT)/ntv2m31cparam.cpp \
-		$(M31_ROOT)/ntv2m31ehparam.cpp \
-		$(M31_ROOT)/ntv2m31vaparam.cpp \
-		$(M31_ROOT)/ntv2m31vinparam.cpp \
-		$(M31_ROOT)/ntv2m31viparam.cpp
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31.cpp \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31cparam.cpp \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31ehparam.cpp \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31vaparam.cpp \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31vinparam.cpp \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31viparam.cpp
 
 
 INCFILES = ntv2bitfile.h  \
@@ -156,12 +153,12 @@ INCFILES = ntv2bitfile.h  \
 		testpatterndata.h \
 		testpatterngen.h \
 		xena2vidproc.h \
-		$(M31_ROOT)/ntv2m31.h \
-		$(M31_ROOT)/ntv2m31cparam.h \
-		$(M31_ROOT)/ntv2m31ehparam.h \
-		$(M31_ROOT)/ntv2m31vaparam.h \
-		$(M31_ROOT)/ntv2m31vinparam.h \
-		$(M31_ROOT)/ntv2m31viparam.h
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31.h \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31cparam.h \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31ehparam.h \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31vaparam.h \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31vinparam.h \
+        $(A_LIB_NTV2_M31_PATH)/ntv2m31viparam.h
 
 OBJFILES = $(patsubst %.cpp,%.o,$(CPPFILES))
 
@@ -174,32 +171,31 @@ OBJFILES = $(patsubst %.cpp,%.o,$(CPPFILES))
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) $(DEFINES) $(INCLUDES) -o $@ $<
 
-all: cleanold $(NTV2_LIB_DIR)/$(AJA_LIBNAME).a
+all: cleanold $(A_UBER_LIB)/$(AJA_LIBNAME).a
 
 -include $(patsubst %.cpp,%.d,$(CPPFILES))
 
-$(NTV2_LIB_DIR)/$(AJA_LIBNAME).a: $(OBJFILES) Makefile
+$(A_UBER_LIB)/$(AJA_LIBNAME).a: $(OBJFILES) Makefile
 #	@echo $(OBJFILES)
-	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
-	$(LIBCMD) $@ $(OBJFILES)
+	+@[ -d $(A_UBER_LIB) ] || mkdir -p $(A_UBER_LIB)
+	$(A_LIBCMD) $@ $(OBJFILES)
 
-$(NTV2_LIB_DIR)/$(AJA_LIBNAME).so: $(OBJFILES) Makefile
-	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
+$(A_UBER_LIB)/$(AJA_LIBNAME).so: $(OBJFILES) Makefile
+	+@[ -d $(A_UBER_LIB) ] || mkdir -p $(A_UBER_LIB)
 	@echo
 	@echo "WARNING: this is a FAKE target and shared object libraries are not is use (yet)"
 	@echo
-	$(LIBCMD_SO) $@ $(OBJFILES)
+	$(A_LIBCMD_SO) $@ $(OBJFILES)
 
 .PHONY: clean cleanold cleandeps realclean
 clean:
 	rm -f *.o
-	rm -f $(M31_ROOT)/*.o
-	rm -f $(NTV2_LIB_DIR)/$(AJA_LIBNAME).a
+	rm -f $(A_LIB_NTV2_M31_PATH)/*.o
+	rm -f $(A_UBER_LIB)/$(AJA_LIBNAME).a
 
 cleanold:
-	rm -f $(AJA_CLASSES)/*.o
-	rm -f $(NTV2_SRC)/*.o
-	rm -f $(NTV2_LINUX_SRC)/*.o
+	rm -f $(A_LIB_NTV2_SRC)/*.o
+	rm -f $(A_LIB_NTV2_SRC_LINUX)/*.o
 
 cleandeps:
 	rm -f *.d
