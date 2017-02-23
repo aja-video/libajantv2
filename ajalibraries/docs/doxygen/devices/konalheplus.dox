@@ -5,8 +5,8 @@
 
 	@image	html	konalheplus.png
 
-	The KONA LHe+ board has a breakout connector on the far left, then the reference input (J2),
-	the SDI input (J3), and the SDI output (J4).
+	The KONA LHe+ board has a breakout connector on the far left, then the SDI input (J2),
+	SDI output 1 (J3), and SDI output 2 (J4).
 
 	@par	PCI Interface
 
@@ -18,7 +18,7 @@
 	@par	Inputs & Outputs
 
 	-	1 x SDI input
-	-	1 x SDI output
+	-	2 x SDI outputs
 	-	1 x analog component video input
 	-	1 x analog component video output
 	-	1 x reference/LTC input
