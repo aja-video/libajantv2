@@ -6,26 +6,24 @@
 # http://make.paulandlesley.org/multi-arch.html
 
 # makefile for classes library
-
-NTV2_ROOT	?= $(shell pwd)/..
-AJA_API_ROOT ?= $(NTV2_ROOT)/../../ajaapi
-M31_ROOT 	?= $(NTV2_ROOT)/../codecs/hevc/m31
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include targets.mk
+  include $(DIR)/../../../targets.mk
 else
+include $(DIR)/../../../configure.mk
 
-AJA_LIBNAME = libaja
+AJA_LIBNAME = libajantv2
 
 KERNEL_INCLUDES 	:= /lib/modules/$(shell uname -r)/build
 
 PYTHON_DEV	:= /usr/include/python2.4
 
-VPATH 	 := $(NTV2_CLASSES):$(NTV2_LINUX_CLASSES):$(NTV2_INCLUDES):$(AJA_API_ROOT):$(KERNEL_INCLUDES):$(SRCDIR)
+VPATH 	 := $(NTV2_SRC):$(NTV2_LINUX_SRC):$(NTV2_INCLUDES):$(AJABASE_DIR):$(KERNEL_INCLUDES):$(SRCDIR)
 
 DEFINES := -D_REENTRANT -DAJALinux -DAJASTATIC -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS  	= -c -fPIC -pipe -Wall -pedantic -Wno-long-long -Wwrite-strings $(DBG)
-INCLUDES	= -I$(NTV2_INCLUDES) -I$(NTV2_CLASSES) -I$(NTV2_LINUX_CLASSES) -I$(AJA_API_ROOT) -I$(KERNEL_INCLUDES) -I$(QTDIR)/include -I$(PYTHON_DEV)
+INCLUDES	= -I$(NTV2_INCLUDES) -I$(NTV2_SRC) -I$(NTV2_LINUX_SRC) -I$(AJABASE_DIR) -I$(KERNEL_INCLUDES) -I$(QTDIR)/include -I$(PYTHON_DEV)
 LIBS    	=
 LIBDIRS 	=
 
@@ -58,6 +56,7 @@ CPPFILES = ntv2audio.cpp \
 		ntv2hevc.cpp \
 		ntv2driverinterface.cpp \
 		ntv2enhancedcsc.cpp \
+		ntv2formatdescriptor.cpp \
 		ntv2interrupts.cpp \
 		ntv2konaflashprogram.cpp \
 		ntv2linuxdriverinterface.cpp \
@@ -70,6 +69,7 @@ CPPFILES = ntv2audio.cpp \
 		ntv2procamp.cpp \
 		ntv2publicinterface.cpp \
 		ntv2register.cpp \
+		ntv2registerexpert.cpp \
 		ntv2resample.cpp \
 		ntv2rp188.cpp \
 		ntv2serialcontrol.cpp \
@@ -113,6 +113,7 @@ INCFILES = ntv2bitfile.h  \
 		ntv2driverinterface.h \
 		ntv2driverprocamp.h \
 		ntv2enhancedcsc.h \
+		ntv2formatdescriptor.h \
 		ntv2framedelay.h \
 		ntv2ioexpressservices.h \
 		ntv2iohdservices.h \
@@ -132,6 +133,7 @@ INCFILES = ntv2bitfile.h  \
 		ntv2nubpktcom.h \
 		ntv2nubtypes.h \
 		ntv2procamp.h \
+		ntv2registerexpert.h \
 		ntv2registers2022.h \
 		ntv2resample.h \
 		ntv2rp188.h \
@@ -172,17 +174,17 @@ OBJFILES = $(patsubst %.cpp,%.o,$(CPPFILES))
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) $(DEFINES) $(INCLUDES) -o $@ $<
 
-all: cleanold $(NTV2_LIBDIR)/$(AJA_LIBNAME).a
+all: cleanold $(NTV2_LIB_DIR)/$(AJA_LIBNAME).a
 
 -include $(patsubst %.cpp,%.d,$(CPPFILES))
 
-$(NTV2_LIBDIR)/$(AJA_LIBNAME).a: $(OBJFILES) Makefile
+$(NTV2_LIB_DIR)/$(AJA_LIBNAME).a: $(OBJFILES) Makefile
 #	@echo $(OBJFILES)
-	+@[ -d $(NTV2_LIBDIR) ] || mkdir -p $(NTV2_LIBDIR)
+	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
 	$(LIBCMD) $@ $(OBJFILES)
 
-$(NTV2_LIBDIR)/$(AJA_LIBNAME).so: $(OBJFILES) Makefile
-	+@[ -d $(NTV2_LIBDIR) ] || mkdir -p $(NTV2_LIBDIR)
+$(NTV2_LIB_DIR)/$(AJA_LIBNAME).so: $(OBJFILES) Makefile
+	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
 	@echo
 	@echo "WARNING: this is a FAKE target and shared object libraries are not is use (yet)"
 	@echo
@@ -192,12 +194,12 @@ $(NTV2_LIBDIR)/$(AJA_LIBNAME).so: $(OBJFILES) Makefile
 clean:
 	rm -f *.o
 	rm -f $(M31_ROOT)/*.o
-	rm -f $(NTV2_LIBDIR)/$(AJA_LIBNAME).a
+	rm -f $(NTV2_LIB_DIR)/$(AJA_LIBNAME).a
 
 cleanold:
 	rm -f $(AJA_CLASSES)/*.o
-	rm -f $(NTV2_CLASSES)/*.o
-	rm -f $(NTV2_LINUX_CLASSES)/*.o
+	rm -f $(NTV2_SRC)/*.o
+	rm -f $(NTV2_LINUX_SRC)/*.o
 
 cleandeps:
 	rm -f *.d

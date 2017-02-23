@@ -3,13 +3,16 @@
 # Proprietary and Confidential information.  
 # All Rights Reserved.
 #
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include ../../targets.mk
-else
+  
+  include $(DIR)/../../../targets.mk
 
-AJA_API_ROOT      ?= ../../..
-AJA_AJABASE_ROOT = $(AJA_API_ROOT)/ajabase
+else
+include $(DIR)/../../../configure.mk
+
+AJA_AJABASE_ROOT = $(AJALIB_DIR)/ajabase
 
 # yes this is redundant
 ifeq ($(AJA_DEBUG),1)
@@ -22,9 +25,17 @@ LIBNAME = lib$(AJA_AJABASE_LIBNAME)
 LIBTARGET = $(LIBNAME)
 
 VPATH    = $(AJA_AJABASE_ROOT)/common:$(AJA_AJABASE_ROOT)/system:$(AJA_AJABASE_ROOT)/system/linux:$(AJA_AJABASE_ROOT)/pnp:$(AJA_AJABASE_ROOT)/pnp/linux:$(AJA_AJABASE_ROOT)/persistence
-INCLUDES = -I$(AJA_API_ROOT)
+INCLUDES = -I$(AJALIB_DIR)
 
-AJA_APP_SRCS =\
+CPP =   g++
+CPPFLAGS += -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
+			-pedantic -Wall -Wno-long-long  -Wwrite-strings -c -pipe -fPIC $(DBG)
+
+
+LIBCMD 		:= ar crsv
+LIBCMD_SO	:= ar crsv
+
+SRCS =\
 	atomic.cpp \
 	audioutilities.cpp \
 	buffer.cpp \
@@ -60,12 +71,42 @@ AJA_APP_SRCS =\
 	videoutilities.cpp \
 	wavewriter.cpp
 
-C_AJA_APP_SRCS =\
+C_SRCS =\
 	sqlite3.c
 
-default: $(LIBNAME).a $(LIBNAME).so copy-a copy-so 
+OBJS = $(patsubst %.cpp,%.o,$(SRCS))
+OBJS += $(patsubst %.c,%.o,$(C_SRCS))
 
-include ../../../common.mk
+%.d: %.cpp
+	$(CPP) -M $(CPPFLAGS) $(INCLUDES) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.o: %.cpp
+	$(CPP) $(CPPFLAGS) $(INCLUDES) -o $@ $<
+
+%.d: %.c
+	$(CC) -M $(CFLAGS) $(INCLUDES) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
+
+
+$(NTV2_LIB_DIR)/$(LIBNAME).a: $(OBJS)
+	+@[ -d $(NTV2_LIB_DIR) ] || mkdir -p $(NTV2_LIB_DIR)
+	$(LIBCMD) $@ $(OBJS)
+
+all: $(NTV2_LIB_DIR)/$(LIBNAME).a 
+
+.PHONY: clean subclean cleandeps
+clean:
+	rm -f *.o
+	rm -f $(NTV2_LIB_DIR)/$(LIBNAME).a
+
+cleandeps:
+	rm -f *.d
 
 subclean:
 	rm -f $(LIBTARGET).a $(LIBTARGET).so *.o 
