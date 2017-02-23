@@ -2,14 +2,12 @@
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2012 AJA Video Systems, Inc.
 # Proprietary and Confidential information.  All Rights Reserved
 #
-# You no longer need to define NTV2TARGET as either KSD, KHD or XENA2
-
-NTV2_ROOT	?= $(shell pwd)/../..
-AJA_API_ROOT ?= $(NTV2_ROOT)/../../ajaapi
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(NTV2_ROOT)/targets.mk
+  include $(DIR)/../../../../targets.mk
 else
+include $(DIR)/../../../../configure.mk
 
 CPP =   g++
 CPPFLAGS = -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
@@ -18,24 +16,24 @@ CPPFLAGS = -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_F
 LD = g++
 LDFLAGS = 
 
-NTV2_APP = $(NTV2_BINDIR)/ntv2burn
+NTV2_APP = $(NTV2_BIN_DIR)/ntv2burn
 
-VPATH 	 := $(SRCDIR) $(NTV2_ROOT)/../democlasses $(AJA_API_ROOT)
+VPATH 	 := $(SRCDIR) $(NTV2_DEMO_ROOT)
 
-INCLUDES = -I$(NTV2_INCLUDES) -I$(NTV2_CLASSES) -I$(NTV2_ROOT)/../democlasses -I$(NTV2_ROOT)/../linuxclasses -I$(AJA_API_ROOT)
+INCLUDES = -I$(NTV2_INCLUDES) -I$(NTV2_SRC) -I$(NTV2_DEMO_ROOT) -I$(NTV2_LINUX_SRC) -I$(AJALIB_DIR) -I$(AJABASE_DIR)
 
 ifeq ($(AJA_DEBUG),1)
-  AJA_STUFF_LIB = ajabased
-  RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
+  AJABASE_LIB = ajabased
+  RELEASE_OR_DEBUG_LIBS = -l$(AJABASE_LIB)
 else
-  AJA_STUFF_LIB = ajabase
-  RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
+  AJABASE_LIB = ajabase
+  RELEASE_OR_DEBUG_LIBS = -l$(AJABASE_LIB)
 endif
 
-LIBDIRS = -L$(NTV2_LIBDIR) -L$(AJA_API_ROOT)/lib64 
+LIBDIRS = -L$(NTV2_LIB_DIR)
 
-LIBCLASSES = $(NTV2_LIBDIR)/libaja.a
-LIBS = -laja -Wl,-Bstatic $(RELEASE_OR_DEBUG_LIBS) -Wl,-Bdynamic -lpthread -lrt
+LIBCLASSES = $(NTV2_LIB_DIR)/libajantv2.a
+LIBS = -lajantv2 -Wl,-Bstatic $(RELEASE_OR_DEBUG_LIBS) -Wl,-Bdynamic -lpthread -lrt
 
 SRCS = main.cpp ntv2burn.cpp ntv2democommon.cpp
 
@@ -51,17 +49,17 @@ OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) $(INCLUDES) -o $@ $<
 
-default: $(AJA_STUFF_LIB).a $(LIBCLASSES) $(NTV2_APP)
+default: $(AJABASE_LIB).a $(LIBCLASSES) $(NTV2_APP)
 
 -include $(patsubst %.cpp,%.d,$(SRCS))
 
 .PHONY : $(LIBCLASSES)
 $(LIBCLASSES): $(SDK_SRCS)
-	$(MAKE) -C $(NTV2_CLASSES)
+	$(MAKE) -C $(NTV2_AJANTV2_DIR)/build
 
-.PHONY : $(AJA_STUFF_LIB)
-$(AJA_STUFF_LIB).a:
-    $(MAKE) -C $(AJA_API_ROOT)/ajabase
+.PHONY : $(AJABASE_LIB)
+$(AJABASE_LIB).a:
+	$(MAKE) -C $(AJABASE_DIR)
 
 $(NTV2_APP): $(OBJS) $(LIBCLASSES) Makefile
 	$(LD) $(LDFLAGS) $(LIBDIRS) $(OBJS) -o $(NTV2_APP) $(LIBS)

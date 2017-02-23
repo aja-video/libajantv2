@@ -1,7 +1,7 @@
 #
 # Top level Makefile for AJA Video demo applications
 #
-# Copyright (C) 2012 AJA Video Systems, Inc.
+# Copyright (C) 2017 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 #
 # This file is the Linux analog of the ajaapi.sln file used with Windows.
