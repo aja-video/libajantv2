@@ -10,7 +10,7 @@
 #include "ajatypes.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/system/systemtime.h"
-#include "../democlasses/ntv2capture4k.h"
+#include "ntv2capture4k.h"
 #include <signal.h>
 #include <iostream>
 #include <iomanip>
