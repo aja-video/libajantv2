@@ -433,7 +433,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         rv = AcquireMailbox();
         if (rv)
         {
-            rv = JoinIGMPGroup(port, channel, rxConfig.DestIP);
+            rv = JoinIGMPGroup(port, channel, stream, rxConfig.DestIP);
             ReleaseMailbox();
         }
     }
@@ -490,7 +490,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
 
 bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable)
 {
-    bool        rv;
+    bool        rv = true;
     bool        disableIGMP;
     eSFP        port;
 
@@ -556,11 +556,11 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
             {
                 if (enable)
                 {
-                    rv = JoinIGMPGroup(port, channel, ipaddr);
+                    rv = JoinIGMPGroup(port, channel, stream, ipaddr);
                 }
                 else
                 {
-                    rv = LeaveIGMPGroup(port, channel, ipaddr);
+                    rv = LeaveIGMPGroup(port, channel, stream, ipaddr);
                 }
                 ReleaseMailbox();
                 // continue but return error code
@@ -590,7 +590,7 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
 
-    return true;
+    return rv;
 }
 
 bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled)
@@ -1247,3 +1247,4 @@ uint32_t CNTV2Config2110::get2110Stream(NTV2Channel ch,NTV2Stream esc )
 {
     return rxtx2110Streams[ch][esc];
 }
+

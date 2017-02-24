@@ -162,6 +162,88 @@ bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, string ip
         return true;
 }
 
+bool CNTV2MBController::JoinIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, string ipaddr)
+{
+    uint32_t features = getFeatures();
+    if (features & SAREK_MB_PRESENT)
+    {
+        sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,channel=%d,stream=%d",(int)MB_CMD_START_IGMP_STREAM,(int)port,ipaddr.c_str(),int(channel),int(stream));
+        bool rv = sendMsg(250);
+        if (!rv)
+        {
+            return false;
+        }
+
+        string response;
+        getResponse(response);
+        vector<string> msg;
+        splitResponse(response, msg);
+        if (msg.size() >=1)
+        {
+            string status;
+            rv = getString(msg[0],"status",status);
+            if (rv && (status == "OK"))
+            {
+                return true;
+            }
+            else if (rv && (status == "FAIL"))
+            {
+                if (msg.size() >= 3)
+                {
+                    rv = getString(msg[2],"error",mError);
+                    return false;
+                }
+            }
+        }
+
+        mError = "Invalid response from MB";
+        return false;
+    }
+    else
+        return true;
+}
+
+bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, string ipaddr)
+{
+    uint32_t features = getFeatures();
+    if (features & SAREK_MB_PRESENT)
+    {
+        sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,channel=%d,stream=%d",(int)MB_CMD_STOP_IGMP_STREAM,(int)port,ipaddr.c_str(),(int)channel,(int)stream);
+        bool rv = sendMsg(250);
+        if (!rv)
+        {
+            return false;
+        }
+
+        string response;
+        getResponse(response);
+        vector<string> msg;
+        splitResponse(response, msg);
+        if (msg.size() >=1)
+        {
+            string status;
+            rv = getString(msg[0],"status",status);
+            if (rv && (status == "OK"))
+            {
+                return true;
+            }
+            else if (rv && (status == "FAIL"))
+            {
+                if (msg.size() >= 3)
+                {
+                    rv = getString(msg[2],"error",mError);
+                    return false;
+                }
+            }
+        }
+
+        mError = "Invalid response from MB";
+        return false;
+    }
+    else
+        return true;
+}
+
 bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 {
     uint32_t features = getFeatures();
