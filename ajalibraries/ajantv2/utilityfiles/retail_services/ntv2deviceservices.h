@@ -171,6 +171,11 @@ public:
     rx2022Config            mRx2022Config2;
     tx2022Config            mTx2022Config3;
     tx2022Config            mTx2022Config4;
+	j2kDecoderConfig		mRx2022J2kConfig1;
+	j2kDecoderConfig		mRx2022J2kConfig2;
+	j2kEncoderConfig		mTx2022J2kConfig1;
+	j2kEncoderConfig		mTx2022J2kConfig2;
+
     IPVNetConfig            mEth0;
     IPVNetConfig            mEth1;
     bool                    m2022_7Mode;

@@ -37,24 +37,18 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     printf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
 
-    // Turn off the encoder and check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
+    // Check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
     if (channel == NTV2_CHANNEL2)
-        encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;
+        encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;    // Bits 16 and 17
     else if (channel == NTV2_CHANNEL1)
-        encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;
+        encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;    // Bits 24 and 25
     else
     {
         mError = "Invalid channel";
         return false;
     }
 
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
-    val &= ~encoderBit;
-    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
-
-    // Wait some time fo the encoder to stop
-    mDevice.WaitForOutputVerticalInterrupt(channel, 10);
-
+    // Now proceed to configure the device
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeBitDepth1, config.bitDepth);
@@ -66,12 +60,33 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, config.pcrPid);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, config.audio1Pid);
 
-    // setup the J2K encoder
-    if (!SetupJ2KForEncode(channel))
-        return false;
+    // The encoder reset sequence
+    // Note we dont have a good sleep at this level of the API so
+    // use WaitForOutputVerticalInterrupt.
+    mDevice.SubscribeOutputVerticalEvent (channel);
+
+    // Assert reset
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val |= encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    // Wait
+    mDevice.WaitForOutputVerticalInterrupt(channel, 8);
+
+    // Clear reset
+    val &= ~encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    // Wait
+    mDevice.WaitForOutputVerticalInterrupt(channel, 8);
+    mDevice.UnsubscribeOutputVerticalEvent (channel);
 
     // setup the TS
     if (!SetupTsForEncode(channel))
+        return false;
+
+    // setup the J2K encoder
+    if (!SetupJ2KForEncode(channel))
         return false;
 
     // Need to set 20 or 24 bit audio in NTV2 audio control reg.  For now we are doing this on
