@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2110.h
     @brief		Declares the CNTV2Config2110 class.
-	@copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2110CONFIG_H
@@ -33,14 +33,7 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 
-enum e2110Stream
-{
-  VIDEO_2110  = 0,
-  AUDIO1_2110 = 1,
-  AUDIO2_2110 = 2,
-  META_2100   = 3,
-  NUM_2100_STREAMS = 4
-};
+
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
@@ -54,10 +47,10 @@ public:
     void init();
 
     bool eq_MACAddr(const MACAddr& a);
-    
+
     bool operator != ( const tx_2110Config &other );
     bool operator == ( const tx_2110Config &other );
-    
+
 public:
     uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
@@ -81,7 +74,7 @@ public:
 
     bool operator != ( const rx_2110Config &other );
     bool operator == ( const rx_2110Config &other );
-    
+
 public:
     uint32_t	RxMatch;         ///< @brief	Bitmap of rxMatch criteria used
     std::string	SourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
@@ -116,17 +109,17 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const rx_2110Config & rxConfig);
-    bool        GetRxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, rx_2110Config & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
 
-    bool        SetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
-    bool        GetRxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
+    bool        SetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
+    bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, const tx_2110Config & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, e2110Stream stream, tx_2110Config & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
+    bool        GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig);
 
-    bool        SetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool enable);
-    bool        GetTxChannelEnable(const NTV2Channel channel, e2110Stream stream, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
+    bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -145,26 +138,26 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    static uint32_t  get2110Stream(NTV2Channel ch,e2110Stream scch );
+    static uint32_t  get2110Stream(NTV2Channel ch,NTV2Stream scch );
 
-	// If method returns false call this to get details
+    // If method returns false call this to get details
     std::string getLastError();
 
 protected:
-    uint32_t    GetFramerAddress(NTV2Channel channel, e2110Stream stream);
-    void        SelectTxFramerChannel(NTV2Channel channel, e2110Stream stream, uint32_t baseAddr);
+    uint32_t    GetFramerAddress(NTV2Channel channel, NTV2Stream stream);
+    void        SelectTxFramerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
-    uint32_t    GetDecapulatorAddress(NTV2Channel channel, e2110Stream stream);
-    void        SelectRxDecapsulatorChannel(NTV2Channel channel, e2110Stream stream, uint32_t baseAddr);
+    uint32_t    GetDecapulatorAddress(NTV2Channel channel, NTV2Stream stream);
+    void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
-    bool        SetRxDepacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t & baseAddr);
-    bool        SetTxPacketizerChannel(NTV2Channel channel, e2110Stream stream, uint32_t  & baseAddr);
+    bool        SetRxDepacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddr);
+    bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);
