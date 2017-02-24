@@ -159,6 +159,7 @@ protected:
     bool        SetRxDepacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddr);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
+
 private:
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);

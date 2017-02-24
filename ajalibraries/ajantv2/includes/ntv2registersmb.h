@@ -8,6 +8,7 @@
 #define REGISTERS_MB_H
 
 #define SAREK_MAX_CHANS 4
+#define SAREK_MAX_PORTS 2
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -78,6 +79,10 @@
 #define kRegSarekRx4Drops           43
 
 // second block
+#define TS_BLOCK_BASE               0
+#define IGMP_BLOCK_BASE             100
+#define ENCODER_BLOCK_BASE          200
+#define UNUSED_BLOCK_BASE           300
 
 #define kRegSarekMBSeqNum           0
 #define kRegSarekActProgramNum      1

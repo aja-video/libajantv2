@@ -287,18 +287,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     destIp = NTV2EndianSwap32(destIp);
     WriteChannelRegister(kRegDecap_match_dst_ip0 + decapBaseAddr, destIp);
 
-    uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    int offset = (int)channel;
-    if (ip0 >= 224 && ip0 <= 239)
-    {
-        // is multicast
-        mDevice.WriteRegister(kRegSarekIGMP0 + offset + SAREK_REGS, destIp);
-    }
-    else
-    {
-        mDevice.WriteRegister(kRegSarekIGMP0 + offset + SAREK_REGS, 0);
-    }
-
     // source port
     WriteChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, rxConfig.SourcePort);
 
@@ -424,20 +412,22 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
 
     // if already enabled, make sure IGMP subscriptions are updated
-    bool rv = true;
-    bool enabled = false;
-    GetRxChannelEnable(channel,stream,enabled);
-    if (enabled)
+    eSFP port = GetRxPort(channel);
+    uint8_t ip0 = (destIp & 0xff000000)>> 24;
+    int offset = (int)channel;
+    if (ip0 >= 224 && ip0 <= 239)
     {
-        eSFP port = GetRxPort(channel);
-        rv = AcquireMailbox();
-        if (rv)
-        {
-            rv = JoinIGMPGroup(port, channel, stream, rxConfig.DestIP);
-            ReleaseMailbox();
-        }
+        // is multicast
+        bool enabled = false;
+        GetRxChannelEnable(channel,stream,enabled);
+        SetIGMPGroup(port, channel, stream, destIp, enabled);
     }
-    return rv;
+    else
+    {
+        UnsetIGMPGroup(port, channel, stream);
+    }
+
+    return true;
 }
 
 bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
@@ -515,57 +505,13 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
     // hold off access while we update channel regs
     AcquireDecapsulatorControlAccess(decapBaseAddr);
 
-    // DAC TODO - this is a hack until memory block is added to store IGMP addresses
-    // HACK is chan 0 vide0 IGMP0, chan 0 audio IGMP1
-    // HACK is chan 1 video IGMP2, chan 0 audio IGMP3
-    int offset = 0;
-    if (channel == 0)
-    {
-        if (stream == NTV2_VIDEO_STREAM)
-            offset = 0;
-        else offset = 1;
-    }
-    else
-    {
-        if (stream == NTV2_VIDEO_STREAM)
-            offset = 2;
-        else offset = 3;
-    }
-    // end HACK
-
-
     // IGMP subscription
     port = GetRxPort(channel);
     GetIGMPDisable(port, disableIGMP);
 
     if (!disableIGMP)
     {
-        // join/leave multicast group if necessary
-        //offset = (int)channel;
-        uint32_t    ip;
-        mDevice.ReadRegister(kRegSarekIGMP0 + offset + SAREK_REGS, &ip);
-        if (ip != 0)
-        {
-            // is mutlicast
-            struct sockaddr_in sin;
-            sin.sin_addr.s_addr = NTV2EndianSwap32(ip);
-            char * ipaddr = inet_ntoa(sin.sin_addr);
-
-            rv = AcquireMailbox();
-            if (rv)
-            {
-                if (enable)
-                {
-                    rv = JoinIGMPGroup(port, channel, stream, ipaddr);
-                }
-                else
-                {
-                    rv = LeaveIGMPGroup(port, channel, stream, ipaddr);
-                }
-                ReleaseMailbox();
-                // continue but return error code
-            }
-        }
+        EnableIGMPGroup(port,channel,stream,enable);
     }
 
     // ** Depacketizer
@@ -1247,4 +1193,5 @@ uint32_t CNTV2Config2110::get2110Stream(NTV2Channel ch,NTV2Stream esc )
 {
     return rxtx2110Streams[ch][esc];
 }
+
 

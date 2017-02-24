@@ -14,9 +14,7 @@ enum eMBCmd
     MB_CMD_GET_MAC_FROM_ARP_TABLE = 3,
     MB_CMD_SEND_ARP_REQ        = 4,
     MB_CMD_UNKNOWN             = 5,
-    MB_CMD_SET_IGMP_VERSION    = 6,
-    MB_CMD_START_IGMP_STREAM   = 7,
-    MB_CMD_STOP_IGMP_STREAM    = 8
+    MB_CMD_SET_IGMP_VERSION    = 6
 };
 
 enum eSFP
@@ -45,6 +43,15 @@ typedef struct
     uint8_t	mac[6];
 } MACAddr;
 
+
+// IGMP Control Block
+#define IGMPPCB_REG_STATE     0
+#define IGMPCB_REG_ADDR       1
+#define IGMPCB_SIZE           2
+
+#define IGMPCB_STATE_USED     BIT(0);
+#define IGMPCB_STATE_ENABLED  BIT(1);
+
 class IPVNetConfig
 {
 public:
@@ -68,12 +75,14 @@ public:
 protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
-    bool JoinIGMPGroup( eSFP port, NTV2Channel channel, NTV2Stream stream, std::string ipaddr);
     bool JoinIGMPGroup( eSFP port, NTV2Channel channel, std::string ipaddr);
-    bool LeaveIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string ipaddr);
     bool LeaveIGMPGroup(eSFP port, NTV2Channel channel, std::string ipaddr);
     bool GetRemoteMAC(std::string remote_IPAddress, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
+
+    void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable);
+    void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
+    void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, std::string & MACaddress);
@@ -83,6 +92,7 @@ private:
     bool getDecimal(const std::string & resp, const std::string & parm, uint32_t & result);
     bool getHex(const std::string & resp, const std::string & parm, uint32_t &result);
     bool getString(const std::string & resp, const std::string & parm, std::string & result);
+    uint32_t getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream);
 
 private:
 };

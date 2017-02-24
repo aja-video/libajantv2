@@ -162,88 +162,6 @@ bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, string ip
         return true;
 }
 
-bool CNTV2MBController::JoinIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, string ipaddr)
-{
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
-    {
-        sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,channel=%d,stream=%d",(int)MB_CMD_START_IGMP_STREAM,(int)port,ipaddr.c_str(),int(channel),int(stream));
-        bool rv = sendMsg(250);
-        if (!rv)
-        {
-            return false;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                return true;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 3)
-                {
-                    rv = getString(msg[2],"error",mError);
-                    return false;
-                }
-            }
-        }
-
-        mError = "Invalid response from MB";
-        return false;
-    }
-    else
-        return true;
-}
-
-bool CNTV2MBController::LeaveIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, string ipaddr)
-{
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
-    {
-        sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,channel=%d,stream=%d",(int)MB_CMD_STOP_IGMP_STREAM,(int)port,ipaddr.c_str(),(int)channel,(int)stream);
-        bool rv = sendMsg(250);
-        if (!rv)
-        {
-            return false;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                return true;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 3)
-                {
-                    rv = getString(msg[2],"error",mError);
-                    return false;
-                }
-            }
-        }
-
-        mError = "Invalid response from MB";
-        return false;
-    }
-    else
-        return true;
-}
-
 bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 {
     uint32_t features = getFeatures();
@@ -467,3 +385,43 @@ bool CNTV2MBController::getString(const std::string & resp, const std::string & 
     return false;   // not found
 }
 
+void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_ADDR, ipaddr);
+
+    EnableIGMPGroup(port,channel,stream,enable);
+}
+
+void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, 0);   // block not used
+}
+
+void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    uint32_t val = IGMPCB_STATE_USED;
+    if (enable)
+    {
+        val += IGMPCB_STATE_ENABLED;
+    }
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, val);
+}
+
+uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream)
+{
+    struct IGMPCB
+    {
+        uint32_t state;
+        uint32_t addr;
+    };
+    static IGMPCB igmpcb[SAREK_MAX_PORTS][SAREK_MAX_CHANS][NTV2_MAX_NUM_STREAMS];
+    if (port < SAREK_MAX_PORTS && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_STREAM(stream))
+    {
+        uint32_t offset = uint32_t(&igmpcb[port][channel][stream] - &igmpcb[0][0][0]);
+        return offset;
+    }
+    return 0;
+}
