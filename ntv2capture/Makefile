@@ -6,9 +6,9 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(DIR)/../../../../targets.mk
+  include $(DIR)/../../../../build/targets.mk
 else
-include $(DIR)/../../../../configure.mk
+include $(DIR)/../../../../build/configure.mk
 
 CPP =   g++
 CPPFLAGS += -DAJA_LINUX
@@ -22,6 +22,6 @@ SRCS = main.cpp ntv2capture.cpp ntv2democommon.cpp
 
 INCS = ntv2capture.h ntv2democommon.h
 
-include $(DIR)/../../../../common.mk
+include $(DIR)/../../../../build/common.mk
 
 endif

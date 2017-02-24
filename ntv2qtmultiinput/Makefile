@@ -6,8 +6,8 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # Makefile to drive qmake
-include $(DIR)/../../../../configure.mk
-include $(DIR)/../../../../qt.mk
+include $(DIR)/../../../../build/configure.mk
+include $(DIR)/../../../../build/qt.mk
 
 APP_FULL_PATH=$(A_UBER_BIN)/ntv2qtmultiinput
 QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/qtmultiinput/qtmultiinput.pro
