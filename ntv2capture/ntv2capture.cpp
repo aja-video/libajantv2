@@ -138,7 +138,6 @@ AJAStatus NTV2Capture::Init (void)
 	if (AJA_FAILURE (status))
 		return status;
 
-cerr << ::NTV2AudioSystemToString(mAudioSystem) << endl;
 	if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
 		status = SetupAudio ();
 	if (AJA_FAILURE (status))
