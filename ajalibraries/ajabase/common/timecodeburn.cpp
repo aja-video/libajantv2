@@ -7,7 +7,7 @@
 #include "timecodeburn.h"
 #include "timecodeburndata.h"
 #include <string.h> //for memcpy
-#include "stdio.h"
+#include <stdio.h>
 
 AJATimeCodeBurn::AJATimeCodeBurn(void)
 {
