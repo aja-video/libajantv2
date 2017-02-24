@@ -61,9 +61,6 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, config.audio1Pid);
 
     // The encoder reset sequence
-    // Note we dont have a good sleep at this level of the API so
-    // use WaitForOutputVerticalInterrupt.
-    mDevice.SubscribeOutputVerticalEvent (channel);
 
     // Assert reset
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
@@ -71,15 +68,22 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
 
     // Wait
-    mDevice.WaitForOutputVerticalInterrupt(channel, 8);
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (200);
+    #else
+        usleep (200 * 1000);
+    #endif
 
     // Clear reset
     val &= ~encoderBit;
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
 
     // Wait
-    mDevice.WaitForOutputVerticalInterrupt(channel, 8);
-    mDevice.UnsubscribeOutputVerticalEvent (channel);
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (200);
+    #else
+        usleep (200 * 1000);
+    #endif
 
     // setup the TS
     if (!SetupTsForEncode(channel))
