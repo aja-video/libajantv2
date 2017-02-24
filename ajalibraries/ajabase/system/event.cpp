@@ -9,7 +9,7 @@
 	#include "ajabase/system/windows/eventimpl.h"
 #endif
 #if defined(AJA_LINUX)
-	#include <ajabase/system/linux/eventimpl.h>
+	#include "ajabase/system/linux/eventimpl.h"
 #endif
 
 #if defined(AJA_MAC)

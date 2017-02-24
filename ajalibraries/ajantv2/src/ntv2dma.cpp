@@ -1,7 +1,7 @@
 /**
 	@file	ntv2dma.cpp
 	@brief	Implementations of DMA-centric NTV2Card methods.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"

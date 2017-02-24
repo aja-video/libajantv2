@@ -1,10 +1,8 @@
-//
-//	dllmain.cpp
-//
-//	Copyright (C) 2008 AJA Video Systems, Inc.  Proprietary and Confidential information.
-//
-//	Windows dll entry
-//
+/**
+	@file	dllmain.cpp
+	@brief	Implementation of Windows DLL entry.
+	@copyright	(C) 2008-2017 AJA Video Systems, Inc.
+**/
 
 #ifdef AJADLL_BUILD
 
