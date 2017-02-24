@@ -53,7 +53,9 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
 
     // Wait some time fo the encoder to stop
-    mDevice.WaitForOutputVerticalInterrupt(channel, 10);
+    mDevice.SubscribeOutputVerticalEvent (channel);
+    mDevice.WaitForOutputVerticalInterrupt(channel, 12);
+    mDevice.UnsubscribeOutputVerticalEvent (channel);
 
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeUllMode1, config.ullMode);
