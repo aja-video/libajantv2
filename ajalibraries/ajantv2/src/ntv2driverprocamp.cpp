@@ -1,12 +1,10 @@
-//ntv2driverprocamp.cpp
-//
-// This file is shared between Windows, Linux and Mac drivers
-// It must be all strictly C or it will break the Linux driver compile.
-//
-// Since the Linux driver is not C++ based, a devicenumber is required in
-// some functions in place of the implicit this pointer.  On windows and
-// Mac, pass in anything, the value will be ignored.
-//
+/**
+	@file		ntv2driverprocamp.cpp
+	@brief		Implementation of driver procamp utility functions.
+	@copyright	(C) 2003-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@note		Because this module is compiled into the driver, it must remain straight ANSI 'C' -- no C++ or STL.
+				Since the Linux driver is not C++ based, a devicenumber is required in some functions in place of "this" pointer.
+**/
 
 #include "ntv2driverprocamp.h"
 

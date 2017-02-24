@@ -1,8 +1,8 @@
 /**
 	@file		ntv2debug.cpp
 	@brief		Implements the NTV2 debug output functions.
-	@copyright	Copyright 2004-2017 AJA Video Systems, Inc. All rights reserved.
-	@note		This module should remain straight ANSI 'C' -- no C++ or STL.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@note		Because this module is compiled into the driver, it must remain straight ANSI 'C' -- no C++ or STL.
 **/
 
 #include "ntv2publicinterface.h"
