@@ -1,35 +1,27 @@
 #
-# Copyright (C) 2004-2010 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  
-# All Rights Reserved.
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  
   include $(DIR)/../../../targets.mk
-
 else
 include $(DIR)/../../../configure.mk
 
-# yes this is redundant
 ifeq ($(AJA_DEBUG),1)
-  AJA_AJABASE_LIBNAME = ajabased
+	AJA_LIB = ajabased
 else
-  AJA_AJABASE_LIBNAME = ajabase
+	AJA_LIB = ajabase
 endif
-
-LIBNAME = lib$(AJA_AJABASE_LIBNAME)
-LIBTARGET = $(LIBNAME)
+AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
 VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence
-INCLUDES = -I$(A_LIBRARIES_PATH)
 
-CPP =   g++
-CPPFLAGS += -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
-			-pedantic -Wall -Wno-long-long  -Wwrite-strings -c -pipe -fPIC $(DBG)
+CPPFLAGS += -DAJA_LINUX
 
-SRCS =\
+AJA_LIB_SRCS =\
 	atomic.cpp \
 	audioutilities.cpp \
 	buffer.cpp \
@@ -65,47 +57,10 @@ SRCS =\
 	videoutilities.cpp \
 	wavewriter.cpp
 
-C_SRCS =\
+AJA_LIB_C_SRCS =\
 	sqlite3.c
 
-OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-OBJS += $(patsubst %.c,%.o,$(C_SRCS))
-
-%.d: %.cpp
-	$(CPP) -M $(CPPFLAGS) $(INCLUDES) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
-
-%.o: %.cpp
-	$(CPP) $(CPPFLAGS) $(INCLUDES) -o $@ $<
-
-%.d: %.c
-	$(CC) -M $(CFLAGS) $(INCLUDES) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
-
-
-$(A_UBER_LIB)/$(LIBNAME).a: $(OBJS)
-	+@[ -d $(A_UBER_LIB) ] || mkdir -p $(A_UBER_LIB)
-	$(A_LIBCMD) $@ $(OBJS)
-
-all: $(A_UBER_LIB)/$(LIBNAME).a
-
-.PHONY: clean subclean cleandeps
-clean:
-	rm -f *.o
-	rm -f $(A_UBER_LIB)/$(LIBNAME).a
-
-cleandeps:
-	rm -f *.d
-
-subclean:
-	rm -f $(LIBTARGET).a $(LIBTARGET).so *.o 
-	rm -f $(A_UBER_LIB)/$(LIBNAME).a
-	rm -f $(A_UBER_LIB)/$(LIBNAME).so
+include $(DIR)/../../../common.mk
 
 endif
 
