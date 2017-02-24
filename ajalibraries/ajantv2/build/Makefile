@@ -6,9 +6,9 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(DIR)/../../../targets.mk
+  include $(DIR)/../../../build/targets.mk
 else
-include $(DIR)/../../../configure.mk
+include $(DIR)/../../../build/configure.mk
 
 ifeq ($(AJA_DEBUG),1)
 	AJA_LIB = ajantv2d
@@ -84,7 +84,7 @@ AJA_LIB_SRCS = ntv2audio.cpp \
         $(A_LIB_NTV2_M31_PATH)/ntv2m31vinparam.cpp \
         $(A_LIB_NTV2_M31_PATH)/ntv2m31viparam.cpp 
 
-include $(DIR)/../../../common.mk
+include $(DIR)/../../../build/common.mk
 
 endif
 

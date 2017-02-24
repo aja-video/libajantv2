@@ -6,9 +6,9 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(DIR)/../../../targets.mk
+  include $(DIR)/../../../build/targets.mk
 else
-include $(DIR)/../../../configure.mk
+include $(DIR)/../../../build/configure.mk
 
 ifeq ($(AJA_DEBUG),1)
 	AJA_LIB = ajabased
@@ -60,7 +60,7 @@ AJA_LIB_SRCS =\
 AJA_LIB_C_SRCS =\
 	sqlite3.c
 
-include $(DIR)/../../../common.mk
+include $(DIR)/../../../build/common.mk
 
 endif
 

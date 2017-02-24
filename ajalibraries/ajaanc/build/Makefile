@@ -6,9 +6,9 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(DIR)/../../../targets.mk
+  include $(DIR)/../../../build/targets.mk
 else
-include $(DIR)/../../../configure.mk
+include $(DIR)/../../../build/configure.mk
 
 AJA_LIB = ajaanc
 AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
@@ -31,7 +31,7 @@ AJA_LIB_SRCS =ancillarydata.cpp \
 			  ancillarydata_timecode_vitc.cpp \
 			  ancillarylist.cpp
 
-include $(DIR)/../../../common.mk
+include $(DIR)/../../../build/common.mk
 
 endif
 
