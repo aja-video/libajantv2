@@ -37,7 +37,6 @@ static const uint32_t	AUDIOBYTES_MAX_48K	(201 * 1024);
 NTV2Player4K::NTV2Player4K (const Player4KConfig & config)
 	:	mPlayThread					(NULL),
 		mProduceFrameThread			(NULL),
-		mLock						(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
@@ -855,13 +854,15 @@ void NTV2Player4K::PlayFrames (void)
 
 	mDevice.AutoCirculateStop (mChannel);	//	Just in case someone else left it
 
-	mDevice.WaitForOutputFieldID (NTV2_FIELD0, NTV2_CHANNEL1);
-	mDevice.WaitForOutputFieldID (NTV2_FIELD0, NTV2_CHANNEL1);
+	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
+	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 
 	//	Initialize & start AutoCirculate...
 	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188);
+		const UWord	startNum	(mChannel < 4  ?                             0  :      numberOfACFramesPerChannel);	//	Ch1: frames 0-6
+		const UWord	endNum		(mChannel < 4  ?  numberOfACFramesPerChannel-1  :  numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
+		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188,
+											1 /*numChannels*/, startNum,  endNum);
 	}
 	mDevice.AutoCirculateStart (mChannel);
 
@@ -899,7 +900,7 @@ void NTV2Player4K::PlayFrames (void)
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}
 		else
-			mDevice.WaitForOutputVerticalInterrupt ();
+			mDevice.WaitForOutputVerticalInterrupt (mChannel);
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
