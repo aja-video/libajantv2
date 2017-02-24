@@ -16,6 +16,7 @@ NTV2_APP = $(A_UBER_BIN)/dvplowlatencydemo
 
 VPATH	 = $(A_DEMOAPPS_PATH)/NVIDIA/common
 INCLUDES = -I$(A_DEMOAPPS_PATH)/NVIDIA/common -I$(A_LIB_GPUSTUFF_PATH)/include
+LIBDIRS = -L$(A_LIB_GPUSTUFF_PATH)/lib/linux/lib64
 
 SRCS = oglapp.cpp \
        oglview.cpp \

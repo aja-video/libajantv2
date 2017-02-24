@@ -31,7 +31,9 @@ oglapp:
 #include "fbo.h"
 
 #include "AJA_Logo_Small.h"
- 
+
+#include "ntv2formatdescriptor.h"
+
 using namespace std;
 const int RING_BUFFER_SIZE = 2;
 
