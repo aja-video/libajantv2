@@ -1,35 +1,27 @@
 #
-# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2012 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  All Rights Reserved
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
-
-NTV2_ROOT	:= $(shell pwd)/../..
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(NTV2_ROOT)/targets.mk
+  include $(DIR)/../../../../targets.mk
 else
+include $(DIR)/../../../../configure.mk
 
-NTV2_APP   = $(NTV2_BINDIR)/ntv2enumerateboards
+CPPFLAGS += -DAJA_LINUX
 
-VPATH    := $(NTV2_ROOT)/../democlasses
+NTV2_APP = $(A_UBER_BIN)/ntv2enumerateboards
 
-INCLUDES = -I.. -I$(NTV2_INCLUDES) -I$(NTV2_CLASSES) -I$(NTV2_ROOT)/../democlasses
+VPATH	 = $(A_DEMOAPPS_PATH)
+INCLUDES = -I$(A_DEMOAPPS_PATH)
 
-LIBS = -laja
-LIBDIRS = -L$(NTV2_LIBDIR)
+SRCS = main.cpp ntv2enumerateboards.cpp ntv2democommon.cpp
 
-# Please keep the list of source files alphabetical
-SRCS =	main.cpp ntv2enumerateboards.cpp
+INCS = ntv2enumerateboards.h ntv2democommon.h
 
-CPPFLAGS += -DAJALinux -DHAVE_PTHREAD_H -DNO_WGLIB
-
-default: $(NTV2_APP)
-
-QTINC :=
-QTLIB :=
-QTL :=
-
-include $(NTV2_ROOT)/../common.mk
+include $(DIR)/../../../../common.mk
 
 endif
 

@@ -10,7 +10,6 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 else
 include $(DIR)/../../../../configure.mk
 
-CPP =   g++
 CPPFLAGS += -DAJA_LINUX
 
 NTV2_APP = $(A_UBER_BIN)/ntv2burn
@@ -25,3 +24,4 @@ INCS = ntv2burn.h ntv2democommon.h
 include $(DIR)/../../../../common.mk
 
 endif
+

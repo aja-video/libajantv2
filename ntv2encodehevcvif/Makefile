@@ -1,79 +1,27 @@
 #
-# Copyright (C) 2004-2017 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  All Rights Reserved
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
-
-NTV2_ROOT	?= $(shell pwd)/../..
-AJA_API_ROOT ?= $(NTV2_ROOT)/../../ajaapi
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include $(NTV2_ROOT)/targets.mk
+  include $(DIR)/../../../../targets.mk
 else
+include $(DIR)/../../../../configure.mk
 
-CPP =   g++
-CPPFLAGS = -DAJALinux -DAJA_LINUX -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
-			-pedantic -Wall -Wno-long-long  -Wwrite-strings -c -pipe -fPIC $(DBG)
+CPPFLAGS += -DAJA_LINUX
 
-LD = g++
-LDFLAGS = 
+NTV2_APP = $(A_UBER_BIN)/ntv2encodehevcvif
 
-NTV2_APP = $(NTV2_BINDIR)/ntv2encodehevcvif
-
-VPATH 	 := $(SRCDIR) $(NTV2_ROOT)/../democlasses $(AJA_API_ROOT)
-
-INCLUDES = -I$(NTV2_INCLUDES) -I$(NTV2_CLASSES) -I$(NTV2_ROOT)/../democlasses -I$(NTV2_ROOT)/../linuxclasses -I$(AJA_API_ROOT) -I$(NTV2_ROOT)/../codecs/hevc/m31
-
-ifeq ($(AJA_DEBUG),1)
-  AJA_STUFF_LIB = ajabased
-  RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
-else
-  AJA_STUFF_LIB = ajabase
-  RELEASE_OR_DEBUG_LIBS = -l$(AJA_STUFF_LIB)
-endif
-
-LIBDIRS = -L$(NTV2_LIBDIR) -L$(AJA_API_ROOT)/lib64 
-
-LIBCLASSES = $(NTV2_LIBDIR)/libaja.a
-LIBS = -laja -Wl,-Bstatic $(RELEASE_OR_DEBUG_LIBS) -Wl,-Bdynamic -lpthread -lrt
+VPATH	 = $(A_DEMOAPPS_PATH)
+INCLUDES = -I$(A_DEMOAPPS_PATH) -I$(A_LIB_NTV2_M31_PATH)
 
 SRCS = main.cpp ntv2encodehevcvif.cpp ntv2encodehevcvifac.cpp ntv2demohevccommon.cpp
 
 INCS = ntv2encodehevcvif.h ntv2encodehevcvifac.h ntv2demohevccommon.h
 
-OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-
-%.d: %.cpp
-	$(CPP) -M $(CPPFLAGS) $(INCLUDES) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
-
-%.o: %.cpp
-	$(CPP) $(CPPFLAGS) $(INCLUDES) -o $@ $<
-
-default: $(AJA_STUFF_LIB).a $(LIBCLASSES) $(NTV2_APP)
-
--include $(patsubst %.cpp,%.d,$(SRCS))
-
-.PHONY : $(LIBCLASSES)
-$(LIBCLASSES): $(SDK_SRCS)
-	$(MAKE) -C $(NTV2_CLASSES)
-
-.PHONY : $(AJA_STUFF_LIB)
-$(AJA_STUFF_LIB).a:
-	$(MAKE) -C $(AJA_API_ROOT)/ajabase
-
-$(NTV2_APP): $(OBJS) $(LIBCLASSES) Makefile
-	$(LD) $(LDFLAGS) $(LIBDIRS) $(OBJS) -o $(NTV2_APP) $(LIBS)
-
-.PHONY: clean cleandeps  realclean
-
-clean:
-	rm -f *.o *~  errors.txt
-	rm -f $(NTV2_APP)
-
-cleandeps:
-	rm -f *.d
-
-realclean: clean cleandeps
+include $(DIR)/../../../../common.mk
 
 endif
+
