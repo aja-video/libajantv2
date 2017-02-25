@@ -32,6 +32,7 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2card.cpp \
 		ntv2colorcorrection.cpp \
 		ntv2config2022.cpp \
+		ntv2config2110.cpp \
 		ntv2configts2022.cpp \
 		ntv2cscmatrix.cpp \
 		ntv2debug.cpp \
