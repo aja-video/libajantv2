@@ -25,8 +25,7 @@ SUBDIRS = ntv2burn \
 		  ntv2player4k \
 		  ntv2qtmultiinput \
 		  NVIDIA/dvplowlatencydemo \
-		  ntv2qtpreview \
-		  ntv2qtrawcapture
+		  ntv2qtpreview
 
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
