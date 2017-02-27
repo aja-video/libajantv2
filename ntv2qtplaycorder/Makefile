@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2004-2013 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  
-# All Rights Reserved.
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
 
 # Makefile to drive qmakes

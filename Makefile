@@ -4,9 +4,6 @@
 # Copyright (C) 2017 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 #
-# This file is the Linux analog of the ajaapi.sln file used with Windows.
-# Its purpose is to build all the projects in the solution.
-#
 
 SUBDIRS = ntv2burn \
 		  ntv2burn4kquadrant \

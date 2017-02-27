@@ -10,7 +10,6 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 else
 include $(DIR)/../../../../build/configure.mk
 
-CPP =   g++
 CPPFLAGS += -DAJA_LINUX
 
 NTV2_APP = $(A_UBER_BIN)/ntv2capture4k
