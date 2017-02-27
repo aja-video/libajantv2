@@ -12,7 +12,7 @@ include $(DIR)/../../../../build/configure.mk
 
 CPPFLAGS += -DAJA_LINUX
 
-NTV2_APP = $(A_UBER_BIN)/ntv2outputtestpattern
+AJA_APP = $(A_UBER_BIN)/ntv2outputtestpattern
 
 VPATH	 = $(A_DEMOAPPS_PATH)
 INCLUDES = -I$(A_DEMOAPPS_PATH)

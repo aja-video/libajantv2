@@ -12,7 +12,7 @@ include $(DIR)/../../../../../build/configure.mk
 
 CPPFLAGS += -DAJA_LINUX
 
-NTV2_APP = $(A_UBER_BIN)/dvplowlatencydemo
+AJA_APP = $(A_UBER_BIN)/dvplowlatencydemo
 
 VPATH	 = $(A_DEMOAPPS_PATH)/NVIDIA/common
 INCLUDES = -I$(A_DEMOAPPS_PATH)/NVIDIA/common -I$(A_LIB_GPUSTUFF_PATH)/include
