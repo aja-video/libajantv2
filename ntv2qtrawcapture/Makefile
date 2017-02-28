@@ -12,7 +12,6 @@ include $(DIR)/../../../../build/qt.mk
 APP_FULL_PATH=$(A_UBER_BIN)/ntv2qtrawcapture
 QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/qtrawcapture/qtrawcapture.pro
 QMAKE_FILE = qMakefile
-QMAKE ?= qmake
 
 .PHONY: clean
 
@@ -25,6 +24,7 @@ $(APP_FULL_PATH):
 clean:
 	rm -f $(APP_FULL_PATH)
 	$(MAKE) -f $(QMAKE_FILE) clean
+	rm -f $(QMAKE_FILE)
 
 .PHONY: cleandeps
 cleandeps:
