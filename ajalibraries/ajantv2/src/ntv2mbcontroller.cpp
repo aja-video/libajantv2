@@ -421,7 +421,7 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
     if (port < SAREK_MAX_PORTS && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_STREAM(stream))
     {
         uint32_t offset = uint32_t(&igmpcb[port][channel][stream] - &igmpcb[0][0][0]);
-        return offset;
+        return offset * 2;    // registers
     }
     return 0;
 }

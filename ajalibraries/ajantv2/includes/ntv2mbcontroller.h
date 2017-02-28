@@ -49,8 +49,8 @@ typedef struct
 #define IGMPCB_REG_ADDR       1
 #define IGMPCB_SIZE           2
 
-#define IGMPCB_STATE_USED     BIT(0);
-#define IGMPCB_STATE_ENABLED  BIT(1);
+#define IGMPCB_STATE_USED     BIT(0)
+#define IGMPCB_STATE_ENABLED  BIT(1)
 
 class IPVNetConfig
 {

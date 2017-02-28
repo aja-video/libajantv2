@@ -511,10 +511,11 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
 
     if (!disableIGMP)
     {
+
         EnableIGMPGroup(port,channel,stream,enable);
     }
 
-    // ** Depacketizer
+    // Depacketizer
     uint32_t depacketizerBaseAddr;
     SetRxDepacketizerChannel(channel,stream,depacketizerBaseAddr);
 
