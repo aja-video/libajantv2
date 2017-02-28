@@ -49,6 +49,9 @@
 #define     ADAPTATION_LOOKUP               0x300
 #define     ADAPTATION_HDR_LENGTH           0x3f0
 
+#define     MODE_STOP                       0x00
+#define     MODE_RECORD                     0x10
+
 
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips

@@ -32,6 +32,8 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
+#define WAIT_RESET_MS   2000
+
     uint32_t    val;
     uint32_t    encoderBit;
 
@@ -39,14 +41,32 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     // Check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
     if (channel == NTV2_CHANNEL2)
-        encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;    // Bits 16 and 17
+        encoderBit = ENCODER_2_ENABLE | ENCODER_2_MD_ENABLE;    // Bits 24 and 25
     else if (channel == NTV2_CHANNEL1)
-        encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;    // Bits 24 and 25
+        encoderBit = ENCODER_1_ENABLE | ENCODER_1_MD_ENABLE;    // Bits 16 and 17
     else
     {
         mError = "Invalid channel";
         return false;
     }
+
+    // Disable encoder
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    val &= ~encoderBit;
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    // Set T2 to mode stop
+    J2kSetMode(channel, 2, MODE_STOP);
+
+    // Set T0 to mode stop
+    J2kSetMode(channel, 0, MODE_STOP);
+
+    // Wait
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (WAIT_RESET_MS);
+    #else
+        usleep (WAIT_RESET_MS * 1000);
+    #endif
 
     // Now proceed to configure the device
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoFormat1, (uint32_t) config.videoFormat);
@@ -59,31 +79,6 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeVideoPid1, config.videoPid);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodePcrPid1, config.pcrPid);
     WriteJ2KConfigVReg(channel, kVRegTxc_2EncodeAudio1Pid1, config.audio1Pid);
-
-    // The encoder reset sequence
-
-    // Assert reset
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
-    val |= encoderBit;
-    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
-
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (200);
-    #else
-        usleep (200 * 1000);
-    #endif
-
-    // Clear reset
-    val &= ~encoderBit;
-    mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
-
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (200);
-    #else
-        usleep (200 * 1000);
-    #endif
 
     // setup the TS
     if (!SetupTsForEncode(channel))
@@ -125,6 +120,12 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
         else
             encoderBit = ENCODER_1_ENABLE;
     }
+
+    // Set T0 to mode record
+    J2kSetMode(channel, 0, MODE_RECORD);
+
+    // Set T2 to mode record
+    J2kSetMode(channel, 2, MODE_RECORD);
 
     // Turn on the encoder
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
@@ -284,7 +285,7 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
     }
 
     // Set T2 to record mode
-    J2kSetMode(channel, 2, 0x10);
+    //J2kSetMode(channel, 2, MODE_RECORD);
 
     return true;
 }
