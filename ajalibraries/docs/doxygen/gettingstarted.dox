@@ -234,8 +234,7 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	Be sure you have the requisite third-party software packages installed:
 	-	<tt>g++</tt>
 	-	<tt>libasound2</tt>
-	-	<tt>libsound2-dev</tt>
-	-	<tt>libncurses5-dev</tt>.
+	-	<tt>libsound2-dev</tt>.
 	Refer to your Linux distro's documentation for the correct utility for managing packages.
 	Note that package managers often install dependent packages, so it may not be necessary to explicitly load all the packages
 	in the aforementioned list. (The Knowledgebase article from which the SDK was downloaded is the authoritative source for this information.)

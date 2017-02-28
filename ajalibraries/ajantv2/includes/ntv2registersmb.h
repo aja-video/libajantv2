@@ -84,6 +84,11 @@
 #define ENCODER_BLOCK_BASE          200
 #define UNUSED_BLOCK_BASE           300
 
+#define TS_BLOCK_BASE               0
+#define IGMP_BLOCK_BASE             100
+#define ENCODER_BLOCK_BASE          200
+#define UNUSED_BLOCK_BASE           300
+
 #define kRegSarekMBSeqNum           0
 #define kRegSarekActProgramNum      1
 #define kRegSarekActProgramPID      2
@@ -107,6 +112,32 @@
 #define kRegSarekPGMNums            24
 #define kRegSarekPGMPIDs            40
 #define kRegSarekAudioPIDs          56
+
+
+// Encoder block regs
+#define kRegSarekEncodeVideoFormat1     ENCODER_BLOCK_BASE+0;
+#define kRegSarekEncodeUllMode1         ENCODER_BLOCK_BASE+1;
+#define kRegSarekEncodeBitDepth1        ENCODER_BLOCK_BASE+2;
+#define kRegSarekEncodeChromaSubSamp1   ENCODER_BLOCK_BASE+3;
+#define kRegSarekEncodeMbps1            ENCODER_BLOCK_BASE+4;
+#define kRegSarekEncodeStreamType1      ENCODER_BLOCK_BASE+5;
+#define kRegSarekEncodeProgramPid1      ENCODER_BLOCK_BASE+6;
+#define kRegSarekEncodeVideoPid1        ENCODER_BLOCK_BASE+7;
+#define kRegSarekEncodePcrPid1          ENCODER_BLOCK_BASE+8;
+#define kRegSarekEncodeAudio1Pid1       ENCODER_BLOCK_BASE+9;
+
+#define kRegSarekEncodeVideoFormat2     ENCODER_BLOCK_BASE+10;
+#define kRegSarekEncodeUllMode2         ENCODER_BLOCK_BASE+11;
+#define kRegSarekEncodeBitDepth2        ENCODER_BLOCK_BASE+12;
+#define kRegSarekEncodeChromaSubSamp2   ENCODER_BLOCK_BASE+13;
+#define kRegSarekEncodeMbps2            ENCODER_BLOCK_BASE+14;
+#define kRegSarekEncodeStreamType2      ENCODER_BLOCK_BASE+15;
+#define kRegSarekEncodeProgramPid2      ENCODER_BLOCK_BASE+16;
+#define kRegSarekEncodeVideoPid2        ENCODER_BLOCK_BASE+17;
+#define kRegSarekEncodePcrPid2          ENCODER_BLOCK_BASE+18;
+#define kRegSarekEncodeAudio1Pid2       ENCODER_BLOCK_BASE+19;
+
+
 
 /////////////////////////////////////////////////////////////////////
 //

@@ -17,7 +17,6 @@
 #include <mach/thread_policy.h>
 #include <mach/thread_act.h>
 #include <mach/mach_time.h>
-//#include <mach/sched.h>
 
 static const size_t STACK_SIZE = 1024 * 1024;
 

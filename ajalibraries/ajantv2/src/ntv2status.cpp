@@ -1,7 +1,7 @@
 /**
 	@file		ntv2status.cpp
 	@deprecated	This module is obsolete.
-	@copyright	(C) 2004-2014 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2status.h"

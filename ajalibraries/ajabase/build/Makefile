@@ -1,30 +1,27 @@
 #
-# Copyright (C) 2004-2010 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  
-# All Rights Reserved.
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 ifeq (,$(filter _%,$(notdir $(CURDIR))))
-  include ../../targets.mk
+  include $(DIR)/../../../build/targets.mk
 else
+include $(DIR)/../../../build/configure.mk
 
-AJA_API_ROOT      ?= ../../..
-AJA_AJABASE_ROOT = $(AJA_API_ROOT)/ajabase
-
-# yes this is redundant
 ifeq ($(AJA_DEBUG),1)
-  AJA_AJABASE_LIBNAME = ajabased
+	AJA_LIB = ajabased
 else
-  AJA_AJABASE_LIBNAME = ajabase
+	AJA_LIB = ajabase
 endif
+AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
-LIBNAME = lib$(AJA_AJABASE_LIBNAME)
-LIBTARGET = $(LIBNAME)
+VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence
 
-VPATH    = $(AJA_AJABASE_ROOT)/common:$(AJA_AJABASE_ROOT)/system:$(AJA_AJABASE_ROOT)/system/linux:$(AJA_AJABASE_ROOT)/pnp:$(AJA_AJABASE_ROOT)/pnp/linux:$(AJA_AJABASE_ROOT)/persistence
-INCLUDES = -I$(AJA_API_ROOT)
+CPPFLAGS += -DAJA_LINUX
 
-AJA_APP_SRCS =\
+AJA_LIB_SRCS =\
 	atomic.cpp \
 	audioutilities.cpp \
 	buffer.cpp \
@@ -60,17 +57,10 @@ AJA_APP_SRCS =\
 	videoutilities.cpp \
 	wavewriter.cpp
 
-C_AJA_APP_SRCS =\
+AJA_LIB_C_SRCS =\
 	sqlite3.c
 
-default: $(LIBNAME).a $(LIBNAME).so copy-a copy-so 
-
-include ../../../common.mk
-
-subclean:
-	rm -f $(LIBTARGET).a $(LIBTARGET).so *.o 
-	rm -f $(AJA_API_LIBDIR)/$(LIBNAME).a
-	rm -f $(AJA_API_LIBDIR)/$(LIBNAME).so
+include $(DIR)/../../../build/common.mk
 
 endif
 
