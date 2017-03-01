@@ -3546,51 +3546,30 @@ typedef enum
 
 typedef enum
 {
-	// channel register masks
-	kRegMaskXlnxChannelSubsystemId				= 0xfff00000,
-	kRegMaskXlnxChannelTarget					= 0x000f0000,
-	kRegMaskXlnxChannelStreamInterface			= 0x00008000,
-	kRegMaskXlnxChannelIdTarget					= 0x00000f00,
-	kRegMaskXlnxChannelVersion					= 0x000000ff,
+	kRegMaskXlnxSubsystemId						= 0xfff00000,
+	kRegMaskXlnxTarget							= 0x000f0000,
+	kRegMaskXlnxStreamInterface					= 0x00008000,
+	kRegMaskXlnxIdTarget						= 0x00000f00,
+	kRegMaskXlnxVersion							= 0x000000ff,
 
 	kRegMaskXlnxStreamWriteBackDisable			= 0x08000000,
 	kRegMaskXlnxPollModeWriteBackEnable			= 0x04000000,
 	kRegMaskXlnxNonIncAddressMode				= 0x02000000,
-	kRegMaskXlnxLogDescErrorEnable				= 0x00f80000,
-	kRegMaskXlnxLogWriteErrorEnable				= 0x0007c000,
-	kRegMaskXlnxLogReadErrorEnable				= 0x00003e00,
-	kRegMaskXlnxLogIdleStopEnable				= 0x00000040,
-	kRegMaskXlnxLogInvalidLengthEnable			= 0x00000020,
-	kRegMaskXlnxLogMagicStopEnable				= 0x00000010,
-	kRegMaskXlnxLogAlignMismatchEnable			= 0x00000008,
-	kRegMaskXlnxLogDescCompleteEnable			= 0x00000004,
-	kRegMaskXlnxLogDescStopEnable				= 0x00000002,
 	kRegMaskXlnxRun								= 0x00000001,
-
-	kRegMaskXlnxStatusDescError					= 0x00f80000,
-	kRegMaskXlnxStatusWriteError				= 0x0007c000,
-	kRegMaskXlnxStatusReadError					= 0x00003e00,
-	kRegMaskXlnxStatusIdleStop					= 0x00000040,
-	kRegMaskXlnxStatusInvalidLength				= 0x00000020,
-	kRegMaskXlnxStatusMagicStop					= 0x00000010,
-	kRegMaskXlnxStatusAlignMismatch				= 0x00000008,
-	kRegMaskXlnxStatusDescComplete				= 0x00000004,
-	kRegMaskXlnxStatusDescStop					= 0x00000002,
-	kRegMaskXlnxBusy							= 0x00000001,
 
 	kRegMaskXlnxAddressAlignment				= 0x00ff0000,
 	kRegMaskXlnxTransferAlignment				= 0x0000ff00,
 	kRegMaskXlnxAddressBits						= 0x000000ff,
 
-	kRegMaskXlnxIntDescErrorEnable				= 0x00f80000,
-	kRegMaskXlnxIntWriteErrorEnable				= 0x0007c000,
-	kRegMaskXlnxIntReadErrorEnable				= 0x00003e00,
-	kRegMaskXlnxIntIdleStopEnable				= 0x00000040,
-	kRegMaskXlnxIntInvalidLengthEnable			= 0x00000020,
-	kRegMaskXlnxIntMagicStopEnable				= 0x00000010,
-	kRegMaskXlnxIntAlignMismatchEnable			= 0x00000008,
-	kRegMaskXlnxIntDescCompleteEnable			= 0x00000004,
-	kRegMaskXlnxIntDescStopEnable				= 0x00000002,
+	kRegMaskXlnxIntDescError					= 0x00f80000,
+	kRegMaskXlnxIntWriteError					= 0x0007c000,
+	kRegMaskXlnxIntReadError					= 0x00003e00,
+	kRegMaskXlnxIntIdleStop						= 0x00000040,
+	kRegMaskXlnxIntInvalidLength				= 0x00000020,
+	kRegMaskXlnxIntMagicStop					= 0x00000010,
+	kRegMaskXlnxIntAlignMismatch				= 0x00000008,
+	kRegMaskXlnxIntDescComplete					= 0x00000004,
+	kRegMaskXlnxIntDescStop						= 0x00000002,
 
 	kRegMaskXlnxPerfRun							= 0x00000004,
 	kRegMaskXlnxPerfClear						= 0x00000002,
@@ -3602,65 +3581,34 @@ typedef enum
 	kRegMaskXlnxPerfDataCountMax				= 0x00010000,
 	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff,
 
-	// irq register masks
-	kRegMaskXlnxIrqVersion						= 0x000000ff,
-
-	// sgdma register masks
-	kRegMaskXlnxSgdmaSubsystemId				= 0xfff00000,
-	kRegMaskXlnxSgdmaTarget						= 0x000f0000,
-	kRegMaskXlnxSgdmaStreamInterface			= 0x00008000,
-	kRegMaskXlnxSgdmaIdTarget					= 0x00000f00,
-	kRegMaskXlnxSgdmaVersion					= 0x000000ff
-
 } XlnxRegisterMask;
 
 typedef enum
 {
-	// channel register shifts
-	kRegShiftXlnxChannelSubsystemId				= 20,
-	kRegShiftXlnxChannelTarget					= 16,
-	kRegShiftXlnxChannelStreamInterface			= 15,
-	kRegShiftXlnxChannelIdTarget				= 8,
-	kRegShiftXlnxChannelVersion					= 0,
+	kRegShiftXlnxSubsystemId					= 20,
+	kRegShiftXlnxTarget							= 16,
+	kRegShiftXlnxStreamInterface				= 15,
+	kRegShiftXlnxIdTarget						= 8,
+	kRegShiftXlnxVersion			   			= 0,
 
 	kRegShiftXlnxStreamWriteBackDisable			= 27,
 	kRegShiftXlnxPollModeWriteBackEnable		= 26,
 	kRegShiftXlnxNonIncAddressMode				= 25,
-	kRegShiftXlnxLogDescErrorEnable				= 19,
-	kRegShiftXlnxLogWriteErrorEnable			= 14,
-	kRegShiftXlnxLogReadErrorEnable				= 9,
-	kRegShiftXlnxLogIdleStopEnable				= 6,
-	kRegShiftXlnxLogInvalidLengthEnable			= 5,
-	kRegShiftXlnxLogMagicStopEnable				= 4,
-	kRegShiftXlnxLogAlignMismatchEnable			= 3,
-	kRegShiftXlnxLogDescCompleteEnable			= 2,
-	kRegShiftXlnxLogDescStopEnable				= 1,
 	kRegShiftXlnxRun							= 0,
-
-	kRegShiftXlnxStatusDescError				= 19,
-	kRegShiftXlnxStatusWriteError				= 14,
-	kRegShiftXlnxStatusReadError				= 9,
-	kRegShiftXlnxStatusIdleStop					= 6,
-	kRegShiftXlnxStatusInvalidLength			= 5,
-	kRegShiftXlnxStatusMagicStop				= 4,
-	kRegShiftXlnxStatusAlignMismatch			= 3,
-	kRegShiftXlnxStatusDescComplete				= 2,
-	kRegShiftXlnxStatusDescStop					= 1,
-	kRegShiftXlnxBusy							= 0,
 
 	kRegShiftXlnxAddressAlignment				= 16,
 	kRegShiftXlnxTransferAlignment				= 8,
 	kRegShiftXlnxAddressBits					= 0,
 
-	kRegShiftXlnxIntDescErrorEnable				= 19,
-	kRegShiftXlnxIntWriteErrorEnable			= 14,
-	kRegShiftXlnxIntReadErrorEnable				= 9,
-	kRegShiftXlnxIntIdleStopEnable				= 6,
-	kRegShiftXlnxIntInvalidLengthEnable			= 5,
-	kRegShiftXlnxIntMagicStopEnable				= 4,
-	kRegShiftXlnxIntAlignMismatchEnable			= 3,
-	kRegShiftXlnxIntDescCompleteEnable			= 2,
-	kRegShiftXlnxIntDescStopEnable				= 1,
+	kRegShiftXlnxIntDescError					= 19,
+	kRegShiftXlnxIntWriteError					= 14,
+	kRegShiftXlnxIntReadError					= 9,
+	kRegShiftXlnxIntIdleStop					= 6,
+	kRegShiftXlnxIntInvalidLength				= 5,
+	kRegShiftXlnxIntMagicStop					= 4,
+	kRegShiftXlnxIntAlignMismatch				= 3,
+	kRegShiftXlnxIntDescComplete				= 2,
+	kRegShiftXlnxIntDescStop					= 1,
 
 	kRegShiftXlnxPerfRun						= 2,
 	kRegShiftXlnxPerfClear						= 1,
@@ -3671,16 +3619,6 @@ typedef enum
 
 	kRegShiftXlnxPerfDataCountMax				= 16,
 	kRegShiftXlnxPerfDataCountHigh				= 0,
-
-	// irq register shifts
-	kRegShiftXlnxIrqVersion						= 0,
-
-	// sgdma register shifts
-	kRegShiftXlnxSgdmaSubsystemId				= 20,
-	kRegShiftXlnxSgdmaTarget					= 16,
-	kRegShiftXlnxSgdmaStreamInterface			= 15,
-	kRegShiftXlnxSgdmaIdTarget					= 8,
-	kRegShiftXlnxSgdmaVersion					= 0
 
 } XlnxRegisterShift;
 
