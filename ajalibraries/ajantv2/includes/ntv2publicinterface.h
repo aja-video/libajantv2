@@ -2273,6 +2273,7 @@ typedef enum
 	kRegMaskHDMIHDRMaxFrameAverageLightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
 	kRegMaskHDMIHDRNonContantLuminance = BIT(0),
+    kRegMaskHDMIHDRDolbyVisionEnable = BIT(6),
 	kRegMaskHDMIHDREnable = BIT(7),
 	kRegMaskElectroOpticalTransferFunction = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31)
@@ -3297,6 +3298,7 @@ typedef enum
 	kRegShiftHDMIHDRMaxFrameAverageLightLevel = 16,
 
 	kRegShiftHDMIHDRNonContantLuminance = 0,
+    kRegShiftHDMIHDRDolbyVisionEnable = 6,
 	kRegShiftHDMIHDREnable = 7,
 	kRegShiftElectroOpticalTransferFunction = 16,
 	kRegShiftHDRStaticMetadataDescriptorID = 24

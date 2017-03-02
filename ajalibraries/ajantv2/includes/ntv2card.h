@@ -4956,6 +4956,15 @@ public:
 	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR);
 	AJA_VIRTUAL bool GetHDMIHDREnabled (void);	///< @return	True if HDMI HDR metadata output is enabled for the device;  otherwise false.
 
+    /**
+        @brief		Enables or disables HDMI HDR Dolby Vision.
+        @param[in]	inEnable		If true, sets the device to output HDMI HDR Dolby Vision; otherwise sets the device to not output HDMI HDR Dolby Vision.
+        @return		True if successful; otherwise false.
+    **/
+    AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);
+    AJA_VIRTUAL bool GetHDMIHDRDolbyVisionEnabled (void);	///< @return	True if HDMI HDR Dolby Vision output is enabled for the device;  otherwise false.
+
+
 	/**
 		@brief		Enables or disables BT.2020 Y'cC'bcC'rc versus BT.2020 Y'C'bC'r or R'G'B'.
 		@param[in]	inEnableConstantLuminance	If true, sets the device to BT.2020 Y'cC'bcC'rc; otherwise sets the device to BT.2020 Y'C'bC'r or R'G'B'.

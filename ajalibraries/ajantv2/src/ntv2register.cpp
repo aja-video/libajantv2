@@ -9514,6 +9514,25 @@ bool CNTV2Card::GetHDMIHDREnabled (void)
 	return regValue ? true : false;
 }
 
+bool CNTV2Card::EnableHDMIHDRDolbyVision(const bool inEnable)
+{
+    bool status = true;
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    status = WriteRegister(kRegHDMIHDRControl, inEnable ? 1 : 0, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
+    return status;
+}
+
+bool CNTV2Card::GetHDMIHDRDolbyVisionEnabled (void)
+{
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    uint32_t regValue = 0;
+    ReadRegister(kRegHDMIHDRControl, &regValue, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    return regValue ? true : false;
+}
+
 bool CNTV2Card::SetHDRData (const HDRFloatValues & inFloatValues)
 {
 	HDRRegValues registerValues;
