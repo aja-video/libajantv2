@@ -7705,4 +7705,8 @@ typedef struct HDRFloatValues{
     uint8_t		staticMetadataDescriptorID;
 }HDRFloatValues;
 
+#define NTV2_IS_VALID_HDR_PRIMARY(__val__)				((__val__ >= 0x0000) && (__val__ <= 0xC350))
+#define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
+#define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
+
 #endif	//	NTV2PUBLICINTERFACE_H

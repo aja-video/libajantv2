@@ -195,8 +195,13 @@ class RegisterExpert
 			DefineRegister (kRegHDMIOutControl,		"",	mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 			DefineRegister (kRegHDMIInputStatus,	"",	mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 			//DefineRegister (kRegHDMIInputControl,	"",	mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
-			DefineRegister (kRegHDMIHDRControl,		"",	mDecodeHDMIHDRControl,		READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
-							DefineRegClass (kRegHDMIHDRControl, kRegClass_HDR);
+			DefineRegister (kRegHDMIHDRGreenPrimary,"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			DefineRegister (kRegHDMIHDRBluePrimary,	"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			DefineRegister (kRegHDMIHDRRedPrimary,	"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			//DefineRegister (kRegHDMIHDRWhitePoint,	"",	mDecodeHDMIOutHDR_TBD,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			//DefineRegister (kRegHDMIHDRMasteringLuminence,"",	mDecodeHDMIOutHDR_TBD,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			//DefineRegister (kRegHDMIHDRLightLevel,"",	mDecodeHDMIOutHDR_TBD,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+			DefineRegister (kRegHDMIHDRControl,		"",	mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
 
 			SetupSDIError();
 
@@ -1505,7 +1510,7 @@ public:
 			}
 		}	mDecodeHDMIInputStatus;
 
-		struct DecodeHDMIHDRControl : public Decoder
+		struct DecodeHDMIOutHDRPrimary : public Decoder
 		{
 			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 			{
@@ -1513,12 +1518,46 @@ public:
 				ostringstream	oss;
 				if (::NTV2DeviceCanDoHDMIHDROut (inDeviceID))
 				{
-					oss	<< "HDMI HDR Out Enabled: " << YesNo(inRegValue & kRegMaskHDMIHDREnable)	<< endl
-						<< "FooBar: " << 0;
+					NTV2_ASSERT (kRegMaskHDMIHDRGreenPrimaryX == kRegMaskHDMIHDRBluePrimaryX  &&  kRegMaskHDMIHDRBluePrimaryX == kRegMaskHDMIHDRRedPrimaryX);
+					NTV2_ASSERT (kRegMaskHDMIHDRGreenPrimaryY == kRegMaskHDMIHDRBluePrimaryY  &&  kRegMaskHDMIHDRBluePrimaryY == kRegMaskHDMIHDRRedPrimaryY);
+					NTV2_ASSERT (kRegShiftHDMIHDRGreenPrimaryX == kRegShiftHDMIHDRBluePrimaryX  &&  kRegShiftHDMIHDRBluePrimaryX == kRegShiftHDMIHDRRedPrimaryX);
+					NTV2_ASSERT (kRegShiftHDMIHDRGreenPrimaryY == kRegShiftHDMIHDRBluePrimaryY  &&  kRegShiftHDMIHDRBluePrimaryY == kRegShiftHDMIHDRRedPrimaryY);
+					const uint16_t	xPrimary	((inRegValue & kRegMaskHDMIHDRGreenPrimaryX) >> kRegShiftHDMIHDRGreenPrimaryX);
+					const uint16_t	yPrimary	((inRegValue & kRegMaskHDMIHDRGreenPrimaryY) >> kRegShiftHDMIHDRGreenPrimaryY);
+					const float		xFloat		(static_cast <float> (xPrimary * 0.00002));
+					const float		yFloat		(static_cast <float> (yPrimary * 0.00002));
+					if (NTV2_IS_VALID_HDR_PRIMARY (xPrimary))
+						oss	<< "X: "	<< xFloat << endl;
+					else
+						oss	<< "X: "	<< HEX0N(xPrimary, 4)	<< "(invalid)" << endl;
+					if (NTV2_IS_VALID_HDR_PRIMARY (yPrimary))
+						oss	<< "Y: "	<< yFloat;
+					else
+						oss	<< "Y: "	<< HEX0N(yPrimary, 4)	<< "(invalid)";
 				}
 				return oss.str();
 			}
-		}	mDecodeHDMIHDRControl;
+		}	mDecodeHDMIOutHDRPrimary;
+
+		struct DecodeHDMIOutHDRControl : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inRegNum;
+				static const string	sEOTFs[]	=	{"Trad Gamma SDR", "Trad Gamma HDR", "SMPTE ST 2084", "??"};
+				ostringstream	oss;
+				if (::NTV2DeviceCanDoHDMIHDROut (inDeviceID))
+				{
+					const uint16_t	EOTFvalue				((inRegValue & kRegMaskElectroOpticalTransferFunction) >> kRegShiftElectroOpticalTransferFunction);
+					const uint16_t	staticMetaDataDescID	((inRegValue & kRegMaskHDRStaticMetadataDescriptorID) >> kRegShiftHDRStaticMetadataDescriptorID);
+					oss	<< "HDMI HDR Out Enabled: "		<< YesNo(inRegValue & kRegMaskHDMIHDREnable)				<< endl
+						<< "Constant Luminance: "		<< YesNo(inRegValue & kRegMaskHDMIHDRNonContantLuminance)	<< endl
+						<< "EOTF: "						<< sEOTFs[(EOTFvalue < 3) ? EOTFvalue : 3]					<< endl
+						<< "Static MetaData Desc ID: "	<< HEX0N(staticMetaDataDescID, 2) << " (" << DEC(staticMetaDataDescID) << ")";
+				}
+				return oss.str();
+			}
+		}	mDecodeHDMIOutHDRControl;
 
 		struct DecodeSDIOutputControl : public Decoder
 		{
