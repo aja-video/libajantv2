@@ -1090,8 +1090,9 @@ bool AJAPersistence::BindToCard(CNTV2Status *card)
 
 void AJAPersistence::Init()
 {
-	mboardId         = "";	
-	mserialNumber	 = "";
+    mboardId        = "";
+    mserialNumber	= "";
+    mSharedPrefFile = false;
 }
 
 void dropTables(std::string dbPath)

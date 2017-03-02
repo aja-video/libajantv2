@@ -9,7 +9,7 @@
 	#include "ajabase/system/windows/threadimpl.h"
 #endif
 #if defined(AJA_LINUX)
-	#include <ajabase/system/linux/threadimpl.h>
+	#include "ajabase/system/linux/threadimpl.h"
 #endif
 #if defined(AJA_MAC)
 	#include "ajabase/system/mac/threadimpl.h"

@@ -1,8 +1,9 @@
-/////////////////////////////////////////////////////////////////////////////
-// NTV2KonaFlashProgram.cpp
-//
-// Copyright (C) 2010 AJA Video Systems, Inc.  Proprietary and Confidential information.
-//
+/**
+	@file		ntv2konaflashprogram.cpp
+	@brief		Implementation of CNTV2KonaFlashProgram class.
+	@copyright	(C) 2010-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
+
 #include "ntv2konaflashprogram.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"

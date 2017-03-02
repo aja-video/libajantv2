@@ -15,13 +15,14 @@
 	#include <stdlib.h>
 #endif
 #include "ajatypes.h"
+#include "ajaexport.h"
 #include "ntv2enums.h"
 
 
 /**
 	@brief	Instances of me can parse a bitfile.
 **/
-class CNTV2Bitfile
+class AJAExport CNTV2Bitfile
 {
 	public:
 		/**

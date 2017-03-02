@@ -1,6 +1,6 @@
 /**
 	@file		ntv2registerexpert.cpp
-	@brief		Implements the NTV2RegisterExpert class.
+	@brief		Implements the CNTV2RegisterExpert class.
 	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2registerexpert.h"
@@ -195,6 +195,8 @@ class RegisterExpert
 			DefineRegister (kRegHDMIOutControl,		"",	mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 			DefineRegister (kRegHDMIInputStatus,	"",	mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 			//DefineRegister (kRegHDMIInputControl,	"",	mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+			DefineRegister (kRegHDMIHDRControl,		"",	mDecodeHDMIHDRControl,		READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+							DefineRegClass (kRegHDMIHDRControl, kRegClass_HDR);
 
 			SetupSDIError();
 
@@ -1502,6 +1504,21 @@ public:
 				return oss.str();
 			}
 		}	mDecodeHDMIInputStatus;
+
+		struct DecodeHDMIHDRControl : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inRegNum;
+				ostringstream	oss;
+				if (::NTV2DeviceCanDoHDMIHDROut (inDeviceID))
+				{
+					oss	<< "HDMI HDR Out Enabled: " << YesNo(inRegValue & kRegMaskHDMIHDREnable)	<< endl
+						<< "FooBar: " << 0;
+				}
+				return oss.str();
+			}
+		}	mDecodeHDMIHDRControl;
 
 		struct DecodeSDIOutputControl : public Decoder
 		{

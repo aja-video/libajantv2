@@ -5,39 +5,46 @@
 **/
 
 #if defined(AJA_LINUX) || defined(AJA_MAC)
-	#include <sys/types.h>
-	#include <sys/mman.h>
-	#include <fcntl.h>
-	#include <stdlib.h>
-	#include <errno.h>
-	#include <unistd.h>
+    #include <errno.h>
+    #include <fcntl.h>
+    #include <stdlib.h>
+    #include <syslog.h>
+    #include <sys/mman.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <unistd.h>
 #endif
 
 #include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/lock.h"
-#if defined(AJA_LINUX) || defined(AJA_MAC)
-#include <syslog.h>
-#include <sys/stat.h>
-// Define this here to avoid an include from the ntv4 directory
-// Must have the same value as in ntv4/driver/lindriver.h
-#define DEBUG_SHARE_LOCATION "/dev/ntv4debugshare"
-#endif
 
 // structure to track shared memory allocations
 struct SharedData
-{
+{    
 	std::string	shareName;
 	void*		pMemory;
 	size_t		memorySize;
 	int32_t		refCount;
 #if defined(AJA_WINDOWS)
 	HANDLE		fileMapHandle;
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 	int			fileDescriptor;
 #endif
+
+    SharedData()
+    {
+        shareName = "";
+        pMemory = NULL;
+        memorySize = 0;
+        refCount = 0;
+#if defined(AJA_WINDOWS)
+        fileMapHandle = NULL;
+#else
+        fileDescriptor = 0;
+#endif
+    }
 };
 
 // lock for shared memory allocation/free
@@ -45,8 +52,6 @@ static AJALock sSharedLock;
 
 // list of allocated shared memory
 static std::list<SharedData> sSharedList;
-
-
 
 AJAMemory::AJAMemory()
 {
@@ -72,8 +77,7 @@ AJAMemory::Allocate(size_t memorySize)
 	// allocate memory with no specific alignment
 #if defined(AJA_WINDOWS)
 	pMemory = malloc(memorySize);
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 	pMemory = malloc(memorySize);
 #endif
 
@@ -97,8 +101,7 @@ void AJAMemory::Free(void* pMemory)
 	// free memory with no specific alignment
 #if defined(AJA_WINDOWS)
 	free(pMemory);
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 	free(pMemory);
 #endif
 }
@@ -118,8 +121,7 @@ AJAMemory::AllocateAligned(size_t size, size_t alignment)
 	// allocate aligned memory
 #if defined(AJA_WINDOWS)
 	pMemory = _aligned_malloc(size, alignment);
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 	if (posix_memalign(&pMemory, alignment, size))
 		pMemory = NULL;
 #endif
@@ -150,8 +152,7 @@ AJAMemory::FreeAligned(void* pMemory)
 	// free aligned memory
 #if defined(AJA_WINDOWS)
 	_aligned_free(pMemory);
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 	free(pMemory);
 #endif
 
@@ -190,8 +191,17 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// look for share with the same name
 	size_t size = (*pMemorySize + AJA_PAGE_SIZE - 1) / AJA_PAGE_SIZE * AJA_PAGE_SIZE;
-	std::string name = "Global\\";
+
+    std::string name;
+#if defined(AJA_WINDOWS)
+    name = "Global\\";
 	name += pShareName;
+#else //Mac and Linux
+    // Docs say to start name with a slash
+    name = "/";
+    name += pShareName;
+#endif
+
 	std::list<SharedData>::iterator shareIter;
 
 	for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); shareIter++)
@@ -256,87 +266,54 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// In User Mode: Global\somename
 	// In Kernel Mode: \BaseNamedObjects\somename
-#endif
-
-#if defined(AJA_LINUX) || defined(AJA_MAC)
-
-	// Special handling for the Linux debugger shared memory
-#if defined(AJA_LINUX)
-	if (*pMemorySize == sizeof(AJADebugShare))
-	{
-		int file;
-
-		// Try to open the shared memory kernel module
-		file = open(DEBUG_SHARE_LOCATION, 0666);
-		if (file < 0)
-		{
-			int saveErr = errno;
-			syslog(LOG_ERR, "AJAMemory::AllocateShared open failed, err %d\n", saveErr);
-			return NULL;
-		}
-
-		// Now try to get a pointer to the kernel module's buffer
-		newData.pMemory = (void*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
-		if ((long int)newData.pMemory < 0)
-		{
-			int saveErr = errno;
-			newData.pMemory = NULL;
-			syslog(LOG_ERR, "AJAMemory::AllocateShared mmap failed, err %d\n", saveErr);
-			return NULL;
-		}
-		// DON'T memset the new mapping. Others may have already logged messages.
-
-		// Close the driver.  The map stays active.
-		close(file);
-	}
-	else
-#endif //AJA_LINUX
-	{
-		// Docs say to start name with a slash
-		std::string fileName = "/" + name;  // For portability considerations
-
-		newData.fileDescriptor = shm_open(fileName.c_str(),
-											O_CREAT | O_RDWR,
-											0666);
+#else    
+    // Mac and Linux
+    {
+        newData.fileDescriptor = shm_open(name.c_str(),
+                                          O_CREAT|O_RDWR,
+                                          S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 		if (newData.fileDescriptor < 0)
 		{
-			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  shm_open failed");
+            syslog(LOG_ERR, "AJAMemory::AllocateShared -- shm_open failed");
 			return NULL;
 		}
-		// Despite 0666 above, write permissions for others was not set.  Force it.
-		{
-			int rc;
 
-			fileName = "/dev/shm" + name;
-			rc       = chmod(fileName.c_str(), 0666);
+        bool needsTruncate = false;
+#if defined(AJA_LINUX)
+        needsTruncate = true;
+        // on Linux shm_open() doesn't set S_IROTH|S_IWOTH, so use fchmod()
+        fchmod(newData.fileDescriptor, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+#else
+        // need this on Mac, see:
+        // http://stackoverflow.com/questions/25502229/ftruncate-not-working-on-posix-shared-memory-in-mac-os-x#25510361
+        struct stat mapstat;
+        if (fstat(newData.fileDescriptor, &mapstat) != -1 && mapstat.st_size == 0)
+        {
+            needsTruncate = true;
+        }
+#endif
 
-			if (rc < 0)
-			{
-				#if !defined(AJA_MAC)
-				int saveErrno = errno;
-				syslog(LOG_ERR, "AJAMemory::AllocateShared chmod failed, err = %d\n", saveErrno);
-				#endif
-			}
-		}
+        if (needsTruncate)
+        {
+            // Creation is zero length. This call actually sets the size.
+            // Mac only needs this called the first time created
+            int retVal = ftruncate(newData.fileDescriptor, size);
 
-		// Creation is zero length. This call actually sets the size.
-		int retVal = ftruncate(newData.fileDescriptor, size);
+            if (0 != retVal)
+            {
+                syslog(LOG_ERR, "AJAMemory::AllocateShared -- ftruncate failed\n");
+            }
+        }
 
-		if (0 != retVal)
-		{
-			AJA_REPORT(0, AJA_DebugSeverity_Error,
-				"AJAMemory::AllocateShared  ftruncate failed");
-		}
-
-		newData.pMemory = mmap(NULL,
-								size,
-								PROT_READ | PROT_WRITE,
-								MAP_SHARED,
-								newData.fileDescriptor,
-								0);
+        newData.pMemory = mmap(NULL,
+                               size,
+                               PROT_READ | PROT_WRITE,
+                               MAP_SHARED,
+                               newData.fileDescriptor,
+                               0);
 		if (newData.pMemory == NULL)
 		{
-			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  mmap failed");
+            syslog(LOG_ERR, "AJAMemory::AllocateShared -- mmap failed\n");
 			// Just because we failed, don't ruin it for others.  If we unlink, nobody will
 			// be able to attach to the shared memory ever again.
 			// shm_unlink(name.c_str());
@@ -376,15 +353,14 @@ AJAMemory::FreeShared(void* pMemory)
 #if defined(AJA_WINDOWS)
 				UnmapViewOfFile(shareIter->pMemory);
 				CloseHandle(shareIter->fileMapHandle);
-#endif
-#if defined(AJA_LINUX) || defined(AJA_MAC)
+#else
 				munmap(shareIter->pMemory, shareIter->memorySize);
 				close(shareIter->fileDescriptor);
 				// This is ugly. If we call shm_unlink, then the shared file name will
 				// be removed from /dev/shm, and future calls to shm_open will create a
 				// different memory share.  Will there be a problem with multiple calls
 				// to shm_open with no intervening calls to shm_unlink?  Time will tell.
-//				shm_unlink(shareIter->shareName.c_str());
+//              shm_unlink(shareIter->shareName.c_str());
 #endif
 				sSharedList.erase(shareIter);
 			}

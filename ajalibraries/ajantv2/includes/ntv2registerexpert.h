@@ -43,6 +43,7 @@
 #define	kRegClass_Analog	std::string ("kRegClass_Analog")
 #define	kRegClass_AES		std::string ("kRegClass_AES")
 #define	kRegClass_HDMI		std::string ("kRegClass_HDMI")
+#define	kRegClass_HDR		std::string ("kRegClass_HDR")
 #define	kRegClass_VPID		std::string ("kRegClass_VPID")
 #define	kRegClass_SDIError	std::string ("kRegClass_SDIError")
 #define	kRegClass_Timing	std::string ("kRegClass_Timing")

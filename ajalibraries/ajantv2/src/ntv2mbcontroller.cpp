@@ -1,3 +1,9 @@
+/**
+	@file		ntv2mbcontroller.cpp
+	@brief		Implementation of CNTV2MBController class.
+	@copyright	(C) 2015-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
+
 #include "ntv2mbcontroller.h"
 #include <sstream>
 
@@ -208,34 +214,20 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACa
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
-        switch (as)
-        {
-        case ARP_VALID:
-            return true;
-        case ARP_ERROR:
-            return false;
-            break;
-        default:
-            break;
-        }
-
-        int count = 60;
+        int count = 30;
         do
         {
             SendArpRequest(remote_IPAddress);
-            mDevice.WaitForOutputVerticalInterrupt();
-            as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
+            mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
+            eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
             switch (as)
             {
             case ARP_VALID:
                 return true;
             case ARP_ERROR:
                 return false;
-                break;
-            case ARP_INCOMPLETE:
-                return false;
             default:
+            case ARP_INCOMPLETE:
             case ARP_NOT_FOUND:
                break;
             }
@@ -399,3 +391,43 @@ bool CNTV2MBController::getString(const std::string & resp, const std::string & 
     return false;   // not found
 }
 
+void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_ADDR, ipaddr);
+
+    EnableIGMPGroup(port,channel,stream,enable);
+}
+
+void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, 0);   // block not used
+}
+
+void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable)
+{
+    uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    uint32_t val = IGMPCB_STATE_USED;
+    if (enable)
+    {
+        val += IGMPCB_STATE_ENABLED;
+    }
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, val);
+}
+
+uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream)
+{
+    struct IGMPCB
+    {
+        uint32_t state;
+        uint32_t addr;
+    };
+    static IGMPCB igmpcb[SAREK_MAX_PORTS][SAREK_MAX_CHANS][NTV2_MAX_NUM_STREAMS];
+    if (port < SAREK_MAX_PORTS && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_STREAM(stream))
+    {
+        uint32_t offset = uint32_t(&igmpcb[port][channel][stream] - &igmpcb[0][0][0]);
+        return offset * 2;    // registers
+    }
+    return 0;
+}
