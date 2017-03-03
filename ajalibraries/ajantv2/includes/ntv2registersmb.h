@@ -155,7 +155,7 @@
 #define ENCODER_2_ENABLE            BIT(24)
 #define ENCODER_2_MD_ENABLE         BIT(25)
 #define ENCODER_2_SF_ENABLE         BIT(26)
-#define DECODER_2_NON_ELSM          (BIT(28) + BIT(29() + BIT(30))
+#define ENCODER_2_CFG_NUM           (BIT(28) + BIT(29() + BIT(30))
 #define ENCODER_2_RESET             BIT(31)
 
 #define SAREK_2022_6                BIT(0)
