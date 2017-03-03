@@ -12,7 +12,6 @@
 	#include <Carbon/Carbon.h>
 	#include <IOKit/IOMessage.h>
 	#include <IOKit/usb/IOUSBLib.h>
-	//#include <IOKit/firewire/IOFireWireFamilyCommon.h>	//	We don't listen to FireWire bus any more
 	#include <vector>
 	#include <map>
 	#include <list>

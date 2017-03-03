@@ -3579,7 +3579,7 @@ typedef enum
 	kRegMaskXlnxPerfCycleCountHigh				= 0x000003ff,
 
 	kRegMaskXlnxPerfDataCountMax				= 0x00010000,
-	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff,
+	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff
 
 } XlnxRegisterMask;
 
@@ -3618,7 +3618,7 @@ typedef enum
 	kRegShiftXlnxPerfCycleCountHigh				= 0,
 
 	kRegShiftXlnxPerfDataCountMax				= 16,
-	kRegShiftXlnxPerfDataCountHigh				= 0,
+	kRegShiftXlnxPerfDataCountHigh				= 0
 
 } XlnxRegisterShift;
 

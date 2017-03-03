@@ -1161,6 +1161,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
 
+		// On J2K IP we just use the top SFP 
         rv = target->GetNetworkConfiguration(SFP_TOP,hwIp,hwNet,hwGate);
         if (rv)
         {
@@ -1177,21 +1178,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
         else
             printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
 
-        rv = target->GetNetworkConfiguration(SFP_BOTTOM,hwIp,hwNet,hwGate);
-        if (rv)
-        {
-            uint32_t ip, net, gate;
-            ip   = inet_addr(hwIp.c_str());
-            net  = inet_addr(hwNet.c_str());
-            gate = inet_addr(hwGate.c_str());
-
-            if ((ip != mEth1.ipc_ip) || (net != mEth1.ipc_subnet) || (gate != mEth1.ipc_gateway))
-            {
-                setNetConfig(SFP_BOTTOM);
-            }
-        }
-        else
-            printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
 
     }
 

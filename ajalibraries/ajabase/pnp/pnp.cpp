@@ -12,7 +12,7 @@
 #endif
 
 #if defined(AJA_LINUX)
-	#include <ajabase/pnp/linux/pnpimpl.h>
+	#include "ajabase/pnp/linux/pnpimpl.h"
 #endif
 
 #if defined(AJA_MAC)

@@ -265,6 +265,26 @@ void j2kDecoderConfig::init()
     audioNumber   = 1;
 }
 
+bool j2kDecoderConfig::operator != ( const j2kDecoderConfig &other )
+{
+    return (!(*this == other));
+}
+
+bool j2kDecoderConfig::operator == ( const j2kDecoderConfig &other )
+{
+    if ((selectionMode      == other.selectionMode)     &&
+        (programNumber      == other.programNumber)     &&
+        (programPID         == other.programPID)        &&
+        (audioNumber        == other.audioNumber))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void j2kDecoderStatus::init()
 {
     numAvailablePrograms = 0;

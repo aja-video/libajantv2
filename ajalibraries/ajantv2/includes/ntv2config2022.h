@@ -204,6 +204,9 @@ public:
     j2kDecoderConfig() {init();}
     void init();
 
+    bool operator == ( const j2kDecoderConfig &other );
+    bool operator != ( const j2kDecoderConfig &other );
+
     eProgSelMode_t  selectionMode;
     uint32_t        programNumber;
     uint32_t        programPID;
