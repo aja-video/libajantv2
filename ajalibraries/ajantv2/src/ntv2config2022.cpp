@@ -516,17 +516,6 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         destIp = NTV2EndianSwap32(destIp);
         WriteChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, destIp);
 
-        uint8_t ip0 = (destIp & 0xff000000)>> 24;
-        int offset = (int)channel;
-        if (ip0 >= 224 && ip0 <= 239)
-        {
-            mDevice.WriteRegister(kRegSarekIGMP4 + offset + SAREK_REGS, destIp);
-        }
-        else
-        {
-            mDevice.WriteRegister(kRegSarekIGMP4 + offset + SAREK_REGS, 0);
-        }
-
         // source port
         WriteChannelRegister(kReg2022_6_rx_match_src_port + baseAddr, rxConfig.secondarySourcePort);
 
@@ -545,18 +534,18 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         // enable  register updates
         ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
 
-        // if already enabled, make sure IGMP subscriptions are updated
-        bool enabled = false;
-        GetRxChannelEnable(channel,enabled);
-        if (enabled)
+        // update IGMP subscriptions
+        uint8_t ip0 = (destIp & 0xff000000)>> 24;
+        if (ip0 >= 224 && ip0 <= 239)
         {
-            rv = AcquireMailbox();
-            if (rv)
-            {
-                //rv = JoinIGMPGroup(SFP_BOTTOM, (NTV2Channel)(int)(channel+2), rxConfig.secondaryDestIP);
-                rv = JoinIGMPGroup(SFP_BOTTOM, channel, rxConfig.secondaryDestIP);
-                ReleaseMailbox();
-            }
+            // is multicast
+            bool enabled = false;
+            GetRxChannelEnable(channel,enabled);
+            SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+        }
+        else
+        {
+            UnsetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM);
         }
     }
 
@@ -631,7 +620,6 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     // update IGMP subscriptions
     eSFP port = GetRxPort(channel);
     uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    int offset = (int)channel;
     if (ip0 >= 224 && ip0 <= 239)
     {
         // is multicast

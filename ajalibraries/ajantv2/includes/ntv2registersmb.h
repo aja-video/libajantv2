@@ -44,10 +44,10 @@
 #define kRegSarekIGMPVersion        9
 
 #define kRegSarekTxAutoMAC          11
-#define kRegSarekIGMP4              12
-#define kRegSarekIGMP5              13
-#define kRegSarekIGMP6              14
-#define kRegSarekIGMP7              15
+#define kRegSarekunused4            12
+#define kRegSarekunused5            13
+#define kRegSarekunused6            14
+#define kRegSarekunused7            15
 
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
