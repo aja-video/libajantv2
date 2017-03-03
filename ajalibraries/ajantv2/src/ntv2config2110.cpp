@@ -383,6 +383,18 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_depkt_payload_len_last + depackBaseAddr,payloadLengthLast);
 
         // end setup 4175 depacketizer
+
+        // setup PLL even if not currently in use
+        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
+        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+        NTV2Standard        std = fd.GetVideoStandard();
+        bool               is2K = fd.Is2KFormat();
+
+        uint32_t val = ( (((uint32_t) fr) << 8) |
+                         (((uint32_t) fg) << 4) |
+                          ((uint32_t) std ) );
+        if (is2K) val += BIT(13);
+        mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, val);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -511,7 +523,6 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
 
     if (!disableIGMP)
     {
-
         EnableIGMPGroup(port,channel,stream,enable);
     }
 
@@ -526,12 +537,22 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x01);
+        uint32_t val = 0x01;
+        if (stream == NTV2_VIDEO_STREAM)
+        {
+            val = 0x0d;
+        }
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
     }
     else
     {
         // order is important
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0x0);
+        uint32_t val = 0x00;
+        if (stream == NTV2_VIDEO_STREAM)
+        {
+            val = 0x0c;
+        }
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
     }
     // enable  register updates
@@ -1171,7 +1192,13 @@ string CNTV2Config2110::getLastError()
 void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
 {
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x00);
-    // DAC TODO - wait for access
+    uint32_t val;
+    mDevice.ReadRegister(kRegFramer_status + baseAddr,&val);
+    while (val & BIT(1))
+    {
+        mDevice.WaitForOutputVerticalInterrupt();
+        mDevice.ReadRegister(kRegFramer_status + baseAddr,&val);
+    }
 }
 
 void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
@@ -1182,7 +1209,13 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
 void CNTV2Config2110::AcquireDecapsulatorControlAccess(uint32_t baseAddr)
 {
     WriteChannelRegister(kRegDecap_control + baseAddr, 0x00);
-    // DAC TODO - wait for access
+    uint32_t val;
+    mDevice.ReadRegister(kRegDecap_status + baseAddr,&val);
+    while (val & BIT(1))
+    {
+        mDevice.WaitForOutputVerticalInterrupt();
+        mDevice.ReadRegister(kRegDecap_status + baseAddr,&val);
+    }
 }
 
 void CNTV2Config2110::ReleaseDecapsulatorControlAccess(uint32_t baseAddr)

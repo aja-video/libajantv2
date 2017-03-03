@@ -5306,12 +5306,12 @@ typedef enum
 		#define AUTOCIRCULATE_P2P_TARGET			BIT(30)		///< @brief prepare p2p target for asynchronous transfer (with message)
 		#define AUTOCIRCULATE_P2P_TRANSFER			BIT(31)		///< @brief transfer to p2p sync or async target
 
-		/**
-			Convenience macros that delimit the new structs.
-			For driver builds, the structs are simply structs.
-			For client builds, the structs are classes with the appropriate __declspec(dllexport) or __declspec(dllimport) decorations.
-		**/
 		#if !defined (NTV2_BUILDING_DRIVER)
+			/**
+				Convenience macros that delimit the new structs.
+				For driver builds, the structs are simply structs.
+				For client builds, the structs are classes with the appropriate __declspec(dllexport) or __declspec(dllimport) decorations.
+			**/
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		class AJAExport __struct_name__ {public:
 			#define	NTV2_STRUCT_END(__struct_name__)		};
 			#define	NTV2_BEGIN_PRIVATE						private:
@@ -5325,6 +5325,7 @@ typedef enum
 				#define	NTV2_ASSERT_STRUCT_VALID
 			#endif
 
+			//	Convenience macros for compactly formatting ostream output...
 			#define	Hex(__x__)				std::hex << (__x__) << std::dec
 			#define	xHex(__x__)				"0x" << HEX(__x__)
 			#define	HexN(__x__,__n__)		std::hex << std::setw(__n__) << (__x__) << std::dec
@@ -5361,6 +5362,7 @@ typedef enum
 			#define	bBIN032(__x__)			"b"	<< BIN032(__x__)
 			#define	bBIN016(__x__)			"b"	<< BIN016(__x__)
 			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
+			#define	fDEC(__x__,__w__,__p__)	std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__) << std::dec
 		#else
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
 			#define	NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
@@ -7843,5 +7845,9 @@ typedef struct HDRFloatValues{
     uint8_t		electroOpticalTransferFunction;
     uint8_t		staticMetadataDescriptorID;
 }HDRFloatValues;
+
+#define NTV2_IS_VALID_HDR_PRIMARY(__val__)				((__val__ >= 0x0000) && (__val__ <= 0xC350))
+#define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
+#define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
 
 #endif	//	NTV2PUBLICINTERFACE_H

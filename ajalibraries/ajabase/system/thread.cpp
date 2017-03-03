@@ -43,7 +43,7 @@ AJAThread::ThreadRun()
 	// initialize the thread
 	status = ThreadInit();
 
-	if (status > 0)
+    if (AJA_SUCCESS(status))
 	{
 		// call the loop until done
 		while (loop && !Terminate())
