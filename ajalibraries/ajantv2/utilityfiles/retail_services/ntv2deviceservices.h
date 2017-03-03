@@ -85,7 +85,6 @@ public:
 						VPIDChannel		inChannel,
 						bool			inUseChannel=true);
 	GeneralFrameFormat GetGeneralFrameFormat(NTV2FrameBufferFormat fbFormat);
-	NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat);
 	NTV2Mode GetCh1Mode();
 	
 	bool IsPulldownConverterMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);

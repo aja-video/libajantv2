@@ -227,6 +227,7 @@ AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 
 AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (UByte geometry, bool progressiveTransport);
 AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat);
+AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat);
 #if defined (NTV2_DEPRECATE)
 	#define	GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
 #else
