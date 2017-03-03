@@ -566,31 +566,75 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		const NTV2FormatDescriptor	&	result			(formatDescriptorTable[inVideoStandard][inFrameBufferFormat]);
 		const ULWord					numActiveLines	(result.numLines);
 		*this = result;
-	
-		//	Account for VANC...
-		if (inVANCenabled)
+
+		switch(inVideoStandard)
 		{
-			switch (inVideoStandard)
+		case NTV2_STANDARD_1080:
+		case NTV2_STANDARD_1080p:
+			mFrameGeometry = NTV2_FG_1920x1080;
+			if(inVANCenabled)
 			{
-				case NTV2_STANDARD_1080:
-				case NTV2_STANDARD_1080p:	numLines = inWideVANC ? 1114 : 1112;	break;
-	
-				case NTV2_STANDARD_720:		numLines = 740;							break;
-	
-				case NTV2_STANDARD_525:		numLines = inWideVANC ? 514 : 508;		break;
-	
-				case NTV2_STANDARD_625:		numLines = inWideVANC ? 612 : 598;		break;
-	
-				case NTV2_STANDARD_2K:		numLines = 1588;						break;
-	
-				default:					MakeInvalid ();							return;
+				numLines = inWideVANC ? 1114 : 1112;
+				mFrameGeometry = inWideVANC ? NTV2_FG_1920x1114 : NTV2_FG_1920x1112;
 			}
+			break;
+		case NTV2_STANDARD_720:
+			mFrameGeometry = NTV2_FG_1280x720;
+			if(inVANCenabled)
+			{
+				numLines = 740;
+				mFrameGeometry = NTV2_FG_1280x740;
+			}
+			break;
+		case NTV2_STANDARD_525:
+			mFrameGeometry = NTV2_FG_720x486;
+			if(inVANCenabled)
+			{
+				numLines = inWideVANC ? 514 : 508;
+				mFrameGeometry = inWideVANC ? NTV2_FG_720x514 : NTV2_FG_720x508;
+			}
+			break;
+		case NTV2_STANDARD_625:
+			mFrameGeometry = NTV2_FG_720x576;
+			if(inVANCenabled)
+			{
+				numLines = inWideVANC ? 612 : 598;
+				mFrameGeometry = inWideVANC ? NTV2_FG_720x612 : NTV2_FG_720x598;
+			}
+			break;
+		case NTV2_STANDARD_2K:
+			mFrameGeometry = NTV2_FG_2048x1556;
+			if(inVANCenabled)
+			{
+				numLines = 1588;
+				mFrameGeometry = NTV2_FG_2048x1588;
+			}
+			break;
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:
+			mFrameGeometry = NTV2_FG_2048x1080;
+			if(inVANCenabled)
+			{
+				numLines = inWideVANC ? 1114 : 1112;
+				mFrameGeometry = inWideVANC ? NTV2_FG_2048x1114 : NTV2_FG_2048x1112;
+			}
+			break;
+		case NTV2_STANDARD_3840x2160p:
+			case NTV2_STANDARD_3840HFR:
+			mFrameGeometry = NTV2_FG_4x1920x1080;
+			break;
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:
+			mFrameGeometry = NTV2_FG_4x2048x1080;
+			break;
 		}
+
 		firstActiveLine = numLines - numActiveLines;
 		mStandard		= inVideoStandard;
 		mPixelFormat	= inFrameBufferFormat;
 		m2Kby1080		= in2Kby1080;
 		mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
+
 		if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
 			FinalizePlanar();
 	
@@ -647,7 +691,8 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWor
 		mPixelFormat	(NTV2_FBF_INVALID),
 		mVancMode		(NTV2_VANCMODE_INVALID),
 		m2Kby1080		(false),
-		mNumPlanes		(1)
+		mNumPlanes		(1),
+		mFrameGeometry	(NTV2_FG_INVALID)
 {
 	mLinePitch[0] = inLinePitch * 4;	//	mLinePitch is in bytes, inLinePitch is in 32-bit longwords
 	mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
@@ -667,6 +712,7 @@ void NTV2FormatDescriptor::MakeInvalid (void)
 	m2Kby1080		= false;
 	mLinePitch[0] = mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
 	mNumPlanes		= 0;
+	mFrameGeometry	= NTV2_FG_INVALID;
 }
 
 
