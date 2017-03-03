@@ -59,10 +59,10 @@
 #define kRegSarekNET1               23
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
-#define kRegSarekIGMP0              26
-#define kRegSarekIGMP1              27
-#define kRegSarekIGMP2              28
-#define kRegSarekIGMP3              29
+#define kRegSarekunused0            26
+#define kRegSarekunused1            27
+#define kRegSarekunused2            28
+#define kRegSarekunused3            29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
 #define kRegSarekFwCfg              32

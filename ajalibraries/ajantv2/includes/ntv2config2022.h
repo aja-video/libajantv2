@@ -287,6 +287,8 @@ public:
 
 	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
+    static uint32_t  get2110Stream(NTV2Channel ch,NTV2Stream scch );
+
 	// If method returns false call this to get details
     std::string getLastError();
 	

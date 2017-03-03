@@ -577,18 +577,6 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     destIp = NTV2EndianSwap32(destIp);
     WriteChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, destIp);
 
-    uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    int offset = (int)channel;
-    if (ip0 >= 224 && ip0 <= 239)
-    {
-        // is multicast
-        mDevice.WriteRegister(kRegSarekIGMP0 + offset + SAREK_REGS, destIp);
-    }
-    else
-    {
-        mDevice.WriteRegister(kRegSarekIGMP0 + offset + SAREK_REGS, 0);
-    }
-
     // source port
     WriteChannelRegister(kReg2022_6_rx_match_src_port + baseAddr, rxConfig.primarySourcePort);
 
@@ -637,20 +625,23 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
        if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
        pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
        mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
-    }
 
-    // if already enabled, make sure IGMP subscriptions are updated
-    bool enabled = false;
-    GetRxChannelEnable(channel,enabled);
-    if (enabled)
+	}
+
+    // update IGMP subscriptions
+    eSFP port = GetRxPort(channel);
+    uint8_t ip0 = (destIp & 0xff000000)>> 24;
+    int offset = (int)channel;
+    if (ip0 >= 224 && ip0 <= 239)
     {
-        eSFP port = GetRxPort(channel);
-        rv = AcquireMailbox();
-        if (rv)
-        {
-            rv = JoinIGMPGroup(port, channel, rxConfig.primaryDestIP);
-            ReleaseMailbox();
-        }
+        // is multicast
+        bool enabled = false;
+        GetRxChannelEnable(channel,enabled);
+        SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+    }
+    else
+    {
+        UnsetIGMPGroup(port, channel, NTV2_VIDEO_STREAM);
     }
 
     return rv;
@@ -776,31 +767,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
 
         if (!disableIGMP)
         {
-            // join/leave multicast group if necessary
-            offset = (int)channel;
-            mDevice.ReadRegister(kRegSarekIGMP4 + offset + SAREK_REGS, &ip);
-            if (ip != 0)
-            {
-                // is mutlicast
-                sin.sin_addr.s_addr = NTV2EndianSwap32(ip);
-                char * ipaddr = inet_ntoa(sin.sin_addr);
-
-                rv = AcquireMailbox();
-                if (rv)
-                {
-                    if (enable)
-                    {
-                        //rv = JoinIGMPGroup(port, (NTV2Channel)(int)(channel+2), ipaddr);
-                        rv = JoinIGMPGroup(port, channel, ipaddr);
-                    }
-                    else
-                    {
-                         //rv = LeaveIGMPGroup(port, (NTV2Channel)(int)(channel+2), ipaddr);
-                         rv = LeaveIGMPGroup(port, channel, ipaddr);
-                    }
-                    ReleaseMailbox();
-                }
-            }
+            EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,enable);
         }
     }
 
@@ -810,30 +777,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
 
     if (!disableIGMP)
     {
-        // join/leave multicast group if necessary
-        offset = (int)channel;
-        mDevice.ReadRegister(kRegSarekIGMP0 + offset + SAREK_REGS, &ip);
-        if (ip != 0)
-        {
-            // is mutlicast
-            sin.sin_addr.s_addr = NTV2EndianSwap32(ip);
-            char * ipaddr = inet_ntoa(sin.sin_addr);
-
-            rv = AcquireMailbox();
-            if (rv)
-            {
-                if (enable)
-                {
-                    rv = JoinIGMPGroup(port, channel, ipaddr);
-                }
-                else
-                {
-                     rv = LeaveIGMPGroup(port, channel, ipaddr);
-                }
-                ReleaseMailbox();
-                // continue but return error code
-            }
-        }
+        EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,enable);
     }
 
     if (enable)
