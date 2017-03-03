@@ -385,9 +385,8 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         // end setup 4175 depacketizer
 
         // setup PLL even if not currently in use
-#if 0
-        NTV2FrameRate       fr = GetNTV2FrameRateFromVideoFormat(fmt);
-        NTV2FrameGeometry   fg = NTV2VideoFormatFrameGeometrys[fmt];
+        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
+        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
         NTV2Standard        std = fd.GetVideoStandard();
         bool               is2K = fd.Is2KFormat();
 
@@ -396,9 +395,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
                           ((uint32_t) std ) );
         if (is2K) val += BIT(13);
         mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, val);
-#else
-        mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, 0x211);    // temp kludge
-#endif
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -527,7 +523,6 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
 
     if (!disableIGMP)
     {
-
         EnableIGMPGroup(port,channel,stream,enable);
     }
 
@@ -542,12 +537,22 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0xd);
+        uint32_t val = 0x01;
+        if (stream == NTV2_VIDEO_STREAM)
+        {
+            val = 0x0d;
+        }
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
     }
     else
     {
         // order is important
-        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, 0xc);
+        uint32_t val = 0x00;
+        if (stream == NTV2_VIDEO_STREAM)
+        {
+            val = 0x0c;
+        }
+        WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
     }
     // enable  register updates
