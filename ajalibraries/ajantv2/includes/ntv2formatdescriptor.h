@@ -222,7 +222,7 @@ typedef struct NTV2FormatDescriptor
 	inline bool						IsQuadRaster (void) const		{return NTV2_IS_QUAD_STANDARD(mStandard) || NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat);}	///< @return	True if I was created with a 4K/UHD video format or standard.
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
-
+	inline NTV2FrameGeometry		GetFrameGeometry (void) const	{return mFrameGeometry;}					///< @return	The frame geometry I was created with.
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:
@@ -242,6 +242,7 @@ typedef struct NTV2FormatDescriptor
 		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
 		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
 		UWord					mNumPlanes;			///< @brief	Number of planes
+		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating video geometry
 
 } NTV2FormatDescriptor;
 

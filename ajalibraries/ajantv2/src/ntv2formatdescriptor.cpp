@@ -608,6 +608,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 											inWideVANC);
 		*this = result;
 		mVideoFormat = inVideoFormat;
+		mFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(inVideoFormat);
 	}	//	construct from NTV2VideoFormat
 
 	NTV2FormatDescriptor GetFormatDescriptor (	const NTV2Standard			inVideoStandard,
