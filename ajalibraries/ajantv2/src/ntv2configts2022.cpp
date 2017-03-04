@@ -32,7 +32,7 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
-#define WAIT_RESET_MS   200
+#define WAIT_RESET_MS   1000
 
     uint32_t    val;
     uint32_t    encoderBit, resetBit;
@@ -63,6 +63,13 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
     val &= ~encoderBit;
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
+
+    // Wait
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (WAIT_RESET_MS);
+    #else
+        usleep (WAIT_RESET_MS * 1000);
+    #endif
 
     // Assert reset
     val |= resetBit;
