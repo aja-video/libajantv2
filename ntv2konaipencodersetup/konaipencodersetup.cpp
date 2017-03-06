@@ -22,7 +22,7 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
     QString vf =  pjson["VideoFormat"].toString();
 
     mKonaIPParams.channels = pjson["Channels"].toInt();
-    std::cout << "Channels       " << vf.toStdString().c_str() << std::endl;
+    std::cout << "Channels       " << mKonaIPParams.channels << std::endl;
 
     mKonaIPParams.videoFormat = videoFormatMap[vf];
     std::cout << "VideoFormat    " << vf.toStdString().c_str() << std::endl;
