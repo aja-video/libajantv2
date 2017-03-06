@@ -12,7 +12,19 @@
 
 #include <stdint.h>
 #include <map>
-#include <stdio.h>
+
+#define KIPDPRINT                       0
+
+#if (KIPDPRINT==0)
+    // no log
+    #define kipdprintf(_format_...)
+
+#elif (KIPDPRINT==1)
+    // printf
+    #include <stdio.h>
+    #define kipdprintf(_format_...) printf(_format_)
+#endif
+
 
 typedef enum
 {
@@ -172,11 +184,11 @@ class TSGenerator
             for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
-                    printf("0x%02x\n", _pkt8[i]);
+                    kipdprintf("0x%02x\n", _pkt8[i]);
                 else
-                    printf("0x%02x, ", _pkt8[i]);
+                    kipdprintf("0x%02x, ", _pkt8[i]);
             }
-            printf("\n\n");
+            kipdprintf("\n\n");
         }
 
         void dump32()
@@ -184,11 +196,11 @@ class TSGenerator
             for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
-                    printf("0x%04x\n", _pkt32[i]);
+                    kipdprintf("0x%04x\n", _pkt32[i]);
                 else
-                    printf("0x%04x ", _pkt32[i]);
+                    kipdprintf("0x%04x ", _pkt32[i]);
             }
-            printf("\n\n");
+            kipdprintf("\n\n");
         }
 
     protected:
