@@ -423,7 +423,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
     mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
 
-    // if already enabled, make sure IGMP subscriptions are updated
+    // make sure IGMP subscriptions are updated
     eSFP port = GetRxPort(channel);
     uint8_t ip0 = (destIp & 0xff000000)>> 24;
     int offset = (int)channel;
