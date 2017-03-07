@@ -194,6 +194,15 @@ typedef struct NTV2FormatDescriptor
 	inline NTV2FrameDimensions		GetVisibleRasterDimensions (void) const					{return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(true));}
 
 	/**
+		@brief		Answers with the equivalent SMPTE line number for the given line offset into the frame buffer I describe.
+		@param[in]	inLineOffset	Specifies the zero-based line offset into the frame buffer that I describe.
+		@param[out]	outSMPTELine	Receives the equivalent SMPTE line number.
+		@param[out]	outIsField2		Receives true if the line number is associated with Field 2 (interlaced only); otherwise false.
+		@return		True if successful;  otherwise false.
+	**/
+	bool							GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const;
+
+	/**
 		@return	True if I'm equal to the given NTV2FormatDescriptor.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/

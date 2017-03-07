@@ -305,6 +305,7 @@ typedef enum
 #define	NTV2_IS_VALID_STANDARD(__s__)			((__s__) >= NTV2_STANDARD_1080 && (__s__) < NTV2_STANDARD_UNDEFINED)
 #define NTV2_IS_PROGRESSIVE_STANDARD(__s__)		(		(__s__) == NTV2_STANDARD_1080p			\
                                                     ||	(__s__) == NTV2_STANDARD_720			\
+                                                    ||	(__s__) == NTV2_STANDARD_2Kx1080p		\
                                                     ||	(__s__) == NTV2_STANDARD_3840x2160p		\
                                                     ||	(__s__) == NTV2_STANDARD_4096x2160p		\
                                                     ||	(__s__) == NTV2_STANDARD_3840HFR		\
