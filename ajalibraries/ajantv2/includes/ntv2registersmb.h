@@ -43,11 +43,12 @@
 #define kRegSarekSerialHi           8
 #define kRegSarekIGMPVersion        9
 
+#define kRegSarekMiscState          10
 #define kRegSarekTxAutoMAC          11
-#define kRegSarekIGMP4              12
-#define kRegSarekIGMP5              13
-#define kRegSarekIGMP6              14
-#define kRegSarekIGMP7              15
+#define kRegSarekunused12           12
+#define kRegSarekunused13           13
+#define kRegSarekunused14           14
+#define kRegSarekunused15           15
 
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
@@ -59,10 +60,10 @@
 #define kRegSarekNET1               23
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
-#define kRegSarekIGMP0              26
-#define kRegSarekIGMP1              27
-#define kRegSarekIGMP2              28
-#define kRegSarekIGMP3              29
+#define kRegSarekunused26           26
+#define kRegSarekunused27           27
+#define kRegSarekunused28           28
+#define kRegSarekunused29           29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
 #define kRegSarekFwCfg              32
@@ -145,15 +146,18 @@
 
 #define RESET_MB                    BIT(0)
 #define VIRTUAL_UART                BIT(4)
+#define DECODER_1_RESET             BIT(11)
 #define ENCODER_1_ENABLE            BIT(16)
 #define ENCODER_1_MD_ENABLE         BIT(17)
 #define ENCODER_1_SF_ENABLE         BIT(18)
 #define DECODER_1_NON_ELSM          BIT(19)
 #define ENCODER_1_CFG_NUM           (BIT(20) + BIT(21) + BIT(22))
+#define ENCODER_1_RESET             BIT(23)
 #define ENCODER_2_ENABLE            BIT(24)
 #define ENCODER_2_MD_ENABLE         BIT(25)
 #define ENCODER_2_SF_ENABLE         BIT(26)
-#define DECODER_2_NON_ELSM          (BIT(28) + BIT(29() + BIT(30))
+#define ENCODER_2_CFG_NUM           (BIT(28) + BIT(29() + BIT(30))
+#define ENCODER_2_RESET             BIT(31)
 
 #define SAREK_2022_6                BIT(0)
 #define SAREK_2022_2                BIT(1)

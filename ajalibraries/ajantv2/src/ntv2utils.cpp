@@ -1904,6 +1904,117 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	return standard;
 }
 
+//-------------------------------------------------------------------------------------------------------
+//	GetNTV2FrameGeometryFromVideoFormat
+//-------------------------------------------------------------------------------------------------------
+NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat)
+{
+	NTV2FrameGeometry result = NTV2_FG_1920x1080;
+
+	switch (videoFormat)
+	{
+		case NTV2_FORMAT_4x1920x1080psf_2398:
+		case NTV2_FORMAT_4x1920x1080psf_2400:
+		case NTV2_FORMAT_4x1920x1080psf_2500:
+		case NTV2_FORMAT_4x1920x1080psf_2997:
+		case NTV2_FORMAT_4x1920x1080psf_3000:
+		case NTV2_FORMAT_4x1920x1080p_2398:
+		case NTV2_FORMAT_4x1920x1080p_2400:
+		case NTV2_FORMAT_4x1920x1080p_2500:
+		case NTV2_FORMAT_4x1920x1080p_2997:
+		case NTV2_FORMAT_4x1920x1080p_3000:
+		case NTV2_FORMAT_4x1920x1080p_5000:
+		case NTV2_FORMAT_4x1920x1080p_5994:
+		case NTV2_FORMAT_4x1920x1080p_6000:
+			result = NTV2_FG_4x1920x1080;
+			break;
+
+		case NTV2_FORMAT_4x2048x1080psf_2398:
+		case NTV2_FORMAT_4x2048x1080psf_2400:
+		case NTV2_FORMAT_4x2048x1080psf_2500:
+		case NTV2_FORMAT_4x2048x1080p_2398:
+		case NTV2_FORMAT_4x2048x1080p_2400:
+		case NTV2_FORMAT_4x2048x1080p_2500:
+		case NTV2_FORMAT_4x2048x1080p_2997:
+		case NTV2_FORMAT_4x2048x1080p_3000:
+		case NTV2_FORMAT_4x2048x1080psf_2997:
+		case NTV2_FORMAT_4x2048x1080psf_3000:
+		case NTV2_FORMAT_4x2048x1080p_5000:
+		case NTV2_FORMAT_4x2048x1080p_5994:
+		case NTV2_FORMAT_4x2048x1080p_6000:
+			result = NTV2_FG_4x2048x1080;
+			break;
+
+		case NTV2_FORMAT_2K_1498:
+		case NTV2_FORMAT_2K_1500:
+		case NTV2_FORMAT_2K_2398:
+		case NTV2_FORMAT_2K_2400:
+		case NTV2_FORMAT_2K_2500:
+			result = NTV2_FG_2048x1556;
+			break;
+
+		case NTV2_FORMAT_1080i_5000:
+		case NTV2_FORMAT_1080i_5994:
+		case NTV2_FORMAT_1080i_6000:
+		case NTV2_FORMAT_1080psf_2500_2:
+		case NTV2_FORMAT_1080psf_2997_2:
+		case NTV2_FORMAT_1080psf_3000_2:
+		case NTV2_FORMAT_1080psf_2398:
+		case NTV2_FORMAT_1080psf_2400:
+		case NTV2_FORMAT_1080p_2997:
+		case NTV2_FORMAT_1080p_3000:
+		case NTV2_FORMAT_1080p_2398:
+		case NTV2_FORMAT_1080p_2400:
+		case NTV2_FORMAT_1080p_2500:
+		case NTV2_FORMAT_1080p_5000_B:
+		case NTV2_FORMAT_1080p_5994_B:
+		case NTV2_FORMAT_1080p_6000_B:
+		case NTV2_FORMAT_1080p_5000_A:
+		case NTV2_FORMAT_1080p_5994_A:
+		case NTV2_FORMAT_1080p_6000_A:
+			result = NTV2_FG_1920x1080;
+			break;
+
+		case NTV2_FORMAT_1080p_2K_2398:
+		case NTV2_FORMAT_1080p_2K_2400:
+		case NTV2_FORMAT_1080p_2K_2500:
+		case NTV2_FORMAT_1080psf_2K_2398:
+		case NTV2_FORMAT_1080psf_2K_2400:
+		case NTV2_FORMAT_1080psf_2K_2500:
+		case NTV2_FORMAT_1080p_2K_2997:
+		case NTV2_FORMAT_1080p_2K_3000:
+		case NTV2_FORMAT_1080p_2K_5000_A:
+		case NTV2_FORMAT_1080p_2K_5994_A:
+		case NTV2_FORMAT_1080p_2K_6000_A:
+			result = NTV2_FG_2048x1080;
+			break;
+
+		case NTV2_FORMAT_720p_5994:
+		case NTV2_FORMAT_720p_6000:
+		case NTV2_FORMAT_720p_5000:
+		case NTV2_FORMAT_720p_2398:
+			result = NTV2_FG_1280x720;
+			break;
+
+		case NTV2_FORMAT_525_2398:
+		case NTV2_FORMAT_525_2400:
+		case NTV2_FORMAT_525_5994:
+		case NTV2_FORMAT_525psf_2997:
+			result = NTV2_FG_720x486;
+			break;
+
+		case NTV2_FORMAT_625_5000:
+		case NTV2_FORMAT_625psf_2500:
+			result = NTV2_FG_720x576;
+			break;
+
+		default:
+			break;
+	}
+
+	return result;
+}
+
 
 //#if !defined (NTV2_DEPRECATE_12_6)
 	// GetVideoActiveSize: returns the number of bytes of active video (including VANC lines, if any)
@@ -3857,6 +3968,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
+		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
 		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:		return "Io4KIP";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
@@ -7129,6 +7242,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
 			case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx.mcs";
 			case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx.mcs";
+			case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
 			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
 			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
@@ -7305,6 +7419,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_TTAP,
+														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KIP,
 														DEVICE_ID_NOTFOUND	};

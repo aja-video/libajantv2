@@ -449,7 +449,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_LHI:			return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
-		case DEVICE_ID_IO4KPLUS:	return "io4kplus";
+		case DEVICE_ID_IO4KPLUS:	return "IO_FLINT";
 		case DEVICE_ID_IO4KIP:		return "io4kip";
 		default:
 			break;
