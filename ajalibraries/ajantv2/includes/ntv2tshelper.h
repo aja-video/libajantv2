@@ -16,7 +16,7 @@
 #define KIPDPRINT                       0
 
 
-#if defined(AJA_WINDOWS)
+#if defined(MSWindows)
 
     #if (KIPDPRINT==0)
         // no log
@@ -29,11 +29,11 @@
 
     #endif
 
-#elif defined(AJA_LINUX)
+#elif defined(AJALinux)
 
     #define kipdprintf(...)
 
-#elif defined(AJA_MAC)
+#elif defined(AJAMac)
 
     #if (KIPDPRINT==0)
         // no log
