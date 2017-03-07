@@ -352,13 +352,15 @@ bool CNTV2KonaFlashProgram::ParseHeader(char* headerAddress)
 
 		_numBytes = htonl(*((uint32_t *)p));		// the next 4 bytes are the length of the raw program data
 
-		if ( _partName[0] == '5' || _partName[0] == '6' || _partName[0] == '7')
+		if ( _partName[0] == '5' || _partName[0] == '6' || _partName[0] == '7' || _partName[0] == 'x')
 		{
 			// still waiting for xilinx to explain this fully
 			if(_partName[0] == '5' || (_partName[0] == '6' && _partName[1] == 'v'))
 				p += 48;							// now pointing at the beginning of the identifier
 			else if(_partName[0] == '7' && _partName[1] == 'k')
 				p += 48;
+			else if(_partName[0] == 'x')
+				p += 80;
 			else
 				p += 16;
 		}
