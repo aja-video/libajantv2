@@ -20,11 +20,11 @@
 
     #if (KIPDPRINT==0)
         // no log
-        #define kipdprintf(_format_...)
+        #define kipdprintf(...)
 
     #elif (KIPDPRINT==1)
         // printf
-        #define kipdprintf(_format_...)
+        #define kipdprintf(...)
     #endif
 
 #elif defined(AJA_LINUX)
