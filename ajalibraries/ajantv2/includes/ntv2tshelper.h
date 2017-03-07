@@ -15,14 +15,34 @@
 
 #define KIPDPRINT                       0
 
-#if (KIPDPRINT==0)
-    // no log
-    #define kipdprintf(_format_...)
 
-#elif (KIPDPRINT==1)
-    // printf
-    #include <stdio.h>
-    #define kipdprintf(_format_...) printf(_format_)
+#if defined(AJA_WINDOWS)
+
+    #if (KIPDPRINT==0)
+        // no log
+        #define kipdprintf(_format_...)
+
+    #elif (KIPDPRINT==1)
+        // printf
+        #define kipdprintf(_format_...)
+    #endif
+
+#elif defined(AJA_LINUX)
+
+    #define kipdprintf(...)
+
+#elif defined(AJA_MAC)
+
+    #if (KIPDPRINT==0)
+        // no log
+        #define kipdprintf(_format_...)
+
+    #elif (KIPDPRINT==1)
+        // printf
+        #include <stdio.h>
+        #define kipdprintf(_format_...) printf(_format_)
+    #endif
+
 #endif
 
 
