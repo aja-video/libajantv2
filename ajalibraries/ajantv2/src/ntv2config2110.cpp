@@ -540,7 +540,7 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
         uint32_t val = 0x01;
         if (stream == NTV2_VIDEO_STREAM)
         {
-            val = 0x0d;
+            val = 0x05;
         }
         WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
     }
@@ -550,7 +550,7 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
         uint32_t val = 0x00;
         if (stream == NTV2_VIDEO_STREAM)
         {
-            val = 0x0c;
+            val = 0x04;
         }
         WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);

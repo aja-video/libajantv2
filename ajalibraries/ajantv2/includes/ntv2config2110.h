@@ -33,8 +33,6 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 
-
-
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
