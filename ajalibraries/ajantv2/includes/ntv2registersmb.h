@@ -43,11 +43,12 @@
 #define kRegSarekSerialHi           8
 #define kRegSarekIGMPVersion        9
 
+#define kRegSarekMiscState          10
 #define kRegSarekTxAutoMAC          11
-#define kRegSarekunused4            12
-#define kRegSarekunused5            13
-#define kRegSarekunused6            14
-#define kRegSarekunused7            15
+#define kRegSarekunused12           12
+#define kRegSarekunused13           13
+#define kRegSarekunused14           14
+#define kRegSarekunused15           15
 
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
@@ -59,10 +60,10 @@
 #define kRegSarekNET1               23
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
-#define kRegSarekunused0            26
-#define kRegSarekunused1            27
-#define kRegSarekunused2            28
-#define kRegSarekunused3            29
+#define kRegSarekunused26           26
+#define kRegSarekunused27           27
+#define kRegSarekunused28           28
+#define kRegSarekunused29           29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
 #define kRegSarekFwCfg              32
