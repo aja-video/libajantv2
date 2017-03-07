@@ -498,6 +498,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
                 case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2TX_1SFP_J2K;         break;
                 case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2RX_1SFP_J2K;         break;
                 case DEVICE_ID_CORVIDHBR:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
+				case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;				break;
 				case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 			#if !defined (_DEBUG)
 				default:					break;
@@ -773,6 +774,7 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 		return true;
 	default:
 		return false;
