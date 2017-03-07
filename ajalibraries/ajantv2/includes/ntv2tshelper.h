@@ -24,7 +24,9 @@
 
     #elif (KIPDPRINT==1)
         // printf
-        #define kipdprintf(...)
+        #include <stdio.h>
+        #define kipdprintf(...) printf(__VA_ARGS__)
+
     #endif
 
 #elif defined(AJA_LINUX)
