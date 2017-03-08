@@ -1158,7 +1158,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
         if (target == NULL)
         {
             target = new CNTV2Config2022(*mCard);
-            target->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 
         // KonaIP network configuration
@@ -1192,13 +1191,13 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
 			if (rv && rv2)
 			{
-				if ((enable != mRx2022Config1.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
+				if ((enable != mRx2022Config1.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config1))
 				{
 					setRxConfig(NTV2_CHANNEL1);
 				}
 			}
 			else
-				printf("RxConfig CHAN 1 read FAILED");
+				printf("rxConfig ch 1 config read failed\n");
 			
 			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
 			{
@@ -1206,13 +1205,13 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
 				if (rv && rv2)
 				{
-					if ((enable != mRx2022Config2.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
+					if ((enable != mRx2022Config2.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config2))
 					{
 						setRxConfig(NTV2_CHANNEL2);
 					}
 				}
 				else
-					printf("RxConfig CHAN 2read FAILED");
+					printf("rxConfig ch 2 config read failed\n");
 			}
 		}
 		
@@ -1223,13 +1222,13 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			tx_2022_channel  txHwConfig;
 			
-			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
-			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
+			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
+			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable);
 			if (rv && rv2)
 			{
-				if ((enable != mTx2022Config3.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
+				if ((enable != mTx2022Config3.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config3))
 				{
-					setTxConfig(NTV2_CHANNEL3);
+					setTxConfig(NTV2_CHANNEL1);
 				}
 				else
 				{
@@ -1251,18 +1250,18 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				}
 			}
 			else
-				printf("txConfig CHAN 3 read FAILED");
+				printf("txConfig ch 1 config read failed\n");
 			
 			if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
 			{
 
-				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
-				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable);
+				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
+				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable);
 				if (rv && rv2)
 				{
-					if ((enable != mTx2022Config4.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
+					if ((enable != mTx2022Config4.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config4))
 					{
-						setTxConfig(NTV2_CHANNEL4);
+						setTxConfig(NTV2_CHANNEL2);
 					}
 					else
 					{
@@ -1284,7 +1283,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					}
 				}
 				else
-					printf("txConfig CHAN 4 read FAILED");
+					printf("txConfig ch 2 config read failed\n");
 			}
 		}
     }
@@ -1879,7 +1878,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	
 	switch((int)channel)
 	{
-		case NTV2_CHANNEL4:
+		case NTV2_CHANNEL2:
 			addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
 			chan.primaryRemoteIP        = inet_ntoa(addr);
 			remoteMAC.mac[0]            = (mTx2022Config4.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
@@ -1910,7 +1909,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			break;
 		default:
 			
-		case NTV2_CHANNEL3:
+		case NTV2_CHANNEL1:
 			addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
 			chan.primaryRemoteIP        = inet_ntoa(addr);
 			remoteMAC.mac[0]            = (mTx2022Config3.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
@@ -1961,24 +1960,6 @@ bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, con
 	return false;
 }
 
-bool  KonaIPJ2kServices::notEqualSecondary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
-{
-	uint32_t addr;
-	
-	if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
-	if (virtual_config.rxc_secondaryDestPort   != hw_channel.secondaryDestPort)  return true;
-	if (virtual_config.rxc_secondaryRxMatch    != hw_channel.secondaryRxMatch)   return true;
-	
-	addr = inet_addr(hw_channel.secondaryDestIP.c_str());
-	if (virtual_config.rxc_secondaryDestIp     != addr) return true;
-	
-	addr = inet_addr(hw_channel.secondarySourceIP.c_str());
-	if (virtual_config.rxc_secondarySourceIp   != addr) return true;
-	
-	return false;
-}
-
-
 bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
 	uint32_t addr;
@@ -1998,27 +1979,6 @@ bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, con
 	
 	return false;
 }
-
-bool  KonaIPJ2kServices::notEqualSecondary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
-{
-	uint32_t addr;
-	if (virtual_config.txc_secondaryLocalPort    != hw_channel.secondaryLocalPort)  return true;
-	if (virtual_config.txc_secondaryRemotePort   != hw_channel.secondaryRemotePort) return true;
-	if (virtual_config.txc_secondaryAutoMac      != hw_channel.secondaryAutoMAC)    return true;
-	
-	addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
-	if (virtual_config.txc_secondaryRemoteIp     != addr) return true;
-	
-	// don't compare automac, but if it is false, do compare the mac addresses
-	if (virtual_config.txc_secondaryAutoMac == false)
-	{
-		// only examine mac when automac is off
-		if (notEqualMAC(virtual_config.txc_secondaryRemoteMAC_lo,virtual_config.txc_secondaryRemoteMAC_hi,hw_channel.secondaryRemoteMAC)) return true;
-	}
-	
-	return false;
-}
-
 
 bool  KonaIPJ2kServices::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr)
 {

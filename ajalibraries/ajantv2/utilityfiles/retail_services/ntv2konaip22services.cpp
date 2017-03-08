@@ -3352,7 +3352,7 @@ void  KonaIP22Services::setTxConfig(NTV2Channel channel)
     
     switch((int)channel)
     {
-        case NTV2_CHANNEL4:
+		case NTV2_CHANNEL4:
             addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
             chan.primaryRemoteIP        = inet_ntoa(addr);
             remoteMAC.mac[0]            = (mTx2022Config4.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
@@ -3383,7 +3383,7 @@ void  KonaIP22Services::setTxConfig(NTV2Channel channel)
             break;
         default:
             
-        case NTV2_CHANNEL3:
+		case NTV2_CHANNEL3:
             addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
             chan.primaryRemoteIP        = inet_ntoa(addr);
             remoteMAC.mac[0]            = (mTx2022Config3.txc_primaryRemoteMAC_hi >> 8)  & 0xff;

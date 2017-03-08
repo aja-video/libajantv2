@@ -989,7 +989,7 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigReg(const NTV2Channel channel, const uint3
     else
         mError = "Invalid channel";
 
-    //printf("CNTV2ConfigTs2022::WriteJ2KConfigReg reg = %d %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
+    printf("CNTV2ConfigTs2022::WriteJ2KConfigReg reg = %08x %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
     return rv;
 }
 
@@ -1005,7 +1005,7 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
     else
         mError = "Invalid channel";
 
-    //printf("CNTV2ConfigTs2022::ReadJ2KConfigVReg reg = %d %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
+    printf("CNTV2ConfigTs2022::ReadJ2KConfigVReg reg = %08x %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), *value);
     return rv;
 }
 
