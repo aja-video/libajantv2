@@ -10,7 +10,7 @@
 #define _WINSOCKAPI_
 #include "ajatypes.h"
 #include "ajabase/common/options_popt.h"
-#include "../democlasses/ntv2burnboardtoboard.h"
+#include "ntv2burnboardtoboard.h"
 #include "ajabase/system/systemtime.h"
 #include <signal.h>
 #include <iostream>

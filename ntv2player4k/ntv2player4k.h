@@ -259,7 +259,6 @@ class NTV2Player4K
 	private:
 		AJAThread *					mPlayThread;				///< @brief	My playout (consumer) thread object
 		AJAThread *					mProduceFrameThread;		///< @brief	My generator (producer) thread object
-		AJALock *					mLock;						///< @brief	Global mutex to avoid device frame buffer allocation race condition
 
 		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
 		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)

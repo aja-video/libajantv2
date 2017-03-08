@@ -1,11 +1,8 @@
 #
 # Top level Makefile for AJA Video demo applications
 #
-# Copyright (C) 2012 AJA Video Systems, Inc.
+# Copyright (C) 2017 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
-#
-# This file is the Linux analog of the ajaapi.sln file used with Windows.
-# Its purpose is to build all the projects in the solution.
 #
 
 SUBDIRS = ntv2burn \
@@ -25,8 +22,7 @@ SUBDIRS = ntv2burn \
 		  ntv2player4k \
 		  ntv2qtmultiinput \
 		  NVIDIA/dvplowlatencydemo \
-		  ntv2qtpreview \
-		  ntv2qtrawcapture
+		  ntv2qtpreview
 
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)

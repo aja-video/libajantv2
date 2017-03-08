@@ -1,31 +1,30 @@
 #
-# Copyright (C) 2004-2010 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  
-# All Rights Reserved.
+# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Proprietary and Confidential information.
+# All righs reserved
 #
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-# Makefile to drive qmakes
+# Makefile to drive qmake
+include $(DIR)/../../../../build/configure.mk
+include $(DIR)/../../../../build/qt.mk
 
-NTV2_ROOT := $(shell pwd)/../..
-
-QT_PRO_FILE = ntv2qtrawcapture.pro
-QT_QRC_FILE = ntv2qtrawcapture.qrc
+APP_FULL_PATH=$(A_UBER_BIN)/ntv2qtrawcapture
+QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/qtrawcapture/qtrawcapture.pro
 QMAKE_FILE = qMakefile
-QMAKE ?= qmake
-
-include ../../qt.mk
 
 .PHONY: clean
 
-default: $(NTV2_ROOT)/bin/ntv2qtrawcapture
+default: $(APP_FULL_PATH)
 
-$(NTV2_ROOT)/bin/ntv2qtrawcapture:
+$(APP_FULL_PATH):
 	$(QMAKE) -o $(QMAKE_FILE) $(QT_PRO_FILE)
 	$(MAKE) -f $(QMAKE_FILE)
 
 clean:
-	rm -f $(NTV2_ROOT)/bin/ntv2qtrawcapture
+	rm -f $(APP_FULL_PATH)
 	$(MAKE) -f $(QMAKE_FILE) clean
+	rm -f $(QMAKE_FILE)
 
 .PHONY: cleandeps
 cleandeps:

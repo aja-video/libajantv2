@@ -8,6 +8,7 @@
 #define _NTV2BURNBOARDTOBOARD_H
 
 #include "ntv2card.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2utils.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/types.h"
