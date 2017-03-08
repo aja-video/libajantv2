@@ -590,12 +590,15 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 {
 	unsigned	num	(0);
 	inOutStream << "AJAAncillaryList: " << CountAncillaryData () << " pkts:" << endl;
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  )
 	{
 		AJAAncillaryData *	ancData	(*it);
 
 		inOutStream << "## Packet " << ++num << ":  ";
 		ancData->Print (inOutStream, inDumpPayload);
+		++it;
+		if (it != m_ancList.end())
+			inOutStream << endl;
 	}
 	return inOutStream;
 }
