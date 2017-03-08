@@ -52,8 +52,6 @@
 #define     MODE_STOP                       0x00
 #define     MODE_RECORD                     0x10
 
-#define     USE_MEM_BLOCK                   1
-
 /**
     @brief	The CNTV2ConfigTs2022 class is the interface to Kona-IP SMPTE 2022 J2K encoder and TS chips
 **/
@@ -103,13 +101,8 @@ public:
     uint32_t            GetIpxJ2KAddr(const NTV2Channel channel);
     uint32_t            GetIpxTsAddr(const NTV2Channel channel);
 
-#if USE_MEM_BLOCK
     bool                WriteJ2KConfigReg(const NTV2Channel channel, const uint32_t reg, const uint32_t value);
     bool                ReadJ2KConfigReg(const NTV2Channel channel, const uint32_t reg,  uint32_t * value);
-#else
-    bool                WriteJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg, const uint32_t value);
-    bool                ReadJ2KConfigVReg(const NTV2Channel channel, const uint32_t vreg,  uint32_t * value);
-#endif // USE_MEM_BLOCK
 
     bool                _is2022_6;
     bool                _is2022_2;

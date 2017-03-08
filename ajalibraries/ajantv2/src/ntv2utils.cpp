@@ -4957,6 +4957,11 @@ AJAExport bool IsVideoFormatB(NTV2VideoFormat format)
 	return NTV2_IS_3Gb_FORMAT (format);
 }
 
+AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
+{
+    return NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED (format);
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 	//
