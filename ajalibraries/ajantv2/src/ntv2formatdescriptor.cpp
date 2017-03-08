@@ -627,6 +627,8 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		case NTV2_STANDARD_4096HFR:
 			mFrameGeometry = NTV2_FG_4x2048x1080;
 			break;
+		case NTV2_NUM_STANDARDS:
+			break;
 		}
 
 		firstActiveLine = numLines - numActiveLines;
@@ -823,38 +825,62 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 
 
 //	NTV2_VANCMODE_OFF							1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
-static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			42,			42,			42,			42,			0	};
 static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		0,			0,			0,			0,			0	};
 //	NTV2_VANCMODE_TALL
-static const ULWord	LineNumbersF1t []	=	{	5,		6,		10,		12,		10,		211,	10,			5,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF1t []	=	{	5,		6,		10,		12,		10,		211,	10,			5,			10,			10,			10,			10,			0	};
 static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			568,		0,			0,			0,			0,			0	};
 //	NTV2_VANCMODE_TALLER
-static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			8,			8,			8,			8,			0	};
 static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		0,			0,			0,			0,			0	};
 
-ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
+
+bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const
 {
+	outIsField2 = false;
+	outSMPTELine = 0;
+	if (!IsValid())
+		return false;
+	if (!NTV2_IS_VALID_STANDARD(mStandard))
+		return false;
+	if (!NTV2_IS_VALID_VANCMODE (mVancMode))
+		return false;
+
 	const bool		is525i		(mStandard == NTV2_STANDARD_525);
-	const bool		isF2		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  false  :  (inLineOffset & 1  ?  !is525i  :  is525i));
+	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
+		outIsField2 = (inLineOffset & 1)  ?  !is525i  :  is525i;
+
 	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  1  :  2);
 	ULWord			smpteLine	(0);
 
-	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
-		inOutStream << "F" << (isF2 ? "2" : "1") << " ";
 	switch (mVancMode)
 	{
-		case NTV2_VANCMODE_OFF:		smpteLine =  isF2  ?  LineNumbersF2[mStandard]   :  LineNumbersF1[mStandard];	break;
-		case NTV2_VANCMODE_TALL:	smpteLine =  isF2  ?  LineNumbersF2t[mStandard]  :  LineNumbersF1t[mStandard];	break;
-		case NTV2_VANCMODE_TALLER:	smpteLine =  isF2  ?  LineNumbersF2tt[mStandard] :  LineNumbersF1tt[mStandard];	break;
+		case NTV2_VANCMODE_OFF:		smpteLine =  outIsField2  ?  LineNumbersF2[mStandard]   :  LineNumbersF1[mStandard];	break;
+		case NTV2_VANCMODE_TALL:	smpteLine =  outIsField2  ?  LineNumbersF2t[mStandard]  :  LineNumbersF1t[mStandard];	break;
+		case NTV2_VANCMODE_TALLER:	smpteLine =  outIsField2  ?  LineNumbersF2tt[mStandard] :  LineNumbersF1tt[mStandard];	break;
 		default:					break;
 	}
-	inOutStream << "L" << dec << (inLineOffset/divisor + smpteLine);
+	outSMPTELine = inLineOffset/divisor + smpteLine;
+	return true;
+}
+
+
+ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
+{
+	ULWord	smpteLine	(0);
+	bool	isF2		(false);
+	if (GetSMPTELineNumber (inLineOffset, smpteLine, isF2))
+	{
+		if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
+			inOutStream << "F" << (isF2 ? "2" : "1") << " ";
+		inOutStream << "L" << dec << smpteLine;	//	(inLineOffset/divisor + smpteLine);
+	}
 	return inOutStream;
 }
 
 
-//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?!
-//	IMPLEMENTATION MOVED HERE TO USE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
+//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?
+//	TO USE THE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
 
 NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
 {
