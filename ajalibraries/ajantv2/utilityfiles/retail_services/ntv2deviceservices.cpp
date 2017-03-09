@@ -512,22 +512,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
 	}
 
-	//Setup HDMI
-	if(NTV2DeviceGetHDMIVersion(deviceID) > 0)
-	{
-		NTV2HDMIAudioChannels channels = NTV2_MAX_NUM_HDMIAudioChannelEnums;
-		mCard->ReadRegister(kVRegHDMIOutAudioChannels, (ULWord*)&channels);
-		mCard->SetHDMIOutAudioChannels(channels);
-		if(channels == NTV2_HDMIAudio8Channels)
-			mCard->SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, NTV2_AUDIOSYSTEM_1);
-		else
-			mCard->SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, NTV2_AUDIOSYSTEM_1);
-
-		NTV2HDMIRange range = NTV2_MAX_NUM_HDMIRanges;
-		mCard->ReadRegister(kVRegHDMIOutRGBRange, (ULWord*)&range);
-		mCard->SetHDMIOutRange(range);
-	}
-
 	//Setup LUTs
 	UpdateK2ColorSpaceMatrixSelect();
 	UpdateK2LUTSelect();
