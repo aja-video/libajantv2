@@ -1112,7 +1112,7 @@ bool CNTV2Card::GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSyste
 	for (NTV2AudioChannelPair chanPair (NTV2_AudioChannel1_2);  NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16 (chanPair);  chanPair = NTV2AudioChannelPair (chanPair + 1))
 		if (detectBits & BIT (bitGroup * 8 + chanPair))
 			outDetectedChannelPairs.insert (chanPair);
-	return false;
+	return true;
 }
 
 
