@@ -12,6 +12,7 @@ include $(DIR)/../../../../build/qt.mk
 APP_FULL_PATH=$(A_UBER_BIN)/ntv2qtpreview
 QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/qtpreview/qtpreview.pro
 QMAKE_FILE = qMakefile
+PLUGIN_IMPORT_CPP=$(shell basename $(APP_FULL_PATH))_plugin_import.cpp
 
 .PHONY: clean
 
@@ -23,8 +24,9 @@ $(APP_FULL_PATH):
 
 clean:
 	rm -f $(APP_FULL_PATH)
-	$(MAKE) -f $(QMAKE_FILE) clean
+	if [ -f $(QMAKE_FILE) ]; then $(MAKE) -f $(QMAKE_FILE) clean ; fi
 	rm -f $(QMAKE_FILE)
+	rm -f $(PLUGIN_IMPORT_CPP)
 
 .PHONY: cleandeps
 cleandeps:
