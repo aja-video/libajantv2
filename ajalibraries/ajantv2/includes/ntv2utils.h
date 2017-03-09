@@ -519,6 +519,7 @@ AJAExport bool IsRaw(NTV2FrameBufferFormat format);
 AJAExport bool Is8BitFrameBufferFormat(NTV2FrameBufferFormat fbFormat);
 AJAExport bool IsVideoFormatA(NTV2VideoFormat format);
 AJAExport bool IsVideoFormatB(NTV2VideoFormat format);
+AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format);
 
 
 AJAExport int  RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, int iChan0,
