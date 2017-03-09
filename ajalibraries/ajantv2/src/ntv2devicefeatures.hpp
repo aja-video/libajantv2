@@ -4651,6 +4651,7 @@ bool NTV2DeviceCanDoPCMDetection (const NTV2DeviceID inDeviceID)
 {
 	switch (inDeviceID)
 	{
+		case DEVICE_ID_CORVID88:
 		case DEVICE_ID_KONA4:
 		case DEVICE_ID_CORVID44:
 			return true;
