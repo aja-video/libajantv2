@@ -267,7 +267,6 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
 
 bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig)
 {
-
     // get address
     uint32_t  decapBaseAddr = GetDecapulatorAddress(channel,stream);
 
@@ -432,7 +431,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         // is multicast
         bool enabled = false;
         GetRxChannelEnable(channel,stream,enabled);
-        SetIGMPGroup(port, channel, stream, destIp, enabled);
+        SetIGMPGroup(port, channel, stream, destIp, true);  // temp for jeff
     }
     else
     {
