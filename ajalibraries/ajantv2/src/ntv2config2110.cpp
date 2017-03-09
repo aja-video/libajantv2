@@ -306,6 +306,8 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
     WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000);
+    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,0xffffffff);
+
 
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
@@ -431,7 +433,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         // is multicast
         bool enabled = false;
         GetRxChannelEnable(channel,stream,enabled);
-        SetIGMPGroup(port, channel, stream, destIp, true);  // temp for jeff
+        SetIGMPGroup(port, channel, stream, destIp, enabled);  // temp for jeff
     }
     else
     {
