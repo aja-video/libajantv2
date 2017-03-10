@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QDebug>
 
 #include "ajatypes.h"
 #include "ntv2enums.h"
@@ -13,13 +14,15 @@ NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
 MACAddr toMAC(QString mac);
 
-CKonaIpBoardJsonReader::CKonaIpBoardJsonReader()
+CKonaIpJsonSetup::CKonaIpJsonSetup()
 {
 
 }
 
-bool CKonaIpBoardJsonReader::readJson(const QJsonObject &json)
+bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 {
+
+
     mKonaIPParams.mSFPs.clear();
     QJsonArray sfpArray = json["sfps"].toArray();
     for (int sfpIndex = 0; sfpIndex < sfpArray.size(); ++sfpIndex)
@@ -137,7 +140,7 @@ bool CKonaIpBoardJsonReader::readJson(const QJsonObject &json)
     return true;
 }
 
-bool CKonaIpBoardJsonReader::openJson(QString fileName)
+bool CKonaIpJsonSetup::openJson(QString fileName)
 {
     QFile loadFile(fileName);
     if ( !loadFile.open(QIODevice::ReadOnly))
@@ -147,18 +150,31 @@ bool CKonaIpBoardJsonReader::openJson(QString fileName)
 
     }
     QByteArray saveData = loadFile.readAll();
-    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
 
-    return readJson(loadDoc.object());
+    QJsonParseError err;
+    QJsonDocument loadDoc = (QJsonDocument::fromJson(saveData,&err));
+    if (err.error != QJsonParseError::NoError)
+    {
+        qDebug() << "JSON ERROR" << err.errorString() << "offset=" << err.offset;
+        return false;
+    }
 
+    const QJsonObject & json = loadDoc.object();
+
+    QJsonValue qjv = json.value("protocol");
+    if (qjv != QJsonValue::Undefined)
+    {
+        QString protocol = qjv.toString();
+        if (protocol == "2110")
+        {
+            is2110 = true;
+        }
+    }
+
+    return readJson(json);
 }
 
-CKonaIPEncoderSetup::CKonaIPEncoderSetup()
-{
-
-}
-
-bool CKonaIPEncoderSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
+bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
 {
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);

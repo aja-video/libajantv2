@@ -35,10 +35,12 @@ int main(int argc, char *argv[])
     {
         qDebug() << args.at(0);
 
-        CKonaIpBoardJsonReader readJson;
-        readJson.openJson(args.at(0));
-        CKonaIPEncoderSetup ipBoardSetup;
-        ipBoardSetup.setupBoard(devStr,readJson.getKonaIParams());
+        CKonaIpJsonSetup jsonSetup;
+        bool rv = jsonSetup.openJson(args.at(0));
+        if (rv)
+            jsonSetup.setupBoard(devStr,jsonSetup.getKonaIParams());
+        else
+            cout << "Failed to parse JSON" << endl;
     }
     else
         parser.showHelp();

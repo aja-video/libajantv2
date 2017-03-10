@@ -52,11 +52,13 @@ typedef  struct {
 } KonaIPParamSetupStruct;
 
 
-class CKonaIpBoardJsonReader
+class CKonaIpJsonSetup
 {
 public:
-    CKonaIpBoardJsonReader();
+    CKonaIpJsonSetup();
+
     bool openJson(QString fileName);
+    bool setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
 
     KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
 
@@ -65,18 +67,9 @@ protected:
 
     KonaIPParamSetupStruct mKonaIPParams;
 
-};
-
-class CKonaIPEncoderSetup
-{
-public:
-    CKonaIPEncoderSetup();
-
-    bool setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
-
-protected:
+private:
     bool enable2022_7;
-
-
+    bool is2110;
 };
+
 #endif // KONAIPBOARD_H
