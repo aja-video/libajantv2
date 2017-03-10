@@ -1206,8 +1206,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			if (rv)
 			{
 				
-				printf("j2kDecoder ch 1 config read\n");
-				printDecoderConfig(mRx2022J2kConfig1, decoderConfig);
+				//printf("j2kDecoder ch 1 config read\n");
+				//printDecoderConfig(mRx2022J2kConfig1, decoderConfig);
 				
 				if (decoderConfig != mRx2022J2kConfig1)
 				{
@@ -1286,8 +1286,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					mTx2022J2kConfig1.bitDepth = 8;
 				}
 				
-				printf("j2kEncoder ch 1 config read\n");
-				printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
+				//printf("j2kEncoder ch 1 config read\n");
+				//printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
 				
 				if (encoderConfig != mTx2022J2kConfig1)
 				{
@@ -1345,8 +1345,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 						mTx2022J2kConfig2.bitDepth = 8;
 					}
 					
-					printf("j2kEncoder ch 2 config read\n");
-					printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
+					//printf("j2kEncoder ch 2 config read\n");
+					//printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
 
 					if (encoderConfig != mTx2022J2kConfig2)
 					{

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ajabase", "build\ajabase_vs9.vcproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajabase", "build\libajabase_vs9.vcproj", "{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
