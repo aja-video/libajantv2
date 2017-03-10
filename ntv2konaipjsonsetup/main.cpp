@@ -37,12 +37,17 @@ int main(int argc, char *argv[])
 
         CKonaIpJsonSetup jsonSetup;
         bool rv = jsonSetup.openJson(args.at(0));
-        if (rv)
-            jsonSetup.setupBoard(devStr,jsonSetup.getKonaIParams());
-        else
+        if (!rv)
+        {
             cout << "Failed to parse JSON" << endl;
+            exit (-1);
+        }
+        jsonSetup.setupBoard(devStr);
     }
     else
+    {
         parser.showHelp();
-
+        exit (-2);
+    }
+    exit(0);
 }

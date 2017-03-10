@@ -18,6 +18,7 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mStream;
     QString mPrimaryDestIPAddress;
     QString mPrimaryDestPort;
     QString mPrimaryFilter;
@@ -32,6 +33,7 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mStream;
     QString mPrimaryLocalPort;
     QString mPrimaryRemoteIPAddress;
     QString mPrimaryRemotePort;
@@ -42,6 +44,7 @@ typedef struct
     QString mSecondaryRemotePort;
     QString mSecondaryRemoteMac;
     QString mSecondaryAutoMac;
+    QString mVideoFormat;
     QString mEnable;
 }TransmitStruct;
 
@@ -58,16 +61,17 @@ public:
     CKonaIpJsonSetup();
 
     bool openJson(QString fileName);
-    bool setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
-
-    KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
+    bool setupBoard(std::string deviceSpec);
 
 protected:
+    bool setupBoard2110(std::string deviceSpec);
+    bool setupBoard2022(std::string deviceSpec);
     bool readJson(const QJsonObject &json);
 
     KonaIPParamSetupStruct mKonaIPParams;
 
 private:
+
     bool enable2022_7;
     bool is2110;
 };
