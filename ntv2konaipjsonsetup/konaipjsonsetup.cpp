@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QDebug>
 
 #include "ajatypes.h"
 #include "ntv2enums.h"
@@ -150,12 +151,10 @@ bool CKonaIpBoardJsonReader::openJson(QString fileName)
     QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
 
     return readJson(loadDoc.object());
-
 }
 
 CKonaIPEncoderSetup::CKonaIPEncoderSetup()
 {
-
 }
 
 bool CKonaIPEncoderSetup::setupBoard(std::string deviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
