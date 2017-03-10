@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>ajabasedll</ProjectName>
+    <ProjectName>libajabasedll</ProjectName>
     <ProjectGuid>{733755C5-1CF3-489B-81D5-ECD353029782}</ProjectGuid>
-    <RootNamespace>ajabasedll</RootNamespace>
+    <RootNamespace>libajabasedll</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

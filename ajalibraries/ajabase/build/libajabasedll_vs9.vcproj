@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="ajabasedll"
+	Name="libajabasedll"
 	ProjectGUID="{733755C5-1CF3-489B-81D5-ECD353029782}"
-	RootNamespace="ajabasedll"
+	RootNamespace="libajabasedll"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>

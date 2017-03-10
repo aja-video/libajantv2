@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="ajabase"
+	Name="libajabase"
 	ProjectGUID="{96CFF836-474A-4AE8-85C8-5BB85697E9AA}"
-	RootNamespace="ajabase"
+	RootNamespace="libajabase"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
