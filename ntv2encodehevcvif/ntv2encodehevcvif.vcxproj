@@ -198,7 +198,7 @@
     <ClInclude Include="ntv2encodehevcvifac.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ajalibraries\ajabase\build\ajabase_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\ajalibraries\ajabase\build\libajabase_vs12.vcxproj">
       <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\ajalibraries\ajantv2\build\libajantv2_vs12.vcxproj">
