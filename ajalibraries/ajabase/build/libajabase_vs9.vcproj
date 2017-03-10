@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="Shlwapi.lib"
-				OutputFile="$(OutDir)\$(ProjectName)d.lib"
+				OutputFile="$(OutDir)\$(ProjectName)_32d.lib"
 				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\$(ProjectName)_64d.lib"
+				OutputFile="$(OutDir)\$(ProjectName)d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -211,7 +211,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="Shlwapi.lib"
-				OutputFile="$(OutDir)\$(ProjectName).lib"
+				OutputFile="$(OutDir)\$(ProjectName)_32.lib"
 				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
@@ -282,7 +282,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\$(ProjectName)_64.lib"
+				OutputFile="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

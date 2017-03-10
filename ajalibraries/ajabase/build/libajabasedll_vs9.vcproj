@@ -67,7 +67,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Rpcrt4.lib"
-				OutputFile="$(OutDir)\$(ProjectName)d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)_32d.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=""
@@ -147,7 +147,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Rpcrt4.lib"
-				OutputFile="$(OutDir)\$(ProjectName)_64d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=""
@@ -226,7 +226,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Rpcrt4.lib"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
+				OutputFile="$(OutDir)\$(ProjectName)_32.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile=""
@@ -309,7 +309,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Rpcrt4.lib"
-				OutputFile="$(OutDir)\$(ProjectName)_64.dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile=""
