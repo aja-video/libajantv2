@@ -68,11 +68,11 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
 
 void rx_2110Config::init()
 {
-    RxMatch     = 0;
-    SourceIP    = "";
-    DestIP      = "";
-    SourcePort  = 0;
-    DestPort    = 0;
+    rxMatch     = 0;
+    sourceIP    = "";
+    destIP      = "";
+    sourcePort  = 0;
+    destPort    = 0;
     SSRC        = 0;
     VLAN        = 0;
     videoFormat   = NTV2_FORMAT_UNKNOWN;
@@ -87,11 +87,11 @@ bool rx_2110Config::operator != ( const rx_2110Config &other )
 
 bool rx_2110Config::operator == ( const rx_2110Config &other )
 {
-    if (    (RxMatch           == other.RxMatch)        &&
-            (SourceIP          == other.SourceIP)       &&
-            (DestIP            == other.DestIP)         &&
-            (SourcePort        == other.SourcePort)     &&
-            (DestPort          == other.DestPort)       &&
+    if (    (rxMatch           == other.rxMatch)        &&
+            (sourceIP          == other.sourceIP)       &&
+            (destIP            == other.destIP)         &&
+            (sourcePort        == other.sourcePort)     &&
+            (destPort          == other.destPort)       &&
             (SSRC              == other.SSRC)           &&
             (VLAN              == other.VLAN)           &&
             (videoFormat       == other.videoFormat)    &&
@@ -277,20 +277,20 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     AcquireDecapsulatorControlAccess(decapBaseAddr);
 
     // source ip address
-    uint32_t sourceIp = inet_addr(rxConfig.SourceIP.c_str());
+    uint32_t sourceIp = inet_addr(rxConfig.sourceIP.c_str());
     sourceIp = NTV2EndianSwap32(sourceIp);
     WriteChannelRegister(kRegDecap_match_src_ip0 + decapBaseAddr, sourceIp);
 
     // dest ip address
-    uint32_t destIp = inet_addr(rxConfig.DestIP.c_str());
+    uint32_t destIp = inet_addr(rxConfig.destIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
     WriteChannelRegister(kRegDecap_match_dst_ip0 + decapBaseAddr, destIp);
 
     // source port
-    WriteChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, rxConfig.SourcePort);
+    WriteChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, rxConfig.sourcePort);
 
     // dest port
-    WriteChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.DestPort);
+    WriteChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.destPort);
 
     // ssrc
     WriteChannelRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.SSRC);
@@ -298,14 +298,23 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // vlan
     WriteChannelRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
 
+    // payload
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000 | rxConfig.payload);
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x20000000 | rxConfig.payload);
+    }
+
     // matching
-    WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.RxMatch);
+    WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 
 
     // some constants
     WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
-    WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,0xffffffff);
 
 
@@ -411,11 +420,11 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // setup PLL
     mDevice.WriteRegister(kRegPll_Config  + SAREK_PLL, PLL_CONFIG_PCR,PLL_CONFIG_PCR);
     mDevice.WriteRegister(kRegPll_SrcIp   + SAREK_PLL, sourceIp);
-    mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.SourcePort);
+    mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.sourcePort);
     mDevice.WriteRegister(kRegPll_DstIp   + SAREK_PLL, destIp);
-    mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.DestPort);
+    mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.destPort);
 
-    uint32_t rxMatch  = rxConfig.RxMatch;
+    uint32_t rxMatch  = rxConfig.rxMatch;
     uint32_t pllMatch = 0;
     if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
     if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
@@ -459,19 +468,19 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
     struct in_addr in;
     in.s_addr = NTV2EndianSwap32(val);
     char * ip = inet_ntoa(in);
-    rxConfig.SourceIP = ip;
+    rxConfig.sourceIP = ip;
 
     // dest ip address
     ReadChannelRegister(kRegDecap_match_dst_ip0 + decapBaseAddr, &val);
     in.s_addr = NTV2EndianSwap32(val);
     ip = inet_ntoa(in);
-    rxConfig.DestIP = ip;
+    rxConfig.destIP = ip;
 
     // source port
-    ReadChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.SourcePort);
+    ReadChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.sourcePort);
 
     // dest port
-    ReadChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.DestPort);
+    ReadChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
 
     // ssrc
     ReadChannelRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
@@ -481,7 +490,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
     rxConfig.VLAN = val & 0xffff;
 
     // matching
-    ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.RxMatch);
+    ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
