@@ -47,6 +47,8 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         sfpStruct.mEnable2022_7 = sfpObject["Enable2022_7"].toString();
         if (!sfpStruct.mEnable2022_7.isEmpty())
             std::cout << "Enable2022_7 " << sfpStruct.mEnable2022_7.toStdString() << std::endl << std::endl;
+        else
+            std::cout << std::endl;
 
         mKonaIPParams.mSFPs.append(sfpStruct);
     }
@@ -63,7 +65,17 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
         std::cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << std::endl;
 
-        //
+        receiveStruct.mStream = receiveChannelObject["stream"].toString();
+        if (!receiveStruct.mStream.isEmpty())
+            std::cout << "Stream " << receiveStruct.mStream.toStdString() << std::endl;
+
+        receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
+        if (!receiveStruct.mSrcPort.isEmpty())
+            std::cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << std::endl;
+
+        receiveStruct.mSrcIPAddress = receiveChannelObject["srcIPAddress"].toString();
+        if (!receiveStruct.mSrcIPAddress.isEmpty())
+            std::cout << "Src IP Address " << receiveStruct.mSrcIPAddress.toStdString() << std::endl;
 
         receiveStruct.mPrimaryDestIPAddress = receiveChannelObject["primaryDestIPAddress"].toString();
         std::cout << "PrimaryDestIPAddress " << receiveStruct.mPrimaryDestIPAddress.toStdString() << std::endl;
@@ -75,19 +87,40 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         std::cout << "PrimaryFilter " << receiveStruct.mPrimaryFilter.toStdString() << std::endl;
 
         receiveStruct.mSecondaryDestIPAddress = receiveChannelObject["secondaryDestIPAddress"].toString();
-        std::cout << "SecondaryDestIPAddress " << receiveStruct.mSecondaryDestIPAddress.toStdString() << std::endl;
+        if (!receiveStruct.mSecondaryDestIPAddress.isEmpty())
+            std::cout << "SecondaryDestIPAddress " << receiveStruct.mSecondaryDestIPAddress.toStdString() << std::endl;
 
         receiveStruct.mSecondaryDestPort = receiveChannelObject["secondaryDestPort"].toString();
-        std::cout << "SecondaryDestPort " << receiveStruct.mSecondaryDestPort.toStdString() << std::endl;
+        if (!receiveStruct.mSecondaryDestPort.isEmpty())
+            std::cout << "SecondaryDestPort " << receiveStruct.mSecondaryDestPort.toStdString() << std::endl;
 
         receiveStruct.mSecondaryFilter = receiveChannelObject["secondaryFilter"].toString();
-        std::cout << "SecondaryFilter " << receiveStruct.mSecondaryFilter.toStdString() << std::endl;
+        if (!receiveStruct.mSecondaryFilter.isEmpty())
+            std::cout << "SecondaryFilter " << receiveStruct.mSecondaryFilter.toStdString() << std::endl;
 
         receiveStruct.mNetworkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
-        std::cout << "NetworkPathDifferential " << receiveStruct.mNetworkPathDifferential.toStdString() << std::endl;
+        if (!receiveStruct.mNetworkPathDifferential.isEmpty())
+            std::cout << "NetworkPathDifferential " << receiveStruct.mNetworkPathDifferential.toStdString() << std::endl;
 
         receiveStruct.mPlayoutDelay = receiveChannelObject["playoutDelay"].toString();
-        std::cout << "PlayoutDelay " << receiveStruct.mPlayoutDelay.toStdString() << std::endl;
+        if (!receiveStruct.mPlayoutDelay.isEmpty())
+            std::cout << "PlayoutDelay " << receiveStruct.mPlayoutDelay.toStdString() << std::endl;
+
+        receiveStruct.mVLAN = receiveChannelObject["vlan"].toString();
+        if (!receiveStruct.mVLAN.isEmpty())
+            std::cout << "VLAN " << receiveStruct.mVLAN.toStdString() << std::endl;
+
+        receiveStruct.mSSRC = receiveChannelObject["ssrc"].toString();
+        if (!receiveStruct.mSSRC.isEmpty())
+            std::cout << "SSRC " << receiveStruct.mSSRC.toStdString() << std::endl;
+
+        receiveStruct.mPayload = receiveChannelObject["payload"].toString();
+        if (!receiveStruct.mPayload.isEmpty())
+            std::cout << "Payload " << receiveStruct.mPayload.toStdString() << std::endl;
+
+        receiveStruct.mVideoFormat = receiveChannelObject["videoFormat"].toString();
+        if (!receiveStruct.mVideoFormat.isEmpty())
+            std::cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << std::endl;
 
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
         std::cout << "Enable " << receiveStruct.mEnable.toStdString() << std::endl << std::endl;
@@ -352,20 +385,28 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         std::cerr << "## receiveIter did" << std::endl;
 
         ReceiveStruct receive = receiveIter.next();
-        rx_2022_channel rxChannelConfig;
+        rx_2110Config rxChannelConfig;
         bool ok;
-        NTV2Channel channel = getChannel(receive.mChannelDesignator);
-        rxChannelConfig.primaryDestIP = receive.mPrimaryDestIPAddress.toStdString();
-        rxChannelConfig.primaryDestPort = receive.mPrimaryDestPort.toUInt();
-        rxChannelConfig.primaryRxMatch = receive.mPrimaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.secondaryDestIP = receive.mSecondaryDestIPAddress.toStdString();
-        rxChannelConfig.secondaryDestPort = receive.mSecondaryDestPort.toUInt();
-        rxChannelConfig.secondaryRxMatch = receive.mSecondaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.networkPathDiff = receive.mNetworkPathDifferential.toUInt();
-        rxChannelConfig.playoutDelay = receive.mPlayoutDelay.toUInt();
+        NTV2Channel channel          = getChannel(receive.mChannelDesignator);
+        rxChannelConfig.rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
+        rxChannelConfig.sourceIP     = receive.mSrcIPAddress.toStdString();
+        rxChannelConfig.destIP       = receive.mPrimaryDestIPAddress.toStdString();
+        rxChannelConfig.sourcePort   = receive.mSrcPort.toUInt();
+        rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
+        rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
+        rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
+        rxChannelConfig.payload      = receive.mPayload.toUInt();
+        rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
+        rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
- //       config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
- //       config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable),enable2022_7);
+        NTV2Stream stream;
+        if (receive.mStream == "audio1")
+            stream = NTV2_AUDIO1_STREAM;
+        else
+            stream = NTV2_VIDEO_STREAM;
+
+        config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig);
+        config2110.SetRxChannelEnable(channel, stream, getEnable(receive.mEnable));
     }
     std::cerr << "## transmitIter" << std::endl;
 
@@ -381,16 +422,16 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.localPort    = transmit.mPrimaryLocalPort.toUInt();
         txChannelConfig.remoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
-        txChannelConfig.remoteMAC    =  toMAC(transmit.mPrimaryRemoteMac);
-        txChannelConfig.autoMAC      =  getEnable(transmit.mPrimaryAutoMac);
+        txChannelConfig.remoteMAC    = toMAC(transmit.mPrimaryRemoteMac);
+        txChannelConfig.autoMAC      = getEnable(transmit.mPrimaryAutoMac);
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
+
         NTV2Stream stream;
         if (transmit.mStream == "audio1")
             stream = NTV2_AUDIO1_STREAM;
         else
             stream = NTV2_VIDEO_STREAM;
-
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));

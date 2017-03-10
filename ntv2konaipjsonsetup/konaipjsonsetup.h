@@ -19,6 +19,8 @@ typedef struct
 {
     QString mChannelDesignator;
     QString mStream;
+    QString mSrcPort;
+    QString mSrcIPAddress;
     QString mPrimaryDestIPAddress;
     QString mPrimaryDestPort;
     QString mPrimaryFilter;
@@ -27,6 +29,10 @@ typedef struct
     QString mSecondaryFilter;
     QString mNetworkPathDifferential;
     QString mPlayoutDelay;
+    QString mVLAN;
+    QString mSSRC;
+    QString mPayload;
+    QString mVideoFormat;
     QString mEnable;
 }ReceiveStruct;
 
