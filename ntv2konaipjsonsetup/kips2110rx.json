@@ -18,7 +18,7 @@
             "vlan":"1",
             "ssrc":"1234",
             "payload":"100",
-            "primaryFilter":"0x1e",
+            "primaryFilter":"0x5e",
             "videoFormat":"720p",
             "Enable":"true"
     },
@@ -32,7 +32,7 @@
             "vlan":"1",
             "ssrc":"1234",
             "payload":"101",
-            "primaryFilter":"0x1e",
+            "primaryFilter":"0x5e",
             "Enable":"false"
     }]
 }
