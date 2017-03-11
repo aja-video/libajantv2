@@ -2532,34 +2532,35 @@ bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
 {
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
-	ULWord	supports2m (0);
-	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
-	if(supports2m == 1)
-	{
-		ULWord value2M (0);
-		switch(value)
-		{
-		case NTV2_FRAMESIZE_2MB:	value2M = 1;	break;
-		case NTV2_FRAMESIZE_4MB:	value2M = 2;	break;
-		case NTV2_FRAMESIZE_6MB:	value2M = 3;	break;
-		case NTV2_FRAMESIZE_8MB:	value2M = 4;	break;
-		case NTV2_FRAMESIZE_10MB:	value2M = 5;	break;
-		case NTV2_FRAMESIZE_12MB:	value2M = 6;	break;
-		case NTV2_FRAMESIZE_14MB:	value2M = 7;	break;
-		case NTV2_FRAMESIZE_16MB:	value2M = 8;	break;
-		case NTV2_FRAMESIZE_18MB:	value2M = 9;	break;
-		case NTV2_FRAMESIZE_20MB:	value2M = 10;	break;
-		case NTV2_FRAMESIZE_22MB:	value2M = 11;	break;
-		case NTV2_FRAMESIZE_24MB:	value2M = 12;	break;
-		case NTV2_FRAMESIZE_26MB:	value2M = 13;	break;
-		case NTV2_FRAMESIZE_28MB:	value2M = 14;	break;
-		case NTV2_FRAMESIZE_30MB:	value2M = 15;	break;
-		case NTV2_FRAMESIZE_32MB:	value2M = 16;	break;
-		default:	return false;
-		}
-		return WriteRegister(gChannelTo2MFrame [NTV2_CHANNEL1], value2M, kRegMask2MFrameSize, kRegShift2MFrameSupport);
-	}
-	else if (value == NTV2_FRAMESIZE_2MB || value == NTV2_FRAMESIZE_4MB || value == NTV2_FRAMESIZE_8MB || value == NTV2_FRAMESIZE_16MB)
+// 	ULWord	supports2m (0);
+// 	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
+// 	if(supports2m == 1)
+// 	{
+// 		ULWord value2M (0);
+// 		switch(value)
+// 		{
+// 		case NTV2_FRAMESIZE_2MB:	value2M = 1;	break;
+// 		case NTV2_FRAMESIZE_4MB:	value2M = 2;	break;
+// 		case NTV2_FRAMESIZE_6MB:	value2M = 3;	break;
+// 		case NTV2_FRAMESIZE_8MB:	value2M = 4;	break;
+// 		case NTV2_FRAMESIZE_10MB:	value2M = 5;	break;
+// 		case NTV2_FRAMESIZE_12MB:	value2M = 6;	break;
+// 		case NTV2_FRAMESIZE_14MB:	value2M = 7;	break;
+// 		case NTV2_FRAMESIZE_16MB:	value2M = 8;	break;
+// 		case NTV2_FRAMESIZE_18MB:	value2M = 9;	break;
+// 		case NTV2_FRAMESIZE_20MB:	value2M = 10;	break;
+// 		case NTV2_FRAMESIZE_22MB:	value2M = 11;	break;
+// 		case NTV2_FRAMESIZE_24MB:	value2M = 12;	break;
+// 		case NTV2_FRAMESIZE_26MB:	value2M = 13;	break;
+// 		case NTV2_FRAMESIZE_28MB:	value2M = 14;	break;
+// 		case NTV2_FRAMESIZE_30MB:	value2M = 15;	break;
+// 		case NTV2_FRAMESIZE_32MB:	value2M = 16;	break;
+// 		default:	return false;
+// 		}
+// 		return WriteRegister(gChannelTo2MFrame [NTV2_CHANNEL1], value2M, kRegMask2MFrameSize, kRegShift2MFrameSupport);
+// 	}
+// 	else 
+	if (value == NTV2_FRAMESIZE_2MB || value == NTV2_FRAMESIZE_4MB || value == NTV2_FRAMESIZE_8MB || value == NTV2_FRAMESIZE_16MB)
 	{
 		return WriteRegister (gChannelToControlRegNum [NTV2_CHANNEL1], value, kK2RegMaskFrameSize, kK2RegShiftFrameSize);
 	}
@@ -2576,37 +2577,37 @@ bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize &
 {
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
-	ULWord	supports2m (0);
-	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
-	if(supports2m == 1)
-	{
-		ULWord frameSize (0);
-		ReadRegister(gChannelTo2MFrame[inChannel], &frameSize, kRegMask2MFrameSize, kRegShift2MFrameSize);
-		if (frameSize)
-		{
-			switch (frameSize)
-			{
-			case 1:		outValue = NTV2_FRAMESIZE_2MB;	break;
-			case 2:		outValue = NTV2_FRAMESIZE_4MB;	break;
-			case 3:		outValue = NTV2_FRAMESIZE_6MB;	break;
-			case 4:		outValue = NTV2_FRAMESIZE_8MB;	break;
-			case 5:		outValue = NTV2_FRAMESIZE_10MB;	break;
-			case 6:		outValue = NTV2_FRAMESIZE_12MB;	break;
-			case 7:		outValue = NTV2_FRAMESIZE_14MB;	break;
-			case 8:		outValue = NTV2_FRAMESIZE_16MB;	break;
-			case 9:		outValue = NTV2_FRAMESIZE_18MB;	break;
-			case 10:	outValue = NTV2_FRAMESIZE_20MB;	break;
-			case 11:	outValue = NTV2_FRAMESIZE_22MB;	break;
-			case 12:	outValue = NTV2_FRAMESIZE_24MB;	break;
-			case 13:	outValue = NTV2_FRAMESIZE_26MB;	break;
-			case 14:	outValue = NTV2_FRAMESIZE_28MB;	break;
-			case 15:	outValue = NTV2_FRAMESIZE_30MB;	break;
-			case 16:	outValue = NTV2_FRAMESIZE_32MB;	break;
-			default:	return false;
-			}
-			return true;
-		}
-	}
+// 	ULWord	supports2m (0);
+// 	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
+// 	if(supports2m == 1)
+// 	{
+// 		ULWord frameSize (0);
+// 		ReadRegister(gChannelTo2MFrame[inChannel], &frameSize, kRegMask2MFrameSize, kRegShift2MFrameSize);
+// 		if (frameSize)
+// 		{
+// 			switch (frameSize)
+// 			{
+// 			case 1:		outValue = NTV2_FRAMESIZE_2MB;	break;
+// 			case 2:		outValue = NTV2_FRAMESIZE_4MB;	break;
+// 			case 3:		outValue = NTV2_FRAMESIZE_6MB;	break;
+// 			case 4:		outValue = NTV2_FRAMESIZE_8MB;	break;
+// 			case 5:		outValue = NTV2_FRAMESIZE_10MB;	break;
+// 			case 6:		outValue = NTV2_FRAMESIZE_12MB;	break;
+// 			case 7:		outValue = NTV2_FRAMESIZE_14MB;	break;
+// 			case 8:		outValue = NTV2_FRAMESIZE_16MB;	break;
+// 			case 9:		outValue = NTV2_FRAMESIZE_18MB;	break;
+// 			case 10:	outValue = NTV2_FRAMESIZE_20MB;	break;
+// 			case 11:	outValue = NTV2_FRAMESIZE_22MB;	break;
+// 			case 12:	outValue = NTV2_FRAMESIZE_24MB;	break;
+// 			case 13:	outValue = NTV2_FRAMESIZE_26MB;	break;
+// 			case 14:	outValue = NTV2_FRAMESIZE_28MB;	break;
+// 			case 15:	outValue = NTV2_FRAMESIZE_30MB;	break;
+// 			case 16:	outValue = NTV2_FRAMESIZE_32MB;	break;
+// 			default:	return false;
+// 			}
+// 			return true;
+// 		}
+// 	}
 	return ReadRegister (gChannelToControlRegNum [NTV2_CHANNEL1], reinterpret_cast <ULWord*> (&outValue), kK2RegMaskFrameSize, kK2RegShiftFrameSize);
 }
 
