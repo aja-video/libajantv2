@@ -564,6 +564,18 @@ bool CNTV2Config2110::SetRxChannelEnable(const NTV2Channel channel, NTV2Stream s
         }
         WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
+        // reset the depacketizer
+        if (stream == NTV2_AUDIO1_STREAM)
+        {
+            mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
+        }
+        else
+        {
+            mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x1);
+        }
+        mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x0);
+        mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
     }
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
