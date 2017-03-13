@@ -1662,7 +1662,7 @@ public:
 			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 			{
 				(void) inRegNum;
-				static const string	sEOTFs[]	=	{"Trad Gamma SDR", "Trad Gamma HDR", "SMPTE ST 2084", "??"};
+				static const string	sEOTFs[]	=	{"Trad Gamma SDR", "Trad Gamma HDR", "SMPTE ST 2084", "HLG"};
 				ostringstream	oss;
 				if (::NTV2DeviceCanDoHDMIHDROut (inDeviceID))
 				{
