@@ -187,6 +187,8 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
 
+    ConfigurePTP(port,localIPAddress);
+
     bool rv = AcquireMailbox();
     if (rv)
     {

@@ -313,10 +313,11 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     _numRxChans  = _numRx0Chans + _numRx1Chans;
     _numTxChans  = _numTx0Chans + _numTx1Chans;
 
-    _is2022_6   = ((features & SAREK_2022_6) != 0);
-    _is2022_2   = ((features & SAREK_2022_2) != 0);
-    _is2022_7   = ((features & SAREK_2022_7) != 0);
+    _is2022_6   = ((features & SAREK_2022_6)   != 0);
+    _is2022_2   = ((features & SAREK_2022_2)   != 0);
+    _is2022_7   = ((features & SAREK_2022_7)   != 0);
     _is_txTop34 = ((features & SAREK_TX_TOP34) != 0);
+    _hasPTP     = ((features & SAREK_PTP_PLL)  != 0);
 
     _biDirectionalChannels = false;
 
@@ -412,6 +413,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
 
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + core2,boardLo2);
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
+    }
+
+    if (_hasPTP)
+    {
+        ConfigurePTP(port,localIPAddress);
     }
 
     bool rv = AcquireMailbox();

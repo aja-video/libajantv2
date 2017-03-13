@@ -138,7 +138,6 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
     static uint32_t  get2110Stream(NTV2Channel ch,NTV2Stream scch );
 
@@ -158,6 +157,8 @@ protected:
 
     bool        SetRxDepacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddr);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
+
+    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);
