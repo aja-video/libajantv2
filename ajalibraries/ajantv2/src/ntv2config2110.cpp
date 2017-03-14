@@ -980,6 +980,25 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
     return true;
 }
 
+bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
+{
+    uint32_t addr = inet_addr(ptpMaster.c_str());
+    addr = NTV2EndianSwap32(addr);
+    return mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
+}
+
+bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
+{
+    uint32_t val;
+    mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, &val);
+
+    struct in_addr addr;
+    addr.s_addr = val;
+    ptpMaster = inet_ntoa(addr);
+
+    return true;
+}
+
 bool CNTV2Config2110::SetIGMPDisable(eSFP port, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
