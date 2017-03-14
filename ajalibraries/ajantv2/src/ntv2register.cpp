@@ -11,6 +11,7 @@
 #include "ntv2endian.h"
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"
+#include "ntv2registersmb.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -1967,7 +1968,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord refControl1 = (ULWord)value, refControl2 = 0, pcrControl = 0;
+	ULWord refControl1 = (ULWord)value, refControl2 = 0, ptpControl = 0;
 	switch(value)
 	{
 	case NTV2_REFERENCE_INPUT5:
@@ -1989,20 +1990,20 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 	case NTV2_REFERENCE_SFP1_PCR:
 		refControl1 = 4;
 		refControl2 = 1;
-		pcrControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP1_PTP:
 		refControl1 = 4;
 		refControl2 = 1;
+		ptpControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP2_PCR:
 		refControl1 = 5;
 		refControl2 = 1;
-		pcrControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP2_PTP:
 		refControl1 = 5;
 		refControl2 = 1;
+		ptpControl = 1;
 		break;
 	default:
 		break;
@@ -2010,7 +2011,13 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	if(IsKonaIPDevice())
 	{
-		WriteRegister(kRegGlobalControl2, pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+		int newValue = 0;
+		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+		if(NTV2DeviceCanDoJ2K(_boardID) && (value ==  NTV2_REFERENCE_SFP1_PCR || value == NTV2_REFERENCE_SFP2_PCR))
+			newValue = 1;
+		if(NTV2DeviceCanDo2110(_boardID) && (value ==  NTV2_REFERENCE_SFP1_PTP || value == NTV2_REFERENCE_SFP2_PTP) )
+			newValue = 0xa2;
+		WriteRegister(SAREK_PLL+kRegPll_Config, value);
 	}
 
 	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
@@ -2027,7 +2034,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 // Output: NONE
 bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 {
-	ULWord	refControl1 = 0, refControl2 = 0, pcrControl = 0;
+	ULWord	refControl1 = 0, refControl2 = 0, ptpControl = 0;
 	bool	result		(ReadRegister (kRegGlobalControl, &refControl1, kRegMaskRefSource, kRegShiftRefSource));
 
 	outValue = static_cast <NTV2ReferenceSource> (refControl1);
@@ -2053,16 +2060,16 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 			case 4:
 				if(IsKonaIPDevice())
 				{
-					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_SFP1_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_SFP1_PCR;
 				break;
 			case 5:
 				if(IsKonaIPDevice())
 				{
-					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP2_PTP : NTV2_REFERENCE_SFP2_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PTP : NTV2_REFERENCE_SFP2_PCR;
 				break;
 				break;
 			default:
