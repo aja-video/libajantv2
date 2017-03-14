@@ -991,6 +991,7 @@ bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
 {
     uint32_t val;
     mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, &val);
+    val = NTV2EndianSwap32(val);
 
     struct in_addr addr;
     addr.s_addr = val;
