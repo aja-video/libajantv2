@@ -2013,11 +2013,11 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 	{
 		int newValue = 0;
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
-		if(NTV2DeviceCanDoJ2K(_boardID) && (value ==  NTV2_REFERENCE_SFP1_PCR || value == NTV2_REFERENCE_SFP2_PCR))
+		if(NTV2DeviceCanDoJ2K(_boardID) && ptpControl == 0)
 			newValue = 1;
-		if(NTV2DeviceCanDo2110(_boardID) && (value ==  NTV2_REFERENCE_SFP1_PTP || value == NTV2_REFERENCE_SFP2_PTP) )
+		if(NTV2DeviceCanDo2110(_boardID) && ptpControl == 1)
 			newValue = 0xa2;
-		WriteRegister(SAREK_PLL+kRegPll_Config, value);
+		WriteRegister(SAREK_PLL+kRegPll_Config, newValue);
 	}
 
 	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
@@ -2062,14 +2062,14 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				{
 					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_SFP1_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PCR : NTV2_REFERENCE_SFP1_PTP;
 				break;
 			case 5:
 				if(IsKonaIPDevice())
 				{
 					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PTP : NTV2_REFERENCE_SFP2_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PCR : NTV2_REFERENCE_SFP2_PTP;
 				break;
 				break;
 			default:
