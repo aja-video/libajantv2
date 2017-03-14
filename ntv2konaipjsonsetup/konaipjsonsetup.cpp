@@ -208,6 +208,8 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
     if (err.error != QJsonParseError::NoError)
     {
         qDebug() << "JSON ERROR" << err.errorString() << "offset=" << err.offset;
+        saveData[err.offset = 0];
+        qDebug() << saveData;
         return false;
     }
 
@@ -221,6 +223,12 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         {
             is2110 = true;
         }
+    }
+
+    qjv = json.value("PTPMaster");
+    if (qjv != QJsonValue::Undefined)
+    {
+       PTPMasterAddr = qjv.toString();
     }
 
     return readJson(json);
@@ -355,9 +363,15 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     CNTV2Config2110	config2110 (mDevice);
 
+    if (!PTPMasterAddr.isEmpty())
+    {
+        config2110.SetPTPMaster(PTPMasterAddr.toStdString());
+    }
+
     if (mKonaIPParams.mSFPs.size() < 1)
     {
-        {std::cerr << "## ERROR:  Need To Specify at Least 1 SFP" << std::endl;  return false;}
+        std::cerr << "## ERROR:  Need To Specify at Least 1 SFP" << std::endl;
+        return false;
     }
 
     QListIterator<SFPStruct> sfpIter(mKonaIPParams.mSFPs);

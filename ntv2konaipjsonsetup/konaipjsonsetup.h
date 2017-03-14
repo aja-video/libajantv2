@@ -77,9 +77,9 @@ protected:
     KonaIPParamSetupStruct mKonaIPParams;
 
 private:
-
-    bool enable2022_7;
-    bool is2110;
+    bool        enable2022_7;
+    bool        is2110;
+    QString     PTPMasterAddr;
 };
 
 #endif // KONAIPBOARD_H
