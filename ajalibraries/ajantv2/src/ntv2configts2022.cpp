@@ -539,13 +539,6 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 }
 
 
-bool CNTV2ConfigTs2022::SetupEncodeTsMpegAncEncap(const NTV2Channel channel)
-{
-    #pragma unused (channel)
-    mError = "SetupEncodeTsMpegAncEncap not yet implemented";
-    return false;
-}
-
 uint32_t CNTV2ConfigTs2022::GetFeatures()
 {
     uint32_t val;

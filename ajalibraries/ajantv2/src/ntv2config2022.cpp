@@ -733,9 +733,6 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
     bool        rv;
     bool        disableIGMP;
     eSFP        port;
-    uint32_t    ip;
-    int         offset;
-    struct      sockaddr_in sin;
 
     if (enable && _biDirectionalChannels)
     {
@@ -1248,6 +1245,26 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
     return true;
 }
 
+bool  CNTV2Config2022::SetPTPMaster(std::string ptpMaster)
+{
+    uint32_t addr = inet_addr(ptpMaster.c_str());
+    addr = NTV2EndianSwap32(addr);
+    return mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
+}
+
+bool CNTV2Config2022::GetPTPMaster(std::string & ptpMaster)
+{
+    uint32_t val;
+    mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, &val);
+    val = NTV2EndianSwap32(val);
+
+    struct in_addr addr;
+    addr.s_addr = val;
+    ptpMaster = inet_ntoa(addr);
+
+    return true;
+}
+
 bool CNTV2Config2022::SetIGMPDisable(eSFP port, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
@@ -1445,7 +1462,6 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    uint32_t channelPS = 0;
     if (!primaryChannel)
         channelIndex |= 0x80000000;
 
@@ -1490,7 +1506,6 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    uint32_t channelPS = 0;
     if (!primaryChannel)
         channelIndex |= 0x80000000;
 

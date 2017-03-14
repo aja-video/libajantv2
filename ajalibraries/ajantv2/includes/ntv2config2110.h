@@ -121,6 +121,9 @@ public:
     bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
     bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
+    bool        SetPTPMaster(std::string ptpMaster);
+    bool        GetPTPMaster(std::string & ptpMaster);
+
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.

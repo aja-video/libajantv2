@@ -317,8 +317,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // some constants
     WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
-    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,0xffffffff);
-
 
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
@@ -976,6 +974,26 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
     uint32_t val;
     ReadChannelRegister(kRegFramer_chan_ctrl + baseAddrFramer, &val);
     enabled = (val & 0x01);
+
+    return true;
+}
+
+bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
+{
+    uint32_t addr = inet_addr(ptpMaster.c_str());
+    addr = NTV2EndianSwap32(addr);
+    return mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
+}
+
+bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
+{
+    uint32_t val;
+    mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, &val);
+    val = NTV2EndianSwap32(val);
+
+    struct in_addr addr;
+    addr.s_addr = val;
+    ptpMaster = inet_ntoa(addr);
 
     return true;
 }
