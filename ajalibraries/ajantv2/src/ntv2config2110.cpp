@@ -317,8 +317,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // some constants
     WriteChannelRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
-    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,0xffffffff);
-
 
     // enable  register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
