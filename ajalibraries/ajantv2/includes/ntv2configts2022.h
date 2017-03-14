@@ -87,7 +87,6 @@ public:
     bool    SetupEncodeTsMpegPcrEncap(const NTV2Channel channel);
     bool    SetupEncodeTsMpegAesEncap(const NTV2Channel channel);
     bool    SetupEncodeTsAesEncap(const NTV2Channel channel);
-    bool    SetupEncodeTsMpegAncEncap(const NTV2Channel channel);
 
     // Routines to talk to the J2K part
     bool                J2kCanAcceptCmd(const NTV2Channel channel);

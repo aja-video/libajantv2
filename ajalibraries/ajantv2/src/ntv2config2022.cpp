@@ -733,9 +733,6 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
     bool        rv;
     bool        disableIGMP;
     eSFP        port;
-    uint32_t    ip;
-    int         offset;
-    struct      sockaddr_in sin;
 
     if (enable && _biDirectionalChannels)
     {
@@ -1445,7 +1442,6 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    uint32_t channelPS = 0;
     if (!primaryChannel)
         channelIndex |= 0x80000000;
 
@@ -1490,7 +1486,6 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    uint32_t channelPS = 0;
     if (!primaryChannel)
         channelIndex |= 0x80000000;
 
