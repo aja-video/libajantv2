@@ -2455,6 +2455,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         {
             target = new CNTV2Config2022(*mCard);
             target->SetBiDirectionalChannels(true);     // logically bidirectional
+			
+			// Enable all channels always.
+			mRx2022Config1.rxc_enable = true;
+			mRx2022Config2.rxc_enable = true;
+			mTx2022Config3.txc_enable = true;
+			mTx2022Config4.txc_enable = true;
         }
 
         // KonaIP network configuration
