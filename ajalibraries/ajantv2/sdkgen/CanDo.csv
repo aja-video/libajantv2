@@ -78,3 +78,4 @@ NTV2DeviceHasHEVCM30,Returns true if the device having the given ID has an HEVC 
 NTV2DeviceCanDoVITC2,Returns true if the device having the given ID can insert and/or extract RP-188/VITC2.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X,X,X,X
 NTV2DeviceCanDoHDMIHDROut,Returns true if the device having the given ID supports HDMI HDR output.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,X,X,X,X,X,X
 NTV2DeviceCanDoJ2K,Returns true if the device supports the JPEG 2000 codec,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-
+NTV2DeviceCanDo2110,Returns true if the device supports SMPTE 2110,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X

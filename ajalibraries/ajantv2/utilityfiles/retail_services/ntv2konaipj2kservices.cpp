@@ -48,6 +48,13 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		return;
 	}
 	
+	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
+	// output enable and input disable because we are in playback mode
+	mRx2022Config1.rxc_enable = false;
+	mRx2022Config2.rxc_enable = false;
+	mTx2022Config3.txc_enable = true;
+	mTx2022Config4.txc_enable = true;
+
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
@@ -632,6 +639,13 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
 		return;
 	}
+	
+	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
+	// input enable and output disable because we are in capture mode
+	mRx2022Config1.rxc_enable = true;
+	mRx2022Config2.rxc_enable = true;
+	mTx2022Config3.txc_enable = false;
+	mTx2022Config4.txc_enable = false;
 	
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
