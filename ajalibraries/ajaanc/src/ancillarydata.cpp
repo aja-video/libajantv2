@@ -4,13 +4,13 @@
 	@copyright	(C) 2010-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
+#include "ntv2publicinterface.h"
 #include "ancillarydata.h"
 #if defined(AJA_LINUX)
 	#include <string.h>				// For memcpy
 	#include <stdlib.h>				// For realloc
 #endif
 #include <ios>
-#include <iomanip>
 
 using namespace std;
 
@@ -531,6 +531,91 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t * pInData, const
 }
 
 
+AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint8_t> & inData, const AJAAncillaryDataLocation & inLocationInfo)
+{
+	AJAStatus status = AJA_STATUS_SUCCESS;
+
+	// if all is well, inData contains a packet that's laid out like this:
+	//
+	//	pInData ->	0:	0xFF			// 1st byte is always FF
+	//				1:  Hdr data1		// location data byte #1
+	//				2:  Hdr data2		// location data byte #2
+	//				3:  DID				// ancillary packet Data ID
+	//				4:  SID				// ancillary packet Secondary ID (or DBN)
+	//				5:  DC				// ancillary packet Data Count (size of payload: 0 - 255)
+	//				6:  Payload[0]		// 1st byte of payload
+	//				7:  Payload[1]		// 2nd byte of payload
+	//             ...    ...
+	//		 (5 + DC):  Payload[DC-1]	// last byte of payload
+	//		 (6 + DC):	checksum		// 8-bit sum of (DID + SID + DC + Payload[0] + ... + Payload[DC-1])
+	//
+	//		 (7 + DC):  (start of next packet, if any...) returned in packetSize.
+	//
+	// Note that this is the layout of the data as returned from the ANCExtractor hardware, and
+	// is NOT exactly the same as SMPTE-291. 
+	//
+	// The inMaxBytes input gives us an indication of how many "valid" bytes remain in the caller's TOTAL
+	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
+	// of the captured data.
+	//
+	// The caller provides an AJAAncillaryDataLocation struct with all of the information filled in
+	// except the line number. We decode it 
+	//
+	// When we have extracted the useful data from the packet, we return the size of the packet so the
+	// caller can find the beginning of the next packet.
+
+	if (inData.empty())
+		return AJA_STATUS_NULL;
+
+	//	The minimum size for a packet (i.e. no payload) is 7 bytes
+	if (inData.size() < size_t(AJAAncillaryDataWrapperSize))
+		return AJA_STATUS_RANGE;
+
+	//	The first byte should be 0xFF. If it's not, then the Anc data stream may be broken...
+	if (inData[0] != 0xFF)
+		return AJA_STATUS_BAD_PARAM;
+
+	//	So we have at least enough bytes for a minimum packet, and the first byte is what we expect.
+	//	Let's see what size this packet actually reports...
+	uint32_t totalSize = inData[5] + AJAAncillaryDataWrapperSize;
+
+	//	If the reported packet size extends beyond the end of the buffer, we're toast...
+	if (size_t(totalSize) > inData.size())
+		return AJA_STATUS_RANGE;
+
+	//	OK... we have enough data in the buffer to contain the packet, and everything else checks out,
+	//	so go ahead and parse the data...
+
+	m_DID	   = inData[3];				// SMPTE-291 Data ID
+	m_SID	   = inData[4];				// SMPTE-291 Secondary ID (or DBN)
+//	DC		   = inData[5];
+	m_checksum = inData[totalSize-1];	// reported checksum
+
+	//	Caller provides all of the "location" information as a default. If the packet header info is "real", overwrite it...
+	m_location = inLocationInfo;
+
+	if ((inData[1] & 0x80) != 0)
+	{
+		m_coding            = ((inData[1] & 0x40) == 0) ? AJAAncillaryDataCoding_Digital : AJAAncillaryDataCoding_Analog;	// byte 1, bit 6
+		m_location.stream   = ((inData[1] & 0x20) == 0) ? AJAAncillaryDataVideoStream_C : AJAAncillaryDataVideoStream_Y;	// byte 1, bit 5
+		m_location.ancSpace = ((inData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC;			// byte 1, bit 4
+		m_location.lineNum  = ((inData[1] & 0x0F) << 7) + (inData[2] & 0x7F);												// byte 1, bits 3:0 + byte 2, bits 6:0
+	}
+
+	//	Allocate space for the payload and copy it in...
+	uint32_t payloadSize = inData[5];	// SMPTE-291 Data Count
+	if (payloadSize)
+	{
+		status = AllocDataMemory (payloadSize);					// note: this also sets our local "DC" value
+		if (status == AJA_STATUS_SUCCESS && m_pPayload)
+			for (uint32_t ndx(0);  ndx < payloadSize;  ndx++)
+				m_pPayload[ndx] = inData[ndx+6];
+	}
+
+	return status;
+}
+
+
 //**********
 // This returns the number of bytes that will be returned by GenerateTransmitData(). This is usually
 // called first so the caller can allocate a buffer large enough to hold the results.
@@ -790,6 +875,21 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 }
 
 
+string AJAAncillaryData::AsString (void) const
+{
+	ostringstream	oss;
+	oss << "[" << ::AJAAncillaryDataCodingToString(GetDataCoding()) << "|" << ::AJAAncillaryDataLocationToString(GetDataLocation()) << "|" << GetDIDSIDPair() << "]";
+	return oss.str();
+}
+
+
+ostream & operator << (ostream & inOutStream, const AJAAncillaryDIDSIDPair & inData)
+{
+	inOutStream << "DID/SID " << xHEX0N(uint16_t(inData.first), 2) << "/" << xHEX0N(uint16_t(inData.second), 2);
+	return inOutStream;
+}
+
+
 ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 {
 	if (m_pPayload)
@@ -816,6 +916,22 @@ ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 	else
 		inOutStream	<< "(NULL payload)" << endl;
 	return inOutStream;
+}
+
+
+bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
+{
+	if (GetDID() == inRHS.GetDID()
+		&&  GetSID() == inRHS.GetSID()
+		&&  GetPayloadByteCount() == inRHS.GetPayloadByteCount()
+		&&  GetChecksum() == inRHS.GetChecksum()
+		&&  GetDataLocation() == inRHS.GetDataLocation()
+		&&  GetDataCoding() == inRHS.GetDataCoding())
+		{
+			if (m_pPayload  &&  inRHS.m_pPayload  &&  ::memcmp (m_pPayload, inRHS.m_pPayload, GetPayloadByteCount()) == 0)
+				return true;
+		}
+	return false;
 }
 
 

@@ -51,6 +51,17 @@ const uint8_t AJAAncillaryData_AnalogDID = 0x00;
 const uint8_t AJAAncillaryData_AnalogSID = 0x00;
 
 
+typedef std::pair <uint8_t, uint8_t>			AJAAncillaryDIDSIDPair;		///< @brief	A DID/SID pair, typically used as an indexing key.
+
+/**
+	@brief	Writes a human-readable rendition of the given AJAAncillaryDIDSIDPair into the given output stream.
+	@param		inOutStream		Specifies the output stream to be written.
+	@param[in]	inData			Specifies the AJAAncillaryDIDSIDPair to be rendered into the output stream.
+	@return		A non-constant reference to the specified output stream.
+**/
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryDIDSIDPair & inData);
+
+
 /**
 	@brief	Identifies the ancillary data types that are known to this module.
 **/
@@ -549,6 +560,14 @@ public:
 	virtual AJAStatus						InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation & inLocationInfo, uint32_t & outPacketByteCount);
 
 	/**
+		@brief		Initializes me from "raw" ancillary data received from hardware (ingest).
+		@param[in]	inData				Specifies the "raw" packet data.
+		@param[in]	inLocationInfo		Specifies the default location info.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						InitWithReceivedData (const std::vector<uint8_t> & inData, const AJAAncillaryDataLocation & inLocationInfo);
+
+	/**
 		@deprecated	Use InitWithReceivedData(const uint8_t *, const uint32_t, const AJAAncillaryDataLocation &, uint32_t &) instead.
 	**/
 	virtual inline AJAStatus				InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation * pInLoc, uint32_t & outPacketByteCount)
@@ -592,6 +611,8 @@ public:
 	virtual std::ostream &					DumpPayload (std::ostream & inOutStream) const;
 
 	virtual inline std::string				IDAsString (void) const	{return DIDSIDToString (GetDID(), GetSID());}	///< @return	A string representing my DID/SID.
+	virtual std::string						AsString (void) const;	///< @return	Converts me to a compact, human-readable string.
+	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const		{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}
 
 	/**
 		@return	A string containing a human-readable representation of the given DID/SDID values,
@@ -600,6 +621,18 @@ public:
 		@param[in]	inSDID	Specifies the Secondary Data ID value.
 	**/
 	static std::string						DIDSIDToString (const uint8_t inDID, const uint8_t inSDID);
+
+	/**
+		@param[in]	inRHS	The packet I am to be compared with.
+		@return		True if I'm identical to the RHS packet.
+	**/
+	virtual bool							operator == (const AJAAncillaryData & inRHS) const;
+
+	/**
+		@param[in]	inRHS	The packet I am to be compared with.
+		@return		True if I differ from the RHS packet.
+	**/
+	virtual inline bool						operator != (const AJAAncillaryData & inRHS) const		{return !(*this == inRHS);}
 
 	protected:
 		void								Init (void);	// NOT virtual - called by constructors
