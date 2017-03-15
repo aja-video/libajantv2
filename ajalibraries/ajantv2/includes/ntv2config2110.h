@@ -83,7 +83,7 @@ public:
     uint32_t	destPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
     uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
     uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
-    uint16_t    payload;
+    uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling    videoSamples;
 };
