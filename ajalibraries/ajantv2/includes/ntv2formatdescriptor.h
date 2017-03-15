@@ -287,6 +287,15 @@ AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVi
 													 const bool						inVANCenabled	= false,
 													 const bool						inWideVANC		= false);
 
+/**
+	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
+	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
+									to be converted.
+	@param[out]	out16BitYUVLine		Receives the unpacked 16-bit-per-component YUV data. The sequence is cleared before filling.
+									The UWord sequence will be Cb0, Y0, Cr0, Y1, Cb1, Y2, Cr1, Y3, Cb2, Y4, Cr2, Y5, . . .
+	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
+	@return		True if successful;  otherwise false.
+**/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);
 
 
