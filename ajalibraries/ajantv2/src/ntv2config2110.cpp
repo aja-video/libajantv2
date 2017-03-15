@@ -300,14 +300,14 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // vlan
     WriteChannelRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
 
-    // payload
+    // payload type
     if (stream == NTV2_VIDEO_STREAM)
     {
-        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000 | rxConfig.payload);
+        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000 | rxConfig.payloadType);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
-        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x20000000 | rxConfig.payload);
+        WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x20000000 | rxConfig.payloadType);
     }
 
     // matching
@@ -360,10 +360,9 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
             break;
         default:
         case VPIDSampling_YUV_422:
+            vf = 2;
             componentsPerPixel = 2;
             componentsPerUnit  = 4;
-
-            vf = 2;
             break;
         }
         mDevice.WriteRegister(kReg4175_depkt_vid_fmt + depackBaseAddr,vf);
@@ -489,12 +488,48 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
     ReadChannelRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
     rxConfig.VLAN = val & 0xffff;
 
+    // payload type
+    ReadChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,&val);
+    rxConfig.payloadType = val & 0x7f;
+
     // matching
     ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
-        // DAC TODO - video format and sampling
+        // depacketizer
+        uint32_t depackBaseAddr;
+        SetRxDepacketizerChannel(channel, stream, depackBaseAddr);
+
+        // sampling
+        mDevice.ReadRegister(kReg4175_depkt_vid_fmt + depackBaseAddr,&val);
+        val = val & 0x3;
+        VPIDSampling vs;
+        switch(val)
+        {
+        case 0:
+            vs = VPIDSampling_GBR_444;
+            break;
+        case 1:
+            vs = VPIDSampling_YUV_444;
+            break;
+        case 2:
+        default:
+            vs = VPIDSampling_YUV_422;
+            break;
+        }
+        rxConfig.videoSamples = vs;
+
+        // format
+#if 0
+        mDevice.ReadRegister(SAREK_PLL + kRegPll_DecVidStd, &val);
+       NTV2FrameRate       fr  = NTV2FrameRate((val & 0xf00) >> 8);
+       NTV2FrameGeometry   fg  = NTV2FrameGeometry((val & 0xf0) >> 4);
+       NTV2Standard        std = NTV2Standard(val & 0x0f);
+       bool               is2K = (val & BIT(13));
+
+       NTV2FormatDescriptor fd;
+#endif
     }
 
     return true;
