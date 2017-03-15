@@ -222,13 +222,18 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         if (protocol == "2110")
         {
             is2110 = true;
+            std::cout << "Protocol 2110 " << std::endl;
         }
+        else
+            std::cout << "Protocol 2022 " << std::endl;
+
     }
 
     qjv = json.value("PTPMaster");
     if (qjv != QJsonValue::Undefined)
     {
        PTPMasterAddr = qjv.toString();
+       std::cout << "PTP Master Address " << PTPMasterAddr.toStdString() << std::endl;
     }
 
     return readJson(json);
