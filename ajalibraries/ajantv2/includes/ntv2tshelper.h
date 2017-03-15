@@ -730,7 +730,11 @@ class PMTGen : public TSGenerator
             _pkt8[pos++] = 0;
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
-            _pkt8[pos++] = 6;                                               // length
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
+                _pkt8[pos++] = 6;                                           // length non-elsm
+            else
+                _pkt8[pos++] = 4;                                           // length standard stream (omitted ST302 channel spec)
+
             _pkt8[pos++] = 0x42;                                            // "B"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x53;                                            // "S"
