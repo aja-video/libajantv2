@@ -14,6 +14,7 @@
 	#include <set>
 	#include <map>
 	#include <vector>
+	#include <iomanip>
 	#include "ajaexport.h"
 #endif	//	user-space clients only
 
