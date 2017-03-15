@@ -222,13 +222,18 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         if (protocol == "2110")
         {
             is2110 = true;
+            std::cout << "Protocol 2110 " << std::endl;
         }
+        else
+            std::cout << "Protocol 2022 " << std::endl;
+
     }
 
     qjv = json.value("PTPMaster");
     if (qjv != QJsonValue::Undefined)
     {
        PTPMasterAddr = qjv.toString();
+       std::cout << "PTP Master Address " << PTPMasterAddr.toStdString() << std::endl;
     }
 
     return readJson(json);
@@ -409,7 +414,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
-        rxChannelConfig.payload      = receive.mPayload.toUInt();
+        rxChannelConfig.payloadType      = receive.mPayload.toUInt();
         rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
         rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
