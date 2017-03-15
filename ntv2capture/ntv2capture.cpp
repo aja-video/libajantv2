@@ -236,12 +236,14 @@ AJAStatus NTV2Capture::SetupAudio (void)
 void NTV2Capture::SetupHostBuffers (void)
 {
 	NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
+	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
 
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	mDevice.GetVANCMode (vancMode);
 	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, vancMode);
+	mFormatDesc = NTV2FormatDescriptor (standard, mPixelFormat, vancMode);
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
 	for (unsigned bufferNdx (0);  bufferNdx < CIRCULAR_BUFFER_SIZE;  bufferNdx++)
@@ -252,6 +254,8 @@ void NTV2Capture::SetupHostBuffers (void)
 		mAVHostBuffer [bufferNdx].fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem) ? NTV2_AUDIOSIZE_MAX : 0;
 		mAVHostBuffer [bufferNdx].fAncBuffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [NTV2_ANCSIZE_MAX]) : 0;
 		mAVHostBuffer [bufferNdx].fAncBufferSize	= mWithAnc ? NTV2_ANCSIZE_MAX : 0;
+		mAVHostBuffer [bufferNdx].fAncF2Buffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [NTV2_ANCSIZE_MAX]) : 0;
+		mAVHostBuffer [bufferNdx].fAncF2BufferSize	= mWithAnc ? NTV2_ANCSIZE_MAX : 0;
 		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
 	}	//	for each AVDataBuffer
 
@@ -337,7 +341,7 @@ void NTV2Capture::ConsumeFrames (void)
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
-		}
+		}	//	if pFrameData
 	}	//	loop til quit signaled
 
 }	//	ConsumeFrames
@@ -403,7 +407,7 @@ void NTV2Capture::CaptureFrames (void)
 			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
 				inputXfer.SetAudioBuffer (captureData->fAudioBuffer, captureData->fAudioBufferSize);
 			if (mWithAnc)
-				inputXfer.SetAncBuffers (captureData->fAncBuffer, captureData->fAncBufferSize);
+				inputXfer.SetAncBuffers (captureData->fAncBuffer, captureData->fAncBufferSize, captureData->fAncF2Buffer, captureData->fAncF2BufferSize);
 
 			//	Do the transfer from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
