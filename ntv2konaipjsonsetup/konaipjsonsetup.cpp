@@ -409,7 +409,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
-        rxChannelConfig.payload      = receive.mPayload.toUInt();
+        rxChannelConfig.payloadType      = receive.mPayload.toUInt();
         rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
         rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 

@@ -1,5 +1,6 @@
 {
     "protocol" : "2110",
+    "PTPMaster":"172.16.0.200",
     "sfps":[
     {
             "designator":"top",
