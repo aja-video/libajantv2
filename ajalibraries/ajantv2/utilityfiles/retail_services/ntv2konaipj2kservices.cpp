@@ -50,11 +50,11 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	
 	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
 	// output enable and input disable because we are in playback mode
-	mRx2022Config1.rxc_enable = false;
-	mRx2022Config2.rxc_enable = false;
-	mTx2022Config3.txc_enable = true;
-	mTx2022Config4.txc_enable = true;
-
+	mCard->WriteRegister(kVRegRxcEnable1, false);
+	mCard->WriteRegister(kVRegRxcEnable2, false);
+	mCard->WriteRegister(kVRegTxcEnable3, true);
+	mCard->WriteRegister(kVRegTxcEnable4, true);
+	
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
@@ -642,11 +642,11 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	
 	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
 	// input enable and output disable because we are in capture mode
-	mRx2022Config1.rxc_enable = true;
-	mRx2022Config2.rxc_enable = true;
-	mTx2022Config3.txc_enable = false;
-	mTx2022Config4.txc_enable = false;
-	
+	mCard->WriteRegister(kVRegRxcEnable1, true);
+	mCard->WriteRegister(kVRegRxcEnable2, true);
+	mCard->WriteRegister(kVRegTxcEnable3, false);
+	mCard->WriteRegister(kVRegTxcEnable4, false);
+
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
@@ -1162,7 +1162,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
-    bool rv, rv2, enable;
+	bool rv, rv2, enable;
+	uint32_t enableHw;
 	
     if (mCard->IsDeviceReady() == true)
     {
@@ -1205,10 +1206,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
 			rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
+			mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
+
 			if (rv && rv2)
 			{
-				if ((enable != mRx2022Config1.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config1))
+				if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config1))
 				{
+					// Special case we handle channel enables at service level automatically
+					mRx2022Config1.rxc_enable = enableHw;
 					setRxConfig(NTV2_CHANNEL1);
 				}
 			}
@@ -1238,10 +1243,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			{
 				rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
 				rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
+				mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
+
 				if (rv && rv2)
 				{
-					if ((enable != mRx2022Config2.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config2))
+					if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config2))
 					{
+						// Special case we handle channel enables at service level automatically
+						mRx2022Config2.rxc_enable = enableHw;
 						setRxConfig(NTV2_CHANNEL2);
 					}
 				}
@@ -1258,10 +1267,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			// Configure tx for ch1
 			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
 			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable);
+			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
+
 			if (rv && rv2)
 			{
-				if ((enable != mTx2022Config3.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config3))
+				if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config3))
 				{
+					// Special case we handle channel enables at service level automatically
+					mTx2022Config3.txc_enable = enableHw;
 					setTxConfig(NTV2_CHANNEL1);
 				}
 				else
@@ -1317,10 +1330,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
 				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable);
+				mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
+
 				if (rv && rv2)
 				{
-					if ((enable != mTx2022Config4.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config4))
+					if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config4))
 					{
+						// Special case we handle channel enables at service level automatically
+						mTx2022Config4.txc_enable = enableHw;
 						setTxConfig(NTV2_CHANNEL2);
 					}
 					else
