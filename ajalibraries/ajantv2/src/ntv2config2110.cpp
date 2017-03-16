@@ -464,7 +464,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // end setup 4175 depacketizer
 
-        // setup PLL even if not currently in use
+        // setup PLL
         NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
         NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
         NTV2Standard        std = fd.GetVideoStandard();
@@ -491,22 +491,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // enable depacketizer
     mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
     mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
-
-    // setup PLL
-    mDevice.WriteRegister(kRegPll_Config  + SAREK_PLL, PLL_CONFIG_PCR,PLL_CONFIG_PCR);
-    mDevice.WriteRegister(kRegPll_SrcIp   + SAREK_PLL, sourceIp);
-    mDevice.WriteRegister(kRegPll_SrcPort + SAREK_PLL, rxConfig.sourcePort);
-    mDevice.WriteRegister(kRegPll_DstIp   + SAREK_PLL, destIp);
-    mDevice.WriteRegister(kRegPll_DstPort + SAREK_PLL, rxConfig.destPort);
-
-    uint32_t rxMatch  = rxConfig.rxMatch;
-    uint32_t pllMatch = 0;
-    if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
-    if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
-    if (rxMatch & RX_MATCH_DEST_PORT)   pllMatch |= PLL_MATCH_DEST_PORT;
-    if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
-    pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
-    mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
 
     // enable the decapsulator
     AcquireDecapsulatorControlAccess(decapBaseAddr);
@@ -841,6 +825,19 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
         // end setup 4175 packetizer
+
+        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
+        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+        NTV2Standard        std = fd.GetVideoStandard();
+        bool               is2K = fd.Is2KFormat();
+
+        uint32_t val = ( (((uint32_t) fr) << 8) |
+                         (((uint32_t) fg) << 4) |
+                          ((uint32_t) std ) );
+        if (is2K) val += BIT(13);
+
+        mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, val);
+
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
