@@ -370,6 +370,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     if (!PTPMasterAddr.isEmpty())
     {
+        mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(PTPMasterAddr.toStdString());
     }
 
@@ -428,7 +429,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         bool rv = config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig,enable);
         if (!rv)
         {
-            std::cerr << "FAILED" << config2110.getLastError() << std::endl;
+            std::cerr << "FAILED: " << config2110.getLastError() << std::endl;
             return false;
         }
     }
