@@ -109,10 +109,8 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig, bool enable);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
-
-    bool        SetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
@@ -158,7 +156,7 @@ protected:
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
-    bool        SetRxDepacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddr);
+    uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
