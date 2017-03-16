@@ -424,15 +424,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         else
             stream = NTV2_VIDEO_STREAM;
 
-        if (getEnable(receive.mEnable))
+        bool enable = (getEnable(receive.mEnable));
+        bool rv = config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig,enable);
+        if (!rv)
         {
-            config2110.SetRxChannelEnable(channel, stream, false);
-            config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig);
-            config2110.SetRxChannelEnable(channel, stream, true);
-        }
-        else
-        {
-            config2110.SetRxChannelEnable(channel, stream, false);
+            std::cerr << "FAILED" << config2110.getLastError() << std::endl;
+            return false;
         }
     }
     std::cerr << "## transmitIter" << std::endl;
@@ -460,7 +457,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         else
             stream = NTV2_VIDEO_STREAM;
 
-            config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
+        config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
     }
 
