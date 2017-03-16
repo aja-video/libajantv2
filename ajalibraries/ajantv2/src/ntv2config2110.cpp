@@ -607,11 +607,14 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
 
 bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled)
 {
-    // Depacketizer
-    uint32_t depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    // get address
+    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel,stream);
+
+    // select channel
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
     uint32_t val;
-    ReadChannelRegister(kReg4175_depkt_control + depacketizerBaseAddr,&val);
+    ReadChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr,&val);
     enabled = (val & 0x01);
 
     return true;
