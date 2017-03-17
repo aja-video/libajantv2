@@ -12,6 +12,10 @@
 #include "ntv2config2022.h"
 #include "ntv2config2110.h"
 
+using std::endl;
+using std::cout;
+using std::cerr;
+
 NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
 MACAddr toMAC(QString mac);
@@ -28,27 +32,27 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
     QJsonArray sfpArray = json["sfps"].toArray();
     for (int sfpIndex = 0; sfpIndex < sfpArray.size(); ++sfpIndex)
     {
-        std::cout << "SFP" << std::endl;
+        cout << "SFP" << endl;
 
         QJsonObject sfpObject = sfpArray[sfpIndex].toObject();
         SFPStruct sfpStruct;
         sfpStruct.mSFPDesignator = sfpObject["designator"].toString();
-        std::cout << "SFPDesignator " << sfpStruct.mSFPDesignator.toStdString() << std::endl;
+        cout << "SFPDesignator " << sfpStruct.mSFPDesignator.toStdString() << endl;
 
         sfpStruct.mIPAddress = sfpObject["IPAddress"].toString();
-        std::cout << "IPAddress " << sfpStruct.mIPAddress.toStdString() << std::endl;
+        cout << "IPAddress " << sfpStruct.mIPAddress.toStdString() << endl;
 
         sfpStruct.mSubnetMask = sfpObject["SubnetMask"].toString();
-        std::cout << "SubnetMask " << sfpStruct.mSubnetMask.toStdString() << std::endl;
+        cout << "SubnetMask " << sfpStruct.mSubnetMask.toStdString() << endl;
 
         sfpStruct.mRouter = sfpObject["Router"].toString();
-        std::cout << "Router " << sfpStruct.mRouter.toStdString() << std::endl;
+        cout << "Router " << sfpStruct.mRouter.toStdString() << endl;
 
         sfpStruct.mEnable2022_7 = sfpObject["Enable2022_7"].toString();
         if (!sfpStruct.mEnable2022_7.isEmpty())
-            std::cout << "Enable2022_7 " << sfpStruct.mEnable2022_7.toStdString() << std::endl << std::endl;
+            cout << "Enable2022_7 " << sfpStruct.mEnable2022_7.toStdString() << endl << endl;
         else
-            std::cout << std::endl;
+            cout << endl;
 
         mKonaIPParams.mSFPs.append(sfpStruct);
     }
@@ -57,73 +61,73 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
     QJsonArray receiveChannelArray = json["receive"].toArray();
     for (int receiveChannelIndex = 0; receiveChannelIndex < receiveChannelArray.size(); ++receiveChannelIndex)
     {
-        std::cout << "ReceiveChannels" << std::endl;
+        cout << "ReceiveChannels" << endl;
 
         QJsonObject receiveChannelObject = receiveChannelArray[receiveChannelIndex].toObject();
         ReceiveStruct receiveStruct;
 
         receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
-        std::cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << std::endl;
+        cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
 
         receiveStruct.mStream = receiveChannelObject["stream"].toString();
         if (!receiveStruct.mStream.isEmpty())
-            std::cout << "Stream " << receiveStruct.mStream.toStdString() << std::endl;
+            cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
 
         receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
         if (!receiveStruct.mSrcPort.isEmpty())
-            std::cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << std::endl;
+            cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << endl;
 
         receiveStruct.mSrcIPAddress = receiveChannelObject["srcIPAddress"].toString();
         if (!receiveStruct.mSrcIPAddress.isEmpty())
-            std::cout << "Src IP Address " << receiveStruct.mSrcIPAddress.toStdString() << std::endl;
+            cout << "Src IP Address " << receiveStruct.mSrcIPAddress.toStdString() << endl;
 
         receiveStruct.mPrimaryDestIPAddress = receiveChannelObject["primaryDestIPAddress"].toString();
-        std::cout << "PrimaryDestIPAddress " << receiveStruct.mPrimaryDestIPAddress.toStdString() << std::endl;
+        cout << "PrimaryDestIPAddress " << receiveStruct.mPrimaryDestIPAddress.toStdString() << endl;
 
         receiveStruct.mPrimaryDestPort = receiveChannelObject["primaryDestPort"].toString();
-        std::cout << "PrimaryDestPort " << receiveStruct.mPrimaryDestPort.toStdString() << std::endl;
+        cout << "PrimaryDestPort " << receiveStruct.mPrimaryDestPort.toStdString() << endl;
 
         receiveStruct.mPrimaryFilter = receiveChannelObject["primaryFilter"].toString();
-        std::cout << "PrimaryFilter " << receiveStruct.mPrimaryFilter.toStdString() << std::endl;
+        cout << "PrimaryFilter " << receiveStruct.mPrimaryFilter.toStdString() << endl;
 
         receiveStruct.mSecondaryDestIPAddress = receiveChannelObject["secondaryDestIPAddress"].toString();
         if (!receiveStruct.mSecondaryDestIPAddress.isEmpty())
-            std::cout << "SecondaryDestIPAddress " << receiveStruct.mSecondaryDestIPAddress.toStdString() << std::endl;
+            cout << "SecondaryDestIPAddress " << receiveStruct.mSecondaryDestIPAddress.toStdString() << endl;
 
         receiveStruct.mSecondaryDestPort = receiveChannelObject["secondaryDestPort"].toString();
         if (!receiveStruct.mSecondaryDestPort.isEmpty())
-            std::cout << "SecondaryDestPort " << receiveStruct.mSecondaryDestPort.toStdString() << std::endl;
+            cout << "SecondaryDestPort " << receiveStruct.mSecondaryDestPort.toStdString() << endl;
 
         receiveStruct.mSecondaryFilter = receiveChannelObject["secondaryFilter"].toString();
         if (!receiveStruct.mSecondaryFilter.isEmpty())
-            std::cout << "SecondaryFilter " << receiveStruct.mSecondaryFilter.toStdString() << std::endl;
+            cout << "SecondaryFilter " << receiveStruct.mSecondaryFilter.toStdString() << endl;
 
         receiveStruct.mNetworkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
         if (!receiveStruct.mNetworkPathDifferential.isEmpty())
-            std::cout << "NetworkPathDifferential " << receiveStruct.mNetworkPathDifferential.toStdString() << std::endl;
+            cout << "NetworkPathDifferential " << receiveStruct.mNetworkPathDifferential.toStdString() << endl;
 
         receiveStruct.mPlayoutDelay = receiveChannelObject["playoutDelay"].toString();
         if (!receiveStruct.mPlayoutDelay.isEmpty())
-            std::cout << "PlayoutDelay " << receiveStruct.mPlayoutDelay.toStdString() << std::endl;
+            cout << "PlayoutDelay " << receiveStruct.mPlayoutDelay.toStdString() << endl;
 
         receiveStruct.mVLAN = receiveChannelObject["vlan"].toString();
         if (!receiveStruct.mVLAN.isEmpty())
-            std::cout << "VLAN " << receiveStruct.mVLAN.toStdString() << std::endl;
+            cout << "VLAN " << receiveStruct.mVLAN.toStdString() << endl;
 
         receiveStruct.mSSRC = receiveChannelObject["ssrc"].toString();
         if (!receiveStruct.mSSRC.isEmpty())
-            std::cout << "SSRC " << receiveStruct.mSSRC.toStdString() << std::endl;
+            cout << "SSRC " << receiveStruct.mSSRC.toStdString() << endl;
 
         receiveStruct.mPayload = receiveChannelObject["payload"].toString();
         if (!receiveStruct.mPayload.isEmpty())
-            std::cout << "Payload " << receiveStruct.mPayload.toStdString() << std::endl;
+            cout << "Payload " << receiveStruct.mPayload.toStdString() << endl;
 
         receiveStruct.mVideoFormat = receiveChannelObject["videoFormat"].toString();
         if (!receiveStruct.mVideoFormat.isEmpty())
-            std::cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << std::endl;
+            cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << endl;
 
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
-        std::cout << "Enable " << receiveStruct.mEnable.toStdString() << std::endl << std::endl;
+        cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
         mKonaIPParams.mReceiveChannels.append(receiveStruct);
     }
@@ -132,59 +136,59 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
     QJsonArray transmitChannelArray = json["transmit"].toArray();
     for (int transmitChannelIndex = 0; transmitChannelIndex < transmitChannelArray.size(); ++transmitChannelIndex)
     {
-        std::cout << "TransmitChannels" << std::endl;
+        cout << "TransmitChannels" << endl;
 
         QJsonObject transmitChannelObject = transmitChannelArray[transmitChannelIndex].toObject();
         TransmitStruct transmitStruct;
 
         transmitStruct.mChannelDesignator = transmitChannelObject["designator"].toString();
-        std::cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << std::endl;
+        cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << endl;
 
         transmitStruct.mStream = transmitChannelObject["stream"].toString();
         if (!transmitStruct.mStream.isEmpty())
-            std::cout << "Stream " << transmitStruct.mStream.toStdString() << std::endl;
+            cout << "Stream " << transmitStruct.mStream.toStdString() << endl;
 
         transmitStruct.mPrimaryLocalPort = transmitChannelObject["primaryLocalPort"].toString();
-        std::cout << "PrimaryLocalPort " << transmitStruct.mPrimaryLocalPort.toStdString() << std::endl;
+        cout << "PrimaryLocalPort " << transmitStruct.mPrimaryLocalPort.toStdString() << endl;
 
         transmitStruct.mPrimaryRemoteIPAddress = transmitChannelObject["primaryRemoteIPAddress"].toString();
-        std::cout << "PrimaryRemoteIPAddress " << transmitStruct.mPrimaryRemoteIPAddress.toStdString() << std::endl;
+        cout << "PrimaryRemoteIPAddress " << transmitStruct.mPrimaryRemoteIPAddress.toStdString() << endl;
 
         transmitStruct.mPrimaryRemotePort = transmitChannelObject["primaryRemotePort"].toString();
-        std::cout << "PrimaryRemotePort " << transmitStruct.mPrimaryRemotePort.toStdString() << std::endl;
+        cout << "PrimaryRemotePort " << transmitStruct.mPrimaryRemotePort.toStdString() << endl;
 
         transmitStruct.mPrimaryRemoteMac = transmitChannelObject["primaryRemoteMac"].toString();
-        std::cout << "PrimaryRemoteMac " << transmitStruct.mPrimaryRemoteMac.toStdString() << std::endl;
+        cout << "PrimaryRemoteMac " << transmitStruct.mPrimaryRemoteMac.toStdString() << endl;
 
         transmitStruct.mPrimaryAutoMac = transmitChannelObject["primaryAutoMac"].toString();
-        std::cout << "PrimaryAutoMac " << transmitStruct.mPrimaryAutoMac.toStdString() << std::endl;
+        cout << "PrimaryAutoMac " << transmitStruct.mPrimaryAutoMac.toStdString() << endl;
 
         transmitStruct.mSecondaryLocalPort = transmitChannelObject["secondaryLocalPort"].toString();
         if (!transmitStruct.mSecondaryLocalPort.isEmpty())
-            std::cout << "SecondaryLocalPort " << transmitStruct.mSecondaryLocalPort.toStdString() << std::endl;
+            cout << "SecondaryLocalPort " << transmitStruct.mSecondaryLocalPort.toStdString() << endl;
 
         transmitStruct.mSecondaryRemoteIPAddress = transmitChannelObject["secondaryRemoteIPAddress"].toString();
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
-            std::cout << "SecondaryRemoteIPAddress " << transmitStruct.mSecondaryRemoteIPAddress.toStdString() << std::endl;
+            cout << "SecondaryRemoteIPAddress " << transmitStruct.mSecondaryRemoteIPAddress.toStdString() << endl;
 
         transmitStruct.mSecondaryRemoteIPAddress = transmitChannelObject["secondaryRemotePort"].toString();
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
-        std::cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << std::endl;
+        cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << endl;
 
         transmitStruct.mSecondaryRemoteMac = transmitChannelObject["secondaryRemoteMac"].toString();
         if (!transmitStruct.mSecondaryRemoteMac.isEmpty())
-            std::cout << "SecondaryRemoteMac " << transmitStruct.mSecondaryRemoteMac.toStdString() << std::endl;
+            cout << "SecondaryRemoteMac " << transmitStruct.mSecondaryRemoteMac.toStdString() << endl;
 
         transmitStruct.mSecondaryAutoMac = transmitChannelObject["secondaryAutoMac"].toString();
         if (!transmitStruct.mSecondaryAutoMac.isEmpty())
-            std::cout << "SecondaryAutoMac " << transmitStruct.mSecondaryAutoMac.toStdString() << std::endl;
+            cout << "SecondaryAutoMac " << transmitStruct.mSecondaryAutoMac.toStdString() << endl;
 
         transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
         if (!transmitStruct.mVideoFormat.isEmpty())
-            std::cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << std::endl;
+            cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
 
         transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
-        std::cout << "Enable " << transmitStruct.mEnable.toStdString() << std::endl << std::endl;
+        cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
 
         mKonaIPParams.mTransmitChannels.append(transmitStruct);
     }
@@ -222,10 +226,10 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         if (protocol == "2110")
         {
             is2110 = true;
-            std::cout << "Protocol 2110 " << std::endl;
+            cout << "Protocol 2110 " << endl;
         }
         else
-            std::cout << "Protocol 2022 " << std::endl;
+            cout << "Protocol 2022 " << endl;
 
     }
 
@@ -233,7 +237,7 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
     if (qjv != QJsonValue::Undefined)
     {
        PTPMasterAddr = qjv.toString();
-       std::cout << "PTP Master Address " << PTPMasterAddr.toStdString() << std::endl;
+       cout << "PTP Master Address " << PTPMasterAddr.toStdString() << endl;
     }
 
     return readJson(json);
@@ -256,17 +260,17 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
-        {std::cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << std::endl;  return false;}
+        {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
     //if (!mDevice.IsKonaIPDevice ())
-    //    {std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+    //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
     while (!mDevice.IsDeviceReady ())
     {
-        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
         mDevice.SleepMs (1000);
         if (mDevice.IsDeviceReady ())
-            std::cout << "## NOTE:  Device is ready" << std::endl;
+            cout << "## NOTE:  Device is ready" << endl;
     }
 
     enable2022_7 = false;
@@ -274,7 +278,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
     if (mKonaIPParams.mSFPs.size() < 1)
     {
-        {std::cerr << "## ERROR:  Need To Specify at Least 1 SFP" << std::endl;  return false;}
+        {cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;  return false;}
     }
 
     QListIterator<SFPStruct> sfpIter(mKonaIPParams.mSFPs);
@@ -295,12 +299,12 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         }
     }
 
-    std::cerr << "## receiveIter" << std::endl;
+    cerr << "## receiveIter" << endl;
 
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
     while (receiveIter.hasNext())
     {
-        std::cerr << "## receiveIter did" << std::endl;
+        cerr << "## receiveIter did" << endl;
 
         ReceiveStruct receive = receiveIter.next();
         rx_2022_channel rxChannelConfig;
@@ -318,12 +322,12 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
         config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable),enable2022_7);
     }
-    std::cerr << "## transmitIter" << std::endl;
+    cerr << "## transmitIter" << endl;
 
     QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
     while (transmitIter.hasNext())
     {
-        std::cerr << "## transmitIter did" << std::endl;
+        cerr << "## transmitIter did" << endl;
 
         TransmitStruct transmit = transmitIter.next();
         tx_2022_channel txChannelConfig;
@@ -353,17 +357,17 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
-        {std::cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << std::endl;  return false;}
+        {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
     //if (!mDevice.IsKonaIPDevice ())
-    //    {std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+    //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
     while (!mDevice.IsDeviceReady ())
     {
-        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
         mDevice.SleepMs (1000);
         if (mDevice.IsDeviceReady ())
-            std::cout << "## NOTE:  Device is ready" << std::endl;
+            cout << "## NOTE:  Device is ready" << endl;
     }
 
     CNTV2Config2110	config2110 (mDevice);
@@ -376,7 +380,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     if (mKonaIPParams.mSFPs.size() < 1)
     {
-        std::cerr << "## ERROR:  Need To Specify at Least 1 SFP" << std::endl;
+        cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;
         return false;
     }
 
@@ -397,26 +401,26 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
-    std::cerr << "## receiveIter" << std::endl;
+    cerr << "## receiveIter" << endl;
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
     bool firstChannel = true;
     while (receiveIter.hasNext())
     {
-        std::cerr << "## receiveIter did" << std::endl;
+        cerr << "## receiveIter did" << endl;
 
         ReceiveStruct receive = receiveIter.next();
         rx_2110Config rxChannelConfig;
         bool ok;
         NTV2Channel channel          = getChannel(receive.mChannelDesignator);
-
+#if 0
         if (firstChannel)
         {
             config2110.ResetDecapsulator(channel);
             config2110.ResetDecapsulator(channel); // resets all Rx channels and streams
             firstChannel = false;
         }
-
+#endif
         rxChannelConfig.rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
         rxChannelConfig.sourceIP     = receive.mSrcIPAddress.toStdString();
         rxChannelConfig.destIP       = receive.mPrimaryDestIPAddress.toStdString();
@@ -438,34 +442,44 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         bool rv = config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig,enable);
         if (!rv)
         {
-            std::cerr << "FAILED: " << config2110.getLastError() << std::endl;
+            cerr << "FAILED: " << config2110.getLastError() << endl;
             return false;
         }
-#if 0
+#if 1
         // check for unlock
         for (;;)
         {
             rv = config2110.WaitDecapsulatorUnlock(channel,stream);
             if (rv)
             {
+                cout << "source unlocked";
+                config2110.DisableDecapsulatorStream(channel,stream);
+                config2110.ResetDepacketizer(channel,stream);
+
                 do
                 {
-                    cout << "waiting for video" << endl;
+                    cout << "waiting for source lock" << endl;
                 }
-                while (!config2110.WaitDecapsulatorLock());
-                config2110.ResetDepacketizer(channel,stream);
-                config211()
-            }
+                while (!config2110.WaitDecapsulatorLock(channel,stream));
 
+                cout << "source locked = - re enabling" << endl;
+
+                config2110.SetupDepacketizer(channel, stream, rxChannelConfig);
+                config2110.EnableDecapsulatorStream(channel,stream);
+            }
+            else
+            {
+                cout << "source OK" << endl;
+            }
         }
 #endif
     }
-    std::cerr << "## transmitIter" << std::endl;
+    cerr << "## transmitIter" << endl;
 
     QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
     while (transmitIter.hasNext())
     {
-        std::cerr << "## transmitIter did" << std::endl;
+        cerr << "## transmitIter did" << endl;
 
         TransmitStruct transmit = transmitIter.next();
         tx_2110Config txChannelConfig;
