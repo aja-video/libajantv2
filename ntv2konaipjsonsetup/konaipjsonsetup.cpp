@@ -398,8 +398,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
     std::cerr << "## receiveIter" << std::endl;
-
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
+
+    bool firstChannel = true;
     while (receiveIter.hasNext())
     {
         std::cerr << "## receiveIter did" << std::endl;
@@ -408,6 +409,14 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rx_2110Config rxChannelConfig;
         bool ok;
         NTV2Channel channel          = getChannel(receive.mChannelDesignator);
+
+        if (firstChannel)
+        {
+            config2110.ResetDecapsulator(channel);
+            config2110.ResetDecapsulator(channel); // resets all Rx channels and streams
+            firstChannel = false;
+        }
+
         rxChannelConfig.rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
         rxChannelConfig.sourceIP     = receive.mSrcIPAddress.toStdString();
         rxChannelConfig.destIP       = receive.mPrimaryDestIPAddress.toStdString();
@@ -415,7 +424,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
-        rxChannelConfig.payloadType      = receive.mPayload.toUInt();
+        rxChannelConfig.payloadType  = receive.mPayload.toUInt();
         rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
         rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
@@ -432,6 +441,24 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             std::cerr << "FAILED: " << config2110.getLastError() << std::endl;
             return false;
         }
+#if 0
+        // check for unlock
+        for (;;)
+        {
+            rv = config2110.WaitDecapsulatorUnlock(channel,stream);
+            if (rv)
+            {
+                do
+                {
+                    cout << "waiting for video" << endl;
+                }
+                while (!config2110.WaitDecapsulatorLock());
+                config2110.ResetDepacketizer(channel,stream);
+                config211()
+            }
+
+        }
+#endif
     }
     std::cerr << "## transmitIter" << std::endl;
 
