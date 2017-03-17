@@ -349,6 +349,12 @@
 #define kRegPll_PTP_LclClkIdHi                  0x1e
 #define kRegPll_PTP_PhaseError                  0x1f
 #define kRegPll_PTP_Correction                  0x20
+#define kRegPll_PTP_FPptpSecHi                  0x21
+#define kRegPll_PTP_FPptpSecLo                  0x22
+#define kRegPll_PTP_FPptpNSec                   0x23
+#define kRegPll_PTP_CurPtpSecHi                 0x24
+#define kRegPll_PTP_CurPtpSecLo                 0x25
+#define kRegPll_PTP_CurPtpNSec                  0x26
 
 /////////////////////////////////////////////////////////////////////
 //
