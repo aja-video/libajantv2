@@ -269,22 +269,8 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
 
 bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig, bool enable)
 {
-    uint32_t  decapBaseAddr        = GetDecapulatorAddress(channel);
+    uint32_t  decapBaseAddr        = GetDecapsulatorAddress(channel);
     eSFP      port                 = GetRxPort(channel);
-
-    // always disable first
-    uint32_t val = 0x00;
-    if (stream == NTV2_VIDEO_STREAM)
-    {
-        val = 0x04;
-    }
-
-    // disable decapsulator channel
-    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
-    WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
-
-    // disable depacketizer
-    //mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
     if (enable == false)
     {
@@ -295,6 +281,10 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         {
             EnableIGMPGroup(port,channel,stream,false);
         }
+
+        // disable decapsulator channel
+        DisableDecapsulatorStream(channel,stream);
+
         return true;
     }
 
@@ -314,6 +304,9 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
         UnsetIGMPGroup(port, channel, stream);
     }
+
+    // disable decapsulator channel
+    DisableDecapsulatorStream(channel,stream);
 
     // wait for FIFO to flush
     mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
@@ -397,23 +390,43 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kRegPll_DecVidStd + SAREK_PLL, val);
     }
 
+    EnableDecapsulatorStream(channel,stream);
+
+    return true;
+}
+
+void  CNTV2Config2110::DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
+    uint32_t val = 0x00;
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        val = 0x04;
+    }
+
+    // disable decapsulator channel
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
+    WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
+}
+
+void  CNTV2Config2110::EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream)
+{
     // enable the decapsulator
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
     AcquireDecapsulatorControlAccess(decapBaseAddr);
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
-    val = 0x01;
+    uint32_t val = 0x01;
     if (stream == NTV2_VIDEO_STREAM)
     {
         val = 0x05;
     }
     WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
-
-    return true;
 }
 
 bool  CNTV2Config2110::WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream)
 {
-    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
 
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
@@ -425,18 +438,23 @@ bool  CNTV2Config2110::WaitDecapsulatorLock(const NTV2Channel channel, NTV2Strea
     {
         if (--timeout <=0 )
         {
+            mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
             return false;
         }
+
         mDevice.WaitForOutputVerticalInterrupt();
         mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
+
     } while ((lock & BIT(0)) == 0);
+
+    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
 
     return true;
 }
 
 bool  CNTV2Config2110::WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream)
 {
-    uint32_t  decapBaseAddr   = GetDecapulatorAddress(channel);
+    uint32_t  decapBaseAddr   = GetDecapsulatorAddress(channel);
 
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
@@ -447,12 +465,17 @@ bool  CNTV2Config2110::WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Str
     do
     {
         mDevice.WaitForOutputVerticalInterrupt();
+
         mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
         if ( lock & (BIT(1)+ BIT(2)) )
         {
-             return true;
+            mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+            return true;
         }
+
     } while (-timeout <= 0);
+
+    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
 
     return false;
 }
@@ -476,10 +499,11 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
 {
     uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
 
+    mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
+
     if (stream == NTV2_VIDEO_STREAM)
     {
         // setup 4175 depacketizer
-        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
@@ -568,7 +592,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
     bool        rv;
 
     // get address
-    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
 
     // select channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
@@ -648,7 +672,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
 bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled)
 {
     // get address
-    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
 
     // select channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
@@ -1135,7 +1159,7 @@ eSFP  CNTV2Config2110::GetTxPort(NTV2Channel chan)
     }
 }
 
-uint32_t CNTV2Config2110::GetDecapulatorAddress(NTV2Channel channel)
+uint32_t CNTV2Config2110::GetDecapsulatorAddress(NTV2Channel channel)
 {
     uint32_t iChannel = (uint32_t) channel;
 
@@ -1156,7 +1180,7 @@ uint32_t CNTV2Config2110::GetDecapulatorAddress(NTV2Channel channel)
 
 void CNTV2Config2110::ResetDecapsulator(NTV2Channel channel)
 {
-    uint32_t decapAddress = GetDecapulatorAddress(channel);
+    uint32_t decapAddress = GetDecapsulatorAddress(channel);
     mDevice.WriteRegister(kRegDecap_control + decapAddress,0x01);   // resets all channels and streams
     mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,3);
 }
