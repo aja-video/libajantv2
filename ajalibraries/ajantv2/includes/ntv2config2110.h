@@ -95,6 +95,7 @@ public:
 
 class AJAExport CNTV2Config2110 : public CNTV2MBController
 {
+    friend class CKonaIpJsonSetup;
 public:
     CNTV2Config2110 (CNTV2Card & device);
     ~CNTV2Config2110();
@@ -151,11 +152,16 @@ protected:
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
-    uint32_t    GetDecapulatorAddress(NTV2Channel channel, NTV2Stream stream);
+    uint32_t    GetDecapulatorAddress(NTV2Channel channel);
+    void        ResetDecapsulator(NTV2Channel channel);
     void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
+    bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
+    bool        WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream);
 
+    void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 

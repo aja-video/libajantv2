@@ -269,8 +269,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
 
 bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig, bool enable)
 {
-    uint32_t  decapBaseAddr        = GetDecapulatorAddress(channel,stream);
-    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    uint32_t  decapBaseAddr        = GetDecapulatorAddress(channel);
     eSFP      port                 = GetRxPort(channel);
 
     // always disable first
@@ -279,12 +278,13 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
         val = 0x04;
     }
-    // disable decapsulator = channel
+
+    // disable decapsulator channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
     WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
 
     // disable depacketizer
-    mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
+    //mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
     if (enable == false)
     {
@@ -315,19 +315,10 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         UnsetIGMPGroup(port, channel, stream);
     }
 
+    // wait for FIFO to flush
+    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
     // reset the depacketizer
-    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
-    if (stream == NTV2_AUDIO1_STREAM)
-    {
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
-    }
-    else
-    {
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x1);
-    }
-    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
-    mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x0);
-    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+    ResetDepacketizer(channel,stream);
 
     // Decapulator select channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
@@ -369,7 +360,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     // matching
     WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 
-
     // some constants
     mDevice.WriteRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
     WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
@@ -378,26 +368,117 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
 
     // wait for lock
+    bool rv = WaitDecapsulatorLock(channel,stream);
+    if (!rv)
+    {
+        mError = "Decaspsulator failed to lock to source";
+        return false;
+    }
+
+    // setup depacketizer
+    SetupDepacketizer(channel, stream, rxConfig);
+
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        NTV2VideoFormat fmt = rxConfig.videoFormat;
+        NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
+
+        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
+        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+        NTV2Standard        std = fd.GetVideoStandard();
+        bool               is2K = fd.Is2KFormat();
+
+        uint32_t val = ( (((uint32_t) fr) << 8) |
+                         (((uint32_t) fg) << 4) |
+                          ((uint32_t) std ) );
+        if (is2K) val += BIT(13);
+
+        // setup PLL
+        mDevice.WriteRegister(kRegPll_DecVidStd + SAREK_PLL, val);
+    }
+
+    // enable the decapsulator
+    AcquireDecapsulatorControlAccess(decapBaseAddr);
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
+    val = 0x01;
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        val = 0x05;
+    }
+    WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
+    ReleaseDecapsulatorControlAccess(decapBaseAddr);
+
+    return true;
+}
+
+bool  CNTV2Config2110::WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
+
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
+
     mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+
     uint32_t lock;
     int timeout = 150;
     do
     {
         if (--timeout <=0 )
         {
-            mError = "Failed to lock to source";
             return false;
         }
         mDevice.WaitForOutputVerticalInterrupt();
         mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
-    } while ((lock & BIT(0) == 0));
+    } while ((lock & BIT(0)) == 0);
 
+    return true;
+}
+
+bool  CNTV2Config2110::WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t  decapBaseAddr   = GetDecapulatorAddress(channel);
+
+    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
+
+    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+
+    uint32_t lock;
+    int timeout = 150;
+    do
+    {
+        mDevice.WaitForOutputVerticalInterrupt();
+        mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
+        if ( lock & (BIT(1)+ BIT(2)) )
+        {
+             return true;
+        }
+    } while (-timeout <= 0);
+
+    return false;
+}
+
+void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream)
+{
+    if (stream == NTV2_AUDIO1_STREAM)
+    {
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
+    }
+    else
+    {
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x1);
+    }
+    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+    mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x0);
+    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+}
+
+void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
+{
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
         // setup 4175 depacketizer
-
-        // disable depacketitzer
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
@@ -463,19 +544,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_depkt_payload_len_last + depacketizerBaseAddr,payloadLengthLast);
 
         // end setup 4175 depacketizer
-
-        // setup PLL
-        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
-        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
-        NTV2Standard        std = fd.GetVideoStandard();
-        bool               is2K = fd.Is2KFormat();
-
-        uint32_t val = ( (((uint32_t) fr) << 8) |
-                         (((uint32_t) fg) << 4) |
-                          ((uint32_t) std ) );
-        if (is2K) val += BIT(13);
-
-        mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, val);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -492,18 +560,6 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
     mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
 
-    // enable the decapsulator
-    AcquireDecapsulatorControlAccess(decapBaseAddr);
-    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
-    val = 0x01;
-    if (stream == NTV2_VIDEO_STREAM)
-    {
-        val = 0x05;
-    }
-    WriteChannelRegister(kRegDecap_chan_ctrl + decapBaseAddr, val);
-    ReleaseDecapsulatorControlAccess(decapBaseAddr);
-
-    return true;
 }
 
 bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
@@ -512,7 +568,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
     bool        rv;
 
     // get address
-    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel,stream);
+    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
 
     // select channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
@@ -592,7 +648,7 @@ bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2
 bool CNTV2Config2110::GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled)
 {
     // get address
-    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel,stream);
+    uint32_t  decapBaseAddr = GetDecapulatorAddress(channel);
 
     // select channel
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
@@ -826,17 +882,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // end setup 4175 packetizer
 
-        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
-        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
-        NTV2Standard        std = fd.GetVideoStandard();
-        bool               is2K = fd.Is2KFormat();
-
-        uint32_t val = ( (((uint32_t) fr) << 8) |
-                         (((uint32_t) fg) << 4) |
-                          ((uint32_t) std ) );
-        if (is2K) val += BIT(13);
-
-        mDevice.WriteRegister(SAREK_PLL + kRegPll_DecVidStd, val);
 
     }
     else if (stream == NTV2_AUDIO1_STREAM)
@@ -1090,7 +1135,7 @@ eSFP  CNTV2Config2110::GetTxPort(NTV2Channel chan)
     }
 }
 
-uint32_t CNTV2Config2110::GetDecapulatorAddress(NTV2Channel channel, NTV2Stream stream)
+uint32_t CNTV2Config2110::GetDecapulatorAddress(NTV2Channel channel)
 {
     uint32_t iChannel = (uint32_t) channel;
 
@@ -1107,6 +1152,13 @@ uint32_t CNTV2Config2110::GetDecapulatorAddress(NTV2Channel channel, NTV2Stream 
     {
         return SAREK_2110_DECAPSULATOR_1_TOP;
     }
+}
+
+void CNTV2Config2110::ResetDecapsulator(NTV2Channel channel)
+{
+    uint32_t decapAddress = GetDecapulatorAddress(channel);
+    mDevice.WriteRegister(kRegDecap_control + decapAddress,0x01);   // resets all channels and streams
+    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,3);
 }
 
 void  CNTV2Config2110::SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  baseAddr)
