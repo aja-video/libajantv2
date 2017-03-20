@@ -350,28 +350,32 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
 bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 {
-    CNTV2Card mDevice;
-    CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
-    if (!mDevice.IsOpen())
+    CNTV2Card device;
+    CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
+    if (!device.IsOpen())
         {std::cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << std::endl;  return false;}
     //if (!mDevice.IsKonaIPDevice ())
     //    {std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
+    while (!device.IsDeviceReady ())
     {
         std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
-        mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
+        device.SleepMs (1000);
+        if (device.IsDeviceReady ())
             std::cout << "## NOTE:  Device is ready" << std::endl;
     }
 
-    CNTV2Config2110	config2110 (mDevice);
+    CNTV2Config2110	config2110 (device);
 
     if (!PTPMasterAddr.isEmpty())
     {
-        mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
+        device.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(PTPMasterAddr.toStdString());
+    }
+    else
+    {
+        device.SetReference(NTV2_REFERENCE_FREERUN);
     }
 
     if (mKonaIPParams.mSFPs.size() < 1)
@@ -400,6 +404,21 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     std::cerr << "## receiveIter" << std::endl;
 
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
+
+    if (receiveIter.hasNext())
+    {
+        // video
+        device.Connect (NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
+
+        // audio
+        device.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_1, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
+        device.SetNumberAudioChannels (8);
+        device.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_1);
+        device.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_1);
+        device.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
+        device.WriteRegister(kRegAudioOutputSourceMap,0);
+    }
+
     while (receiveIter.hasNext())
     {
         std::cerr << "## receiveIter did" << std::endl;
