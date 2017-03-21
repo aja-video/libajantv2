@@ -5508,6 +5508,12 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				/**
+					@param	inDumpMaxBytes		If non-zero, includes a hex dump of my contents up to the number of specified bytes (64 maximum).
+					@return	A string containing a human-readable representation of me.
+				**/
+				std::string		AsString (UWord inDumpMaxBytes = 0) const;
+
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 
