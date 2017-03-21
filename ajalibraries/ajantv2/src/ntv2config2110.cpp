@@ -360,21 +360,21 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     if (stream == NTV2_VIDEO_STREAM)
     {
         WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000 | rxConfig.payloadType);
+        WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x20000000 | rxConfig.payloadType);
+        WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000 * 2);
     }
 
     // matching
     WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 
-
-    // some constants
+    // constant
     mDevice.WriteRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
-    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
 
-    // enable  register updates
+    // enable register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
 
     // wait for lock
@@ -859,7 +859,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
 
     }
-    return rv;
+    return true;
 }
 
 bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig)
