@@ -433,28 +433,24 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 		return AJA_STATUS_FAIL;
 	++iter;	//	Now pointing at DID
 
-	uint8_t *					pPacketBytes	(new uint8_t [inPacketWords.size()]);
-	if (!pPacketBytes)
-		return AJA_STATUS_MEMORY;
+	vector<uint8_t>		packetBytes;
+	packetBytes.reserve (inPacketWords.size());
 
-	pPacketBytes[0] = 0xFF;						//	First byte always 0xFF
-	pPacketBytes[1] = 0x80;						//	Location data byte 1:	"location valid" bit always set
-	pPacketBytes[1] |= (inLineNum >> 7) & 0x0F;	//	Location data byte 1:	LS 4 bits == MS 4 bits of 11-bit line number
+	packetBytes.push_back(0xFF);				//	[0]	First byte always 0xFF
+	packetBytes.push_back(0x80);				//	[1]	Location data byte 1:	"location valid" bit always set
+	packetBytes[1] |= (inLineNum >> 7) & 0x0F;	//	[1]	Location data byte 1:	LS 4 bits == MS 4 bits of 11-bit line number
 	if (inStream == AJAAncillaryDataVideoStream_Y)
-		pPacketBytes[1] |= 0x20;				//	Location data byte 1:	set Y/C bit for luma channel;  clear for chroma
-	pPacketBytes[2] = inLineNum & 0x7F;			//	Location data byte 2:	MSB reserved; LS 7 bits == LS 7 bits of 11-bit line number
+		packetBytes[1] |= 0x20;					//	[1]	Location data byte 1:	set Y/C bit for luma channel;  clear for chroma
+	packetBytes.push_back (inLineNum & 0x7F);	//	[2]	Location data byte 2:	MSB reserved; LS 7 bits == LS 7 bits of 11-bit line number
 
-	unsigned	ndx	(3);	//	Start copying at the DID
 	while (iter != inPacketWords.end())
 	{
-		pPacketBytes [ndx++] = *iter & 0xFF;	//	Mask off upper byte
+		packetBytes.push_back(*iter & 0xFF);	//	Mask off upper byte
 		++iter;
 	}
 
-	uint32_t			pktByteCount	(0);
 	AJAAncillaryData	newAncData;
-	status = newAncData.InitWithReceivedData (pPacketBytes, uint32_t(inPacketWords.size()), defaultLoc, pktByteCount);
-	delete [] pPacketBytes;
+	status = newAncData.InitWithReceivedData (packetBytes, defaultLoc);
 	if (AJA_SUCCESS (status))
 	{
 		AJAAncillaryDataFactory	factory;
