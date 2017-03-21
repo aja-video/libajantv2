@@ -115,7 +115,7 @@ ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 }
 
 
-bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, const ULWord inNumPixels)
+bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels)
 {
 	out16BitYUVLine.clear ();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
@@ -125,7 +125,7 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 	if (inNumPixels < 6)
 		return false;	//	bad width
 	if (inNumPixels % 6)
-		return false;	//	width must be evenly divisible by 6
+		inNumPixels -= inNumPixels % 6;
 
 	const ULWord	totalULWords	(inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
 
