@@ -766,7 +766,7 @@ bool NTV2CCPlayer::DeviceAncExtractorIsAvailable (void)
 	UWord	majorVersion (0),	minorVersion (0),	pointVersion (0),	buildNumber (0);
 	mDevice.GetDriverVersionComponents (majorVersion, minorVersion, pointVersion, buildNumber);
 	//	Device Anc extraction requires driver version 12.3 minimum  (or 0.0.0.0 for internal development)...
-	if ((majorVersion >= 12 && minorVersion >= 3) || (majorVersion == 0 && minorVersion == 0 && pointVersion == 0 && buildNumber == 0))
+	if ((majorVersion == 12 && minorVersion >= 3) || (majorVersion >= 13) || (majorVersion == 0 && minorVersion == 0 && pointVersion == 0 && buildNumber == 0))
 		//	The device must also support it...
 		if (::NTV2DeviceCanDoCustomAnc (mDeviceID))
 			//	And perhaps even do firmware version/date checks??
@@ -979,7 +979,6 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 {
 	const NTV2Standard		outputStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
-	const UWord				numVideoOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
 	bool					isRGB			(::IsRGBFormat (mPixelFormat));
 	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  true/*isRGB*/));
 	NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel,  false/*isRGB*/,  false/*is425*/));
@@ -1000,7 +999,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	}	//	if RGB FBF
 
 	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting ();
+		mDevice.ClearRouting ();	//	Clear routing only when -m option not specified
 
 	if (NTV2_IS_QUAD_FRAME_FORMAT (mVideoFormat))
 	{
@@ -1010,8 +1009,10 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			//	For RGB, the frame buffer outputs feed the CSC inputs, and the CSC outputs feed the SDIOut inputs...
 			for (unsigned ch (0);  ch < 4;  ch++)
 			{
-				mDevice.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mOutputChannel + ch)), ::GetFrameBufferOutputXptFromChannel (NTV2Channel (mOutputChannel + ch), true));
-				mDevice.Connect (::GetSDIOutputInputXpt (NTV2Channel (mOutputChannel + ch)), ::GetCSCOutputXptFromChannel (NTV2Channel (mOutputChannel + ch)));
+				mDevice.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mOutputChannel + ch)),
+									::GetFrameBufferOutputXptFromChannel (NTV2Channel (mOutputChannel + ch), true));
+				mDevice.Connect (::GetSDIOutputInputXpt (NTV2Channel (mOutputChannel + ch)),
+									::GetCSCOutputXptFromChannel (NTV2Channel (mOutputChannel + ch)));
 				if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 					mDevice.SetSDITransmitEnable (NTV2Channel (mOutputChannel + ch), true);
 
@@ -1027,7 +1028,8 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			//	For YCbCr, the frame buffer outputs feed the SDI outputs directly
 			for (unsigned ch (0);  ch < 4;  ch++)
 			{
-				mDevice.Connect (::GetSDIOutputInputXpt (NTV2Channel (mOutputChannel + ch)), ::GetFrameBufferOutputXptFromChannel (NTV2Channel (mOutputChannel + ch)));
+				mDevice.Connect (::GetSDIOutputInputXpt (NTV2Channel (mOutputChannel + ch)),
+									::GetFrameBufferOutputXptFromChannel (NTV2Channel (mOutputChannel + ch)));
 				if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 					mDevice.SetSDITransmitEnable (NTV2Channel (mOutputChannel + ch), true);
 
@@ -1044,48 +1046,25 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		if (isRGB)
 			mDevice.Connect (::GetCSCInputXptFromChannel (mOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
 
-		if (mConfig.fDoMultiFormat)
-		{
-			//	Multiformat --- route the one SDI output to the CSC video output (RGB) or FrameStore output (YUV)...
-			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
-				mDevice.SetSDITransmitEnable (mOutputChannel, true);
-
-			mDevice.Connect (::GetSDIOutputInputXpt (mOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
-			mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
-
-			if (!mConfig.fSuppressTimecode)
-			{	//	Enable timecode output...
-				mDevice.DisableRP188Bypass (mOutputChannel);
-				mDevice.SetRP188Mode (mOutputChannel, NTV2_RP188_OUTPUT);
-			}
-		}
-		else
-		{
-			//	Not multiformat:  Route all possible SDI outputs to CSC video output (RGB) or FrameStore output (YUV)...
+		if (!mConfig.fDoMultiFormat)
 			mDevice.ClearRouting ();
 
-			for (NTV2Channel chan (NTV2_CHANNEL1);  ULWord (chan) < numVideoOutputs;  chan = NTV2Channel (chan + 1))
-			{
-				if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
-					mDevice.SetSDITransmitEnable (chan, true);		//	Make it an output
+		//	Connect the one SDI output to the CSC video output (RGB) or FrameStore output (YUV).
+		//	NOTE:	In past SDKs, if the -m option wasn't specified, we'd connect all available SDI
+		//			outputs. This worked fine for VANC geometries, but on newer devices using the Anc
+		//			inserter firmware, only the output spigot associated with the output channel had
+		//			caption data. This is because the Anc inserters are tied to a specific output's
+		//			embedder. Better to correctly drive one output than many that don't work.
+		if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
+			mDevice.SetSDITransmitEnable (mOutputChannel, true);
 
-				mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
-				mDevice.SetSDIOutputStandard (chan, outputStandard);
+		mDevice.Connect (::GetSDIOutputInputXpt (mOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+		mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
 
-				if (!mConfig.fSuppressTimecode)
-				{	//	Enable timecode output...
-					mDevice.DisableRP188Bypass (chan);
-					mDevice.SetRP188Mode (chan, NTV2_RP188_OUTPUT);
-				}
-			}	//	for each output spigot
-
-			if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtAnalogOut1))
-				mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt);
-
-			if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1)
-				|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2)
-				|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3))
-					mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+		if (!mConfig.fSuppressTimecode)
+		{	//	Enable timecode output...
+			mDevice.DisableRP188Bypass (mOutputChannel);
+			mDevice.SetRP188Mode (mOutputChannel, NTV2_RP188_OUTPUT);
 		}
 	}	//	else non-quad
 
@@ -1285,8 +1264,6 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	static const NTV2Line21Attributes		kBlueOnWhite	(NTV2_CC608_Blue,  NTV2_CC608_White,   NTV2_CC608_Opaque);
 	static const NTV2Line21Attributes		kRedOnYellow	(NTV2_CC608_Red,   NTV2_CC608_Yellow,  NTV2_CC608_Opaque);
 	static const AJAAncillaryDataLocation	kCEA708Location	(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  9);
-	static UByte				pF1AncBuffer [1024];
-	static UByte				pF2AncBuffer [1024];
 	static const uint32_t		AUDIOBYTES_MAX_48K	(201 * 1024);	//	Max audio bytes per frame (16 chls x 4 bytes x 67 msec/fr x 48000 Hz)
 	static const double			gAmplitudes [16]	= {	0.10,			0.15,			0.20,			0.25,			0.30,			0.35,			0.40,
 														0.45,			0.50,			0.55,			0.60,			0.65,			0.70,			0.75,
@@ -1300,6 +1277,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow ());
 	const ULWord				vancLineNum			(CNTV2SMPTEAncData::GetVancLineOffset (formatDesc, ::GetSmpteLineNumber (standard),
 																							CNTV2SMPTEAncData::GetCaptionAncLineNumber (mVideoFormat)));
+	NTV2_POINTER				F1AncBuffer	(2048);	//	F1 Anc buffer
+	NTV2_POINTER				F2AncBuffer;		//	F2 Anc buffer
 	CNTV2Line21Captioner		F1Line21Encoder;	//	Used to encode Field 1 analog (line 21) waveform
 	CNTV2Line21Captioner		F2Line21Encoder;	//	Used to encode Field 2 analog (line 21) waveform
 	CaptionData					captionData;		//	Current frame's 608 caption bytes (Fields 1 and 2)
@@ -1343,8 +1322,13 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	//	Set up the transfer buffers...
 	xferInfo.SetVideoBuffer (reinterpret_cast <ULWord *> (mpVideoBuffer), mVideoBufferSize);
 	if (!mConfig.fForceVanc)
-		xferInfo.SetAncBuffers (reinterpret_cast <ULWord *> (pF1AncBuffer), sizeof (pF1AncBuffer),
-								reinterpret_cast <ULWord *> (pF2AncBuffer), sizeof (pF2AncBuffer));
+	{
+		if (!IsProgressivePicture (mVideoFormat))				//	Interlaced?
+			F2AncBuffer.Allocate(F1AncBuffer.GetByteCount());	//	Allocate an F2 Anc buffer (same size as F1)
+		//	Always transfer this/these Anc buffer/s...
+		xferInfo.SetAncBuffers ((ULWord *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(),
+								(ULWord *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount());
+	}
 	if (mConfig.fSuppressTimecode)
 		xferInfo.acOutputTimeCodes.Set (NULL, 0);
 
@@ -1368,36 +1352,36 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		mDroppedFrameTally = acStatus.acFramesDropped;
 		if (acStatus.CanAcceptMoreOutputFrames ())			//	Room for another frame on the device?
 		{
+			if (!mConfig.fForceVanc)
+				{F1AncBuffer.Fill(ULWord(0));	F2AncBuffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
 			m608Encoder->GetNextCaptionData (captionData);	//	Pop queued captions from 608 encoder waiting to be transmitted
 			m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
 			if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate F1's SMPTE-334 Anc data packet
 			{
-				bool	doVanc	(mConfig.fForceVanc);	//	True if --vanc option set, or Anc functions fail
-				if (!doVanc)
+				if (mConfig.fForceVanc)		//	True if --vanc option set, or no Anc inserters
+					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+				else
 				{
 					uint32_t					pktSizeInBytes	(0);
 					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
+					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
 					pkt.Calculate8BitChecksum ();
-					doVanc = AJA_FAILURE (pkt.GenerateTransmitData (pF1AncBuffer, sizeof (pF1AncBuffer), pktSizeInBytes));
+					pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
 				}
-				if (doVanc)
-					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
 			}
 
 			if (!IsProgressivePicture (mVideoFormat) && m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field2))		//	Generate F2's SMPTE-334 Anc data packet (interlace only)
 			{
-				bool	doVanc	(mConfig.fForceVanc);	//	True if --vanc option set, or Anc functions fail
-				if (!doVanc)
+				if (mConfig.fForceVanc)	//	True if --vanc option set, or no Anc inserters
+					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+				else
 				{
 					uint32_t					pktSizeInBytes	(0);
 					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data (), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
+					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
 					pkt.Calculate8BitChecksum ();
-					doVanc = AJA_FAILURE (pkt.GenerateTransmitData (pF2AncBuffer, sizeof (pF2AncBuffer), pktSizeInBytes));
+					pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
 				}
-				if (doVanc)
-					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
 			}
 
 			if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat) && !mConfig.fSuppressLine21)
@@ -1451,7 +1435,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				}
 				::memcpy (tcString + colShift, rp188.GetRP188CString (), 11);
 				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow, formatDesc.GetTopVisibleRowAddress (mpVideoBuffer),
-													formatDesc.GetVisibleRasterDimensions (), mPixelFormat, bytesPerRow, 3, 1);
+												formatDesc.GetVisibleRasterDimensions (), mPixelFormat, bytesPerRow, 3, 1);
 			}
 
 			if (!mConfig.fSuppressAudio && !pAudioBuffer.IsNULL ())
