@@ -379,6 +379,7 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
 
     // wait for lock
     mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+#if 0
     uint32_t lock;
     int timeout = 150;
     do
@@ -390,8 +391,10 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         }
         mDevice.WaitForOutputVerticalInterrupt();
         mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
-    } while ((lock & BIT(0) == 0));
-
+    } while ((lock & BIT(0)) == 0);
+#else
+    mDevice.WaitForOutputVerticalInterrupt();
+#endif
 
     if (stream == NTV2_VIDEO_STREAM)
     {
