@@ -230,12 +230,11 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         }
         else
             cout << "Protocol 2022 " << endl;
-
     }
 
     qjv = json.value("PTPMaster");
     if (qjv != QJsonValue::Undefined)
-    {
+{
        PTPMasterAddr = qjv.toString();
        cout << "PTP Master Address " << PTPMasterAddr.toStdString() << endl;
     }
@@ -248,7 +247,7 @@ bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
     if (is2110)
     {
         return setupBoard2110(deviceSpec);
-    }
+}
     else
     {
         return setupBoard2022(deviceSpec);
@@ -354,28 +353,32 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
 bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 {
-    CNTV2Card mDevice;
-    CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
-    if (!mDevice.IsOpen())
+    CNTV2Card device;
+    CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
+    if (!device.IsOpen())
         {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
     //if (!mDevice.IsKonaIPDevice ())
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
+    while (!device.IsDeviceReady ())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
-        mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
+        device.SleepMs (1000);
+        if (device.IsDeviceReady ())
             cout << "## NOTE:  Device is ready" << endl;
     }
 
-    CNTV2Config2110	config2110 (mDevice);
+    CNTV2Config2110	config2110 (device);
 
     if (!PTPMasterAddr.isEmpty())
     {
-        mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
+        device.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(PTPMasterAddr.toStdString());
+    }
+    else
+    {
+        device.SetReference(NTV2_REFERENCE_FREERUN);
     }
 
     if (mKonaIPParams.mSFPs.size() < 1)
@@ -408,6 +411,21 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
     bool firstChannel = true;
+
+    if (receiveIter.hasNext())
+    {
+        // video
+        device.Connect (NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
+
+        // audio
+        device.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_1, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
+        device.SetNumberAudioChannels (8);
+        device.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_1);
+        device.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_1);
+        device.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
+        device.WriteRegister(kRegAudioOutputSourceMap,0);
+    }
+
     while (receiveIter.hasNext())
     {
         cerr << "## receiveIter did" << endl;
@@ -483,13 +501,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
-    }
 
-#if 1
+#if 0
         // check for unlock
         for (;;)
         {
-            rv = config2110.WaitDecapsulatorUnlock(channel,stream);
+            bool rv = config2110.WaitDecapsulatorUnlock(channel,stream);
             if (rv)
             {
                 cout << "source unlocked";
@@ -513,7 +530,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             }
         }
 #endif
-
+    }
     return true;
 }
 NTV2Channel getChannel(QString channelDesignator)
