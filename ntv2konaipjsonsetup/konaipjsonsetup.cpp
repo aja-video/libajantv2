@@ -401,6 +401,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
+    bool hasRxVideo = false;
+    bool hasRxAudio = false;
+
     cerr << "## receiveIter" << endl;
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
@@ -434,9 +437,15 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         NTV2Stream stream;
         if (receive.mStream == "audio1")
-            stream = NTV2_AUDIO1_STREAM;
+        {
+            stream     = NTV2_AUDIO1_STREAM;
+            hasRxAudio = true;
+        }
         else
-            stream = NTV2_VIDEO_STREAM;
+        {
+            stream     = NTV2_VIDEO_STREAM;
+            hasRxVideo = true;
+        }
 
         bool enable = (getEnable(receive.mEnable));
         bool rv = config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig,enable);
@@ -445,34 +454,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             cerr << "FAILED: " << config2110.getLastError() << endl;
             return false;
         }
-#if 1
-        // check for unlock
-        for (;;)
-        {
-            rv = config2110.WaitDecapsulatorUnlock(channel,stream);
-            if (rv)
-            {
-                cout << "source unlocked";
-                config2110.DisableDecapsulatorStream(channel,stream);
-                config2110.ResetDepacketizer(channel,stream);
 
-                do
-                {
-                    cout << "waiting for source lock" << endl;
-                }
-                while (!config2110.WaitDecapsulatorLock(channel,stream));
-
-                cout << "source locked = - re enabling" << endl;
-
-                config2110.SetupDepacketizer(channel, stream, rxChannelConfig);
-                config2110.EnableDecapsulatorStream(channel,stream);
-            }
-            else
-            {
-                cout << "source OK" << endl;
-            }
-        }
-#endif
     }
     cerr << "## transmitIter" << endl;
 
@@ -502,6 +484,35 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
     }
+
+#if 1
+        // check for unlock
+        for (;;)
+        {
+            rv = config2110.WaitDecapsulatorUnlock(channel,stream);
+            if (rv)
+            {
+                cout << "source unlocked";
+                config2110.DisableDecapsulatorStream(channel,stream);
+                config2110.ResetDepacketizer(channel,stream);
+
+                do
+                {
+                    cout << "waiting for source lock" << endl;
+                }
+                while (!config2110.WaitDecapsulatorLock(channel,stream));
+
+                cout << "source locked = - re enabling" << endl;
+
+                config2110.SetupDepacketizer(channel, stream, rxChannelConfig);
+                config2110.EnableDecapsulatorStream(channel,stream);
+            }
+            else
+            {
+                cout << "source OK" << endl;
+            }
+        }
+#endif
 
     return true;
 }
