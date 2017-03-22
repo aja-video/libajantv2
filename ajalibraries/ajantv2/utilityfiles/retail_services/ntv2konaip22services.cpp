@@ -2442,26 +2442,27 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
+	bool					rv, rv2, enable;
+	uint32_t				enableHw;
 
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
 	const bool				kNot48Bit = false;
-    bool rv, rv2;
-    
+	
     if (mCard->IsDeviceReady() == true)
     {
         if (target == NULL)
         {
             target = new CNTV2Config2022(*mCard);
             target->SetBiDirectionalChannels(true);     // logically bidirectional
-			
-			// Enable all channels always.
-			mRx2022Config1.rxc_enable = true;
-			mRx2022Config2.rxc_enable = true;
-			mTx2022Config3.txc_enable = true;
-			mTx2022Config4.txc_enable = true;
         }
+		
+		// Enable all channels always.
+		mCard->WriteRegister(kVRegRxcEnable1, true);
+		mCard->WriteRegister(kVRegRxcEnable2, true);
+		mCard->WriteRegister(kVRegTxcEnable3, true);
+		mCard->WriteRegister(kVRegTxcEnable4, true);
 
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
@@ -2500,14 +2501,15 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP input configurations
         rx_2022_channel  rxHwConfig;
-        bool enable;
-
-        rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
-        rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
+		
+		rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
+		rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
+		mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != mRx2022Config1.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
+            if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
             {
+				mRx2022Config1.rxc_enable = enableHw;
                 setRxConfig(NTV2_CHANNEL1);
             }
         }
@@ -2516,10 +2518,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
         rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
+		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != mRx2022Config2.rxc_enable) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
+            if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
             {
+				mRx2022Config2.rxc_enable = enableHw;
                 setRxConfig(NTV2_CHANNEL2);
             }
         }
@@ -2531,10 +2535,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
+		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != mTx2022Config3.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
+            if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
             {
+				mTx2022Config3.txc_enable = enableHw;
                 setTxConfig(NTV2_CHANNEL3);
             }
             else
@@ -2562,10 +2568,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable);
+		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != mTx2022Config4.txc_enable) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
+            if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
             {
+				mTx2022Config4.txc_enable = enableHw;
                 setTxConfig(NTV2_CHANNEL4);
             }
             else
