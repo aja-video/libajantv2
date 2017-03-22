@@ -1139,7 +1139,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enable;
 	uint32_t				enableHw;
-	uint32_t				readyCounter = 0;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
@@ -1372,8 +1371,9 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
     }
 	else
 	{
-		readyCounter++;
-		if (readyCounter % 100)
+		uint32_t	count;
+		mCard->ReadRegister(kVRegAgentCheck, &count);
+		if ((count % 150) == 0)
 			printf("device not ready\n");
 	}
 
