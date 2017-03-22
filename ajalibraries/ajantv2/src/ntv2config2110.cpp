@@ -360,25 +360,26 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
     if (stream == NTV2_VIDEO_STREAM)
     {
         WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x10000000 | rxConfig.payloadType);
+        WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         WriteChannelRegister(kRegDecap_match_payload_ip_type + decapBaseAddr,0x20000000 | rxConfig.payloadType);
+        WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000 * 2);
     }
 
     // matching
     WriteChannelRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 
-
-    // some constants
+    // constant
     mDevice.WriteRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
-    WriteChannelRegister(kRegDecap_chan_timeout + decapBaseAddr,156250000);
 
-    // enable  register updates
+    // enable register updates
     ReleaseDecapsulatorControlAccess(decapBaseAddr);
 
     // wait for lock
     mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+#if 0
     uint32_t lock;
     int timeout = 150;
     do
@@ -390,8 +391,10 @@ bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2S
         }
         mDevice.WaitForOutputVerticalInterrupt();
         mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
-    } while ((lock & BIT(0) == 0));
-
+    } while ((lock & BIT(0)) == 0);
+#else
+    mDevice.WaitForOutputVerticalInterrupt();
+#endif
 
     if (stream == NTV2_VIDEO_STREAM)
     {
@@ -859,7 +862,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
 
     }
-    return rv;
+    return true;
 }
 
 bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig)
@@ -1220,6 +1223,7 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
     WriteChannelRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
     WriteChannelRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
+    WriteChannelRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
 
     //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
     //WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);

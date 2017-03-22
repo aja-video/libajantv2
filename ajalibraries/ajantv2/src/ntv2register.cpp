@@ -2016,9 +2016,9 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		int newValue = 0;
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 		if(NTV2DeviceCanDoJ2K(_boardID) && ptpControl == 0)
-			newValue = 1;
+            newValue = 0x1;
 		if(NTV2DeviceCanDo2110(_boardID) && ptpControl == 1)
-			newValue = 0xa2;
+            newValue = 0x2;
 		WriteRegister(SAREK_PLL+kRegPll_Config, newValue);
 	}
 
