@@ -201,10 +201,8 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	}
 	
 	
-	// CSC 3
+	// CSC 3 and 4
 	mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
-	
-	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	
 	// LUT 1
@@ -274,16 +272,10 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptBlack);
 	mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptBlack);
 	
-    // DualLink Out 1
+	// DualLink Out 1, 2, 3, 4
 	mCard->Connect (NTV2_XptDualLinkOut1Input, frameSync2RGB);
-
-    // DualLink Out 2
 	mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptBlack);
-
-    // DualLink Out 3
 	mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptBlack);
-
-    // DualLink Out 4
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	
 	// SDI Out 1
@@ -365,7 +357,6 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 	}
 
-	
 	// HDMI Out
 	NTV2CrosspointID XPt1 = NTV2_XptBlack;
 	NTV2CrosspointID XPt2 = NTV2_XptBlack;
@@ -395,10 +386,8 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// 4K Hdmi-to-Hdmi Bypass always disabled for playback
 	mCard->WriteRegister(kRegHDMIOutControl, false, kRegMaskHDMIV2TxBypass, kRegShiftHDMIV2TxBypass);
 	
-		
 	// Analog Out
 	mCard->Connect (NTV2_XptAnalogOutInput, frameSync1YUV);
-	
 	
 	//
 	// Mixer/Keyer
@@ -790,13 +779,9 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
 	
-	// CSC 2
+	// CSC 2, 3, 4
 	mCard->Connect (NTV2_XptCSC2VidInput, inputXptYUV2);
-
-	// CSC 3
 	mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
-	
-	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 
 	// LUT 1
@@ -839,10 +824,8 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
 	}
 	
-	// LUT 3 
+	// LUT 3, 4
 	mCard->Connect (NTV2_XptLUT3Input, NTV2_XptBlack);
-	
-	// LUT 4 
 	mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 
 	// Dual Link Out 1,2,3,4 3 Out
@@ -1018,10 +1001,8 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	}
 	
-	// Frame Buffer 3
+	// Frame Buffer 3, 4
 	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
-	
-	// Frame Buffer 4
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer Disabling
@@ -1084,8 +1065,6 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 	}
-
-	
 
 	// SDI Out 4 - acts like SDI 2
 	if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
@@ -1158,13 +1137,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-
+	bool					rv, rv2, enable;
+	uint32_t				enableHw;
+	uint32_t				readyCounter = 0;
+	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
-	bool rv, rv2, enable;
-	uint32_t enableHw;
-	
+
     if (mCard->IsDeviceReady() == true)
     {
 		// We need the device ID for KonaIP J2k because there are three flavors of this device
@@ -1390,6 +1370,13 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			}
 		}
     }
+	else
+	{
+		readyCounter++;
+		if (readyCounter % 100)
+			printf("device not ready\n");
+	}
+
 
 	// VPID
 	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
@@ -1447,7 +1434,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
 	}
-
 
 	// HDMI output - initialization sequence
 	if (mHDMIStartupCountDown > 0)
@@ -1687,8 +1673,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			break;
 		}
 	}
-
-
+	
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);
