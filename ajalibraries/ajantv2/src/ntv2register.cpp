@@ -2016,9 +2016,9 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		int newValue = 0;
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 		if(NTV2DeviceCanDoJ2K(_boardID) && ptpControl == 0)
-			newValue = 1;
+            newValue = 0x1;
 		if(NTV2DeviceCanDo2110(_boardID) && ptpControl == 1)
-			newValue = 0xa2;
+            newValue = 0x2;
 		WriteRegister(SAREK_PLL+kRegPll_Config, newValue);
 	}
 
@@ -9512,6 +9512,25 @@ bool CNTV2Card::GetHDMIHDREnabled (void)
 	uint32_t regValue = 0;
 	ReadRegister(kRegHDMIHDRControl, &regValue, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
 	return regValue ? true : false;
+}
+
+bool CNTV2Card::EnableHDMIHDRDolbyVision(const bool inEnable)
+{
+    bool status = true;
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    status = WriteRegister(kRegHDMIHDRControl, inEnable ? 1 : 0, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
+    return status;
+}
+
+bool CNTV2Card::GetHDMIHDRDolbyVisionEnabled (void)
+{
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    uint32_t regValue = 0;
+    ReadRegister(kRegHDMIHDRControl, &regValue, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    return regValue ? true : false;
 }
 
 bool CNTV2Card::SetHDRData (const HDRFloatValues & inFloatValues)

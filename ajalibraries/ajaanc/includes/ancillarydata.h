@@ -611,7 +611,7 @@ public:
 	virtual std::ostream &					DumpPayload (std::ostream & inOutStream) const;
 
 	virtual inline std::string				IDAsString (void) const	{return DIDSIDToString (GetDID(), GetSID());}	///< @return	A string representing my DID/SID.
-	virtual std::string						AsString (void) const;	///< @return	Converts me to a compact, human-readable string.
+	virtual std::string						AsString (uint16_t inDumpMaxBytes = 0) const;	///< @return	Converts me to a compact, human-readable string.
 	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const		{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}
 
 	/**

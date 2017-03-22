@@ -875,10 +875,20 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 }
 
 
-string AJAAncillaryData::AsString (void) const
+string AJAAncillaryData::AsString (uint16_t inDumpMaxBytes) const
 {
 	ostringstream	oss;
-	oss << "[" << ::AJAAncillaryDataCodingToString(GetDataCoding()) << "|" << ::AJAAncillaryDataLocationToString(GetDataLocation()) << "|" << GetDIDSIDPair() << "]";
+	oss	<< "[" << ::AJAAncillaryDataCodingToString(GetDataCoding())
+		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation()) << "|" << GetDIDSIDPair() << "]";
+	if (inDumpMaxBytes  &&  m_pPayload)
+	{
+		uint16_t	byteCount	= uint16_t(GetPayloadByteCount());
+		oss << byteCount << " bytes: ";
+		if (inDumpMaxBytes > byteCount)
+			inDumpMaxBytes = byteCount;
+		for (uint16_t ndx(0);  ndx < inDumpMaxBytes;  ndx++)
+			oss << HEX0N(uint16_t(m_pPayload[ndx]),2);
+	}
 	return oss.str();
 }
 

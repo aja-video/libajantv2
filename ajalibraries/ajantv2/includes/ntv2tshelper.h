@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <map>
 
-#define KIPDPRINT                       1
+#define KIPDPRINT                       0
 
 
 #if defined(MSWindows)
