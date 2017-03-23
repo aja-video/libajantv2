@@ -515,6 +515,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 
 	*this = formatDescriptorTable[inStandard][inFrameBufferFormat];		//	The 'formatDescriptorTable' handles everything but VANC
 
+	mVideoFormat	= inVideoFormat;
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;

@@ -1662,16 +1662,17 @@ public:
 			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 			{
 				(void) inRegNum;
-				static const string	sEOTFs[]	=	{"Trad Gamma SDR", "Trad Gamma HDR", "SMPTE ST 2084", "??"};
+				static const string	sEOTFs[]	=	{"Trad Gamma SDR", "Trad Gamma HDR", "SMPTE ST 2084", "HLG"};
 				ostringstream	oss;
 				if (::NTV2DeviceCanDoHDMIHDROut (inDeviceID))
 				{
 					const uint16_t	EOTFvalue				((inRegValue & kRegMaskElectroOpticalTransferFunction) >> kRegShiftElectroOpticalTransferFunction);
 					const uint16_t	staticMetaDataDescID	((inRegValue & kRegMaskHDRStaticMetadataDescriptorID) >> kRegShiftHDRStaticMetadataDescriptorID);
-					oss	<< "HDMI HDR Out Enabled: "		<< YesNo(inRegValue & kRegMaskHDMIHDREnable)				<< endl
-						<< "Constant Luminance: "		<< YesNo(inRegValue & kRegMaskHDMIHDRNonContantLuminance)	<< endl
-						<< "EOTF: "						<< sEOTFs[(EOTFvalue < 3) ? EOTFvalue : 3]					<< endl
-						<< "Static MetaData Desc ID: "	<< HEX0N(staticMetaDataDescID, 2) << " (" << DEC(staticMetaDataDescID) << ")";
+                    oss	<< "HDMI Out Dolby Vision Enabled: " << YesNo(inRegValue & kRegMaskHDMIHDRDolbyVisionEnable)     << endl
+                        << "HDMI HDR Out Enabled: "		     << YesNo(inRegValue & kRegMaskHDMIHDREnable)				<< endl
+                        << "Constant Luminance: "		     << YesNo(inRegValue & kRegMaskHDMIHDRNonContantLuminance)	<< endl
+                        << "EOTF: "						     << sEOTFs[(EOTFvalue < 3) ? EOTFvalue : 3]					<< endl
+                        << "Static MetaData Desc ID: "	     << HEX0N(staticMetaDataDescID, 2) << " (" << DEC(staticMetaDataDescID) << ")";
 				}
 				return oss.str();
 			}

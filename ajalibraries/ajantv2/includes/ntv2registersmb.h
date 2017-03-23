@@ -85,11 +85,6 @@
 #define ENCODER_BLOCK_BASE          200
 #define UNUSED_BLOCK_BASE           300
 
-#define TS_BLOCK_BASE               0
-#define IGMP_BLOCK_BASE             100
-#define ENCODER_BLOCK_BASE          200
-#define UNUSED_BLOCK_BASE           300
-
 #define kRegSarekMBSeqNum           0
 #define kRegSarekActProgramNum      1
 #define kRegSarekActProgramPID      2
@@ -354,6 +349,12 @@
 #define kRegPll_PTP_LclClkIdHi                  0x1e
 #define kRegPll_PTP_PhaseError                  0x1f
 #define kRegPll_PTP_Correction                  0x20
+#define kRegPll_PTP_FPptpSecHi                  0x21
+#define kRegPll_PTP_FPptpSecLo                  0x22
+#define kRegPll_PTP_FPptpNSec                   0x23
+#define kRegPll_PTP_CurPtpSecHi                 0x24
+#define kRegPll_PTP_CurPtpSecLo                 0x25
+#define kRegPll_PTP_CurPtpNSec                  0x26
 
 /////////////////////////////////////////////////////////////////////
 //

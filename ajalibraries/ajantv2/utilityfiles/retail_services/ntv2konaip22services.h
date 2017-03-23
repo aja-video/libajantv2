@@ -19,7 +19,7 @@ class KonaIP22Services : public DeviceServices
 	
 public:
     KonaIP22Services();
-    ~KonaIP22Services();
+	~KonaIP22Services();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);

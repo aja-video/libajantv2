@@ -11,6 +11,7 @@
 #include "ntv2endian.h"
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"
+#include "ntv2registersmb.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -759,8 +760,10 @@ static const ULWord	gIndexToVidProcControlRegNum []		= {	kRegVidProc1Control,	kR
 
 static const ULWord	gIndexToVidProcMixCoeffRegNum []	= {	kRegMixer1Coefficient,	kRegMixer2Coefficient,	kRegMixer3Coefficient,	kRegMixer4Coefficient,	0};
 
+#if defined (NTV2_ALLOW_2MB_FRAMES)
 static const ULWord	gChannelTo2MFrame []				= {	kRegCh1Control2MFrame, kRegCh2Control2MFrame, kRegCh3Control2MFrame, kRegCh4Control2MFrame, kRegCh5Control2MFrame, kRegCh6Control2MFrame,
 															kRegCh7Control2MFrame, kRegCh8Control2MFrame, 0};
+#endif	//	defined (NTV2_ALLOW_2MB_FRAMES)
 
 static const ULWord	gChannelToRP188ModeGCRegisterNum []		= {	kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
 																kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			0};
@@ -1967,7 +1970,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord refControl1 = (ULWord)value, refControl2 = 0, pcrControl = 0;
+	ULWord refControl1 = (ULWord)value, refControl2 = 0, ptpControl = 0;
 	switch(value)
 	{
 	case NTV2_REFERENCE_INPUT5:
@@ -1989,20 +1992,20 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 	case NTV2_REFERENCE_SFP1_PCR:
 		refControl1 = 4;
 		refControl2 = 1;
-		pcrControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP1_PTP:
 		refControl1 = 4;
 		refControl2 = 1;
+		ptpControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP2_PCR:
 		refControl1 = 5;
 		refControl2 = 1;
-		pcrControl = 1;
 		break;
 	case NTV2_REFERENCE_SFP2_PTP:
 		refControl1 = 5;
 		refControl2 = 1;
+		ptpControl = 1;
 		break;
 	default:
 		break;
@@ -2010,7 +2013,13 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	if(IsKonaIPDevice())
 	{
-		WriteRegister(kRegGlobalControl2, pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+		int newValue = 0;
+		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+		if(NTV2DeviceCanDoJ2K(_boardID) && ptpControl == 0)
+            newValue = 0x1;
+		if(NTV2DeviceCanDo2110(_boardID) && ptpControl == 1)
+            newValue = 0x2;
+		WriteRegister(SAREK_PLL+kRegPll_Config, newValue);
 	}
 
 	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
@@ -2027,7 +2036,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 // Output: NONE
 bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 {
-	ULWord	refControl1 = 0, refControl2 = 0, pcrControl = 0;
+	ULWord	refControl1 = 0, refControl2 = 0, ptpControl = 0;
 	bool	result		(ReadRegister (kRegGlobalControl, &refControl1, kRegMaskRefSource, kRegShiftRefSource));
 
 	outValue = static_cast <NTV2ReferenceSource> (refControl1);
@@ -2053,16 +2062,16 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 			case 4:
 				if(IsKonaIPDevice())
 				{
-					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_SFP1_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PCR : NTV2_REFERENCE_SFP1_PTP;
 				break;
 			case 5:
 				if(IsKonaIPDevice())
 				{
-					ReadRegister(kRegGlobalControl2, &pcrControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+					ReadRegister(kRegGlobalControl2, &ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
-				outValue = pcrControl == 0 ? NTV2_REFERENCE_SFP2_PTP : NTV2_REFERENCE_SFP2_PCR;
+				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PCR : NTV2_REFERENCE_SFP2_PTP;
 				break;
 				break;
 			default:
@@ -2532,6 +2541,7 @@ bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
 {
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
+#if defined (NTV2_ALLOW_2MB_FRAMES)
 	ULWord	supports2m (0);
 	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
 	if(supports2m == 1)
@@ -2559,14 +2569,11 @@ bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
 		}
 		return WriteRegister(gChannelTo2MFrame [NTV2_CHANNEL1], value2M, kRegMask2MFrameSize, kRegShift2MFrameSupport);
 	}
-	else if (value == NTV2_FRAMESIZE_2MB || value == NTV2_FRAMESIZE_4MB || value == NTV2_FRAMESIZE_8MB || value == NTV2_FRAMESIZE_16MB)
-	{
-		return WriteRegister (gChannelToControlRegNum [NTV2_CHANNEL1], value, kK2RegMaskFrameSize, kK2RegShiftFrameSize);
-	}
 	else
-	{
-		return false;
-	}
+#endif	//	defined (NTV2_ALLOW_2MB_FRAMES)
+	if (value == NTV2_FRAMESIZE_2MB || value == NTV2_FRAMESIZE_4MB || value == NTV2_FRAMESIZE_8MB || value == NTV2_FRAMESIZE_16MB)
+		return WriteRegister (gChannelToControlRegNum [NTV2_CHANNEL1], value, kK2RegMaskFrameSize, kK2RegShiftFrameSize);
+	return false;
 }
 
 // Method: GetK2FrameBufferSize
@@ -2576,6 +2583,7 @@ bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize &
 {
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
+#if defined (NTV2_ALLOW_2MB_FRAMES)
 	ULWord	supports2m (0);
 	ReadRegister(kRegGlobalControl2, &supports2m, kRegMask2MFrameSupport, kRegShift2MFrameSupport);
 	if(supports2m == 1)
@@ -2604,9 +2612,11 @@ bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize &
 			case 16:	outValue = NTV2_FRAMESIZE_32MB;	break;
 			default:	return false;
 			}
+			NTV2_ASSERT (NTV2_IS_8MB_OR_16MB_FRAMESIZE(outValue));
 			return true;
 		}
 	}
+#endif	//	defined (NTV2_ALLOW_2MB_FRAMES)
 	return ReadRegister (gChannelToControlRegNum [NTV2_CHANNEL1], reinterpret_cast <ULWord*> (&outValue), kK2RegMaskFrameSize, kK2RegShiftFrameSize);
 }
 
@@ -9504,6 +9514,25 @@ bool CNTV2Card::GetHDMIHDREnabled (void)
 	uint32_t regValue = 0;
 	ReadRegister(kRegHDMIHDRControl, &regValue, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
 	return regValue ? true : false;
+}
+
+bool CNTV2Card::EnableHDMIHDRDolbyVision(const bool inEnable)
+{
+    bool status = true;
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    status = WriteRegister(kRegHDMIHDRControl, inEnable ? 1 : 0, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
+    return status;
+}
+
+bool CNTV2Card::GetHDMIHDRDolbyVisionEnabled (void)
+{
+    if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
+        return false;
+    uint32_t regValue = 0;
+    ReadRegister(kRegHDMIHDRControl, &regValue, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+    return regValue ? true : false;
 }
 
 bool CNTV2Card::SetHDRData (const HDRFloatValues & inFloatValues)

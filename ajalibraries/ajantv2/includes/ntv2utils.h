@@ -83,7 +83,7 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSeq
 	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
 	@return		True if successful;  otherwise false.
 **/
-AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, const ULWord inNumPixels);
+AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels);
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -154,6 +154,10 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 										this be a multiple of 16, while NTV2_FBF_8BIT_YCBCR requires an even number).
 										Must exceed zero.
 	@param[in]	inDstTotalLines			The total number of raster lines to set to legal black. Must exceed zero.
+	@bug		Need implementations for NTV2_FBF_8BIT_YCBCR_YUY2, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX, NTV2_FBF_24BIT_RGB,
+				NTV2_FBF_24BIT_BGR, NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LITTLEENDIAN, NTV2_FBF_48BIT_RGB, NTV2_FBF_10BIT_RGB_PACKED,
+				NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB, NTV2_FBF_10BIT_YCBCR_420PL, NTV2_FBF_10BIT_YCBCR_422PL, NTV2_FBF_8BIT_YCBCR_420PL,
+				and NTV2_FBF_8BIT_YCBCR_422PL.
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
@@ -210,6 +214,8 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 	@note		The use of unsigned values precludes positioning the source raster above the top line of the destination raster,
 				or to the left of the destination raster's left edge. This function will, however, clip the source raster if it
 				overhangs the bottom and/or right edge of the destination raster.
+	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB,
+				NTV2_FBF_10BIT_YCBCR_420PL, NTV2_FBF_10BIT_YCBCR_422PL, NTV2_FBF_8BIT_YCBCR_420PL, and NTV2_FBF_8BIT_YCBCR_422PL.
 **/
 AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							UByte *						pDstBuffer,
@@ -519,6 +525,7 @@ AJAExport bool IsRaw(NTV2FrameBufferFormat format);
 AJAExport bool Is8BitFrameBufferFormat(NTV2FrameBufferFormat fbFormat);
 AJAExport bool IsVideoFormatA(NTV2VideoFormat format);
 AJAExport bool IsVideoFormatB(NTV2VideoFormat format);
+AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format);
 
 
 AJAExport int  RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, int iChan0,

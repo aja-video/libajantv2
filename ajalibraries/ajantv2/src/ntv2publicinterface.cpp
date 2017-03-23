@@ -142,8 +142,27 @@ ostream & operator << (ostream & inOutStream, const NTV2_POINTER & inObj)
 
 ostream & NTV2_POINTER::Print (ostream & inOutStream) const
 {
-	inOutStream << (fFlags & NTV2_POINTER_ALLOCATED ? "0X" : "0x") << hex << GetRawHostPointer () << dec << "/" << GetByteCount ();
+	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << hex << GetRawHostPointer() << dec << "/" << GetByteCount();
 	return inOutStream;
+}
+
+
+string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
+{
+	ostringstream	oss;
+	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
+	if (inDumpMaxBytes)
+	{
+		oss << ":";
+		if (inDumpMaxBytes > 64)
+			inDumpMaxBytes = 64;
+		if (ULWord(inDumpMaxBytes) > GetByteCount())
+			inDumpMaxBytes = GetByteCount();
+		const UByte *	pBytes	((const UByte *) GetHostPointer());
+		for (UWord ndx(0);  ndx < inDumpMaxBytes;  ndx++)
+			oss << HEX0N(uint16_t(pBytes[ndx]),2);
+	}
+	return oss.str();
 }
 
 

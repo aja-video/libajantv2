@@ -3001,7 +3001,27 @@ public:
 	AJA_VIRTUAL bool	ReadSDIStatistics (NTV2SDIInStatistics & outStats);
 	///@}
 
+	/**
+		@brief		Sets the frame size used on the device.
+		@param[in]	inChannel	Specifies the frame store to be affected. (Currently ignored -- see note below.)
+		@param[in]	inValue		Specifies the new frame size. Must be NTV2_FRAMESIZE_8MB or NTV2_FRAMESIZE_16MB.
+		@return		True if successful;  otherwise false.
+		@note		Currently, all NTV2 devices globally use an 8MB or 16MB frame size across any/all frame stores.
+					When a frame store is told to use a particular frame buffer format and frame geometry, the device will
+					automatically switch to the smallest size that will safely accommodate the frame data. You can use this function
+					to override the default. For example, channel 1 may be capturing 525i2997 '2vuy' video with AutoCirculate, which only
+					requires 8MB frames by default. Starting a second channel to playback 2K1080p RGB10 video would automatically bump
+					the device to 16MB frames, which would result in the capture of several "glitched" frames in Channel 1. To prevent
+					the glitch, call this function to set 16MB frames before starting capture in Channel 1.
+	**/
 	AJA_VIRTUAL bool	SetFrameBufferSize(NTV2Channel inChannel, NTV2Framesize inValue);
+
+	/**
+		@brief		Answers with the frame size currently being used on the device.
+		@param[in]	inChannel	Currently ignored. Use NTV2_CHANNEL1.
+		@param[out]	outValue	Receives the device's current frame size.
+		@return		True if successful;  otherwise false.
+	**/
 	AJA_VIRTUAL bool	GetFrameBufferSize (NTV2Channel inChannel, NTV2Framesize & outValue);
 	AJA_VIRTUAL bool	GetFrameBufferSize (NTV2Channel inChannel, NTV2Framesize * pOutValue)		{return pOutValue ? GetFrameBufferSize (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	using CNTV2DriverInterface::GetFrameBufferSize;		//	Keep CNTV2DriverInterface::GetFrameBufferSize visible after being shadowed by CNTV2Card::GetFrameBufferSize
@@ -4935,6 +4955,15 @@ public:
 	**/
 	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR);
 	AJA_VIRTUAL bool GetHDMIHDREnabled (void);	///< @return	True if HDMI HDR metadata output is enabled for the device;  otherwise false.
+
+    /**
+        @brief		Enables or disables HDMI HDR Dolby Vision.
+        @param[in]	inEnable		If true, sets the device to output HDMI HDR Dolby Vision; otherwise sets the device to not output HDMI HDR Dolby Vision.
+        @return		True if successful; otherwise false.
+    **/
+    AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);
+    AJA_VIRTUAL bool GetHDMIHDRDolbyVisionEnabled (void);	///< @return	True if HDMI HDR Dolby Vision output is enabled for the device;  otherwise false.
+
 
 	/**
 		@brief		Enables or disables BT.2020 Y'cC'bcC'rc versus BT.2020 Y'C'bC'r or R'G'B'.

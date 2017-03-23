@@ -690,7 +690,8 @@ class PMTGen : public TSGenerator
                 put16( _videoStreamData.denFrameRate, pos );                // frame rate
                 put16( _videoStreamData.numFrameRate, pos );
                 _pkt8[pos++] = 3;                                           // color spec
-                _pkt8[pos++] = _videoStreamData.interlaced <<6;             // interlaced and still mode
+                _pkt8[pos] = _videoStreamData.interlaced <<6;               // interlaced and still mode
+                _pkt8[pos++] |= 0x3F;                                       // reserved bits all 1's for standard streams
             }
             else
             {
@@ -729,22 +730,21 @@ class PMTGen : public TSGenerator
             _pkt8[pos++] = 0;
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
-            _pkt8[pos++] = 6;                                               // length
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
+                _pkt8[pos++] = 6;                                           // length non-elsm
+            else
+                _pkt8[pos++] = 4;                                           // length standard stream (omitted ST302 channel spec)
+
             _pkt8[pos++] = 0x42;                                            // "B"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x44;                                            // "D"
 
-            // These two bytes are defined in Table 1 of ST302 spec starting with num channels
-            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+            // These two bytes are defined in Table 1 of ST302 spec starting with num channels, we dont add these for standard streams
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
             {
-                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
-                _pkt8[pos++] = 0x10;                                    // two bits of channel ID, 20 bits per sample, alignment 0 reserved
-            }
-            else
-            {
-                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
-                _pkt8[pos++] = 0x20;                                    // two bits of channel ID, 24 bits per sample, alignment 0 reserved
+                _pkt8[pos++] = 0x0;                                         // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x20;                                        // two bits of channel ID, 24 bits per sample, alignment 0 reserved
             }
 
             return pos-startPos;

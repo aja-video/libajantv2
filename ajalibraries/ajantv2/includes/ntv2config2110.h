@@ -19,6 +19,7 @@
 #define RX_MATCH_SOURCE_PORT            BIT(3)
 #define RX_MATCH_DEST_PORT              BIT(4)
 #define RX_MATCH_SSRC                   BIT(5)
+#define RX_MATCH_PAYLOAD                BIT(6)
 
 #define VOIP_SEMAPHORE_SET              0x2
 #define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
@@ -74,14 +75,15 @@ public:
     bool operator == ( const rx_2110Config &other );
 
 public:
-    uint32_t	RxMatch;         ///< @brief	Bitmap of rxMatch criteria used
-    std::string	SourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
+    uint32_t	rxMatch;         ///< @brief	Bitmap of rxMatch criteria used
+    std::string	sourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
                                  ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-    std::string	DestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	SourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	DestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
+    std::string	destIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
+    uint32_t	sourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
+    uint32_t	destPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
     uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
     uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
+    uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling    videoSamples;
 };
@@ -107,10 +109,8 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig, bool enable);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
-
-    bool        SetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
@@ -118,6 +118,9 @@ public:
 
     bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
     bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
+
+    bool        SetPTPMaster(std::string ptpMaster);
+    bool        GetPTPMaster(std::string & ptpMaster);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -136,7 +139,6 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
     static uint32_t  get2110Stream(NTV2Channel ch,NTV2Stream scch );
 
@@ -154,8 +156,10 @@ protected:
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
-    bool        SetRxDepacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddr);
+    uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
+
+    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);

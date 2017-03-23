@@ -908,6 +908,34 @@ typedef enum
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994 ||					\
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	)
 
+#define NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(__f__)					\
+    (	(__f__) == NTV2_FORMAT_525_2398 ||                          \
+        (__f__) == NTV2_FORMAT_525_5994 ||                          \
+        (__f__) == NTV2_FORMAT_625_5000 ||                          \
+        (__f__) == NTV2_FORMAT_720p_2398 ||                         \
+        (__f__) == NTV2_FORMAT_720p_5000 ||                         \
+        (__f__) == NTV2_FORMAT_720p_5994 ||                         \
+        (__f__) == NTV2_FORMAT_720p_6000 ||                         \
+        (__f__) == NTV2_FORMAT_1080i_5000 ||						\
+        (__f__) == NTV2_FORMAT_1080i_5994 ||						\
+        (__f__) == NTV2_FORMAT_1080i_6000 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2398 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2400 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2500 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2997 ||						\
+        (__f__) == NTV2_FORMAT_1080p_3000 ||                        \
+        (__f__) == NTV2_FORMAT_1080p_5000_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_5994_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_6000_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_2K_2398 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_2400 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_2997 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_4795 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_4800 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5994 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_6000	)
 
 typedef enum
 {
