@@ -1021,6 +1021,9 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 		case 0xA5:	return "SMPTE-299M 3G HD Aud Data 7";
 		case 0xA6:	return "SMPTE-299M 3G HD Aud Data 6";
 		case 0xA7:	return "SMPTE-299M 3G HD Aud Data 5";
+		case 0xD1:
+		case 0xD2:	return "AJA QA F1 Test Packet";
+		case 0xD3:	return "AJA QA F2 Test Packet";
 		case 0xE0:	return "SMPTE-299M HD Aud Ctrl 4";
 		case 0xE1:	return "SMPTE-299M HD Aud Ctrl 3";
 		case 0xE2:	return "SMPTE-299M HD Aud Ctrl 2";
