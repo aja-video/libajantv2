@@ -1153,11 +1153,11 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		j2kEncoderConfig	encoderConfig;
 		j2kDecoderConfig	decoderConfig;
 
-        if (target == NULL)
-        {
-            target = new CNTV2Config2022(*mCard);
-        }
-
+		if (target == NULL)
+		{
+			target = new CNTV2Config2022(*mCard);
+		}
+		
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
 

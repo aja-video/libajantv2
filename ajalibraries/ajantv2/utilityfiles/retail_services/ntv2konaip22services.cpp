@@ -1166,6 +1166,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	
     if (mCard->IsDeviceReady() == true)
     {
+		rx_2022_channel		rxHwConfig;
+		tx_2022_channel		txHwConfig;
+
         if (target == NULL)
         {
             target = new CNTV2Config2022(*mCard);
@@ -1214,8 +1217,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
 
         // KonaIP input configurations
-        rx_2022_channel  rxHwConfig;
-		
 		rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
 		rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
 		mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
@@ -1245,8 +1246,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             printf("RxConfig CHAN 2read FAILED");
 
         // KonaIP output configurations
-        tx_2022_channel  txHwConfig;
-
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
 		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
