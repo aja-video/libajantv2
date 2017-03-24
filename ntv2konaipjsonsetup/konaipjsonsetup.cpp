@@ -404,9 +404,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
-    bool hasRxVideo = false;
-    bool hasRxAudio = false;
-
     cerr << "## receiveIter" << endl;
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
@@ -426,53 +423,60 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         device.WriteRegister(kRegAudioOutputSourceMap,0);
     }
 
+
+    // this is a kludge to see if we can reset channels after packet loss
+    rx_2110Config rxChannelConfig[2];
+    int index = 0;
+    int found = 0;
     while (receiveIter.hasNext())
     {
         cerr << "## receiveIter did" << endl;
 
         ReceiveStruct receive = receiveIter.next();
-        rx_2110Config rxChannelConfig;
         bool ok;
         NTV2Channel channel          = getChannel(receive.mChannelDesignator);
-#if 0
-        if (firstChannel)
-        {
-            config2110.ResetDecapsulator(channel);
-            config2110.ResetDecapsulator(channel); // resets all Rx channels and streams
-            firstChannel = false;
-        }
-#endif
-        rxChannelConfig.rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.sourceIP     = receive.mSrcIPAddress.toStdString();
-        rxChannelConfig.destIP       = receive.mPrimaryDestIPAddress.toStdString();
-        rxChannelConfig.sourcePort   = receive.mSrcPort.toUInt();
-        rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
-        rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
-        rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
-        rxChannelConfig.payloadType  = receive.mPayload.toUInt();
-        rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
-        rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
-
         NTV2Stream stream;
         if (receive.mStream == "audio1")
         {
             stream     = NTV2_AUDIO1_STREAM;
-            hasRxAudio = true;
+            index = 1;
         }
         else
         {
             stream     = NTV2_VIDEO_STREAM;
-            hasRxVideo = true;
+            index = 0;
         }
+        rxChannelConfig[index].rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
+        rxChannelConfig[index].sourceIP     = receive.mSrcIPAddress.toStdString();
+        rxChannelConfig[index].destIP       = receive.mPrimaryDestIPAddress.toStdString();
+        rxChannelConfig[index].sourcePort   = receive.mSrcPort.toUInt();
+        rxChannelConfig[index].destPort     = receive.mPrimaryDestPort.toUInt();
+        rxChannelConfig[index].SSRC         = receive.mSSRC.toUInt();
+        rxChannelConfig[index].VLAN         = receive.mVLAN.toUInt();
+        rxChannelConfig[index].payloadType  = receive.mPayload.toUInt();
+        rxChannelConfig[index].videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
+        rxChannelConfig[index].videoSamples = VPIDSampling_YUV_422;
 
         bool enable = (getEnable(receive.mEnable));
-        bool rv = config2110.SetRxChannelConfiguration (channel, stream, rxChannelConfig,enable);
-        if (!rv)
-        {
-            cerr << "FAILED: " << config2110.getLastError() << endl;
-            return false;
-        }
 
+        found++;
+
+        if (found == 2)     // super-kludge!!
+        {
+            if (enable)
+            {
+                bool rv = config2110.EnableRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
+                if (!rv)
+                {
+                    cerr << "FAILED: " << config2110.getLastError() << endl;
+                    return false;
+                }
+            }
+            else
+            {
+                config2110.DisableRxChannel(channel);
+            }
+         }
     }
     cerr << "## transmitIter" << endl;
 
