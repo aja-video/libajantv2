@@ -267,26 +267,42 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig, bool enable)
+bool CNTV2Config2110::DisableRxChannel(const NTV2Channel channel)
+{
+    // disable IGMP subscription
+    eSFP port = GetRxPort(channel);
+    bool disableIGMP;
+    GetIGMPDisable(port, disableIGMP);
+    if (!disableIGMP)
+    {
+        EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,false);
+        EnableIGMPGroup(port,channel,NTV2_AUDIO1_STREAM,false);
+    }
+
+    // disable decapsulator channel
+    DisableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
+    DisableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
+
+    return true;
+}
+
+bool CNTV2Config2110::EnableRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig)
+{
+
+    bool rv;
+    rv = EnableRxChannel(channel,NTV2_VIDEO_STREAM,videoConfig);
+    if (rv)
+    {
+        rv = EnableRxChannel(channel,NTV2_AUDIO1_STREAM,audioConfig);
+    }
+    return rv;
+}
+
+bool CNTV2Config2110::EnableRxChannel(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig)
 {
     uint32_t  decapBaseAddr        = GetDecapsulatorAddress(channel);
     eSFP      port                 = GetRxPort(channel);
 
-    if (enable == false)
-    {
-        // disable IGMP subscription
-        bool disableIGMP;
-        GetIGMPDisable(port, disableIGMP);
-        if (!disableIGMP)
-        {
-            EnableIGMPGroup(port,channel,stream,false);
-        }
-
-        // disable decapsulator channel
-        DisableDecapsulatorStream(channel,stream);
-
-        return true;
-    }
 
     // make IGMP subsciption if needed
     uint32_t destIp = inet_addr(rxConfig.destIP.c_str());

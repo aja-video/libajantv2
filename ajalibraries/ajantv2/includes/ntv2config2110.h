@@ -110,7 +110,9 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig, bool enable);
+    bool        EnableRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig);
+    bool        DisableRxChannel(const NTV2Channel channel);
+
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
     bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
@@ -157,6 +159,9 @@ protected:
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
     bool        WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream);
+
+    bool        EnableRxChannel(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig);
+
 
     uint32_t    GetDecapsulatorAddress(NTV2Channel channel);
     void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
