@@ -1256,7 +1256,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 				mTx2022Config3.txc_enable = enableHw;
                 setTxConfig(NTV2_CHANNEL3);
             }
-#if 0
             else
             {
                 if (mTx2022Config3.txc_primaryAutoMac)
@@ -1275,7 +1274,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                     mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi3, hi);
                 }
             }
-#endif
         }
         else
             printf("txConfig CHAN 3 read FAILED");
@@ -1291,7 +1289,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 				mTx2022Config4.txc_enable = enableHw;
                 setTxConfig(NTV2_CHANNEL4);
             }
-#if 0
             else
             {
                 if (mTx2022Config4.txc_primaryAutoMac)
@@ -1310,7 +1307,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                     mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi4, hi);
                 }
            }
-#endif
         }
         else
             printf("txConfig CHAN 4 read FAILED");
