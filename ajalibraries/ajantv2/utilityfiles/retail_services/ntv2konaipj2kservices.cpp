@@ -1256,6 +1256,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					mTx2022Config3.txc_enable = enableHw;
 					setTxConfig(NTV2_CHANNEL1);
 				}
+#if 0
 				else
 				{
 					if (mTx2022Config3.txc_primaryAutoMac)
@@ -1265,15 +1266,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo3, lo);
 						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi3, hi);
 					}
-					
-					if (mTx2022Config3.txc_secondaryAutoMac)
-					{
-						uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-						uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-						mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo3, lo);
-						mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi3, hi);
-					}
 				}
+#endif
 			}
 			else
 				printf("txConfig ch 1 config read failed\n");
@@ -1319,6 +1313,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 						mTx2022Config4.txc_enable = enableHw;
 						setTxConfig(NTV2_CHANNEL2);
 					}
+#if 0
 					else
 					{
 						if (mTx2022Config4.txc_primaryAutoMac)
@@ -1328,15 +1323,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo4, lo);
 							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi4, hi);
 						}
-						
-						if (mTx2022Config4.txc_secondaryAutoMac)
-						{
-							uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-							uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-							mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo4, lo);
-							mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi4, hi);
-						}
 					}
+#endif
 				}
 				else
 					printf("txConfig ch 2 config read failed\n");
@@ -2059,7 +2047,7 @@ bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, con
 	if (virtual_config.txc_primaryRemoteIp     != addr) return true;
 	
 	// don't compare automac, but if it is false, do compare the mac addresses
-	if (virtual_config.txc_primaryAutoMac == false)
+	//if (virtual_config.txc_primaryAutoMac == false)
 	{
 		// only examine mac when automac is off
 		if (notEqualMAC(virtual_config.txc_primaryRemoteMAC_lo,virtual_config.txc_primaryRemoteMAC_hi,hw_channel.primaryRemoteMAC)) return true;
