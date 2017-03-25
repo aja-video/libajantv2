@@ -154,14 +154,12 @@ protected:
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
+    void        SetupDecapsulator(const NTV2Channel channel,NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDecapsulator(NTV2Channel channel);
     void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
     bool        WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream);
-
-    bool        EnableRxChannel(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config &rxConfig);
-
 
     uint32_t    GetDecapsulatorAddress(NTV2Channel channel);
     void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
