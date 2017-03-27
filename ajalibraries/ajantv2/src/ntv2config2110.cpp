@@ -611,7 +611,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg3190_depkt_num_samples + depacketizerBaseAddr,48);
 
         // audio channels
-        mDevice.WriteRegister(kReg3190_depkt_num_audio_chans + depacketizerBaseAddr,8);
+        mDevice.WriteRegister(kReg3190_depkt_num_audio_chans + depacketizerBaseAddr,2);
     }
 
     // enable depacketizer
@@ -949,10 +949,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer,48);
 
         // audio channels
-        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer,8);
+        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer,2);
 
         // payload length
-        mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer,1152);
+        mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer,0x120);
 
         // payload type
         mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer,101);

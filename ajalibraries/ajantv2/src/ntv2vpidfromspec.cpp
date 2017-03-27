@@ -20,6 +20,8 @@
 	#define GetNTV2FrameRateFromVideoFormat	CNTV2Device::GetNTV2FrameRateFromVideoFormat
 #elif defined(AJAMac)
 	#include "MacDriver.h"
+	#define GetNTV2StandardFromVideoFormat	MacDriver::GetNTV2StandardFromVideoFormat
+	#define GetNTV2FrameRateFromVideoFormat	MacDriver::GetNTV2FrameRateFromVideoFormat
 #else
 	#error "Unimplemented platform"
 #endif

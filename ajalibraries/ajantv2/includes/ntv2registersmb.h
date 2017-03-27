@@ -355,6 +355,7 @@
 #define kRegPll_PTP_CurPtpSecHi                 0x24
 #define kRegPll_PTP_CurPtpSecLo                 0x25
 #define kRegPll_PTP_CurPtpNSec                  0x26
+#define kRegPll_NTP_Timestamp                   0x27
 
 /////////////////////////////////////////////////////////////////////
 //
