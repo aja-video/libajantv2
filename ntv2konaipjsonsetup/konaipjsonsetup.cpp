@@ -356,7 +356,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     CNTV2Card device;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
     if (!device.IsOpen())
-        {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
+    {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
     //if (!mDevice.IsKonaIPDevice ())
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
@@ -396,8 +396,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         {
             config2110.SetNetworkConfiguration (SFP_TOP, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
         }
-        else
-        if ( sfp.mSFPDesignator == "bottom")
+        else if ( sfp.mSFPDesignator == "bottom")
         {
             config2110.SetNetworkConfiguration (SFP_BOTTOM, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
 
@@ -407,10 +406,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     cerr << "## receiveIter" << endl;
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
-    bool firstChannel = true;
+    bool hasRx = false;
 
     if (receiveIter.hasNext())
     {
+        hasRx = true;
+
         // video
         device.Connect (NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
 
@@ -476,7 +477,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             {
                 config2110.DisableRxChannel(channel);
             }
-         }
+        }
     }
     cerr << "## transmitIter" << endl;
 
@@ -505,37 +506,60 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
+    }
 
-#if 0
-        // check for unlock
-        for (;;)
+    if (!hasRx)
+        return true;
+
+    int count = 0;
+    // monitor rx
+    for (;;)
+    {
+        NTV2Stream stream;
+        bool unlock  = false;
+        bool timeout = false;
+        bool rv = config2110.WaitDecapsulatorUnlock(stream,unlock,timeout);
+        if (rv)
         {
-            bool rv = config2110.WaitDecapsulatorUnlock(channel,stream);
-            if (rv)
+            if (stream == NTV2_VIDEO_STREAM )
             {
-                cout << "source unlocked";
-                config2110.DisableDecapsulatorStream(channel,stream);
-                config2110.ResetDepacketizer(channel,stream);
-
-                do
-                {
-                    cout << "waiting for source lock" << endl;
-                }
-                while (!config2110.WaitDecapsulatorLock(channel,stream));
-
-                cout << "source locked = - re enabling" << endl;
-
-                config2110.SetupDepacketizer(channel, stream, rxChannelConfig);
-                config2110.EnableDecapsulatorStream(channel,stream);
+                if (unlock)
+                    cout << "video stream unlocked" << endl;
+                else
+                    cout << "video stream timeout" << endl;
             }
             else
             {
+                if (unlock)
+                    cout << "audio stream unlocked"  << endl;
+                else
+                    cout << "audio stream timeout" << endl;
+            }
+
+            config2110.DisableDecapsulatorStream(NTV2_CHANNEL1,stream);
+            config2110.ResetDepacketizer(NTV2_CHANNEL1,stream);
+
+            do
+            {
+                cout << "waiting for source lock" << endl;
+            }
+            while (!config2110.WaitDecapsulatorLock(NTV2_CHANNEL1,stream));
+
+            cout << "source locked = - re enabling" << endl;
+
+            config2110.SetupDepacketizer(NTV2_CHANNEL1, stream, rxChannelConfig[(int)stream]);
+            config2110.EnableDecapsulatorStream(NTV2_CHANNEL1,stream);
+        }
+        else
+        {
+            if (++count == 60)
+            {
                 cout << "source OK" << endl;
+                count = 0;
             }
         }
-#endif
     }
-    return true;
+
 }
 NTV2Channel getChannel(QString channelDesignator)
 {
