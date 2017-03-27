@@ -357,7 +357,7 @@ void CNTV2Config2110::SetupDecapsulator(const NTV2Channel channel, NTV2Stream st
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
     // clear interruppts
-    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+    WriteChannelRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
 
     // hold off access while we update channel regs
     AcquireDecapsulatorControlAccess(decapBaseAddr);
@@ -439,52 +439,58 @@ bool  CNTV2Config2110::WaitDecapsulatorLock(const NTV2Channel channel, NTV2Strea
 
     SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
 
-
-
     uint32_t lock;
     int timeout = 150;
     do
     {
         if (--timeout <=0 )
         {
-            mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+            WriteChannelRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
             return false;
         }
 
         mDevice.WaitForOutputVerticalInterrupt();
-        mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
+        ReadChannelRegister(kRegDecap_int_status + decapBaseAddr,&lock);
 
     } while ((lock & BIT(0)) == 0);
 
-    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+    WriteChannelRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
 
     return true;
 }
 
-bool  CNTV2Config2110::WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream)
+bool  CNTV2Config2110::WaitDecapsulatorUnlock(NTV2Stream & stream, bool & unlock, bool & timeout)
 {
-    uint32_t  decapBaseAddr   = GetDecapsulatorAddress(channel);
+    unlock  = false;
+    timeout = false;
+    uint32_t  decapBaseAddr   = GetDecapsulatorAddress(NTV2_CHANNEL1);
 
-    SelectRxDecapsulatorChannel(channel, stream, decapBaseAddr);
-
-    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
-
-    uint32_t lock;
-    int timeout = 150;
+    int ticks = 150;
     do
     {
         mDevice.WaitForOutputVerticalInterrupt();
 
-        mDevice.ReadRegister(kRegDecap_int_status + decapBaseAddr,&lock);
-        if ( lock & (BIT(1)+ BIT(2)) )
+        uint32_t interrupt = 0;
+        mDevice.ReadRegister(kRegDecap_chan_int_grp_ored + decapBaseAddr,&interrupt);
+        if (interrupt)
         {
-            mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+            mDevice.ReadRegister(kRegDecap_chan_int_grp_0 + decapBaseAddr,&interrupt);
+            if (interrupt & BIT(0))
+                stream = NTV2_VIDEO_STREAM;
+            else
+                stream = NTV2_AUDIO1_STREAM;
+            SelectRxDecapsulatorChannel(NTV2_CHANNEL1, stream, decapBaseAddr);
+            uint32_t lock = 0;
+            ReadChannelRegister(kRegDecap_int_status + decapBaseAddr,&lock);
+            if ( lock & BIT(1) )
+                unlock = true;
+            if ( lock &   BIT(2) )
+                timeout = true;
+            WriteChannelRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
             return true;
         }
 
-    } while (-timeout <= 0);
-
-    mDevice.WriteRegister(kRegDecap_int_clear + decapBaseAddr,0x7);
+    } while (--ticks <= 0);
 
     return false;
 }

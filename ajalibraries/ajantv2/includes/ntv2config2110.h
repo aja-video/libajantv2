@@ -159,7 +159,7 @@ protected:
     void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
-    bool        WaitDecapsulatorUnlock(const NTV2Channel channel, NTV2Stream stream);
+    bool        WaitDecapsulatorUnlock(NTV2Stream & stream, bool & unlock, bool & timeout);
 
     uint32_t    GetDecapsulatorAddress(NTV2Channel channel);
     void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
