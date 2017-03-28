@@ -425,7 +425,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
 
-    // this is a kludge to see if we can reset channels after packet loss
+    // supports reset of streams after packet loss
     rx_2110Config rxChannelConfig[2];
     int index = 0;
     int found = 0;
@@ -447,6 +447,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             stream     = NTV2_VIDEO_STREAM;
             index = 0;
         }
+        rxChannelConfig[index].enable       = getEnable(receive.mEnable);
         rxChannelConfig[index].rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
         rxChannelConfig[index].sourceIP     = receive.mSrcIPAddress.toStdString();
         rxChannelConfig[index].destIP       = receive.mPrimaryDestIPAddress.toStdString();
@@ -458,27 +459,19 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig[index].videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
         rxChannelConfig[index].videoSamples = VPIDSampling_YUV_422;
 
-        bool enable = (getEnable(receive.mEnable));
-
-        found++;
-
-        if (found == 2)     // super-kludge!!
+        if (++found == 2)     // super-kludge!!
         {
-            if (enable)
+            bool rv = config2110.ConfigureRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
+            if (!rv)
             {
-                bool rv = config2110.EnableRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
-                if (!rv)
-                {
-                    cerr << "FAILED: " << config2110.getLastError() << endl;
-                    return false;
-                }
+                cerr << "FAILED: " << config2110.getLastError() << endl;
+                return false;
             }
             else
-            {
-                config2110.DisableRxChannel(channel);
-            }
+                cout << "Rx configured" << endl;
         }
     }
+
     cerr << "## transmitIter" << endl;
 
     QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
@@ -577,11 +570,7 @@ NTV2Channel getChannel(QString channelDesignator)
 
 bool getEnable(QString enableBoolString)
 {
-    bool enable = false;
-    if ( enableBoolString == "true")
-        enable = true;
-
-    return enable;
+    return (enableBoolString == "true");
 }
 
 MACAddr toMAC(QString mac)
