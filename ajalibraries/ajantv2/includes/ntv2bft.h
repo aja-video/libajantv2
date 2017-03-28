@@ -10,7 +10,7 @@
 	#include <iostream>
 	#include <assert.h>
 
-    #if defined (_DEBUG)
+    #if defined (_DEBUG)  &&  defined (MSWindows)
         #include <Windows.h>
     #endif
 
