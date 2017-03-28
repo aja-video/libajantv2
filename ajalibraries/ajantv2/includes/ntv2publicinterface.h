@@ -15,6 +15,7 @@
 	#include <map>
 	#include <vector>
 	#include <iomanip>
+	#include <bitset>
 	#include "ajaexport.h"
 #endif	//	user-space clients only
 
@@ -5205,6 +5206,8 @@ typedef enum
 			#define	DEC(__x__)				std::dec << (__x__)
 			#define	DECN(__x__,__n__)		std::dec << std::setw(__n__) << (__x__)
 			#define	DEC0N(__x__,__n__)		std::dec << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	OCT(__x__)				std::oct << (__x__) << std::dec
+			#define	OCT0N(__x__,__n__)		std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	oOCT(__x__)				"o" << std::oct << (__x__) << std::dec
 			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	BIN064(__x__)			std::bitset<8>((uint64_t(__x__)&0xFF00000000000000)>>56) << "."		\
