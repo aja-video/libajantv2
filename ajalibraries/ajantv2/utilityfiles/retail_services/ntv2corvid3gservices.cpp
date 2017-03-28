@@ -643,53 +643,6 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Figure out what our input format is based on what is selected 
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
-	
-	//
-	// SDI Out 1
-	//
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbTransportOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbTransportOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-	
-	// Set VPID
-	vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-	SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-	if (bDualStreamOut && b3GbTransportOut)
-		SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-	
-	
-	// Finish VPID for SDI 1 Out / SDI 2 Out 
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
-		
-		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-	}
-	
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
 	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
@@ -706,7 +659,6 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	mCard->WriteRegister(kRegSDIOut1Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
 	mCard->WriteRegister(kRegSDIOut2Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
-
 }
 
 

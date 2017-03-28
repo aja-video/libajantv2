@@ -838,77 +838,6 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		else
 			mCard->SetConverterInStandard(secondaryStandard);		// input conversion needed - need converter on input
 	}
-
-	
-	//
-	// SDI Out 1
-	//
-	if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, secondaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, secondaryStandard);
-		
-		// Set VPID
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		SetVPIDData(vpidOut1a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
-	}
-
-
-	//
-	// SDI Out 2
-	//
-	if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, secondaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, secondaryStandard);
-		
-		// Set VPID
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		SetVPIDData(vpidOut2a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, primaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		vpidChannel = bDualStreamOut ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut, false, vpidChannel, true);
-	}
 	
 	
 	
@@ -1019,26 +948,4 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	//else
 		//mADCStabilizeCount = kADCStabilizeCount;
-	
-	
-	// Finish VPID for SDI 1 Out / SDI 2 Out 
-	/* Not supported yet
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(mode == NTV2_MODE_CAPTURE);
-		
-		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kRegMaskVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kRegMaskVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kRegMaskVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut2Control, 1, kRegMaskVPIDInsertionEnable);
-
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-		
-		// write VPID for SDI 2
-		mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-	}
-	*/
 }
