@@ -1659,8 +1659,6 @@ void Corvid24Services::SetDeviceMiscRegisters (NTV2Mode mode)
 												  b2wire4kOut || b2wire4kIn;
 	bool	b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bRGBOut) || b2wire4kOut || b2wire4kIn;
 	NTV2VideoFormat	inputFormat = NTV2_FORMAT_UNKNOWN;
-	VPIDChannel	vpidChannela;
-	ULWord	vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mode == NTV2_MODE_CAPTURE)

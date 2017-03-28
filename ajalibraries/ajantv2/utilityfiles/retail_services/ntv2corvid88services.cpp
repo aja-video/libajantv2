@@ -2032,8 +2032,6 @@ void Corvid88Services::SetDeviceMiscRegisters (NTV2Mode mode)
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
 	// single wire 3Gb out

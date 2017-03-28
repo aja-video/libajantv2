@@ -1734,8 +1734,6 @@ void Kona3GQuadServices::SetDeviceMiscRegisters (NTV2Mode mode)
 												  IsVideoFormatB(mFb1VideoFormat) ||
 												  bRGBOut || b2wire4kIn || b2wire4kOut;
 	bool					b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bRGBOut) || b2wire4kOut || b2wire4kIn;
-	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 

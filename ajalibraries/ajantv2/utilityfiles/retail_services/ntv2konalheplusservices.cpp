@@ -741,10 +741,6 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	const bool				bRGBOut	= false;
 	const bool				kNot48Bit = false;
-	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a, vpidOut2a;
-	bool					vpid16x9 = true;
-	
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)
 	if (bDualStreamOut)

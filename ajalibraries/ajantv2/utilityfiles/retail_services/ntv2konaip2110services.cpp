@@ -2418,8 +2418,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	
 	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	

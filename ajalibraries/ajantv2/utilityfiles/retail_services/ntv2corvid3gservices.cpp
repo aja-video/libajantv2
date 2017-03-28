@@ -630,7 +630,6 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 												  bRGBOut;
 											  
 	const bool				kNot48Bit = false;
-	ULWord					vpidOut1a, vpidOut1b;
 	bool					vpid16x9 = true;
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	

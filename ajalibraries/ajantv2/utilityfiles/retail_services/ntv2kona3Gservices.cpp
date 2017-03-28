@@ -1060,9 +1060,6 @@ void Kona3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 												  bRGBOut;
 											  
 	const bool				kNot48Bit = false;
-	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b;
-	bool					vpid16x9 = true;
 
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);

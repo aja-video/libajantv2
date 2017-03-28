@@ -3005,8 +3005,6 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	//bool					vpid16x9			= ! NTV2_IS_SD_VIDEO_FORMAT(primaryVideoFormat);
 
-	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b, vpidOut5a, vpidOut5b;
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat			= NTV2_FORMAT_UNKNOWN;
 
