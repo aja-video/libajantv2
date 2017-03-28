@@ -75,6 +75,7 @@ public:
     bool operator == ( const rx_2110Config &other );
 
 public:
+    bool        enable;
     uint32_t	rxMatch;         ///< @brief	Bitmap of rxMatch criteria used
     std::string	sourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
                                  ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
@@ -110,10 +111,10 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        EnableRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig);
-    bool        DisableRxChannel(const NTV2Channel channel);
-
+    bool        ConfigureRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
+
+    bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
     bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);

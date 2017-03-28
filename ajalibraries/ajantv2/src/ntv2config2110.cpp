@@ -267,7 +267,7 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
     return true;
 }
 
-bool CNTV2Config2110::DisableRxChannel(const NTV2Channel channel)
+bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Stream stream)
 {
     // disable IGMP subscription
     eSFP port = GetRxPort(channel);
@@ -275,18 +275,16 @@ bool CNTV2Config2110::DisableRxChannel(const NTV2Channel channel)
     GetIGMPDisable(port, disableIGMP);
     if (!disableIGMP)
     {
-        EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,false);
-        EnableIGMPGroup(port,channel,NTV2_AUDIO1_STREAM,false);
+        EnableIGMPGroup(port,channel,stream,false);
     }
 
     // disable decapsulator channel
-    DisableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
-    DisableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
+    DisableDecapsulatorStream(channel, stream);
 
     return true;
 }
 
-bool CNTV2Config2110::EnableRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig)
+bool CNTV2Config2110::ConfigureRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig)
 {
     // disable decasulator
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
@@ -298,28 +296,41 @@ bool CNTV2Config2110::EnableRxChannel(const NTV2Channel channel,const rx_2110Con
     // enable Decapsulator
     mDevice.WriteRegister(kRegDecap_module_ctrl + decapBaseAddr, 0x01);
 
-    // wait for lock
-    bool rv = WaitDecapsulatorLock(channel,NTV2_VIDEO_STREAM);
-    if (!rv)
+    if (videoConfig.enable)
     {
-        mError = "Video Decaspsulator failed to lock to source";
-        return false;
+        // wait for lock
+        bool rv = WaitDecapsulatorLock(channel,NTV2_VIDEO_STREAM);
+        if (!rv)
+        {
+            mError = "Video Decaspsulator failed to lock to source";
+            return false;
+        }
+        // setup depacketizer
+        SetupDepacketizer(channel, NTV2_VIDEO_STREAM, videoConfig);
+        EnableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
     }
-    // setup depacketizer
-    SetupDepacketizer(channel, NTV2_VIDEO_STREAM, videoConfig);
-    EnableDecapsulatorStream(channel,NTV2_VIDEO_STREAM);
-
-    // wait for lock
-    rv = WaitDecapsulatorLock(channel,NTV2_AUDIO1_STREAM);
-    if (!rv)
+    else
     {
-        mError = "Audio Decaspsulator failed to lock to source";
-        return false;
+        DisableRxStream(channel, NTV2_VIDEO_STREAM);
     }
-    // setup depacketizer
-    SetupDepacketizer(channel, NTV2_AUDIO1_STREAM, audioConfig);
-    EnableDecapsulatorStream(channel,NTV2_AUDIO1_STREAM);
 
+    if (audioConfig.enable)
+    {
+        // wait for lock
+        bool rv = WaitDecapsulatorLock(channel,NTV2_AUDIO1_STREAM);
+        if (!rv)
+        {
+            mError = "Audio Decaspsulator failed to lock to source";
+            return false;
+        }
+        // setup depacketizer
+        SetupDepacketizer(channel, NTV2_AUDIO1_STREAM, audioConfig);
+        EnableDecapsulatorStream(channel,NTV2_AUDIO1_STREAM);
+    }
+    else
+    {
+        DisableRxStream(channel,NTV2_AUDIO1_STREAM);
+    }
 }
 
 void CNTV2Config2110::SetupDecapsulator(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
