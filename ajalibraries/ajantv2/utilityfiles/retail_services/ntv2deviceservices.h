@@ -12,7 +12,6 @@
 #include "ntv2vidproc.h"
 #include "ntv2vidprocmasks.h"
 #include "ntv2config2022.h"
-#include "ntv2devicefeatures.hh"
 
 #ifndef ISO_CONVERT_FMT
 #define ISO_CONVERT_FMT(fmt)	(mIsoConvertEnable && (fmt == NTV2_FORMAT_525_5994 || fmt == NTV2_FORMAT_625_5000))
