@@ -469,8 +469,7 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 
 
 AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer, const NTV2FormatDescriptor & inFormatDesc,
-											AJAAncillaryList & outF1Packets, AJAAncillaryList & outF2Packets,
-											const AJAAncillaryDataLink inLink)
+											AJAAncillaryList & outF1Packets, AJAAncillaryList & outF2Packets)
 {
 	outF1Packets.Clear();
 	outF2Packets.Clear();
