@@ -20,9 +20,13 @@ SUBDIRS = ntv2burn \
 		  ntv2outputtestpattern \
 		  ntv2player \
 		  ntv2player4k \
-		  NVIDIA/dvplowlatencydemo \
+		  NVIDIA/dvplowlatencydemo
+
+ifndef AJA_NO_QT
+SUBDIRS := $(SUBDIRS) \
 		  ntv2qtmultiinput \
 		  ntv2qtpreview
+endif
 
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
