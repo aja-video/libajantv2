@@ -1281,6 +1281,9 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				{
 					mTx2022J2kConfig1.bitDepth = 8;
 				}
+				// Force this, other settings dont work
+				mTx2022J2kConfig1.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
+				
 				
 				//printf("j2kEncoder ch 1 config read\n");
 				//printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
@@ -1338,7 +1341,9 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					{
 						mTx2022J2kConfig2.bitDepth = 8;
 					}
-					
+					// Force this, other settings dont work
+					mTx2022J2kConfig2.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
+
 					//printf("j2kEncoder ch 2 config read\n");
 					//printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
 					if (encoderConfig != mTx2022J2kConfig2)
