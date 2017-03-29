@@ -6,7 +6,9 @@
 
 #include "ancillarylist.h"
 #include "ancillarydatafactory.h"
-
+#include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
+												//	CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence
+												//	CNTV2SMPTEAncData::GetAncPacketsFromVANCLine
 using namespace std;
 
 
@@ -464,6 +466,60 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 	return status;
 
 }	//	AddVANCData
+
+
+AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer, const NTV2FormatDescriptor & inFormatDesc,
+											AJAAncillaryList & outF1Packets, AJAAncillaryList & outF2Packets,
+											const AJAAncillaryDataLink inLink)
+{
+	outF1Packets.Clear();
+	outF2Packets.Clear();
+	if (inFrameBuffer.IsNULL())
+		return AJA_STATUS_BAD_PARAM;
+	if (!inFormatDesc.IsValid())
+		return AJA_STATUS_BAD_PARAM;
+	if (!inFormatDesc.IsVANC())
+		return AJA_STATUS_BAD_PARAM;
+	const ULWord	vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
+	if (inFrameBuffer.GetByteCount() < vancBytes)
+		return AJA_STATUS_FAIL;
+	const NTV2PixelFormat	fbf	(inFormatDesc.GetPixelFormat());
+	if (fbf != NTV2_FBF_10BIT_YCBCR  &&  fbf != NTV2_FBF_8BIT_YCBCR)
+		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
+
+	for (ULWord line (0);  line < inFormatDesc.GetFirstActiveLine();  line++)
+	{
+		UWordSequence		uwords;
+		bool				isF2			(false);
+		ULWord				smpteLineNum	(0);
+		UWordVANCPacketList	yPackets, cPackets;
+
+		inFormatDesc.GetSMPTELineNumber (line, smpteLineNum, isF2);
+		if (fbf == NTV2_FBF_10BIT_YCBCR)
+			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+													inFormatDesc, uwords);
+		else
+			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+																	uwords,  inFormatDesc.GetRasterWidth());
+
+		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
+		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
+
+		for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
+			if (isF2)
+				outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+			else
+				outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+
+		for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it)
+			if (isF2)
+				outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+			else
+				outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+	}	//	for each VANC line
+
+	return AJA_STATUS_SUCCESS;
+}
 
 
 AJAAncillaryDataType AJAAncillaryList::GetAnalogAncillaryDataType (AJAAncillaryData * pData)

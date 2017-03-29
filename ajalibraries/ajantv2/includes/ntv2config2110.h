@@ -95,6 +95,7 @@ public:
 
 class AJAExport CNTV2Config2110 : public CNTV2MBController
 {
+    friend class CKonaIpJsonSetup;
 public:
     CNTV2Config2110 (CNTV2Card & device);
     ~CNTV2Config2110();
@@ -109,7 +110,9 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        SetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig, bool enable);
+    bool        EnableRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig);
+    bool        DisableRxChannel(const NTV2Channel channel);
+
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
     bool        GetRxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
 
@@ -151,11 +154,20 @@ protected:
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
-    uint32_t    GetDecapulatorAddress(NTV2Channel channel, NTV2Stream stream);
+    void        SetupDecapsulator(const NTV2Channel channel,NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDecapsulator(NTV2Channel channel);
+    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
+    bool        WaitDecapsulatorUnlock(NTV2Stream & stream, bool & unlock, bool & timeout);
+
+    uint32_t    GetDecapsulatorAddress(NTV2Channel channel);
     void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
     void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
+    void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 

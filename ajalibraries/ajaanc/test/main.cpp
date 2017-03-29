@@ -59,7 +59,6 @@ static string AJAStatusToString (const AJAStatus inStatus)
 	{
 		case AJA_STATUS_SUCCESS:			return "AJA_STATUS_SUCCESS";
 		case AJA_STATUS_TRUE:				return "AJA_STATUS_TRUE";
-		case AJA_STATUS_FALSE:				return "AJA_STATUS_FALSE";
 		case AJA_STATUS_UNKNOWN:			return "AJA_STATUS_UNKNOWN";
 		case AJA_STATUS_FAIL:				return "AJA_STATUS_FAIL";
 		case AJA_STATUS_TIMEOUT:			return "AJA_STATUS_TIMEOUT";
@@ -89,6 +88,7 @@ static string AJAStatusToString (const AJAStatus inStatus)
 		case AJA_STATUS_STREAMCONFLICT:		return "AJA_STATUS_STREAMCONFLICT";
 		case AJA_STATUS_NOTINITIALIZED:		return "AJA_STATUS_NOTINITIALIZED";
 		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
+        case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
 	}
 	return "<bad AJAStatus>";
 }

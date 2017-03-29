@@ -57,13 +57,25 @@ bool ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,  ULWo
 }
 
 
+
+
 bool ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPX, const ULWord inNumPixels)
 {
-    (void)pInSrcLine_8bitABGR;
-    (void)pOutDstLine_10BitDPX;
-    (void)inNumPixels;
-	NTV2_ASSERT (false && "Needs implementation");
-	return false;	//	unimplemented
+	if (!pInSrcLine_8bitABGR || !pOutDstLine_10BitDPX || !inNumPixels)
+		return false;
+
+	ULWord* pSrc = (ULWord*) pInSrcLine_8bitABGR;
+	ULWord* pDst = (ULWord*) pOutDstLine_10BitDPX;
+	
+	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	{
+		*pDst = ((*pSrc & 0x000000FF)     ) +
+				((*pSrc & 0x0000FC00) >> 2) + ((*pSrc & 0x00000300) << 14) +
+				((*pSrc & 0x00F00000) >> 4) + ((*pSrc & 0x000F0000) << 12);
+		pDst++; pSrc++;
+	}
+	
+	return true;
 }
 
 

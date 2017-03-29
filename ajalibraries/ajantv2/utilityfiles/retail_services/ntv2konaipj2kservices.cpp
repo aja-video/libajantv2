@@ -1153,11 +1153,11 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		j2kEncoderConfig	encoderConfig;
 		j2kDecoderConfig	decoderConfig;
 
-        if (target == NULL)
-        {
-            target = new CNTV2Config2022(*mCard);
-        }
-
+		if (target == NULL)
+		{
+			target = new CNTV2Config2022(*mCard);
+		}
+		
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
 
@@ -1265,14 +1265,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo3, lo);
 						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi3, hi);
 					}
-					
-					if (mTx2022Config3.txc_secondaryAutoMac)
-					{
-						uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-						uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-						mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo3, lo);
-						mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi3, hi);
-					}
 				}
 			}
 			else
@@ -1327,14 +1319,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 							uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
 							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo4, lo);
 							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi4, hi);
-						}
-						
-						if (mTx2022Config4.txc_secondaryAutoMac)
-						{
-							uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-							uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-							mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo4, lo);
-							mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi4, hi);
 						}
 					}
 				}
@@ -2027,6 +2011,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			enable                      = mTx2022Config3.txc_enable;
 			break;
 	}
+	printTxConfig(chan);
 	target->SetTxChannelConfiguration(channel,chan);
 	target->SetTxChannelEnable(channel,enable,m2022_7Mode);
 }
@@ -2059,7 +2044,7 @@ bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, con
 	if (virtual_config.txc_primaryRemoteIp     != addr) return true;
 	
 	// don't compare automac, but if it is false, do compare the mac addresses
-	if (virtual_config.txc_primaryAutoMac == false)
+	//if (virtual_config.txc_primaryAutoMac == false)
 	{
 		// only examine mac when automac is off
 		if (notEqualMAC(virtual_config.txc_primaryRemoteMAC_lo,virtual_config.txc_primaryRemoteMAC_hi,hw_channel.primaryRemoteMAC)) return true;
@@ -2078,6 +2063,26 @@ bool  KonaIPJ2kServices::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & m
 	if (macaddr.mac[5]   != ( lo        & 0xff)) return true;
 	
 	return false;
+}
+
+void KonaIPJ2kServices::printTxConfig(tx_2022_channel chan)
+{
+	printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
+	printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
+	printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
+	printf("primaryAutoMAC			%d\n", chan.primaryAutoMAC);
+	printf("primaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n", chan.primaryRemoteMAC.mac[0], chan.primaryRemoteMAC.mac[1],
+		   chan.primaryRemoteMAC.mac[2], chan.primaryRemoteMAC.mac[3],
+		   chan.primaryRemoteMAC.mac[4], chan.primaryRemoteMAC.mac[5]);
+
+
+	printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
+	printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
+	printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
+	printf("secondaryAutoMAC		%d\n", chan.secondaryAutoMAC);
+	printf("secondaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n", chan.secondaryRemoteMAC.mac[0], chan.secondaryRemoteMAC.mac[1],
+		   chan.secondaryRemoteMAC.mac[2], chan.secondaryRemoteMAC.mac[3],
+		   chan.secondaryRemoteMAC.mac[4], chan.secondaryRemoteMAC.mac[5]);
 }
 
 void KonaIPJ2kServices::printEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)

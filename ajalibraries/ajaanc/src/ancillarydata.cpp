@@ -802,7 +802,7 @@ const string & AJAAncillaryDataLinkToString (const AJAAncillaryDataLink inValue,
 
 const string & AJAAncillaryDataVideoStreamToString (const AJAAncillaryDataVideoStream inValue, const bool inCompact)
 {
-	static const string		gAncDataVideoStreamToStr []		= {"Chroma", "Luma", ""};
+	static const string		gAncDataVideoStreamToStr []		= {"Chr", "Lum", ""};
 	static const string		gDAncDataVideoStreamToStr []	= {"AJAAncillaryDataVideoStream_C", "AJAAncillaryDataVideoStream_Y", "AJAAncillaryDataVideoStream_Unknown"};
 
 	return IS_VALID_AJAAncillaryDataVideoStream (inValue) ? (inCompact ? gAncDataVideoStreamToStr [inValue] : gDAncDataVideoStreamToStr [inValue]) : gEmptyString;
@@ -811,7 +811,7 @@ const string & AJAAncillaryDataVideoStreamToString (const AJAAncillaryDataVideoS
 
 const string & AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValue, const bool inCompact)
 {
-	static const string		gAncDataSpaceToStr []			= {"VANC", "HANC", "?"};
+	static const string		gAncDataSpaceToStr []			= {"VANC", "HANC", "????"};
 	static const string		gDAncDataSpaceToStr []			= {"AJAAncillaryDataSpace_VANC", "AJAAncillaryDataSpace_HANC", "AJAAncillaryDataSpace_Unknown"};
 
 	return IS_VALID_AJAAncillaryDataSpace (inValue) ? (inCompact ? gAncDataSpaceToStr [inValue] : gDAncDataSpaceToStr [inValue]) : gEmptyString;
@@ -838,7 +838,7 @@ ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & i
 
 const string & AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inValue, const bool inCompact)
 {
-	static const string		gAncDataCodingToStr []			= {"Digital", "Analog/Raw", ""};
+	static const string		gAncDataCodingToStr []			= {"Dig", "Ana", "???"};
 	static const string		gDAncDataCodingToStr []			= {"AJAAncillaryDataCoding_Digital", "AJAAncillaryDataCoding_Raw", "AJAAncillaryDataCoding_Unknown"};
 
 	return IS_VALID_AJAAncillaryDataCoding (inValue) ? (inCompact ? gAncDataCodingToStr [inValue] : gDAncDataCodingToStr [inValue]) : gEmptyString;
@@ -1021,6 +1021,9 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 		case 0xA5:	return "SMPTE-299M 3G HD Aud Data 7";
 		case 0xA6:	return "SMPTE-299M 3G HD Aud Data 6";
 		case 0xA7:	return "SMPTE-299M 3G HD Aud Data 5";
+		case 0xD1:
+		case 0xD2:	return "AJA QA F1 Test Packet";
+		case 0xD3:	return "AJA QA F2 Test Packet";
 		case 0xE0:	return "SMPTE-299M HD Aud Ctrl 4";
 		case 0xE1:	return "SMPTE-299M HD Aud Ctrl 3";
 		case 0xE2:	return "SMPTE-299M HD Aud Ctrl 2";
