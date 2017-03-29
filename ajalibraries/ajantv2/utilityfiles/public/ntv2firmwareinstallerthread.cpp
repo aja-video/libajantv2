@@ -402,13 +402,9 @@ CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const C
 
 bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, const std::string designName) const
 {
-    std::string name;
+    std::string name = GetPrimaryDesignName(inDeviceID);
 
-    printf("Design name %s Device ID %08x\n", designName.c_str(), inDeviceID);
-
-    name = GetPrimaryDesignName(inDeviceID);
-    printf("Device name %s\n", name.c_str());
-
+#if 0
     name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP);
     printf("DEVICE_ID_KONAIP_4CH_1SFP name %s\n", name.c_str());
 
@@ -426,9 +422,13 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 
 	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110);
 	printf("DEVICE_ID_KONAIP_1RX_1TX_2110 name %s\n", name.c_str());
+#endif
 
-	if (designName == GetPrimaryDesignName(inDeviceID))
-		return true;
+    // Can always install over self
+    if (designName == name)
+        return true;
+
+    printf("Make sure we can install %s, replacing %s\n", designName.c_str(), name.c_str());
 
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
 	switch (inDeviceID)
