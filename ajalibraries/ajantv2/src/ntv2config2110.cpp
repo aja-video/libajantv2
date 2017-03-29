@@ -187,14 +187,18 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
 
-    ConfigurePTP(port,localIPAddress);
-
     bool rv = AcquireMailbox();
     if (rv)
     {
         rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
         ReleaseMailbox();
     }
+
+    if (port == SFP_TOP)
+    {
+        ConfigurePTP(port,localIPAddress);
+    }
+
     return rv;
 }
 
@@ -1334,13 +1338,14 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     addr = NTV2EndianSwap32(addr);
 
     // configure pll
-    WriteChannelRegister(kRegPll_PTP_LclMacLo   + SAREK_PLL, alignedMACLo);
-    WriteChannelRegister(kRegPll_PTP_LclMacHi   + SAREK_PLL, alignedMACHi);
+    mDevice.WriteRegister(kRegPll_PTP_LclMacLo   + SAREK_PLL, alignedMACLo);
+    mDevice.WriteRegister(kRegPll_PTP_LclMacHi   + SAREK_PLL, alignedMACHi);
 
-    WriteChannelRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
-    WriteChannelRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
-    WriteChannelRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
-    WriteChannelRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
+    mDevice.WriteRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
+    mDevice.WriteRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
+    mDevice.WriteRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
+    mDevice.WriteRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
+    mDevice.WriteRegister(kRegPll_Config         + SAREK_PLL, PLL_CONFIG_PTP);
 
     //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
     //WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);

@@ -33,6 +33,7 @@
 #define PLL_MATCH_ES_PID                BIT(4)
 
 #define PLL_CONFIG_PCR                  BIT(0)
+#define PLL_CONFIG_PTP                  BIT(1)
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
