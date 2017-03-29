@@ -1203,10 +1203,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			rv  = target->GetJ2KDecoderConfiguration(decoderConfig);
 			if (rv)
 			{
-				
 				//printf("j2kDecoder ch 1 config read\n");
 				//printDecoderConfig(mRx2022J2kConfig1, decoderConfig);
-				
 				if (decoderConfig != mRx2022J2kConfig1)
 				{
 					printf("set j2kDecoder ch 1\n");
@@ -1286,10 +1284,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				
 				//printf("j2kEncoder ch 1 config read\n");
 				//printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
-				
 				if (encoderConfig != mTx2022J2kConfig1)
 				{
 					printf("set j2kEncoder ch 1\n");
+					printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
+
+					
 					target->SetJ2KEncoderConfiguration(NTV2_CHANNEL1,mTx2022J2kConfig1);
 				}
 			}
@@ -1341,10 +1341,11 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					
 					//printf("j2kEncoder ch 2 config read\n");
 					//printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
-
 					if (encoderConfig != mTx2022J2kConfig2)
 					{
 						printf("set j2kEncoder ch 2\n");
+						printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
+
 						target->SetJ2KEncoderConfiguration(NTV2_CHANNEL2,mTx2022J2kConfig2);
 					}
 				}
@@ -1353,14 +1354,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			}
 		}
     }
-	else
-	{
-		uint32_t	count;
-		mCard->ReadRegister(kVRegAgentCheck, &count);
-		if ((count % 150) == 0)
-			printf("device not ready\n");
-	}
-
 
 	// VPID
 	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
@@ -1936,6 +1929,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			break;
 	}
 	
+	printRxConfig(chan);
 	target->SetRxChannelConfiguration(channel,chan);
 	target->SetRxChannelEnable(channel,enable,m2022_7Mode);
 }
@@ -2011,6 +2005,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			enable                      = mTx2022Config3.txc_enable;
 			break;
 	}
+	
 	printTxConfig(chan);
 	target->SetTxChannelConfiguration(channel,chan);
 	target->SetTxChannelEnable(channel,enable,m2022_7Mode);
@@ -2065,6 +2060,25 @@ bool  KonaIPJ2kServices::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & m
 	return false;
 }
 
+void KonaIPJ2kServices::printRxConfig(rx_2022_channel chan)
+{
+	printf("primarySourceIP			%s\n", chan.primarySourceIP.c_str());
+	printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
+	printf("primarySourcePort		%d\n", chan.primarySourcePort);
+	printf("primaryDestPort			%d\n", chan.primaryDestPort);
+	printf("primarySsrc				%d\n", chan.primarySsrc);
+	printf("primaryVlan				%d\n", chan.primaryVlan);
+	printf("primaryRxMatch			%d\n", chan.primaryRxMatch);
+	
+	printf("secondarySourceIP		%s\n", chan.secondarySourceIP.c_str());
+	printf("secondaryDestIP			%s\n", chan.secondaryDestIP.c_str());
+	printf("secondarySourcePort		%d\n", chan.secondarySourcePort);
+	printf("secondaryDestPort		%d\n", chan.secondaryDestPort);
+	printf("secondarySsrc			%d\n", chan.secondarySsrc);
+	printf("secondaryVlan			%d\n", chan.secondaryVlan);
+	printf("secondaryRxMatch		%d\n\n", chan.secondaryRxMatch);
+}
+
 void KonaIPJ2kServices::printTxConfig(tx_2022_channel chan)
 {
 	printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
@@ -2080,7 +2094,7 @@ void KonaIPJ2kServices::printTxConfig(tx_2022_channel chan)
 	printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
 	printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
 	printf("secondaryAutoMAC		%d\n", chan.secondaryAutoMAC);
-	printf("secondaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n", chan.secondaryRemoteMAC.mac[0], chan.secondaryRemoteMAC.mac[1],
+	printf("secondaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n\n", chan.secondaryRemoteMAC.mac[0], chan.secondaryRemoteMAC.mac[1],
 		   chan.secondaryRemoteMAC.mac[2], chan.secondaryRemoteMAC.mac[3],
 		   chan.secondaryRemoteMAC.mac[4], chan.secondaryRemoteMAC.mac[5]);
 }
@@ -2096,7 +2110,7 @@ void KonaIPJ2kServices::printEncoderConfig(j2kEncoderConfig modelConfig, j2kEnco
 	printf("pmtPid		   %6d%6d\n", modelConfig.pmtPid, encoderConfig.pmtPid);
 	printf("videoPid	   %6d%6d\n", modelConfig.videoPid, encoderConfig.videoPid);
 	printf("pcrPid		   %6d%6d\n", modelConfig.pcrPid, encoderConfig.pcrPid);
-	printf("audio1Pid	   %6d%6d\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
+	printf("audio1Pid	   %6d%6d\n\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
 }
 
 void KonaIPJ2kServices::printDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
@@ -2104,5 +2118,5 @@ void KonaIPJ2kServices::printDecoderConfig(j2kDecoderConfig modelConfig, j2kDeco
 	printf("selectionMode  %6d%6d\n", modelConfig.selectionMode, encoderConfig.selectionMode);
 	printf("programNumber  %6d%6d\n", modelConfig.programNumber, encoderConfig.programNumber);
 	printf("programPID	   %6d%6d\n", modelConfig.programPID, encoderConfig.programPID);
-	printf("audioNumber    %6d%6d\n", modelConfig.audioNumber, encoderConfig.audioNumber);
+	printf("audioNumber    %6d%6d\n\n", modelConfig.audioNumber, encoderConfig.audioNumber);
 }
