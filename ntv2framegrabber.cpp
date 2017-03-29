@@ -80,6 +80,7 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
 		mAbort					(false),
 		mCheckFor4K				(false),
 		mDeinterlace			(true),
+        mbFixedReference        (false),
 		mBoardNumber			(0),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mChannel				(NTV2_CHANNEL1),
@@ -579,7 +580,8 @@ bool NTV2FrameGrabber::SetupInput (void)
 		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
 
  		mFormatIsProgressive = IsProgressivePicture (mCurrentVideoFormat);
-		mNTV2Card.SetReference (NTV2_REFERENCE_FREERUN);
+        if (!mbFixedReference)
+            mNTV2Card.SetReference (NTV2_REFERENCE_FREERUN);
 
 		if (NTV2_INPUT_SOURCE_IS_SDI (mInputSource))
 		{
@@ -599,14 +601,16 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2_CHANNEL1), NTV2_XptAnalogIn);
 			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel (NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
 			mNTV2Card.SetFrameBufferFormat (NTV2_CHANNEL1, mFrameBufferFormat);
-			mNTV2Card.SetReference (NTV2_REFERENCE_ANALOG_INPUT);
+            if (!mbFixedReference)
+                mNTV2Card.SetReference (NTV2_REFERENCE_ANALOG_INPUT);
 			mChannel = NTV2_CHANNEL1;
 		}
 		else if (mInputSource == NTV2_INPUTSOURCE_HDMI)
 		{
 			NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
 			mNTV2Card.GetHDMIInputColor (hdmiColor);
-			mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT);
+            if (!mbFixedReference)
+                mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT);
 			mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_4K_CAPTURE);		//	Allow 4K HDMI capture
 			for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL5;  channel = NTV2Channel(channel+1))
 			{

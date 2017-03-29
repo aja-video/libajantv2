@@ -88,6 +88,8 @@ class NTV2FrameGrabber : public QThread
 
 		inline bool		GetDeinterlaceNonProgressiveVideo (void) const					{return mDeinterlace;}	///< @return	True if deinterlacing is enabled;  otherwise false.
 
+        void            SetFixedReference(bool fixed)                                   {mbFixedReference = fixed;}
+
 	protected:
 		void			ClearCaptionBuffer (const bool inSignalClients = false);
 		void			GrabCaptions (void);		///< @brief	Performs caption data extraction & decoding
@@ -154,6 +156,7 @@ class NTV2FrameGrabber : public QThread
 		bool						mAbort;					///< @brief	Used in my destructor to immediately cause me to exit
 		bool						mCheckFor4K;			///< @brief	Check for 4K/UHD video?
 		bool						mDeinterlace;			///< @brief	De-interlace non-progressive video?
+        bool                        mbFixedReference;
 
 		CNTV2Card					mNTV2Card;				///< @brief	Used to talk to monitor & control the device
 		UWord						mBoardNumber;			///< @brief	Index number of the device I'm using

@@ -54,7 +54,8 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 
 	//	Checkboxes...
 	mWithAudioCheckBox = new QCheckBox ("With Audio", this);
-	mCheckFor4kCheckBox = new QCheckBox ("Check for 4K Input", this);
+    mCheckFor4kCheckBox = new QCheckBox ("Check for 4K Input", this);
+    mCheckFixedReference = new QCheckBox ("Fixed Reference", this);
 
  	mVideoPreviewWidget = new AJAPreviewWidget (this);
 	mVideoPreviewWidget->setFixedWidth (QTPREVIEW_WIDGET_X);
@@ -102,7 +103,8 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
 			layout->addWidget (iter.next());
 		layout->addWidget (mWithAudioCheckBox);
-		layout->addWidget (mCheckFor4kCheckBox);
+        layout->addWidget (mCheckFor4kCheckBox);
+        layout->addWidget (mCheckFixedReference);
 	#endif	//	!defined (INCLUDE_AJACC)
 
 	layout->addStretch (1);
@@ -111,6 +113,7 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
     QObject::connect (mBoardChoiceCombo,	SIGNAL (currentIndexChanged (int)),				this,					SLOT (RequestDeviceChange (const int)));
 	QObject::connect (mInputButtonGroup,	SIGNAL (buttonReleased (int)),					this,					SLOT (inputChanged (int)));
 	QObject::connect (mWithAudioCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (withAudioChanged (int)));
+    QObject::connect (mCheckFixedReference,	SIGNAL (toggled (bool)),                        this,					SLOT (fixedRefChanged (bool)));
 	QObject::connect (mCheckFor4kCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (checkFor4kChanged (int)));
 			 connect (mFrameGrabber,		SIGNAL (newFrame (const QImage &, bool)),		mVideoPreviewWidget,	SLOT (updateFrame (const QImage &, bool)));
 			 connect (mFrameGrabber,		SIGNAL (newStatusString (const QString)),		mVideoPreviewWidget,	SLOT (updateStatusString (const QString)));
@@ -174,6 +177,13 @@ void NTV2QtPreview::withAudioChanged (int state)
 	mFrameGrabber->SetWithAudio (state == Qt::Checked ? true : false);
 
 }	//	withAudioChanged
+
+
+void NTV2QtPreview::fixedRefChanged (bool checked)
+{
+    mFrameGrabber->SetFixedReference(checked);
+
+}
 
 
 void NTV2QtPreview::checkFor4kChanged (int state)
