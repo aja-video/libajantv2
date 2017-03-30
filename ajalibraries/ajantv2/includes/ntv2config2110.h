@@ -57,6 +57,7 @@ public:
     uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
     bool		autoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
     MACAddr     remoteMAC;		 ///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
+    uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
 };

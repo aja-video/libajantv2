@@ -942,7 +942,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
 
         // payload type
-        mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,100);
+        mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,txConfig.payloadType);
 
         // pix per pkt
         int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
@@ -970,7 +970,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer,0x120);
 
         // payload type
-        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer,101);
+        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer,txConfig.payloadType);
 
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
