@@ -85,6 +85,8 @@
 #define kReg3190_pkt_chan_num                   (0x0028/4)
 #define kReg3190_pkt_payload_type               (0x0030/4)
 #define kReg3190_pkt_ssrc                       (0x0038/4)
+#define kReg3190_pkt_tx_pkt_cnt                 (0x0040/4)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -103,6 +105,7 @@
 #define kReg3190_depkt_pkt_len_valid            (0x0034/4)
 #define kReg3190_depkt_payload_type             (0x0038/4)
 #define kReg3190_depkt_payload_type_valid       (0x003c/4)
+#define kReg3190_depkt_rx_pkt_cnt               (0x0040/4)
 #define kReg3190_depkt_chan_status_0            (0x0048/4)
 #define kReg3190_depkt_chan_status_1            (0x0050/4)
 #define kReg3190_depkt_chan_status_2            (0x0058/4)
