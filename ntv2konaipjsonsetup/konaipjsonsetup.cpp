@@ -183,6 +183,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mSecondaryAutoMac.isEmpty())
             cout << "SecondaryAutoMac " << transmitStruct.mSecondaryAutoMac.toStdString() << endl;
 
+        transmitStruct.mPayload = transmitChannelObject["payload"].toString();
+        if (!transmitStruct.mPayload.isEmpty())
+            cout << "Payload " << transmitStruct.mPayload.toStdString() << endl;
+
         transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
         if (!transmitStruct.mVideoFormat.isEmpty())
             cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
@@ -488,6 +492,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
         txChannelConfig.remoteMAC    = toMAC(transmit.mPrimaryRemoteMac);
         txChannelConfig.autoMAC      = getEnable(transmit.mPrimaryAutoMac);
+        txChannelConfig.payloadType  = transmit.mPayload.toUInt();
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
 

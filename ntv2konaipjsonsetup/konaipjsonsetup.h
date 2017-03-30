@@ -50,6 +50,7 @@ typedef struct
     QString mSecondaryRemotePort;
     QString mSecondaryRemoteMac;
     QString mSecondaryAutoMac;
+    QString mPayload;
     QString mVideoFormat;
     QString mEnable;
 }TransmitStruct;
