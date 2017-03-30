@@ -26,12 +26,7 @@
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
 #include "ntv2vpidfromspec.h"
-
-//#define CORVID88_SUPPORT
-#ifdef CORVID88_SUPPORT
 #include "ntv2corvid88services.h"
-#endif
-
 #include "ajabase/system/systemtime.h"
 
 
@@ -100,11 +95,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_CORVID44:
 			pDeviceServices = new Corvid44Services();
 			break;
-		#ifdef CORVID88_SUPPORT
 		case DEVICE_ID_CORVID88:
 			pDeviceServices = new Corvid88Services();
 			break;
-		#endif
 		default:
 		case DEVICE_ID_CORVID1:
 		case DEVICE_ID_CORVID22:
