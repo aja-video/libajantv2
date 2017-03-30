@@ -1355,9 +1355,9 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
 
 string CNTV2Config2110::getLastError()
 {
-    string astring = mError;
-    mError.clear();
-    return astring;
+    std::string err;
+    getError(err);
+    return err;
 }
 
 void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
