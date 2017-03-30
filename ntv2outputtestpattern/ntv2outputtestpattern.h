@@ -78,9 +78,8 @@ class NTV2OutputTestPattern
 		const NTV2Channel			mOutputChannel;		///< @brief	The channel I'm using
 		NTV2VideoFormat				mVideoFormat;		///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;		///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief Used to restore the previous task mode
-		bool						mVancEnabled;		///< @brief	VANC enabled?
-		bool						mWideVanc;			///< @brief	Wide VANC?
+		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief For restoring previous task mode
+		NTV2VANCMode				mVancMode;			///< @brief	My VANC mode
 
 };	//	NTV2OutputTestPattern
 

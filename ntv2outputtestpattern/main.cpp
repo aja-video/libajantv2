@@ -33,7 +33,7 @@ int main (int argc, const char ** argv)
 		{"board",	'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",	'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"channel",	'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"1 thru 8"					},
-		{"pattern",	'p',	POPT_ARG_INT,		&testPatternIndex,	0,	"which test pattern to show",	"test pattern number"		},
+		{"pattern",	'p',	POPT_ARG_INT,		&testPatternIndex,	0,	"which test pattern to show",	"0 thru 15"					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -47,6 +47,8 @@ int main (int argc, const char ** argv)
 	const NTV2Channel	channel	(::GetNTV2ChannelForIndex (channelNumber - 1));
 	if (!NTV2_IS_VALID_CHANNEL (channel))
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
+	if (testPatternIndex >= uint32_t(AJA_TestPatt_All))
+		{cerr << "## ERROR:  Invalid test pattern index " << testPatternIndex << " -- expected 0 thru " << (uint32_t(AJA_TestPatt_All)-1) << endl;  return 2;}
 
 	//  Create the object that will display the test pattern...
 	NTV2OutputTestPattern outputTestPattern (pDeviceSpec ? string (pDeviceSpec) : "0", channel);
