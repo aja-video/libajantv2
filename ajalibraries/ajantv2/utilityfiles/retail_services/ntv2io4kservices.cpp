@@ -3539,7 +3539,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (!b2pi)
 		{
-			if (!b4K && bHfr && mDualStreamTransportType == NTV2_SDITransport_DualLink_1_5)
+			if (!b4K && mDualStreamTransportType == NTV2_SDITransport_DualLink_1_5)
 			{
 				// 2-wire dual link
 				vpidChannela = VPIDChannel_2;

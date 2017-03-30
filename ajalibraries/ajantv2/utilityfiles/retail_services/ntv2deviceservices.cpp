@@ -600,6 +600,10 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 		else if (vpidSpec.isRGBOnWire == false && IsFrameBufferFormatRGB(mFb1FrameBufferFomat) == true)
 			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1FrameBufferFomat) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
+		// Converted YUV -> RGB on wire
+		else if (vpidSpec.isRGBOnWire == true && IsFrameBufferFormatRGB(mFb1FrameBufferFomat) == false)
+			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
+	
 		// otherwise
 		else
 			vpidSpec.pixelFormat = mFb1FrameBufferFomat;
