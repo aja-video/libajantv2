@@ -79,6 +79,9 @@ enum AJAAncillaryDataType
 	AJAAncillaryDataType_Smpte2051,				///< @brief	SMPTE 2051 "Two Frame Marker"
 	AJAAncillaryDataType_FrameStatusInfo524D,	///< @brief	Frame Status Information, such as Active Frame flag
 	AJAAncillaryDataType_FrameStatusInfo5251,	///< @brief	Frame Status Information, such as Active Frame flag
+	AJAAncillaryDataType_HDR_SDR,
+	AJAAncillaryDataType_HDR_HDR10,
+	AJAAncillaryDataType_HDR_HLG,
 	AJAAncillaryDataType_Size
 };
 
