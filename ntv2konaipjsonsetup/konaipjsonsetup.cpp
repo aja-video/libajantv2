@@ -417,7 +417,10 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         hasRx = true;
 
         // video
-        device.Connect (NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
+        device.SetVideoFormat (NTV2_FORMAT_720p_5994, false, false, NTV2_CHANNEL2);
+        device.Connect(NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
+        device.Connect(NTV2_XptFrameBuffer2Input,NTV2_XptSDIIn1);
+        device.SetFrameBufferFormat (NTV2_CHANNEL2, NTV2_FBF_10BIT_YCBCR);
 
         // audio
         device.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_1, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
