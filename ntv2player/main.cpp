@@ -35,6 +35,7 @@ int main (int argc, const char ** argv)
 	uint32_t		channelNumber		(1);					//	Number of the channel to use
 	int				noAudio				(0);					//	Disable audio tone?
 	int				doMultiChannel		(0);					//	Enable multi-format?
+	int				hdrType				(0);
 	poptContext		optionsContext; 							//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
@@ -44,6 +45,7 @@ int main (int argc, const char ** argv)
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"index#, serial#, or model"	},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",		"'?' or 'list' to list"},
+		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",			"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",				"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",			NULL},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",				NULL},
@@ -87,8 +89,24 @@ int main (int argc, const char ** argv)
 
 	const NTV2Channel			channel		(::GetNTV2ChannelForIndex (channelNumber - 1));
 	const NTV2OutputDestination	outputDest	(::NTV2ChannelToOutputDestination (channel));
+	AJAAncillaryDataType sendType = AJAAncillaryDataType_Unknown;
+	switch(hdrType)
+	{
+	case 1:
+		sendType = AJAAncillaryDataType_HDR_SDR;
+		break;
+	case 2:
+		sendType = AJAAncillaryDataType_HDR_HDR10;
+		break;
+	case 3:
+		sendType = AJAAncillaryDataType_HDR_HLG;
+		break;
+	default:
+		sendType = AJAAncillaryDataType_Unknown;
+		break;
+	}
 
-	NTV2Player	player (deviceSpec, (noAudio ? false : true), channel, pixelFormat, outputDest, videoFormat, false, false, doMultiChannel ? true : false);
+	NTV2Player	player (deviceSpec, (noAudio ? false : true), channel, pixelFormat, outputDest, videoFormat, false, false, doMultiChannel ? true : false, sendType);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)

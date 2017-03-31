@@ -46,7 +46,8 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 						const NTV2VideoFormat		inVideoFormat,
 						const bool					inEnableVanc,
 						const bool					inLevelConversion,
-						const bool					inDoMultiChannel)
+						const bool					inDoMultiChannel,
+						const AJAAncillaryDataType	inSendHDRType)
 
 	:	mConsumerThread				(NULL),
 		mProducerThread				(NULL),
@@ -73,7 +74,8 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mTestPatternVideoBuffers	(NULL),
 		mNumTestPatterns			(0),
 		mCallbackUserData			(NULL),
-		mCallback					(NULL)
+		mCallback					(NULL),
+		mAncType					(inSendHDRType)
 {
 	::memset (mAVHostBuffer, 0, sizeof (mAVHostBuffer));
 }
@@ -432,6 +434,16 @@ void NTV2Player::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		//
 void NTV2Player::PlayFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER		mOutputXferInfo;
+
+	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
+	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
+	switch(mAncType)
+	{
+	case AJAAncillaryDataType_HDR_SDR:
+
+	case AJAAncillaryDataType_HDR_HDR10:
+	case AJAAncillaryDataType_HDR_HLG:
+	}
 
 	mDevice.AutoCirculateStart (mOutputChannel);	//	Start it running
 

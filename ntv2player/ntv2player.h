@@ -14,6 +14,7 @@
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
+#include "ajaanc/includes/ancillarydata.h"
 
 
 /**
@@ -57,7 +58,8 @@ class NTV2Player
 											const NTV2VideoFormat		inVideoFormat		= NTV2_FORMAT_1080i_5994,
 											const bool					inWithVanc			= false,
 											const bool					inLevelConversion	= false,
-											const bool					inDoMultiFormat		= false);
+											const bool					inDoMultiFormat		= false,
+											const AJAAncillaryDataType	inSendHDRType		= AJAAncillaryDataType_Unknown);
 
 		virtual					~NTV2Player (void);
 
@@ -239,6 +241,7 @@ class NTV2Player
 
 		void *						mCallbackUserData;			///< @brief	User data to be passed to the callback function
 		NTV2PlayerCallback *		mCallback;					///< @brief	Address of callback function
+		AJAAncillaryDataType		mAncType;
 
 };	//	NTV2Player
 
