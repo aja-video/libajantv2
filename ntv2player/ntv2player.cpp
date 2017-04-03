@@ -10,9 +10,11 @@
 #include "ntv2debug.h"
 #include "ajabase/common/testpatterngen.h"
 #include "ajabase/common/timecode.h"
+#include "ajabase/system/memory.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
 
+#define NTV2_ANCSIZE_MAX	(0x2000)
 /**
 	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
 			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
@@ -385,7 +387,7 @@ void NTV2Player::SetUpOutputAutoCirculate ()
 		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
 		mDevice.AutoCirculateInitForOutput (mOutputChannel, buffersPerChannel,
 											mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system?
-											AUTOCIRCULATE_WITH_RP188);								//	Add RP188 timecode!
+											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC);								//	Add RP188 timecode!
 	}
 
 }	//	SetUpOutputAutoCirculate
@@ -437,12 +439,28 @@ void NTV2Player::PlayFrames (void)
 
 	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
 	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
+	::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
+	uint32_t	packetSize = 0;
 	switch(mAncType)
 	{
 	case AJAAncillaryDataType_HDR_SDR:
-
+	{
+		AJAAncillaryData_HDR_SDR sdrPacket;
+		sdrPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
 	case AJAAncillaryDataType_HDR_HDR10:
+	{
+		AJAAncillaryData_HDR_HDR10 hdr10Packet;
+		hdr10Packet.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
 	case AJAAncillaryDataType_HDR_HLG:
+	{
+		AJAAncillaryData_HDR_HLG hlgPacket;
+		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
 	}
 
 	mDevice.AutoCirculateStart (mOutputChannel);	//	Start it running
@@ -465,6 +483,7 @@ void NTV2Player::PlayFrames (void)
 				//	Transfer the timecode-burned frame to the device for playout...
 				mOutputXferInfo.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
 				mOutputXferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : NULL, mWithAudio ? playData->fAudioBufferSize : 0);
+				mOutputXferInfo.SetAncBuffers(fAncBuffer, NTV2_ANCSIZE_MAX, NULL, 0);
 				mDevice.AutoCirculateTransfer (mOutputChannel, mOutputXferInfo);
 				mAVCircularBuffer.EndConsumeNextBuffer ();	//	Signal that the frame has been "consumed"
 			}
@@ -475,6 +494,7 @@ void NTV2Player::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mOutputChannel);
+	//delete [] fAncBuffer;
 
 }	//	PlayFrames
 

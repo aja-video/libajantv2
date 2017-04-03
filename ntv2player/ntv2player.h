@@ -15,7 +15,9 @@
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 #include "ajaanc/includes/ancillarydata.h"
-
+#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
+#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
+#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
