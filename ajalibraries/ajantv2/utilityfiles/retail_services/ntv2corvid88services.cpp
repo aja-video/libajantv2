@@ -1103,7 +1103,13 @@ void Corvid88Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);	
 	mCard->WriteRegister(kRegCh3Control, bCh3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);	
-	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);	
+	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	
+	// always disable 5-8 for now
+	mCard->WriteRegister(kRegCh5Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh6Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh7Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh8Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
 
 	// connect muxes
 	if (b2pi)
@@ -1901,6 +1907,12 @@ void Corvid88Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh3Control, bCh3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+
+	// always disable 5-8 for now
+	mCard->WriteRegister(kRegCh5Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh6Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh7Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh8Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
 
 
 	// SDI Out 1
