@@ -375,6 +375,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     CNTV2Config2110	config2110 (device);
 
+    config2110.SetIGMPVersion(eIGMPVersion_2);
+
     if (!PTPMasterAddr.isEmpty())
     {
         device.SetReference(NTV2_REFERENCE_SFP1_PTP);
@@ -384,6 +386,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     {
         device.SetReference(NTV2_REFERENCE_FREERUN);
     }
+
 
     if (mKonaIPParams.mSFPs.size() < 1)
     {
