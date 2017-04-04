@@ -33,8 +33,7 @@ NTV2OutputTestPattern::NTV2OutputTestPattern (const string &	inDeviceSpecifier,
 		mOutputChannel		(channel),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat		(NTV2_FBF_8BIT_YCBCR),
-		mVancEnabled		(false),
-		mWideVanc			(false)
+		mVancMode			(NTV2_VANCMODE_INVALID)
 {
 }	//	constructor
 
@@ -76,8 +75,8 @@ AJAStatus NTV2OutputTestPattern::Init ()
 	if (!mDevice.GetVideoFormat (mVideoFormat, mOutputChannel))
 		return AJA_STATUS_FAIL;
 
-	//  Read the current VANC settings so an NTV2FormatDescriptor can be constructed...
-	if (!mDevice.GetEnableVANCData (mVancEnabled, mWideVanc, mOutputChannel))
+	//  Read the current VANC mode so an NTV2FormatDescriptor can be constructed...
+	if (!mDevice.GetVANCMode (mVancMode, mOutputChannel))
 		return AJA_STATUS_FAIL;
 
 	return AJA_STATUS_SUCCESS;
@@ -175,7 +174,7 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (const UWord testPatternIndex)
 		RouteOutputSignal ();
 
 	//	Get information about current video format...
-	NTV2FormatDescriptor	fd	(GetFormatDescriptor (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc));
+	NTV2FormatDescriptor	fd	(mVideoFormat, mPixelFormat, mVancMode);
 
 	//	Write the requested test pattern into host buffer...
 	AJATestPatternGen		testPatternGen;

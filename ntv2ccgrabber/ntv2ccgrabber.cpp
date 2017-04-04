@@ -1036,19 +1036,20 @@ void NTV2CCGrabber::CaptioningChanged (const NTV2Caption608ChangeInfo & inChange
 	switch (inChangeInfo.mWhatChanged)
 	{
 		case NTV2Caption608ChangeInfo::NTV2DecoderChange_ScreenCharacter:
-			NTV2_ASSERT (inChangeInfo.mChannel == m608Channel);
-			if (IsValidLine21Mode (m608Mode) && !IsLine21RollUpMode (m608Mode))
-				EmitCharacter (::NTV2CC608CodePointToUtf8String (inChangeInfo.u.screenChar.mNew));
+			if (inChangeInfo.mChannel == m608Channel)
+				if (IsValidLine21Mode (m608Mode) && !IsLine21RollUpMode (m608Mode))
+					EmitCharacter (::NTV2CC608CodePointToUtf8String (inChangeInfo.u.screenChar.mNew));
 			break;
 		case NTV2Caption608ChangeInfo::NTV2DecoderChange_CaptionMode:
-			NTV2_ASSERT (inChangeInfo.mChannel == m608Channel);
-			m608Mode = NTV2Line21Mode (inChangeInfo.u.captionMode.mNew);
-			NTV2_ASSERT (IsValidLine21Mode (m608Mode));
-			EmitCharacter (" ");
+			if (inChangeInfo.mChannel == m608Channel  &&  IsValidLine21Mode(inChangeInfo.u.captionMode.mNew))
+			{
+				m608Mode = NTV2Line21Mode (inChangeInfo.u.captionMode.mNew);
+				EmitCharacter (" ");
+			}
 			break;
 		case NTV2Caption608ChangeInfo::NTV2DecoderChange_CurrentRow:
-			NTV2_ASSERT (inChangeInfo.mChannel == m608Channel);
-			EmitCharacter (" ");
+			if (inChangeInfo.mChannel == m608Channel)
+				EmitCharacter (" ");
 			break;
 	}
 	mCaptionDataTally++;
