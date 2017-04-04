@@ -35,6 +35,8 @@ void tx_2110Config::init()
     memset(remoteMAC.mac, 0, sizeof(MACAddr));
     videoFormat  = NTV2_FORMAT_UNKNOWN;
     videoSamples = VPIDSampling_YUV_422;
+    payloadLen = 0;
+    lastPayLoadLen = 0;
 }
 
 bool tx_2110Config::eq_MACAddr(const MACAddr& a)
@@ -77,7 +79,8 @@ void rx_2110Config::init()
     VLAN        = 0;
     videoFormat   = NTV2_FORMAT_UNKNOWN;
     videoSamples  = VPIDSampling_YUV_422;
-
+    payloadLen = 0;
+    lastPayloadLen = 0;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -605,7 +608,13 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         int payloadLength      = payloadLength_root * lcm;
         float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
         int ipktsPerLine       = (int)ceil(pktsPerLine);
+
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
+
+        if (rxConfig.payloadLen != 0)
+            payloadLength      = rxConfig.payloadLen;
+        if (rxConfig.lastPayloadLen != 0)
+            payloadLengthLast  = rxConfig.lastPayloadLen;
 
         // pkts per line
         mDevice.WriteRegister(kReg4175_depkt_pkts_per_line + depacketizerBaseAddr,ipktsPerLine);
@@ -628,6 +637,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         // audio channels
         mDevice.WriteRegister(kReg3190_depkt_num_audio_chans + depacketizerBaseAddr,2);
     }
+
 
     // enable depacketizer
     mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
@@ -929,7 +939,13 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         int payloadLength      = payloadLength_root * lcm;
         float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
         int ipktsPerLine       = (int)ceil(pktsPerLine);
+
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
+
+        if (txConfig.payloadLen != 0)
+            payloadLength = txConfig.payloadLen;
+        if (txConfig.lastPayLoadLen != 0)
+            payloadLengthLast = txConfig.lastPayLoadLen;
 
         // pkts per line
         mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);

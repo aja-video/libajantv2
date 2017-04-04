@@ -60,6 +60,8 @@ public:
     uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
+    uint32_t     payloadLen;
+    uint32_t     lastPayLoadLen;
 };
 
 /**
@@ -89,6 +91,8 @@ public:
     uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling    videoSamples;
+    uint32_t     payloadLen;
+    uint32_t     lastPayloadLen;
 };
 
 
