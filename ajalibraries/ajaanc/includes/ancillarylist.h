@@ -36,14 +36,15 @@ public:	//	CLASS METHODS
 		@param[in]	inFormatDesc		Describes the frame buffer (pixel format, video standard, etc.).
 		@param[out]	outF1Packets		Receives the Field1 packets found.
 		@param[out]	outF2Packets		Receives the Field2 packets found (interlaced video only).
-		@param[in]	inLink				Optionally specifies the data link for the packets. Defaults to AJAAncillaryDataLink_A.
 		@return		AJA_STATUS_SUCCESS if successful.
+		@bug		The \c AJAAncillaryDataLink in the \c AJAAncillaryDataLocation in each of the returned packets
+					is currently \c AJAAncillaryDataLink_A, which will be incorrect if, for example, the FrameStore
+					that delivered the \c inFrameBuffer was sourced from the "B" link of a Dual-Link SDI source.
 	**/
 	static AJAStatus						SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 															const NTV2FormatDescriptor & inFormatDesc,
 															AJAAncillaryList & outF1Packets,
-															AJAAncillaryList & outF2Packets,
-															const AJAAncillaryDataLink inLink = AJAAncillaryDataLink_A);
+															AJAAncillaryList & outF2Packets);
 
 public:	//	INSTANCE METHODS
 											AJAAncillaryList ();			///< @brief	Instantiate and initialize with a default set of values.

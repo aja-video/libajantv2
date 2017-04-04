@@ -1293,6 +1293,37 @@ bool CNTV2Card::GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInpu
 }
 
 
+static const ULWord	kAudCtrlRegsForSDIOutputs []	=	{	kRegAud1Control,	kRegAud1Control,	kRegAud3Control,	kRegAud3Control,
+															kRegAud5Control,	kRegAud5Control,	kRegAud7Control,	kRegAud7Control	};
+
+bool CNTV2Card::GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, bool & outIsEnabled)
+{
+	outIsEnabled = true;	//	presume normal
+	if (!NTV2_IS_VALID_CHANNEL (inSDIOutputSpigot))
+		return false;
+	if (UWord(inSDIOutputSpigot) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
+		return false;
+
+	ULWord	value	(0);
+	if (!ReadRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot], &value, (inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1))
+		return false;
+	outIsEnabled = value ? false : true;	//	Bit sense is 1=disabled, 0=enabled/normal
+	return true;
+}
+
+bool CNTV2Card::SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, const bool & inEnable)
+{
+	if (!NTV2_IS_VALID_CHANNEL (inSDIOutputSpigot))
+		return false;
+	if (UWord(inSDIOutputSpigot) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
+		return false;
+
+	if (!WriteRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot], inEnable ? 0 : 1, (inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1))
+		return false;
+	return true;
+}
+
+
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable)
 	{

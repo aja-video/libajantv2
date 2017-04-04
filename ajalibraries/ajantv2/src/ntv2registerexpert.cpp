@@ -1251,14 +1251,25 @@ public:
 				(void) inRegNum;
 				(void) inDeviceID;
 				static const string	ChStrs []	=	{	"Ch 1/2",	"Ch 3/4",	"Ch 5/6",	"Ch 7/8"	};
-				ostringstream	oss;
+				uint16_t			sdiOutput	(0);
+				switch (inRegNum)
+				{	case kRegAud1Control:	sdiOutput = 1;	break;
+					case kRegAud3Control:	sdiOutput = 3;	break;
+					case kRegAud5Control:	sdiOutput = 5;	break;
+					case kRegAud7Control:	sdiOutput = 7;	break;
+					default:								break;
+				}
+
+				ostringstream		oss;
 				oss		<< "Audio Capture: "		<< (BIT(0) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "Audio Loopback: "		<< (BIT(3) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "Audio Input: "			<< (BIT(8) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Channel 1 Embedder: "	<< (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Channel 2 Embedder: "	<< (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
+						<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+				if (sdiOutput)
+					oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
+						<< "Audio Embedder SDIOut" << ++sdiOutput	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+
+				oss		<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
 						<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
 						<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl

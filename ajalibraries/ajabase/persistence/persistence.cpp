@@ -96,7 +96,11 @@ std::string storagePath(bool bSharedPrefFile)
     // want ~/.aja/config
 	
     char *home = getenv("HOME");
-    if (home)
+    if (bSharedPrefFile)
+    {
+        path.append("/opt/aja/config/");
+    }
+    else if (home)
     {
         path.append(home);
         path.append("/.aja/config/");
