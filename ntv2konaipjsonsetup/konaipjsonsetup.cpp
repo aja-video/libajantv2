@@ -126,6 +126,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mVideoFormat.isEmpty())
             cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << endl;
 
+        receiveStruct.mPayloadLen = receiveChannelObject["payloadLen"].toString();
+        if (!receiveStruct.mPayloadLen.isEmpty())
+            cout << "Payload Len " << receiveStruct.mPayloadLen.toStdString() << endl;
+
+        receiveStruct.mLastPayloadLen = receiveChannelObject["lastPayloadLen"].toString();
+        if (!receiveStruct.mLastPayloadLen.isEmpty())
+            cout << "Last Payload Len " << receiveStruct.mLastPayloadLen.toStdString() << endl;
+
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
@@ -190,6 +198,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
         if (!transmitStruct.mVideoFormat.isEmpty())
             cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
+
+        transmitStruct.mPayloadLen = transmitChannelObject["payloadLen"].toString();
+        if (!transmitStruct.mPayloadLen.isEmpty())
+            cout << "Payload Len " << transmitStruct.mPayloadLen.toStdString() << endl;
+
+        transmitStruct.mLastPayloadLen = transmitChannelObject["lastPayloadLen"].toString();
+        if (!transmitStruct.mLastPayloadLen.isEmpty())
+            cout << "Last Payload Len " << transmitStruct.mLastPayloadLen.toStdString() << endl;
 
         transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
@@ -469,6 +485,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig[index].videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
         rxChannelConfig[index].videoSamples = VPIDSampling_YUV_422;
 
+        if (!receive.mPayloadLen.isEmpty())
+            rxChannelConfig[index].payloadLen = receive.mPayloadLen.toUInt();
+        if (!receive.mLastPayloadLen.isEmpty())
+            rxChannelConfig[index].lastPayloadLen = receive.mLastPayloadLen.toUInt();
+
+
         if (++found == 2)     // super-kludge!!
         {
             bool rv = config2110.ConfigureRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
@@ -501,6 +523,11 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.payloadType  = transmit.mPayload.toUInt();
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
+
+        if (!transmit.mPayloadLen.isEmpty())
+            txChannelConfig.payloadLen = transmit.mPayloadLen.toUInt();
+        if (!transmit.mLastPayloadLen.isEmpty())
+            txChannelConfig.lastPayLoadLen = transmit.mLastPayloadLen.toUInt();
 
         NTV2Stream stream;
         if (transmit.mStream == "audio1")

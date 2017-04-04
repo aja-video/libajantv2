@@ -18,7 +18,9 @@
             "primaryRemoteMac":"00:00:00:00:00:00",
             "primaryAutoMac":"true",
             "videoFormat":"720p",
-            "Enable":"true"
+            "Enable":"true",
+            "payloadLen":"1200",
+            "lastPayloadLen":"800"
     },
     {
             "designator":"channel1",
