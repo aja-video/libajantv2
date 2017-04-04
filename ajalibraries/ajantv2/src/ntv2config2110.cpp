@@ -637,7 +637,6 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
 bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
 {
     uint32_t    val;
-    bool        rv;
 
     // get address
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel);
@@ -754,7 +753,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     uint8_t     ip0;
     uint32_t    destIp;
     uint32_t    mac;
-    bool        rv;
+    bool        rv = true;
 
     // get frame address
     uint32_t baseAddrFramer = GetFramerAddress(channel,stream);
@@ -982,7 +981,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig)
 {
     uint32_t    val;
-    bool        rv;
 
     // get frame address
     uint32_t baseAddrFramer = GetFramerAddress(channel,stream);
