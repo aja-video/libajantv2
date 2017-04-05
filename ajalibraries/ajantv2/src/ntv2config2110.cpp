@@ -37,6 +37,7 @@ void tx_2110Config::init()
     videoSamples = VPIDSampling_YUV_422;
     payloadLen = 0;
     lastPayLoadLen = 0;
+    pktsPerLine = 0;
 }
 
 bool tx_2110Config::eq_MACAddr(const MACAddr& a)
@@ -81,6 +82,7 @@ void rx_2110Config::init()
     videoSamples  = VPIDSampling_YUV_422;
     payloadLen = 0;
     lastPayloadLen = 0;
+    pktsPerLine = 0;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -612,9 +614,11 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
         if (rxConfig.payloadLen != 0)
-            payloadLength      = rxConfig.payloadLen;
+            payloadLength       = rxConfig.payloadLen;
         if (rxConfig.lastPayloadLen != 0)
-            payloadLengthLast  = rxConfig.lastPayloadLen;
+            payloadLengthLast   = rxConfig.lastPayloadLen;
+        if (rxConfig.pktsPerLine != 0)
+            ipktsPerLine        = rxConfig.pktsPerLine;
 
         // pkts per line
         mDevice.WriteRegister(kReg4175_depkt_pkts_per_line + depacketizerBaseAddr,ipktsPerLine);
@@ -943,9 +947,11 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
         if (txConfig.payloadLen != 0)
-            payloadLength = txConfig.payloadLen;
+            payloadLength       = txConfig.payloadLen;
         if (txConfig.lastPayLoadLen != 0)
-            payloadLengthLast = txConfig.lastPayLoadLen;
+            payloadLengthLast   = txConfig.lastPayLoadLen;
+        if (txConfig.pktsPerLine != 0)
+            ipktsPerLine        = txConfig.pktsPerLine;
 
         // pkts per line
         mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);

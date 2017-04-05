@@ -62,6 +62,7 @@ public:
     VPIDSampling videoSamples;
     uint32_t     payloadLen;
     uint32_t     lastPayLoadLen;
+    uint32_t     pktsPerLine;
 };
 
 /**
@@ -93,6 +94,7 @@ public:
     VPIDSampling    videoSamples;
     uint32_t     payloadLen;
     uint32_t     lastPayloadLen;
+    uint32_t     pktsPerLine;
 };
 
 
