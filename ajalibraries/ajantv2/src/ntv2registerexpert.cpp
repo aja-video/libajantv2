@@ -1267,7 +1267,7 @@ public:
 						<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
 				if (sdiOutput)
 					oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Audio Embedder SDIOut" << ++sdiOutput	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+						<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
 
 				oss		<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
