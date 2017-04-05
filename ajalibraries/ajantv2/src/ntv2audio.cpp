@@ -1305,7 +1305,9 @@ bool CNTV2Card::GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot
 		return false;
 
 	ULWord	value	(0);
-	if (!ReadRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot], &value, (inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1))
+	if (!ReadRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot],  &value,
+						(inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1),
+						(inSDIOutputSpigot & 1) ? kRegShiftEmbeddedOutputSupressCh2 : kRegShiftEmbeddedOutputSupressCh1)
 		return false;
 	outIsEnabled = value ? false : true;	//	Bit sense is 1=disabled, 0=enabled/normal
 	return true;
@@ -1318,9 +1320,9 @@ bool CNTV2Card::SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot
 	if (UWord(inSDIOutputSpigot) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
 		return false;
 
-	if (!WriteRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot], inEnable ? 0 : 1, (inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1))
-		return false;
-	return true;
+	return WriteRegister (kAudCtrlRegsForSDIOutputs[inSDIOutputSpigot],  inEnable ? 0 : 1,
+						(inSDIOutputSpigot & 1) ? kRegMaskEmbeddedOutputSupressCh2 : kRegMaskEmbeddedOutputSupressCh1,
+						(inSDIOutputSpigot & 1) ? kRegShiftEmbeddedOutputSupressCh2 : kRegShiftEmbeddedOutputSupressCh1);
 }
 
 
