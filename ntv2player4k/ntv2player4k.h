@@ -13,6 +13,10 @@
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
+#include "ajaanc/includes/ancillarydata.h"
+#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
+#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
+#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 
 
 class AJAThread;
@@ -33,6 +37,7 @@ typedef struct Player4KConfig
 		bool					fDoMultiChannel;		///<	If true, enables multiple player 4k instances to share a board.
 		bool					fDoTsiRouting;			///<	If true, enables two sample interleave routing, else squares.
 		bool					fDoRGBOnWire;			///<	If true, enables RGB on the wire, else CSCs convert to YCbCr.
+		AJAAncillaryDataType	fSendAncType;
 
 		/**
 			@brief	Constructs a default generator configuration.
@@ -46,7 +51,8 @@ typedef struct Player4KConfig
 				fUseHDMIOut			(false),
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
-				fDoRGBOnWire		(false)
+				fDoRGBOnWire		(false),
+				fSendAncType		(AJAAncillaryDataType_Unknown)
 		{
 		}
 }	Player4KConfigConfig;
@@ -296,6 +302,7 @@ class NTV2Player4K
 
 		void *						mInstance;					///< @brief	Instance information for the callback function
 		NTV2Player4KCallback *		mPlayerCallback;			///< @brief	Address of callback function
+		AJAAncillaryDataType		mAncType;
 
 };	//	NTV2Player4K
 
