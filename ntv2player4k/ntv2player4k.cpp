@@ -16,6 +16,8 @@
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 
+#define NTV2_ANCSIZE_MAX	(0x2000)
+
 /**
 	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of
 			DMA transfers. When aligned to the page size of the architecture, only one DMA
@@ -53,7 +55,8 @@ NTV2Player4K::NTV2Player4K (const Player4KConfig & config)
 		mDoRGBOnWire				(config.fDoRGBOnWire),
 		mTestPatternVideoBuffers	(NULL),
 		mInstance					(NULL),
-		mPlayerCallback				(NULL)
+		mPlayerCallback				(NULL),
+		mAncType					(config.fSendAncType)
 {
 	mGlobalQuit = false;
 	::memset (mAVHostBuffer, 0, sizeof (mAVHostBuffer));
@@ -596,7 +599,7 @@ void NTV2Player4K::RouteFsToCsc (void)
 			mDevice.Connect (NTV2_XptCSC5VidInput,	NTV2_XptFrameBuffer5RGB);
 			mDevice.Connect (NTV2_XptCSC6VidInput,	NTV2_XptFrameBuffer6RGB);
 			mDevice.Connect (NTV2_XptCSC7VidInput,	NTV2_XptFrameBuffer7RGB);
-			mDevice.Connect (NTV2_XptCSC7VidInput,	NTV2_XptFrameBuffer8RGB);
+			mDevice.Connect (NTV2_XptCSC8VidInput,	NTV2_XptFrameBuffer8RGB);
 		}
 		else
 		{
@@ -857,11 +860,37 @@ void NTV2Player4K::PlayFrames (void)
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 
+	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
+	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
+	::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
+	uint32_t	packetSize = 0;
+	switch(mAncType)
+	{
+	case AJAAncillaryDataType_HDR_SDR:
+	{
+		AJAAncillaryData_HDR_SDR sdrPacket;
+		sdrPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
+	case AJAAncillaryDataType_HDR_HDR10:
+	{
+		AJAAncillaryData_HDR_HDR10 hdr10Packet;
+		hdr10Packet.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
+	case AJAAncillaryDataType_HDR_HLG:
+	{
+		AJAAncillaryData_HDR_HLG hlgPacket;
+		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+		break;
+	}
+	}
+
 	//	Initialize & start AutoCirculate...
 	{
 		const UWord	startNum	(mChannel < 4  ?                             0  :      numberOfACFramesPerChannel);	//	Ch1: frames 0-6
 		const UWord	endNum		(mChannel < 4  ?  numberOfACFramesPerChannel-1  :  numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
-		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188,
+		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1 /*numChannels*/, startNum,  endNum);
 	}
 	mDevice.AutoCirculateStart (mChannel);
@@ -891,6 +920,7 @@ void NTV2Player4K::PlayFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			mOutputTransferStruct.acVideoBuffer.Set (playData->fVideoBuffer, playData->fVideoBufferSize);
 			mOutputTransferStruct.acAudioBuffer.Set (playData->fAudioBuffer, playData->fAudioBufferSize);
+			mOutputTransferStruct.acANCBuffer.Set(fAncBuffer, 0x2000);
 			mOutputTransferStruct.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), NTV2_TCDEST_SDI1);
 			mOutputTransferStruct.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), NTV2_TCDEST_SDI1_LTC);
 
