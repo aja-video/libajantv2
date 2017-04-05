@@ -134,6 +134,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mLastPayloadLen.isEmpty())
             cout << "Last Payload Len " << receiveStruct.mLastPayloadLen.toStdString() << endl;
 
+        receiveStruct.mPktsPerLine = receiveChannelObject["pktsPerLine"].toString();
+        if (!receiveStruct.mPktsPerLine.isEmpty())
+            cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
+
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
@@ -206,6 +210,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         transmitStruct.mLastPayloadLen = transmitChannelObject["lastPayloadLen"].toString();
         if (!transmitStruct.mLastPayloadLen.isEmpty())
             cout << "Last Payload Len " << transmitStruct.mLastPayloadLen.toStdString() << endl;
+
+        transmitStruct.mPktsPerLine = transmitChannelObject["pktsPerLine"].toString();
+        if (!transmitStruct.mPktsPerLine.isEmpty())
+            cout << "Packets per line " << transmitStruct.mPktsPerLine.toStdString() << endl;
 
         transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
@@ -489,7 +497,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig[index].payloadLen = receive.mPayloadLen.toUInt();
         if (!receive.mLastPayloadLen.isEmpty())
             rxChannelConfig[index].lastPayloadLen = receive.mLastPayloadLen.toUInt();
-
+        if (!receive.mPktsPerLine.isEmpty())
+            rxChannelConfig[index].pktsPerLine = receive.mPktsPerLine.toUInt();
 
         if (++found == 2)     // super-kludge!!
         {
@@ -528,6 +537,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             txChannelConfig.payloadLen = transmit.mPayloadLen.toUInt();
         if (!transmit.mLastPayloadLen.isEmpty())
             txChannelConfig.lastPayLoadLen = transmit.mLastPayloadLen.toUInt();
+        if (!transmit.mPktsPerLine.isEmpty())
+            txChannelConfig.pktsPerLine = transmit.mPktsPerLine.toUInt();
 
         NTV2Stream stream;
         if (transmit.mStream == "audio1")

@@ -36,6 +36,7 @@ typedef struct
     QString mEnable;
     QString mPayloadLen;
     QString mLastPayloadLen;
+    QString mPktsPerLine;
 }ReceiveStruct;
 
 typedef struct
@@ -57,6 +58,7 @@ typedef struct
     QString mEnable;
     QString mPayloadLen;
     QString mLastPayloadLen;
+    QString mPktsPerLine;
 }TransmitStruct;
 
 typedef  struct {

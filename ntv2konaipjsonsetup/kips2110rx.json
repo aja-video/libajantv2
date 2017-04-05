@@ -23,7 +23,8 @@
             "videoFormat":"720p",
             "Enable":"true",
             "payloadLen":"1200",
-            "lastPayloadLen":"800"
+            "lastPayloadLen":"800",
+            "pktsPerLine":"3"
     },
     {
             "designator":"channel1",
