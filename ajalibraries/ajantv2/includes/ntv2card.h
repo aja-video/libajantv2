@@ -1845,7 +1845,7 @@ public:
 		@param[out]	outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, bool & outIsEnabled);
+	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
 
 	/**
 		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -1855,7 +1855,7 @@ public:
 											Specify 'false' to disable the embedder.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, const bool & inEnable);
+	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
 
 	///@}
 

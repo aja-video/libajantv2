@@ -223,7 +223,7 @@ The display highlights changed content with a brighter color.
 	-	<b>Non-PCM Pairs Indicator</b> -- Indicates the non-PCM audio channel pairs.
 	-	<b>PCM</b> -- If checked, the audio system is set for PCM audio. When unchecked, it's configured for non-PCM audio.
 	-	<b>Loopback</b> -- If checked, audio samples from the audio system's audio source are copied into the corresponding SDI output's audio embedder.
-	-	<b>SDI Output Embedder</b> -- If checked, the audio system's corresponding SDI output's audio embedder is enabled.
+	-	<b>SDI Output Embedder</b> -- If checked, the audio system's corresponding SDI output's audio embedder is enabled. (Available only for "Output" View mode.)
 	-	<b>View</b> -- Controls which part of the audio system to inspect:
 		-	<b>Input</b> -- Inspects the incoming audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
 		-	<b>Output</b> -- Inspects the outgoing audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
