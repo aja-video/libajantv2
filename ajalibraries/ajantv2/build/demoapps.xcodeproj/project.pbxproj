@@ -218,7 +218,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-        B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
+		B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
 		B439717616F2BB7900A53B64 /* ntv2outputtestpattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2outputtestpattern.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.h; sourceTree = SOURCE_ROOT; };
 		B43C7CAA17259A490030A94E /* ntv2ccplayer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2ccplayer; sourceTree = BUILT_PRODUCTS_DIR; };
 		B43C7CB517259D840030A94E /* ntv2ccplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2ccplayer.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2ccplayer/ntv2ccplayer.cpp; sourceTree = SOURCE_ROOT; };
@@ -995,6 +995,11 @@
 		B45183E11935348C00F3D8E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"-lajantv2d",
+					"-lajabased",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2player4k;
 			};
 			name = Debug;
@@ -1002,6 +1007,11 @@
 		B45183E21935348C00F3D8E9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"-lajantv2",
+					"-lajabase",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2player4k;
 			};
 			name = Release;
@@ -1023,6 +1033,11 @@
 		B4A700F916794E9B001D4AA8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"-lajantv2d",
+					"-lajabased",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2player;
 			};
 			name = Debug;
@@ -1030,6 +1045,11 @@
 		B4A700FA16794E9B001D4AA8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"-lajantv2",
+					"-lajabase",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2player;
 			};
 			name = Release;
