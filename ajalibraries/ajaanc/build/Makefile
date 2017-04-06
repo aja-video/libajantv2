@@ -26,6 +26,9 @@ AJA_LIB_SRCS =ancillarydata.cpp \
 			  ancillarydata_cea708.cpp \
 			  ancillarydata_framestatusinfo524D.cpp	\
 			  ancillarydata_framestatusinfo5251.cpp	\
+			  ancillarydata_hdr_hdr10.cpp \
+			  ancillarydata_hdr_hlg.cpp \
+			  ancillarydata_hdr_sdr.cpp \
 			  ancillarydata_timecode.cpp \
 			  ancillarydata_timecode_atc.cpp \
 			  ancillarydata_timecode_vitc.cpp \

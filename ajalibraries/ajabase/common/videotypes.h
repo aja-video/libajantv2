@@ -131,16 +131,25 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_YCBCR8_420PL,		/**< Pixel format YCbCr 8 bit 420 packed planer */
 	AJA_PixelFormat_YCBCR8_422PL,		/**< Pixel format YCbCr 8 bit 422 packed planer */
 
-/// SMPTE 2022-6 related....not actually pixel formats on any board...
-        AJA_PixelFormat_S0226_720p50,
-        AJA_PixelFormat_S0226_720p60,
-        AJA_PixelFormat_S0226_1080i30,
-        AJA_PixelFormat_S0226_1080i25,
-        AJA_PixelFormat_S0226_1080p30,
-        AJA_PixelFormat_S0226_1080p25,
-        AJA_PixelFormat_S0226_1080p24,
-        AJA_PixelFormat_S0226_525i30,
-        AJA_PixelFormat_S0226_625i25,
+
+    /// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...
+            AJA_PixelFormat_S0226_720p50,
+            AJA_PixelFormat_S0226_720p60,
+            AJA_PixelFormat_S0226_1080i30,
+            AJA_PixelFormat_S0226_1080i25,
+            AJA_PixelFormat_S0226_1080p30,
+            AJA_PixelFormat_S0226_1080p25,
+            AJA_PixelFormat_S0226_1080p24,
+            AJA_PixelFormat_S0226_525i30,
+            AJA_PixelFormat_S0226_625i25,
+
+            AJA_PixelFormat_RFC4175_720p,
+            AJA_PixelFormat_RFC4175_1080i,
+            AJA_PixelFormat_RFC4175_1080p,
+            AJA_PixelFormat_RFC4175_525i30,
+            AJA_PixelFormat_RFC4175_625i25,
+
+            AJA_PixelFormat_RGB10_3DLUT,
 	AJA_PixelFormat_Size
 };
 
