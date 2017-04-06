@@ -1460,6 +1460,9 @@
     <ClInclude Include="..\includes\ancillarydata_timecode.h" />
     <ClInclude Include="..\includes\ancillarydata_timecode_atc.h" />
     <ClInclude Include="..\includes\ancillarydata_timecode_vitc.h" />
+    <ClInclude Include="..\includes\ancillarydata_hdr_hdr10.h" />
+    <ClInclude Include="..\includes\ancillarydata_hdr_sdr.h" />
+    <ClInclude Include="..\includes\ancillarydata_hdr_hlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ancillarydata.cpp" />
@@ -1474,6 +1477,9 @@
     <ClCompile Include="..\src\ancillarydata_timecode_atc.cpp" />
     <ClCompile Include="..\src\ancillarydata_timecode_vitc.cpp" />
     <ClCompile Include="..\src\ancillarylist.cpp" />
+    <ClCompile Include="..\src\ancillarydata_hdr_hdr10.cpp" />
+    <ClCompile Include="..\src\ancillarydata_hdr_sdr.cpp" />
+    <ClCompile Include="..\src\ancillarydata_hdr_hlg.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
