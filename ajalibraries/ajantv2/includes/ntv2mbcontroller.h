@@ -18,8 +18,12 @@ enum eMBCmd
 enum eSFP
 {
     SFP_TOP,
-    SFP_BOTTOM
+    SFP_BOTTOM,
+    SFP_MAX_NUM_SFPS,
+    SFP_INVALID		= SFP_MAX_NUM_SFPS
 };
+
+#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_TOP)  &&  ((__sfp__) < SFP_INVALID))
 
 enum eArpState
 {

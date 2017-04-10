@@ -222,7 +222,7 @@ bool CNTV2MCSfile::InsertBitFile(const string & inBitFileName, const string & in
 
 		iRecord[0] = ':';
 
-		sprintf(&iRecord[1], "%02lX", recordSize);
+		sprintf(&iRecord[1], "%02X", UByte(recordSize));
 		checksum += (UByte)recordSize;
 
 		UWord addr = baseAddress;
@@ -291,7 +291,7 @@ bool CNTV2MCSfile::InsertBitFile(const string & inBitFileName, const string & in
 
 		iRecord[0] = ':';
 
-		sprintf(&iRecord[1], "%02lX", recordSize);
+		sprintf(&iRecord[1], "%02X", UByte(recordSize));
 		checksum += (UByte)recordSize;
 
 		UWord addr = baseAddress;
