@@ -44,7 +44,7 @@ public:
     cl::Device* getDefaultDevice() { return &default_device; }
     cl::Context* getContextCL() { return & contextCL; }
     cl::CommandQueue* getOpenCLQueue() { return &queue; }
-    cl::Program* getRGB10_3DLUTKernel() { return &mRGB10_3DLUTKernel; }
+    cl::Program* getRGB10_3DLUT_10Bit_Kernel() { return &mRGB10_3DLUT_10Bit_Kernel; }
 
 
 signals:
@@ -98,6 +98,7 @@ protected:
     cl::Program mABGR8Kernel;
     cl::Program mRGB10Kernel;
     cl::Program mRGB10_3DLUTKernel;
+    cl::Program mRGB10_3DLUT_10Bit_Kernel;
     cl::Program mRGB10DPXLEKernel;
     cl::Program mRGB10DPXBEKernel;
     cl::Program mRGB8Kernel;

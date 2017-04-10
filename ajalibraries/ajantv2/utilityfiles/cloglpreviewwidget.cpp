@@ -634,6 +634,7 @@ bool  COpenGLPreviewWidget::initializeCL()
     createKernel(mRGB10DPXBEKernel,":/gpufiles/rgb10dpxbe.cl");
     createKernel(mRGB10Kernel,":/gpufiles/rgb10.cl");
     createKernel(mRGB10_3DLUTKernel,":/gpufiles/rgb10_3dlut.cl");
+    createKernel(mRGB10_3DLUT_10Bit_Kernel,":/gpufiles/rgb10_3dlut_10bit.cl");
     createKernel(mRGBA8Kernel,":/gpufiles/rgba8.cl");
     createKernel(mARGB8Kernel,":/gpufiles/argb8.cl");
     createKernel(mABGR8Kernel,":/gpufiles/abgr8.cl");
