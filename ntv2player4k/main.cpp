@@ -93,7 +93,6 @@ int main (int argc, const char ** argv)
 	config.fDoMultiChannel	= doMultiChannel ? true : false;
 	config.fDoTsiRouting	= doTsiRouting ? true : false;
 	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
-	AJAAncillaryDataType sendType = AJAAncillaryDataType_Unknown;
 	switch(hdrType)
 	{
 	case 1:

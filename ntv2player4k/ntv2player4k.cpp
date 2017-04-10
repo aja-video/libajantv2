@@ -884,6 +884,7 @@ void NTV2Player4K::PlayFrames (void)
 		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
 		break;
 	}
+	default:	break;
 	}
 
 	//	Initialize & start AutoCirculate...

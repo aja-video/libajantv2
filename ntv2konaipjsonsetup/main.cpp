@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
         bool rv = jsonSetup.openJson(args.at(0));
         if (!rv)
         {
-            std::cout << "Failed to parse JSON" << endl;
+            std::cout << "Failed to parse JSON" << std::endl;
             exit (-1);
         }
         jsonSetup.setupBoard(devStr);
