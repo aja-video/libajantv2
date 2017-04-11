@@ -45,6 +45,7 @@ public:
     cl::Context* getContextCL() { return & contextCL; }
     cl::CommandQueue* getOpenCLQueue() { return &queue; }
     cl::Program* getRGB10_3DLUT_10Bit_Kernel() { return &mRGB10_3DLUT_10Bit_Kernel; }
+    cl::Program* getRGB48_3DLUT_16Bit_Kernel() { return &mRGB48_3DLUT_16Bit_Kernel; }
 
 
 signals:
@@ -99,6 +100,7 @@ protected:
     cl::Program mRGB10Kernel;
     cl::Program mRGB10_3DLUTKernel;
     cl::Program mRGB10_3DLUT_10Bit_Kernel;
+    cl::Program mRGB48_3DLUT_16Bit_Kernel;
     cl::Program mRGB10DPXLEKernel;
     cl::Program mRGB10DPXBEKernel;
     cl::Program mRGB8Kernel;

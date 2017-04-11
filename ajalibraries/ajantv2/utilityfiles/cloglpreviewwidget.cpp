@@ -635,6 +635,7 @@ bool  COpenGLPreviewWidget::initializeCL()
     createKernel(mRGB10Kernel,":/gpufiles/rgb10.cl");
     createKernel(mRGB10_3DLUTKernel,":/gpufiles/rgb10_3dlut.cl");
     createKernel(mRGB10_3DLUT_10Bit_Kernel,":/gpufiles/rgb10_3dlut_10bit.cl");
+    createKernel(mRGB48_3DLUT_16Bit_Kernel,":/gpufiles/rgb48_3dlut_16bit.cl");
     createKernel(mRGBA8Kernel,":/gpufiles/rgba8.cl");
     createKernel(mARGB8Kernel,":/gpufiles/argb8.cl");
     createKernel(mABGR8Kernel,":/gpufiles/abgr8.cl");
@@ -788,7 +789,7 @@ void COpenGLPreviewWidget::initialize3DLUT(QString fileName)
             QString bString = list.at(2);
             coefPtr->bCoef = bString.toDouble();
             *coefIntPtr++ = (((uint32_t)(coefPtr->bCoef*1023.9))<<20) + (((uint32_t)(coefPtr->gCoef*1023.9))<<10) + ((uint32_t)(coefPtr->rCoef*1023.9));
-            coefInt16Ptr->rCoef =(uint16_t)(coefPtr->bCoef*65535.9);
+            coefInt16Ptr->rCoef =(uint16_t)(coefPtr->rCoef*65535.9);
             coefInt16Ptr->gCoef =(uint16_t)(coefPtr->gCoef*65535.9);
             coefInt16Ptr->bCoef =(uint16_t)(coefPtr->bCoef*65535.9);
             coefInt16Ptr++;
