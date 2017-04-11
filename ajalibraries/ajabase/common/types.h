@@ -36,9 +36,9 @@
     #define AJA_LITTLE_ENDIAN
 
 	// These macros conform to C99 convention
-	#define PRId64 "I64d"
-	#define PRIi64 "I64i"
-	#define PRIu64 "I64u"
+//	#define PRId64 "I64d"
+//	#define PRIi64 "I64i"
+//	#define PRIu64 "I64u"
 
 	// Synonyms for library functions
 	#define ajasnprintf(a, b, c, d) _snprintf( (a), (b), (c), (d) )
