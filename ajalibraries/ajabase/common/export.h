@@ -20,19 +20,21 @@
 			#pragma comment (lib, "shlwapi.lib")
 		#else
 			#define AJA_EXPORT __declspec(dllimport)
-			#if defined(AJA_DEBUG)
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabasedlld")
-				#else
-                    #pragma comment (lib, "libajabasedll_32d")
-				#endif
-			#else
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabasedll")
-				#else
-                    #pragma comment (lib, "libajabasedll_32")
-				#endif
-			#endif
+            #if !defined(AJA_NO_AUTOIMPORT)
+                #if defined(AJA_DEBUG)
+                    #if defined(_WIN64)
+                        #pragma comment (lib, "libajabasedlld")
+                    #else
+                        #pragma comment (lib, "libajabasedll_32d")
+                    #endif
+                #else
+                    #if defined(_WIN64)
+                        #pragma comment (lib, "libajabasedll")
+                    #else
+                        #pragma comment (lib, "libajabasedll_32")
+                    #endif
+                #endif
+            #endif
 		#endif
 	#else
 		#define AJA_EXPORT
