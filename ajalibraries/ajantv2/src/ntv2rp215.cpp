@@ -19,6 +19,7 @@
 #pragma warning(disable: 4800) 
 #endif
 
+/**	UNUSED
 // Tables
 // CRC Table
 static const UWord CRC16_table[256] = {
@@ -62,7 +63,6 @@ static void updateCRC16(UWord& crc, UByte data) {
 }
 
 
-/**	UNUSED
 	// Parity Table
 	static const UWord Parity_table[256] = {
 	0x200,0x101,0x102,0x203,0x104,0x205,0x206,0x107,

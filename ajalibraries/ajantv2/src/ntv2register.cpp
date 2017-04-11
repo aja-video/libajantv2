@@ -2013,7 +2013,6 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	if(IsKonaIPDevice())
 	{
-		int newValue = 0;
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 	}
 
