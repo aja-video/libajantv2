@@ -228,15 +228,15 @@ class TSGenerator
     protected:
         void put16( uint16_t val, int &pos )
         {
-            _pkt8[pos++] = (uint8_t)(val>>8);
-            _pkt8[pos++] = val;
+            _pkt8[pos++] = uint8_t(val>>8);
+            _pkt8[pos++] = uint8_t(val);
         }
 
         void put32( uint32_t val, int &pos )
         {
-            _pkt8[pos++] = (uint8_t)(val>>24);
-            _pkt8[pos++] = (uint8_t)(val>>16);
-            _pkt8[pos++] = (uint8_t)(val>>8);
+            _pkt8[pos++] = uint8_t(val>>24);
+            _pkt8[pos++] = uint8_t(val>>16);
+            _pkt8[pos++] = uint8_t(val>>8);
             _pkt8[pos++] = val;
         }
 };
@@ -518,7 +518,7 @@ class PATGen : public TSGenerator
 
             _pkt8[pos++] = 0;                                   // table id = 0
 
-            int length = 9 + (4*_progNumToPID.size());
+            uint16_t length = 9 + uint16_t(4*_progNumToPID.size());
             put16( (uint16_t)0xb000 + (length & 0x3ff), pos);   // syntax indicator, reserved, length
             put16( _tsId, pos );
 

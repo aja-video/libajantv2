@@ -35,32 +35,6 @@
 	#endif
     #define AJA_LITTLE_ENDIAN
 
-	// Macros for integer constants
-#if !defined(INT8_C)
-	#define INT8_C(v)  v##i8
-#endif
-#if !defined(INT16_C)
-	#define INT16_C(v) v##i16
-#endif
-#if !defined(INT32_C)
-	#define INT32_C(v) v##i32
-#endif
-#if !defined(INT64_C)
-	#define INT64_C(v) v##i64
-#endif
-#if !defined(UINT8_C)
-	#define UINT8_C(v)  v##ui8
-#endif
-#if !defined(UINT16_C)
-	#define UINT16_C(v) v##ui16
-#endif
-#if !defined(UINT32_C)
-	#define UINT32_C(v) v##ui32
-#endif
-#if !defined(UINT64_C)
-	#define UINT64_C(v) v##ui64
-#endif
-
 	// These macros conform to C99 convention
 	#define PRId64 "I64d"
 	#define PRIi64 "I64i"
@@ -329,16 +303,19 @@ typedef enum
    #define NUMELMS(aa) (sizeof(aa)/sizeof((aa)[0]))
 #endif
 
-#define AJA_ENDIAN_SWAP16(_data_) (((_data_<<8)&0xff00)|((_data_>>8)&0x00ff))
-#define AJA_ENDIAN_SWAP32(_data_) (((_data_<<24)&0xff000000)|((_data_<<8)&0x00ff0000)|((_data_>>8)&0x0000ff00)|((_data_>>24)&0x000000ff))
-#define AJA_ENDIAN_SWAP64(_data_) (\
-	((_data_<<56)&0xff00000000000000)| \
-	((_data_<<40)&0x00ff000000000000)| \
-	((_data_<<24)&0x0000ff0000000000)| \
-	((_data_<< 8)&0x000000ff00000000)| \
-	((_data_>> 8)&0x00000000ff000000)| \
-	((_data_>>24)&0x0000000000ff0000)| \
-	((_data_>>40)&0x000000000000ff00)| \
-	((_data_>>56)&0x00000000000000ff))
+#define AJA_ENDIAN_SWAP16(_data_) (	(((_data_)<< 8)&0xff00)|	\
+									(((_data_)>> 8)&0x00ff)	)
+#define AJA_ENDIAN_SWAP32(_data_) (	(((_data_)<<24)&0xff000000)|	\
+									(((_data_)<< 8)&0x00ff0000)|	\
+									(((_data_)>> 8)&0x0000ff00)|	\
+									(((_data_)>>24)&0x000000ff)	)
+#define AJA_ENDIAN_SWAP64(_data_) (	(((_data_)<<56)&0xff00000000000000)| \
+									(((_data_)<<40)&0x00ff000000000000)| \
+									(((_data_)<<24)&0x0000ff0000000000)| \
+									(((_data_)<< 8)&0x000000ff00000000)| \
+									(((_data_)>> 8)&0x00000000ff000000)| \
+									(((_data_)>>24)&0x0000000000ff0000)| \
+									(((_data_)>>40)&0x000000000000ff00)| \
+									(((_data_)>>56)&0x00000000000000ff)	)
 
 #endif	//	AJA_TYPES_H
