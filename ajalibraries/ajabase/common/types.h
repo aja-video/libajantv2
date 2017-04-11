@@ -303,19 +303,19 @@ typedef enum
    #define NUMELMS(aa) (sizeof(aa)/sizeof((aa)[0]))
 #endif
 
-#define AJA_ENDIAN_SWAP16(_data_) (	(((_data_)<< 8)&0xff00)|	\
-									(((_data_)>> 8)&0x00ff)	)
-#define AJA_ENDIAN_SWAP32(_data_) (	(((_data_)<<24)&0xff000000)|	\
-									(((_data_)<< 8)&0x00ff0000)|	\
-									(((_data_)>> 8)&0x0000ff00)|	\
-									(((_data_)>>24)&0x000000ff)	)
-#define AJA_ENDIAN_SWAP64(_data_) (	(((_data_)<<56)&0xff00000000000000)| \
-									(((_data_)<<40)&0x00ff000000000000)| \
-									(((_data_)<<24)&0x0000ff0000000000)| \
-									(((_data_)<< 8)&0x000000ff00000000)| \
-									(((_data_)>> 8)&0x00000000ff000000)| \
-									(((_data_)>>24)&0x0000000000ff0000)| \
-									(((_data_)>>40)&0x000000000000ff00)| \
-									(((_data_)>>56)&0x00000000000000ff)	)
+#define AJA_ENDIAN_SWAP16(_data_) (	((uint16_t(_data_) <<  8) & uint16_t(0xff00)) |	\
+									((uint16_t(_data_) >>  8) & uint16_t(0x00ff))	)
+#define AJA_ENDIAN_SWAP32(_data_) (	((uint32_t(_data_) << 24) & uint32_t(0xff000000)) |	\
+									((uint32_t(_data_) <<  8) & uint32_t(0x00ff0000)) |	\
+									((uint32_t(_data_) >>  8) & uint32_t(0x0000ff00)) |	\
+									((uint32_t(_data_) >> 24) & uint32_t(0x000000ff))	)
+#define AJA_ENDIAN_SWAP64(_data_) (	((uint64_t(_data_) << 56) & uint64_t(0xff00000000000000)) | \
+									((uint64_t(_data_) << 40) & uint64_t(0x00ff000000000000)) | \
+									((uint64_t(_data_) << 24) & uint64_t(0x0000ff0000000000)) | \
+									((uint64_t(_data_) <<  8) & uint64_t(0x000000ff00000000)) | \
+									((uint64_t(_data_) >>  8) & uint64_t(0x00000000ff000000)) | \
+									((uint64_t(_data_) >> 24) & uint64_t(0x0000000000ff0000)) | \
+									((uint64_t(_data_) >> 40) & uint64_t(0x000000000000ff00)) | \
+									((uint64_t(_data_) >> 56) & uint64_t(0x00000000000000ff))	)
 
 #endif	//	AJA_TYPES_H
