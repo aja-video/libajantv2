@@ -300,7 +300,6 @@ void NTV2EncodeHEVCFileAc::Quit (void)
 
 AJAStatus NTV2EncodeHEVCFileAc::Init (void)
 {
-    char fileName[64];
     AJAStatus	status	(AJA_STATUS_SUCCESS);
 
     //	Open the device...
@@ -414,28 +413,28 @@ AJAStatus NTV2EncodeHEVCFileAc::Init (void)
 
 	//	Setup the circular buffers
 	SetupHostBuffers ();
-  
-	//	Create encoded video output file
-    strcpy(fileName, "raw.hevc");
-    if (mMultiStream)
-    {
-        sprintf(fileName, "raw_%d.hevc", (int)mInputChannel + 1);
-    }
 
-    status = mHevcCommon->CreateHevcFile (fileName, mMaxFrames);
-    if (AJA_FAILURE (status))
-        return status;
+	{
+		//	Create encoded video output file
+		ostringstream	fileName;
+		if (mMultiStream)
+			fileName << "raw_" << (mInputChannel+1) << ".hevc";
+		else
+			fileName << "raw.hevc";
+		status = mHevcCommon->CreateHevcFile (fileName.str(), mMaxFrames);
+		if (AJA_FAILURE (status))
+			return status;
+	}
 
     if (mWithInfo)
     {
         //	Create encoded data output file
-        strcpy(fileName, "raw.txt");
+		ostringstream	fileName;
         if (mMultiStream)
-        {
-            sprintf(fileName, "raw_%d.txt", (int)mInputChannel + 1);
-        }
-
-        status = mHevcCommon->CreateEncFile (fileName, mMaxFrames);
+            fileName << "raw_" << (mInputChannel+1) << ".txt";
+        else
+	        fileName << "raw.txt";
+        status = mHevcCommon->CreateEncFile (fileName.str(), mMaxFrames);
         if (AJA_FAILURE (status))
             return status;
     }
@@ -443,13 +442,12 @@ AJAStatus NTV2EncodeHEVCFileAc::Init (void)
     if (mWithAudio)
     {
         //	Create audio output file
-        strcpy(fileName, "raw.aiff");
+		ostringstream	fileName;
         if (mMultiStream)
-        {
-            sprintf(fileName, "raw_%d.aiff", (int)mInputChannel + 1);
-        }
-
-        status = mHevcCommon->CreateAiffFile (fileName, mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
+            fileName << "raw_" << (mInputChannel+1) << ".aiff";
+        else
+	        fileName << "raw.aiff";
+        status = mHevcCommon->CreateAiffFile (fileName.str(), mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
         if (AJA_FAILURE (status))
             return status;
     }
