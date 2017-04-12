@@ -698,11 +698,18 @@ typedef struct {
     uint16_t aCoef;
 } RGBA16BitCoefs;
 
+typedef struct {
+    uint16_t rCoef;
+    uint16_t gCoef;
+    uint16_t bCoef;
+} RGB16BitCoefs;
+
 typedef uint32_t RGBCoefsInt;
 
 RGBCoefs lut3D[33][33][33]; //[B][G][R]
 RGBCoefsInt lut3DInts[33][33][33];
 RGBA16BitCoefs lut3DRGBA16Ints[33][33][33];
+RGB16BitCoefs lut3DRGB16Ints[33][33][33];
 
 static uint32_t TestInterpolation(uint32_t inValue,RGBCoefs* pLut3D);
 static uint32_t TestInterpolationInteger(uint32_t inValue,RGBCoefsInt* pLut3D);
@@ -764,7 +771,8 @@ void COpenGLPreviewWidget::initialize3DLUT(QString fileName)
         QTextStream in(&inputFile);
         RGBCoefs* coefPtr = &lut3D[0][0][0];
         RGBCoefsInt* coefIntPtr = &lut3DInts[0][0][0];
-        RGBA16BitCoefs* coefInt16Ptr = &lut3DRGBA16Ints[0][0][0];
+        RGBA16BitCoefs* coefRGBA16Ptr = &lut3DRGBA16Ints[0][0][0];
+        RGB16BitCoefs* coefRGB16Ptr = &lut3DRGB16Ints[0][0][0];
         uint32_t tableEntries = 0;
         while (!in.atEnd())
         {
@@ -789,10 +797,14 @@ void COpenGLPreviewWidget::initialize3DLUT(QString fileName)
             QString bString = list.at(2);
             coefPtr->bCoef = bString.toDouble();
             *coefIntPtr++ = (((uint32_t)(coefPtr->bCoef*1023.9))<<20) + (((uint32_t)(coefPtr->gCoef*1023.9))<<10) + ((uint32_t)(coefPtr->rCoef*1023.9));
-            coefInt16Ptr->rCoef =(uint16_t)(coefPtr->rCoef*65535.9);
-            coefInt16Ptr->gCoef =(uint16_t)(coefPtr->gCoef*65535.9);
-            coefInt16Ptr->bCoef =(uint16_t)(coefPtr->bCoef*65535.9);
-            coefInt16Ptr++;
+            coefRGBA16Ptr->rCoef =(uint16_t)(coefPtr->rCoef*65535.9);
+            coefRGBA16Ptr->gCoef =(uint16_t)(coefPtr->gCoef*65535.9);
+            coefRGBA16Ptr->bCoef =(uint16_t)(coefPtr->bCoef*65535.9);
+            coefRGB16Ptr->rCoef =(uint16_t)(coefPtr->rCoef*65535.9);
+            coefRGB16Ptr->gCoef =(uint16_t)(coefPtr->gCoef*65535.9);
+            coefRGB16Ptr->bCoef =(uint16_t)(coefPtr->bCoef*65535.9);
+            coefRGBA16Ptr++;
+            coefRGB16Ptr++;
             coefPtr++;
 
             tableEntries++;
