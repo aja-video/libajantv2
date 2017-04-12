@@ -186,6 +186,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			{
 				if (!ShouldUpdate(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
 				{
+                    cerr << "Error: invalid MCS update" << endl;
 					m_updateSuccessful = false;
                     return AJA_STATUS_BAD_PARAM;
 				}
@@ -196,6 +197,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         rv = kfp.SetMCSFile(m_bitfilePath.c_str());
         if (!rv)
         {
+            cerr << "Error: SetMCSFile failed" << end;;
             m_updateSuccessful = false;
             return AJA_STATUS_FAIL;
         }
@@ -203,6 +205,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         rv = kfp.ProgramFromMCS(true);
         if (!rv)
         {
+            cerr << "Error: ProgramFromMCS failed" << endl;
             m_updateSuccessful = false;
             return AJA_STATUS_FAIL;
         }
@@ -212,6 +215,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         m_device.WriteRegister(kVRegFlashSize,MCS_STEPS);
         m_device.WriteRegister(kVRegFlashStatus,MCS_STEPS);
 
+        cout << "MCS update: ok" << endl;
         return AJA_STATUS_SUCCESS;
     }
 

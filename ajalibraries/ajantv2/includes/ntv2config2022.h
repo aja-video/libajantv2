@@ -26,10 +26,10 @@
 #define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
 #define VOIP_SECONDARY_ENABLE           0x80000000
 
-#define PLL_MATCH_DEST_IP               BIT(0)
-#define PLL_MATCH_SOURCE_IP             BIT(1)
-#define PLL_MATCH_DEST_PORT             BIT(2)
-#define PLL_MATCH_SOURCE_PORT           BIT(3)
+#define PLL_MATCH_SOURCE_IP             BIT(0)
+#define PLL_MATCH_DEST_IP               BIT(1)
+#define PLL_MATCH_SOURCE_PORT           BIT(2)
+#define PLL_MATCH_DEST_PORT             BIT(3)
 #define PLL_MATCH_ES_PID                BIT(4)
 
 #define PLL_CONFIG_PCR                  BIT(0)
