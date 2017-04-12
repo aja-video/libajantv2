@@ -197,7 +197,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         rv = kfp.SetMCSFile(m_bitfilePath.c_str());
         if (!rv)
         {
-            cerr << "Error: SetMCSFile failed" << end;;
+            cerr << "Error: SetMCSFile failed" << endl;
             m_updateSuccessful = false;
             return AJA_STATUS_FAIL;
         }
