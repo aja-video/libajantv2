@@ -3336,7 +3336,7 @@ typedef enum
 
 	kRegNwlC2S1Capabilities					= 0x0800+(NWL_REG_START),
 	kRegNwlC2S1ControlStatus				= 0x0801+(NWL_REG_START),
-	kRegNwlC2S1ChainStartAddressLow			= 0x0802+(NWL_REG_START),
+ 	kRegNwlC2S1ChainStartAddressLow			= 0x0802+(NWL_REG_START),
 	kRegNwlC2S1ChainStartAddressHigh		= 0x0803+(NWL_REG_START),
 	kRegNwlC2S1HardwareTime					= 0x0804+(NWL_REG_START),
 	kRegNwlC2S1ChainCompleteByteCount		= 0x0805+(NWL_REG_START),
@@ -3488,6 +3488,145 @@ typedef enum
 
 } NwlRegisterShift;
 
+// XLNX Registers
+
+#define XLNX_MAX_CHANNELS						4
+#define XLNX_REG_TARGET_SIZE					0x400
+#define XLNX_REG_CHANNEL_SIZE					0x40
+#define XLNX_SUBSYSTEM_ID						0x1fc
+
+typedef enum
+{
+	kRegXlnxTargetChannelH2C					= 0x0,
+	kRegXlnxTargetChannelC2H					= 0x1,
+	kRegXlnxTargetIRQ							= 0x2,
+	kRegXlnxTargetConfig						= 0x3,
+	kRegXlnxTargetSgdmaH2C						= 0x4,
+	kRegXlnxTargetSgdmaC2H						= 0x5,
+	kRegXlnxTargetSgdmaCommon					= 0x6,
+	kRegXlnxTargetMsiX							= 0x8
+} XlnxRegisterTarget;
+
+typedef enum
+{
+	kRegXlnxChannelIdentifier					= 0x00,
+	kRegXlnxChannelControl						= 0x01,
+	kRegXlnxChannelControlW1S					= 0x02,
+	kRegXlnxChannelControlW1C					= 0x03,
+	kRegXlnxChannelStatus						= 0x10,
+	kRegXlnxChannelStatusRC						= 0x11,
+	kRegXlnxChannelDescCompleteCount			= 0x12,
+	kRegXlnxChannelAlignments					= 0x13,
+	kRegXlnxChannelPollModeAddressLow			= 0x22,
+	kRegXlnxChannelPollModeAddressHigh			= 0x23,
+	kRegXlnxChannelInterruptEnable				= 0x24,
+	kRegXlnxChannelInterruptEnableW1S			= 0x25,
+	kRegXlnxChannelInterruptEnableW1C			= 0x26,
+	kRegXlnxChannelPerfControl					= 0x30,
+	kRegXlnxChannelPerfCycleCountLow			= 0x31,
+	kRegXlnxChannelPerfCycleCountHigh			= 0x32,
+	kRegXlnxChannelPerfDataCountLow				= 0x33,
+	kRegXlnxChannelPerfDataCountHigh			= 0x34,
+
+	kRegXlnxIrqIdentifier						= 0x00,
+	kRegXlnxIrqUserInterruptEnable				= 0x01,
+	kRegXlnxIrqUserInterruptEnableW1S			= 0x02,
+	kRegXlnxIrqUserInterruptEnableW1C			= 0x03,
+	kRegXlnxIrqChannelInterruptEnable			= 0x04,
+	kRegXlnxIrqChannelInterruptEnableW1S		= 0x05,
+	kRegXlnxIrqChannelInterruptEnableW1C		= 0x06,
+	kRegXlnxIrqUserInterruptRequest				= 0x10,	
+	kRegXlnxIrqChannelInterruptRequest			= 0x11,	
+	kRegXlnxIrqUserInterruptPending				= 0x12,	
+	kRegXlnxIrqChannelInterruptPending			= 0x13,
+
+	kRegXlnxSgdmaIdentifier						= 0x00,
+	kRegXlnxSgdmaDescAddressLow					= 0x20,
+	kRegXlnxSgdmaDescAddressHigh				= 0x21,
+	kRegXlnxSgdmaDescAdjacent					= 0x22,
+	kRegXlnxSgdmaDescCredits					= 0x23
+
+} XlnxRegisterNum;
+
+typedef enum
+{
+	kRegMaskXlnxSubsystemId						= 0xfff00000,
+	kRegMaskXlnxTarget							= 0x000f0000,
+	kRegMaskXlnxStreamInterface					= 0x00008000,
+	kRegMaskXlnxIdTarget						= 0x00000f00,
+	kRegMaskXlnxVersion							= 0x000000ff,
+
+	kRegMaskXlnxStreamWriteBackDisable			= 0x08000000,
+	kRegMaskXlnxPollModeWriteBackEnable			= 0x04000000,
+	kRegMaskXlnxNonIncAddressMode				= 0x02000000,
+	kRegMaskXlnxRun								= 0x00000001,
+
+	kRegMaskXlnxAddressAlignment				= 0x00ff0000,
+	kRegMaskXlnxTransferAlignment				= 0x0000ff00,
+	kRegMaskXlnxAddressBits						= 0x000000ff,
+
+	kRegMaskXlnxIntDescError					= 0x00f80000,
+	kRegMaskXlnxIntWriteError					= 0x0007c000,
+	kRegMaskXlnxIntReadError					= 0x00003e00,
+	kRegMaskXlnxIntIdleStop						= 0x00000040,
+	kRegMaskXlnxIntInvalidLength				= 0x00000020,
+	kRegMaskXlnxIntMagicStop					= 0x00000010,
+	kRegMaskXlnxIntAlignMismatch				= 0x00000008,
+	kRegMaskXlnxIntDescComplete					= 0x00000004,
+	kRegMaskXlnxIntDescStop						= 0x00000002,
+
+	kRegMaskXlnxPerfRun							= 0x00000004,
+	kRegMaskXlnxPerfClear						= 0x00000002,
+	kRegMaskXlnxPerfAuto						= 0x00000001,
+
+	kRegMaskXlnxPerfCycleCountMax				= 0x00010000,
+	kRegMaskXlnxPerfCycleCountHigh				= 0x000003ff,
+
+	kRegMaskXlnxPerfDataCountMax				= 0x00010000,
+	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff
+
+} XlnxRegisterMask;
+
+typedef enum
+{
+	kRegShiftXlnxSubsystemId					= 20,
+	kRegShiftXlnxTarget							= 16,
+	kRegShiftXlnxStreamInterface				= 15,
+	kRegShiftXlnxIdTarget						= 8,
+	kRegShiftXlnxVersion			   			= 0,
+
+	kRegShiftXlnxStreamWriteBackDisable			= 27,
+	kRegShiftXlnxPollModeWriteBackEnable		= 26,
+	kRegShiftXlnxNonIncAddressMode				= 25,
+	kRegShiftXlnxRun							= 0,
+
+	kRegShiftXlnxAddressAlignment				= 16,
+	kRegShiftXlnxTransferAlignment				= 8,
+	kRegShiftXlnxAddressBits					= 0,
+
+	kRegShiftXlnxIntDescError					= 19,
+	kRegShiftXlnxIntWriteError					= 14,
+	kRegShiftXlnxIntReadError					= 9,
+	kRegShiftXlnxIntIdleStop					= 6,
+	kRegShiftXlnxIntInvalidLength				= 5,
+	kRegShiftXlnxIntMagicStop					= 4,
+	kRegShiftXlnxIntAlignMismatch				= 3,
+	kRegShiftXlnxIntDescComplete				= 2,
+	kRegShiftXlnxIntDescStop					= 1,
+
+	kRegShiftXlnxPerfRun						= 2,
+	kRegShiftXlnxPerfClear						= 1,
+	kRegShiftXlnxPerfAuto						= 0,
+
+	kRegShiftXlnxPerfCycleCountMax				= 16,
+	kRegShiftXlnxPerfCycleCountHigh				= 0,
+
+	kRegShiftXlnxPerfDataCountMax				= 16,
+	kRegShiftXlnxPerfDataCountHigh				= 0
+
+} XlnxRegisterShift;
+
+// P2P Registers
 
 typedef enum
 {
