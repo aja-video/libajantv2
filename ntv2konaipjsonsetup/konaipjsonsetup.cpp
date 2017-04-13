@@ -516,6 +516,14 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     cerr << "## transmitIter" << endl;
 
     QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
+
+    if (transmitIter.hasNext())
+    {
+        // video
+        device.SetEveryFrameServices(NTV2_OEM_TASKS);
+        device.Connect(NTV2_XptSDIOut1Input,NTV2_XptFrameBuffer1YUV);
+    }
+
     while (transmitIter.hasNext())
     {
         cerr << "## transmitIter did" << endl;
