@@ -43,11 +43,12 @@
 #define kRegSarekSerialHi           8
 #define kRegSarekIGMPVersion        9
 
+#define kRegSarekMiscState          10
 #define kRegSarekTxAutoMAC          11
-#define kRegSarekIGMP4              12
-#define kRegSarekIGMP5              13
-#define kRegSarekIGMP6              14
-#define kRegSarekIGMP7              15
+#define kRegSarekunused12           12
+#define kRegSarekunused13           13
+#define kRegSarekunused14           14
+#define kRegSarekunused15           15
 
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
@@ -59,10 +60,10 @@
 #define kRegSarekNET1               23
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
-#define kRegSarekIGMP0              26
-#define kRegSarekIGMP1              27
-#define kRegSarekIGMP2              28
-#define kRegSarekIGMP3              29
+#define kRegSarekunused26           26
+#define kRegSarekunused27           27
+#define kRegSarekunused28           28
+#define kRegSarekunused29           29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
 #define kRegSarekFwCfg              32
@@ -79,11 +80,6 @@
 #define kRegSarekRx4Drops           43
 
 // second block
-#define TS_BLOCK_BASE               0
-#define IGMP_BLOCK_BASE             100
-#define ENCODER_BLOCK_BASE          200
-#define UNUSED_BLOCK_BASE           300
-
 #define TS_BLOCK_BASE               0
 #define IGMP_BLOCK_BASE             100
 #define ENCODER_BLOCK_BASE          200
@@ -155,7 +151,7 @@
 #define ENCODER_2_ENABLE            BIT(24)
 #define ENCODER_2_MD_ENABLE         BIT(25)
 #define ENCODER_2_SF_ENABLE         BIT(26)
-#define DECODER_2_NON_ELSM          (BIT(28) + BIT(29() + BIT(30))
+#define ENCODER_2_CFG_NUM           (BIT(28) + BIT(29() + BIT(30))
 #define ENCODER_2_RESET             BIT(31)
 
 #define SAREK_2022_6                BIT(0)
@@ -353,6 +349,13 @@
 #define kRegPll_PTP_LclClkIdHi                  0x1e
 #define kRegPll_PTP_PhaseError                  0x1f
 #define kRegPll_PTP_Correction                  0x20
+#define kRegPll_PTP_FPptpSecHi                  0x21
+#define kRegPll_PTP_FPptpSecLo                  0x22
+#define kRegPll_PTP_FPptpNSec                   0x23
+#define kRegPll_PTP_CurPtpSecHi                 0x24
+#define kRegPll_PTP_CurPtpSecLo                 0x25
+#define kRegPll_PTP_CurPtpNSec                  0x26
+#define kRegPll_NTP_Timestamp                   0x27
 
 /////////////////////////////////////////////////////////////////////
 //

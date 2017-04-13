@@ -12,7 +12,41 @@
 
 #include <stdint.h>
 #include <map>
-#include <stdio.h>
+
+#define KIPDPRINT                       0
+
+
+#if defined(MSWindows)
+
+    #if (KIPDPRINT==0)
+        // no log
+        #define kipdprintf(...)
+
+    #elif (KIPDPRINT==1)
+        // printf
+        #include <stdio.h>
+        #define kipdprintf(...) printf(__VA_ARGS__)
+
+    #endif
+
+#elif defined(AJALinux)
+
+    #define kipdprintf(...)
+
+#elif defined(AJAMac)
+
+    #if (KIPDPRINT==0)
+        // no log
+        #define kipdprintf(_format_...)
+
+    #elif (KIPDPRINT==1)
+        // printf
+        #include <stdio.h>
+        #define kipdprintf(_format_...) printf(_format_)
+    #endif
+
+#endif
+
 
 typedef enum
 {
@@ -172,11 +206,11 @@ class TSGenerator
             for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
-                    printf("0x%02x\n", _pkt8[i]);
+                    kipdprintf("0x%02x\n", _pkt8[i]);
                 else
-                    printf("0x%02x, ", _pkt8[i]);
+                    kipdprintf("0x%02x, ", _pkt8[i]);
             }
-            printf("\n\n");
+            kipdprintf("\n\n");
         }
 
         void dump32()
@@ -184,11 +218,11 @@ class TSGenerator
             for (uint32_t i=0; i<_tableLength; i++)
             {
                 if (i % 16 == 15)
-                    printf("0x%04x\n", _pkt32[i]);
+                    kipdprintf("0x%04x\n", _pkt32[i]);
                 else
-                    printf("0x%04x ", _pkt32[i]);
+                    kipdprintf("0x%04x ", _pkt32[i]);
             }
-            printf("\n\n");
+            kipdprintf("\n\n");
         }
 
     protected:
@@ -656,7 +690,8 @@ class PMTGen : public TSGenerator
                 put16( _videoStreamData.denFrameRate, pos );                // frame rate
                 put16( _videoStreamData.numFrameRate, pos );
                 _pkt8[pos++] = 3;                                           // color spec
-                _pkt8[pos++] = _videoStreamData.interlaced <<6;             // interlaced and still mode
+                _pkt8[pos] = _videoStreamData.interlaced <<6;               // interlaced and still mode
+                _pkt8[pos++] |= 0x3F;                                       // reserved bits all 1's for standard streams
             }
             else
             {
@@ -695,22 +730,21 @@ class PMTGen : public TSGenerator
             _pkt8[pos++] = 0;
 
             _pkt8[pos++] = 0x05;                                            // descriptor tag
-            _pkt8[pos++] = 6;                                               // length
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
+                _pkt8[pos++] = 6;                                           // length non-elsm
+            else
+                _pkt8[pos++] = 4;                                           // length standard stream (omitted ST302 channel spec)
+
             _pkt8[pos++] = 0x42;                                            // "B"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x53;                                            // "S"
             _pkt8[pos++] = 0x44;                                            // "D"
 
-            // These two bytes are defined in Table 1 of ST302 spec starting with num channels
-            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeStandard)
+            // These two bytes are defined in Table 1 of ST302 spec starting with num channels, we dont add these for standard streams
+            if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
             {
-                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
-                _pkt8[pos++] = 0x10;                                    // two bits of channel ID, 20 bits per sample, alignment 0 reserved
-            }
-            else
-            {
-                _pkt8[pos++] = 0x0;                                     // 2 channels, 6 bits of channel ID
-                _pkt8[pos++] = 0x20;                                    // two bits of channel ID, 24 bits per sample, alignment 0 reserved
+                _pkt8[pos++] = 0x0;                                         // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] = 0x20;                                        // two bits of channel ID, 24 bits per sample, alignment 0 reserved
             }
 
             return pos-startPos;

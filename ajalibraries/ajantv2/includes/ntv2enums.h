@@ -212,6 +212,7 @@ typedef enum
     DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,
     DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,
 	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,
+	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
 	DEVICE_ID_IO4KIP					= 0x10710850,
 #if !defined (NTV2_DEPRECATE_12_6)
@@ -306,6 +307,7 @@ typedef enum
 #define	NTV2_IS_VALID_STANDARD(__s__)			((__s__) >= NTV2_STANDARD_1080 && (__s__) < NTV2_STANDARD_UNDEFINED)
 #define NTV2_IS_PROGRESSIVE_STANDARD(__s__)		(		(__s__) == NTV2_STANDARD_1080p			\
                                                     ||	(__s__) == NTV2_STANDARD_720			\
+                                                    ||	(__s__) == NTV2_STANDARD_2Kx1080p		\
                                                     ||	(__s__) == NTV2_STANDARD_3840x2160p		\
                                                     ||	(__s__) == NTV2_STANDARD_4096x2160p		\
                                                     ||	(__s__) == NTV2_STANDARD_3840HFR		\
@@ -906,6 +908,33 @@ typedef enum
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994 ||					\
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	)
 
+#define NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(__f__)					\
+    (	(__f__) == NTV2_FORMAT_525_2398 ||                          \
+        (__f__) == NTV2_FORMAT_525_5994 ||                          \
+        (__f__) == NTV2_FORMAT_625_5000 ||                          \
+        (__f__) == NTV2_FORMAT_720p_5000 ||                         \
+        (__f__) == NTV2_FORMAT_720p_5994 ||                         \
+        (__f__) == NTV2_FORMAT_720p_6000 ||                         \
+        (__f__) == NTV2_FORMAT_1080i_5000 ||						\
+        (__f__) == NTV2_FORMAT_1080i_5994 ||						\
+        (__f__) == NTV2_FORMAT_1080i_6000 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2398 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2400 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2500 ||						\
+        (__f__) == NTV2_FORMAT_1080p_2997 ||						\
+        (__f__) == NTV2_FORMAT_1080p_3000 ||                        \
+        (__f__) == NTV2_FORMAT_1080p_5000_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_5994_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_6000_A ||                      \
+        (__f__) == NTV2_FORMAT_1080p_2K_2398 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_2400 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_2997 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_4795 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_4800 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5994 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_6000	)
 
 typedef enum
 {
@@ -2828,8 +2857,9 @@ typedef enum
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
 	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,
-	NTV2_BITFILE_IO4KPLUS_MAIN	= 49,
-	NTV2_BITFILE_IO4KIP_MAIN	= 50,
+	NTV2_BITFILE_KONAIP_1RX_1TX_2110 = 49,
+	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
+	NTV2_BITFILE_IO4KIP_MAIN	= 51,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

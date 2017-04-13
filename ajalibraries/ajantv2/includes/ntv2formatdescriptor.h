@@ -194,6 +194,15 @@ typedef struct NTV2FormatDescriptor
 	inline NTV2FrameDimensions		GetVisibleRasterDimensions (void) const					{return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(true));}
 
 	/**
+		@brief		Answers with the equivalent SMPTE line number for the given line offset into the frame buffer I describe.
+		@param[in]	inLineOffset	Specifies the zero-based line offset into the frame buffer that I describe.
+		@param[out]	outSMPTELine	Receives the equivalent SMPTE line number.
+		@param[out]	outIsField2		Receives true if the line number is associated with Field 2 (interlaced only); otherwise false.
+		@return		True if successful;  otherwise false.
+	**/
+	bool							GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const;
+
+	/**
 		@return	True if I'm equal to the given NTV2FormatDescriptor.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/
@@ -278,6 +287,15 @@ AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVi
 													 const bool						inVANCenabled	= false,
 													 const bool						inWideVANC		= false);
 
+/**
+	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
+	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
+									to be converted.
+	@param[out]	out16BitYUVLine		Receives the unpacked 16-bit-per-component YUV data. The sequence is cleared before filling.
+									The UWord sequence will be Cb0, Y0, Cr0, Y1, Cb1, Y2, Cr1, Y3, Cb2, Y4, Cr2, Y5, . . .
+	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
+	@return		True if successful;  otherwise false.
+**/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);
 
 

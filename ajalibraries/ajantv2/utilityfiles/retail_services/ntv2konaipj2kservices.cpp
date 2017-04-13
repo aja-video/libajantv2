@@ -48,6 +48,13 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		return;
 	}
 	
+	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
+	// output enable and input disable because we are in playback mode
+	mCard->WriteRegister(kVRegRxcEnable1, false);
+	mCard->WriteRegister(kVRegRxcEnable2, false);
+	mCard->WriteRegister(kVRegTxcEnable3, true);
+	mCard->WriteRegister(kVRegTxcEnable4, true);
+	
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
@@ -194,10 +201,8 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	}
 	
 	
-	// CSC 3
+	// CSC 3 and 4
 	mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
-	
-	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	
 	// LUT 1
@@ -267,16 +272,10 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptBlack);
 	mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptBlack);
 	
-    // DualLink Out 1
+	// DualLink Out 1, 2, 3, 4
 	mCard->Connect (NTV2_XptDualLinkOut1Input, frameSync2RGB);
-
-    // DualLink Out 2
 	mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptBlack);
-
-    // DualLink Out 3
 	mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptBlack);
-
-    // DualLink Out 4
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	
 	// SDI Out 1
@@ -358,7 +357,6 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 	}
 
-	
 	// HDMI Out
 	NTV2CrosspointID XPt1 = NTV2_XptBlack;
 	NTV2CrosspointID XPt2 = NTV2_XptBlack;
@@ -388,10 +386,8 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// 4K Hdmi-to-Hdmi Bypass always disabled for playback
 	mCard->WriteRegister(kRegHDMIOutControl, false, kRegMaskHDMIV2TxBypass, kRegShiftHDMIV2TxBypass);
 	
-		
 	// Analog Out
 	mCard->Connect (NTV2_XptAnalogOutInput, frameSync1YUV);
-	
 	
 	//
 	// Mixer/Keyer
@@ -633,6 +629,13 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		return;
 	}
 	
+	// J2K products have unidirectional input and output that share same frame buffer so override any user setting here and force
+	// input enable and output disable because we are in capture mode
+	mCard->WriteRegister(kVRegRxcEnable1, true);
+	mCard->WriteRegister(kVRegRxcEnable2, true);
+	mCard->WriteRegister(kVRegTxcEnable3, false);
+	mCard->WriteRegister(kVRegTxcEnable4, false);
+
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
@@ -776,13 +779,9 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
 	
-	// CSC 2
+	// CSC 2, 3, 4
 	mCard->Connect (NTV2_XptCSC2VidInput, inputXptYUV2);
-
-	// CSC 3
 	mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
-	
-	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 
 	// LUT 1
@@ -825,10 +824,8 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
 	}
 	
-	// LUT 3 
+	// LUT 3, 4
 	mCard->Connect (NTV2_XptLUT3Input, NTV2_XptBlack);
-	
-	// LUT 4 
 	mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 
 	// Dual Link Out 1,2,3,4 3 Out
@@ -1004,10 +1001,8 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	}
 	
-	// Frame Buffer 3
+	// Frame Buffer 3, 4
 	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
-	
-	// Frame Buffer 4
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer Disabling
@@ -1070,8 +1065,6 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 	}
-
-	
 
 	// SDI Out 4 - acts like SDI 2
 	if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
@@ -1144,20 +1137,27 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-
+	bool					rv, rv2, enable;
+	uint32_t				enableHw;
+	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
-    bool rv;
-	
+
     if (mCard->IsDeviceReady() == true)
     {
-        if (target == NULL)
-        {
-            target = new CNTV2Config2022(*mCard);
-            target->SetBiDirectionalChannels(true);     // logically bidirectional
-        }
+		// We need the device ID for KonaIP J2k because there are three flavors of this device
+		NTV2DeviceID deviceID = mCard->GetDeviceID();
+		rx_2022_channel		rxHwConfig;
+		tx_2022_channel		txHwConfig;
+		j2kEncoderConfig	encoderConfig;
+		j2kDecoderConfig	decoderConfig;
 
+		if (target == NULL)
+		{
+			target = new CNTV2Config2022(*mCard);
+		}
+		
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
 
@@ -1177,17 +1177,197 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
         }
         else
             printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
+		
+		// KonaIP input configurations
+		// Only config RX for devices that have RX channels
+		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+			(deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+		{
+			rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
+			rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
+			mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
 
+			if (rv && rv2)
+			{
+				if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config1))
+				{
+					// Special case we handle channel enables at service level automatically
+					mRx2022Config1.rxc_enable = enableHw;
+					setRxConfig(NTV2_CHANNEL1);
+				}
+			}
+			else
+				printf("rxConfig ch 1 config read failed\n");
+			
+			// Configure j2kDecoder for ch1
+			rv  = target->GetJ2KDecoderConfiguration(decoderConfig);
+			if (rv)
+			{
+				
+				//printf("j2kDecoder ch 1 config read\n");
+				//printDecoderConfig(mRx2022J2kConfig1, decoderConfig);
+				
+				if (decoderConfig != mRx2022J2kConfig1)
+				{
+					printf("set j2kDecoder ch 1\n");
+					target->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
+				}
+			}
+			else
+				printf("j2kEncoder ch 1 config read failed\n");
 
+			
+			
+			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
+			{
+				rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
+				rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
+				mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
+
+				if (rv && rv2)
+				{
+					if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config2))
+					{
+						// Special case we handle channel enables at service level automatically
+						mRx2022Config2.rxc_enable = enableHw;
+						setRxConfig(NTV2_CHANNEL2);
+					}
+				}
+				else
+					printf("rxConfig ch 2 config read failed\n");
+			}
+		}
+		
+		// KonaIP output configurations
+		// Only config TX for devices that have TX channels
+		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+			(deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
+		{
+			// Configure tx for ch1
+			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
+			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable);
+			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
+
+			if (rv && rv2)
+			{
+				if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config3))
+				{
+					// Special case we handle channel enables at service level automatically
+					mTx2022Config3.txc_enable = enableHw;
+					setTxConfig(NTV2_CHANNEL1);
+				}
+				else
+				{
+					if (mTx2022Config3.txc_primaryAutoMac)
+					{
+						uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
+						uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
+						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo3, lo);
+						mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi3, hi);
+					}
+				}
+			}
+			else
+				printf("txConfig ch 1 config read failed\n");
+			
+			// Configure j2kEncoder for ch1
+			rv  = target->GetJ2KEncoderConfiguration(NTV2_CHANNEL1,encoderConfig);
+			if (rv)
+			{
+				// current video format
+				mTx2022J2kConfig1.videoFormat = mFb1VideoFormat;
+				
+				// current bit depth
+				mTx2022J2kConfig1.bitDepth = 10;
+				if (Is8BitFrameBufferFormat(primaryPixelFormat))
+				{
+					mTx2022J2kConfig1.bitDepth = 8;
+				}
+				
+				//printf("j2kEncoder ch 1 config read\n");
+				//printEncoderConfig(mTx2022J2kConfig1, encoderConfig);
+				
+				if (encoderConfig != mTx2022J2kConfig1)
+				{
+					printf("set j2kEncoder ch 1\n");
+					target->SetJ2KEncoderConfiguration(NTV2_CHANNEL1,mTx2022J2kConfig1);
+				}
+			}
+			else
+				printf("j2kEncoder ch 1 config read failed\n");
+			
+			if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
+			{
+
+				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
+				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable);
+				mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
+
+				if (rv && rv2)
+				{
+					if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config4))
+					{
+						// Special case we handle channel enables at service level automatically
+						mTx2022Config4.txc_enable = enableHw;
+						setTxConfig(NTV2_CHANNEL2);
+					}
+					else
+					{
+						if (mTx2022Config4.txc_primaryAutoMac)
+						{
+							uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
+							uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
+							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo4, lo);
+							mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi4, hi);
+						}
+					}
+				}
+				else
+					printf("txConfig ch 2 config read failed\n");
+				
+				// Configure j2kEncoder for ch2
+				rv  = target->GetJ2KEncoderConfiguration(NTV2_CHANNEL2,encoderConfig);
+				if (rv)
+				{
+					// current video format
+					mTx2022J2kConfig2.videoFormat = mFb1VideoFormat;
+					
+					// current bit depth
+					mTx2022J2kConfig2.bitDepth = 10;
+					if (Is8BitFrameBufferFormat(primaryPixelFormat))
+					{
+						mTx2022J2kConfig2.bitDepth = 8;
+					}
+					
+					//printf("j2kEncoder ch 2 config read\n");
+					//printEncoderConfig(mTx2022J2kConfig2, encoderConfig);
+
+					if (encoderConfig != mTx2022J2kConfig2)
+					{
+						printf("set j2kEncoder ch 2\n");
+						target->SetJ2KEncoderConfiguration(NTV2_CHANNEL2,mTx2022J2kConfig2);
+					}
+				}
+				else
+					printf("j2kEncoder ch 2 config read failed\n");
+			}
+		}
     }
+	else
+	{
+		uint32_t	count;
+		mCard->ReadRegister(kVRegAgentCheck, &count);
+		if ((count % 150) == 0)
+			printf("device not ready\n");
+	}
+
 
 	// VPID
 	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	
+
 	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -1237,7 +1417,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
 	}
-
 
 	// HDMI output - initialization sequence
 	if (mHDMIStartupCountDown > 0)
@@ -1477,8 +1656,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			break;
 		}
 	}
-
-
+	
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);
@@ -1528,108 +1706,9 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
 	NTV2Standard transportStandard = b3GbTransportOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
-
-	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-
-	// Set VPID 1
-	if (b4K)
-	{
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_1);
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
-
-
-	//
-	// SDI Out 2
-	//
-
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
 
-	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
-
-	// Set VPID 2
-	if (b4K)
-	{
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_4);
-		}
-		else
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
-	
-	
-	// Finish VPID for SDI Out 1-4 Out
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
-		
-		// enable overwrite
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-			mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		}
-		
-		// enable VPID write
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-			mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		}
-
-		// write VPID value
-		if (b4K)
-		{
-			// write VPID for SDI 1
-			//debugOut("out vpid = %08x  %08x  %08x  %08x  %08x  %08x  %08x %08x\n", true, vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b);
-			mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-			
-			// write VPID for SDI 2
-			mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
-		}
-
-	}
-	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	mCard->WriteRegister(kRegSDIOut1Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
 	mCard->WriteRegister(kRegSDIOut2Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
@@ -1691,4 +1770,239 @@ void  KonaIPJ2kServices::setNetConfig(eSFP  port)
         break;
     }
     target->SetNetworkConfiguration(port,ip,sub,gate);
+}
+
+void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
+{
+	printf("set RxConfig chn=%d\n",(int)channel);
+	
+	rx_2022_channel chan;
+	struct in_addr addr;
+	bool enable;
+	switch ((int)channel)
+	{
+		case NTV2_CHANNEL2:
+			addr.s_addr                 = mRx2022Config2.rxc_primarySourceIp;
+			chan.primarySourceIP        = inet_ntoa(addr);
+			addr.s_addr                 = mRx2022Config2.rxc_primaryDestIp;
+			chan.primaryDestIP          = inet_ntoa(addr);;
+			chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch;
+			chan.primarySourcePort      = mRx2022Config2.rxc_primarySourcePort;
+			chan.primaryDestPort        = mRx2022Config2.rxc_primaryDestPort;
+			chan.primarySsrc            = mRx2022Config2.rxc_primarySsrc;
+			chan.primaryVlan            = mRx2022Config2.rxc_primaryVlan;
+			
+			addr.s_addr                 = mRx2022Config2.rxc_secondarySourceIp;
+			chan.secondarySourceIP      = inet_ntoa(addr);
+			addr.s_addr                 = mRx2022Config2.rxc_secondaryDestIp;
+			chan.secondaryDestIP        = inet_ntoa(addr);;
+			chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch;
+			chan.secondarySourcePort    = mRx2022Config2.rxc_secondarySourcePort;
+			chan.secondaryDestPort      = mRx2022Config2.rxc_secondaryDestPort;
+			chan.secondarySsrc          = mRx2022Config2.rxc_secondarySsrc;
+			chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
+			
+			chan.networkPathDiff        = mRx2022Config2.rxc_networkPathDiff;
+			chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
+			
+			enable                      = mRx2022Config2.rxc_enable;
+			break;
+		default:
+		case NTV2_CHANNEL1:
+			addr.s_addr                 = mRx2022Config1.rxc_primarySourceIp;
+			chan.primarySourceIP        = inet_ntoa(addr);
+			addr.s_addr                 = mRx2022Config1.rxc_primaryDestIp;
+			chan.primaryDestIP          = inet_ntoa(addr);;
+			chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch;
+			chan.primarySourcePort      = mRx2022Config1.rxc_primarySourcePort;
+			chan.primaryDestPort        = mRx2022Config1.rxc_primaryDestPort;
+			chan.primarySsrc            = mRx2022Config1.rxc_primarySsrc;
+			chan.primaryVlan            = mRx2022Config1.rxc_primaryVlan;
+			
+			addr.s_addr                 = mRx2022Config1.rxc_secondarySourceIp;
+			chan.secondarySourceIP      = inet_ntoa(addr);
+			addr.s_addr                 = mRx2022Config1.rxc_secondaryDestIp;
+			chan.secondaryDestIP        = inet_ntoa(addr);;
+			chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch;
+			chan.secondarySourcePort    = mRx2022Config1.rxc_secondarySourcePort;
+			chan.secondaryDestPort      = mRx2022Config1.rxc_secondaryDestPort;
+			chan.secondarySsrc          = mRx2022Config1.rxc_secondarySsrc;
+			chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
+			
+			chan.networkPathDiff        = mRx2022Config1.rxc_networkPathDiff;
+			chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
+			
+			enable                      = mRx2022Config1.rxc_enable;
+			break;
+	}
+	
+	target->SetRxChannelConfiguration(channel,chan);
+	target->SetRxChannelEnable(channel,enable,m2022_7Mode);
+}
+
+void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
+{
+	printf("set TxConfig chn=%d\n",(int)channel);
+	tx_2022_channel chan;
+	MACAddr remoteMAC;
+	struct in_addr addr;
+	bool enable;
+	
+	switch((int)channel)
+	{
+		case NTV2_CHANNEL2:
+			addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
+			chan.primaryRemoteIP        = inet_ntoa(addr);
+			remoteMAC.mac[0]            = (mTx2022Config4.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
+			remoteMAC.mac[1]            =  mTx2022Config4.txc_primaryRemoteMAC_hi        & 0xff;
+			remoteMAC.mac[2]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 24) & 0xff;
+			remoteMAC.mac[3]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 16) & 0xff;
+			remoteMAC.mac[4]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
+			remoteMAC.mac[5]            =  mTx2022Config4.txc_primaryRemoteMAC_lo        & 0xff;
+			chan.primaryRemoteMAC       = remoteMAC;
+			chan.primaryAutoMAC         = mTx2022Config4.txc_primaryAutoMac;
+			chan.primaryLocalPort       = mTx2022Config4.txc_primaryLocalPort;
+			chan.primaryRemotePort      = mTx2022Config4.txc_primaryRemotePort;
+			
+			addr.s_addr                 = mTx2022Config4.txc_secondaryRemoteIp;
+			chan.secondaryRemoteIP      = inet_ntoa(addr);
+			remoteMAC.mac[0]            = (mTx2022Config4.txc_secondaryRemoteMAC_hi >> 8)  & 0xff;
+			remoteMAC.mac[1]            =  mTx2022Config4.txc_secondaryRemoteMAC_hi        & 0xff;
+			remoteMAC.mac[2]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 24) & 0xff;
+			remoteMAC.mac[3]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 16) & 0xff;
+			remoteMAC.mac[4]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
+			remoteMAC.mac[5]            =  mTx2022Config4.txc_secondaryRemoteMAC_lo        & 0xff;
+			chan.secondaryRemoteMAC     = remoteMAC;
+			chan.secondaryAutoMAC       = mTx2022Config4.txc_secondaryAutoMac;
+			chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
+			chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
+			
+			enable                      = mTx2022Config4.txc_enable;
+			break;
+		default:
+			
+		case NTV2_CHANNEL1:
+			addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
+			chan.primaryRemoteIP        = inet_ntoa(addr);
+			remoteMAC.mac[0]            = (mTx2022Config3.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
+			remoteMAC.mac[1]            =  mTx2022Config3.txc_primaryRemoteMAC_hi        & 0xff;
+			remoteMAC.mac[2]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 24) & 0xff;
+			remoteMAC.mac[3]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 16) & 0xff;
+			remoteMAC.mac[4]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
+			remoteMAC.mac[5]            =  mTx2022Config3.txc_primaryRemoteMAC_lo        & 0xff;
+			chan.primaryRemoteMAC       = remoteMAC;
+			chan.primaryAutoMAC         = mTx2022Config3.txc_primaryAutoMac;
+			chan.primaryLocalPort       = mTx2022Config3.txc_primaryLocalPort;
+			chan.primaryRemotePort      = mTx2022Config3.txc_primaryRemotePort;
+			
+			addr.s_addr                 = mTx2022Config3.txc_secondaryRemoteIp;
+			chan.secondaryRemoteIP      = inet_ntoa(addr);
+			remoteMAC.mac[0]            = (mTx2022Config3.txc_secondaryRemoteMAC_hi >> 8)  & 0xff;
+			remoteMAC.mac[1]            =  mTx2022Config3.txc_secondaryRemoteMAC_hi        & 0xff;
+			remoteMAC.mac[2]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 24) & 0xff;
+			remoteMAC.mac[3]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 16) & 0xff;
+			remoteMAC.mac[4]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
+			remoteMAC.mac[5]            =  mTx2022Config3.txc_secondaryRemoteMAC_lo        & 0xff;
+			chan.secondaryRemoteMAC     = remoteMAC;
+			chan.secondaryAutoMAC       = mTx2022Config3.txc_secondaryAutoMac;
+			chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
+			chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
+			
+			enable                      = mTx2022Config3.txc_enable;
+			break;
+	}
+	printTxConfig(chan);
+	target->SetTxChannelConfiguration(channel,chan);
+	target->SetTxChannelEnable(channel,enable,m2022_7Mode);
+}
+
+bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
+{
+	uint32_t addr;
+	
+	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
+	if (virtual_config.rxc_primaryDestPort   != hw_channel.primaryDestPort)  return true;
+	if (virtual_config.rxc_primaryRxMatch    != hw_channel.primaryRxMatch)   return true;
+	
+	addr = inet_addr(hw_channel.primaryDestIP.c_str());
+	if (virtual_config.rxc_primaryDestIp     != addr) return true;
+	
+	addr = inet_addr(hw_channel.primarySourceIP.c_str());
+	if (virtual_config.rxc_primarySourceIp   != addr) return true;
+	
+	return false;
+}
+
+bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
+{
+	uint32_t addr;
+	if (virtual_config.txc_primaryLocalPort    != hw_channel.primaryLocalPort)  return true;
+	if (virtual_config.txc_primaryRemotePort   != hw_channel.primaryRemotePort) return true;
+	if (virtual_config.txc_primaryAutoMac      != hw_channel.primaryAutoMAC)    return true;
+	
+	addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
+	if (virtual_config.txc_primaryRemoteIp     != addr) return true;
+	
+	// don't compare automac, but if it is false, do compare the mac addresses
+	//if (virtual_config.txc_primaryAutoMac == false)
+	{
+		// only examine mac when automac is off
+		if (notEqualMAC(virtual_config.txc_primaryRemoteMAC_lo,virtual_config.txc_primaryRemoteMAC_hi,hw_channel.primaryRemoteMAC)) return true;
+	}
+	
+	return false;
+}
+
+bool  KonaIPJ2kServices::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr)
+{
+	if (macaddr.mac[0]   != ((hi >> 8 ) & 0xff)) return true;
+	if (macaddr.mac[1]   != ( hi        & 0xff)) return true;
+	if (macaddr.mac[2]   != ((lo >> 24) & 0xff)) return true;
+	if (macaddr.mac[3]   != ((lo >> 16) & 0xff)) return true;
+	if (macaddr.mac[4]   != ((lo >> 8)  & 0xff)) return true;
+	if (macaddr.mac[5]   != ( lo        & 0xff)) return true;
+	
+	return false;
+}
+
+void KonaIPJ2kServices::printTxConfig(tx_2022_channel chan)
+{
+	printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
+	printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
+	printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
+	printf("primaryAutoMAC			%d\n", chan.primaryAutoMAC);
+	printf("primaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n", chan.primaryRemoteMAC.mac[0], chan.primaryRemoteMAC.mac[1],
+		   chan.primaryRemoteMAC.mac[2], chan.primaryRemoteMAC.mac[3],
+		   chan.primaryRemoteMAC.mac[4], chan.primaryRemoteMAC.mac[5]);
+
+
+	printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
+	printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
+	printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
+	printf("secondaryAutoMAC		%d\n", chan.secondaryAutoMAC);
+	printf("secondaryRemoteMAC		%02x:%02x:%02x:%02x:%02x:%02x\n", chan.secondaryRemoteMAC.mac[0], chan.secondaryRemoteMAC.mac[1],
+		   chan.secondaryRemoteMAC.mac[2], chan.secondaryRemoteMAC.mac[3],
+		   chan.secondaryRemoteMAC.mac[4], chan.secondaryRemoteMAC.mac[5]);
+}
+
+void KonaIPJ2kServices::printEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
+{
+	printf("videoFormat	   %6d%6d\n", modelConfig.videoFormat, encoderConfig.videoFormat);
+	printf("ullMode		   %6d%6d\n", modelConfig.ullMode, encoderConfig.ullMode);
+	printf("bitDepth	   %6d%6d\n", modelConfig.bitDepth, encoderConfig.bitDepth);
+	printf("chromaSubsamp  %6d%6d\n", modelConfig.chromaSubsamp, encoderConfig.chromaSubsamp);
+	printf("mbps		   %6d%6d\n", modelConfig.mbps, encoderConfig.mbps);
+	printf("streamType	   %6d%6d\n", modelConfig.streamType, encoderConfig.streamType);
+	printf("pmtPid		   %6d%6d\n", modelConfig.pmtPid, encoderConfig.pmtPid);
+	printf("videoPid	   %6d%6d\n", modelConfig.videoPid, encoderConfig.videoPid);
+	printf("pcrPid		   %6d%6d\n", modelConfig.pcrPid, encoderConfig.pcrPid);
+	printf("audio1Pid	   %6d%6d\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
+}
+
+void KonaIPJ2kServices::printDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
+{
+	printf("selectionMode  %6d%6d\n", modelConfig.selectionMode, encoderConfig.selectionMode);
+	printf("programNumber  %6d%6d\n", modelConfig.programNumber, encoderConfig.programNumber);
+	printf("programPID	   %6d%6d\n", modelConfig.programPID, encoderConfig.programPID);
+	printf("audioNumber    %6d%6d\n", modelConfig.audioNumber, encoderConfig.audioNumber);
 }

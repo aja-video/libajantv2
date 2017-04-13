@@ -22,15 +22,15 @@
 			#define AJA_EXPORT __declspec(dllimport)
 			#if defined(AJA_DEBUG)
 				#if defined(_WIN64)
-                    #pragma comment (lib, "ajabasedll_64d")
+                    #pragma comment (lib, "libajabasedlld")
 				#else
-                    #pragma comment (lib, "ajabasedlld")
+                    #pragma comment (lib, "libajabasedll_32d")
 				#endif
 			#else
 				#if defined(_WIN64)
-                    #pragma comment (lib, "ajabasedll_64")
+                    #pragma comment (lib, "libajabasedll")
 				#else
-                    #pragma comment (lib, "ajabasedll")
+                    #pragma comment (lib, "libajabasedll_32")
 				#endif
 			#endif
 		#endif
@@ -40,15 +40,15 @@
 	#if !defined AJA_STUFF_OBJ
 			#if defined(AJA_DEBUG)
 				#if defined(_WIN64)
-                    #pragma comment (lib, "ajabase_64d")
+                    #pragma comment (lib, "libajabased")
 				#else
-                    #pragma comment (lib, "ajabased")
+                    #pragma comment (lib, "libajabase_32d")
 				#endif
 			#else
 				#if defined(_WIN64)
-                    #pragma comment (lib, "ajabase_64")
+                    #pragma comment (lib, "libajabase")
 				#else
-                    #pragma comment (lib, "ajabase")
+                    #pragma comment (lib, "libajabase_32")
 				#endif
 			#endif
 			#pragma comment (lib, "comctl32.lib")

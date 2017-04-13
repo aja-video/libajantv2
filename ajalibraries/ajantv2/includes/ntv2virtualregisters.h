@@ -460,7 +460,7 @@ typedef enum
 } VirtualRegisterNum;
 
 #if !defined (NTV2_DEPRECATE_12_7)
-	//	The old virtual register names will be deprecated in SDK 12.7
+	//	The old virtual register names will be deprecated sometime after SDK 13.0.0
 	#define	kRegLinuxDriverVersion				kVRegLinuxDriverVersion
 	#define	kRegRelativeVideoPlaybackDelay		kVRegRelativeVideoPlaybackDelay
 	#define	kRegAudioRecordPinDelay				kVRegAudioRecordPinDelay

@@ -9,8 +9,6 @@
 enum eMBCmd
 {
     MB_CMD_SET_NET      = 0,
-    MB_CMD_START_IGMP   = 1,
-    MB_CMD_STOP_IGMP    = 2,
     MB_CMD_GET_MAC_FROM_ARP_TABLE = 3,
     MB_CMD_SEND_ARP_REQ        = 4,
     MB_CMD_UNKNOWN             = 5,
@@ -75,8 +73,6 @@ public:
 protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
-    bool JoinIGMPGroup( eSFP port, NTV2Channel channel, std::string ipaddr);
-    bool LeaveIGMPGroup(eSFP port, NTV2Channel channel, std::string ipaddr);
     bool GetRemoteMAC(std::string remote_IPAddress, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
 

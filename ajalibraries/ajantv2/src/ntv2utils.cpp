@@ -115,7 +115,7 @@ ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 }
 
 
-bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, const ULWord inNumPixels)
+bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels)
 {
 	out16BitYUVLine.clear ();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
@@ -125,7 +125,7 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 	if (inNumPixels < 6)
 		return false;	//	bad width
 	if (inNumPixels % 6)
-		return false;	//	width must be evenly divisible by 6
+		inNumPixels -= inNumPixels % 6;
 
 	const ULWord	totalULWords	(inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
 
@@ -150,6 +150,8 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV
 		return false;	//	bad formatDesc
 	if (inFormatDesc.GetRasterWidth () < 6)
 		return false;	//	bad width
+	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
+		return false;	//	wrong FBF
 
 	for (ULWord inputCount (0);  inputCount < inFormatDesc.linePitch;  inputCount++)
 	{
@@ -2933,17 +2935,18 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 		frameRate = NTV2_FRAMERATE_12000;
 		break;
 
-	//	To reveal missing values, comment out the "default:" below, then uncomment out these cases:
-	//case NTV2_FORMAT_UNKNOWN:
-	//case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
-	//case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
-	//case NTV2_FORMAT_END_2K_DEF_FORMATS:
-	//case NTV2_FORMAT_END_4K_DEF_FORMATS:
-	//case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+#if defined (_DEBUG)
+	//	Debug builds warn about missing values
+	case NTV2_FORMAT_UNKNOWN:
+	case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
+	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
+	case NTV2_FORMAT_END_2K_DEF_FORMATS:
+	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		break;
+#else
 	default:
-		// should error out.
-		break;	// Unsupported
-
+		break;	// Unsupported -- fail
+#endif
 	}
 
 	return frameRate;
@@ -3968,6 +3971,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
+		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
 		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:		return "Io4KIP";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
@@ -4954,6 +4959,11 @@ AJAExport bool IsVideoFormatA (NTV2VideoFormat format)
 AJAExport bool IsVideoFormatB(NTV2VideoFormat format)
 {
 	return NTV2_IS_3Gb_FORMAT (format);
+}
+
+AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
+{
+    return NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED (format);
 }
 
 
@@ -7240,6 +7250,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
 			case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx.mcs";
 			case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx.mcs";
+			case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
 			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
 			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
@@ -7416,6 +7427,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_TTAP,
+														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KIP,
 														DEVICE_ID_NOTFOUND	};

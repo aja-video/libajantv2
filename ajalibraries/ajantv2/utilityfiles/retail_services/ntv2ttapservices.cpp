@@ -192,29 +192,4 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-	
-	// Set SDI out control video standard (reg 129, bits 2-0)
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	
-	// VPID insertion
-	{
-		const bool				kRGBOut				= false;
-		const bool				kNot48Bit			= false;
-		const bool				kNot3Gb				= false;
-		ULWord					vpidOut1a;
-	
-		// enable overwrite
-		mCard->WriteRegister(kRegSDIOut1Control,	1, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		
-		// generate vpid register value
-        // get video format
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, kRGBOut, kNot48Bit, kNot3Gb, false, VPIDChannel_1);
-		
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-	}
 }

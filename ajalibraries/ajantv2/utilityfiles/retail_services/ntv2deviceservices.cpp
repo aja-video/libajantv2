@@ -23,6 +23,7 @@
 #include "ntv2kona4quadservices.h"
 #include "ntv2kona4ufcservices.h"
 #include "ntv2konaip22services.h"
+#include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
 #include "ntv2vpidfromspec.h"
 
@@ -46,6 +47,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+			pDeviceServices = new KonaIP2110Services();
+			break;
         case DEVICE_ID_KONAIP_4CH_1SFP:
             pDeviceServices = new KonaIP22Services();
             break;
@@ -510,22 +514,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
 	{
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
-	}
-
-	//Setup HDMI
-	if(NTV2DeviceGetHDMIVersion(deviceID) > 0)
-	{
-		NTV2HDMIAudioChannels channels = NTV2_MAX_NUM_HDMIAudioChannelEnums;
-		mCard->ReadRegister(kVRegHDMIOutAudioChannels, (ULWord*)&channels);
-		mCard->SetHDMIOutAudioChannels(channels);
-		if(channels == NTV2_HDMIAudio8Channels)
-			mCard->SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, NTV2_AUDIOSYSTEM_1);
-		else
-			mCard->SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, NTV2_AUDIOSYSTEM_1);
-
-		NTV2HDMIRange range = NTV2_MAX_NUM_HDMIRanges;
-		mCard->ReadRegister(kVRegHDMIOutRGBRange, (ULWord*)&range);
-		mCard->SetHDMIOutRange(range);
 	}
 
 	//Setup LUTs

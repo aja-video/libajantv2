@@ -265,6 +265,9 @@ public:
     bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
     bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
 
+    bool        SetPTPMaster(std::string ptpMaster);
+    bool        GetPTPMaster(std::string & ptpMaster);
+
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -285,14 +288,13 @@ public:
     bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
 
-	bool		ConfigurePTP(eSFP port, std::string localIPAddress);
-
 	// If method returns false call this to get details
     std::string getLastError();
 	
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
+    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
@@ -310,6 +312,7 @@ private:
     bool        _is2022_7;
     bool        _biDirectionalChannels;             // logically bi-directional channels
     bool        _is_txTop34;
+    bool        _hasPTP;
 
 };	//	CNTV2Config2022
 
