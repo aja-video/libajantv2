@@ -92,6 +92,8 @@ public:
     bool                J2kCanAcceptCmd(const NTV2Channel channel);
     void                J2kSetParam(const NTV2Channel channel, uint32_t config, uint32_t param, uint32_t value);
     void                J2kSetMode(const NTV2Channel channel, uint32_t tier, uint32_t mode);
+    uint32_t            J2kGetFrameCounter(const NTV2Channel channel, uint32_t tier);
+
     uint32_t            GetFeatures();
 
     void                GenerateTableForMpegJ2kEncap(const NTV2Channel channel);

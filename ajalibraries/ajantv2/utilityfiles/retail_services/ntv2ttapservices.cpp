@@ -75,6 +75,7 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 void TTapServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 {
+	(void) format;
 	// no input for T-Tap, should not be here
 	mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
 }

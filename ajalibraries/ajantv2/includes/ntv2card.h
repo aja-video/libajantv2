@@ -1838,6 +1838,25 @@ public:
 	**/
 	AJA_VIRTUAL bool	SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
+	/**
+		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
+					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
+		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
+		@param[out]	outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
+
+	/**
+		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
+					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
+		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
+		@param[out]	inEnable				Specify 'true' to enable the audio output embedder (normal operation).
+											Specify 'false' to disable the embedder.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
+
 	///@}
 
 	//

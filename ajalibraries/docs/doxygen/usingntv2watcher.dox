@@ -219,13 +219,15 @@ The display highlights changed content with a brighter color.
 	-	<b>Audio Channel Count</b> -- Indicates the audio system's current channel count.  It can be changed using this menu
 		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
 	-	<b>AutoCirculate Indicator</b> -- Indicates if the audio system is being used by AutoCirculate, and if so, which Channel.
-	-	<b>Start</b> -- Starts the audio system running.
-	-	<b>Pause/Resume</b> -- Pauses or resumes the audio system.
-	-	<b>Stop</b> -- Stops the audio system.
+	-	<b>Active Pairs Indicator</b> -- Indicates the active audio channel pairs in use.
+	-	<b>Non-PCM Pairs Indicator</b> -- Indicates the non-PCM audio channel pairs.
+	-	<b>PCM</b> -- If checked, the audio system is set for PCM audio. When unchecked, it's configured for non-PCM audio.
+	-	<b>Loopback</b> -- If checked, audio samples from the audio system's audio source are copied into the corresponding SDI output's audio embedder.
+	-	<b>SDI Output Embedder</b> -- If checked, the audio system's corresponding SDI output's audio embedder is enabled. (Available only for "Output" View mode.)
 	-	<b>View</b> -- Controls which part of the audio system to inspect:
 		-	<b>Input</b> -- Inspects the incoming audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
 		-	<b>Output</b> -- Inspects the outgoing audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
-	-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the new audio data nearest the audio system's read/write head.
+	-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the audio data near the audio system's read/write head.
 	-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
 		@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
 				audio should only be done with very short (less than 30 millisecond) polling intervals.

@@ -1190,11 +1190,11 @@ public:
 			{
 				(void) inRegNum;
 				(void) inDeviceID;
-				const UWord	rawDieTemp	((inRegValue & 0x0000FFFF) >> 6);
-				const UWord	rawVoltage	((inRegValue >> 22) & 0x3FF);
-				const float	dieTempC	((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
-				const float	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
-				const float	voltage		(float(rawVoltage)/ 1024.0 * 3.0);
+				const UWord		rawDieTemp	((inRegValue & 0x0000FFFF) >> 6);
+				const UWord		rawVoltage	((inRegValue >> 22) & 0x3FF);
+				const double	dieTempC	((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
+				const double	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
+				const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 				ostringstream	oss;
 				oss << "\tDie Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit"	<< endl
 					<< "\tCore Voltage: " << fDEC(voltage,5,2) << " Volts DC";
@@ -1251,14 +1251,25 @@ public:
 				(void) inRegNum;
 				(void) inDeviceID;
 				static const string	ChStrs []	=	{	"Ch 1/2",	"Ch 3/4",	"Ch 5/6",	"Ch 7/8"	};
-				ostringstream	oss;
+				uint16_t			sdiOutput	(0);
+				switch (inRegNum)
+				{	case kRegAud1Control:	sdiOutput = 1;	break;
+					case kRegAud3Control:	sdiOutput = 3;	break;
+					case kRegAud5Control:	sdiOutput = 5;	break;
+					case kRegAud7Control:	sdiOutput = 7;	break;
+					default:								break;
+				}
+
+				ostringstream		oss;
 				oss		<< "Audio Capture: "		<< (BIT(0) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "Audio Loopback: "		<< (BIT(3) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "Audio Input: "			<< (BIT(8) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Channel 1 Embedder: "	<< (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "Channel 2 Embedder: "	<< (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl
-						<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
+						<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+				if (sdiOutput)
+					oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
+						<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+
+				oss		<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
 						<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
 						<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
 						<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
@@ -1610,8 +1621,8 @@ public:
 							NTV2_ASSERT (kRegShiftHDMIHDRRedPrimaryX == kRegShiftHDMIHDRWhitePointX  &&  kRegShiftHDMIHDRRedPrimaryY == kRegShiftHDMIHDRWhitePointY);
 							const uint16_t	xPrimary	((inRegValue & kRegMaskHDMIHDRRedPrimaryX) >> kRegShiftHDMIHDRRedPrimaryX);
 							const uint16_t	yPrimary	((inRegValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
-							const float		xFloat		(float(xPrimary) * 0.00002);
-							const float		yFloat		(float(yPrimary) * 0.00002);
+							const double	xFloat		(double(xPrimary) * 0.00002);
+							const double	yFloat		(double(yPrimary) * 0.00002);
 							if (NTV2_IS_VALID_HDR_PRIMARY (xPrimary))
 								oss	<< "X: "	<< fDEC(xFloat,7,5) << endl;
 							else
@@ -1626,8 +1637,8 @@ public:
 						{
 							const uint16_t	minValue	((inRegValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
 							const uint16_t	maxValue	((inRegValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
-							const float		minFloat	(float(minValue) * 0.00001);
-							const float		maxFloat	(maxValue);
+							const double	minFloat	(double(minValue) * 0.00001);
+							const double	maxFloat	(maxValue);
 							if (NTV2_IS_VALID_HDR_MASTERING_LUMINENCE (minValue))
 								oss	<< "Min: "	<< fDEC(minFloat,7,5) << endl;
 							else
@@ -1639,8 +1650,8 @@ public:
 						{
 							const uint16_t	cntValue	((inRegValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
 							const uint16_t	frmValue	((inRegValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
-							const float		cntFloat	(cntValue);
-							const float		frmFloat	(frmValue);
+							const double	cntFloat	(cntValue);
+							const double	frmFloat	(frmValue);
 							if (NTV2_IS_VALID_HDR_LIGHT_LEVEL (cntValue))
 								oss	<< "Max Content Light Level: "	<< fDEC(cntFloat,7,5)					<< endl;
 							else

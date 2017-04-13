@@ -9,6 +9,7 @@
 #include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
+
 #include <sstream>
 
 #if defined (AJALinux) || defined (AJAMac)
@@ -34,7 +35,7 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 {
 #define WAIT_RESET_MS   1000
 
-    uint32_t    val;
+    uint32_t    val, audioCounterStart, audioCounterStop;
     uint32_t    encoderBit, resetBit;
 
     kipdprintf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
@@ -76,12 +77,46 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     val &= ~encoderBit;
     mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
 
+    mDevice.ReadRegister(kRegAud1Counter, &audioCounterStart);
+
+    // Now wait until T2 has stopped
+    uint32_t lastFrameCount = J2kGetFrameCounter(channel, 2);
+    uint32_t currentFrameCount = 0;
+    uint32_t tries = 20;
+
+    while (tries)
+    {
+        // Wait
+        #if defined(AJAWindows) || defined(MSWindows)
+            ::Sleep (50);
+        #else
+            usleep (50 * 1000);
+        #endif
+
+        currentFrameCount = J2kGetFrameCounter(channel, 2);
+        // See if t2 is still running
+        if (lastFrameCount != currentFrameCount)
+        {
+            // Yep wait some more
+            lastFrameCount = currentFrameCount;
+            tries--;
+        }
+        else
+        {
+            // Nope end the wait
+            tries = 0;
+        }
+    }
+
     // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS);
-    #else
-        usleep (WAIT_RESET_MS * 1000);
-    #endif
+    //#if defined(AJAWindows) || defined(MSWindows)
+    //    ::Sleep (WAIT_RESET_MS);
+    //#else
+    //    usleep (WAIT_RESET_MS * 1000);
+    //#endif
+
+    mDevice.ReadRegister(kRegAud1Counter, &audioCounterStop);
+    printf("audioCount elapsed %d\n", (audioCounterStop-audioCounterStart)/48);
 
     // Assert reset
     val |= resetBit;
@@ -578,6 +613,17 @@ void CNTV2ConfigTs2022::J2kSetMode(const NTV2Channel channel, uint32_t tier, uin
 
     mDevice.WriteRegister(addr + (tier*0x40) + kRegJ2kT0MainCsr, mode);
     //printf("J2kSetMode - %d wrote 0x%08x to MAIN CSR in tier %d\n", channel, mode, tier);
+}
+
+
+uint32_t CNTV2ConfigTs2022::J2kGetFrameCounter(const NTV2Channel channel, uint32_t tier)
+{
+    uint32_t addr = GetIpxJ2KAddr(channel);
+    uint32_t val = 0;
+
+    mDevice.ReadRegister(addr + (tier*0x40) + kRegJ2kT0Framecount, &val);
+    printf("J2kGetFrameCounter - %d read 0x%08x to MAIN CSR in tier %d\n", channel, val, tier);
+    return val;
 }
 
 

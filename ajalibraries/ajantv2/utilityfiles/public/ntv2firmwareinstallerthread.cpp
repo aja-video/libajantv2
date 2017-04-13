@@ -186,6 +186,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			{
 				if (!ShouldUpdate(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
 				{
+                    cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Invalid MCS update" << endl;
 					m_updateSuccessful = false;
                     return AJA_STATUS_BAD_PARAM;
 				}
@@ -196,6 +197,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         rv = kfp.SetMCSFile(m_bitfilePath.c_str());
         if (!rv)
         {
+            cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  SetMCSFile failed" << endl;
             m_updateSuccessful = false;
             return AJA_STATUS_FAIL;
         }
@@ -203,6 +205,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         rv = kfp.ProgramFromMCS(true);
         if (!rv)
         {
+            cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  ProgramFromMCS failed" << endl;
             m_updateSuccessful = false;
             return AJA_STATUS_FAIL;
         }
@@ -212,6 +215,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         m_device.WriteRegister(kVRegFlashSize,MCS_STEPS);
         m_device.WriteRegister(kVRegFlashStatus,MCS_STEPS);
 
+        cout << "## NOTE:  CNTV2FirmwareInstallerThread:  MCS update succeeded" << endl;
         return AJA_STATUS_SUCCESS;
     }
 
@@ -402,13 +406,9 @@ CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const C
 
 bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, const std::string designName) const
 {
-    std::string name;
+    std::string name = GetPrimaryDesignName(inDeviceID);
 
-    printf("Design name %s Device ID %08x\n", designName.c_str(), inDeviceID);
-
-    name = GetPrimaryDesignName(inDeviceID);
-    printf("Device name %s\n", name.c_str());
-
+#if 0
     name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP);
     printf("DEVICE_ID_KONAIP_4CH_1SFP name %s\n", name.c_str());
 
@@ -426,9 +426,13 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 
 	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110);
 	printf("DEVICE_ID_KONAIP_1RX_1TX_2110 name %s\n", name.c_str());
+#endif
 
-	if (designName == GetPrimaryDesignName(inDeviceID))
-		return true;
+    // Can always install over self
+    if (designName == name)
+        return true;
+
+    printf("Make sure we can install %s, replacing %s\n", designName.c_str(), name.c_str());
 
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
 	switch (inDeviceID)
@@ -486,7 +490,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
                 designName == "s2022_12_2ch_tx" ||
                 designName == "s2022_12_2ch_rx" ||
 				designName == "s2022_56_4ch_rxtx_fec" ||
-				designName == "s2022_56_1rx_1tx_2110");
+                designName == "s2110_1rx_1tx");
 	default: break;
 	}
 	return false;
@@ -519,7 +523,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx_mb";
         case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			return "s2022_12_2ch_rx_mb";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110";
+        case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx";
 		case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
 		case DEVICE_ID_IO4KIP:						return "IO_XT_4K_IP";
 		default: return "";
