@@ -261,7 +261,6 @@ void NTV2EncodeHEVCVif::Quit (void)
 
 AJAStatus NTV2EncodeHEVCVif::Init (void)
 {
-    char fileName[64];
     AJAStatus	status	(AJA_STATUS_SUCCESS);
     
     //	Open the device...
@@ -360,25 +359,19 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
         return status;
 
 	//	Create encoded video output file
-    strcpy(fileName, "raw.hevc");
-
-    status = mHevcCommon->CreateHevcFile (fileName, mMaxFrames);
+    status = mHevcCommon->CreateHevcFile ("raw.hevc", mMaxFrames);
     if (AJA_FAILURE (status))
         return status;
 
 	//	Create rw video output file
-    strcpy(fileName, "raw.yuv");
-
-    status = mHevcCommon->CreateRawFile (fileName, mMaxFrames);
+    status = mHevcCommon->CreateRawFile ("raw.yuv", mMaxFrames);
     if (AJA_FAILURE (status))
         return status;
 
     if (mWithInfo)
     {
         //	Create encoded data output file
-        strcpy(fileName, "raw.txt");
-
-        status = mHevcCommon->CreateEncFile (fileName, mMaxFrames);
+        status = mHevcCommon->CreateEncFile ("raw.txt", mMaxFrames);
         if (AJA_FAILURE (status))
             return status;
     }
@@ -386,9 +379,7 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     if (mWithAudio)
     {
         //	Create audio output file
-        strcpy(fileName, "raw.aiff");
-
-        status = mHevcCommon->CreateAiffFile (fileName, mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
+        status = mHevcCommon->CreateAiffFile ("raw.aiff", mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
         if (AJA_FAILURE (status))
             return status;
     }

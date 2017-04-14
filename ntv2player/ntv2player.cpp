@@ -461,6 +461,7 @@ void NTV2Player::PlayFrames (void)
 		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
 		break;
 	}
+	default:	break;
 	}
 
 	mDevice.AutoCirculateStart (mOutputChannel);	//	Start it running

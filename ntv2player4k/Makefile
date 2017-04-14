@@ -21,6 +21,8 @@ SRCS = main.cpp ntv2player4k.cpp ntv2democommon.cpp
 
 INCS = ntv2player4k.h ntv2democommon.h
 
+LIBS = -lajaanc
+
 include $(DIR)/../../../../build/common.mk
 
 endif

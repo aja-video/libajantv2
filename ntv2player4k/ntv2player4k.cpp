@@ -853,9 +853,9 @@ void NTV2Player4K::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	s
 
 void NTV2Player4K::PlayFrames (void)
 {
-	uint32_t numberOfACFramesPerChannel = 7;
+	uint8_t	numberOfACFramesPerChannel	(7);
 
-	mDevice.AutoCirculateStop (mChannel);	//	Just in case someone else left it
+	mDevice.AutoCirculateStop (mChannel);	//	Just in case someone else left it running
 
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
@@ -884,12 +884,13 @@ void NTV2Player4K::PlayFrames (void)
 		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
 		break;
 	}
+	default:	break;
 	}
 
 	//	Initialize & start AutoCirculate...
 	{
-		const UWord	startNum	(mChannel < 4  ?                             0  :      numberOfACFramesPerChannel);	//	Ch1: frames 0-6
-		const UWord	endNum		(mChannel < 4  ?  numberOfACFramesPerChannel-1  :  numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
+		const uint8_t	startNum	(mChannel < 4	?								0	:	numberOfACFramesPerChannel);		//	Ch1: frames 0-6
+		const uint8_t	endNum		(mChannel < 4	?	numberOfACFramesPerChannel-1	:	numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
 		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1 /*numChannels*/, startNum,  endNum);
 	}

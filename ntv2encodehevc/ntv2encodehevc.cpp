@@ -304,7 +304,6 @@ void NTV2EncodeHEVC::Quit (void)
 
 AJAStatus NTV2EncodeHEVC::Init (void)
 {
-    char fileName[64];
     AJAStatus	status	(AJA_STATUS_SUCCESS);
     
     //	Open the device...
@@ -416,26 +415,20 @@ AJAStatus NTV2EncodeHEVC::Init (void)
 	SetupHostBuffers ();
   
 	//	Create encoded video output file
-    strcpy(fileName, "raw.hevc");
-    if (mMultiStream)
-    {
-        sprintf(fileName, "raw_%d.hevc", (int)mInputChannel + 1);
+	{
+		ostringstream	oss;
+	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".hevc";  else oss << "raw.hevc";
+		status = mHevcCommon->CreateHevcFile (oss.str(), mMaxFrames);
+		if (AJA_FAILURE (status))
+			return status;
     }
-
-    status = mHevcCommon->CreateHevcFile (fileName, mMaxFrames);
-    if (AJA_FAILURE (status))
-        return status;
 
     if (mWithInfo)
     {
         //	Create encoded data output file
-        strcpy(fileName, "raw.txt");
-        if (mMultiStream)
-        {
-            sprintf(fileName, "raw_%d.txt", (int)mInputChannel + 1);
-        }
-
-        status = mHevcCommon->CreateEncFile (fileName, mMaxFrames);
+		ostringstream	oss;
+	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".txt";  else oss << "raw.txt";
+        status = mHevcCommon->CreateEncFile (oss.str(), mMaxFrames);
         if (AJA_FAILURE (status))
             return status;
     }
@@ -443,13 +436,9 @@ AJAStatus NTV2EncodeHEVC::Init (void)
     if (mWithAudio)
     {
         //	Create audio output file
-        strcpy(fileName, "raw.aiff");
-        if (mMultiStream)
-        {
-            sprintf(fileName, "raw_%d.aiff", (int)mInputChannel + 1);
-        }
-
-        status = mHevcCommon->CreateAiffFile (fileName, mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
+		ostringstream	oss;
+	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".aiff";  else oss << "raw.aiff";
+        status = mHevcCommon->CreateAiffFile (oss.str(), mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
         if (AJA_FAILURE (status))
             return status;
     }

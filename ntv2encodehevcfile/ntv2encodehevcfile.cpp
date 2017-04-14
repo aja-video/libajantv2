@@ -227,7 +227,6 @@ void NTV2EncodeHEVCFile::Quit (void)
 
 AJAStatus NTV2EncodeHEVCFile::Init (void)
 {
-    char fileName[128];
     AJAStatus	status	(AJA_STATUS_SUCCESS);
     
     //	Open the device...
@@ -301,25 +300,24 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
 	SetupHostBuffers ();
     
     //	Open the YUV input file
-    strcpy(fileName, mFileName.c_str());
-    status = mHevcCommon->OpenYuv420File (fileName, RAWFILEWIDTH, RAWFILEHEIGHT);
+    status = mHevcCommon->OpenYuv420File (mFileName, RAWFILEWIDTH, RAWFILEHEIGHT);
     if (AJA_FAILURE (status))
 	{
-		printf("OpenYuv420File %s failed %d\n", fileName, status);
+		cerr << "OpenYuv420File " << mFileName << " failed " << status << endl;
         return status;
 	}
   
-	//	Create encoded video output file
-    strcpy(fileName, "raw.hevc");
-    if (mMultiStream)
-    {
-        sprintf(fileName, "raw_%d.hevc", (int)mInputChannel + 1);
+	{
+		//	Create encoded video output file
+		ostringstream	fileName;
+		if (mMultiStream)
+			fileName << "raw_" << (mInputChannel+1) << ".hevc";
+		else
+			fileName << "raw.hevc";
+		status = mHevcCommon->CreateHevcFile (fileName.str(), mHevcCommon->YuvNumFrames());
+		if (AJA_FAILURE (status))
+			return status;
     }
-
-    status = mHevcCommon->CreateHevcFile (fileName, mHevcCommon->YuvNumFrames());
-    if (AJA_FAILURE (status))
-        return status;
-    
     return AJA_STATUS_SUCCESS;
 
 }	//	Init
