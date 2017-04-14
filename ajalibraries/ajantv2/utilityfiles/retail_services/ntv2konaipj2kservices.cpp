@@ -1200,10 +1200,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 			if (rv && rv2)
 			{
-				if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config1))
+				if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1))
 				{
 					// Special case we handle channel enables at service level automatically
-					mRx2022Config1.rxc_enable = enableHw;
+					mRx2022Config1.rxc_enable = enableHw ? true : false;
 					setRxConfig(NTV2_CHANNEL1);
 				}
 			}
@@ -1235,10 +1235,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				if (rv && rv2)
 				{
-					if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config2))
+					if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2))
 					{
 						// Special case we handle channel enables at service level automatically
-						mRx2022Config2.rxc_enable = enableHw;
+						mRx2022Config2.rxc_enable = enableHw ? true : false;
 						setRxConfig(NTV2_CHANNEL2);
 					}
 				}
@@ -1259,10 +1259,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 			if (rv && rv2)
 			{
-				if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config3))
+				if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3))
 				{
 					// Special case we handle channel enables at service level automatically
-					mTx2022Config3.txc_enable = enableHw;
+					mTx2022Config3.txc_enable = enableHw ? true : false;
 					setTxConfig(NTV2_CHANNEL1);
 				}
 				else
@@ -1319,10 +1319,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				if (rv && rv2)
 				{
-					if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config4))
+					if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4))
 					{
 						// Special case we handle channel enables at service level automatically
-						mTx2022Config4.txc_enable = enableHw;
+						mTx2022Config4.txc_enable = enableHw ? true : false;
 						setTxConfig(NTV2_CHANNEL2);
 					}
 					else

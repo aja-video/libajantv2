@@ -2013,7 +2013,7 @@ bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode bur
 			{
 				scale = scale / 10;
 
-				char1 = count / scale;
+				char1 = int(count / scale);
 				CopyDigit ( (_pCharRenderMap + (char1 * charSizeBytes)), _charWidthBytes, _charHeightLines, pFrameBuff, rowBytes);
 				pFrameBuff += _charWidthBytes;
 

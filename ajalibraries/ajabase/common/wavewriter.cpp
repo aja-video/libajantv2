@@ -30,37 +30,37 @@ const int sizeOf_data   = 8;
 #define AjaWavBigEndianHw
 #endif
 
-#define AjaWavSwap16(x) (((uint16_t(x) & 0xFF00) >> 8) + \
-((uint16_t(x) & 0x00FF) << 8))
+#define AjaWavSwap16(x) (	((uint16_t(x) & 0xFF00) >> 8)	|	\
+							((uint16_t(x) & 0x00FF) << 8)	)
 
-#define AjaWavSwap32(x) (((uint32_t(x) & UINT32_C(0xFF000000)) >> 24)  + \
-((uint32_t(x) & UINT32_C(0x00FF0000)) >>  8)  + \
-((uint32_t(x) & UINT32_C(0x0000FF00)) <<  8)  + \
-((uint32_t(x) & UINT32_C(0x000000FF)) << 24))
+#define AjaWavSwap32(x) (	((uint32_t(x) & 0xFF000000) >> 24)	|	\
+							((uint32_t(x) & 0x00FF0000) >>  8)	|	\
+							((uint32_t(x) & 0x0000FF00) <<  8)	|	\
+							((uint32_t(x) & 0x000000FF) << 24)	)
 
-#define AjaWavSwap64(x) (((uint64_t(x) & UINT64_C(0xFF00000000000000)) >> 56)  + \
-((uint64_t(x) & UINT64_C(0x00FF000000000000)) >> 40)  + \
-((uint64_t(x) & UINT64_C(0x0000FF0000000000)) >> 24)  + \
-((uint64_t(x) & UINT64_C(0x000000FF00000000)) >>  8)  + \
-((uint64_t(x) & UINT64_C(0x00000000FF000000)) <<  8)  + \
-((uint64_t(x) & UINT64_C(0x0000000000FF0000)) << 24)  + \
-((uint64_t(x) & UINT64_C(0x000000000000FF00)) << 40)  + \
-((uint64_t(x) & UINT64_C(0x00000000000000FF)) << 56))
+#define AjaWavSwap64(x) (	((uint64_t(x) & 0xFF00000000000000ULL) >> 56)	|	\
+							((uint64_t(x) & 0x00FF000000000000ULL) >> 40)	|	\
+							((uint64_t(x) & 0x0000FF0000000000ULL) >> 24)	|	\
+							((uint64_t(x) & 0x000000FF00000000ULL) >>  8)	|	\
+							((uint64_t(x) & 0x00000000FF000000ULL) <<  8)	|	\
+							((uint64_t(x) & 0x0000000000FF0000ULL) << 24)	|	\
+							((uint64_t(x) & 0x000000000000FF00ULL) << 40)	|	\
+							((uint64_t(x) & 0x00000000000000FFULL) << 56)	)
 
 #ifdef  AjaWavBigEndianHw
-#define AjaWavBigEndian16(x)      (x)
-#define AjaWavLittleEndian16(x)   AjaWavSwap16(x)
-#define AjaWavBigEndian32(x)      (x)
-#define AjaWavLittleEndian32(x)   AjaWavSwap32(x)
-#define AjaWavBigEndian64(x)      (x)
-#define AjaWavLittleEndian64(x)   AjaWavSwap64(x)
+	#define AjaWavBigEndian16(x)      (x)
+	#define AjaWavLittleEndian16(x)   AjaWavSwap16(x)
+	#define AjaWavBigEndian32(x)      (x)
+	#define AjaWavLittleEndian32(x)   AjaWavSwap32(x)
+	#define AjaWavBigEndian64(x)      (x)
+	#define AjaWavLittleEndian64(x)   AjaWavSwap64(x)
 #else
-#define AjaWavLittleEndian16(x)   (x)
-#define AjaWavBigEndian16(x)      AjaWavSwap16(x)
-#define AjaWavLittleEndian32(x)   (x)
-#define AjaWavBigEndian32(x)      AjaWavSwap32(x)
-#define AjaWavLittleEndian64(x)   (x)
-#define AjaWavBigEndian64(x)      AjaWavSwap64(x)
+	#define AjaWavLittleEndian16(x)   (x)
+	#define AjaWavBigEndian16(x)      AjaWavSwap16(x)
+	#define AjaWavLittleEndian32(x)   (x)
+	#define AjaWavBigEndian32(x)      AjaWavSwap32(x)
+	#define AjaWavLittleEndian64(x)   (x)
+	#define AjaWavBigEndian64(x)      AjaWavSwap64(x)
 #endif
 
 void getDataAndTimeInBextFormat(std::string& formattedDate, std::string& formattedTime)

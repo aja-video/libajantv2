@@ -545,6 +545,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 void DeviceServices::SetDeviceMiscRegisters (NTV2Mode mode)
 {
+	(void) mode;
 }
 
 

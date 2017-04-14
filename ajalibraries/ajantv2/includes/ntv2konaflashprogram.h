@@ -136,8 +136,7 @@ public:
 	bool ProgramFlashValue(uint32_t address, uint32_t value);
 	bool FastProgramFlash256(uint32_t address, uint32_t* buffer);
 	bool EraseSector(uint32_t sectorAddress);
-	bool CheckFlashErased(FlashBlockID flashBlockNumber);
-	bool CheckFlashErased();
+	bool CheckFlashErasedWithBlockID(FlashBlockID flashBlockNumber);
 	uint32_t ReadDeviceID();
 	bool SetDeviceProperties();
 	void DetermingFlashTypeAndBlockNumberFromFileName(const char* bitFileName);
@@ -257,5 +256,4 @@ public:
 
 };
 
-
-#endif
+#endif	//	NTV2KONAFLASHPROGRAM_H
