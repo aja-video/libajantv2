@@ -18,6 +18,9 @@
 		"_comment_Mbps_":"Encoder bit rate (10-200)",
         "Mbps":100,
 
+        "_comment_AudioChannels_":"Number of audio channels (0-16), 0 is no audio",
+        "AudioChannels":2,
+
 		"_comment_Pids_":"Various pids for the streams (video, audio, pcr, program)",
         "ProgramPid":256,
         "VideoPid":257,
