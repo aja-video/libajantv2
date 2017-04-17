@@ -2122,6 +2122,7 @@ void KonaIPJ2kServices::printEncoderConfig(j2kEncoderConfig modelConfig, j2kEnco
 	printf("bitDepth	   %6d%6d\n", modelConfig.bitDepth, encoderConfig.bitDepth);
 	printf("chromaSubsamp  %6d%6d\n", modelConfig.chromaSubsamp, encoderConfig.chromaSubsamp);
 	printf("mbps		   %6d%6d\n", modelConfig.mbps, encoderConfig.mbps);
+	printf("audioChannels  %6d%6d\n", modelConfig.audioChannels, encoderConfig.audioChannels);
 	printf("streamType	   %6d%6d\n", modelConfig.streamType, encoderConfig.streamType);
 	printf("pmtPid		   %6d%6d\n", modelConfig.pmtPid, encoderConfig.pmtPid);
 	printf("videoPid	   %6d%6d\n", modelConfig.videoPid, encoderConfig.videoPid);

@@ -33,7 +33,7 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
-#define WAIT_RESET_MS   1000
+#define WAIT_RESET_MS   150
 
     uint32_t    val, audioCounterStart, audioCounterStop;
     uint32_t    encoderBit, resetBit;
