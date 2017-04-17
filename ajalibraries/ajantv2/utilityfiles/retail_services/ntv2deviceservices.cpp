@@ -288,6 +288,7 @@ void DeviceServices::ReadDriverState (void)
 		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
 		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
 		mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
+		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
 		mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
 		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
 		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
@@ -299,6 +300,7 @@ void DeviceServices::ReadDriverState (void)
 		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
 		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
 		mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
+		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
 		mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
 		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
 		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);

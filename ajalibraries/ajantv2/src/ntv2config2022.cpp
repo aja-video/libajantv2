@@ -225,6 +225,7 @@ void j2kEncoderConfig::init()
     chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
     mbps            = 200;
     streamType      = kJ2KStreamTypeStandard;
+    audioChannels   = 2;
     pmtPid          = 255;
     videoPid        = 256;
     pcrPid          = 257;
@@ -244,6 +245,7 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
         (chromaSubsamp      == other.chromaSubsamp)     &&
         (mbps               == other.mbps)              &&
         (streamType         == other.streamType)        &&
+        (audioChannels      == other.audioChannels)     &&
         (pmtPid             == other.pmtPid)            &&
         (videoPid           == other.videoPid)          &&
         (pcrPid             == other.pcrPid)            &&

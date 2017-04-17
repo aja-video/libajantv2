@@ -182,6 +182,7 @@ public:
     J2KChromaSubSampling    chromaSubsamp;      ///< @brief	Specifies the chroma sub sampling for J2K encode.
     uint32_t                mbps;               ///< @brief	Specifies the mbits per-second for J2K encode.
     J2KStreamType           streamType;         ///< @brief	Specifies the stream type for J2K encode.
+    uint32_t                audioChannels;      ///< @brief	Specifies the number of audio channels for J2K encode, a value of 0 indicates no audio.
     uint32_t                pmtPid;             ///< @brief	Specifies the PID for the PMT.
     uint32_t                videoPid;           ///< @brief	Specifies the PID for the video.
     uint32_t                pcrPid;             ///< @brief	Specifies the PID for the PCR.
