@@ -3,11 +3,11 @@ NTV2DeviceCanChangeEmbeddedAudioClock,,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanChangeFrameBufferSize,Returns true if the device having the given ID does not have fixed frame buffer sizes.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDisableUFC,"Returns true if the device having the given ID has at least one UFC, and it can be disabled.",-,-,-,-,-,-,-,-,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDo2KVideo,Returns true if the device having the given ID is capable of handling 2Kx1556 video.,-,-,-,-,-,-,-,-,X,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
-NTV2DeviceCanDo3GLevelConversion,Returns true if the device having the given ID can perform 3G level B to 3G level A conversion.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoRGBLevelAConversion,Returns true if the device having the given ID can do RGB over 3G Level A.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X
+NTV2DeviceCanDo3GLevelConversion,Returns true if the device having the given ID can perform 3G level B to 3G level A conversion.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,-,-,-,X,X,X
+NTV2DeviceCanDoRGBLevelAConversion,Returns true if the device having the given ID can do RGB over 3G Level A.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X
 NTV2DeviceCanDo425Mux,Returns true if the device having the given ID supports SMPTE 425 mux control.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,X,-,X,X,-,-,-,-,-,-,-,X,X
 NTV2DeviceCanDo4KVideo,Returns true if the device having the given ID can handle 4K/UHD video.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,X,X,-,-,-,-,-,-,X,X
-NTV2DeviceCanDoAESAudioIn,Returns true if the device having the given ID has at least one AES/EBU audio input.,-,-,-,X,X,X,X,-,X,X,-,-,-,-,-,-,X,X,-,-,X,-,-,-,-,-,-,-,-
+NTV2DeviceCanDoAESAudioIn,Returns true if the device having the given ID has at least one AES/EBU audio input.,-,-,-,X,X,X,X,-,X,X,-,-,-,-,-,-,X,X,-,-,X,-,-,X,X,X,-,-,-
 NTV2DeviceCanDoAnalogAudio,Returns true if the device having the given ID has at least one analog audio input or output.,-,-,-,X,X,X,X,-,X,X,-,X,-,X,X,-,X,X,-,-,-,-,-,-,-,-,-,X,X
 NTV2DeviceCanDoAnalogVideoIn,Returns true if the device having the given ID has at least one analog video input.,-,-,-,X,X,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoAnalogVideoOut,Returns true if the device having the given ID has at least one analog video output.,-,-,-,X,X,X,X,-,X,X,-,X,-,-,-,-,X,X,-,-,-,-,-,-,-,-,-,-,-
@@ -17,8 +17,8 @@ NTV2DeviceCanDoAudio8Channels,Returns true if the audio system(s) on the device 
 NTV2DeviceCanDoAudio96K,Returns true if audio system(s) on the device having the given ID can be set to a 96kHz sample rate.,-,-,-,X,X,-,X,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,-,-,-,X,X,X
 NTV2DeviceCanDoAudioDelay,Returns true if audio system(s) on the device having the given ID have an adjustable delay.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoBreakoutBox,Returns true if the device having the given ID can be connected to an AJA breakout box.,-,-,-,X,X,X,-,-,X,X,-,-,-,-,-,-,X,X,-,-,-,-,-,-,-,-,-,-,-
-NTV2DeviceCanDoCapture,Returns true if the device having the given ID can capture (ingest) video.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoColorCorrection,Returns true if the device having the given ID has at least one programmable LUT.,-,-,-,X,X,X,-,-,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,-,-,-,X,X,X
+NTV2DeviceCanDoCapture,Returns true if the device having the given ID can capture (ingest) video.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X
+NTV2DeviceCanDoColorCorrection,Returns true if the device having the given ID has at least one programmable LUT.,-,-,-,X,X,X,-,-,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoCustomAnc,Returns true if the device having the given ID supports ANC insertion/extraction.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,-,-,-,X,X,X
 NTV2DeviceCanDoDSKOpacity,Returns true if the device having the given ID has a mixer/keyer whose opacity is adjustable.,-,-,X,X,X,-,-,-,X,X,X,X,-,X,X,-,X,X,-,-,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoDualLink,Returns true if the device having the given ID can input/output 10-bit RGB over 2-wire SDI.,-,-,-,-,-,-,-,-,X,X,-,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X
@@ -35,7 +35,7 @@ NTV2DeviceCanDoLTCInOnRefPort,Returns true if the device having the given ID can
 NTV2DeviceCanDoMSI,Returns true if the DMA hardware on the device having the given ID supports MSI (Message Signaled Interrupts).,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoMultiFormat,Returns true if the device having the given ID can simultaneously handle different video formats on more than one SDI input or output.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,X,-,X,X,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoPCMControl,Returns true if the audio system(s) on the device having the given ID can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X
-NTV2DeviceCanDoPCMDetection,Returns true if the device having the given ID has per-audio-channel-pair PCM detection capabilities.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,-,-,-,-,-,-,-,-,-,-
+NTV2DeviceCanDoPCMDetection,Returns true if the device having the given ID has per-audio-channel-pair PCM detection capabilities.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-,X,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoPIO,Returns true if the device having the given ID supports Programmed I/O.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoPlayback,Returns true if the device having the given ID can output (play) video.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoProgrammableCSC,Returns true if the device having the given ID has at least one programmable color space converter widget.,-,-,X,X,X,X,-,X,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X
@@ -49,13 +49,13 @@ NTV2DeviceCanDoRP188,Returns true if the device having the given ID can insert a
 NTV2DeviceCanDoSDVideo,Returns true if the device having the given ID can handle SD (Standard Definition) video.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoSDIErrorChecks,Returns true if the device having the given ID can perform SDI error checking.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoStackedAudio,"Returns true if the device having the given ID uses a ""stacked"" arrangement of its audio buffers.",-,-,-,-,-,-,-,-,-,X,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoStereoIn,Returns true if the device having the given ID supports 3D video input over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoStereoOut,Returns true if the device having the given ID supports 3D video output over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X
+NTV2DeviceCanDoStereoIn,Returns true if the device having the given ID supports 3D video input over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X
+NTV2DeviceCanDoStereoOut,Returns true if the device having the given ID supports 3D video output over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X
 NTV2DeviceCanDoThunderbolt,Returns true if the device having the given ID connects to the host using a Thunderbolt cable.,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,-,-,-,-,-,-,-,-,-,-,-,-,X,X
 NTV2DeviceCanDoVideoProcessing,,-,-,X,X,X,X,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanMeasureTemperature,Returns true if the device having the given ID can measure its temperature.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanReportFrameSize,,-,-,-,-,-,-,-,-,-,-,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,X,X,X,X,X,X
+NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,-,-,-,X,X,X
 NTV2DeviceHasColorSpaceConverterOnChannel2,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceHasNWL,Returns true if the device having the given ID has NorthWest Logic DMA hardware.,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-
 NTV2DeviceHasPCIeGen2,Returns true if the device having the given ID supports 2nd-generation PCIe.,-,-,-,-,-,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-
