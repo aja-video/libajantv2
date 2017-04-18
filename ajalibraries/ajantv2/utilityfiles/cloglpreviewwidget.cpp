@@ -869,6 +869,9 @@ void COpenGLPreviewWidget::readLUT16(QString fileName)
                         ri = (lut3DRGBA16Ints[b][g][r].rCoef>>6)&0x3FF;
                         gi = (lut3DRGBA16Ints[b][g][r].gCoef>>6)&0x3FF;
                         bi = (lut3DRGBA16Ints[b][g][r].bCoef>>6)&0x3FF;
+                        lut3DRGB16Ints[b][g][r].rCoef = lut3DRGBA16Ints[b][g][r].rCoef;
+                        lut3DRGB16Ints[b][g][r].gCoef = lut3DRGBA16Ints[b][g][r].gCoef;
+                        lut3DRGB16Ints[b][g][r].bCoef = lut3DRGBA16Ints[b][g][r].bCoef;
                         uint32_t value = ri + (gi<<10) + (bi<<20);
                         lut3DInts[b][g][r] = value;
                     }
@@ -1481,4 +1484,97 @@ void Tetrahedral16bit(int ri,int gi,int bi,int &ro,int &go,int &bo,unsigned long
     bo = (f1*((p1>>32)&0xffff) + f2*((p2>>32)&0xffff) + f3*((p3>>32)&0xffff) + f4*((p4>>32)&0xffff)+1024)>>11;
 
 }
+#if 0
+define _CRT_SECURE_NO_WARNINGS
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include <fstream>
+using std::ifstream;
+
+#include <cstring>
+
+const int MAX_CHARS_PER_LINE = 512;
+const int MAX_TOKENS_PER_LINE = 20;
+const char* const DELIMITER = " ";
+
+int main()
+{
+  // create a file-reading object
+  ifstream fin;
+  fin.open("data.txt"); // open a file
+  if (!fin.good())
+    return 1; // exit if file not found
+
+  // read each line of the file
+  while (!fin.eof())
+  {
+    // read an entire line into memory
+    char buf[MAX_CHARS_PER_LINE];
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+
+    // parse the line into blank-delimited tokens
+    int n = 0; // a for-loop index
+
+    // array to store memory addresses of the tokens in buf
+    const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
+
+    // parse the line
+    token[0] = strtok(buf, DELIMITER); // first token
+    if (token[0]) // zero if line is blank
+    {
+      for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
+      {
+        token[n] = strtok(0, DELIMITER); // subsequent tokens
+        if (!token[n]) break; // no more tokens
+      }
+    }
+
+    // process (print) the tokens
+    for (int i = 0; i < n; i++) // n = #of tokens
+      cout << "Token[" << i << "] = " << token[i] << endl;
+    cout << endl;
+  }
+}
+// stof example
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stof
+
+int main ()
+{
+  std::string orbits ("686.97 365.24");
+  std::string::size_type sz;     // alias of size_t
+
+  float mars = std::stof (orbits,&sz);
+  float earth = std::stof (orbits.substr(sz));
+  std::cout << "One martian year takes " << (mars/earth) << " Earth years.\n";
+  return 0;
+}
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+int main()
+{
+    using namespace boost::algorithm;
+
+    std::string str = "This is a string";
+    std::vector<std::string> tokens;
+
+    split(tokens, str, is_any_of(" ")); // here it is
+
+    for(auto& s: tokens)
+        std::cout << '"' << s << '"' << '\n';
+}
+#endif
