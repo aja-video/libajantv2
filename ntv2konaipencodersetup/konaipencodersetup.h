@@ -16,6 +16,7 @@ typedef  struct {
     uint32_t streamType;
     uint32_t chromaSubSampling;
     uint32_t mbps;
+    uint32_t audioChannels;
     uint32_t programPid;
     uint32_t videoPid;
     uint32_t pcrPid;

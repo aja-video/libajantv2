@@ -39,6 +39,9 @@ bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
     std::cout << "BitDepth       " << mKonaIPParams.bitDepth << std::endl;
     mKonaIPParams.mbps = pjson["Mbps"].toInt();
     std::cout << "Mbps           " << mKonaIPParams.mbps << std::endl;
+    mKonaIPParams.audioChannels = pjson["AudioChannels"].toInt();
+    std::cout << "AudioChannels  " << mKonaIPParams.audioChannels << std::endl;
+
     mKonaIPParams.programPid = pjson["ProgramPid"].toInt();
     std::cout << "ProgramPid     " << mKonaIPParams.programPid << std::endl;
     mKonaIPParams.videoPid = pjson["VideoPid"].toInt();
@@ -110,6 +113,7 @@ bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStr
     encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
     encoderCfg.streamType      = (J2KStreamType)pKonaIPParams->streamType;
     encoderCfg.mbps            = pKonaIPParams->mbps;
+    encoderCfg.audioChannels    = pKonaIPParams->audioChannels;
     encoderCfg.pmtPid          = pKonaIPParams->programPid;
     encoderCfg.videoPid        = pKonaIPParams->videoPid;
     encoderCfg.pcrPid          = pKonaIPParams->pcrPid;

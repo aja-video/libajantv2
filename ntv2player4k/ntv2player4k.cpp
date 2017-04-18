@@ -921,7 +921,7 @@ void NTV2Player4K::PlayFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			mOutputTransferStruct.acVideoBuffer.Set (playData->fVideoBuffer, playData->fVideoBufferSize);
 			mOutputTransferStruct.acAudioBuffer.Set (playData->fAudioBuffer, playData->fAudioBufferSize);
-			mOutputTransferStruct.acANCBuffer.Set(fAncBuffer, 0x2000);
+			mOutputTransferStruct.acANCBuffer.Set(fAncBuffer, NTV2_ANCSIZE_MAX);
 			mOutputTransferStruct.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), NTV2_TCDEST_SDI1);
 			mOutputTransferStruct.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), NTV2_TCDEST_SDI1_LTC);
 
