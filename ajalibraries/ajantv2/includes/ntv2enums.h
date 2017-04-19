@@ -926,8 +926,6 @@ typedef enum
         (__f__) == NTV2_FORMAT_1080p_2K_2398 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2400 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2997 ||                     \
-        (__f__) == NTV2_FORMAT_1080p_2K_4795 ||                     \
-        (__f__) == NTV2_FORMAT_1080p_2K_4800 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_5000 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_5994 ||                     \

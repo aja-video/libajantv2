@@ -205,10 +205,11 @@ class TSGenerator
         {
             for (uint32_t i=0; i<_tableLength; i++)
             {
-                if (i % 16 == 15)
+                if (i % 16 == 15) {
                     kipdprintf("0x%02x\n", _pkt8[i]);
-                else
+				} else {
                     kipdprintf("0x%02x, ", _pkt8[i]);
+				}
             }
             kipdprintf("\n\n");
         }
@@ -217,10 +218,11 @@ class TSGenerator
         {
             for (uint32_t i=0; i<_tableLength; i++)
             {
-                if (i % 16 == 15)
+                if (i % 16 == 15) {
                     kipdprintf("0x%04x\n", _pkt32[i]);
-                else
+				} else {
                     kipdprintf("0x%04x ", _pkt32[i]);
+				}
             }
             kipdprintf("\n\n");
         }
@@ -228,15 +230,15 @@ class TSGenerator
     protected:
         void put16( uint16_t val, int &pos )
         {
-            _pkt8[pos++] = uint8_t(val>>8);
-            _pkt8[pos++] = uint8_t(val);
+            _pkt8[pos++] = (uint8_t)(val>>8);
+            _pkt8[pos++] = val;
         }
 
         void put32( uint32_t val, int &pos )
         {
-            _pkt8[pos++] = uint8_t(val>>24);
-            _pkt8[pos++] = uint8_t(val>>16);
-            _pkt8[pos++] = uint8_t(val>>8);
+            _pkt8[pos++] = (uint8_t)(val>>24);
+            _pkt8[pos++] = (uint8_t)(val>>16);
+            _pkt8[pos++] = (uint8_t)(val>>8);
             _pkt8[pos++] = val;
         }
 };
@@ -518,7 +520,7 @@ class PATGen : public TSGenerator
 
             _pkt8[pos++] = 0;                                   // table id = 0
 
-            uint16_t length = 9 + uint16_t(4*_progNumToPID.size());
+            int length = 9 + (4*_progNumToPID.size());
             put16( (uint16_t)0xb000 + (length & 0x3ff), pos);   // syntax indicator, reserved, length
             put16( _tsId, pos );
 

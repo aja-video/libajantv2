@@ -189,19 +189,19 @@ public:
     uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
 };
 
-typedef enum
-{
-    eProgSel_Off,
-    eProgSel_AutoFirstProg,
-    eProgSel_LowestProgNum,
-    eProgSel_SpecificProgNum,
-    eProgSel_SpecificProgPID,
-    eProgSel_Default = eProgSel_AutoFirstProg,
-} eProgSelMode_t;
-
 class j2kDecoderConfig
 {
 public:
+	typedef enum
+	{
+		eProgSel_Off,
+		eProgSel_AutoFirstProg,
+		eProgSel_LowestProgNum,
+		eProgSel_SpecificProgNum,
+		eProgSel_SpecificProgPID,
+		eProgSel_Default = eProgSel_AutoFirstProg,
+	} eProgSelMode_t;
+
     j2kDecoderConfig() {init();}
     void init();
 
