@@ -261,7 +261,7 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
 
 void j2kDecoderConfig::init()
 {
-    selectionMode = eProgSel_Default;
+    selectionMode = j2kDecoderConfig::eProgSel_Default;
     programNumber = 1;
     programPID    = 0;
     audioNumber   = 1;
