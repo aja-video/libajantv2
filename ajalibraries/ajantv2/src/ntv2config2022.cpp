@@ -619,7 +619,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
        if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
        if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
        if (rxMatch & RX_MATCH_DEST_PORT)   pllMatch |= PLL_MATCH_DEST_PORT;
-       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
+       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= PLL_MATCH_SOURCE_PORT;
        pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
        mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
 
