@@ -63,7 +63,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoLTCInOnRefPort,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
 	kDeviceCanDoMSI,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
 	kDeviceCanDoMultiFormat,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
-	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.
+	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
 	kDeviceCanDoPCMDetection,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
 //	kDeviceCanDoPIO,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
 	kDeviceCanDoPlayback,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can output (play) video.
