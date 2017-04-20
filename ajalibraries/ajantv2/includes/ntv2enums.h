@@ -3257,7 +3257,7 @@ typedef enum
 #define	NTV2_IS_VANCMODE_TALL(__v__)			((__v__) == NTV2_VANCMODE_TALL)
 #define	NTV2_IS_VANCMODE_TALLER(__v__)			((__v__) == NTV2_VANCMODE_TALLER)
 #define NTV2_IS_VANCMODE_ON(__v__)				((__v__) > NTV2_VANCMODE_OFF && (__v__) < NTV2_VANCMODE_INVALID)
-#define NTV2VANCModeFromBools(_tall_,_taller_)	NTV2VANCMode ((_tall_) ? ((_taller_) ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_TALL) : ((_taller_) ? NTV2_VANCMODE_INVALID : NTV2_VANCMODE_OFF))
+#define NTV2VANCModeFromBools(_tall_,_taller_)	NTV2VANCMode ((_tall_) ? ((_taller_) ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_TALL) : NTV2_VANCMODE_OFF)
 
 
 typedef enum
