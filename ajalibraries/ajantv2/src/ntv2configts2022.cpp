@@ -33,10 +33,7 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
-#define WAIT_RESET_MS   150
-
-    uint32_t    val;
-    uint32_t    encoderBit, resetBit;
+#define WAIT_RESET_MS   200
 
     kipdprintf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
 
@@ -62,9 +59,6 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     // Set T2 to mode stop
     J2kSetMode(channel, 2, MODE_STOP);
-
-    // Disable encoder inputs
-    SetEncoderInputEnable( channel, false, false );
 
     // Now wait until T2 has stopped
     uint32_t lastFrameCount = J2kGetFrameCounter(channel, 2);
@@ -95,24 +89,39 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
         }
     }
 
-    // Assert reset
-	SetEncoderReset( channel, true );
+    // Disable encoder inputs
+    SetEncoderInputEnable( channel, false, false );
 
-    // Wait
     #if defined(AJAWindows) || defined(MSWindows)
         ::Sleep (WAIT_RESET_MS);
     #else
         usleep (WAIT_RESET_MS * 1000);
     #endif
 
+    // Assert reset
+	SetEncoderReset( channel, true );
+
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (4);
+    #else
+        usleep (4 * 1000);
+    #endif
+
+    // Wait
+    //#if defined(AJAWindows) || defined(MSWindows)
+    //    ::Sleep (WAIT_RESET_MS);
+    //#else
+    //    usleep (WAIT_RESET_MS * 1000);
+    //#endif
+
     // De-assert reset
 	SetEncoderReset( channel, false );
 
     // Wait
     #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS);
+        ::Sleep (WAIT_RESET_MS*3);
     #else
-        usleep (WAIT_RESET_MS * 1000);
+        usleep (WAIT_RESET_MS*3 * 1000);
     #endif
 
     // Now proceed to configure the device     
@@ -174,6 +183,7 @@ bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoder
         ReadJ2KConfigReg(channel, kRegSarekEncodeChromaSubSamp1, (uint32_t *) &config.chromaSubsamp);
         ReadJ2KConfigReg(channel, kRegSarekEncodeMbps1, &config.mbps);
         ReadJ2KConfigReg(channel, kRegSarekEncodeStreamType1, (uint32_t *) &config.streamType);
+        ReadJ2KConfigReg(channel, kRegSarekEncodeAudioChannels1, (uint32_t *) &config.audioChannels);
         ReadJ2KConfigReg(channel, kRegSarekEncodeProgramPid1, &config.pmtPid);
         ReadJ2KConfigReg(channel, kRegSarekEncodeVideoPid1, &config.videoPid);
         ReadJ2KConfigReg(channel, kRegSarekEncodePcrPid1, &config.pcrPid);
