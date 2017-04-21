@@ -15,7 +15,6 @@ SUBDIRS = ntv2burn \
           ntv2encodehevcvif \
 		  ntv2enumerateboards \
           ntv2fieldburn \
-          ntv2konaipjsonsetup \
 		  ntv2llburn \
 		  ntv2outputtestpattern \
 		  ntv2player \
@@ -24,6 +23,7 @@ SUBDIRS = ntv2burn \
 
 ifndef AJA_NO_QT
 SUBDIRS := $(SUBDIRS) \
+          ntv2konaipjsonsetup \
 		  ntv2qtmultiinput \
 		  ntv2qtpreview
 endif
