@@ -19,7 +19,7 @@ AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
 KERNEL_INCLUDES	:= /lib/modules/$(shell uname -r)/build
 
-VPATH := $(A_LIB_NTV2_SRC):$(A_LIB_NTV2_SRC_LINUX):$(A_LIB_NTV2_INC):$(A_LIB_BASE_PATH):$(KERNEL_INCLUDES):$(SRCDIR)
+VPATH := $(A_LIB_NTV2_SRC):$(A_LIB_NTV2_SRC_LINUX):$(A_LIB_NTV2_M31_PATH):$(A_LIB_NTV2_INC):$(A_LIB_BASE_PATH):$(KERNEL_INCLUDES):$(SRCDIR)
 
 CPPFLAGS := -D_REENTRANT -DAJASTATIC
 
@@ -78,12 +78,12 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2task.cpp \
 		testpatterngen.cpp \
 		xena2vidproc.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31cparam.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31ehparam.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31vaparam.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31vinparam.cpp \
-        $(A_LIB_NTV2_M31_PATH)/ntv2m31viparam.cpp 
+        ntv2m31.cpp \
+        ntv2m31cparam.cpp \
+        ntv2m31ehparam.cpp \
+        ntv2m31vaparam.cpp \
+        ntv2m31vinparam.cpp \
+        ntv2m31viparam.cpp 
 
 include $(DIR)/../../../build/common.mk
 
