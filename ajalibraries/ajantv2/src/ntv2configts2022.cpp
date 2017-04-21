@@ -1030,7 +1030,7 @@ void CNTV2ConfigTs2022::SetEncoderInputEnable( NTV2Channel channel, bool bEnable
 #ifdef COCHRANE
 	mDevice.WriteRegister( 0x20000, (bEnable?BIT(16):0)|(bMDEnable?BIT(17):0), BIT(16)|BIT(17));
 #else
-	uint32_t encoderBit, mdBit;
+	uint32_t encoderBit(0), mdBit(0);
     if (channel == NTV2_CHANNEL2)
     {
 		encoderBit = ENCODER_2_ENABLE;
