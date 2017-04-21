@@ -651,7 +651,7 @@ uint32_t CNTV2ConfigTs2022::J2kGetFrameCounter(const NTV2Channel channel, uint32
     uint32_t val = 0;
 
     mDevice.ReadRegister(addr + (tier*0x40) + kRegJ2kT0Framecount, &val);
-    printf("J2kGetFrameCounter - %d read 0x%08x to MAIN CSR in tier %d\n", channel, val, tier);
+    //printf("J2kGetFrameCounter - %d read 0x%08x to MAIN CSR in tier %d\n", channel, val, tier);
     return val;
 }
 
