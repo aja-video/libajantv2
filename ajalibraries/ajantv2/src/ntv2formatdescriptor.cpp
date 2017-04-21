@@ -827,13 +827,13 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 
 //	NTV2_VANCMODE_OFF							1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
 static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			42,			42,			42,			42,			0	};
-static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		43,			43,			43,			43,			0	};
 //	NTV2_VANCMODE_TALL
 static const ULWord	LineNumbersF1t []	=	{	5,		6,		10,		12,		10,		211,	10,			5,			10,			10,			10,			10,			0	};
-static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			568,		0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			568,		11,			11,			11,			11,			0	};
 //	NTV2_VANCMODE_TALLER
 static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			8,			8,			8,			8,			0	};
-static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		9,			9,			9,			9,			0	};
 
 
 bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const
