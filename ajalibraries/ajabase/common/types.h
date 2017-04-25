@@ -40,11 +40,11 @@
 //	#define PRIi64 "I64i"
 //	#define PRIu64 "I64u"
 
-	// Synonyms for library functions
-	#define ajasnprintf(a, b, c, d) _snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsprintf_s( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) _stricmp( (a), (b) )
-	#define ajawcscasecmp(a, b) _wcsicmp( (a), (b) )
+    // Synonyms for library functions with different names on different platforms
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) _snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsprintf_s( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) _stricmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) _wcsicmp( _str1_, _str2_ )
 
 #endif  // defined(AJA_WINDOWS)
 
@@ -110,10 +110,10 @@
       #endif  // MODULE
 
 	// Synonyms for library functions with different names on different platforms
-	#define ajasnprintf(a, b, c, d) snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsnprintf( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) strcasecmp( (a), (b) )
-	#define ajawcscasecmp(a, b) wcscasecmp( (a), (b) )
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
 #endif  // defined(AJA_LINUX)
 
@@ -150,11 +150,11 @@
     //#define PRIi64	__PRI64_PREFIX "i"
     //#define PRIu64	__PRI64_PREFIX "u"
 
-	// Synonyms for library functions
-	#define ajasnprintf(a, b, c, d) snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsnprintf( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) strcasecmp( (a), (b) )
-	#define ajawcscasecmp(a, b) wcscasecmp( (a), (b) )
+    // Synonyms for library functions with different names on different platforms
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
 	#ifndef EXCLUDE_WCHAR
 		#include <wchar.h>
