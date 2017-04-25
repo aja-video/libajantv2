@@ -311,7 +311,7 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 		{
 			pFormat = (char*) "no message";
 		}
-		vsnprintf(spShare->messageRing[messageIndex].messageText, AJA_DEBUG_MESSAGE_MAX_SIZE, pFormat, vargs);
+        ajavsnprintf(spShare->messageRing[messageIndex].messageText, AJA_DEBUG_MESSAGE_MAX_SIZE, pFormat, vargs);
 		va_end(vargs);
 
 		// set last to indicate message complete

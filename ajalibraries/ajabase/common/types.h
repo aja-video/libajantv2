@@ -42,7 +42,7 @@
 
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) _snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
-    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsprintf_s( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsprintf_s( _str_, _maxbytes_, _format_, __VA_ARGS__ )
     #define ajastrcasecmp(_str1_, _str2_) _stricmp( _str1_, _str2_ )
     #define ajawcscasecmp(_str1_, _str2_) _wcsicmp( _str1_, _str2_ )
 
@@ -111,7 +111,7 @@
 
 	// Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
-    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
     #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
     #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
@@ -152,7 +152,7 @@
 
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
-    #define ajavnsprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
     #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
     #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
