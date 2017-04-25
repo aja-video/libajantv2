@@ -35,11 +35,6 @@
 	#endif
     #define AJA_LITTLE_ENDIAN
 
-	// These macros conform to C99 convention
-//	#define PRId64 "I64d"
-//	#define PRIi64 "I64i"
-//	#define PRIu64 "I64u"
-
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) _snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
     #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsprintf_s( _str_, _maxbytes_, _format_, __VA_ARGS__ )
@@ -143,12 +138,6 @@
 	# define __PRI64_PREFIX   "ll"
 	# define __PRIPTR_PREFIX
 	#endif
-
-	// Macros for printing format specifiers.
-	// Decimal notation.
-    //#define PRId64	__PRI64_PREFIX "d"
-    //#define PRIi64	__PRI64_PREFIX "i"
-    //#define PRIu64	__PRI64_PREFIX "u"
 
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
