@@ -16,6 +16,7 @@
 #endif
 
 #include "ajabase/system/info.h"
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 

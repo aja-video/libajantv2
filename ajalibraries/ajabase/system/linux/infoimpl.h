@@ -15,6 +15,13 @@ public:
 
     AJASystemInfoImpl(int units);
     virtual ~AJASystemInfoImpl();
+
+    virtual AJAStatus Rescan();
+
+    std::map<int, std::string> mLabelMap;
+    std::map<int, std::string> mValueMap;
+
+    int mMemoryUnits;
 };
 
 #endif	//	AJA_INFO_IMPL_H

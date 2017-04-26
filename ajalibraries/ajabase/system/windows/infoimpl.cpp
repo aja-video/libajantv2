@@ -5,11 +5,12 @@
 **/
 
 #include "ajabase/system/system.h"
+#include "ajabase/system/info.h"
 #include "ajabase/system/windows/infoimpl.h"
 
-AJASystemInfoImpl::AJASystemInfoImpl()
+AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
-
+    mMemoryUnits = units;
 }
 
 AJASystemInfoImpl::~AJASystemInfoImpl()
