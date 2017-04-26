@@ -7,7 +7,7 @@
 #include "ajabase/system/system.h"
 #include "ajabase/system/linux/infoimpl.h"
 
-AJASystemInfoImpl::AJASystemInfoImpl()
+AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
 
 }

@@ -13,7 +13,7 @@ class AJASystemInfoImpl
 {
 public:
 
-    AJASystemInfoImpl();
+    AJASystemInfoImpl(int units);
     virtual ~AJASystemInfoImpl();
 };
 

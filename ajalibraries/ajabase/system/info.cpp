@@ -15,14 +15,14 @@
     #include "ajabase/system/mac/infoimpl.h"
 #endif
 
-
 #include "ajabase/system/info.h"
+#include <iomanip>
+#include <iostream>
 
-
-AJASystemInfo::AJASystemInfo()
+AJASystemInfo::AJASystemInfo(AJASystemInfoMemoryUnit units)
 {
 	// create the implementation class
-    mpImpl = new AJASystemInfoImpl();
+    mpImpl = new AJASystemInfoImpl(units);
 
     Rescan();
 }
@@ -42,6 +42,25 @@ AJASystemInfo::Rescan()
     AJAStatus ret = AJA_STATUS_FAIL;
     if(mpImpl)
     {
+        // labels
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)] = "System Model";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)] = "System Name";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)] = "System Boot Time";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)] = "OS Product Name";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_Version)] = "OS Version";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = "OS Build";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = "OS Kernel Version";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_Type)] = "CPU Type";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_NumCores)] = "CPU Num Cores";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)] = "Memory Total";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
+
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)] = "AJA Utilities Path";
+
         ret = mpImpl->Rescan();
     }
 
@@ -49,9 +68,10 @@ AJASystemInfo::Rescan()
 }
 
 AJAStatus
-AJASystemInfo::GetTagValue(AJASystemInfoTag tag, std::string &value)
+AJASystemInfo::GetValue(AJASystemInfoTag tag, std::string &value)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
+    value = "";
     if (mpImpl && mpImpl->mValueMap.count(int(tag)) != 0)
     {
         value = mpImpl->mValueMap[int(tag)];
@@ -62,24 +82,29 @@ AJASystemInfo::GetTagValue(AJASystemInfoTag tag, std::string &value)
 }
 
 AJAStatus
-AJASystemInfo::GetTagValue(AJASystemInfoTag tag, char* value, size_t max_len)
+AJASystemInfo::GetValue(AJASystemInfoTag tag, char* value, size_t max_len)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
+    if (max_len > 0)
+    {
+        strcpy(value, "");
 
-    std::string tmp;
-    ret = GetTagValue(tag, tmp);
-    strncpy(value, tmp.c_str(), max_len);
+        std::string tmp;
+        ret = GetValue(tag, tmp);
+        strncpy(value, tmp.c_str(), max_len);
+    }
 
     return ret;
 }
 
 AJAStatus
-AJASystemInfo::GetTagDescription(AJASystemInfoTag tag, std::string& desc)
+AJASystemInfo::GetLabel(AJASystemInfoTag tag, std::string& label)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
-    if (mpImpl && mpImpl->mDescMap.count(int(tag)) != 0)
+    label = "";
+    if (mpImpl && mpImpl->mLabelMap.count(int(tag)) != 0)
     {
-        desc = mpImpl->mDescMap[int(tag)];
+        label = mpImpl->mLabelMap[int(tag)];
         ret = AJA_STATUS_SUCCESS;
     }
 
@@ -87,13 +112,68 @@ AJASystemInfo::GetTagDescription(AJASystemInfoTag tag, std::string& desc)
 }
 
 AJAStatus
-AJASystemInfo::GetTagDescription(AJASystemInfoTag tag, char* desc, size_t max_len)
+AJASystemInfo::GetLabel(AJASystemInfoTag tag, char* label, size_t max_len)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
+    if (max_len > 0)
+    {
+        strcpy(label, "");
 
-    std::string tmp;
-    ret = GetTagDescription(tag, tmp);
-    strncpy(desc, tmp.c_str(), max_len);
+        std::string tmp;
+        ret = GetLabel(tag, tmp);
+        strncpy(label, tmp.c_str(), max_len);
+    }
 
     return ret;
+}
+
+std::string
+AJASystemInfo::ToString()
+{
+    std::ostringstream oss;
+
+    int longestLabelLen = 0;
+    for (int i=0;i<(int)AJA_SystemInfoTag_LAST;i++)
+    {
+        AJASystemInfoTag tag = (AJASystemInfoTag)i;
+        std::string label, value;
+        AJAStatus retLabel = GetLabel(tag, label);
+        AJAStatus retValue = GetValue(tag, value);
+        if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
+        {
+            if (label.length() > longestLabelLen)
+                longestLabelLen = label.length();
+        }
+    }
+
+    longestLabelLen += 3;
+
+    for (int i=0;i<(int)AJA_SystemInfoTag_LAST;i++)
+    {
+        AJASystemInfoTag tag = (AJASystemInfoTag)i;
+        std::string label, value;
+        AJAStatus retLabel = GetLabel(tag, label);
+        AJAStatus retValue = GetValue(tag, value);
+
+        if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
+        {
+            label += ":";
+            oss << std::setw(longestLabelLen) << std::left << label << " " << value << std::endl;
+        }
+    }
+
+    return oss.str();
+}
+
+void
+AJASystemInfo::ToString(std::string& allLabelsAndValues)
+{
+    allLabelsAndValues = ToString();
+}
+
+std::ostream & operator << (std::ostream & inOutStream, const AJASystemInfo & inData)
+{
+    AJASystemInfo* instance = (AJASystemInfo*)&inData;
+    inOutStream << instance->ToString();
+    return inOutStream;
 }
