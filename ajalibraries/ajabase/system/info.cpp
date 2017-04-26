@@ -45,6 +45,7 @@ AJASystemInfo::Rescan()
     {
         // labels
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)] = "System Model";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Bios)] = "System BIOS";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)] = "System Name";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)] = "System Boot Time";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)] = "OS Product Name";
@@ -83,22 +84,6 @@ AJASystemInfo::GetValue(AJASystemInfoTag tag, std::string &value)
 }
 
 AJAStatus
-AJASystemInfo::GetValue(AJASystemInfoTag tag, char* value, size_t max_len)
-{
-    AJAStatus ret = AJA_STATUS_FAIL;
-    if (max_len > 0)
-    {
-        strcpy(value, "");
-
-        std::string tmp;
-        ret = GetValue(tag, tmp);
-        strncpy(value, tmp.c_str(), max_len);
-    }
-
-    return ret;
-}
-
-AJAStatus
 AJASystemInfo::GetLabel(AJASystemInfoTag tag, std::string& label)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
@@ -107,22 +92,6 @@ AJASystemInfo::GetLabel(AJASystemInfoTag tag, std::string& label)
     {
         label = mpImpl->mLabelMap[int(tag)];
         ret = AJA_STATUS_SUCCESS;
-    }
-
-    return ret;
-}
-
-AJAStatus
-AJASystemInfo::GetLabel(AJASystemInfoTag tag, char* label, size_t max_len)
-{
-    AJAStatus ret = AJA_STATUS_FAIL;
-    if (max_len > 0)
-    {
-        strcpy(label, "");
-
-        std::string tmp;
-        ret = GetLabel(tag, tmp);
-        strncpy(label, tmp.c_str(), max_len);
     }
 
     return ret;

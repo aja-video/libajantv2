@@ -25,6 +25,7 @@ enum AJASystemInfoMemoryUnit
 enum AJASystemInfoTag
 {
     AJA_SystemInfoTag_System_Model,
+    AJA_SystemInfoTag_System_Bios,
     AJA_SystemInfoTag_System_Name,
     AJA_SystemInfoTag_System_BootTime,
     AJA_SystemInfoTag_OS_ProductName,
@@ -60,10 +61,7 @@ public:
     virtual AJAStatus Rescan();
 	
     AJAStatus GetValue(AJASystemInfoTag tag, std::string& value);
-    AJAStatus GetValue(AJASystemInfoTag tag, char* value, size_t max_len);
-
     AJAStatus GetLabel(AJASystemInfoTag tag, std::string& label);
-    AJAStatus GetLabel(AJASystemInfoTag tag, char* label, size_t max_len);
 
     void ToString(std::string& allLabelsAndValues);
     std::string ToString();
