@@ -98,7 +98,7 @@ AJASystemInfo::GetLabel(AJASystemInfoTag tag, std::string& label)
 }
 
 std::string
-AJASystemInfo::ToString()
+AJASystemInfo::ToString(int maxLength)
 {
     std::ostringstream oss;
 
@@ -111,7 +111,7 @@ AJASystemInfo::ToString()
         AJAStatus retValue = GetValue(tag, value);
         if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
         {
-            if (label.length() > longestLabelLen)
+            if ((int)label.length() > longestLabelLen)
                 longestLabelLen = label.length();
         }
     }
@@ -128,7 +128,47 @@ AJASystemInfo::ToString()
         if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
         {
             label += ":";
-            oss << std::setw(longestLabelLen) << std::left << label << " " << value << std::endl;
+            std::ostringstream l;
+            l << std::setw(longestLabelLen) << std::left << label << " " << value;
+
+            int longestLabelPlusColonLen = longestLabelLen+1;
+
+            if (maxLength > 0 &&
+                maxLength > longestLabelPlusColonLen &&
+                (int)l.str().length() > maxLength)
+            {
+                // this will wrap the values at maxLength to use multiple lines
+                // a maxLength of -1 will skip this functionality
+                // i.e:
+                //
+                // some label:   this is a long string of text
+                //
+                // with a maxLength of 36 would become
+                //
+                // some label:   this is a long string
+                //               of text
+                //
+
+                std::string tmp = l.str();
+
+                oss << tmp.substr(0, maxLength) << std::endl;
+                tmp = tmp.substr(maxLength, std::string::npos);
+
+                int maxGrabAmount = maxLength - longestLabelPlusColonLen;
+                while(!tmp.empty())
+                {
+                    int grab = maxGrabAmount;
+                    if (grab > (int)tmp.length())
+                        grab = (int)tmp.length();
+
+                    oss << std::setw(longestLabelLen) << std::left << "" << " " << tmp.substr(0, grab) << std::endl;
+                    tmp = tmp.substr(grab, std::string::npos);
+                }
+            }
+            else
+            {
+                oss << l.str() << std::endl;
+            }
         }
     }
 

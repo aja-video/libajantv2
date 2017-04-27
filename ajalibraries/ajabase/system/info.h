@@ -64,7 +64,7 @@ public:
     AJAStatus GetLabel(AJASystemInfoTag tag, std::string& label);
 
     void ToString(std::string& allLabelsAndValues);
-    std::string ToString();
+    std::string ToString(int maxLength = -1);
 private:
 
     AJASystemInfoImpl* mpImpl;
