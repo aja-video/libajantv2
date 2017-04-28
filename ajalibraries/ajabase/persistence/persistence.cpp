@@ -7,8 +7,8 @@
 #include "persistence.h"
 #include "sqlite3.h"
 #include "stdlib.h"
+#include "ajabase/system/info.h"
 //#include "ajabase/system/debug.h"
-//#include "ajabase/system/systemtime.h"
 
 // Mac defines
 #if !defined(AJA_MAC) && defined(AJAMac)
@@ -25,7 +25,6 @@
 #define AJA_WINDOWS
 #endif
 
-
 // Platform includes
 #if defined(AJA_MAC)
 #include <sys/stat.h>
@@ -33,12 +32,8 @@
 #endif
 
 #if defined(AJA_WINDOWS)
-// need to link with Shlwapi.lib
 #include <Windows.h>
-#include <Shlobj.h>
-#include <Shlwapi.h>
 #include <io.h>
-// #include <shfolder.h>
 #pragma warning(disable:4996)
 #ifndef F_OK
 #define F_OK 0
@@ -69,158 +64,6 @@
 #endif
 
 //MARK: hidden helpers
-
-std::string storagePath(bool bSharedPrefFile)
-{
-	std::string path;
-	
-#if defined(AJA_MAC)		
-	
-	if (bSharedPrefFile)
-	{
-		path.append("/Users/Shared");
-	}
-	else	// Users
-	{
-		// get current users home dir path, /Users/<username>
-		const char* homePath = getenv("HOME");
-		if (homePath != NULL)
-			path.append(homePath);
-	}
-	
-	path.append("/Library/Preferences/");
-	
-#endif
-	
-#if defined(AJA_LINUX)
-    // want ~/.aja/config
-	
-    char *home = getenv("HOME");
-    if (bSharedPrefFile)
-    {
-        path.append("/opt/aja/config/");
-    }
-    else if (home)
-    {
-        path.append(home);
-        path.append("/.aja/config/");
-    }
-    else
-    {
-        path.append("/opt/aja/config/");
-    }
-#endif	
-	
-#if defined(AJA_MAC) || defined(AJA_LINUX)
-	// If the path does not exist create it
-	struct stat st;
-	if ( stat( path.c_str(), &st ) == -1) 
-	{
-		//mkdir(path.c_str(),S_IRWXU|S_IRGRP|S_IROTH); // give 744 permissions
-		//mkdir(path.c_str(),S_IRWXU| S_IRWXG | S_IRWXO); // give 777 permissions
-		mkdir(path.c_str(),ALLPERMS); 
-		chmod(path.c_str(),ALLPERMS);
-	}	
-#endif	
-	
-#if defined(AJA_WINDOWS)
-	/* makes something like \Users\<username>\AppData\Local\Aja */
-
-	if(bSharedPrefFile)
-	{
-		TCHAR szPath[MAX_PATH];
-		HRESULT r;
-		r = SHGetFolderPath(NULL,CSIDL_COMMON_APPDATA,NULL,0,szPath);
-		if(r != S_OK)
-		{
-			//error
-		}
-		else
-		{
-			path.erase();
-#ifdef UNICODE
-			PathAppend(szPath, L"Aja\\");
-			char tmpPath[MAX_PATH];
-			::wcstombs(tmpPath,szPath,MAX_PATH);
-			path.append(tmpPath);
-#else
-			PathAppend(szPath, "Aja\\");
-			path.append(szPath);
-#endif
-		}
-		
-	}
-	else
-	{
-		// Need to get the user from the registry since when this is run as a service all the normal
-		// calls to get the user name return SYSTEM
-
-		// Method 1 of getting username from registry 
-		char  szUserName[128];
-		memset(szUserName,0,128);
-		DWORD dwDataSize=128;
-		HKEY hkey;
-		long lResult;
-		lResult = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI", 0, KEY_QUERY_VALUE|KEY_WOW64_64KEY, &hkey);
-		if(ERROR_SUCCESS == lResult)
-		{
-			// read the value
-			DWORD dwType;
-			lResult = RegQueryValueExA(hkey,"LastLoggedOnUser", NULL, &dwType, (BYTE*)szUserName, &dwDataSize);
-			RegCloseKey(hkey);
-		}
-		std::string tmpStr(szUserName);
-
-		path.erase();
-		path.append(getenv("SystemDrive"));
-		path.append("\\Users\\");
-		if(tmpStr.find('\\') != std::string::npos )
-		{
-			//strip off anything before a "\\"
-			path.append(tmpStr.substr(tmpStr.find('\\')+1));
-		}
-		else
-		{
-			path.append(tmpStr);
-		}
-
-		//AJA_REPORT(1,AJA_DebugSeverity_Debug,"method #1 %s",path.c_str());
-
-		//check it directory exists, if not try Method 2
-		if(PathFileExistsA(path.c_str())==false)
-		{
-			// Method 2 of getting username from registry (will not work if logged in with a Microsoft ID)
-			// http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
-			memset(szUserName,0,128);
-			lResult = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_QUERY_VALUE|KEY_WOW64_64KEY, &hkey);
-			if(ERROR_SUCCESS == lResult)
-			{
-				// read the value
-				DWORD dwType;
-				lResult = RegQueryValueExA(hkey,"LastUsedUsername", NULL, &dwType, (BYTE*)szUserName, &dwDataSize);
-				RegCloseKey(hkey);
-			}
-			path.erase();
-			path.append(getenv("SystemDrive"));
-			path.append("\\Users\\");
-			path.append(szUserName);
-
-			//AJA_REPORT(1,AJA_DebugSeverity_Debug,"method #2 %s",path.c_str());
-		} 
-
-		path.append("\\AppData\\Local\\Aja\\");
-		//AJA_REPORT(1,AJA_DebugSeverity_Debug,"full path used %s",path.c_str());
-	}
-
-	if(PathFileExistsA(path.c_str())==false)
-	{
-		SHCreateDirectoryExA(NULL,path.c_str(),NULL);
-	}
-
-#endif
-
-	return path;
-}
 
 std::string makeCreateTableString(std::string tableName,bool blobTable = false)
 {
@@ -915,12 +758,20 @@ AJAPersistence::AJAPersistence()
 {
 	//AJADebug::Open();
 	Init();
-	
-//TODO: temp for testing	
+		
 	std::string serialNum = "card1";
 
-	mstateKeyName = storagePath(mSharedPrefFile);
-	mstateKeyName += "board " + serialNum;
+    AJASystemInfo si;
+    if (mSharedPrefFile)
+    {
+        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
+    }
+    else
+    {
+        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
+    }
+
+    mstateKeyName += "board " + serialNum;
 }
 
 AJAPersistence::AJAPersistence(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
@@ -931,7 +782,15 @@ AJAPersistence::AJAPersistence(std::string appID, std::string deviceType, std::s
 	mserialNumber = deviceNumber;
 
 	mSharedPrefFile = bSharePrefFile;
-	mstateKeyName = storagePath(mSharedPrefFile);
+    AJASystemInfo si;
+    if (mSharedPrefFile)
+    {
+        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
+    }
+    else
+    {
+        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
+    }
 	mstateKeyName += appID;	
 }
 
