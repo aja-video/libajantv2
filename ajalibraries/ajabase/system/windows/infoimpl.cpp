@@ -8,7 +8,7 @@
 #include "ajabase/system/info.h"
 #include "ajabase/system/windows/infoimpl.h"
 
-// need to link with Shlwapi.lib
+// need to link with Shlwapi.lib & Netapi32.lib
 #pragma warning(disable:4996)
 #include <io.h>
 #include <Lm.h>

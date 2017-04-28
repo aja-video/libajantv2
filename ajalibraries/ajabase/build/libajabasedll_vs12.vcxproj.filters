@@ -125,6 +125,12 @@
       <Filter>Persistence</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="..\system\info.cpp">
+      <Filter>System Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\system\windows\infoimpl.cpp">
+      <Filter>System Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\audioutilities.h">
@@ -261,6 +267,12 @@
     </ClInclude>
     <ClInclude Include="..\persistence\sqlite3.h">
       <Filter>Persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\system\info.h">
+      <Filter>System Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\system\windows\infoimpl.h">
+      <Filter>System Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -110,7 +110,7 @@
       <ProgramDatabaseFile />
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>netapi32.lib;rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -140,7 +140,7 @@
       <ProgramDatabaseFile />
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>Rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>netapi32.lib;rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -168,7 +168,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>netapi32.lib;rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -200,7 +200,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>Rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>netapi32.lib;rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -226,10 +226,12 @@
     <ClCompile Include="..\system\debug.cpp" />
     <ClCompile Include="..\system\diskstatus.cpp" />
     <ClCompile Include="..\system\event.cpp" />
+    <ClCompile Include="..\system\info.cpp" />
     <ClCompile Include="..\system\windows\eventimpl.cpp" />
     <ClCompile Include="..\system\windows\file_io.cpp" />
     <ClCompile Include="..\system\ip_socket.cpp" />
     <ClCompile Include="..\system\lock.cpp" />
+    <ClCompile Include="..\system\windows\infoimpl.cpp" />
     <ClCompile Include="..\system\windows\lockimpl.cpp" />
     <ClCompile Include="..\system\log.cpp" />
     <ClCompile Include="..\system\memory.cpp" />
@@ -286,10 +288,12 @@
     <ClInclude Include="..\system\debugshare.h" />
     <ClInclude Include="..\system\diskstatus.h" />
     <ClInclude Include="..\system\event.h" />
+    <ClInclude Include="..\system\info.h" />
     <ClInclude Include="..\system\windows\eventimpl.h" />
     <ClInclude Include="..\system\file_io.h" />
     <ClInclude Include="..\system\ip_socket.h" />
     <ClInclude Include="..\system\lock.h" />
+    <ClInclude Include="..\system\windows\infoimpl.h" />
     <ClInclude Include="..\system\windows\lockimpl.h" />
     <ClInclude Include="..\system\log.h" />
     <ClInclude Include="..\system\memory.h" />
