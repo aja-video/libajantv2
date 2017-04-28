@@ -33,6 +33,8 @@ AJA_LIB_SRCS =\
 	eventimpl.cpp \
 	file_io.cpp \
 	guid.cpp \
+	info.cpp \
+	infoimpl.cpp \
 	ip_socket.cpp \
 	lock.cpp \
 	lockimpl.cpp \
