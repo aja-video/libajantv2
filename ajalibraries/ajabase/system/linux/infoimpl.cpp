@@ -8,6 +8,8 @@
 #include "ajabase/system/info.h"
 #include "ajabase/system/linux/infoimpl.h"
 
+#include <cstdlib>
+#include <stdexcept>
 #include <unistd.h>
 
 std::string aja_cmd(const char* cmd)
