@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include "ajabase/system/info.h"
 
 //Change these to match way linking in SDK
 
@@ -45,6 +46,8 @@ public:
 		
 	virtual ~AJAPersistence();
 
+    void SetParams(std::string appID="", std::string deviceType="", std::string deviceNumber="", bool bSharePrefFile=false);
+
 	bool SetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);	
 	bool GetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);
 	bool FileExists();
@@ -78,8 +81,7 @@ public:
 #if defined(USE_WITH_NTV4)
 #endif
 	
-private:
-	void Init();
+private:	
 	
 #if defined(USE_WITH_NTV2)	
 	CNTV2Status 	*mpboardHandle;
@@ -89,6 +91,8 @@ private:
 	bool					mSharedPrefFile;
 	std::string				mserialNumber;	
 	std::string				mstateKeyName;
+
+    AJASystemInfo           mSysInfo;
 };
 
 #endif	//	AJAPersistence_H

@@ -7,7 +7,6 @@
 #include "persistence.h"
 #include "sqlite3.h"
 #include "stdlib.h"
-#include "ajabase/system/info.h"
 //#include "ajabase/system/debug.h"
 
 // Mac defines
@@ -120,7 +119,6 @@ bool PersistenceSetValue(std::string keyRoot, std::string key, void *value, AJAP
 		isGood = false;
 		return isGood;		
 	}
-	
 	
 	char *valueAsStr=NULL;
 	if(type == AJAPersistenceTypeString)
@@ -756,47 +754,36 @@ bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, 
 
 AJAPersistence::AJAPersistence()		
 {
-	//AJADebug::Open();
-	Init();
-		
-	std::string serialNum = "card1";
-
-    AJASystemInfo si;
-    if (mSharedPrefFile)
-    {
-        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
-    }
-    else
-    {
-        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
-    }
-
-    mstateKeyName += "board " + serialNum;
+    //AJADebug::Open();
+    SetParams("device 1");
 }
 
 AJAPersistence::AJAPersistence(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
 {
-	Init();
-	
-	mboardId = deviceType;
-	mserialNumber = deviceNumber;
-
-	mSharedPrefFile = bSharePrefFile;
-    AJASystemInfo si;
-    if (mSharedPrefFile)
-    {
-        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
-    }
-    else
-    {
-        si.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
-    }
-	mstateKeyName += appID;	
+    SetParams(appID, deviceType, deviceNumber, bSharePrefFile);
 }
 
 AJAPersistence::~AJAPersistence()
 {
 	
+}
+
+void AJAPersistence::SetParams(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
+{
+    mboardId        = deviceType;
+    mserialNumber	= deviceNumber;
+    mSharedPrefFile = bSharePrefFile;
+
+    if (mSharedPrefFile)
+    {
+        mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
+    }
+    else
+    {
+        mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
+    }
+
+    mstateKeyName += appID;
 }
 
 bool AJAPersistence::SetValue(std::string key, void *value, AJAPersistenceType type, int blobSize)
@@ -806,7 +793,6 @@ bool AJAPersistence::SetValue(std::string key, void *value, AJAPersistenceType t
 	else
 		return ::PersistenceSetValue(mstateKeyName, key, value, type, mboardId, mserialNumber);
 }
-
 
 bool AJAPersistence::GetValue(std::string key, void *value, AJAPersistenceType type, int blobSize)
 {
@@ -886,8 +872,6 @@ bool AJAPersistence::GetValuesDouble(std::string key_query, std::vector<std::str
 	return false;
 }
 
-
-
 bool AJAPersistence::FileExists()
 {
 #if defined(AJA_WINDOWS)
@@ -901,7 +885,6 @@ bool AJAPersistence::FileExists()
 	return bExists;
 }
 
-
 // delete pref file
 bool AJAPersistence::DeletePrefFile()
 {
@@ -913,7 +896,6 @@ bool AJAPersistence::DeletePrefFile()
 	}
 	return bSuccess;
 }
-
 
 //MARK: NTV2 specific methods
 
@@ -950,13 +932,6 @@ bool AJAPersistence::BindToCard(CNTV2Status *card)
 #endif //USE_NTV2
 
 //MARK: Private Methods
-
-void AJAPersistence::Init()
-{
-    mboardId        = "";
-    mserialNumber	= "";
-    mSharedPrefFile = false;
-}
 
 void dropTables(std::string dbPath)
 {
