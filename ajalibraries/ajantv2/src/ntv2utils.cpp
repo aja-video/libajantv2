@@ -6725,6 +6725,31 @@ string NTV2VANCModeToString (const NTV2VANCMode inValue, const bool inCompactDis
 }
 
 
+string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
+{
+	ostringstream	oss;
+	if (NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(inValue))
+		oss << (inCompactDisplay ? "SDI" : "NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_") << DEC(inValue+1);
+	else
+		oss << (inCompactDisplay ? "SDI?" : "NTV2_EMBEDDED_AUDIO_INPUT_INVALID");
+	return oss.str();
+}
+
+
+string NTV2AudioSourceToString (const NTV2AudioSource inValue,  const bool inCompactDisplay)
+{
+	switch (inValue)
+	{
+		case NTV2_AUDIO_EMBEDDED:	return inCompactDisplay ? "SDI"		: "NTV2_AUDIO_EMBEDDED";
+		case NTV2_AUDIO_AES:		return inCompactDisplay ? "AES"		: "NTV2_AUDIO_AES";
+		case NTV2_AUDIO_ANALOG:		return inCompactDisplay ? "Analog"	: "NTV2_AUDIO_ANALOG";
+		case NTV2_AUDIO_HDMI:		return inCompactDisplay ? "HDMI"	: "NTV2_AUDIO_HDMI";
+		default:					break;
+	}
+	return inCompactDisplay ? "" : "NTV2_AUDIO_SOURCE_INVALID";
+}
+
+
 string NTV2VideoFormatToString (const NTV2VideoFormat inFormat, const bool inUseFrameRate)
 {
 	if (inUseFrameRate && !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (inFormat))

@@ -1559,13 +1559,25 @@ typedef enum
     NTV2_MAX_NUM_CaptureModes
 } NTV2CaptureMode;
 
+/**
+	@brief	Represents the size of the audio buffer used by a device audio system for storing captured
+			samples or samples awaiting playout. For example, NTV2_AUDIO_BUFFER_SIZE_4MB means that a
+			4MB chunk of device memory is used to store captured audio samples, while another 4MB block
+			of device memory is used to store audio samples for playout.
+	@note	All NTV2 devices have standardized on 4MB audio buffers. Using a different value may result
+			in unexpected behavior.
+**/
 typedef enum
 {
-    NTV2_AUDIO_BUFFER_STANDARD	= 0,	/* 1 MB 00*/
-    NTV2_AUDIO_BUFFER_BIG		= 1,	/* 4 MB 01*/
+	NTV2_AUDIO_BUFFER_SIZE_1MB	= 0,	//	0b00
+	NTV2_AUDIO_BUFFER_SIZE_4MB	= 1,	//	0b01
+    NTV2_AUDIO_BUFFER_STANDARD	= NTV2_AUDIO_BUFFER_SIZE_1MB,
+    NTV2_AUDIO_BUFFER_BIG		= NTV2_AUDIO_BUFFER_SIZE_4MB,
 #if !defined (NTV2_DEPRECATE)
-    NTV2_AUDIO_BUFFER_MEDIUM	= 2,	/* 2 MB 10*/
-    NTV2_AUDIO_BUFFER_BIGGER	= 3,	/* 8 MB 11*/			// 8 MB capture buffer and 8 MB playback buffer
+	NTV2_AUDIO_BUFFER_SIZE_2MB	= 2,	//	0b10
+	NTV2_AUDIO_BUFFER_SIZE_8MB	= 3,	//	0b11
+    NTV2_AUDIO_BUFFER_MEDIUM	= NTV2_AUDIO_BUFFER_SIZE_2MB,
+    NTV2_AUDIO_BUFFER_BIGGER	= NTV2_AUDIO_BUFFER_SIZE_8MB,
 #endif	//	!defined (NTV2_DEPRECATE)
     NTV2_AUDIO_BUFFER_INVALID,
     NTV2_MAX_NUM_AudioBufferSizes	= NTV2_AUDIO_BUFFER_INVALID
@@ -1612,7 +1624,7 @@ typedef enum
     NTV2_EMBEDDED_AUDIO_INPUT_INVALID	= NTV2_MAX_NUM_EmbeddedAudioInputs
 } NTV2EmbeddedAudioInput;
 
-#define	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(_x_)			((_x_) < NTV2_MAX_NUM_EmbeddedAudioInputs)
+#define	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(_x_)			((_x_) >= NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1  &&  (_x_) < NTV2_EMBEDDED_AUDIO_INPUT_INVALID)
 
 
 typedef enum
@@ -1644,7 +1656,7 @@ typedef enum
 #define	NTV2_AUDIO_SOURCE_IS_AES(_x_)			((_x_) == NTV2_AUDIO_AES)
 #define	NTV2_AUDIO_SOURCE_IS_ANALOG(_x_)		((_x_) == NTV2_AUDIO_ANALOG)
 #define	NTV2_AUDIO_SOURCE_IS_HDMI(_x_)			((_x_) == NTV2_AUDIO_HDMI)
-#define	NTV2_IS_VALID_AUDIO_SOURCE(_x_)			((_x_) < NTV2_MAX_NUM_AudioSources)
+#define	NTV2_IS_VALID_AUDIO_SOURCE(_x_)			((_x_) >= NTV2_AUDIO_EMBEDDED  &&  (_x_) < NTV2_AUDIO_SOURCE_INVALID)
 
 
 typedef enum
