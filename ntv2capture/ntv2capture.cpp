@@ -428,8 +428,10 @@ void NTV2Capture::CaptureFrames (void)
 					NTV2AudioChannelPairs	becomingNonPCM, becomingPCM;
 					set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (becomingPCM, becomingPCM.begin()));
 					set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (becomingNonPCM, becomingNonPCM.begin()));
-					if (!becomingNonPCM.empty () || !becomingPCM.empty ())
-						cerr << "## NOTE:  Audio channel pair(s) '" << becomingNonPCM << "' now non-PCM, '" << becomingPCM << "' now PCM" << endl;
+					if (!becomingNonPCM.empty ())
+						cerr << "## NOTE:  Audio channel pair(s) '" << becomingNonPCM << "' now non-PCM" << endl;
+					if (!becomingPCM.empty ())
+						cerr << "## NOTE:  Audio channel pair(s) '" << becomingPCM << "' now PCM" << endl;
 					oldNonPcmPairs = nonPcmPairs;
 				}
 
