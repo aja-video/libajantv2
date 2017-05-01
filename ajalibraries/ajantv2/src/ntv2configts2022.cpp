@@ -528,21 +528,29 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 {
     uint32_t addr = GetIpxTsAddr(channel);
 
-    J2KStreamType       streamType;
-    ReadJ2KConfigReg(channel, kRegSarekEncodeStreamType1, (uint32_t *) &streamType);
+    J2KStreamType   streamType;
+    uint32_t        numAudioChannels = 0;
+    uint32_t        audioChannels = 0;
 
-    // Write number of channels 0 is actually 1 stereo pair and set bit 4 for non elsm streams to indicate 24 bit audio
+    ReadJ2KConfigReg(channel, kRegSarekEncodeStreamType1, (uint32_t *) &streamType);
+    ReadJ2KConfigReg(channel, kRegSarekEncodeAudioChannels1, (uint32_t *) &numAudioChannels);
+
+    // Need to figure out how many stereo pairs we have (0 is actually 1 stereo pair)
+    if (numAudioChannels)
+        audioChannels = (numAudioChannels/2) - 1;
+
+    // Write number of audio channels and set bit 4 for non elsm streams to indicate 24 bit audio
     if (streamType == kJ2KStreamTypeNonElsm)
     {
-        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x10));
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, audioChannels | 0x10);
     }
     else
     {
-        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, (0x00));
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapNumChannels, audioChannels);
     }
 
-    // Enable this device
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapHostEn, (0x1));
+    // Enable the AES encapsulator if there is audio
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_AES_ENCAP) + kRegTsAesEncapHostEn, numAudioChannels?1:0);
 
     return true;
 }
@@ -607,11 +615,15 @@ bool CNTV2ConfigTs2022::GetT0CmdStatus( const NTV2Channel channel, const uint32_
 	uint32_t val;
 	static const int MAX_STATUSES_TO_WAIT = 16;
 	int count = 0;
-	while( J2KGetNextT0Status(channel, &val) ) {
-		if ( ((val >> 16)& 0xff) == cmdId ) {
+    while( J2KGetNextT0Status(channel, &val) )
+    {
+        if ( ((val >> 16)& 0xff) == cmdId )
+        {
 			*pStatus = val;
 			return true;
-		} else {
+        }
+        else
+        {
 			count++;
 			if (count == MAX_STATUSES_TO_WAIT)
 				return false;
@@ -630,18 +642,21 @@ void CNTV2ConfigTs2022::J2kSetMode(const NTV2Channel channel, uint32_t tier, uin
 }
 
 
-void CNTV2ConfigTs2022::J2kSetConfig(const NTV2Channel channel, uint32_t config) {
+void CNTV2ConfigTs2022::J2kSetConfig(const NTV2Channel channel, uint32_t config)
+{
     uint32_t val;
     uint32_t addr = GetIpxJ2KAddr(channel);
 
     mDevice.WriteRegister(addr + kRegJ2kT0CmdFIFO, 0x73010000 | (config & 0xffff));
 
-	if (!GetT0CmdStatus( channel, 0x01, &val)) {
+    if (!GetT0CmdStatus( channel, 0x01, &val))
+    {
 		printf("No status received for setconfig\n");
 		return;
 	}
 
-	if (val >> 24 != 0xf3) {
+    if (val >> 24 != 0xf3)
+    {
 		printf("J2KSetConfig: Expected status 0xf3...... received 0x%08x\n", val);
 	}
 }
@@ -684,12 +699,14 @@ void CNTV2ConfigTs2022::J2kSetParam (const NTV2Channel channel, uint32_t config,
     mDevice.WriteRegister(addr + kRegJ2kT0CmdFIFO, val);
     //printf("J2kSetParam - wrote 0x%08x to CMD FIFO\n", val);
 
-	if (!GetT0CmdStatus( channel, param /* doubles as cmd id*/, &val)) {
+    if (!GetT0CmdStatus( channel, param /* doubles as cmd id*/, &val))
+    {
 		printf("No status received for SetParam\n");
 		return;
 	}
 
-	if (val >> 24 != 0xf0) {
+    if (val >> 24 != 0xf0)
+    {
 		printf("J2KSetConfig: Expected status 0xf0...... received 0x%08x\n", val);
 	}
 }
@@ -706,6 +723,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     // Get our variable user params
     ReadJ2KConfigReg(channel, kRegSarekEncodeVideoFormat1, (uint32_t*) &videoFormat);
     ReadJ2KConfigReg(channel, kRegSarekEncodeStreamType1, (uint32_t *) &streamData.j2kStreamType);
+    ReadJ2KConfigReg(channel, kRegSarekEncodeAudioChannels1, (uint32_t *) &streamData.numAudioChannels);
 
     streamData.interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(videoFormat);
 
@@ -744,6 +762,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     pes._videoStreamData.height = streamData.height;
     pes._videoStreamData.denFrameRate = streamData.denFrameRate;
     pes._videoStreamData.numFrameRate = streamData.numFrameRate;
+    pes._videoStreamData.numAudioChannels = streamData.numAudioChannels;
     pes._videoStreamData.interlaced = streamData.interlaced;
 
     kipdprintf("Host Register Settings:\n\n");
@@ -826,6 +845,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
     pmt._videoStreamData.height = streamData.height;
     pmt._videoStreamData.denFrameRate = streamData.denFrameRate;
     pmt._videoStreamData.numFrameRate = streamData.numFrameRate;
+    pmt._videoStreamData.numAudioChannels = streamData.numAudioChannels;
     pmt._videoStreamData.interlaced = streamData.interlaced;
     length = pmt.makePacket();
 

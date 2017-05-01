@@ -84,6 +84,7 @@ typedef struct TsEncapStreamData
     uint32_t        height;
     uint32_t        denFrameRate;
     uint32_t        numFrameRate;
+    uint32_t        numAudioChannels;
     uint32_t        programPid;
     uint32_t        videoPid;
     uint32_t        pcrPid;
@@ -99,6 +100,7 @@ typedef struct TsVideoStreamData
     uint32_t        height;
     uint32_t        denFrameRate;
     uint32_t        numFrameRate;
+    uint32_t        numAudioChannels;
     bool            interlaced;
 } TsVideoStreamData;
 
@@ -624,7 +626,7 @@ class PMTGen : public TSGenerator
                 _pkt8[j2kLengthPos] =  (uint8_t) (len & 0xff);
             }
 
-            if (_audioNumToPID[1] != 0)
+            if ((_audioNumToPID[1] != 0) && (_videoStreamData.numAudioChannels != 0))
             {
                 // Audio
                 _pkt8[pos++] = 0x06;                                            // Audio Type
@@ -722,7 +724,6 @@ class PMTGen : public TSGenerator
         int makeAudioDescriptor(int &pos)
         {
             int         startPos = pos;
-
             // Header
             _pkt8[pos++] = 0x0a;                                            // descriptor tag
             _pkt8[pos++] = 4;                                               // descriptor length
@@ -745,7 +746,7 @@ class PMTGen : public TSGenerator
             // These two bytes are defined in Table 1 of ST302 spec starting with num channels, we dont add these for standard streams
             if (_videoStreamData.j2kStreamType == kJ2KStreamTypeNonElsm)
             {
-                _pkt8[pos++] = 0x0;                                         // 2 channels, 6 bits of channel ID
+                _pkt8[pos++] =  (_videoStreamData.numAudioChannels/2) - 1;  // number of audio pairs (0 is 1 pair of audio), 6 bits of channel ID
                 _pkt8[pos++] = 0x20;                                        // two bits of channel ID, 24 bits per sample, alignment 0 reserved
             }
 
