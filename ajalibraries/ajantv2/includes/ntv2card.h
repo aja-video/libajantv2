@@ -1664,6 +1664,14 @@ public:
 
 
 	/**
+		@brief		Answers which AES/EBU audio channel pairs are present on the device.
+		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in any of the device's AES/EBU inputs.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetDetectedAESChannelPairs (NTV2AudioChannelPairs & outDetectedChannelPairs);
+
+
+	/**
 		@brief		Sets the audio source for the given audio system on the device.
 		@param[in]	inAudioSystem		Specifies the audio system of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
 										(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.)
