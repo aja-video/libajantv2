@@ -108,8 +108,9 @@ public:
     bool                WriteJ2KConfigReg(const NTV2Channel channel, const uint32_t reg, const uint32_t value);
     bool                ReadJ2KConfigReg(const NTV2Channel channel, const uint32_t reg,  uint32_t * value);
 
-    void                SetEncoderInputEnable( NTV2Channel channel, bool bEnable, bool bMDEnable );
-    void                SetEncoderReset( NTV2Channel channel, bool bReset );
+    void                SetEncoderInputEnable(const NTV2Channel channel, bool bEnable, bool bMDEnable );
+    void                SetEncoderReset(const NTV2Channel channel, bool bReset );
+    int32_t             CalculateTsGen(const NTV2Channel channel);
 
     bool                _is2022_6;
     bool                _is2022_2;

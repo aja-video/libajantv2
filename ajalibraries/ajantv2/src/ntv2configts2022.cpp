@@ -119,9 +119,9 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 
     // Wait
     #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS*3);
+        ::Sleep (WAIT_RESET_MS*2);
     #else
-        usleep (WAIT_RESET_MS*3 * 1000);
+        usleep (WAIT_RESET_MS*2 * 1000);
     #endif
 
     // Now proceed to configure the device     
@@ -414,13 +414,15 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 bool CNTV2ConfigTs2022::SetupEncodeTsTimer(const NTV2Channel channel)
 {
     uint32_t addr = GetIpxTsAddr(channel);
+    int32_t tsGen = 0;
 
     kipdprintf("CNTV2ConfigTs2022::SetupEncodeTsTimer\n");
 
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsLoad, (0x103110));
-    // This will give us about 255mbps so it will handle a 200mbps encoded stream
-    // (former value was 0x3aa which resulted in choppy video with 200mbps encoded streams)
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, (0x300));
+
+    // Calculate TS Gen based on total bitrate and system clock
+    tsGen = CalculateTsGen(channel);
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsGenTc, tsGen);
 
     J2KStreamType       streamType;
     ReadJ2KConfigReg(channel, kRegSarekEncodeStreamType1, (uint32_t *) &streamType);
@@ -1026,7 +1028,7 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
     return rv;
 }
 
-void CNTV2ConfigTs2022::SetEncoderInputEnable( NTV2Channel channel, bool bEnable, bool bMDEnable ) {
+void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bEnable, bool bMDEnable ) {
 #ifdef COCHRANE
 	mDevice.WriteRegister( 0x20000, (bEnable?BIT(16):0)|(bMDEnable?BIT(17):0), BIT(16)|BIT(17));
 #else
@@ -1051,7 +1053,7 @@ void CNTV2ConfigTs2022::SetEncoderInputEnable( NTV2Channel channel, bool bEnable
 }
 
 
-void CNTV2ConfigTs2022::SetEncoderReset( NTV2Channel channel, bool bReset ) {
+void CNTV2ConfigTs2022::SetEncoderReset(const NTV2Channel channel, bool bReset ) {
 #ifdef COCHRANE
 	mDevice.WriteRegister( 0x20000, (bReset?BIT(12):0), BIT(12));
 #else
@@ -1066,4 +1068,26 @@ void CNTV2ConfigTs2022::SetEncoderReset( NTV2Channel channel, bool bReset ) {
 #endif
 }
 
+
+int32_t CNTV2ConfigTs2022::CalculateTsGen(const NTV2Channel channel)
+{
+    uint32_t    mbps;
+    uint32_t    audioChannels1;
+
+    ReadJ2KConfigReg(channel, kRegSarekEncodeMbps1, &mbps);
+    ReadJ2KConfigReg(channel, kRegSarekEncodeAudioChannels1, &audioChannels1);
+
+    // Calculate bitrate, allow 1.2mbps per audio channel, then add an additional 20%
+    double ts_bitrate = (((double) mbps + ((double) audioChannels1 * 1.6)) *  1.2) * 1000000;
+    double sys_clk = 125e6;
+    double d1, d2;
+
+    // First packet rate
+    d1 = ts_bitrate / 8.0 / 188.0;		// Packet Rate
+    d1 = 1.0 / d1;						// Packet Period
+    d2 = 1.0 / sys_clk;					// Clock Period
+    d1 = d1 / d2 - 1.0;					// One less as it counts from 0
+
+    return (int32_t) d1;
+}
 
