@@ -9452,7 +9452,7 @@ bool CNTV2Card::SetHDMIHDRConstantLuminance(const bool inEnableConstantLuminance
 	return WriteRegister(kRegHDMIHDRControl, inEnableConstantLuminance ? 1 : 0, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
 }
 
-bool CNTV2Card::GetHDMIHDRConstantLuminanceSet()
+bool CNTV2Card::GetHDMIHDRConstantLuminance()
 {
 	if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
 		return false;
