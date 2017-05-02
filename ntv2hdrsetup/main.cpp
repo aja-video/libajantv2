@@ -1,7 +1,7 @@
 /**
 	@file		ntv2hdrsetup/main.cpp
 	@brief		Demonstration application that shows how to enable HDR capabilities of 
-				the HDMI out.
+                HDMI out.
 	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -14,6 +14,7 @@
 #include "ajabase/system/systemtime.h"
 #include "ntv2card.h"
 #include "ntv2devicescanner.h"
+#include "ntv2democommon.h"
 //#include "ntv2hdrsetup.h"
 #include <signal.h>
 #include <iostream>
@@ -51,15 +52,19 @@ int main (int argc, const char ** argv)
 	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);		//	Time code source
 	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
 
+    int              eotf            (0);                      //  Eotf to enable 0,1,2,3
+    int              luminance       (0);                      //  Luminanace
+    int              dolbyVision     (0);                      //  Enable dolby vision bit?
+    int				noHdr           (0);						//	Disable hdr?
+
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"index#, serial#, or model"	},
-        //{"input",		'i',	POPT_ARG_STRING,	&pVidSource,	0,	"video input",						"{'?' to list}"		},
-        //{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",					"{'?' to list}"		},
-        //{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",					NULL},
-        //{"rgb",			0,		POPT_ARG_NONE,		&useRGB,		0,	"use RGB10 frame buffer?",			NULL},
-        //{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multichannel/multiformat?",	NULL},
+        {"device",      'd',	POPT_ARG_STRING,	&pDeviceSpec, 0,	"which device to use",     "index#, serial#, or model"	},
+        {"eotf",        'e', POPT_ARG_INT,    &eotf,        0, "EOTF to use",             "0 (Trad Gamma SD), 1 (Trad Gamma HD), 2 (ST 2084), 3 (HLG)"},
+        {"luminance",   'l', POPT_ARG_INT,    &luminance,   0, "luminance",               "0 (Non-Constant), 1 (Constant)"},
+        {"dolbyvision",   0, POPT_ARG_NONE,   &dolbyVision, 1, "enable dolby vision bit", NULL},
+        {"nohdr",         0, POPT_ARG_NONE,   &noHdr,       1, "disable hdr",             NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -72,34 +77,7 @@ int main (int argc, const char ** argv)
 		return 1;
 	}
 	optionsContext = ::poptFreeContext (optionsContext);
-/*
-    //	Select video source...
-    if (pVidSource)
-    {
-        const string	videoSource	(CNTV2DemoCommon::ToLower (pVidSource));
-        if (gSourceMap.find (videoSource) == gSourceMap.end ())
-            {cerr << "## ERROR:  Video source '" << videoSource << "' not one of these: " << gSourceMap << endl;	return 1;}
-        vidSource = gSourceMap [videoSource];
-    }	//	if video source specified
 
-    //	Select time code source...
-    if (pTcSource)
-    {
-        const string	timecodeSource	(CNTV2DemoCommon::ToLower (pTcSource));
-        if (gTCSourceMap.find (timecodeSource) == gTCSourceMap.end ())
-            {cerr << "## ERROR:  Timecode source '" << timecodeSource << "' not one of these: " << gTCSourceMap << endl;	return 1;}
-        tcSource = gTCSourceMap [timecodeSource];
-    }*/
-
-    /*
-	//	Instantiate the NTV2Burn object...
-	NTV2LLBurn	burner (pDeviceSpec ? pDeviceSpec : "0",					//	Which device?
-						(noAudio ? false : true),							//	Include audio?
-						useRGB ? NTV2_FBF_10BIT_RGB : NTV2_FBF_8BIT_YCBCR,	//	Use RGB frame buffer format?
-						vidSource,											//	Which video input source?
-						tcSource,											//	Which time code source?
-						doMultiChannel ? true : false);						//  Set the board up for multi-channel/format
-*/
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
 		::signal (SIGHUP, SignalHandler);
@@ -131,43 +109,16 @@ int main (int argc, const char ** argv)
 
     // setup HDR values based on passed args here
 
+    device.SetHDMIHDRConstantLuminance(luminance == 0 ? false : true);
+    device.SetHDMIHDRElectroOpticalTransferFunction(uint8_t(eotf));
+    device.EnableHDMIHDRDolbyVision(dolbyVision == 0 ? false : true);
+    device.EnableHDMIHDR(noHdr == 1 ? false : true);
 
-    // Loop until ctrl-c is used, that way user can inspect the changes with watcher
-    // if they want
-    while(gGlobalQuit == false)
-    {
-        AJATime::Sleep (250);
-    }
+    // Loop until a key is pressed, that way user can inspect the changes with watcher
+    CNTV2DemoCommon::WaitForEnterKeyPress();
 
     device.SetEveryFrameServices (savedTaskMode);										//	Restore prior service level
     device.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
-
-    /*
-	//	Initialize the NTV2Burn instance...
-	status = burner.Init ();
-	if (AJA_SUCCESS (status))
-	{
-		//	Start the burner's capture and playout threads...
-		burner.Run ();
-
-		//	Loop until told to stop...
-		cout	<< "   Frames   Frames" << endl
-				<< "Processed  Dropped" << endl;
-		while (!gGlobalQuit)
-		{
-			ULWord	framesProcessed, framesDropped;
-			burner.GetStatus (framesProcessed, framesDropped);
-			cout	<< setw (9) << framesProcessed
-					<< setw (9) << framesDropped
-					<< "\r" << flush;
-			AJATime::Sleep (2000);
-		}	//	loop until signaled
-
-		cout << endl;
-	}
-	else
-		cerr << "## ERROR:  Initialization failed, status=" << status << endl;
-    */
 
 	return AJA_SUCCESS (status) ? 0 : 2;	//	Return zero upon success -- otherwise 2
 
