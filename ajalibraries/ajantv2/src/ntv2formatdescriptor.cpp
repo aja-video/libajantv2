@@ -465,6 +465,8 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 		const ULWord					numActiveLines	(numLines);
 		switch (inStandard)
 		{
+			case NTV2_STANDARD_2Kx1080p:
+			case NTV2_STANDARD_2Kx1080i:
 			case NTV2_STANDARD_1080:
 			case NTV2_STANDARD_1080p:	numLines = NTV2_IS_VANCMODE_TALLER(inVancMode) ? 1114 : 1112;	break;
 
@@ -476,7 +478,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 
 			case NTV2_STANDARD_2K:		numLines = 1588;												break;
 
-			default:					MakeInvalid ();													return;
+			default:					numLines = numActiveLines;										break;
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
@@ -527,6 +529,8 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		const ULWord					numActiveLines	(numLines);
 		switch (inStandard)
 		{
+			case NTV2_STANDARD_2Kx1080p:
+			case NTV2_STANDARD_2Kx1080i:
 			case NTV2_STANDARD_1080:
 			case NTV2_STANDARD_1080p:	numLines = NTV2_IS_VANCMODE_TALLER(inVancMode) ? 1114 : 1112;	break;
 
@@ -538,7 +542,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 
 			case NTV2_STANDARD_2K:		numLines = 1588;												break;
 
-			default:					MakeInvalid ();													return;
+			default:					numLines = numActiveLines;										break;
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
