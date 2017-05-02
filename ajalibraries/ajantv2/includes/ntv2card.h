@@ -3839,6 +3839,7 @@ public:
 	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutRange (NTV2HDMIRange * pOutValue)									{return pOutValue ? GetHDMIOutRange (*pOutValue) : false;}
 
+	AJA_VIRTUAL bool		GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue);
 	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (NTV2HDMIAudioChannels inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutAudioChannels (NTV2HDMIAudioChannels * pOutValue)					{return pOutValue ? GetHDMIOutAudioChannels (*pOutValue) : false;}

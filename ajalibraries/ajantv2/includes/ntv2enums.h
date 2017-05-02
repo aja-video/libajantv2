@@ -3101,8 +3101,11 @@ typedef enum
 {
     NTV2_HDMIAudio2Channels,	//	2 Channel output
     NTV2_HDMIAudio8Channels,	//	8 Channel output
-    NTV2_MAX_NUM_HDMIAudioChannelEnums
+    NTV2_MAX_NUM_HDMIAudioChannelEnums,
+    NTV2_INVALID_HDMI_AUDIO_CHANNELS	=	NTV2_MAX_NUM_HDMIAudioChannelEnums
 } NTV2HDMIAudioChannels;
+
+#define	NTV2_IS_VALID_HDMI_AUDIO_CHANNELS(__x__)	((__x__) >= NTV2_HDMIAudio2Channels)  &&  ((__x__) < NTV2_INVALID_HDMI_AUDIO_CHANNELS)
 
 
 /**

@@ -632,6 +632,17 @@ bool CNTV2Card::GetHDMIAudioSampleRateConverterEnable (bool & outEnabled)
 }
 
 
+bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue)
+{
+	ULWord	tempVal	(0);
+	outValue = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
+	if (!ReadRegister(kRegHDMIInputStatus, &tempVal))
+		return false;
+	outValue = (tempVal & kLHIRegMaskHDMIInput2ChAudio) ? NTV2_HDMIAudio2Channels : NTV2_HDMIAudio8Channels;
+	return true;
+}
+
+
 bool CNTV2Card::SetHDMIOutAudioChannels (NTV2HDMIAudioChannels value)
 {
 	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (value), kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
