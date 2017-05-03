@@ -17,9 +17,9 @@ AJA_APP = $(A_UBER_BIN)/ntv2hdrsetup
 VPATH	 = $(A_DEMOAPPS_PATH)
 INCLUDES = -I$(A_DEMOAPPS_PATH)
 
-SRCS = main.cpp ntv2hdrsetup.cpp ntv2democommon.cpp
+SRCS = main.cpp ntv2democommon.cpp
 
-INCS = ntv2hdrsetup.h ntv2democommon.h
+INCS = ntv2democommon.h
 
 include $(DIR)/../../../../build/common.mk
 

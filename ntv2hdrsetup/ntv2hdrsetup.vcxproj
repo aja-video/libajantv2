@@ -190,10 +190,8 @@
   <ItemGroup>
     <ClCompile Include="..\ntv2democommon.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ntv2hdrsetup.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ntv2hdrsetup.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\ajalibraries\ajabase\build\libajabase_vs12.vcxproj">
