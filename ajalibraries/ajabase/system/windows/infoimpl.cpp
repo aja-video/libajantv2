@@ -17,6 +17,8 @@
 #include <time.h>
 #include <Windows.h>
 
+#include <iomanip>
+
 struct WindowsVersionEntry
 {
     int major;
@@ -167,8 +169,12 @@ aja_getboottime()
     FileTimeToSystemTime(&bootTime, &sysBootTime);
 
     std::ostringstream t;
-    t << sysBootTime.wYear << "-" << sysBootTime.wMonth << "-" << sysBootTime.wDay <<
-         " " << sysBootTime.wHour << ":" << sysBootTime.wMinute << ":" << sysBootTime.wSecond;
+    t << std::setfill('0') << std::setw(4) << sysBootTime.wYear << "-" <<
+         std::setfill('0') << std::setw(2) << sysBootTime.wMonth << "-" <<
+         std::setfill('0') << std::setw(2) << sysBootTime.wDay << " " <<
+         std::setfill('0') << std::setw(2) << sysBootTime.wHour << ":" <<
+         std::setfill('0') << std::setw(2) << sysBootTime.wMinute << ":" <<
+         std::setfill('0') << std::setw(2) << sysBootTime.wSecond;
 
     return t.str();
 }
