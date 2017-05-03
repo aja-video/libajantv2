@@ -13,6 +13,7 @@
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include "ntv2card.h"
+#include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
 
