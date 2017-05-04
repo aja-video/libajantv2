@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8B5BDCA3-FA56-4DBE-B006-966EB55132BD}</ProjectGuid>
+    <ProjectGuid>{8AF1A4E4-F828-4CAB-A94C-45D49F4B8A94}</ProjectGuid>
     <RootNamespace>ntv2hdrsetup</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

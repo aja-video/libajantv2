@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2democommon.cpp">
+    <ClCompile Include="..\ntv2democommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
