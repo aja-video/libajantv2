@@ -104,18 +104,18 @@ int main (int argc, const char ** argv)
     }
     device.SetEveryFrameServices (NTV2_OEM_TASKS);  // Set the OEM service level
 
-    // setup HDR values based on passed args
+    // load up the digital primitives with some reasonable values
+    HDRRegValues registerValues;
+    setHDRDefaultsForBT2020(registerValues);
+    registerValues.electroOpticalTransferFunction = uint8_t(eotf);
+    device.SetHDRData(registerValues);
 
+    // setup HDR values based on passed args
     device.SetHDMIHDRConstantLuminance(constluminance == 0 ? false : true);
     device.SetHDMIHDRElectroOpticalTransferFunction(uint8_t(eotf));
 
     // Enabling this will allow dolby vision containing frames to properly display out of HDMI
     device.EnableHDMIHDRDolbyVision(dolbyVision == 0 ? false : true);
-
-    // load up the digital primitives with some reasonable values
-    HDRRegValues registerValues;
-    setHDRDefaultsForBT2020(registerValues);
-    device.SetHDRData(registerValues);
 
     // The master switch for HDMI HDR output
     device.EnableHDMIHDR(noHdr == 1 ? false : true);
