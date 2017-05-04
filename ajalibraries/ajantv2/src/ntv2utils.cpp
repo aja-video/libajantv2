@@ -6042,7 +6042,7 @@ string NTV2ChannelToString (const NTV2Channel inValue, const bool inForRetailDis
 		case NTV2_CHANNEL6:			return inForRetailDisplay ? "Ch6" : "NTV2_CHANNEL6";
 		case NTV2_CHANNEL7:			return inForRetailDisplay ? "Ch7" : "NTV2_CHANNEL7";
 		case NTV2_CHANNEL8:			return inForRetailDisplay ? "Ch8" : "NTV2_CHANNEL8";
-		case NTV2_MAX_NUM_CHANNELS:	return inForRetailDisplay ? "???" : "NTV2_CHANNEL_INVALID";
+		case NTV2_MAX_NUM_CHANNELS:	return inForRetailDisplay ? "n/a" : "NTV2_CHANNEL_INVALID";
 	}
 	return "";
 }

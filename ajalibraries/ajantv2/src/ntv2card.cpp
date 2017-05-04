@@ -750,8 +750,11 @@ bool CNTV2Card::GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, N
 
 ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
 {
-	for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
+	if (inSet.empty())
+		inOutStr << "(none)";
+	else
+		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
 	return inOutStr;
 }
 
