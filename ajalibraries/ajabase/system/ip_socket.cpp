@@ -155,10 +155,11 @@ AJAIPSocket::Deinitialize(void)
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-bool
-AJAIPSocket::Open(const string& ipAddress, uint16_t port)
+AJAStatus AJAIPSocket::Open(const string& ipAddress, uint16_t port)
 {
-	return false;
+    AJA_UNUSED(ipAddress);
+    AJA_UNUSED(port);
+    return AJA_STATUS_FAIL;
 }
 
 
@@ -388,6 +389,11 @@ AJAIPSocket::Poll(
 				struct sockaddr_in& client,
 				int                 timeout)
 {
+    AJA_UNUSED(pData);
+    AJA_UNUSED(dataLength);
+    AJA_UNUSED(client);
+    AJA_UNUSED(timeout);
+
 	return (0);
 }
 
@@ -398,6 +404,9 @@ AJAIPSocket::Poll(
 uint32_t
 AJAIPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
 {
+    AJA_UNUSED(pData);
+    AJA_UNUSED(dataLength);
+    AJA_UNUSED(client);
 	return (0);
 }
 
@@ -411,6 +420,9 @@ AJAIPSocket::Write(
 				uint32_t            dataLength,
 				struct sockaddr_in& targetAddress)
 {
+    AJA_UNUSED(pData);
+    AJA_UNUSED(dataLength);
+    AJA_UNUSED(targetAddress);
 	return (0);
 }
 

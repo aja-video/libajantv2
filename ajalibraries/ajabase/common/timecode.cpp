@@ -467,8 +467,8 @@ void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
 
 bool AJATimeCode::QueryIsRP188DropFrame(uint32_t dbb, uint32_t low, uint32_t high)
 {
-    (void)dbb;
-    (void)high;
+    AJA_UNUSED(dbb);
+    AJA_UNUSED(high);
 	return (low >> 10) & 0x01;
 }
 
@@ -527,8 +527,8 @@ void AJATimeCode::SetRP188(uint32_t dbb, uint32_t low, uint32_t high, const AJAT
 
 void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop)
 {
-    (void)timeBase;
-    (void)bDrop;
+    AJA_UNUSED(timeBase);
+    AJA_UNUSED(bDrop);
     
 	uint32_t dbb  = 0;
 	uint32_t low  = 0;

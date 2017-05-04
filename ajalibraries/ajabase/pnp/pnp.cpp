@@ -70,7 +70,7 @@ AJAPnp::GetPnpDevices() const
 
 AJAPnp::AJAPnp (const AJAPnp & inObjToCopy)
 {
-	(void) inObjToCopy;	assert (false && "hidden copy constructor");	//	mpImpl=inObjToCopy.mpImpl;
+    AJA_UNUSED(inObjToCopy); assert (false && "hidden copy constructor");	//	mpImpl=inObjToCopy.mpImpl;
 }
 
 

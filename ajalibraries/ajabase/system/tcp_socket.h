@@ -28,8 +28,8 @@ class AJA_EXPORT AJATCPSocket : public AJAIPSocket
 		AJAStatus Listen(void);
 		int       Accept(void);
 
-		uint32_t Read(uint8_t* pData, uint32_t dataLength);
-		uint32_t Write(const uint8_t* pData, uint32_t dataLength);
+        uint32_t Read(uint8_t* pData, uint32_t dataLength);
+        uint32_t Write(const uint8_t* pData, uint32_t dataLength);
 
 	private:
 		// None

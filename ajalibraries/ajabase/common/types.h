@@ -288,6 +288,9 @@ typedef enum
 } AJAStatus;
 ///@}
 
+// Use to silence "unused parameter" warnings
+#define AJA_UNUSED(_x_) (void)_x_;
+
 #ifndef NUMELMS
    #define NUMELMS(aa) (sizeof(aa)/sizeof((aa)[0]))
 #endif

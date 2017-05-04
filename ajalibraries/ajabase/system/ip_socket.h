@@ -49,7 +49,7 @@ class AJA_EXPORT AJAIPSocket
 		bool Initialize(void);
 		bool Deinitialize(void);
 
-		virtual bool Open(const std::string& ipAddress, uint16_t port);
+        virtual AJAStatus Open(const std::string& ipAddress, uint16_t port);
 		bool              IsOpen(void);
 
 		bool Shutdown(int how);

@@ -14,7 +14,7 @@
 // event implementation class (mac)
 AJAEventImpl::AJAEventImpl(bool manualReset, const std::string& name) : mManualReset(manualReset)
 {
-    (void)name;
+    AJA_UNUSED(name);
 	pthread_mutex_init(&mMutex, NULL);
 	pthread_cond_init(&mCondVar, NULL);
 	Clear();
@@ -81,7 +81,7 @@ AJAEventImpl::SetState(bool signaled)
 AJAStatus
 AJAEventImpl::GetState(bool* pSignaled)
 {
-    (void)pSignaled;
+    AJA_UNUSED(pSignaled);
 	// wait with timeout 0 returns immediately
 	return WaitForSignal(0);
 }
@@ -163,7 +163,7 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 AJAStatus
 AJAEventImpl::GetEventObject(uint64_t* pEventObject)
 {
-    (void)pEventObject;
+    AJA_UNUSED(pEventObject);
 	return AJA_STATUS_SUCCESS;
 }
 

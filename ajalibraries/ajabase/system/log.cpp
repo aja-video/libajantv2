@@ -143,7 +143,7 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 // print dela time in micro seconds, use additional tag
 void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
 {
-    (void)addTag;
+    AJA_UNUSED(addTag);
 
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);

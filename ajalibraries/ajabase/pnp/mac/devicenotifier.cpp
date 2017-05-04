@@ -11,6 +11,9 @@
 #include <iomanip>
 #include <IOKit/IOCFPlugIn.h>
 #include "devicenotifier.h"
+
+#include "ajabase/common/common.h"
+
 //#include "IOKit/firewire/IOFireWireFamilyCommon.h"	//	No more FireWire support
 
 
@@ -357,7 +360,7 @@ void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_servi
 void DeviceNotifier::DeviceChanged (io_service_t unitService, natural_t messageType, void* message)
 {
 	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "messageType=" << MessageTypeToStr(messageType) << ", message=" << HEX16(message));
-	(void) unitService;
+    AJA_UNUSED(unitService);
 
 	if (m_clientCallback)
 		(*(m_clientCallback))(messageType, m_refcon);	// notify client
