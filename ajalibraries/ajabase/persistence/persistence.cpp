@@ -1087,6 +1087,8 @@ bool AJAPersistence::UnitTestDiskReadWrite()
 	mserialNumber = "987654";	//in db
 	isGood = GetValue(keyName, &hierarchyValue3, AJAPersistenceTypeInt);
 
+    AJA_UNUSED(isGood);
+
 	if(intValue == 42 &&
 	   trueValue == true &&
 	   falseValue == false &&
