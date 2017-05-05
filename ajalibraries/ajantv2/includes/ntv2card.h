@@ -163,22 +163,28 @@ typedef enum _NTV2NumericParamID
 } NTV2NumericParamID;
 
 
-typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			/// @brief	A set of distinct NTV2AudioChannelPair values.
-typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter;	/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
+typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief	A set of distinct NTV2AudioChannelPair values.
+typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter;	///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
 
-typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			/// @brief	A set of distinct NTV2AudioChannelQuad values.
-typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter;	/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
+typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			///< @brief	A set of distinct NTV2AudioChannelQuad values.
+typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter;	///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelQuads & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelQuads.
 
-typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			/// @brief	A set of distinct NTV2AudioChannelOctet values.
-typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
+typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			///< @brief	A set of distinct NTV2AudioChannelOctet values.
+typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
+AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
 
-typedef std::vector <double>					NTV2DoubleArray;				/// @brief	An array of double-precision floating-point values.
-typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			/// @brief	Handy non-const iterator to iterate over an NTV2DoubleArray.
-typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		/// @brief	Handy const iterator to iterate over an NTV2DoubleArray.
+typedef std::vector <double>					NTV2DoubleArray;				///< @brief	An array of double-precision floating-point values.
+typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			///< @brief	Handy non-const iterator to iterate over an NTV2DoubleArray.
+typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		///< @brief	Handy const iterator to iterate over an NTV2DoubleArray.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DoubleArray & inVector);	///<	@brief	Handy ostream writer for NTV2DoubleArray.
+
+typedef UByte						NTV2DID;				///< @brief	An ancillary Data IDentifier.
+typedef std::set <UByte>			NTV2DIDSet;				///< @brief	A set of distinct NTV2DID values.
+typedef NTV2DIDSet::iterator		NTV2DIDSetIter;			///< @brief	Handy non-const iterator to iterate over an NTV2DIDSet.
+typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief	Handy const iterator to iterate over an NTV2DIDSet.
+AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
 
 
 //////////////////////////////////////////////////////////
@@ -4646,13 +4652,45 @@ public:
 	///@}
 
 	/**
+		@name	Ancillary Data
+	**/
+	///@{
+	/**
+		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
+	**/
+	AJA_VIRTUAL bool		GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
+
+	/**
+		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[in]	inDIDs			Specifies the set of DIDs to be filtered for the given SDI input. Specify an
+									empty set to disable all packet filtering.
+		@note		DIDs having the value 0 (zero) are ignored.
+	**/
+	AJA_VIRTUAL bool		SetAncExtractorFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+
+	/**
+		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
+	**/
+	static UWord			GetMaxNumAncExtractorFilterDIDs (void);
+
+	/**
+		@return		The default DIDs that the device Anc extractor filter is started with.
+	**/
+	static NTV2DIDSet		GetDefaultAncExtractorDIDs (void);
+	///@}
+
+	/**
 		@name	TCP/IP
 	**/
 	///@{
 	AJA_VIRTUAL bool		AcquireMailBoxLock (void);
 	AJA_VIRTUAL bool		ReleaseMailBoxLock (void);
 	AJA_VIRTUAL bool		AbortMailBoxLock (void);
-
 	///@}
 
 	/**
