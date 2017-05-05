@@ -32,7 +32,8 @@ class AJA_EXPORT AJATCPSocket : public AJAIPSocket
         uint32_t Write(const uint8_t* pData, uint32_t dataLength);
 
 	private:
-		// None
+        uint32_t Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client);
+        uint32_t Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress);
 };
 
 

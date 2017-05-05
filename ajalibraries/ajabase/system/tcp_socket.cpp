@@ -264,5 +264,19 @@ AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
 	return uint32_t(bytesSent);
 }
 
+// These are here to silence the warning about hiding overloaded virtual functions
+uint32_t
+AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
+{
+    AJA_UNUSED(client);
+    return Read(pData, dataLength);
+}
+
+uint32_t
+AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress)
+{
+    AJA_UNUSED(targetAddress);
+    return Write(pData, dataLength);
+}
 
 //////////////////////// End of tcp_socket.cpp //////////////////////
