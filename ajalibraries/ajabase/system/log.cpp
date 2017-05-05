@@ -91,6 +91,7 @@ AJATimeLog::AJATimeLog(const char* tag)
 #if defined(AJA_MAC)
     strncpy(mTag, tag, TAG_SIZE);
 #else
+    AJA_UNUSED(tag);
     mTag[0] = 0;
 #endif
     
