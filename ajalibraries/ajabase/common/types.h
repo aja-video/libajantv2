@@ -92,12 +92,21 @@
         #endif
 
         // Macros for printing format specifiers.
-        // Decimal notation.
-        #define PRId64	__PRI64_PREFIX "d"
-        #define PRIi64	__PRI64_PREFIX "i"
-        #define PRIu64	__PRI64_PREFIX "u"
-        #define PRIo64	__PRI64_PREFIX "o"
-        #define PRIx64	__PRI64_PREFIX "x"
+        #ifndef PRId64
+            #define PRId64 __PRI64_PREFIX "d"
+        #endif
+        #ifndef PRIi64
+            #define PRIi64 __PRI64_PREFIX "i"
+        #endif
+        #ifndef PRIu64
+            #define PRIu64 __PRI64_PREFIX "u"
+        #endif
+        #ifndef PRIo64
+            #define PRIo64 __PRI64_PREFIX "o"
+        #endif
+        #ifndef PRIx64
+            #define PRIx64 __PRI64_PREFIX "x"
+        #endif
       #endif  // MODULE
 
 	// Synonyms for library functions with different names on different platforms
@@ -134,6 +143,23 @@
 	# define __PRI64_PREFIX   "ll"
 	# define __PRIPTR_PREFIX
 	#endif
+
+    // Macros for printing format specifiers.
+    #ifndef PRId64
+        #define PRId64 __PRI64_PREFIX "d"
+    #endif
+    #ifndef PRIi64
+        #define PRIi64 __PRI64_PREFIX "i"
+    #endif
+    #ifndef PRIu64
+        #define PRIu64 __PRI64_PREFIX "u"
+    #endif
+    #ifndef PRIo64
+        #define PRIo64 __PRI64_PREFIX "o"
+    #endif
+    #ifndef PRIx64
+        #define PRIx64 __PRI64_PREFIX "x"
+    #endif
 
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
