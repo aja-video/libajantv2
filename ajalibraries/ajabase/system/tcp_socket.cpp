@@ -162,7 +162,7 @@ AJATCPSocket::Accept(void)
 
 		memset(&client, 0, sizeof(struct sockaddr_in));
 
-		if ((sock = accept(mSocket, (struct sockaddr*) &client, &length)) < 0)
+        if ((sock = (int)accept(mSocket, (struct sockaddr*) &client, &length)) < 0)
 		{
 			// If we have an EINVAL error, then either the address length
 			// is invalid, or we are not listening to connections -- which

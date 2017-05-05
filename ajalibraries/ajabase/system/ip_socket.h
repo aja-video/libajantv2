@@ -24,6 +24,7 @@
 #	include <poll.h>
 #	include <sys/socket.h>
 #elif defined(AJA_WINDOWS)
+#include <WinSock2.h>
 	typedef int socklen_t;
 #endif
 

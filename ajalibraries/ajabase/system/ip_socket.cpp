@@ -14,6 +14,9 @@
 #if defined(AJA_LINUX)
 #include <unistd.h>
 #endif
+#if defined(AJA_WINDOWS)
+#include <WS2tcpip.h>
+#endif
 
 using std::cout;
 using std::endl;

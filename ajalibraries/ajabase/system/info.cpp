@@ -112,7 +112,7 @@ AJASystemInfo::ToString(int maxLength)
         if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
         {
             if ((int)label.length() > longestLabelLen)
-                longestLabelLen = label.length();
+                longestLabelLen = (int)label.length();
         }
     }
 
