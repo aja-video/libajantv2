@@ -94,14 +94,10 @@
         // Macros for printing format specifiers.
         // Decimal notation.
         #define PRId64	__PRI64_PREFIX "d"
-#if defined(powerpc) || defined(CRUSHER)
-	// On Crusher scanf %I64i works with a 32-bit int
-	// TODO: Change this macro to platform-specific if possible
-	#define PRIi64 "lli"
-#else
         #define PRIi64	__PRI64_PREFIX "i"
-#endif
         #define PRIu64	__PRI64_PREFIX "u"
+        #define PRIo64	__PRI64_PREFIX "o"
+        #define PRIx64	__PRI64_PREFIX "x"
       #endif  // MODULE
 
 	// Synonyms for library functions with different names on different platforms
