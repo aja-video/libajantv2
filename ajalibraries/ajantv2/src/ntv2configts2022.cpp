@@ -33,7 +33,7 @@ CNTV2ConfigTs2022::CNTV2ConfigTs2022(CNTV2Card & device) : CNTV2MBController(dev
 
 bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEncoderConfig &config)
 {
-#define WAIT_RESET_MS   200
+#define WAIT_RESET_MS   600
 
     kipdprintf("CNTV2ConfigTs2022::SetupJ2KEncoder channel = %d\n", channel);
 
@@ -92,36 +92,24 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     // Disable encoder inputs
     SetEncoderInputEnable( channel, false, false );
 
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS);
-    #else
-        usleep (WAIT_RESET_MS * 1000);
-    #endif
-
     // Assert reset
 	SetEncoderReset( channel, true );
 
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (4);
-    #else
-        usleep (4 * 1000);
-    #endif
-
     // Wait
-    //#if defined(AJAWindows) || defined(MSWindows)
-    //    ::Sleep (WAIT_RESET_MS);
-    //#else
-    //    usleep (WAIT_RESET_MS * 1000);
-    //#endif
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (WAIT_RESET_MS/2);
+    #else
+        usleep (WAIT_RESET_MS/2 * 1000);
+    #endif
 
     // De-assert reset
 	SetEncoderReset( channel, false );
 
     // Wait
     #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS*2);
+        ::Sleep (WAIT_RESET_MS);
     #else
-        usleep (WAIT_RESET_MS*2 * 1000);
+        usleep (WAIT_RESET_MS * 1000);
     #endif
 
     // Now proceed to configure the device     
@@ -306,9 +294,65 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
 
     if (ullMode)
     {
+        // Sanity checks
+        if ((height != 1080) && (height != 540))
+        {
+            mError = "Setup J2K Failed because height not supported in ull mode";
+            return false;
+        }
+
+        if ((height == 1080) && (num_levels > 4))
+        {
+            mError = "Setup J2K Failed because no more than 4 levels is supported in 1080p ull";
+            return false;
+        }
+
+        if ((height == 540) && (num_levels > 3))
+        {
+            mError = "Setup J2K Failed because no more than 3 levels is supported in 1080i ull";
+            return false;
+        }
+
         mError = "Setup J2K Failed because ull mode not yet supported";
         return false;
     }
+
+#if 0
+    if {$ull} {
+
+        #Set ULL in active mode
+        opb_write $env [expr 0x10000*$enc+0x1006] 1
+
+        #Set img height for each kind of tile
+        if {$im_height == 1080} {
+            ipx_jp2k_e_set_param $env $enc 0 0x1 128
+            ipx_jp2k_e_set_param $env $enc 1 0x1 128
+            ipx_jp2k_e_set_param $env $enc 2 0x1 56
+        }
+        if {$im_height == 540} {
+            ipx_jp2k_e_set_param $env $enc 0 0x1 64
+            ipx_jp2k_e_set_param $env $enc 1 0x1 64
+            ipx_jp2k_e_set_param $env $enc 2 0x1 28
+        }
+
+        #Specify all kind of tile
+        ipx_jp2k_e_set_param $env $enc 0 0xF 1
+        ipx_jp2k_e_set_param $env $enc 1 0xF 2
+        ipx_jp2k_e_set_param $env $enc 2 0xF 3
+    }
+
+    #ipx_jp2k_e_get_all_status $env $enc 0
+    for {set config 0} {$config<3} {incr config} {
+        for {set lvl 0} {$lvl<7} {incr lvl} {
+            ipx_jp2k_e_set_param $env $enc $config [expr 0x80+$lvl] [lindex $GOB 	$lvl]
+            ipx_jp2k_e_set_param $env $enc $config [expr 0x88+$lvl] [expr [lindex $QS_C0 $lvl]*0x800]
+            ipx_jp2k_e_set_param $env $enc $config [expr 0x90+$lvl] [expr [lindex $QS_C1 $lvl]*0x800]
+            ipx_jp2k_e_set_param $env $enc $config [expr 0x98+$lvl] [expr [lindex $QS_C2 $lvl]*0x800]
+        }
+    }
+
+#endif
+
 
     for (uint32_t config=0; config < 3; config++)
     {
@@ -1048,7 +1092,8 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
     return rv;
 }
 
-void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bEnable, bool bMDEnable ) {
+void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bEnable, bool bMDEnable )
+{
 #ifdef COCHRANE
 	mDevice.WriteRegister( 0x20000, (bEnable?BIT(16):0)|(bMDEnable?BIT(17):0), BIT(16)|BIT(17));
 #else
@@ -1073,7 +1118,8 @@ void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bE
 }
 
 
-void CNTV2ConfigTs2022::SetEncoderReset(const NTV2Channel channel, bool bReset ) {
+void CNTV2ConfigTs2022::SetEncoderReset(const NTV2Channel channel, bool bReset )
+{
 #ifdef COCHRANE
 	mDevice.WriteRegister( 0x20000, (bReset?BIT(12):0), BIT(12));
 #else
