@@ -13,6 +13,8 @@
 #include <sys/utsname.h>
 #include <mach/mach.h>
 
+#import <Foundation/Foundation.h>
+
 AJAStatus
 aja_sysctl(const char *name, std::string &result)
 {
@@ -72,14 +74,9 @@ aja_sysctl(const char *name, std::string &result)
     {
         // no sysctl for this, so fake it
 
-        SInt32 majorVersion,minorVersion,pointVersion;
-
-        Gestalt(gestaltSystemVersionMajor, &majorVersion);
-        Gestalt(gestaltSystemVersionMinor, &minorVersion);
-        Gestalt(gestaltSystemVersionBugFix, &pointVersion);
-
+        NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
         std::ostringstream oss;
-        oss << majorVersion << "." << minorVersion << "." << pointVersion;
+        oss << v.majorVersion << "." << v.minorVersion << "." << v.patchVersion;
         result = oss.str();
         ret = AJA_STATUS_SUCCESS;
     }
