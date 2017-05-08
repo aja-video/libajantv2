@@ -15,6 +15,7 @@ SUBDIRS = ntv2burn \
           ntv2encodehevcvif \
 		  ntv2enumerateboards \
           ntv2fieldburn \
+		  ntv2hdrsetup \
 		  ntv2llburn \
 		  ntv2outputtestpattern \
 		  ntv2player \

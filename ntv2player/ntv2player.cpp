@@ -535,15 +535,7 @@ AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
 													AJA_TestPatt_LineSweep,
 													AJA_TestPatt_CheckField,
 													AJA_TestPatt_FlatField,
-													AJA_TestPatt_MultiPattern,
-													AJA_TestPatt_Black,
-													AJA_TestPatt_White,
-													AJA_TestPatt_Border,
-													AJA_TestPatt_LinearRamp,
-													AJA_TestPatt_SlantRamp,
-													AJA_TestPatt_ZonePlate,
-													AJA_TestPatt_ColorQuadrant,
-													AJA_TestPatt_ColorQuadrantBorder};
+													AJA_TestPatt_MultiPattern};
 
 	mNumTestPatterns = sizeof (testPatternTypes) / sizeof (AJATestPatternSelect);
 	mTestPatternVideoBuffers = new uint8_t * [mNumTestPatterns];
