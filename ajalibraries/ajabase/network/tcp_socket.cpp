@@ -7,7 +7,7 @@
 /////////////////////////////
 // Includes
 /////////////////////////////
-#include "ajabase/system/tcp_socket.h"
+#include "ajabase/network/tcp_socket.h"
 #include "ajabase/system/debug.h"
 #include <errno.h>
 #include <string.h>

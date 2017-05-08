@@ -23,6 +23,6 @@
  *  @param[in]  to   The string to replace the substring with
  *	@return		Reference to the modified STL string.
  */
-std::string& AJA_EXPORT replace(std::string& str, const std::string& from, const std::string& to);
+AJA_EXPORT std::string& replace(std::string& str, const std::string& from, const std::string& to);
 
 #endif	//	AJA_COMMON_H

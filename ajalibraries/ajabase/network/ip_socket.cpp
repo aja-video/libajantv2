@@ -7,7 +7,7 @@
 /////////////////////////////
 // Includes
 /////////////////////////////
-#include "ajabase/system/ip_socket.h"
+#include "ajabase/network/ip_socket.h"
 #include "ajabase/system/debug.h"
 #include <errno.h>
 #include <iostream>

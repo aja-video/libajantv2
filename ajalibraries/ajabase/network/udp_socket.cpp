@@ -7,7 +7,7 @@
 /////////////////////////////
 // Includes
 /////////////////////////////
-#include "ajabase/system/udp_socket.h"
+#include "ajabase/network/udp_socket.h"
 #include "ajabase/system/debug.h"
 #include <errno.h>
 #include <string.h>

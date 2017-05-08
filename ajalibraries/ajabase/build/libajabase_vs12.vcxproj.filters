@@ -14,6 +14,9 @@
     <Filter Include="Persistence">
       <UniqueIdentifier>{60027cd1-b18a-4393-b6c8-bdc6c75e98e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{378bc0b9-9b9d-42ba-9e25-72e77fad4e65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\audioutilities.cpp">
@@ -79,9 +82,6 @@
     <ClCompile Include="..\system\windows\file_io.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\network\ip_socket.cpp">
-      <Filter>System Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\system\lock.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
@@ -115,9 +115,6 @@
     <ClCompile Include="..\system\windows\threadimpl.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\network\udp_socket.cpp">
-      <Filter>System Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\persistence\persistence.cpp">
       <Filter>Persistence</Filter>
     </ClCompile>
@@ -129,6 +126,12 @@
     </ClCompile>
     <ClCompile Include="..\system\windows\infoimpl.cpp">
       <Filter>System Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\network\ip_socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\network\udp_socket.cpp">
+      <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -219,9 +222,6 @@
     <ClInclude Include="..\system\file_io.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\network\ip_socket.h">
-      <Filter>System Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\system\lock.h">
       <Filter>System Files</Filter>
     </ClInclude>
@@ -258,9 +258,6 @@
     <ClInclude Include="..\system\windows\threadimpl.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\network\udp_socket.h">
-      <Filter>System Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\persistence\persistence.h">
       <Filter>Persistence</Filter>
     </ClInclude>
@@ -272,6 +269,12 @@
     </ClInclude>
     <ClInclude Include="..\system\windows\infoimpl.h">
       <Filter>System Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\network\ip_socket.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\network\udp_socket.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
