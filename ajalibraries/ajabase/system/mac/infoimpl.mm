@@ -14,6 +14,7 @@
 #include <mach/mach.h>
 
 #import <Foundation/Foundation.h>
+#include <Availability.h>
 
 AJAStatus
 aja_sysctl(const char *name, std::string &result)
@@ -74,10 +75,21 @@ aja_sysctl(const char *name, std::string &result)
     {
         // no sysctl for this, so fake it
 
+#if defined(__MAC_10_10) && __MAC_OS_X_VERSION_MAX_ALLOWED >= __MAC_10_10
         NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
         std::ostringstream oss;
         oss << v.majorVersion << "." << v.minorVersion << "." << v.patchVersion;
         result = oss.str();
+#else
+        SInt32 majorVersion,minorVersion,pointVersion;
+        Gestalt(gestaltSystemVersionMajor, &majorVersion);
+        Gestalt(gestaltSystemVersionMinor, &minorVersion);
+        Gestalt(gestaltSystemVersionBugFix, &pointVersion);
+
+        std::ostringstream oss;
+        oss << majorVersion << "." << minorVersion << "." << pointVersion;
+        result = oss.str();
+#endif
         ret = AJA_STATUS_SUCCESS;
     }
     else if (sysctlbyname(name, tmp_buf, &size, NULL, 0) == 0)
