@@ -6,11 +6,9 @@
 
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2democommon.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2config2022.h"
-#include "ntv2config2110.h"
 
 using std::endl;
 using std::cout;
@@ -22,7 +20,6 @@ MACAddr toMAC(QString mac);
 
 CKonaIpJsonSetup::CKonaIpJsonSetup()
 {
-    is2110       = false;
     enable2022_7 = false;
 }
 
@@ -69,10 +66,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
         cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
 
-        receiveStruct.mStream = receiveChannelObject["stream"].toString();
-        if (!receiveStruct.mStream.isEmpty())
-            cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
-
         receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
         if (!receiveStruct.mSrcPort.isEmpty())
             cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << endl;
@@ -118,14 +111,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mSSRC.isEmpty())
             cout << "SSRC " << receiveStruct.mSSRC.toStdString() << endl;
 
-        receiveStruct.mPayload = receiveChannelObject["payload"].toString();
-        if (!receiveStruct.mPayload.isEmpty())
-            cout << "Payload " << receiveStruct.mPayload.toStdString() << endl;
-
-        receiveStruct.mVideoFormat = receiveChannelObject["videoFormat"].toString();
-        if (!receiveStruct.mVideoFormat.isEmpty())
-            cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << endl;
-
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
@@ -143,10 +128,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         transmitStruct.mChannelDesignator = transmitChannelObject["designator"].toString();
         cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << endl;
-
-        transmitStruct.mStream = transmitChannelObject["stream"].toString();
-        if (!transmitStruct.mStream.isEmpty())
-            cout << "Stream " << transmitStruct.mStream.toStdString() << endl;
 
         transmitStruct.mPrimaryLocalPort = transmitChannelObject["primaryLocalPort"].toString();
         cout << "PrimaryLocalPort " << transmitStruct.mPrimaryLocalPort.toStdString() << endl;
@@ -219,39 +200,12 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
 
     const QJsonObject & json = loadDoc.object();
 
-    QJsonValue qjv = json.value("protocol");
-    if (qjv != QJsonValue::Undefined)
-    {
-        QString protocol = qjv.toString();
-        if (protocol == "2110")
-        {
-            is2110 = true;
-            cout << "Protocol 2110 " << endl;
-        }
-        else
-            cout << "Protocol 2022 " << endl;
-    }
-
-    qjv = json.value("PTPMaster");
-    if (qjv != QJsonValue::Undefined)
-{
-       PTPMasterAddr = qjv.toString();
-       cout << "PTP Master Address " << PTPMasterAddr.toStdString() << endl;
-    }
-
     return readJson(json);
 }
 
 bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 {
-    if (is2110)
-    {
-        return setupBoard2110(deviceSpec);
-}
-    else
-    {
         return setupBoard2022(deviceSpec);
-    }
 }
 
 bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
@@ -351,216 +305,6 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     return true;
 }
 
-bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
-{
-    CNTV2Card device;
-    CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
-    if (!device.IsOpen())
-    {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
-    //if (!mDevice.IsKonaIPDevice ())
-    //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
-
-    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!device.IsDeviceReady ())
-    {
-        cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
-        device.SleepMs (1000);
-        if (device.IsDeviceReady ())
-            cout << "## NOTE:  Device is ready" << endl;
-    }
-
-    CNTV2Config2110	config2110 (device);
-
-    if (!PTPMasterAddr.isEmpty())
-    {
-        device.SetReference(NTV2_REFERENCE_SFP1_PTP);
-        config2110.SetPTPMaster(PTPMasterAddr.toStdString());
-    }
-    else
-    {
-        device.SetReference(NTV2_REFERENCE_FREERUN);
-    }
-
-    if (mKonaIPParams.mSFPs.size() < 1)
-    {
-        cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;
-        return false;
-    }
-
-    QListIterator<SFPStruct> sfpIter(mKonaIPParams.mSFPs);
-    while (sfpIter.hasNext())
-    {
-        SFPStruct sfp = sfpIter.next();
-
-        if ( sfp.mSFPDesignator == "top")
-        {
-            config2110.SetNetworkConfiguration (SFP_TOP, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
-        }
-        else if ( sfp.mSFPDesignator == "bottom")
-        {
-            config2110.SetNetworkConfiguration (SFP_BOTTOM, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
-
-        }
-    }
-
-    cerr << "## receiveIter" << endl;
-    QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
-
-    bool hasRx = false;
-
-    if (receiveIter.hasNext())
-    {
-        hasRx = true;
-
-        // video
-        device.Connect (NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
-
-        // audio
-        device.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_1, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
-        device.SetNumberAudioChannels (8);
-        device.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_1);
-        device.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_1);
-        device.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
-        device.WriteRegister(kRegAudioOutputSourceMap,0);
-    }
-
-
-    // this is a kludge to see if we can reset channels after packet loss
-    rx_2110Config rxChannelConfig[2];
-    int index = 0;
-    int found = 0;
-    while (receiveIter.hasNext())
-    {
-        cerr << "## receiveIter did" << endl;
-
-        ReceiveStruct receive = receiveIter.next();
-        bool ok;
-        NTV2Channel channel          = getChannel(receive.mChannelDesignator);
-        NTV2Stream stream;
-        if (receive.mStream == "audio1")
-        {
-            stream     = NTV2_AUDIO1_STREAM;
-            index = 1;
-        }
-        else
-        {
-            stream     = NTV2_VIDEO_STREAM;
-            index = 0;
-        }
-        rxChannelConfig[index].rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
-        rxChannelConfig[index].sourceIP     = receive.mSrcIPAddress.toStdString();
-        rxChannelConfig[index].destIP       = receive.mPrimaryDestIPAddress.toStdString();
-        rxChannelConfig[index].sourcePort   = receive.mSrcPort.toUInt();
-        rxChannelConfig[index].destPort     = receive.mPrimaryDestPort.toUInt();
-        rxChannelConfig[index].SSRC         = receive.mSSRC.toUInt();
-        rxChannelConfig[index].VLAN         = receive.mVLAN.toUInt();
-        rxChannelConfig[index].payloadType  = receive.mPayload.toUInt();
-        rxChannelConfig[index].videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
-        rxChannelConfig[index].videoSamples = VPIDSampling_YUV_422;
-
-        bool enable = (getEnable(receive.mEnable));
-
-        found++;
-
-        if (found == 2)     // super-kludge!!
-        {
-            if (enable)
-            {
-                bool rv = config2110.EnableRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
-                if (!rv)
-                {
-                    cerr << "FAILED: " << config2110.getLastError() << endl;
-                    return false;
-                }
-            }
-            else
-            {
-                config2110.DisableRxChannel(channel);
-            }
-        }
-    }
-    cerr << "## transmitIter" << endl;
-
-    QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
-    while (transmitIter.hasNext())
-    {
-        cerr << "## transmitIter did" << endl;
-
-        TransmitStruct transmit = transmitIter.next();
-        tx_2110Config txChannelConfig;
-
-        NTV2Channel channel          = getChannel(transmit.mChannelDesignator);
-        txChannelConfig.localPort    = transmit.mPrimaryLocalPort.toUInt();
-        txChannelConfig.remoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
-        txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
-        txChannelConfig.remoteMAC    = toMAC(transmit.mPrimaryRemoteMac);
-        txChannelConfig.autoMAC      = getEnable(transmit.mPrimaryAutoMac);
-        txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
-        txChannelConfig.videoSamples = VPIDSampling_YUV_422;
-
-        NTV2Stream stream;
-        if (transmit.mStream == "audio1")
-            stream = NTV2_AUDIO1_STREAM;
-        else
-            stream = NTV2_VIDEO_STREAM;
-
-        config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
-    }
-
-    if (!hasRx)
-        return true;
-
-    int count = 0;
-    // monitor rx
-    for (;;)
-    {
-        NTV2Stream stream;
-        bool unlock  = false;
-        bool timeout = false;
-        bool rv = config2110.WaitDecapsulatorUnlock(stream,unlock,timeout);
-        if (rv)
-        {
-            if (stream == NTV2_VIDEO_STREAM )
-            {
-                if (unlock)
-                    cout << "video stream unlocked" << endl;
-                else
-                    cout << "video stream timeout" << endl;
-            }
-            else
-            {
-                if (unlock)
-                    cout << "audio stream unlocked"  << endl;
-                else
-                    cout << "audio stream timeout" << endl;
-            }
-
-            config2110.DisableDecapsulatorStream(NTV2_CHANNEL1,stream);
-            config2110.ResetDepacketizer(NTV2_CHANNEL1,stream);
-
-            do
-            {
-                cout << "waiting for source lock" << endl;
-            }
-            while (!config2110.WaitDecapsulatorLock(NTV2_CHANNEL1,stream));
-
-            cout << "source locked = - re enabling" << endl;
-
-            config2110.SetupDepacketizer(NTV2_CHANNEL1, stream, rxChannelConfig[(int)stream]);
-            config2110.EnableDecapsulatorStream(NTV2_CHANNEL1,stream);
-        }
-        else
-        {
-            if (++count == 60)
-            {
-                cout << "source OK" << endl;
-                count = 0;
-            }
-        }
-    }
-
-}
 NTV2Channel getChannel(QString channelDesignator)
 {
     NTV2Channel channel = NTV2_CHANNEL1;
