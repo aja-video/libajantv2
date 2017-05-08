@@ -1665,6 +1665,9 @@ public:
 		@param[in]	inAudioSystem				Specifies the audio subsystem of interest.
 		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in the audio subsystem's input stream.
 		@return		True if successful; otherwise false.
+		@note		NTV2 device firmware performs this detection using a simple method of detecting the presence of the Audio Group's data packet.
+					It does not perform detailed inspection of the packet -- i.e., checking bits b1/b2 of the AES sub-frame per SMPTE 272, nor
+					checking the V/U/C/P bits per SMPTE 299.
 	**/
 	AJA_VIRTUAL bool		GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outDetectedChannelPairs);
 
