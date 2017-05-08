@@ -17,7 +17,7 @@ else
 endif
 AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
-VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence
+VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence:$(A_LIB_BASE_PATH)/network
 
 CPPFLAGS += -DAJA_LINUX
 

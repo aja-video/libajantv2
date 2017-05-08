@@ -79,7 +79,7 @@
     <ClCompile Include="..\system\windows\file_io.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\system\ip_socket.cpp">
+    <ClCompile Include="..\network\ip_socket.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
     <ClCompile Include="..\system\lock.cpp">
@@ -115,7 +115,7 @@
     <ClCompile Include="..\system\windows\threadimpl.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\system\udp_socket.cpp">
+    <ClCompile Include="..\network\udp_socket.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
     <ClCompile Include="..\persistence\persistence.cpp">
@@ -220,7 +220,7 @@
     <ClInclude Include="..\system\file_io.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\system\ip_socket.h">
+    <ClInclude Include="..\network\ip_socket.h">
       <Filter>System Files</Filter>
     </ClInclude>
     <ClInclude Include="..\system\lock.h">
@@ -259,7 +259,7 @@
     <ClInclude Include="..\system\windows\threadimpl.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\system\udp_socket.h">
+    <ClInclude Include="..\network\udp_socket.h">
       <Filter>System Files</Filter>
     </ClInclude>
     <ClInclude Include="..\persistence\persistence.h">
