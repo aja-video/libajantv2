@@ -1,12 +1,12 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include "konaipencodersetup.h"
+#include "konaipj2ksetup.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     QCommandLineParser parser;
-    parser.setApplicationDescription("Kona IP Encoder Setup");
+    parser.setApplicationDescription("Kona IP J2K Setup");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption deviceOption("d", "which device to use", "device");

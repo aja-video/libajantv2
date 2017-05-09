@@ -1,4 +1,4 @@
-#include "konaipencodersetup.h"
+#include "konaipj2ksetup.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
