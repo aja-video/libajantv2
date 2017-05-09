@@ -1484,7 +1484,7 @@ public:
 	AJA_VIRTUAL bool	GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Determines if the given audio system on the AJA device will configured to capture audio samples.
+		@brief		Enables or disables audio capture for the given audio system on the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the audio system of interest.
 		@param[in]	inEnable		If true, the audio system will capture samples into memory, if not currently reset.
@@ -1496,12 +1496,12 @@ public:
 	AJA_VIRTUAL bool	SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether the audio system is configured for capturing audio samples
+		@brief		Answers whether or not the audio system is configured for capturing audio samples.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the audio system
-										will capture samples to memory when not in reset mode,
-										or 'false' if the audio system is inhibited from capturing samples.
+		@param[in]	outEnable			Receives 'true' if the audio system will capture samples to memory when
+										not in reset mode;  otherwise 'false' if the audio system is inhibited from
+										capturing samples.
 	**/
 	AJA_VIRTUAL bool	GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
@@ -1873,6 +1873,24 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
+
+	/**
+		@brief		Answers with the current state of the audio output erase mode for the given audio system.
+					If enabled, the audio system automatically writes zeroes into the audio output buffer behind the output read head during playout.
+		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[out]	outEraseModeEnabled		Receives 'true' if enabled;  otherwise 'false' if disabled (normal operation).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
+
+	/**
+		@brief		Enables or disables output erase mode for the given audio system, which, when enabled, automatically writes zeroes into the audio output buffer
+					behind the output read head.
+		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[in]	inEraseModeEnabled		Specify 'true' to enable output erase mode;  otherwise 'false' for normal operation.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
 
 	///@}
 

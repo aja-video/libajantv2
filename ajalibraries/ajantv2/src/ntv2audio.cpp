@@ -1356,6 +1356,31 @@ bool CNTV2Card::SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot
 }
 
 
+bool CNTV2Card::GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled)
+{
+	outEraseModeEnabled = false;
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
+		return false;
+	if (inAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;
+	ULWord	regValue	(0);
+	if (!ReadRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], &regValue))
+		return false;
+	outEraseModeEnabled = (regValue & kRegMaskAudioAutoErase) ? true : false;
+	return true;
+}
+
+
+bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled)
+{
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
+		return false;
+	if (inAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;
+	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
+}
+
+
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable)
 	{
