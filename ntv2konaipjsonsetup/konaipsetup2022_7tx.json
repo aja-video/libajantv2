@@ -2,14 +2,14 @@
     "sfps":[
     {
             "designator":"top",
-            "IPAddress":"172.16.19.10",
+            "IPAddress":"172.16.19.12",
             "SubnetMask":"255.255.0.0",
             "Router":"255.255.255.255",
             "Enable2022_7":"true"
     },
     {
             "designator":"bottom",
-            "IPAddress":"172.16.19.11",
+            "IPAddress":"172.16.19.13",
             "SubnetMask":"255.255.0.0",
             "Router":"255.255.255.255",
             "Enable2022_7":"true"
