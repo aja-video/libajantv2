@@ -1,6 +1,6 @@
 /**
     @file		common.cpp
-	@copyright	Copyright (C) 2015 AJA Video Systems, Inc.  All rights reserved.
+    @copyright	Copyright (C) 2009-2017 AJA Video Systems, Inc.  All rights reserved.
     @brief		Generic helper functions.
 **/
 
@@ -9,6 +9,11 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+
+#include <stdlib.h>
+
+namespace aja
+{
 
 std::string& replace(std::string& str, const std::string& from, const std::string& to)
 {
@@ -22,36 +27,129 @@ std::string& replace(std::string& str, const std::string& from, const std::strin
     return str;
 }
 
-int string_to_int(const std::string str, int fallback)
+int stoi(const std::string& str, std::size_t* idx, int base)
 {
-    int number = fallback;
-    if (str.length() > 1 &&
-        str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
-    {
-        const std::string  hexStr(str.substr(2));
-        std::istringstream iss(hexStr);
-        iss >> std::hex >> number;
-        if (iss.fail())
-        {
-            number = fallback;
-        }
-    }
-    else
-    {
-        std::istringstream iss(str);
-        iss >> number;
-        if (iss.fail())
-        {
-            number = fallback;
-        }
-    }
-    return number;
+    return (int)aja::stol(str, idx, base);
 }
 
-std::string int_to_string(int i)
+long stol(const std::string& str, std::size_t* idx, int base)
+{
+    char* pEnd = NULL;
+    long retVal = ::strtol(str.c_str(), &pEnd, base);
+    if (idx && pEnd)
+    {
+        *idx = pEnd - str.c_str();
+    }
+    return retVal;
+}
+
+long long stoll(const std::string& str, std::size_t* idx, int base)
+{
+    return (long long)aja::stol(str, idx, base);
+}
+
+unsigned long stoul(const std::string& str, std::size_t* idx, int base)
+{
+    char* pEnd = NULL;
+    unsigned long retVal = ::strtoul(str.c_str(), &pEnd, base);
+    if (idx && pEnd)
+    {
+        *idx = pEnd - str.c_str();
+    }
+    return retVal;
+}
+
+unsigned long long stoull(const std::string& str, std::size_t* idx, int base)
+{
+    return (unsigned long long)aja::stoul(str, idx, base);
+}
+
+float stof(const std::string& str, std::size_t* idx)
+{
+    return (float)aja::stod(str, idx);
+}
+
+double stod(const std::string& str, std::size_t* idx)
+{
+    char* pEnd = NULL;
+    double retVal = ::strtod(str.c_str(), &pEnd);
+    if (idx && pEnd)
+    {
+        *idx = pEnd - str.c_str();
+    }
+    return retVal;
+}
+
+long double stold(const std::string& str, std::size_t* idx)
+{
+    return (long double)aja::stod(str, idx);
+}
+
+std::string to_string(bool val)
+{
+    return val ? "true" : "false";
+}
+
+std::string to_string(int val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(long val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(long long val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(unsigned val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(unsigned long val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(unsigned long long val)
+{
+    std::ostringstream oss; oss << val;
+    return oss.str();
+}
+
+std::string to_string(float val)
 {
     std::ostringstream oss;
-    oss << i;
+    oss.precision(6);
+    oss.setf(std::ios::fixed, std::ios::floatfield);
+    oss << val;
+    return oss.str();
+}
+
+std::string to_string(double val)
+{
+    std::ostringstream oss;
+    oss.precision(6);
+    oss.setf(std::ios::fixed, std::ios::floatfield);
+    oss << val;
+    return oss.str();
+}
+
+std::string to_string(long double val)
+{
+    std::ostringstream oss;
+    oss.precision(6);
+    oss.setf(std::ios::fixed, std::ios::floatfield);
+    oss << val;
     return oss.str();
 }
 
@@ -122,3 +220,5 @@ std::string join(std::vector<std::string> parts, const std::string delim)
     }
     return oss.str();
 }
+
+} //end aja namespace
