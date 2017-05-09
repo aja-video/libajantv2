@@ -3,8 +3,11 @@
     @brief		Unittests for the AJA Base Library (using doctest).
     @copyright	Copyright (c) 2017 AJA Video Systems, Inc. All rights reserved.
 **/
+// for doctest usage see: https://github.com/onqtam/doctest/blob/1.1.4/doc/markdown/tutorial.md
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
+
 
 #include "ajabase/common/common.h"
 #include "ajabase/persistence/persistence.h"
