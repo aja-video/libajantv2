@@ -49,19 +49,6 @@
 #endif
 #endif
 
-// SDK specific includes
-#if defined(USE_WITH_STREAMS)
-#endif
-
-#if defined(USE_WITH_NTV2)
-#include "ntv2status.h"
-#include "ntv2utils.h"
-#include "ntv2devicefeatures.h"
-#endif
-
-#if defined(USE_WITH_NTV4)
-#endif
-
 //MARK: hidden helpers
 
 std::string makeCreateTableString(std::string tableName,bool blobTable = false)
@@ -770,6 +757,7 @@ AJAPersistence::~AJAPersistence()
 
 void AJAPersistence::SetParams(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
 {
+    mappId          = appID;
     mboardId        = deviceType;
     mserialNumber	= deviceNumber;
     mSharedPrefFile = bSharePrefFile;
@@ -784,6 +772,14 @@ void AJAPersistence::SetParams(std::string appID, std::string deviceType, std::s
     }
 
     mstateKeyName += appID;
+}
+
+void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile)
+{
+    appID = mappId;
+    deviceType = mboardId;
+    deviceNumber = mserialNumber;
+    bSharePrefFile = mSharedPrefFile;
 }
 
 bool AJAPersistence::SetValue(std::string key, void *value, AJAPersistenceType type, int blobSize)
@@ -895,217 +891,4 @@ bool AJAPersistence::DeletePrefFile()
 		bSuccess = err != 0;
 	}
 	return bSuccess;
-}
-
-//MARK: NTV2 specific methods
-
-#if defined(USE_WITH_NTV2)
-
-AJAPersistence::AJAPersistence(CNTV2Status *card)
-{
-	BindToCard(card);
-}
-
-bool AJAPersistence::BindToCard(CNTV2Status *card)
-{
-	Init();
-	
-	bool isGood = false;
-	if( c != NULL && c->BoardOpened() )
-	{
-		mpboardHandle = c;
-		
-		//mboardId 		 = mpboardHandle->GetBoardID();
-		
-		std::string serialNum = "";
-		mpboardHandle->GetSerialNumberString(serialNum);
-		
-		mstateKeyName = storagePath(mIsShared);
-		mstateKeyName += "board " + serialNum;
-
-		isGood = SynchronizeState();			
-	}
-	
-	return isGood;
-}
-
-#endif //USE_NTV2
-
-//MARK: Private Methods
-
-void dropTables(std::string dbPath)
-{
-	std::string stmt;
-	sqlite3 *db;	
-	int rc=0;
-	char *zErrMsg = 0;
-	char **azResult;
-	int nRows;
-	int nCols;
-
-	rc = sqlite3_open(dbPath.c_str(), &db);
-	if(rc != SQLITE_OK)
-	{
-		sqlite3_close(db);
-		return;
-	}
-
-	stmt = std::string("DROP TABLE persistence;");
-	rc = sqlite3_get_table(db,stmt.c_str(),&azResult,&nRows,&nCols,&zErrMsg);
-	sqlite3_free(zErrMsg);zErrMsg=0;
-	sqlite3_free_table(azResult);
-
-	stmt = std::string("DROP TABLE persistenceBlobs;");
-	rc = sqlite3_get_table(db,stmt.c_str(),&azResult,&nRows,&nCols,&zErrMsg);
-	sqlite3_free(zErrMsg);zErrMsg=0;
-	sqlite3_free_table(azResult);
-
-	sqlite3_close(db);
-}
-
-bool AJAPersistence::UnitTestDiskReadWrite()
-{
-	std::string keyName     = "";
-	int			intValue    = 42;
-	bool		trueValue   = true;
-	bool		falseValue  = false;
-	double		doubleValue = 3.14;
-	std::string strValue    = "testing 1,2,3";
-	char		blobValue[] = "blob test data";
-	int			blobLen     = (int)strlen(blobValue);
-	int			hierarchyValue1 = 17;
-	int			hierarchyValue2 = 23;
-	int			hierarchyValue3 = 27;
-
-	std::string longStrValue = "some really long string to test if text stored as values are getting clipped in the persistence storage. like I said this is a long string testing the ability of sqlite to handle long strings of text. even though the column is set to 64 chars, mysql lets it grow to fit longer strings.";
-	std::string orgLongStrValue = longStrValue;
-
-	bool		isGood;
-	
-	//clear out any old values
-	dropTables(mstateKeyName);
-
-	// Write
-	mboardId = "";
-	mserialNumber = "";
-	// int
-	keyName = "UnitTestInt";
-	SetValue(keyName, &intValue, AJAPersistenceTypeInt);
-	intValue = 0;
-	
-	// bool
-	keyName = "UnitTestBoolTrue";
-	SetValue(keyName, &trueValue, AJAPersistenceTypeBool);
-	trueValue = false;
-	
-	keyName = "UnitTestBoolFalse";
-	SetValue(keyName, &falseValue, AJAPersistenceTypeBool);
-	falseValue = true;
-	
-	// float
-	keyName = "UnitTestDouble";
-	SetValue(keyName, &doubleValue, AJAPersistenceTypeDouble);
-	doubleValue = 0.0;
-	
-	// string
-	keyName = "UnitTestString";			
-	SetValue(keyName, &strValue, AJAPersistenceTypeString);
-	strValue = "";
-	
-	// blob
-	keyName = "UnitTestBlob";
-	SetValue(keyName, &blobValue, AJAPersistenceTypeBlob, blobLen);
-	strcpy(blobValue,"");
-	memset(blobValue,0,blobLen);
-
-	// long string
-	keyName = "UnitTestString (long)";
-	SetValue(keyName, &longStrValue, AJAPersistenceTypeString);
-	longStrValue = "";
-
-	// write values to test hierarchical search
-	keyName = "UnitTestHierarchyInt";
-	mboardId = "";
-	mserialNumber = "";
-	SetValue(keyName, &hierarchyValue1, AJAPersistenceTypeInt);
-	hierarchyValue1 = 0;
-
-	keyName = "UnitTestHierarchyInt";
-	mboardId = "device 1";
-	mserialNumber = "123456";
-	SetValue(keyName, &hierarchyValue2, AJAPersistenceTypeInt);
-	hierarchyValue2 = 0;
-
-	keyName = "UnitTestHierarchyInt";
-	mboardId = "device 2";
-	mserialNumber = "987654";
-	SetValue(keyName, &hierarchyValue3, AJAPersistenceTypeInt);
-	hierarchyValue3 = 0;
-
-	// Read
-	mboardId = "";
-	mserialNumber = "";
-
-	// int
-	keyName = "UnitTestInt";	
-	isGood = GetValue(keyName, &intValue, AJAPersistenceTypeInt);		
-	
-	// bool
-	keyName = "UnitTestBoolTrue";	
-	isGood = GetValue(keyName, &trueValue, AJAPersistenceTypeBool);	
-	
-	keyName = "UnitTestBoolFalse";
-	isGood = GetValue(keyName, &falseValue, AJAPersistenceTypeBool);		
-	
-	// float
-	keyName = "UnitTestDouble";
-	isGood = GetValue(keyName, &doubleValue, AJAPersistenceTypeDouble);
-	
-	// string
-	keyName = "UnitTestString";	
-	isGood = GetValue(keyName, &strValue, AJAPersistenceTypeString);
-	
-	// blob
-	keyName = "UnitTestBlob";
-	isGood = GetValue(keyName, &blobValue, AJAPersistenceTypeBlob, blobLen);
-
-	// long string
-	keyName = "UnitTestString (long)";
-	isGood = GetValue(keyName, &longStrValue, AJAPersistenceTypeString);
-
-	// test hierarchical search
-	keyName = "UnitTestHierarchyInt";
-	mboardId = "device 3";		//not in db
-	mserialNumber = "424242";	//not in db
-	isGood = GetValue(keyName, &hierarchyValue1, AJAPersistenceTypeInt);
-
-	mboardId = "device 1";		//in db
-	mserialNumber = "171717";	//not in db
-	isGood = GetValue(keyName, &hierarchyValue2, AJAPersistenceTypeInt);
-
-	mboardId = "device 2";		//in db
-	mserialNumber = "987654";	//in db
-	isGood = GetValue(keyName, &hierarchyValue3, AJAPersistenceTypeInt);
-
-    AJA_UNUSED(isGood);
-
-	if(intValue == 42 &&
-	   trueValue == true &&
-	   falseValue == false &&
-	   doubleValue > 3.1 && doubleValue < 3.15 &&
-	   strValue == "testing 1,2,3" &&
-	   strcmp(blobValue,"blob test data")==0 && 
-	   longStrValue == orgLongStrValue &&
-	   hierarchyValue1 == 17 &&					//should be 17 since device and serial not found
-	   hierarchyValue2 == 23 &&					//should be 23 since device found but serial not found
-	   hierarchyValue3 == 27 					//should be 27 since an exact match
-	   )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
 }

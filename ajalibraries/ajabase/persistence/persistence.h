@@ -11,16 +11,6 @@
 #include <vector>
 #include "ajabase/system/info.h"
 
-//Change these to match way linking in SDK
-
-//#define USE_WITH_STREAMS			//If linking with Streams use this
-//#define USE_WITH_NTV2    			//If linking with Ntv2 but not streams use this
-//#define USE_WITH_NTV4				//If linking with Ntv4 but not streams use this
-
-#if defined(USE_WITH_NTV2)
-#include "ntv2status.h"
-#endif
-
 enum AJAPersistenceType
 {
 	AJAPersistenceTypeInt,		
@@ -47,6 +37,7 @@ public:
 	virtual ~AJAPersistence();
 
     void SetParams(std::string appID="", std::string deviceType="", std::string deviceNumber="", bool bSharePrefFile=false);
+    void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile);
 
 	bool SetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);	
 	bool GetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);
@@ -58,35 +49,9 @@ public:
     bool GetValuesDouble(std::string key_query, std::vector<std::string>& keys, std::vector<double>& values);
     bool GetValuesString(std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
-	// for testing storage to disk
-	bool UnitTestDiskReadWrite();	
-	
-#if defined(USE_WITH_STREAMS)
-#endif
-	
-#if defined(USE_WITH_NTV2)	
-	/**
-	 * Constructor that allows immediate binding to a card
-	 *	@param card (in) Pointer to a card to use when changing persist state.
-	 */
-	AJAPersistence(CNTV2Status *card);
-
-	/**
-	 * Bindings to a specific card.
-	 *	@param card (in) Pointer to a card to use when changing persist state.
-	 */	
-	bool BindToCard(CNTV2Status *card);	
-#endif
-
-#if defined(USE_WITH_NTV4)
-#endif
-	
 private:	
-	
-#if defined(USE_WITH_NTV2)	
-	CNTV2Status 	*mpboardHandle;
-#endif	
-	
+
+    std::string             mappId;
 	std::string				mboardId;
 	bool					mSharedPrefFile;
 	std::string				mserialNumber;	
