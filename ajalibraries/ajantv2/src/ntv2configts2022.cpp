@@ -89,22 +89,8 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
         }
     }
 
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS/2);
-    #else
-        usleep (WAIT_RESET_MS/2 * 1000);
-    #endif
-
     // Disable encoder inputs
     SetEncoderInputEnable( channel, false, false );
-
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (WAIT_RESET_MS/2);
-    #else
-        usleep (WAIT_RESET_MS/2 * 1000);
-    #endif
 
     // Assert reset
 	SetEncoderReset( channel, true );

@@ -15,7 +15,6 @@
 
 #define KIPDPRINT                       0
 
-
 #if defined(MSWindows)
 
     #if (KIPDPRINT==0)
