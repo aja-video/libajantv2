@@ -7,9 +7,8 @@
 #include <QList>
 #include <QMap>
 
-
-
-typedef  struct {
+typedef struct
+{
     uint32_t channels;
     NTV2VideoFormat videoFormat;
     uint32_t bitDepth;
@@ -22,23 +21,37 @@ typedef  struct {
     uint32_t pcrPid;
     uint32_t audio1Pid;
     bool ullMode;
-} KonaIPParamSetupStruct;
+} EncoderStruct;
+
+typedef struct
+{
+    uint32_t selectionMode;
+    uint32_t programNumber;
+    uint32_t programPID;
+    uint32_t audioNumber;
+}DecoderStruct;
+
+typedef  struct
+{
+    QList<EncoderStruct> mEncoder;
+    QList<DecoderStruct> mDecoder;
+} KonaIPParamJ2KSetupStruct;
 
 
-class CKonaIpEncoderJsonReader
+class CKonaIpJ2kJsonReader
 {
 public:
-    CKonaIpEncoderJsonReader();
+    CKonaIpJ2kJsonReader();
     bool openJson(QString fileName);
     void printVideoFormatMap();
 
-    KonaIPParamSetupStruct* getKonaIParams() { return &mKonaIPParams; }
+    KonaIPParamJ2KSetupStruct* getKonaIpJ2kParams() { return &mKonaIpJ2kParams; }
 
 protected:
     bool readJson(const QJsonObject &json);
-
-    KonaIPParamSetupStruct mKonaIPParams;
     void initMaps();
+
+    KonaIPParamJ2KSetupStruct mKonaIpJ2kParams;
 
     QMap<QString, NTV2VideoFormat> videoFormatMap;
     QMap<QString, uint32_t> streamTypeMap;
@@ -46,15 +59,20 @@ protected:
 
 };
 
-class CKonaIPEncoderSetup
+class CKonaIpEncoderSetup
 {
 public:
-    CKonaIPEncoderSetup();
+    CKonaIpEncoderSetup(){};
 
-    bool setupBoard(std::string pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams);
-
-protected:
-
-
+    bool setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams);
 };
+
+class CKonaIpDecoderSetup
+{
+public:
+    CKonaIpDecoderSetup(){};
+
+    bool setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams);
+};
+
 #endif // KONAIPBOARD_H
