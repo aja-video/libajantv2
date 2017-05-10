@@ -108,7 +108,7 @@ AJASystemInfoImpl::Rescan()
     if (memTotalStr.find(" kB") != std::string::npos)
     {
         // convert from kilobytes to bytes
-        replace(memTotalStr, " kB", "");
+        aja::replace(memTotalStr, " kB", "");
         std::istringstream(memTotalStr) >> memtotalbytes;
         memtotalbytes *= 1024;
     }
@@ -123,7 +123,7 @@ AJASystemInfoImpl::Rescan()
     if (memFreeStr.find(" kB") != std::string::npos)
     {
         // convert from kilobytes to bytes
-        replace(memFreeStr, " kB", "");
+        aja::replace(memFreeStr, " kB", "");
         std::istringstream(memFreeStr) >> memfreebytes;
         memfreebytes *= 1024;
     }
