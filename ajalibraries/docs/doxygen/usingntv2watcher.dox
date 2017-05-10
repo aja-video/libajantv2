@@ -62,10 +62,10 @@ If you click back to return to an inspector that was previously in use, its stat
 
 The Frame Buffer inspector monitors the contents of frame buffer memory on the AJA device.
 
-@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher's currently selected polling rate,
+@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at the selected channel's frame rate,
 		it can interfere with any currently running video application, particularly if the additional DMAs exceed the available
-		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
-		in which the act of monitoring an AJA device affects it and the application(s) under test.
+		device or host data transfer budget. Thus, this inspector is not immune from "Heisenbugs" in which the act of monitoring
+		an AJA device affects it and the application(s) under test.
 
 Frame buffer memory contents can be displayed in four ways:
 	-	<b>Line</b> -- The full raster, line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
@@ -73,7 +73,7 @@ Frame buffer memory contents can be displayed in four ways:
 	-	<b>Component</b> -- The full raster, line-by-line, in component format, dictated by the frame store's frame buffer format, in hex or decimal.
 	-	<b>Image</b> -- The visible raster, as an image.
 
-When device polling is enabled, this inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
+This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
 It reads the entire buffer into host memory and compares it to what was read the last time.
 When displaying rasters, the status bar shows the number of lines in the raster that changed from the last frame.
 Except in its Image view, the raster content display always highlights changed content with a brighter color.
