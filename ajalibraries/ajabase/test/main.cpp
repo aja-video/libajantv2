@@ -57,11 +57,14 @@ TEST_CASE("aja::stod")
     double v = aja::stod("-42",&idx);
     CHECK(v == -42);
     CHECK(idx == 3);
-    double v2 = aja::stod("0xF00D",&idx);
-    CHECK(v2 == 61453);
-    CHECK(idx == 6);
+    double v2 = aja::stod("1e9",&idx);
+    CHECK(v2 == 1000000000.000000);
+    CHECK(idx == 3);
     double v3 = aja::stod("3.14",&idx);
     CHECK(v3 == 3.14);
+    CHECK(idx == 4);
+    double v4 = aja::stod("1e-9",&idx);
+    CHECK(v4 == 0.000000001);
     CHECK(idx == 4);
 }
 
@@ -69,14 +72,14 @@ TEST_CASE("aja::to_string variants")
 {
     double f1 = 23.43;
     double f2 = 1e-9;
-    double f3 = 1e40;
+    double f3 = 1e16;
     double f4 = 1e-40;
     double f5 = 123456789;
     double f6 = 3.1415926;
     int    f7 = 28;
     CHECK(aja::to_string(f1) == "23.430000");
     CHECK(aja::to_string(f2) == "0.000000");
-    CHECK(aja::to_string(f3) == "10000000000000000303786028427003666890752.000000");
+    CHECK(aja::to_string(f3) == "10000000000000000.000000");
     CHECK(aja::to_string(f4) == "0.000000");
     CHECK(aja::to_string(f5) == "123456789.000000");
     CHECK(aja::to_string(f6) == "3.141593");
