@@ -234,10 +234,6 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
         tc.QueryString(ctmp, AJATimeBase(AJA_FrameRate_2400), false);
         CHECK(strcmp(ctmp, "01:44:10:00")==0);
 
-        //wchar_t wctmp[12];
-        //tc.QueryString(wctmp, AJATimeBase(AJA_FrameRate_2400), false);
-        //CHECK(wcscmp(wctmp, L"01:44:10:00")==0);
-
         // tc string to frames
         std::vector<AJATimeCode> tcs;
         tcs.push_back(AJATimeCode("01:44:10:00", AJATimeBase(AJA_FrameRate_2398), false));
@@ -256,6 +252,21 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
             CHECK(it->QueryFrame() == frames);
             ++it;
         }
+
+        // misc
+        AJATimeCode tc2;
+        tc2.SetWithCleanup("01:02:03:04 junk here", AJATimeBase(AJA_FrameRate_2400), false);
+        tc2.QueryString(tmp, AJATimeBase(AJA_FrameRate_2400), false);
+        CHECK(tmp == "01:02:03:04");
+        tc2.SetWithCleanup("   01:02:03:04   ", AJATimeBase(AJA_FrameRate_2400), false);
+        tc2.QueryString(tmp, AJATimeBase(AJA_FrameRate_2400), false);
+        CHECK(tmp == "01:02:03:04");
+        tc2.SetWithCleanup("   01 02 03 04   ", AJATimeBase(AJA_FrameRate_2400), false);
+        tc2.QueryString(tmp, AJATimeBase(AJA_FrameRate_2400), false);
+        CHECK(tmp == "01:02:03:04");
+        tc2.SetWithCleanup("01-02-03-04 ", AJATimeBase(AJA_FrameRate_2400), false);
+        tc2.QueryString(tmp, AJATimeBase(AJA_FrameRate_2400), false);
+        CHECK(tmp == "01:02:03:04");
     }
 
 TEST_SUITE_END(); //timecode

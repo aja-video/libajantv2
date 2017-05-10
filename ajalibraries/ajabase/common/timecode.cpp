@@ -51,26 +51,11 @@ AJATimeCode::AJATimeCode(uint32_t frame) :
 	Set(frame);
 }
 
-/*
-AJATimeCode::AJATimeCode(const std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc)
-    : m_stdTimecodeForHfr(bStdTc)
-{
-    Set(wstr.c_str(), timeBase, bDropFrame);
-}
-*/
-
 AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc)
     : m_stdTimecodeForHfr(bStdTc)
 {
     Set(str.c_str(), timeBase, bDropFrame);
 }
-
-/*
-AJATimeCode::AJATimeCode(const std::wstring &wstr, const AJATimeBase& timeBase)
-    : m_stdTimecodeForHfr(true)
-{
-    Set(wstr.c_str(), timeBase);
-}*/
 
 AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase)
     : m_stdTimecodeForHfr(true)
@@ -85,26 +70,10 @@ AJATimeCode::~AJATimeCode()
 {
 } //end ~AJATimeCode
 
-/*
-bool AJATimeCode::QueryIsDropFrame(const wchar_t *pString)
+bool AJATimeCode::QueryIsDropFrame(const string &str)
 {
-	if (!pString)
-		return false;
 	bool bHasSemicolon = false;
-	wstring s(pString);
-	if (s.find(L";",0) != string::npos)
-		bHasSemicolon = true;
-	return bHasSemicolon;
-}
-*/
-
-bool AJATimeCode::QueryIsDropFrame(const char *pString)
-{
-	if (!pString)
-		return false;
-	bool bHasSemicolon = false;
-	string s(pString);
-	if (s.find(";",0) != string::npos)
+    if (str.find(";", 0) != string::npos)
 		bHasSemicolon = true;
 	return bHasSemicolon;
 }
@@ -245,30 +214,6 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 	}
 }
 
-/*
-void AJATimeCode::QueryString(std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame)
-{
-    uint32_t h = 0,m = 0,s = 0,f = 0;
-    QueryHmsf(h,m,s,f,timeBase,bDropFrame);
-
-    std::wostringstream woss;
-    if (bDropFrame)
-    {
-        woss << setfill(L'0') << setw(2) << h << L":"
-             << setfill(L'0') << setw(2) << m << L":"
-             << setfill(L'0') << setw(2) << s << L";"
-             << setfill(L'0') << setw(2) << f;
-    }
-    else
-    {
-        woss << setfill(L'0') << setw(2) << h << L":"
-             << setfill(L'0') << setw(2) << m << L":"
-             << setfill(L'0') << setw(2) << s << L":"
-             << setfill(L'0') << setw(2) << f;
-    }
-    wstr.assign(woss.str());
-}*/
-
 void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
     /*
@@ -295,14 +240,6 @@ void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, boo
     }
     str.assign(oss.str());
 }
-
-/*
-void AJATimeCode::QueryString(wchar_t *pString, const AJATimeBase& timeBase, bool bDropFrame)
-{
-    wstring ws;
-    QueryString(ws, timeBase, bDropFrame);
-    ::swprintf(pString, 12, L"%ls", ws.c_str());
-}*/
 
 void AJATimeCode::QueryString(char *pString,const AJATimeBase& timeBase,bool bDropFrame)
 {
@@ -392,82 +329,6 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 	Set(frame);
 } //end SetHmsf
 
-/*
-void AJATimeCode::Set(const wchar_t *pString,const AJATimeBase& timeBase,bool bDropFrame)
-{
-	const int valCount = 4;
-	uint32_t val[valCount];
-	::memset(val,0,sizeof(val));
-	
-	// work from bottom up so that partial time code
-	// (ie. something like 10:02 rather than 00:00:10:02)
-	// is handled
-	size_t len = ::wcslen(pString);
-	int valOffset = 0;
-	int valMult   = 1;
-	for (size_t i = 0; i < len; i++)
-	{
-		wchar_t charWide = pString[len - i - 1];
-		if (::iswdigit(charWide))
-		{
-			val[valOffset] = val[valOffset] + ((charWide - L'0') * valMult);
-			valMult *= 10;
-		}
-		else
-		{
-			valOffset++;
-			valMult = 1;
-		}
-		
-		if (valOffset >= 4)
-			break;
-	}
-	
-	SetHmsf(val[3],val[2],val[1],val[0],timeBase,bDropFrame);
-}
-*/
-/*
-void AJATimeCode::Set(const std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame)
-{
-    const int valCount = 4;
-    uint32_t val[valCount];
-    ::memset(val,0,sizeof(val));
-
-    // work from bottom up so that partial time code
-    // (ie. something like 10:02 rather than 00:00:10:02)
-    // is handled
-    size_t len = wstr.length();
-    int valOffset = 0;
-    int valMult   = 1;
-    for (size_t i = 0; i < len; i++)
-    {
-        wchar_t charWide = wstr.data()[len - i - 1];
-        if (::iswdigit(charWide))
-        {
-            val[valOffset] = val[valOffset] + ((charWide - L'0') * valMult);
-            valMult *= 10;
-        }
-        else
-        {
-            valOffset++;
-            valMult = 1;
-        }
-
-        if (valOffset >= 4)
-            break;
-    }
-
-    SetHmsf(val[3],val[2],val[1],val[0],timeBase,bDropFrame);
-}
-*/
-/*
-void AJATimeCode::Set(const char *pString,const AJATimeBase& timeBase,bool bDropFrame)
-{
-	wchar_t tempString[256];
-	::mbstowcs(tempString,pString,256);
-	Set(tempString,timeBase,bDropFrame);
-}*/
-
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
     const int valCount = 4;
@@ -501,48 +362,6 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
     SetHmsf(val[3],val[2],val[1],val[0],timeBase,bDropFrame);
 }
 
-/*
-void AJATimeCode::Set(const wchar_t *pString,const AJATimeBase& timeBase)
-{
-	size_t len = ::wcslen(pString);
-	bool bDropFrame = false;
-	for (size_t i = 0; i < len; i++)
-	{
-		if ((pString[i] == L';') || (pString[i] == L'.'))
-		{
-			bDropFrame = true;
-			break;
-		}
-	}
-	Set(pString,timeBase,bDropFrame);
-}
-*/
-/*
-void AJATimeCode::Set(const std::wstring &wstr, const AJATimeBase& timeBase)
-{
-    bool bDropFrame = false;
-    std::wstring::const_iterator it = wstr.begin();
-    while(it != wstr.end())
-    {
-        if ((*it == L';') || (*it == L'.'))
-        {
-            bDropFrame = true;
-            break;
-        }
-        ++it;
-    }
-    Set(wstr, timeBase, bDropFrame);
-}
-*/
-/*
-void AJATimeCode::Set(const char *pString, const AJATimeBase& timeBase)
-{
-	wchar_t tempString[256];
-	::mbstowcs(tempString,pString,256);
-	Set(tempString,timeBase);
-}
-*/
-
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase)
 {
     bool bDropFrame = false;
@@ -559,56 +378,54 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase)
     Set(str, timeBase, bDropFrame);
 }
 
-/*
-void AJATimeCode::SetWithCleanup(const char *pString, const AJATimeBase& timeBase,bool bDrop)
+void AJATimeCode::SetWithCleanup(const std::string &str, const AJATimeBase& timeBase, bool bDrop)
 {
-	char tempString[1024];
-	if (pString == NULL)
-		return;
-	
-	bool bHasMark = false;
-	int len  = (int)::strlen(pString);
-	for (int i = 0; i < len; i++)
-	{
-		if ((pString[i] == ':') || (pString[i] == ';'))
-		{
-			bHasMark = true;
-			break;
-		}
-	}
-	
-	if (bHasMark)
-	{
-		::strcpy(tempString,pString);
-	}
-	else
-	{
-		if (bDrop)
-			::strcpy(tempString,"00:00:00;00");
-		else
-			::strcpy(tempString,"00:00:00:00");
-		
-		int tgtOffset = 10;
-		for (int i = 0; i < len; i++)
-		{
-			int srcOffset = len - i - 1;
-			if ((pString[srcOffset] >= '0') && (pString[srcOffset] <= '9'))
-			{
-				tempString[tgtOffset] = pString[srcOffset];
-				tgtOffset--;
-				if ((tgtOffset == 8) || (tgtOffset == 5) || (tgtOffset == 2))
-					tgtOffset--;
-				
-				if (tgtOffset < 0)
-					break;
-			}
-		}
-	}
-	wchar_t tempString2[256];
-	::mbstowcs(tempString2,tempString,256);
-	Set(tempString2,timeBase);
+    if (str.empty())
+        return;
+
+    bool bHasMark = false;
+    if ( (str.find(";", 0) != string::npos) || (str.find(":", 0) != string::npos) )
+    {
+        bHasMark = true;
+    }
+
+    if (bHasMark)
+    {
+        std::string tmp(str);
+        aja::strip(tmp);
+
+        if (tmp.length() > 11)
+            tmp.resize(11);
+
+        Set(tmp, timeBase);
+    }
+    else
+    {
+        std::string tmp;
+        if (bDrop)
+            tmp = "00:00:00;00";
+        else
+            tmp = "00:00:00:00";
+
+        int len = str.length();
+        int tgtOffset = 10;
+        for (int i = 0; i < len; i++)
+        {
+            int srcOffset = len - i - 1;
+            if ((str[srcOffset] >= '0') && (str[srcOffset] <= '9'))
+            {
+                tmp[tgtOffset] = str[srcOffset];
+                tgtOffset--;
+                if ((tgtOffset == 8) || (tgtOffset == 5) || (tgtOffset == 2))
+                    tgtOffset--;
+
+                if (tgtOffset < 0)
+                    break;
+            }
+        }
+        Set(tmp, timeBase);
+    }
 }
-*/
 
 void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
 {

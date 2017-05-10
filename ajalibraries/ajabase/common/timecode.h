@@ -18,22 +18,11 @@ class AJA_EXPORT AJATimeCode
 public:
 	AJATimeCode();
 	AJATimeCode(uint32_t frame);
-    //AJATimeCode(const std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc=false);
     AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc=false);
-    //AJATimeCode(const std::wstring &wstr, const AJATimeBase& timeBase);
     AJATimeCode(const std::string &str, const AJATimeBase& timeBase);
 
 	virtual	~AJATimeCode();
 	
-    /**
-     *	Query string showing timecode for current frame count given the passed parameters.
-     *
-     *	@param[out]	wstr                        wchar_t string in which to place timecode.
-     *	@param[in]	timeBase  					frame rate from which to calculate string.
-     *	@param[in]	bDropFrame					drop frame value for string.
-     */
-    //void				QueryString(std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame);
-
     /**
      *	Query string showing timecode for current frame count given the passed parameters.
      *
@@ -42,8 +31,6 @@ public:
      *	@param[in]	bDropFrame					drop frame value for string.
      */
     void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame);
-
-    //void				QueryString(wchar_t *pString, const AJATimeBase& timeBase, bool bDropFrame);  ///< @deprecated	Use QueryString(std::wstring) instead.
     void				QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame);     ///< @deprecated	Use QueryString(std::string) instead.
 
 	/**
@@ -99,14 +86,6 @@ public:
 	/**
 	 *	Set current frame number.
 	 *
-     *	@param[in]	wstr    					xx:xx:xx:xx style string representing new frame number.
- 	 *	@param[in]	timeBase  					frame rate associated with pString.
-	 */
-    //void				Set(const std::wstring &wstr, const AJATimeBase& timeBase);
-	
-	/**
-	 *	Set current frame number.
-	 *
      *	@param[in]	str                         xx:xx:xx:xx style string representing new frame number.
  	 *	@param[in]	timeBase  					frame rate associated with pString.
 	 */
@@ -119,18 +98,8 @@ public:
  	 *	@param[in]	timeBase  					frame rate associated with pString.
 	 *  @param[in]  bDrop                       true if drop frame
 	 */
-    //void				SetWithCleanup(const char *pString, const AJATimeBase& timeBase,bool bDrop);
-    //void				SetWithCleanup(const std::string &str, const AJATimeBase& timeBase,bool bDrop);
+    void				SetWithCleanup(const std::string &str, const AJATimeBase& timeBase,bool bDrop);
 	
-	/**
-	 *	Set current frame number.
-	 *
-     *	@param[in]	wstr    					xx:xx:xx:xx style string representing new frame number.
- 	 *	@param[in]	timeBase  					frame rate associated with pString.
- 	 *	@param[in]	bDropFrame  				true if forcing dropframe, false otherwise.
-	 */
-    //void				Set(const std::wstring &wstr, const AJATimeBase& timeBase, bool bDropFrame);
-
 	/**
 	 *	Set current frame number.
 	 *
@@ -192,10 +161,9 @@ public:
 	/**
 	 *	Query string showing timecode for current frame count given the passed parameters.
 	 *
-	 *	@param[in]	pString                     character string with timecode
+     *	@param[in]	str                     string with timecode
 	 */
-    //static bool			QueryIsDropFrame(const wchar_t *pString);
-	static bool			QueryIsDropFrame(const char    *pString);
+    static bool			QueryIsDropFrame(const std::string &str);
 	
 	/**
 	 *	@return	Query string size needed for query string commands.
