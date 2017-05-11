@@ -11,7 +11,7 @@
         "ProgramPID":256,
 
         "_comment_AudioNumber_":"Which program to pull audio from",
-        "AudioNumber":1,
+        "AudioNumber":1
     }
     ]
 }

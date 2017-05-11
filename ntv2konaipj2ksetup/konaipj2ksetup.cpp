@@ -11,50 +11,80 @@
 #include "ntv2configts2022.h"
 
 
-CKonaIpEncoderJsonReader::CKonaIpEncoderJsonReader()
+CKonaIpJ2kJsonReader::CKonaIpJ2kJsonReader()
 {
     initMaps();
 }
 
-bool CKonaIpEncoderJsonReader::readJson(const QJsonObject &json)
+bool CKonaIpJ2kJsonReader::readJson(const QJsonObject &json)
 {
-    QJsonObject pjson = json["encoder"].toObject();
+    mKonaIpJ2kParams.mDecoder.clear();
+    QJsonArray decoderArray = json["decoder"].toArray();
+    for (int decoderIndex = 0; decoderIndex < decoderArray.size(); ++decoderIndex)
+    {
+        std::cout << "Decoder" << std::endl;
 
-    mKonaIPParams.channels = pjson["Channels"].toInt();
-    std::cout << "Channels       " << mKonaIPParams.channels << std::endl;
+        QJsonObject pDecoder = decoderArray[decoderIndex].toObject();
+        DecoderStruct decoderStruct;
 
-    QString vf =  pjson["VideoFormat"].toString();
-    mKonaIPParams.videoFormat = videoFormatMap[vf];
-    std::cout << "VideoFormat    " << vf.toStdString().c_str() << std::endl;
+        decoderStruct.selectionMode = pDecoder["SelectionMode"].toInt();
+        std::cout << "SelectionMode    " << decoderStruct.selectionMode << std::endl;
+        decoderStruct.programNumber = pDecoder["ProgramNumber"].toInt();
+        std::cout << "ProgramNumber    " << decoderStruct.selectionMode << std::endl;
+        decoderStruct.programPID = pDecoder["ProgramPID"].toInt();
+        std::cout << "ProgramPID       " << decoderStruct.selectionMode << std::endl;
+        decoderStruct.audioNumber = pDecoder["AudioNumber"].toInt();
+        std::cout << "AudioNumber      " << decoderStruct.selectionMode << std::endl;
+        mKonaIpJ2kParams.mDecoder.append(decoderStruct);
+    }
 
-    QString st =  pjson["StreamType"].toString();
-    mKonaIPParams.streamType = streamTypeMap[st];
-    std::cout << "StreamType     " << st.toStdString().c_str() << std::endl;
+    mKonaIpJ2kParams.mEncoder.clear();
+    QJsonArray encoderArray = json["encoder"].toArray();
+    for (int encoderIndex = 0; encoderIndex < encoderArray.size(); ++encoderIndex)
+    {
+        std::cout << "Encoder" << std::endl;
 
-    QString css =  pjson["ChromaSampling"].toString();
-    mKonaIPParams.chromaSubSampling = chromaSubSamplingMap[css];
-    std::cout << "ChromaSampling " << css.toStdString().c_str() << std::endl;
+        QJsonObject pEncoder = encoderArray[encoderIndex].toObject();
+        EncoderStruct encoderStruct;
 
-    mKonaIPParams.bitDepth = pjson["BitDepth"].toInt();
-    std::cout << "BitDepth       " << mKonaIPParams.bitDepth << std::endl;
-    mKonaIPParams.mbps = pjson["Mbps"].toInt();
-    std::cout << "Mbps           " << mKonaIPParams.mbps << std::endl;
-    mKonaIPParams.audioChannels = pjson["AudioChannels"].toInt();
-    std::cout << "AudioChannels  " << mKonaIPParams.audioChannels << std::endl;
+        encoderStruct.channels = pEncoder["Channels"].toInt();
+        std::cout << "Channels       " << encoderStruct.channels << std::endl;
 
-    mKonaIPParams.programPid = pjson["ProgramPid"].toInt();
-    std::cout << "ProgramPid     " << mKonaIPParams.programPid << std::endl;
-    mKonaIPParams.videoPid = pjson["VideoPid"].toInt();
-    std::cout << "VideoPid       " << mKonaIPParams.videoPid << std::endl;
-    mKonaIPParams.pcrPid = pjson["PcrPid"].toInt();
-    std::cout << "PcrPid         " << mKonaIPParams.pcrPid << std::endl;
-    mKonaIPParams.audio1Pid = pjson["Audio1Pid"].toInt();
-    std::cout << "Audio1Pid      " << mKonaIPParams.audio1Pid << std::endl << std::endl;
-    mKonaIPParams.ullMode = false;
+        QString vf =  pEncoder["VideoFormat"].toString();
+        encoderStruct.videoFormat = videoFormatMap[vf];
+        std::cout << "VideoFormat    " << vf.toStdString().c_str() << std::endl;
+
+        QString st =  pEncoder["StreamType"].toString();
+        encoderStruct.streamType = streamTypeMap[st];
+        std::cout << "StreamType     " << st.toStdString().c_str() << std::endl;
+
+        QString css =  pEncoder["ChromaSampling"].toString();
+        encoderStruct.chromaSubSampling = chromaSubSamplingMap[css];
+        std::cout << "ChromaSampling " << css.toStdString().c_str() << std::endl;
+
+        encoderStruct.bitDepth = pEncoder["BitDepth"].toInt();
+        std::cout << "BitDepth       " << encoderStruct.bitDepth << std::endl;
+        encoderStruct.mbps = pEncoder["Mbps"].toInt();
+        std::cout << "Mbps           " << encoderStruct.mbps << std::endl;
+        encoderStruct.audioChannels = pEncoder["AudioChannels"].toInt();
+        std::cout << "AudioChannels  " << encoderStruct.audioChannels << std::endl;
+
+        encoderStruct.programPid = pEncoder["ProgramPid"].toInt();
+        std::cout << "ProgramPid     " << encoderStruct.programPid << std::endl;
+        encoderStruct.videoPid = pEncoder["VideoPid"].toInt();
+        std::cout << "VideoPid       " << encoderStruct.videoPid << std::endl;
+        encoderStruct.pcrPid = pEncoder["PcrPid"].toInt();
+        std::cout << "PcrPid         " << encoderStruct.pcrPid << std::endl;
+        encoderStruct.audio1Pid = pEncoder["Audio1Pid"].toInt();
+        std::cout << "Audio1Pid      " << encoderStruct.audio1Pid << std::endl << std::endl;
+        encoderStruct.ullMode = false;
+
+        mKonaIpJ2kParams.mEncoder.append(encoderStruct);
+    }
     return true;
 }
 
-bool CKonaIpEncoderJsonReader::openJson(QString fileName)
+bool CKonaIpJ2kJsonReader::openJson(QString fileName)
 {
     QFile loadFile(fileName);
     if ( !loadFile.open(QIODevice::ReadOnly))
@@ -69,7 +99,7 @@ bool CKonaIpEncoderJsonReader::openJson(QString fileName)
 
 }
 
-void CKonaIpEncoderJsonReader::printVideoFormatMap()
+void CKonaIpJ2kJsonReader::printVideoFormatMap()
 {
     QMap<QString, NTV2VideoFormat>::iterator i;
     for (i = videoFormatMap.begin(); i != videoFormatMap.end(); ++i)
@@ -79,63 +109,7 @@ void CKonaIpEncoderJsonReader::printVideoFormatMap()
     }
 }
 
-CKonaIPEncoderSetup::CKonaIPEncoderSetup()
-{
-
-}
-
-bool CKonaIPEncoderSetup::setupBoard(std::string pDeviceSpec,KonaIPParamSetupStruct* pKonaIPParams)
-{
-    bool rv;
-    CNTV2Card mDevice;
-    CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
-    if (!mDevice.IsOpen())
-    {std::cerr << "## ERROR:  No devices found" << std::endl;  return false;}
-    //if (!mDevice.IsKonaIPDevice ())
-    //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
-
-    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
-    {
-        std::cerr << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
-        mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
-            std::cerr << "## NOTE:  Device is ready" << std::endl;
-    }
-
-    CNTV2Config2022     config2022 (mDevice);
-    j2kEncoderConfig    encoderCfg;
-
-    // retrieve encode params
-    encoderCfg.videoFormat     = (NTV2VideoFormat)pKonaIPParams->videoFormat;
-    encoderCfg.ullMode         = 0;
-    encoderCfg.bitDepth        = pKonaIPParams->bitDepth;
-    encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)pKonaIPParams->chromaSubSampling;
-    encoderCfg.streamType      = (J2KStreamType)pKonaIPParams->streamType;
-    encoderCfg.mbps            = pKonaIPParams->mbps;
-    encoderCfg.audioChannels    = pKonaIPParams->audioChannels;
-    encoderCfg.pmtPid          = pKonaIPParams->programPid;
-    encoderCfg.videoPid        = pKonaIPParams->videoPid;
-    encoderCfg.pcrPid          = pKonaIPParams->pcrPid;
-    encoderCfg.audio1Pid       = pKonaIPParams->audio1Pid;
-
-    // For the J2K encoder we only configure output channels NTV2_CHANNEL1 and NTV2_CHANNEL2
-    if (pKonaIPParams->channels & 1)
-    {
-        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
-    }
-
-    if (pKonaIPParams->channels & 2)
-    {
-        rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
-    }
-
-    std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
-
-    return true;
-}
-
-void CKonaIpEncoderJsonReader::initMaps()
+void CKonaIpJ2kJsonReader::initMaps()
 {
 
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_525_5994, false))] = NTV2_FORMAT_525_5994;
@@ -177,6 +151,131 @@ void CKonaIpEncoderJsonReader::initMaps()
 
 }
 
+
+bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams)
+{
+    bool rv;
+    CNTV2Card mDevice;
+    CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
+    if (!mDevice.IsOpen())
+    {std::cerr << "## ERROR:  No devices found" << std::endl;  return false;}
+    //if (!mDevice.IsKonaIPDevice ())
+    //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+
+    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
+    while (!mDevice.IsDeviceReady ())
+    {
+        std::cerr << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        mDevice.SleepMs (1000);
+        if (mDevice.IsDeviceReady ())
+            std::cerr << "## NOTE:  Device is ready" << std::endl;
+    }
+
+    if (pKonaIpJ2kParams->mEncoder.size() == 0)
+    {
+        std::cerr << "Not setting up encoder, no data" << std::endl;
+        return false;
+    }
+
+    if (pKonaIpJ2kParams->mEncoder.size() > 1)
+    {
+        std::cerr << "Multiple encoders not supported at this time" << std::endl;
+        return false;
+    }
+
+    QListIterator<EncoderStruct> encoderIter(pKonaIpJ2kParams->mEncoder);
+    while (encoderIter.hasNext())
+    {
+        std::cerr << "## encoderIter did" << std::endl;
+
+        EncoderStruct encoder = encoderIter.next();
+        CNTV2Config2022     config2022 (mDevice);
+        j2kEncoderConfig    encoderCfg;
+
+        // retrieve encode params
+        encoderCfg.videoFormat     = (NTV2VideoFormat)encoder.videoFormat;
+        encoderCfg.ullMode         = 0;
+        encoderCfg.bitDepth        = encoder.bitDepth;
+        encoderCfg.chromaSubsamp   = (J2KChromaSubSampling)encoder.chromaSubSampling;
+        encoderCfg.streamType      = (J2KStreamType)encoder.streamType;
+        encoderCfg.mbps            = encoder.mbps;
+        encoderCfg.audioChannels   = encoder.audioChannels;
+        encoderCfg.pmtPid          = encoder.programPid;
+        encoderCfg.videoPid        = encoder.videoPid;
+        encoderCfg.pcrPid          = encoder.pcrPid;
+        encoderCfg.audio1Pid       = encoder.audio1Pid;
+
+        // For the J2K encoder we only configure output channels NTV2_CHANNEL1 and NTV2_CHANNEL2
+        if (encoder.channels & 1)
+        {
+            rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
+        }
+
+        if (encoder.channels & 2)
+        {
+            rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
+        }
+    }
+
+    std::cerr << "## NOTE:  Encoder is setup and running" << std::endl;
+
+    return true;
+}
+
+
+bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams)
+{
+    bool rv;
+    CNTV2Card mDevice;
+    CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
+    if (!mDevice.IsOpen())
+    {std::cerr << "## ERROR:  No devices found" << std::endl;  return false;}
+    //if (!mDevice.IsKonaIPDevice ())
+    //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+
+    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
+    while (!mDevice.IsDeviceReady ())
+    {
+        std::cerr << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        mDevice.SleepMs (1000);
+        if (mDevice.IsDeviceReady ())
+            std::cerr << "## NOTE:  Device is ready" << std::endl;
+    }
+
+    if (pKonaIpJ2kParams->mDecoder.size() == 0)
+    {
+        std::cerr << "Not setting up decoder, no data" << std::endl;
+        return false;
+    }
+
+    if (pKonaIpJ2kParams->mDecoder.size() > 1)
+    {
+        std::cerr << "Multiple decoders not supported at this time" << std::endl;
+        return false;
+    }
+
+    QListIterator<DecoderStruct> decoderIter(pKonaIpJ2kParams->mDecoder);
+    while (decoderIter.hasNext())
+    {
+        std::cerr << "## decoderIter did" << std::endl;
+
+        DecoderStruct decoder = decoderIter.next();
+        CNTV2Config2022     config2022 (mDevice);
+        j2kDecoderConfig    decoderCfg;
+
+        // retrieve decode params
+        decoderCfg.selectionMode    = (j2kDecoderConfig::eProgSelMode_t)decoder.selectionMode;
+        decoderCfg.programNumber    = decoder.programNumber;
+        decoderCfg.programPID       = decoder.programPID;
+        decoderCfg.audioNumber      = decoder.audioNumber;
+
+        rv = config2022.SetJ2KDecoderConfiguration(decoderCfg);
+    }
+
+    std::cerr << "## NOTE:  Decoder is setup and running" << std::endl;
+
+    return true;
+}
 
 
 

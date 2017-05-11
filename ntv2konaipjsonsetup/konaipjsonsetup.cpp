@@ -173,7 +173,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         mKonaIPParams.mTransmitChannels.append(transmitStruct);
     }
-
     return true;
 }
 
