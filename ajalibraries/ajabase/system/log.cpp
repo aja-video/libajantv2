@@ -48,9 +48,13 @@ AJALog::AJALog()
         bInitialized = true;
         
         #if defined(AJA_MAC)
-        
-            #if (AJA_LOGTYPE==9999)
+
+            #if (AJA_LOGTYPE==2)
+                AJADebug::Open();
+
+            #elif (AJA_LOGTYPE==9999)
                 CreateFireLogUserClient();
+
             #endif
         
         #elif defined(AJA_LINUX)
