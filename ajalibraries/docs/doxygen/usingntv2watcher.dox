@@ -197,8 +197,8 @@ and read or write "head" position.
 
 @note	Because this inspector reads (via DMA) the entire contents of an audio buffer at NTV2Watcher's currently selected polling rate,
 		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
-		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
-		in which the act of monitoring an AJA device affects it and the application(s) under test.
+		device or host data transfer budget. Thus, this inspector is not immune from "Heisenbugs" in which the act of monitoring an AJA
+		device affects it and the application(s) under test.
 
 Audio buffer memory contents can be displayed in three ways:
 	-	<b>Raw</b> -- The entire buffer in 4096-byte "lines", grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
@@ -206,31 +206,52 @@ Audio buffer memory contents can be displayed in three ways:
 	-	<b>Phase</b> -- A phase plot of one audio channel against another. Both audio channels must be carrying PCM data.
 
 When device polling is enabled, this inspector repeatedly monitors the audio system's input or output buffer.
-It reads the entire buffer into host memory and compares it to what was read the last time.
+It reads the entire buffer into host memory and compares it to its previous contents.
 The status bar shows the read or write head position, as well as what changed.
 The display highlights changed content with a brighter color.
 
-@par	Audio System Controls
-	-	<b>Audio System</b> -- Selects the audio system of interest.
-	-	<b>Sample Rate</b> -- Indicates the audio system's current sample rate.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Buffer Size</b> -- Indicates the audio system's current buffer size.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Audio Channel Count</b> -- Indicates the audio system's current channel count.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>AutoCirculate Indicator</b> -- Indicates if the audio system is being used by AutoCirculate, and if so, which Channel.
-	-	<b>Active Pairs Indicator</b> -- Indicates the active audio channel pairs in use.
-	-	<b>Non-PCM Pairs Indicator</b> -- Indicates the non-PCM audio channel pairs.
-	-	<b>PCM</b> -- If checked, the audio system is set for PCM audio. When unchecked, it's configured for non-PCM audio.
-	-	<b>Loopback</b> -- If checked, audio samples from the audio system's audio source are copied into the corresponding SDI output's audio embedder.
-	-	<b>SDI Output Embedder</b> -- If checked, the audio system's corresponding SDI output's audio embedder is enabled. (Available only for "Output" View mode.)
-	-	<b>View</b> -- Controls which part of the audio system to inspect:
-		-	<b>Input</b> -- Inspects the incoming audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
-		-	<b>Output</b> -- Inspects the outgoing audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
-	-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the audio data near the audio system's read/write head.
-	-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
-		@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
-				audio should only be done with very short (less than 30 millisecond) polling intervals.
+@par	Audio System Controls and Indicators
+	-	<b>Audio System Selection and Configuration</b>
+		-	<b>Audio System</b> -- Selects the audio system of interest.
+		-	<b>Rate</b> -- Indicates the audio system's current sample rate.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Size</b> -- Indicates the audio system's current buffer size.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Channels</b> -- Indicates the audio system's current channel count.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>State Indicators</b>
+		-	<b>A/C Indicator</b> -- Indicates if the audio system is being used by <b>AutoCirculate</b>, and if so, which <b>AutoCirculate Channel</b>.
+		-	<b>Active Pairs</b> -- Indicates which audio channel pairs are currently active.
+		-	<b>Non-PCM Pairs</b> -- Indicates which of the active audio channel pairs are carrying non-PCM data.
+	-	<b>Operation Controls</b>
+		-	<b>Start</b> -- Click this button to start/run the audio system. If already running, the button is dimmed and indicates "Running".
+		-	<b>Stop</b> -- Click this button to stop the audio system. If already stopped, the button is dimmed and indicates "Stopped".
+		-	<b>Loopback</b> -- If checked, audio samples from the audio system's source are routed directly into the output embedder(s) that are sourced from this audio system.
+		-	<b>Erase</b> -- (Shown only in <b>Output</b> mode.) If checked, the audio system will automatically write silence (i.e., zero values) into the output buffer
+			immediately behind the <b>Read Head</b>.
+		-	<b>Embed</b> -- (Shown only in <b>Output</b> mode.) If checked, the audio system's output audio embedder is enabled.
+			If unchecked, the audio system's output embedder is disabled, and will emit no audio packets.
+		-	<b>PCM Output</b> -- (Shown only in <b>Output</b> mode, and only for devices that lack per-audio-channel-pair PCM control.)
+			If checked, the output embedder marks all outgoing audio packets as normal PCM.
+			If unchecked, the output embedder marks all outgoing audio packets as non-PCM.
+		-	<b>Non-PCM Output</b> -- (Shown only in <b>Output</b> mode, and only for devices that have per-audio-channel-pair PCM control.)
+			This popup menu lists all possible channel pairs.
+			If a channel pair is checked, the output embedder marks outgoing audio packets for that channel pair as non-PCM.
+			If a channel pair is unchecked, the output embedder marks outgoing audio packets for that channel pair as normal PCM.
+	-	<b>Mode and View Controls</b>
+		-	<b>View</b> -- Controls which part of the audio system to inspect:
+			-	<b>Input</b> -- Inspects the input (capture) audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
+			-	<b>Output</b> -- Inspects the output (playout) audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
+		-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the audio data that immediately precedes the <b>Read Head</b> or follows the <b>Write Head</b>.
+		-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
+			@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
+					audio should only be done with very short (less than 30 millisecond) polling intervals.
+		-	<b>AutoDetect</b> -- If checked, scans for muted channels or channels that contain Dolby-encoded audio data, and augments the <b>Vertical Ruler</b> scale accordingly.
+		-	<b>Source</b> -- (Shown only in <b>Input</b> mode.) This popup menu lists all possible audio sources for the audio system, and indicates the current source.
+			The current source can be changed immediately using this menu.
+	-	<b>Other</b>
+		-	<b>Status Bar</b> -- Indicates the audio system's current <b>Write Head</b> (<b>Input</b> mode) or <b>Read Head</b> (<b>Output</b> mode) position,
+			and which part of its sample buffer changed (if any).
 
 @par	Navigation
 	-	<b>Scrolling</b> -- The display can be scrolled horizontally and/or vertically.
@@ -240,8 +261,13 @@ The display highlights changed content with a brighter color.
 		-	Use the up-arrow or down-arrow keys to scroll the display up or down.
 		-	Use the left-arrow or right-arrow keys to scroll the display left or right.
 		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
-	-	<b>Vertical Ruler</b> -- This ruler identifies each audio channel in the display.
-	-	<b>Horizontal Ruler</b> -- This ruler identifies the position in the audio buffer.
+	-	<b>Vertical Ruler</b> -- This ruler identifies each audio channel in the display. Each channel can be augmented with "Absent", "PCM" or "Non-PCM" (or "Mute" or "Non-PCM Dolby" with <b>AutoDetect</b> enabled).
+	-	<b>Horizontal Ruler</b> -- This ruler identifies the offset into the audio buffer of each column (or pixel, horizontally) in the audio buffer.
+		-	Right-click in the horizontal ruler to pop up the <b>Units</b> menu:
+			-	<b>Byte Offset</b> -- Shows the buffer offset as a byte count, in hexadecimal.
+			-	<b>Samples</b> -- Shows the buffer offset as a zero-based decimal sample index number.
+			-	<b>Seconds</b> -- Shows the buffer offset as a fixed-point decimal time value (in microseconds, milliseconds, or seconds, as appropriate).
+			@note	This setting also affects the units used in the <b>Change Indicator</b> in the status bar.
 	-	Right-click in the display to pop up a context-sensitive menu:
 		-	<b>View</b> menu:
 			-	<b>Raw</b> -- Switch to the <b>Raw</b> view.
@@ -253,8 +279,9 @@ The display highlights changed content with a brighter color.
 			-	<b>Percent</b> -- Shows raw sample data as a decimal percentage of maximum.
 			-	<b>Float</b> -- Shows samples as floating point values.
 			-	<b>dB</b> -- Shows samples in decibels.
-
-
+		-	<b>Copy</b> -- Copies the audio buffer contents to the clipboard.
+		-	<b>Paste</b> -- (Output mode only) Pastes the clipboard contents into the output audio buffer. Available only if previously copied from an Audio inspector view.
+		-	<b>Fill</b> -- (Output mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
 
 
 @subsection	inspectoranc		Ancillary Data Inspector
@@ -296,7 +323,7 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		-	<b>Name</b> -- A description of the packet.
 		-	<b>DC</b> -- Data Count of the payload data, in bytes.
 		-	<b>CS</b> -- The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
-		-	<b>Data</b> -- The payload data bytes.
+		-	<b>Data</b> -- The payload data bytes (64 bytes maximum).
 
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
 It reads the entire buffer into host memory and compares it to what was read the last time.
