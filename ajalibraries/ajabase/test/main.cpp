@@ -230,8 +230,8 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
         tc.QueryString(tmp, AJATimeBase(AJA_FrameRate_6000), false);
         CHECK(tmp == "00:41:40:00");
 
+        // test the deprecated functionality
         char ctmp[12];
-        memset(ctmp,0,sizeof(ctmp));
         tc.QueryString(ctmp, AJATimeBase(AJA_FrameRate_2400), false);
         CHECK(strcmp(ctmp, "01:44:10:00")==0);
 
