@@ -81,7 +81,7 @@ bool CKonaIpJ2kJsonReader::readJson(const QJsonObject &json)
 
         mKonaIpJ2kParams.mEncoder.append(encoderStruct);
     }
-
+    return true;
 }
 
 bool CKonaIpJ2kJsonReader::openJson(QString fileName)
