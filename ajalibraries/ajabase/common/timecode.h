@@ -165,10 +165,8 @@ public:
 	 */
     static bool			QueryIsDropFrame(const std::string &str);
 	
-	/**
-	 *	@return	Query string size needed for query string commands.
-	 */
-	static int 			QueryStringSize(void);
+
+    static int 			QueryStringSize(void);  ///< @deprecated	Not needed when using std::string.
 	
 	/**
 	 *	Query if rp188 data is drop frame or not
@@ -202,4 +200,3 @@ private:
 };
 
 #endif	// AJA_TIMECODE_H
-

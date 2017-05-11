@@ -216,10 +216,6 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 
 void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
-    /*
-    wstring ws;
-    QueryString(ws, timeBase, bDropFrame);
-    str.assign(string(ws.begin(), ws.end()));*/
     uint32_t h = 0,m = 0,s = 0,f = 0;
     QueryHmsf(h,m,s,f,timeBase,bDropFrame);
 
@@ -241,11 +237,12 @@ void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, boo
     str.assign(oss.str());
 }
 
-void AJATimeCode::QueryString(char *pString,const AJATimeBase& timeBase,bool bDropFrame)
+void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame)
 {
     string s;
     QueryString(s, timeBase, bDropFrame);
     strncpy(pString, s.c_str(), s.length());
+    pString[11] = '\0';
 }
 
 int AJATimeCode::QuerySMPTEStringSize(void)
@@ -642,8 +639,3 @@ const AJATimeCode AJATimeCode::operator-(const int32_t val) const
 {
 	return AJATimeCode(*this) -= val;
 }
-//---------------------------------------------------------------------------------------------------------------------
-//  Private and Protected Functions and Class Methods
-//---------------------------------------------------------------------------------------------------------------------
-
-
