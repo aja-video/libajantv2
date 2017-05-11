@@ -210,6 +210,7 @@
     <ClCompile Include="..\common\audioutilities.cpp" />
     <ClCompile Include="..\common\buffer.cpp" />
     <ClCompile Include="..\common\cli_utils.cpp" />
+    <ClCompile Include="..\common\common.cpp" />
     <ClCompile Include="..\common\dpx_hdr.cpp" />
     <ClCompile Include="..\common\dpxfileio.cpp" />
     <ClCompile Include="..\common\guid.cpp" />

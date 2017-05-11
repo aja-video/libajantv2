@@ -134,6 +134,9 @@
     <ClCompile Include="..\network\udp_socket.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\common.cpp">
+      <Filter>Common Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\audioutilities.h">
