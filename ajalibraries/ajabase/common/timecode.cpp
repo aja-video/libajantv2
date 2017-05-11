@@ -343,7 +343,7 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
     int valMult   = 1;
     for (size_t i = 0; i < len; i++)
     {
-        char theChar = str.data()[len - i - 1];
+        char theChar = str[len - i - 1];
         if (::isdigit(theChar))
         {
             val[valOffset] = val[valOffset] + ((theChar - '0') * valMult);
@@ -359,7 +359,7 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
             break;
     }
 
-    SetHmsf(val[3],val[2],val[1],val[0],timeBase,bDropFrame);
+    SetHmsf(val[3], val[2], val[1], val[0], timeBase, bDropFrame);
 }
 
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase)
@@ -433,10 +433,10 @@ void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
 	if (pBufr[0] & 0x40)
 		bDrop = true;
 	
-	uint32_t f =	(((pBufr[0] & 0x30) >> 4) * 10)	+	(pBufr[0] & 0x0f);
-	uint32_t s =	(((pBufr[1] & 0x70) >> 4) * 10)	+	(pBufr[1] & 0x0f);
-	uint32_t m =	(((pBufr[2] & 0x70) >> 4) * 10)	+	(pBufr[2] & 0x0f);
-	uint32_t h =	(((pBufr[3] & 0x30) >> 4) * 10)	+	(pBufr[3] & 0x0f);
+    uint32_t f = (((pBufr[0] & 0x30) >> 4) * 10) + (pBufr[0] & 0x0f);
+    uint32_t s = (((pBufr[1] & 0x70) >> 4) * 10) + (pBufr[1] & 0x0f);
+    uint32_t m = (((pBufr[2] & 0x70) >> 4) * 10) + (pBufr[2] & 0x0f);
+    uint32_t h = (((pBufr[3] & 0x30) >> 4) * 10) + (pBufr[3] & 0x0f);
 	
     SetHmsf(h,m,s,f,timeBase,bDrop);
 }

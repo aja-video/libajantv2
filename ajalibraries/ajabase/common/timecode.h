@@ -98,7 +98,7 @@ public:
  	 *	@param[in]	timeBase  					frame rate associated with pString.
 	 *  @param[in]  bDrop                       true if drop frame
 	 */
-    void				SetWithCleanup(const std::string &str, const AJATimeBase& timeBase,bool bDrop);
+    void				SetWithCleanup(const std::string &str, const AJATimeBase& timeBase, bool bDrop);
 	
 	/**
 	 *	Set current frame number.
