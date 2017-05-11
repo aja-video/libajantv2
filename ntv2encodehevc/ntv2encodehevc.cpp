@@ -1432,14 +1432,15 @@ AJAStatus NTV2EncodeHEVC::ProcessVideoFrame (AVHevcDataBuffer * pSrcFrame, AVHev
 
     if (mWithAnc)
     {
-        char timeString[24];
+        std::string timeString;
+
         mTimeCode.Set(frameNumber);
         mTimeCode.SetStdTimecodeForHfr(false);
         mTimeCode.QueryString(timeString, mTimeBase, false);
-        mTimeCodeBurn.BurnTimeCode((char*)pDstFrame->pVideoBuffer, timeString, 10);
+        mTimeCodeBurn.BurnTimeCode((char*)pDstFrame->pVideoBuffer, timeString.c_str(), 10);
         mTimeCode.SetRP188(pDstFrame->timeCodeDBB, pDstFrame->timeCodeLow, pDstFrame->timeCodeHigh, mTimeBase);
         mTimeCode.QueryString(timeString, mTimeBase, false);
-        mTimeCodeBurn.BurnTimeCode((char*)pDstFrame->pVideoBuffer, timeString, 20);
+        mTimeCodeBurn.BurnTimeCode((char*)pDstFrame->pVideoBuffer, timeString.c_str(), 20);
     }
 
     return AJA_STATUS_SUCCESS;
