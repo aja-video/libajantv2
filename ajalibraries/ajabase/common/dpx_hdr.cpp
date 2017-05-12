@@ -102,7 +102,7 @@ float dpx_get_r32(const float *ptr, bool BE)
 
 
 
-DpxHdr DpxHdr::operator=(const DpxHdr& rhs)
+DpxHdr& DpxHdr::operator=(const DpxHdr& rhs)
 {
     if (this != &rhs)
     {
