@@ -43,7 +43,7 @@ void wstringToString(wstring inPath, string& outPath)
     ::wcstombs(tmp,inPath.c_str(),pathSize);
     tmp[pathSize] = 0;
     outPath.assign(tmp);
-    delete tmp;
+    delete[] tmp;
 }
 
 void stringToWstring(string inPath, wstring& outPath)
