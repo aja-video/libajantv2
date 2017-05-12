@@ -43,32 +43,42 @@ const int64_t AJATimeBaseDefaultDuration  = 1001;
 const int64_t AJATimeBaseDefaultAudioRate = 48000;
 
 AJATimeBase::AJATimeBase()
-    : AJATimeBase(AJATimeBaseDefaultTimeScale, AJATimeBaseDefaultDuration, AJATimeBaseDefaultAudioRate)
 {
+    SetToDefault();
 }
 
 AJATimeBase::AJATimeBase(AJA_FrameRate ajaFrameRate)
-    : AJATimeBase(AJATimeBaseDefaultTimeScale, AJATimeBaseDefaultDuration, AJATimeBaseDefaultAudioRate)
 {
+    SetToDefault();
     // this will set the correct timeScale and duration
     SetAJAFrameRatePrivate(ajaFrameRate);
 }
 
 AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration)
-    : AJATimeBase(frameTimeScale, frameDuration, AJATimeBaseDefaultAudioRate)
 {
+    SetToDefault();
+    mFrameTimeScale = frameTimeScale;
+    mFrameDuration  = frameDuration;
 }
 
 AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate)
-{    
+{
+    SetToDefault();
 	mFrameTimeScale	= frameTimeScale;
 	mFrameDuration	= frameDuration;
 	mAudioRate		= audioRate;
-	mTickRate		= AJATime::GetSystemFrequency();
 }
 
 AJATimeBase::~AJATimeBase()
 {
+}
+
+void AJATimeBase::SetToDefault(void)
+{
+    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
+    mFrameDuration  = AJATimeBaseDefaultDuration;
+    mAudioRate      = AJATimeBaseDefaultAudioRate;
+	mTickRate       = AJATime::GetSystemFrequency();
 }
 
 AJATimeBase& AJATimeBase::operator=(const AJATimeBase &t)
@@ -103,14 +113,6 @@ bool AJATimeBase::operator==(const AJATimeBase &b) const
 bool AJATimeBase::operator!=(const AJATimeBase &a) const 
 {
 	return !(*this == a);
-}
-
-void AJATimeBase::SetToDefault(void)
-{
-    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
-    mFrameDuration  = AJATimeBaseDefaultDuration;
-    mAudioRate      = AJATimeBaseDefaultAudioRate;
-	mTickRate       = AJATime::GetSystemFrequency();
 }
 
 void AJATimeBase::SetFrameRate(int64_t frameTimeScale, int64_t frameDuration)
