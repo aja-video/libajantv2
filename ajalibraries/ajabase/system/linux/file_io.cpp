@@ -372,7 +372,7 @@ AJAFileIO::ReadDirectory(
 		convertedPath = directory;
 		for (string::iterator it = convertedPath.begin();
 				it < convertedPath.end();
-				it++)
+                ++it)
 		{
 			if( *it == '\\' )
 				*it = '/';
@@ -382,7 +382,7 @@ AJAFileIO::ReadDirectory(
 		upperPattern = filePattern;
 		for (string::iterator it = upperPattern.begin();
 				it < upperPattern.end();
-				it++)
+                ++it)
 		{
 			*it = toupper( *it );
 		}
