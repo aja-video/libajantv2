@@ -11,6 +11,7 @@
 #include "limits.h"
 
 #include "ajabase/common/common.h"
+#include "ajabase/common/guid.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/persistence/persistence.h"
@@ -271,6 +272,25 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
     }
 
 TEST_SUITE_END(); //timecode
+
+
+TEST_SUITE("guid -- functions in ajabase/common/guid.h");
+
+    TEST_CASE("CreateGuid")
+    {
+        std::string guid = CreateGuid();
+        CHECK(guid.length() == 36);
+        std::vector<std::string> parts;
+        aja::split(guid, '-', parts);
+        CHECK(parts.size() == 5);
+        CHECK(parts.at(0).length() == 8);
+        CHECK(parts.at(1).length() == 4);
+        CHECK(parts.at(2).length() == 4);
+        CHECK(parts.at(3).length() == 4);
+        CHECK(parts.at(4).length() == 12);
+    }
+
+TEST_SUITE_END(); //guid
 
 
 TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
