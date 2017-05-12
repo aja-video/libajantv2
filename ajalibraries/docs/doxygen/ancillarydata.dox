@@ -10,7 +10,7 @@
 
 	For application developers who needed to extract or insert their own VANC data, "tall" frame geometries were introduced as
 	a stopgap to incorporate VANC lines into the frame buffers. Unfortunately, this trick has some serious disadvantages:
-	-	The VANC data must be packed/encoded properly based on the frame buffer pixel format, which adds a lot of complexity to client code.
+	-	The VANC data must be packed/encoded properly based on the frame buffer pixel format, which adds much complexity to client code.
 	-	The VANC data can be corrupted by any CSCs/LUTs upstream/downstream of the FrameStore (for capture/playout, respectively).
 	-	There's no HANC support.
 	-	The frame buffer geometry doesn't match the video standard -- again, more code complexity.
@@ -27,21 +27,20 @@
 	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry now can
 		match the video standard.
 
-	Notes:
-	-	All NTV2 devices support the "tall" and "taller" VANC geometries.
-	-	Both AUTOCIRCULATE_TRANSFER and AUTOCIRCULATE_TRANSFER_STRUCT -based AutoCirculate APIs support VANC geometries.
-	-	Only AUTOCIRCULATE_TRANSFER supports the new Anc inserter/extractor firmware, and \c AUTOCIRCULATE_WITH_ANC must be
-		specified in the call to CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
-	-	The new Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for setting up and controlling
-		the Anc inserter/extractor firmare will be provided for non-AutoCirculate applications in a future SDK.
+	@note	All NTV2 devices support the "tall" and "taller" VANC geometries.
+	@note	AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
+			To use the latter, the \c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
+			or CNTV2Card::AutoCirculateInitForOutput.
+	@note	The newer custom Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for operating the Anc
+			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK.
 
 	@section	ancembeddedaudio	Embedded Audio
 
 	To capture embedded audio from HANC into the audio input buffer, set the audio source select register, for the specific
-	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetEmbeddedAudioInput and CNTV2Card::SetAudioSystemInputSource).
-	During playout, if audio is present in the audio output buffer, it will always be written into the HANC of the output video --
-	unless the embedded audio suppress bit for that channel is set in the audio control register (see CNTV2Card::SetAudioOutputPause
-	and CNTV2Card::SetAudioOutputReset).
+	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetAudioSystemInputSource) and start the audio system running.
+	For playout, audio samples present in the audio output buffer will be embedded into outgoing HANC packets of SDI output(s) sourced
+	from it if the audio system is running -- otherwise silence (zeroes) will be embedded. Note that embedded audio output can be
+	suppressed (see CNTV2Card::SetAudioOutputEmbedderState).
 
 	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
 

@@ -1803,6 +1803,10 @@ public:
 		@param[in]	inSDIInputChannel		Specifies the SDI input of interest.
 		@param[out]	outChannelPairs		Receives the channel pairs that are currently PCM-encoded.
 		@return		True if successful;  otherwise false.
+		@note		The audio de-embedder firmware sets non-PCM-detect bits in registers independently of its channel-pair-detection registers.
+					Non-PCM-detect bits representing missing channel pairs are always clear. Therefore, callers of this function may wish to also
+					call CNTV2Card::GetDetectedAudioChannelPairs (or CNTV2Card::GetDetectedAESChannelPairs), and then use std::set_intersection to
+					produce a more realistic set of PCM channel pairs.
 	**/
 	virtual bool GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
 

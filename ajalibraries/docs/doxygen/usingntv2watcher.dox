@@ -34,6 +34,7 @@ To remove a remote device, be sure it's the currently selected one, then click t
 
 There are several settings that are common to the device and apply to all inspectors:
 -	<b>Poll Device</b> -- Check the box to repeatedly poll the device, and update the Watcher's data displays. Un-check the box to "freeze" the Watcher's data displays.
+	@note	Some inspectors (Frame Buffer, Anc, etc.) are driven by the device's input or output vertical blanking interrupt, and therefore ignore this setting.
 -	<b>Polling Interval</b> -- Adjusts the polling interval, from 25 milliseconds up to 2 seconds. Note that some inspectors are sync'd to an input/output/reference VBI and ignore this setting.
 -	<b>Task Mode</b> -- Indicates the device's current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> -- Indicates the device's "multi-format" mode, and allows it to be changed by choosing a different setting.
