@@ -1312,16 +1312,19 @@ bool CNTV2Card::GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInpu
 		return false;
 
 	//	Read channel pair bitmask registers...
+	const UWord					numChannels	(::NTV2DeviceGetMaxAudioChannels(_boardID));
+	const bool					isExtended	(numChannels > 16);
 	const NTV2RegisterNumber	regNum	(::GetNonPCMDetectRegisterNumber (inSDIInputChannel));
 	ULWord						mask	(0);
 	ULWord						extMask	(0);
 	if (!CNTV2DriverInterface::ReadRegister (regNum, mask))
 		return false;
-	if (!CNTV2DriverInterface::ReadRegister (regNum + 1, extMask))
-		return false;
+	if (isExtended)
+		if (!CNTV2DriverInterface::ReadRegister (regNum + 1, extMask))
+			return false;
 
 	//	Convert bitmasks to set of non-PCM pairs...
-	outNonPCMPairs = ::BitMasksToNTV2AudioChannelPairs (mask, extMask);
+	outNonPCMPairs = ::BitMasksToNTV2AudioChannelPairs (mask, isExtended ? extMask : 0);
 	return true;
 }
 
