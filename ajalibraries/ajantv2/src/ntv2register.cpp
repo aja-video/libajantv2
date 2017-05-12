@@ -2875,7 +2875,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 	std::string designName = bitfileStream.GetDesignName();
 	if(readBytes != bitfileLength)
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return result;
 	}
 
@@ -2920,7 +2920,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 	}
 	else
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return result;
 	}
 	
@@ -2971,7 +2971,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 		WriteRegister(kVRegFlashState, kProgramStateFinished);
 	}
 
-	delete bitfileBuffer;
+    delete[] bitfileBuffer;
 	return result;
 }
 
@@ -3048,7 +3048,7 @@ bool CNTV2Card::VerifyMainFlash(const char *fileName)
 	bitfileStream.Close();
 	if(readBytes != bitfileLength)
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return false;
 	}
 
