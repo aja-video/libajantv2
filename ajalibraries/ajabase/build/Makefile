@@ -26,6 +26,7 @@ AJA_LIB_SRCS =\
 	audioutilities.cpp \
 	buffer.cpp \
 	cli_utils.cpp \
+	common.cpp \
 	debug.cpp \
 	dpx_hdr.cpp \
 	dpxfileio.cpp \
