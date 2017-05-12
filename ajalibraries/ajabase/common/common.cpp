@@ -182,13 +182,13 @@ std::string& upper(std::string& str)
     return str;
 }
 
-std::string& lstrip(std::string& str, const std::string ws)
+std::string& lstrip(std::string& str, const std::string& ws)
 {
     str.erase(0, str.find_first_not_of(ws));
     return str;
 }
 
-std::string& rstrip(std::string& str, const std::string ws)
+std::string& rstrip(std::string& str, const std::string& ws)
 {
     if(str.length() > 0)
     {
@@ -197,14 +197,14 @@ std::string& rstrip(std::string& str, const std::string ws)
     return str;
 }
 
-std::string& strip(std::string& str, const std::string ws)
+std::string& strip(std::string& str, const std::string& ws)
 {
     lstrip(str,ws);
     rstrip(str,ws);
     return str;
 }
 
-std::string join(std::vector<std::string> parts, const std::string delim)
+std::string join(std::vector<std::string> parts, const std::string& delim)
 {
     std::ostringstream oss;
     std::vector<std::string>::iterator it;

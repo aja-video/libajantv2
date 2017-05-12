@@ -190,7 +190,7 @@ AJA_EXPORT std::string& upper(std::string& str);
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& lstrip(std::string& str, const std::string ws=aja::WHITESPACE);
+AJA_EXPORT std::string& lstrip(std::string& str, const std::string& ws=aja::WHITESPACE);
 
 /**
  *	Strips the trailing whitespace characters from the string
@@ -199,7 +199,7 @@ AJA_EXPORT std::string& lstrip(std::string& str, const std::string ws=aja::WHITE
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& rstrip(std::string& str, const std::string ws=aja::WHITESPACE);
+AJA_EXPORT std::string& rstrip(std::string& str, const std::string& ws=aja::WHITESPACE);
 
 /**
  *	Strips the leading & trailing whitespace characters from the string
@@ -208,7 +208,7 @@ AJA_EXPORT std::string& rstrip(std::string& str, const std::string ws=aja::WHITE
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& strip(std::string& str, const std::string ws=aja::WHITESPACE);
+AJA_EXPORT std::string& strip(std::string& str, const std::string& ws=aja::WHITESPACE);
 
 /**
  *	Join a vector of strings separated by a string delimeter
@@ -217,7 +217,7 @@ AJA_EXPORT std::string& strip(std::string& str, const std::string ws=aja::WHITES
  *  @param[in]  delim  The string delimeter that will separate the strings
  *	@return		The joined string made up of the parts concatinated with delimeter string
  */
-AJA_EXPORT std::string join(std::vector<std::string> parts, const std::string delim=" ");
+AJA_EXPORT std::string join(std::vector<std::string> parts, const std::string& delim=" ");
 
 } //end aja namespace
 
