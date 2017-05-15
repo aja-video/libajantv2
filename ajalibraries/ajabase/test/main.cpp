@@ -280,6 +280,7 @@ TEST_SUITE("guid -- functions in ajabase/common/guid.h");
     {
         std::string guid = CreateGuid();
         CHECK(guid.length() == 36);
+        CHECK(guid != "00000000-0000-0000-0000-000000000000");
         std::vector<std::string> parts;
         aja::split(guid, '-', parts);
         CHECK(parts.size() == 5);
@@ -288,6 +289,12 @@ TEST_SUITE("guid -- functions in ajabase/common/guid.h");
         CHECK(parts.at(2).length() == 4);
         CHECK(parts.at(3).length() == 4);
         CHECK(parts.at(4).length() == 12);
+        std::string guidLowercase = guid;
+        aja::lower(guidLowercase);
+        CHECK(guidLowercase.find_first_not_of("0123456789abcdef-") == std::string::npos);
+
+        std::string guid2 = CreateGuid();
+        CHECK(guid != guid2);
     }
 
 TEST_SUITE_END(); //guid
