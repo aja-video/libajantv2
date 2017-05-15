@@ -51,7 +51,7 @@
 
 //MARK: hidden helpers
 
-std::string makeCreateTableString(std::string tableName,bool blobTable = false)
+std::string makeCreateTableString(const std::string& tableName,bool blobTable = false)
 {
 	std::string stmt;
 	if (blobTable)
@@ -446,13 +446,14 @@ bool PersistenceGetValue(std::string keyRoot, std::string key, void *value, AJAP
 	}
 
 	char *valueAsStr=NULL;
-	int valueLen = 64;
 
 	if (isGood)
 	{	
 		//get value
 		if(nRows > 0)
 		{
+            int valueLen = 64;
+
 			// skip row 0, that contains column names
 			int i = 1;		
 
@@ -604,15 +605,15 @@ bool PresistenceGetValues(std::string keyRoot, std::string key_query, std::vecto
         }
     }
 
-	char colName[255];
-	char value[64];
-    int valueLen = 64;
-
     if (isGood)
     {
         //get value
         if(nRows > 0)
         {
+            char colName[255];
+            char value[64];
+            int valueLen = 64;
+
             // skip row 0, contains col 1 name
 			// skip row 1, contains col 2 name
             for(int r=nCols; r < ((nRows+1)*nCols); r+=nCols)
@@ -745,7 +746,7 @@ AJAPersistence::AJAPersistence()
     SetParams("device 1");
 }
 
-AJAPersistence::AJAPersistence(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
+AJAPersistence::AJAPersistence(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
 {
     SetParams(appID, deviceType, deviceNumber, bSharePrefFile);
 }
@@ -755,7 +756,7 @@ AJAPersistence::~AJAPersistence()
 	
 }
 
-void AJAPersistence::SetParams(std::string appID, std::string deviceType, std::string deviceNumber, bool bSharePrefFile)
+void AJAPersistence::SetParams(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
 {
     mappId          = appID;
     mboardId        = deviceType;
@@ -782,7 +783,7 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
     bSharePrefFile = mSharedPrefFile;
 }
 
-bool AJAPersistence::SetValue(std::string key, void *value, AJAPersistenceType type, int blobSize)
+bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
 {
 	if(type == AJAPersistenceTypeBlob)
 		return ::PersistenceSetValueBlob(mstateKeyName, key, value, blobSize, mboardId, mserialNumber);
@@ -790,7 +791,7 @@ bool AJAPersistence::SetValue(std::string key, void *value, AJAPersistenceType t
 		return ::PersistenceSetValue(mstateKeyName, key, value, type, mboardId, mserialNumber);
 }
 
-bool AJAPersistence::GetValue(std::string key, void *value, AJAPersistenceType type, int blobSize)
+bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
@@ -802,7 +803,7 @@ bool AJAPersistence::GetValue(std::string key, void *value, AJAPersistenceType t
 		return ::PersistenceGetValue(mstateKeyName, key, value, type, mboardId, mserialNumber);
 }
 
-bool AJAPersistence::GetValuesString(std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values)
+bool AJAPersistence::GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
@@ -811,7 +812,7 @@ bool AJAPersistence::GetValuesString(std::string key_query, std::vector<std::str
 	return ::PresistenceGetValues(mstateKeyName, key_query, keys, values, mboardId, mserialNumber);
 }
 
-bool AJAPersistence::GetValuesInt(std::string key_query, std::vector<std::string>& keys, std::vector<int>& values)
+bool AJAPersistence::GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
@@ -830,7 +831,7 @@ bool AJAPersistence::GetValuesInt(std::string key_query, std::vector<std::string
 	return false;
 }
 
-bool AJAPersistence::GetValuesBool(std::string key_query, std::vector<std::string>& keys, std::vector<bool>& values)
+bool AJAPersistence::GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
@@ -849,7 +850,7 @@ bool AJAPersistence::GetValuesBool(std::string key_query, std::vector<std::strin
 	return false;
 }
 
-bool AJAPersistence::GetValuesDouble(std::string key_query, std::vector<std::string>& keys, std::vector<double>& values)
+bool AJAPersistence::GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)

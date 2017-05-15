@@ -32,22 +32,22 @@ class AJAPersistence
 {
 public:	
 	AJAPersistence();
-	AJAPersistence(std::string appID, std::string deviceType="", std::string deviceNumber="", bool bSharePrefFile=false);
+    AJAPersistence(const std::string& appID, const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
 		
 	virtual ~AJAPersistence();
 
-    void SetParams(std::string appID="", std::string deviceType="", std::string deviceNumber="", bool bSharePrefFile=false);
+    void SetParams(const std::string& appID="", const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
     void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile);
 
-	bool SetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);	
-	bool GetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);
+    bool SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
+    bool GetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
 	bool FileExists();
 	bool DeletePrefFile();
 
-    bool GetValuesInt(std::string key_query, std::vector<std::string>& keys, std::vector<int>& values);
-    bool GetValuesBool(std::string key_query, std::vector<std::string>& keys, std::vector<bool>& values);
-    bool GetValuesDouble(std::string key_query, std::vector<std::string>& keys, std::vector<double>& values);
-    bool GetValuesString(std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
+    bool GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values);
+    bool GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values);
+    bool GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values);
+    bool GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
 private:	
 
