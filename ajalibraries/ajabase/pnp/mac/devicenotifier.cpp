@@ -197,12 +197,12 @@ void DeviceNotifier::Uninstall ()
 												<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
 	//	Release device-matching list...
 	list<io_object_t>::iterator p;
-	for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); p++)
+    for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceMatchList.clear();
 
 	//	Release device-interest list...
-	for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); p++)
+    for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceInterestList.clear();
 
