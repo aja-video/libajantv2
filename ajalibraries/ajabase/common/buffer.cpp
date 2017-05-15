@@ -252,13 +252,11 @@ AJABuffer::GetData()
 void 
 AJABuffer::ComputeAlignment()
 {
-	int32_t i;
-
 	mBufferAlignment = 0;
 	if (mpBuffer != NULL)
 	{
 		mBufferAlignment = 1;
-		for (i = 0; i < 12; i++)
+        for (int32_t i = 0; i < 12; i++)
 		{
 			if (((uintptr_t)mpBuffer & ((uintptr_t)0x1 << i)) != 0)
 			{
@@ -268,5 +266,3 @@ AJABuffer::ComputeAlignment()
 		}
 	}
 }
-
-

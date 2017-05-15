@@ -333,12 +333,11 @@ int64_t AJATimeBase::GetSystemTicks()
 int64_t AJATimeBase::Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large)
 {
 	int64_t outValue = 0;
-	int64_t roundValue = 0;
 
 	if (round)
 	{
 		// convert half the out rate to the in rate and increase the in value
-		roundValue = inRate / (outRate * 2);
+        int64_t roundValue = inRate / (outRate * 2);
 		if (inValue > 0)
 		{
 			inValue += roundValue;
