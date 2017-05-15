@@ -268,7 +268,7 @@ The display highlights changed content with a brighter color.
 			-	<b>Byte Offset</b> -- Shows the buffer offset as a byte count, in hexadecimal.
 			-	<b>Samples</b> -- Shows the buffer offset as a zero-based decimal sample index number.
 			-	<b>Seconds</b> -- Shows the buffer offset as a fixed-point decimal time value (in microseconds, milliseconds, or seconds, as appropriate).
-			@note	This setting also affects the units used in the <b>Change Indicator</b> in the status bar.
+			-	This setting affects the units used in the <b>Change Indicator</b> in the status bar.
 	-	Right-click in the display to pop up a context-sensitive menu:
 		-	<b>View</b> menu:
 			-	<b>Raw</b> -- Switch to the <b>Raw</b> view.
@@ -347,5 +347,46 @@ The inspector shows the following:
 		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or "Hide" to not display timecodes).
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
+
+
+
+
+@subsection	inspectorregs		Registers Inspector
+
+The Registers inspector is a faster alternative to the slower register pages, and allows easy customization to focus on specific registers of interest.
+
+The inspector has the following:
+	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
+	-	<b>Virtuals</b> -- A checkbox that controls if virtual registers are included in the list or not.
+	-	<b>Filter</b> -- An editable text box whose content determines which registers are seen in the list:
+		-	<i>empty</i> -- No filtering takes place. All registers are shown.
+		-	<i>non-empty</i> -- Filtering takes place based on what's in the search box:
+			-	<b>decimal numbers</b> -- A comma-separated list of register number ranges. For example:
+				-	<b>25</b> -- Only show register 25
+				-	<b>25-31</b> -- Only show registers 25, 26, 27, 28, 29, 30 and 31.
+				-	<b>3,5,7</b> -- Only show registers 3, 5 and 7.
+				-	<b>3-5,7</b> -- Only show registers 3, 4, 5 and 7.
+			-	<b>kRegClass</b>... -- A predefined group of registers. The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
+			-	Anything else is used in a case-insensitive search for register names containing that character sequence.
+	-	<b>Horizontal Ruler</b> -- This ruler shows the table column headings.
+		-	Right-click in the horizontal ruler to control the register table view:
+			-	<b>Column Display</b> -- Controls which columns are shown, and in what order:
+				-	<b>Reg Number</b> -- The register number
+				-	<b>Reg Offset</b> -- The register offset into its base address range (BAR).
+				-	<b>Reg Name</b> -- The register name.
+				-	<b>Reg Value</b> -- The register value.
+				-	<b>Reg Decoded Value</b> -- Text that shows the register value in a human-readable format.
+			-	<b>Radix</b> -- Controls the radix of the displayed register values.
+				-	<b>Bin (Base 2)</b> -- Display register values in base 2 (binary).
+				-	<b>Oct (Base 8)</b> -- Display register values in base 8 (octal).
+				-	<b>Dec (Base 10)</b> -- Display register values in base 10 (unsigned decimal).
+				-	<b>Hex (Base 16)</b> -- Display register values in base 16 (hexadecimal).
+
+To change a register's value:
+	-	Click in the value. An edit box will appear.
+	-	Changes the value in the edit box as desired (keeping to the existing display radix).
+	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
+	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
+
 
 **/

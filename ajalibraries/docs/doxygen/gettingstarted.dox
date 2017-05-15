@@ -56,34 +56,25 @@ This section explores the contents of the SDK, which is nearly identical on all 
 				-	<b>codecs</b> -- Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
 				-	<b>includes</b> -- SDK header/include files.
 				-	<b>src</b> -- SDK implementation source files (with platform-specific subdirectories).
-		-	<b>bin</b> -- Destination directory for all executable files and the dynamically-loaded libraries they need to run.
+		-	<b>bin</b> -- Destination directory for all executable files and the dynamically-loaded libraries they need to run. Also contains all pre-built tools and utilities.
+			-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
+			-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
+				@image	html	gs-systemtest-75.png
+			-	Note that <b>Data Rate Calculator</b> is no longer supplied in the SDK, but is now made for mobile devices:
+				-	iOS: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
+				-	Android: https://play.google.com/store/apps/details?id=com.aja.datacalc
+			-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
+				This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
+				Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
+			-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
+				the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
+				This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
+				and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
+				@note	The \ref corvidhevc requires a somewhat different procedure for checking and updating its firmware.  See \ref hevcsupplement for more information.
+			-	<b>ntv2thermo</b> -- \ref ntv2thermo
 		-	<b>lib</b> -- Destination directory for all static libraries.
 		-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
 		-	<b>qtbuild</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. See \ref gs-qtbuild.
-	-	<b>tools</b> -- Contains a number of pre-built tools and utilities for Windows and MacOS that are useful in developing video
-		applications and for diagnosing problems that may arise while doing so.
-		(On Linux, the tools are built from the provided source code, and thus appear in the <b>bin</b> directory.)
-		-	<b>prune.py</b> -- A Python command that prunes files and folders from the SDK directory that are extraneous
-			or unnecessary for the host's platform. For example, if the SDK was downloaded and unzipped on a Windows host, the script will remove
-			all Linux-specific files (e.g., <tt>ajadriver</tt>, <tt>lin</tt> and <tt>linux</tt> folders, etc.) and Mac-specific
-			files (e.g., Xcode project files, etc.) from the unzipped SDK.
-
-		-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
-		-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
-			@image	html	gs-systemtest-75.png
-		-	<b>Data Rate Calculator</b> -- The platform-specific Data Rate Calculator host applications are no longer supplied in the SDK.
-			AJA DataCalc is available for Android and iOS mobile devices.
-			-	iOS: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
-			-	Android: https://play.google.com/store/apps/details?id=com.aja.datacalc
-		-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
-			This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
-			Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
-		-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
-			the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
-			This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
-			and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
-			@note	The \ref corvidhevc requires a somewhat different procedure for checking and updating its firmware.  See \ref hevcsupplement for more information.
-		-	<b>ntv2thermo</b> -- \ref ntv2thermo
 
 
 @subsection		gs-contents-libs	SDK Libraries
