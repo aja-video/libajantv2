@@ -70,6 +70,9 @@
 // Platform dependent
 
 #if defined (MSWindows)				/////////////// WINDOWS/////////////////////////
+
+    #define	_WINSOCK_DEPRECATED_NO_WARNINGS		1
+
 	#if !defined (NTV2_BUILDING_DRIVER)
 		#ifndef WIN32_LEAN_AND_MEAN
 		#define WIN32_LEAN_AND_MEAN
