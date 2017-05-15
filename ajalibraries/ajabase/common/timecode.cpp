@@ -404,11 +404,11 @@ void AJATimeCode::SetWithCleanup(const std::string &str, const AJATimeBase& time
         else
             tmp = "00:00:00:00";
 
-        int len = str.length();
+        size_t len = str.length();
         int tgtOffset = 10;
-        for (int i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
         {
-            int srcOffset = len - i - 1;
+            size_t srcOffset = len - i - 1;
             if ((str[srcOffset] >= '0') && (str[srcOffset] <= '9'))
             {
                 tmp[tgtOffset] = str[srcOffset];
