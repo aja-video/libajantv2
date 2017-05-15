@@ -72,7 +72,7 @@ AJAMemory::Allocate(size_t memorySize)
 		return NULL;
 	}
 
-	void* pMemory = NULL;
+    void* pMemory;
 	
 	// allocate memory with no specific alignment
 #if defined(AJA_WINDOWS)
