@@ -406,7 +406,7 @@ Many OEM developers choose to create their own solution and project files "from 
 -	It's important to link with the correct runtime libraries. When using AJA's static libraries, link with Multi-threaded "/MT" or Multi-threaded debug "/Mtd"
 	runtime libraries. When using AJA's dynamic libraries, link with Multi-threaded-DLL "/MD" or Multi-threaded DLL debug "/MDd" runtime libraries.
 -	When using the 'ajacc' and 'ajaanc' libraries (found in the "lib" directory), it's important to link with the ones that are correct for the Visual Studio
-	compiler being used. The library names have been decorated with the Visual Studio compiler version ('_vs9', '_vs10', etc.), Win32 or x64 ('_32' or '_64'),
+	compiler being used. The library names have been decorated with the Visual Studio compiler version ('_vs10', '_vs11', etc.), Win32 or x64 ('_32' or '_64'),
 	and the runtime library they're compatible with (undecorated is "/MT", 'd' for "/Mtd", 'MD' for "/MD", and 'MDd' for "/MDd).
 -	When using AJA's pre-built DLLs, AJA recommends configuring your solution to place build products in the same "bin" directory that contains AJA's pre-built
 	executables. This will speed development, since the requisite DLLs can readily be found by your application at run time.
