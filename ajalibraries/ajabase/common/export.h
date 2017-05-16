@@ -40,7 +40,7 @@
 	#else
 		#define AJA_EXPORT
 #if !defined(AJA_NO_AUTOIMPORT)
-	#if !defined AJA_STUFF_OBJ
+    #if !defined AJA_BASE_OBJ
 			#if defined(AJA_DEBUG)
 				#if defined(_WIN64)
                     #pragma comment (lib, "libajabased")
