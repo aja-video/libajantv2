@@ -161,6 +161,12 @@ void split(const std::string& str, const char delim, std::vector<std::string>& e
     {
         elems.push_back(item);
     }
+
+    // if last character in string matches the split delim add an empty string
+    if (str.length() > 0 && str[str.length()-1] == delim)
+    {
+        elems.push_back("");
+    }
 }
 
 std::vector<std::string> split(const std::string& str, const char delim)

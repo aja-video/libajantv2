@@ -113,6 +113,36 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
             CHECK(results.at(2) == "Curly");
             CHECK(results.at(3) == "Shemp");
         }
+        SUBCASE("split not found")
+        {
+            aja::split(tosplit, '?', results);
+            CHECK(results.size() == 1);
+            CHECK(results.at(0) == tosplit);
+        }
+        SUBCASE("split at front")
+        {
+            aja::split(tosplit, 'L', results);
+            CHECK(results.size() == 2);
+            CHECK(results.at(0) == "");
+            CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
+        }
+        SUBCASE("split at end")
+        {
+            aja::split(tosplit, 'p', results);
+            CHECK(results.size() == 2);
+            CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
+            CHECK(results.at(1) == "");
+        }
+        SUBCASE("split all delims")
+        {
+            std::string alldelims = "???";
+            aja::split(alldelims, '?', results);
+            CHECK(results.size() == 4);
+            CHECK(results.at(0) == "");
+            CHECK(results.at(1) == "");
+            CHECK(results.at(2) == "");
+            CHECK(results.at(3) == "");
+        }
     }
 
     TEST_CASE("aja::lower")
