@@ -16,6 +16,20 @@
 #include "ajabase/common/timecode.h"
 #include "ajabase/persistence/persistence.h"
 
+#if 0
+template
+void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
+TEST_SUITE("filename -- functions in streams/common/filename.h");
+
+    TEST_CASE("constructor")
+    {
+    }
+
+TEST_SUITE_END(); //filename
+#endif
+
+
+void common_marker() {}
 TEST_SUITE("common -- functions in ajabase/common/common.h");
 
     TEST_CASE("aja::replace")
@@ -187,6 +201,7 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
 TEST_SUITE_END(); //common
 
 
+void timebase_timecode_marker() {}
 TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h");
 
     TEST_CASE("AJATimeBase")
@@ -304,6 +319,7 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
 TEST_SUITE_END(); //timecode
 
 
+void guid_marker() {}
 TEST_SUITE("guid -- functions in ajabase/common/guid.h");
 
     TEST_CASE("CreateGuid")
@@ -330,6 +346,7 @@ TEST_SUITE("guid -- functions in ajabase/common/guid.h");
 TEST_SUITE_END(); //guid
 
 
+void persistence_marker() {}
 TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
 
     TEST_CASE("AJAPersistence")
