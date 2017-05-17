@@ -870,15 +870,18 @@ bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord
 }
 
 
-ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset) const
+ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, const ULWord inLineOffset, const bool inForTextMode) const
 {
 	ULWord	smpteLine	(0);
 	bool	isF2		(false);
 	if (GetSMPTELineNumber (inLineOffset, smpteLine, isF2))
 	{
 		if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
-			inOutStream << "F" << (isF2 ? "2" : "1") << " ";
-		inOutStream << "L" << dec << smpteLine;	//	(inLineOffset/divisor + smpteLine);
+			inOutStream << "F" << (isF2 ? "2" : "1") << (inForTextMode ? "" : " ");
+		if (inForTextMode)
+			inOutStream << "L" << DEC0N(smpteLine,4);
+		else
+			inOutStream << "L" << DEC(smpteLine);	//	(inLineOffset/divisor + smpteLine);
 	}
 	return inOutStream;
 }
