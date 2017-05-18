@@ -16,6 +16,9 @@
 #include "ajabase/common/timecode.h"
 #include "ajabase/persistence/persistence.h"
 
+#include <clocale>
+#include <iostream>
+
 #if 0
 template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
@@ -103,6 +106,36 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(aja::to_string(f7) == "28");
         CHECK(aja::to_string(true) == "true");
         CHECK(aja::to_string(false) == "false");
+    }
+
+    TEST_CASE("aja::string_to_wstring & aja::wstring_to_string")
+    {
+        //std::setlocale(LC_ALL, "en_US.utf8");
+
+        std::string str, str2;
+        std::wstring wstr, wstr2;
+
+        str = "hello";
+        CHECK(aja::string_to_wstring(str, wstr));
+        CHECK(wstr == L"hello");
+
+        str  = "";
+        wstr = L"hello";
+        CHECK(aja::wstring_to_string(wstr, str));
+        CHECK(str == "hello");
+
+        str  = u8"z\u00df\u6c34\U0001f34c";
+        wstr = L"";
+        CHECK(aja::string_to_wstring(str, wstr));
+        CHECK(aja::wstring_to_string(wstr, str2));
+        CHECK(str == str2);
+
+        str  = "";
+        wstr = L"a¥z";
+        wstr2= L"";
+        CHECK(aja::wstring_to_string(wstr, str));
+        CHECK(aja::string_to_wstring(str, wstr2));
+        CHECK(wstr == wstr2);
     }
 
     TEST_CASE("aja::split")

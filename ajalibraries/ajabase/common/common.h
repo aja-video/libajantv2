@@ -150,6 +150,24 @@ AJA_EXPORT std::string to_string(double val);
 AJA_EXPORT std::string to_string(long double val);
 
 /**
+ *	Convert string to wstring
+ *
+ *  @param[in]  str The string to convert
+ *  @param[out] wstr The wstring to convert to
+ *	@return		true if success else false
+ */
+AJA_EXPORT bool string_to_wstring(const std::string& str, std::wstring& wstr);
+
+/**
+ *	Convert wstring to string
+ *
+ *  @param[in]  wstr The wstring to convert
+ *  @param[out] str  The string to convert to
+ *	@return		true if success else false
+ */
+AJA_EXPORT bool wstring_to_string(const std::wstring& wstr, std::string& str);
+
+/**
  *	Splits a string into substrings at a character delimeter
  *
  *  @param[in]   str   The string to split into parts
