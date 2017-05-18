@@ -124,7 +124,7 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(aja::wstring_to_string(wstr, str));
         CHECK(str == "hello");
 
-        str  = u8"z\u00df\u6c34\U0001f34c";
+        str  = "z\u00df\u6c34\U0001f34c";
         wstr = L"";
         CHECK(aja::string_to_wstring(str, wstr));
         CHECK(aja::wstring_to_string(wstr, str2));
