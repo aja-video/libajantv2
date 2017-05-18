@@ -455,6 +455,7 @@ void CRP188::Init()
 	_pCharRenderMap = NULL;
 	_bRendered      = false;
 	_bInitialized   = false;
+	_bFresh			= false;
 	_tcFormat		= kTCFormatUnknown;
 }
 
@@ -500,6 +501,9 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
 
 	if (tcFormat != kTCFormatUnknown)
 		_tcFormat = tcFormat;
+
+	if (rp188.DBB == 0xffffffff)
+		return;
 
     ULWord TC0_31  = rp188.Low;
     ULWord TC32_63 = rp188.High;
@@ -2009,7 +2013,7 @@ bool CRP188::BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode bur
 			{
 				scale = scale / 10;
 
-				char1 = count / scale;
+				char1 = int(count / scale);
 				CopyDigit ( (_pCharRenderMap + (char1 * charSizeBytes)), _charWidthBytes, _charHeightLines, pFrameBuff, rowBytes);
 				pFrameBuff += _charWidthBytes;
 

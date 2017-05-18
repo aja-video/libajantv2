@@ -51,6 +51,12 @@
 		D7E8C0421B600FAD00726D22 /* ancillarydata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7E8C03B1B600FAD00726D22 /* ancillarydata.cpp */; };
 		D7E8C0431B600FAD00726D22 /* ancillarydatafactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7E8C03C1B600FAD00726D22 /* ancillarydatafactory.cpp */; };
 		D7E8C0441B600FAD00726D22 /* ancillarylist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7E8C03D1B600FAD00726D22 /* ancillarylist.cpp */; };
+		DCBF62E21E96C6760006093B /* ancillarydata_hdr_hdr10.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCBF62DF1E96C6760006093B /* ancillarydata_hdr_hdr10.cpp */; };
+		DCBF62E31E96C6770006093B /* ancillarydata_hdr_hlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCBF62E01E96C6760006093B /* ancillarydata_hdr_hlg.cpp */; };
+		DCBF62E41E96C6770006093B /* ancillarydata_hdr_sdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCBF62E11E96C6760006093B /* ancillarydata_hdr_sdr.cpp */; };
+		DCBF62E81E96C6840006093B /* ancillarydata_hdr_hdr10.h in Headers */ = {isa = PBXBuildFile; fileRef = DCBF62E51E96C6840006093B /* ancillarydata_hdr_hdr10.h */; };
+		DCBF62E91E96C6840006093B /* ancillarydata_hdr_hlg.h in Headers */ = {isa = PBXBuildFile; fileRef = DCBF62E61E96C6840006093B /* ancillarydata_hdr_hlg.h */; };
+		DCBF62EA1E96C6840006093B /* ancillarydata_hdr_sdr.h in Headers */ = {isa = PBXBuildFile; fileRef = DCBF62E71E96C6840006093B /* ancillarydata_hdr_sdr.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,6 +119,12 @@
 		D7E8C03B1B600FAD00726D22 /* ancillarydata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata.cpp; path = ../src/ancillarydata.cpp; sourceTree = SOURCE_ROOT; };
 		D7E8C03C1B600FAD00726D22 /* ancillarydatafactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydatafactory.cpp; path = ../src/ancillarydatafactory.cpp; sourceTree = SOURCE_ROOT; };
 		D7E8C03D1B600FAD00726D22 /* ancillarylist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarylist.cpp; path = ../src/ancillarylist.cpp; sourceTree = SOURCE_ROOT; };
+		DCBF62DF1E96C6760006093B /* ancillarydata_hdr_hdr10.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_hdr10.cpp; path = ../src/ancillarydata_hdr_hdr10.cpp; sourceTree = "<group>"; };
+		DCBF62E01E96C6760006093B /* ancillarydata_hdr_hlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_hlg.cpp; path = ../src/ancillarydata_hdr_hlg.cpp; sourceTree = "<group>"; };
+		DCBF62E11E96C6760006093B /* ancillarydata_hdr_sdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_sdr.cpp; path = ../src/ancillarydata_hdr_sdr.cpp; sourceTree = "<group>"; };
+		DCBF62E51E96C6840006093B /* ancillarydata_hdr_hdr10.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_hdr10.h; path = ../includes/ancillarydata_hdr_hdr10.h; sourceTree = "<group>"; };
+		DCBF62E61E96C6840006093B /* ancillarydata_hdr_hlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_hlg.h; path = ../includes/ancillarydata_hdr_hlg.h; sourceTree = "<group>"; };
+		DCBF62E71E96C6840006093B /* ancillarydata_hdr_sdr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_sdr.h; path = ../includes/ancillarydata_hdr_sdr.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +183,12 @@
 		08FB77ACFE841707C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				DCBF62E51E96C6840006093B /* ancillarydata_hdr_hdr10.h */,
+				DCBF62E61E96C6840006093B /* ancillarydata_hdr_hlg.h */,
+				DCBF62E71E96C6840006093B /* ancillarydata_hdr_sdr.h */,
+				DCBF62DF1E96C6760006093B /* ancillarydata_hdr_hdr10.cpp */,
+				DCBF62E01E96C6760006093B /* ancillarydata_hdr_hlg.cpp */,
+				DCBF62E11E96C6760006093B /* ancillarydata_hdr_sdr.cpp */,
 				B4E23EF71BAB260600F3C3B7 /* ancillarydata_framestatusinfo524D.cpp */,
 				B4E23EFB1BAB274900F3C3B7 /* ancillarydata_framestatusinfo524D.h */,
 				B4E23EF81BAB260600F3C3B7 /* ancillarydata_framestatusinfo5251.cpp */,
@@ -215,18 +233,21 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCBF62EA1E96C6840006093B /* ancillarydata_hdr_sdr.h in Headers */,
 				B4A71D3D1BF2BC6400A9E314 /* ancillarydata_timecode.h in Headers */,
 				D7E8C0331B600F9B00726D22 /* ancillarydata_cea708.h in Headers */,
 				D7E8C0321B600F9B00726D22 /* ancillarydata_cea608.h in Headers */,
 				B4E23EFE1BAB274900F3C3B7 /* ancillarydata_framestatusinfo5251.h in Headers */,
 				B4A71D3B1BF2BC6400A9E314 /* ancillarydata_timecode_atc.h in Headers */,
 				B4A71D3C1BF2BC6400A9E314 /* ancillarydata_timecode_vitc.h in Headers */,
+				DCBF62E81E96C6840006093B /* ancillarydata_hdr_hdr10.h in Headers */,
 				D7E8C0341B600F9B00726D22 /* ancillarydata.h in Headers */,
 				B4E23EFD1BAB274900F3C3B7 /* ancillarydata_framestatusinfo524D.h in Headers */,
 				D7E8C0361B600F9B00726D22 /* ancillarylist.h in Headers */,
 				D7E8C0351B600F9B00726D22 /* ancillarydatafactory.h in Headers */,
 				D7E8C0301B600F9B00726D22 /* ancillarydata_cea608_line21.h in Headers */,
 				D7E8C0311B600F9B00726D22 /* ancillarydata_cea608_vanc.h in Headers */,
+				DCBF62E91E96C6840006093B /* ancillarydata_hdr_hlg.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,12 +342,15 @@
 				B4A71D421BF2BC7E00A9E314 /* ancillarydata_timecode_vitc.cpp in Sources */,
 				D7E8C03F1B600FAD00726D22 /* ancillarydata_cea608_vanc.cpp in Sources */,
 				B4A71D431BF2BC7E00A9E314 /* ancillarydata_timecode.cpp in Sources */,
+				DCBF62E31E96C6770006093B /* ancillarydata_hdr_hlg.cpp in Sources */,
 				B4A71D411BF2BC7E00A9E314 /* ancillarydata_timecode_atc.cpp in Sources */,
 				D7E8C0411B600FAD00726D22 /* ancillarydata_cea708.cpp in Sources */,
 				D7E8C0421B600FAD00726D22 /* ancillarydata.cpp in Sources */,
 				D7E8C03E1B600FAD00726D22 /* ancillarydata_cea608_line21.cpp in Sources */,
+				DCBF62E21E96C6760006093B /* ancillarydata_hdr_hdr10.cpp in Sources */,
 				B4E23EFA1BAB260600F3C3B7 /* ancillarydata_framestatusinfo5251.cpp in Sources */,
 				D7E8C0401B600FAD00726D22 /* ancillarydata_cea608.cpp in Sources */,
+				DCBF62E41E96C6770006093B /* ancillarydata_hdr_sdr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

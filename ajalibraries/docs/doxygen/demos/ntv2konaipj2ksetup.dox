@@ -1,0 +1,10 @@
+/**
+@page	ntv2konaipj2ksetup		NTV2KonaIP J2K Setup Demo
+
+This command-line program shows how to configure the encoder or decoder for the KONA IP 2022-2 configuration.
+
+The program demonstrates...
+-	how to detect if the AJA device is an IP device;
+-	how to determine if the MicroBlaze on the device is up and running;
+-	how to set the J2K decoder and/or encoder parameters.
+**/

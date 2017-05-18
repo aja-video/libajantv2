@@ -38,43 +38,47 @@ const AJAFrameRateEntry AJAFrameRateTable[] =
 };
 const size_t AJAFrameRateTableSize = sizeof(AJAFrameRateTable) / sizeof(AJAFrameRateEntry);
 
+const int64_t AJATimeBaseDefaultTimeScale = 30000;
+const int64_t AJATimeBaseDefaultDuration  = 1001;
+const int64_t AJATimeBaseDefaultAudioRate = 48000;
+
 AJATimeBase::AJATimeBase()
 {
-	mFrameTimeScale = 30000;
-	mFrameDuration = 1001;
-	mAudioRate = 48000;
-	mTickRate = AJATime::GetSystemFrequency();
+    SetToDefault();
 }
 
+AJATimeBase::AJATimeBase(AJA_FrameRate ajaFrameRate)
+{
+    SetToDefault();
+    // this will set the correct timeScale and duration
+    SetAJAFrameRatePrivate(ajaFrameRate);
+}
+
+AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration)
+{
+    SetToDefault();
+    mFrameTimeScale = frameTimeScale;
+    mFrameDuration  = frameDuration;
+}
+
+AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate)
+{
+    SetToDefault();
+	mFrameTimeScale	= frameTimeScale;
+	mFrameDuration	= frameDuration;
+	mAudioRate		= audioRate;
+}
 
 AJATimeBase::~AJATimeBase()
 {
 }
 
-
-AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration)
+void AJATimeBase::SetToDefault(void)
 {
-	mFrameTimeScale	= frameTimeScale;
-	mFrameDuration	= frameDuration;
-	mAudioRate		= 48000;
-	mTickRate		= AJATime::GetSystemFrequency();
-}
-
-
-AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate)
-{
-	mFrameTimeScale	= frameTimeScale;
-	mFrameDuration	= frameDuration;
-	mAudioRate		= audioRate;
-	mTickRate		= AJATime::GetSystemFrequency();
-}
-
-AJATimeBase::AJATimeBase(AJA_FrameRate ajaFrameRate)
-{
-	mAudioRate      = 48000;
+    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
+    mFrameDuration  = AJATimeBaseDefaultDuration;
+    mAudioRate      = AJATimeBaseDefaultAudioRate;
 	mTickRate       = AJATime::GetSystemFrequency();
-
-	SetAJAFrameRatePrivate(ajaFrameRate);
 }
 
 AJATimeBase& AJATimeBase::operator=(const AJATimeBase &t)
@@ -88,7 +92,8 @@ AJATimeBase& AJATimeBase::operator=(const AJATimeBase &t)
 	}
 
 	return *this;
-} 
+}
+
 bool AJATimeBase::operator==(const AJATimeBase &b) const 
 {
 	bool bIsSame = true;
@@ -104,19 +109,11 @@ bool AJATimeBase::operator==(const AJATimeBase &b) const
 
 	return bIsSame;
 }
+
 bool AJATimeBase::operator!=(const AJATimeBase &a) const 
 {
 	return !(*this == a);
 }
-
-void AJATimeBase::SetToDefault(void)
-{
-	mFrameTimeScale = 30000;
-	mFrameDuration  = 1001;
-	mAudioRate      = 48000;
-	mTickRate       = AJATime::GetSystemFrequency();
-}
-
 
 void AJATimeBase::SetFrameRate(int64_t frameTimeScale, int64_t frameDuration)
 {
@@ -124,25 +121,21 @@ void AJATimeBase::SetFrameRate(int64_t frameTimeScale, int64_t frameDuration)
 	mFrameDuration = frameDuration;
 }
 
-
 void AJATimeBase::GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const
 {
 	frameTimeScale = mFrameTimeScale;
 	frameDuration = mFrameDuration;
 }
 
-
 int64_t AJATimeBase::GetFrameTimeScale(void) const
 {
 	return mFrameTimeScale;
 }
 
-
 void AJATimeBase::SetFrameTimeScale(int64_t timeScale)
 {
 	mFrameTimeScale = timeScale;
 }
-
 
 int64_t AJATimeBase::GetFrameDuration(void) const
 {
@@ -154,7 +147,6 @@ void AJATimeBase::SetAudioRate(int64_t rate)
 	mAudioRate = rate;
 }
 
-
 int64_t AJATimeBase::GetAudioRate() const
 {
 	return mAudioRate;
@@ -164,7 +156,6 @@ void AJATimeBase::SetAJAFrameRate(AJA_FrameRate ajaFrameRate)
 {
 	SetAJAFrameRatePrivate(ajaFrameRate);
 }
-
 
 void AJATimeBase::SetTickRate(int64_t rate)
 {
@@ -179,24 +170,20 @@ void AJATimeBase::SetTickRate(int64_t rate)
 	}
 }
 
-
 int64_t AJATimeBase::GetTickRate() const
 {
 	return mTickRate;
 }
-
 
 int64_t AJATimeBase::FramesToSamples(int64_t frames, bool round) const
 {
 	return Convert(frames, mFrameTimeScale, mFrameDuration, mAudioRate, 1, round, true);
 }
 
-
 int64_t AJATimeBase::FramesToTicks(int64_t frames, bool round) const
 {
 	return Convert(frames, mFrameTimeScale, mFrameDuration, mTickRate, 1, round, true);
 }
-
 
 double AJATimeBase::FramesToSeconds(int64_t frames) const
 {
@@ -219,102 +206,85 @@ double AJATimeBase::GetFramesPerSecondDouble(void)
 	return val;
 }
 
-
 int64_t AJATimeBase::FramesToMicroseconds(int64_t frames, bool round) const
 {
 	return Convert(frames, mFrameTimeScale, mFrameDuration, 1000000, 1, round, true);
 }
-
 
 int64_t AJATimeBase::SamplesToFrames(int64_t samples, bool round) const
 {
 	return Convert(samples, mAudioRate, 1, mFrameTimeScale, mFrameDuration, round, true);
 }
 
-
 int64_t AJATimeBase::SamplesToTicks(int64_t samples, bool round) const
 {
 	return Convert(samples, mAudioRate, mTickRate, round, true);
 }
-
 
 double AJATimeBase::SamplesToSeconds(int64_t samples)
 {
 	return (double)samples / (double)mAudioRate;
 }
 
-
 int64_t AJATimeBase::SamplesToMicroseconds(int64_t samples, bool round)
 {
 	return Convert(samples, mAudioRate, 1000000, round, true);
 }
-
 
 int64_t AJATimeBase::TicksToFrames(int64_t ticks, bool round)
 {
 	return Convert(ticks, mTickRate, 1, mFrameTimeScale, mFrameDuration, round, true);
 }
 
-
 int64_t AJATimeBase::TicksToSamples(int64_t ticks, bool round)
 {
 	return Convert(ticks, mTickRate, mAudioRate, round, true);
 }
-
 
 double AJATimeBase::TicksToSeconds(int64_t ticks)
 {
 	return (double)ticks / (double)mTickRate;
 }
 
-
 int64_t AJATimeBase::TicksToMicroseconds(int64_t ticks, bool round)
 {
 	return Convert(ticks, mTickRate, 1000000, round, true);
 }
-
 
 int64_t AJATimeBase::SecondsToFrames(double seconds, bool round)
 {
 	return Convert((int64_t)(seconds * 1000000000.0), 1000000000, 1, mFrameTimeScale, mFrameDuration, round, true);
 }
 
-
 int64_t AJATimeBase::SecondsToSamples(double seconds, bool round)
 {
 	return Convert((int64_t)(seconds * 1000000000.0), 1000000000, mAudioRate, round, true);
 }
-
 
 int64_t AJATimeBase::SecondsToTicks(double seconds, bool round)
 {
 	return Convert((int64_t)(seconds * 1000000000.0), 1000000000, mTickRate, round, true);
 }
 
-
 int64_t AJATimeBase::SecondsToMicroseconds(double seconds, bool round)
 {
 	return Convert((int64_t)(seconds * 1000000.0), 1000000, 1000000, round, false);
 }
-
 
 int64_t AJATimeBase::MicrosecondsToFrames(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, 1, mFrameTimeScale, mFrameDuration, round, true);
 }
 
-
 int64_t AJATimeBase::MicrosecondsToSamples(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, mAudioRate, round, true);
 }
 
-
 int64_t AJATimeBase::MicrosecondsToTicks(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, mTickRate, round, true);
 }
-
 
 double AJATimeBase::MicrosecondsToSeconds(int64_t microseconds)
 {
@@ -360,16 +330,14 @@ int64_t AJATimeBase::GetSystemTicks()
 	return ticks;
 }
 
-
 int64_t AJATimeBase::Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large)
 {
 	int64_t outValue = 0;
-	int64_t roundValue = 0;
 
 	if (round)
 	{
 		// convert half the out rate to the in rate and increase the in value
-		roundValue = inRate / (outRate * 2);
+        int64_t roundValue = inRate / (outRate * 2);
 		if (inValue > 0)
 		{
 			inValue += roundValue;
@@ -394,7 +362,6 @@ int64_t AJATimeBase::Convert(int64_t inValue, int64_t inRate, int64_t outRate, b
 
 	return outValue;
 }
-
 
 int64_t AJATimeBase::Convert(int64_t inValue, int64_t inScale, int64_t inDuration,
 							 int64_t outScale, int64_t outDuration, bool round, bool large)
@@ -433,8 +400,8 @@ int64_t AJATimeBase::Convert(int64_t inValue, int64_t inScale, int64_t inDuratio
 	return outValue;
 }
 
- AJA_FrameRate AJATimeBase::GetAJAFrameRate(void) const
- {
+AJA_FrameRate AJATimeBase::GetAJAFrameRate(void) const
+{
 	AJA_FrameRate fr = AJA_FrameRate_Unknown;
     for (size_t i = 0; i < AJAFrameRateTableSize; i++)
     {
@@ -446,12 +413,12 @@ int64_t AJATimeBase::Convert(int64_t inValue, int64_t inScale, int64_t inDuratio
 	}
      
 	return fr;
- }
+}
 
 void AJATimeBase::SetAJAFrameRatePrivate(AJA_FrameRate ajaFrameRate)
 {
-	mFrameTimeScale = 30000;
-	mFrameDuration  = 1001;
+    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
+    mFrameDuration  = AJATimeBaseDefaultDuration;
 
 	for (size_t i = 0; i < AJAFrameRateTableSize; i++)
 	{

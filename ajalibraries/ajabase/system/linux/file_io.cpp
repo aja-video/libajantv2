@@ -43,7 +43,7 @@ void wstringToString(wstring inPath, string& outPath)
     ::wcstombs(tmp,inPath.c_str(),pathSize);
     tmp[pathSize] = 0;
     outPath.assign(tmp);
-    delete tmp;
+    delete[] tmp;
 }
 
 void stringToWstring(string inPath, wstring& outPath)
@@ -372,7 +372,7 @@ AJAFileIO::ReadDirectory(
 		convertedPath = directory;
 		for (string::iterator it = convertedPath.begin();
 				it < convertedPath.end();
-				it++)
+                ++it)
 		{
 			if( *it == '\\' )
 				*it = '/';
@@ -382,7 +382,7 @@ AJAFileIO::ReadDirectory(
 		upperPattern = filePattern;
 		for (string::iterator it = upperPattern.begin();
 				it < upperPattern.end();
-				it++)
+                ++it)
 		{
 			*it = toupper( *it );
 		}

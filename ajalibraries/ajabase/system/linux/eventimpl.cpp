@@ -16,6 +16,7 @@ using std::string;
 AJAEventImpl::AJAEventImpl(bool manualReset, const string& name)
 	: mManualReset(manualReset)
 {
+    AJA_UNUSED(name);
 	pthread_mutex_init(&mMutex, NULL);
 	pthread_cond_init(&mCondVar, NULL);
 	Clear();
@@ -79,6 +80,8 @@ AJAEventImpl::SetState(bool signaled)
 AJAStatus
 AJAEventImpl::GetState(bool* pSignaled)
 {
+    AJA_UNUSED(pSignaled);
+
 	// wait with timeout 0 returns immediately
 	return WaitForSignal(0);
 }
@@ -159,6 +162,8 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 AJAStatus
 AJAEventImpl::GetEventObject(uint64_t* pEventObject)
 {
+    AJA_UNUSED(pEventObject);
+
 	return AJA_STATUS_SUCCESS;
 }
 

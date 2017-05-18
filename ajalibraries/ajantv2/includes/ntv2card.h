@@ -63,7 +63,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoLTCInOnRefPort,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
 	kDeviceCanDoMSI,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
 	kDeviceCanDoMultiFormat,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
-	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.
+	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
 	kDeviceCanDoPCMDetection,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
 //	kDeviceCanDoPIO,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
 	kDeviceCanDoPlayback,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can output (play) video.
@@ -163,22 +163,28 @@ typedef enum _NTV2NumericParamID
 } NTV2NumericParamID;
 
 
-typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			/// @brief	A set of distinct NTV2AudioChannelPair values.
-typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter;	/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
+typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief	A set of distinct NTV2AudioChannelPair values.
+typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter;	///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
 
-typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			/// @brief	A set of distinct NTV2AudioChannelQuad values.
-typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter;	/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
+typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			///< @brief	A set of distinct NTV2AudioChannelQuad values.
+typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter;	///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelQuads & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelQuads.
 
-typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			/// @brief	A set of distinct NTV2AudioChannelOctet values.
-typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;/// @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet);	///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
+typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			///< @brief	A set of distinct NTV2AudioChannelOctet values.
+typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;///< @brief	Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
+AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
 
-typedef std::vector <double>					NTV2DoubleArray;				/// @brief	An array of double-precision floating-point values.
-typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			/// @brief	Handy non-const iterator to iterate over an NTV2DoubleArray.
-typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		/// @brief	Handy const iterator to iterate over an NTV2DoubleArray.
+typedef std::vector <double>					NTV2DoubleArray;				///< @brief	An array of double-precision floating-point values.
+typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			///< @brief	Handy non-const iterator to iterate over an NTV2DoubleArray.
+typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		///< @brief	Handy const iterator to iterate over an NTV2DoubleArray.
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DoubleArray & inVector);	///<	@brief	Handy ostream writer for NTV2DoubleArray.
+
+typedef UByte						NTV2DID;				///< @brief	An ancillary Data IDentifier.
+typedef std::set <UByte>			NTV2DIDSet;				///< @brief	A set of distinct NTV2DID values.
+typedef NTV2DIDSet::iterator		NTV2DIDSetIter;			///< @brief	Handy non-const iterator to iterate over an NTV2DIDSet.
+typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief	Handy const iterator to iterate over an NTV2DIDSet.
+AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
 
 
 //////////////////////////////////////////////////////////
@@ -1478,7 +1484,7 @@ public:
 	AJA_VIRTUAL bool	GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Determines if the given audio system on the AJA device will configured to capture audio samples.
+		@brief		Enables or disables audio capture for the given audio system on the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the audio system of interest.
 		@param[in]	inEnable		If true, the audio system will capture samples into memory, if not currently reset.
@@ -1490,12 +1496,12 @@ public:
 	AJA_VIRTUAL bool	SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether the audio system is configured for capturing audio samples
+		@brief		Answers whether or not the audio system is configured for capturing audio samples.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the audio system
-										will capture samples to memory when not in reset mode,
-										or 'false' if the audio system is inhibited from capturing samples.
+		@param[in]	outEnable			Receives 'true' if the audio system will capture samples to memory when
+										not in reset mode;  otherwise 'false' if the audio system is inhibited from
+										capturing samples.
 	**/
 	AJA_VIRTUAL bool	GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
@@ -1659,8 +1665,19 @@ public:
 		@param[in]	inAudioSystem				Specifies the audio subsystem of interest.
 		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in the audio subsystem's input stream.
 		@return		True if successful; otherwise false.
+		@note		NTV2 device firmware performs this detection using a simple method of detecting the presence of the Audio Group's data packet.
+					It does not perform detailed inspection of the packet -- i.e., checking bits b1/b2 of the AES sub-frame per SMPTE 272, nor
+					checking the V/U/C/P bits per SMPTE 299.
 	**/
 	AJA_VIRTUAL bool		GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outDetectedChannelPairs);
+
+
+	/**
+		@brief		Answers which AES/EBU audio channel pairs are present on the device.
+		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in any of the device's AES/EBU inputs.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetDetectedAESChannelPairs (NTV2AudioChannelPairs & outDetectedChannelPairs);
 
 
 	/**
@@ -1786,6 +1803,10 @@ public:
 		@param[in]	inSDIInputChannel		Specifies the SDI input of interest.
 		@param[out]	outChannelPairs		Receives the channel pairs that are currently PCM-encoded.
 		@return		True if successful;  otherwise false.
+		@note		The audio de-embedder firmware sets non-PCM-detect bits in registers independently of its channel-pair-detection registers.
+					Non-PCM-detect bits representing missing channel pairs are always clear. Therefore, callers of this function may wish to also
+					call CNTV2Card::GetDetectedAudioChannelPairs (or CNTV2Card::GetDetectedAESChannelPairs), and then use std::set_intersection to
+					produce a more realistic set of PCM channel pairs.
 	**/
 	virtual bool GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
 
@@ -1845,7 +1866,7 @@ public:
 		@param[out]	outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, bool & outIsEnabled);
+	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
 
 	/**
 		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -1855,7 +1876,25 @@ public:
 											Specify 'false' to disable the embedder.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, const bool & inEnable);
+	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
+
+	/**
+		@brief		Answers with the current state of the audio output erase mode for the given audio system.
+					If enabled, the audio system automatically writes zeroes into the audio output buffer behind the output read head during playout.
+		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[out]	outEraseModeEnabled		Receives 'true' if enabled;  otherwise 'false' if disabled (normal operation).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
+
+	/**
+		@brief		Enables or disables output erase mode for the given audio system, which, when enabled, automatically writes zeroes into the audio output buffer
+					behind the output read head.
+		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[in]	inEraseModeEnabled		Specify 'true' to enable output erase mode;  otherwise 'false' for normal operation.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
 
 	///@}
 
@@ -3831,6 +3870,7 @@ public:
 	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutRange (NTV2HDMIRange * pOutValue)									{return pOutValue ? GetHDMIOutRange (*pOutValue) : false;}
 
+	AJA_VIRTUAL bool		GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue);
 	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (NTV2HDMIAudioChannels inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutAudioChannels (NTV2HDMIAudioChannels * pOutValue)					{return pOutValue ? GetHDMIOutAudioChannels (*pOutValue) : false;}
@@ -4637,13 +4677,45 @@ public:
 	///@}
 
 	/**
+		@name	Ancillary Data
+	**/
+	///@{
+	/**
+		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
+	**/
+	AJA_VIRTUAL bool		GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
+
+	/**
+		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[in]	inDIDs			Specifies the set of DIDs to be filtered for the given SDI input. Specify an
+									empty set to disable all packet filtering.
+		@note		DIDs having the value 0 (zero) are ignored.
+	**/
+	AJA_VIRTUAL bool		SetAncExtractorFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+
+	/**
+		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
+	**/
+	static UWord			GetMaxNumAncExtractorFilterDIDs (void);
+
+	/**
+		@return		The default DIDs that the device Anc extractor filter is started with.
+	**/
+	static NTV2DIDSet		GetDefaultAncExtractorDIDs (void);
+	///@}
+
+	/**
 		@name	TCP/IP
 	**/
 	///@{
 	AJA_VIRTUAL bool		AcquireMailBoxLock (void);
 	AJA_VIRTUAL bool		ReleaseMailBoxLock (void);
 	AJA_VIRTUAL bool		AbortMailBoxLock (void);
-
 	///@}
 
 	/**
@@ -4990,7 +5062,7 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool SetHDMIHDRConstantLuminance (const bool inEnableConstantLuminance);
-	AJA_VIRTUAL bool GetHDMIHDRConstantLuminanceSet (void);		///< @return	True if BT.2020 Y'cC'bcC'rc is enabled; otherwise false for BT.2020 Y'C'bC'r or R'G'B'.
+	AJA_VIRTUAL bool GetHDMIHDRConstantLuminance (void);		///< @return	True if BT.2020 Y'cC'bcC'rc is enabled; otherwise false for BT.2020 Y'C'bC'r or R'G'B'.
 
 	/**
 		@brief		Sets the Display Mastering data for Green Primary X as defined in SMPTE ST 2086. This is Byte 3 and 4 of SMDT Type 1.

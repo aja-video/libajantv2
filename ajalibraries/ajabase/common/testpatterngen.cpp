@@ -22,10 +22,20 @@ uint32_t MakeSineWaveVideo(double radians, bool bChroma,double Gain);
 // CTestPattern
 
 AJATestPatternGen::AJATestPatternGen() :
+    _patternNumber(AJA_TestPatt_ColorBars100),
+    _frameWidth(0),
+    _frameHeight(0),
+    _linePitch(0),
+    _dataLinePitch(0),
+    _bufferSize(0),
+    _pTestPatternBuffer(NULL),
+    _pPackedLineBuffer(NULL),
+    _pUnPackedLineBuffer(NULL),
 	_sliderValue(DEFAULT_PATT_GAIN),
-	_signalMask(AJA_SIGNALMASK_ALL)
+    _signalMask(AJA_SIGNALMASK_ALL),
+    _pixelFormat(AJA_PixelFormat_Unknown),
+    _bayerPhase(AJA_BayerColorPhase_RedGreen)
 {
-	_bayerPhase = AJA_BayerColorPhase_RedGreen;
 }
 
 

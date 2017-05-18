@@ -20,6 +20,13 @@ public:
 
 	AJATimeBase();
 
+    /**
+     *	Construct the time base class.
+     *
+     *	@param[in]	ajaFrameRate		Frame rate define found in videotypes.h
+     */
+    AJATimeBase(AJA_FrameRate ajaFrameRate);
+
 	/**
 	 *	Construct the time base class.
 	 *
@@ -36,13 +43,6 @@ public:
 	 *	@param[in]	audioRate			Audio sample rate (samples/second)
 	 */
 	AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate);
-
-	/**
-	 *	Construct the time base class.
-	 *
-	 *	@param[in]	ajaFrameRate		Frame rate define found in videotypes.h
-	 */
-	AJATimeBase(AJA_FrameRate ajaFrameRate);
 
 	virtual ~AJATimeBase();
 

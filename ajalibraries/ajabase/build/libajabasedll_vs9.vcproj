@@ -563,11 +563,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\system\ip_socket.cpp"
+				RelativePath="..\network\ip_socket.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\system\ip_socket.h"
+				RelativePath="..\network\ip_socket.h"
 				>
 			</File>
 			<File
@@ -663,11 +663,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\system\udp_socket.cpp"
+				RelativePath="..\network\udp_socket.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\system\udp_socket.h"
+				RelativePath="..\network\udp_socket.h"
 				>
 			</File>
 		</Filter>

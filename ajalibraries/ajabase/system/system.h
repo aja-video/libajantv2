@@ -10,7 +10,7 @@
 #if defined(AJA_WINDOWS)
 	#pragma warning (disable:4996)
 	#if !defined(_WIN32_WINNT)
-		#define _WIN32_WINNT 0x0500
+        #define _WIN32_WINNT 0x0600
 	#endif
 	#include <windows.h>
 	#include <stdio.h>

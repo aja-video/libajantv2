@@ -429,31 +429,33 @@ typedef enum
     kVRegTxc_2EncodeBitDepth1               = VIRTUALREG_START+489,
     kVRegTxc_2EncodeChromaSubSamp1          = VIRTUALREG_START+490,
     kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+491,
-    kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+492,
-    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+493,
-    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+494,
-    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+495,
-    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+496,
+	kVRegTxc_2EncodeAudioChannels1			= VIRTUALREG_START+492,
+	kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+493,
+    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+494,
+    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+495,
+    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+496,
+    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+497,
     
-    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+497,
-    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+498,
-    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+499,
-    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+500,
-    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+501,
-    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+502,
-    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+503,
-    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+504,
-    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+505,
-    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+506,
+    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+498,
+    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+499,
+    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+500,
+    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+501,
+    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+502,
+	kVRegTxc_2EncodeAudioChannels2			= VIRTUALREG_START+503,
+    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+504,
+    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+505,
+    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+506,
+    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+507,
+    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+508,
 
-    kVReg2022_7Enable						= VIRTUALREG_START+507,
-	
-    kVRegUserDefinedDBB						= VIRTUALREG_START+508,
+    kVReg2022_7Enable						= VIRTUALREG_START+509,
 
-    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+509,
-    kVRegHDMIOutRGBRange					= VIRTUALREG_START+510,
+    kVRegUserDefinedDBB						= VIRTUALREG_START+510,
 
-    kVRegLastAJA							= VIRTUALREG_START+511,		///< @brief	The last AJA virtual register slot
+    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+511,
+    kVRegHDMIOutRGBRange					= VIRTUALREG_START+512,
+
+    kVRegLastAJA							= VIRTUALREG_START+513,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

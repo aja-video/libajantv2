@@ -6,5 +6,5 @@ This Qt-based command-line program shows how to configure the network parameters
 The program demonstrates...
 -	how to detect if the AJA device is an IP device;
 -	how to determine if the MicroBlaze on the device is up and running;
--	how to set the network configuration paramters for each of the SFP cages on the device.
+-	how to set the network configuration parameters for each of the SFP cages on the device.
 **/

@@ -576,7 +576,7 @@ void CNTV2KonaFlashProgram::EraseBlock(FlashBlockID blockID)
         WriteRegister(kVRegFlashStatus,numSectors);
 		if(!_bQuiet)
 			printf("Erase status: 100%%             \n");
-		//if ( !CheckFlashErased(flashBlockNumber))
+		//if ( !CheckFlashErasedWithBlockID(flashBlockNumber))
 			//throw "Erase didn't work";
 	}
 	else
@@ -677,7 +677,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
     return !busy;  // Return true if wait was successful
 }
 
-bool CNTV2KonaFlashProgram::CheckFlashErased(FlashBlockID flashID)
+bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID(FlashBlockID flashID)
 {
 	bool status = true;
 	uint32_t baseAddress = GetBaseAddressForProgramming(flashID);

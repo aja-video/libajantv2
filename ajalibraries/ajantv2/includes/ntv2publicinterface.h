@@ -2423,6 +2423,7 @@ typedef enum
 	// Audio Source Select
 	kRegShiftAudioSource				= 0,
 	kRegShiftEmbeddedAudioInput			= 16,
+	kRegShiftAudioAutoErase				= 19,
 	kRegShiftAnalogHDMIvsAES     		= 20,
 	kRegShift3GbSelect					= 21,
 	kRegShiftEmbeddedAudioClock			= 22,
@@ -5192,11 +5193,11 @@ typedef enum
 
 			//	Convenience macros for compactly formatting ostream output...
 			#define	Hex(__x__)				std::hex << (__x__) << std::dec
-			#define	xHex(__x__)				"0x" << HEX(__x__)
+			#define	xHex(__x__)				"0x" << Hex(__x__)
 			#define	HexN(__x__,__n__)		std::hex << std::setw(__n__) << (__x__) << std::dec
-			#define	xHexN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
+			#define	xHexN(__x__,__n__)		"0x" << HexN((__x__),(__n__))
 			#define	Hex0N(__x__,__n__)		std::hex << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
-			#define	xHex0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
+			#define	xHex0N(__x__,__n__)		"0x" << Hex0N((__x__),(__n__))
 			#define	HEX(__x__)				std::hex << std::uppercase << (__x__) << std::dec << std::nouppercase
 			#define	xHEX(__x__)				"0x" << HEX(__x__)
 			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << (__x__) << std::dec << std::nouppercase

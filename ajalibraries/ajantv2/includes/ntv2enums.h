@@ -909,6 +909,8 @@ typedef enum
 #define NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(__f__)					\
     (	(__f__) == NTV2_FORMAT_525_5994 ||                          \
         (__f__) == NTV2_FORMAT_625_5000 ||                          \
+        (__f__) == NTV2_FORMAT_720p_2398 ||                         \
+        (__f__) == NTV2_FORMAT_720p_2500 ||                         \
         (__f__) == NTV2_FORMAT_720p_5000 ||                         \
         (__f__) == NTV2_FORMAT_720p_5994 ||                         \
         (__f__) == NTV2_FORMAT_720p_6000 ||                         \
@@ -925,10 +927,11 @@ typedef enum
         (__f__) == NTV2_FORMAT_1080p_6000_A ||                      \
         (__f__) == NTV2_FORMAT_1080p_2K_2398 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2400 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_2500 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2997 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_4795 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_4800 ||                     \
-        (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_5000 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_5994 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_6000	)
@@ -1556,13 +1559,25 @@ typedef enum
     NTV2_MAX_NUM_CaptureModes
 } NTV2CaptureMode;
 
+/**
+	@brief	Represents the size of the audio buffer used by a device audio system for storing captured
+			samples or samples awaiting playout. For example, NTV2_AUDIO_BUFFER_SIZE_4MB means that a
+			4MB chunk of device memory is used to store captured audio samples, while another 4MB block
+			of device memory is used to store audio samples for playout.
+	@note	All NTV2 devices have standardized on 4MB audio buffers. Using a different value may result
+			in unexpected behavior.
+**/
 typedef enum
 {
-    NTV2_AUDIO_BUFFER_STANDARD	= 0,	/* 1 MB 00*/
-    NTV2_AUDIO_BUFFER_BIG		= 1,	/* 4 MB 01*/
+	NTV2_AUDIO_BUFFER_SIZE_1MB	= 0,	//	0b00
+	NTV2_AUDIO_BUFFER_SIZE_4MB	= 1,	//	0b01
+    NTV2_AUDIO_BUFFER_STANDARD	= NTV2_AUDIO_BUFFER_SIZE_1MB,
+    NTV2_AUDIO_BUFFER_BIG		= NTV2_AUDIO_BUFFER_SIZE_4MB,
 #if !defined (NTV2_DEPRECATE)
-    NTV2_AUDIO_BUFFER_MEDIUM	= 2,	/* 2 MB 10*/
-    NTV2_AUDIO_BUFFER_BIGGER	= 3,	/* 8 MB 11*/			// 8 MB capture buffer and 8 MB playback buffer
+	NTV2_AUDIO_BUFFER_SIZE_2MB	= 2,	//	0b10
+	NTV2_AUDIO_BUFFER_SIZE_8MB	= 3,	//	0b11
+    NTV2_AUDIO_BUFFER_MEDIUM	= NTV2_AUDIO_BUFFER_SIZE_2MB,
+    NTV2_AUDIO_BUFFER_BIGGER	= NTV2_AUDIO_BUFFER_SIZE_8MB,
 #endif	//	!defined (NTV2_DEPRECATE)
     NTV2_AUDIO_BUFFER_INVALID,
     NTV2_MAX_NUM_AudioBufferSizes	= NTV2_AUDIO_BUFFER_INVALID
@@ -1609,7 +1624,7 @@ typedef enum
     NTV2_EMBEDDED_AUDIO_INPUT_INVALID	= NTV2_MAX_NUM_EmbeddedAudioInputs
 } NTV2EmbeddedAudioInput;
 
-#define	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(_x_)			((_x_) < NTV2_MAX_NUM_EmbeddedAudioInputs)
+#define	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(_x_)			((_x_) >= NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1  &&  (_x_) < NTV2_EMBEDDED_AUDIO_INPUT_INVALID)
 
 
 typedef enum
@@ -1641,7 +1656,7 @@ typedef enum
 #define	NTV2_AUDIO_SOURCE_IS_AES(_x_)			((_x_) == NTV2_AUDIO_AES)
 #define	NTV2_AUDIO_SOURCE_IS_ANALOG(_x_)		((_x_) == NTV2_AUDIO_ANALOG)
 #define	NTV2_AUDIO_SOURCE_IS_HDMI(_x_)			((_x_) == NTV2_AUDIO_HDMI)
-#define	NTV2_IS_VALID_AUDIO_SOURCE(_x_)			((_x_) < NTV2_MAX_NUM_AudioSources)
+#define	NTV2_IS_VALID_AUDIO_SOURCE(_x_)			((_x_) >= NTV2_AUDIO_EMBEDDED  &&  (_x_) < NTV2_AUDIO_SOURCE_INVALID)
 
 
 typedef enum
@@ -3086,8 +3101,11 @@ typedef enum
 {
     NTV2_HDMIAudio2Channels,	//	2 Channel output
     NTV2_HDMIAudio8Channels,	//	8 Channel output
-    NTV2_MAX_NUM_HDMIAudioChannelEnums
+    NTV2_MAX_NUM_HDMIAudioChannelEnums,
+    NTV2_INVALID_HDMI_AUDIO_CHANNELS	=	NTV2_MAX_NUM_HDMIAudioChannelEnums
 } NTV2HDMIAudioChannels;
+
+#define	NTV2_IS_VALID_HDMI_AUDIO_CHANNELS(__x__)	((__x__) >= NTV2_HDMIAudio2Channels)  &&  ((__x__) < NTV2_INVALID_HDMI_AUDIO_CHANNELS)
 
 
 /**
@@ -3259,7 +3277,7 @@ typedef enum
 #define	NTV2_IS_VANCMODE_TALL(__v__)			((__v__) == NTV2_VANCMODE_TALL)
 #define	NTV2_IS_VANCMODE_TALLER(__v__)			((__v__) == NTV2_VANCMODE_TALLER)
 #define NTV2_IS_VANCMODE_ON(__v__)				((__v__) > NTV2_VANCMODE_OFF && (__v__) < NTV2_VANCMODE_INVALID)
-#define NTV2VANCModeFromBools(_tall_,_taller_)	NTV2VANCMode ((_tall_) ? ((_taller_) ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_TALL) : ((_taller_) ? NTV2_VANCMODE_INVALID : NTV2_VANCMODE_OFF))
+#define NTV2VANCModeFromBools(_tall_,_taller_)	NTV2VANCMode ((_tall_) ? ((_taller_) ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_TALL) : NTV2_VANCMODE_OFF)
 
 
 typedef enum

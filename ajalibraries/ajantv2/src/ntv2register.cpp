@@ -2013,7 +2013,6 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	if(IsKonaIPDevice())
 	{
-		int newValue = 0;
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 	}
 
@@ -2876,7 +2875,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 	std::string designName = bitfileStream.GetDesignName();
 	if(readBytes != bitfileLength)
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return result;
 	}
 
@@ -2921,7 +2920,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 	}
 	else
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return result;
 	}
 	
@@ -2972,7 +2971,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 		WriteRegister(kVRegFlashState, kProgramStateFinished);
 	}
 
-	delete bitfileBuffer;
+    delete[] bitfileBuffer;
 	return result;
 }
 
@@ -3049,7 +3048,7 @@ bool CNTV2Card::VerifyMainFlash(const char *fileName)
 	bitfileStream.Close();
 	if(readBytes != bitfileLength)
 	{
-		delete bitfileBuffer;
+        delete[] bitfileBuffer;
 		return false;
 	}
 
@@ -6255,7 +6254,7 @@ static const ULWord	sShifts[]	=	{	         0,	         8,	        16,	        24
 
 bool CNTV2Card::GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (GetDeviceID ()));
+	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 
@@ -6293,7 +6292,7 @@ bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV
 
 bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (GetDeviceID ()));
+	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 
@@ -6367,7 +6366,7 @@ bool CNTV2Card::ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool
 bool CNTV2Card::ClearRouting (void)
 {
 	const NTV2RegNumSet	routingRegisters	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
-	const ULWord		maxRegisterNumber	(::NTV2DeviceGetMaxRegisterNumber (GetDeviceID ()));
+	const ULWord		maxRegisterNumber	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
 	unsigned			nFailures			(0);
 
 	for (NTV2RegNumSetConstIter it (routingRegisters.begin());  it != routingRegisters.end();  ++it)	//	for each routing register
@@ -9453,7 +9452,7 @@ bool CNTV2Card::SetHDMIHDRConstantLuminance(const bool inEnableConstantLuminance
 	return WriteRegister(kRegHDMIHDRControl, inEnableConstantLuminance ? 1 : 0, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
 }
 
-bool CNTV2Card::GetHDMIHDRConstantLuminanceSet()
+bool CNTV2Card::GetHDMIHDRConstantLuminance()
 {
 	if (!NTV2DeviceCanDoHDMIHDROut(_boardID))
 		return false;

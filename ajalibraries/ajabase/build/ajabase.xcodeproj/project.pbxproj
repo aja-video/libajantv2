@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		A401624B1EBCDC23001B8830 /* infoimpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = A401624A1EBCDC23001B8830 /* infoimpl.mm */; };
 		A411D89711DE8E40003E7E53 /* buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A411D88511DE8E40003E7E53 /* buffer.cpp */; };
 		A411D89811DE8E40003E7E53 /* buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = A411D88611DE8E40003E7E53 /* buffer.h */; };
 		A411D89911DE8E40003E7E53 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = A411D88711DE8E40003E7E53 /* common.h */; };
@@ -57,6 +58,9 @@
 		A486D74916CDB4A900797C2F /* diskstatus.h in Headers */ = {isa = PBXBuildFile; fileRef = A486D74716CDB4A900797C2F /* diskstatus.h */; };
 		A4B58E521770C6820077542D /* wavewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B58E501770C6820077542D /* wavewriter.cpp */; };
 		A4B58E531770C6820077542D /* wavewriter.h in Headers */ = {isa = PBXBuildFile; fileRef = A4B58E511770C6820077542D /* wavewriter.h */; };
+		A4C509231EB3C58F00947CA3 /* infoimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = A4C509211EB3C58F00947CA3 /* infoimpl.h */; };
+		A4C509261EB3C5A800947CA3 /* info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4C509241EB3C5A800947CA3 /* info.cpp */; };
+		A4C509271EB3C5A800947CA3 /* info.h in Headers */ = {isa = PBXBuildFile; fileRef = A4C509251EB3C5A800947CA3 /* info.h */; };
 		A4E3581D16C9AAEE000A649E /* file_io.h in Headers */ = {isa = PBXBuildFile; fileRef = A4E3581C16C9AAEE000A649E /* file_io.h */; };
 		A4E3582016C9AB02000A649E /* file_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4E3581F16C9AB02000A649E /* file_io.cpp */; };
 		B40C6FC216682EF90080F00F /* videotypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B40C6FC116682EF90080F00F /* videotypes.h */; };
@@ -121,6 +125,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A401624A1EBCDC23001B8830 /* infoimpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = infoimpl.mm; sourceTree = "<group>"; };
 		A411D88511DE8E40003E7E53 /* buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = buffer.cpp; path = ../common/buffer.cpp; sourceTree = SOURCE_ROOT; };
 		A411D88611DE8E40003E7E53 /* buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer.h; path = ../common/buffer.h; sourceTree = SOURCE_ROOT; };
 		A411D88711DE8E40003E7E53 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common.h; path = ../common/common.h; sourceTree = SOURCE_ROOT; };
@@ -157,6 +162,9 @@
 		A486D74716CDB4A900797C2F /* diskstatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = diskstatus.h; path = ../system/diskstatus.h; sourceTree = SOURCE_ROOT; };
 		A4B58E501770C6820077542D /* wavewriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wavewriter.cpp; path = ../common/wavewriter.cpp; sourceTree = SOURCE_ROOT; };
 		A4B58E511770C6820077542D /* wavewriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wavewriter.h; path = ../common/wavewriter.h; sourceTree = SOURCE_ROOT; };
+		A4C509211EB3C58F00947CA3 /* infoimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = infoimpl.h; sourceTree = "<group>"; };
+		A4C509241EB3C5A800947CA3 /* info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = info.cpp; sourceTree = "<group>"; };
+		A4C509251EB3C5A800947CA3 /* info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = info.h; sourceTree = "<group>"; };
 		A4E3581C16C9AAEE000A649E /* file_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_io.h; path = ../system/file_io.h; sourceTree = SOURCE_ROOT; };
 		A4E3581F16C9AB02000A649E /* file_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_io.cpp; path = ../system/mac/file_io.cpp; sourceTree = SOURCE_ROOT; };
 		B40C6FC116682EF90080F00F /* videotypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = videotypes.h; path = ../common/videotypes.h; sourceTree = SOURCE_ROOT; };
@@ -317,6 +325,8 @@
 				A411D8AF11DE8E56003E7E53 /* event.cpp */,
 				A411D8B011DE8E56003E7E53 /* event.h */,
 				A4E3581C16C9AAEE000A649E /* file_io.h */,
+				A4C509241EB3C5A800947CA3 /* info.cpp */,
+				A4C509251EB3C5A800947CA3 /* info.h */,
 				A411D8B811DE8E56003E7E53 /* lock.cpp */,
 				A411D8B911DE8E56003E7E53 /* lock.h */,
 				B4969FDC15F67FA400274357 /* log.cpp */,
@@ -338,9 +348,11 @@
 		A411D8BA11DE8E56003E7E53 /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				A4E3581F16C9AB02000A649E /* file_io.cpp */,
 				A411D8BB11DE8E56003E7E53 /* eventimpl.cpp */,
 				A411D8BC11DE8E56003E7E53 /* eventimpl.h */,
+				A4E3581F16C9AB02000A649E /* file_io.cpp */,
+				A4C509211EB3C58F00947CA3 /* infoimpl.h */,
+				A401624A1EBCDC23001B8830 /* infoimpl.mm */,
 				A411D8BD11DE8E56003E7E53 /* lockimpl.cpp */,
 				A411D8BE11DE8E56003E7E53 /* lockimpl.h */,
 				B4A35BF3144CDBEB00957C64 /* processimpl.cpp */,
@@ -398,6 +410,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4C509271EB3C5A800947CA3 /* info.h in Headers */,
 				A411D8D011DE8E56003E7E53 /* atomic.h in Headers */,
 				B4CE1FC116E802870092B564 /* audioutilities.h in Headers */,
 				A411D89811DE8E40003E7E53 /* buffer.h in Headers */,
@@ -408,6 +421,7 @@
 				A411D89911DE8E40003E7E53 /* common.h in Headers */,
 				B41148C61DC1562C00A7D6E1 /* devicenotifier.h in Headers */,
 				A411D8D211DE8E56003E7E53 /* debug.h in Headers */,
+				A4C509231EB3C58F00947CA3 /* infoimpl.h in Headers */,
 				A411D8D311DE8E56003E7E53 /* debugshare.h in Headers */,
 				A486D74916CDB4A900797C2F /* diskstatus.h in Headers */,
 				A411D89B11DE8E40003E7E53 /* export.h in Headers */,
@@ -504,6 +518,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A411D8CF11DE8E56003E7E53 /* atomic.cpp in Sources */,
+				A401624B1EBCDC23001B8830 /* infoimpl.mm in Sources */,
 				B4CE1FC016E802870092B564 /* audioutilities.cpp in Sources */,
 				A411D89711DE8E40003E7E53 /* buffer.cpp in Sources */,
 				B4CE1FC416E802870092B564 /* cli_utils.cpp in Sources */,
@@ -516,6 +531,7 @@
 				A411D8E011DE8E56003E7E53 /* lockimpl.cpp in Sources */,
 				B4969FDE15F67FA400274357 /* log.cpp in Sources */,
 				A411D8E411DE8E56003E7E53 /* memory.cpp in Sources */,
+				A4C509261EB3C5A800947CA3 /* info.cpp in Sources */,
 				B4CE1FB016E802460092B564 /* options_popt.cpp in Sources */,
 				B4148CA91B29EB2100617891 /* guid.cpp in Sources */,
 				B4CE1FC616E802870092B564 /* performance.cpp in Sources */,

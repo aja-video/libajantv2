@@ -294,6 +294,8 @@ AJAThreadImpl::Stop(uint32_t timeout)
 AJAStatus
 AJAThreadImpl::Kill(uint32_t exitCode)
 {
+    AJA_UNUSED(exitCode);
+
 	AJAAutoLock lock(&mLock);
 	AJAStatus returnStatus = AJA_STATUS_SUCCESS;
 

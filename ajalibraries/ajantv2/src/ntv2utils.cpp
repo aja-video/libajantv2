@@ -6042,7 +6042,7 @@ string NTV2ChannelToString (const NTV2Channel inValue, const bool inForRetailDis
 		case NTV2_CHANNEL6:			return inForRetailDisplay ? "Ch6" : "NTV2_CHANNEL6";
 		case NTV2_CHANNEL7:			return inForRetailDisplay ? "Ch7" : "NTV2_CHANNEL7";
 		case NTV2_CHANNEL8:			return inForRetailDisplay ? "Ch8" : "NTV2_CHANNEL8";
-		case NTV2_MAX_NUM_CHANNELS:	return inForRetailDisplay ? "???" : "NTV2_CHANNEL_INVALID";
+		case NTV2_MAX_NUM_CHANNELS:	return inForRetailDisplay ? "n/a" : "NTV2_CHANNEL_INVALID";
 	}
 	return "";
 }
@@ -6722,6 +6722,31 @@ string NTV2VANCModeToString (const NTV2VANCMode inValue, const bool inCompactDis
 		default:					break;
 	}
 	return inCompactDisplay ? "" : "NTV2_VANCMODE_INVALID";
+}
+
+
+string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
+{
+	ostringstream	oss;
+	if (NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(inValue))
+		oss << (inCompactDisplay ? "SDI" : "NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_") << DEC(inValue+1);
+	else
+		oss << (inCompactDisplay ? "SDI?" : "NTV2_EMBEDDED_AUDIO_INPUT_INVALID");
+	return oss.str();
+}
+
+
+string NTV2AudioSourceToString (const NTV2AudioSource inValue,  const bool inCompactDisplay)
+{
+	switch (inValue)
+	{
+		case NTV2_AUDIO_EMBEDDED:	return inCompactDisplay ? "SDI"		: "NTV2_AUDIO_EMBEDDED";
+		case NTV2_AUDIO_AES:		return inCompactDisplay ? "AES"		: "NTV2_AUDIO_AES";
+		case NTV2_AUDIO_ANALOG:		return inCompactDisplay ? "Analog"	: "NTV2_AUDIO_ANALOG";
+		case NTV2_AUDIO_HDMI:		return inCompactDisplay ? "HDMI"	: "NTV2_AUDIO_HDMI";
+		default:					break;
+	}
+	return inCompactDisplay ? "" : "NTV2_AUDIO_SOURCE_INVALID";
 }
 
 

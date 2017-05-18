@@ -14,6 +14,9 @@
     <Filter Include="Persistence">
       <UniqueIdentifier>{574e1285-98e3-42da-b0c0-9e933fd298f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{fc695c13-bfb0-49cb-b530-fb56f5a6384c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\audioutilities.cpp">
@@ -79,9 +82,6 @@
     <ClCompile Include="..\system\windows\file_io.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\system\ip_socket.cpp">
-      <Filter>System Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\system\lock.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
@@ -115,9 +115,6 @@
     <ClCompile Include="..\system\windows\threadimpl.cpp">
       <Filter>System Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\system\udp_socket.cpp">
-      <Filter>System Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\persistence\persistence.cpp">
       <Filter>Persistence</Filter>
     </ClCompile>
@@ -125,6 +122,21 @@
       <Filter>Persistence</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="..\system\info.cpp">
+      <Filter>System Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\system\windows\infoimpl.cpp">
+      <Filter>System Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\network\ip_socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\network\udp_socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\common.cpp">
+      <Filter>Common Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\audioutilities.h">
@@ -214,9 +226,6 @@
     <ClInclude Include="..\system\file_io.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\system\ip_socket.h">
-      <Filter>System Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\system\lock.h">
       <Filter>System Files</Filter>
     </ClInclude>
@@ -253,14 +262,23 @@
     <ClInclude Include="..\system\windows\threadimpl.h">
       <Filter>System Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\system\udp_socket.h">
-      <Filter>System Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\persistence\persistence.h">
       <Filter>Persistence</Filter>
     </ClInclude>
     <ClInclude Include="..\persistence\sqlite3.h">
       <Filter>Persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\system\info.h">
+      <Filter>System Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\system\windows\infoimpl.h">
+      <Filter>System Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\network\ip_socket.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\network\udp_socket.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

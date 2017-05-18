@@ -18,7 +18,9 @@ extern void __cdecl log_odprintf(const char *format, ...);
 #endif
 
 // use this the select alternate platform specific loggers, 0 is used for no-log
-#define AJA_LOGTYPE     1
+#ifndef AJA_LOGTYPE
+#define AJA_LOGTYPE    1
+#endif
 
 // define AJA_LOG here
 
@@ -35,7 +37,8 @@ extern void __cdecl log_odprintf(const char *format, ...);
 
 		#elif (AJA_LOGTYPE==2)
 			#define AJA_LOG(...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, __VA_ARGS__)
-		#else
+
+        #else
 			//catch all, so builds won't break
 			#define AJA_LOG(_format_,...)
 		#endif
@@ -61,7 +64,10 @@ extern void __cdecl log_odprintf(const char *format, ...);
             // printf
 			#include <stdio.h>
 			#define AJA_LOG(_format_...) printf(_format_)
-		
+
+        #elif (AJA_LOGTYPE==2)
+            #define AJA_LOG(_format_...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, _format_)
+
         #elif (AJA_LOGTYPE==9999)	//	'9999' is an attempt to make it obvious when FireLog is being used, to prevent downstream build failures on MacOS
 			//	If this #include fails at compile time, then FireLog isn't installed:
 			#include "/System/Library/Frameworks/FireLog.framework/Headers/FireLog.h"

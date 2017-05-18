@@ -22,6 +22,10 @@
 #	define INVALID_HANDLE_VALUE -1
 #endif
 
+#if defined(AJA_WINDOWS)
+#include <WinSock2.h>
+#endif
+
  
 typedef union
 {
@@ -98,7 +102,7 @@ float dpx_get_r32(const float *ptr, bool BE)
 
 
 
-DpxHdr DpxHdr::operator=(const DpxHdr& rhs)
+DpxHdr& DpxHdr::operator=(const DpxHdr& rhs)
 {
     if (this != &rhs)
     {

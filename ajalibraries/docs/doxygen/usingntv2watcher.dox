@@ -34,6 +34,7 @@ To remove a remote device, be sure it's the currently selected one, then click t
 
 There are several settings that are common to the device and apply to all inspectors:
 -	<b>Poll Device</b> -- Check the box to repeatedly poll the device, and update the Watcher's data displays. Un-check the box to "freeze" the Watcher's data displays.
+	@note	Some inspectors (Frame Buffer, Anc, etc.) are driven by the device's input or output vertical blanking interrupt, and therefore ignore this setting.
 -	<b>Polling Interval</b> -- Adjusts the polling interval, from 25 milliseconds up to 2 seconds. Note that some inspectors are sync'd to an input/output/reference VBI and ignore this setting.
 -	<b>Task Mode</b> -- Indicates the device's current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> -- Indicates the device's "multi-format" mode, and allows it to be changed by choosing a different setting.
@@ -62,10 +63,10 @@ If you click back to return to an inspector that was previously in use, its stat
 
 The Frame Buffer inspector monitors the contents of frame buffer memory on the AJA device.
 
-@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher's currently selected polling rate,
+@note	Because this inspector reads (via DMA) the entire contents of a frame buffer at the selected channel's frame rate,
 		it can interfere with any currently running video application, particularly if the additional DMAs exceed the available
-		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
-		in which the act of monitoring an AJA device affects it and the application(s) under test.
+		device or host data transfer budget. Thus, this inspector is not immune from "Heisenbugs" in which the act of monitoring
+		an AJA device affects it and the application(s) under test.
 
 Frame buffer memory contents can be displayed in four ways:
 	-	<b>Line</b> -- The full raster, line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
@@ -73,7 +74,7 @@ Frame buffer memory contents can be displayed in four ways:
 	-	<b>Component</b> -- The full raster, line-by-line, in component format, dictated by the frame store's frame buffer format, in hex or decimal.
 	-	<b>Image</b> -- The visible raster, as an image.
 
-When device polling is enabled, this inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
+This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
 It reads the entire buffer into host memory and compares it to what was read the last time.
 When displaying rasters, the status bar shows the number of lines in the raster that changed from the last frame.
 Except in its Image view, the raster content display always highlights changed content with a brighter color.
@@ -197,8 +198,8 @@ and read or write "head" position.
 
 @note	Because this inspector reads (via DMA) the entire contents of an audio buffer at NTV2Watcher's currently selected polling rate,
 		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
-		device or host data transfer budget. Thus, this inspector is not immune from the Heisenburg Uncertainty Principle (or "Heisenbugs")
-		in which the act of monitoring an AJA device affects it and the application(s) under test.
+		device or host data transfer budget. Thus, this inspector is not immune from "Heisenbugs" in which the act of monitoring an AJA
+		device affects it and the application(s) under test.
 
 Audio buffer memory contents can be displayed in three ways:
 	-	<b>Raw</b> -- The entire buffer in 4096-byte "lines", grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
@@ -206,29 +207,52 @@ Audio buffer memory contents can be displayed in three ways:
 	-	<b>Phase</b> -- A phase plot of one audio channel against another. Both audio channels must be carrying PCM data.
 
 When device polling is enabled, this inspector repeatedly monitors the audio system's input or output buffer.
-It reads the entire buffer into host memory and compares it to what was read the last time.
+It reads the entire buffer into host memory and compares it to its previous contents.
 The status bar shows the read or write head position, as well as what changed.
 The display highlights changed content with a brighter color.
 
-@par	Audio System Controls
-	-	<b>Audio System</b> -- Selects the audio system of interest.
-	-	<b>Sample Rate</b> -- Indicates the audio system's current sample rate.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Buffer Size</b> -- Indicates the audio system's current buffer size.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Audio Channel Count</b> -- Indicates the audio system's current channel count.  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>AutoCirculate Indicator</b> -- Indicates if the audio system is being used by AutoCirculate, and if so, which Channel.
-	-	<b>Start</b> -- Starts the audio system running.
-	-	<b>Pause/Resume</b> -- Pauses or resumes the audio system.
-	-	<b>Stop</b> -- Stops the audio system.
-	-	<b>View</b> -- Controls which part of the audio system to inspect:
-		-	<b>Input</b> -- Inspects the incoming audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
-		-	<b>Output</b> -- Inspects the outgoing audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
-	-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the new audio data nearest the audio system's read/write head.
-	-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
-		@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
-				audio should only be done with very short (less than 30 millisecond) polling intervals.
+@par	Audio System Controls and Indicators
+	-	<b>Audio System Selection and Configuration</b>
+		-	<b>Audio System</b> -- Selects the audio system of interest.
+		-	<b>Rate</b> -- Indicates the audio system's current sample rate.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Size</b> -- Indicates the audio system's current buffer size.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Channels</b> -- Indicates the audio system's current channel count.
+			It can be changed using this menu (if the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+	-	<b>State Indicators</b>
+		-	<b>A/C Indicator</b> -- Indicates if the audio system is being used by <b>AutoCirculate</b>, and if so, which <b>AutoCirculate Channel</b>.
+		-	<b>Active Pairs</b> -- Indicates which audio channel pairs are currently active.
+		-	<b>Non-PCM Pairs</b> -- Indicates which of the active audio channel pairs are carrying non-PCM data.
+	-	<b>Operation Controls</b>
+		-	<b>Start</b> -- Click this button to start/run the audio system. If already running, the button is dimmed and indicates "Running".
+		-	<b>Stop</b> -- Click this button to stop the audio system. If already stopped, the button is dimmed and indicates "Stopped".
+		-	<b>Loopback</b> -- If checked, audio samples from the audio system's source are routed directly into the output embedder(s) that are sourced from this audio system.
+		-	<b>Erase</b> -- (Shown only in <b>Output</b> mode.) If checked, the audio system will automatically write silence (i.e., zero values) into the output buffer
+			immediately behind the <b>Read Head</b>.
+		-	<b>Embed</b> -- (Shown only in <b>Output</b> mode.) If checked, the audio system's output audio embedder is enabled.
+			If unchecked, the audio system's output embedder is disabled, and will emit no audio packets.
+		-	<b>PCM Output</b> -- (Shown only in <b>Output</b> mode, and only for devices that lack per-audio-channel-pair PCM control.)
+			If checked, the output embedder marks all outgoing audio packets as normal PCM.
+			If unchecked, the output embedder marks all outgoing audio packets as non-PCM.
+		-	<b>Non-PCM Output</b> -- (Shown only in <b>Output</b> mode, and only for devices that have per-audio-channel-pair PCM control.)
+			This popup menu lists all possible channel pairs.
+			If a channel pair is checked, the output embedder marks outgoing audio packets for that channel pair as non-PCM.
+			If a channel pair is unchecked, the output embedder marks outgoing audio packets for that channel pair as normal PCM.
+	-	<b>Mode and View Controls</b>
+		-	<b>View</b> -- Controls which part of the audio system to inspect:
+			-	<b>Input</b> -- Inspects the input (capture) audio buffer. Look for changes up to the write head, where the de-embedder is writing new samples.
+			-	<b>Output</b> -- Inspects the output (playout) audio buffer. Look for changes ahead of the read head, where a playout application may be writing new samples.
+		-	<b>Auto</b> -- If checked, automatically and dynamically scrolls the display to reveal the audio data that immediately precedes the <b>Read Head</b> or follows the <b>Write Head</b>.
+		-	<b>Mon</b> -- If checked, sends new audio data to the host audio system.
+			@note	Because of the nature of digital audio, and the human ear's sensitivity to interruptions or distortions in audio waveforms, monitoring
+					audio should only be done with very short (less than 30 millisecond) polling intervals.
+		-	<b>AutoDetect</b> -- If checked, scans for muted channels or channels that contain Dolby-encoded audio data, and augments the <b>Vertical Ruler</b> scale accordingly.
+		-	<b>Source</b> -- (Shown only in <b>Input</b> mode.) This popup menu lists all possible audio sources for the audio system, and indicates the current source.
+			The current source can be changed immediately using this menu.
+	-	<b>Other</b>
+		-	<b>Status Bar</b> -- Indicates the audio system's current <b>Write Head</b> (<b>Input</b> mode) or <b>Read Head</b> (<b>Output</b> mode) position,
+			and which part of its sample buffer changed (if any).
 
 @par	Navigation
 	-	<b>Scrolling</b> -- The display can be scrolled horizontally and/or vertically.
@@ -238,8 +262,13 @@ The display highlights changed content with a brighter color.
 		-	Use the up-arrow or down-arrow keys to scroll the display up or down.
 		-	Use the left-arrow or right-arrow keys to scroll the display left or right.
 		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
-	-	<b>Vertical Ruler</b> -- This ruler identifies each audio channel in the display.
-	-	<b>Horizontal Ruler</b> -- This ruler identifies the position in the audio buffer.
+	-	<b>Vertical Ruler</b> -- This ruler identifies each audio channel in the display. Each channel can be augmented with "Absent", "PCM" or "Non-PCM" (or "Mute" or "Non-PCM Dolby" with <b>AutoDetect</b> enabled).
+	-	<b>Horizontal Ruler</b> -- This ruler identifies the offset into the audio buffer of each column (or pixel, horizontally) in the audio buffer.
+		-	Right-click in the horizontal ruler to pop up the <b>Units</b> menu:
+			-	<b>Byte Offset</b> -- Shows the buffer offset as a byte count, in hexadecimal.
+			-	<b>Samples</b> -- Shows the buffer offset as a zero-based decimal sample index number.
+			-	<b>Seconds</b> -- Shows the buffer offset as a fixed-point decimal time value (in microseconds, milliseconds, or seconds, as appropriate).
+			-	This setting affects the units used in the <b>Change Indicator</b> in the status bar.
 	-	Right-click in the display to pop up a context-sensitive menu:
 		-	<b>View</b> menu:
 			-	<b>Raw</b> -- Switch to the <b>Raw</b> view.
@@ -251,8 +280,9 @@ The display highlights changed content with a brighter color.
 			-	<b>Percent</b> -- Shows raw sample data as a decimal percentage of maximum.
 			-	<b>Float</b> -- Shows samples as floating point values.
 			-	<b>dB</b> -- Shows samples in decibels.
-
-
+		-	<b>Copy</b> -- Copies the audio buffer contents to the clipboard.
+		-	<b>Paste</b> -- (Output mode only) Pastes the clipboard contents into the output audio buffer. Available only if previously copied from an Audio inspector view.
+		-	<b>Fill</b> -- (Output mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
 
 
 @subsection	inspectoranc		Ancillary Data Inspector
@@ -294,7 +324,7 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		-	<b>Name</b> -- A description of the packet.
 		-	<b>DC</b> -- Data Count of the payload data, in bytes.
 		-	<b>CS</b> -- The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
-		-	<b>Data</b> -- The payload data bytes.
+		-	<b>Data</b> -- The payload data bytes (64 bytes maximum).
 
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
 It reads the entire buffer into host memory and compares it to what was read the last time.
@@ -317,5 +347,46 @@ The inspector shows the following:
 		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or "Hide" to not display timecodes).
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
+
+
+
+
+@subsection	inspectorregs		Registers Inspector
+
+The Registers inspector is a faster alternative to the slower register pages, and allows easy customization to focus on specific registers of interest.
+
+The inspector has the following:
+	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
+	-	<b>Virtuals</b> -- A checkbox that controls if virtual registers are included in the list or not.
+	-	<b>Filter</b> -- An editable text box whose content determines which registers are seen in the list:
+		-	<i>empty</i> -- No filtering takes place. All registers are shown.
+		-	<i>non-empty</i> -- Filtering takes place based on what's in the search box:
+			-	<b>decimal numbers</b> -- A comma-separated list of register number ranges. For example:
+				-	<b>25</b> -- Only show register 25
+				-	<b>25-31</b> -- Only show registers 25, 26, 27, 28, 29, 30 and 31.
+				-	<b>3,5,7</b> -- Only show registers 3, 5 and 7.
+				-	<b>3-5,7</b> -- Only show registers 3, 4, 5 and 7.
+			-	<b>kRegClass</b>... -- A predefined group of registers. The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
+			-	Anything else is used in a case-insensitive search for register names containing that character sequence.
+	-	<b>Horizontal Ruler</b> -- This ruler shows the table column headings.
+		-	Right-click in the horizontal ruler to control the register table view:
+			-	<b>Column Display</b> -- Controls which columns are shown, and in what order:
+				-	<b>Reg Number</b> -- The register number
+				-	<b>Reg Offset</b> -- The register offset into its base address range (BAR).
+				-	<b>Reg Name</b> -- The register name.
+				-	<b>Reg Value</b> -- The register value.
+				-	<b>Reg Decoded Value</b> -- Text that shows the register value in a human-readable format.
+			-	<b>Radix</b> -- Controls the radix of the displayed register values.
+				-	<b>Bin (Base 2)</b> -- Display register values in base 2 (binary).
+				-	<b>Oct (Base 8)</b> -- Display register values in base 8 (octal).
+				-	<b>Dec (Base 10)</b> -- Display register values in base 10 (unsigned decimal).
+				-	<b>Hex (Base 16)</b> -- Display register values in base 16 (hexadecimal).
+
+To change a register's value:
+	-	Click in the value. An edit box will appear.
+	-	Changes the value in the edit box as desired (keeping to the existing display radix).
+	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
+	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
+
 
 **/

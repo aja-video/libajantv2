@@ -9,16 +9,7 @@
 
 #include <string>
 #include <vector>
-
-//Change these to match way linking in SDK
-
-//#define USE_WITH_STREAMS			//If linking with Streams use this
-//#define USE_WITH_NTV2    			//If linking with Ntv2 but not streams use this
-//#define USE_WITH_NTV4				//If linking with Ntv4 but not streams use this
-
-#if defined(USE_WITH_NTV2)
-#include "ntv2status.h"
-#endif
+#include "ajabase/system/info.h"
 
 enum AJAPersistenceType
 {
@@ -41,54 +32,32 @@ class AJAPersistence
 {
 public:	
 	AJAPersistence();
-	AJAPersistence(std::string appID, std::string deviceType="", std::string deviceNumber="", bool bSharePrefFile=false);
+    AJAPersistence(const std::string& appID, const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
 		
 	virtual ~AJAPersistence();
 
-	bool SetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);	
-	bool GetValue(std::string key, void *value, AJAPersistenceType type, int blobBytes = 0);
+    void SetParams(const std::string& appID="", const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
+    void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile);
+
+    bool SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
+    bool GetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
 	bool FileExists();
 	bool DeletePrefFile();
 
-    bool GetValuesInt(std::string key_query, std::vector<std::string>& keys, std::vector<int>& values);
-    bool GetValuesBool(std::string key_query, std::vector<std::string>& keys, std::vector<bool>& values);
-    bool GetValuesDouble(std::string key_query, std::vector<std::string>& keys, std::vector<double>& values);
-    bool GetValuesString(std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
+    bool GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values);
+    bool GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values);
+    bool GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values);
+    bool GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
-	// for testing storage to disk
-	bool UnitTestDiskReadWrite();	
-	
-#if defined(USE_WITH_STREAMS)
-#endif
-	
-#if defined(USE_WITH_NTV2)	
-	/**
-	 * Constructor that allows immediate binding to a card
-	 *	@param card (in) Pointer to a card to use when changing persist state.
-	 */
-	AJAPersistence(CNTV2Status *card);
+private:	
 
-	/**
-	 * Bindings to a specific card.
-	 *	@param card (in) Pointer to a card to use when changing persist state.
-	 */	
-	bool BindToCard(CNTV2Status *card);	
-#endif
-
-#if defined(USE_WITH_NTV4)
-#endif
-	
-private:
-	void Init();
-	
-#if defined(USE_WITH_NTV2)	
-	CNTV2Status 	*mpboardHandle;
-#endif	
-	
+    std::string             mappId;
 	std::string				mboardId;
 	bool					mSharedPrefFile;
 	std::string				mserialNumber;	
 	std::string				mstateKeyName;
+
+    AJASystemInfo           mSysInfo;
 };
 
 #endif	//	AJAPersistence_H

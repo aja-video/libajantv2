@@ -353,7 +353,6 @@ void CNTV2Config2110::SetupDecapsulator(const NTV2Channel channel, NTV2Stream st
     destIp = NTV2EndianSwap32(destIp);
 
     uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    int offset = (int)channel;
 
     if (ip0 >= 224 && ip0 <= 239)
     {
@@ -517,6 +516,7 @@ bool  CNTV2Config2110::WaitDecapsulatorUnlock(NTV2Stream & stream, bool & unlock
 
 void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream)
 {
+	(void) channel;
     if (stream == NTV2_AUDIO1_STREAM)
     {
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
@@ -602,9 +602,9 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
         int activeLineLength   = activeLine_root/8;
         int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-        int pixelGroupSize     = pixelGroup_root/8;
+//      int pixelGroupSize     = pixelGroup_root/8;
         int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-        int bytesPerCycle      = bytesPerCycle_root/8;
+//      int bytesPerCycle      = bytesPerCycle_root/8;
         int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
@@ -937,7 +937,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
         int pixelGroupSize     = pixelGroup_root/8;
         int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-        int bytesPerCycle      = bytesPerCycle_root/8;
+//      int bytesPerCycle      = bytesPerCycle_root/8;
         int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
@@ -1284,6 +1284,7 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(NTV2Channel channel, NTV2Stream stream)
 {
+	(void) stream;
     uint32_t iChannel = (uint32_t) channel;
 
     if (iChannel > _numTxChans)

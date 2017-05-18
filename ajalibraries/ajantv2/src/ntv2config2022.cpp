@@ -117,105 +117,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
     }
 }
 
-void rx2022Config::init()
-{
-    rxc_enable  = 0;
-    rxc_primaryRxMatch = 0;
-    rxc_primarySourceIp = 0;
-    rxc_primaryDestIp = 0;
-    rxc_primarySourcePort = 0;
-    rxc_primaryDestPort  = 0;
-    rxc_primarySsrc = 0;
-    rxc_primaryVlan = 0;
-    rxc_secondaryRxMatch = 0;
-    rxc_secondarySourceIp = 0;
-    rxc_secondaryDestIp = 0;
-    rxc_secondarySourcePort = 0;
-    rxc_secondaryDestPort  = 0;
-    rxc_secondarySsrc = 0;
-    rxc_secondaryVlan = 0;
-    rxc_networkPathDiff = 50;
-    rxc_playoutDelay = 50;
-}
-
-bool rx2022Config::operator != ( const rx2022Config &other )
-{
-    return (!(*this == other));
-}
-
-bool rx2022Config::operator == ( const rx2022Config &other )
-{
-    if ((rxc_enable                   == other.rxc_enable)                &&
-        (rxc_primaryRxMatch           == other.rxc_primaryRxMatch)        &&
-        (rxc_primarySourceIp          == other.rxc_primarySourceIp)       &&
-        (rxc_primaryDestIp            == other.rxc_primaryDestIp)         &&
-        (rxc_primarySourcePort        == other.rxc_primarySourcePort)     &&
-        (rxc_primaryDestPort          == other.rxc_primaryDestPort)       &&
-        (rxc_primarySsrc              == other.rxc_primarySsrc)           &&
-        (rxc_primaryVlan              == other.rxc_primaryVlan)           &&
-        (rxc_secondaryRxMatch         == other.rxc_secondaryRxMatch)      &&
-        (rxc_secondarySourceIp        == other.rxc_secondarySourceIp)     &&
-        (rxc_secondaryDestIp          == other.rxc_secondaryDestIp)       &&
-        (rxc_secondarySourcePort      == other.rxc_secondarySourcePort)   &&
-        (rxc_secondaryDestPort        == other.rxc_secondaryDestPort)     &&
-        (rxc_secondarySsrc            == other.rxc_secondarySsrc)         &&
-        (rxc_secondaryVlan            == other.rxc_secondaryVlan)         &&
-        (rxc_networkPathDiff          == other.rxc_networkPathDiff)       &&
-        (rxc_playoutDelay             == other.rxc_playoutDelay))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void tx2022Config::init()
-{
-    txc_enable  = 0;
-    txc_primaryLocalPort = 0;
-    txc_primaryRemoteIp = 0;
-    txc_primaryRemotePort = 0;
-    txc_primaryRemoteMAC_lo = 0;
-    txc_primaryRemoteMAC_hi  = 0;
-    txc_primaryAutoMac = 0;
-    txc_secondaryLocalPort = 0;
-    txc_secondaryRemoteIp = 0;
-    txc_secondaryRemotePort = 0;
-    txc_secondaryRemoteMAC_lo = 0;
-    txc_secondaryRemoteMAC_hi = 0;
-    txc_secondaryAutoMac  = 0;
-}
-
-bool tx2022Config::operator != ( const tx2022Config &other )
-{
-    return (!(*this == other));
-}
-
-bool tx2022Config::operator == ( const tx2022Config &other )
-{
-    if ((txc_enable                   == other.txc_enable)                &&
-        (txc_primaryLocalPort         == other.txc_primaryLocalPort)      &&
-        (txc_primaryRemoteIp          == other.txc_primaryRemoteIp)       &&
-        (txc_primaryRemotePort        == other.txc_primaryRemotePort)     &&
-        (txc_primaryRemoteMAC_lo      == other.txc_primaryRemoteMAC_lo)   &&
-        (txc_primaryRemoteMAC_hi      == other.txc_primaryRemoteMAC_hi)   &&
-        (txc_primaryAutoMac           == other.txc_primaryAutoMac)        &&
-        (txc_secondaryLocalPort       == other.txc_secondaryLocalPort)    &&
-        (txc_secondaryRemoteIp        == other.txc_secondaryRemoteIp)     &&
-        (txc_secondaryRemotePort      == other.txc_secondaryRemotePort)   &&
-        (txc_secondaryRemoteMAC_lo    == other.txc_secondaryRemoteMAC_lo) &&
-        (txc_secondaryRemoteMAC_hi    == other.txc_secondaryRemoteMAC_hi) &&
-        (txc_secondaryAutoMac         == other.txc_secondaryAutoMac))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 void j2kEncoderConfig::init()
 {
@@ -225,6 +126,7 @@ void j2kEncoderConfig::init()
     chromaSubsamp   = kJ2KChromaSubSamp_422_Standard;
     mbps            = 200;
     streamType      = kJ2KStreamTypeStandard;
+    audioChannels   = 2;
     pmtPid          = 255;
     videoPid        = 256;
     pcrPid          = 257;
@@ -244,6 +146,7 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
         (chromaSubsamp      == other.chromaSubsamp)     &&
         (mbps               == other.mbps)              &&
         (streamType         == other.streamType)        &&
+        (audioChannels      == other.audioChannels)     &&
         (pmtPid             == other.pmtPid)            &&
         (videoPid           == other.videoPid)          &&
         (pcrPid             == other.pcrPid)            &&
@@ -259,7 +162,7 @@ bool j2kEncoderConfig::operator == ( const j2kEncoderConfig &other )
 
 void j2kDecoderConfig::init()
 {
-    selectionMode = eProgSel_Default;
+    selectionMode = j2kDecoderConfig::eProgSel_Default;
     programNumber = 1;
     programPID    = 0;
     audioNumber   = 1;
@@ -588,7 +491,15 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, rxConfig.primaryRxMatch);
 
     // playout delay in 27MHz clocks or 90kHz clocks
-    uint32_t delay = (_is2022_2) ? (rxConfig.playoutDelay * 90) << 9 : rxConfig.playoutDelay * 27000;
+    uint32_t delay;
+    if (_is2022_2)
+    {
+        delay = 0x20400;      // 90 kHz clocks
+    }
+    else
+    {
+        delay = rxConfig.playoutDelay * 27000;  // 27 MhZ CLOCKS
+    }
     WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, delay);
 
     // network path differential in 27MHz or 90kHz clocks
@@ -617,7 +528,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
        if (rxMatch & RX_MATCH_DEST_IP)     pllMatch |= PLL_MATCH_DEST_IP;
        if (rxMatch & RX_MATCH_SOURCE_IP)   pllMatch |= PLL_MATCH_SOURCE_IP;
        if (rxMatch & RX_MATCH_DEST_PORT)   pllMatch |= PLL_MATCH_DEST_PORT;
-       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= RX_MATCH_SOURCE_PORT;
+       if (rxMatch & RX_MATCH_SOURCE_PORT) pllMatch |= PLL_MATCH_SOURCE_PORT;
        pllMatch |= PLL_MATCH_ES_PID;    // always set for TS PCR
        mDevice.WriteRegister(kRegPll_Match   + SAREK_PLL, pllMatch);
 
@@ -1350,6 +1261,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
 {
     if (_is2022_2)
     {
+        mDevice.SetAudioSystemInputSource(NTV2_AUDIOSYSTEM_1,NTV2_AUDIO_AES,NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
         mError = tsConfig.getLastError();

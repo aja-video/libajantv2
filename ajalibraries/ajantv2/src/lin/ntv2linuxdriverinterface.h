@@ -267,13 +267,6 @@ public:
 	bool GetOutputTimecodeType( ULWord* pType );
 	bool LockFormat( void );
 	bool StartDriver( DriverStartPhase phase );
-	bool GetQuicktimeUsingBoard( ULWord* value );
-	bool SetDefaultVideoOutMode ( uint32_t mode,
-								  uint32_t channel = 1,
-								  uint32_t frameNum = 14,
-								  uint32_t initializing = 0 );
-
-	bool GetDefaultVideoOutMode( ULWord* pMode );
 
 	bool AcquireStreamForApplicationWithReference( ULWord appType, int32_t pid );
 	bool ReleaseStreamForApplicationWithReference( ULWord appType, int32_t pid );

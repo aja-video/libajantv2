@@ -37,7 +37,7 @@ void wstringToString(wstring inPath, string& outPath)
 	char* tmp = new char[inPath.length()];
 	::wcstombs(tmp,inPath.c_str(),inPath.length());
 	outPath.assign(tmp);
-	delete tmp;
+    delete[] tmp;
 }
 
 void stringToWstring(string inPath, wstring& outPath)

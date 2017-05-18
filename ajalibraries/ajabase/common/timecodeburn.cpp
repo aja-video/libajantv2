@@ -9,10 +9,18 @@
 #include <string.h> //for memcpy
 #include <stdio.h>
 
-AJATimeCodeBurn::AJATimeCodeBurn(void)
+AJATimeCodeBurn::AJATimeCodeBurn(void) :
+    _bRendered(false),
+    _pCharRenderMap(NULL),
+    _charRenderPixelFormat(AJA_PixelFormat_Unknown),
+    _charRenderHeight(0),
+    _charRenderWidth(0),
+    _charWidthBytes(0),
+    _charHeightLines(0),
+    _charPositionX(0),
+    _charPositionY(0),
+    _rowBytes(0)
 {
-	_bRendered = false;
-	_pCharRenderMap = NULL;
 }
 
 AJATimeCodeBurn::~AJATimeCodeBurn(void)

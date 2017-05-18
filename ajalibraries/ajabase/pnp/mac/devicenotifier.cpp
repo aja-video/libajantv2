@@ -11,6 +11,9 @@
 #include <iomanip>
 #include <IOKit/IOCFPlugIn.h>
 #include "devicenotifier.h"
+
+#include "ajabase/common/common.h"
+
 //#include "IOKit/firewire/IOFireWireFamilyCommon.h"	//	No more FireWire support
 
 
@@ -194,12 +197,12 @@ void DeviceNotifier::Uninstall ()
 												<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
 	//	Release device-matching list...
 	list<io_object_t>::iterator p;
-	for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); p++)
+    for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceMatchList.clear();
 
 	//	Release device-interest list...
-	for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); p++)
+    for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceInterestList.clear();
 
@@ -357,7 +360,7 @@ void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_servi
 void DeviceNotifier::DeviceChanged (io_service_t unitService, natural_t messageType, void* message)
 {
 	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "messageType=" << MessageTypeToStr(messageType) << ", message=" << HEX16(message));
-	(void) unitService;
+    AJA_UNUSED(unitService);
 
 	if (m_clientCallback)
 		(*(m_clientCallback))(messageType, m_refcon);	// notify client

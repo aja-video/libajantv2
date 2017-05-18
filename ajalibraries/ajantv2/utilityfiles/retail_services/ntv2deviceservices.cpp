@@ -288,6 +288,7 @@ void DeviceServices::ReadDriverState (void)
 		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
 		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
 		mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
+		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
 		mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
 		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
 		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
@@ -299,6 +300,7 @@ void DeviceServices::ReadDriverState (void)
 		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
 		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
 		mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
+		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
 		mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
 		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
 		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
@@ -545,6 +547,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 void DeviceServices::SetDeviceMiscRegisters (NTV2Mode mode)
 {
+	(void) mode;
 }
 
 
@@ -2385,79 +2388,92 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 {
 	(void) format;
+	NTV2DeviceID deviceID = mCard->GetDeviceID();
+
 	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
 
-	uint32_t audioInputSelect;
-	mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
-	SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
-
 	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
 	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
-
+	
 	NTV2WidgetID inputSelectID = NTV2_Wgt3GSDIIn1;
 	if(mVirtualInputSelect == NTV2_Input2Select)
 		inputSelectID = NTV2_Wgt3GSDIIn2;
 
-	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	switch (mCaptureReferenceSelect)
+	if ((deviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
+		(deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
+		(deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K))
 	{
-	default:
-	case kFreeRun:
-		mCard->SetReference(NTV2_REFERENCE_FREERUN);
-		break;
-	case kReferenceIn:
-		mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
-		break;
-	case kVideoIn:
-		switch (mVirtualInputSelect)
+		uint32_t audioInputSelect;
+		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
+		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
+
+		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
+		switch (mCaptureReferenceSelect)
 		{
 		default:
-		case NTV2_Input1Select:
-			mCard->SetReference(NTV2_REFERENCE_INPUT1);
+		case kFreeRun:
+			mCard->SetReference(NTV2_REFERENCE_FREERUN);
 			break;
-		case NTV2_Input2Select:
-			switch(deviceID)
+		case kReferenceIn:
+			mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
+			break;
+		case kVideoIn:
+			switch (mVirtualInputSelect)
 			{
-			case DEVICE_ID_LHI:
-			case DEVICE_ID_IOEXPRESS:
-				mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-				break;
-			case DEVICE_ID_LHE_PLUS:
-				mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-				break;
 			default:
-				mCard->SetReference(NTV2_REFERENCE_INPUT2);
+			case NTV2_Input1Select:
+				mCard->SetReference(NTV2_REFERENCE_INPUT1);
 				break;
-			}
-			break;
-		case NTV2_Input3Select:
-			{
+			case NTV2_Input2Select:
 				switch(deviceID)
 				{
 				case DEVICE_ID_LHI:
+				case DEVICE_ID_IOEXPRESS:
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+					break;
+				case DEVICE_ID_LHE_PLUS:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 					break;
-				case DEVICE_ID_IO4KUFC:
-				case DEVICE_ID_IOXT:
 				default:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+					mCard->SetReference(NTV2_REFERENCE_INPUT2);
 					break;
 				}
-			}
-			break;
-		case NTV2_Input5Select:
-			{
-				switch(deviceID)
+				break;
+			case NTV2_Input3Select:
 				{
-				default:
-				case DEVICE_ID_IO4K:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
+					switch(deviceID)
+					{
+					case DEVICE_ID_LHI:
+						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+						break;
+					case DEVICE_ID_IO4KUFC:
+					case DEVICE_ID_IOXT:
+					default:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					}
 				}
+				break;
+			case NTV2_Input5Select:
+				{
+					switch(deviceID)
+					{
+					default:
+					case DEVICE_ID_IO4K:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					}
+				}
+				break;
 			}
-			break;
 		}
+	}
+	// For J2K devices we don't set the audio input select reg, audio input
+	// has to come from AES and the configuration code will set this properly
+	// we also force the reference on input to NTV2_REFERENCE_SFP1_PCR
+	else
+	{
+		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
 	}
 
 	if(!b4K)//if we are 4k all connections are inputs

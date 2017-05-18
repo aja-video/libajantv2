@@ -1,34 +1,49 @@
 /**
 	@page	audiooperation		Audio System Operation
 
-	NTV2-compatible devices have a minimum of one Audio System. Each system can accommodate a minimum of 8 channels.
-	Newer AJA devices can accommodate 16 channels. For backward compatibility with older AJA devices, all audio subsystems
-	can be configured to accommodate just 6 channels.
+	NTV2-compatible devices have a minimum of one Audio System (or Audio Engine). Each system can accommodate a minimum of 8 channels.
+	More modern AJA devices can accommodate up to 16 channels. The audio sample rate is fixed at 48 kHz.
 
-	Incoming audio is normalized into 24-bit PCM samples. Each sample is stuffed into the most significant 3 bytes of a
-	4-byte sample, with the least-significant byte set to zero. Outgoing audio is de-normalized using the reverse process -- only
-	the most significant 3 bytes of each 32-bit longword sample are used. The sample rate is fixed at 48 kHz. Each system's PCM
-	normalization can be disabled to pass through specially-encoded audio data unchanged, (e.g., Dolby-E), which would otherwise
-	be irretrievably corrupted, and impossible to decode downstream. Newer AJA devices can even disable PCM normalization on a
-	per-audio-channel-pair basis.
+	Incoming audio is de-embedded from incoming audio and audio-control packets in HANC (SMPTE 299M for HD, SMPTE 272M for SD).
+	Each audio sample consists of 24-bits of sample data (normally PCM).
+	When the audio engine is started and running, each 24-bit sample is copied into the most-significant 3 bytes of each 4-byte sample
+	in the device audio buffer. The least-significant byte of each 32-bit sample word in the buffer is always set to zero.
 
-	Generally, each Audio System's input source is selectable from any of the device's SDI inputs. For devices that support 3Gb
-	Level B inputs, the audio can be taken from data stream 1 or 2. SDI output embedders can usually be driven by any Audio System.
+	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) by setting certain bits
+	in SMPTE 299M/272M audio control packets. The audio system's de-embedder makes this information available in a hardware register,
+	and clients can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM or CNTV2Card::InputAudioChannelPairHasPCM.
 
-	Each audio subsystem uses an 8 MB chunk of SDRAM in the last video frame buffer to store its audio data. The first and last 4 MB
-	of that chunk is used for audio output and audio input, respectively. Six, eight or or sixteen channels of audio are always
-	written/read to/from this memory, regardless of whether they are all used. On newer AJA devices, the last byte of the first
-	audio subsystem's buffer coincides with the last byte of the last frame buffer (and subsequent buffers stack downward from there),
-	while on older devices, the first byte of the first audio subsystem's buffer coincides with the first byte of the last frame buffer
-	(and subsequent buffers stack upward from there).
+	Outgoing audio is embedded into outgoing audio/audio-control packets in HANC (SMPTE 299M for HD, SMPTE 272M for SD).
+	The output embedder always runs unless disabled (call CNTV2Card::SetAudioOutputEmbedderState to enable or disable it).
+	When the audio engine is not running, silence (zeroes) is continually embedded into the output data stream.
+	When the audio engine is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
+	sample in the device audio buffer (the least-significant byte is ignored).
+
+	To tell downstream equipment that one or more audio channel pairs is not carrying PCM data, newer AJA devices can set the non-PCM
+	indicator bits in the outgoing SMPTE 299M/272M audio control packets via the CNTV2Card::SetAudioPCMControl function.
+	The ::NTV2DeviceCanDoPCMControl function will return true if the device	supports this functionality.
+
+	Each audio system's output embedder can be connected directly to another audio system's input embedder for direct audio pass-through,
+	also called "loopback mode". Call CNTV2Card::SetAudioLoopBack to enable or disable this mode.
+
+	Generally, each Audio System's input source is selectable, to receive samples from any of the device's video (and possibly audio)
+	input sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
+	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
+
+	Each audio system uses an 8 MB chunk of SDRAM in the last video frame buffer(s) to store its audio data. The first and last 4 MB
+	of that chunk is used for audio output and audio input, respectively. Eight or sixteen channels of audio are always written/read to/from
+	this memory, regardless of whether they are all used. On newer AJA devices, the last byte of the first audio subsystem's buffer coincides
+	with the last byte of the last frame buffer (and subsequent buffers stack downward from there), while on older devices, the first byte of
+	the first audio subsystem's buffer coincides with the first byte of the last frame buffer (and subsequent buffers stack upward from there).
 
 	@image	html	hwref-fig2-audiobuffers.png
 
 	@section	audiocapture		Audio Capture
 
-	During capture, incoming audio data is written into the Audio Input Buffer at the address specified by the subsystem's Audio
-	Input Last Address register (i.e., the "record head" or "write head"). Audio data continues to be written into the input buffer
-	until filled, whereupon the "write head" wraps back to the start of the buffer, and writing continues.
+	During capture, incoming audio data is written into the Audio Input Buffer at the address specified by the engine's Audio Input
+	Last Address register (i.e., the "record head" or "write head"). Audio data continues to be written into the input buffer until
+	filled, whereupon the "write head" wraps back to the start of the buffer, and writing continues.
 
 	@section	audioplayout		Audio Playout
 

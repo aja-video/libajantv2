@@ -38,7 +38,7 @@ AJAProcessImpl::IsValid(uint64_t pid)
 bool
 AJAProcessImpl::Activate(const char* pWindow)
 {
-    (void)pWindow;
+    AJA_UNUSED(pWindow);
     
 	//Dummy place holder
 	return false;
@@ -47,7 +47,7 @@ AJAProcessImpl::Activate(const char* pWindow)
 bool
 AJAProcessImpl::Activate(uint64_t handle)
 {
-    (void)handle;
+    AJA_UNUSED(handle);
     
 	//Dummy place holder
 	return false;

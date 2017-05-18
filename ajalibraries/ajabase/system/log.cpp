@@ -48,9 +48,13 @@ AJALog::AJALog()
         bInitialized = true;
         
         #if defined(AJA_MAC)
-        
-            #if (AJA_LOGTYPE==9999)
+
+            #if (AJA_LOGTYPE==2)
+                AJADebug::Open();
+
+            #elif (AJA_LOGTYPE==9999)
                 CreateFireLogUserClient();
+
             #endif
         
         #elif defined(AJA_LINUX)
@@ -91,6 +95,7 @@ AJATimeLog::AJATimeLog(const char* tag)
 #if defined(AJA_MAC)
     strncpy(mTag, tag, TAG_SIZE);
 #else
+    AJA_UNUSED(tag);
     mTag[0] = 0;
 #endif
     
@@ -143,7 +148,7 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 // print dela time in micro seconds, use additional tag
 void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
 {
-    (void)addTag;
+    AJA_UNUSED(addTag);
 
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);

@@ -1222,9 +1222,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
+            if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
             {
-				mRx2022Config1.rxc_enable = enableHw;
+				mRx2022Config1.rxc_enable = enableHw ? true : false;
                 setRxConfig(NTV2_CHANNEL1);
             }
         }
@@ -1236,9 +1236,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != enableHw) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
+            if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
             {
-				mRx2022Config2.rxc_enable = enableHw;
+				mRx2022Config2.rxc_enable = enableHw ? true : false;
                 setRxConfig(NTV2_CHANNEL2);
             }
         }
@@ -1251,9 +1251,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
+            if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
             {
-				mTx2022Config3.txc_enable = enableHw;
+				mTx2022Config3.txc_enable = enableHw ? true : false;
                 setTxConfig(NTV2_CHANNEL3);
             }
             else
@@ -1284,9 +1284,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
         if (rv && rv2)
         {
-            if ((enable != enableHw) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
+            if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
             {
-				mTx2022Config4.txc_enable = enableHw;
+				mTx2022Config4.txc_enable = enableHw ? true : false;
                 setTxConfig(NTV2_CHANNEL4);
             }
             else

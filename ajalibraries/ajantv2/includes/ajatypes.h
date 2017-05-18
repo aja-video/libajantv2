@@ -22,6 +22,7 @@
 
 #if defined (NTV2_USE_STDINT)
 	#if defined (MSWindows)
+		#define	_WINSOCK_DEPRECATED_NO_WARNINGS		1
 		#if (_MSC_VER < 1300)
 			typedef signed char				int8_t;
 			typedef signed short			int16_t;
@@ -69,6 +70,9 @@
 // Platform dependent
 
 #if defined (MSWindows)				/////////////// WINDOWS/////////////////////////
+
+    #define	_WINSOCK_DEPRECATED_NO_WARNINGS		1
+
 	#if !defined (NTV2_BUILDING_DRIVER)
 		#ifndef WIN32_LEAN_AND_MEAN
 		#define WIN32_LEAN_AND_MEAN

@@ -48,6 +48,7 @@
 		- AJATimeCode
 		- AJADPXFileIO and DpxHdr
 	- Miscellaneous
+        - AJASystemInfo: get common information about the system
 		- the "popt library" for parsing command line arguments
 		- CreateGuid: create globally unique identifier strings
 		- AJAPersistence:  save/retrieve integer/string/blob data to/from a host user's registry/preferences store using string keys
