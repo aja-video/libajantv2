@@ -361,6 +361,7 @@
 #define kRegPll_PTP_CurPtpNSec                  0x26
 #define kRegPll_90KHzRTP_TS                     0x27
 #define kRegPll_48KHzRTP_TS                     0x28
+#define kRegPll_Intr_Reg                        0x29
 
 /////////////////////////////////////////////////////////////////////
 //
