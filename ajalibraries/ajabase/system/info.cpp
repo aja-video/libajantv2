@@ -181,9 +181,9 @@ AJASystemInfo::ToString(std::string& allLabelsAndValues)
     allLabelsAndValues = ToString();
 }
 
-std::ostream & operator << (std::ostream & inOutStream, const AJASystemInfo & inData)
+std::ostream & operator << (std::ostream & outStream, const AJASystemInfo & inData)
 {
     AJASystemInfo* instance = (AJASystemInfo*)&inData;
-    inOutStream << instance->ToString();
-    return inOutStream;
+    outStream << instance->ToString();
+    return outStream;
 }

@@ -70,6 +70,6 @@ private:
     AJASystemInfoImpl* mpImpl;
 };
 
-AJA_EXPORT std::ostream & operator << (std::ostream & inOutStream, const AJASystemInfo & inData);
+AJA_EXPORT std::ostream & operator << (std::ostream & outStream, const AJASystemInfo & inData);
 
 #endif	//	AJA_INFO_H
