@@ -90,7 +90,7 @@ AJA_FrameRate CNTV2DemoHevcCommon::GetAJAFrameRate(NTV2FrameRate frameRate)
 }
 
 
-AJAStatus CNTV2DemoHevcCommon::CreateHevcFile(const char* pFileName, uint32_t maxFrames)
+AJAStatus CNTV2DemoHevcCommon::CreateHevcFile(const string & inFileName, uint32_t maxFrames)
 {
     //  Close file if already open
     if (mHevcFd != NULL)
@@ -99,7 +99,7 @@ AJAStatus CNTV2DemoHevcCommon::CreateHevcFile(const char* pFileName, uint32_t ma
     }
     
     //  Open binary output
-    mHevcFd = fopen(pFileName, "wb");
+    mHevcFd = fopen(inFileName.c_str(), "wb");
     if (mHevcFd == NULL)
     {
         return AJA_STATUS_OPEN;
@@ -139,7 +139,7 @@ void CNTV2DemoHevcCommon::WriteHevcData(void* pBuffer, uint32_t bufferSize)
 }
 
 
-AJAStatus CNTV2DemoHevcCommon::CreateEncFile(const char* pFileName, uint32_t maxFrames)
+AJAStatus CNTV2DemoHevcCommon::CreateEncFile(const string & inFileName, uint32_t maxFrames)
 {
     //  Close file if already open
     if (mEncFd != NULL)
@@ -148,7 +148,7 @@ AJAStatus CNTV2DemoHevcCommon::CreateEncFile(const char* pFileName, uint32_t max
     }
     
     //  Open text output
-    mEncFd = fopen(pFileName, "w");
+    mEncFd = fopen(inFileName.c_str(), "w");
     if (mEncFd == NULL)
     {
         return AJA_STATUS_OPEN;
@@ -213,7 +213,7 @@ void CNTV2DemoHevcCommon::WriteEncData(void* pBuffer, uint32_t bufferSize)
 }
 
 
-AJAStatus CNTV2DemoHevcCommon::CreateAiffFile(const char* pFileName, uint32_t numChannels, uint32_t maxFrames, uint32_t bufferSize)
+AJAStatus CNTV2DemoHevcCommon::CreateAiffFile(const string & inFileName, uint32_t numChannels, uint32_t maxFrames, uint32_t bufferSize)
 {
     //  Close file if already open
     if (mAiffFd != NULL)
@@ -222,7 +222,7 @@ AJAStatus CNTV2DemoHevcCommon::CreateAiffFile(const char* pFileName, uint32_t nu
     }
     
     //  Open binary output
-    mAiffFd = fopen(pFileName, "wb");
+    mAiffFd = fopen(inFileName.c_str(), "wb");
     if (mAiffFd == NULL)
     {
         return AJA_STATUS_OPEN;
@@ -379,7 +379,7 @@ void CNTV2DemoHevcCommon::WriteAiffData(void* pBuffer, uint32_t numChannels, uin
 }
 
 
-AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const char* pFileName, const uint32_t width, const uint32_t height)
+AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const string & inFileName, const uint32_t width, const uint32_t height)
 {
 	struct stat fileStat;
 
@@ -390,7 +390,7 @@ AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const char* pFileName, const uint3
     }
     
     //  Open binary output
-    mYuvFd = fopen(pFileName, "rb");
+    mYuvFd = fopen(inFileName.c_str(), "rb");
     if (mYuvFd == NULL)
     {
         return AJA_STATUS_OPEN;
@@ -404,7 +404,7 @@ AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const char* pFileName, const uint3
     mYuvFrameWidth = width;
     mYuvFrameHeight = height;
     mYuvFrameSize = (width * height) + ((width * height) / 2);
-    mYuvNumTotalFrames = mYuvFileSize / mYuvFrameSize;
+    mYuvNumTotalFrames = uint32_t(mYuvFileSize / mYuvFrameSize);
     
     return AJA_STATUS_SUCCESS;
 }
@@ -474,7 +474,7 @@ AJAStatus CNTV2DemoHevcCommon::ConvertYuv420FrameToNV12(void* pSrcBuffer, void* 
 }
 
 
-AJAStatus CNTV2DemoHevcCommon::CreateRawFile(const char* pFileName, uint32_t maxFrames)
+AJAStatus CNTV2DemoHevcCommon::CreateRawFile(const string & inFileName, uint32_t maxFrames)
 {
     //  Close file if already open
     if (mRawFd != NULL)
@@ -483,7 +483,7 @@ AJAStatus CNTV2DemoHevcCommon::CreateRawFile(const char* pFileName, uint32_t max
     }
     
     //  Open binary output
-    mRawFd = fopen(pFileName, "wb");
+    mRawFd = fopen(inFileName.c_str(), "wb");
     if (mRawFd == NULL)
     {
         return AJA_STATUS_OPEN;

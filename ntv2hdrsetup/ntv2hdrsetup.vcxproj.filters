@@ -2,15 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{5FC837F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <UniqueIdentifier>{9453B3BB-265E-4DB1-96B7-61EE2D453BD2}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{53985380-89BD-4b04-78EB-625FBE52EBFB}</UniqueIdentifier>
+      <UniqueIdentifier>{9A25C238-D141-4575-B853-E9683A094779}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{67D86AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <UniqueIdentifier>{5D1E22F2-8B2B-4865-A966-1888EC7E7508}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
   </ItemGroup>
@@ -18,5 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ntv2democommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
 </Project>

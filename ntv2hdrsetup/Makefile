@@ -12,16 +12,14 @@ include $(DIR)/../../../../build/configure.mk
 
 CPPFLAGS += -DAJA_LINUX
 
-AJA_APP = $(A_UBER_BIN)/ntv2player4k
+AJA_APP = $(A_UBER_BIN)/ntv2hdrsetup
 
 VPATH	 = $(A_DEMOAPPS_PATH)
 INCLUDES = -I$(A_DEMOAPPS_PATH)
 
-SRCS = main.cpp ntv2player4k.cpp ntv2democommon.cpp
+SRCS = main.cpp ntv2democommon.cpp
 
-INCS = ntv2player4k.h ntv2democommon.h
-
-LIBS = -lajaanc
+INCS = ntv2democommon.h
 
 include $(DIR)/../../../../build/common.mk
 

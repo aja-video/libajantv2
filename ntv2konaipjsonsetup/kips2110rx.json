@@ -21,10 +21,7 @@
             "payload":"100",
             "primaryFilter":"0x5e",
             "videoFormat":"720p",
-            "Enable":"true",
-            "payloadLen":"1200",
-            "lastPayloadLen":"800",
-            "pktsPerLine":"3"
+            "Enable":"true"
     },
     {
             "designator":"channel1",

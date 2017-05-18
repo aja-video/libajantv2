@@ -7,15 +7,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>ntv2konaipencodersetup</string>
+	<string>ntv2konaipj2ksetup</string>
 	<key>CFBundleIconFile</key>
 	<string>app.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aja.ntv2konaipencodersetup</string>
+	<string>com.aja.ntv2konaipj2ksetup</string>
 	<key>CFBundleName</key>
-	<string>ntv2konaipencodersetup</string>
+	<string>ntv2konaipj2ksetup</string>
 	<key>CFBundleSignature</key>
-	<string>AjIP</string>
+	<string>Aj2k</string>
 	<key>CFBundleVersion</key>
 	<string>0.0.0</string>
 	<key>CFBundleShortVersionString</key>

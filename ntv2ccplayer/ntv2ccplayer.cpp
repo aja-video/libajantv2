@@ -301,8 +301,7 @@ class CaptionSource
 			else if (rawBytes [0] < 0xC0)	//	invalid
 				LOGLOCKSTART
 					cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
-							<< ": Invalid UTF8 value read from input stream:  "
-							<< "0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+							<< ": Invalid UTF8 value read from input stream:  " << xHEX0N(uint16_t(rawBytes[0]),2) << endl;
 				LOGLOCKEND
 			else if (rawBytes [0] < 0xE0)	//	2-byte code
 			{
@@ -366,7 +365,7 @@ class CaptionSource
 			else
 				LOGLOCKSTART
 					cerr	<< "## WARNING:  CaptionSource::GetNextCaptionCharacter:  " << ::NTV2Line21ChannelToStr(mCaptionChannel)
-							<< ": UTF8 byte value not handled:  0x" << CNTV2CaptionLogConfig::gHexUC [rawBytes [0]] << endl;
+							<< ": UTF8 byte value not handled:  " << xHEX0N(uint16_t(rawBytes[0]),2) << endl;
 				LOGLOCKEND
 
 			#if defined (MEASURE_ACCURACY)

@@ -1,12 +1,12 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include "konaipencodersetup.h"
+#include "konaipj2ksetup.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     QCommandLineParser parser;
-    parser.setApplicationDescription("Kona IP Encoder Setup");
+    parser.setApplicationDescription("Kona IP J2K Setup");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption deviceOption("d", "which device to use", "device");
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(listOption))
     {
-        CKonaIpEncoderJsonReader readJson;
+        CKonaIpJ2kJsonReader readJson;
         readJson.printVideoFormatMap();
     }
     else
@@ -42,13 +42,14 @@ int main(int argc, char *argv[])
         const QStringList args = parser.positionalArguments();
         if ( args.size() == 1 )
         {
-            CKonaIpEncoderJsonReader readJson;
+            CKonaIpJ2kJsonReader readJson;
             readJson.openJson(args.at(0));
-            CKonaIPEncoderSetup ipBoardSetup;
-            ipBoardSetup.setupBoard(devStr.c_str(),readJson.getKonaIParams());
+            CKonaIpEncoderSetup ipEncoderSetup;
+            ipEncoderSetup.setupBoard(devStr.c_str(), readJson.getKonaIpJ2kParams ());
+            CKonaIpDecoderSetup ipDecoderSetup;
+            ipDecoderSetup.setupBoard(devStr.c_str(), readJson.getKonaIpJ2kParams ());
         }
         else
             parser.showHelp();
     }
-
 }

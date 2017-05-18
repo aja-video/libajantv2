@@ -16,6 +16,7 @@
 
 #include "ntv2m31enums.h"
 #include "ntv2m31.h"
+#include <string>
 
 /**
 	@brief	This structure encapsulates the video and audio buffers used by the HEVC demo applications. The demo 
@@ -60,24 +61,24 @@ class CNTV2DemoHevcCommon
         AJA_PixelFormat             GetAJAPixelFormat(NTV2FrameBufferFormat pixelFormat);
         AJA_FrameRate               GetAJAFrameRate(NTV2FrameRate frameRate);
 
-        AJAStatus                   CreateHevcFile(const char* pFileName, uint32_t maxFrames);
+        AJAStatus                   CreateHevcFile(const std::string & inFileName, uint32_t maxFrames);
         void                        CloseHevcFile(void);
         void                        WriteHevcData(void* pBuffer, uint32_t bufferSize);
     
-        AJAStatus                   CreateEncFile(const char* pFileName, uint32_t maxFrames);
+        AJAStatus                   CreateEncFile(const std::string & inFileName, uint32_t maxFrames);
         void                        CloseEncFile(void);
         void                        WriteEncData(void* pBuffer, uint32_t bufferSize);
     
-        AJAStatus                   CreateAiffFile(const char* pFileName, uint32_t numChannels, uint32_t maxFrames, uint32_t bufferSize);
+        AJAStatus                   CreateAiffFile(const std::string & inFileName, uint32_t numChannels, uint32_t maxFrames, uint32_t bufferSize);
         void                        CloseAiffFile(void);
         void                        WriteAiffHeader(void);
         void                        WriteAiffData(void* pBuffer, uint32_t numChannels, uint32_t numSamples);
 
-        AJAStatus                   CreateRawFile(const char* pFileName, uint32_t maxFrames);
+        AJAStatus                   CreateRawFile(const std::string & inFileName, uint32_t maxFrames);
         void                        CloseRawFile(void);
         void                        WriteRawData(void* pBuffer, uint32_t bufferSize);
     
-        AJAStatus                   OpenYuv420File(const char* pFileName, const uint32_t width, const uint32_t height);
+        AJAStatus                   OpenYuv420File(const std::string & inFileName, const uint32_t width, const uint32_t height);
         void                        CloseYuv420File(void);
         AJAStatus                   ReadYuv420Frame(void* pBuffer, uint32_t numFrame);
         AJAStatus                   ConvertYuv420FrameToNV12(void* pSrcBuffer, void* pDstBuffer, uint32_t bufferSize);

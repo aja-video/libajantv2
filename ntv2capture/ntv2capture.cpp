@@ -9,7 +9,7 @@
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
-
+#include <iterator>	//	for inserter
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(0x2000)
@@ -216,7 +216,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
 AJAStatus NTV2Capture::SetupAudio (void)
 {
 	//	In multiformat mode, base the audio system on the channel...
-	if (mDoMultiFormat && ::NTV2DeviceGetNumAudioSystems (mDeviceID) > 1 && UWord (mInputChannel) < ::NTV2DeviceGetNumAudioSystems (mDeviceID))
+	if (mDoMultiFormat  &&  ::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1  &&  UWord(mInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
 		mAudioSystem = ::NTV2ChannelToAudioSystem (mInputChannel);
 
 	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
@@ -237,11 +237,12 @@ void NTV2Capture::SetupHostBuffers (void)
 {
 	NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
 	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
+	mDevice.GetVANCMode (vancMode);
+	mDevice.GetStandard (standard);
 
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	mDevice.GetVANCMode (vancMode);
 	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, vancMode);
 	mFormatDesc = NTV2FormatDescriptor (standard, mPixelFormat, vancMode);
 
@@ -378,16 +379,18 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
-	ULWord					acOptions	(AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
+	ULWord					acOptions			(AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
 
-	//	Tell capture AutoCirculate to use 7 frame buffers on the device...
-	mDevice.AutoCirculateStop (mInputChannel);
+	mDevice.AutoCirculateStop (mInputChannel);	//	Just in case
+
+	//	Tell AutoCirculate to use 7 frame buffers for capturing from the device...
 	{
 		AJAAutoLock	autoLock (mLock);	//	Avoid A/C buffer collisions with other processes
 		mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
 											mAudioSystem,		//	Which audio system (if any)?
-											acOptions);			//	Include timecode
+											acOptions);			//	Include timecode (and maybe Anc too)
 	}
+	
 	//	Start AutoCirculate running...
 	mDevice.AutoCirculateStart (mInputChannel);
 
@@ -428,8 +431,10 @@ void NTV2Capture::CaptureFrames (void)
 					NTV2AudioChannelPairs	becomingNonPCM, becomingPCM;
 					set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (becomingPCM, becomingPCM.begin()));
 					set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (becomingNonPCM, becomingNonPCM.begin()));
-					if (!becomingNonPCM.empty () || !becomingPCM.empty ())
-						cerr << "## NOTE:  Audio channel pair(s) '" << becomingNonPCM << "' now non-PCM, '" << becomingPCM << "' now PCM" << endl;
+					if (!becomingNonPCM.empty ())
+						cerr << "## NOTE:  Audio channel pair(s) '" << becomingNonPCM << "' now non-PCM" << endl;
+					if (!becomingPCM.empty ())
+						cerr << "## NOTE:  Audio channel pair(s) '" << becomingPCM << "' now PCM" << endl;
 					oldNonPcmPairs = nonPcmPairs;
 				}
 
