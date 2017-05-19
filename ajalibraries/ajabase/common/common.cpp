@@ -192,7 +192,7 @@ bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
         return false;
 
     size_t maxSize = std::min(str.size(), c_str_size-1);
-    for(int i=0;i<maxSize;++i)
+    for(size_t i=0;i<maxSize;++i)
     {
         c_str[i] = str[i];
     }
