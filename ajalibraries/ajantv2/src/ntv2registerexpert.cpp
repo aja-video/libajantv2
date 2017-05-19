@@ -834,6 +834,8 @@ private:
 			DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 			DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
 			DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");
+			DefineRegName	(kVRegZeroHostAncPostCapture,			"kVRegZeroHostAncPostCapture");
+			DefineRegName	(kVRegZeroDeviceAncPostCapture,			"kVRegZeroDeviceAncPostCapture");
 			DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 			DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
