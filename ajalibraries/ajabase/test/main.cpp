@@ -138,6 +138,20 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(wstr == wstr2);
     }
 
+    TEST_CASE("aja::string_to_cstring")
+    {
+        std::string str("hello");
+        std::string strlong("hello there friend");
+        const int c_str_len = 10;
+        char c_str[c_str_len];
+        CHECK_FALSE(aja::string_to_cstring(str, NULL, 100));
+        CHECK_FALSE(aja::string_to_cstring(str, c_str, 0));
+        CHECK(aja::string_to_cstring(str, c_str, c_str_len));
+        CHECK(strcmp(c_str, "hello") == 0);
+        CHECK(aja::string_to_cstring(strlong, c_str, c_str_len));
+        CHECK(strcmp(c_str, "hello the") == 0);
+    }
+
     TEST_CASE("aja::split")
     {
         std::string tosplit("Larry,Moe,Curly,Shemp");
