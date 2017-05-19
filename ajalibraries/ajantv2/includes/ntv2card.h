@@ -579,11 +579,14 @@ public:
 											 PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data
 
 	/**
-		@brief		Transfers audio data from a given audio system on the AJA device to the host.
+		@brief		Transfers audio data from a given audio system's buffer memory on the AJA device to the specified host buffer.
+					It will happily read audio samples from either the capture side or playout side of the audio system's buffer memory.
 		@param[in]	inAudioEngine		Specifies the audio engine on the device that is to supply the audio data.
 		@param		pOutAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the audio data.
 										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
-		@param[in]	inOffsetBytes		Specifies the offset into the audio engine's capture buffer on the device from which to transfer audio data.
+		@param[in]	inOffsetBytes		Specifies the offset into the audio system's buffer memory on the device from which to transfer
+										audio data. The start of the capture portion of the audio system's audio buffer is at the offset
+										value returned from CNTV2Card::GetAudioReadOffset.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
@@ -594,10 +597,14 @@ public:
 										const ULWord			inByteCount);
 
 	/**
-		@brief		Transfers audio data from a given host buffer to a specific audio system's playout buffer on the AJA device.
+		@brief		Transfers audio data from the specified host buffer to the given audio system's buffer memory on the AJA device.
+					It will happily write audio samples into the capture portion of the audio system's buffer memory (which will
+					quickly be overwritten if the capture engine has been started).
 		@param[in]	inAudioEngine		Specifies the audio engine on the device that is to receive the audio data.
 		@param[in]	pInAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the audio data.
-		@param[in]	inOffsetBytes		Specifies the offset into the audio engine's playout buffer on the device to which audio data will be transferred.
+		@param[in]	inOffsetBytes		Specifies the offset into the audio system's buffer memory on the device to which audio data
+										will be transferred. Use zero for the start of the playout portion of the audio system's buffer
+										memory.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer. Note that this value must not overrun the host
 										buffer, nor the device's audio playout buffer.
 		@return		True if successful; otherwise false.
@@ -1321,6 +1328,16 @@ public:
 		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		For internal SDK use only. Answers with the absolute byte offset in device memory to the given audio buffer
+					offset for the specified audio system.
+		@return		True if successful; otherwise false.
+		@param[in]	inOffsetBytes		Specifies a byte offset into the audio system's audio buffer memory.
+		@param[out]	outAbsByteOffset	Receives the absolute byte offset in device memory.
+		@param[in]	inAudioSystem		Specifies the audio system of interest.
+	**/
+	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset, const NTV2AudioSystem	inAudioSystem);
 
 	#if !defined (NTV2_DEPRECATE)
 		//	These functions dealt exclusively with audio systems, but unfortunately required channels to be passed into them.
