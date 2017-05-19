@@ -18,6 +18,7 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mStream;
     QString mSrcPort;
     QString mSrcIPAddress;
     QString mPrimaryDestIPAddress;
@@ -30,6 +31,8 @@ typedef struct
     QString mPlayoutDelay;
     QString mVLAN;
     QString mSSRC;
+    QString mPayload;
+    QString mVideoFormat;
     QString mEnable;
     QString mPayloadLen;
     QString mLastPayloadLen;
@@ -39,6 +42,7 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mStream;
     QString mPrimaryLocalPort;
     QString mPrimaryRemoteIPAddress;
     QString mPrimaryRemotePort;
@@ -73,6 +77,7 @@ public:
     bool setupBoard(std::string deviceSpec);
 
 protected:
+    bool setupBoard2110(std::string deviceSpec);
     bool setupBoard2022(std::string deviceSpec);
     bool readJson(const QJsonObject &json);
 
@@ -80,6 +85,8 @@ protected:
 
 private:
     bool        enable2022_7;
+    bool        is2110;
+    QString     PTPMasterAddr;
 };
 
 #endif // KONAIPBOARD_H
