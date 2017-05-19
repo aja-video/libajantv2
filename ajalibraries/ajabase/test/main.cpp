@@ -110,7 +110,7 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
 
     TEST_CASE("aja::string_to_wstring & aja::wstring_to_string")
     {
-        //std::setlocale(LC_ALL, "en_US.utf8");
+        std::setlocale(LC_ALL, "en_US.utf8");
 
         std::string str, str2;
         std::wstring wstr, wstr2;

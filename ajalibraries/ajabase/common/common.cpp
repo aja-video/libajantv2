@@ -154,10 +154,10 @@ std::string to_string(long double val)
     return oss.str();
 }
 
-
 bool string_to_wstring(const std::string& str, std::wstring& wstr)
 {
     std::mbstate_t state = std::mbstate_t();
+    mbrlen(NULL, 0, &state);
     const char *tmpPtr = str.c_str();
     size_t len = 1 + mbsrtowcs(NULL, &tmpPtr, 0, &state);
     std::vector<wchar_t> tmp(len);
@@ -172,7 +172,7 @@ bool string_to_wstring(const std::string& str, std::wstring& wstr)
 
 bool wstring_to_string(const std::wstring& wstr, std::string& str)
 {
-    std::mbstate_t state;
+    std::mbstate_t state = std::mbstate_t();
     mbrlen(NULL, 0, &state);
     const wchar_t *tmpPtr = wstr.c_str();
     size_t len = 1 + wcsrtombs(NULL, &tmpPtr, 0, &state);
