@@ -1,41 +1,72 @@
 /**
 @page	audioformats	Audio Data Formats
 
-AJA's NTV2-compatible devices have independent audio subsystems, each supporting up to 8 or 16 audio channels.
-(Most can be configured to support 6 channels for backward compatibility with older AJA devices.)
-For detailed information about how audio is handled in NTV2 devices, see \ref audiooperation.
+Each Audio System on AJA's NTV2 devices support up to 8 or 16 audio channels.
+(While some devices can be configured to support 6 channels, this may cause problems and should be avoided.)
 
-@section	audfmt-24bitpcm		24-bit PCM Audio
+The format of audio sample data in the host buffer exactly mirrors the format of audio sample data in the
+Audio System's audio buffer in SDRAM on the device. See \ref audiooperation for more information.
 
-Each PCM audio sample requires four bytes of storage, but only the upper (most-significant) 24 bits are used, as follows:
+@note	These formats apply even if the audio sample data is not PCM. See \ref audiooperation for more information about non-PCM audio.
+
+
+##	Single-Channel Individual Audio Samples
+
+Each single-channel audio sample requires exactly four bytes of storage.
+
+
+###	24-Bit (HD) Audio
+
+Only the upper (most-significant) 24 bits are used, as follows:
 
 @image	html	fbf-24bitpcmaudio-75.png
 
-@note	This format doesn't apply when PCM normalization is disabled for the audio subsystem.
-		Non-PCM audio is discussed in \ref audiooperation.
+Note that when playing video from a host audio buffer that contains 32-bit audio samples, only the
+most-significant 24 bits will end up in the transmitted audio packets. The least-significant 8 bits
+from each 32-bit sample word in the host buffer are ignored.
 
-@subsection		audio6chlmode		6-Channel Mode
 
-Here are This format was used on older AJA devices, and is provided for backward compatibility.
+###	20-Bit (SD) Audio
+
+Only the upper (most-significant) 20 bits are used, as follows:
+
+@image	html	fbf-20bitpcmaudio-75.png
+
+Note that AJA devices don't support audio extended packets.
+Thus, when capturing SD video that contains 24-bit audio, only the most-significant 20 bits will end up
+in the captured samples in the host buffer.
+Likewise, when playing SD video from a host audio buffer that contains 24-bit (or 32-bit) audio samples,
+only the most-significant 20 bits will end up in the transmitted audio packets. The least-significant 12
+bits from each 32-bit sample word in the host buffer are ignored.
+
+
+
+##	6-Channel Mode
+
+This format was used on older AJA devices, and is still provided for backward compatibility.
 
 @image	html	fbf-6channelaudio-75.png
 
-This format was used on older AJA devices, and is provided for backward compatibility.
+@note	6-Channel Mode is deprecated. Please avoid its use, even on older boards.
 
-@subsection		audio8chlmode		8-Channel Mode
+
+
+##	8-Channel Mode
 
 The layout for two samples of 8-channel audio data is:
 
 @image	html	fbf-8channelaudio-75.png
 
-Within each 32-bit word, the 24-bit PCM audio sample is left-justified identically to that of the 6-channel format.
+Within each 32-bit word, the 20/24-bit audio sample is left-justified identically to that of the 6-channel format.
 
-@subsection		audio16chlmode		16-Channel Mode
+
+
+##	16-Channel Mode
 
 The layout for two samples of 16-channel audio data is:
 
 @image	html	fbf-16channelaudio-75.png
 
-Within each 32-bit word, the 24-bit PCM audio sample is left-justified identically to that of the 6-channel format.
+Within each 32-bit word, the 20/24-bit audio sample is left-justified identically to that of the 6-channel format.
 
 **/
