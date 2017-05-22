@@ -1596,44 +1596,48 @@ public:
 
 
 	/**
-		@brief		Determines whether the given Audio System on the device is treated as normal PCM audio or not.
+		@brief		Determines whether or not all outgoing audio channel pairs are to be flagged as non-PCM for the given Audio
+					System on the device.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	inIsNonPCM		If true, all audio channels in the Audio System are treated as non-PCM;
-									otherwise, they're treated as normal PCM audio.
+		@param[in]	inIsNonPCM		If true, the "non-PCM" indicator in the AES header of all outgoing audio channel pairs is set "On";
+									otherwise, the indicator is set "Off" (to indicate normal PCM audio).
 		@return		True if successful;  otherwise false.
-		@note		This setting, if non-PCM, overrides per-audio-channel-pair PCM control on those devices that support it.
+		@note		This setting, if non-PCM, overrides per-audio-channel-pair PCM control on those devices that support it
+					(see ::NTV2DeviceCanDoPCMControl).
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const bool inIsNonPCM);
 
 
 	/**
-		@brief		Answers whether or not the given Audio System on the device is being treated as normal PCM audio.
+		@brief		Answers whether or not all outgoing audio channel pairs are currently being flagged as non-PCM for the
+					given Audio System on the device.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[out]	outIsNonPCM		Receives true if all audio channels in the Audio System are being treated as non-PCM;
-									otherwise false if they're being treated as normal PCM audio.
+		@param[out]	outIsNonPCM		Receives true if all outgoing audio channel pairs are currently flagged as non-PCM;
+									otherwise receives false if the non-PCM indicator is set "Off".
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, bool & outIsNonPCM);
 
 
 	/**
-		@brief		Determines whether or not the given channel pair in the given Audio System on the device is treated as normal PCM audio.
+		@brief		Determines whether the given audio channel pair being transmitted by the given Audio System is to be
+					flagged as non-PCM or not.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	inChannelPair	Specifies the channel pair of interest.
-		@param[in]	inIsNonPCM		If true, the channel pair is treated as non-PCM;
-									otherwise, it's treated as normal PCM audio.
+		@param[in]	inChannelPair	Specifies the audio channel pair of interest.
+		@param[in]	inIsNonPCM		If true, the "non-PCM" indicator in the AES header of the channel pair is set "On";
+									otherwise, the indicator is set "Off" (to indicate normal PCM audio).
 		@return		True if successful;  otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if per-audio-channel-pair PCM control capability is available on this device.
-		@note		This function has no effect if the per-Audio-System PCM control setting is set to non-PCM.
-					(See the overloaded function SetAudioPCMControl(const NTV2AudioSystem, const bool).)
+		@note		This function has no effect if the Audio-System-wide non-PCM control setting is set to non-PCM.
+					(See the two-parameter overloaded version of this function.)
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, const bool inIsNonPCM);
 
 
 	/**
-		@brief		Sets which channel pairs are configured for non-PCM in the given Audio System on the device.
+		@brief		Sets the non-PCM indicator in the AES header of the given channel pairs for the given Audio System on the device.
 		@param[in]	inAudioSystem			Specifies the Audio System of interest.
-		@param[in]	inNonPCMChannelPairs	Specifies the channel pairs that will be configured to emit non-PCM audio data.
+		@param[in]	inNonPCMChannelPairs	Specifies the audio channel pairs whose non-PCM indicators will be set "On".
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 	**/
@@ -1641,23 +1645,25 @@ public:
 
 
 	/**
-		@brief		Answers whether or not the given channel pair in the given Audio System on the device is being treated as normal PCM audio.
+		@brief		Answers whether or not the given audio channel pair in the given Audio System on the device is being treated
+					as normal PCM audio.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inChannelPair	Specifies the channel pair of interest.
-		@param[out]	outIsNonPCM		Receives true if the channel pair is being treated as non-PCM;
-									otherwise false if it's being treated as normal PCM audio.
+		@param[out]	outIsNonPCM		Receives true if the audio channel pair is currently being flagged as non-PCM;
+									otherwise false.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
-		@note		This function's answer is irrelevant if the per-Audio-System PCM control setting is set to non-PCM.
-					(See the overloaded function SetAudioPCMControl(const NTV2AudioSystem, const bool).)
+		@note		This function's answer is irrelevant if the Audio-System-wide non-PCM control setting is set to non-PCM.
+					(See the two-parameter overloaded version of this function.)
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsNonPCM);
 
 
 	/**
-		@brief		Answers which channel pairs are configured for non-PCM in the given Audio System on the device.
+		@brief		Answers which audio channel pairs being transmitted by the given Audio System are currently being flagged
+					as non-PCM.
 		@param[in]	inAudioSystem			Specifies the Audio System of interest.
-		@param[out]	outNonPCMChannelPairs	Receives the channel pairs that are currently configured to emit non-PCM audio data.
+		@param[out]	outNonPCMChannelPairs	Receives the audio channel pairs that are currently being flagged as non-PCM.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 	**/
