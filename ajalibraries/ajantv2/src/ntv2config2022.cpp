@@ -1093,6 +1093,15 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         // enable  register updates
         ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
     }
+    else
+    {
+        // Select secondary channel
+        rv = SelectTxChannel(channel, false, baseAddr);
+        if (!rv) return false;
+
+        // disable
+        WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
+    }
 
 
     // select primary channel
