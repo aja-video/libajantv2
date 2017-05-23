@@ -152,10 +152,14 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
 
-    static uint32_t  get2110Stream(NTV2Channel ch,NTV2Stream scch );
+    static uint32_t  get2110Stream(NTV2Channel ch, NTV2Stream str );
+    static bool      decompose2110Stream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
 
     // If method returns false call this to get details
     std::string getLastError();
+
+    static uint32_t v_packetizers[4];
+    static uint32_t a_packetizers[4];
 
 protected:
     uint32_t    GetFramerAddress(NTV2Channel channel, NTV2Stream stream);

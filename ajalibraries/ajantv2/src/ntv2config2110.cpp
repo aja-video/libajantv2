@@ -18,13 +18,10 @@
 #include <math.h>
 #endif
 
-using namespace std;
+uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
+uint32_t CNTV2Config2110::a_packetizers[4] = {SAREK_3190_TX_PACKETIZER_1,SAREK_3190_TX_PACKETIZER_2,SAREK_3190_TX_PACKETIZER_3,SAREK_3190_TX_PACKETIZER_4};
 
-static const int rxtx2110Streams[SAREK_MAX_CHANS][NTV2_MAX_NUM_STREAMS] = {
-    {   NTV2_VIDEO_STREAM,        NTV2_AUDIO1_STREAM,         NTV2_AUDIO2_STREAM,        NTV2_METADATA_STREAM},
-    {   NTV2_VIDEO_STREAM + 0x10, NTV2_AUDIO1_STREAM + 0x10 , NTV2_AUDIO2_STREAM + 0x10, NTV2_METADATA_STREAM + 0x10},
-    {   NTV2_VIDEO_STREAM + 0x20, NTV2_AUDIO1_STREAM + 0x20 , NTV2_AUDIO2_STREAM + 0x20, NTV2_METADATA_STREAM + 0x20},
-    {   NTV2_VIDEO_STREAM + 0x30, NTV2_AUDIO1_STREAM + 0x30 , NTV2_AUDIO2_STREAM + 0x30, NTV2_METADATA_STREAM + 0x30}};
+using namespace std;
 
 void tx_2110Config::init()
 {
@@ -1311,9 +1308,6 @@ void CNTV2Config2110::SelectTxFramerChannel(NTV2Channel channel, NTV2Stream stre
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddrPacketizer)
 {
-    static uint32_t v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
-    static uint32_t a_packetizers[4] = {SAREK_3190_TX_PACKETIZER_1,SAREK_3190_TX_PACKETIZER_2,SAREK_3190_TX_PACKETIZER_3,SAREK_3190_TX_PACKETIZER_4};
-
     uint32_t iChannel = (uint32_t) channel;
 
     if (iChannel > _numTxChans)
@@ -1415,9 +1409,20 @@ void CNTV2Config2110::ReleaseDecapsulatorControlAccess(uint32_t baseAddr)
     WriteChannelRegister(kRegDecap_control + baseAddr, 0x02);
 }
 
-uint32_t CNTV2Config2110::get2110Stream(NTV2Channel ch,NTV2Stream esc )
+uint32_t CNTV2Config2110::get2110Stream(NTV2Channel ch,NTV2Stream str )
 {
-    return rxtx2110Streams[ch][esc];
+    // this stream number is a core 'channel' number
+    uint32_t iStream =  ( (int(ch) * 2) + (int)str );
+    return iStream;
 }
 
+bool  CNTV2Config2110::decompose2110Stream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
+{
+    if (istream > 7) return false;
 
+    int stream  = istream & 1;
+    int channel = istream >> 1;
+    ch          = (NTV2Channel) channel;
+    str         = (NTV2Stream)  stream;
+    return true;
+}
