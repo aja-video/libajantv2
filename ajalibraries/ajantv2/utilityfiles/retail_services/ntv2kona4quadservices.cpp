@@ -2918,8 +2918,10 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	else
 	{
 		NTV2VideoFormat fb1VideoFormat = mFb1VideoFormat;
-		if (b1wireQ4k)
+		if (b4K && b1wireQ4k)
+		{
 			fb1VideoFormat = GetQuarterSizedVideoFormat(mFb1VideoFormat);
+		}
 	
         bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
         SetVPIDData(vpidOut3a, fb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
