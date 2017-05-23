@@ -272,15 +272,15 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
 }
 
 bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
-{    if (is2110)
+{
+    if (is2110)
     {
         return setupBoard2110(deviceSpec);
     }
     else
     {
-
-        return setupBoard2022(deviceSpec);    }
-
+        return setupBoard2022(deviceSpec);
+    }
 }
 
 bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
