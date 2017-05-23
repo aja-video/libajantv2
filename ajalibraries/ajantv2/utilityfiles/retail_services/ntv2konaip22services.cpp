@@ -647,7 +647,8 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	NTV2CrosspointID			inputXptYUV2 = NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect = NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 	NTV2FrameBufferFormat		fbFormatCh1;
-
+	
+	
 	// frame buffer format
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 
@@ -717,7 +718,7 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	}
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->Set425FrameEnable(b425, NTV2_CHANNEL1);
+	mCard->SetTsiFrameEnable(b425, NTV2_CHANNEL1);
 	
 
 	// SDI In 1
@@ -1324,6 +1325,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
+	
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
@@ -1718,6 +1720,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	// Set VPID 1
 	if (b4K)
 	{
+
 		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
 		if (b3GbTransportOut)
 		{
@@ -1800,12 +1803,13 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	else
 	{	
         bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
-        SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
+		SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
         if (b3gb)
 		{
-            SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 		}
 	}
+
 
 	//
 	// SDI Out 4
