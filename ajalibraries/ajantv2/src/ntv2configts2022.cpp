@@ -505,17 +505,8 @@ bool CNTV2ConfigTs2022::SetupEncodeTsJ2KEncoder(const NTV2Channel channel)
     }
 
     // Flush encoder and IntoPiX prop hdr delete
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderFlushTimeout, (0x1));
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x6));
-
-    // Wait 60 ms
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (60);
-    #else
-        usleep (60 * 1000);
-    #endif
-
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x1));
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderFlushTimeout, (0x0));
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x7));
 
     return true;
 }
