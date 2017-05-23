@@ -1065,44 +1065,46 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
-    if (_is2022_7 && enable2022_7)
+    if (_is2022_7)
     {
-        // Select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
-        if (!rv) return false;
-
-        // hold off access while we update channel regs
-        ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
-
-        if (enable)
+        if (enable2022_7)
         {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
-            WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+            // Select secondary channel
+            rv = SelectTxChannel(channel, false, baseAddr);
+            if (!rv) return false;
 
-            // enables
-            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+            // hold off access while we update channel regs
+            ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
+
+            if (enable)
+            {
+                mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+                WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+
+                // enables
+                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
+                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+            }
+            else
+            {
+                // disable
+                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
+                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
+            }
+
+            // enable  register updates
+            ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
         }
         else
         {
+            // Select secondary channel
+            rv = SelectTxChannel(channel, false, baseAddr);
+            if (!rv) return false;
+
             // disable
             WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
-        }
-
-        // enable  register updates
-        ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
+       }
     }
-    else
-    {
-        // Select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
-        if (!rv) return false;
-
-        // disable
-        WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-    }
-
 
     // select primary channel
     rv = SelectTxChannel(channel, true, baseAddr);
