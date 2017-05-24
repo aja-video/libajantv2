@@ -46,7 +46,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if (!(_expression_)) AJADebug::Assert(__FILE__, __LINE__, #_expression_);
+            if (!(_expression_)) AJADebug::AssertWithMessage(__FILE__, __LINE__, #_expression_);
 		#define AJA_PRINT(...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, __VA_ARGS__)
 	#else
@@ -61,7 +61,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if(!(_expression_)) AJADebug::Assert(NULL, 0, #_expression_); 
+            if(!(_expression_)) AJADebug::AssertWithMessage(NULL, 0, #_expression_);
 		#define AJA_PRINT(...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, __VA_ARGS__)
 	#else
@@ -77,7 +77,7 @@
 	#if defined(AJA_DEBUG)
 	
 		#define AJA_ASSERT(_expression_) \
-			if (!(_expression_)) AJADebug::Assert(__FILE__, __LINE__, #_expression_);
+            if (!(_expression_)) AJADebug::AssertWithMessage(__FILE__, __LINE__, #_expression_);
 		#if !defined (AJA_PRINTTYPE)
 			#define AJA_PRINTTYPE		0
 		#endif	//	if AJA_PRINTTYPE undefined
@@ -111,7 +111,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if(!(_expression_)) AJADebug::Assert(NULL, 0, #_expression_); 
+            if(!(_expression_)) AJADebug::AssertWithMessage(NULL, 0, #_expression_);
 		#define AJA_PRINT(_format_,...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, _format_)
 	#else
@@ -244,13 +244,13 @@ public:
 	static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...);
 
 	/**
-	 *	Assert that an unexpected error has occurred.
+     *	Assert that an unexpected error has occurred.
 	 *
 	 *	@param[in]	pFileName		The source file name reporting the assertion.
 	 *	@param[in]	lineNumber		The line number in the source file reporting the assertion.
 	 *  @param[in]	pExpression		Expression that caused the assertion.
 	 */
-	static void Assert(const char* pFileName, int32_t lineNumber, const char* pExpression);
+    static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression);
 
 	/**
 	 *	Get the sequence number of the latest message
