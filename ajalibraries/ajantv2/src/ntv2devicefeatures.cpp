@@ -304,19 +304,36 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 	}
 }	//	NTV2DeviceCanDo3GOut
 
+bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
+{
+	switch (index0)
+	{
+	case 0:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
+	case 1:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
+	case 2:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
+	case 3:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
+	default:
+		return false;
+	}
+}	//	NTV2DeviceCanDo3GOut
+
 
 bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)
 	{
 	case 0:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1));
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
 	case 1:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2));
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
 	case 2:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
 	case 3:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
 	case 4:
 		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
 	case 5:

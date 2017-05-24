@@ -37,6 +37,7 @@ AJAExport bool NTV2DeviceCanDoFormat(NTV2DeviceID boardID,
 									NTV2Standard		standard);
 
 AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
+AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
 
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
