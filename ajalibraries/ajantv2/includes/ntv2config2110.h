@@ -13,13 +13,13 @@
 #include "ntv2mbcontroller.h"
 #include <string.h>
 
-#define RX_MATCH_VLAN                   BIT(0)
-#define RX_MATCH_SOURCE_IP              BIT(1)
-#define RX_MATCH_DEST_IP                BIT(2)
-#define RX_MATCH_SOURCE_PORT            BIT(3)
-#define RX_MATCH_DEST_PORT              BIT(4)
-#define RX_MATCH_SSRC                   BIT(5)
-#define RX_MATCH_PAYLOAD                BIT(6)
+#define RX_MATCH_2110_VLAN                   BIT(0)
+#define RX_MATCH_2110_SOURCE_IP              BIT(1)
+#define RX_MATCH_2110_DEST_IP                BIT(2)
+#define RX_MATCH_2110_SOURCE_PORT            BIT(3)
+#define RX_MATCH_2110_DEST_PORT              BIT(4)
+#define RX_MATCH_2110_PAYLOAD                BIT(5)
+#define RX_MATCH_2110_SSRC                   BIT(6)
 
 #define VOIP_SEMAPHORE_SET              0x2
 #define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
@@ -119,7 +119,7 @@ public:
     bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
                                         std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
-    bool        ConfigureRxChannel(const NTV2Channel channel,const rx_2110Config & videoConfig,const rx_2110Config & audioConfig);
+    bool        ConfigureRxChannel(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
 
     bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
@@ -152,8 +152,9 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
 
-    static uint32_t  get2110Stream(NTV2Channel ch, NTV2Stream str );
-    static bool      decompose2110Stream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
+    static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
+    static bool      decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
+    static uint32_t  GetDecapsulatorAddress(NTV2Channel channel, NTV2Stream stream);
 
     // If method returns false call this to get details
     std::string getLastError();
@@ -167,17 +168,8 @@ protected:
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
-    void        SetupDecapsulator(const NTV2Channel channel,NTV2Stream stream, const rx_2110Config & rxConfig);
-    void        ResetDecapsulator(NTV2Channel channel);
     void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
-    bool        WaitDecapsulatorLock(const NTV2Channel channel, NTV2Stream stream);
-    bool        WaitDecapsulatorUnlock(NTV2Stream & stream, bool & unlock, bool & timeout);
-
-    uint32_t    GetDecapsulatorAddress(NTV2Channel channel);
-    void        SelectRxDecapsulatorChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
-    void        AcquireDecapsulatorControlAccess(uint32_t baseAddr);
-    void        ReleaseDecapsulatorControlAccess(uint32_t baseAddr);
 
     void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);

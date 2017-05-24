@@ -14,12 +14,12 @@
 #include "ntv2tshelper.h"
 #include <string.h>
 
-#define RX_MATCH_VLAN                   BIT(0)
-#define RX_MATCH_SOURCE_IP              BIT(1)
-#define RX_MATCH_DEST_IP                BIT(2)
-#define RX_MATCH_SOURCE_PORT            BIT(3)
-#define RX_MATCH_DEST_PORT              BIT(4)
-#define RX_MATCH_SSRC                   BIT(5)
+#define RX_MATCH_2022_VLAN              BIT(0)
+#define RX_MATCH_2022_SOURCE_IP         BIT(1)
+#define RX_MATCH_2022_DEST_IP           BIT(2)
+#define RX_MATCH_2022_SOURCE_PORT       BIT(3)
+#define RX_MATCH_2022_DEST_PORT         BIT(4)
+#define RX_MATCH_2022_SSRC              BIT(5)
 
 #define VOIP_SEMAPHORE_SET              0x2
 #define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
