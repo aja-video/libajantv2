@@ -1176,11 +1176,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             target->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 		
-		// Enable all channels always.
+		// Enable all RX channels always.
 		mCard->WriteRegister(kVRegRxcEnable1, true);
 		mCard->WriteRegister(kVRegRxcEnable2, true);
-		mCard->WriteRegister(kVRegTxcEnable3, true);
-		mCard->WriteRegister(kVRegTxcEnable4, true);
 
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
@@ -1808,6 +1806,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 		}
+		printf("vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
+
 	}
 
 
