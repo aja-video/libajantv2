@@ -125,16 +125,15 @@
 #endif
 
 //	Handy ostream-based macros...
+#define	AJA_sASSERT(_expr_)                 do {std::ostringstream	__ss__;  __ss__ << #_expr_;  AJADebug::AssertWithMessage(__FILE__, __LINE__, __ss__.str().c_str());} while (false)
 #define	AJA_sREPORT(_ndx_,_sev_,_expr_)		do {std::ostringstream	__ss__;  __ss__ << _expr_;  AJADebug::Report((_ndx_), (_sev_), __FILE__, __LINE__, "%s", __ss__.str().c_str());} while (false)
 #define	AJA_sEMERGENCY(_ndx_,_expr_)		AJA_sREPORT((_ndx_), AJA_DebugSeverity_Emergency,	_expr_)
 #define	AJA_sALERT(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Alert,		_expr_)
-#define	AJA_sASSERT(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Assert,		_expr_)
 #define	AJA_sERROR(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Error,		_expr_)
 #define	AJA_sWARNING(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Warning,		_expr_)
 #define	AJA_sNOTICE(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Notice,		_expr_)
 #define	AJA_sINFO(_ndx_,_expr_)				AJA_sREPORT((_ndx_), AJA_DebugSeverity_Info,		_expr_)
 #define	AJA_sDEBUG(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Debug,		_expr_)
-
 
 // forward declarations
 class AJAMemory;
