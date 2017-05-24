@@ -55,7 +55,7 @@ int main (int argc, const char ** argv)
     const struct poptOption userOptionsTable [] =
     {
         {"device",     'd', POPT_ARG_STRING, &pDeviceSpec,    0, "which device to use",     "index#, serial#, or model"},
-        {"eotf",       'e', POPT_ARG_INT,    &eotf,           0, "EOTF to use",             "0 (Trad Gamma SD), 1 (Trad Gamma HD), 2 (ST 2084), 3 (HLG)"},
+        {"eotf",       'e', POPT_ARG_INT,    &eotf,           0, "EOTF to use",             "0 (Trad Gamma SDR), 1 (Trad Gamma HDR), 2 (ST 2084), 3 (HLG)"},
         {"luminance",  'l', POPT_ARG_INT,    &constluminance, 0, "luminance",               "0 (Non-Constant), 1 (Constant)"},
         {"dolbyvision",  0, POPT_ARG_NONE,   &dolbyVision,    1, "enable dolby vision bit", NULL},
         {"nohdr",        0, POPT_ARG_NONE,   &noHdr,          1, "disable HDMI HDR out",    NULL},
