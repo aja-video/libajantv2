@@ -103,11 +103,14 @@ strictly necessary but it will clean the older SDK from the system directories. 
 with an included driver installer.  This means that the SDK will no longer be installed to the Windows Program Files directory. 
 
 To use the new SDK, decompress the zip file to a working directory.  At the top level you will see the following files.
--	<b>APIandSamples</b> -- This directory contains the SDK source files described in the HEVC SDK contents section.
--	<b>DiagnosticsAndTools</b> -- This directory contains prebuilt SDK tools.
--	<b>Docs</b> -- This directory contains the SDK documentation.
--	<b>Driver</b> -- This directory contains the NTV2 debug and release driver files for debugging.
--	<b>ntv2driver-x.x.x.msi</b> -- This is the installer for the NTV2 driver.
+-	<b>ajaapps</b> -- Contains the demonstration application sources.
+-	<b>ajalibraries</b> -- Contains the SDK sources and project files.
+-	<b>bin</b> -- Contains linked binaries (and requisite DLLs), including pre-built SDK tools.
+-	<b>build</b> -- Contains Qt/qmake build files.
+-	<b>docs</b> -- Contains a web URL to the online SDK documentation.
+-	<b>lib</b> -- This directory contains static libraries.
+-	<b>ntv2_vsNN.sln</b> -- This is a handy top-level solution file for the SDK and demo applications.
+-	<b>ntv2driver-N.N.N.N.msi</b> -- This is the installer for the NTV2 driver.
 
 Run the "ntv2driver-x.x.x.msi" to install the NTV2 driver that was tested with this SDK.  The driver installer also
 installs the Microsoft Visual Studio runtime environment required to use the prebuilt SDK libraries and tools.
@@ -116,16 +119,16 @@ installs the Microsoft Visual Studio runtime environment required to use the pre
 
 To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln.
 Choose the solution platform (win32 or x64) and the configuration (debug or release) for the build and select build all. 
-This will build the libraries to the \c APIandSamples\\lib directory and the binaries to the \c APIandSamples\\bin directory.
+This will build the libraries to the \c lib directory and the binaries to the \c bin directory.
 
 @subsection	hevcwindowsinstallfirmware		Installing the HEVC firmware
 
-There is an HEVC monitor application (\c qthevcmon.exe) in the \c DiagnosticsAndTools directory.
+There is an HEVC monitor application (\c qthevcmon.exe) in the \c bin directory.
 Run this application and select the <b>Debug</b> tab to display the currently installed driver and firmware versions. 
 The firmware versions will be labelled as either "OK" or "Iffy".  "OK" means that they are the same firmware version
 that was used for SDK testing.  "Iffy" means that the firmware has not been tested with this version of the SDK and should be updated.
 
-To update the HEVC firmware, extract the \c hevcmaintenance.zip file in the \c DiagnosticsAndTools directory.
+To update the HEVC firmware, extract the \c hevcmaintenance.zip file in the \c bin directory.
 Navigate into the \c hevcmaintenance directory and double-click on the <tt>flash_all.bat</tt> file.
 The script will install all the codec firmware then remind you to power cycle the system when it is complete.
 After the power cycle use the HEVC monitor application to confirm that the correct firmware is installed.
@@ -169,26 +172,8 @@ Here you can find definitions, enums, structures, classes, headers, and both use
 This section includes everything --- nothing is hidden.
 
 -	ntv2linuxhevc_12_x.y.z
-	-	<b>ajantv2</b>
-		-	<b>classes</b>
-			-	ntv2driverinterface.cpp
-			-	ntv2driverinterface.h
-		-	<b>codecs</b>
-			-	<b>hevc</b>
-				-	<b>m31</b>
-					-	ntv2m31.cpp
-					-	ntv2m31.h
-					-	ntv2m31cparam.cpp
-					-	ntv2m31cparam.h
-					-	ntv2m31ehparam.cpp
-					-	ntv2m31ehparam.h
-					-	ntv2m31vaparam.cpp
-					-	ntv2m31vaparam.h
-					-	ntv2m31vinparam.cpp
-					-	ntv2m31vinparam.h
-					-	ntv2m31viparam.cpp
-					-	ntv2m31viparam.h
-		-	<b>commonapps</b>
+	-	<b>ajaapps</b>
+		-	<b>crossplatform</b>
 			-	<b>hevcmaintenance</b>
 				-	config_common.bin
 				-	dram_init_param.bin
@@ -219,22 +204,19 @@ This section includes everything --- nothing is hidden.
 				-	qthevcmon.pro
 				-	streamtab.cpp
 				-	streamtab.h
-		-	<b>demoapps</b>
-			-	<b>ntv2encodehevc</b>
-				-	main.cpp
-				-	Makefile
-		-	<b>democlasses</b>
-			-	ntv2encodehevc.cpp
-			-	ntv2encodehevc.h
-		-	<b>includes</b>
-			-	ntv2linuxpublicinterface.h
-			-	ntv2publicinterface.h
-			-	ntv2m31enums.h
-			-	ntv2m31publicinterface.h
-		-	<b>linuxclasses</b>
-			-	ntv2linuxdriverinterface.cpp
-			-	ntv2linuxdriverinterface.h
-		-	<b>linuxdriver</b>
+			-	<b>demoapps</b>
+				-	<b>ntv2encodehevc</b>
+					-	main.cpp
+					-	Makefile
+					-	ntv2encodehevc.cpp
+					-	ntv2encodehevc.h
+			-	<b>ntv2watcher</b>
+			-	<b>watcher</b>
+			-	<b>xenacablesfltk</b>
+		-	<b>lin</b>
+			-	<b>pciwhacker</b>
+	-	<b>ajadriver</b>
+		-	<b>linux</b>
 			-	driverdbg.h
 			-	hevcapi.c
 			-	hevccommand.c
@@ -254,6 +236,35 @@ This section includes everything --- nothing is hidden.
 			-	hevcstream.h
 			-	registerio.c
 			-	registerio.h
+	-	<b>ajalibraries</b>
+		-	<b>ajabase</b>
+		-	<b>ajantv2</b>
+			-	<b>src</b>
+				-	ntv2driverinterface.cpp
+			-	<b>codecs</b>
+				-	<b>hevc</b>
+					-	<b>m31</b>
+						-	ntv2m31.cpp
+						-	ntv2m31.h
+						-	ntv2m31cparam.cpp
+						-	ntv2m31cparam.h
+						-	ntv2m31ehparam.cpp
+						-	ntv2m31ehparam.h
+						-	ntv2m31vaparam.cpp
+						-	ntv2m31vaparam.h
+						-	ntv2m31vinparam.cpp
+						-	ntv2m31vinparam.h
+						-	ntv2m31viparam.cpp
+						-	ntv2m31viparam.h
+			-	<b>includes</b>
+				-	<b>lin</b>
+					-	ntv2linuxdriverinterface.cpp
+					-	ntv2linuxdriverinterface.h
+				-	ntv2driverinterface.h
+				-	ntv2linuxpublicinterface.h
+				-	ntv2publicinterface.h
+				-	ntv2m31enums.h
+				-	ntv2m31publicinterface.h
 
 
 @subsection	hevcimpl-kernel		The Kernel Driver

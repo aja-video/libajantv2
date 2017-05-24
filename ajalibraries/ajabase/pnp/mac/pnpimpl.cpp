@@ -7,7 +7,7 @@
 #include "ajabase/pnp/mac/pnpimpl.h"
 
 // for now use the ntv2version
-#include "DeviceNotifier.h"
+#include "devicenotifier.h"
 
 
 // static

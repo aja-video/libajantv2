@@ -2423,6 +2423,7 @@ typedef enum
 	// Audio Source Select
 	kRegShiftAudioSource				= 0,
 	kRegShiftEmbeddedAudioInput			= 16,
+	kRegShiftAudioAutoErase				= 19,
 	kRegShiftAnalogHDMIvsAES     		= 20,
 	kRegShift3GbSelect					= 21,
 	kRegShiftEmbeddedAudioClock			= 22,

@@ -10,7 +10,7 @@
 /////////////////////////////
 // Includes
 /////////////////////////////
-#include "ajabase/system/ip_socket.h"
+#include "ajabase/network/ip_socket.h"
 
 
 /////////////////////////////
@@ -28,11 +28,12 @@ class AJA_EXPORT AJATCPSocket : public AJAIPSocket
 		AJAStatus Listen(void);
 		int       Accept(void);
 
-		uint32_t Read(uint8_t* pData, uint32_t dataLength);
-		uint32_t Write(const uint8_t* pData, uint32_t dataLength);
+        uint32_t Read(uint8_t* pData, uint32_t dataLength);
+        uint32_t Write(const uint8_t* pData, uint32_t dataLength);
 
 	private:
-		// None
+        uint32_t Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client);
+        uint32_t Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress);
 };
 
 

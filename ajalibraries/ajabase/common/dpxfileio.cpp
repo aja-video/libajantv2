@@ -67,6 +67,8 @@ string AJADPXFileIO::GetPath () const
 
 AJAStatus AJADPXFileIO::Read (const uint32_t index)
 {
+    AJA_UNUSED(index);
+
 	AJAFileIO	file;
 	AJAStatus 	status = AJA_STATUS_SUCCESS;
 
@@ -101,6 +103,8 @@ AJAStatus AJADPXFileIO::Read (uint8_t  &		buffer,
 							  const uint32_t	bufferSize,
 							  uint32_t &		index)
 {
+    AJA_UNUSED(bufferSize);
+
 	AJAFileIO	file;
 	AJAStatus 	status = AJA_STATUS_SUCCESS;
 

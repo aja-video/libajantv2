@@ -18,6 +18,7 @@
 			#pragma comment (lib, "setupapi.lib")
 			#pragma comment (lib, "odbc32.lib")
 			#pragma comment (lib, "shlwapi.lib")
+            #pragma comment (lib, "netapi32.lib")
 		#else
 			#define AJA_EXPORT __declspec(dllimport)
             #if !defined(AJA_NO_AUTOIMPORT)
@@ -39,7 +40,7 @@
 	#else
 		#define AJA_EXPORT
 #if !defined(AJA_NO_AUTOIMPORT)
-	#if !defined AJA_STUFF_OBJ
+    #if !defined AJA_BASE_OBJ
 			#if defined(AJA_DEBUG)
 				#if defined(_WIN64)
                     #pragma comment (lib, "libajabased")
@@ -58,6 +59,8 @@
 			#pragma comment (lib, "winmm")
 			#pragma comment (lib, "setupapi.lib")
 			#pragma comment (lib, "odbc32.lib")
+            #pragma comment (lib, "shlwapi.lib")
+            #pragma comment (lib, "netapi32.lib")
 		#endif
 #endif
 	#endif

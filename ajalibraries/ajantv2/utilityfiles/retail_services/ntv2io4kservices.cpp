@@ -1623,7 +1623,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	bool b425_4wireA       = false;
 	bool b425_4wireB       = false;
 		
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);

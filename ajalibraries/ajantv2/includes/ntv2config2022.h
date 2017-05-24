@@ -102,70 +102,6 @@ public:
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
 };
 
-
-// These structs are used internally be retail services
-
-class rx2022Config
-{
-public:
-
-    rx2022Config() { init(); }
-
-    void init();
-
-    bool operator == ( const rx2022Config &other );
-    bool operator != ( const rx2022Config &other );
-
-    bool        rxc_enable;
-    
-    uint32_t    rxc_primaryRxMatch;
-    uint32_t    rxc_primarySourceIp;
-    uint32_t    rxc_primaryDestIp;
-    uint32_t    rxc_primarySourcePort;
-    uint32_t    rxc_primaryDestPort;
-    uint32_t    rxc_primarySsrc;
-    uint32_t    rxc_primaryVlan;
-    
-    uint32_t    rxc_secondaryRxMatch;
-    uint32_t    rxc_secondarySourceIp;
-    uint32_t    rxc_secondaryDestIp;
-    uint32_t    rxc_secondarySourcePort;
-    uint32_t    rxc_secondaryDestPort;
-    uint32_t    rxc_secondarySsrc;
-    uint32_t    rxc_secondaryVlan;
-
-    uint32_t	rxc_networkPathDiff;
-    uint32_t	rxc_playoutDelay;
- };
-
-class tx2022Config
-{
-public:
-
-    tx2022Config() { init(); }
-
-    void init();
-
-    bool operator == ( const tx2022Config &other );
-    bool operator != ( const tx2022Config &other );
-
-    bool        txc_enable;
-    
-    uint32_t    txc_primaryLocalPort;
-    uint32_t    txc_primaryRemoteIp;
-    uint32_t    txc_primaryRemotePort;
-    uint32_t    txc_primaryRemoteMAC_lo;
-    uint32_t    txc_primaryRemoteMAC_hi;
-    bool        txc_primaryAutoMac;
-    
-    uint32_t    txc_secondaryLocalPort;
-    uint32_t    txc_secondaryRemoteIp;
-    uint32_t    txc_secondaryRemotePort;
-    uint32_t    txc_secondaryRemoteMAC_lo;
-    uint32_t    txc_secondaryRemoteMAC_hi;
-    bool        txc_secondaryAutoMac;
-};
-
 class j2kEncoderConfig
 {
 public:
@@ -189,19 +125,19 @@ public:
     uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
 };
 
-typedef enum
-{
-    eProgSel_Off,
-    eProgSel_AutoFirstProg,
-    eProgSel_LowestProgNum,
-    eProgSel_SpecificProgNum,
-    eProgSel_SpecificProgPID,
-    eProgSel_Default = eProgSel_AutoFirstProg,
-} eProgSelMode_t;
-
 class j2kDecoderConfig
 {
 public:
+	typedef enum
+	{
+		eProgSel_Off,
+		eProgSel_AutoFirstProg,
+		eProgSel_LowestProgNum,
+		eProgSel_SpecificProgNum,
+		eProgSel_SpecificProgPID,
+		eProgSel_Default = eProgSel_AutoFirstProg,
+	} eProgSelMode_t;
+
     j2kDecoderConfig() {init();}
     void init();
 

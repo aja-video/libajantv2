@@ -1205,11 +1205,20 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					// Special case we handle channel enables at service level automatically
 					mRx2022Config1.rxc_enable = enableHw ? true : false;
 					setRxConfig(NTV2_CHANNEL1);
+					
+					// for now just configure the decoder with defaults everytime we configure the RX channel
+					printf("set j2kDecoder ch 1\n");
+					mRx2022J2kConfig1.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
+					mRx2022J2kConfig1.programNumber = 1;
+					mRx2022J2kConfig1.programPID = 1;
+					mRx2022J2kConfig1.audioNumber = 1;
+					target->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
 				}
 			}
 			else
 				printf("rxConfig ch 1 config read failed\n");
 			
+#if 0
 			// Configure j2kDecoder for ch1
 			rv  = target->GetJ2KDecoderConfiguration(decoderConfig);
 			if (rv)
@@ -1223,8 +1232,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				}
 			}
 			else
-				printf("j2kEncoder ch 1 config read failed\n");
-
+				printf("j2kDecoder ch 1 config read failed\n");
+#endif
 			
 			
 			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
@@ -1945,7 +1954,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			break;
 	}
 	
-	printRxConfig(chan);
+	//printRxConfig(chan);
 	target->SetRxChannelConfiguration(channel,chan);
 	target->SetRxChannelEnable(channel,enable,m2022_7Mode);
 }
@@ -2022,7 +2031,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			break;
 	}
 	
-	printTxConfig(chan);
+	//printTxConfig(chan);
 	target->SetTxChannelConfiguration(channel,chan);
 	target->SetTxChannelEnable(channel,enable,m2022_7Mode);
 }

@@ -35,16 +35,37 @@
 	#endif
     #define AJA_LITTLE_ENDIAN
 
-	// These macros conform to C99 convention
-//	#define PRId64 "I64d"
-//	#define PRIi64 "I64i"
-//	#define PRIu64 "I64u"
+    // This adds the ability to format 64-bit entities
+    #if defined(AJA_OS_64)
+    # define __PRI64_PREFIX   "l"
+    # define __PRIPTR_PREFIX  "l"
+    #else
+    # define __PRI64_PREFIX   "ll"
+    # define __PRIPTR_PREFIX
+    #endif
 
-	// Synonyms for library functions
-	#define ajasnprintf(a, b, c, d) _snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsprintf_s( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) _stricmp( (a), (b) )
-	#define ajawcscasecmp(a, b) _wcsicmp( (a), (b) )
+    // Macros for printing format specifiers.
+    #ifndef PRId64
+        #define PRId64 __PRI64_PREFIX "d"
+    #endif
+    #ifndef PRIi64
+        #define PRIi64 __PRI64_PREFIX "i"
+    #endif
+    #ifndef PRIu64
+        #define PRIu64 __PRI64_PREFIX "u"
+    #endif
+    #ifndef PRIo64
+        #define PRIo64 __PRI64_PREFIX "o"
+    #endif
+    #ifndef PRIx64
+        #define PRIx64 __PRI64_PREFIX "x"
+    #endif
+
+    // Synonyms for library functions with different names on different platforms
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) _snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsprintf_s( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) _stricmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) _wcsicmp( _str1_, _str2_ )
 
 #endif  // defined(AJA_WINDOWS)
 
@@ -97,23 +118,28 @@
         #endif
 
         // Macros for printing format specifiers.
-        // Decimal notation.
-        #define PRId64	__PRI64_PREFIX "d"
-#if defined(powerpc) || defined(CRUSHER)
-	// On Crusher scanf %I64i works with a 32-bit int
-	// TODO: Change this macro to platform-specific if possible
-	#define PRIi64 "lli"
-#else
-        #define PRIi64	__PRI64_PREFIX "i"
-#endif
-        #define PRIu64	__PRI64_PREFIX "u"
+        #ifndef PRId64
+            #define PRId64 __PRI64_PREFIX "d"
+        #endif
+        #ifndef PRIi64
+            #define PRIi64 __PRI64_PREFIX "i"
+        #endif
+        #ifndef PRIu64
+            #define PRIu64 __PRI64_PREFIX "u"
+        #endif
+        #ifndef PRIo64
+            #define PRIo64 __PRI64_PREFIX "o"
+        #endif
+        #ifndef PRIx64
+            #define PRIx64 __PRI64_PREFIX "x"
+        #endif
       #endif  // MODULE
 
 	// Synonyms for library functions with different names on different platforms
-	#define ajasnprintf(a, b, c, d) snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsnprintf( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) strcasecmp( (a), (b) )
-	#define ajawcscasecmp(a, b) wcscasecmp( (a), (b) )
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
 #endif  // defined(AJA_LINUX)
 
@@ -144,17 +170,28 @@
 	# define __PRIPTR_PREFIX
 	#endif
 
-	// Macros for printing format specifiers.
-	// Decimal notation.
-    //#define PRId64	__PRI64_PREFIX "d"
-    //#define PRIi64	__PRI64_PREFIX "i"
-    //#define PRIu64	__PRI64_PREFIX "u"
+    // Macros for printing format specifiers.
+    #ifndef PRId64
+        #define PRId64 __PRI64_PREFIX "d"
+    #endif
+    #ifndef PRIi64
+        #define PRIi64 __PRI64_PREFIX "i"
+    #endif
+    #ifndef PRIu64
+        #define PRIu64 __PRI64_PREFIX "u"
+    #endif
+    #ifndef PRIo64
+        #define PRIo64 __PRI64_PREFIX "o"
+    #endif
+    #ifndef PRIx64
+        #define PRIx64 __PRI64_PREFIX "x"
+    #endif
 
-	// Synonyms for library functions
-	#define ajasnprintf(a, b, c, d) snprintf( (a), (b), (c), (d) )
-	#define ajavnsprintf(a, b, c, d) vsnprintf( (a), (b), (c), (d) )
-	#define ajastrcasecmp(a, b) strcasecmp( (a), (b) )
-	#define ajawcscasecmp(a, b) wcscasecmp( (a), (b) )
+    // Synonyms for library functions with different names on different platforms
+    #define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+    #define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
+    #define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
 
 	#ifndef EXCLUDE_WCHAR
 		#include <wchar.h>
@@ -298,6 +335,9 @@ typedef enum
 
 } AJAStatus;
 ///@}
+
+// Use to silence "unused parameter" warnings
+#define AJA_UNUSED(_x_) (void)_x_;
 
 #ifndef NUMELMS
    #define NUMELMS(aa) (sizeof(aa)/sizeof((aa)[0]))

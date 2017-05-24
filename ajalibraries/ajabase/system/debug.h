@@ -46,7 +46,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if (!(_expression_)) AJADebug::Assert(__FILE__, __LINE__, #_expression_);
+            if (!(_expression_)) AJADebug::AssertWithMessage(__FILE__, __LINE__, #_expression_);
 		#define AJA_PRINT(...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, __VA_ARGS__)
 	#else
@@ -61,7 +61,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if(!(_expression_)) AJADebug::Assert(NULL, 0, #_expression_); 
+            if(!(_expression_)) AJADebug::AssertWithMessage(NULL, 0, #_expression_);
 		#define AJA_PRINT(...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, __VA_ARGS__)
 	#else
@@ -77,7 +77,7 @@
 	#if defined(AJA_DEBUG)
 	
 		#define AJA_ASSERT(_expression_) \
-			if (!(_expression_)) AJADebug::Assert(__FILE__, __LINE__, #_expression_);
+            if (!(_expression_)) AJADebug::AssertWithMessage(__FILE__, __LINE__, #_expression_);
 		#if !defined (AJA_PRINTTYPE)
 			#define AJA_PRINTTYPE		0
 		#endif	//	if AJA_PRINTTYPE undefined
@@ -111,7 +111,7 @@
 
 	#if defined(AJA_DEBUG)
 		#define AJA_ASSERT(_expression_) \
-			if(!(_expression_)) AJADebug::Assert(NULL, 0, #_expression_); 
+            if(!(_expression_)) AJADebug::AssertWithMessage(NULL, 0, #_expression_);
 		#define AJA_PRINT(_format_,...) \
 			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, _format_)
 	#else
@@ -125,16 +125,15 @@
 #endif
 
 //	Handy ostream-based macros...
+#define	AJA_sASSERT(_expr_)                 do {std::ostringstream	__ss__;  __ss__ << #_expr_;  AJADebug::AssertWithMessage(__FILE__, __LINE__, __ss__.str().c_str());} while (false)
 #define	AJA_sREPORT(_ndx_,_sev_,_expr_)		do {std::ostringstream	__ss__;  __ss__ << _expr_;  AJADebug::Report((_ndx_), (_sev_), __FILE__, __LINE__, "%s", __ss__.str().c_str());} while (false)
 #define	AJA_sEMERGENCY(_ndx_,_expr_)		AJA_sREPORT((_ndx_), AJA_DebugSeverity_Emergency,	_expr_)
 #define	AJA_sALERT(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Alert,		_expr_)
-#define	AJA_sASSERT(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Assert,		_expr_)
 #define	AJA_sERROR(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Error,		_expr_)
 #define	AJA_sWARNING(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Warning,		_expr_)
 #define	AJA_sNOTICE(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Notice,		_expr_)
 #define	AJA_sINFO(_ndx_,_expr_)				AJA_sREPORT((_ndx_), AJA_DebugSeverity_Info,		_expr_)
 #define	AJA_sDEBUG(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Debug,		_expr_)
-
 
 // forward declarations
 class AJAMemory;
@@ -244,13 +243,13 @@ public:
 	static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...);
 
 	/**
-	 *	Assert that an unexpected error has occurred.
+     *	Assert that an unexpected error has occurred.
 	 *
 	 *	@param[in]	pFileName		The source file name reporting the assertion.
 	 *	@param[in]	lineNumber		The line number in the source file reporting the assertion.
 	 *  @param[in]	pExpression		Expression that caused the assertion.
 	 */
-	static void Assert(const char* pFileName, int32_t lineNumber, const char* pExpression);
+    static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression);
 
 	/**
 	 *	Get the sequence number of the latest message

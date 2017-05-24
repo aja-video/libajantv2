@@ -158,15 +158,15 @@ void createVideoFrame( uint32_t *buffer , uint64_t frameNumber,
 					   AJA_PixelFormat pixFmt, uint32_t lines, uint32_t pixels, uint32_t linepitch, 
 					   uint16_t y, uint16_t cb, uint16_t cr )
 {
-    (void)buffer;
-    (void)frameNumber;
-    (void)pixFmt;
-    (void)lines;
-    (void)pixels;
-    (void)linepitch;
-    (void)y;
-    (void)cb;
-    (void)cr;
+    AJA_UNUSED(buffer);
+    AJA_UNUSED(frameNumber);
+    AJA_UNUSED(pixFmt);
+    AJA_UNUSED(lines);
+    AJA_UNUSED(pixels);
+    AJA_UNUSED(linepitch);
+    AJA_UNUSED(y);
+    AJA_UNUSED(cb);
+    AJA_UNUSED(cr);
 }
 
 

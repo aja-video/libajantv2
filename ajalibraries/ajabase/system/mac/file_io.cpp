@@ -4,7 +4,7 @@
 	@brief		Implements the AJAFileIO class on the Mac platform.
 **/
 
-
+#include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/log.h"
 #include <fcntl.h>
@@ -35,29 +35,11 @@ AJAFileIO::~AJAFileIO(void)
 	Close();
 }
 
-void wstringToString(wstring inPath, string& outPath)
-{
-    int pathSize = inPath.size();
-	char* tmp = new char[pathSize+1];
-    memset(tmp,0,pathSize);
-	::wcstombs(tmp,inPath.c_str(),pathSize);
-    tmp[pathSize] = 0;
-	outPath.assign(tmp);
-	delete [] tmp;
-}
-
-void stringToWstring(string inPath, wstring& outPath)
-{
-	std::wstringstream s;
-	s << inPath.c_str();
-	outPath = s.str();
-}
-
 bool
 AJAFileIO::FileExists(const wstring& fileName) const
 {
 	string aString;
-	wstringToString(fileName, aString);
+    aja::wstring_to_string(fileName, aString);
 	return FileExists(aString);
 }
 
@@ -76,7 +58,7 @@ AJAFileIO::Open(
 	int properties)
 {
 	string aString;
-	wstringToString(fileName,aString);
+    aja::wstring_to_string(fileName,aString);
     AJAStatus status = Open(aString,flags,properties);
 
 	return status;
@@ -363,7 +345,7 @@ AJAFileIO::Delete(const wstring& fileName) const
 	AJAStatus status = AJA_STATUS_FAIL;
 
 	string aString;
-	wstringToString(fileName,aString);
+    aja::wstring_to_string(fileName,aString);
 	status = Delete(aString);
 
 	return status;
@@ -390,7 +372,7 @@ AJAFileIO::ReadDirectory(
 		convertedPath = directory;
 		for (string::iterator it = convertedPath.begin();
 				it < convertedPath.end();
-				it++)
+                ++it)
 		{
 			if( *it == '\\' )
 				*it = '/';
@@ -400,7 +382,7 @@ AJAFileIO::ReadDirectory(
 		upperPattern = filePattern;
 		for (string::iterator it = upperPattern.begin();
 				it < upperPattern.end();
-				it++)
+                ++it)
 		{
 			*it = toupper( *it );
 		}
@@ -449,14 +431,14 @@ AJAFileIO::ReadDirectory(
 	AJAStatus status = AJA_STATUS_FAIL;
 
 	string aDir,aPat;
-	wstringToString(directory,aDir);
-	wstringToString(filePattern,aPat);
+    aja::wstring_to_string(directory,aDir);
+    aja::wstring_to_string(filePattern,aPat);
 	vector<string> aContainer;
 	status = ReadDirectory(aDir,aPat,aContainer);
 	for(vector<string>::iterator i = aContainer.begin(); i != aContainer.end(); ++i)
 	{
 		wstring tmp;
-		stringToWstring(*i,tmp);
+        aja::string_to_wstring(*i,tmp);
 		fileContainer.push_back(tmp);
 	}
 
@@ -491,8 +473,8 @@ AJAFileIO::DoesDirectoryContain(
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 	string aDir,aPat;
-	wstringToString(directory,aDir);
-	wstringToString(filePattern,aPat);
+    aja::wstring_to_string(directory,aDir);
+    aja::wstring_to_string(filePattern,aPat);
 	status = DoesDirectoryContain(aDir,aPat);
 
 	return status;
@@ -520,7 +502,7 @@ AJAFileIO::DoesDirectoryExist(const wstring& directory) const
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 	string aDir;
-	wstringToString(directory,aDir);
+    aja::wstring_to_string(directory,aDir);
 	status = DoesDirectoryExist(aDir);
 
 	return status;

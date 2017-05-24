@@ -13,6 +13,7 @@
 			buildPhases = (
 			);
 			dependencies = (
+				A40162401EBA8295001B8830 /* PBXTargetDependency */,
 				B4A7018016795895001D4AA8 /* PBXTargetDependency */,
 				B4CADAD3180F03A8004C9057 /* PBXTargetDependency */,
 				B4E76F7A16AA1BD700473DBD /* PBXTargetDependency */,
@@ -31,6 +32,11 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		A401623C1EBA8095001B8830 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
+		A401623D1EBA8095001B8830 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
+		A401623E1EBA80A4001B8830 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		A40162471EBA835B001B8830 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A40162431EBA835B001B8830 /* main.cpp */; };
+		A40162491EBA85B8001B8830 /* ntv2democommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */; };
 		B439717716F2BB7900A53B64 /* ntv2outputtestpattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */; };
 		B43C7CB617259D840030A94E /* ntv2ccplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B43C7CB517259D840030A94E /* ntv2ccplayer.cpp */; };
 		B43C7CBC17259FE50030A94E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
@@ -99,6 +105,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A401623F1EBA8295001B8830 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4A7F8B71677FB4C001D4AA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A40162341EBA804E001B8830;
+			remoteInfo = ntv2hdrsetup;
+		};
 		B43C7CB717259D910030A94E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B4A7F8B71677FB4C001D4AA8 /* Project object */;
@@ -179,6 +192,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		A40162331EBA804E001B8830 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		B43C7CA817259A490030A94E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -218,6 +240,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A40162351EBA804E001B8830 /* ntv2hdrsetup */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2hdrsetup; sourceTree = BUILT_PRODUCTS_DIR; };
+		A40162431EBA835B001B8830 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
 		B439717616F2BB7900A53B64 /* ntv2outputtestpattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2outputtestpattern.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.h; sourceTree = SOURCE_ROOT; };
 		B43C7CAA17259A490030A94E /* ntv2ccplayer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2ccplayer; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -270,6 +294,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A40162321EBA804E001B8830 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A401623E1EBA80A4001B8830 /* CoreServices.framework in Frameworks */,
+				A401623C1EBA8095001B8830 /* CoreFoundation.framework in Frameworks */,
+				A401623D1EBA8095001B8830 /* IOKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B43C7CA717259A490030A94E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -382,6 +416,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A40162421EBA835B001B8830 /* ntv2hdrsetup */ = {
+			isa = PBXGroup;
+			children = (
+				A40162431EBA835B001B8830 /* main.cpp */,
+			);
+			name = ntv2hdrsetup;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2hdrsetup;
+			sourceTree = SOURCE_ROOT;
+		};
 		B43C7CB417259B840030A94E /* ntv2ccplayer */ = {
 			isa = PBXGroup;
 			children = (
@@ -482,6 +525,7 @@
 				B4CADAC2180F0134004C9057 /* ntv2burn4kquadrant */,
 				B45183E31935348C00F3D8E9 /* ntv2player4k */,
 				B44C0B0C1B61C25100D7F59A /* ntv2llburn */,
+				A40162351EBA804E001B8830 /* ntv2hdrsetup */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -509,6 +553,7 @@
 				B43C7CB417259B840030A94E /* ntv2ccplayer */,
 				B4A7F8C916781854001D4AA8 /* ntv2enumerateboards */,
 				B46B5F981729AF3E004E84C3 /* ntv2fieldburn */,
+				A40162421EBA835B001B8830 /* ntv2hdrsetup */,
 				B44C0B0F1B61C2B300D7F59A /* ntv2llburn */,
 				B4A7012E167950A3001D4AA8 /* ntv2outputtestpattern */,
 				B4A700C71679479D001D4AA8 /* ntv2player */,
@@ -564,6 +609,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A40162341EBA804E001B8830 /* ntv2hdrsetup */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A401623B1EBA804E001B8830 /* Build configuration list for PBXNativeTarget "ntv2hdrsetup" */;
+			buildPhases = (
+				A40162311EBA804E001B8830 /* Sources */,
+				A40162321EBA804E001B8830 /* Frameworks */,
+				A40162331EBA804E001B8830 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntv2hdrsetup;
+			productName = ntv2hdrsetup;
+			productReference = A40162351EBA804E001B8830 /* ntv2hdrsetup */;
+			productType = "com.apple.product-type.tool";
+		};
 		B43C7CA917259A490030A94E /* ntv2ccplayer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B43C7CB317259A490030A94E /* Build configuration list for PBXNativeTarget "ntv2ccplayer" */;
@@ -750,6 +812,12 @@
 		B4A7F8B71677FB4C001D4AA8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				TargetAttributes = {
+					A40162341EBA804E001B8830 = {
+						CreatedOnToolsVersion = 8.3.2;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = B4A7F8BA1677FB4C001D4AA8 /* Build configuration list for PBXProject "demoapps" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -778,11 +846,21 @@
 				B45183D81935348C00F3D8E9 /* ntv2player4k */,
 				B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */,
 				B4A7017A1679587A001D4AA8 /* BuildAll */,
+				A40162341EBA804E001B8830 /* ntv2hdrsetup */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A40162311EBA804E001B8830 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A40162471EBA835B001B8830 /* main.cpp in Sources */,
+				A40162491EBA85B8001B8830 /* ntv2democommon.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B43C7CA617259A490030A94E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -896,6 +974,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A40162401EBA8295001B8830 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A40162341EBA804E001B8830 /* ntv2hdrsetup */;
+			targetProxy = A401623F1EBA8295001B8830 /* PBXContainerItemProxy */;
+		};
 		B43C7CB817259D910030A94E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B43C7CA917259A490030A94E /* ntv2ccplayer */;
@@ -954,6 +1037,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		A40162391EBA804E001B8830 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A401623A1EBA804E001B8830 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		B43C7CB117259A490030A94E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1260,6 +1357,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A401623B1EBA804E001B8830 /* Build configuration list for PBXNativeTarget "ntv2hdrsetup" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A40162391EBA804E001B8830 /* Debug */,
+				A401623A1EBA804E001B8830 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		B43C7CB317259A490030A94E /* Build configuration list for PBXNativeTarget "ntv2ccplayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

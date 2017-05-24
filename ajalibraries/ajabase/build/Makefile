@@ -17,7 +17,7 @@ else
 endif
 AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
-VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence
+VPATH    = $(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence:$(A_LIB_BASE_PATH)/network
 
 CPPFLAGS += -DAJA_LINUX
 
@@ -26,6 +26,7 @@ AJA_LIB_SRCS =\
 	audioutilities.cpp \
 	buffer.cpp \
 	cli_utils.cpp \
+	common.cpp \
 	debug.cpp \
 	dpx_hdr.cpp \
 	dpxfileio.cpp \
@@ -33,6 +34,8 @@ AJA_LIB_SRCS =\
 	eventimpl.cpp \
 	file_io.cpp \
 	guid.cpp \
+	info.cpp \
+	infoimpl.cpp \
 	ip_socket.cpp \
 	lock.cpp \
 	lockimpl.cpp \

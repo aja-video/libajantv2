@@ -1,13 +1,13 @@
 /**
-	@file		tcp_socket.cpp
+	@file		udp_socket.cpp
 	@copyright	Copyright (C) 2011-2017 AJA Video Systems, Inc.  All rights reserved.
-	@brief		Implements the AJATCPSocket class.
+	@brief		Implements the AJAUDPSocket class.
 **/
 
 /////////////////////////////
 // Includes
 /////////////////////////////
-#include "ajabase/system/tcp_socket.h"
+#include "ajabase/network/udp_socket.h"
 #include "ajabase/system/debug.h"
 #include <errno.h>
 #include <string.h>
@@ -22,8 +22,7 @@ using std::string;
 /////////////////////////////
 // Defines
 /////////////////////////////
-#define DEBUG_TCP_OPERATION   0
-#define MAX_PENDING           10
+#define DEBUG_UDP_OPERATION   0
 
 
 /////////////////////////////
@@ -32,7 +31,7 @@ using std::string;
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJATCPSocket::AJATCPSocket(void)
+AJAUDPSocket::AJAUDPSocket(void)
 {
 }
 
@@ -40,7 +39,7 @@ AJATCPSocket::AJATCPSocket(void)
 ///////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////
-AJATCPSocket::~AJATCPSocket(void)
+AJAUDPSocket::~AJAUDPSocket(void)
 {
 }
 
@@ -49,11 +48,11 @@ AJATCPSocket::~AJATCPSocket(void)
 //
 ///////////////////////////////////////////////////////////
 AJAStatus
-AJATCPSocket::Open(const string& ipAddress, uint16_t port)
+AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 {
 	if ((true == IsInstantiated()) && (-1 == mSocket))
 	{
-		if (-1 != (mSocket = (int) socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)))
+		if (-1 != (mSocket = (int) socket(AF_INET, SOCK_DGRAM, 0)))
 		{
 			if (0 == ipAddress.length())
 			{
@@ -72,15 +71,15 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 						(struct sockaddr*) &mSocketAddress,
 						sizeof(struct sockaddr_in)))
 			{
-#if DEBUG_TCP_OPERATION
+#if DEBUG_UDP_OPERATION
 				cerr << __FUNCTION__
 					<< ": Socket created and bound"
 					<< endl;
 #endif
-				return (AJA_STATUS_SUCCESS);
+                return AJA_STATUS_SUCCESS;
 			}
 
-#if DEBUG_TCP_OPERATION
+#if DEBUG_UDP_OPERATION
 			cerr << __FUNCTION__
 				<< ": Unable to bind the socket (errno:"
 				<< strerror(errno)
@@ -91,7 +90,7 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 		}
 		else
 		{
-#if DEBUG_TCP_OPERATION
+#if DEBUG_UDP_OPERATION
 			cerr << __FUNCTION__
 				<< ": Unable to create a socket (errno:"
 				<< strerror(errno)
@@ -100,103 +99,7 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 #endif
 		}
 	}
-	return (AJA_STATUS_FAIL);
-}
-
-
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
-AJAStatus
-AJATCPSocket::Connect(const string& ipAddress, uint16_t port)
-{
-	struct sockaddr_in serverAddress;
-
-	if ((-1 != mSocket) && (0 != ipAddress.length()))
-	{
-		memset(&serverAddress, 0, sizeof(struct sockaddr_in));
-		serverAddress.sin_family      = AF_INET;
-		serverAddress.sin_addr.s_addr = inet_addr(ipAddress.c_str());
-		serverAddress.sin_port        = htons(port);
-
-		if (0 == connect(
-					mSocket,
-					(struct sockaddr*) &serverAddress,
-					sizeof(struct sockaddr_in)))
-		{
-			return (AJA_STATUS_SUCCESS);
-		}
-	}
-	return (AJA_STATUS_FAIL);
-}
-
-
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
-AJAStatus
-AJATCPSocket::Listen(void)
-{
-	if (-1 != mSocket)
-	{
-		if (0 == listen(mSocket, MAX_PENDING))
-		{
-			return (AJA_STATUS_SUCCESS);
-		}
-	}
-	return (AJA_STATUS_FAIL);
-}
-
-
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
-int
-AJATCPSocket::Accept(void)
-{
-	if (-1 != mSocket)
-	{
-		struct sockaddr_in client;
-		socklen_t          length = sizeof(struct sockaddr_in);
-		int                sock;
-
-		memset(&client, 0, sizeof(struct sockaddr_in));
-
-		if ((sock = accept(mSocket, (struct sockaddr*) &client, &length)) < 0)
-		{
-			// If we have an EINVAL error, then either the address length
-			// is invalid, or we are not listening to connections -- which
-			// likely means that we shutting down.
-			if (errno != EINVAL)
-			{
-				cerr << __FUNCTION__
-					<< ": Did not accept a connect-request from "
-					<< inet_ntoa(client.sin_addr)
-					<< " (errno:"
-					<< errno
-					<< ")"
-					<< endl;
-			}
-			else
-			{
-				cout << __FUNCTION__
-					<< ": Not listening for connections"
-					<< endl;
-			}
-		}
-		else
-		{
-			cout << __FUNCTION__
-				<< ": Accepted the connect-request from "
-				<< inet_ntoa(client.sin_addr)
-				<< ", socket "
-				<< sock
-				<< endl;
-
-			return (sock);
-		}
-	}
-	return (-1);
+    return AJA_STATUS_FAIL;
 }
 
 
@@ -204,27 +107,103 @@ AJATCPSocket::Accept(void)
 //
 ///////////////////////////////////////////////////////////
 uint32_t
-AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength)
+AJAUDPSocket::Poll(
+				uint8_t*            pData,
+				uint32_t            dataLength,
+				struct sockaddr_in& client,
+				int                 timeout)
 {
-	int bytesReceived = 0;
+	int retVal = 0;
+
+	if (-1 != mSocket)
+	{
+#if defined(AJA_LINUX) || defined(AJA_MAC)
+		struct pollfd fds[1];
+
+		fds[0].fd     = mSocket;
+		fds[0].events = POLLIN;
+
+		if (0 < (retVal = poll(fds, 1, timeout)))
+		{
+			if (fds[0].revents & POLLIN)
+			{
+				return (Read(pData, dataLength, client));
+			}
+			else
+			{
+				AJA_REPORT(
+					0,
+					AJA_DebugSeverity_Warning,
+					"AJAUDPSocket::Poll (errno:%d)",
+					errno);
+#if DEBUG_UDP_OPERATION
+				cerr << __FUNCTION__
+					<< ": poll event (errno:"
+					<< errno
+					<< ")"
+					<< endl;
+#endif
+				return (0);
+			}
+		}
+		else if (0 == retVal)
+		{
+			// Timed-out
+#if DEBUG_UDP_OPERATION
+			cerr << __FUNCTION__ << ": time-out" << endl;
+#endif
+		}
+		else
+		{
+			AJA_REPORT(
+				0,
+				AJA_DebugSeverity_Error,
+				"AJAUDPSocket::Poll failed (errno:%d)",
+				errno);
+#if DEBUG_UDP_OPERATION
+			cerr << __FUNCTION__
+				<< ": poll errno:"
+				<< errno
+				<< " (retVal:"
+				<< retVal
+				<< ")"
+				<< endl;
+#endif
+		}
+#endif
+	}
+	return uint32_t(retVal);
+}
+
+
+///////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////
+uint32_t
+AJAUDPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
+{
+	socklen_t socketLength = sizeof(struct sockaddr_in);
+	int       bytesReceived = 0;
 
 	if (-1 != mSocket)
 	{
 		if (0 >= (bytesReceived =
-					recv(
+					recvfrom(
 						mSocket,
 						(char*) pData,
 						dataLength,
-						0)))
+						0,
+						(struct sockaddr*) &client,
+						&socketLength)))
 		{
 			if (0 != bytesReceived)
 			{
 				AJA_REPORT(
 					0,
 					AJA_DebugSeverity_Error,
-					"AJATCPSocket::Read failed (errno:%d)",
+					"AJAUDPSocket::Read failed (errno:%d)",
 					errno);
-#if DEBUG_TCP_OPERATION
+#if DEBUG_UDP_OPERATION
 				cerr << __FUNCTION__
 					<< ": recvfrom errno:"
 					<< errno
@@ -241,19 +220,24 @@ AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength)
 //
 ///////////////////////////////////////////////////////////
 uint32_t
-AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
+AJAUDPSocket::Write(
+					const uint8_t*      pData,
+					uint32_t            dataLength,
+					struct sockaddr_in& targetAddress)
 {
 	int bytesSent = 0;
 
 	if (-1 != mSocket)
 	{
-		if (-1 == (bytesSent = send(
+		if (-1 == (bytesSent = sendto(
 									mSocket,
 									(char*) pData,
 									(int) dataLength,
-									0)))
+									0,
+									(struct sockaddr*) &targetAddress,
+									sizeof(struct sockaddr_in))))
 		{
-#if DEBUG_TCP_OPERATION
+#if DEBUG_UDP_OPERATION
 			cerr << __FUNCTION__
 				<< ": sendto errno:"
 				<< errno
@@ -263,6 +247,3 @@ AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
 	}
 	return uint32_t(bytesSent);
 }
-
-
-//////////////////////// End of tcp_socket.cpp //////////////////////

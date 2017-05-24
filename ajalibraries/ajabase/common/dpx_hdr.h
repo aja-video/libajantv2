@@ -251,7 +251,7 @@ public:
     DpxHdr(void) { init(DPX_C_MAGIC_BE); }
 	~DpxHdr();
 
-    DpxHdr operator=(const DpxHdr& rhs );
+    DpxHdr& operator=(const DpxHdr& rhs);
 
     void  init(uint32_t endianness);
     bool  valid() const;

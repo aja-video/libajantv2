@@ -4,7 +4,7 @@
 	@brief		Implements the AJAFileIO class on the Windows platform.
 **/
 
-
+#include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -32,21 +32,6 @@ int64_t FileTime_to_POSIX(FILETIME ft)
 	return (int64_t)(date.QuadPart / 10000000);
 }
 
-void wstringToString(wstring inPath, string& outPath)
-{
-	char* tmp = new char[inPath.length()];
-	::wcstombs(tmp,inPath.c_str(),inPath.length());
-	outPath.assign(tmp);
-	delete tmp;
-}
-
-void stringToWstring(string inPath, wstring& outPath)
-{
-	std::wstringstream s;
-	s << inPath.c_str();
-	outPath = s.str();
-}
-
 bool
 AJAFileIO::FileExists(const wstring& fileName) const
 {
@@ -66,7 +51,6 @@ AJAFileIO::AJAFileIO(void)
 	mFileDescriptor = INVALID_HANDLE_VALUE;
 }
 
-
 AJAFileIO::~AJAFileIO(void)
 {
 	Close();
@@ -79,7 +63,7 @@ AJAFileIO::Open(
 	const int				properties)
 {
 	wstring wString;
-	stringToWstring(fileName,wString);
+    aja::string_to_wstring(fileName,wString);
 	AJAStatus status = Open(wString,flags,properties);
 
 	return status;

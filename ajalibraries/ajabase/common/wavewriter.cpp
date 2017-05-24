@@ -102,7 +102,7 @@ AJAStatus AJAWavWriter::Close(void)
 bool AJAWavWriter::open()
 {
     bool retVal = false;
-    AJAStatus result = Open(mFileName.c_str(),eAJACreateAlways | eAJAWriteOnly,eAJABuffered);
+    AJAStatus result = Open(mFileName,eAJACreateAlways | eAJAWriteOnly,eAJABuffered);
     if(result == AJA_STATUS_SUCCESS)
     {
         writeHeader();

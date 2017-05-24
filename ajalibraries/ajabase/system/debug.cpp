@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #endif
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -311,7 +312,7 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 		{
 			pFormat = (char*) "no message";
 		}
-		vsnprintf(spShare->messageRing[messageIndex].messageText, AJA_DEBUG_MESSAGE_MAX_SIZE, pFormat, vargs);
+        ajavsnprintf(spShare->messageRing[messageIndex].messageText, AJA_DEBUG_MESSAGE_MAX_SIZE, pFormat, vargs);
 		va_end(vargs);
 
 		// set last to indicate message complete
@@ -323,12 +324,13 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 }
 
 void 
-AJADebug::Assert(const char* pFileName, int32_t lineNumber, const char* pExpression)
+AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression)
 {
+#if defined(AJA_DEBUG)
 	// check for open
 	if (spShare == NULL)
 	{
-		throw;
+        assert(false);
 	}
 
 	try
@@ -369,7 +371,12 @@ AJADebug::Assert(const char* pFileName, int32_t lineNumber, const char* pExpress
 	{
 	}
 
-	throw;
+    assert(false);
+#else
+    AJA_UNUSED(pFileName);
+    AJA_UNUSED(lineNumber);
+    AJA_UNUSED(pExpression);
+#endif
 }
 
 
@@ -792,12 +799,14 @@ AJADebug::RestoreState(char* pFileName)
 		version = intVersion;
 		if((count != 1) || (version != spShare->version))
 		{
+            fclose(pFile);
 			return AJA_STATUS_FAIL;
 		}
 		count = fscanf(pFile, " AJADebugStateFileVersion: %d", &intVersion);
 		version = intVersion;
 		if((count != 1) || (version != AJA_DEBUG_STATE_FILE_VERSION))
 		{
+            fclose(pFile);
 			return AJA_STATUS_FAIL;
 		}
 
@@ -822,6 +831,7 @@ AJADebug::RestoreState(char* pFileName)
 	}
 	catch(...)
 	{
+        fclose(pFile);
 		return AJA_STATUS_FAIL;
 	}
 

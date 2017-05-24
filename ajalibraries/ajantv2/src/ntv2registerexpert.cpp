@@ -146,6 +146,8 @@ class RegisterExpert
 			DefineRegister (kRegSDIOut7Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7,	kRegClass_NULL);
 			DefineRegister (kRegSDIOut8Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8,	kRegClass_NULL);
 
+			DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
+
 			DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 			//	Anc Ins/Ext
@@ -832,6 +834,8 @@ private:
 			DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 			DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
 			DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");
+			DefineRegName	(kVRegZeroHostAncPostCapture,			"kVRegZeroHostAncPostCapture");
+			DefineRegName	(kVRegZeroDeviceAncPostCapture,			"kVRegZeroDeviceAncPostCapture");
 			DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 			DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
@@ -1043,8 +1047,7 @@ public:
 		//	of a register value, given its number and the ID of the device it came from.
 		struct Decoder
 		{
-			//	This functor returns a string that contains a human-readable decoding of a register number, its value,
-			//	and the ID of the device it was read from.
+			//	The default reg decoder functor returns an empty string.
 			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 			{
 				(void) inRegNum;
@@ -1178,8 +1181,8 @@ public:
 				const bool		isOn	((inRegValue & (1 << 29)) != 0);
 				const uint16_t	format	((inRegValue >> 15) & 0x1F);
 				ostringstream	oss;
-				oss << "\t" << OnOff(isOn) << endl
-					<< "\tFormat=0x" << hex << format << dec << "(" << format << ")";
+				oss << OnOff(isOn)	<< endl
+					<< "Format: "	<< xHEX0N(format,4) << " (" << DEC(format) << ")";
 				return oss.str();
 			}
 		}	mDecodeFBControlReg;
@@ -1196,8 +1199,8 @@ public:
 				const double	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
 				const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 				ostringstream	oss;
-				oss << "\tDie Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit"	<< endl
-					<< "\tCore Voltage: " << fDEC(voltage,5,2) << " Volts DC";
+				oss << "Die Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit"	<< endl
+					<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
 				return oss.str();
 			}
 		}	mDecodeSysmonVccIntDieTemp;
@@ -1211,11 +1214,89 @@ public:
 				const bool		is16x9	((inRegValue & (1 << 31)) != 0);
 				const bool		isMono	((inRegValue & (1 << 30)) != 0);
 				ostringstream	oss;
-				oss << "\tAspect Ratio: " << (is16x9 ? "16x9" : "4x3") << endl
-					<< "\tDepth: " << (isMono ? "Monochrome" : "Color");
+				oss << "Aspect Ratio: " << (is16x9 ? "16x9" : "4x3") << endl
+					<< "Depth: " << (isMono ? "Monochrome" : "Color");
 				return oss.str();
 			}
 		}	mDecodeVidControlReg;
+
+		struct DecodeInputStatusReg : public Decoder
+		{
+			virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+			{
+				(void) inRegNum;
+				(void) inDeviceID;
+				NTV2FrameRate	fRate1	(NTV2FrameRate( (inRegValue & (BIT( 0)|BIT( 1)|BIT( 2)        ))        | ((inRegValue & BIT(28)) >> (28-3)) ));
+				NTV2FrameRate	fRate2	(NTV2FrameRate(((inRegValue & (BIT( 8)|BIT( 9)|BIT(10)        )) >>  8) | ((inRegValue & BIT(29)) >> (29-3)) ));
+				NTV2FrameRate	fRateRf	(NTV2FrameRate(((inRegValue & (BIT(16)|BIT(17)|BIT(18)|BIT(19))) >> 16)                                      ));
+				ostringstream	oss;
+				oss	<< "Input 1 Frame Rate: " << ::NTV2FrameRateToString(fRate1, true) << endl
+					<< "Input 1 Geometry: ";
+				if (BIT(30) & inRegValue)
+					switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+					{
+						case 0:		oss << "2K x 1080";		break;
+						case 1:		oss << "2K x 1556";		break;
+						default:	oss << "Invalid HI";	break;
+					}
+				else
+					switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+					{
+						case 0:				oss << "Unknown";		break;
+						case 1:				oss << "525";			break;
+						case 2:				oss << "625";			break;
+						case 3:				oss << "750";			break;
+						case 4:				oss << "1125";			break;
+						case 5:				oss << "1250";			break;
+						case 6:	case 7:		oss << "Reserved";		break;
+						default:			oss << "Invalid LO";	break;
+					}
+				oss	<< endl
+					<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
+					<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
+					<< "Input 2 Geometry: ";
+				if (BIT(30) & inRegValue)
+					switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+					{
+						case 0:		oss << "2K x 1080";		break;
+						case 1:		oss << "2K x 1556";		break;
+						default:	oss << "Invalid HI";	break;
+					}
+				else
+					switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+					{
+						case 0:				oss << "Unknown";		break;
+						case 1:				oss << "525";			break;
+						case 2:				oss << "625";			break;
+						case 3:				oss << "750";			break;
+						case 4:				oss << "1125";			break;
+						case 5:				oss << "1250";			break;
+						case 6:	case 7:		oss << "Reserved";		break;
+						default:			oss << "Invalid LO";	break;
+					}
+				oss	<< endl
+					<< "Input 2 Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
+					<< "Reference Frame Rate: " << ::NTV2FrameRateToString(fRateRf, true) << endl
+					<< "Reference Geometry: ";
+				switch (((BIT(20)|BIT(21)|BIT(22)|BIT(23)) & inRegValue) >> 20)
+				{
+					case 0:					oss << "Unknown";		break;
+					case 1:					oss << "525";			break;
+					case 2:					oss << "625";			break;
+					case 3:					oss << "750";			break;
+					case 4:					oss << "1125";			break;
+					case 5: case 6: case 7:	oss << "N/A";			break;
+					default:				oss << "Invalid";		break;
+				}
+				oss	<< endl
+					<< "Reference Scan Mode: " << ((BIT(23) & inRegValue) ? "Progressive" : "Interlaced") << endl
+					<< "AES Channel 1-2: " << ((BIT(24) & inRegValue) ? "Invalid" : "Valid") << endl
+					<< "AES Channel 3-4: " << ((BIT(25) & inRegValue) ? "Invalid" : "Valid") << endl
+					<< "AES Channel 5-6: " << ((BIT(26) & inRegValue) ? "Invalid" : "Valid") << endl
+					<< "AES Channel 7-8: " << ((BIT(27) & inRegValue) ? "Invalid" : "Valid");
+				return oss.str();
+			}
+		}	mDecodeInputStatusReg;
 
 		struct DecodeAudDetectReg : public Decoder
 		{
@@ -1401,7 +1482,7 @@ public:
 					default:	return "Invalid register type";	break;
 				}
 				oss	<< byteTotal	<< endl
-					<< "Overrun: "	<< (overrun ? "yes" : "no");
+					<< "Overrun: "	<< YesNo(overrun);
 				return oss.str();
 			}
 		}	mDecodeAncExtStatus;

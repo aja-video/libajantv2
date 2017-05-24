@@ -121,8 +121,9 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_StatsGeneric				= 81,
 	AJA_DebugUnit_AJACCLib					= 82,
 	AJA_DebugUnit_AJAAncLib					= 83,
+	AJA_DebugUnit_QuickTime					= 84,
 
-    AJA_DebugUnit_Size						= 84
+    AJA_DebugUnit_Size						= 85
 } AJADebugUnit;
 
 

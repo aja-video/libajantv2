@@ -3154,24 +3154,6 @@ bool CNTV2WinDriverInterface::StartDriver( DriverStartPhase phase )
 	return false;
 }
 
-bool CNTV2WinDriverInterface::GetQuicktimeUsingBoard( ULWord* qtApp )
-{
-	return ReadRegister(kVRegQuicktimeUsingBoard, qtApp);
-}
-
-bool CNTV2WinDriverInterface::SetDefaultVideoOutMode ( uint32_t mode,
-													   uint32_t channel,
-													   uint32_t frameNum,
-													   uint32_t initializing )
-{
-	return WriteRegister(kVRegDefaultVideoOutMode, mode);
-}
-
-bool CNTV2WinDriverInterface::GetDefaultVideoOutMode( ULWord* pMode )
-{
-	return ReadRegister(kVRegDefaultVideoOutMode, pMode);
-}
-
 //--------------------------------------------------------------------------------------------------------------------
 //	Get/Set Debug Levels
 //--------------------------------------------------------------------------------------------------------------------

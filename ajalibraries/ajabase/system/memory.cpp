@@ -72,7 +72,7 @@ AJAMemory::Allocate(size_t memorySize)
 		return NULL;
 	}
 
-	void* pMemory = NULL;
+    void* pMemory;
 	
 	// allocate memory with no specific alignment
 #if defined(AJA_WINDOWS)
@@ -204,7 +204,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	std::list<SharedData>::iterator shareIter;
 
-	for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); shareIter++)
+    for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); ++shareIter)
 	{
 		// if share name match return this share
 		if (name == shareIter->shareName)
@@ -343,7 +343,7 @@ AJAMemory::FreeShared(void* pMemory)
 
 	// look for memory at the same address
 	std::list<SharedData>::iterator shareIter;
-	for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); shareIter++)
+    for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); ++shareIter)
 	{
 		if (pMemory == shareIter->pMemory)
 		{
