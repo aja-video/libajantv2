@@ -92,9 +92,11 @@ public:
     uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling    videoSamples;
-    uint32_t     payloadLen;
-    uint32_t     lastPayloadLen;
-    uint32_t     pktsPerLine;
+    uint32_t    payloadLen;
+    uint32_t    lastPayloadLen;
+    uint32_t    pktsPerLine;
+    uint32_t    audioChannels;
+    uint32_t    audioSamplesPerPkt;
 };
 
 

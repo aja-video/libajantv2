@@ -94,31 +94,9 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg3190_depkt_control                  (0x0000/4)
-#define kReg3190_depkt_num_samples              (0x0010/4)
-#define kReg3190_depkt_num_audio_chans          (0x0018/4)
-#define kReg3190_depkt_pkt_type                 (0x0020/4)
-#define kReg3190_depkt_pkt_type_valid           (0x0024/4)
-#define kReg3190_depkt_chan_num                 (0x0028/4)
-#define kReg3190_depkt_chan_num_valid           (0x002c/4)
-#define kReg3190_depkt_pkt_len                  (0x0030/4)
-#define kReg3190_depkt_pkt_len_valid            (0x0034/4)
-#define kReg3190_depkt_payload_type             (0x0038/4)
-#define kReg3190_depkt_payload_type_valid       (0x003c/4)
-#define kReg3190_depkt_rx_pkt_cnt               (0x0040/4)
-#define kReg3190_depkt_chan_status_0            (0x0048/4)
-#define kReg3190_depkt_chan_status_1            (0x0050/4)
-#define kReg3190_depkt_chan_status_2            (0x0058/4)
-#define kReg3190_depkt_chan_status_3            (0x0060/4)
-#define kReg3190_depkt_chan_status_4            (0x0068/4)
-#define kReg3190_depkt_chan_status_5            (0x0070/4)
-#define kReg3190_depkt_user_data_0              (0x0078/4)
-#define kReg3190_depkt_user_data_1              (0x0080/4)
-#define kReg3190_depkt_user_data_2              (0x0088/4)
-#define kReg3190_depkt_user_data_3              (0x0090/4)
-#define kReg3190_depkt_user_data_4              (0x0098/4)
-#define kReg3190_depkt_user_data_5              (0x00a0/4)
-#define kReg3190_depkt_stat_reset               (0x00b0/4)
+#define kReg3190_depkt_enable                   0
+#define kReg3190_depkt_config                   1
+#define kReg3190_depkt_rx_pkt_count             2
 
 /////////////////////////////////////////////////////////////////////
 //

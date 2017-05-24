@@ -480,23 +480,23 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         // payload length last
         mDevice.WriteRegister(kReg4175_depkt_payload_len_last + depacketizerBaseAddr,payloadLengthLast);
 
+        // enable video depacketizer
+        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
+        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
         // end setup 4175 depacketizer
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 depacketizer
 
-        // num samples
-        mDevice.WriteRegister(kReg3190_depkt_num_samples + depacketizerBaseAddr,48);
+        uint32_t num_samples  = rxConfig.audioSamplesPerPkt;
+        uint32_t num_channels = rxConfig.audioChannels;
+        uint32_t val = (num_samples << 8) + num_channels;
+        mDevice.WriteRegister(kReg3190_depkt_config + depacketizerBaseAddr,val);
 
         // audio channels
-        mDevice.WriteRegister(kReg3190_depkt_num_audio_chans + depacketizerBaseAddr,2);
+        mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr,0x01);
     }
-
-
-    // enable depacketizer
-    mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
-    mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
 }
 
 bool  CNTV2Config2110::GetRxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
