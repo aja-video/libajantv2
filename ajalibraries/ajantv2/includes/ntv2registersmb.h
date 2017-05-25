@@ -111,6 +111,10 @@
 #define kRegSarekPGMPIDs            40
 #define kRegSarekAudioPIDs          56
 
+#define kRegSarekBlk2Unused         72
+#define kRegSarek2022_7enb          80
+
+
 // Encoder block regs
 #define kRegSarekEncodeVideoFormat1     (ENCODER_BLOCK_BASE+0)
 #define kRegSarekEncodeUllMode1         (ENCODER_BLOCK_BASE+1)

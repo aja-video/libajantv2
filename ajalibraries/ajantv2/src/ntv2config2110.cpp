@@ -824,19 +824,43 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
-        // setup 4175 packetizer
+        // setup 3190 packetizer
+        NTV2AudioSystem audioSys;
+        switch (channel)
+        {
+        default:
+        case NTV2_CHANNEL1:
+            audioSys = NTV2_AUDIOSYSTEM_1;
+            break;
+        case NTV2_CHANNEL2:
+            audioSys = NTV2_AUDIOSYSTEM_2;
+            break;
+        case NTV2_CHANNEL3:
+            audioSys = NTV2_AUDIOSYSTEM_3;
+            break;
+        case NTV2_CHANNEL4:
+            audioSys = NTV2_AUDIOSYSTEM_4;
+            break;
+        }
+
+        uint32_t audioChans = 16;
+        mDevice.GetNumberAudioChannels (audioChans,audioSys);
+        if (audioChans < 8)   audioChans = 8;
+        if (audioChans < 16)  audioChans = 16;
+        uint32_t samples = (audioChans == 8) ? 48 : 6;
+        uint32_t plength = audioChans * samples * 3;
 
         // num samples
-        mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer,48);
+        mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, samples);
 
         // audio channels
-        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer,2);
+        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, audioChans);
 
         // payload length
-        mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer,0x120);
+        mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer, plength);
 
         // payload type
-        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer,txConfig.payloadType);
+        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payloadType);
 
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
