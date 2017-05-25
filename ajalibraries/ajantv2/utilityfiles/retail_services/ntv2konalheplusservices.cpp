@@ -742,7 +742,8 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	const bool				bRGBOut	= false;
 	const bool				kNot48Bit = false;
 	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a, vpidOut2a;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut2a(0);
 	bool					vpid16x9 = true;
 	
 	

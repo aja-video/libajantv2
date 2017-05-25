@@ -1330,7 +1330,14 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	
 	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
+	ULWord					vpidOut3a(0);
+	ULWord					vpidOut3b(0);
+	ULWord					vpidOut4a(0);
+	ULWord					vpidOut4b(0);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
@@ -1816,7 +1823,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 		}
-		//printf("vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
+		//printf("b vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
 	}
 
 

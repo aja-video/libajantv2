@@ -2060,7 +2060,14 @@ void Corvid88Services::SetDeviceMiscRegisters (NTV2Mode mode)
 	
 	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
+	ULWord					vpidOut3a(0);
+	ULWord					vpidOut3b(0);
+	ULWord					vpidOut4a(0);
+	ULWord					vpidOut4b(0);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
 	// single wire 3Gb out
