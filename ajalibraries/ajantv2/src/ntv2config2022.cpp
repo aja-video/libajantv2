@@ -647,8 +647,8 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
 
     if (enable && _biDirectionalChannels)
     {
-        bool txEnabled;
-        GetTxChannelEnable(channel,txEnabled);
+        bool txEnabled, tx20227Enabled;
+        GetTxChannelEnable(channel, txEnabled, tx20227Enabled);
         if (txEnabled)
         {
             // disable tx channel
@@ -1152,15 +1152,30 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
     return true;
 }
 
-bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled, bool & enable2022_7)
 {
     uint32_t baseAddr;
+    uint32_t val;
+    bool rv;
+
+    if (_is2022_7)
+    {
+        // Select secondary channel
+        rv = SelectTxChannel(channel, false, baseAddr);
+        if (!rv) return false;
+
+        ReadChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr, &val);
+        enable2022_7 = (val == 0x01);
+    }
+    else
+    {
+        enable2022_7 = false;
+    }
 
     // select primary channel
-    bool rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, true, baseAddr);
     if (!rv) return false;
 
-    uint32_t val;
     ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
     enabled = (val == 0x01);
 
