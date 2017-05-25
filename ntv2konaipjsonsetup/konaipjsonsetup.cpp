@@ -503,7 +503,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         if (++found == 2)     // super-kludge!!
         {
-            bool rv = config2110.ConfigureRxChannel (channel, rxChannelConfig[0],rxChannelConfig[1]);
+            bool rv = config2110.EnableRxStream (channel, rxChannelConfig[0],rxChannelConfig[1]);
             if (!rv)
             {
                 cerr << "FAILED: " << config2110.getLastError() << endl;
