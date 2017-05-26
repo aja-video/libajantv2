@@ -22,10 +22,12 @@ NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
 MACAddr toMAC(QString mac);
 
-CKonaIpJsonSetup::CKonaIpJsonSetup()
-{    is2110       = false;
+#undef CABLE_ME_SIMPLE
 
-     enable2022_7 = false;
+CKonaIpJsonSetup::CKonaIpJsonSetup()
+{
+    is2110       = false;
+    enable2022_7 = false;
 }
 
 bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
@@ -38,6 +40,7 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         QJsonObject sfpObject = sfpArray[sfpIndex].toObject();
         SFPStruct sfpStruct;
+
         sfpStruct.mSFPDesignator = sfpObject["designator"].toString();
         cout << "SFPDesignator " << sfpStruct.mSFPDesignator.toStdString() << endl;
 
@@ -70,10 +73,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
         cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
+
         receiveStruct.mStream = receiveChannelObject["stream"].toString();
         if (!receiveStruct.mStream.isEmpty())
             cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
-
 
         receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
         if (!receiveStruct.mSrcPort.isEmpty())
@@ -157,10 +160,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         transmitStruct.mChannelDesignator = transmitChannelObject["designator"].toString();
         cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << endl;
+
         transmitStruct.mStream = transmitChannelObject["stream"].toString();
         if (!transmitStruct.mStream.isEmpty())
             cout << "Stream " << transmitStruct.mStream.toStdString() << endl;
-
 
         transmitStruct.mPrimaryLocalPort = transmitChannelObject["primaryLocalPort"].toString();
         cout << "PrimaryLocalPort " << transmitStruct.mPrimaryLocalPort.toStdString() << endl;
@@ -288,7 +291,10 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
-    {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
+    {
+        cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;
+        return false;
+    }
     //if (!mDevice.IsKonaIPDevice ())
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
@@ -306,25 +312,25 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
     if (mKonaIPParams.mSFPs.size() < 1)
     {
-        {cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;  return false;}
+        {
+            cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;
+            return false;
+        }
     }
 
     QListIterator<SFPStruct> sfpIter(mKonaIPParams.mSFPs);
     while (sfpIter.hasNext())
     {
         SFPStruct sfp = sfpIter.next();
-
         if ( sfp.mSFPDesignator == "top")
         {
-            config2022.SetNetworkConfiguration (SFP_TOP,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            config2022.SetNetworkConfiguration (SFP_TOP,   sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
             enable2022_7 = getEnable(sfp.mEnable2022_7);
         }
-        else
-            if ( sfp.mSFPDesignator == "bottom")
-            {
-                config2022.SetNetworkConfiguration (SFP_BOTTOM,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
-
-            }
+        else if ( sfp.mSFPDesignator == "bottom")
+        {
+            config2022.SetNetworkConfiguration (SFP_BOTTOM, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+        }
     }
 
     cerr << "## receiveIter" << endl;
@@ -400,7 +406,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     CNTV2Config2110	config2110 (device);
 
-    config2110.SetIGMPVersion(eIGMPVersion_2);
+#ifdef CABLE_ME_SIMPLE
+    //config2110.SetIGMPVersion(eIGMPVersion_2);
+#endif
 
     if (!PTPMasterAddr.isEmpty())
     {
@@ -438,14 +446,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     cerr << "## receiveIter" << endl;
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
 
-    bool hasRx = false;
-
+#ifdef CABLE_ME_SIMPLE
     if (receiveIter.hasNext())
     {
-        hasRx = true;
-
-        // video
-        //device.SetVideoFormat (NTV2_FORMAT_720p_5994, false, false, NTV2_CHANNEL2);
         device.Connect(NTV2_XptHDMIOutQ1Input, NTV2_XptSDIIn1);
         device.Connect(NTV2_XptFrameBuffer2Input,NTV2_XptSDIIn1);
         device.SetFrameBufferFormat (NTV2_CHANNEL2, NTV2_FBF_10BIT_YCBCR);
@@ -458,6 +461,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         device.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
         device.WriteRegister(kRegAudioOutputSourceMap,0);
     }
+#endif
 
     rx_2110Config rxChannelConfig;
     while (receiveIter.hasNext())
@@ -471,11 +475,11 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         NTV2Stream stream;
         if (receive.mStream == "audio1")
         {
-            stream     = NTV2_AUDIO1_STREAM;
+            stream = NTV2_AUDIO1_STREAM;
         }
         else
         {
-            stream     = NTV2_VIDEO_STREAM;
+            stream = NTV2_VIDEO_STREAM;
         }
 
         bool enable = getEnable(receive.mEnable);
@@ -523,12 +527,14 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     QListIterator<TransmitStruct> transmitIter(mKonaIPParams.mTransmitChannels);
 
+#ifdef CABLE_ME_SIMPLE
     if (transmitIter.hasNext())
     {
         // video
         device.SetEveryFrameServices(NTV2_OEM_TASKS);
         device.Connect(NTV2_XptSDIOut1Input,NTV2_XptFrameBuffer1YUV);
     }
+#endif
 
     while (transmitIter.hasNext())
     {
