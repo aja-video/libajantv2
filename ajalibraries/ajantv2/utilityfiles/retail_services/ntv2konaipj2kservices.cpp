@@ -1148,8 +1148,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-	bool					rv, rv2, enable;
-	uint32_t				enableHw;
+	bool					rv, rv2, enable, enable2022_7;
+	uint32_t				enableSv;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
@@ -1196,14 +1196,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
 			rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
-			mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
+			mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableSv);
 
 			if (rv && rv2)
 			{
-				if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1))
+				if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1))
 				{
 					// Special case we handle channel enables at service level automatically
-					mRx2022Config1.rxc_enable = enableHw ? true : false;
+					mRx2022Config1.rxc_enable = enableSv ? true : false;
 					setRxConfig(NTV2_CHANNEL1);
 					
 					// for now just configure the decoder with defaults everytime we configure the RX channel
@@ -1240,14 +1240,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			{
 				rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
 				rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
-				mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
+				mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableSv);
 
 				if (rv && rv2)
 				{
-					if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2))
+					if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2))
 					{
 						// Special case we handle channel enables at service level automatically
-						mRx2022Config2.rxc_enable = enableHw ? true : false;
+						mRx2022Config2.rxc_enable = enableSv ? true : false;
 						setRxConfig(NTV2_CHANNEL2);
 					}
 				}
@@ -1263,15 +1263,15 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			// Configure tx for ch1
 			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
-			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable);
-			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
+			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable,enable2022_7);
+			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
 
 			if (rv && rv2)
 			{
-				if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3))
+				if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3))
 				{
 					// Special case we handle channel enables at service level automatically
-					mTx2022Config3.txc_enable = enableHw ? true : false;
+					mTx2022Config3.txc_enable = enableSv ? true : false;
 					setTxConfig(NTV2_CHANNEL1);
 				}
 				else
@@ -1323,15 +1323,15 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			{
 
 				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
-				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable);
-				mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
+				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable,enable2022_7);
+				mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
 
 				if (rv && rv2)
 				{
-					if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4))
+					if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4))
 					{
 						// Special case we handle channel enables at service level automatically
-						mTx2022Config4.txc_enable = enableHw ? true : false;
+						mTx2022Config4.txc_enable = enableSv ? true : false;
 						setTxConfig(NTV2_CHANNEL2);
 					}
 					else
@@ -1386,7 +1386,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 
 	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -1956,7 +1959,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	
 	//printRxConfig(chan);
 	target->SetRxChannelConfiguration(channel,chan);
-	target->SetRxChannelEnable(channel,enable,m2022_7Mode);
+	target->SetRxChannelEnable(channel,enable,false);
 }
 
 void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
@@ -2033,7 +2036,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	
 	//printTxConfig(chan);
 	target->SetTxChannelConfiguration(channel,chan);
-	target->SetTxChannelEnable(channel,enable,m2022_7Mode);
+	target->SetTxChannelEnable(channel,enable,false);
 }
 
 bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
