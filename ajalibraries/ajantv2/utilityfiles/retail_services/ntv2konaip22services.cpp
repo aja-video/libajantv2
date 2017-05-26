@@ -647,7 +647,8 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	NTV2CrosspointID			inputXptYUV2 = NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect = NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 	NTV2FrameBufferFormat		fbFormatCh1;
-
+	
+	
 	// frame buffer format
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 
@@ -717,7 +718,7 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	}
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->Set425FrameEnable(b425, NTV2_CHANNEL1);
+	mCard->SetTsiFrameEnable(b425, NTV2_CHANNEL1);
 	
 
 	// SDI In 1
@@ -1156,8 +1157,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-	bool					rv, rv2, enable;
-	uint32_t				enableHw;
+	bool					rv, rv2, enable, enable2022_7;
+	uint32_t				enableSv, enable2022_7Sv;
 
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
@@ -1175,11 +1176,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             target->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 		
-		// Enable all channels always.
+		// Enable all RX channels always.
 		mCard->WriteRegister(kVRegRxcEnable1, true);
 		mCard->WriteRegister(kVRegRxcEnable2, true);
-		mCard->WriteRegister(kVRegTxcEnable3, true);
-		mCard->WriteRegister(kVRegTxcEnable4, true);
 
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
@@ -1219,12 +1218,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         // KonaIP input configurations
 		rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
 		rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
-		mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableHw);
+		mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
+            if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1) || notEqualSecondary(rxHwConfig,mRx2022Config1))
             {
-				mRx2022Config1.rxc_enable = enableHw ? true : false;
+				mRx2022Config1.rxc_enable = enableSv ? true : false;
                 setRxConfig(NTV2_CHANNEL1);
             }
         }
@@ -1233,12 +1232,12 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
         rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enable);
-		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableHw);
+		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if ((enable != (enableHw ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
+            if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2) || notEqualSecondary(rxHwConfig,mRx2022Config2))
             {
-				mRx2022Config2.rxc_enable = enableHw ? true : false;
+				mRx2022Config2.rxc_enable = enableSv ? true : false;
                 setRxConfig(NTV2_CHANNEL2);
             }
         }
@@ -1247,13 +1246,18 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP output configurations
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
-		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableHw);
+        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable,enable2022_7);
+		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3) || notEqualSecondary(txHwConfig,mTx2022Config3))
+            if ((enable != (enableSv ? true : false)) ||
+				((enable == true) && (enable2022_7 != m2022_7Mode)) ||
+				notEqualPrimary(txHwConfig,mTx2022Config3) ||
+				notEqualSecondary(txHwConfig,mTx2022Config3))
             {
-				mTx2022Config3.txc_enable = enableHw ? true : false;
+				//printf("enable2022_7 %d, m2022_7Mode %d\n", enable2022_7, m2022_7Mode);
+				//printf("enable %d, enableSv %d\n", enable, (enableSv ? true : false));
+				mTx2022Config3.txc_enable = enableSv ? true : false;
                 setTxConfig(NTV2_CHANNEL3);
             }
             else
@@ -1280,13 +1284,18 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
 
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable);
-		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableHw);
+        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable,enable2022_7);
+		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if ((enable != (enableHw ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4) || notEqualSecondary(txHwConfig,mTx2022Config4))
+            if ((enable != (enableSv ? true : false)) ||
+				((enable == true) && (enable2022_7 != m2022_7Mode)) ||
+				notEqualPrimary(txHwConfig,mTx2022Config4) ||
+				notEqualSecondary(txHwConfig,mTx2022Config4))
             {
-				mTx2022Config4.txc_enable = enableHw ? true : false;
+				//printf("enable2022_7 %d, m2022_7Mode %d\n", enable2022_7, m2022_7Mode);
+				//printf("enable %d, enableSv %d\n", enable, (enableSv ? true : false));
+				mTx2022Config4.txc_enable = enableSv ? true : false;
                 setTxConfig(NTV2_CHANNEL4);
             }
             else
@@ -1321,9 +1330,17 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	
 	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
+	ULWord					vpidOut3a(0);
+	ULWord					vpidOut3b(0);
+	ULWord					vpidOut4a(0);
+	ULWord					vpidOut4b(0);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
+	
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
@@ -1718,6 +1735,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	// Set VPID 1
 	if (b4K)
 	{
+
 		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
 		if (b3GbTransportOut)
 		{
@@ -1800,12 +1818,14 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	else
 	{	
         bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
-        SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
+		SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
         if (b3gb)
 		{
-            SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 		}
+		//printf("b vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
 	}
+
 
 	//
 	// SDI Out 4

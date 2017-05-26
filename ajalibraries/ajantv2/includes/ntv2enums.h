@@ -959,21 +959,30 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+	@brief		Identifies a specific video input source.
+	@details	Always call ::NTV2DeviceCanDoInputSource to determine if a device has one of these input sources.
+				Call CNTV2Card::GetInputVideoFormat to determine what video signal is present on the input (if any).
+				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
+				CNTV2Card::Connect.
+	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
+				can be introduced that require additional inputs.
+**/
 typedef enum
 {
     #if defined (NTV2_DEPRECATE)
-        NTV2_INPUTSOURCE_ANALOG1,
+        NTV2_INPUTSOURCE_ANALOG1,		///< @brief	Identifies Analog Video Input 1.
         NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	//	Might deprecate this someday
-        NTV2_INPUTSOURCE_HDMI1,
+        NTV2_INPUTSOURCE_HDMI1,			///< @brief	Identifies HDMI Input 1.
         NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	//	Might deprecate this someday
-        NTV2_INPUTSOURCE_SDI1,
-        NTV2_INPUTSOURCE_SDI2,
-        NTV2_INPUTSOURCE_SDI3,
-        NTV2_INPUTSOURCE_SDI4,
-        NTV2_INPUTSOURCE_SDI5,
-        NTV2_INPUTSOURCE_SDI6,
-        NTV2_INPUTSOURCE_SDI7,
-        NTV2_INPUTSOURCE_SDI8,
+        NTV2_INPUTSOURCE_SDI1,			///< @brief	Identifies SDI Input 1.
+        NTV2_INPUTSOURCE_SDI2,			///< @brief	Identifies SDI Input 2.
+        NTV2_INPUTSOURCE_SDI3,			///< @brief	Identifies SDI Input 3.
+        NTV2_INPUTSOURCE_SDI4,			///< @brief	Identifies SDI Input 4.
+        NTV2_INPUTSOURCE_SDI5,			///< @brief	Identifies SDI Input 5.
+        NTV2_INPUTSOURCE_SDI6,			///< @brief	Identifies SDI Input 6.
+        NTV2_INPUTSOURCE_SDI7,			///< @brief	Identifies SDI Input 7.
+        NTV2_INPUTSOURCE_SDI8,			///< @brief	Identifies SDI Input 8.
     #else
         NTV2_INPUTSOURCE_SDI,
         NTV2_INPUTSOURCE_SDI1		= NTV2_INPUTSOURCE_SDI,

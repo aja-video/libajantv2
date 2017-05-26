@@ -1623,7 +1623,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	bool b425_4wireA       = false;
 	bool b425_4wireB       = false;
 		
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);
@@ -3006,7 +3006,16 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//bool					vpid16x9			= ! NTV2_IS_SD_VIDEO_FORMAT(primaryVideoFormat);
 
 	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b, vpidOut5a, vpidOut5b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
+	ULWord					vpidOut3a(0);
+	ULWord					vpidOut3b(0);
+	ULWord					vpidOut4a(0);
+	ULWord					vpidOut4b(0);
+	ULWord					vpidOut5a(0);
+	ULWord					vpidOut5b(0);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat			= NTV2_FORMAT_UNKNOWN;
 	
@@ -3498,6 +3507,7 @@ void Io4KServices::SetDeviceMiscRegisters (NTV2Mode mode)
         SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
         if (b3gb)
 	        SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+		//printf("a vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
 	}
 	
 	
