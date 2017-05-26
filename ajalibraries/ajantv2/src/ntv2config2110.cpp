@@ -56,7 +56,6 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
         (eq_MACAddr(other.remoteMAC))             &&
         (videoFormat     == other.videoFormat)    &&
         (videoSamples    == other.videoSamples))
-
     {
         return true;
     }
@@ -867,7 +866,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t audioChans = 16;
         mDevice.GetNumberAudioChannels (audioChans,audioSys);
         if (audioChans < 8)   audioChans = 8;
-        if (audioChans < 16)  audioChans = 16;
+        if (audioChans > 16)  audioChans = 16;
         uint32_t samples = (audioChans == 8) ? 48 : 6;
         uint32_t plength = audioChans * samples * 3;
 
@@ -929,11 +928,14 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
     txConfig.autoMAC = ((val & (1 << channel)) != 0);
 
+    uint32_t baseAddrPacketizer;
+    SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
+
     if (stream == NTV2_VIDEO_STREAM)
     {
-
-        uint32_t baseAddrPacketizer;
-        SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
+        // payload type
+        mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, &val);
+        txConfig.payloadType = (uint16_t)val;
 
         uint32_t width;
         mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, &width);
@@ -950,11 +952,6 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // payload length last
         mDevice.ReadRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,&txConfig.lastPayLoadLen);
 
-        // payload type
-        uint32_t val;
-        mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, &val);
-        txConfig.payloadType = (uint16_t)val;
-
         // pix per pkt
         uint32_t ppp;
         mDevice.ReadRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,&ppp);
@@ -963,7 +960,12 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t  ilace;
         mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
     }
-
+    else
+    {
+        // payload type
+        mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, &val);
+        txConfig.payloadType = (uint16_t)val;
+    }
     return true;
 }
 
