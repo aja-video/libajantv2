@@ -1111,7 +1111,10 @@ void IoXTServices::SetDeviceMiscRegisters (NTV2Mode mode)
 											  
 	const bool				kNot48Bit = false;
 	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
 	bool					vpid16x9 = true;
 
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);

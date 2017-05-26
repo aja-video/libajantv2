@@ -10,7 +10,11 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 else
 include $(DIR)/../../../build/configure.mk
 
-AJA_LIB = ajaanc
+ifeq ($(AJA_DEBUG),1)
+	AJA_LIB = ajaancd
+else
+	AJA_LIB = ajaanc
+endif
 AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
 VPATH    = $(A_LIB_ANC_PATH)/src

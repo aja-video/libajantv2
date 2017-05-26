@@ -140,7 +140,6 @@
 #define kRegSarekEncodePcrPid2          (ENCODER_BLOCK_BASE+20)
 #define kRegSarekEncodeAudio1Pid2       (ENCODER_BLOCK_BASE+21)
 
-
 /////////////////////////////////////////////////////////////////////
 //
 // 2022 Sarek General Registers Bit Definitions

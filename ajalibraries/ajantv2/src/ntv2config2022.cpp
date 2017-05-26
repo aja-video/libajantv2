@@ -647,8 +647,8 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
 
     if (enable && _biDirectionalChannels)
     {
-        bool txEnabled;
-        GetTxChannelEnable(channel,txEnabled);
+        bool txEnabled, tx20227Enabled;
+        GetTxChannelEnable(channel, txEnabled, tx20227Enabled);
         if (txEnabled)
         {
             // disable tx channel
@@ -1065,35 +1065,46 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
-    if (_is2022_7 && enable2022_7)
+    if (_is2022_7)
     {
-        // Select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
-        if (!rv) return false;
-
-        // hold off access while we update channel regs
-        ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
-
-        if (enable)
+        if (enable2022_7)
         {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
-            WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+            // Select secondary channel
+            rv = SelectTxChannel(channel, false, baseAddr);
+            if (!rv) return false;
 
-            // enables
-            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+            // hold off access while we update channel regs
+            ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
+
+            if (enable)
+            {
+                mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+                WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+
+                // enables
+                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
+                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+            }
+            else
+            {
+                // disable
+                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
+                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
+            }
+
+            // enable  register updates
+            ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
         }
         else
         {
+            // Select secondary channel
+            rv = SelectTxChannel(channel, false, baseAddr);
+            if (!rv) return false;
+
             // disable
             WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
-        }
-
-        // enable  register updates
-        ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
+       }
     }
-
 
     // select primary channel
     rv = SelectTxChannel(channel, true, baseAddr);
@@ -1141,15 +1152,30 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
     return true;
 }
 
-bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled)
+bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled, bool & enable2022_7)
 {
     uint32_t baseAddr;
+    uint32_t val;
+    bool rv;
+
+    if (_is2022_7)
+    {
+        // Select secondary channel
+        rv = SelectTxChannel(channel, false, baseAddr);
+        if (!rv) return false;
+
+        ReadChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr, &val);
+        enable2022_7 = (val == 0x01);
+    }
+    else
+    {
+        enable2022_7 = false;
+    }
 
     // select primary channel
-    bool rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, true, baseAddr);
     if (!rv) return false;
 
-    uint32_t val;
     ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
     enabled = (val == 0x01);
 

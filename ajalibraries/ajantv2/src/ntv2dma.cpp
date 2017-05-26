@@ -97,72 +97,67 @@ bool CNTV2Card::DmaP2PTransferFrame(NTV2DMAEngine DMAEngine,
 }
 
 
-bool CNTV2Card::DMAReadAudio (	const NTV2AudioSystem	inAudioEngine,
+bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,  const NTV2AudioSystem inAudioSystem)
+{
+	outAbsByteOffset = 0;
+	const NTV2DeviceID	deviceID	(GetDeviceID());
+	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(deviceID))
+		return false;	//	Invalid audio system
+
+	if (::NTV2DeviceCanDoStackedAudio(deviceID))
+	{
+		const ULWord	EIGHT_MEGABYTES	(0x800000);
+		const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize(deviceID));
+		const ULWord	engineOffset	(memSize  -  EIGHT_MEGABYTES * ULWord(inAudioSystem+1));
+		outAbsByteOffset = inOffsetBytes + engineOffset;
+	}
+	else
+	{
+		NTV2FrameGeometry		fg	(NTV2_FG_INVALID);
+		NTV2FrameBufferFormat	fbf	(NTV2_FBF_INVALID);
+		if (!GetFrameGeometry (fg, NTV2Channel(inAudioSystem)) || !GetFrameBufferFormat (NTV2Channel(inAudioSystem), fbf))
+			return false;
+
+		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
+		outAbsByteOffset = inOffsetBytes  +  audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
+	}
+	return true;
+}
+
+
+bool CNTV2Card::DMAReadAudio (	const NTV2AudioSystem	inAudioSystem,
 								ULWord *				pOutAudioBuffer,
 								const ULWord			inOffsetBytes,
 								const ULWord			inByteCount)
 {
-    NTV2DeviceID deviceID = GetDeviceID();
-	WriteRegister (kVRegAdvancedIndexing, 1);	//	Mac only, required for SDK 12.4 or earlier, obsolete after 12.4
+	if (!pOutAudioBuffer)
+		return false;	//	NULL buffer
+	if (!inByteCount)
+		return false;	//	Nothing to transfer
 
-    if (::NTV2DeviceCanDoStackedAudio(deviceID))
-    {
-        const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize(deviceID));
-        const ULWord	engineOffset	(memSize - ((ULWord (inAudioEngine) + 1) * 0x800000));
-        const ULWord	audioOffset		(inOffsetBytes + engineOffset);
+	ULWord	absoluteByteOffset	(0);
+	if (!GetAudioMemoryOffset (inOffsetBytes,  absoluteByteOffset,  inAudioSystem))
+		return false;
 
-        return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pOutAudioBuffer, audioOffset, inByteCount, true);
-    }
-    else
-    {
-        if (UWord (inAudioEngine) >= ::NTV2DeviceGetNumAudioStreams(deviceID))
-            return false;	//	Invalid audio system
-
-        NTV2Channel channel = static_cast <NTV2Channel>(inAudioEngine);
-
-        NTV2FrameGeometry fg;
-        NTV2FrameBufferFormat fbf;
-        GetFrameGeometry(&fg, channel);
-        GetFrameBufferFormat(channel, &fbf);
-        ULWord audioFrameBuffer = NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1;
-        ULWord audioOffset = inOffsetBytes + (audioFrameBuffer * NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf));
-
-        return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pOutAudioBuffer, audioOffset, inByteCount, true);
-    }
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pOutAudioBuffer, absoluteByteOffset, inByteCount, true);
 }
 
 
-bool CNTV2Card::DMAWriteAudio (	const NTV2AudioSystem	inAudioEngine,
+bool CNTV2Card::DMAWriteAudio (	const NTV2AudioSystem	inAudioSystem,
 								const ULWord *			pInAudioBuffer,
 								const ULWord			inOffsetBytes,
 								const ULWord			inByteCount)
 {
-    NTV2DeviceID deviceID = GetDeviceID();
-	WriteRegister (kVRegAdvancedIndexing, 1);	//	Mac only, required for SDK 12.4 or earlier, obsolete after 12.4
-    if (::NTV2DeviceCanDoStackedAudio (deviceID))
-    {
-        const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize(deviceID));
-        const ULWord	engineOffset	(memSize - ((ULWord (inAudioEngine) + 1) * 0x800000));
-        const ULWord	audioOffset		(inOffsetBytes + engineOffset);
+	if (!pInAudioBuffer)
+		return false;	//	NULL buffer
+	if (!inByteCount)
+		return false;	//	Nothing to transfer
 
-        return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pInAudioBuffer), audioOffset, inByteCount, true);
-    }
-    else
-    {
-        if (UWord (inAudioEngine) >= ::NTV2DeviceGetNumAudioStreams(deviceID))
-            return false;	//	Invalid audio system
+	ULWord	absoluteByteOffset	(0);
+	if (!GetAudioMemoryOffset (inOffsetBytes,  absoluteByteOffset,  inAudioSystem))
+		return false;
 
-        NTV2Channel channel = static_cast <NTV2Channel>(inAudioEngine);
-
-        NTV2FrameGeometry fg;
-        NTV2FrameBufferFormat fbf;
-        GetFrameGeometry(&fg, channel);
-        GetFrameBufferFormat(channel, &fbf);
-        ULWord audioFrameBuffer = NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1;
-        ULWord audioOffset = inOffsetBytes + (audioFrameBuffer * NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf));
-
-        return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pInAudioBuffer), audioOffset, inByteCount, true);
-    }
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pInAudioBuffer), absoluteByteOffset, inByteCount, true);
 }
 
 

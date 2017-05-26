@@ -1,64 +1,117 @@
 /**
 	@page	audiooperation		Audio System Operation
 
-	NTV2-compatible devices have a minimum of one Audio System (or Audio Engine). Each system can accommodate a minimum of 8 channels.
-	More modern AJA devices can accommodate up to 16 channels. The audio sample rate is fixed at 48 kHz.
+	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an Audio Engine).
+	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
 
-	Incoming audio is de-embedded from incoming audio and audio-control packets in HANC (SMPTE 299M for HD, SMPTE 272M for SD).
-	Each audio sample consists of 24-bits of sample data (normally PCM).
-	When the audio engine is started and running, each 24-bit sample is copied into the most-significant 3 bytes of each 4-byte sample
-	in the device audio buffer. The least-significant byte of each 32-bit sample word in the buffer is always set to zero.
+	Each Audio System can accommodate at least 8 channels of audio.
+	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device's Audio System(s) can handle.
+	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device Audio System is currently configured for.
+	Modern AJA devices will accommodate up to 16 channels. Older AJA devices defaulted to 6 channels at power-up -- these should be
+	configured to use 8 channels.
+	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device Audio System is configured to use.
 
-	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) by setting certain bits
-	in SMPTE 299M/272M audio control packets. The audio system's de-embedder makes this information available in a hardware register,
-	and clients can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM or CNTV2Card::InputAudioChannelPairHasPCM.
+	@note	It is recommended that the Audio System be configured to use the maximum number of audio channels the device is capable of.
 
-	Outgoing audio is embedded into outgoing audio/audio-control packets in HANC (SMPTE 299M for HD, SMPTE 272M for SD).
-	The output embedder always runs unless disabled (call CNTV2Card::SetAudioOutputEmbedderState to enable or disable it).
-	When the audio engine is not running, silence (zeroes) is continually embedded into the output data stream.
-	When the audio engine is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
-	sample in the device audio buffer (the least-significant byte is ignored).
+	The audio sample rate on all AJA devices is fixed at 48 kHz.
 
-	To tell downstream equipment that one or more audio channel pairs is not carrying PCM data, newer AJA devices can set the non-PCM
-	indicator bits in the outgoing SMPTE 299M/272M audio control packets via the CNTV2Card::SetAudioPCMControl function.
-	The ::NTV2DeviceCanDoPCMControl function will return true if the device	supports this functionality.
+	Each Audio System uses an 8 MB contiguous block of SDRAM in the last video frame buffer(s) to store its audio data. The first and last 4 MB
+	of that chunk is used for <b>Audio Output</b> and <b>Audio Input</b>, respectively. Each Output or Input aspect of the Audio System operate
+	independently, each being in one of two states: <b>Running</b> or <b>Stopped</b> (aka the "Reset" state). When the Input or Output of the
+	Audio System is Running, eight or sixteen channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this
+	memory, regardless of whether all 8 or 16 channels are used.
 
-	Each audio system's output embedder can be connected directly to another audio system's input embedder for direct audio pass-through,
-	also called "loopback mode". Call CNTV2Card::SetAudioLoopBack to enable or disable this mode.
-
-	Generally, each Audio System's input source is selectable, to receive samples from any of the device's video (and possibly audio)
-	input sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
-	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
-	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
-
-	Each audio system uses an 8 MB chunk of SDRAM in the last video frame buffer(s) to store its audio data. The first and last 4 MB
-	of that chunk is used for audio output and audio input, respectively. Eight or sixteen channels of audio are always written/read to/from
-	this memory, regardless of whether they are all used. On newer AJA devices, the last byte of the first audio subsystem's buffer coincides
-	with the last byte of the last frame buffer (and subsequent buffers stack downward from there), while on older devices, the first byte of
-	the first audio subsystem's buffer coincides with the first byte of the last frame buffer (and subsequent buffers stack upward from there).
+	On newer AJA devices, the last byte of the first Audio System's memory buffer coincides with the last byte of the last frame buffer
+	(and subsequent buffers stack downward from there). On older devices, the first byte of the first Audio System's buffer coincides
+	with the first byte of the last frame buffer (and subsequent buffers stack upward from there).
 
 	@image	html	hwref-fig2-audiobuffers.png
 
+	See \ref audioformats for a detailed look at the format of the audio data in the buffer.
+
+
 	@section	audiocapture		Audio Capture
 
-	During capture, incoming audio data is written into the Audio Input Buffer at the address specified by the engine's Audio Input
-	Last Address register (i.e., the "record head" or "write head"). Audio data continues to be written into the input buffer until
-	filled, whereupon the "write head" wraps back to the start of the buffer, and writing continues.
+	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
+	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
+	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
 
-	@section	audioplayout		Audio Playout
-
-	During playout, audio data in the audio output buffer is played out at 48 kHz when the Audio Output Reset bit is cleared.
-	Unless the "embedded output suppress" control bit is set for a given SDI output, audio data is always embedded. Silence is sent
-	if the audio output is reset or paused. Channels 1 and 2 are transmitted on Embedded Group 1, channels 1 & 2. Channels 3 and 4
-	are transmitted on Embedded Group 1, channels 3 & 4. Channels 5 and 6 are transmitted on Embedded Group 2, channels 1 & 2.
-	Channels 7 and 8 (in 8-channel audio mode) are transmitted on Embedded Group 2, channels 3 & 4.
-	In 16-channel mode, the remaining 8 channels are distributed in Embedded Groups 3 and 4 in a similar fashion.
+	When the Audio System is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
+	in the Audio Input Buffer in device memory at the address specified by the Audio System's Audio Input Last Address register (i.e.,
+	the <b>Record Head</b> or "write head"). Call CNTV2Card::ReadAudioLastIn to get the current Record Head position. Audio data continues to
+	be written into the input buffer until filled, whereupon the Record Head wraps back to the start of the buffer, where writing continues.
+	The least-significant byte of each 32-bit sample word in the Audio Input Buffer is always set to zero. (Note that for SD, because
+	extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
 
 	@image	html	hwref-fig3-audiorecordplay.png
 
-	The Audio Data (all channels interleaved) can be moved from the host into the Audio Output Buffer via DMA. The last address
-	written into the Audio Output Buffer (by DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
+	Audio data can be transferred from the Audio Input Buffer in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
+	While the offset to the Input portion of the device Audio Buffer is typically fixed at 4 MB, to be absolutely safe should this ever change,
+	call CNTV2Card::GetAudioReadOffset to obtain the actual offset being used by the driver and SDK.
 
+	Note that if AutoCirculate is used for capture, AutoCirculate completely and automatically manages the Audio System.
+	See \ref aboutautocirculate for more information.
+
+	If the Embedded Audio Group packet (containing two audio channel pairs) is not present in the data stream, its samples in the buffer
+	will be set to zero (silence). The firmware notes which audio group packets are present and which are missing, and coalesces this
+	information into a hardware register. Client software can query this information by calling CNTV2Card::GetDetectedAudioChannelPairs.
+
+	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) via certain bits in the AES
+	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the Audio System's de-embedder makes this
+	information available in a hardware register, and client software can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM
+	or CNTV2Card::InputAudioChannelPairHasPCM.
+
+	Generally, each Audio System's <b>Input Source</b> is selectable, to receive samples from any of the device's video (and possibly audio)
+	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
+	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+
+
+	@section	audioplayout		Audio Playout
+
+	If the device supports SDI playout, each Audio System has an output embedder that generates audio packets (per SMPTE 299M for HD
+	and SMPTE 272M for SD) and inserts them into the HANC area of the outgoing SDI data stream.
+	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
+	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
+	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
+	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
+	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
+	in a similar fashion.
+	There is currently no provision for enabling or disabling specific audio groups.
+
+	The output embedder always inserts audio packets unless it's been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
+
+	When the Audio System is stopped, the output embedder will either embed silence (zeroes) into the data stream, or, if <b>Loopback Mode</b>
+	is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder (see CNTV2Card::SetAudioLoopBack).
+
+	When the Audio System is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
+	in the device audio buffer (the least-significant byte is ignored). Note, however, for SD, only the most-significant 20 bits are
+	used (since the embedder does not create extended audio packets).
+
+	During playout, the output embedder pulls audio samples from the Audio Output Buffer in device memory at the address specified by the
+	Audio System's Audio Output Last Address register (i.e., the <b>Play Head</b> or "read head"). Call CNTV2Card::ReadAudioLastOut to get the
+	current Play Head position. Audio data continues to be read from the output buffer until the end is reached, whereupon the Play Head wraps
+	back to the start of the buffer, where reading continues.
+
+	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the Output Buffer memory immediately behind
+	the Play Head as it runs. If the host application fails to transfer new samples into the Audio Output Buffer, the buffer will eventually
+	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
+	to configure this feature.
+
+	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
+	written into the Audio Output Buffer (via DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
 	If the output hardware "Play Head" pointer catches up to the Audio Output Last Address, the buffer will wrap, and audio/video
 	synchronization will be lost.
+
+	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the Audio System.
+	See \ref aboutautocirculate for more information.
+
+	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
+
+	Downstream equipment can be told that the outgoing audio is not carrying PCM data, by setting the non-PCM indicator in the AES header.
+	Older AJA devices can only do this on an audio-system-wide basis -- i.e., all outgoing audio groups are marked PCM or non-PCM.
+	Use the simpler form of the CNTV2Card::SetAudioPCMControl function for these devices.
+
+	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
+	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
+	single NTV2AudioChannelPair or an NTV2AudioChannelPairs set.
 **/

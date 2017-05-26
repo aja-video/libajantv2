@@ -2434,10 +2434,18 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	bool					b1wireQ4k = (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
 	
 	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b;
+	ULWord					vpidOut1a(0);
+	ULWord					vpidOut1b(0);
+	ULWord					vpidOut2a(0);
+	ULWord					vpidOut2b(0);
+	ULWord					vpidOut3a(0);
+	ULWord					vpidOut3b(0);
+	ULWord					vpidOut4a(0);
+	ULWord					vpidOut4b(0);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -2901,8 +2909,8 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	}
 
 
-	// Set VPID 3	
-	if ((b4K && !b2pi) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
+	// Set VPID 3
+	if ((b4K && !b2pi && !b1wireQ4k) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
 	{
 		if (b3GbTransportOut)
 		{
@@ -2915,12 +2923,18 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		}
 	}
 	else
-	{	
+	{
+		NTV2VideoFormat fb1VideoFormat = mFb1VideoFormat;
+		if (b4K && b1wireQ4k)
+		{
+			fb1VideoFormat = GetQuarterSizedVideoFormat(mFb1VideoFormat);
+		}
+	
         bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
-        SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
+        SetVPIDData(vpidOut3a, fb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
         if (b3gb)
 		{
-            SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+            SetVPIDData(vpidOut3b, fb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
 		}
 	}
 

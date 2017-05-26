@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #endif
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -323,12 +324,13 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 }
 
 void 
-AJADebug::Assert(const char* pFileName, int32_t lineNumber, const char* pExpression)
+AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression)
 {
+#if defined(AJA_DEBUG)
 	// check for open
 	if (spShare == NULL)
 	{
-		throw;
+        assert(false);
 	}
 
 	try
@@ -369,7 +371,12 @@ AJADebug::Assert(const char* pFileName, int32_t lineNumber, const char* pExpress
 	{
 	}
 
-	throw;
+    assert(false);
+#else
+    AJA_UNUSED(pFileName);
+    AJA_UNUSED(lineNumber);
+    AJA_UNUSED(pExpression);
+#endif
 }
 
 

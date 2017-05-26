@@ -11,6 +11,7 @@
 #include <string>
 
 #include <stdlib.h>
+#include <wchar.h>
 
 namespace aja
 {
@@ -151,6 +152,52 @@ std::string to_string(long double val)
     oss.setf(std::ios::fixed, std::ios::floatfield);
     oss << val;
     return oss.str();
+}
+
+bool string_to_wstring(const std::string& str, std::wstring& wstr)
+{
+    std::mbstate_t state = std::mbstate_t();
+    mbrlen(NULL, 0, &state);
+    const char *tmpPtr = str.c_str();
+    size_t len = 1 + mbsrtowcs(NULL, &tmpPtr, 0, &state);
+    std::vector<wchar_t> tmp(len);
+    int num_chars = (int)mbsrtowcs(&tmp[0], &tmpPtr, str.size(), &state);
+    if (num_chars < 0)
+        return false;
+    else
+        wstr.assign(&tmp[0]);
+
+    return true;
+}
+
+bool wstring_to_string(const std::wstring& wstr, std::string& str)
+{
+    std::mbstate_t state = std::mbstate_t();
+    mbrlen(NULL, 0, &state);
+    const wchar_t *tmpPtr = wstr.c_str();
+    size_t len = 1 + wcsrtombs(NULL, &tmpPtr, 0, &state);
+    std::vector<char> tmp(len);
+    int num_chars = (int)wcsrtombs(&tmp[0], &tmpPtr, tmp.size(), &state);
+    if (num_chars < 0)
+        return false;
+    else
+        str.assign(&tmp[0]);
+
+    return true;
+}
+
+bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
+{
+    if(c_str == NULL || c_str_size < 1)
+        return false;
+
+    size_t maxSize = std::min(str.size(), c_str_size-1);
+    for(size_t i=0;i<maxSize;++i)
+    {
+        c_str[i] = str[i];
+    }
+    c_str[maxSize] = '\0';
+    return true;
 }
 
 void split(const std::string& str, const char delim, std::vector<std::string>& elems)

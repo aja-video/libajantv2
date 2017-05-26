@@ -424,10 +424,6 @@ bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
 
 bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 {
-    // first setup TS for the encoder
-    if (!SetupEncodeTsJ2KEncoder(channel))
-        return false;
-
     // program TS timer
     if (!SetupEncodeTsTimer(channel))
         return false;
@@ -446,6 +442,10 @@ bool CNTV2ConfigTs2022::SetupTsForEncode(const NTV2Channel channel)
 
     // program TS for aes encapsulator
     if (!SetupEncodeTsAesEncap(channel))
+        return false;
+
+    // finally setup TS for the encoder
+    if (!SetupEncodeTsJ2KEncoder(channel))
         return false;
 
     return true;
@@ -504,7 +504,16 @@ bool CNTV2ConfigTs2022::SetupEncodeTsJ2KEncoder(const NTV2Channel channel)
         mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderInterlacedVideo, (0x1));
     }
 
-    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x7));
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderFlushTimeout, (0x0));
+    mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x6));
+
+    // Wait 60 ms
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (60);
+    #else
+        usleep (60 * 1000);
+    #endif
+
     mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x1));
 
     return true;

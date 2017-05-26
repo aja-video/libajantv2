@@ -193,7 +193,7 @@ public:
     bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
-    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled);
+    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled, bool & enable2022_7);
 
     bool        SetJ2KEncoderConfiguration(const NTV2Channel channel, const j2kEncoderConfig & j2kConfig);
     bool        GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kEncoderConfig &j2kConfig);

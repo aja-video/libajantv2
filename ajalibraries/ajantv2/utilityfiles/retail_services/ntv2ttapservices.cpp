@@ -203,7 +203,7 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		const bool				kRGBOut				= false;
 		const bool				kNot48Bit			= false;
 		const bool				kNot3Gb				= false;
-		ULWord					vpidOut1a;
+		ULWord					vpidOut1a(0);
 	
 		// enable overwrite
 		mCard->WriteRegister(kRegSDIOut1Control,	1, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);

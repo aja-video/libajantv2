@@ -40,11 +40,11 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoAnalogAudio,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog audio input or output.
 	kDeviceCanDoAnalogVideoIn,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video input.
 	kDeviceCanDoAnalogVideoOut,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video output.
-//	kDeviceCanDoAudio2Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 2 audio channels.
-//	kDeviceCanDoAudio6Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 6 audio channels.
-//	kDeviceCanDoAudio8Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the audio system(s) on the device can be configured to embed/de-embed only 8 audio channels.
-//	kDeviceCanDoAudio96K,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device can be set to a 96kHz sample rate.
-//	kDeviceCanDoAudioDelay,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if audio system(s) on the device have an adjustable delay.
+//	kDeviceCanDoAudio2Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 2 audio channels.
+//	kDeviceCanDoAudio6Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 6 audio channels.
+//	kDeviceCanDoAudio8Channels,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 8 audio channels.
+//	kDeviceCanDoAudio96K,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device can be set to a 96kHz sample rate.
+//	kDeviceCanDoAudioDelay,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device have an adjustable delay.
 	kDeviceCanDoBreakoutBox,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can be connected to an AJA breakout box.
 	kDeviceCanDoCapture,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can capture (ingest) video.
 //	kDeviceCanDoColorCorrection,				///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable LUT.
@@ -63,7 +63,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoLTCInOnRefPort,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
 	kDeviceCanDoMSI,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
 	kDeviceCanDoMultiFormat,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
-	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device audio system(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
+	kDeviceCanDoPCMControl,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device Audio System(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
 	kDeviceCanDoPCMDetection,					///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
 //	kDeviceCanDoPIO,							///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
 	kDeviceCanDoPlayback,						///< @brief	Use with CNTV2Card::GetBoolParam to determine if the device can output (play) video.
@@ -120,7 +120,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetDownConverterDelay,				///< @brief	Use with CNTV2Card::GetNumericParam to obtain the down-converter delay on the device.
 	kDeviceGetHDMIVersion,						///< @brief	Use with CNTV2Card::GetNumericParam to obtain the version number of the HDMI input(s) and/or output(s) on the device.
 	kDeviceGetLUTVersion,						///< @brief	Use with CNTV2Card::GetNumericParam to obtain the version number of the LUT(s) on the device.
-	kDeviceGetMaxAudioChannels,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the maximum number of audio channels that a single audio system can support on the device.
+	kDeviceGetMaxAudioChannels,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the maximum number of audio channels that a single Audio System can support on the device.
 	kDeviceGetMaxRegisterNumber,				///< @brief	Use with CNTV2Card::GetNumericParam to obtain the highest register number for the device.
 	kDeviceGetMaxTransferCount,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the maximum number of 32-bit words that the DMA engine can move at a time on the device.
 	kDeviceGetNumDMAEngines,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of DMA engines on the device.
@@ -134,7 +134,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetNumAnalogAudioOutputChannels,		///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of analog audio output channels on the device.
 	kDeviceGetNumAnalogVideoInputs,				///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of analog video inputs on the device.
 	kDeviceGetNumAnalogVideoOutputs,			///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of analog video outputs on the device.
-	kDeviceGetNumAudioSystems,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of independent audio systems on the device.
+	kDeviceGetNumAudioSystems,					///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of independent Audio Systems on the device.
 	kDeviceGetNumCrossConverters,				///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of cross-converters on the device.
 	kDeviceGetNumCSCs,							///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of colorspace converter widgets on the device.
 	kDeviceGetNumDownConverters,				///< @brief	Use with CNTV2Card::GetNumericParam to obtain the number of down-converters on the device.
@@ -579,11 +579,14 @@ public:
 											 PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data
 
 	/**
-		@brief		Transfers audio data from a given audio system on the AJA device to the host.
-		@param[in]	inAudioEngine		Specifies the audio engine on the device that is to supply the audio data.
+		@brief		Transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host buffer.
+					It will happily read audio samples from either the capture side or playout side of the Audio System's buffer memory.
+		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to supply the audio data.
 		@param		pOutAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the audio data.
 										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
-		@param[in]	inOffsetBytes		Specifies the offset into the audio engine's capture buffer on the device from which to transfer audio data.
+		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device from which to transfer
+										audio data. The start of the capture portion of the Audio System's audio buffer is at the offset
+										value returned from CNTV2Card::GetAudioReadOffset.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
@@ -594,10 +597,14 @@ public:
 										const ULWord			inByteCount);
 
 	/**
-		@brief		Transfers audio data from a given host buffer to a specific audio system's playout buffer on the AJA device.
-		@param[in]	inAudioEngine		Specifies the audio engine on the device that is to receive the audio data.
+		@brief		Transfers audio data from the specified host buffer to the given Audio System's buffer memory on the AJA device.
+					It will happily write audio samples into the capture portion of the Audio System's buffer memory (which will
+					quickly be overwritten if the capture engine has been started).
+		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to receive the audio data.
 		@param[in]	pInAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the audio data.
-		@param[in]	inOffsetBytes		Specifies the offset into the audio engine's playout buffer on the device to which audio data will be transferred.
+		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device to which audio data
+										will be transferred. Use zero for the start of the playout portion of the Audio System's buffer
+										memory.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer. Note that this value must not overrun the host
 										buffer, nor the device's audio playout buffer.
 		@return		True if successful; otherwise false.
@@ -1218,77 +1225,93 @@ public:
 	///@{
 
 	/**
-		@brief		Sets the number of audio channels to be concurrently captured or played for a given audio system on the AJA device.
+		@brief		Sets the number of audio channels to be concurrently captured or played for a given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inNumChannels		Specifies the number of audio channels the device will record or play to/from a
-										given audio system. For most applications, this should always be set to the maximum
+										given Audio System. For most applications, this should always be set to the maximum
 										number of audio channels the device is capable of capturing or playing, which can
 										be obtained by calling the NTV2BoardGetMaxAudioChannels function (see ntv2devicefeatures.h).
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Returns the current number of audio channels being captured or played by a given audio system on the AJA device.
+		@brief		Returns the current number of audio channels being captured or played by a given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
 		@param[out]	outNumChannels		Receives the number of audio channels that the AJA device hardware is currently capturing
-										or playing for the given audio system. If the function result is true, the variable's
+										or playing for the given Audio System. If the function result is true, the variable's
 										contents will be valid, and for most AJA devices will be 6, 8, or 16.
-		@param[in]	inAudioSystem		Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem		Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 		@details	This function allows client applications to determine how many audio channels the AJA hardware is
-					currently capturing/playing into/from the given audio system on the device.
+					currently capturing/playing into/from the given Audio System on the device.
 	**/
 	AJA_VIRTUAL bool	GetNumberAudioChannels (ULWord & outNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
-	/**
-		@brief		Sets the current audio sample rate for the given audio system on the AJA device.
-		@return		True if successful; otherwise false.
-		@param[in]	inRate			Specifies the desired audio sample rate for the given audio system.
-									The specified rate value must be NTV2_AUDIO_48K or NTV2_AUDIO_96K.
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
-		@details	AJA devices generally use a 48 kHz audio sample rate. Many devices also support a 96 kHz sample rate,
-					which is useful for "double speed" ingest or playout applications from tape equipment that is capable
-					of playing or recording at twice the normal rate. This function call allows the client application to
-					change the AJA device's audio sample rate for a given audio system.
-	**/
-	AJA_VIRTUAL bool	SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool	SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	AJA_VIRTUAL bool	GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
 
 	/**
-		@brief		Retrieves the current audio sample rate for the given audio system on the AJA device.
-		@return		True if successful; otherwise false.
-		@param[out]	outRate			Receives the current audio sample rate for the given audio system. If the function
-									result is true, the variable will contain one of the following values: NTV2_AUDIO_48K,
-									or NTV2_AUDIO_96K.
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
-		@details	AJA devices usually use a 48 kHz audio sample rate, but many also support a 96 kHz sample rate, which
-					is useful for "double speed" ingest or playout applications from tape equipment that is capable of
-					playing or recording at twice the normal rate. This function call allows the client application to
-					discover the AJA device's audio sample rate that's currently being used for a given audio system.
-	**/
-	AJA_VIRTUAL bool	GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-
-	/**
-		@brief		Changes the size of the audio buffer that is used for a given audio system in the AJA device.
+		@brief		Changes the size of the audio buffer that is used for a given Audio System in the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
 									All modern AJA devices use NTV2_AUDIO_BUFFER_BIG (4 MB).
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Retrieves the size of the input or output audio buffer being used for a given audio system on the AJA device.
+		@brief		Retrieves the size of the input or output audio buffer being used for a given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
-		@param[out]	outSize			Receives the size of the capture/playout audio buffer for the given audio system on the AJA device.
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[out]	outSize			Receives the size of the capture/playout audio buffer for the given Audio System on the AJA device.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Enables or disables 20 bit mode for the Audio System.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
+		@param[in]	inEnable		Specify 'true' to use 20-bit mode;  specify 'false' for normal (24-bit) mode.
+		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+	**/
+    AJA_VIRTUAL bool		SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+
+	/**
+		@brief		Answers whether or not the device's Audio System is currently operating in 20 bit
+					mode.  Normally the Audio System is in 24 bit mode.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
+									if audio is in 24 bit mode.
+		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+	**/
+    AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+
+	/**
+		@brief		Enables or disables "loopback" mode the given Audio System.
+		@return		True if successful; otherwise false.
+		@param[in]	inMode			Specify NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout engine
+									is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
+									Specify NTV2_AUDIO_LOOPBACK_OFF to have the output embedder emit silence (zeroes) when the playout
+									engine is stopped.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to NTV2_AUDIOSYSTEM_1.
+	**/
+	AJA_VIRTUAL bool	SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Answers if "loopback" mode is currently on or off for the given Audio System.
+		@return		True if successful; otherwise false.
+		@param[in]	outMode			Receives NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
+									the Audio System's input de-embedder when the playout engine is stopped;
+									otherwise receives NTV2_AUDIO_LOOPBACK_OFF if the output embedder emits silence (zeroes) when the
+									playout engine is stopped.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to NTV2_AUDIOSYSTEM_1.
+	**/
+	AJA_VIRTUAL bool	GetAudioLoopBack (NTV2AudioLoopBack & outMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 
 	AJA_VIRTUAL bool	SetAudioAnalogLevel (const NTV2AudioLevel value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	GetAudioAnalogLevel (NTV2AudioLevel & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	SetAudioLoopBack (const NTV2AudioLoopBack value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	GetAudioLoopBack (NTV2AudioLoopBack & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	SetEncodedAudioMode (const NTV2EncodedAudioMode value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	GetEncodedAudioMode (NTV2EncodedAudioMode & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
@@ -1297,7 +1320,7 @@ public:
 	AJA_VIRTUAL bool	GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		For the given audio system, answers with the wrap address, the threshold at which input/record or output/play transfers
+		@brief		For the given Audio System, answers with the wrap address, the threshold at which input/record or output/play transfers
 					will likely need to account for "wrapping" around the end of the buffer back to the start of the buffer to continue
 					recording/playing.
 		@note		Since input/record wrap detection is simple -- i.e., the value returned from CNTV2Card::ReadAudioLastIn has decreased --
@@ -1307,23 +1330,33 @@ public:
 									This is typically 16KB from the end of the buffer. If the current offset plus the audio bytes to be
 									written will go past this position, the caller should split the DMA transfer into two separate ones:
 									one to fill to the end of the buffer, and the remainder from the start of the buffer.
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		For the given audio system, answers with the byte offset from the start of the audio buffer to the first byte
+		@brief		For the given Audio System, answers with the byte offset from the start of the audio buffer to the first byte
 					of the input/capture buffer. (The capture buffer immediately follows the playout buffer in increasing memory
 					address order.)
 		@return		True if successful; otherwise false.
 		@param[out]	outReadOffset	Receives the offset to the audio capture buffer from the start of the audio buffer.
 									This will typically be 4MB.
-		@param[in]	inAudioSystem	Optionally specifies the audio system of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
+	/**
+		@brief		Answers with the absolute byte offset in device memory to the given audio buffer offset for the specified
+					Audio System.
+		@return		True if successful; otherwise false.
+		@param[in]	inOffsetBytes		Specifies a byte offset into the Audio System's audio buffer memory.
+		@param[out]	outAbsByteOffset	Receives the absolute byte offset in device memory.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+	**/
+	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset, const NTV2AudioSystem	inAudioSystem);
+
 	#if !defined (NTV2_DEPRECATE)
-		//	These functions dealt exclusively with audio systems, but unfortunately required channels to be passed into them.
+		//	These functions dealt exclusively with Audio Systems, but unfortunately required channels to be passed into them.
 		AJA_VIRTUAL NTV2_DEPRECATED bool	SetNumberAudioChannels(ULWord numChannels, NTV2Channel channel);			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetNumberAudioChannels(ULWord *numChannels, NTV2Channel channel = NTV2_CHANNEL1);	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
 		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAudioRate(NTV2AudioRate value, NTV2Channel channel);						///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
@@ -1348,7 +1381,7 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		For the given audio system, specifies the byte offset in the device's output audio buffer
+		@brief		For the given Audio System, specifies the byte offset in the device's output audio buffer
 					where its audio embedder will fetch the next 128-byte audio sample. This essentially moves
 					the "play head" for audio output.
 		@param[in]	inValue		Specifies the new byte offset into the device's output audio buffer.
@@ -1358,7 +1391,7 @@ public:
 	AJA_VIRTUAL bool	WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		For the given audio system, answers with the byte offset of the last 128-byte audio sample
+		@brief		For the given Audio System, answers with the byte offset of the last 128-byte audio sample
 					read by the device's output audio embedder. This is essentially the position of the "play
 					"head" during audio output.
 		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample read by the device's output audio
@@ -1370,7 +1403,7 @@ public:
 	AJA_VIRTUAL bool	ReadAudioLastOut (ULWord * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? ReadAudioLastOut (*pOutValue, inChannel) : false;}
 
 	/**
-		@brief		For the given audio system, answers with the byte offset of the last 128-byte audio sample
+		@brief		For the given Audio System, answers with the byte offset of the last 128-byte audio sample
 					written by the device's input audio de-embedder. This is essentially the position of the
 					"write head" during audio capture.
 		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample written by the device's input audio
@@ -1390,178 +1423,159 @@ public:
 	AJA_VIRTUAL bool	GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
-		@brief		Enables or disables the output of audio samples by the given audio engine, resetting
-					the playback position to the start of the audio buffer.
+		@brief		Enables or disables the output of audio samples by the given Audio System, resetting
+					the playback position to the start of the audio output buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the audio system on the device to be affected.
-		@param[in]	inEnable		If true,  audio samples will be produced by the audio system.
-									If false, audio sample production is inhibited.
-		@note		Calling this funcion with a true parameter has the side effect of resetting
-					the current audio buffer pointer (as reported by ReadAudioLastOut) to zero.
-					This can be useful for resynchronizing audio and video. If it is desired to
-					stop sample production without resetting the pointer, use SetAudioOutputPause instead. 
+		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
+		@param[in]	inEnable		Specify 'true' to stop audio playout. (When stopped, the Audio System's output embedder,
+									if enabled, will emit silence.)
+									Specify 'false' to stop audio playout. (When started, the Audio System's output embedder
+									will continue to pull samples from the Audio Output Buffer as the "read head" moves forward
+									through the buffer.)
+		@note		Passing 'true' to this function has the side effect of resetting the current Audio Output Buffer Pointer ("read head")
+					pointer (as reported by CNTV2Card::ReadAudioLastOut) to zero. This can be useful for resynchronizing audio and video.
+					If it is desired to stop playout without resetting the pointer, use CNTV2Card::SetAudioOutputPause instead.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether or not the device's audio system is currently operating in the mode
-					in which it is not producing audio output samples and the audio buffer pointer has
-					been reset to zero.
+		@brief		Answers whether or not the specified Audio System is currently in "Reset" mode -- i.e., stopped --
+					and the audio buffer pointer ("Read Head") is zero.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the audio system
-										is not producing output samples and the buffer pointer is zero,
-										or 'false' if the audio system is operating normally.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	outEnable		Receives 'true' if the Audio System's playout engine is stopped (i.e.,
+									it's not currently producing output samples and the "Read Head" is parked
+									at zero). Receives 'false' if the Audio System's playout engine is currently
+									running.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
-
-    /**
-        @brief		Enables or disables 20 bit mode for the audio engine.
-        @return		True if successful; otherwise false.
-        @param[in]	inAudioSystem	Specifies the audio system on the device to be affected.
-        @param[in]	inEnable		If true,  audio samples will be in 20 bit mode.
-                                    If false, audio sample will be in 20 bit mode.
-        @note		This is only used by Kona IP.
-    **/
-    AJA_VIRTUAL bool	SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
-
-    /**
-        @brief		Answers whether or not the device's audio system is currently operating in 20 bit
-                    mode.  Normally the audio system is in 24 bit mode.
-        @return		True if successful; otherwise false.
-        @param[in]	inAudioSystem		Specifies the audio system of interest.
-        @param[in]	outEnable			Receives 'true' if the audio system is in 20 bit moe, or 'false'
-                                        if audio is in 24 bit mode.  This is only used by Kona IP.
-    **/
-    AJA_VIRTUAL bool	GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Enables or disables the output of audio samples and advancment of the audio buffer
-					pointer ("play head") of the given audio engine.
+		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
+					pointer ("play head") of the given Audio System.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the audio system on the device to be affected.
-		@param[in]	inEnable		If true,  audio samples will be produced by the audio system.
-									If false, audio sample production is inhibited.
-		@note		If it is desired to reset the audio buffer pointer to the beginning of the
-					buffer, use SetAudioOutputReset instead.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device to be affected.
+		@param[in]	inEnablePlayout		Specify 'true' to resume producing audio samples ("running").
+										Specify 'false' to stop producing audio samples ("stopped").
+		@note		This function doesn't alter the Audio Output Buffer Pointer ("play head") position.
+					To reset the "play head" back to the beginning of the buffer, use CNTV2Card::SetAudioOutputReset instead.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inEnablePlayout);
 
 	/**
-		@brief		Answers whether or not the device's audio system is currently operating in the mode
+		@brief		Answers whether or not the device's Audio System is currently operating in the mode
 					in which it is not producing audio output samples and the audio buffer pointer
 					is not advancing.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			Receives 'true' if the audio system is paused, or 'false' if audio
-										playout is operating normally.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outIsPaused			Receives 'true' if audio output is paused, or 'false' if audio
+										playout is running normally.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);
 
 	/**
-		@brief		Enables or disables the input of audio samples by the given audio engine, resetting
+		@brief		Enables or disables the input of audio samples by the given Audio System, resetting
 					the playback position to the start of the audio buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the audio system on the device to be affected.
-		@param[in]	inEnable		If true,  audio samples will be captured by the audio system.
+		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
+		@param[in]	inEnable		If true,  audio samples will be captured by the Audio System.
 									If false, audio sample capture is inhibited.
 		@note		Calling this funcion with a true parameter has the side effect of resetting
-					the current audio buffer pointer (as reported by ReadAudioLastIn) to zero.
+					the current audio buffer pointer (as reported by CNTV2Card::ReadAudioLastIn) to zero.
 					This can be useful for resynchronizing audio and video.
 	**/
-	AJA_VIRTUAL bool	SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether or not the device's audio system is currently operating in the mode
+		@brief		Answers whether or not the device's Audio System is currently operating in the mode
 					in which it is not capturing audio output samples and the audio buffer pointer has
 					been reset to zero.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the audio system
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outEnable			A boolean variable that is to receive 'true' if the Audio System
 										is not capturing output samples and the buffer pointer is zero,
-										or 'false' if the audio system is operating normally.
+										or 'false' if the Audio System is operating normally.
 	**/
-	AJA_VIRTUAL bool	GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Enables or disables audio capture for the given audio system on the AJA device.
+		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the audio system of interest.
-		@param[in]	inEnable		If true, the audio system will capture samples into memory, if not currently reset.
-									If false, the audio system will not capture samples.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	inEnable		If true, the Audio System will capture samples into memory, if not currently reset.
+									If false, the Audio System will not capture samples.
 		@note		Applications that acquire exclusive use of the AJA device, set its "every frame services" mode
 					to NTV2_OEM_TASKS, and use AutoCirculate won't need to call this function, since AutoCirculate
-					configures the audio system automatically.
+					configures the Audio System automatically.
 	**/
-	AJA_VIRTUAL bool	SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether or not the audio system is configured for capturing audio samples.
+		@brief		Answers whether or not the Audio System is configured for capturing audio samples.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			Receives 'true' if the audio system will capture samples to memory when
-										not in reset mode;  otherwise 'false' if the audio system is inhibited from
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outEnable			Receives 'true' if the Audio System will capture samples to memory when
+										not in reset mode;  otherwise 'false' if the Audio System is inhibited from
 										capturing samples.
 	**/
-	AJA_VIRTUAL bool	GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Enables or disables a special mode for the given audio system whereby its embedder and
+		@brief		Enables or disables a special mode for the given Audio System whereby its embedder and
 					deembedder both start from the audio base address, instead of operating independently.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system on the device to be affected.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device to be affected.
 		@param[in]	inEnable			If true, de-embedder and embedder both start from the audio base address.
-										If false, the audio system operates normally.
+										If false, the Audio System operates normally.
 	**/
-	AJA_VIRTUAL bool	SetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether or not the device's audio system is currently operating in a special mode
+		@brief		Answers whether or not the device's Audio System is currently operating in a special mode
 					in which its embedder and deembedder both start from the audio base address, instead of
 					operating independently.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the audio system of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the audio system's
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outEnable			A boolean variable that is to receive 'true' if the Audio System's
 										de-embedder and embedder both start from the audio base address,
-										or 'false' if the audio system is operating normally.
+										or 'false' if the Audio System is operating normally.
 	**/
-	AJA_VIRTUAL bool	GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Sets the audio input delay for the given audio subsystem on the device.
-		@param[in]	inAudioSystem	Specifies the audio subsystem whose input delay is to be set.
-		@param[in]	inDelay			Specifies the new audio input delay value for the audio subsystem.
+		@brief		Sets the audio input delay for the given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System whose input delay is to be set.
+		@param[in]	inDelay			Specifies the new audio input delay value for the Audio System.
 									Each increment of this value increases the delay by exactly 512 bytes
-									in the audio subsystem's audio buffer, or about 166.7 microseconds.
+									in the Audio System's audio buffer, or about 166.7 microseconds.
 									Values from 0 thru 8159 are valid, which gives a maximum delay of about
 									1.36 seconds.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioInputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
+	AJA_VIRTUAL bool		SetAudioInputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
 
 	/**
-		@brief		Answers with the audio input delay for the given audio subsystem on the device.
-		@param[in]	inAudioSystem	Specifies the audio subsystem whose input delay is to be retrieved.
-		@param[out]	outDelay		A ULWord variable that is to receive the audio subsystem's current input delay
-									value, expressed as an integral number of 512 byte chunks in the audio subsystem's
+		@brief		Answers with the audio input delay for the given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System whose input delay is to be retrieved.
+		@param[out]	outDelay		A ULWord variable that is to receive the Audio System's current input delay
+									value, expressed as an integral number of 512 byte chunks in the Audio System's
 									audio buffer on the device. This can be translated into microseconds by multiplying
 									the received value by 166.7.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAudioInputDelay (const NTV2AudioSystem inAudioSystem, ULWord & outDelay);
+	AJA_VIRTUAL bool		GetAudioInputDelay (const NTV2AudioSystem inAudioSystem, ULWord & outDelay);
 
 
 	/**
-		@brief		Sets the audio output delay for the given audio subsystem on the device.
-		@param[in]	inAudioSystem	Specifies the audio subsystem whose output delay is to be set.
-		@param[in]	inDelay			Specifies the new audio output delay value for the audio subsystem.
-									Each increment of this value increases the delay by exactly 512 bytes
-									in the audio subsystem's audio buffer, or about 166.7 microseconds.
-									Values from 0 thru 8159 are valid, which gives a maximum delay of about
-									1.36 seconds.
+		@brief		Sets the audio output delay for the given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System whose output delay is to be set.
+		@param[in]	inDelay			Specifies the new audio output delay value for the Audio System. Each increment of this
+									value increases the delay by exactly 512 bytes in the Audio System's audio buffer, or
+									about 166.7 microseconds (when configured for 16 audio channels). Values from 0 to 8159
+									are valid, which gives a maximum delay of about 1.36 seconds.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
+	AJA_VIRTUAL bool		SetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable);		///< @deprecated	Use GetAudioPlayCaptureModeEnable(NTV2AudioSystem,bool&) instead.
@@ -1570,10 +1584,10 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		Answers with the audio output delay for the given audio subsystem on the device.
-		@param[in]	inAudioSystem	Specifies the audio subsystem whose output delay is to be retrieved.
-		@param[out]	outDelay		A ULWord variable that is to receive the audio subsystem's current output delay
-									value, expressed as an integral number of 512 byte chunks in the audio subsystem's
+		@brief		Answers with the audio output delay for the given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System whose output delay is to be retrieved.
+		@param[out]	outDelay		A ULWord variable that is to receive the Audio System's current output delay
+									value, expressed as an integral number of 512-byte chunks in the Audio System's
 									audio buffer on the device. This can be translated into microseconds by multiplying
 									the received value by 166.7.
 		@return		True if successful;  otherwise false.
@@ -1582,44 +1596,48 @@ public:
 
 
 	/**
-		@brief		Determines whether the given audio subsystem on the device is treated as normal PCM audio or not.
-		@param[in]	inAudioSystem	Specifies the audio subsystem of interest.
-		@param[in]	inIsNonPCM		If true, all audio channels in the audio subsystem are treated as non-PCM;
-									otherwise, they're treated as normal PCM audio.
+		@brief		Determines whether or not all outgoing audio channel pairs are to be flagged as non-PCM for the given Audio
+					System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	inIsNonPCM		If true, the "non-PCM" indicator in the AES header of all outgoing audio channel pairs is set "On";
+									otherwise, the indicator is set "Off" (to indicate normal PCM audio).
 		@return		True if successful;  otherwise false.
-		@note		This setting, if non-PCM, overrides per-audio-channel-pair PCM control on those devices that support it.
+		@note		This setting, if non-PCM, overrides per-audio-channel-pair PCM control on those devices that support it
+					(see ::NTV2DeviceCanDoPCMControl).
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const bool inIsNonPCM);
 
 
 	/**
-		@brief		Answers whether or not the given audio subsystem on the device is being treated as normal PCM audio.
-		@param[in]	inAudioSystem	Specifies the audio subsystem of interest.
-		@param[out]	outIsNonPCM		Receives true if all audio channels in the audio subsystem are being treated as non-PCM;
-									otherwise false if they're being treated as normal PCM audio.
+		@brief		Answers whether or not all outgoing audio channel pairs are currently being flagged as non-PCM for the
+					given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[out]	outIsNonPCM		Receives true if all outgoing audio channel pairs are currently flagged as non-PCM;
+									otherwise receives false if the non-PCM indicator is set "Off".
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, bool & outIsNonPCM);
 
 
 	/**
-		@brief		Determines whether or not the given channel pair in the given audio subsystem on the device is treated as normal PCM audio.
-		@param[in]	inAudioSystem	Specifies the audio subsystem of interest.
-		@param[in]	inChannelPair	Specifies the channel pair of interest.
-		@param[in]	inIsNonPCM		If true, the channel pair is treated as non-PCM;
-									otherwise, it's treated as normal PCM audio.
+		@brief		Determines whether the given audio channel pair being transmitted by the given Audio System is to be
+					flagged as non-PCM or not.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	inChannelPair	Specifies the audio channel pair of interest.
+		@param[in]	inIsNonPCM		If true, the "non-PCM" indicator in the AES header of the channel pair is set "On";
+									otherwise, the indicator is set "Off" (to indicate normal PCM audio).
 		@return		True if successful;  otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if per-audio-channel-pair PCM control capability is available on this device.
-		@note		This function has no effect if the per-audio-subsystem PCM control setting is set to non-PCM.
-					(See the overloaded function SetAudioPCMControl(const NTV2AudioSystem, const bool).)
+		@note		This function has no effect if the Audio-System-wide non-PCM control setting is set to non-PCM.
+					(See the two-parameter overloaded version of this function.)
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, const bool inIsNonPCM);
 
 
 	/**
-		@brief		Sets which channel pairs are configured for non-PCM in the given audio subsystem on the device.
-		@param[in]	inAudioSystem			Specifies the audio subsystem of interest.
-		@param[in]	inNonPCMChannelPairs	Specifies the channel pairs that will be configured to emit non-PCM audio data.
+		@brief		Sets the non-PCM indicator in the AES header of the given channel pairs for the given Audio System on the device.
+		@param[in]	inAudioSystem			Specifies the Audio System of interest.
+		@param[in]	inNonPCMChannelPairs	Specifies the audio channel pairs whose non-PCM indicators will be set "On".
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 	**/
@@ -1627,23 +1645,25 @@ public:
 
 
 	/**
-		@brief		Answers whether or not the given channel pair in the given audio subsystem on the device is being treated as normal PCM audio.
-		@param[in]	inAudioSystem	Specifies the audio subsystem of interest.
+		@brief		Answers whether or not the given audio channel pair in the given Audio System on the device is being treated
+					as normal PCM audio.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inChannelPair	Specifies the channel pair of interest.
-		@param[out]	outIsNonPCM		Receives true if the channel pair is being treated as non-PCM;
-									otherwise false if it's being treated as normal PCM audio.
+		@param[out]	outIsNonPCM		Receives true if the audio channel pair is currently being flagged as non-PCM;
+									otherwise false.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
-		@note		This function's answer is irrelevant if the per-audio-subsystem PCM control setting is set to non-PCM.
-					(See the overloaded function SetAudioPCMControl(const NTV2AudioSystem, const bool).)
+		@note		This function's answer is irrelevant if the Audio-System-wide non-PCM control setting is set to non-PCM.
+					(See the two-parameter overloaded version of this function.)
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsNonPCM);
 
 
 	/**
-		@brief		Answers which channel pairs are configured for non-PCM in the given audio subsystem on the device.
-		@param[in]	inAudioSystem			Specifies the audio subsystem of interest.
-		@param[out]	outNonPCMChannelPairs	Receives the channel pairs that are currently configured to emit non-PCM audio data.
+		@brief		Answers which audio channel pairs being transmitted by the given Audio System are currently being flagged
+					as non-PCM.
+		@param[in]	inAudioSystem			Specifies the Audio System of interest.
+		@param[out]	outNonPCMChannelPairs	Receives the audio channel pairs that are currently being flagged as non-PCM.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 	**/
@@ -1651,8 +1671,8 @@ public:
 
 
 	/**
-		@brief		Answers whether or not the given audio channel pair in the given audio subsystem on the device is present in the input signal.
-		@param[in]	inAudioSystem	Specifies the audio subsystem of interest.
+		@brief		Answers whether or not the given audio channel pair in the given Audio System on the device is present in the input signal.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inChannelPair	Specifies the channel pair of interest.
 		@param[out]	outIsPresent	Receives true if the channel pair is present;  otherwise false if it's not present.
 		@return		True if successful; otherwise false.
@@ -1661,9 +1681,9 @@ public:
 
 
 	/**
-		@brief		Answers which audio channel pairs are present in the given audio subsystem's input stream.
-		@param[in]	inAudioSystem				Specifies the audio subsystem of interest.
-		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in the audio subsystem's input stream.
+		@brief		Answers which audio channel pairs are present in the given Audio System's input stream.
+		@param[in]	inAudioSystem				Specifies the Audio System of interest.
+		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in the Audio System's input stream.
 		@return		True if successful; otherwise false.
 		@note		NTV2 device firmware performs this detection using a simple method of detecting the presence of the Audio Group's data packet.
 					It does not perform detailed inspection of the packet -- i.e., checking bits b1/b2 of the AES sub-frame per SMPTE 272, nor
@@ -1681,15 +1701,15 @@ public:
 
 
 	/**
-		@brief		Sets the audio source for the given audio system on the device.
-		@param[in]	inAudioSystem		Specifies the audio system of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-										(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.)
-		@param[in]	inAudioSource		Specifies the audio source to use for the given audio system (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
+		@brief		Sets the audio source for the given Audio System on the device.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
+										(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
+		@param[in]	inAudioSource		Specifies the audio source to use for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
 		@param[in]	inEmbeddedInput		If the audio source is set to NTV2_AUDIO_EMBEDDED, and the device has multiple SDI inputs, use inEmbeddedInput
 										to specify which NTV2EmbeddedAudioInput to use. This parameter is ignored if the inAudioSource is not NTV2_AUDIO_EMBEDDED.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedInput);
+	AJA_VIRTUAL bool		SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedInput);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource);
@@ -1697,14 +1717,14 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		Answers with the current audio source for the given audio system on the device.
-		@param[in]	inAudioSystem	Specifies the audio system of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-									(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.)
-		@param[out]	outAudioSource	Receives the audio source that's currently being used for the given audio system (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
+		@brief		Answers with the current audio source for the given Audio System on the device.
+		@param[in]	inAudioSystem	Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
+									(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
+		@param[out]	outAudioSource	Receives the audio source that's currently being used for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
 		@param[out]	outEmbeddedSource	If the audio source is NTV2_AUDIO_EMBEDDED, outEmbeddedSource will be the SDI input it is configured for.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource, NTV2EmbeddedAudioInput & outEmbeddedSource);
+	AJA_VIRTUAL bool		GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource, NTV2EmbeddedAudioInput & outEmbeddedSource);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource);
@@ -1712,22 +1732,22 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		Sets the device's audio system that will provide audio for the given SDI output's audio embedder.
+		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder.
 		@param[in]	inChannel		Specifies the SDI output as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
-		@param[in]	inAudioSystem	Specifies the audio system that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.
+		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
-	AJA_VIRTUAL bool	SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers with the device's audio system that is currently providing audio for the given SDI output's audio embedder.
+		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder.
 		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
-		@param[in]	outAudioSystem	Receives the audio system that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.
+		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
-	AJA_VIRTUAL bool	GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	SetSDIOutAudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1);	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
@@ -1751,22 +1771,22 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@brief		Sets the device's audio system that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
+		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
 		@param[in]	inChannel		Specifies the SDI output as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
-		@param[in]	inAudioSystem	Specifies the audio system that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.
+		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
-	AJA_VIRTUAL bool	SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers with the device's audio system that is currently providing audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
+		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
 		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
-		@param[in]	outAudioSystem	Receives the audio system that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent audio systems are available on the device.
+		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
-	AJA_VIRTUAL bool	GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	SetSDIOutDS2AudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1);	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
@@ -1796,7 +1816,7 @@ public:
 		@param[out]	outIsPCM			Receives true if the channel pair is currently PCM-encoded;  otherwise false.
 		@return		True if successful;  otherwise false.
 	**/
-	virtual bool InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputChannel, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);
+	virtual bool			InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputChannel, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently PCM-encoded.
@@ -1808,7 +1828,7 @@ public:
 					call CNTV2Card::GetDetectedAudioChannelPairs (or CNTV2Card::GetDetectedAESChannelPairs), and then use std::set_intersection to
 					produce a more realistic set of PCM channel pairs.
 	**/
-	virtual bool GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently not PCM-encoded.
@@ -1816,7 +1836,7 @@ public:
 		@param[out]	outChannelPairs		Receives the channel pairs that are not currently PCM-encoded.
 		@return		True if successful;  otherwise false.
 	**/
-	virtual bool GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
 
 	/**
 		@brief		Answers as to whether or not the host OS audio services for the AJA device (e.g. CoreAudio on MacOS)
@@ -1825,17 +1845,17 @@ public:
 									device;  otherwise, receives 'false'.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetSuspendHostAudio (bool & outIsSuspended);
+	AJA_VIRTUAL bool		GetSuspendHostAudio (bool & outIsSuspended);
 
 	/**
 		@brief		Suspends or resumes host OS audio (e.g. CoreAudio on MacOS) for the AJA device.
 		@param[in]	inSuspend	If true, suspends host OS audio for the AJA device;  otherwise, resumes it.
 		@return		True if successful; otherwise false.
 		@note		This function is currently only implemented on MacOS, and is used to suspend or resume CoreAudio
-					when an application uses AutoCirculate to capture or play audio, to keep the two audio systems
+					when an application uses AutoCirculate to capture or play audio, to keep the two Audio Systems
 					from conflicting with each other.
 	**/
-	AJA_VIRTUAL bool	SetSuspendHostAudio (const bool inSuspend);
+	AJA_VIRTUAL bool		SetSuspendHostAudio (const bool inSuspend);
 
 	/**
 		@brief		Answers with the current audio source for a given quad of AES audio output channels.
@@ -1843,10 +1863,10 @@ public:
 					reflect what's being output from audio channels 1/2/3/4 from NTV2_AUDIOSYSTEM_1, likewise with audio channels 5/6/7/8, etc.
 		@param[in]	inAESAudioChannels		Specifies the AES audio output channel quad of interest.
 		@param[out]	outSrcAudioSystem		Receives the NTV2AudioSystem that is currently driving the given AES audio output channel quad.
-		@param[out]	outSrcAudioChannels		Receives the audio channel quad from the audio engine that's sourcing the given AES audio output channel quad.
+		@param[out]	outSrcAudioChannels		Receives the audio channel quad from the Audio System that's sourcing the given AES audio output channel quad.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels);
+	AJA_VIRTUAL bool		GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels);
 
 	/**
 		@brief		Changes the audio source for the given quad of AES audio output channels.
@@ -1854,10 +1874,10 @@ public:
 					reflect what's being output from audio channels 1/2/3/4 from NTV2_AUDIOSYSTEM_1, likewise with audio channels 5/6/7/8, etc.
 		@param[in]	inAESAudioChannels		Specifies the AES audio output channel quad of interest.
 		@param[in]	inSrcAudioSystem		Specifies the NTV2AudioSystem that should drive the given AES audio output channel quad.
-		@param[in]	inSrcAudioChannels		Specifies the audio channel quad from the given audio engine that should drive the given AES audio output channel quad.
+		@param[in]	inSrcAudioChannels		Specifies the audio channel quad from the given Audio System that should drive the given AES audio output channel quad.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
+	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
 	/**
 		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -1866,7 +1886,7 @@ public:
 		@param[out]	outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
+	AJA_VIRTUAL bool		GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
 
 	/**
 		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -1876,25 +1896,25 @@ public:
 											Specify 'false' to disable the embedder.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
+	AJA_VIRTUAL bool		SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
 
 	/**
-		@brief		Answers with the current state of the audio output erase mode for the given audio system.
-					If enabled, the audio system automatically writes zeroes into the audio output buffer behind the output read head during playout.
+		@brief		Answers with the current state of the audio output erase mode for the given Audio System.
+					If enabled, the Audio System automatically writes zeroes into the audio output buffer behind the output read head during playout.
 		@param[in]	inAudioSystem			Specifies the SDI output of interest.
 		@param[out]	outEraseModeEnabled		Receives 'true' if enabled;  otherwise 'false' if disabled (normal operation).
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
+	AJA_VIRTUAL bool		GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
 
 	/**
-		@brief		Enables or disables output erase mode for the given audio system, which, when enabled, automatically writes zeroes into the audio output buffer
+		@brief		Enables or disables output erase mode for the given Audio System, which, when enabled, automatically writes zeroes into the audio output buffer
 					behind the output read head.
 		@param[in]	inAudioSystem			Specifies the SDI output of interest.
 		@param[in]	inEraseModeEnabled		Specify 'true' to enable output erase mode;  otherwise 'false' for normal operation.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
 
 	///@}
 
@@ -2672,7 +2692,7 @@ public:
 												and avoid using the default frame buffer allocator (see "inStartFrameNumber" and "inEndFrameNumber"
 												parameters below).
 
-		@param[in]		inAudioSystem			Specifies the audio system to use, if any. Defaults to NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]		inAudioSystem			Specifies the Audio System to use, if any. Defaults to NTV2_AUDIOSYSTEM_INVALID (no audio).
 
 		@param[in]		inOptionFlags			A bit mask that specifies additional AutoCirculate options (e.g., AUTOCIRCULATE_WITH_RP188,
 												AUTOCIRCULATE_WITH_LTC, AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
@@ -2732,7 +2752,7 @@ public:
 												and avoid using the default frame buffer allocator (see "inStartFrameNumber" and "inEndFrameNumber"
 												parameters below).
 
-		@param[in]		inAudioSystem			Specifies the audio system to use, if any. Defaults to NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]		inAudioSystem			Specifies the Audio System to use, if any. Defaults to NTV2_AUDIOSYSTEM_INVALID (no audio).
 
 		@param[in]		inOptionFlags			A bit mask that specifies additional AutoCirculate options (e.g., AUTOCIRCULATE_WITH_RP188,
 												AUTOCIRCULATE_WITH_LTC, AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
@@ -2829,7 +2849,7 @@ public:
 					next VBI, AutoCirculate is explicitly stopped, after which the channel's AutoCirculate state is set to "disabled".
 					Once this method has been called, the channel cannot be used until it gets reinitialized by a subsequent call
 					to CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
-					When called with <i>inAbort</i> set to 'true', audio capture or playback is immediately stopped (if a valid audio system
+					When called with <i>inAbort</i> set to 'true', audio capture or playback is immediately stopped (if a valid Audio System
 					was specified at initialization time), and the AutoCirculate channel status is changed to "disabled".
 	**/
 	AJA_VIRTUAL bool	AutoCirculateStop (const NTV2Channel inChannel, const bool inAbort = false);
@@ -3904,8 +3924,8 @@ public:
 
 	/**
 		@brief						Sets the HDMI output's 2-channel audio source.
-		@param[in]	inNewValue		Specifies the audio channels from the given audio system to be used.
-		@param[in]	inAudioSystem	Specifies the audio system that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inNewValue		Specifies the audio channels from the given Audio System to be used.
+		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inNewValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
@@ -3913,15 +3933,15 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current 2-channel audio source.
 		@param[out]	outValue		Receives the audio channels that are currently being used.
-		@param[out]	outAudioSystem	Receives the audio system that is currently supplying audio samples to the HDMI output.
+		@param[out]	outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem);
 
 	/**
 		@brief						Changes the HDMI output's 8-channel audio source.
-		@param[in]	inNewValue		Specifies the audio channels from the given audio system to be used.
-		@param[in]	inAudioSystem	Specifies the audio system that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inNewValue		Specifies the audio channels from the given Audio System to be used.
+		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inNewValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
@@ -3929,7 +3949,7 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current 8-channel audio source.
 		@param[out]	outValue		Receives the audio channels that are currently being used.
-		@param[out]	outAudioSystem	Receives the audio system that is currently supplying audio samples to the HDMI output.
+		@param[out]	outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
