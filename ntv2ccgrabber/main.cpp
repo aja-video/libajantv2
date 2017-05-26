@@ -41,7 +41,6 @@ static void SignalHandler (int inSignal)
 static void PnpCallback (const AJAPnpMessage inMessage, void * pUserData)		//	static
 {
 	(void) pUserData;
-	cerr << "## PnpCallback:  " << inMessage << endl;
 	if (inMessage == AJA_Pnp_DeviceAdded || inMessage == AJA_Pnp_DeviceRemoved)
 	{
 		static unsigned	sAttaches	(0);
