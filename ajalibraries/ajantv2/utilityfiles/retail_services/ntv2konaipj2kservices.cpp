@@ -1203,7 +1203,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1))
 				{
 					// Special case we handle channel enables at service level automatically
-					mRx2022Config1.rxc_enable = enableSv ? true : false;
+					mRx2022Config1.rxc_enable32 = enableSv;
 					setRxConfig(NTV2_CHANNEL1);
 					
 					// for now just configure the decoder with defaults everytime we configure the RX channel
@@ -1247,7 +1247,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2))
 					{
 						// Special case we handle channel enables at service level automatically
-						mRx2022Config2.rxc_enable = enableSv ? true : false;
+						mRx2022Config2.rxc_enable32 = enableSv;
 						setRxConfig(NTV2_CHANNEL2);
 					}
 				}
@@ -1271,12 +1271,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 				if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3))
 				{
 					// Special case we handle channel enables at service level automatically
-					mTx2022Config3.txc_enable = enableSv ? true : false;
+					mTx2022Config3.txc_enable32 = enableSv;
 					setTxConfig(NTV2_CHANNEL1);
 				}
 				else
 				{
-					if (mTx2022Config3.txc_primaryAutoMac)
+					if (mTx2022Config3.txc_primaryAutoMacAddr)
 					{
 						uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
 						uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
@@ -1331,12 +1331,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 					if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4))
 					{
 						// Special case we handle channel enables at service level automatically
-						mTx2022Config4.txc_enable = enableSv ? true : false;
+						mTx2022Config4.txc_enable32 = enableSv;
 						setTxConfig(NTV2_CHANNEL2);
 					}
 					else
 					{
-						if (mTx2022Config4.txc_primaryAutoMac)
+						if (mTx2022Config4.txc_primaryAutoMacAddr)
 						{
 							uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
 							uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
@@ -1926,7 +1926,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.networkPathDiff        = mRx2022Config2.rxc_networkPathDiff;
 			chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
 			
-			enable                      = mRx2022Config2.rxc_enable;
+			enable                      = mRx2022Config2.rxc_enable32;
 			break;
 		default:
 		case NTV2_CHANNEL1:
@@ -1953,7 +1953,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.networkPathDiff        = mRx2022Config1.rxc_networkPathDiff;
 			chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
 			
-			enable                      = mRx2022Config1.rxc_enable;
+			enable                      = mRx2022Config1.rxc_enable32;
 			break;
 	}
 	
@@ -1982,7 +1982,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			remoteMAC.mac[4]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
 			remoteMAC.mac[5]            =  mTx2022Config4.txc_primaryRemoteMAC_lo        & 0xff;
 			chan.primaryRemoteMAC       = remoteMAC;
-			chan.primaryAutoMAC         = mTx2022Config4.txc_primaryAutoMac;
+			chan.primaryAutoMAC         = mTx2022Config4.txc_primaryAutoMacAddr ? true : false;
 			chan.primaryLocalPort       = mTx2022Config4.txc_primaryLocalPort;
 			chan.primaryRemotePort      = mTx2022Config4.txc_primaryRemotePort;
 			
@@ -1995,11 +1995,11 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			remoteMAC.mac[4]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
 			remoteMAC.mac[5]            =  mTx2022Config4.txc_secondaryRemoteMAC_lo        & 0xff;
 			chan.secondaryRemoteMAC     = remoteMAC;
-			chan.secondaryAutoMAC       = mTx2022Config4.txc_secondaryAutoMac;
+			chan.secondaryAutoMAC       = mTx2022Config4.txc_secondaryAutoMacAddr ? true : false;
 			chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
 			chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
 			
-			enable                      = mTx2022Config4.txc_enable;
+			enable                      = mTx2022Config4.txc_enable32;
 			break;
 		default:
 			
@@ -2013,7 +2013,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			remoteMAC.mac[4]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
 			remoteMAC.mac[5]            =  mTx2022Config3.txc_primaryRemoteMAC_lo        & 0xff;
 			chan.primaryRemoteMAC       = remoteMAC;
-			chan.primaryAutoMAC         = mTx2022Config3.txc_primaryAutoMac;
+			chan.primaryAutoMAC         = mTx2022Config3.txc_primaryAutoMacAddr ? true : false;
 			chan.primaryLocalPort       = mTx2022Config3.txc_primaryLocalPort;
 			chan.primaryRemotePort      = mTx2022Config3.txc_primaryRemotePort;
 			
@@ -2026,11 +2026,11 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			remoteMAC.mac[4]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
 			remoteMAC.mac[5]            =  mTx2022Config3.txc_secondaryRemoteMAC_lo        & 0xff;
 			chan.secondaryRemoteMAC     = remoteMAC;
-			chan.secondaryAutoMAC       = mTx2022Config3.txc_secondaryAutoMac;
+			chan.secondaryAutoMAC       = mTx2022Config3.txc_secondaryAutoMacAddr ? true : false;
 			chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
 			chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
 			
-			enable                      = mTx2022Config3.txc_enable;
+			enable                      = mTx2022Config3.txc_enable32;
 			break;
 	}
 	
@@ -2059,9 +2059,9 @@ bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, con
 bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
 	uint32_t addr;
-	if (virtual_config.txc_primaryLocalPort    != hw_channel.primaryLocalPort)  return true;
-	if (virtual_config.txc_primaryRemotePort   != hw_channel.primaryRemotePort) return true;
-	if (virtual_config.txc_primaryAutoMac      != hw_channel.primaryAutoMAC)    return true;
+	if (virtual_config.txc_primaryLocalPort			!= hw_channel.primaryLocalPort)  return true;
+	if (virtual_config.txc_primaryRemotePort		!= hw_channel.primaryRemotePort) return true;
+	if ((bool)virtual_config.txc_primaryAutoMacAddr != hw_channel.primaryAutoMAC)    return true;
 	
 	addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
 	if (virtual_config.txc_primaryRemoteIp     != addr) return true;
