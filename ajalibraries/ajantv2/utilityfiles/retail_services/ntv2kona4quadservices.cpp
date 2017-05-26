@@ -1109,6 +1109,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
+		case NTV2_Quarter4k:	   mCard->Connect (NTV2_XptAnalogOutInput, NTV2_Xpt4KDownConverterOut); break;
 		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1YUV); break;
 		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC2VidYUV : NTV2_XptFrameBuffer2YUV); break;
 		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC3VidYUV : NTV2_XptFrameBuffer3YUV); break;
