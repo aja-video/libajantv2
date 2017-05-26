@@ -931,7 +931,37 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
     if (stream == NTV2_VIDEO_STREAM)
     {
-        // DAC TODO - video format and sampling
+
+        uint32_t baseAddrPacketizer;
+        SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
+
+        uint32_t width;
+        mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, &width);
+
+        uint32_t height;
+        mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, &height);
+
+        // pkts per line
+        mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,&txConfig.pktsPerLine);
+
+        // payload length
+        mDevice.ReadRegister(kReg4175_pkt_payload_len + baseAddrPacketizer,&txConfig.payloadLen);
+
+        // payload length last
+        mDevice.ReadRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,&txConfig.lastPayLoadLen);
+
+        // payload type
+        uint32_t val;
+        mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, &val);
+        txConfig.payloadType = (uint16_t)val;
+
+        // pix per pkt
+        uint32_t ppp;
+        mDevice.ReadRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,&ppp);
+
+        // interlace
+        uint32_t  ilace;
+        mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
     }
 
     return true;
