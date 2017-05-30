@@ -1976,61 +1976,69 @@ public:
 
 };	//	RegisterExpert
 
-static const RegisterExpert	gRegExpert;		//	Register Expert Singleton
+//	Register Expert Singleton
+RegisterExpert* CNTV2RegisterExpert::gRegExpert = 0;
 
-
+RegisterExpert* CNTV2RegisterExpert::instance()
+{
+    if(gRegExpert == 0)
+    {
+        gRegExpert = new RegisterExpert();
+    }
+    return gRegExpert;
+}
 
 string CNTV2RegisterExpert::GetDisplayName (const uint32_t inRegNum)
 {
-	return gRegExpert.RegNameToString (inRegNum);
+    return instance()->RegNameToString (inRegNum);
 }
 
 string CNTV2RegisterExpert::GetDisplayValue (const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID)
 {
-	return gRegExpert.RegValueToString (inRegNum, inRegValue, inDeviceID);
+    return instance()->RegValueToString (inRegNum, inRegValue, inDeviceID);
 }
 
 bool CNTV2RegisterExpert::IsRegisterInClass (const uint32_t inRegNum, const string & inClassName)
 {
-	return gRegExpert.IsRegInClass (inRegNum, inClassName);
+    return instance()->IsRegInClass (inRegNum, inClassName);
 }
 
 NTV2StringSet CNTV2RegisterExpert::GetAllRegisterClasses (void)
 {
-	return gRegExpert.GetAllRegisterClasses ();
+    return instance()->GetAllRegisterClasses ();
 }
 
 NTV2StringSet CNTV2RegisterExpert::GetRegisterClasses (const uint32_t inRegNum)
 {
-	return gRegExpert.GetRegisterClasses (inRegNum);
+    return instance()->GetRegisterClasses (inRegNum);
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForClass	(const string & inClassName)
 {
-	return gRegExpert.GetRegistersForClass (inClassName);
+    return instance()->GetRegistersForClass (inClassName);
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForChannel (const NTV2Channel inChannel)
 {
-	return NTV2_IS_VALID_CHANNEL (inChannel)  ?  gRegExpert.GetRegistersForClass (gChlClasses[inChannel])  :  NTV2RegNumSet();
+    return NTV2_IS_VALID_CHANNEL (inChannel)  ?  instance()->GetRegistersForClass (gChlClasses[inChannel])  :  NTV2RegNumSet();
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals)
 {
-	return gRegExpert.GetRegistersForDevice (inDeviceID, inIncludeVirtuals);
+    return instance()->GetRegistersForDevice (inDeviceID, inIncludeVirtuals);
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersWithName (const string & inName, const int inSearchStyle)
 {
-	return gRegExpert.GetRegistersWithName (inName, inSearchStyle);
+    return instance()->GetRegistersWithName (inName, inSearchStyle);
 }
 
 NTV2InputCrosspointID CNTV2RegisterExpert::GetInputCrosspointID (const uint32_t inXptRegNum, const uint32_t inMaskIndex)
 {
-	return gRegExpert.GetInputCrosspointID (inXptRegNum, inMaskIndex);
+    return instance()->GetInputCrosspointID (inXptRegNum, inMaskIndex);
 }
 
 bool CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex)
 {
-	return gRegExpert.GetXptRegNumAndMaskIndex (inInputXpt, outXptRegNum, outMaskIndex);
+    return instance()->GetXptRegNumAndMaskIndex (inInputXpt, outXptRegNum, outMaskIndex);
 }
