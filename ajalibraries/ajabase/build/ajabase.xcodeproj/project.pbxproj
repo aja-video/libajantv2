@@ -112,6 +112,7 @@
 		B4CE1FCA16E802870092B564 /* timecodeburn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FBD16E802870092B564 /* timecodeburn.cpp */; };
 		B4CE1FCB16E802870092B564 /* timecodeburn.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBE16E802870092B564 /* timecodeburn.h */; };
 		B4CE1FCC16E802870092B564 /* timecodeburndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBF16E802870092B564 /* timecodeburndata.h */; };
+		B4FF311E1EDDDB180084915F /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4FF311D1EDDDB180084915F /* common.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -218,6 +219,7 @@
 		B4CE1FBD16E802870092B564 /* timecodeburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timecodeburn.cpp; path = ../common/timecodeburn.cpp; sourceTree = SOURCE_ROOT; };
 		B4CE1FBE16E802870092B564 /* timecodeburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecodeburn.h; path = ../common/timecodeburn.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FBF16E802870092B564 /* timecodeburndata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecodeburndata.h; path = ../common/timecodeburndata.h; sourceTree = SOURCE_ROOT; };
+		B4FF311D1EDDDB180084915F /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common.cpp; path = ../common/common.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libajabased.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libajabased.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -272,6 +274,7 @@
 				B4CE1FB816E802870092B564 /* cli_utils.h */,
 				A411D88511DE8E40003E7E53 /* buffer.cpp */,
 				A411D88611DE8E40003E7E53 /* buffer.h */,
+				B4FF311D1EDDDB180084915F /* common.cpp */,
 				A411D88711DE8E40003E7E53 /* common.h */,
 				B4CADAEF180F10B1004C9057 /* dpx_hdr.cpp */,
 				B4CADAF0180F10B1004C9057 /* dpx_hdr.h */,
@@ -541,6 +544,7 @@
 				B4A35BF7144CDBEB00957C64 /* processimpl.cpp in Sources */,
 				B4A35BF9144CDBEB00957C64 /* pthreadsextra.cpp in Sources */,
 				B4A35B94144CDAA100957C64 /* sqlite3.c in Sources */,
+				B4FF311E1EDDDB180084915F /* common.cpp in Sources */,
 				A411D8E711DE8E56003E7E53 /* systemtime.cpp in Sources */,
 				B41148C51DC1562C00A7D6E1 /* devicenotifier.cpp in Sources */,
 				B4A35B3B144CD91B00957C64 /* testpatterngen.cpp in Sources */,
