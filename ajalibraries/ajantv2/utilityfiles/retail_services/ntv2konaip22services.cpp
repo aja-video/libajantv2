@@ -993,7 +993,25 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID XPt4 = NTV2_XptBlack;
 	if (b4K)
 	{
-		if (b4kHfr && (genFrameFormat != FORMAT_RGB))
+		if (b1wireQ4k)
+		{
+			switch (mVirtualHDMIOutputSelect)
+			{
+			default:
+			case NTV2_PrimaryOutputSelect:
+				XPt1 = NTV2_XptFrameBuffer1YUV;
+				XPt2 = NTV2_XptFrameBuffer2YUV;
+				XPt3 = NTV2_XptFrameBuffer3YUV;
+				XPt4 = NTV2_XptFrameBuffer4YUV;
+				break;
+			case NTV2_Quarter4k:       XPt1 = (genFrameFormat != FORMAT_RGB) ? NTV2_Xpt4KDownConverterOut : NTV2_Xpt4KDownConverterOutRGB; break;
+			case NTV2_Quadrant1Select: XPt1 = NTV2_XptFrameBuffer1YUV; break;
+			case NTV2_Quadrant2Select: XPt1 = NTV2_XptFrameBuffer2YUV; break;
+			case NTV2_Quadrant3Select: XPt1 = NTV2_XptFrameBuffer3YUV; break;
+			case NTV2_Quadrant4Select: XPt1 = NTV2_XptFrameBuffer4YUV; break;
+			}
+		}
+		else if (b4kHfr && (genFrameFormat != FORMAT_RGB))
 		{
 			// YUV to HDMI Out
 			if (b2pi)
@@ -1061,10 +1079,10 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				}
 				else
 				{
-                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
+					XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+					XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
+					XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
+					XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
 				}
 				break;
 			case NTV2_4kHalfFrameRate:
@@ -1128,6 +1146,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
+		case NTV2_Quarter4k:	   mCard->Connect (NTV2_XptAnalogOutInput, NTV2_Xpt4KDownConverterOut); break;
 		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1YUV); break;
 		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC2VidYUV : NTV2_XptFrameBuffer2YUV); break;
 		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, genFrameFormat == FORMAT_RGB ? NTV2_XptCSC3VidYUV : NTV2_XptFrameBuffer3YUV); break;
