@@ -457,7 +457,9 @@ typedef enum
     kVRegZeroHostAncPostCapture				= VIRTUALREG_START+513,
     kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+514,
 
-    kVRegLastAJA							= VIRTUALREG_START+515,		///< @brief	The last AJA virtual register slot
+    kVRegKIPError                           = VIRTUALREG_START+515,
+
+    kVRegLastAJA							= VIRTUALREG_START+516,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
