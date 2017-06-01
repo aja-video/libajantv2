@@ -138,9 +138,6 @@ void CKonaIpJ2kJsonReader::initMaps()
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_2400, false))] = NTV2_FORMAT_1080p_2K_2400;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_2997, false))] = NTV2_FORMAT_1080p_2K_2997;
     videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_3000, false))] = NTV2_FORMAT_1080p_2K_3000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_5000, false))] = NTV2_FORMAT_1080p_2K_5000;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_5994, false))] = NTV2_FORMAT_1080p_2K_5994;
-    videoFormatMap[QString::fromStdString(NTV2VideoFormatToString(NTV2_FORMAT_1080p_2K_6000, false))] = NTV2_FORMAT_1080p_2K_6000;
 
     chromaSubSamplingMap["444"] = 0;
     chromaSubSamplingMap["422-444"] = 1;
