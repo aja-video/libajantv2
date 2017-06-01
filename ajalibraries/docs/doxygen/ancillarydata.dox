@@ -27,7 +27,8 @@
 	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry now can
 		match the video standard.
 
-	@note	All NTV2 devices support the "tall" and "taller" VANC geometries.
+	@note	All NTV2 devices support the "tall" and "taller" VANC geometries (see NTV2VANCMode).
+	@note	Neither NTV2_VANCMODE_TALL nor NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see NTV2_IS_4K_VIDEO_FORMAT macro).
 	@note	AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
 			To use the latter, the \c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.

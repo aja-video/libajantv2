@@ -6500,7 +6500,8 @@ typedef enum
 
 
 		/**
-			@brief	This is embedded in the AUTOCIRCULATE_TRANSFER struct that's returned from the CNTV2Card::AutoCirculateTransfer function.
+			@brief	This object is embedded in the AUTOCIRCULATE_TRANSFER struct that's returned from the CNTV2Card::AutoCirculateTransfer function,
+					and contains status information about the transfer and the state of AutoCirculate.
 			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)
@@ -6544,7 +6545,9 @@ typedef enum
 
 
 		/**
-			@brief	This is used in the CNTV2Card::AutoCirculateTransfer function.
+			@brief	This object specifies the information that will be transferred to or from the AJA device in the CNTV2Card::AutoCirculateTransfer
+					function call. It will be used by the device driver only if the AUTOCIRCULATE_WITH_ANC option was used in the call to
+					CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
 			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)
