@@ -2084,19 +2084,19 @@ void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uin
 	{
 		default:
 		case NTV2_CHANNEL1:
-			errCode = (errCode & 0xff) | value;
+			errCode = (errCode & 0xffffff00) | value;
 			break;
 			
 		case NTV2_CHANNEL2:
-			errCode = (errCode & 0xff00) | (value << 8);
+			errCode = (errCode & 0xffff00ff) | (value << 8);
 			break;
 			
 		case NTV2_CHANNEL3:
-			errCode = (errCode & 0xff0000) | (value << 16);
+			errCode = (errCode & 0xff00ffff) | (value << 16);
 			break;
 			
 		case NTV2_CHANNEL4:
-			errCode = (errCode & 0xff000000) | (value << 24);
+			errCode = (errCode & 0x00ffffff) | (value << 24);
 			break;
 	}
 	
