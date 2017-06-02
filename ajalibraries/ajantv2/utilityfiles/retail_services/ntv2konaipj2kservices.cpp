@@ -1957,7 +1957,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			break;
 	}
 	
-	//printRxConfig(chan);
 	if (target->SetRxChannelConfiguration(channel,chan) == true)
 	{
 		printf("set RxConfig chn=%d OK\n",(int)channel);
@@ -2044,7 +2043,6 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			break;
 	}
 	
-	//printTxConfig(chan);
 	if (target->SetTxChannelConfiguration(channel,chan) == true)
 	{
 		printf("set TxConfig chn=%d OK\n",(int)channel);
