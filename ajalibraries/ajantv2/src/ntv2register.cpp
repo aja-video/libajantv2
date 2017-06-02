@@ -6850,18 +6850,25 @@ bool CNTV2Card::GetConversionMode(NTV2ConversionMode & outMode)
 }
 
 
-bool CNTV2Card::SetColorSpaceRGBBlackRange			(NTV2RGBBlackRange rgbBlackRange,	NTV2Channel inChannel)
+bool CNTV2Card::SetColorSpaceRGBBlackRange (const NTV2_CSC_RGB_Range inRange,	const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return WriteRegister (gChannelToCSCoeff34RegNum [inChannel],	rgbBlackRange,			kK2RegMaskXena2RGBRange,			kK2RegShiftXena2RGBRange);
+	if (!NTV2_IS_VALID_CSCRGBRANGE(inRange))
+		return false;
+	return WriteRegister (gChannelToCSCoeff34RegNum[inChannel],  inRange,  kK2RegMaskXena2RGBRange,  kK2RegShiftXena2RGBRange);
 }
 
-bool CNTV2Card::GetColorSpaceRGBBlackRange			(NTV2RGBBlackRange* rgbBlackRange,	NTV2Channel inChannel)
+bool CNTV2Card::GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,	const NTV2Channel inChannel)
 {
+	outRange = NTV2_CSC_RGB_RANGE_INVALID;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return ReadRegister  (gChannelToCSCoeff34RegNum [inChannel],	(ULWord*)rgbBlackRange,	kK2RegMaskXena2RGBRange,			kK2RegShiftXena2RGBRange);
+	ULWord	regValue	(0);
+	if (!ReadRegister  (gChannelToCSCoeff34RegNum[inChannel],  &regValue,  kK2RegMaskXena2RGBRange,  kK2RegShiftXena2RGBRange))
+		return false;
+	outRange = NTV2_CSC_RGB_Range(regValue);
+	return true;	
 }
 
 bool CNTV2Card::SetColorSpaceUseCustomCoefficient	(ULWord useCustomCoefficient,		NTV2Channel inChannel)
