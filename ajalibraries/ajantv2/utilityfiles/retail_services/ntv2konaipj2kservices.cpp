@@ -1961,14 +1961,13 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	{
 		printf("set RxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
-		target->SetRxChannelEnable(channel,enable,false);
 	}
 	else
 	{
 		printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrRxConfig, 1);
-		target->SetRxChannelEnable(channel,false,false);
 	}
+	target->SetRxChannelEnable(channel,enable,false);
 }
 
 void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
@@ -2047,14 +2046,13 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	{
 		printf("set TxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
-		target->SetTxChannelEnable(channel,enable,false);
 	}
 	else
 	{
 		printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrTxConfig, 1);
-		target->SetTxChannelEnable(channel,false,false);
 	}
+	target->SetTxChannelEnable(channel,enable,false);
 }
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
