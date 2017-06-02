@@ -27,10 +27,6 @@ using std::map;
 #define UINT64_MAX      18446744073709551615
 #endif
 
-
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
 AJAPerformance::AJAPerformance(const std::string& name,
                                AJATimerPrecision precision)
     : mTimer(precision)
@@ -65,15 +61,17 @@ AJAPerformance::AJAPerformance(AJATimerPrecision precision)
     mMaxTime    = 0;
 }
 
-
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
 AJAPerformance::~AJAPerformance(void)
 {
+    // If not already stopped then stop and output report
+    if (mTimer.IsRunning())
+    {
+        Stop();
+        Report();
+    }
 }
 
-void AJAPerformance::SetExtras(const AJAPerformaceExtraMap &values)
+void AJAPerformance::SetExtras(const AJAPerformaceExtraMap& values)
 {
     mExtras = values;
 }
@@ -113,17 +111,11 @@ AJATimerPrecision AJAPerformance::Precision(void)
     return mTimer.Precision();
 }
 
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
 void AJAPerformance::Start(void)
 {
 	mTimer.Start();
 }
 
-///////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////
 void AJAPerformance::Stop(void)
 {
 	uint32_t elapsedTime;
@@ -152,6 +144,29 @@ void AJAPerformance::Stop(void)
 	}
 }
 
+void AJAPerformance::Report(const std::string& name)
+{
+    int entries = (int)Entries();
+    if (entries > 0)
+    {
+        int min   = (int)MinTime();
+        int max   = (int)MaxTime();
+        float avg = ((float)TotalTime()/(float)entries);
+        string times = (entries == 1) ? "time,  " : "times, ";
+
+        std::string reportName = name.empty() ? Name() : name;
+
+        AJA_REPORT(AJA_DebugUnit_StatsGeneric,
+                   AJA_DebugSeverity_Debug,
+                   "  [%-23s] called %4d %s min: %4d, avg: %5.2f, max: %4d",
+                   reportName.c_str(),
+                   entries,
+                   times.c_str(),
+                   min,
+                   avg,
+                   max);
+    }
+}
 
 bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
                                  std::string key, const AJAPerformaceExtraMap& extras, AJATimerPrecision precision)
@@ -216,24 +231,8 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             std::string key = foundAt->first;
             AJAPerformance perf = foundAt->second;
 
-            uint64_t entries = perf.Entries();
-            if (entries > 0)
-            {
-                int min   = (int)perf.MinTime();
-                int max   = (int)perf.MaxTime();
-                float avg = ((float)perf.TotalTime()/(float)entries);
-                string times = (entries == 1) ? "time,  " : "times, ";
+            perf.Report(key);
 
-                AJA_REPORT(AJA_DebugUnit_StatsGeneric,
-                           AJA_DebugSeverity_Debug,
-                           "  [%-23s] called %4d %s min: %4d, avg: %5.2f, max: %4d",
-                           key.c_str(),
-                           entries,
-                           times.c_str(),
-                           min,
-                           avg,
-                           max);
-            }
             ++foundAt;
         }
         AJA_REPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "}");
