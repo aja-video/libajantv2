@@ -127,7 +127,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
          return true;
 }
 
-bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACaddress)
+bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
@@ -135,9 +135,9 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACa
         int count = 30;
         do
         {
-            SendArpRequest(remote_IPAddress);
+            SendArpRequest(remote_IPAddress,port);
             mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
-            eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,MACaddress);
+            eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,port,channel,stream,MACaddress);
             switch (as)
             {
             case ARP_VALID:
@@ -158,12 +158,17 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, string & MACa
         return true;
 }
 
-eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, string & MACaddress)
+eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s",(int)MB_CMD_GET_MAC_FROM_ARP_TABLE,remote_IPAddress.c_str());
+        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s port=%d, chan=%d, sream=%d",
+                (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
+                remote_IPAddress.c_str(),
+                (int)port,
+                (int)channel,
+                (int)stream);
         bool rv = sendMsg(250);
         if (!rv)
         {
@@ -213,12 +218,15 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
          return ARP_VALID;
 }
 
-bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress)
+bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
 {
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s",(int)MB_CMD_SEND_ARP_REQ,remote_IPAddress.c_str());
+        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s port=%d",
+                (int)MB_CMD_SEND_ARP_REQ,
+                remote_IPAddress.c_str(),
+                int(port));
         bool rv = sendMsg(250);
         if (!rv)
         {

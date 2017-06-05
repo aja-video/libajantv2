@@ -801,7 +801,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
                 rv = AcquireMailbox();
                 if (rv)
                 {
-                    rv = GetRemoteMAC(txConfig.secondaryRemoteIP,macAddr);
+                    rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
                     ReleaseMailbox();
                 }
                 if (!rv)
@@ -921,7 +921,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
             rv = AcquireMailbox();
             if (rv)
             {
-                rv = GetRemoteMAC(txConfig.primaryRemoteIP,macAddr);
+                rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
                 ReleaseMailbox();
             }
             if (!rv)

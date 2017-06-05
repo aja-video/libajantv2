@@ -806,7 +806,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
             rv = AcquireMailbox();
             if (rv)
             {
-                rv = GetRemoteMAC(txConfig.remoteIP,macAddr);
+                rv = GetRemoteMAC(txConfig.remoteIP,SFP_TOP,channel,stream,macAddr);
                 ReleaseMailbox();
             }
             if (!rv)
