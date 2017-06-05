@@ -59,6 +59,7 @@
 #define	kRegClass_WriteOnly	std::string ("kRegClass_WriteOnly")
 #define	kRegClass_Virtual	std::string ("kRegClass_Virtual")
 
+class RegisterExpert;
 
 /**
 	@brief	I provide information about registers and their values.
@@ -166,6 +167,10 @@ class AJAExport CNTV2RegisterExpert
 		static const int	STARTSWITH	=	1;
 		static const int	ENDSWITH	=	2;
 		static const int	EXACTMATCH	=	3;
+
+private:
+        static RegisterExpert* instance();
+        static RegisterExpert* gRegExpert;
 
 };	//	CNTV2RegisterExpert
 
