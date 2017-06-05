@@ -751,6 +751,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	return true;
 }
 
+
 bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
