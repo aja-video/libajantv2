@@ -64,7 +64,7 @@ NTV2DeviceHasSDIRelays,Returns true if the device having the given ID has bypass
 NTV2DeviceHasSPIFlash,,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceHasSPIFlashSerial,,-,-,-,-,-,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-,-,-,-,-,X,X
 NTV2DeviceHasSPIv2,Returns true if the device having the given ID uses version 2 SPI hardware.,-,-,-,-,-,X,-,-,X,X,X,X,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
-NTV2DeviceHasSPIv3,Returns true if the device having the given ID uses version 3 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,-,-,-,-,-,-,X,-
+NTV2DeviceHasSPIv3,Returns true if the device having the given ID uses version 3 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,-,-,-,-,-,-,-,-
 NTV2DeviceHasSPIv4,Returns true if the device having the given ID uses version 4 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,X
 NTV2DeviceIs64Bit,,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceIsDirectAddressable,,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
@@ -81,3 +81,4 @@ NTV2DeviceCanDoJ2K,Returns true if the device supports the JPEG 2000 codec,-,-,-
 NTV2DeviceCanDo2110,Returns true if the device supports SMPTE 2110,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-
 NTV2DeviceHasXilinxDMA,Returns true if the device has Xilinx DMA engine,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X
 NTV2DeviceCanDo12GSDI,Returns true if the device supports 12G SDI,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X
+NTV2DeviceHasSPIv5,Returns true if the device having the given ID uses version 5 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-
