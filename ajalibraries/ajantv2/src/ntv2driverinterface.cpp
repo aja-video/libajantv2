@@ -731,10 +731,24 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 bool CNTV2DriverInterface::IsDeviceReady()
 {
 	if (IsKonaIPDevice())
-		return IsMBSystemReady();
-	else
-		return true;
+	{
+		if(!IsMBSystemReady())
+			return false;
+		if(!IsMBSystemValid())
+			return false;
+	}
+	return true;
 }
+
+bool CNTV2DriverInterface::IsMBSystemValid()
+{
+	if (IsKonaIPDevice())
+	{
+		return true;
+	}
+	return true;
+}
+
 
 bool CNTV2DriverInterface::IsMBSystemReady()
 {

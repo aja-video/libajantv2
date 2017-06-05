@@ -216,6 +216,7 @@ public:
 					but the device won't be capable of either ingesting or playing video or performing DMA operations.
 	**/
 	virtual bool		IsDeviceReady (void);
+	virtual bool		IsMBSystemValid (void);
 	virtual bool		IsMBSystemReady (void);
 	virtual bool		IsKonaIPDevice (void);
 
