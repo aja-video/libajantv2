@@ -6647,32 +6647,26 @@ typedef enum
 													~AUTOCIRCULATE_TRANSFER ();		///< @brief	My default destructor, which frees all allocatable fields that I own.
 
 				/**
-					@brief	Constructs a default AUTOCIRCULATE_TRANSFER struct from the given information.
+					@brief	Constructs an AUTOCIRCULATE_TRANSFER object to use in a CNTV2Card::AutoCirculateTransfer call.
 					@param	pInVideoBuffer		Specifies a pointer to the host video buffer. On capture, this buffer will be written during the DMA operation.
 												On playout, this buffer will be read during the DMA operation. If NULL, no video will be transferred.
 					@param	inVideoByteCount	On capture, specifies the maximum capacity of the host video buffer, in bytes.
 												On playout, specifies the number of video bytes to transfer from the host buffer.
 												If zero, no video will be transferred.
-					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd to this buffer.
+					@param	pInAudioBuffer		Optionally specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd to this buffer.
 												On playout, audio data will be read from this buffer. If NULL, no audio will be transferred.
 												Defaults to NULL.
-					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes. After the transfer,
-												it will contain the actual number of bytes transferred.
-												On playout, specifies the number of audio bytes to transfer from the host buffer.
-												If zero, no audio will be transferred. Defaults to zero.
-					@param	pInANCBuffer		Specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
-												On playout, ancillary data will be read from this buffer. If NULL, no ancillary data will be transferred.
+					@param	inAudioByteCount	Optionally specifies the maximum capacity of the host audio buffer, in bytes. If zero, no audio will be transferred.
+												Defaults to zero.
+					@param	pInANCBuffer		Optionally specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
+												On playout, ancillary data will be read from this buffer. If NULL, no Field 1 ancillary data will be transferred.
 												Defaults to NULL.
-					@param	inANCByteCount		On capture, specifies the maximum capacity of the host ancillary data buffer, in bytes. After the transfer,
-												it will contain the actual number of bytes transferred.
-												On playout, specifies the number of ancillary data bytes to transfer from the host buffer.
+					@param	inANCByteCount		Optionally specifies the maximum capacity of the Field 1 host ancillary data buffer, in bytes.
 												If zero, no ancillary data (progressive or interlaced F1) will be transferred.  Defaults to zero.
-					@param	pInANCF2Buffer		Specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
+					@param	pInANCF2Buffer		Optionally specifies a pointer to the Field 2 host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
 												On playout, ancillary data will be read from this buffer. If NULL, no ancillary data will be transferred.
 												Defaults to NULL.
-					@param	inANCF2ByteCount	On capture, specifies the maximum capacity of the host ancillary data buffer, in bytes. After the transfer,
-												it will contain the actual number of bytes transferred.
-												On playout, specifies the number of ancillary data bytes to transfer from the host buffer.
+					@param	inANCF2ByteCount	Optionally specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes.
 												If zero, no ancillary data (interlaced F2) will be transferred.  Defaults to zero.
 				**/
 				explicit							AUTOCIRCULATE_TRANSFER (ULWord * pInVideoBuffer, const ULWord inVideoByteCount, ULWord * pInAudioBuffer = 0,
@@ -6698,7 +6692,7 @@ typedef enum
 				**/
 				///@{
 				/**
-					@brief	Sets my buffers for use in AutoCirculateTransfer operations.
+					@brief	Sets my buffers for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInVideoBuffer		Specifies a pointer to the host video buffer. On capture, this buffer will be written during the DMA operation.
 												On playout, this buffer will be read during the DMA operation. If NULL, no video will be transferred.
 					@param	inVideoByteCount	On capture, specifies the maximum capacity of the host video buffer, in bytes.
@@ -6706,25 +6700,21 @@ typedef enum
 												If zero, no video will be transferred.
 					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd to this buffer.
 												On playout, audio data will be read from this buffer. If NULL, no audio will be transferred.
-												Defaults to NULL.
 					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes. After the transfer,
 												it will contain the actual number of bytes transferred.
 												On playout, specifies the number of audio bytes to transfer from the host buffer.
-												If zero, no audio will be transferred. Defaults to zero.
+												If zero, no audio will be transferred.
 					@param	pInANCBuffer		Specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
 												On playout, ancillary data will be read from this buffer. If NULL, no ancillary data will be transferred.
-												Defaults to NULL.
 					@param	inANCByteCount		On capture, specifies the maximum capacity of the host ancillary data buffer, in bytes. After the transfer,
 												it will contain the actual number of bytes transferred.
 												On playout, specifies the number of ancillary data bytes to transfer from the host buffer.
-												If zero, no ancillary data will be transferred.  Defaults to zero.
-					@param	pInANCF2Buffer		Specifies a pointer to the "field 2" host ancillary data buffer. On capture, ancillary data for Field 2
+												If zero, no ancillary data will be transferred.
+					@param	pInANCF2Buffer		Optionally specifies a pointer to the Field 2 host ancillary data buffer. On capture, ancillary data for Field 2
 												(interlaced video formats only) will be DMA'd into this buffer.
 												On playout, ancillary data for Field 2 (interlaced video formats only) will be read from this buffer.
 												If NULL, no Field 2 ancillary data will be transferred. Defaults to NULL.
-					@param	inANCF2ByteCount	On capture, specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes.
-												After the transfer, it will contain the actual number of Field 2 ancillary data bytes transferred.
-												On playout, specifies the number of Field 2 ancillary data bytes to transfer from the host buffer.
+					@param	inANCF2ByteCount	Optionally specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes.
 												If zero, no ancillary data (interlaced F2) will be transferred.  Defaults to zero.
 				**/
 				bool									SetBuffers (ULWord * pInVideoBuffer, const ULWord inVideoByteCount,
@@ -6733,11 +6723,10 @@ typedef enum
 																	ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0);
 
 				/**
-					@brief	Sets the AUTOCIRCULATE_TRANSFER's video buffer.
+					@brief	Sets my video buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInVideoBuffer		Specifies a pointer to the host video buffer. On capture, this buffer will be written during the DMA operation.
 												On playout, this buffer will be read during the DMA operation. If NULL, no video will be transferred.
-					@param	inVideoByteCount	On capture, specifies the maximum capacity of the host video buffer, in bytes.
-												On playout, specifies the number of video bytes to transfer from the host buffer.
+					@param	inVideoByteCount	Specifies the maximum capacity of the host video buffer, in bytes, or the maximum number of video data bytes to transfer.
 												If zero, no video will be transferred.
 					@return	True if successful;  otherwise false.
 					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary,
@@ -6747,14 +6736,11 @@ typedef enum
 				bool									SetVideoBuffer (ULWord * pInVideoBuffer, const ULWord inVideoByteCount);
 
 				/**
-					@brief	Sets the AUTOCIRCULATE_TRANSFER's audio buffer.
-					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd to this buffer.
-												On playout, audio data will be read from this buffer. If NULL, no audio will be transferred.
-												Defaults to NULL.
-					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes. After the transfer,
-												it will contain the actual number of bytes transferred.
-												On playout, specifies the number of audio bytes to transfer from the host buffer.
-												If zero, no audio will be transferred. Defaults to zero.
+					@brief	Sets my audio buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
+					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd into this buffer.
+												On playout, audio data will be DMA'd from this buffer. If NULL, no audio will be transferred.
+					@param	inAudioByteCount	Specifies the maximum capacity of the host audio buffer, in bytes, or the maximum number of audio bytes to transfer.
+												If zero, no audio will be transferred.
 					@return	True if successful;  otherwise false.
 					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary,
 							and the \c inAudioByteCount be a multiple of 8-bytes (or optimally a multiple of a page) increases PCIe DMA
@@ -6763,22 +6749,20 @@ typedef enum
 				bool									SetAudioBuffer (ULWord * pInAudioBuffer, const ULWord inAudioByteCount);
 
 				/**
-					@brief	Sets my ancillary data buffers.
+					@brief	Sets my ancillary data buffers for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInANCBuffer		Specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
 												On playout, ancillary data will be read from this buffer. If NULL, no ancillary data will be transferred.
-												Defaults to NULL.
 					@param	inANCByteCount		On capture, specifies the maximum capacity of the host ancillary data buffer, in bytes. After the transfer,
 												it will contain the actual number of bytes transferred.
 												On playout, specifies the number of ancillary data bytes to transfer from the host buffer.
-												If zero, no ancillary data will be transferred.  Defaults to zero.
-					@param	pInANCF2Buffer		Specifies a pointer to the "field 2" host ancillary data buffer. On capture, ancillary data for Field 2
+												If zero, no ancillary data will be transferred.
+					@param	pInANCF2Buffer		Optionally specifies a pointer to the Field 2 host ancillary data buffer. On capture, ancillary data for Field 2
 												(interlaced video formats only) will be DMA'd into this buffer.
 												On playout, ancillary data for Field 2 (interlaced video formats only) will be read from this buffer.
 												If NULL, no Field 2 ancillary data will be transferred. Defaults to NULL.
-					@param	inANCF2ByteCount	On capture, specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes.
-												After the transfer, it will contain the actual number of Field 2 ancillary data bytes transferred.
-												On playout, specifies the number of Field 2 ancillary data bytes to transfer from the host buffer.
-												If zero, no ancillary data (interlaced F2) will be transferred.  Defaults to zero.
+					@param	inANCF2ByteCount	Optionally specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes, or the maximum
+												number of Field 2 ancillary data bytes to transfer. If zero, no ancillary data (interlaced F2) will be transferred.
+												Defaults to zero.
 					@note	If using a non-NULL pointer address for either \c pInANCBuffer or \c pInANCF2Buffer, be sure they're aligned to the nearest 8-byte boundary.
 					@note	If using a non-zero byte count, AJA recommends using a 2048-byte buffer (per field). There's no need to fill the entire buffer,
 							but the data it contains should be compatible with what's documented in Chapter 10 (Ancillary Data) of the SDK Guide.
