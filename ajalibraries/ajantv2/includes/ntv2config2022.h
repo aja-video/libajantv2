@@ -46,8 +46,6 @@ public:
 
     void init();
 
-    bool eq_MACAddr(const MACAddr& a);
-    
     bool operator != ( const tx_2022_channel &other );
     bool operator == ( const tx_2022_channel &other );
     
@@ -55,14 +53,10 @@ public:
     uint32_t	primaryLocalPort;		///< @brief	Specifies the local (source) port number.
     std::string	primaryRemoteIP;        ///< @brief	Specifies remote (destination) IP address.
     uint32_t	primaryRemotePort;		///< @brief	Specifies the remote (destination) port number.
-    bool		primaryAutoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr		primaryRemoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
 
     uint32_t	secondaryLocalPort;		///< @brief	Specifies the local (source) port number.
     std::string	secondaryRemoteIP;      ///< @brief	Specifies remote (destination) IP address.
     uint32_t	secondaryRemotePort;	///< @brief	Specifies the remote (destination) port number.
-    bool		secondaryAutoMAC;       ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr		secondaryRemoteMAC;		///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
 };
 
 /**

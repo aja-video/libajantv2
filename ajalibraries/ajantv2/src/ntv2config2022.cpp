@@ -24,18 +24,9 @@ void tx_2022_channel::init()
     primaryLocalPort    = 0;
     primaryRemoteIP.erase();
     primaryRemotePort   = 0;
-    primaryAutoMAC      = false;
-    memset(primaryRemoteMAC.mac, 0, sizeof(MACAddr));
     secondaryLocalPort  = 0;
     secondaryRemoteIP.erase();
     secondaryRemotePort = 0;
-    secondaryAutoMAC    = false;
-    memset(secondaryRemoteMAC.mac, 0, sizeof(MACAddr));
-}
-
-bool tx_2022_channel::eq_MACAddr(const MACAddr& a)
-{
-    return (memcmp(primaryRemoteMAC.mac, a.mac, 6) == 0);
 }
 
 bool tx_2022_channel::operator != ( const tx_2022_channel &other )
@@ -48,14 +39,10 @@ bool tx_2022_channel::operator == ( const tx_2022_channel &other )
     if ((primaryLocalPort       == other.primaryLocalPort)      &&
         (primaryRemoteIP        == other.primaryRemoteIP)       &&
         (primaryRemotePort      == other.primaryRemotePort)     &&
-        (primaryAutoMAC         == other.primaryAutoMAC)        &&
-        (eq_MACAddr(other.primaryRemoteMAC))                    &&
 
         (secondaryLocalPort     == other.secondaryLocalPort)    &&
         (secondaryRemoteIP      == other.secondaryRemoteIP)     &&
-        (secondaryRemotePort    == other.secondaryRemotePort)   &&
-        (secondaryAutoMAC       == other.secondaryAutoMAC)      &&
-        (eq_MACAddr(other.secondaryRemoteMAC)))
+        (secondaryRemotePort    == other.secondaryRemotePort))
     {
         return true;
     }
@@ -757,89 +744,62 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // dest port
         WriteChannelRegister(kReg2022_6_tx_udp_dest_port + baseAddr,txConfig.secondaryRemotePort);
 
-        // auto MAC setting
-        mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
-        if (txConfig.secondaryAutoMAC)
-        {
-            val |= (1 << channel);
-        }
-        else
-        {
-            val &= ~(1 << channel);
-        }
-        mDevice.WriteRegister(kRegSarekTxAutoMAC + SAREK_REGS,val);
-
         // dest MAC
-        if (txConfig.secondaryAutoMAC)
+        // is remote address muticast
+        ip0 = (destIp & 0xff000000)>> 24;
+        if (ip0 >= 224 && ip0 <= 239)
         {
-            // is remote address muticast
-            ip0 = (destIp & 0xff000000)>> 24;
-            if (ip0 >= 224 && ip0 <= 239)
-            {
-               // generate multicast MAC
-                mac = destIp & 0x7fffff;  // lower 23 bits
+            // generate multicast MAC
+            mac = destIp & 0x7fffff;  // lower 23 bits
 
-                macaddr.mac[0] = 0x01;
-                macaddr.mac[1] = 0x00;
-                macaddr.mac[2] = 0x5e;
-                macaddr.mac[3] =  mac >> 16;
-                macaddr.mac[4] = (mac & 0xffff) >> 8;
-                macaddr.mac[5] =  mac & 0xff;
+            macaddr.mac[0] = 0x01;
+            macaddr.mac[1] = 0x00;
+            macaddr.mac[2] = 0x5e;
+            macaddr.mac[3] =  mac >> 16;
+            macaddr.mac[4] = (mac & 0xffff) >> 8;
+            macaddr.mac[5] =  mac & 0xff;
 
-                hi  = macaddr.mac[0]  << 8;
-                hi += macaddr.mac[1];
+            hi  = macaddr.mac[0]  << 8;
+            hi += macaddr.mac[1];
 
-                lo  = macaddr.mac[2] << 24;
-                lo += macaddr.mac[3] << 16;
-                lo += macaddr.mac[4] << 8;
-                lo += macaddr.mac[5];
-            }
-            else
-            {
-                // get MAC from ARP
-                string macAddr;
-                rv = AcquireMailbox();
-                if (rv)
-                {
-                    rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
-                    ReleaseMailbox();
-                }
-                if (!rv)
-                {
-                    mError = "Failed to retrieve MAC address from ARP table";
-                    macAddr = "0:0:0:0:0:0";
-                }
-
-                istringstream ss(macAddr);
-                string token;
-                int i=0;
-                while (i < 6)
-                {
-                    getline (ss, token, ':');
-                    macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
-                }
-
-                hi  = macaddr.mac[0]  << 8;
-                hi += macaddr.mac[1];
-
-                lo  = macaddr.mac[2] << 24;
-                lo += macaddr.mac[3] << 16;
-                lo += macaddr.mac[4] << 8;
-                lo += macaddr.mac[5];
-            }
+            lo  = macaddr.mac[2] << 24;
+            lo += macaddr.mac[3] << 16;
+            lo += macaddr.mac[4] << 8;
+            lo += macaddr.mac[5];
         }
         else
         {
-            // use supplied MAC
-            hi  = txConfig.secondaryRemoteMAC.mac[0]  << 8;
-            hi += txConfig.secondaryRemoteMAC.mac[1];
+            // get MAC from ARP
+            string macAddr;
+            rv = AcquireMailbox();
+            if (rv)
+            {
+                rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
+                ReleaseMailbox();
+            }
+            if (!rv)
+            {
+                mError = "Failed to retrieve MAC address from ARP table";
+                macAddr = "0:0:0:0:0:0";
+            }
 
-            lo  = txConfig.secondaryRemoteMAC.mac[2] << 24;
-            lo += txConfig.secondaryRemoteMAC.mac[3] << 16;
-            lo += txConfig.secondaryRemoteMAC.mac[4] << 8;
-            lo += txConfig.secondaryRemoteMAC.mac[5];
+            istringstream ss(macAddr);
+            string token;
+            int i=0;
+            while (i < 6)
+            {
+                getline (ss, token, ':');
+                macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
+            }
+
+            hi  = macaddr.mac[0]  << 8;
+            hi += macaddr.mac[1];
+
+            lo  = macaddr.mac[2] << 24;
+            lo += macaddr.mac[3] << 16;
+            lo += macaddr.mac[4] << 8;
+            lo += macaddr.mac[5];
         }
-
         WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
         WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
 
@@ -876,88 +836,61 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     // dest port
     WriteChannelRegister(kReg2022_6_tx_udp_dest_port + baseAddr,txConfig.primaryRemotePort);
 
-    // auto MAC setting
-    uint32_t autoMacReg;
-    mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&autoMacReg);
-    if (txConfig.primaryAutoMAC)
-    {
-        autoMacReg |= (1 << channel);
-    }
-    else
-    {
-        autoMacReg &= ~(1 << channel);
-    }
-    mDevice.WriteRegister(kRegSarekTxAutoMAC + SAREK_REGS,autoMacReg);
-
     // dest MAC
-    if (txConfig.primaryAutoMAC)
+    // is remote address muticast
+    ip0 = (destIp & 0xff000000)>> 24;
+    if (ip0 >= 224 && ip0 <= 239)
     {
-        // is remote address muticast
-        ip0 = (destIp & 0xff000000)>> 24;
-        if (ip0 >= 224 && ip0 <= 239)
-        {
-           // generate multicast MAC
-            mac = destIp & 0x7fffff;  // lower 23 bits
+        // generate multicast MAC
+        mac = destIp & 0x7fffff;  // lower 23 bits
 
-            macaddr.mac[0] = 0x01;
-            macaddr.mac[1] = 0x00;
-            macaddr.mac[2] = 0x5e;
-            macaddr.mac[3] =  mac >> 16;
-            macaddr.mac[4] = (mac & 0xffff) >> 8;
-            macaddr.mac[5] =  mac & 0xff;
+        macaddr.mac[0] = 0x01;
+        macaddr.mac[1] = 0x00;
+        macaddr.mac[2] = 0x5e;
+        macaddr.mac[3] =  mac >> 16;
+        macaddr.mac[4] = (mac & 0xffff) >> 8;
+        macaddr.mac[5] =  mac & 0xff;
 
-            hi  = macaddr.mac[0]  << 8;
-            hi += macaddr.mac[1];
+        hi  = macaddr.mac[0]  << 8;
+        hi += macaddr.mac[1];
 
-            lo  = macaddr.mac[2] << 24;
-            lo += macaddr.mac[3] << 16;
-            lo += macaddr.mac[4] << 8;
-            lo += macaddr.mac[5];
-        }
-        else
-        {
-            // get MAC from ARP
-            string macAddr;
-            rv = AcquireMailbox();
-            if (rv)
-            {
-                rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
-                ReleaseMailbox();
-            }
-            if (!rv)
-            {
-                mError = "Failed to retrieve MAC address from ARP table";
-                macAddr = "0:0:0:0:0:0";
-            }
-
-            istringstream ss(macAddr);
-            string token;
-            int i=0;
-            while (i < 6)
-            {
-                getline (ss, token, ':');
-                macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
-            }
-
-            hi  = macaddr.mac[0]  << 8;
-            hi += macaddr.mac[1];
-
-            lo  = macaddr.mac[2] << 24;
-            lo += macaddr.mac[3] << 16;
-            lo += macaddr.mac[4] << 8;
-            lo += macaddr.mac[5];
-        }
+        lo  = macaddr.mac[2] << 24;
+        lo += macaddr.mac[3] << 16;
+        lo += macaddr.mac[4] << 8;
+        lo += macaddr.mac[5];
     }
     else
     {
-        // use supplied MAC
-        hi  = txConfig.primaryRemoteMAC.mac[0]  << 8;
-        hi += txConfig.primaryRemoteMAC.mac[1];
+        // get MAC from ARP
+        string macAddr;
+        rv = AcquireMailbox();
+        if (rv)
+        {
+            rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
+            ReleaseMailbox();
+        }
+        if (!rv)
+        {
+            mError = "Failed to retrieve MAC address from ARP table";
+            macAddr = "0:0:0:0:0:0";
+        }
 
-        lo  = txConfig.primaryRemoteMAC.mac[2] << 24;
-        lo += txConfig.primaryRemoteMAC.mac[3] << 16;
-        lo += txConfig.primaryRemoteMAC.mac[4] << 8;
-        lo += txConfig.primaryRemoteMAC.mac[5];
+        istringstream ss(macAddr);
+        string token;
+        int i=0;
+        while (i < 6)
+        {
+            getline (ss, token, ':');
+            macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
+        }
+
+        hi  = macaddr.mac[0]  << 8;
+        hi += macaddr.mac[1];
+
+        lo  = macaddr.mac[2] << 24;
+        lo += macaddr.mac[3] << 16;
+        lo += macaddr.mac[4] << 8;
+        lo += macaddr.mac[5];
     }
 
     WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
@@ -993,22 +926,6 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
 
         // dest port
         ReadChannelRegister(kReg2022_6_tx_udp_dest_port + baseAddr,&txConfig.secondaryRemotePort);
-
-        // dest MAC
-        uint32_t hi;
-        uint32_t lo;
-        ReadChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr, &lo);
-        ReadChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr, &hi);
-
-        txConfig.secondaryRemoteMAC.mac[0] = (hi >> 8) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[1] =  hi        & 0xff;
-        txConfig.secondaryRemoteMAC.mac[2] = (lo >> 24) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[3] = (lo >> 16) & 0xff;
-        txConfig.secondaryRemoteMAC.mac[4] = (lo >> 8)  & 0xff;
-        txConfig.secondaryRemoteMAC.mac[5] =  lo        & 0xff;
-
-        mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
-        txConfig.secondaryAutoMAC = ((val & (1 << channel)) != 0);
     }
 
     // Select primary channel
@@ -1027,22 +944,6 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
 
     // dest port
     ReadChannelRegister(kReg2022_6_tx_udp_dest_port + baseAddr,&txConfig.primaryRemotePort);
-
-    // dest MAC
-    uint32_t hi;
-    uint32_t lo;
-    ReadChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr, &lo);
-    ReadChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr, &hi);
-
-    txConfig.primaryRemoteMAC.mac[0] = (hi >> 8) & 0xff;
-    txConfig.primaryRemoteMAC.mac[1] =  hi        & 0xff;
-    txConfig.primaryRemoteMAC.mac[2] = (lo >> 24) & 0xff;
-    txConfig.primaryRemoteMAC.mac[3] = (lo >> 16) & 0xff;
-    txConfig.primaryRemoteMAC.mac[4] = (lo >> 8)  & 0xff;
-    txConfig.primaryRemoteMAC.mac[5] =  lo        & 0xff;
-
-    mDevice.ReadRegister(kRegSarekTxAutoMAC + SAREK_REGS,&val);
-    txConfig.primaryAutoMAC = ((val & (1 << channel)) != 0);
 
     return true;
 }

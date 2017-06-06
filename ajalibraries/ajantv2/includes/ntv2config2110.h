@@ -45,8 +45,6 @@ public:
 
     void init();
 
-    bool eq_MACAddr(const MACAddr& a);
-
     bool operator != ( const tx_2110Config &other );
     bool operator == ( const tx_2110Config &other );
 
@@ -54,8 +52,6 @@ public:
     uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
     uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
-    bool		autoMAC;         ///< @brief	If true, MAC address is generated for multicast remoteIP address, or fetched from ARP table
-    MACAddr     remoteMAC;		 ///< @brief	Specifies the MAC address of the remote (target) device. Ignored if autoMAC is true.
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
 };

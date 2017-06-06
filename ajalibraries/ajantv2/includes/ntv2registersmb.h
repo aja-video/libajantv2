@@ -47,7 +47,7 @@
 #define kRegSarekIGMPVersion        9
 
 #define kRegSarekMiscState          10
-#define kRegSarekTxAutoMAC          11
+#define kRegSarekunused11           11
 #define kRegSareIfVersion           12
 #define kRegSarekunused13           13
 #define kRegSarekunused14           14
