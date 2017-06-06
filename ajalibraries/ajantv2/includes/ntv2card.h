@@ -3354,8 +3354,27 @@ public:
 	AJA_VIRTUAL bool	SetLUTV2OutputBank (NTV2Channel channel, ULWord bank);
 	AJA_VIRTUAL bool	GetLUTV2OutputBank (NTV2Channel channel, ULWord *bank);
 
-	AJA_VIRTUAL bool	SetColorSpaceRGBBlackRange(NTV2RGBBlackRange rgbBlackRange,NTV2Channel channel= NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange(NTV2RGBBlackRange* rgbBlackRange,NTV2Channel channel= NTV2_CHANNEL1);
+	/**
+		@brief		Sets the RGB range for the given CSC.
+		@param[in]	inRange		Specifies the new RGB range (NTV2_CSC_RGB_RANGE_FULL or NTV2_CSC_RGB_RANGE_SMPTE).
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to CSC 0 (NTV2_CHANNEL1).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetColorSpaceRGBBlackRange (const NTV2_CSC_RGB_Range inRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers with the current RGB range being used by a given CSC.
+		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to CSC 0 (NTV2_CHANNEL1).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range * pOutRange,  const NTV2Channel inChannel = NTV2_CHANNEL1)	///< @deprecated	Use the version of this function with the NTV2_CSC_RGB_Range & outRange parameter.
+							{return pOutRange ? GetColorSpaceRGBBlackRange (*pOutRange, inChannel) : false;}
 
 	AJA_VIRTUAL bool	SetColorSpaceUseCustomCoefficient(ULWord useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetColorSpaceUseCustomCoefficient(ULWord* useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);
