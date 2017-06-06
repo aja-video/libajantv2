@@ -138,12 +138,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         transmitStruct.mPrimaryRemotePort = transmitChannelObject["primaryRemotePort"].toString();
         cout << "PrimaryRemotePort " << transmitStruct.mPrimaryRemotePort.toStdString() << endl;
 
-        transmitStruct.mPrimaryRemoteMac = transmitChannelObject["primaryRemoteMac"].toString();
-        cout << "PrimaryRemoteMac " << transmitStruct.mPrimaryRemoteMac.toStdString() << endl;
-
-        transmitStruct.mPrimaryAutoMac = transmitChannelObject["primaryAutoMac"].toString();
-        cout << "PrimaryAutoMac " << transmitStruct.mPrimaryAutoMac.toStdString() << endl;
-
         transmitStruct.mSecondaryLocalPort = transmitChannelObject["secondaryLocalPort"].toString();
         if (!transmitStruct.mSecondaryLocalPort.isEmpty())
             cout << "SecondaryLocalPort " << transmitStruct.mSecondaryLocalPort.toStdString() << endl;
@@ -155,14 +149,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         transmitStruct.mSecondaryRemoteIPAddress = transmitChannelObject["secondaryRemotePort"].toString();
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
         cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << endl;
-
-        transmitStruct.mSecondaryRemoteMac = transmitChannelObject["secondaryRemoteMac"].toString();
-        if (!transmitStruct.mSecondaryRemoteMac.isEmpty())
-            cout << "SecondaryRemoteMac " << transmitStruct.mSecondaryRemoteMac.toStdString() << endl;
-
-        transmitStruct.mSecondaryAutoMac = transmitChannelObject["secondaryAutoMac"].toString();
-        if (!transmitStruct.mSecondaryAutoMac.isEmpty())
-            cout << "SecondaryAutoMac " << transmitStruct.mSecondaryAutoMac.toStdString() << endl;
 
         transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
         if (!transmitStruct.mVideoFormat.isEmpty())
@@ -288,16 +274,11 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         txChannelConfig.primaryLocalPort = transmit.mPrimaryLocalPort.toUInt();
         txChannelConfig.primaryRemoteIP = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.primaryRemotePort = transmit.mPrimaryRemotePort.toUInt();
-        txChannelConfig.primaryRemoteMAC =  toMAC(transmit.mPrimaryRemoteMac);
-        txChannelConfig.primaryAutoMAC =  getEnable(transmit.mPrimaryAutoMac);
         txChannelConfig.secondaryLocalPort = transmit.mSecondaryLocalPort.toUInt();
         txChannelConfig.secondaryRemoteIP = transmit.mSecondaryRemoteIPAddress.toStdString();
         txChannelConfig.secondaryRemotePort = transmit.mSecondaryRemotePort.toUInt();
-        txChannelConfig.secondaryRemoteMAC =  toMAC(transmit.mSecondaryRemoteMac);
-        txChannelConfig.secondaryAutoMAC =  getEnable(transmit.mSecondaryAutoMac);
 
-
-        config2022.SetTxChannelConfiguration (channel, txChannelConfig);
+        config2022.SetTxChannelConfiguration (channel, txChannelConfig,enable2022_7);
         config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable),enable2022_7);
     }
 
