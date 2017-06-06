@@ -10,6 +10,8 @@
 #define SAREK_MAX_CHANS 4
 #define SAREK_MAX_PORTS 2
 
+#define SAREK_IF_VERSION 3
+
 /////////////////////////////////////////////////////////////////////
 //
 // General memory map definitions
@@ -45,7 +47,7 @@
 
 #define kRegSarekMiscState          10
 #define kRegSarekTxAutoMAC          11
-#define kRegSarekunused12           12
+#define kRegSareIfVersion           12
 #define kRegSarekunused13           13
 #define kRegSarekunused14           14
 #define kRegSarekunused15           15
