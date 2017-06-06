@@ -712,7 +712,7 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     return rv;
 }
 
-bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig)
+bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7)
 {
     uint32_t    baseAddr;
     uint32_t    val;
@@ -726,7 +726,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     // select channel
 
-    if (_is2022_7)
+    if (_is2022_7 && enable2022_7)
     {
         // Select secondary channel
         rv = SelectTxChannel(channel, false, baseAddr);
@@ -1053,7 +1053,29 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
     bool        rv;
     uint32_t    localIp;
 
-    if (enable && _biDirectionalChannels)
+    if (!enable)
+    {
+        if (_is2022_7)
+        {
+            // always disable secondary channel if there is one
+            rv = SelectTxChannel(channel, false, baseAddr);
+            if (!rv) return false;
+
+            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
+        }
+
+        // disable the primary
+        rv = SelectTxChannel(channel, true, baseAddr);
+        if (!rv) return false;
+
+        WriteChannelRegister(kReg2022_6_tx_hitless_config + baseAddr,0x01);  // 1 disables hitless mode
+        WriteChannelRegister(kReg2022_6_tx_tx_enable      + baseAddr,0x01);  // enables tx over mac1/mac2
+        WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
+        return true;
+    }
+
+
+    if (_biDirectionalChannels)
     {
         bool rxEnabled;
         GetRxChannelEnable(channel,rxEnabled);
@@ -1065,45 +1087,33 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
-    if (_is2022_7)
+    if (_is2022_7 && enable2022_7)
     {
-        if (enable2022_7)
+        // Select secondary channel
+        rv = SelectTxChannel(channel, false, baseAddr);
+        if (!rv) return false;
+
+        // hold off access while we update channel regs
+        ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
+
+        if (enable)
         {
-            // Select secondary channel
-            rv = SelectTxChannel(channel, false, baseAddr);
-            if (!rv) return false;
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+            WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
 
-            // hold off access while we update channel regs
-            ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
-
-            if (enable)
-            {
-                mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
-                WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
-
-                // enables
-                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
-            }
-            else
-            {
-                // disable
-                WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-                WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
-            }
-
-            // enable  register updates
-            ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
+            // enables
+            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
+            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
         }
         else
         {
-            // Select secondary channel
-            rv = SelectTxChannel(channel, false, baseAddr);
-            if (!rv) return false;
-
             // disable
             WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-       }
+            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
+        }
+
+        // enable  register updates
+        ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
     }
 
     // select primary channel
@@ -1113,38 +1123,29 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
     // hold off access while we update channel regs
     ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
 
-    if (enable)
+    if (GetTxPort(channel) == SFP_TOP)
     {
-        if (GetTxPort(channel) == SFP_TOP)
-        {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
-        }
-        else
-        {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
-        }
-        WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
-
-        if (_is2022_7 && enable2022_7)
-        {
-            WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
-        }
-        else
-        {
-            WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x01); // 1 disables hitless mode
-        }
-
-        // enables
-        WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-        WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
     }
     else
     {
-        // disable
-        WriteChannelRegister(kReg2022_6_tx_hitless_config + baseAddr,0x01);  // 1 disables hitless mode
-        WriteChannelRegister(kReg2022_6_tx_tx_enable      + baseAddr,0x01);  // enables tx over mac1/mac2
-        WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
     }
+    WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+
+    if (_is2022_7 && enable2022_7)
+    {
+        WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
+    }
+    else
+    {
+        WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x01); // 1 disables hitless mode
+    }
+
+    // enables
+    WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
+    WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
+
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);

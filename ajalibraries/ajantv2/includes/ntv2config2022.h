@@ -189,7 +189,7 @@ public:
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
