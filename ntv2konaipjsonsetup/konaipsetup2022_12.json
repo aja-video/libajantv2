@@ -21,8 +21,6 @@
             "primaryRemoteIPAddress":"239.0.45.15",
             "primaryRemotePort":"6010",
             "primaryLocalPort":"5010",
-            "primaryRemoteMac":"00:00:00:00:00:00",
-            "primaryAutoMac":"true",
             "Enable":"true"
     },
     {
@@ -30,8 +28,6 @@
             "primaryRemoteIPAddress":"239.0.45.25",
             "primaryRemotePort":"6011",
             "primaryLocalPort":"5011",
-            "primaryRemoteMac":"00:00:00:00:00:00",
-            "primaryAutoMac":"true",
             "Enable":"false"
     }
     ]
