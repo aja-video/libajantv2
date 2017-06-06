@@ -1,7 +1,7 @@
 /**
-	@file		ntv2_2022_registers.h
-	@brief		Defines the Sarek board's registers.
-	@copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file		ntv2_2022_registers.h
+    @brief		Defines the Sarek board's registers.
+    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_MB_H
@@ -10,7 +10,8 @@
 #define SAREK_MAX_CHANS 4
 #define SAREK_MAX_PORTS 2
 
-#define SAREK_IF_VERSION 3
+#define SAREK_IF_VERSION 3  // update this if mb protocol is changed (here and in mb)
+
 
 /////////////////////////////////////////////////////////////////////
 //
