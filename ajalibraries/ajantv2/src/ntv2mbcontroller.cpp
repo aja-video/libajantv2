@@ -1,7 +1,7 @@
 /**
-	@file		ntv2mbcontroller.cpp
-	@brief		Implementation of CNTV2MBController class.
-	@copyright	(C) 2015-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file		ntv2mbcontroller.cpp
+    @brief		Implementation of CNTV2MBController class.
+    @copyright	(C) 2015-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2mbcontroller.h"
@@ -135,7 +135,8 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NT
         int count = 30;
         do
         {
-            SendArpRequest(remote_IPAddress,port);
+            bool rv = SendArpRequest(remote_IPAddress,port);
+            if (!rv) return false;
             mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
             eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,port,channel,stream,MACaddress);
             switch (as)
@@ -163,7 +164,7 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s port=%d, chan=%d, sream=%d",
+        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d,chan=%d,stream=%d",
                 (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
                 remote_IPAddress.c_str(),
                 (int)port,
@@ -223,7 +224,7 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
     uint32_t features = getFeatures();
     if (features & SAREK_MB_PRESENT)
     {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s port=%d",
+        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d",
                 (int)MB_CMD_SEND_ARP_REQ,
                 remote_IPAddress.c_str(),
                 int(port));
