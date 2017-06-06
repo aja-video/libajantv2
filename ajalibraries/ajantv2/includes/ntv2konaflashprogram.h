@@ -81,6 +81,7 @@ public:
 	bool			VerifyFlash (FlashBlockID flashBlockNumber);
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
+    bool            ROMHasBankSelect();
 	uint32_t			ReadBankSelect ();
 
 	std::string & GetDesignName()

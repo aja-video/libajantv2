@@ -727,7 +727,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord()
 
 	for ( uint32_t count = 0; count < _flashSize; count+=32)
 	{
-		if ((::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID)) && count % _bankSize == 0)
+        if (ROMHasBankSelect() && count % _bankSize == 0)
 		{
 			baseAddress = 0;
 			partitionOffset += count;
@@ -834,7 +834,7 @@ bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 
 	for (uint32_t count = 0; count < _bankSize; count += 32)
 	{
-		if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID))
+        if (ROMHasBankSelect())
 		{
 			SetBankSelect(bankID);
 		}
@@ -1182,7 +1182,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
 
 bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 {
-	if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID))
+    if (ROMHasBankSelect())
 	{
 		WriteRegister(kRegXenaxFlashAddress, (uint32_t)bankNumber);
 		WriteRegister(kRegXenaxFlashControlStatus, BANKSELECT_COMMMAND);
@@ -1194,7 +1194,7 @@ bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 uint32_t CNTV2KonaFlashProgram::ReadBankSelect()
 {
 	uint32_t bankNumber = 0;
-	if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID))
+    if (ROMHasBankSelect())
 	{
 		WriteRegister(kRegXenaxFlashControlStatus, READBANKSELECT_COMMAND);
 		WaitForFlashNOTBusy();
@@ -1782,7 +1782,15 @@ bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)
 	default:
 		return false;
 	}
-	return SetBankSelect(bankID);
+    return SetBankSelect(bankID);
+}
+
+bool CNTV2KonaFlashProgram::ROMHasBankSelect()
+{
+    if(::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID) || ::NTV2DeviceHasSPIv5(_boardID))
+        return true;
+    else
+        return false;
 }
 
 void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset)
