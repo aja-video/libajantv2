@@ -2464,7 +2464,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enable, enable2022_7;
-	uint32_t				enableSv, enable2022_7Sv;
+	uint32_t				enableSv;
 
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
