@@ -160,12 +160,19 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
+    while (!mDevice.IsMBSystemReady())
     {
-        std::cerr << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
         mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
-            std::cerr << "## NOTE:  Device is ready" << std::endl;
+        if (mDevice.IsMBSystemReady ())
+        {
+            std::cout << "## NOTE:  Device is ready" << std::endl;
+            if (!mDevice.IsMBSystemValid())
+            {
+                std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
+                return false;
+            }
+        }
     }
 
     if (pKonaIpJ2kParams->mEncoder.size() == 0)
@@ -231,12 +238,19 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
+    while (!mDevice.IsMBSystemReady())
     {
-        std::cerr << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
+        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
         mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
-            std::cerr << "## NOTE:  Device is ready" << std::endl;
+        if (mDevice.IsMBSystemReady ())
+        {
+            std::cout << "## NOTE:  Device is ready" << std::endl;
+            if (!mDevice.IsMBSystemValid())
+            {
+                std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
+                return false;
+            }
+        }
     }
 
     if (pKonaIpJ2kParams->mDecoder.size() == 0)

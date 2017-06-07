@@ -121,7 +121,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-	if (!mDevice.IsDeviceReady ())
+    if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	ULWord	appSignature	(0);
