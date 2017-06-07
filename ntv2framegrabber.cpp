@@ -412,7 +412,7 @@ void NTV2FrameGrabber::run (void)
 				if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
 					mNTV2Card.SetMultiFormatMode (true);
 
-				if (!mNTV2Card.IsDeviceReady ())
+                if (!mNTV2Card.IsDeviceReady (false))
 				{
 					qDebug ("Device not ready");
 					msleep (1000);	//	Keep the UI responsive while waiting for device to become ready

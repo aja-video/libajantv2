@@ -166,7 +166,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	if (!::NTV2DeviceCanDo4KVideo (mInputDeviceID))
 		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
-	if (!mInputDevice.IsDeviceReady ())
+    if (!mInputDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	//	Output device:
@@ -178,7 +178,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	if (!::NTV2DeviceCanDo4KVideo (mOutputDeviceID))
 		{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
-	if (!mOutputDevice.IsDeviceReady ())
+    if (!mOutputDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	if (mSingleDevice)

@@ -203,12 +203,19 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!mDevice.IsDeviceReady ())
+    while (!mDevice.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
         mDevice.SleepMs (1000);
-        if (mDevice.IsDeviceReady ())
+        if (mDevice.IsMBSystemReady ())
+        {
             cout << "## NOTE:  Device is ready" << endl;
+            if (!mDevice.IsMBSystemValid())
+            {
+                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+                return false;
+            }
+        }
     }
 
     enable2022_7 = false;
