@@ -746,7 +746,12 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 {
 	if (IsKonaIPDevice())
 	{
-		return true;
+        uint32_t val;
+        ReadRegister(SAREK_REGS + kRegSareIfVersion, &val);
+        if (val = SAREK_IF_VERSION)
+            return true;
+        else
+            return false;
 	}
 	return true;
 }
