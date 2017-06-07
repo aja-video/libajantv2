@@ -37,44 +37,45 @@ The documentation is fully cross-referenced, searchable, and includes collaborat
 
 This section explores the contents of the SDK, which is nearly identical on all three platforms.
 
--	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- This is the folder that resulted after extracting the .zip file.
-	-	<b>sdk</b>
-		-	<b>ajaapps</b> -- Contains sources used to build applications and tools.
-			-	<b>crossplatform  </b>
-				-	<b>demoapps</b>
-			-	<b>lin  </b><i>(Linux only)</i>
-			-	<b>mac  </b><i>(MacOS only)</i>
-			-	<b>win  </b><i>(Windows only)</i>
-		-	<b>ajadriver</b>
-			-	<b>linux</b> -- Device driver source code <i>(Linux only)</i>.
-		-	<b>ajalibraries</b>
-			-	<b>ajabase</b> -- Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
-			-	<b>ajaanc</b> -- Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
-			-	<b>ajacc</b> -- Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
-			-	<b>ajantv2</b> -- Contains source code for the "libajantv2" library:
-				-	<b>build</b> -- <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
-				-	<b>codecs</b> -- Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only).
-				-	<b>includes</b> -- SDK header/include files.
-				-	<b>src</b> -- SDK implementation source files (with platform-specific subdirectories).
-		-	<b>bin</b> -- Destination directory for all executable files and the dynamically-loaded libraries they need to run. Also contains all pre-built tools and utilities.
-			-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
-			-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
-				@image	html	gs-systemtest-75.png
-			-	Note that <b>Data Rate Calculator</b> is no longer supplied in the SDK, but is now made for mobile devices:
-				-	iOS: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
-				-	Android: https://play.google.com/store/apps/details?id=com.aja.datacalc
-			-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
-				This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
-				Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
-			-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
-				the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
-				This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
-				and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
-				@note	The \ref corvidhevc requires a somewhat different procedure for checking and updating its firmware.  See \ref hevcsupplement for more information.
-			-	<b>ntv2thermo</b> -- \ref ntv2thermo
-		-	<b>lib</b> -- Destination directory for all static libraries.
-		-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
-		-	<b>qtbuild</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. See \ref gs-qtbuild.
+-	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- This is the folder that resulted after extracting the .zip file. "PPP" indicates the platform, "XX" is the major version number, "YY" is the minor version number, and "ZZ" is the point release number.
+	-	<b>ajaapps</b> -- Contains sources used to build applications and tools.
+		-	<b>crossplatform  </b>
+			-	<b>demoapps</b> -- Contains sources for \ref demoapps.
+		-	<b>lin  </b><i>(Linux-only apps)</i>
+		-	<b>mac  </b><i>(MacOS-only apps)</i>
+		-	<b>win  </b><i>(Windows-only apps)</i>
+	-	<b>ajadriver  </b><i>(Linux only)</i>
+		-	<b>linux</b> -- Device driver source code <i>(Linux only)</i>.
+	-	<b>ajalibraries</b>
+		-	<b>ajabase</b> -- Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
+		-	<b>ajaanc</b> -- Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
+		-	<b>ajacc</b> -- Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
+		-	<b>ajantv2</b> -- Contains source code for the "libajantv2" library:
+			-	<b>build</b> -- <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
+			-	<b>codecs</b> -- Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only, <i>Windows and Linux only</i>).
+			-	<b>includes</b> -- SDK header/include files.
+			-	<b>src</b> -- SDK implementation source files (with platform-specific subdirectories).
+	-	<b>bin</b> -- Destination directory for all executables and requisite dynamically-loaded libraries. Also contains all pre-built tools and utilities.
+		-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
+		-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
+			@image	html	gs-systemtest-75.png
+		-	<b>Data Rate Calculator</b> calculates DMA performance requirements for various video and pixel formats. It's now universally available on mobile devices:
+			-	iOS: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
+			-	Android: https://play.google.com/store/apps/details?id=com.aja.datacalc
+		-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
+			This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
+			Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
+		-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
+			the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
+			This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
+			and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
+			@note	The \ref corvidhevc requires a somewhat different procedure for checking and updating its firmware.  See \ref hevcsupplement for more information.
+		-	<b>ntv2konaipjsonsetup</b> -- A command-line tool used to configure the \ref konaip22 from a JSON configuration file.
+		-	<b>ntv2thermo</b> -- \ref ntv2thermo
+	-	<b>build</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. See \ref gs-qtbuild.
+	-	<b>docs</b> -- Contains a webloc file that points to the NTV2 online API documentation.
+	-	<b>lib</b> -- Destination directory for all static libraries.
+	-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
 
 
 @subsection		gs-contents-libs	SDK Libraries
@@ -284,39 +285,38 @@ Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
 
 @subsection		gs-qtbuild	Building With Qt
 
-Qt is a cross-platform application framework used for developing applications that run on Linux, MacOS and Windows with little or no change in the underlying codebase,
+<b>Qt</b> is a cross-platform application framework used for developing applications that run on Linux, MacOS and Windows with little or no change in the underlying codebase,
 while retaining native capabilities and speed.
 
-Qt Creator is a feature-rich integrated development environment (IDE) that works identically on Linux, MacOS and Windows.
+<b>Qt Creator</b> is a feature-rich integrated development environment (IDE) that works identically on Linux, MacOS and Windows.
 
-The NTV2 SDK now makes it easy to develop NTV2 applications with Qt's <b>qmake</b> facility or with the <b>Qt Creator</b> IDE. To get started, look for the <b>qtbuild</b> folder in the SDK:
+The NTV2 SDK now makes it easy to develop NTV2 applications with Qt's <b>qmake</b> facility or with the <b>Qt Creator</b> IDE. To get started, look for the <b>build</b> folder in the SDK:
 
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- The extracted SDK folder.
-	-	<b>sdk</b> -- The folder that contains the SDK.
-		-	<b>qtbuild</b> -- This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
-			-	<b>_ntv2demos.pro</b> -- This is the "solution file" or "project file" that builds everything -- the libraries and the demonstration applications.
-			-	<b>ajaanc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
-			-	<b>ajabase</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
-			-	<b>ajacc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
-			-	<b>ajantv2</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
-			-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
-			-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
-			-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
-			-	<b>ntv2demos</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
+	-	<b>build</b> -- This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
+		-	<b>_ntv2demos.pro</b> -- This is the "solution file" or "project file" that builds everything -- the libraries and the demonstration applications.
+		-	<b>ajaanc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
+		-	<b>ajabase</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
+		-	<b>ajacc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
+		-	<b>ajantv2</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
+		-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
+		-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
+		-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
+		-	<b>ntv2demos</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
 
 <b>Building libraries and demos with qmake/make:</b>
 
 Assuming at least one version of Qt is already installed:
 
--#	Change the current directory to \c sdk/qtbuild.
--#	Type \c path/to/qmake \c _ntv2demos.pro
--#	\c make
+-#	Change the current directory to \c build inside the unzipped SDK folder.
+-#	Enter \c path/to/qmake \c _ntv2demos.pro
+-#	Enter \c make
 
 <b>Building libraries and demos with Qt Creator:</b>
 
 Assuming <b>Qt Creator</b> is installed...
 
--#	Double-click <b>_ntv2demos.pro</b> (or open it from inside <b>Qt Creator</b>.
+-#	Double-click <b>_ntv2demos.pro</b> (or open it from inside <b>Qt Creator</b>).
 -#	Assign it a kit.
 -#	Build the project.
 

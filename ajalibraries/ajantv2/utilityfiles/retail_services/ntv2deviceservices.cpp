@@ -196,7 +196,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1FrameBufferFomat);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
 
-    if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady() == true))
+    if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
         mCard->ReadRegister(kVReg2022_7Enable, (ULWord*)&m2022_7Mode);
         
