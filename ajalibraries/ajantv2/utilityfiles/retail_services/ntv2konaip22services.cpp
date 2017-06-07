@@ -2471,7 +2471,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
 	const bool				kNot48Bit = false;
 	
-    if (mCard->IsDeviceReady() == true)
+    if (mCard->IsDeviceReady(true) == true)
     {
 		rx_2022_channel		rxHwConfig;
 		tx_2022_channel		txHwConfig;
