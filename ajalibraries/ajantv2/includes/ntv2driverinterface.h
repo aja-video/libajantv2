@@ -215,7 +215,7 @@ public:
 					power-up or wake from sleep. Calls to Open, IsOpen, ReadRegister and WriteRegister will all succeed,
 					but the device won't be capable of either ingesting or playing video or performing DMA operations.
 	**/
-	virtual bool		IsDeviceReady (void);
+    virtual bool		IsDeviceReady (bool checkValid);
 	virtual bool		IsMBSystemValid (void);
 	virtual bool		IsMBSystemReady (void);
 	virtual bool		IsKonaIPDevice (void);
