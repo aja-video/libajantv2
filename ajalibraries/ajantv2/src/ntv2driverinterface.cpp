@@ -525,7 +525,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
      ULWord* bitFilePtr =  new ULWord[256/4];
      ULWord dwordSizeCount = 256/4;
 
-	 if(!IsDeviceReady() || !IsKonaIPDevice())
+     if(!IsDeviceReady(false) || !IsKonaIPDevice())
      {
          // cannot read flash
          return false;
