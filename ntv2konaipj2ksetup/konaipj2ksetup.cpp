@@ -162,14 +162,14 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
     while (!mDevice.IsMBSystemReady())
     {
-        cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
+        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
         mDevice.SleepMs (1000);
         if (mDevice.IsMBSystemReady ())
         {
-            cout << "## NOTE:  Device is ready" << endl;
+            std::cout << "## NOTE:  Device is ready" << std::endl;
             if (!mDevice.IsMBSystemValid())
             {
-                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+                std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
                 return false;
             }
         }
@@ -240,14 +240,14 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
     while (!mDevice.IsMBSystemReady())
     {
-        cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
+        std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
         mDevice.SleepMs (1000);
         if (mDevice.IsMBSystemReady ())
         {
-            cout << "## NOTE:  Device is ready" << endl;
+            std::cout << "## NOTE:  Device is ready" << std::endl;
             if (!mDevice.IsMBSystemValid())
             {
-                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+                std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
                 return false;
             }
         }
