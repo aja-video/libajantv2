@@ -746,7 +746,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	{
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSareIfVersion, &val);
-        if (val = SAREK_IF_VERSION)
+        if (val == SAREK_IF_VERSION)
             return true;
         else
             return false;
