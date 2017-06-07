@@ -1,7 +1,7 @@
 /**
-	@file		ntv2registerexpert.h
-	@brief		Declares the CNTV2RegisterExpert class.
-	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file		ntv2registerexpert.h
+    @brief		Declares the CNTV2RegisterExpert class.
+    @copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2REGEXPERT_H
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <vector>
 #if defined (AJALinux)
-	#include <stdint.h>
+    #include <stdint.h>
 #endif
 
 
@@ -59,118 +59,113 @@
 #define	kRegClass_WriteOnly	std::string ("kRegClass_WriteOnly")
 #define	kRegClass_Virtual	std::string ("kRegClass_Virtual")
 
-class RegisterExpert;
 
 /**
-	@brief	I provide information about registers and their values.
+    @brief	I provide information about registers and their values.
 **/
 class AJAExport CNTV2RegisterExpert
 {
-	public:
-		/**
-			@param[in]	inRegNum	Specifies the register number.
-			@return		A string that contains the name of the register (or empty if unknown).
-		**/
-		static std::string		GetDisplayName	(const uint32_t inRegNum);
+    public:
+        /**
+            @param[in]	inRegNum	Specifies the register number.
+            @return		A string that contains the name of the register (or empty if unknown).
+        **/
+        static std::string		GetDisplayName	(const uint32_t inRegNum);
 
-		/**
-			@param[in]	inRegNum	Specifies the register number.
-			@param[in]	inRegValue	Specifies the 32-bit register value.
-			@param[in]	inDeviceID	Optionally specifies an NTV2DeviceID. Defaults to DEVICE_ID_NOTFOUND.
-			@return		A string that contains the human-readable rendering of the value of the given register
-						(or empty if unknown).
-		**/
-		static std::string		GetDisplayValue	(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
+        /**
+            @param[in]	inRegNum	Specifies the register number.
+            @param[in]	inRegValue	Specifies the 32-bit register value.
+            @param[in]	inDeviceID	Optionally specifies an NTV2DeviceID. Defaults to DEVICE_ID_NOTFOUND.
+            @return		A string that contains the human-readable rendering of the value of the given register
+                        (or empty if unknown).
+        **/
+        static std::string		GetDisplayValue	(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
 
-		/**
-			@param[in]	inRegNum	Specifies the register number.
-			@param[in]	inClassName	Specifies the class name.
-			@return		True if the register is a member of the class;  otherwise false.
-		**/
-		static bool				IsRegisterInClass (const uint32_t inRegNum, const std::string & inClassName);
+        /**
+            @param[in]	inRegNum	Specifies the register number.
+            @param[in]	inClassName	Specifies the class name.
+            @return		True if the register is a member of the class;  otherwise false.
+        **/
+        static bool				IsRegisterInClass (const uint32_t inRegNum, const std::string & inClassName);
 
-		/**
-			@param[in]	inRegNum	Specifies the register number.
-			@return		True if the register is read-only (i.e., it cannot be written);  otherwise false.
-		**/
-		static inline bool		IsReadOnly		(const uint32_t inRegNum)	{return IsRegisterInClass (inRegNum, kRegClass_ReadOnly);}
+        /**
+            @param[in]	inRegNum	Specifies the register number.
+            @return		True if the register is read-only (i.e., it cannot be written);  otherwise false.
+        **/
+        static inline bool		IsReadOnly		(const uint32_t inRegNum)	{return IsRegisterInClass (inRegNum, kRegClass_ReadOnly);}
 
-		/**
-			@param[in]	inRegNum	Specifies the register number.
-			@return		True if the register is write-only (i.e., it cannot be read);  otherwise false.
-		**/
-		static inline bool		IsWriteOnly		(const uint32_t inRegNum)	{return IsRegisterInClass (inRegNum, kRegClass_WriteOnly);}
+        /**
+            @param[in]	inRegNum	Specifies the register number.
+            @return		True if the register is write-only (i.e., it cannot be read);  otherwise false.
+        **/
+        static inline bool		IsWriteOnly		(const uint32_t inRegNum)	{return IsRegisterInClass (inRegNum, kRegClass_WriteOnly);}
 
-		/**
-			@return		A set of strings containing the names of all known register classes.
-		**/
-		static NTV2StringSet	GetAllRegisterClasses (void);
+        /**
+            @return		A set of strings containing the names of all known register classes.
+        **/
+        static NTV2StringSet	GetAllRegisterClasses (void);
 
-		/**
-			@return		A set of strings containing the names of all register classes the given register belongs to.
-		**/
-		static NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum);
+        /**
+            @return		A set of strings containing the names of all register classes the given register belongs to.
+        **/
+        static NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum);
 
-		/**
-			@param[in]	inClassName	Specifies the register class.
-			@return		A set of register numbers that belong to the specified class. Will be empty if none found.
-		**/
-		static NTV2RegNumSet	GetRegistersForClass	(const std::string & inClassName);
+        /**
+            @param[in]	inClassName	Specifies the register class.
+            @return		A set of register numbers that belong to the specified class. Will be empty if none found.
+        **/
+        static NTV2RegNumSet	GetRegistersForClass	(const std::string & inClassName);
 
-		/**
-			@param[in]	inChannel	Specifies a valid NTV2Channel.
-			@return		A set of register numbers that are associated with the given NTV2Channel (class kRegClass_ChannelN).
-						Will be empty if an invalid NTV2Channel is specified.
-		**/
-		static NTV2RegNumSet	GetRegistersForChannel	(const NTV2Channel inChannel);
+        /**
+            @param[in]	inChannel	Specifies a valid NTV2Channel.
+            @return		A set of register numbers that are associated with the given NTV2Channel (class kRegClass_ChannelN).
+                        Will be empty if an invalid NTV2Channel is specified.
+        **/
+        static NTV2RegNumSet	GetRegistersForChannel	(const NTV2Channel inChannel);
 
-		/**
-			@param[in]	inDeviceID			Specifies a valid NTV2DeviceID.
-			@param[in]	inIncludeVirtuals	Specify true to include virtual registers;  otherwise virtual registers
-											will be excluded (the default).
-			@return		A set of register numbers that are legal for the device having the given NTV2DeviceID.
-						Will be empty if an invalid NTV2DeviceID is specified.
-		**/
-		static NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals = false);
+        /**
+            @param[in]	inDeviceID			Specifies a valid NTV2DeviceID.
+            @param[in]	inIncludeVirtuals	Specify true to include virtual registers;  otherwise virtual registers
+                                            will be excluded (the default).
+            @return		A set of register numbers that are legal for the device having the given NTV2DeviceID.
+                        Will be empty if an invalid NTV2DeviceID is specified.
+        **/
+        static NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals = false);
 
-		/**
-			@param[in]	inName			Specifies a non-empty string that contains all or part of a register name.
-			@param[in]	inSearchStyle	Specifies the search style. Must be EXACTMATCH (the default), CONTAINS,
-										STARTSWITH or ENDSWITH.
-			@return		A set of register numbers that match all or part of the given name.
-						Empty if none match.
-			@note		All searching is performed case-insensitively.
-		**/
-		static NTV2RegNumSet	GetRegistersWithName (const std::string & inName, const int inSearchStyle = EXACTMATCH);
+        /**
+            @param[in]	inName			Specifies a non-empty string that contains all or part of a register name.
+            @param[in]	inSearchStyle	Specifies the search style. Must be EXACTMATCH (the default), CONTAINS,
+                                        STARTSWITH or ENDSWITH.
+            @return		A set of register numbers that match all or part of the given name.
+                        Empty if none match.
+            @note		All searching is performed case-insensitively.
+        **/
+        static NTV2RegNumSet	GetRegistersWithName (const std::string & inName, const int inSearchStyle = EXACTMATCH);
 
-		/**
-			@param[in]	inXptRegNum		Specifies the crosspoint select group register number. Note that it only makes
-										sense to pass register numbers having names that start with "kRegXptSelectGroup".
-			@param[in]	inMaskIndex		Specifies the mask index, an unsigned value that must be less than 4.
-										(0 specifies the least significant byte of the crosspoint register value,
-										3 specifies the most significant byte, etc.)
-			@return		The NTV2InputCrosspointID of the widget input crosspoint associated with the given "Xpt"
-						register and mask index, or NTV2_INPUT_CROSSPOINT_INVALID if there isn't one.
-		**/
-		static NTV2InputCrosspointID	GetInputCrosspointID (const uint32_t inXptRegNum, const uint32_t inMaskIndex);
+        /**
+            @param[in]	inXptRegNum		Specifies the crosspoint select group register number. Note that it only makes
+                                        sense to pass register numbers having names that start with "kRegXptSelectGroup".
+            @param[in]	inMaskIndex		Specifies the mask index, an unsigned value that must be less than 4.
+                                        (0 specifies the least significant byte of the crosspoint register value,
+                                        3 specifies the most significant byte, etc.)
+            @return		The NTV2InputCrosspointID of the widget input crosspoint associated with the given "Xpt"
+                        register and mask index, or NTV2_INPUT_CROSSPOINT_INVALID if there isn't one.
+        **/
+        static NTV2InputCrosspointID	GetInputCrosspointID (const uint32_t inXptRegNum, const uint32_t inMaskIndex);
 
-		/**
-			@brief		Answers with the crosspoint select register and mask information for a given widget input.
-			@param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
-			@param[in]	outXptRegNum	Receives the crosspoint select group register number.
-			@param[in]	outMaskIndex	Receives the mask index (where 0=0x000000FF, 1=0x0000FF00, 2=0x00FF0000, 3=0xFF000000).
-			@return		True if successful;  otherwise false.
-		**/
-		static bool						GetCrosspointSelectGroupRegisterInfo (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex);
+        /**
+            @brief		Answers with the crosspoint select register and mask information for a given widget input.
+            @param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
+            @param[in]	outXptRegNum	Receives the crosspoint select group register number.
+            @param[in]	outMaskIndex	Receives the mask index (where 0=0x000000FF, 1=0x0000FF00, 2=0x00FF0000, 3=0xFF000000).
+            @return		True if successful;  otherwise false.
+        **/
+        static bool						GetCrosspointSelectGroupRegisterInfo (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex);
 
-		static const int	CONTAINS	=	0;
-		static const int	STARTSWITH	=	1;
-		static const int	ENDSWITH	=	2;
-		static const int	EXACTMATCH	=	3;
-
-private:
-        static RegisterExpert* instance();
-        static RegisterExpert* gRegExpert;
+        static const int	CONTAINS	=	0;
+        static const int	STARTSWITH	=	1;
+        static const int	ENDSWITH	=	2;
+        static const int	EXACTMATCH	=	3;
 
 };	//	CNTV2RegisterExpert
 
