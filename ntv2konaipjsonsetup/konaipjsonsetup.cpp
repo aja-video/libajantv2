@@ -383,12 +383,19 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
-    while (!device.IsDeviceReady ())
+    while (!device.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
         device.SleepMs (1000);
-        if (device.IsDeviceReady ())
+        if (device.IsMBSystemReady ())
+        {
             cout << "## NOTE:  Device is ready" << endl;
+            if (device.IsMBSystemValid())
+            {
+                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+                return false;
+            }
+        }
     }
 
     CNTV2Config2110	config2110 (device);
@@ -534,8 +541,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.localPort    = transmit.mPrimaryLocalPort.toUInt();
         txChannelConfig.remoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
-        txChannelConfig.remoteMAC    = toMAC(transmit.mPrimaryRemoteMac);
-        txChannelConfig.autoMAC      = getEnable(transmit.mPrimaryAutoMac);
         txChannelConfig.payloadType  = transmit.mPayload.toUInt();
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
