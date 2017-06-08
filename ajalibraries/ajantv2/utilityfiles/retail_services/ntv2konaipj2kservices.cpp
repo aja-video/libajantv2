@@ -1155,7 +1155,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
 
-    if (mCard->IsDeviceReady() == true)
+    if (mCard->IsDeviceReady(true) == true)
     {
 		// We need the device ID for KonaIP J2k because there are three flavors of this device
 		NTV2DeviceID deviceID = mCard->GetDeviceID();
