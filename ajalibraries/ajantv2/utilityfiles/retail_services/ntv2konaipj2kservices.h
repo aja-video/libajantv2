@@ -35,7 +35,6 @@ protected:
 	
 	bool	notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
 	bool	notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
-	bool	notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr);
 	void	printRxConfig(rx_2022_channel chan);
 	void	printTxConfig(tx_2022_channel chan);
 	void	printEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);

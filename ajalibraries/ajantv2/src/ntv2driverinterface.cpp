@@ -525,7 +525,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
      ULWord* bitFilePtr =  new ULWord[256/4];
      ULWord dwordSizeCount = 256/4;
 
-	 if(!IsDeviceReady() || !IsKonaIPDevice())
+     if(!IsDeviceReady(false) || !IsKonaIPDevice())
      {
          // cannot read flash
          return false;
@@ -728,13 +728,33 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 }	//	BumpEventCount
 
-bool CNTV2DriverInterface::IsDeviceReady()
+bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
 {
 	if (IsKonaIPDevice())
-		return IsMBSystemReady();
-	else
-		return true;
+	{
+		if(!IsMBSystemReady())
+			return false;
+
+        if(checkValid && !IsMBSystemValid())
+			return false;
+	}
+	return true;
 }
+
+bool CNTV2DriverInterface::IsMBSystemValid()
+{
+	if (IsKonaIPDevice())
+	{
+        uint32_t val;
+        ReadRegister(SAREK_REGS + kRegSareIfVersion, &val);
+        if (val == SAREK_IF_VERSION)
+            return true;
+        else
+            return false;
+	}
+	return true;
+}
+
 
 bool CNTV2DriverInterface::IsMBSystemReady()
 {

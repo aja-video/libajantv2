@@ -2464,14 +2464,14 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enable, enable2022_7;
-	uint32_t				enableSv, enable2022_7Sv;
+	uint32_t				enableSv;
 
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
 	const bool				kNot48Bit = false;
 	
-    if (mCard->IsDeviceReady() == true)
+    if (mCard->IsDeviceReady(true) == true)
     {
 		rx_2022_channel		rxHwConfig;
 		tx_2022_channel		txHwConfig;
@@ -2566,24 +2566,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 				mTx2022Config3.txc_enable32 = enableSv;
                 setTxConfig(NTV2_CHANNEL3);
             }
-            else
-            {
-                if (mTx2022Config3.txc_primaryAutoMacAddr)
-                {
-                    uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
-                    uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo3, lo);
-                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi3, hi);
-                }
-                
-                if (mTx2022Config3.txc_secondaryAutoMacAddr)
-                {
-                    uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-                    uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo3, lo);
-                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi3, hi);
-                }
-            }
         }
         else
             printf("txConfig CHAN 3 read FAILED");
@@ -2604,24 +2586,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 				mTx2022Config4.txc_enable32 = enableSv;
                 setTxConfig(NTV2_CHANNEL4);
             }
-            else
-            {
-                if (mTx2022Config4.txc_primaryAutoMacAddr)
-                {
-                    uint32_t hi = (txHwConfig.primaryRemoteMAC.mac[0] << 8) + txHwConfig.primaryRemoteMAC.mac[1];
-                    uint32_t lo =  (txHwConfig.primaryRemoteMAC.mac[2] << 24) + (txHwConfig.primaryRemoteMAC.mac[3] << 16) + (txHwConfig.primaryRemoteMAC.mac[4] << 8) + txHwConfig.primaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_lo4, lo);
-                    mCard->WriteRegister(kVRegTxcPrimaryRemoteMAC_hi4, hi);
-                }
-                
-                if (mTx2022Config4.txc_secondaryAutoMacAddr)
-                {
-                    uint32_t hi = (txHwConfig.secondaryRemoteMAC.mac[0] << 8) + txHwConfig.secondaryRemoteMAC.mac[1];
-                    uint32_t lo =  (txHwConfig.secondaryRemoteMAC.mac[2] << 24) + (txHwConfig.secondaryRemoteMAC.mac[3] << 16) + (txHwConfig.secondaryRemoteMAC.mac[4] << 8) + txHwConfig.secondaryRemoteMAC.mac[5];
-                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_lo4, lo);
-                    mCard->WriteRegister(kVRegTxcSecondaryRemoteMAC_hi4, hi);
-                }
-           }
         }
         else
             printf("txConfig CHAN 4 read FAILED");
@@ -3412,7 +3376,6 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
 {
     printf("set TxConfig chn=%d\n",(int)channel);
     tx_2022_channel chan;
-    MACAddr remoteMAC;
     struct in_addr addr;
     bool enable;
     
@@ -3421,27 +3384,11 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
 		case NTV2_CHANNEL4:
             addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
             chan.primaryRemoteIP        = inet_ntoa(addr);
-            remoteMAC.mac[0]            = (mTx2022Config4.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
-            remoteMAC.mac[1]            =  mTx2022Config4.txc_primaryRemoteMAC_hi        & 0xff;
-            remoteMAC.mac[2]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 24) & 0xff;
-            remoteMAC.mac[3]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 16) & 0xff;
-            remoteMAC.mac[4]            = (mTx2022Config4.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
-            remoteMAC.mac[5]            =  mTx2022Config4.txc_primaryRemoteMAC_lo        & 0xff;
-            chan.primaryRemoteMAC       = remoteMAC;
-			chan.primaryAutoMAC         = mTx2022Config4.txc_primaryAutoMacAddr ? true : false;
             chan.primaryLocalPort       = mTx2022Config4.txc_primaryLocalPort;
             chan.primaryRemotePort      = mTx2022Config4.txc_primaryRemotePort;
             
             addr.s_addr                 = mTx2022Config4.txc_secondaryRemoteIp;
             chan.secondaryRemoteIP      = inet_ntoa(addr);
-            remoteMAC.mac[0]            = (mTx2022Config4.txc_secondaryRemoteMAC_hi >> 8)  & 0xff;
-            remoteMAC.mac[1]            =  mTx2022Config4.txc_secondaryRemoteMAC_hi        & 0xff;
-            remoteMAC.mac[2]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 24) & 0xff;
-            remoteMAC.mac[3]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 16) & 0xff;
-            remoteMAC.mac[4]            = (mTx2022Config4.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
-            remoteMAC.mac[5]            =  mTx2022Config4.txc_secondaryRemoteMAC_lo        & 0xff;
-            chan.secondaryRemoteMAC     = remoteMAC;
-            chan.secondaryAutoMAC       = mTx2022Config4.txc_secondaryAutoMacAddr ? true : false;
             chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
             chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
             
@@ -3452,27 +3399,11 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
 		case NTV2_CHANNEL3:
             addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
             chan.primaryRemoteIP        = inet_ntoa(addr);
-            remoteMAC.mac[0]            = (mTx2022Config3.txc_primaryRemoteMAC_hi >> 8)  & 0xff;
-            remoteMAC.mac[1]            =  mTx2022Config3.txc_primaryRemoteMAC_hi        & 0xff;
-            remoteMAC.mac[2]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 24) & 0xff;
-            remoteMAC.mac[3]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 16) & 0xff;
-            remoteMAC.mac[4]            = (mTx2022Config3.txc_primaryRemoteMAC_lo >> 8)  & 0xff;
-            remoteMAC.mac[5]            =  mTx2022Config3.txc_primaryRemoteMAC_lo        & 0xff;
-            chan.primaryRemoteMAC       = remoteMAC;
-            chan.primaryAutoMAC         = mTx2022Config3.txc_primaryAutoMacAddr ? true : false;
             chan.primaryLocalPort       = mTx2022Config3.txc_primaryLocalPort;
             chan.primaryRemotePort      = mTx2022Config3.txc_primaryRemotePort;
             
             addr.s_addr                 = mTx2022Config3.txc_secondaryRemoteIp;
             chan.secondaryRemoteIP      = inet_ntoa(addr);
-            remoteMAC.mac[0]            = (mTx2022Config3.txc_secondaryRemoteMAC_hi >> 8)  & 0xff;
-            remoteMAC.mac[1]            =  mTx2022Config3.txc_secondaryRemoteMAC_hi        & 0xff;
-            remoteMAC.mac[2]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 24) & 0xff;
-            remoteMAC.mac[3]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 16) & 0xff;
-            remoteMAC.mac[4]            = (mTx2022Config3.txc_secondaryRemoteMAC_lo >> 8)  & 0xff;
-            remoteMAC.mac[5]            =  mTx2022Config3.txc_secondaryRemoteMAC_lo        & 0xff;
-            chan.secondaryRemoteMAC     = remoteMAC;
-            chan.secondaryAutoMAC       = mTx2022Config3.txc_secondaryAutoMacAddr ? true : false;
             chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
             chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
             
@@ -3480,7 +3411,7 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             break;
     }
 	
-	if (target->SetTxChannelConfiguration(channel,chan) == true)
+	if (target->SetTxChannelConfiguration(channel,chan,m2022_7Mode) == true)
 	{
 		printf("set TxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
@@ -3581,18 +3512,10 @@ bool  KonaIP22Services::notEqualPrimary(const tx_2022_channel & hw_channel, cons
     uint32_t addr;
     if (virtual_config.txc_primaryLocalPort			!= hw_channel.primaryLocalPort)  return true;
     if (virtual_config.txc_primaryRemotePort		!= hw_channel.primaryRemotePort) return true;
-    if ((bool)virtual_config.txc_primaryAutoMacAddr	!= hw_channel.primaryAutoMAC)    return true;
-    
+	
     addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
     if (virtual_config.txc_primaryRemoteIp     != addr) return true;
-    
-    // don't compare automac, but if it is false, do compare the mac addresses
-    if (!virtual_config.txc_primaryAutoMacAddr)
-    {
-        // only examine mac when automac is off
-        if (notEqualMAC(virtual_config.txc_primaryRemoteMAC_lo,virtual_config.txc_primaryRemoteMAC_hi,hw_channel.primaryRemoteMAC)) return true;
-    }
-    
+	
     return false;
 }
 
@@ -3601,29 +3524,9 @@ bool  KonaIP22Services::notEqualSecondary(const tx_2022_channel & hw_channel, co
     uint32_t addr;
     if (virtual_config.txc_secondaryLocalPort			!= hw_channel.secondaryLocalPort)  return true;
     if (virtual_config.txc_secondaryRemotePort			!= hw_channel.secondaryRemotePort) return true;
-    if ((bool)virtual_config.txc_secondaryAutoMacAddr	!= hw_channel.secondaryAutoMAC)    return true;
-    
+	
     addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
     if (virtual_config.txc_secondaryRemoteIp     != addr) return true;
-    
-    // don't compare automac, but if it is false, do compare the mac addresses
-    if (!virtual_config.txc_secondaryAutoMacAddr)
-    {
-        // only examine mac when automac is off
-        if (notEqualMAC(virtual_config.txc_secondaryRemoteMAC_lo,virtual_config.txc_secondaryRemoteMAC_hi,hw_channel.secondaryRemoteMAC)) return true;
-    }
-    
-    return false;
-}
-
-bool  KonaIP22Services::notEqualMAC(uint32_t lo, uint32_t hi, const MACAddr & macaddr)
-{
-    if (macaddr.mac[0]   != ((hi >> 8 ) & 0xff)) return true;
-    if (macaddr.mac[1]   != ( hi        & 0xff)) return true;
-    if (macaddr.mac[2]   != ((lo >> 24) & 0xff)) return true;
-    if (macaddr.mac[3]   != ((lo >> 16) & 0xff)) return true;
-    if (macaddr.mac[4]   != ((lo >> 8)  & 0xff)) return true;
-    if (macaddr.mac[5]   != ( lo        & 0xff)) return true;
     
     return false;
 }

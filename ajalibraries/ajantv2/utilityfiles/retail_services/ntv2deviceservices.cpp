@@ -196,7 +196,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1FrameBufferFomat);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
 
-    if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady() == true))
+    if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
         mCard->ReadRegister(kVReg2022_7Enable, (ULWord*)&m2022_7Mode);
         
@@ -249,29 +249,17 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegTxcPrimaryLocalPort3,		&mTx2022Config3.txc_primaryLocalPort);
         mCard->ReadRegister(kVRegTxcPrimaryRemoteIp3,		&mTx2022Config3.txc_primaryRemoteIp);
         mCard->ReadRegister(kVRegTxcPrimaryRemotePort3,		&mTx2022Config3.txc_primaryRemotePort);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteMAC_lo3,	&mTx2022Config3.txc_primaryRemoteMAC_lo);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteMAC_hi3,	&mTx2022Config3.txc_primaryRemoteMAC_hi);
-        mCard->ReadRegister(kVRegTxcPrimaryAutoMac3,		&mTx2022Config3.txc_primaryAutoMacAddr);
         mCard->ReadRegister(kVRegTxcSecondaryLocalPort3,	&mTx2022Config3.txc_secondaryLocalPort);
         mCard->ReadRegister(kVRegTxcSecondaryRemoteIp3,		&mTx2022Config3.txc_secondaryRemoteIp);
         mCard->ReadRegister(kVRegTxcSecondaryRemotePort3,	&mTx2022Config3.txc_secondaryRemotePort);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteMAC_lo3, &mTx2022Config3.txc_secondaryRemoteMAC_lo);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteMAC_hi3, &mTx2022Config3.txc_secondaryRemoteMAC_hi);
-        mCard->ReadRegister(kVRegTxcSecondaryAutoMac3,		&mTx2022Config3.txc_secondaryAutoMacAddr);
-       
+		
         mCard->ReadRegister(kVRegTxcEnable4,				&mTx2022Config4.txc_enable32);
         mCard->ReadRegister(kVRegTxcPrimaryLocalPort4,		&mTx2022Config4.txc_primaryLocalPort);
         mCard->ReadRegister(kVRegTxcPrimaryRemoteIp4,		&mTx2022Config4.txc_primaryRemoteIp);
         mCard->ReadRegister(kVRegTxcPrimaryRemotePort4,		&mTx2022Config4.txc_primaryRemotePort);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteMAC_lo4,	&mTx2022Config4.txc_primaryRemoteMAC_lo);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteMAC_hi4,	&mTx2022Config4.txc_primaryRemoteMAC_hi);
-        mCard->ReadRegister(kVRegTxcPrimaryAutoMac4,		&mTx2022Config4.txc_primaryAutoMacAddr);
         mCard->ReadRegister(kVRegTxcSecondaryLocalPort4,	&mTx2022Config4.txc_secondaryLocalPort);
         mCard->ReadRegister(kVRegTxcSecondaryRemoteIp4,		&mTx2022Config4.txc_secondaryRemoteIp);
         mCard->ReadRegister(kVRegTxcSecondaryRemotePort4,	&mTx2022Config4.txc_secondaryRemotePort);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteMAC_lo4, &mTx2022Config4.txc_secondaryRemoteMAC_lo);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteMAC_hi4, &mTx2022Config4.txc_secondaryRemoteMAC_hi);
-        mCard->ReadRegister(kVRegTxcSecondaryAutoMac4,		&mTx2022Config4.txc_secondaryAutoMacAddr);
 		
 		mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
 		mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);

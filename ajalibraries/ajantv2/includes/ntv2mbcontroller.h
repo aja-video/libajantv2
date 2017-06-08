@@ -77,7 +77,7 @@ public:
 protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
-    bool GetRemoteMAC(std::string remote_IPAddress, std::string & MACaddress);
+    bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
 
     void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable);
@@ -85,8 +85,8 @@ protected:
     void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
 
 private:
-    eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, std::string & MACaddress);
-    bool SendArpRequest(std::string remote_IPAddress);
+    eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
+    bool SendArpRequest(std::string remote_IPAddress, eSFP port);
 
     void splitResponse(const std::string response, std::vector<std::string> & results);
     bool getDecimal(const std::string & resp, const std::string & parm, uint32_t & result);
