@@ -53,7 +53,7 @@ AJAStatus NTV2OutputTestPattern::Init ()
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-	if (!mDevice.IsDeviceReady ())
+    if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))

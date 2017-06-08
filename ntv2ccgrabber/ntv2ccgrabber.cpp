@@ -114,7 +114,7 @@ AJAStatus NTV2CCGrabber::Init (void)
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-	if (!mDevice.IsDeviceReady ())
+    if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID ();	//	Keep this handy because it's used frequently

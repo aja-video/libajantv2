@@ -85,7 +85,7 @@ int main (int argc, const char ** argv)
     if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec ? pDeviceSpec : "0", device))
         {cerr << "## ERROR:  Device '" << pDeviceSpec << "' not found" << endl; return 2;}
 
-    if (!device.IsDeviceReady ())
+    if (!device.IsDeviceReady (false))
         {cerr << "## ERROR:  Device '" << pDeviceSpec << "' not ready" << endl; return 2;}
 
     if (!NTV2DeviceCanDoHDMIHDROut (device.GetDeviceID()))
