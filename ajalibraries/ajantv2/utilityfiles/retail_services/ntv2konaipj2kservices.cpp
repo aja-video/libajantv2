@@ -1887,7 +1887,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.primarySourceIP        = inet_ntoa(addr);
 			addr.s_addr                 = mRx2022Config2.rxc_primaryDestIp;
 			chan.primaryDestIP          = inet_ntoa(addr);;
-			chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch;
+			chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch & 0x7fffffff;
 			chan.primarySourcePort      = mRx2022Config2.rxc_primarySourcePort;
 			chan.primaryDestPort        = mRx2022Config2.rxc_primaryDestPort;
 			chan.primarySsrc            = mRx2022Config2.rxc_primarySsrc;
@@ -1897,7 +1897,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.secondarySourceIP      = inet_ntoa(addr);
 			addr.s_addr                 = mRx2022Config2.rxc_secondaryDestIp;
 			chan.secondaryDestIP        = inet_ntoa(addr);;
-			chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch;
+			chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch & 0x7fffffff;
 			chan.secondarySourcePort    = mRx2022Config2.rxc_secondarySourcePort;
 			chan.secondaryDestPort      = mRx2022Config2.rxc_secondaryDestPort;
 			chan.secondarySsrc          = mRx2022Config2.rxc_secondarySsrc;
@@ -1914,7 +1914,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.primarySourceIP        = inet_ntoa(addr);
 			addr.s_addr                 = mRx2022Config1.rxc_primaryDestIp;
 			chan.primaryDestIP          = inet_ntoa(addr);;
-			chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch;
+			chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch & 0x7fffffff;
 			chan.primarySourcePort      = mRx2022Config1.rxc_primarySourcePort;
 			chan.primaryDestPort        = mRx2022Config1.rxc_primaryDestPort;
 			chan.primarySsrc            = mRx2022Config1.rxc_primarySsrc;
@@ -1924,7 +1924,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.secondarySourceIP      = inet_ntoa(addr);
 			addr.s_addr                 = mRx2022Config1.rxc_secondaryDestIp;
 			chan.secondaryDestIP        = inet_ntoa(addr);;
-			chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch;
+			chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch & 0x7fffffff;
 			chan.secondarySourcePort    = mRx2022Config1.rxc_secondarySourcePort;
 			chan.secondaryDestPort      = mRx2022Config1.rxc_secondaryDestPort;
 			chan.secondarySsrc          = mRx2022Config1.rxc_secondarySsrc;
@@ -2054,15 +2054,15 @@ bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, con
 {
 	uint32_t addr;
 	
-	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
-	if (virtual_config.rxc_primaryDestPort   != hw_channel.primaryDestPort)  return true;
-	if (virtual_config.rxc_primaryRxMatch    != hw_channel.primaryRxMatch)   return true;
+	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort) return true;
+	if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
+	if ((virtual_config.rxc_primaryRxMatch & 0x7FFFFFFF) != (hw_channel.primaryRxMatch & 0x7FFFFFFF)) return true;
 	
 	addr = inet_addr(hw_channel.primaryDestIP.c_str());
-	if (virtual_config.rxc_primaryDestIp     != addr) return true;
+	if (virtual_config.rxc_primaryDestIp != addr) return true;
 	
 	addr = inet_addr(hw_channel.primarySourceIP.c_str());
-	if (virtual_config.rxc_primarySourceIp   != addr) return true;
+	if (virtual_config.rxc_primarySourceIp != addr) return true;
 	
 	return false;
 }
