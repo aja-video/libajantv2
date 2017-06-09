@@ -20,7 +20,7 @@ NTV2DeviceCanDoBreakoutBox,Returns true if the device having the given ID can be
 NTV2DeviceCanDoCapture,Returns true if the device having the given ID can capture (ingest) video.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X
 NTV2DeviceCanDoColorCorrection,Returns true if the device having the given ID has at least one programmable LUT.,-,-,-,X,X,X,-,-,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,X,X,X,X
 NTV2DeviceCanDoCustomAnc,Returns true if the device having the given ID supports ANC insertion/extraction.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,-,-,-,X
-NTV2DeviceCanDoDSKOpacity,Returns true if the device having the given ID has a mixer/keyer whose opacity is adjustable.,-,-,X,X,X,-,-,-,X,X,X,X,-,X,X,-,X,X,-,-,-,X,X,X,X,X,X
+NTV2DeviceCanDoDSKOpacity,Returns true if the device having the given ID has a mixer/keyer whose opacity is adjustable.,-,-,X,X,X,-,-,-,X,X,X,X,-,X,X,X,X,X,-,-,-,X,X,X,X,X,X
 NTV2DeviceCanDoDualLink,Returns true if the device having the given ID can input/output 10-bit RGB over 2-wire SDI.,-,-,-,-,-,-,-,-,X,X,-,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X
 NTV2DeviceCanDoDVCProHD,Returns true if the device having the given ID can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.,-,-,-,X,X,X,X,-,X,X,-,X,X,-,X,-,-,X,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoEnhancedCSC,Returns true if the device having the given ID has enhanced color space converter capability.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-,X,-,-,X,X,-,-,-,X
