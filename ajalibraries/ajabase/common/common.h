@@ -31,7 +31,7 @@ static const std::string WHITESPACE(" \t\n\r");
 AJA_EXPORT std::string& replace(std::string& str, const std::string& from, const std::string& to);
 
 // NOTE: these sto* functions are ment to be similar to the C++11 functions of the same name
-//       one big difference is that these to not throw exceptions on errors and instead return
+//       one big difference is that these do not throw exceptions on errors and instead return
 //       0 like the underlying strtol function does.
 
 /**
