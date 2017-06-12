@@ -128,7 +128,7 @@ To build with the obsolete APIs, the @code #define NTV2_DEPRECATE @endcode line 
 then the 'classes' library will need to be rebuilt.
 
 Starting with SDK 12.5, the '<b>NTV2_DEPRECATE_12_5</b>' macro has also been defined in 'ajatypes.h'.
-Going forward, all API deprecations that are new to that SDK can be reverted by uncommenting the respective "NTV2_DEPRECATE_<i>maj</i>_<i>min</i>" macro.
+Going forward, all API deprecations that are new to that SDK can be reverted by uncommenting the respective "NTV2_DEPRECATE_..." macro.
 
 @note	Do not undefine "NTV2_DEPRECATE" while leaving "NTV2_DEPRECATE_12_5" (or subsequent macros) defined.
 		Unexpected results -- probably bad ones -- will occur.

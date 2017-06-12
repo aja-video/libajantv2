@@ -167,6 +167,8 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
     if (m_bitfilePath.find(".mcs") != std::string::npos)
     {
         CNTV2KonaFlashProgram kfp;
+        if (!m_verbose)
+            kfp.SetQuietMode();
 
         m_device.WriteRegister(kVRegFlashState,kProgramStateCalculating);
         m_device.WriteRegister(kVRegFlashSize,MCS_STEPS);
