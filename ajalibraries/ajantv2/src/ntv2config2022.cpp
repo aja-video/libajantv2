@@ -481,7 +481,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     uint32_t delay;
     if (_is2022_2)
     {
-        delay = 0x20E00;      // 90 kHz clocks
+        delay = (rxConfig.playoutDelay * 90) << 9;  // 90 kHz clocks
     }
     else
     {
