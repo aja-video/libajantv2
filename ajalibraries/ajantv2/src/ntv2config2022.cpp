@@ -702,7 +702,6 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
 bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7)
 {
     uint32_t    baseAddr;
-    uint32_t    val;
     uint32_t    hi;
     uint32_t    lo;
     MACAddr     macaddr;
