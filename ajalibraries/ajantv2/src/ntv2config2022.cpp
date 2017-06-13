@@ -481,7 +481,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     uint32_t delay;
     if (_is2022_2)
     {
-        delay = 0x20400;      // 90 kHz clocks
+        delay = 0x20E00;      // 90 kHz clocks
     }
     else
     {
@@ -620,7 +620,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
 
     // network path differential in ms
     ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
-    rxConfig.playoutDelay = (_is2022_2) ? (val>>9)/90 : val/27000;
+    rxConfig.networkPathDiff = (_is2022_2) ? (val>>9)/90 : val/27000;
 
     return true;
 }
@@ -702,7 +702,6 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
 bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7)
 {
     uint32_t    baseAddr;
-    uint32_t    val;
     uint32_t    hi;
     uint32_t    lo;
     MACAddr     macaddr;
