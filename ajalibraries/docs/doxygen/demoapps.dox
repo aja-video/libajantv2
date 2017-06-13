@@ -18,22 +18,27 @@
 
 	@section	demobuildingapps	Building the Demo Apps
 
-	@subsection	demobuildwin	Windows:
+	-#	Unzip the downloaded SDK.
+	-#	Look inside the resulting folder that appears after unzipping.
+	-#	To build the demonstration applications:
+		-	<b>Windows</b> (natively):
+			-#	Open <b>ntv2_vs12.sln</b> with Visual Studio.
+			-#	Choose the project configuration (x64).
+			-#	Build solution.
+		-	<b>Mac OS X</b> (natively):
+			-#	Open <b>ntv2.xcworkspace</b> using Xcode.
+			-#	Build.
+		-	<b>Linux</b> (natively):
+			-#	/c cd ajaapps/crossplatform/demoapps
+			-#	make
+		-	Using <b>Qt Creator</b> (same on all platforms):
+			-#	Inside the <b>build</b> folder, open <b>_ntv2demos.pro</b> with <b>Qt Creator</b>.
+			-#	Assign it a kit, then choose <b>Rebuild</b>.
 
-	Open the solution file located here:
-	-	NTV2SDK\\APIandSamples\\ntv2projects\\winworkspace\\ntv2_vs12.sln
 
-	@subsection	demobuildmac	MacOS:
-
-	Open the Xcode project file located here:
-	-	sdkdir/sdk/ntv2projects/demoapps/demoapps.xcodeproj
-
-	@subsection	demobuildlin	Linux:
-
-	Use the <b>Makefile</b> located here:
-	-	sdkdir/ntv2projects/demoapps
 
 	@subsection	demos			The Demo Apps, Simple to Complex
+	-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
 	-	\ref	ntv2enumerateboards
 	-	\ref	ntv2konaipjsonsetup  <i>(KONA IP only)</i>
 	-	\ref	ntv2outputtestpattern
@@ -60,6 +65,7 @@
 	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
 	-	\ref	ntv2enumerateboards
 	-	\ref	ntv2fieldburn
+	-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
 	-	\ref	ntv2konaipjsonsetup  <i>(KONA IP only)</i>
 	-	\ref	ntv2llburn
 	-	\ref	ntv2outputtestpattern
