@@ -7,13 +7,10 @@ it's very likely neither application will run correctly if they both attempt to 
 Once your application has found the device it needs to use, AJA strongly recommends obtaining exclusive use of it to
 prevent collisions with other applications, including AJA's own utilities and applications.
 
-On MacOS, AJA provides an agent (<b>AJAAgent</b>) that manages device ownership and provides convenient device widget
-routing and configuration services to "retail" client applications (e.g., Adobe, Avid, etc.). On Windows, AJA provides
-an optional system service (<b>AJA System Service</b>) to perform these tasks. On Linux, the retail services and <b>AJA ControlPanel</b>
-are not supported.
-
-@note	If retail services are unsupported or not installed, it's assumed that OEM applications may operate all AJA devices
-		without considering other applications that may run on the host.
+On <b>Mac OS X</b>, AJA provides an agent (<b>AJAAgent</b>) that manages device ownership and provides convenient device widget
+routing and configuration services to "retail" client applications (e.g., Adobe, Avid, etc.). On <b>Windows</b>, AJA provides an
+optional system service (<b>AJA System Service</b>) to perform these tasks. On <b>Linux</b>, AJA provides an optional "retail"
+installer that installs a daemon that performs these tasks.
 
 @image	html	ajacontrolpanel.png
 
