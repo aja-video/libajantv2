@@ -2056,6 +2056,7 @@ bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, con
 	
 	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort) return true;
 	if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
+	if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
 	if ((virtual_config.rxc_primaryRxMatch & 0x7FFFFFFF) != (hw_channel.primaryRxMatch & 0x7FFFFFFF)) return true;
 	
 	addr = inet_addr(hw_channel.primaryDestIP.c_str());
