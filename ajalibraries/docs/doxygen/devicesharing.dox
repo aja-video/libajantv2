@@ -21,7 +21,7 @@ computer's file system.
 @note	AJA does not provide an API for interrogating or controlling the Control Panel settings.
 
 
-@par	Determining if an AJA Device is Being Used
+@section	devshareisinuse		Determining if an AJA Device is Being Used
 
 To determine if an AJA device is being used by another application, whether it be an OEM application, or one that uses the
 Control Panel services, application writers should call \c GetStreamingApplication.
@@ -46,7 +46,7 @@ Control Panel services, application writers should call \c GetStreamingApplicati
 @endcode
 
 
-@par	Acquiring Exclusive Use of an AJA Device
+@section	devshareacquire		Acquiring Exclusive Use of an AJA Device
 
 To acquire and release exclusive use of an AJA device, OEM application writers must call CNTV2Card::AcquireStreamForApplication
 or CNTV2Card::ReleaseStreamForApplication, respectively.
@@ -68,7 +68,7 @@ or CNTV2Card::ReleaseStreamForApplication, respectively.
 @endcode
 
 
-@par	Getting Full Control Over Device Configuration
+@section	devsharefullcontrol		Getting Full Control Over Device Configuration
 
 In addition to ensuring that other applications won't use use the same AJA device, many applications often need to
 configure the device differently than the Control Panel settings dictate. These applications must disable the retail
@@ -93,7 +93,7 @@ calling CNTV2Card::GetEveryFrameServices) and restored when the device is releas
 The demonstration applications all use these techniques, and can be used as "best practice" examples.
 
 
-@par	Reserving Exclusive Use of a Device by a "Process Family"
+@section	devshareprocessfam		Reserving Exclusive Use of a Device by a "Process Family"
 
 Some applications may require several programs that run concurrently, all using the same AJA device.
 For example, there may be one capture or playout process instance running for each AutoCirculate channel that's

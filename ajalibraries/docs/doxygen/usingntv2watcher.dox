@@ -61,7 +61,7 @@ If you click back to return to an inspector that was previously in use, its stat
 
 @image	html	watcher-inspector-framebuffer.png
 
-The Frame Buffer inspector monitors the contents of frame buffer memory on the AJA device.
+The <b>Frame Buffer</b> inspector monitors the contents of frame buffer memory on the AJA device.
 
 @note	Because this inspector reads (via DMA) the entire contents of a frame buffer at the selected channel's frame rate,
 		it can interfere with any currently running video application, particularly if the additional DMAs exceed the available
@@ -193,7 +193,7 @@ Except in its Image view, the raster content display always highlights changed c
 
 @image	html	watcher-inspector-audio.png
 
-The Audio inspector monitors the input or output of a selected audio engine of the AJA device, including its buffer memory
+The <b>Audio</b> inspector monitors the input or output of a selected audio engine of the AJA device, including its buffer memory
 and read or write "head" position.
 
 @note	Because this inspector reads (via DMA) the entire contents of an audio buffer at NTV2Watcher's currently selected polling rate,
@@ -289,7 +289,7 @@ The display highlights changed content with a brighter color.
 
 @image	html	watcher-inspector-anc.png
 
-The Anc inspector monitors the ancillary data areas of a frame buffer, and the state registers of the device's Anc inserter/extractor widgets (if any).
+The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, and the state registers of the device's Anc inserter/extractor widgets (if any).
 
 @note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher's currently selected polling rate,
 		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
@@ -337,7 +337,7 @@ The display highlights changed content with a brighter color.
 
 @image	html	watcher-inspector-ac.png
 
-The AutoCirculate inspector monitors AutoCirculate status for every channel on the device.
+The <b>AutoCirculate</b> inspector monitors AutoCirculate status for every channel on the device.
 
 The inspector shows the following:
 	-	<b>Streaming Application</b> -- Shows the process ID and four-CC "signature" of the application that called CNTV2Card::SetStreamingApplication.
@@ -353,7 +353,9 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accu
 
 @subsection	inspectorregs		Registers Inspector
 
-The Registers inspector is a faster alternative to the slower register pages, and allows easy customization to focus on specific registers of interest.
+@image	html	watcher-inspector-regs.png
+
+The <b>Regs</b> inspector is a faster alternative to the register pages, and allows easy, immediate customization to focus on specific registers of interest.
 
 The inspector has the following:
 	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
@@ -387,6 +389,25 @@ To change a register's value:
 	-	Changes the value in the edit box as desired (keeping to the existing display radix).
 	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
 	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
+
+
+
+
+@subsection	inspectorroute		Routing Inspector
+
+The <b>Routing</b> inspector monitors widget signal crosspoint routing.
+
+@bug	This inspector is currently an experimental port of the Cables program and is not feature-complete.
+		Eventually, when completed, it will replace \ref usingcables.
+
+The inspector has the following individual panels:
+	-	<b>Routing Diagram</b> -- Shows the device widgets and signal connections between them.
+	-	<b>Code</b> -- A text-only representation of the device's current routing connections. It can display the routing in three different ways:
+		-	<b>Symbolic</b>	-- Widget connections are shown mnemonically.
+		-	<b>C++ (CNTV2Card calls)</b> -- C++ code that will produce the current routing configuration.
+		-	<b>C++ (CNTV2Card calls)</b> -- C++ code that will produce the current routing configuration using CNTV2Card::Connect calls.
+		-	<b>C++ (CNTV2SignalRouter calls)</b> -- C++ code that will produce the current routing configuration using CNTV2SignalRouter::AddConnection calls.
+	-	<b>Routing Registers</b> -- A panel containing a list of the device's routing registers. The register values can be changed.
 
 
 **/

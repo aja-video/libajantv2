@@ -8,6 +8,8 @@ The user interface consists of a single window that's split horizontally into th
 
 @image	html	cableslayout.png
 
+@note	This tool will eventually be replaced with the \ref inspectorroute in \ref usingntv2watcher.
+
 @par	Device Selection Panel
 
 @image	html	cables-deviceselpanel.png
