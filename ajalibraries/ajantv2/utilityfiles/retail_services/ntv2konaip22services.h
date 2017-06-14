@@ -32,10 +32,8 @@ protected:
     void   setTxConfig(NTV2Channel channel);
 	void   setIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
 
-    bool   notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
-    bool   notEqualSecondary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
-    bool   notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
-    bool   notEqualSecondary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
+    bool   notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
+    bool   notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
 
     CNTV2Config2022     * target;
 };

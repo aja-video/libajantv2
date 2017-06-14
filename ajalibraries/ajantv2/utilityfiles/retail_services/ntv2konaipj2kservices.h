@@ -33,8 +33,8 @@ protected:
 	void	setIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
 
 	
-	bool	notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
-	bool	notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
+	bool	notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
+	bool	notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
 	void	printRxConfig(rx_2022_channel chan);
 	void	printTxConfig(tx_2022_channel chan);
 	void	printEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
