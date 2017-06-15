@@ -1,7 +1,7 @@
 /**
 @page	ntv2capture4k		NTV2Capture4K Demo
 
-This simple command-line program shows how to capture 4K/UHD video frames provided to an AJA device.
+This command-line program is identical to the \ref ntv2capture except that it captures 4K/UHD video.
 
 The NTV2Capture4K class demonstrates...
 - how to properly acquire and release an AJA device in order to use it exclusively;
