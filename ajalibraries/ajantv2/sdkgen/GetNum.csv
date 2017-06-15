@@ -12,7 +12,7 @@ NTV2DeviceGetNumVideoChannels,ULWord,Returns the number of video channels suppor
 NTV2DeviceGetPingLED,ULWord,Returns the highest bit number of the LED bits in the Global Control Register on the device having the given ID.,0,BIT(19),BIT(19),BIT(16),BIT(16),BIT(16),BIT(16),BIT(19),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16),BIT(16)
 NTV2DeviceGetUFCVersion,ULWord,Returns the version number of the UFC on the device having the given ID.,0,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,0,0,0,0,0,0,0,0
 NTV2DeviceGetNum4kQuarterSizeConverters,UWord,Returns the number of quarter-size 4K/UHD down-converters on the device having the given ID.,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0
-NTV2DeviceGetNumAESAudioInputChannels,UWord,Returns the number of AES/EBU audio input channels on the device having the given ID.,0,0,0,2,2,2,2,0,16,16,0,0,0,0,0,0,16,16,0,0,2,0,0,0,0,0,0
+NTV2DeviceGetNumAESAudioInputChannels,UWord,Returns the number of AES/EBU audio input channels on the device having the given ID.,0,0,0,2,2,2,2,0,16,16,0,0,0,0,0,0,16,16,0,0,2,0,0,16,16,16,0
 NTV2DeviceGetNumAESAudioOutputChannels,UWord,Returns the number of AES/EBU audio output channels on the device having the given ID.,0,0,0,2,2,2,2,0,16,16,0,0,0,0,16,0,16,16,0,0,0,0,0,0,0,0,0
 NTV2DeviceGetNumAnalogAudioInputChannels,UWord,Returns the number of analog audio input channels on the device having the given ID.,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 NTV2DeviceGetNumAnalogAudioOutputChannels,UWord,Returns the number of analog audio output channels on the device having the given ID.,0,0,0,2,2,2,2,0,0,0,0,8,0,8,8,0,0,0,0,0,8,0,0,0,0,0,0
