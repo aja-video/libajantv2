@@ -9,6 +9,7 @@ This is a typical WFM display showing quadrant 4 of a 4+-channel AJA device conn
 Note the timecode "burned" into the video test pattern and 8 channels of audio tone.
 
 The NTV2Player4K class demonstrates everything NTV2Player does, plus...
--	how to generate a 4K/UHD test pattern and get it into a 4K frame buffer;
+-	how to generate a 4K/UHD test pattern and get it into a 4K/UHD frame buffer;
+-	how to configure the device to use quads or Tsi;
 -	how to use AutoCirculate to efficiently stream 4K/UHD video with audio and timecode.
 **/

@@ -44,6 +44,7 @@
 	-	\ref	ntv2outputtestpattern
 	-	\ref	ntv2capture
 	-	\ref	ntv2player
+	-	\ref	ntv2capture4k
 	-	\ref	ntv2player4k
 	-	\ref	ntv2burn
 	-	\ref	ntv2burn4kquadrant
@@ -60,6 +61,7 @@
 	-	\ref	ntv2burn
 	-	\ref	ntv2burn4kquadrant
 	-	\ref	ntv2capture
+	-	\ref	ntv2capture4k
 	-	\ref	ntv2ccgrabber
 	-	\ref	ntv2ccplayer
 	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>

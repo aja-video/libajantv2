@@ -1,0 +1,11 @@
+/**
+@page	ntv2capture4k		NTV2Capture4K Demo
+
+This simple command-line program shows how to capture 4K/UHD video frames provided to an AJA device.
+
+The NTV2Capture4K class demonstrates...
+- how to properly acquire and release an AJA device in order to use it exclusively;
+- how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
+- how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
+- how to configure the AJA device to capture quads or Tsi.
+**/
