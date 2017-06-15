@@ -1200,7 +1200,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 			if (rv && rv2)
 			{
-				if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config1))
+				if ((enable != (enableSv ? true : false)) || notEqual(rxHwConfig,mRx2022Config1))
 				{
 					// Special case we handle channel enables at service level automatically
 					mRx2022Config1.rxc_enable32 = enableSv;
@@ -1244,7 +1244,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				if (rv && rv2)
 				{
-					if ((enable != (enableSv ? true : false)) || notEqualPrimary(rxHwConfig,mRx2022Config2))
+					if ((enable != (enableSv ? true : false)) || notEqual(rxHwConfig,mRx2022Config2))
 					{
 						// Special case we handle channel enables at service level automatically
 						mRx2022Config2.rxc_enable32 = enableSv;
@@ -1268,7 +1268,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 			if (rv && rv2)
 			{
-				if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config3))
+				if ((enable != (enableSv ? true : false)) || notEqual(txHwConfig,mTx2022Config3))
 				{
 					// Special case we handle channel enables at service level automatically
 					mTx2022Config3.txc_enable32 = enableSv;
@@ -1318,7 +1318,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				if (rv && rv2)
 				{
-					if ((enable != (enableSv ? true : false)) || notEqualPrimary(txHwConfig,mTx2022Config4))
+					if ((enable != (enableSv ? true : false)) || notEqual(txHwConfig,mTx2022Config4))
 					{
 						// Special case we handle channel enables at service level automatically
 						mTx2022Config4.txc_enable32 = enableSv;
@@ -2050,12 +2050,13 @@ void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uin
 	mCard->WriteRegister(reg, errCode);
 }
 
-bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
 {
 	uint32_t addr;
 	
 	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort) return true;
 	if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
+	if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
 	if ((virtual_config.rxc_primaryRxMatch & 0x7FFFFFFF) != (hw_channel.primaryRxMatch & 0x7FFFFFFF)) return true;
 	
 	addr = inet_addr(hw_channel.primaryDestIP.c_str());
@@ -2067,7 +2068,7 @@ bool  KonaIPJ2kServices::notEqualPrimary(const rx_2022_channel & hw_channel, con
 	return false;
 }
 
-bool  KonaIPJ2kServices::notEqualPrimary(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
+bool  KonaIPJ2kServices::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
 	uint32_t addr;
 	if (virtual_config.txc_primaryLocalPort			!= hw_channel.primaryLocalPort)  return true;

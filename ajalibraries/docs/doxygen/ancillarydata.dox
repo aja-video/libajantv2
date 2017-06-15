@@ -14,26 +14,29 @@
 	-	The VANC data can be corrupted by any CSCs/LUTs upstream/downstream of the FrameStore (for capture/playout, respectively).
 	-	There's no HANC support.
 	-	The frame buffer geometry doesn't match the video standard -- again, more code complexity.
+	-	Not supported for 4K or UHD video formats.
 
-	Starting in SDK 12.3, AJA introduced a new way of handling VANC data using Anc extractor/inserter widgets in device firmware.
-	During playout, an inserter widget inserts VANC data into the outgoing SDI data stream from a separate host buffer in the
-	AUTOCIRCULATE_TRANSFER struct. During capture, an extractor widget extracts VANC data from the incoming SDI data stream and copies
-	it into a separate host buffer in the AUTOCIRCULATE_TRANSFER struct. (Note that this is very similar to how AutoCirculate
-	handles audio data.) The ::NTV2DeviceCanDoCustomAnc function tells if a given device has this extractor/inserter firmware.
+	Starting in SDK 12.3, AJA introduced a new way of handling ancillary data using Anc extractor/inserter widgets in device firmware.
+	During playout, an inserter widget inserts ancillary data into the outgoing SDI data stream from a separate host buffer in the
+	AUTOCIRCULATE_TRANSFER struct. During capture, an extractor widget extracts ancillary data from the incoming SDI data stream and
+	copies it into a separate host buffer in the AUTOCIRCULATE_TRANSFER struct (somewhat similar to how audio data is handled in AutoCirculate).
+	The ::NTV2DeviceCanDoCustomAnc function tells if a given device has this extractor/inserter firmware.
 	The benefits of this technique are:
 	-	The ancillary data in the separate host buffer has a simple format that closely matches the SMPTE 293 specification;
 	-	Data corruption problems introduced by CSCs, LUTs, UDCs, etc. are eliminated, since data extraction/insertion occurs
-		right at the SDI spigot.
+		right at the SDI spigot;
 	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry now can
 		match the video standard.
 
-	@note	All NTV2 devices support the "tall" and "taller" VANC geometries (see NTV2VANCMode).
-	@note	Neither NTV2_VANCMODE_TALL nor NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see NTV2_IS_4K_VIDEO_FORMAT macro).
+	@note	All NTV2 devices still support the "tall" and "taller" VANC geometries (see \c NTV2VANCMode).
+	@note	Neither \c NTV2_VANCMODE_TALL nor \c NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see \c NTV2_IS_4K_VIDEO_FORMAT macro).
 	@note	AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
 			To use the latter, the \c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
 	@note	The newer custom Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for operating the Anc
 			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK.
+
+	@bug	Custom HANC insertion on playout doesn't currently work (firmware issue).
 
 	@section	ancembeddedaudio	Embedded Audio
 

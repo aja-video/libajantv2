@@ -1,0 +1,11 @@
+/**
+@page	ntv2hdrsetup		NTV2HDRSetup Demo
+
+This simple command-line program performs HDR configuration on the HDMI output for a compatible AJA device on the local host.
+
+The program shows how to...
+- determine if the device supports HDMI-HDR;
+- enables or disables HDMI-HDR on the device;
+- how to configure for BT-2020 and/or constant luminance;
+- how to configure for HLG or ST-2084 compliance.
+**/
