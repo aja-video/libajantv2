@@ -1273,7 +1273,7 @@ bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Out
 	outOutputs.clear ();
 
 	Widget2OutputXptsConstIter	iter	(gWidget2OutputXpts.find (inWidgetID));
-	while (iter != gWidget2OutputXpts.end ())
+	while (iter != gWidget2OutputXpts.end()  &&  iter->first == inWidgetID)
 	{
 		outOutputs.insert (iter->second);
 		++iter;
