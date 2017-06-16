@@ -509,20 +509,20 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
     ULWord TC32_63 = rp188.High;
 	_bDropFrameFlag  = (TC0_31 >> 10) & 0x01;	// Drop Frame:  timecode bit 10
 
-	if ( FormatIs60_50fps(_tcFormat) )
-	{
-			// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
-			// we use the field ID bit to be the LS bit of the three bit number.
-		bool bFieldID = (FormatIsPAL(_tcFormat) ? ((TC32_63 & BIT_27) != 0) : ((TC0_31 & BIT_27) != 0) );	// Note: FID is in different words for PAL & NTSC!
-		int numFrames = (((((TC0_31>>8)&0x3) * 10) + (TC0_31&0xF)) * 2) + (int)bFieldID;					// double the regular frame count and add fieldID
-		unitFrames = bcd[numFrames % 10];
-		tensFrames = bcd[numFrames / 10];
-	}
-	else
-	{
+//	if ( FormatIs60_50fps(_tcFormat) )
+//	{
+//			// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
+//			// we use the field ID bit to be the LS bit of the three bit number.
+//		bool bFieldID = (FormatIsPAL(_tcFormat) ? ((TC32_63 & BIT_27) != 0) : ((TC0_31 & BIT_27) != 0) );	// Note: FID is in different words for PAL & NTSC!
+//		int numFrames = (((((TC0_31>>8)&0x3) * 10) + (TC0_31&0xF)) * 2) + (int)bFieldID;					// double the regular frame count and add fieldID
+//		unitFrames = bcd[numFrames % 10];
+//		tensFrames = bcd[numFrames / 10];
+//	}
+//	else
+//	{
 		unitFrames = bcd[(TC0_31   )&0xF];
 		tensFrames = bcd[(TC0_31>>8)&0x3];
-	}
+	//}
     unitSeconds = bcd[(TC0_31>>16)&0xF];
     tensSeconds = bcd[(TC0_31>>24)&0x7];
 
@@ -564,7 +564,7 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
 
     _rp188        = rp188;
     _bInitialized = true;
-	_bFresh = (rp188.DBB & NEW_SELECT_RP188_RCVD);
+	_bFresh = ((rp188.DBB & NEW_SELECT_RP188_RCVD) || (rp188.DBB & BIT(18)) || (rp188.DBB & BIT(19)));
 
 	// User bits
 
