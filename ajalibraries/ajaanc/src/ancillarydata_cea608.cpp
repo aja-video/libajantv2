@@ -173,7 +173,7 @@ ostream & AJAAncillaryData_Cea608::Print (ostream & debugStream, const bool bSho
 	if (char1 >= 0x20 && char1 < 0x7F)
 		debugStream << " ('" << char1 << "')";
 
-	debugStream << "Byte2=0x" << hex << setw(2) << setfill('0') << uint16_t(m_char2);
+	debugStream << " Byte2=0x" << hex << setw(2) << setfill('0') << uint16_t(m_char2);
 	if (char2 >= 0x20 && char2 < 0x7F)
 		debugStream << " ('" << char2 << "')";
 	return debugStream;
