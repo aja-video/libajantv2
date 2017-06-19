@@ -25,6 +25,7 @@
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
+#include "ntv2io4kplusservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
 #include "ajabase/system/systemtime.h"
@@ -97,6 +98,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			break;
 		case DEVICE_ID_CORVID88:
 			pDeviceServices = new Corvid88Services();
+			break;
+		case DEVICE_ID_IO4KPLUS:
+			pDeviceServices = new Io4KPlusServices();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
