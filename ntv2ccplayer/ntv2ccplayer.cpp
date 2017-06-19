@@ -1270,6 +1270,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	static const double			gFrequencies [16]	= {	150.00000000,	200.00000000,	266.66666667,	355.55555556,	474.07407407,	632.09876543,
 														842.79835391,	1123.73113855,	1498.30818473,	1997.74424630,	2663.65899507,	3551.54532676,
 														4735.39376902,	6313.85835869,	8418.47781159,	11224.63708211};
+	static const uint16_t		kF1PktLineNumCEA608(12), kF2PktLineNumCEA608(kF1PktLineNumCEA608+1);
 	const TimecodeFormat		tcFormat			(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (mFrameRate));
 	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat (mVideoFormat));
 	const NTV2FormatDescriptor	formatDesc			(mVideoFormat, mPixelFormat, mVancMode);
@@ -1339,6 +1340,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  ::NTV2DeviceCanDoLTCOutN (mDeviceID, 0))
 		acOptionFlags |= AUTOCIRCULATE_WITH_LTC;		//	Emit analog LTC if we "own" the device
 	mDevice.AutoCirculateStop (mOutputChannel);			//	Maybe some other app left this A/C channel running
+	if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fForceVanc)
+		cerr << "## WARNING:  SD video with '--noline21' option and '--vanc' option (or no device Anc inserter) will produce no captions" << endl;
 	{
 		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
 		mDevice.AutoCirculateInitForOutput (mOutputChannel,  7,  audioSystem,  acOptionFlags);
@@ -1353,55 +1356,78 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		{
 			if (!mConfig.fForceVanc)
 				{F1AncBuffer.Fill(ULWord(0));	F2AncBuffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
+
 			m608Encoder->GetNextCaptionData (captionData);	//	Pop queued captions from 608 encoder waiting to be transmitted
-			m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
-			if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate F1's SMPTE-334 Anc data packet
+
+			if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat))
 			{
-				if (mConfig.fForceVanc)		//	True if --vanc option set, or no Anc inserters
-					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
-				else
+				if (!mConfig.fSuppressLine21)
 				{
-					uint32_t					pktSizeInBytes	(0);
-					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
-					pkt.Calculate8BitChecksum ();
-					pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+					const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
+					const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
+					UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
+					UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
+					UByte *			pF1Line21InBuffer	(mpVideoBuffer + (kLine21F1RowNum * bytesPerRow));
+					UByte *			pF2Line21InBuffer	(mpVideoBuffer + (kLine21F2RowNum * bytesPerRow));
+	
+					if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
+						::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace F1 line 21 with resulting F1 line from EncodeLine
+					else if (mPixelFormat == NTV2_FBF_10BIT_YCBCR)
+						::ConvertLine_2vuy_to_v210 (pF1EncodedYUV8Line, reinterpret_cast <ULWord *> (pF1Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
+	
+					if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
+						::memcpy (pF2Line21InBuffer, pF2EncodedYUV8Line, bytesPerRow);		//	Replace F2 line 21 with resulting F2 line from EncodeLine
+					else if (mPixelFormat == NTV2_FBF_10BIT_YCBCR)
+						::ConvertLine_2vuy_to_v210 (pF2EncodedYUV8Line, reinterpret_cast <ULWord *> (pF2Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
 				}
-			}
-
-			if (!IsProgressivePicture (mVideoFormat) && m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field2))		//	Generate F2's SMPTE-334 Anc data packet (interlace only)
-			{
-				if (mConfig.fForceVanc)	//	True if --vanc option set, or no Anc inserters
-					m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
-				else
+				if (!mConfig.fForceVanc)	//	If --vanc option not specified and Anc inserters available
 				{
-					uint32_t					pktSizeInBytes	(0);
-					AJAAncillaryData_Cea708		pkt;
-					pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
-					pkt.Calculate8BitChecksum ();
-					pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+					uint32_t						pktSizeInBytes	(0);
+					AJAAncillaryData_Cea608_Vanc	pkt608F1,  pkt608F2;
+
+					pkt608F1.SetLocationLineNumber (kF1PktLineNumCEA608);	//	pkt608F1.SetLine (0, kF1PktLineNumCEA608);
+					pkt608F1.SetCEA608Bytes (captionData.f1_char1, captionData.f1_char2);
+					pkt608F1.GeneratePayloadData();
+					pkt608F1.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+
+					pkt608F2.SetLocationLineNumber (kF2PktLineNumCEA608);	//	pkt608F2.SetLine (0, kF2PktLineNumCEA608);
+					pkt608F2.SetCEA608Bytes (captionData.f2_char1, captionData.f2_char2);
+					pkt608F2.GeneratePayloadData();
+					pkt608F2.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
 				}
-			}
-
-			if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat) && !mConfig.fSuppressLine21)
+			}	//	if SD video
+			else
 			{
-				const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
-				const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
-				UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
-				UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
-				UByte *			pF1Line21InBuffer	(mpVideoBuffer + (kLine21F1RowNum * bytesPerRow));
-				UByte *			pF2Line21InBuffer	(mpVideoBuffer + (kLine21F2RowNum * bytesPerRow));
+				m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
 
-				if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
-					::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace line 21 with the line handed to us by EncodeLine
-				else if (mPixelFormat == NTV2_FBF_10BIT_YCBCR)
-					::ConvertLine_2vuy_to_v210 (pF1EncodedYUV8Line, reinterpret_cast <ULWord *> (pF1Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-
-				if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
-					::memcpy (pF2Line21InBuffer, pF2EncodedYUV8Line, bytesPerRow);		//	Replace line 21 with the line handed to us by EncodeLine
-				else if (mPixelFormat == NTV2_FBF_10BIT_YCBCR)
-					::ConvertLine_2vuy_to_v210 (pF2EncodedYUV8Line, reinterpret_cast <ULWord *> (pF2Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-			}	//	if SD and --noline21 wasn't specified
+				if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate F1's SMPTE-334 Anc data packet
+				{
+					if (mConfig.fForceVanc)		//	True if --vanc option set, or no Anc inserters
+						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+					else
+					{
+						uint32_t					pktSizeInBytes	(0);
+						AJAAncillaryData_Cea708		pkt;
+						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
+						pkt.Calculate8BitChecksum ();
+						pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+					}
+				}
+	
+				if (!IsProgressivePicture (mVideoFormat) && m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field2))		//	Generate F2 Anc packet (interlace only)
+				{
+					if (mConfig.fForceVanc)	//	True if --vanc option set, or no Anc inserters
+						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+					else
+					{
+						uint32_t					pktSizeInBytes	(0);
+						AJAAncillaryData_Cea708		pkt;
+						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
+						pkt.Calculate8BitChecksum ();
+						pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+					}
+				}
+			}	//	else HD video
 
 			if (!mConfig.fSuppressTimecode)
 			{
@@ -1435,7 +1461,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				::memcpy (tcString + colShift, rp188.GetRP188CString (), 11);
 				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow, formatDesc.GetTopVisibleRowAddress (mpVideoBuffer),
 												formatDesc.GetVisibleRasterDimensions (), mPixelFormat, bytesPerRow, 3, 1);
-			}
+			}	//	if not suppressing timecode injection
 
 			if (!mConfig.fSuppressAudio && !pAudioBuffer.IsNULL ())
 				xferInfo.SetAudioBuffer (reinterpret_cast <ULWord *> (pAudioBuffer.GetHostPointer ()),
@@ -1448,6 +1474,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 														31,								//	bits per sample
 														false,							//	don't byte swap
 														numAudioChannels));				//	number of audio channels
+			//	Finally ... transfer the frame data...
 			mDevice.AutoCirculateTransfer (mOutputChannel, xferInfo);
 		}	//	if room for another output frame on device
 		else
