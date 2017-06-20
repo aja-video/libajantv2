@@ -553,8 +553,28 @@ AJAStatus CNTV2DemoHevcCommon::DetermineInputFormat(NTV2VideoFormat sdiFormat, b
     
     switch (sdiFormat)
     {
-        case NTV2_FORMAT_1080p_5000_A:
-        case NTV2_FORMAT_1080p_5000_B:
+	   case NTV2_FORMAT_1080p_2398:
+		   videoFormat = NTV2_FORMAT_1080p_2398;
+		   if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_2398;
+		   break;
+	   case NTV2_FORMAT_1080p_2400:
+		   videoFormat = NTV2_FORMAT_1080p_2400;
+		   if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_2400;
+		   break;
+	   case NTV2_FORMAT_1080p_2500:
+		   videoFormat = NTV2_FORMAT_1080p_2500;
+		   if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_2500;
+		   break;
+	   case NTV2_FORMAT_1080p_2997:
+		   videoFormat = NTV2_FORMAT_1080p_2997;
+		   if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_2997;
+		   break;
+	   case NTV2_FORMAT_1080p_3000:
+		   videoFormat = NTV2_FORMAT_1080p_3000;
+		   if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_3000;
+		   break;
+       case NTV2_FORMAT_1080p_5000_A:
+       case NTV2_FORMAT_1080p_5000_B:
             videoFormat = NTV2_FORMAT_1080p_5000_A;
             if (quad) videoFormat = NTV2_FORMAT_4x1920x1080p_5000;
             break;
