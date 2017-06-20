@@ -273,6 +273,7 @@ class NTV2EncodeHEVC
         NTV2FrameBufferFormat		mPixelFormat;			///	Pixel format
 		bool						mQuad;					/// VideoFormat is quad
 		bool						mTsi;					/// Video input is two sample interleave
+		bool						m60p;					/// Video input is > 30 fps
 		bool						mVif;					/// Encode sdi video
 		bool						mInterlaced;			/// Video is interlaced
         bool						mMultiStream;			/// Demonstrates how to configure the board for multi-stream

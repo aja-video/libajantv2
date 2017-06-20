@@ -47,6 +47,7 @@ NTV2EncodeHEVC::NTV2EncodeHEVC (const string				inDeviceSpecifier,
     mPixelFormat			(inPixelFormat),
     mQuad					(inQuadMode),
     mTsi					(inTsiMode),
+	m60p					(false),
 	mVif					(false),
 	mInterlaced				(false),
     mMultiStream			(false),
@@ -390,6 +391,9 @@ AJAStatus NTV2EncodeHEVC::Init (void)
 		mInterlaced = CNTV2m31::IsPresetInterlaced(mPreset);
     }
 
+	//  Video format frame rate above 30
+	m60p = GetFramesPerSecond(GetNTV2FrameRateFromVideoFormat(mVideoFormat)) > 31.0;
+
     //	Setup frame buffer
 	status = SetupVideo ();
 	if (AJA_FAILURE (status))
@@ -475,8 +479,8 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 		//	Set frame buffer format
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+		mDevice.SetFrameBufferFormat(NTV2_CHANNEL3, mPixelFormat);
+		mDevice.SetFrameBufferFormat(NTV2_CHANNEL4, mPixelFormat);
         mDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mPixelFormat);
         mDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mPixelFormat);
         mDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mPixelFormat);
@@ -485,8 +489,16 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 		//	Set catpure mode
 		mDevice.SetMode (NTV2_CHANNEL1, NTV2_MODE_CAPTURE, false);
 		mDevice.SetMode (NTV2_CHANNEL2, NTV2_MODE_CAPTURE, false);
-		mDevice.SetMode (NTV2_CHANNEL3, NTV2_MODE_CAPTURE, false);
-		mDevice.SetMode (NTV2_CHANNEL4, NTV2_MODE_CAPTURE, false);
+		if (!mTsi)
+		{
+			mDevice.SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE, false);
+			mDevice.SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE, false);
+		}
+		else
+		{
+			mDevice.SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY, false);
+			mDevice.SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY, false);
+		}
         mDevice.SetMode (NTV2_CHANNEL5, NTV2_MODE_DISPLAY, false);
         mDevice.SetMode (NTV2_CHANNEL6, NTV2_MODE_DISPLAY, false);
         mDevice.SetMode (NTV2_CHANNEL7, NTV2_MODE_DISPLAY, false);
@@ -707,17 +719,38 @@ void NTV2EncodeHEVC::RouteInputSignal (void)
 	bool is3Gb = false;
 	mDevice.GetSDIInput3GbPresent (is3Gb, mInputChannel);
 
-	if (mQuad)
+	if (mQuad && mTsi)
 	{
-		mDevice.SetSDIInLevelBtoLevelAConversion (NTV2_CHANNEL1, is3Gb);
-		mDevice.SetSDIInLevelBtoLevelAConversion (NTV2_CHANNEL2, is3Gb);
-		mDevice.SetSDIInLevelBtoLevelAConversion (NTV2_CHANNEL3, is3Gb);
-		mDevice.SetSDIInLevelBtoLevelAConversion (NTV2_CHANNEL4, is3Gb);
-        mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL5, false);
-        mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL6, false);
-        mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL7, false);
-        mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL8, false);
+		if (m60p)
+		{
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, is3Gb);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, is3Gb);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, is3Gb);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, is3Gb);
+		}
+		else
+		{
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, false);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, false);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, false);
+			mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, false);
+		}
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL6, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL7, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL8, false);
     }
+	else if (mQuad)
+	{
+		mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, is3Gb);
+		mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, is3Gb);
+		mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, is3Gb);
+		mDevice.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, is3Gb);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL6, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL7, false);
+		mDevice.SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL8, false);
+	}
 	else
 	{
 		mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, is3Gb);
@@ -728,17 +761,26 @@ void NTV2EncodeHEVC::RouteInputSignal (void)
 	//	the appropriate values into the appropriate device registers...
 	CNTV2SignalRouter	router;
 
-	if (mTsi)
+	if (mQuad && mTsi)
 	{
-		//	Route in tsi mux
-		router.AddConnection (NTV2_Xpt425Mux1AInput,		NTV2_XptSDIIn1);
-		router.AddConnection (NTV2_Xpt425Mux1BInput,		NTV2_XptSDIIn2);
-		router.AddConnection (NTV2_Xpt425Mux2AInput,		NTV2_XptSDIIn3);
-		router.AddConnection (NTV2_Xpt425Mux2BInput,		NTV2_XptSDIIn4);
-		router.AddConnection (NTV2_XptFrameBuffer1Input,	NTV2_Xpt425Mux1AYUV);
-		router.AddConnection (NTV2_XptFrameBuffer1BInput,	NTV2_Xpt425Mux1BYUV);
-		router.AddConnection (NTV2_XptFrameBuffer2Input,	NTV2_Xpt425Mux2AYUV);
-		router.AddConnection (NTV2_XptFrameBuffer2BInput,	NTV2_Xpt425Mux2BYUV);
+		if (m60p || !is3Gb)
+		{
+			router.AddConnection(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
+			router.AddConnection(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn2);
+			router.AddConnection(NTV2_Xpt425Mux2AInput, NTV2_XptSDIIn3);
+			router.AddConnection(NTV2_Xpt425Mux2BInput, NTV2_XptSDIIn4);
+		}
+		else
+		{
+			router.AddConnection(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
+			router.AddConnection(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn1DS2);
+			router.AddConnection(NTV2_Xpt425Mux2AInput, NTV2_XptSDIIn2);
+			router.AddConnection(NTV2_Xpt425Mux2BInput, NTV2_XptSDIIn2DS2);
+		}
+		router.AddConnection(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV);
+		router.AddConnection(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
+		router.AddConnection(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
+		router.AddConnection(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
 	}
 	else
 	{
