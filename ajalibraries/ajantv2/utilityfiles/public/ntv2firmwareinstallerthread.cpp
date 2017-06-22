@@ -60,10 +60,10 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 		if (firmwarePath.find(".mcs") != std::string::npos)
 		{
 			//We have an mcs file?
-			 CNTV2KonaFlashProgram kfp;
-			 kfp.SetBoard(device.GetIndexNumber());
-			 kfp.GetMCSInfo();
-			if(!mcsFile.Open(firmwarePath))
+            CNTV2KonaFlashProgram kfp;
+            kfp.SetBoard(device.GetIndexNumber());
+            kfp.GetMCSInfo();
+            if(!mcsFile.GetMCSHeaderInfo(firmwarePath))
 			{
 				outReason = "MCS File open failed";
 				return kFirmwareUpdateCheckFailed;
