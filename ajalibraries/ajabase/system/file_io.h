@@ -117,16 +117,6 @@ public:
 	uint32_t Write(const std::string& buffer) const;
 
 	/**
-	 *	Test file to see if it exists
-	 *
-	 *	@param[in]	fileName			The fully qualified file name
-	 *
-	 *	@return		bool				true if file exists
-	 */
-	bool FileExists(const std::wstring& fileName) const;
-	bool FileExists(const std::string& fileName) const;
-
-	/**
 	 *	Flush the cache 
 	 *
 	 */	
@@ -167,6 +157,16 @@ public:
 	 */
 	AJAStatus FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size);
 
+    /**
+     *	Test file to see if it exists
+     *
+     *	@param[in]	fileName			The fully qualified file name
+     *
+     *	@return		bool				true if file exists
+     */
+    static bool FileExists(const std::wstring& fileName);
+    static bool FileExists(const std::string& fileName);
+
 	/**
 	 *	Remove the file for the system
 	 *
@@ -175,9 +175,8 @@ public:
 	 *	@return		AJA_STATUS_SUCCESS	The file was successfully deleteed
 	 *				AJA_STATUS_FAIL		The file could not be deleted
 	 */
-	AJAStatus Delete(const std::string& fileName) const;
-
-	AJAStatus Delete(const std::wstring& fileName) const;
+    static AJAStatus Delete(const std::string& fileName);
+    static AJAStatus Delete(const std::wstring& fileName);
 
 	/**
 	 *	Retrieves a set of files from a directory.
@@ -189,12 +188,12 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	The returned container has a size > 0 
 	 */
-	AJAStatus ReadDirectory(
+    static AJAStatus ReadDirectory(
 				const std::string&   directory,
 				const std::string&   filePattern,
 				std::vector<std::string>& fileContainer);
 
-	AJAStatus ReadDirectory(
+    static AJAStatus ReadDirectory(
 				const std::wstring&   directory,
 				const std::wstring&   filePattern,
 				std::vector<std::wstring>& fileContainer);
@@ -208,11 +207,11 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If the directory has at least one matching file
 	 */
-	AJAStatus DoesDirectoryContain(
+    static AJAStatus DoesDirectoryContain(
 				const std::string& directory,
 				const std::string& filePattern);
 
-	AJAStatus DoesDirectoryContain(
+    static AJAStatus DoesDirectoryContain(
 				const std::wstring& directory,
 				const std::wstring& filePattern);
 
@@ -224,9 +223,8 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if the directory exists
 	 */
-	AJAStatus DoesDirectoryExist(const std::string& directory) const;
-
-	AJAStatus DoesDirectoryExist(const std::wstring& directory) const;
+    static AJAStatus DoesDirectoryExist(const std::string& directory);
+    static AJAStatus DoesDirectoryExist(const std::wstring& directory);
 
 	/**
 	 *	Tests if a directory is empty.
@@ -236,9 +234,8 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if the directory contains no files
 	 */
-	AJAStatus IsDirectoryEmpty(const std::string& directory);
-
-	AJAStatus IsDirectoryEmpty(const std::wstring& directory);
+    static AJAStatus IsDirectoryEmpty(const std::string& directory);
+    static AJAStatus IsDirectoryEmpty(const std::wstring& directory);
 
 #if defined(AJA_LINUX) || defined(AJA_MAC)
 	void     *GetHandle(void) {return NULL;}
