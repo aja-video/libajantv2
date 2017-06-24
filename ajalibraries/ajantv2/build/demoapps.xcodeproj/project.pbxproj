@@ -13,14 +13,15 @@
 			buildPhases = (
 			);
 			dependencies = (
-				A40162401EBA8295001B8830 /* PBXTargetDependency */,
 				B4A7018016795895001D4AA8 /* PBXTargetDependency */,
 				B4CADAD3180F03A8004C9057 /* PBXTargetDependency */,
 				B4E76F7A16AA1BD700473DBD /* PBXTargetDependency */,
+				B4AEFE411EFDEA99002F08BD /* PBXTargetDependency */,
 				B43C7CB817259D910030A94E /* PBXTargetDependency */,
 				B4A7049616829CC0001D4AA8 /* PBXTargetDependency */,
 				B4A7017E16795895001D4AA8 /* PBXTargetDependency */,
 				B46B5F971729AEF2004E84C3 /* PBXTargetDependency */,
+				A40162401EBA8295001B8830 /* PBXTargetDependency */,
 				B44C0B0E1B61C28B00D7F59A /* PBXTargetDependency */,
 				B4A7018416795895001D4AA8 /* PBXTargetDependency */,
 				B4A7018216795895001D4AA8 /* PBXTargetDependency */,
@@ -90,6 +91,14 @@
 		B4A7FE5216791755001D4AA8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4A7FE6F16791C35001D4AA8 /* ntv2burn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A7F8DA16781B57001D4AA8 /* ntv2burn.cpp */; };
 		B4A7FFA9167927B3001D4AA8 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		B4AEFE311EFDEA00002F08BD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2E1EFDEA00002F08BD /* main.cpp */; };
+		B4AEFE321EFDEA00002F08BD /* ntv2capture4k.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */; };
+		B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F4B16AA186B00473DBD /* main.cpp */; };
+		B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */; };
+		B4AEFE371EFDEA39002F08BD /* ntv2capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F3B16AA180300473DBD /* ntv2capture.cpp */; };
+		B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
+		B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4CADACB180F02E2004C9057 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADABD180F00F6004C9057 /* main.cpp */; };
 		B4CADACE180F0321004C9057 /* ntv2burn4kquadrant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */; };
 		B4CADACF180F037B004C9057 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
@@ -174,6 +183,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B4A7048B16829C4A001D4AA8;
 			remoteInfo = ntv2ccgrabber;
+		};
+		B4AEFE401EFDEA99002F08BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4A7F8B71677FB4C001D4AA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4AEFE331EFDEA39002F08BD;
+			remoteInfo = ntv2capture4k;
 		};
 		B4CADAD2180F03A8004C9057 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -283,6 +299,10 @@
 		B4A7FD94167916D7001D4AA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4A7FD981679171B001D4AA8 /* ntv2burn */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2burn; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		B4AEFE2E1EFDEA00002F08BD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k/main.cpp; sourceTree = SOURCE_ROOT; };
+		B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2capture4k.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k/ntv2capture4k.cpp; sourceTree = SOURCE_ROOT; };
+		B4AEFE301EFDEA00002F08BD /* ntv2capture4k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2capture4k.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k/ntv2capture4k.h; sourceTree = SOURCE_ROOT; };
+		B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2capture4k; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CADABD180F00F6004C9057 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4CADAC2180F0134004C9057 /* ntv2burn4kquadrant */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2burn4kquadrant; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn4kquadrant.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.cpp; sourceTree = SOURCE_ROOT; };
@@ -390,6 +410,16 @@
 				B4A7FE5116791755001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A7FE5216791755001D4AA8 /* IOKit.framework in Frameworks */,
 				B4A7FFA9167927B3001D4AA8 /* CoreServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4AEFE381EFDEA39002F08BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */,
+				B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */,
+				B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -526,6 +556,7 @@
 				B45183E31935348C00F3D8E9 /* ntv2player4k */,
 				B44C0B0C1B61C25100D7F59A /* ntv2llburn */,
 				A40162351EBA804E001B8830 /* ntv2hdrsetup */,
+				B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -549,6 +580,7 @@
 				B4A7FD9116791695001D4AA8 /* ntv2burn */,
 				B4CADABC180F0049004C9057 /* ntv2burn4kquadrant */,
 				B4E76F4616AA181B00473DBD /* ntv2capture */,
+				B4AEFE2D1EFDE9BE002F08BD /* ntv2capture4k */,
 				B4A7048816829C07001D4AA8 /* ntv2ccgrabber */,
 				B43C7CB417259B840030A94E /* ntv2ccplayer */,
 				B4A7F8C916781854001D4AA8 /* ntv2enumerateboards */,
@@ -582,6 +614,17 @@
 			);
 			name = ntv2burn;
 			path = ../../../ajaapps/crossplatform/demoapps/ntv2burn;
+			sourceTree = SOURCE_ROOT;
+		};
+		B4AEFE2D1EFDE9BE002F08BD /* ntv2capture4k */ = {
+			isa = PBXGroup;
+			children = (
+				B4AEFE2E1EFDEA00002F08BD /* main.cpp */,
+				B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */,
+				B4AEFE301EFDEA00002F08BD /* ntv2capture4k.h */,
+			);
+			name = ntv2capture4k;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4CADABC180F0049004C9057 /* ntv2burn4kquadrant */ = {
@@ -773,6 +816,22 @@
 			productReference = B4A7FD981679171B001D4AA8 /* ntv2burn */;
 			productType = "com.apple.product-type.tool";
 		};
+		B4AEFE331EFDEA39002F08BD /* ntv2capture4k */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4AEFE3C1EFDEA39002F08BD /* Build configuration list for PBXNativeTarget "ntv2capture4k" */;
+			buildPhases = (
+				B4AEFE341EFDEA39002F08BD /* Sources */,
+				B4AEFE381EFDEA39002F08BD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntv2capture4k;
+			productName = ntv2capture;
+			productReference = B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */;
+			productType = "com.apple.product-type.tool";
+		};
 		B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4CADAC8180F0134004C9057 /* Build configuration list for PBXNativeTarget "ntv2burn4kquadrant" */;
@@ -838,15 +897,16 @@
 				B4A7FD971679171B001D4AA8 /* ntv2burn */,
 				B46B5F8B1729AD2F004E84C3 /* ntv2fieldburn */,
 				B4E76F5016AA1AC900473DBD /* ntv2capture */,
+				B4AEFE331EFDEA39002F08BD /* ntv2capture4k */,
 				B4A7048B16829C4A001D4AA8 /* ntv2ccgrabber */,
 				B43C7CA917259A490030A94E /* ntv2ccplayer */,
+				A40162341EBA804E001B8830 /* ntv2hdrsetup */,
 				B44C0B001B61C25100D7F59A /* ntv2llburn */,
 				B4A700F616794E9A001D4AA8 /* ntv2player */,
 				B4A70131167950CA001D4AA8 /* ntv2outputtestpattern */,
 				B45183D81935348C00F3D8E9 /* ntv2player4k */,
 				B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */,
 				B4A7017A1679587A001D4AA8 /* BuildAll */,
-				A40162341EBA804E001B8830 /* ntv2hdrsetup */,
 			);
 		};
 /* End PBXProject section */
@@ -937,7 +997,9 @@
 			files = (
 				B4A7F8D21678186E001D4AA8 /* main.cpp in Sources */,
 				B4A6C4A91BF1746D0033D1AD /* ntv2democommon.cpp in Sources */,
+				B4AEFE311EFDEA00002F08BD /* main.cpp in Sources */,
 				B4CE1ECD16E6BE390092B564 /* ntv2enumerateboards.cpp in Sources */,
+				B4AEFE321EFDEA00002F08BD /* ntv2capture4k.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -948,6 +1010,16 @@
 				B4A7FD9D16791749001D4AA8 /* main.cpp in Sources */,
 				B4A6C4AA1BF1746D0033D1AD /* ntv2democommon.cpp in Sources */,
 				B4A7FE6F16791C35001D4AA8 /* ntv2burn.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4AEFE341EFDEA39002F08BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */,
+				B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */,
+				B4AEFE371EFDEA39002F08BD /* ntv2capture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1023,6 +1095,11 @@
 			isa = PBXTargetDependency;
 			target = B4A7048B16829C4A001D4AA8 /* ntv2ccgrabber */;
 			targetProxy = B4A7049516829CC0001D4AA8 /* PBXContainerItemProxy */;
+		};
+		B4AEFE411EFDEA99002F08BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4AEFE331EFDEA39002F08BD /* ntv2capture4k */;
+			targetProxy = B4AEFE401EFDEA99002F08BD /* PBXContainerItemProxy */;
 		};
 		B4CADAD3180F03A8004C9057 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1326,6 +1403,20 @@
 			};
 			name = Release;
 		};
+		B4AEFE3D1EFDEA39002F08BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B4AEFE3E1EFDEA39002F08BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		B4CADAC9180F0134004C9057 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1461,6 +1552,15 @@
 			buildConfigurations = (
 				B4A7FD9A1679171B001D4AA8 /* Debug */,
 				B4A7FD9B1679171B001D4AA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4AEFE3C1EFDEA39002F08BD /* Build configuration list for PBXNativeTarget "ntv2capture4k" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4AEFE3D1EFDEA39002F08BD /* Debug */,
+				B4AEFE3E1EFDEA39002F08BD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
