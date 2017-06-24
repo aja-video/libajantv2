@@ -275,7 +275,7 @@ class CNTV2DemoCommon
 		static char							ReadCharacterPress (void);
 
 		/**
-			@brief	Prompts the user (via stdout) to press the Return or Enter key, then waits until he does so.
+			@brief	Prompts the user (via stdout) to press the Return or Enter key, then waits for it to happen.
 		**/
 		static void							WaitForEnterKeyPress (void);
 
@@ -296,6 +296,13 @@ class CNTV2DemoCommon
 			@param[in]	inFrameRate	Specifies the NTV2FrameRate to be converted into an equivalent AJA_FrameRate.
 		**/
 		static AJA_FrameRate				GetAJAFrameRate (const NTV2FrameRate inFrameRate);
+
+		/**
+			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
+			@param[out]	On entry, specifies the wire format;  on exit, receives the 4K video format.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);
 
 		/**
 			@return		A pointer to a 'C' string containing the name of the AJA NTV2 demonstration application global mutex.

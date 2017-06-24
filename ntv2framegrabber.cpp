@@ -5,6 +5,7 @@
 **/
 #include <ostream>
 #include "ntv2framegrabber.h"
+#include "ntv2democommon.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
@@ -19,59 +20,6 @@
 
 static QMutex			gMutex;
 static const uint32_t	kAppSignature			(AJA_FOURCC ('D','E','M','O'));
-
-
-//
-//	@brief	Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
-//
-static bool get4KInputFormat (NTV2VideoFormat & videoFormat)
-{
-	bool	status	(false);
-	struct	VideoFormatPair
-	{
-		NTV2VideoFormat	vIn;
-		NTV2VideoFormat	vOut;
-	} VideoFormatPairs [] =	{	//			vIn								vOut
-								{NTV2_FORMAT_1080psf_2398,		NTV2_FORMAT_4x1920x1080psf_2398},
-								{NTV2_FORMAT_1080psf_2400,		NTV2_FORMAT_4x1920x1080psf_2400},
-								{NTV2_FORMAT_1080p_2398,		NTV2_FORMAT_4x1920x1080p_2398},
-								{NTV2_FORMAT_1080p_2400,		NTV2_FORMAT_4x1920x1080p_2400},
-								{NTV2_FORMAT_1080p_2500,		NTV2_FORMAT_4x1920x1080p_2500},
-								{NTV2_FORMAT_1080p_2997,		NTV2_FORMAT_4x1920x1080p_2997},
-								{NTV2_FORMAT_1080p_3000,		NTV2_FORMAT_4x1920x1080p_3000},
-								{NTV2_FORMAT_1080p_5000,		NTV2_FORMAT_4x1920x1080p_5000},
-								{NTV2_FORMAT_1080p_5994,		NTV2_FORMAT_4x1920x1080p_5994},
-								{NTV2_FORMAT_1080p_6000,		NTV2_FORMAT_4x1920x1080p_6000},
-								{NTV2_FORMAT_1080p_2K_2398,		NTV2_FORMAT_4x2048x1080p_2398},
-								{NTV2_FORMAT_1080p_2K_2400,		NTV2_FORMAT_4x2048x1080p_2400},
-								{NTV2_FORMAT_1080p_2K_2500,		NTV2_FORMAT_4x2048x1080p_2500},
-								{NTV2_FORMAT_1080p_2K_2997,		NTV2_FORMAT_4x2048x1080p_2997},
-								{NTV2_FORMAT_1080p_2K_3000,		NTV2_FORMAT_4x2048x1080p_3000},
-								{NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_4x2048x1080p_5000},
-								{NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_4x2048x1080p_5994},
-								{NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_4x2048x1080p_6000},
-
-								{NTV2_FORMAT_1080p_5000_A,		NTV2_FORMAT_4x1920x1080p_5000},
-								{NTV2_FORMAT_1080p_5994_A,		NTV2_FORMAT_4x1920x1080p_5994},
-								{NTV2_FORMAT_1080p_6000_A,		NTV2_FORMAT_4x1920x1080p_6000},
-
-								{NTV2_FORMAT_1080p_2K_5000_A,	NTV2_FORMAT_4x2048x1080p_5000},
-								{NTV2_FORMAT_1080p_2K_5994_A,	NTV2_FORMAT_4x2048x1080p_5994},
-								{NTV2_FORMAT_1080p_2K_6000_A,	NTV2_FORMAT_4x2048x1080p_6000}
-	};
-
-	for (size_t formatNdx = 0;  formatNdx < sizeof (VideoFormatPairs) / sizeof (VideoFormatPair);  formatNdx++)
-	{
-		if (VideoFormatPairs [formatNdx].vIn == videoFormat)
-		{
-			videoFormat = VideoFormatPairs [formatNdx].vOut;
-			status = true;
-		}
-	}
-
-	return status;
-
-}	//	get4KInputFormat
 
 
 NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
@@ -712,7 +660,7 @@ NTV2VideoFormat NTV2FrameGrabber::GetVideoFormatFromInputSource (void)
 					{
 						videoFormatNext = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 3));
 						if (videoFormatNext == videoFormat)
-							get4KInputFormat (videoFormat);
+							CNTV2DemoCommon::Get4KInputFormat (videoFormat);
 					}
 				}
 			}
