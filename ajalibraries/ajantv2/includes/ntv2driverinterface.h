@@ -211,11 +211,12 @@ public:
 
 	/**
 		@return		True if the device is ready to be fully operable;  otherwise false.
+		@param[in]	inCheckValid	If true, additionally checks CNTV2Card::IsMBSystemValid. Defaults to false.
 		@note		Some devices have processors that require a lot of time (~30 to ~90 seconds) to start up after a PCIe bus reset,
 					power-up or wake from sleep. Calls to Open, IsOpen, ReadRegister and WriteRegister will all succeed,
 					but the device won't be capable of either ingesting or playing video or performing DMA operations.
 	**/
-    virtual bool		IsDeviceReady (bool checkValid);
+    virtual bool		IsDeviceReady (bool inCheckValid = false);
 	virtual bool		IsMBSystemValid (void);
 	virtual bool		IsMBSystemReady (void);
 	virtual bool		IsKonaIPDevice (void);
