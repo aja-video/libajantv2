@@ -8,6 +8,7 @@
 SUBDIRS = ntv2burn \
 		  ntv2burn4kquadrant \
 		  ntv2capture \
+		  ntv2capture4k \
 		  ntv2ccgrabber \
 		  ntv2ccplayer \
 		  ntv2encodehevc \

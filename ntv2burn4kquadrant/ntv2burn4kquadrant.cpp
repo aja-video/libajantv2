@@ -5,6 +5,7 @@
 **/
 
 #include "ntv2burn4kquadrant.h"
+#include "ntv2democommon.h"
 #include "ntv2formatdescriptor.h"
 #include "ajabase/common/types.h"
 #include <iostream>
@@ -16,54 +17,6 @@
 static const ULWord	gAppSignature	(AJA_FOURCC ('D','E','M','O'));
 
 
-/**
-	@brief	Given a video format, if all 4 inputs are the same and promotable to 4K,
-			this function does the promotion, and returns true.
-**/
-static bool get4KInputFormat (NTV2VideoFormat & inOutVideoFormat)
-{
-	bool			status	(false);
-	const struct	VideoFormatPair
-	{
-		NTV2VideoFormat	vIn;
-		NTV2VideoFormat	vOut;
-	} VideoFormatPairs [] =	{	//vIn	vOut
-		{NTV2_FORMAT_1080psf_2398,		NTV2_FORMAT_4x1920x1080psf_2398},
-		{NTV2_FORMAT_1080psf_2400,		NTV2_FORMAT_4x1920x1080psf_2400},
-		{NTV2_FORMAT_1080psf_2500,		NTV2_FORMAT_4x1920x1080psf_2500},
-		{NTV2_FORMAT_1080p_2398,		NTV2_FORMAT_4x1920x1080p_2398},
-		{NTV2_FORMAT_1080p_2400,		NTV2_FORMAT_4x1920x1080p_2400},
-		{NTV2_FORMAT_1080p_2500,		NTV2_FORMAT_4x1920x1080p_2500},
-		{NTV2_FORMAT_1080p_2997,		NTV2_FORMAT_4x1920x1080p_2997},
-		{NTV2_FORMAT_1080p_3000,		NTV2_FORMAT_4x1920x1080p_3000},
-		{NTV2_FORMAT_1080p_5000_A,		NTV2_FORMAT_4x1920x1080p_5000},
-		{NTV2_FORMAT_1080p_5994_A,		NTV2_FORMAT_4x1920x1080p_5994},
-		{NTV2_FORMAT_1080p_6000_A,		NTV2_FORMAT_4x1920x1080p_6000},
-		{NTV2_FORMAT_1080psf_2K_2398,	NTV2_FORMAT_4x2048x1080psf_2398},
-		{NTV2_FORMAT_1080psf_2K_2400,	NTV2_FORMAT_4x2048x1080psf_2400},
-		{NTV2_FORMAT_1080psf_2K_2500,	NTV2_FORMAT_4x2048x1080psf_2500},
-		{NTV2_FORMAT_1080p_2K_2398,		NTV2_FORMAT_4x2048x1080p_2398},
-		{NTV2_FORMAT_1080p_2K_2400,		NTV2_FORMAT_4x2048x1080p_2400},
-		{NTV2_FORMAT_1080p_2K_2500,		NTV2_FORMAT_4x2048x1080p_2500},
-		{NTV2_FORMAT_1080p_2K_2997,		NTV2_FORMAT_4x2048x1080p_2997},
-		{NTV2_FORMAT_1080p_2K_3000,		NTV2_FORMAT_4x2048x1080p_3000},
-		{NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_4x2048x1080p_5000},
-		{NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_4x2048x1080p_5994},
-		{NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_4x2048x1080p_6000}
-	};
-
-	for (size_t formatNdx = 0;  formatNdx < sizeof (VideoFormatPairs) / sizeof (VideoFormatPair);  formatNdx++)
-	{
-		if (VideoFormatPairs [formatNdx].vIn == inOutVideoFormat)
-		{
-			inOutVideoFormat = VideoFormatPairs [formatNdx].vOut;
-			status = true;
-		}
-	}
-
-	return status;
-
-}	//	get4KInputFormat
 
 
 NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const string &				inInputDeviceSpecifier,
@@ -303,7 +256,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 		return AJA_STATUS_NOINPUT;	//	Sorry, can't handle this format
 
 	//	Set the device format to the input format detected...
-	get4KInputFormat (mVideoFormat);
+	CNTV2DemoCommon::Get4KInputFormat (mVideoFormat);
 	mInputDevice.SetVideoFormat (mVideoFormat);
 
 	//	Set the frame buffer pixel format for all the channels on the device
