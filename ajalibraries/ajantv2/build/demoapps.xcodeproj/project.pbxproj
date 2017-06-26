@@ -91,11 +91,8 @@
 		B4A7FE5216791755001D4AA8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4A7FE6F16791C35001D4AA8 /* ntv2burn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A7F8DA16781B57001D4AA8 /* ntv2burn.cpp */; };
 		B4A7FFA9167927B3001D4AA8 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
-		B4AEFE311EFDEA00002F08BD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2E1EFDEA00002F08BD /* main.cpp */; };
-		B4AEFE321EFDEA00002F08BD /* ntv2capture4k.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */; };
 		B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F4B16AA186B00473DBD /* main.cpp */; };
 		B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */; };
-		B4AEFE371EFDEA39002F08BD /* ntv2capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F3B16AA180300473DBD /* ntv2capture.cpp */; };
 		B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
 		B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
@@ -110,6 +107,7 @@
 		B4E76F5716AA1B1B00473DBD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B4E76F5816AA1B1B00473DBD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
 		B4E76F5916AA1B1B00473DBD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
+		B4F54BDE1F01BEE200F0C146 /* ntv2capture4k.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */; };
 		B4FAD80C1BC44B2500BBBCC3 /* ntv2llburn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B44C0B121B61C2EC00D7F59A /* ntv2llburn.cpp */; };
 /* End PBXBuildFile section */
 
@@ -893,19 +891,19 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B4A7F8C21677FC15001D4AA8 /* ntv2enumerateboards */,
 				B4A7FD971679171B001D4AA8 /* ntv2burn */,
-				B46B5F8B1729AD2F004E84C3 /* ntv2fieldburn */,
+				B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */,
 				B4E76F5016AA1AC900473DBD /* ntv2capture */,
 				B4AEFE331EFDEA39002F08BD /* ntv2capture4k */,
 				B4A7048B16829C4A001D4AA8 /* ntv2ccgrabber */,
 				B43C7CA917259A490030A94E /* ntv2ccplayer */,
+				B4A7F8C21677FC15001D4AA8 /* ntv2enumerateboards */,
+				B46B5F8B1729AD2F004E84C3 /* ntv2fieldburn */,
 				A40162341EBA804E001B8830 /* ntv2hdrsetup */,
 				B44C0B001B61C25100D7F59A /* ntv2llburn */,
-				B4A700F616794E9A001D4AA8 /* ntv2player */,
 				B4A70131167950CA001D4AA8 /* ntv2outputtestpattern */,
+				B4A700F616794E9A001D4AA8 /* ntv2player */,
 				B45183D81935348C00F3D8E9 /* ntv2player4k */,
-				B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */,
 				B4A7017A1679587A001D4AA8 /* BuildAll */,
 			);
 		};
@@ -997,9 +995,7 @@
 			files = (
 				B4A7F8D21678186E001D4AA8 /* main.cpp in Sources */,
 				B4A6C4A91BF1746D0033D1AD /* ntv2democommon.cpp in Sources */,
-				B4AEFE311EFDEA00002F08BD /* main.cpp in Sources */,
 				B4CE1ECD16E6BE390092B564 /* ntv2enumerateboards.cpp in Sources */,
-				B4AEFE321EFDEA00002F08BD /* ntv2capture4k.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1019,7 +1015,7 @@
 			files = (
 				B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */,
 				B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */,
-				B4AEFE371EFDEA39002F08BD /* ntv2capture.cpp in Sources */,
+				B4F54BDE1F01BEE200F0C146 /* ntv2capture4k.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
