@@ -261,6 +261,8 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_IO4KPLUS:
+	case DEVICE_ID_IO4KIP:
 		switch (inStandard)
 		{
 		case NTV2_STANDARD_525:
@@ -282,110 +284,38 @@ bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 	switch (index0)
 	{
 	case 0:
-		switch (boardID)
-		{
-		#if !defined (NTV2_DEPRECATE)
-		//case BOARD_ID_LHI_DVI:
-		case BOARD_ID_LHI_T:
-		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_KONALHIDVI:
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_CORVID3G:
-		case DEVICE_ID_LHI:
-		case DEVICE_ID_KONA3G:
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IOXT:
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-		case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-			return true;
-		default:
-			return false;
-		}
-
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
 	case 1:
-		switch (boardID)
-		{
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_KONA3G:
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IOXT:
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-		case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-			return true;
-		default:
-			return false;
-		}
-
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
 	case 2:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
 	case 3:
-		switch (boardID)
-		{
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-		case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-			return true;
-		default:
-			return false;
-		}
-
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
 	case 4:
-		switch (boardID)
-		{
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVIDHEVC:
-			return true;
-		default:
-			return false;
-		}
-
-
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
 	case 5:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
 	case 6:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
 	case 7:
-		switch (boardID)
-		{
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVIDHEVC:
-			return true;
-		default:
-			return false;
-		}
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
+	default:
+		return false;
+	}
+}	//	NTV2DeviceCanDo3GOut
 
+bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
+{
+	switch (index0)
+	{
+	case 0:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
+	case 1:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
+	case 2:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
+	case 3:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
 	default:
 		return false;
 	}
@@ -397,98 +327,21 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 	switch (index0)
 	{
 	case 0:
-		switch (boardID)
-		{
-		#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_XENA2:
-		//case BOARD_ID_LHI_DVI:
-		case BOARD_ID_LHI_T:
-		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_KONALHIDVI:
-		case DEVICE_ID_LHE_PLUS:
-		case DEVICE_ID_LHI:
-		case DEVICE_ID_CORVID1:
-		case DEVICE_ID_IOEXPRESS:
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_CORVID3G:
-		case DEVICE_ID_IOXT:
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_KONA3G:
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-            return true;
-		default:
-			return false;
-		}
-
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
 	case 1:
-		switch (boardID)
-		{
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_KONA3G:
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-            return true;
-		default:
-			return false;
-		}
-
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
 	case 2:
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
 	case 3:
-		switch (boardID)
-		{
-		case DEVICE_ID_CORVID24:
-		case DEVICE_ID_KONA3GQUAD:
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-        case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_4CH_1SFP:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-            return true;
-		default:
-			return false;
-		}
-
+		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
 	case 4:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
 	case 5:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
 	case 6:
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
 	case 7:
-		switch (boardID)
-		{
-		case DEVICE_ID_CORVID88:
-			return true;
-		default:
-			return false;
-		}
-
+		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
 	default:
 		return false;
 	}
@@ -535,6 +388,8 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_IO4KPLUS:
+	case DEVICE_ID_IO4KIP:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
 	default:
@@ -596,6 +451,8 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_IO4KPLUS:
+	case DEVICE_ID_IO4KIP:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -696,6 +553,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_IO4KPLUS:
+	case DEVICE_ID_IO4KIP:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -755,6 +614,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_IO4KPLUS:
+	case DEVICE_ID_IO4KIP:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:

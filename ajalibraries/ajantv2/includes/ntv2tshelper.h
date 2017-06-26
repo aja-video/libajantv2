@@ -521,7 +521,7 @@ class PATGen : public TSGenerator
 
             _pkt8[pos++] = 0;                                   // table id = 0
 
-            int length = 9 + (4*_progNumToPID.size());
+            int length = 9 + (4 * (int)_progNumToPID.size());
             put16( (uint16_t)0xb000 + (length & 0x3ff), pos);   // syntax indicator, reserved, length
             put16( _tsId, pos );
 

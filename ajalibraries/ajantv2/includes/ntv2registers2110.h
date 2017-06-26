@@ -85,6 +85,8 @@
 #define kReg3190_pkt_chan_num                   (0x0028/4)
 #define kReg3190_pkt_payload_type               (0x0030/4)
 #define kReg3190_pkt_ssrc                       (0x0038/4)
+#define kReg3190_pkt_tx_pkt_cnt                 (0x0040/4)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -92,30 +94,9 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg3190_depkt_control                  (0x0000/4)
-#define kReg3190_depkt_num_samples              (0x0010/4)
-#define kReg3190_depkt_num_audio_chans          (0x0018/4)
-#define kReg3190_depkt_pkt_type                 (0x0020/4)
-#define kReg3190_depkt_pkt_type_valid           (0x0024/4)
-#define kReg3190_depkt_chan_num                 (0x0028/4)
-#define kReg3190_depkt_chan_num_valid           (0x002c/4)
-#define kReg3190_depkt_pkt_len                  (0x0030/4)
-#define kReg3190_depkt_pkt_len_valid            (0x0034/4)
-#define kReg3190_depkt_payload_type             (0x0038/4)
-#define kReg3190_depkt_payload_type_valid       (0x003c/4)
-#define kReg3190_depkt_chan_status_0            (0x0048/4)
-#define kReg3190_depkt_chan_status_1            (0x0050/4)
-#define kReg3190_depkt_chan_status_2            (0x0058/4)
-#define kReg3190_depkt_chan_status_3            (0x0060/4)
-#define kReg3190_depkt_chan_status_4            (0x0068/4)
-#define kReg3190_depkt_chan_status_5            (0x0070/4)
-#define kReg3190_depkt_user_data_0              (0x0078/4)
-#define kReg3190_depkt_user_data_1              (0x0080/4)
-#define kReg3190_depkt_user_data_2              (0x0088/4)
-#define kReg3190_depkt_user_data_3              (0x0090/4)
-#define kReg3190_depkt_user_data_4              (0x0098/4)
-#define kReg3190_depkt_user_data_5              (0x00a0/4)
-#define kReg3190_depkt_stat_reset               (0x00b0/4)
+#define kReg3190_depkt_enable                   0
+#define kReg3190_depkt_config                   1
+#define kReg3190_depkt_rx_pkt_count             2
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -155,46 +136,22 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kRegDecap_control               (0x0000/4)
-#define kRegDecap_status                (0x0004/4)
-#define kRegDecap_channel_access        (0x0008/4)
-#define kRegDecap_sys_config            (0x000c/4)
-#define kRegDecap_version               (0x0010/4)
-#define kRegDecap_pkt_lock_window       (0x0014/4)
-#define kRegDecap_rx_pkt_cnt            (0x0018/4)
-#define kRegDecap_mismatch_pkt_cnt      (0x001c/4)
-#define kRegDecap_err_pkt_cnt           (0x0020/4)
-#define kRegDecap_stat_reset            (0x0024/4)
-#define kRegDecap_peak_buf_lvl          (0x0028/4)
-#define kRegDecap_module_ctrl           (0x002c/4)
-#define kRegDecap_chan_int_grp_ored     (0x0030/4)
-#define kRegDecap_chan_int_grp_0        (0x0034/4)
-
-//channel
-#define kRegDecap_chan_ctrl                 (0x0080/4)
-#define kRegDecap_chan_timeout              (0x0084/4)
-#define kRegDecap_ip_hdr_param              (0x0088/4)
-#define kRegDecap_match_vlan                (0x0090/4)
-#define kRegDecap_match_dst_ip0             (0x0094/4)
-#define kRegDecap_match_src_ip0             (0x00a4/4)
-#define kRegDecap_match_udp_src_port        (0x00b4/4)
-#define kRegDecap_match_udp_dst_port        (0x00b8/4)
-#define kRegDecap_match_ssrc                (0x00bc/4)
-#define kRegDecap_match_sel                 (0x00c0/4)
-#define kRegDecap_vid_fmt                   (0x00c4/4)
-#define kRegDecap_vid_src_fmt               (0x00c8/4)
-#define kRegDecap_media_hdr                 (0x00cc/4)
-#define kRegDecap_valid_media_pkt_cnt       (0x00d0/4)
-#define kRegDecap_valid_media_fec_cnt       (0x00d4/4)
-#define kRegDecap_reordered_pkt_cnt         (0x00d8/4)
-#define kRegDecap_drop_pkt_cnt              (0x00dc/4)
-#define kRegDecap_chan_stat_reset           (0x00e0/4)
-#define kRegDecap_pkt_interval              (0x00e4/4)
-#define kRegDecap_pkt_interval_network      (0x00e8/4)
-#define kRegDecap_match_payload_ip_type     (0x00ec/4)
-#define kRegDecap_int_status                (0x00f0/4)
-#define kRegDecap_int_mask                  (0x00f4/4)
-#define kRegDecap_int_clear                 (0x00f8/4)
+#define kRegDecap_chan_enable            0
+#define kRegDecap_match_reserved         1
+#define kRegDecap_match_src_ip           2
+#define kRegDecap_match_dst_ip           3
+#define kRegDecap_match_udp_src_port     4
+#define kRegDecap_match_udp_dst_port     5
+#define kRegDecap_match_payload          6
+#define kRegDecap_match_ssrc             7
+#define kRegDecap_match_sel              8
+#define kRegDecap_unused                 9
+#define kRegDecap_rx_payload            10
+#define kRegDecap_rx_ssrc               11
+#define kRegDecap_rx_pkt_cnt            12
+#define kRegDecap_reordered_pkt_cnt     13
+#define kRegDecap_unused2               14
+#define kRegDecap_descriptiom           15
 
 
 #endif // REGISTERS_2110_H

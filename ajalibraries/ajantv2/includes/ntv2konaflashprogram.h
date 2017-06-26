@@ -73,7 +73,6 @@ public:
     bool            ProgramFromMCS(bool verify);
     bool            ProgramSOC(bool verify = true);
 	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
-	void			EraseBlock ();
 	void			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
 	bool			CreateSRecord ();
@@ -82,6 +81,7 @@ public:
 	bool			VerifyFlash (FlashBlockID flashBlockNumber);
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
+    bool            ROMHasBankSelect();
 	uint32_t			ReadBankSelect ();
 
 	std::string & GetDesignName()

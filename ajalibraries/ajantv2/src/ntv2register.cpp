@@ -8269,7 +8269,8 @@ bool CNTV2Card::GetLHIVideoDACMode(NTV2VideoDACMode *value)
 
 bool CNTV2Card::SetLTCInputEnable(bool value)
 {
-	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC))
+	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC
+				 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IO4KIP))
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
@@ -8287,7 +8288,8 @@ bool CNTV2Card::SetLTCInputEnable(bool value)
 bool CNTV2Card::SetLTCOnReference(bool value)
 {
 
-	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC))
+	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC
+				 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IO4KIP))
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);

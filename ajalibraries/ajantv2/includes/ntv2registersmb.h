@@ -76,11 +76,13 @@
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
 #define kRegSarekLicenseStatus      38
+#define kRegSareakunused39          39
 
 #define kRegSarekRx1Drops           40
 #define kRegSarekRx2Drops           41
 #define kRegSarekRx3Drops           42
 #define kRegSarekRx4Drops           43
+#define kRegSarekTReady             44
 
 // second block
 #define TS_BLOCK_BASE               0
@@ -113,6 +115,8 @@
 #define kRegSarekAudioPIDs          56
 
 #define kRegSarekBlk2Unused         72
+#define kRegSarek2022_7enb          80
+
 
 // Encoder block regs
 #define kRegSarekEncodeVideoFormat1     (ENCODER_BLOCK_BASE+0)
@@ -361,7 +365,9 @@
 #define kRegPll_PTP_CurPtpSecHi                 0x24
 #define kRegPll_PTP_CurPtpSecLo                 0x25
 #define kRegPll_PTP_CurPtpNSec                  0x26
-#define kRegPll_NTP_Timestamp                   0x27
+#define kRegPll_90KHzRTP_TS                     0x27
+#define kRegPll_48KHzRTP_TS                     0x28
+#define kRegPll_Intr_Reg                        0x29
 
 /////////////////////////////////////////////////////////////////////
 //
