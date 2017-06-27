@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2capture.cpp">
+    <ClCompile Include="..\..\democlasses\ntv2capture4k.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\democlasses\ntv2democommon.cpp">
@@ -26,7 +26,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\democlasses\ntv2capture.h">
+    <ClInclude Include="..\..\democlasses\ntv2capture4k.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
