@@ -91,7 +91,6 @@
 		B4A7FE5216791755001D4AA8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4A7FE6F16791C35001D4AA8 /* ntv2burn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A7F8DA16781B57001D4AA8 /* ntv2burn.cpp */; };
 		B4A7FFA9167927B3001D4AA8 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
-		B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F4B16AA186B00473DBD /* main.cpp */; };
 		B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */; };
 		B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
@@ -103,6 +102,7 @@
 		B4CADAD1180F0382004C9057 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4CE1EB916E6BC010092B564 /* ntv2capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F3B16AA180300473DBD /* ntv2capture.cpp */; };
 		B4CE1ECD16E6BE390092B564 /* ntv2enumerateboards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A7F8DC16781B57001D4AA8 /* ntv2enumerateboards.cpp */; };
+		B4E1C5851F02CDE7004968BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2E1EFDEA00002F08BD /* main.cpp */; };
 		B4E76F5516AA1AEE00473DBD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F4B16AA186B00473DBD /* main.cpp */; };
 		B4E76F5716AA1B1B00473DBD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B4E76F5816AA1B1B00473DBD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
@@ -1013,7 +1013,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4AEFE351EFDEA39002F08BD /* main.cpp in Sources */,
+				B4E1C5851F02CDE7004968BE /* main.cpp in Sources */,
 				B4AEFE361EFDEA39002F08BD /* ntv2democommon.cpp in Sources */,
 				B4F54BDE1F01BEE200F0C146 /* ntv2capture4k.cpp in Sources */,
 			);
