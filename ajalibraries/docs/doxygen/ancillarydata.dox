@@ -126,6 +126,8 @@
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
 	However, dual-link RGB video to/from RGB frame buffers will work.
 
+	@note	VANC Shift Mode is not implemented for SD video formats.
+
 	The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
 
 	@subsection	sd525i			SD 525i

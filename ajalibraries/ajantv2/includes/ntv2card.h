@@ -1089,7 +1089,7 @@ public:
 	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Retrieves the current VANC mode for the AJA device.
+		@brief		Retrieves the current VANC mode for the AJA device's Frame Store (channel).
 		@return		True if successful; otherwise false.
 		@param[out]	outVancMode		Receives true if VANC is currently enabled for the given channel on the device.
 		@param[in]	inChannel		Specifies the NTV2Channel of interest.
@@ -1098,7 +1098,17 @@ public:
 	AJA_VIRTUAL bool		GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANCEnabled, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled = NULL, NTV2Channel inChannel = NTV2_CHANNEL1);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
-	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode value);
+	/**
+		@brief		Enables or disables the "VANC Shift Mode" feature for the given Frame Store (channel).
+		@param[in]	inChannel	Specifies the device FrameStore to be affected.
+		@param[in]	inMode		Specifies the new data shift mode. Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+		@return		True if successful;  otherwise false.
+		@note		NTV2 devices only implement this feature for HD video formats (see \c NTV2_IS_HD_VIDEO_FORMAT macro).
+		@note		NTV2 devices only implement this feature for \c NTV2_FBF_8BIT_YCBCR pixel formats.
+		@note		If enabled, be sure the device Frame Store's VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@sa			\ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);
 	AJA_VIRTUAL inline bool	GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode * pOutValue)		{return pOutValue ? GetVANCShiftMode (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
