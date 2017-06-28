@@ -1840,6 +1840,15 @@ ostream & operator << (ostream & inOutStream, const NTV2RasterLineOffsets & inOb
 }
 
 
+NTV2RegisterReadsConstIter FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos)
+{
+	for (NTV2RegisterReadsConstIter	iter(inRegInfos.begin());  iter != inRegInfos.end();  ++iter)	//	Ugh -- linear search
+		if (iter->registerNumber == inRegNum)
+			return iter;
+	return inRegInfos.end();
+}
+
+
 ostream & operator << (std::ostream & inOutStream, const NTV2RegInfo & inObj)
 {
 	const string	regName	(::NTV2RegisterNumberToString (NTV2RegisterNumber (inObj.registerNumber)));

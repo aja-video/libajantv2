@@ -2483,9 +2483,10 @@ typedef enum NTV2InputCrosspointID
             (identified by \c NTV2InputCrosspointID) and/or zero or more signal outputs
             (identified by \c NTV2OutputCrosspointID).
 **/
-typedef enum 
+typedef enum
 {
-	NTV2_WgtFrameBuffer1,
+	NTV2_WIDGET_FIRST,
+	NTV2_WgtFrameBuffer1	= NTV2_WIDGET_FIRST,
 	NTV2_WgtFrameBuffer2,
 	NTV2_WgtFrameBuffer3,
 	NTV2_WgtFrameBuffer4,
@@ -2598,7 +2599,7 @@ typedef enum
 	NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
 } NTV2WidgetID;
 
-#define	NTV2_IS_VALID_WIDGET(__w__)		((__w__) < NTV2_WIDGET_INVALID)
+#define	NTV2_IS_VALID_WIDGET(__w__)		(((__w__) >= NTV2_WIDGET_FIRST)  &&  ((__w__) < NTV2_WIDGET_INVALID))
 
 
 #if !defined (NTV2_DEPRECATE)

@@ -6385,10 +6385,10 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 
 	//	First, compile a set of NTV2WidgetIDs that are legit for this device...
 	NTV2WidgetIDSet	validWidgets;
-	for (NTV2WidgetID widgetID (NTV2_WgtFrameBuffer1);  NTV2_IS_VALID_WIDGET (widgetID);  widgetID = NTV2WidgetID (widgetID + 1))
-		if (::NTV2DeviceCanDoWidget (GetDeviceID (), widgetID))
-			validWidgets.insert (widgetID);
-	//cerr	<< "## DEBUG:  GetRouting:  Device '" << ::NTV2DeviceIDToString (GetDeviceID ()) << "' has " << validWidgets.size () << " widgets:  "
+	if (!CNTV2SignalRouter::GetWidgetIDs (GetDeviceID(), validWidgets))
+		return false;
+
+	//cerr	<< "## DEBUG: GetRouting: Device '" << ::NTV2DeviceIDToString (GetDeviceID ()) << "' has " << validWidgets.size () << " widgets:  "
 	//		<< validWidgets << endl;
 
 	//	Inspect every input of every widget...
@@ -9172,7 +9172,7 @@ bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
-	if (!inOutValues.size())
+	if (inOutValues.empty())
 		return true;		//	Nothing to do!
 
 	NTV2GetRegisters	getRegsParams (inOutValues);

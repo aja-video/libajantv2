@@ -263,7 +263,7 @@ AJAExport bool NTV2DeviceCanDoMSI (const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceCanDoMultiFormat (const NTV2DeviceID inDeviceID);
 
 /**
-	@brief		Returns true if the audio system(s) on the device having the given ID can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.
+	@brief		Returns true if the audio system(s) on the device having the given ID can set the per-audio-channel-pair non-PCM (Pulse Code Modulation) bits in outgoing embedded audio.
 	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
 **/
 AJAExport bool NTV2DeviceCanDoPCMControl (const NTV2DeviceID inDeviceID);

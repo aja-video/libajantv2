@@ -4016,6 +4016,14 @@ typedef NTV2RegInfo	NTV2ReadWriteRegisterSingle;	///< @brief	This is an alias fo
 	typedef NTV2RegisterWritesIter				NTV2RegisterReadsIter;			///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterReads instance.
 
 	/**
+		@brief		Returns a const iterator to the first entry in the NTV2RegInfo collection with a matching register number.
+		@param[in]	inRegNum	Specifies the register number of interest.
+		@param[in]	inRegInfos	Specifies the NTV2RegInfo collection to search.
+		@return		A const_iterator that references the entry in the NTV2RegInfo collection, or "end()" if not found.
+	**/
+	AJAExport NTV2RegisterReadsConstIter	FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos);
+
+	/**
 		@brief		Writes the given NTV2RegInfo to the specified output stream.
 		@param		inOutStream	Specifies the output stream to receive the human-readable representation of the NTV2RegInfo instance.
 		@param[in]	inObj		Specifies the NTV2RegInfo instance to print to the output stream.
