@@ -3310,8 +3310,12 @@ typedef enum
 {
     NTV2_VANCDATA_NORMAL,
     NTV2_VANCDATA_8BITSHIFT_ENABLE,
-    NTV2_MAX_NUM_VANCDataShiftModes
+    NTV2_VANCDATA_INVALID,
+    NTV2_MAX_NUM_VANCDataShiftModes = NTV2_VANCDATA_INVALID
 } NTV2VANCDataShiftMode;
+
+#define	NTV2_IS_VALID_VANCDATASHIFT(__v__)		((__v__) >= NTV2_VANCDATA_NORMAL && (__v__) < NTV2_MAX_NUM_VANCDataShiftModes)
+#define	NTV2_IS_VANCDATASHIFT_ENABLED(__v__)	((__v__) == NTV2_VANCDATA_8BITSHIFT_ENABLE)
 
 
 /////////////////////////////////////////////////////////////////////////////////////
