@@ -47,12 +47,14 @@ typedef struct
 
 
 // IGMP Control Block
-#define IGMPPCB_REG_STATE     0
-#define IGMPCB_REG_ADDR       1
-#define IGMPCB_SIZE           2
+#define IGMPCB_REG_STATE       0
+#define IGMPCB_REG_MCAST_ADDR  1
+#define IGMPCB_REG_SRC_ADDR    2
+#define IGMPCB_SIZE            3
 
 #define IGMPCB_STATE_USED     BIT(0)
 #define IGMPCB_STATE_ENABLED  BIT(1)
+#define IGMPCB_STATE_BUSY     BIT(31)   // ignore when busy
 
 class IPVNetConfig
 {
@@ -80,7 +82,7 @@ protected:
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
 
-    void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable);
+    void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
     void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
 

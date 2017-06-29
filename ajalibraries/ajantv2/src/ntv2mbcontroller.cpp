@@ -318,10 +318,12 @@ bool CNTV2MBController::getString(const std::string & resp, const std::string & 
     return false;   // not found
 }
 
-void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t ipaddr, bool enable)
+void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable)
 {
     uint32_t offset = getIGMPCBOffset(port,channel,stream);
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_ADDR, ipaddr);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, mcast_addr);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_SRC_ADDR,   src_addr);
 
     EnableIGMPGroup(port,channel,stream,enable);
 }
@@ -329,18 +331,19 @@ void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream 
 void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream)
 {
     uint32_t offset = getIGMPCBOffset(port,channel,stream);
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, 0);   // block not used
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, 0);   // block not used
 }
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable)
 {
     uint32_t offset = getIGMPCBOffset(port,channel,stream);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
     uint32_t val = IGMPCB_STATE_USED;
     if (enable)
     {
         val += IGMPCB_STATE_ENABLED;
     }
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPPCB_REG_STATE, val);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
 }
 
 uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream)
@@ -348,7 +351,8 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
     struct IGMPCB
     {
         uint32_t state;
-        uint32_t addr;
+        uint32_t multicast_addr;
+        uint32_t source_addr;
     };
     static IGMPCB igmpcb[SAREK_MAX_PORTS][SAREK_MAX_CHANS][NTV2_MAX_NUM_STREAMS];
     if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_STREAM(stream))
