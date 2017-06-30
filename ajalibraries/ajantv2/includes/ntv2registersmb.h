@@ -10,7 +10,7 @@
 #define SAREK_MAX_CHANS 4
 #define SAREK_MAX_PORTS 2
 
-#define SAREK_IF_VERSION 3  // update this if mb protocol is changed (here and in mb)
+#define SAREK_IF_VERSION 4  // update this if mb protocol is changed (here and in mb)
 
 
 /////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@
 
 #define kRegSarekMiscState          10
 #define kRegSarekunused11           11
-#define kRegSareIfVersion           12
+#define kRegSarekIfVersion          12
 #define kRegSarekunused13           13
 #define kRegSarekunused14           14
 #define kRegSarekunused15           15
@@ -116,7 +116,6 @@
 
 #define kRegSarekBlk2Unused         72
 #define kRegSarek2022_7enb          80
-
 
 // Encoder block regs
 #define kRegSarekEncodeVideoFormat1     (ENCODER_BLOCK_BASE+0)

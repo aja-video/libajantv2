@@ -237,12 +237,18 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
     addr.s_addr = (uint32_t)netConfig.ipc_gateway;
     gateway = inet_ntoa(addr);
 
-    SetNetworkConfiguration(port, ip, subnet, gateway);
-    return true;
+    bool rv = SetNetworkConfiguration(port, ip, subnet, gateway);
+    return rv;
 }
 
 bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
+    if (!mDevice.IsMBSystemValid())
+    {
+        mError = "Host software does not match device firmware. Firmware update required.";
+        return false;
+    }
+
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
 
@@ -323,10 +329,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string ne
                                                 string localIPAddress1, string netmask1, string gateway1)
 {
 
-    SetNetworkConfiguration(SFP_TOP, localIPAddress0, netmask0, gateway0);
-    SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
+    bool rv = SetNetworkConfiguration(SFP_TOP, localIPAddress0, netmask0, gateway0);
+    if (!rv) return false;
 
-    return true;
+    rv = SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
+    return rv;
 }
 
 bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
@@ -437,7 +444,10 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
             // is multicast
             bool enabled = false;
             GetRxChannelEnable(channel,enabled);
-            SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+            if (rxConfig.secondaryRxMatch & RX_MATCH_2022_SOURCE_IP)
+                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+            else
+                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
         }
         else
         {
@@ -529,7 +539,10 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         // is multicast
         bool enabled = false;
         GetRxChannelEnable(channel,enabled);
-        SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+        if (rxConfig.primaryRxMatch & RX_MATCH_2022_SOURCE_IP)
+            SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+        else
+            SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
     }
     else
     {
