@@ -231,7 +231,7 @@ def do_device (args, device_id, verilogPath, hppPath):
                     if "casex (" in line:
                         if len (inputSelect) > 0:
                             msg = ErrorMessage2 % (line.strip (), device_id, input_line_count, verilogPath, inputSelect)
-                            print msg
+                            print(msg)
                             f.write ("%s\n\n** %s ABORTED **\n" % (msg, device_id))
                             f.flush ()
                             return 503
@@ -240,25 +240,25 @@ def do_device (args, device_id, verilogPath, hppPath):
                     elif "endcase" in line:
                         if len (inputSelect) == 0:
                             msg = ErrorMessage3 % (line.strip (), device_id, input_line_count, verilogPath)
-                            print msg
+                            print(msg)
                             f.write ("%s\n\n** %s ABORTED **\n" % (msg, device_id))
                             f.flush ()
                             return 503
                         #print "## DEBUG:  '%s' end" % (inputSelect)
                         inputSelect = ""
                     elif "<=" in line and len (inputSelect) > 0 and not "default" in line:
-                        if line.strip()[:2] <> "//":
+                        if line.strip()[:2] != "//":
                             chunks = line.split ("<=")
-                            if len (chunks) <> 2:
+                            if len (chunks) != 2:
                                 msg = ErrorMessage % (line.strip (), inputSelect, device_id, input_line_count, verilogPath, len (chunks) - 1, '<=')
-                                print msg
+                                print(msg)
                                 f.write ("%s\n\n** %s ABORTED **\n" % (msg, device_id))
                                 f.flush ()
                                 return 503
                             chunks = chunks[0].strip ().split (":")
-                            if len (chunks) <> 2 and len (chunks) <> 3:
+                            if len (chunks) != 2 and len (chunks) != 3:
                                 msg = ErrorMessage % (line.strip (), inputSelect, device_id, input_line_count, verilogPath, len (chunks) - 1, ':')
-                                print msg
+                                print(msg)
                                 f.write ("%s\n\n** %s ABORTED **\n" % (msg, device_id))
                                 f.flush ()
                                 return 503
@@ -271,16 +271,16 @@ def do_device (args, device_id, verilogPath, hppPath):
                             else:
                                 f.write ("'%s' <== '%s'\n" % (inputSelect, output_xpt_name))
                                 if not inputSelect in missingInputSelects:
-                                    print "## WARNING:  VerilogToNTV2InXpt:  No equivalent NTV2InputCrosspointID for '%s'" % (inputSelect)
+                                    print("## WARNING:  VerilogToNTV2InXpt:  No equivalent NTV2InputCrosspointID for '%s'" % (inputSelect))
                                     missingInputSelects [inputSelect] = 1 
             f.flush ()
             if len (inputSelect) > 0:
                 msg = ErrorMessage4 % (line.strip (), device_id, verilogPath, inputSelect)
-                print msg
+                print(msg)
                 f.write ("%s\n\n** %s ABORTED **\n" % (msg, device_id))
                 return 503
             if args.verbose:
-                print "## NOTE:  %s:  %d lines read from '%s', %d lines written to '%s'" % (device_id, input_line_count, verilogPath, output_line_count, hppPath)
+                print("## NOTE:  %s:  %d lines read from '%s', %d lines written to '%s'" % (device_id, input_line_count, verilogPath, output_line_count, hppPath))
     return 0
 
 
@@ -336,35 +336,35 @@ def main ():
     if args.input:
         inputDir = os.path.join (args.input)
         if not os.path.exists (inputDir) or not os.path.isdir (inputDir):
-            print "## ERROR:  Input folder '%s' not found or not a folder" % (args.input)
+            print("## ERROR:  Input folder '%s' not found or not a folder" % (args.input))
             return 404
         if args.verbose:
-            print "## NOTE:  Looking for verilog files relative to '%s'" % (args.input)
+            print("## NOTE:  Looking for verilog files relative to '%s'" % (args.input))
     else:
         inputDir = os.getcwd ()
 
     if args.output:
         outputDir = os.path.join (args.output)
         if not os.path.exists (outputDir) or not os.path.isdir (outputDir):
-            print "## ERROR:  Output folder '%s' not found or not a folder" % (args.output)
+            print("## ERROR:  Output folder '%s' not found or not a folder" % (args.output))
             return 404
         if args.verbose:
-            print "## NOTE:  Will write .hpp & .hh files into folder '%s'" % (args.output)
+            print("## NOTE:  Will write .hpp & .hh files into folder '%s'" % (args.output))
     else:
         outputDir = os.getcwd ()
 
     hppPath = os.path.join (outputDir, hppName)
     if os.path.exists (hppPath):
         if os.path.isdir (hppPath):
-            print "## ERROR:  Output HPP file '%s' is a folder" % (hppPath)
+            print("## ERROR:  Output HPP file '%s' is a folder" % (hppPath))
             return 505
         if args.verbose:
-            print "## NOTE:  Will overwrite existing .hpp file '%s'" % (hppPath)
+            print("## NOTE:  Will overwrite existing .hpp file '%s'" % (hppPath))
 
-    device_ids = known_devices.values ()
+    device_ids = list(known_devices.values ())
     if args.device:
         if not args.device in known_devices:
-            print "## ERROR:  No such device '%s'" % (args.device)
+            print("## ERROR:  No such device '%s'" % (args.device))
             return 500
         device_ids = [known_devices [args.device]]
 
@@ -372,18 +372,18 @@ def main ():
         f.write ("//\tGenerated by '%s' on %s\n" % (sys.argv[0], datetime.datetime.now ().strftime ("%c")))
     for device_id in device_ids:
         if not device_id in verilogPaths:
-            print "## WARNING:  '%s' not in 'verilogPaths' map" % (device_id)
+            print("## WARNING:  '%s' not in 'verilogPaths' map" % (device_id))
             continue
         verilogPath = verilogPaths [device_id]
         if len (verilogPath) == 0:
-            print "## WARNING:  Empty path to verilog file for '%s'" % (device_id)
+            print("## WARNING:  Empty path to verilog file for '%s'" % (device_id))
             continue
         verilogPath = os.path.join (inputDir, verilogPath)
         if not os.path.exists (verilogPath):
-            print "## WARNING:  Device '%s' verilog file path '%s' not found" % (device_id, verilogPath)
+            print("## WARNING:  Device '%s' verilog file path '%s' not found" % (device_id, verilogPath))
             continue
         if os.path.isdir (verilogPath):
-            print "## WARNING:  Device '%s' verilog file path '%s' is folder" % (device_id, verilogPath)
+            print("## WARNING:  Device '%s' verilog file path '%s' is folder" % (device_id, verilogPath))
             continue
         result_code = do_device (args, device_id, verilogPath, hppPath)
 

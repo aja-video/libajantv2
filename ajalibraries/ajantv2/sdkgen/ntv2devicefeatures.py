@@ -80,7 +80,7 @@ def generate_code_NTV2DeviceCanDoFrameBufferFormat (args, hppPath, hPath, device
             f.write ("}\t//  NTV2DeviceCanDoFrameBufferFormat (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoFrameBufferFormat' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoFrameBufferFormat' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2FrameBufferFormat.\n")
@@ -128,7 +128,7 @@ def generate_code_NTV2DeviceCanDoVideoFormat (args, hppPath, hPath, device_names
             f.write ("}\t//  NTV2DeviceCanDoVideoFormat (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoVideoFormat' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoVideoFormat' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2VideoFormat.\n")
@@ -176,7 +176,7 @@ def generate_code_NTV2DeviceCanDoWidget (args, hppPath, hPath, device_names, sup
             f.write ("}\t//  NTV2DeviceCanDoWidget (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoWidget' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoWidget' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2WidgetID.\n")
@@ -224,7 +224,7 @@ def generate_code_NTV2DeviceCanDoConversionMode (args, hppPath, hPath, device_na
             f.write ("}\t//  NTV2DeviceCanDoConversionMode (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoConversionMode' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoConversionMode' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2ConversionMode.\n")
@@ -272,7 +272,7 @@ def generate_code_NTV2DeviceCanDoDSKMode (args, hppPath, hPath, device_names, su
             f.write ("}\t//  NTV2DeviceCanDoDSKMode (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoDSKMode' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoDSKMode' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2DSKMode.\n")
@@ -330,7 +330,7 @@ def generate_code_NTV2DeviceCanDoInputSource (args, hppPath, hPath, device_names
             f.write ("}\t//  NTV2DeviceCanDoInputSource (auto-generated)\n")
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote 'NTV2DeviceCanDoInputSource' function into '%s'" % (sys.argv[0], hppPath)
+                print("## NOTE:  %s:  Wrote 'NTV2DeviceCanDoInputSource' function into '%s'" % (sys.argv[0], hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             f.write ("\n/**\n\t@brief\t\tReturns true if the device having the given ID supports the given NTV2InputSource.\n")
@@ -376,7 +376,7 @@ def generate_code_NTV2DeviceCanDo (args, hppPath, hPath, device_names, supported
                 f.write ("}\t//  %s (auto-generated)\n" % (function_name))
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote %d 'NTV2DeviceCanDo...' functions into '%s'" % (sys.argv[0], len (supported_can_do_features), hppPath)
+                print("## NOTE:  %s:  Wrote %d 'NTV2DeviceCanDo...' functions into '%s'" % (sys.argv[0], len (supported_can_do_features), hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             for supported_feature in supported_can_do_features:
@@ -391,7 +391,7 @@ def generate_code_NTV2DeviceCanDo (args, hppPath, hPath, device_names, supported
                 f.write ("AJAExport bool %s (const NTV2DeviceID inDeviceID);\n" % (function_name))
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote %d 'NTV2DeviceCanDo...' functions into '%s'" % (sys.argv[0], len (supported_can_do_features), hPath)
+                print("## NOTE:  %s:  Wrote %d 'NTV2DeviceCanDo...' functions into '%s'" % (sys.argv[0], len (supported_can_do_features), hPath))
     return 0
 
 
@@ -433,7 +433,7 @@ def generate_code_NTV2DeviceGetNum (args, hppPath, hPath, device_names, get_nums
                 f.write ("}\t//  %s (auto-generated)\n" % (function_name))
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote %d 'NTV2DeviceGetNum...' functions into '%s'" % (sys.argv[0], len (get_nums), hppPath)
+                print("## NOTE:  %s:  Wrote %d 'NTV2DeviceGetNum...' functions into '%s'" % (sys.argv[0], len (get_nums), hppPath))
     if hPath:
         with open (hPath, 'a+') as f:
             for get_num_feature in get_nums:
@@ -448,7 +448,7 @@ def generate_code_NTV2DeviceGetNum (args, hppPath, hPath, device_names, get_nums
                 f.write ("AJAExport %s %s (const NTV2DeviceID inDeviceID);\n" % (return_type, function_name))
             f.flush ()
             if args.verbose:
-                print "## NOTE:  %s:  Wrote %d 'NTV2DeviceGetNum...' functions into '%s'" % (sys.argv[0], len (get_nums), hPath)
+                print("## NOTE:  %s:  Wrote %d 'NTV2DeviceGetNum...' functions into '%s'" % (sys.argv[0], len (get_nums), hPath))
     return 0
 
 
@@ -475,57 +475,57 @@ def main ():
     if args.csv:
         csvDir = os.path.join (args.csv)
         if not os.path.exists (csvDir) or not os.path.isdir (csvDir):
-            print "## ERROR:  CSV folder '%s' not found or not a folder" % (args.csv)
+            print("## ERROR:  CSV folder '%s' not found or not a folder" % (args.csv))
             return 404
         if args.verbose:
-            print "## NOTE:  Looking for CSV files in folder '%s'" % (args.csv)
+            print("## NOTE:  Looking for CSV files in folder '%s'" % (args.csv))
     else:
         csvDir = os.getcwd ()
 
     for csvFile in ["VideoFormats.csv", "FBFormats.csv", "Widgets.csv", "ConversionModes.csv", "DSKModes.csv", "InputSources.csv", "CanDo.csv", "GetNum.csv"]:
         csvPath = os.path.join (csvDir, csvFile)
         if not os.path.exists (csvPath):
-            print "## ERROR:  CSV file '%s' not found" % (csvPath)
+            print("## ERROR:  CSV file '%s' not found" % (csvPath))
             return 404
         if os.path.isdir (csvPath):
-            print "## ERROR:  CSV file '%s' is a folder, not a file" % (csvPath)
+            print("## ERROR:  CSV file '%s' is a folder, not a file" % (csvPath))
             return 404
 
     if args.ohh:
         hhOutputDir = os.path.join (args.ohh)
         if not os.path.exists (hhOutputDir) or not os.path.isdir (hhOutputDir):
-            print "## ERROR:  '.hh' output folder '%s' not found or not a folder" % (args.ohh)
+            print("## ERROR:  '.hh' output folder '%s' not found or not a folder" % (args.ohh))
             return 404
         if args.verbose:
-            print "## NOTE:  Will write '.hh' file into folder '%s'" % (args.ohh)
+            print("## NOTE:  Will write '.hh' file into folder '%s'" % (args.ohh))
     else:
         hhOutputDir = os.getcwd ()
 
     if args.ohpp:
         hppOutputDir = os.path.join (args.ohpp)
         if not os.path.exists (hppOutputDir) or not os.path.isdir (hppOutputDir):
-            print "## ERROR:  '.hpp' output folder '%s' not found or not a folder" % (args.ohpp)
+            print("## ERROR:  '.hpp' output folder '%s' not found or not a folder" % (args.ohpp))
             return 404
         if args.verbose:
-            print "## NOTE:  Will write '.hpp' file into folder '%s'" % (args.ohpp)
+            print("## NOTE:  Will write '.hpp' file into folder '%s'" % (args.ohpp))
     else:
         hppOutputDir = os.getcwd ()
 
     hppPath = os.path.join (hppOutputDir, hppName)
     if os.path.exists (hppPath):
         if os.path.isdir (hppPath):
-            print "## ERROR:  Output HPP file '%s' is a folder" % (hppPath)
+            print("## ERROR:  Output HPP file '%s' is a folder" % (hppPath))
             return 505
         if args.verbose:
-            print "## NOTE:  Will overwrite existing .hpp file '%s'" % (hppPath)
+            print("## NOTE:  Will overwrite existing .hpp file '%s'" % (hppPath))
 
     hPath = os.path.join (hhOutputDir, hName)
     if os.path.exists (hPath):
         if os.path.isdir (hPath):
-            print "## ERROR:  Output HH file '%s' is a folder" % (hPath)
+            print("## ERROR:  Output HH file '%s' is a folder" % (hPath))
             return 505
         if args.verbose:
-            print "## NOTE:  Will overwrite existing .hh file '%s'" % (hPath)
+            print("## NOTE:  Will overwrite existing .hh file '%s'" % (hPath))
 
     #	device_names ['DEVICE_ID_UNKNOWN', 'DEVICE_ID_CORVID1', ...]
     device_names = []
