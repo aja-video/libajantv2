@@ -704,6 +704,13 @@ typedef enum NTV2RXSDIStatusRegister
 	kRegNumRXSDIRegisters = 2113 - 2048 + 1
 } NTV2RXSDIStatusRegisters;
 
+typedef enum
+{
+	kRegAudioMixerInputSelects = 2114,	//2114
+	kRegAudioMixerMainInputGain,		//2115
+	kRegAudioMixer2ChannelInput1Gain,	//2116
+	kRegAudioMixer2ChannelInput2Gain	//2117
+}NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
 typedef enum _NTV2NonPCMAudioDetectRegisters
@@ -2277,9 +2284,11 @@ typedef enum
     kRegMaskHDMIHDRDolbyVisionEnable = BIT(6),
 	kRegMaskHDMIHDREnable = BIT(7),
 	kRegMaskElectroOpticalTransferFunction = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
-	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31)
+	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
-
+	kRegMaskAudioMixerMainInputSelect = BIT(2) + BIT(1) + BIT(0),
+	kRegMaskAudioMixer2CHInput1 = BIT(6) + BIT(5) + BIT(4),
+	kRegMaskAudioMixer2CHInput2 = BIT(10) + BIT(9) + BIT(8)
 } RegisterMask;
 
 typedef enum
@@ -3303,8 +3312,11 @@ typedef enum
     kRegShiftHDMIHDRDolbyVisionEnable = 6,
 	kRegShiftHDMIHDREnable = 7,
 	kRegShiftElectroOpticalTransferFunction = 16,
-	kRegShiftHDRStaticMetadataDescriptorID = 24
-	
+	kRegShiftHDRStaticMetadataDescriptorID = 24,
+
+	kRegShiftAudioMixerMainInputSelect = 0,
+	kRegShiftAudioMixer2CHInput1 = 4,
+	kRegShiftAudioMixer2CHInput2 = 8
 } RegisterShift;
 
 
