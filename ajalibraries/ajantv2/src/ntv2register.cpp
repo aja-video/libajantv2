@@ -8520,6 +8520,47 @@ bool CNTV2Card::GetSDIOut3GbEnable(NTV2Channel inChannel, bool & outIsEnabled)
 	return retVal;
 }
 
+bool CNTV2Card::SetSDIOut6GEnable(NTV2Channel inChannel, bool enable)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	WriteRegister(gChannelToSDIOutControlRegNum[inChannel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+	return WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+}
+
+bool CNTV2Card::GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	ULWord		is6G(0), is12G(0);
+	bool retVal = ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	retVal = ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+	if (is6G == 1 && is12G == 0)
+		outIsEnabled = true;
+	else
+		outIsEnabled = false;
+	return retVal;
+}
+
+bool CNTV2Card::SetSDIOut12GEnable(NTV2Channel inChannel, bool enable)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	if (enable)
+		WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	return WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+}
+
+bool CNTV2Card::GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	ULWord		tempVal(0);
+	const bool	retVal(ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &tempVal, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
+	outIsEnabled = static_cast <bool> (tempVal);
+	return retVal;
+}
+
 
 // SDI bypass relay control
 static bool AccessWatchdogControlBit( CNTV2Card* card, ULWord* value, ULWord mask, ULWord shift, bool read )

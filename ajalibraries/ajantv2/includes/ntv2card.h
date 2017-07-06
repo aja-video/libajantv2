@@ -4358,6 +4358,14 @@ public:
 	AJA_VIRTUAL bool		GetSDIOut3GbEnable (NTV2Channel inChannel, bool & outIsEnabled);
 	AJA_VIRTUAL inline bool	GetSDIOut3GbEnable (NTV2Channel inChannel, bool* pOutIsEnabled)			{return pOutIsEnabled ? GetSDIOut3GbEnable (inChannel, *pOutIsEnabled) : false;}
 
+	AJA_VIRTUAL bool		SetSDIOut6GEnable(NTV2Channel inChannel, bool enable);
+	AJA_VIRTUAL bool		GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIOut6GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut6GEnable(inChannel, *pOutIsEnabled) : false; }
+
+	AJA_VIRTUAL bool		SetSDIOut12GEnable(NTV2Channel inChannel, bool enable);
+	AJA_VIRTUAL bool		GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIOut12GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut12GEnable(inChannel, *pOutIsEnabled) : false; }
+
 
 	/**
 		@name	SDI Bypass Relays
