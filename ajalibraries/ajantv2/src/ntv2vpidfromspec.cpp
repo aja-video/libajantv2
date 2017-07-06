@@ -42,6 +42,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	isRGB					= false;
 	bool	isTSI					= false;
 	bool	isStereo				= false;
+	bool	is6G					= false;
+	bool	is12G					= false;
 
 	uint8_t	byte1 = 0;
 	uint8_t	byte2 = 0;
@@ -60,6 +62,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	isRGB					= pInVPIDSpec->isRGBOnWire;
 	isTSI					= pInVPIDSpec->isTwoSampleInterleave;
 	isStereo				= pInVPIDSpec->isStereo;
+	is6G					= pInVPIDSpec->isOutput6G;
+	is12G					= pInVPIDSpec->isOutput12G;
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
 	{
@@ -192,7 +196,12 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x2048x1080p_3000:
 		if (isTSI)
 		{
-            byte1 = is3G ? (uint8_t) VPIDStandard_2160_DualLink : (uint8_t) VPIDStandard_1080;	//	0x96 : 0x85
+			if(is12G)
+				byte1 = VPIDStandard_2160_Single_12Gb;
+			else if(is6G)
+				byte1 = VPIDStandard_2160_Single_6Gb;
+			else
+				byte1 = is3G ? (uint8_t) VPIDStandard_2160_DualLink : (uint8_t) VPIDStandard_1080;	//	0x96 : 0x85
 		}
 		else
 		{
@@ -213,7 +222,12 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x2048x1080p_6000:
 		if (isTSI)
 		{
-			byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+			if(is12G)
+				byte1 = VPIDStandard_2160_Single_12Gb;
+			else if(is6G)
+				byte1 = VPIDStandard_2160_Single_6Gb;
+			else
+				byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
 		}
 		else
 		{
@@ -225,8 +239,6 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		*pOutVPID = 0;
 		return true;
 	}
-
-	byte1 |= VPIDVersion_1 << 7;	//	0x80
 
 	//
 	//	Byte 2
