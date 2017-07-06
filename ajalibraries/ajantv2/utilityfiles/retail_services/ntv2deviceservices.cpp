@@ -469,38 +469,40 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		if (NTV2DeviceCanDoLTCInOnRefPort(mCard->GetDeviceID()))
 			mCard->SetLTCOnReference(false);
 	}
+	
+	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
 
 	//Setup the SDI Outputs audio source
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
 	case 8:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
 	case 7:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, audioSystem);
 	case 6:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, audioSystem);
 	case 5:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem);
 	case 4:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, audioSystem);
 	case 3:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, audioSystem);
 	case 2:
 		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
 		{
-			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, NTV2_AUDIOSYSTEM_1);
+			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, audioSystem);
 		}
 	default:
 	case 1:
 		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
 		{
-			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, NTV2_AUDIOSYSTEM_1);
+			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
 		}
 		break;
 	}
 	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
 	{
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem );
 	}
 
 	//Setup LUTs
@@ -2382,7 +2384,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 	(void) format;
 	NTV2DeviceID deviceID = mCard->GetDeviceID();
 
-	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
+	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 
 	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
@@ -2610,7 +2612,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 		break;
 	}
 
-	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
+	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_2);
 
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
