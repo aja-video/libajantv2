@@ -470,7 +470,16 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetLTCOnReference(false);
 	}
 	
+	bool suspended = false;
+	mCard->GetSuspendHostAudio(suspended);
 	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
+	if (suspended == false)
+	{
+		ULWord hostAudioSystemVal = audioSystem;
+		mCard->ReadRegister(kVRegHostAudioSystem, &hostAudioSystemVal);
+		if (hostAudioSystemVal < NTV2_MAX_NUM_AudioSystemEnums)
+			audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
+	}
 
 	//Setup the SDI Outputs audio source
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
