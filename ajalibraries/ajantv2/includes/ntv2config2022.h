@@ -75,22 +75,22 @@ public:
     
 public:
     uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
-    std::string	primarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
+    std::string	primarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2022_SOURCE_IP set). If it's in the multiclass range, then
                                         ///			by default, the IGMP multicast group will be joined (see CNTV2Config2022::SetIGMPDisable).
-    std::string	primaryDestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	primarySourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	primaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
-    uint32_t	primarySsrc;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
-    uint16_t	primaryVlan;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
+    std::string	primaryDestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
+    uint32_t	primarySourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_2022_SOURCE_PORT set)
+    uint32_t	primaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2022_DEST_PORT set)
+    uint32_t	primarySsrc;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
+    uint16_t	primaryVlan;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
     uint32_t	secondaryRxMatch;       ///< @brief	Bitmap of rxMatch criteria used
-    std::string	secondarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
+    std::string	secondarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2022_SOURCE_IP set). If it's in the multiclass range, then
                                         ///			by default, the IGMP multicast group will be joined (see CNTV2Config2022::SetIGMPDisable).
-    std::string	secondaryDestIP;        ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	secondarySourcePort;	///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	secondaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
-    uint32_t	secondarySsrc;          ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
-    uint16_t	secondaryVlan;          ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
+    std::string	secondaryDestIP;        ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
+    uint32_t	secondarySourcePort;	///< @brief	Specifies the source (sender) port number (if RX_MATCH_2022_SOURCE_PORT set)
+    uint32_t	secondaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2022_DEST_PORT set)
+    uint32_t	secondarySsrc;          ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
+    uint16_t	secondaryVlan;          ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
     uint32_t	networkPathDiff;        ///< @brief	Specifies the max accepted delay in milliseconds between 2 steams in hitless operation (0-150).
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
