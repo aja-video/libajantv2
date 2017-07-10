@@ -471,7 +471,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 
 	//Setup the SDI Outputs audio source
-	switch(NTV2DeviceGetNumVideoInputs(deviceID))
+	switch(NTV2DeviceGetNumVideoOutputs(deviceID))
 	{
 	case 8:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, NTV2_AUDIOSYSTEM_1);
@@ -486,21 +486,37 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	case 3:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, NTV2_AUDIOSYSTEM_1);
 	case 2:
-		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
-		{
-			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, NTV2_AUDIOSYSTEM_1);
-		}
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, NTV2_AUDIOSYSTEM_1);
 	default:
 	case 1:
-		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
-		{
-			mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, NTV2_AUDIOSYSTEM_1);
-		}
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, NTV2_AUDIOSYSTEM_1);
 		break;
 	}
 	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
 	{
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
+	}
+
+	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	{
+	case 8:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL8, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 7:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL7, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 6:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL6, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 5:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL5, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 4:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL4, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 3:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL3, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 2:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL2, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	default:
+	case 1:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL1, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		break;
 	}
 
 	//Setup LUTs
