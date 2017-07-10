@@ -233,14 +233,22 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
         if ( sfp.mSFPDesignator == "top")
         {
-            config2022.SetNetworkConfiguration (SFP_TOP,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool rv = config2022.SetNetworkConfiguration (SFP_TOP,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            if (!rv)
+            {
+                cerr << "Error: " << config2022.getLastError() << endl;
+                return false;
+            }
             enable2022_7 = getEnable(sfp.mEnable2022_7);
         }
-        else
-        if ( sfp.mSFPDesignator == "bottom")
+        else if ( sfp.mSFPDesignator == "bottom")
         {
-            config2022.SetNetworkConfiguration (SFP_BOTTOM,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
-
+            bool rv = config2022.SetNetworkConfiguration (SFP_BOTTOM,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            if (!rv)
+            {
+                cerr << "Error: " << config2022.getLastError() << endl;
+                return false;
+            }
         }
     }
 
