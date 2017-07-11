@@ -66,13 +66,13 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
         cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
 
-        receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
-        if (!receiveStruct.mSrcPort.isEmpty())
-            cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << endl;
+        receiveStruct.mPrimarySrcPort = receiveChannelObject["primarySrcPort"].toString();
+        if (!receiveStruct.mPrimarySrcPort.isEmpty())
+            cout << "PrimarySrcPort " << receiveStruct.mPrimarySrcPort.toStdString() << endl;
 
-        receiveStruct.mSrcIPAddress = receiveChannelObject["srcIPAddress"].toString();
-        if (!receiveStruct.mSrcIPAddress.isEmpty())
-            cout << "Src IP Address " << receiveStruct.mSrcIPAddress.toStdString() << endl;
+        receiveStruct.mPrimarySrcIPAddress = receiveChannelObject["primarySrcIPAddress"].toString();
+        if (!receiveStruct.mPrimarySrcIPAddress.isEmpty())
+            cout << "PrimarySrcIPAddress " << receiveStruct.mPrimarySrcIPAddress.toStdString() << endl;
 
         receiveStruct.mPrimaryDestIPAddress = receiveChannelObject["primaryDestIPAddress"].toString();
         cout << "PrimaryDestIPAddress " << receiveStruct.mPrimaryDestIPAddress.toStdString() << endl;
@@ -82,6 +82,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         receiveStruct.mPrimaryFilter = receiveChannelObject["primaryFilter"].toString();
         cout << "PrimaryFilter " << receiveStruct.mPrimaryFilter.toStdString() << endl;
+
+        receiveStruct.mSecondarySrcPort = receiveChannelObject["secondarySrcPort"].toString();
+        if (!receiveStruct.mSecondarySrcPort.isEmpty())
+            cout << "SecondarySrcPort " << receiveStruct.mSecondarySrcPort.toStdString() << endl;
+
+        receiveStruct.mSecondarySrcIPAddress = receiveChannelObject["secondarySrcIPAddress"].toString();
+        if (!receiveStruct.mSecondarySrcIPAddress.isEmpty())
+            cout << "SecondarySrcIAddress " << receiveStruct.mSecondarySrcIPAddress.toStdString() << endl;
 
         receiveStruct.mSecondaryDestIPAddress = receiveChannelObject["secondaryDestIPAddress"].toString();
         if (!receiveStruct.mSecondaryDestIPAddress.isEmpty())
@@ -262,15 +270,19 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         ReceiveStruct receive = receiveIter.next();
         rx_2022_channel rxChannelConfig;
         bool ok;
-        NTV2Channel channel = getChannel(receive.mChannelDesignator);
-        rxChannelConfig.primaryDestIP = receive.mPrimaryDestIPAddress.toStdString();
-        rxChannelConfig.primaryDestPort = receive.mPrimaryDestPort.toUInt();
-        rxChannelConfig.primaryRxMatch = receive.mPrimaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.secondaryDestIP = receive.mSecondaryDestIPAddress.toStdString();
-        rxChannelConfig.secondaryDestPort = receive.mSecondaryDestPort.toUInt();
-        rxChannelConfig.secondaryRxMatch = receive.mSecondaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.networkPathDiff = receive.mNetworkPathDifferential.toUInt();
-        rxChannelConfig.playoutDelay = receive.mPlayoutDelay.toUInt();
+        NTV2Channel channel                 = getChannel(receive.mChannelDesignator);
+        rxChannelConfig.primarySourceIP     = receive.mPrimarySrcIPAddress.toStdString();
+        rxChannelConfig.primarySourcePort   = receive.mPrimarySrcPort.toUInt();
+        rxChannelConfig.primaryDestIP       = receive.mPrimaryDestIPAddress.toStdString();
+        rxChannelConfig.primaryDestPort     = receive.mPrimaryDestPort.toUInt();
+        rxChannelConfig.primaryRxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
+        rxChannelConfig.secondarySourceIP   = receive.mSecondarySrcIPAddress.toStdString();
+        rxChannelConfig.secondarySourcePort = receive.mSecondarySrcPort.toUInt();
+        rxChannelConfig.secondaryDestIP     = receive.mSecondaryDestIPAddress.toStdString();
+        rxChannelConfig.secondaryDestPort   = receive.mSecondaryDestPort.toUInt();
+        rxChannelConfig.secondaryRxMatch    = receive.mSecondaryFilter.toUInt(&ok, 16);
+        rxChannelConfig.networkPathDiff     = receive.mNetworkPathDifferential.toUInt();
+        rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
 
         config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
         config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable),enable2022_7);
@@ -285,12 +297,12 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         TransmitStruct transmit = transmitIter.next();
         tx_2022_channel txChannelConfig;
 
-        NTV2Channel channel = getChannel(transmit.mChannelDesignator);
-        txChannelConfig.primaryLocalPort = transmit.mPrimaryLocalPort.toUInt();
-        txChannelConfig.primaryRemoteIP = transmit.mPrimaryRemoteIPAddress.toStdString();
-        txChannelConfig.primaryRemotePort = transmit.mPrimaryRemotePort.toUInt();
-        txChannelConfig.secondaryLocalPort = transmit.mSecondaryLocalPort.toUInt();
-        txChannelConfig.secondaryRemoteIP = transmit.mSecondaryRemoteIPAddress.toStdString();
+        NTV2Channel channel                 = getChannel(transmit.mChannelDesignator);
+        txChannelConfig.primaryLocalPort    = transmit.mPrimaryLocalPort.toUInt();
+        txChannelConfig.primaryRemoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
+        txChannelConfig.primaryRemotePort   = transmit.mPrimaryRemotePort.toUInt();
+        txChannelConfig.secondaryLocalPort  = transmit.mSecondaryLocalPort.toUInt();
+        txChannelConfig.secondaryRemoteIP   = transmit.mSecondaryRemoteIPAddress.toStdString();
         txChannelConfig.secondaryRemotePort = transmit.mSecondaryRemotePort.toUInt();
 
         config2022.SetTxChannelConfiguration (channel, txChannelConfig,enable2022_7);
