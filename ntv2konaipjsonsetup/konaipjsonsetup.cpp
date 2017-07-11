@@ -16,7 +16,6 @@ using std::cerr;
 
 NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
-MACAddr toMAC(QString mac);
 
 CKonaIpJsonSetup::CKonaIpJsonSetup()
 {
@@ -335,19 +334,3 @@ bool getEnable(QString enableBoolString)
     return enable;
 }
 
-MACAddr toMAC(QString mac)
-{
-    MACAddr MAC;
-
-    QStringList mlist = mac.split(':');
-    int numBytes = mlist.size();
-    if (numBytes > 6) numBytes = 6;
-
-    for (int i=0; i< numBytes; i++)
-    {
-        bool ok;
-        MAC.mac[i] = mlist[i].toUShort(&ok,16);
-    }
-
-    return MAC;
-}
