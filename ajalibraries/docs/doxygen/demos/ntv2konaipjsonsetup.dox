@@ -7,4 +7,42 @@ The program demonstrates...
 -	how to detect if the AJA device is an IP device;
 -	how to determine if the MicroBlaze on the device is up and running;
 -	how to set the network configuration parameters for each of the SFP cages on the device.
+
+Keywords in the scripts:
+sfps
+    designator
+    IPAddress
+    SubnetMask
+    Router
+    Enable2022_7
+
+receive
+    designator              channel2,channel3,channel4 (defualts NTV2_CHANNEL1)
+    primarySrcPort
+    primarySrcIPAddress
+    primaryDestPort
+    primaryDestIPAddress
+    primaryFilter           vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20
+    secondarySrcPort
+    secondarySrcIPAddress
+    secondaryDestPort
+    secondaryDestIPAddress
+    secondaryFilter         vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20
+    networkPathDifferential
+    networkPathDifferential
+    playoutDelay
+    vlan
+    ssrc
+    Enable                  true,false
+
+transmit
+    designator              channel2,channel3,channel4 (defualts NTV2_CHANNEL1)
+    primaryLocalPort
+    primaryRemoteIPAddress
+    primaryRemotePort
+    secondaryLocalPort
+    secondaryRemoteIPAddress
+    secondaryRemotePort
+    videoFormat
+    Enable                  true,false
 **/
