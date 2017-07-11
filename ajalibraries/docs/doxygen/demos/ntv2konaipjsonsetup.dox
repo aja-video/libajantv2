@@ -10,14 +10,14 @@ The program demonstrates...
 
 Keywords in the scripts:
 sfps
-    designator
+    designator              top,bottom
     IPAddress
     SubnetMask
     Router
-    Enable2022_7
+    Enable2022_7            true,false
 
 receive
-    designator              channel2,channel3,channel4 (defualts NTV2_CHANNEL1)
+    designator              channel1,channel2,channel3,channel4
     primarySrcPort
     primarySrcIPAddress
     primaryDestPort
@@ -36,7 +36,7 @@ receive
     Enable                  true,false
 
 transmit
-    designator              channel2,channel3,channel4 (defualts NTV2_CHANNEL1)
+    designator              channel1,channel2,channel3,channel4
     primaryLocalPort
     primaryRemoteIPAddress
     primaryRemotePort
