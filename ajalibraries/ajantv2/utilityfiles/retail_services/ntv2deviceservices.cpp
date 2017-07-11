@@ -469,32 +469,43 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		if (NTV2DeviceCanDoLTCInOnRefPort(mCard->GetDeviceID()))
 			mCard->SetLTCOnReference(false);
 	}
+	
+	bool suspended = false;
+	mCard->GetSuspendHostAudio(suspended);
+	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
+	if (suspended == false)
+	{
+		ULWord hostAudioSystemVal = audioSystem;
+		mCard->ReadRegister(kVRegHostAudioSystem, &hostAudioSystemVal);
+		if (hostAudioSystemVal < NTV2_MAX_NUM_AudioSystemEnums)
+			audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
+	}
 
-	//Setup the SDI Outputs audio source
+	// Setup the SDI Outputs audio source
 	switch(NTV2DeviceGetNumVideoOutputs(deviceID))
 	{
 	case 8:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
 	case 7:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, audioSystem);
 	case 6:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, audioSystem);
 	case 5:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem);
 	case 4:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, audioSystem);
 	case 3:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, audioSystem);
 	case 2:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, audioSystem);
 	default:
 	case 1:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
 		break;
 	}
 	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
 	{
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, NTV2_AUDIOSYSTEM_1);
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem );
 	}
 
 	switch(NTV2DeviceGetNumVideoChannels(deviceID))

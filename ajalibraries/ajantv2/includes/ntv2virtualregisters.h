@@ -449,8 +449,10 @@ typedef enum
     kVRegKIPTxCfgError                      = VIRTUALREG_START+504,
     kVRegKIPEncCfgError                     = VIRTUALREG_START+505,
     kVRegKIPDecCfgError                     = VIRTUALREG_START+506,
+	
+    kVRegHostAudioSystem                    = VIRTUALREG_START+507,
 
-    kVRegLastAJA							= VIRTUALREG_START+507,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+508,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
