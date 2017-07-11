@@ -206,7 +206,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		else
 		{
 			if (is3G)
-				byte1 = (uint8_t) VPIDStandard_1080_DualLink_3Gb;	//	0x8A
+				byte1 = (uint8_t) VPIDStandard_1080_3Gb;	//	0x8C
 			else
 				byte1 = (uint8_t) VPIDStandard_1080;		//	0x85
 		}
