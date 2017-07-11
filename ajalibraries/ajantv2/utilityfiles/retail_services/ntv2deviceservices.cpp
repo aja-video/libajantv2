@@ -481,7 +481,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
 	}
 
-	//Setup the SDI Outputs audio source
+	// Setup the SDI Outputs audio source
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
 	case 8:
