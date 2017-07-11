@@ -43,6 +43,5 @@ transmit
     secondaryLocalPort
     secondaryRemoteIPAddress
     secondaryRemotePort
-    videoFormat
     Enable                  true,false
 **/
