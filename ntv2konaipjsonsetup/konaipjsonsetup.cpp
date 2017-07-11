@@ -157,10 +157,6 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
         cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << endl;
 
-        transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
-        if (!transmitStruct.mVideoFormat.isEmpty())
-            cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
-
         transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
 
