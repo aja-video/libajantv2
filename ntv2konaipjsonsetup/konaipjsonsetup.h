@@ -19,11 +19,13 @@ typedef struct
 {
     QString mChannelDesignator;
     QString mStream;
-    QString mSrcPort;
-    QString mSrcIPAddress;
+    QString mPrimarySrcPort;
+    QString mPrimarySrcIPAddress;
     QString mPrimaryDestIPAddress;
     QString mPrimaryDestPort;
     QString mPrimaryFilter;
+    QString mSecondarySrcPort;
+    QString mSecondarySrcIPAddress;
     QString mSecondaryDestIPAddress;
     QString mSecondaryDestPort;
     QString mSecondaryFilter;

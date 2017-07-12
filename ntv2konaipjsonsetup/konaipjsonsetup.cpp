@@ -20,7 +20,6 @@ using std::cerr;
 
 NTV2Channel getChannel(QString channelDesignator);
 bool getEnable(QString enableBoolString);
-MACAddr toMAC(QString mac);
 
 #undef CABLE_ME_SIMPLE
 
@@ -77,14 +76,13 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         receiveStruct.mStream = receiveChannelObject["stream"].toString();
         if (!receiveStruct.mStream.isEmpty())
             cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
+        receiveStruct.mPrimarySrcPort = receiveChannelObject["primarySrcPort"].toString();
+        if (!receiveStruct.mPrimarySrcPort.isEmpty())
+            cout << "PrimarySrcPort " << receiveStruct.mPrimarySrcPort.toStdString() << endl;
 
-        receiveStruct.mSrcPort = receiveChannelObject["srcPort"].toString();
-        if (!receiveStruct.mSrcPort.isEmpty())
-            cout << "Src Port " << receiveStruct.mSrcPort.toStdString() << endl;
-
-        receiveStruct.mSrcIPAddress = receiveChannelObject["srcIPAddress"].toString();
-        if (!receiveStruct.mSrcIPAddress.isEmpty())
-            cout << "Src IP Address " << receiveStruct.mSrcIPAddress.toStdString() << endl;
+        receiveStruct.mPrimarySrcIPAddress = receiveChannelObject["primarySrcIPAddress"].toString();
+        if (!receiveStruct.mPrimarySrcIPAddress.isEmpty())
+            cout << "PrimarySrcIPAddress " << receiveStruct.mPrimarySrcIPAddress.toStdString() << endl;
 
         receiveStruct.mPrimaryDestIPAddress = receiveChannelObject["primaryDestIPAddress"].toString();
         cout << "PrimaryDestIPAddress " << receiveStruct.mPrimaryDestIPAddress.toStdString() << endl;
@@ -94,6 +92,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
 
         receiveStruct.mPrimaryFilter = receiveChannelObject["primaryFilter"].toString();
         cout << "PrimaryFilter " << receiveStruct.mPrimaryFilter.toStdString() << endl;
+
+        receiveStruct.mSecondarySrcPort = receiveChannelObject["secondarySrcPort"].toString();
+        if (!receiveStruct.mSecondarySrcPort.isEmpty())
+            cout << "SecondarySrcPort " << receiveStruct.mSecondarySrcPort.toStdString() << endl;
+
+        receiveStruct.mSecondarySrcIPAddress = receiveChannelObject["secondarySrcIPAddress"].toString();
+        if (!receiveStruct.mSecondarySrcIPAddress.isEmpty())
+            cout << "SecondarySrcIAddress " << receiveStruct.mSecondarySrcIPAddress.toStdString() << endl;
 
         receiveStruct.mSecondaryDestIPAddress = receiveChannelObject["secondaryDestIPAddress"].toString();
         if (!receiveStruct.mSecondaryDestIPAddress.isEmpty())
@@ -316,13 +322,23 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         SFPStruct sfp = sfpIter.next();
         if ( sfp.mSFPDesignator == "top")
         {
-            config2022.SetNetworkConfiguration (SFP_TOP,   sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool rv = config2022.SetNetworkConfiguration (SFP_TOP,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            if (!rv)
+            {
+                cerr << "Error: " << config2022.getLastError() << endl;
+                return false;
+            }
             enable2022_7 = getEnable(sfp.mEnable2022_7);
         }
         else if ( sfp.mSFPDesignator == "bottom")
         {
-            config2022.SetNetworkConfiguration (SFP_BOTTOM, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
-        }
+            bool rv = config2022.SetNetworkConfiguration (SFP_BOTTOM,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            if (!rv)
+            {
+                cerr << "Error: " << config2022.getLastError() << endl;
+                return false;
+        	}
+    	}
     }
 
     cerr << "## receiveIter" << endl;
@@ -336,9 +352,13 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rx_2022_channel rxChannelConfig;
         bool ok;
         NTV2Channel channel = getChannel(receive.mChannelDesignator);
+        rxChannelConfig.primarySourceIP     = receive.mPrimarySrcIPAddress.toStdString();
+        rxChannelConfig.primarySourcePort   = receive.mPrimarySrcPort.toUInt();
         rxChannelConfig.primaryDestIP = receive.mPrimaryDestIPAddress.toStdString();
         rxChannelConfig.primaryDestPort = receive.mPrimaryDestPort.toUInt();
         rxChannelConfig.primaryRxMatch = receive.mPrimaryFilter.toUInt(&ok, 16);
+        rxChannelConfig.secondarySourceIP   = receive.mSecondarySrcIPAddress.toStdString();
+        rxChannelConfig.secondarySourcePort = receive.mSecondarySrcPort.toUInt();
         rxChannelConfig.secondaryDestIP = receive.mSecondaryDestIPAddress.toStdString();
         rxChannelConfig.secondaryDestPort = receive.mSecondaryDestPort.toUInt();
         rxChannelConfig.secondaryRxMatch = receive.mSecondaryFilter.toUInt(&ok, 16);
@@ -582,19 +602,3 @@ bool getEnable(QString enableBoolString)
     return (enableBoolString == "true");
 }
 
-MACAddr toMAC(QString mac)
-{
-    MACAddr MAC;
-
-    QStringList mlist = mac.split(':');
-    int numBytes = mlist.size();
-    if (numBytes > 6) numBytes = 6;
-
-    for (int i=0; i< numBytes; i++)
-    {
-        bool ok;
-        MAC.mac[i] = mlist[i].toUShort(&ok,16);
-    }
-
-    return MAC;
-}
