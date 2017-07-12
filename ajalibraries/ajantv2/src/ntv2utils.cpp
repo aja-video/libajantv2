@@ -3975,6 +3975,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
 		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:		return "Io4KIP";
+		case DEVICE_ID_KONAIP_4TX_2110: return "KONA IP 4TX 2110";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
 //	    default:					break;
 #else
@@ -7291,6 +7292,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
 			case DEVICE_ID_IO4KIP:						return "io4kip_pcie.bit";
+			case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx.mcs";
 			default:									return "";
 		}
 	#else
@@ -7465,6 +7467,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KIP,
+														DEVICE_ID_KONAIP_4TX_2110,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
