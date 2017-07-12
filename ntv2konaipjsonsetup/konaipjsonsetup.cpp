@@ -510,9 +510,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
 
         rxChannelConfig.rxMatch      = receive.mPrimaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.sourceIP     = receive.mSrcIPAddress.toStdString();
+        rxChannelConfig.sourceIP     = receive.mPrimarySrcIPAddress.toStdString();
         rxChannelConfig.destIP       = receive.mPrimaryDestIPAddress.toStdString();
-        rxChannelConfig.sourcePort   = receive.mSrcPort.toUInt();
+        rxChannelConfig.sourcePort   = receive.mPrimarySrcPort.toUInt();
         rxChannelConfig.destPort     = receive.mPrimaryDestPort.toUInt();
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
