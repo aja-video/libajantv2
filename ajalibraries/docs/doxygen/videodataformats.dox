@@ -11,10 +11,16 @@ Each format is identified by a specific <tt>NTV2VideoFormat</tt> enumeration con
 and HD-SDI video formats that can be accommodated in a single 1.5 Gbps SDI link. Progressively newer AJA devices support 3Gbps
 dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video at 60 fps.
 
+@note	The low-frame-rate (LFR) 720p and 525i formats (23.98, 24, 25 fps) marked with an asterisk below
+		are not "legal" SDI wire formats, and should not be routed to the SDI outputs. Typically they're
+		used to support "retail" editing applications. With firmware that supports the Universal Format
+		Converter widget (see \c NTV2DeviceCanDoWidget for \c NTV2_WgtUpDownConverter1), these formats
+		may be convertible into "legal" SDI wire formats (see \c NTV2DeviceCanDoConversionMode).
+
 @subsection		vidformatssd	SD Formats
 <table>
-	<tr><td><b>525i 2398</b>	<td>\c NTV2_FORMAT_525_2398
-	<tr><td><b>525i 24</b>		<td>\c NTV2_FORMAT_525_2400
+	<tr><td><b>525i 2398</b>	<td>\c NTV2_FORMAT_525_2398 *
+	<tr><td><b>525i 24</b>		<td>\c NTV2_FORMAT_525_2400 *
 	<tr><td><b>525i 5994</b>	<td>\c NTV2_FORMAT_525_5994
 	<tr><td><b>525psf 2997</b>	<td>\c NTV2_FORMAT_525psf_2997
 	<tr><td><b>625i 50</b>		<td>\c NTV2_FORMAT_625_5000
@@ -23,8 +29,8 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 
 @subsection		vidformatshd	HD Formats
 <table>
-	<tr><td><b>720p 2398</b>				<td>\c NTV2_FORMAT_720p_2398
-	<tr><td><b>720p 25</b>					<td>\c NTV2_FORMAT_720p_2500
+	<tr><td><b>720p 2398</b>				<td>\c NTV2_FORMAT_720p_2398 *
+	<tr><td><b>720p 25</b>					<td>\c NTV2_FORMAT_720p_2500 *
 	<tr><td><b>720p 50</b>					<td>\c NTV2_FORMAT_720p_5000
 	<tr><td><b>720p 5994</b>				<td>\c NTV2_FORMAT_720p_5994
 	<tr><td><b>720p 60</b>					<td>\c NTV2_FORMAT_720p_6000
