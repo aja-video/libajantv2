@@ -2908,6 +2908,16 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
 			WaitForFlashNOTBusy();
 		}
+		else if(NTV2DeviceHasSPIv5(_boardID))
+		{
+			programSize = 32 * 1024 * 1024;
+			programSize += 256*twoFiftySixBlockSizeCount;
+			programSize += 4*fileDwordSize;
+			numSectors = 128;
+			WriteRegister(kRegXenaxFlashAddress, 0);
+			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+			WaitForFlashNOTBusy();
+		}
 		else
 		{
 			programSize = 4*1024*1024;
@@ -2936,6 +2946,14 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 		uint32_t baseAddress = 0;
 		for(uint32_t blockCount = 0; blockCount < twoFiftySixBlockSizeCount; blockCount++, baseAddress += 256)
 		{
+			if(NTV2DeviceHasSPIv5(_boardID) && baseAddress == 16 * 1024 * 1024)
+			{
+				baseAddress = 0;
+				WriteRegister(kRegXenaxFlashAddress, 1);
+				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+				WaitForFlashNOTBusy();
+
+			}
 			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
 			WaitForFlashNOTBusy();
 			for ( ULWord count=0; count < 64; count++ )
@@ -2950,6 +2968,13 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 			WriteRegister(kVRegFlashStatus, _programStatus);
 		}
 
+		if(NTV2DeviceHasSPIv5(_boardID))
+		{
+			WriteRegister(kRegXenaxFlashAddress, 0);
+			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+			WaitForFlashNOTBusy();
+		}
+
 		// Protect Device
 		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
 		WaitForFlashNOTBusy();
@@ -2957,7 +2982,6 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName)
 		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteStatus);
 		WaitForFlashNOTBusy();
 
-		//verify program
 		if (VerifyMainFlash(fileName))
 			result =  true;
 
@@ -2998,6 +3022,30 @@ bool CNTV2Card::EraseFlashBlock(ULWord numSectors, ULWord sectorSize)
 		}
 		_programStatus += sectorSize;
 		WriteRegister(kVRegFlashStatus, _programStatus);
+	}
+
+	if(NTV2DeviceHasSPIv5(_boardID))
+	{
+		WriteRegister(kRegXenaxFlashAddress, 1);
+		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+		WaitForFlashNOTBusy();
+		baseAddress = 0;
+		for (ULWord sectorCount = 0; sectorCount < numSectors; sectorCount++ )
+		{
+			for (int i=0; i<4; i++ , baseAddress += (64*1024))
+			{
+				WriteRegister(kRegXenaxFlashAddress, baseAddress);
+				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
+				WaitForFlashNOTBusy();
+				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandSectorErase);
+				WaitForFlashNOTBusy();
+			}
+			_programStatus += sectorSize;
+			WriteRegister(kVRegFlashStatus, _programStatus);
+		}
+		WriteRegister(kRegXenaxFlashAddress, 0);
+		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+		WaitForFlashNOTBusy();
 	}
 
 	// Optional check. Program status is not updated here so progress indicator will stall if enabled.
@@ -3059,6 +3107,13 @@ bool CNTV2Card::VerifyMainFlash(const char *fileName)
 	ULWord dwordSizeCount = (bitfileLength+4)/4;
 	for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
 	{
+		if(NTV2DeviceHasSPIv5(_boardID) && baseAddress == 16 * 1024 * 1024)
+		{
+			baseAddress = 0;
+			WriteRegister(kRegXenaxFlashAddress, 1);
+			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+			WaitForFlashNOTBusy();
+		}
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
 		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandReadFast);
 		WaitForFlashNOTBusy();
@@ -3073,6 +3128,12 @@ bool CNTV2Card::VerifyMainFlash(const char *fileName)
 		}
 		_programStatus += 4;
 		WriteRegister(kVRegFlashStatus, _programStatus);
+	}
+	if(NTV2DeviceHasSPIv5(_boardID))
+	{
+		WriteRegister(kRegXenaxFlashAddress, 0);
+		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
+		WaitForFlashNOTBusy();
 	}
 
 	return errorCount ? false : true;
@@ -8524,8 +8585,8 @@ bool CNTV2Card::SetSDIOut6GEnable(NTV2Channel inChannel, bool enable)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	WriteRegister(gChannelToSDIOutControlRegNum[inChannel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
-	return WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+	return WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
 }
 
 bool CNTV2Card::GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled)
@@ -8533,8 +8594,8 @@ bool CNTV2Card::GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled)
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	ULWord		is6G(0), is12G(0);
-	bool retVal = ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
-	retVal = ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+	bool retVal = ReadRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], &is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	retVal = ReadRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], &is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 	if (is6G == 1 && is12G == 0)
 		outIsEnabled = true;
 	else
@@ -8547,8 +8608,8 @@ bool CNTV2Card::SetSDIOut12GEnable(NTV2Channel inChannel, bool enable)
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	if (enable)
-		WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
-	return WriteRegister(gChannelToSDIOutControlRegNum[inChannel], enable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+		WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	return WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], enable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
 
 bool CNTV2Card::GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled)
@@ -8556,7 +8617,7 @@ bool CNTV2Card::GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled)
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	ULWord		tempVal(0);
-	const bool	retVal(ReadRegister(gChannelToSDIOutControlRegNum[inChannel], &tempVal, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
+	const bool	retVal(ReadRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], &tempVal, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
 	outIsEnabled = static_cast <bool> (tempVal);
 	return retVal;
 }
