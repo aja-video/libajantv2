@@ -21,73 +21,79 @@ using namespace std;
 
 
 #if defined (NTV2_DEPRECATE)
-#define	AJA_LOCAL_STATIC	static
+	#define	AJA_LOCAL_STATIC	static
 #else	//	!defined (NTV2_DEPRECATE)
-#define	AJA_LOCAL_STATIC
+	#define	AJA_LOCAL_STATIC
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-#define	DefineRegName(__rn__,__cstr__)			do																								\
-{																								\
-const string __regName__ (__cstr__);														\
-if (!__regName__.empty())																	\
-if (mRegNumToStringMap.find ((__rn__)) == mRegNumToStringMap.end())						\
-{																						\
-mRegNumToStringMap.insert (RegNumToStringPair ((__rn__), __regName__));				\
-mStringToRegNumMap.insert (StringToRegNumPair (ToLower (__regName__), (__rn__)));	\
-}																						\
-} while (false)
+#define	DefineRegName(__rn__,__cstr__)																\
+	do																								\
+	{																								\
+		const string __regName__ (__cstr__);														\
+		if (!__regName__.empty())																	\
+			if (mRegNumToStringMap.find ((__rn__)) == mRegNumToStringMap.end())						\
+			{																						\
+				mRegNumToStringMap.insert (RegNumToStringPair ((__rn__), __regName__));				\
+				mStringToRegNumMap.insert (StringToRegNumPair (ToLower (__regName__), (__rn__)));	\
+			}																						\
+	} while (false)
 
-#define	DefineRegDecoder(__rn__,__dec__)		mRegNumToDecoderMap.insert (RegNumToDecoderPair ((__rn__), &(__dec__)))
+#define	DefineRegDecoder(__rn__,__dec__)															\
+	mRegNumToDecoderMap.insert (RegNumToDecoderPair ((__rn__), &(__dec__)))
 
-#define	DefineRegClass(__rn__,__str__)			do																						\
-{																						\
-if (!(__str__).empty())																\
-mRegClassToRegNumMap.insert (StringToRegNumPair ((__str__), (__rn__)));		\
-} while (false)
+#define	DefineRegClass(__rn__,__str__)																\
+	do																								\
+	{																								\
+		if (!(__str__).empty())																		\
+			mRegClassToRegNumMap.insert (StringToRegNumPair ((__str__), (__rn__)));					\
+	} while (false)
 
-#define DefineRegReadWrite(__rn__,__rorw__)		do														\
-{														\
-if ((__rorw__) == READONLY)							\
-{													\
-NTV2_ASSERT (!IsRegisterWriteOnly(__rn__));		\
-DefineRegClass ((__rn__), kRegClass_ReadOnly);	\
-}													\
-if ((__rorw__) == WRITEONLY)						\
-{													\
-NTV2_ASSERT (!IsRegisterReadOnly(__rn__));		\
-DefineRegClass ((__rn__), kRegClass_WriteOnly);	\
-}													\
-} while (false)
+#define DefineRegReadWrite(__rn__,__rorw__)					\
+	do														\
+	{														\
+		if ((__rorw__) == READONLY)							\
+		{													\
+			NTV2_ASSERT (!IsRegisterWriteOnly(__rn__));		\
+			DefineRegClass ((__rn__), kRegClass_ReadOnly);	\
+		}													\
+		if ((__rorw__) == WRITEONLY)						\
+		{													\
+			NTV2_ASSERT (!IsRegisterReadOnly(__rn__));		\
+			DefineRegClass ((__rn__), kRegClass_WriteOnly);	\
+		}													\
+	} while (false)
 
-#define	DefineRegister(__rnum__,__rname__,__decoder__,__rorw__,__c1__, __c2__, __c3__)	do													\
-{													\
-DefineRegName ((__rnum__), (__rname__));		\
-DefineRegDecoder ((__rnum__), (__decoder__));	\
-DefineRegReadWrite ((__rnum__), (__rorw__));	\
-DefineRegClass ((__rnum__), (__c1__));			\
-DefineRegClass ((__rnum__), (__c2__));			\
-DefineRegClass ((__rnum__), (__c3__));			\
-} while (false)
+#define	DefineRegister(__rnum__,__rname__,__decoder__,__rorw__,__c1__, __c2__, __c3__)		\
+	do														\
+	{														\
+		DefineRegName ((__rnum__), (__rname__));			\
+		DefineRegDecoder ((__rnum__), (__decoder__));		\
+		DefineRegReadWrite ((__rnum__), (__rorw__));		\
+		DefineRegClass ((__rnum__), (__c1__));				\
+		DefineRegClass ((__rnum__), (__c2__));				\
+		DefineRegClass ((__rnum__), (__c3__));				\
+	} while (false)
 
-#define	DefineXptReg(__rn__,__xpt0__,__xpt1__,__xpt2__,__xpt3__)	do																															\
-{																															\
-DefineRegister ((__rn__),	"",	mDecodeXptGroupReg,	READWRITE,	kRegClass_Routing,	kRegClass_NULL,	kRegClass_NULL);	\
-const NTV2InputCrosspointID	indexes	[4]	= {(__xpt0__), (__xpt1__), (__xpt2__), (__xpt3__)};								\
-for (int ndx(0);  ndx < 4;  ndx++)																						\
-{																														\
-if (indexes[ndx] == NTV2_INPUT_CROSSPOINT_INVALID)																	\
-continue;																										\
-const XptRegNumAndMaskIndex regNumAndNdx ((__rn__), ndx);															\
-if (mXptRegNumMaskIndex2InputXptMap.find (regNumAndNdx) == mXptRegNumMaskIndex2InputXptMap.end())					\
-mXptRegNumMaskIndex2InputXptMap [regNumAndNdx] = indexes[ndx];													\
-if (mInputXpt2XptRegNumMaskIndexMap.find (indexes[ndx]) == mInputXpt2XptRegNumMaskIndexMap.end())					\
-mInputXpt2XptRegNumMaskIndexMap[indexes[ndx]] = regNumAndNdx;													\
-}																														\
-} while (false)
+#define	DefineXptReg(__rn__,__xpt0__,__xpt1__,__xpt2__,__xpt3__)	\
+	do																															\
+	{																															\
+		DefineRegister ((__rn__),	"",	mDecodeXptGroupReg,	READWRITE,	kRegClass_Routing,	kRegClass_NULL,	kRegClass_NULL);	\
+		const NTV2InputCrosspointID	indexes	[4]	= {(__xpt0__), (__xpt1__), (__xpt2__), (__xpt3__)};								\
+		for (int ndx(0);  ndx < 4;  ndx++)																						\
+		{																														\
+			if (indexes[ndx] == NTV2_INPUT_CROSSPOINT_INVALID)																	\
+				continue;																										\
+			const XptRegNumAndMaskIndex regNumAndNdx ((__rn__), ndx);															\
+			if (mXptRegNumMaskIndex2InputXptMap.find (regNumAndNdx) == mXptRegNumMaskIndex2InputXptMap.end())					\
+				mXptRegNumMaskIndex2InputXptMap [regNumAndNdx] = indexes[ndx];													\
+			if (mInputXpt2XptRegNumMaskIndexMap.find (indexes[ndx]) == mInputXpt2XptRegNumMaskIndexMap.end())					\
+				mInputXpt2XptRegNumMaskIndexMap[indexes[ndx]] = regNumAndNdx;													\
+		}																														\
+	} while (false)
 
 static const string	gChlClasses[8]	=	{	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3,	kRegClass_Channel4,
-	kRegClass_Channel5,	kRegClass_Channel6,	kRegClass_Channel7,	kRegClass_Channel8	};
+											kRegClass_Channel5,	kRegClass_Channel6,	kRegClass_Channel7,	kRegClass_Channel8	};
 
 class RegisterExpert
 {
@@ -145,7 +151,10 @@ public:
 		DefineRegister (kRegSDIOut6Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut7Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut8Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8,	kRegClass_NULL);
-		
+
+		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -1192,7 +1201,38 @@ private:
 			return oss.str();
 		}
 	}	mDecodeSysmonVccIntDieTemp;
-	
+
+	struct DecodeBitfileDateTime : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			ostringstream	oss;
+			if (inRegNum == kRegBitfileDate)
+			{
+				const UWord		yyyy	((inRegValue & 0xFFFF0000) >> 16);
+				const UWord		mm		((inRegValue & 0x0000FF00) >> 8);
+				const UWord		dd		(inRegValue & 0x000000FF);
+				if (yyyy > 0x2015  &&  mm > 0  &&  mm < 0x13  &&  dd > 0  &&  dd < 0x32)
+					oss << "Bitfile Date: " << HEX0N(mm,2) << "/" << HEX0N(dd,2) << "/"	<< HEX0N(yyyy,4);
+				else
+					oss << "Bitfile Date: " << xHEX0N(inRegValue, 8);
+			}
+			else if (inRegNum == kRegBitfileTime)
+			{
+				const UWord		hh	((inRegValue & 0x00FF0000) >> 16);
+				const UWord		mm	((inRegValue & 0x0000FF00) >> 8);
+				const UWord		ss	(inRegValue & 0x000000FF);
+				if (hh < 0x24  &&  mm < 0x60  &&  ss < 0x60)
+					oss << "Bitfile Time: " << HEX0N(hh,2) << ":" << HEX0N(mm,2) << ":"	<< HEX0N(ss,2);
+				else
+					oss << "Bitfile Time: " << xHEX0N(inRegValue, 8);
+			}
+			else NTV2_ASSERT(false);	//	impossible
+			return oss.str();
+		}
+	}	mDecodeBitfileDateTime;
+
 	struct DecodeVidControlReg : public Decoder		//	Bit31=Is16x9 | Bit30=IsMono
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1802,6 +1842,7 @@ private:
 			(void) inDeviceID;
 			const uint16_t	gen		((inRegValue & (BIT(20)|BIT(21)|BIT(22)|BIT(23))) >> 20);
 			const uint16_t	lanes	((inRegValue & (BIT(16)|BIT(17)|BIT(18)|BIT(19))) >> 16);
+			const uint16_t	fwRev	((inRegValue & 0x0000FF00) >> 8);
 			ostringstream	oss;
 			for (uint16_t engine(0);  engine < 4;  engine++)
 				oss	<< "DMA " << (engine+1) << " Int Active?: "	<< YesNo(inRegValue & BIT(27+engine))						<< endl;
@@ -1809,8 +1850,9 @@ private:
 			for (uint16_t engine(0);  engine < 4;  engine++)
 				oss	<< "DMA " << (engine+1) << " Busy?: "		<< YesNo(inRegValue & BIT(27+engine))						<< endl;
 			oss	<< "Strap: "									<< ((inRegValue & BIT(7)) ? "Installed" : "Not Installed")	<< endl
-			<< "Gen: "										<< gen << ((gen > 0 && gen < 4) ? "" : " <invalid>")		<< endl
-			<< "Lanes: "									<< lanes << ((lanes >= 0  &&  lanes < 9) ? "" : " <invalid>");
+				<< "Firmware Rev: "								<< xHEX0N(fwRev, 2) << " (" << DEC(fwRev) << ")"			<< endl
+				<< "Gen: "										<< gen << ((gen > 0 && gen < 4) ? "" : " <invalid>")		<< endl
+				<< "Lanes: "									<< lanes << ((lanes >= 0  &&  lanes < 9) ? "" : " <invalid>");
 			return oss.str();
 		}
 	}	mDMAControlRegDecoder;

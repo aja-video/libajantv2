@@ -119,8 +119,8 @@ typedef enum
 	kRegFS1ProcAmpC2CROffsetY,		// 86
 	kRegFS1AudioDelay,				// 87
 	kRegAud2Delay = kRegFS1AudioDelay, //87
-	kRegAuxInterruptDelay,			// 88
-	kRegReserved89,					// 89
+	kRegBitfileDate,				// 88
+	kRegBitfileTime,				// 89
 	
 	kRegFS1I2CControl,				// 90
 	kRegFS1I2C1Address,				// 91
@@ -1153,7 +1153,10 @@ typedef enum
 		kRegDNX_NumberOfRegisters = ((kRegDNX_MaximumRegister - DNX_REG_START) + 1)
 	} DNXRegisterNum;
 #endif	//	!defined (NTV2_DEPRECATE)
-
+#if defined (NTV2_DEPRECATE_13_1)
+	#define	kRegAuxInterruptDelay	kRegBitfileDate			///< @deprecated		Use kRegBitfileDate instead.
+	#define	kRegReserved89			kRegBitfileTime			///< @deprecated		Use kRegBitfileTime instead.
+#endif	//	NTV2_DEPRECATE_13_1
 
 // Virtual registers
 #include "ntv2virtualregisters.h"
