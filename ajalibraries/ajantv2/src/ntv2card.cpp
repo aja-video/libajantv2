@@ -559,6 +559,15 @@ bool CNTV2Card::DeviceCanDoInputSource (const NTV2InputSource inInputSource)
 	return ::NTV2DeviceCanDoInputSource (GetDeviceID(), inInputSource);
 }
 
+bool CNTV2Card::DeviceCanDoAudioMixer ()
+{
+	ULWord isMixerSupported = 0;
+	ReadRegister(kRegGlobalControl2, &isMixerSupported, BIT(19), 19);
+	if(isMixerSupported == 1)
+		return true;
+	return false;
+}
+
 bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 {
 	uint32_t	regValue	(0);

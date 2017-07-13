@@ -706,10 +706,11 @@ typedef enum NTV2RXSDIStatusRegister
 
 typedef enum
 {
-	kRegAudioMixerInputSelects = 2114,	//2114
-	kRegAudioMixerMainInputGain,		//2115
-	kRegAudioMixer2ChannelInput1Gain,	//2116
-	kRegAudioMixer2ChannelInput2Gain	//2117
+	kRegAudioMixerInputSelects = 2304,	//2304
+	kRegAudioMixerMainInputGain,		//2305
+	kRegAudioMixer2ChannelInput1Gain,	//2306
+	kRegAudioMixer2ChannelInput2Gain,	//2307
+	kRegAudioMixerChannelSelect			//2308
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
@@ -2289,8 +2290,9 @@ typedef enum
 	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
 	kRegMaskAudioMixerMainInputSelect = BIT(2) + BIT(1) + BIT(0),
-	kRegMaskAudioMixer2CHInput1 = BIT(6) + BIT(5) + BIT(4),
-	kRegMaskAudioMixer2CHInput2 = BIT(10) + BIT(9) + BIT(8)
+	kRegMaskAudioMixerAux1x2CHInput = BIT(6) + BIT(5) + BIT(4),
+	kRegMaskAudioMixerAux2x2CHInput = BIT(10) + BIT(9) + BIT(8),
+	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0)
 } RegisterMask;
 
 typedef enum
@@ -3319,8 +3321,9 @@ typedef enum
 	kRegShiftHDRStaticMetadataDescriptorID = 24,
 
 	kRegShiftAudioMixerMainInputSelect = 0,
-	kRegShiftAudioMixer2CHInput1 = 4,
-	kRegShiftAudioMixer2CHInput2 = 8
+	kRegShiftAudioMixerAux1x2CHInput = 4,
+	kRegShiftAudioMixerAux2x2CHInput = 8,
+	kRegShiftAudioMixerChannelSelect = 0
 } RegisterShift;
 
 

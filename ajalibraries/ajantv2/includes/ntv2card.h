@@ -448,6 +448,12 @@ public:
 	AJA_VIRTUAL bool	DeviceCanDoInputSource (const NTV2InputSource inInputSource);
 
 	/**
+		@brief		Returns true if the device having the given ID supports the audio mixer.
+		@return		True if the device supports the given input source.
+	**/
+	AJA_VIRTUAL bool	DeviceCanDoAudioMixer ();
+
+	/**
 		@brief		Fetches the requested boolean value. Typically called to determine device features.
 		@param[in]	inParamID	Specifies the NTV2BoolParamID of interest.
 		@param[out]	outValue	Receives the requested boolean value.
@@ -1925,6 +1931,20 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+
+	AJA_VIRTUAL bool		GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+
+	AJA_VIRTUAL bool		SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+
+
+
+	AJA_VIRTUAL bool		SetAudioMixerAux1x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+
+	AJA_VIRTUAL bool		SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem);
 
 	///@}
 

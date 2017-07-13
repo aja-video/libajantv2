@@ -1655,6 +1655,7 @@ typedef enum
     NTV2_AUDIO_AES,				///< @brief	Obtain audio samples from the device AES inputs, if available.
     NTV2_AUDIO_ANALOG,			///< @brief	Obtain audio samples from the device analog input(s), if available.
     NTV2_AUDIO_HDMI,			///< @brief	Obtain audio samples from the device HDMI input, if available
+	NTV2_AUDIO_MIC,
     NTV2_MAX_NUM_AudioSources,
     NTV2_AUDIO_SOURCE_INVALID	= NTV2_MAX_NUM_AudioSources
 } NTV2AudioSource;
@@ -3397,7 +3398,7 @@ typedef enum
     NTV2_AUDIOSYSTEM_5,
     NTV2_AUDIOSYSTEM_6,
     NTV2_AUDIOSYSTEM_7,
-    NTV2_AUDIOSYSTEM_8,
+	NTV2_AUDIOSYSTEM_8,
     NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_NUM_AUDIOSYSTEMS		= NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS

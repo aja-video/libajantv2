@@ -3018,9 +3018,9 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_Wgt3GSDIIn2:
 				case NTV2_Wgt3GSDIIn3:
 				case NTV2_Wgt3GSDIIn4:
-				case NTV2_Wgt3GSDIOut1:
-				case NTV2_Wgt3GSDIOut2:
-				case NTV2_Wgt3GSDIOut4:
+				case NTV2_Wgt12GSDIOut1:
+				case NTV2_Wgt12GSDIOut2:
+				case NTV2_Wgt12GSDIOut4:
 				case NTV2_WgtDualLinkV2In1:
 				case NTV2_WgtDualLinkV2In2:
 				case NTV2_WgtDualLinkV2Out1:
