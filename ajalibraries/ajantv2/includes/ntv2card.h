@@ -4703,7 +4703,7 @@ public:
 	/**
 		@brief		Enables or disables multi-format (per channel) device operation.
 					If enabled, each device channel can handle a different video format (provided it's in the same clock family).
-					If disabled, all device channels have the same video format. See \ref clockingandsync for more information.
+					If disabled, all device channels have the same video format. See \ref deviceclockingandsync for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
