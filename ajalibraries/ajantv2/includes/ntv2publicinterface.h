@@ -707,9 +707,9 @@ typedef enum NTV2RXSDIStatusRegister
 typedef enum
 {
 	kRegAudioMixerInputSelects = 2304,	//2304
-	kRegAudioMixerMainInputGain,		//2305
-	kRegAudioMixer2ChannelInput1Gain,	//2306
-	kRegAudioMixer2ChannelInput2Gain,	//2307
+	kRegAudioMixerMainGain,		//2305
+	kRegAudioMixerAux1Gain,	//2306
+	kRegAudioMixerAux2Gain,	//2307
 	kRegAudioMixerChannelSelect			//2308
 }NTV2AudioMixerRegisters;
 

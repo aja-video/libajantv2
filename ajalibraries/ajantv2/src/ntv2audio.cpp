@@ -634,12 +634,60 @@ bool CNTV2Card::SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudio
 	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
 		return false;	//	Invalid audio system
 
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))	//	bit 18 is MSB
+	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
 		return false;
 
 	return true;
 
 }	//	SetAudioMixerMainInputAudioSystem
+
+bool CNTV2Card::GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+	uint32_t audioChannelSelect = 0;
+	if (!ReadRegister(kRegMaskAudioMixerChannelSelect, &audioChannelSelect, kRegMaskAudioMixerChannelSelect, kRegShiftAudioMixerChannelSelect))
+		return false;
+	outChannelPair = (NTV2AudioChannelPair)audioChannelSelect;
+	return true;
+}
+
+bool CNTV2Card::SetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair inChannelPair)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+
+	if (UWord(inChannelPair) > NTV2_AudioChannel15_16)
+		return false;	//	Invalid audio system
+
+	if (!WriteRegister(kRegAudioMixerInputSelects, (ULWord)inChannelPair, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
+		return false;
+
+	return true;
+}
+
+bool CNTV2Card::GetAudioMixerMainInputGain(ULWord & outGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+	if (!ReadRegister(kRegAudioMixerMainGain, &outGainValue))
+		return false;
+	return true;
+}
+
+bool CNTV2Card::SetAudioMixerMainInputGain(const ULWord inGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+
+	if (inGainValue > 0x1fff)
+		return false;
+
+	if (!WriteRegister(kRegAudioMixerMainGain, inGainValue))
+		return false;
+
+	return true;
+}
 
 bool CNTV2Card::GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem)
 {
@@ -664,12 +712,35 @@ bool CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (const NTV2AudioSystem inA
 	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
 		return false;	//	Invalid audio system
 
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux1x2CHInput))	//	bit 18 is MSB
+	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux1x2CHInput))
 		return false;
 
 	return true;
 
 }	//	SetAudioMixerAux1x2chInputAudioSystem
+
+bool CNTV2Card::GetAudioMixerAux1InputGain(ULWord & outGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+	if (!ReadRegister(kRegAudioMixerAux1Gain, &outGainValue))
+		return false;
+	return true;
+}
+
+bool CNTV2Card::SetAudioMixerAux1InputGain(const ULWord inGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+
+	if (inGainValue > 0x1fff)
+		return false;
+
+	if (!WriteRegister(kRegAudioMixerAux1Gain, inGainValue))
+		return false;
+
+	return true;
+}
 
 bool CNTV2Card::GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem)
 {
@@ -694,12 +765,35 @@ bool CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inA
 	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
 		return false;	//	Invalid audio system
 
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux2x2CHInput, kRegShiftAudioMixerAux2x2CHInput))	//	bit 18 is MSB
+	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux2x2CHInput, kRegShiftAudioMixerAux2x2CHInput))
 		return false;
 
 	return true;
 
 }	//	SetAudioMixerAux2x2chInputAudioSystem
+
+bool CNTV2Card::GetAudioMixerAux2InputGain(ULWord & outGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+	if (!ReadRegister(kRegAudioMixerAux2Gain, &outGainValue))
+		return false;
+	return true;
+}
+
+bool CNTV2Card::SetAudioMixerAux2InputGain(const ULWord inGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;
+
+	if (inGainValue > 0x1fff)
+		return false;
+
+	if (!WriteRegister(kRegAudioMixerAux2Gain, inGainValue))
+		return false;
+
+	return true;
+}
 
 
 bool CNTV2Card::SetHDMIAudioSampleRateConverterEnable (bool value)
