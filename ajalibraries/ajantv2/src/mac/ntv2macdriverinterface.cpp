@@ -90,14 +90,18 @@ static const char * GetKernErrStr (const kern_return_t inError);
 										} while (false)
 
 
-#define							kMaxNumDevices		(32)						///	Limit to 32 devices
-static const string				sNTV2PCIDriverName	("com_aja_iokit_ntv2");		///	This should be the only place the driver's IOService name is defined
-static uint64_t					gErrorLogging		(0x0000000000000000);		///	Log errors? (one flag bit per UserClientCommandCode)
-static unsigned					gnBoardMaps;									///	Instance counter -- should never exceed one
-static unsigned int				FIVE_SECONDS		(5);						///	Maximum wait time for IORegistry to settle for hot plug/unplug (not used now)
-static unsigned int				TWO_SECONDS			(2);						///	Maximum wait time for IORegistry to settle for hot plug/unplug
-static uint64_t					RECHECK_INTERVAL	(100LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
-
+#define							kMaxNumDevices			(32)						///	Limit to 32 devices
+static const string				sNTV2PCIDriverName		("com_aja_iokit_ntv2");		///	This should be the only place the driver's IOService name is defined
+static uint64_t					gErrorLogging			(0x0000000000000000);		///	Log errors? (one flag bit per UserClientCommandCode)
+static unsigned					gnBoardMaps;										///	Instance counter -- should never exceed one
+static uint64_t					RECHECK_INTERVAL		(100LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
+#define							NTV2_IGNORE_IOREG_BUSY	(true)						///	If defined, ignore IORegistry busy state;
+																					///	otherwise wait for non-busy IORegistry before making new connections
+#if !defined(NTV2_IGNORE_IOREG_BUSY)
+	///	Max wait times for IORegistry to settle for hot plug/unplug...
+	static unsigned int			FIVE_SECONDS			(5);
+	static unsigned int			TWO_SECONDS				(2);
+#endif
 
 #if !defined (NTV2_NULL_DEVICE)
 	//	This section builds 'classes.a' with the normal linkage to the IOKit...
@@ -261,12 +265,12 @@ class DeviceMap
 			}
 
 			//	Wait for IORegistry to settle down (if busy)...
-			//if (!WaitForBusToSettle ())
-			//{
-			//	MDIWARN ("IORegistry unstable, resetting DeviceMap");
-			//	Reset ();
-			//	return 0;
-			//}
+			if (!WaitForBusToSettle ())
+			{
+				MDIWARN ("IORegistry unstable, resetting DeviceMap");
+				Reset ();
+				return 0;
+			}
 
 			//	Make a new connection...
 			UWord			ndx			(inDeviceIndex);
@@ -371,13 +375,18 @@ class DeviceMap
 				MDIFAIL ("IOKitGetBusyState failed -- " << KR(kr));
 			else if (busyState)
 			{
-				mach_timespec_t	maxWaitTime	= {TWO_SECONDS, 0};
-				MDINOTEIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitGetBusyState reported BUSY -- waiting for IORegistry to stabilize...");
+				#if defined (NTV2_IGNORE_IOREG_BUSY)
+					MDINOTEIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitGetBusyState reported BUSY");
+					return true;	//	IORegistry busy, but so what?
+				#else
+					mach_timespec_t	maxWaitTime	= {TWO_SECONDS, 0};
+					MDINOTEIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitGetBusyState reported BUSY -- waiting for IORegistry to stabilize...");
 
-				kr = OS_IOKitWaitQuiet (mMasterPort, &maxWaitTime);
-				if (kr == kIOReturnSuccess)
-					return true;
-				MDIFAILIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitWaitQuiet timed out -- " << KR(kr));
+					kr = OS_IOKitWaitQuiet (mMasterPort, &maxWaitTime);
+					if (kr == kIOReturnSuccess)
+						return true;
+					MDIFAILIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitWaitQuiet timed out -- " << KR(kr));
+				#endif	//	defined (NTV2_IGNORE_IOREG_BUSY)
 			}
 			else
 				return true;
