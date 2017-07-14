@@ -261,12 +261,12 @@ class DeviceMap
 			}
 
 			//	Wait for IORegistry to settle down (if busy)...
-			if (!WaitForBusToSettle ())
-			{
-				MDIWARN ("IORegistry unstable, resetting DeviceMap");
-				Reset ();
-				return 0;
-			}
+			//if (!WaitForBusToSettle ())
+			//{
+			//	MDIWARN ("IORegistry unstable, resetting DeviceMap");
+			//	Reset ();
+			//	return 0;
+			//}
 
 			//	Make a new connection...
 			UWord			ndx			(inDeviceIndex);
