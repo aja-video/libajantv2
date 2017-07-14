@@ -834,7 +834,6 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
 											<< " -- reg=" << registerNumber << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift) << ", WILL RESET DEVICE MAP");
 			gDeviceMap.Reset (kernResult == MACH_SEND_INVALID_DEST);	//	Reset masterPort for MACH_SEND_INVALID_DEST failures
-			SleepMs (30);
 			return false;
 		}
 	}
