@@ -646,7 +646,7 @@ bool CNTV2Card::GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outCh
 	if (!DeviceCanDoAudioMixer())
 		return false;
 	uint32_t audioChannelSelect = 0;
-	if (!ReadRegister(kRegMaskAudioMixerChannelSelect, &audioChannelSelect, kRegMaskAudioMixerChannelSelect, kRegShiftAudioMixerChannelSelect))
+	if (!ReadRegister(kRegAudioMixerChannelSelect, &audioChannelSelect, kRegMaskAudioMixerChannelSelect, kRegShiftAudioMixerChannelSelect))
 		return false;
 	outChannelPair = (NTV2AudioChannelPair)audioChannelSelect;
 	return true;
@@ -660,7 +660,7 @@ bool CNTV2Card::SetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair inChann
 	if (UWord(inChannelPair) > NTV2_AudioChannel15_16)
 		return false;	//	Invalid audio system
 
-	if (!WriteRegister(kRegAudioMixerInputSelects, (ULWord)inChannelPair, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
+	if (!WriteRegister(kRegAudioMixerChannelSelect, (ULWord)inChannelPair, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
 		return false;
 
 	return true;
