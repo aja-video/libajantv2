@@ -94,8 +94,8 @@ static const char * GetKernErrStr (const kern_return_t inError);
 static const string				sNTV2PCIDriverName	("com_aja_iokit_ntv2");		///	This should be the only place the driver's IOService name is defined
 static uint64_t					gErrorLogging		(0x0000000000000000);		///	Log errors? (one flag bit per UserClientCommandCode)
 static unsigned					gnBoardMaps;									///	Instance counter -- should never exceed one
-static unsigned int				FIVE_SECONDS		(5);						///	Maximum wait time for IORegistry to settle for hot plug/unplug (not used now)
 static unsigned int				TWO_SECONDS			(2);						///	Maximum wait time for IORegistry to settle for hot plug/unplug
+//static unsigned int				FIVE_SECONDS		(5);						///	Maximum wait time for IORegistry to settle for hot plug/unplug
 static uint64_t					RECHECK_INTERVAL	(100LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
 
 
