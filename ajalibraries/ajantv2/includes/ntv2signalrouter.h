@@ -177,13 +177,13 @@ class AJAExport CNTV2SignalRouter
 	private:
 		typedef std::map <NTV2InputCrosspointID, NTV2OutputCrosspointID>	MyConnections;
 		typedef MyConnections::const_iterator								MyConnectionsConstIter;
-		typedef MyConnections::iterator										MyConnectionsIter;
+                typedef MyConnections::iterator										MyConnectionsIter;
 
 		MyConnections								mConnections;		///< @brief	My collection of NTV2SignalConnections
 
 
 	//	Class Methods
-	public:
+        public:
 		#if !defined (NTV2_DEPRECATE_12_5)
 			static NTV2_DEPRECATED const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt);	///< @deprecated	NTV2RoutingEntry is deprecated.
 			static NTV2_DEPRECATED NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry);	///< @deprecated	NTV2RoutingEntry is deprecated.

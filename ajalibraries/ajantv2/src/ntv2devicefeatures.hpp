@@ -2080,7 +2080,7 @@ bool NTV2DeviceCanDoFrameBufferFormat (const NTV2DeviceID inDeviceID, const NTV2
 
 
 /**
-	NTV2DeviceCanDoWidget
+    NTV2DeviceCanDoWidget
 **/
 bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID inWidgetID)
 {
@@ -3037,7 +3037,7 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 
 	return false;
 
-}	//  NTV2DeviceCanDoWidget (auto-generated)
+}	//  NTV2Deviceidget (auto-generated)
 
 
 /**

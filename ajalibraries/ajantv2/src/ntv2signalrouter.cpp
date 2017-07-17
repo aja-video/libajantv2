@@ -1265,7 +1265,7 @@ bool CNTV2SignalRouter::GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetI
 {
 	outWidgets.clear();
 	for (NTV2WidgetID widgetID(NTV2_WIDGET_FIRST);  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
-		if (::NTV2DeviceCanDoWidget (inDeviceID, widgetID))
+        if (::NTV2DeviceCanDoWidget (inDeviceID, widgetID))
 			outWidgets.insert(widgetID);
 	return !outWidgets.empty();
 }
