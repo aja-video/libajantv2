@@ -95,7 +95,6 @@ static const string				sNTV2PCIDriverName	("com_aja_iokit_ntv2");		///	This shou
 static uint64_t					gErrorLogging		(0x0000000000000000);		///	Log errors? (one flag bit per UserClientCommandCode)
 static unsigned					gnBoardMaps;									///	Instance counter -- should never exceed one
 static unsigned int				TWO_SECONDS			(2);						///	Maximum wait time for IORegistry to settle for hot plug/unplug
-//static unsigned int				FIVE_SECONDS		(5);						///	Maximum wait time for IORegistry to settle for hot plug/unplug
 static uint64_t					RECHECK_INTERVAL	(100LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
 
 
@@ -261,12 +260,12 @@ class DeviceMap
 			}
 
 			//	Wait for IORegistry to settle down (if busy)...
-			if (!WaitForBusToSettle ())
-			{
-				MDIWARN ("IORegistry unstable, resetting DeviceMap");
-				Reset ();
-				return 0;
-			}
+			//if (!WaitForBusToSettle ())
+			//{
+			//	MDIWARN ("IORegistry unstable, resetting DeviceMap");
+			//	Reset ();
+			//	return 0;
+			//}
 
 			//	Make a new connection...
 			UWord			ndx			(inDeviceIndex);
@@ -834,7 +833,6 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
 											<< " -- reg=" << registerNumber << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift) << ", WILL RESET DEVICE MAP");
 			gDeviceMap.Reset (kernResult == MACH_SEND_INVALID_DEST);	//	Reset masterPort for MACH_SEND_INVALID_DEST failures
-			SleepMs (30);
 			return false;
 		}
 	}
