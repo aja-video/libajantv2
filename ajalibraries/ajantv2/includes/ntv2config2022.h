@@ -196,9 +196,6 @@ public:
     bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
     bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
 
-    bool        SetPTPMaster(std::string ptpMaster);
-    bool        GetPTPMaster(std::string & ptpMaster);
-
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -243,7 +240,6 @@ private:
     bool        _is2022_7;
     bool        _biDirectionalChannels;             // logically bi-directional channels
     bool        _is_txTop34;
-    bool        _hasPTP;
 
 };	//	CNTV2Config2022
 
