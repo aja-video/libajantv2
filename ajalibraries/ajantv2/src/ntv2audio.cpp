@@ -467,7 +467,7 @@ bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 
 	static const ULWord	sAudioSourceToRegValues []	=	{0x1/*NTV2_AUDIO_EMBEDDED*/,  0x0/*NTV2_AUDIO_AES*/,  0x9/*NTV2_AUDIO_ANALOG*/,  0xA/*NTV2_AUDIO_HDMI*/, 0xB/*NTV2_AUDIO_MIC*/};
 
-	if (static_cast <UWord> (inAudioSystem) < (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)) && NTV2_IS_VALID_AUDIO_SOURCE (inAudioSource))
+	if (static_cast <UWord> (inAudioSystem) < (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)) && NTV2_IS_VALID_AUDIO_SOURCE (inAudioSource))
 		result = WriteRegister (gAudioSystemToSrcSelectRegNum [inAudioSystem], sAudioSourceToRegValues [inAudioSource], kRegMaskAudioSource, kRegShiftAudioSource);
 
 	if (result)
@@ -491,7 +491,7 @@ bool CNTV2Card::GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 	outAudioSource		= NTV2_AUDIO_SOURCE_INVALID;
 	outEmbeddedSource	= NTV2_EMBEDDED_AUDIO_INPUT_INVALID;
 
-	if (static_cast <UWord> (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
+	if (static_cast <UWord> (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
 		return false;
 	if (!ReadRegister (gAudioSystemToSrcSelectRegNum [inAudioSystem], &regValue, kRegMaskAudioSource, kRegShiftAudioSource))
 		return false;
@@ -536,7 +536,7 @@ bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2
 {
 	if (ULWord (inChannel) >= ::NTV2DeviceGetNumVideoOutputs (_boardID))
 		return false;	//	Invalid channel
-	if (UWord (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
+	if (UWord (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
 		return false;	//	Invalid audio system
 
 	ULWord	value	(inAudioSystem);
