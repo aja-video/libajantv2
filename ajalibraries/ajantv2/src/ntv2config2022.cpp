@@ -207,7 +207,6 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     _is2022_2   = ((features & SAREK_2022_2)   != 0);
     _is2022_7   = ((features & SAREK_2022_7)   != 0);
     _is_txTop34 = ((features & SAREK_TX_TOP34) != 0);
-    _hasPTP     = ((features & SAREK_PTP_PLL)  != 0);
 
     _biDirectionalChannels = false;
 
@@ -237,12 +236,18 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
     addr.s_addr = (uint32_t)netConfig.ipc_gateway;
     gateway = inet_ntoa(addr);
 
-    SetNetworkConfiguration(port, ip, subnet, gateway);
-    return true;
+    bool rv = SetNetworkConfiguration(port, ip, subnet, gateway);
+    return rv;
 }
 
 bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
+    if (!mDevice.IsMBSystemValid())
+    {
+        mError = "Host software does not match device firmware. Firmware update required.";
+        return false;
+    }
+
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
 
@@ -305,11 +310,6 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
     }
 
-    if (_hasPTP)
-    {
-        ConfigurePTP(port,localIPAddress);
-    }
-
     bool rv = AcquireMailbox();
     if (rv)
     {
@@ -323,10 +323,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string ne
                                                 string localIPAddress1, string netmask1, string gateway1)
 {
 
-    SetNetworkConfiguration(SFP_TOP, localIPAddress0, netmask0, gateway0);
-    SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
+    bool rv = SetNetworkConfiguration(SFP_TOP, localIPAddress0, netmask0, gateway0);
+    if (!rv) return false;
 
-    return true;
+    rv = SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
+    return rv;
 }
 
 bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
@@ -437,7 +438,10 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
             // is multicast
             bool enabled = false;
             GetRxChannelEnable(channel,enabled);
-            SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+            if (rxConfig.secondaryRxMatch & RX_MATCH_2022_SOURCE_IP)
+                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+            else
+                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
         }
         else
         {
@@ -529,7 +533,10 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         // is multicast
         bool enabled = false;
         GetRxChannelEnable(channel,enabled);
-        SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, enabled);
+        if (rxConfig.primaryRxMatch & RX_MATCH_2022_SOURCE_IP)
+            SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+        else
+            SetIGMPGroup(port, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
     }
     else
     {
@@ -1079,26 +1086,6 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
 
     ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
     enabled = (val == 0x01);
-
-    return true;
-}
-
-bool  CNTV2Config2022::SetPTPMaster(std::string ptpMaster)
-{
-    uint32_t addr = inet_addr(ptpMaster.c_str());
-    addr = NTV2EndianSwap32(addr);
-    return mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
-}
-
-bool CNTV2Config2022::GetPTPMaster(std::string & ptpMaster)
-{
-    uint32_t val;
-    mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, &val);
-    val = NTV2EndianSwap32(val);
-
-    struct in_addr addr;
-    addr.s_addr = val;
-    ptpMaster = inet_ntoa(addr);
 
     return true;
 }

@@ -35,7 +35,7 @@ AJAFileIO::~AJAFileIO(void)
 }
 
 bool
-AJAFileIO::FileExists(const wstring& fileName) const
+AJAFileIO::FileExists(const wstring& fileName)
 {
 	string aString;
     aja::wstring_to_string(fileName, aString);
@@ -43,7 +43,7 @@ AJAFileIO::FileExists(const wstring& fileName) const
 }
 
 bool
-AJAFileIO::FileExists(const string& fileName) const
+AJAFileIO::FileExists(const string& fileName)
 {
 	struct stat dummy;
 	bool bExists = stat(fileName.c_str(), &dummy) != -1;
@@ -307,7 +307,7 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size)
 }
 
 AJAStatus
-AJAFileIO::Delete(const string& fileName) const
+AJAFileIO::Delete(const string& fileName)
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -322,7 +322,7 @@ AJAFileIO::Delete(const string& fileName) const
 }
 
 AJAStatus
-AJAFileIO::Delete(const wstring& fileName) const
+AJAFileIO::Delete(const wstring& fileName)
 {
     AJAStatus status = AJA_STATUS_FAIL;
 
@@ -467,7 +467,7 @@ AJAFileIO::DoesDirectoryContain(
 
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const string& directory) const
+AJAFileIO::DoesDirectoryExist(const string& directory)
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -484,7 +484,7 @@ AJAFileIO::DoesDirectoryExist(const string& directory) const
 }
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const wstring& directory) const
+AJAFileIO::DoesDirectoryExist(const wstring& directory)
 {
     AJAStatus status = AJA_STATUS_FAIL;
     string aDir;

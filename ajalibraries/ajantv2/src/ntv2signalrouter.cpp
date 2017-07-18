@@ -4,6 +4,7 @@
 **/
 #include "ntv2signalrouter.h"
 #include "ntv2debug.h"
+#include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2registerexpert.h"
 #include <memory.h>
@@ -167,11 +168,37 @@ bool CNTV2SignalRouter::RemoveConnection (const NTV2InputCrosspointID inSignalIn
 }
 
 
+static const ULWord	sSignalRouterRegMasks[]		=	{	0x000000FF,	0x0000FF00,	0x00FF0000,	0xFF000000	};
+static const ULWord	sSignalRouterRegShifts[]	=	{	         0,	         8,	        16,	        24	};
+
+
+bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputs, const NTV2RegisterReads & inRegReads)
+{
+	Reset();
+	for (NTV2InputCrosspointIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+	{
+		uint32_t	regNum(0),	maskNdx(0);
+		CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
+		NTV2RegisterReadsConstIter	iter	(::FindFirstMatchingRegisterNumber(regNum, inRegReads));
+		NTV2_ASSERT(iter != inRegReads.end());
+		if (iter != inRegReads.end())
+		{
+			NTV2_ASSERT(iter->registerNumber == regNum);
+			NTV2_ASSERT(iter->registerMask == 0xFFFFFFFF);
+			NTV2_ASSERT(iter->registerShift == 0);
+			NTV2_ASSERT(maskNdx < 4);
+			const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
+			const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
+			if (outputXpt != NTV2_XptBlack)
+				mConnections.insert(NTV2SignalConnection (*it, outputXpt));
+		}
+	}	//	for each NTV2InputCrosspointID
+	return true;
+}
+
+
 bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) const
 {
-	static const ULWord	sMasks[]	=	{	0x000000FF,	0x0000FF00,	0x00FF0000,	0xFF000000	};
-	static const ULWord	sShifts[]	=	{	         0,	         8,	        16,	        24	};
-
 	outRegWrites.clear ();
 
 	for (MyConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
@@ -187,7 +214,7 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 			return false;
 		}
 
-		const NTV2RegInfo	regInfo	(regNum, outputXpt, sMasks[ndx], sShifts[ndx]);
+		const NTV2RegInfo	regInfo	(regNum, outputXpt, sSignalRouterRegMasks[ndx], sSignalRouterRegShifts[ndx]);
 		try
 		{
 			outRegWrites.push_back (regInfo);
@@ -1234,6 +1261,16 @@ NTV2OutputCrosspointID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const 
 }
 
 
+bool CNTV2SignalRouter::GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets)
+{
+	outWidgets.clear();
+	for (NTV2WidgetID widgetID(NTV2_WIDGET_FIRST);  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
+		if (::NTV2DeviceCanDoWidget (inDeviceID, widgetID))
+			outWidgets.insert(widgetID);
+	return !outWidgets.empty();
+}
+
+
 bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID)
 {
 	assert (!gInputXpt2WidgetID.empty ());
@@ -1264,6 +1301,37 @@ bool CNTV2SignalRouter::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2Inpu
 		++iter;
 	}
 	return !outInputs.empty ();
+}
+
+
+bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputCrosspointIDSet & outInputs)
+{
+	outInputs.clear();
+	NTV2WidgetIDSet	widgetIDs;
+	if (!GetWidgetIDs (inDeviceID, widgetIDs))
+		return false;	//	Fail
+
+	for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());  iter != widgetIDs.end ();  ++iter)
+	{
+		NTV2InputCrosspointIDSet	inputs;
+		CNTV2SignalRouter::GetWidgetInputs (*iter, inputs);
+		outInputs.insert(inputs.begin(), inputs.end());
+	}
+	return true;
+}
+
+
+bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos)
+{
+	outRegInfos.clear();
+
+	std::set<uint32_t>	regNums;
+	uint32_t			regNum(0),	maskNdx(0);
+	for (NTV2InputCrosspointIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+		if (CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx))
+			if (regNums.find(regNum) == regNums.end())
+				outRegInfos.push_back(NTV2RegInfo(regNum));
+	return true;
 }
 
 

@@ -748,7 +748,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	if (IsKonaIPDevice())
 	{
         uint32_t val;
-        ReadRegister(SAREK_REGS + kRegSareIfVersion, &val);
+        ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
         if (val == SAREK_IF_VERSION)
             return true;
         else
@@ -797,6 +797,7 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_KONAIP_4TX_2110:
 		return true;
 	default:
 		return false;

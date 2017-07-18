@@ -3975,6 +3975,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
 		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:		return "Io4KIP";
+		case DEVICE_ID_KONAIP_4TX_2110: return "KONA IP 4TX 2110";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
 //	    default:					break;
 #else
@@ -6557,6 +6558,16 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		case NTV2_Wgt425Mux2:				return inCompactDisplay ? "425Mux2"			: "NTV2_Wgt425Mux2";
 		case NTV2_Wgt425Mux3:				return inCompactDisplay ? "425Mux3"			: "NTV2_Wgt425Mux3";
 		case NTV2_Wgt425Mux4:				return inCompactDisplay ? "425Mux4"			: "NTV2_Wgt425Mux4";
+		case NTV2_Wgt12GSDIIn1:				return inCompactDisplay ? "12GSDIIn1"		: "NTV2_Wgt12GSDIIn1";
+		case NTV2_Wgt12GSDIIn2:				return inCompactDisplay ? "12GSDIIn2"		: "NTV2_Wgt12GSDIIn2";
+		case NTV2_Wgt12GSDIIn3:				return inCompactDisplay ? "12GSDIIn3"		: "NTV2_Wgt12GSDIIn3";
+		case NTV2_Wgt12GSDIIn4:				return inCompactDisplay ? "12GSDIIn4"		: "NTV2_Wgt12GSDIIn4";
+		case NTV2_Wgt12GSDIOut1:			return inCompactDisplay ? "12GSDIOut1"		: "NTV2_Wgt12GSDIOut1";
+		case NTV2_Wgt12GSDIOut2:			return inCompactDisplay ? "12GSDIOut2"		: "NTV2_Wgt12GSDIOut2";
+		case NTV2_Wgt12GSDIOut3:			return inCompactDisplay ? "12GSDIOut3"		: "NTV2_Wgt12GSDIOut3";
+		case NTV2_Wgt12GSDIOut4:			return inCompactDisplay ? "12GSDIOut4"		: "NTV2_Wgt12GSDIOut4";
+		case NTV2_WgtHDMIIn1v4:				return inCompactDisplay ? "HDMIv4In1"		: "NTV2_WgtHDMIIn1v4";
+		case NTV2_WgtHDMIOut1v4:			return inCompactDisplay ? "HDMIv4Out1"		: "NTV2_WgtHDMIOut1v4";
 		case NTV2_WgtModuleTypeCount:		return inCompactDisplay ? "???"				: "???";
 	}
 	return "";
@@ -7281,6 +7292,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
 			case DEVICE_ID_IO4KIP:						return "io4kip_pcie.bit";
+			case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx.mcs";
 			default:									return "";
 		}
 	#else
@@ -7455,6 +7467,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KIP,
+														DEVICE_ID_KONAIP_4TX_2110,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)

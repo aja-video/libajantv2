@@ -105,6 +105,14 @@ class AJAExport CNTV2SignalRouter
 		virtual inline void							Reset (void)										{mConnections.clear ();}
 
 		/**
+			@brief		Resets me, erasing any/all existing connections, then rebuilding my connections from the given register values.
+			@param[in]	inInputXpts		Specifies the input crosspoints of interest (perhaps obtained from CNTV2SignalRouter::GetAllWidgetInputs).
+			@param[in]	inRegReads		Specifies the routing registers/values (perhaps obtained from CNTV2Card::ReadRegisters).
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputs, const NTV2RegisterReads & inRegReads);
+
+		/**
 			@brief	Answers with the current number of connections (signal routes).
 			@return	The current number of connections.
 		**/
@@ -210,6 +218,14 @@ class AJAExport CNTV2SignalRouter
 		static NTV2OutputCrosspointID				StringToNTV2OutputCrosspointID (const std::string & inStr);
 
 		/**
+			@brief		Returns the widget IDs supported by the given device.
+			@param[in]	inDeviceID		Specifies the NTV2DeviceID of the NTV2 device of interest.
+			@param[out]	outWidgets		Receives the NTV2WidgetIDSet of widgets that are supported by the given device.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool									GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets);
+
+		/**
 			@brief		Returns the widget that "owns" the specified output crosspoint.
 			@param[in]	inOutputXpt		Specifies the output crosspoint of interest.
 			@param[out]	outWidgetID		Receives the NTV2WidgetID of the widget that "owns" the output crosspoint
@@ -235,6 +251,22 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;  otherwise false.
 		**/
 		static bool									GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs);
+
+		/**
+			@brief		Returns all known widget input crosspoints for the given device.
+			@param[in]	inDeviceID		Specifies the NTV2DeviceID of the device of interest.
+			@param[out]	outInputs		Receives the NTV2InputCrosspointIDs (or empty upon failure).
+			@return		True if successful;  otherwise false.
+		**/
+		static bool									GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputCrosspointIDSet & outInputs);
+
+		/**
+			@brief		Returns all routing registers for the given set of input crosspoints.
+			@param[in]	inInputs		Specifies the input crosspoints.
+			@param[out]	outRegInfos		Receives the NTV2RegInfo collection (empty upon failure).
+			@return		True if successful;  otherwise false.
+		**/
+		static bool									GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos);
 
 		/**
 			@brief		Returns the output crosspoints known to be "owned" by the given widget.

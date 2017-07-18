@@ -119,8 +119,8 @@ typedef enum
 	kRegFS1ProcAmpC2CROffsetY,		// 86
 	kRegFS1AudioDelay,				// 87
 	kRegAud2Delay = kRegFS1AudioDelay, //87
-	kRegAuxInterruptDelay,			// 88
-	kRegReserved89,					// 89
+	kRegBitfileDate,				// 88
+	kRegBitfileTime,				// 89
 	
 	kRegFS1I2CControl,				// 90
 	kRegFS1I2C1Address,				// 91
@@ -704,6 +704,14 @@ typedef enum NTV2RXSDIStatusRegister
 	kRegNumRXSDIRegisters = 2113 - 2048 + 1
 } NTV2RXSDIStatusRegisters;
 
+typedef enum
+{
+	kRegAudioMixerInputSelects = 2304,	//2304
+	kRegAudioMixerMainGain,		//2305
+	kRegAudioMixerAux1Gain,	//2306
+	kRegAudioMixerAux2Gain,	//2307
+	kRegAudioMixerChannelSelect			//2308
+}NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
 typedef enum _NTV2NonPCMAudioDetectRegisters
@@ -1145,7 +1153,10 @@ typedef enum
 		kRegDNX_NumberOfRegisters = ((kRegDNX_MaximumRegister - DNX_REG_START) + 1)
 	} DNXRegisterNum;
 #endif	//	!defined (NTV2_DEPRECATE)
-
+#if defined (NTV2_DEPRECATE_13_1)
+	#define	kRegAuxInterruptDelay	kRegBitfileDate			///< @deprecated		Use kRegBitfileDate instead.
+	#define	kRegReserved89			kRegBitfileTime			///< @deprecated		Use kRegBitfileTime instead.
+#endif	//	NTV2_DEPRECATE_13_1
 
 // Virtual registers
 #include "ntv2virtualregisters.h"
@@ -1613,6 +1624,8 @@ typedef enum
 	kLHRegMaskVideoOutputDigitalSelect = BIT(4) + BIT(5),
 	kK2RegMaskSDIOutHBlankRGBRange  = BIT(7),
 	kLHRegMaskVideoOutputAnalogSelect = BIT(8) + BIT(9),
+	kRegMaskSDIOut6GbpsMode = BIT(16),
+	kRegMaskSDIOut12GbpsMode = BIT(17),
 	kRegMaskRGBLevelA = BIT(22),
 	kRegMaskSDIOutLevelAtoLevelB = BIT(23),
 	kLHIRegMaskSDIOut3GbpsMode = BIT(24),
@@ -2277,9 +2290,12 @@ typedef enum
     kRegMaskHDMIHDRDolbyVisionEnable = BIT(6),
 	kRegMaskHDMIHDREnable = BIT(7),
 	kRegMaskElectroOpticalTransferFunction = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
-	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31)
+	kRegMaskHDRStaticMetadataDescriptorID = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
-
+	kRegMaskAudioMixerMainInputSelect = BIT(2) + BIT(1) + BIT(0),
+	kRegMaskAudioMixerAux1x2CHInput = BIT(6) + BIT(5) + BIT(4),
+	kRegMaskAudioMixerAux2x2CHInput = BIT(10) + BIT(9) + BIT(8),
+	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0)
 } RegisterMask;
 
 typedef enum
@@ -2668,6 +2684,8 @@ typedef enum
 	kLHRegShiftVideoOutputDigitalSelect	= 4,
 	kK2RegShiftSDIOutHBlankRGBRange		= 7,
 	kLHRegShiftVideoOutputAnalogSelect  = 8,
+	kRegShiftSDIOut6GbpsMode			= 16,
+	kRegShiftSDIOut12GbpsMode			= 17,
 	kRegShiftRGBLevelA					= 22,
 	kRegShiftSDIOutLevelAtoLevelB		= 23,
 	kLHIRegShiftSDIOut3GbpsMode			= 24,
@@ -3303,8 +3321,12 @@ typedef enum
     kRegShiftHDMIHDRDolbyVisionEnable = 6,
 	kRegShiftHDMIHDREnable = 7,
 	kRegShiftElectroOpticalTransferFunction = 16,
-	kRegShiftHDRStaticMetadataDescriptorID = 24
-	
+	kRegShiftHDRStaticMetadataDescriptorID = 24,
+
+	kRegShiftAudioMixerMainInputSelect = 0,
+	kRegShiftAudioMixerAux1x2CHInput = 4,
+	kRegShiftAudioMixerAux2x2CHInput = 8,
+	kRegShiftAudioMixerChannelSelect = 0
 } RegisterShift;
 
 
@@ -4014,6 +4036,14 @@ typedef NTV2RegInfo	NTV2ReadWriteRegisterSingle;	///< @brief	This is an alias fo
 	typedef NTV2RegisterWrites					NTV2RegisterReads;				///< @brief	An ordered sequence of zero or more NTV2RegInfo structs intended for ReadRegister.
 	typedef NTV2RegisterWritesConstIter			NTV2RegisterReadsConstIter;		///< @brief	A handy const (read-only) iterator for iterating over the contents of an NTV2RegisterReads instance.
 	typedef NTV2RegisterWritesIter				NTV2RegisterReadsIter;			///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterReads instance.
+
+	/**
+		@brief		Returns a const iterator to the first entry in the NTV2RegInfo collection with a matching register number.
+		@param[in]	inRegNum	Specifies the register number of interest.
+		@param[in]	inRegInfos	Specifies the NTV2RegInfo collection to search.
+		@return		A const_iterator that references the entry in the NTV2RegInfo collection, or "end()" if not found.
+	**/
+	AJAExport NTV2RegisterReadsConstIter	FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos);
 
 	/**
 		@brief		Writes the given NTV2RegInfo to the specified output stream.

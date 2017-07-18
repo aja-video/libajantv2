@@ -409,7 +409,9 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 							const bool				inOutputIs3Gb,
 							const bool				inIsSMPTE425,
 							const VPIDChannel		inChannel,
-							const bool				inUseChannel)
+							const bool				inUseChannel,
+							const bool				inOutputIs6G,
+							const bool				inOutputIs12G)
 {
 	VPIDSpec vpidSpec;
 
@@ -428,6 +430,8 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 	vpidSpec.isStereo				= false;
 	vpidSpec.isRightEye				= false;
 	vpidSpec.audioCarriage			= VPIDAudio_Unknown;
+	vpidSpec.isOutput6G				= inOutputIs6G;
+	vpidSpec.isOutput12G			= inOutputIs12G;
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
 }

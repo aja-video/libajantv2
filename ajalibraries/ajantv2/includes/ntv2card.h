@@ -448,6 +448,12 @@ public:
 	AJA_VIRTUAL bool	DeviceCanDoInputSource (const NTV2InputSource inInputSource);
 
 	/**
+		@brief		Returns true if the device having the given ID supports the audio mixer.
+		@return		True if the device supports the given input source.
+	**/
+	AJA_VIRTUAL bool	DeviceCanDoAudioMixer ();
+
+	/**
 		@brief		Fetches the requested boolean value. Typically called to determine device features.
 		@param[in]	inParamID	Specifies the NTV2BoolParamID of interest.
 		@param[out]	outValue	Receives the requested boolean value.
@@ -1089,7 +1095,7 @@ public:
 	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Retrieves the current VANC mode for the AJA device.
+		@brief		Retrieves the current VANC mode for the AJA device's Frame Store (channel).
 		@return		True if successful; otherwise false.
 		@param[out]	outVancMode		Receives true if VANC is currently enabled for the given channel on the device.
 		@param[in]	inChannel		Specifies the NTV2Channel of interest.
@@ -1098,7 +1104,17 @@ public:
 	AJA_VIRTUAL bool		GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANCEnabled, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled = NULL, NTV2Channel inChannel = NTV2_CHANNEL1);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
-	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode value);
+	/**
+		@brief		Enables or disables the "VANC Shift Mode" feature for the given Frame Store (channel).
+		@param[in]	inChannel	Specifies the device FrameStore to be affected.
+		@param[in]	inMode		Specifies the new data shift mode. Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+		@return		True if successful;  otherwise false.
+		@note		NTV2 devices only implement this feature for HD video formats (see \c NTV2_IS_HD_VIDEO_FORMAT macro).
+		@note		NTV2 devices only implement this feature for \c NTV2_FBF_8BIT_YCBCR pixel formats.
+		@note		If enabled, be sure the device Frame Store's VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@sa			\ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);
 	AJA_VIRTUAL inline bool	GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode * pOutValue)		{return pOutValue ? GetVANCShiftMode (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
@@ -1915,6 +1931,27 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+
+	AJA_VIRTUAL bool		GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem);
+
+	AJA_VIRTUAL bool		GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair);
+	AJA_VIRTUAL bool		SetAudioMixerMainInputChannelSelect(const NTV2AudioChannelPair inChannelPair);
+
+	AJA_VIRTUAL bool		GetAudioMixerMainInputGain(ULWord & outGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerMainInputGain(const ULWord inGainValue);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux1InputGain(ULWord & outGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerAux1InputGain(const ULWord inGainValue);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux2InputGain(ULWord & outGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerAux2InputGain(const ULWord inGainValue);
 
 	///@}
 
@@ -4348,6 +4385,14 @@ public:
 	AJA_VIRTUAL bool		GetSDIOut3GbEnable (NTV2Channel inChannel, bool & outIsEnabled);
 	AJA_VIRTUAL inline bool	GetSDIOut3GbEnable (NTV2Channel inChannel, bool* pOutIsEnabled)			{return pOutIsEnabled ? GetSDIOut3GbEnable (inChannel, *pOutIsEnabled) : false;}
 
+	AJA_VIRTUAL bool		SetSDIOut6GEnable(NTV2Channel inChannel, bool enable);
+	AJA_VIRTUAL bool		GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIOut6GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut6GEnable(inChannel, *pOutIsEnabled) : false; }
+
+	AJA_VIRTUAL bool		SetSDIOut12GEnable(NTV2Channel inChannel, bool enable);
+	AJA_VIRTUAL bool		GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIOut12GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut12GEnable(inChannel, *pOutIsEnabled) : false; }
+
 
 	/**
 		@name	SDI Bypass Relays
@@ -4658,7 +4703,7 @@ public:
 	/**
 		@brief		Enables or disables multi-format (per channel) device operation.
 					If enabled, each device channel can handle a different video format (provided it's in the same clock family).
-					If disabled, all device channels have the same video format. See \ref clockingandsync for more information.
+					If disabled, all device channels have the same video format. See \ref deviceclockingandsync for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.

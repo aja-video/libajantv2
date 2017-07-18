@@ -213,6 +213,7 @@ typedef enum
     DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,
 	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
+	DEVICE_ID_KONAIP_4TX_2110			= 0x10646706,
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
 	DEVICE_ID_IO4KIP					= 0x10710850,
 #if !defined (NTV2_DEPRECATE_12_6)
@@ -1654,6 +1655,7 @@ typedef enum
     NTV2_AUDIO_AES,				///< @brief	Obtain audio samples from the device AES inputs, if available.
     NTV2_AUDIO_ANALOG,			///< @brief	Obtain audio samples from the device analog input(s), if available.
     NTV2_AUDIO_HDMI,			///< @brief	Obtain audio samples from the device HDMI input, if available
+	NTV2_AUDIO_MIC,
     NTV2_MAX_NUM_AudioSources,
     NTV2_AUDIO_SOURCE_INVALID	= NTV2_MAX_NUM_AudioSources
 } NTV2AudioSource;
@@ -2483,9 +2485,10 @@ typedef enum NTV2InputCrosspointID
             (identified by \c NTV2InputCrosspointID) and/or zero or more signal outputs
             (identified by \c NTV2OutputCrosspointID).
 **/
-typedef enum 
+typedef enum
 {
-	NTV2_WgtFrameBuffer1,
+	NTV2_WIDGET_FIRST,
+	NTV2_WgtFrameBuffer1	= NTV2_WIDGET_FIRST,
 	NTV2_WgtFrameBuffer2,
 	NTV2_WgtFrameBuffer3,
 	NTV2_WgtFrameBuffer4,
@@ -2598,7 +2601,7 @@ typedef enum
 	NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
 } NTV2WidgetID;
 
-#define	NTV2_IS_VALID_WIDGET(__w__)		((__w__) < NTV2_WIDGET_INVALID)
+#define	NTV2_IS_VALID_WIDGET(__w__)		(((__w__) >= NTV2_WIDGET_FIRST)  &&  ((__w__) < NTV2_WIDGET_INVALID))
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -2878,6 +2881,7 @@ typedef enum
 	NTV2_BITFILE_KONAIP_1RX_1TX_2110 = 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
 	NTV2_BITFILE_IO4KIP_MAIN	= 51,
+	NTV2_BITFILE_KONAIP_RTX_2110 = 52,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
@@ -3309,8 +3313,12 @@ typedef enum
 {
     NTV2_VANCDATA_NORMAL,
     NTV2_VANCDATA_8BITSHIFT_ENABLE,
-    NTV2_MAX_NUM_VANCDataShiftModes
+    NTV2_VANCDATA_INVALID,
+    NTV2_MAX_NUM_VANCDataShiftModes = NTV2_VANCDATA_INVALID
 } NTV2VANCDataShiftMode;
+
+#define	NTV2_IS_VALID_VANCDATASHIFT(__v__)		((__v__) >= NTV2_VANCDATA_NORMAL && (__v__) < NTV2_MAX_NUM_VANCDataShiftModes)
+#define	NTV2_IS_VANCDATASHIFT_ENABLED(__v__)	((__v__) == NTV2_VANCDATA_8BITSHIFT_ENABLE)
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -3390,7 +3398,7 @@ typedef enum
     NTV2_AUDIOSYSTEM_5,
     NTV2_AUDIOSYSTEM_6,
     NTV2_AUDIOSYSTEM_7,
-    NTV2_AUDIOSYSTEM_8,
+	NTV2_AUDIOSYSTEM_8,
     NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_NUM_AUDIOSYSTEMS		= NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS
@@ -3554,50 +3562,50 @@ typedef enum
 typedef enum
 {
     VPIDStandard_Unknown						= 0x00,	// default
-    VPIDStandard_483_576						= 0x01,	// ntsc / pal
-    VPIDStandard_483_576_DualLink				= 0x02,	// no matching ntv2 format
-    VPIDStandard_483_576_360Mbs					= 0x02,	// no matching ntv2 format
-    VPIDStandard_483_576_540Mbs					= 0x03,	// no matching ntv2 format
-    VPIDStandard_720							= 0x04,	// 720 single link
-    VPIDStandard_1080							= 0x05,	// 1080 single link
-    VPIDStandard_483_576_1485Mbs				= 0x06,	// no matching ntv2 format
-    VPIDStandard_1080_DualLink					= 0x07,	// 1080 dual link
-    VPIDStandard_720_3Ga						= 0x08,	// no matching ntv2 format
-    VPIDStandard_1080_3Ga						= 0x09,	// 1080p 50/5994/60
-    VPIDStandard_1080_DualLink_3Gb				= 0x0A,	// 1080 dual link 3Gb
-    VPIDStandard_720_3Gb						= 0x0B,	// 2 - 720 links
-    VPIDStandard_1080_3Gb						= 0x0C,	// 2 - 1080 links
-    VPIDStandard_483_576_3Gb					= 0x0D,	// no matching ntv2 format
-    VPIDStandard_720_Stereo_3Gb					= 0x0E,	// 720 Stereo 3Gb
-    VPIDStandard_1080_Stereo_3Gb				= 0x0F,	// 1080 Stereo 3Gb
-    VPIDStandard_1080_QuadLink					= 0x10,	// 1080 quad link 10Gbs
-    VPIDStandard_720_Stereo_3Ga					= 0x11,	// 720 Stereo 3Ga
-    VPIDStandard_1080_Stereo_3Ga				= 0x12,	// 1080 Stereo 3Ga
-    VPIDStandard_1080_Stereo_DualLink_3Gb		= 0x13,	// 1080 Stereo dual link 3Gb
-    VPIDStandard_1080_Dual_3Ga					= 0x14,	// 1080 dual link 3Ga
-    VPIDStandard_1080_Dual_3Gb					= 0x15,	// 1080 dual link 3Gb
-    VPIDStandard_2160_DualLink					= 0x16,	// 2160 dual link
-    VPIDStandard_2160_QuadLink_3Ga				= 0x17,	// 2160 quad link 3Ga
-    VPIDStandard_2160_QuadDualLink_3Gb			= 0x18,	// 2160 quad link 3Gb
-    VPIDStandard_1080_Stereo_Quad_3Ga			= 0x19,	// 1080 Stereo Quad 3Ga
-    VPIDStandard_1080_Stereo_Quad_3Gb			= 0x1A,	// 1080 Stereo Quad 3Gb
-    VPIDStandard_2160_Stereo_Quad_3Gb			= 0x1B,	// 2160 Stereo Quad 3Gb
-    VPIDStandard_1080_OctLink					= 0x20,	// 1080 oct link 10Gbs
-    VPIDStandard_UHDTV1_Single_DualLink_10Gb	= 0x21,	// UHDTV1 single or dual link 10Gbs
-    VPIDStandard_UHDTV2_Quad_OctaLink_10Gb		= 0x22,	// UHDTV2 quad or octa link 10Gbs
-    VPIDStandard_UHDTV1_MultiLink_10Gb			= 0x25,	// UHDTV1 multi link 10Gbs
-    VPIDStandard_UHDTV2_MultiLink_10Gb			= 0x26,	// UHDTV2 multi link 10Gbs
-    VPIDStandard_VC2							= 0x30,	// VC2 compressed 1.5Gbs
-    VPIDStandard_720_1080_Stereo				= 0x31,	// 720 and 1080 Stereo dusl 1.5Gb
-    VPIDStandard_VC2_Level65_270Mbs				= 0x32,	// VC2 level 65 commpressed 270Mbs
-    VPIDStandard_4K_DCPIF_FSW709_10Gbs			= 0x33,	// 4K Digital Cinematography Production Image Formats FS/709 10Gbs
-    VPIDStandard_FT_2048x1556_Dual				= 0x34,	// Film Transfer 2048x1556 dual 1.5Gbs
-    VPIDStandard_FT_2048x1556_3Gb				= 0x35,	// Film Tramsfer 1048x1556 3Gb
-    VPIDStandard_2160_Single_6Gb				= 0x40,	// 2160 single link 6Gb
-    VPIDStandard_1080_Single_6Gb				= 0x41,	// 1080 single link 6Gb
-    VPIDStandard_1080_AFR_Single_6Gb			= 0x42,	// 1080 additional frame rates single link 6Gb
-    VPIDStandard_2160_Single_12Gb				= 0x4E,	// 2160 single link 12Gb
-    VPIDStandard_1080_10_12_AFR_Single_12Gb		= 0x4F	// 1080 10 bit or 12 bit additional frame rates single link 12Gb
+	VPIDStandard_483_576						= 0x81,	// ntsc / pal
+	VPIDStandard_483_576_DualLink				= 0x82,	// no matching ntv2 format
+	VPIDStandard_483_576_360Mbs					= 0x82,	// no matching ntv2 format
+	VPIDStandard_483_576_540Mbs					= 0x83,	// no matching ntv2 format
+	VPIDStandard_720							= 0x84,	// 720 single link
+	VPIDStandard_1080							= 0x85,	// 1080 single link
+	VPIDStandard_483_576_1485Mbs				= 0x86,	// no matching ntv2 format
+	VPIDStandard_1080_DualLink					= 0x87,	// 1080 dual link
+	VPIDStandard_720_3Ga						= 0x88,	// no matching ntv2 format
+	VPIDStandard_1080_3Ga						= 0x89,	// 1080p 50/5994/60
+	VPIDStandard_1080_DualLink_3Gb				= 0x8A,	// 1080 dual link 3Gb
+	VPIDStandard_720_3Gb						= 0x8B,	// 2 - 720 links
+	VPIDStandard_1080_3Gb						= 0x8C,	// 2 - 1080 links
+	VPIDStandard_483_576_3Gb					= 0x8D,	// no matching ntv2 format
+	VPIDStandard_720_Stereo_3Gb					= 0x8E,	// 720 Stereo 3Gb
+	VPIDStandard_1080_Stereo_3Gb				= 0x8F,	// 1080 Stereo 3Gb
+	VPIDStandard_1080_QuadLink					= 0x90,	// 1080 quad link 10Gbs
+	VPIDStandard_720_Stereo_3Ga					= 0x91,	// 720 Stereo 3Ga
+	VPIDStandard_1080_Stereo_3Ga				= 0x92,	// 1080 Stereo 3Ga
+	VPIDStandard_1080_Stereo_DualLink_3Gb		= 0x93,	// 1080 Stereo dual link 3Gb
+	VPIDStandard_1080_Dual_3Ga					= 0x94,	// 1080 dual link 3Ga
+	VPIDStandard_1080_Dual_3Gb					= 0x95,	// 1080 dual link 3Gb
+	VPIDStandard_2160_DualLink					= 0x96,	// 2160 dual link
+	VPIDStandard_2160_QuadLink_3Ga				= 0x97,	// 2160 quad link 3Ga
+	VPIDStandard_2160_QuadDualLink_3Gb			= 0x98,	// 2160 quad link 3Gb
+	VPIDStandard_1080_Stereo_Quad_3Ga			= 0x99,	// 1080 Stereo Quad 3Ga
+	VPIDStandard_1080_Stereo_Quad_3Gb			= 0x9A,	// 1080 Stereo Quad 3Gb
+	VPIDStandard_2160_Stereo_Quad_3Gb			= 0x9B,	// 2160 Stereo Quad 3Gb
+	VPIDStandard_1080_OctLink					= 0xA0,	// 1080 oct link 10Gbs
+	VPIDStandard_UHDTV1_Single_DualLink_10Gb	= 0xA1,	// UHDTV1 single or dual link 10Gbs
+	VPIDStandard_UHDTV2_Quad_OctaLink_10Gb		= 0xA2,	// UHDTV2 quad or octa link 10Gbs
+	VPIDStandard_UHDTV1_MultiLink_10Gb			= 0xA5,	// UHDTV1 multi link 10Gbs
+	VPIDStandard_UHDTV2_MultiLink_10Gb			= 0xA6,	// UHDTV2 multi link 10Gbs
+	VPIDStandard_VC2							= 0xB0,	// VC2 compressed 1.5Gbs
+	VPIDStandard_720_1080_Stereo				= 0xB1,	// 720 and 1080 Stereo dusl 1.5Gb
+	VPIDStandard_VC2_Level65_270Mbs				= 0xB2,	// VC2 level 65 commpressed 270Mbs
+	VPIDStandard_4K_DCPIF_FSW709_10Gbs			= 0xB3,	// 4K Digital Cinematography Production Image Formats FS/709 10Gbs
+	VPIDStandard_FT_2048x1556_Dual				= 0xB4,	// Film Transfer 2048x1556 dual 1.5Gbs
+	VPIDStandard_FT_2048x1556_3Gb				= 0xB5,	// Film Tramsfer 1048x1556 3Gb
+	VPIDStandard_2160_Single_6Gb				= 0xC0,	// 2160 single link 6Gb
+	VPIDStandard_1080_Single_6Gb				= 0xC1,	// 1080 single link 6Gb
+	VPIDStandard_1080_AFR_Single_6Gb			= 0xC2,	// 1080 additional frame rates single link 6Gb
+	VPIDStandard_2160_Single_12Gb				= 0xCE,	// 2160 single link 12Gb
+	VPIDStandard_1080_10_12_AFR_Single_12Gb		= 0xCF	// 1080 10 bit or 12 bit additional frame rates single link 12Gb
 } VPIDStandard;
 
 typedef enum

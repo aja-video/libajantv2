@@ -94,7 +94,9 @@ public:
 											const bool				inIsOutput3Gb,
 											const bool				inIsSMPTE425,
 											const VPIDChannel		inVPIDChannel,
-											const bool				inUseVPIDChannel = true);		// defaults to using VPID channel
+											const bool				inUseVPIDChannel = true,
+											const bool				inOutputIs6G = false,
+											const bool				inOutputIs12G = false);
 	#if !defined (NTV2_DEPRECATE)
 		static NTV2_DEPRECATED inline bool	SetVPIDData (ULWord *					pOutVPID,
 														const NTV2VideoFormat		inOutputFormat,

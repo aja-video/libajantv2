@@ -29,6 +29,8 @@ typedef struct
 	bool					isStereo;				///< @brief	If true, the video stream is part of a stereo pair.
 	bool					isRightEye;				///< @brief	If true, the video stream is the right eye of a stereo pair.
 	VPIDAudio				audioCarriage;			///< @brief	Specifies how audio is carried in additional channels.
+	bool					isOutput6G;				///< @brief	If true, the transport on the wire is 6G.
+	bool					isOutput12G;			///< @brief	If true, the transport on the wire is 12G.
 } VPIDSpec;
 
 /**

@@ -77,13 +77,13 @@ public:
 
 public:
     uint32_t	rxMatch;         ///< @brief	Bitmap of rxMatch criteria used
-    std::string	sourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_SOURCE_IP set). If it's in the multiclass range, then
+    std::string	sourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2110_SOURCE_IP set). If it's in the multiclass range, then
                                  ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-    std::string	destIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_DEST_IP set)
-    uint32_t	sourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_SOURCE_PORT set)
-    uint32_t	destPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_DEST_PORT set)
-    uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_SSRC set)
-    uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_VLAN set)
+    std::string	destIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
+    uint32_t	sourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
+    uint32_t	destPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
+    uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
+    uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
     VPIDSampling    videoSamples;
