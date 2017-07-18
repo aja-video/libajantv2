@@ -680,7 +680,7 @@ bool CNTV2Card::SetAudioMixerMainInputGain(const ULWord inGainValue)
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
-	if (inGainValue > 0x1fff)
+	if (inGainValue > 0x1ffff)
 		return false;
 
 	if (!WriteRegister(kRegAudioMixerMainGain, inGainValue))
@@ -733,7 +733,7 @@ bool CNTV2Card::SetAudioMixerAux1InputGain(const ULWord inGainValue)
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
-	if (inGainValue > 0x1fff)
+	if (inGainValue > 0x1ffff)
 		return false;
 
 	if (!WriteRegister(kRegAudioMixerAux1Gain, inGainValue))
@@ -786,7 +786,7 @@ bool CNTV2Card::SetAudioMixerAux2InputGain(const ULWord inGainValue)
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
-	if (inGainValue > 0x1fff)
+	if (inGainValue > 0x1ffff)
 		return false;
 
 	if (!WriteRegister(kRegAudioMixerAux2Gain, inGainValue))
