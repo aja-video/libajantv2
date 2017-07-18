@@ -3973,7 +3973,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
-		case DEVICE_ID_IO4KPLUS:		return "Io4KPLUS";
+	case DEVICE_ID_IO4KPLUS:		return inForRetailDisplay ? "DNxIV" : "Io4K+";
 		case DEVICE_ID_IO4KIP:		return "Io4KIP";
 		case DEVICE_ID_KONAIP_4TX_2110: return "KONA IP 4TX 2110";
 #if defined (AJA_DEBUG) || defined (_DEBUG)
