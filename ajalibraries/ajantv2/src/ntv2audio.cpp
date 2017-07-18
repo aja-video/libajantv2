@@ -709,7 +709,7 @@ bool CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (const NTV2AudioSystem inA
 	if(!DeviceCanDoAudioMixer())
 		return false;
 
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
+	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
 		return false;	//	Invalid audio system
 
 	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux1x2CHInput))
@@ -762,7 +762,7 @@ bool CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inA
 	if(!DeviceCanDoAudioMixer())
 		return false;
 
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
+	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
 		return false;	//	Invalid audio system
 
 	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux2x2CHInput, kRegShiftAudioMixerAux2x2CHInput))
