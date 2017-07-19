@@ -2150,7 +2150,7 @@ typedef enum
 
 
 /**
-    @brief	Identifies a widget output that potentially can drive another widget's input (identified by NTV2InputCrosspointID).
+    @brief	Identifies a widget output, a signal source, that potentially can drive another widget's input (identified by NTV2InputCrosspointID).
 **/
 typedef enum NTV2OutputCrosspointID
 {

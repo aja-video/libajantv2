@@ -1891,16 +1891,18 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_4x2048x1080p_12000:
 			standard = NTV2_STANDARD_4096HFR;
 			break;
-
+#if defined (_DEBUG)
+	//	Debug builds warn about missing values
 		case NTV2_FORMAT_UNKNOWN:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 			break;	// Unsupported
-
+#else
 		default:
 			break;
+#endif
     }
 	
 	return standard;
@@ -1911,7 +1913,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 //-------------------------------------------------------------------------------------------------------
 NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat)
 {
-	NTV2FrameGeometry result = NTV2_FG_1920x1080;
+	NTV2FrameGeometry result = NTV2_FG_INVALID;
 
 	switch (videoFormat)
 	{
@@ -1941,9 +1943,13 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 		case NTV2_FORMAT_4x2048x1080p_3000:
 		case NTV2_FORMAT_4x2048x1080psf_2997:
 		case NTV2_FORMAT_4x2048x1080psf_3000:
+		case NTV2_FORMAT_4x2048x1080p_4795:
+		case NTV2_FORMAT_4x2048x1080p_4800:
 		case NTV2_FORMAT_4x2048x1080p_5000:
 		case NTV2_FORMAT_4x2048x1080p_5994:
 		case NTV2_FORMAT_4x2048x1080p_6000:
+		case NTV2_FORMAT_4x2048x1080p_11988:
+		case NTV2_FORMAT_4x2048x1080p_12000:
 			result = NTV2_FG_4x2048x1080;
 			break;
 
@@ -1985,16 +1991,24 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 		case NTV2_FORMAT_1080psf_2K_2500:
 		case NTV2_FORMAT_1080p_2K_2997:
 		case NTV2_FORMAT_1080p_2K_3000:
-		case NTV2_FORMAT_1080p_2K_5000_A:
-		case NTV2_FORMAT_1080p_2K_5994_A:
-		case NTV2_FORMAT_1080p_2K_6000_A:
+		case NTV2_FORMAT_1080p_2K_4795:
+		case NTV2_FORMAT_1080p_2K_4795_B:
+		case NTV2_FORMAT_1080p_2K_4800:
+		case NTV2_FORMAT_1080p_2K_4800_B:
+		case NTV2_FORMAT_1080p_2K_5000:
+		case NTV2_FORMAT_1080p_2K_5000_B:
+		case NTV2_FORMAT_1080p_2K_5994:
+		case NTV2_FORMAT_1080p_2K_5994_B:
+		case NTV2_FORMAT_1080p_2K_6000:
+		case NTV2_FORMAT_1080p_2K_6000_B:
 			result = NTV2_FG_2048x1080;
 			break;
 
+		case NTV2_FORMAT_720p_2398:
+		case NTV2_FORMAT_720p_2500:
 		case NTV2_FORMAT_720p_5994:
 		case NTV2_FORMAT_720p_6000:
 		case NTV2_FORMAT_720p_5000:
-		case NTV2_FORMAT_720p_2398:
 			result = NTV2_FG_1280x720;
 			break;
 
@@ -2010,8 +2024,18 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 			result = NTV2_FG_720x576;
 			break;
 
+#if defined (_DEBUG)
+	//	Debug builds warn about missing values
+		case NTV2_FORMAT_UNKNOWN:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
+		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
+		case NTV2_FORMAT_END_2K_DEF_FORMATS:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+			break;	// Unsupported
+#else
 		default:
 			break;
+#endif
 	}
 
 	return result;
@@ -3959,26 +3983,24 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		#if !defined (NTV2_DEPRECATE)
         case BOARD_ID_LHI_T:                    return inForRetailDisplay ?	"KONA LHi T"                : "KonaLHiT";
 		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_IO4K:		return inForRetailDisplay ?	"Io4K"					: "Io4K";
-		case DEVICE_ID_IO4KUFC:		return inForRetailDisplay ?	"Io4K UFC"				: "Io4KUfc";
-		case DEVICE_ID_KONA4:		return inForRetailDisplay ?	"KONA 4"				: "Kona4";
-		case DEVICE_ID_KONA4UFC:	return inForRetailDisplay ?	"KONA 4 UFC"			: "Kona4Ufc";
-		case DEVICE_ID_CORVID88:	return inForRetailDisplay ?	"Corvid 88"				: "Corvid88";
-		case DEVICE_ID_CORVID44:	return inForRetailDisplay ?	"Corvid 44"				: "Corvid44";
-		case DEVICE_ID_CORVIDHEVC:  return inForRetailDisplay ?	"Corvid HEVC"			: "CorvidHEVC";
-		case DEVICE_ID_KONAIP_4CH_1SFP:	return inForRetailDisplay ? "KONA IP 4CH 1SFP"	: "KonaIP4Ch1SFP";
-		case DEVICE_ID_KONAIP_4CH_2SFP:	return inForRetailDisplay ? "KONA IP 4CH 2SFP"	: "KonaIP4Ch2SFP";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K" : "KonaIP1Rx1Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K" : "KonaIP2Tx1SFPJ2K";
+		case DEVICE_ID_IO4K:					return inForRetailDisplay ?	"Io4K"						: "Io4K";
+		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ?	"Io4K UFC"					: "Io4KUfc";
+		case DEVICE_ID_KONA4:					return inForRetailDisplay ?	"KONA 4"					: "Kona4";
+		case DEVICE_ID_KONA4UFC:				return inForRetailDisplay ?	"KONA 4 UFC"				: "Kona4Ufc";
+		case DEVICE_ID_CORVID88:				return inForRetailDisplay ?	"Corvid 88"					: "Corvid88";
+		case DEVICE_ID_CORVID44:				return inForRetailDisplay ?	"Corvid 44"					: "Corvid44";
+		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ?	"Corvid HEVC"				: "CorvidHEVC";
+		case DEVICE_ID_KONAIP_4CH_1SFP:			return inForRetailDisplay ? "KONA IP 4CH 1SFP"			: "KonaIP4Ch1SFP";
+		case DEVICE_ID_KONAIP_4CH_2SFP:			return inForRetailDisplay ? "KONA IP 4CH 2SFP"			: "KonaIP4Ch2SFP";
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K"	: "KonaIP1Rx1Tx1SFPJ2K";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K"		: "KonaIP2Tx1SFPJ2K";
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
-	case DEVICE_ID_IO4KPLUS:		return inForRetailDisplay ? "DNxIV" : "Io4K+";
-		case DEVICE_ID_IO4KIP:		return inForRetailDisplay ? "DNxIP" : "Io4KIP";
-		case DEVICE_ID_KONAIP_4TX_2110: return "KONA IP 4TX 2110";
-#if defined (AJA_DEBUG) || defined (_DEBUG)
-//	    default:					break;
-#else
+		case DEVICE_ID_IO4KPLUS:				return "Io4KPLUS";
+		case DEVICE_ID_IO4KIP:					return "Io4KIP";
+		case DEVICE_ID_KONAIP_4TX_2110:			return "KONA IP 4TX 2110";
+#if !defined (_DEBUG)
 	    default:					break;
 #endif
 	}
@@ -6519,7 +6541,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		case NTV2_WgtCSC3:					return inCompactDisplay ? "CSC3"			: "NTV2_WgtCSC3";
 		case NTV2_WgtCSC4:					return inCompactDisplay ? "CSC4"			: "NTV2_WgtCSC4";
 		case NTV2_WgtHDMIIn1v2:				return inCompactDisplay ? "HDMIv2In1"		: "NTV2_WgtHDMIIn1v2";
-		case NTV2_WgtHDMIOut1v2:			return inCompactDisplay ? "HDMIv2Out2"		: "NTV2_WgtHDMIOut1v2";
+		case NTV2_WgtHDMIOut1v2:			return inCompactDisplay ? "HDMIv2Out1"		: "NTV2_WgtHDMIOut1v2";
 		case NTV2_WgtSDIMonOut1:			return inCompactDisplay ? "SDIMonOut1"		: "NTV2_WgtSDIMonOut1";
 		case NTV2_WgtCSC5:					return inCompactDisplay ? "CSC5"			: "NTV2_WgtCSC5";
 		case NTV2_WgtLUT5:					return inCompactDisplay ? "LUT5"			: "NTV2_WgtLUT5";
