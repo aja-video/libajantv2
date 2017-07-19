@@ -3517,15 +3517,15 @@ typedef enum
 // This is necessary since the Xilinx registers live in another PCI BAR and these offsets conflict with normal VP registers.  With this
 // offset the driver knows which mapped BAR to use.  Windows maps individual registers at start so this isn't necessary for Windows.
 #ifdef AJAMac
-#define XILINX_START 13000
-#define XILINX_CHANNEL_START 13100
-#define XILINX_IRQ_START 13200
-#define XLINIX_DMA_START 13300
+#define XILINX_START							13000
+#define XILINX_CHANNEL_START					13100
+#define XILINX_IRQ_START						13200
+#define XLINIX_DMA_START						13300
 #else
-#define XILINX_START 0
-#define XILINX_CHANNEL_START 0
-#define XILINX_IRQ_START 0
-#define XLINIX_DMA_START 0
+#define XILINX_START							0
+#define XILINX_CHANNEL_START					0
+#define XILINX_IRQ_START						0
+#define XLINIX_DMA_START						0
 #endif
 
 #define XLNX_MAX_CHANNELS						4
