@@ -1,9 +1,8 @@
-////////////////////////////////////////////////////////////
-//
-//	Copyright (C) 2003, 2004, 2005, 2006, 2007 AJA Video Systems, Inc.
-//	Proprietary and Confidential information.
-//
-////////////////////////////////////////////////////////////
+/**
+	@file		ntv2windriverinterface.h
+	@brief		Declares the MSWindows-specific flavor of CNTV2DriverInterface.
+	@copyright	(C) 2003-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 #ifndef NTV2WINDRIVERINTERFACE_H
 #define NTV2WINDRIVERINTERFACE_H
 
@@ -23,12 +22,7 @@
 #include "ntv2driverinterface.h"
 #include "ntv2winpublicinterface.h"
 #include "ntv2devicefeatures.h"
-
-
-// oem dma: save locked pages in a stl::vector
 #include <vector>
-using namespace std;
-typedef vector<ULWord *> DMA_LOCKED_VEC;
 
 
 class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
@@ -270,6 +264,8 @@ public:
 	bool LoadBitFile( void* dataPtr, uint32_t dataSize, NTV2BitfileType bitFileType );
 
 protected:
+	// oem dma: save locked pages in a stl::vector
+	typedef std::vector<ULWord *>	DMA_LOCKED_VEC;
 
 	PSP_DEVICE_INTERFACE_DETAIL_DATA _pspDevIFaceDetailData;
 	SP_DEVINFO_DATA _spDevInfoData;
@@ -287,4 +283,4 @@ protected:
 
 };
 
-#endif
+#endif	//	NTV2WINDRIVERINTERFACE_H

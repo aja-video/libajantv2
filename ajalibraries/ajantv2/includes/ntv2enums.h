@@ -213,6 +213,7 @@ typedef enum
     DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,
 	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
+	DEVICE_ID_KONAIP_4TX_2110			= 0x10646706,
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
 	DEVICE_ID_IO4KIP					= 0x10710850,
 #if !defined (NTV2_DEPRECATE_12_6)
@@ -1654,6 +1655,7 @@ typedef enum
     NTV2_AUDIO_AES,				///< @brief	Obtain audio samples from the device AES inputs, if available.
     NTV2_AUDIO_ANALOG,			///< @brief	Obtain audio samples from the device analog input(s), if available.
     NTV2_AUDIO_HDMI,			///< @brief	Obtain audio samples from the device HDMI input, if available
+	NTV2_AUDIO_MIC,
     NTV2_MAX_NUM_AudioSources,
     NTV2_AUDIO_SOURCE_INVALID	= NTV2_MAX_NUM_AudioSources
 } NTV2AudioSource;
@@ -2879,6 +2881,7 @@ typedef enum
 	NTV2_BITFILE_KONAIP_1RX_1TX_2110 = 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
 	NTV2_BITFILE_IO4KIP_MAIN	= 51,
+	NTV2_BITFILE_KONAIP_RTX_2110 = 52,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
@@ -3395,7 +3398,7 @@ typedef enum
     NTV2_AUDIOSYSTEM_5,
     NTV2_AUDIOSYSTEM_6,
     NTV2_AUDIOSYSTEM_7,
-    NTV2_AUDIOSYSTEM_8,
+	NTV2_AUDIOSYSTEM_8,
     NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_NUM_AUDIOSYSTEMS		= NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS

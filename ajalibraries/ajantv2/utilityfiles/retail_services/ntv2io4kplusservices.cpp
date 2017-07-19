@@ -742,8 +742,8 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
         if (bSdiRgbOut || bCh1HDR_RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
+			mCard->Connect (NTV2_XptSDIOut1Input, mCard->DeviceIsDNxIV() ? NTV2_XptDuallinkOut3 : NTV2_XptDuallinkOut1);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, mCard->DeviceIsDNxIV() ? NTV2_XptDuallinkOut3DS2 : NTV2_XptDuallinkOut1DS2);
 		}
 		else if (!b2pi)
 		{
@@ -752,11 +752,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				// is 4k quad 4-wire
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptSDIOut1Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC3VidYUV : NTV2_XptCSC1VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptFrameBuffer1YUV);
+					mCard->Connect (NTV2_XptSDIOut1Input, mCard->DeviceIsDNxIV() ? NTV2_XptFrameBuffer3YUV : NTV2_XptFrameBuffer1YUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
@@ -774,11 +774,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			{
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptSDIOut1Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC3VidYUV : NTV2_XptCSC1VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_Xpt425Mux1AYUV);
+					mCard->Connect (NTV2_XptSDIOut1Input, mCard->DeviceIsDNxIV() ? NTV2_Xpt425Mux2AYUV : NTV2_Xpt425Mux1AYUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
@@ -801,8 +801,8 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
         if (bSdiRgbOut || bCh1HDR_RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
-			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
+			mCard->Connect (NTV2_XptSDIOut2Input,mCard->DeviceIsDNxIV() ?  NTV2_XptDuallinkOut4 : NTV2_XptDuallinkOut2);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, mCard->DeviceIsDNxIV() ?  NTV2_XptDuallinkOut4DS2 : NTV2_XptDuallinkOut2DS2);
 		}
 		else if (!b2pi)
 		{
@@ -811,11 +811,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				// is 4k quad 4-wire
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
+					mCard->Connect (NTV2_XptSDIOut2Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC4VidYUV : NTV2_XptCSC2VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptFrameBuffer2YUV);
+					mCard->Connect (NTV2_XptSDIOut2Input, mCard->DeviceIsDNxIV() ?  NTV2_XptFrameBuffer4YUV : NTV2_XptFrameBuffer2YUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
@@ -832,11 +832,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			{ 
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
+					mCard->Connect (NTV2_XptSDIOut2Input, mCard->DeviceIsDNxIV() ?  NTV2_XptCSC4VidYUV : NTV2_XptCSC2VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_Xpt425Mux1BYUV);
+					mCard->Connect (NTV2_XptSDIOut2Input, mCard->DeviceIsDNxIV() ?  NTV2_Xpt425Mux2BYUV : NTV2_Xpt425Mux1BYUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
@@ -859,8 +859,8 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
         if (bSdiRgbOut || bCh1HDR_RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
+			mCard->Connect (NTV2_XptSDIOut3Input, mCard->DeviceIsDNxIV() ?  NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut3);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, mCard->DeviceIsDNxIV() ?  NTV2_XptDuallinkOut1DS2 : NTV2_XptDuallinkOut3DS2);
 		}
 		else if (!b2pi)
 		{
@@ -869,11 +869,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				// is 4k quad 4-wire
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC1VidYUV : NTV2_XptCSC3VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer3YUV);
+					mCard->Connect (NTV2_XptSDIOut3Input, mCard->DeviceIsDNxIV() ?  NTV2_XptFrameBuffer1YUV : NTV2_XptFrameBuffer3YUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 			}
@@ -899,11 +899,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			{ 
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3Input, mCard->DeviceIsDNxIV() ?  NTV2_XptCSC1VidYUV : NTV2_XptCSC3VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux2AYUV);
+					mCard->Connect (NTV2_XptSDIOut3Input, mCard->DeviceIsDNxIV() ? NTV2_Xpt425Mux1AYUV : NTV2_Xpt425Mux2AYUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 			}
@@ -970,8 +970,8 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
         if (bSdiRgbOut || bCh1HDR_RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
+			mCard->Connect (NTV2_XptSDIOut4Input, mCard->DeviceIsDNxIV() ? NTV2_XptDuallinkOut2 : NTV2_XptDuallinkOut4);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, mCard->DeviceIsDNxIV() ? NTV2_XptDuallinkOut2DS2 : NTV2_XptDuallinkOut4DS2);
 		}
 		else if (!b2pi)
 		{
@@ -980,11 +980,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				// is 4k quad 4-wire
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC2VidYUV : NTV2_XptCSC4VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptFrameBuffer4YUV);
+					mCard->Connect (NTV2_XptSDIOut4Input, mCard->DeviceIsDNxIV() ? NTV2_XptFrameBuffer2YUV : NTV2_XptFrameBuffer4YUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 			}
@@ -1010,11 +1010,11 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			{
 				if (genFrameFormat == FORMAT_RGB)
 				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4Input, mCard->DeviceIsDNxIV() ? NTV2_XptCSC2VidYUV : NTV2_XptCSC4VidYUV);
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux2BYUV);
+					mCard->Connect (NTV2_XptSDIOut4Input, mCard->DeviceIsDNxIV() ? NTV2_Xpt425Mux2BYUV : NTV2_Xpt425Mux2BYUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 			}
@@ -3260,7 +3260,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				break;
 			}
 			
-			mCard->SetHDMIOutVideoFPS(tempRate);
+			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
 			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
@@ -3289,7 +3289,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				break;
 		}
 
-		mCard->SetHDMIOutVideoStandard(v2Standard);
+		//mCard->SetHDMIOutVideoStandard(v2Standard);
 		
 		// HDMI out colorspace auto-detect status
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
@@ -3403,31 +3403,31 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	NTV2Standard transportStandard = b3GbTransportOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 	
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
+//	if (b3GbTransportOut)
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
+//	}
 	
 	// Set VPID 1
-	if (b4K)
-	{
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
-		}
-	}
+//	if (b4K)
+//	{
+//		SetVPIDData(vpidOut1a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_1);
+//		if (b3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut1b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+//		}
+//	}
 	
 	
 	//
@@ -3435,35 +3435,35 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//
 	
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
+//	if (b3GbTransportOut)
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
+//	}
 	
 	// Set VPID 2
-	if (b4K)
-	{
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
-		}
-		else
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
-		}
-	}
+//	if (b4K)
+//	{
+//		if (b3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut2a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
+//			SetVPIDData(vpidOut2b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
+//		}
+//		else
+//		{
+//			SetVPIDData(vpidOut2a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+//		}
+//	}
 	
 	
 	//
@@ -3471,44 +3471,44 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//
 	
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bLevelA && b3GbTransportOut) || ((mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
-	}
+//	if (b3GbTransportOut || (b2pi && !b4kHfr))
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
+//	}
 	
 	
 	// Set VPID 3
-	if ((b4K && !b2pi) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
-	{
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_5);
-			SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_6);
-		}
-		else
-		{
-			SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
-		}
-	}
-	else
-	{
-        bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
-        SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
-        if (b3gb)
-	        SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
-		//printf("a vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
-	}
+//	if ((b4K && !b2pi) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
+//	{
+//		if (b3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_5);
+//			SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_6);
+//		}
+//		else
+//		{
+//			SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_3);
+//		}
+//	}
+//	else
+//	{
+//        bool b3gb = (b2pi && !b4kHfr) ? true : b3GbTransportOut;
+//        SetVPIDData(vpidOut3a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_1);
+//        if (b3gb)
+//	        SetVPIDData(vpidOut3b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3gb, b2pi, VPIDChannel_2);
+//		//printf("a vpidOut3a %08x vpidOut3b %08x\n", vpidOut3a, vpidOut3b);
+//	}
 	
 	
 	//
@@ -3516,61 +3516,61 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//
 	
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bLevelA && b3GbTransportOut) || ((mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
-	}
+//	if (b3GbTransportOut || (b2pi && !b4kHfr))
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
+//	}
 	
 	// Set VPID 4
-	if ((b4K && !b2pi) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
-	{
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_7);
-			SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_8);
-		}
-		else
-		{
-			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
-		}
-	}
-	else
-	{
-		if (!b2pi)
-		{
-			if (!b4K && mDualStreamTransportType == NTV2_SDITransport_DualLink_1_5)
-			{
-				// 2-wire dual link
-				vpidChannela = VPIDChannel_2;
-			}
-			else
-			{
-				vpidChannela = VPIDChannel_1;
-			}
-			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, vpidChannela, true);
-			if (b3GbTransportOut)
-			{
-				SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
-			}
-		}
-		else
-		{
-            // is TSI  low frame rate 2-wire
-            SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, true, b2pi, VPIDChannel_3);
-			SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, true, b2pi, VPIDChannel_4);
-		}
-	}
+//	if ((b4K && !b2pi) || (b2pi && b4kHfr) || (b2pi && bSdiRgbOut))
+//	{
+//		if (b3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_7);
+//			SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_8);
+//		}
+//		else
+//		{
+//			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_4);
+//		}
+//	}
+//	else
+//	{
+//		if (!b2pi)
+//		{
+//			if (!b4K && mDualStreamTransportType == NTV2_SDITransport_DualLink_1_5)
+//			{
+//				// 2-wire dual link
+//				vpidChannela = VPIDChannel_2;
+//			}
+//			else
+//			{
+//				vpidChannela = VPIDChannel_1;
+//			}
+//			SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, vpidChannela, true);
+//			if (b3GbTransportOut)
+//			{
+//				SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, b3GbTransportOut, b2pi, VPIDChannel_2);
+//			}
+//		}
+//		else
+//		{
+//            // is TSI  low frame rate 2-wire
+//            SetVPIDData(vpidOut4a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, true, b2pi, VPIDChannel_3);
+//			SetVPIDData(vpidOut4b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, true, b2pi, VPIDChannel_4);
+//		}
+//	}
 	
 	
 	
@@ -3588,8 +3588,8 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//  If it is a quad signal it is downconverted to HD
 	//	   Otherwise it is passed through
 	
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL5, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL5, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL5, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL5, transportStandard);
 
 	bool sdi5_3GbTransportOut = false;
 
@@ -3597,10 +3597,10 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	{
 		if (b4kHfr)
 		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
+			//mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
 			sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 				(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
 		else
 		{
@@ -3613,108 +3613,108 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				//sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 				sdi5_3GbTransportOut = false;       // DAC - this works for 29.97 UHD YUV playback
 			}
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
 	}
 	else
 	{
 		if (bHfr)
 		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
+			//mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
 			sdi5_3GbTransportOut = IsVideoFormatB(mFb1VideoFormat)
 				|| (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
 		else
 		{
 			sdi5_3GbTransportOut = b3GbTransportOut || bSdiRgbOut;
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
+			//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
 	}
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bLevelA && sdi5_3GbTransportOut) || (b4K && bSdiRgbOut));
 
 	// Set VPID 5
-	if (b4K)
-	{
-		if (sdi5_3GbTransportOut)
-		{
-			SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
-			SetVPIDData(vpidOut5b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
-		}
-		else
-		{
-			SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
-		}
-	}
-	else
-	{
-		SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
-		if (sdi5_3GbTransportOut)
-		{
-			SetVPIDData(vpidOut5b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
+//	if (b4K)
+//	{
+//		if (sdi5_3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+//			SetVPIDData(vpidOut5b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
+//		}
+//		else
+//		{
+//			SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+//		}
+//	}
+//	else
+//	{
+//		SetVPIDData(vpidOut5a, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_1);
+//		if (sdi5_3GbTransportOut)
+//		{
+//			SetVPIDData(vpidOut5b, mFb1VideoFormat, bSdiRgbOut, kNot48Bit, sdi5_3GbTransportOut, false, VPIDChannel_2);
+//		}
+//	}
 	
 	
 	
 	// Finish VPID for SDI Out 1-4 Out
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
-							  ((mVirtualInputSelect == NTV2_DualLinkInputSelect && bSdiRgbOut == true) ||
-							   (mVirtualInputSelect != NTV2_DualLinkInputSelect && bSdiRgbOut != true)   ));
+//	{
+//		// don't overwrite if e-to-e and input and outputs match
+//		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
+//							  ((mVirtualInputSelect == NTV2_DualLinkInputSelect && bSdiRgbOut == true) ||
+//							   (mVirtualInputSelect != NTV2_DualLinkInputSelect && bSdiRgbOut != true)   ));
 		
 		// enable overwrite
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-			mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		}
-		mCard->WriteRegister(kRegSDIOut3Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut4Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut5Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
+//		if (b4K)
+//		{
+//			mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
+//			mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
+//		}
+//		mCard->WriteRegister(kRegSDIOut3Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
+//		mCard->WriteRegister(kRegSDIOut4Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
+//		mCard->WriteRegister(kRegSDIOut5Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
 		
-		// enable VPID write
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-			mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		}
-		mCard->WriteRegister(kRegSDIOut3Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut4Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut5Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
+//		// enable VPID write
+//		if (b4K)
+//		{
+//			mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
+//			mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
+//		}
+//		mCard->WriteRegister(kRegSDIOut3Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
+//		mCard->WriteRegister(kRegSDIOut4Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
+//		mCard->WriteRegister(kRegSDIOut5Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
 		
-		// write VPID value
-		if (b4K)
-		{
-			// write VPID for SDI 1
-			mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
+//		// write VPID value
+//		if (b4K)
+//		{
+//			// write VPID for SDI 1
+//			mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
+//			if (b3GbTransportOut)
+//				mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
 				
-			// write VPID for SDI 2
-			mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
-		}
+//			// write VPID for SDI 2
+//			mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
+//			if (b3GbTransportOut)
+//				mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
+//		}
 		
-		// write VPID for SDI 3
-		mCard->WriteRegister(kRegSDIOut3VPIDA, vpidOut3a);
-		if (b3GbTransportOut || b2pi)
-			mCard->WriteRegister(kRegSDIOut3VPIDB, vpidOut3b);
+//		// write VPID for SDI 3
+//		mCard->WriteRegister(kRegSDIOut3VPIDA, vpidOut3a);
+//		if (b3GbTransportOut || b2pi)
+//			mCard->WriteRegister(kRegSDIOut3VPIDB, vpidOut3b);
 		
-		// write VPID for SDI 4
-		mCard->WriteRegister(kRegSDIOut4VPIDA, vpidOut4a);
-		if (b3GbTransportOut || b2pi)
-			mCard->WriteRegister(kRegSDIOut4VPIDB, vpidOut4b);
+//		// write VPID for SDI 4
+//		mCard->WriteRegister(kRegSDIOut4VPIDA, vpidOut4a);
+//		if (b3GbTransportOut || b2pi)
+//			mCard->WriteRegister(kRegSDIOut4VPIDB, vpidOut4b);
 		
-		// write VPID for SDI 5
-		mCard->WriteRegister(kRegSDIOut5VPIDA, vpidOut5a);
-		if (sdi5_3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut5VPIDB, vpidOut5b);
-	}
+//		// write VPID for SDI 5
+//		mCard->WriteRegister(kRegSDIOut5VPIDA, vpidOut5a);
+//		if (sdi5_3GbTransportOut)
+//			mCard->WriteRegister(kRegSDIOut5VPIDB, vpidOut5b);
+	//}
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	if (b4K)
