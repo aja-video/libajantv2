@@ -4000,9 +4000,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_IO4KPLUS:				return "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:					return "Io4KIP";
 		case DEVICE_ID_KONAIP_4TX_2110:			return "KONA IP 4TX 2110";
-#if defined (AJA_DEBUG) || defined (_DEBUG)
-//	    default:					break;
-#else
+#if !defined (_DEBUG)
 	    default:					break;
 #endif
 	}
