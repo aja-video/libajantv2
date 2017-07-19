@@ -6517,7 +6517,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		case NTV2_WgtCSC3:					return inCompactDisplay ? "CSC3"			: "NTV2_WgtCSC3";
 		case NTV2_WgtCSC4:					return inCompactDisplay ? "CSC4"			: "NTV2_WgtCSC4";
 		case NTV2_WgtHDMIIn1v2:				return inCompactDisplay ? "HDMIv2In1"		: "NTV2_WgtHDMIIn1v2";
-		case NTV2_WgtHDMIOut1v2:			return inCompactDisplay ? "HDMIv2Out2"		: "NTV2_WgtHDMIOut1v2";
+		case NTV2_WgtHDMIOut1v2:			return inCompactDisplay ? "HDMIv2Out1"		: "NTV2_WgtHDMIOut1v2";
 		case NTV2_WgtSDIMonOut1:			return inCompactDisplay ? "SDIMonOut1"		: "NTV2_WgtSDIMonOut1";
 		case NTV2_WgtCSC5:					return inCompactDisplay ? "CSC5"			: "NTV2_WgtCSC5";
 		case NTV2_WgtLUT5:					return inCompactDisplay ? "LUT5"			: "NTV2_WgtLUT5";
