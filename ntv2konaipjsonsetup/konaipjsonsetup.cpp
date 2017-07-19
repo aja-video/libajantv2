@@ -581,6 +581,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
     }
+    return true;
 }
 
 NTV2Channel getChannel(QString channelDesignator)
