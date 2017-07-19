@@ -3513,6 +3513,21 @@ typedef enum
 
 // XLNX Registers
 
+// For the Mac we define an offset.  This is done so that read/write register can easily identify any of the Xilinx registers from a VP register.
+// This is necessary since the Xilinx registers live in another PCI BAR and these offsets conflict with normal VP registers.  With this
+// offset the driver knows which mapped BAR to use.  Windows maps individual registers at start so this isn't necessary for Windows.
+#ifdef AJAMac
+#define XILINX_START 13000
+#define XILINX_CHANNEL_START 13100
+#define XILINX_IRQ_START 13200
+#define XLINIX_DMA_START 13300
+#else
+#define XILINX_START 0
+#define XILINX_CHANNEL_START 0
+#define XILINX_IRQ_START 0
+#define XLINIX_DMA_START 0
+#endif
+
 #define XLNX_MAX_CHANNELS						4
 #define XLNX_REG_TARGET_SIZE					0x400
 #define XLNX_REG_CHANNEL_SIZE					0x40
@@ -3520,54 +3535,54 @@ typedef enum
 
 typedef enum
 {
-	kRegXlnxTargetChannelH2C					= 0x0,
-	kRegXlnxTargetChannelC2H					= 0x1,
-	kRegXlnxTargetIRQ							= 0x2,
-	kRegXlnxTargetConfig						= 0x3,
-	kRegXlnxTargetSgdmaH2C						= 0x4,
-	kRegXlnxTargetSgdmaC2H						= 0x5,
-	kRegXlnxTargetSgdmaCommon					= 0x6,
-	kRegXlnxTargetMsiX							= 0x8
+	kRegXlnxTargetChannelH2C					= 0x0 + XILINX_START,
+	kRegXlnxTargetChannelC2H					= 0x1 + XILINX_START,
+	kRegXlnxTargetIRQ							= 0x2 + XILINX_START,
+	kRegXlnxTargetConfig						= 0x3 + XILINX_START,
+	kRegXlnxTargetSgdmaH2C						= 0x4 + XILINX_START,
+	kRegXlnxTargetSgdmaC2H						= 0x5 + XILINX_START,
+	kRegXlnxTargetSgdmaCommon					= 0x6 + XILINX_START,
+	kRegXlnxTargetMsiX							= 0x8 + XILINX_START
 } XlnxRegisterTarget;
 
 typedef enum
 {
-	kRegXlnxChannelIdentifier					= 0x00,
-	kRegXlnxChannelControl						= 0x01,
-	kRegXlnxChannelControlW1S					= 0x02,
-	kRegXlnxChannelControlW1C					= 0x03,
-	kRegXlnxChannelStatus						= 0x10,
-	kRegXlnxChannelStatusRC						= 0x11,
-	kRegXlnxChannelDescCompleteCount			= 0x12,
-	kRegXlnxChannelAlignments					= 0x13,
-	kRegXlnxChannelPollModeAddressLow			= 0x22,
-	kRegXlnxChannelPollModeAddressHigh			= 0x23,
-	kRegXlnxChannelInterruptEnable				= 0x24,
-	kRegXlnxChannelInterruptEnableW1S			= 0x25,
-	kRegXlnxChannelInterruptEnableW1C			= 0x26,
-	kRegXlnxChannelPerfControl					= 0x30,
-	kRegXlnxChannelPerfCycleCountLow			= 0x31,
-	kRegXlnxChannelPerfCycleCountHigh			= 0x32,
-	kRegXlnxChannelPerfDataCountLow				= 0x33,
-	kRegXlnxChannelPerfDataCountHigh			= 0x34,
+	kRegXlnxChannelIdentifier					= 0x00 + XILINX_CHANNEL_START,
+	kRegXlnxChannelControl						= 0x01 + XILINX_CHANNEL_START,
+	kRegXlnxChannelControlW1S					= 0x02 + XILINX_CHANNEL_START,
+	kRegXlnxChannelControlW1C					= 0x03 + XILINX_CHANNEL_START,
+	kRegXlnxChannelStatus						= 0x10 + XILINX_CHANNEL_START,
+	kRegXlnxChannelStatusRC						= 0x11 + XILINX_CHANNEL_START,
+	kRegXlnxChannelDescCompleteCount			= 0x12 + XILINX_CHANNEL_START,
+	kRegXlnxChannelAlignments					= 0x13 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPollModeAddressLow			= 0x22 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPollModeAddressHigh			= 0x23 + XILINX_CHANNEL_START,
+	kRegXlnxChannelInterruptEnable				= 0x24 + XILINX_CHANNEL_START,
+	kRegXlnxChannelInterruptEnableW1S			= 0x25 + XILINX_CHANNEL_START,
+	kRegXlnxChannelInterruptEnableW1C			= 0x26 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPerfControl					= 0x30 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPerfCycleCountLow			= 0x31 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPerfCycleCountHigh			= 0x32 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPerfDataCountLow				= 0x33 + XILINX_CHANNEL_START,
+	kRegXlnxChannelPerfDataCountHigh			= 0x34 + XILINX_CHANNEL_START,
 
-	kRegXlnxIrqIdentifier						= 0x00,
-	kRegXlnxIrqUserInterruptEnable				= 0x01,
-	kRegXlnxIrqUserInterruptEnableW1S			= 0x02,
-	kRegXlnxIrqUserInterruptEnableW1C			= 0x03,
-	kRegXlnxIrqChannelInterruptEnable			= 0x04,
-	kRegXlnxIrqChannelInterruptEnableW1S		= 0x05,
-	kRegXlnxIrqChannelInterruptEnableW1C		= 0x06,
-	kRegXlnxIrqUserInterruptRequest				= 0x10,	
-	kRegXlnxIrqChannelInterruptRequest			= 0x11,	
-	kRegXlnxIrqUserInterruptPending				= 0x12,	
-	kRegXlnxIrqChannelInterruptPending			= 0x13,
+	kRegXlnxIrqIdentifier						= 0x00 + XILINX_IRQ_START,
+	kRegXlnxIrqUserInterruptEnable				= 0x01 + XILINX_IRQ_START,
+	kRegXlnxIrqUserInterruptEnableW1S			= 0x02 + XILINX_IRQ_START,
+	kRegXlnxIrqUserInterruptEnableW1C			= 0x03 + XILINX_IRQ_START,
+	kRegXlnxIrqChannelInterruptEnable			= 0x04 + XILINX_IRQ_START,
+	kRegXlnxIrqChannelInterruptEnableW1S		= 0x05 + XILINX_IRQ_START,
+	kRegXlnxIrqChannelInterruptEnableW1C		= 0x06 + XILINX_IRQ_START,
+	kRegXlnxIrqUserInterruptRequest				= 0x10 + XILINX_IRQ_START,
+	kRegXlnxIrqChannelInterruptRequest			= 0x11 + XILINX_IRQ_START,
+	kRegXlnxIrqUserInterruptPending				= 0x12 + XILINX_IRQ_START,
+	kRegXlnxIrqChannelInterruptPending			= 0x13 + XILINX_IRQ_START,
 
-	kRegXlnxSgdmaIdentifier						= 0x00,
-	kRegXlnxSgdmaDescAddressLow					= 0x20,
-	kRegXlnxSgdmaDescAddressHigh				= 0x21,
-	kRegXlnxSgdmaDescAdjacent					= 0x22,
-	kRegXlnxSgdmaDescCredits					= 0x23
+	kRegXlnxSgdmaIdentifier						= 0x00 + XLINIX_DMA_START,
+	kRegXlnxSgdmaDescAddressLow					= 0x20 + XLINIX_DMA_START,
+	kRegXlnxSgdmaDescAddressHigh				= 0x21 + XLINIX_DMA_START,
+	kRegXlnxSgdmaDescAdjacent					= 0x22 + XLINIX_DMA_START,
+	kRegXlnxSgdmaDescCredits					= 0x23 + XLINIX_DMA_START
 
 } XlnxRegisterNum;
 
