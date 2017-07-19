@@ -226,7 +226,11 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 
 		if (!bitfile.Open (m_bitfilePath))
 		{
-			cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' not found" << endl;
+			const string	extraInfo	(bitfile.GetLastError());
+			cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
+			if (!extraInfo.empty())
+				cerr << ": " << extraInfo;
+			cerr << endl;
 			return AJA_STATUS_OPEN;
 		}
 

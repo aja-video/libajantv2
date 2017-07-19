@@ -35,6 +35,31 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Widg
 
 typedef std::pair <NTV2InputCrosspointID, NTV2OutputCrosspointID>	NTV2SignalConnection;	///< @brief	This links an NTV2InputCrosspointID and an NTV2OutputCrosspointID.
 
+typedef	std::map <std::string, NTV2InputCrosspointID>			String2InputXpt;
+typedef String2InputXpt::const_iterator				String2InputXptConstIter;
+
+typedef	std::map <NTV2InputCrosspointID, std::string>			InputXpt2String;
+typedef InputXpt2String::const_iterator				InputXpt2StringConstIter;
+
+typedef std::map <NTV2InputCrosspointID, NTV2WidgetID>	InputXpt2WidgetID;
+typedef	InputXpt2WidgetID::const_iterator			InputXpt2WidgetIDConstIter;
+
+typedef	std::map <std::string, NTV2OutputCrosspointID>		String2OutputXpt;
+typedef String2OutputXpt::const_iterator			String2OutputXptConstIter;
+
+typedef	std::map <NTV2OutputCrosspointID, std::string>		OutputXpt2String;
+typedef OutputXpt2String::const_iterator			OutputXpt2StringConstIter;
+
+typedef std::map <NTV2OutputCrosspointID, NTV2WidgetID>	OutputXpt2WidgetID;
+typedef	OutputXpt2WidgetID::const_iterator			OutputXpt2WidgetIDConstIter;
+
+typedef std::pair <NTV2WidgetID, NTV2OutputCrosspointID>		Widget2OutputXptPair;
+typedef std::multimap <NTV2WidgetID, NTV2OutputCrosspointID>	Widget2OutputXpts;
+typedef Widget2OutputXpts::const_iterator				Widget2OutputXptsConstIter;
+
+typedef std::pair <NTV2WidgetID, NTV2InputCrosspointID>		Widget2InputXptPair;
+typedef std::multimap <NTV2WidgetID, NTV2InputCrosspointID>	Widget2InputXpts;
+typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
 	@brief	This class is a collection of input-to-output connections that can be applied to an NTV2 device.
@@ -177,13 +202,13 @@ class AJAExport CNTV2SignalRouter
 	private:
 		typedef std::map <NTV2InputCrosspointID, NTV2OutputCrosspointID>	MyConnections;
 		typedef MyConnections::const_iterator								MyConnectionsConstIter;
-		typedef MyConnections::iterator										MyConnectionsIter;
+                typedef MyConnections::iterator										MyConnectionsIter;
 
 		MyConnections								mConnections;		///< @brief	My collection of NTV2SignalConnections
 
 
 	//	Class Methods
-	public:
+        public:
 		#if !defined (NTV2_DEPRECATE_12_5)
 			static NTV2_DEPRECATED const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt);	///< @deprecated	NTV2RoutingEntry is deprecated.
 			static NTV2_DEPRECATED NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry);	///< @deprecated	NTV2RoutingEntry is deprecated.
@@ -289,6 +314,15 @@ class AJAExport CNTV2SignalRouter
 		static bool									Initialize (void);		///< @brief	Initializes my tables.
 		static bool									Deinitialize (void);	///< @brief	Deinitializes (frees) my tables.
 		static bool									IsInitialized (void);	///< @brief	Returns true if my tables are initialized.
+
+        static String2InputXpt		gString2InputXpt;
+        static InputXpt2String		gInputXpt2String;
+        static InputXpt2WidgetID	gInputXpt2WidgetID;
+        static String2OutputXpt		gString2OutputXpt;
+        static OutputXpt2String		gOutputXpt2String;
+        static OutputXpt2WidgetID	gOutputXpt2WidgetID;
+        static Widget2OutputXpts	gWidget2OutputXpts;
+        static Widget2InputXpts		gWidget2InputXpts;
 
 };	//	CNTV2SignalRouter
 

@@ -1095,7 +1095,7 @@ NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
 	if(inDeviceID != DEVICE_ID_IO4KPLUS || inDeviceID != DEVICE_ID_IO4K)
 		return NTV2_AUDIOSYSTEM_INVALID;
-	return (NTV2AudioSystem) NTV2DeviceGetNumAudioSystems(inDeviceID);
+	return (NTV2AudioSystem) (NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
 }
 
 #if !defined (NTV2_DEPRECATE)
