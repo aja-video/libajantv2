@@ -1108,7 +1108,7 @@ bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inC
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
 	if (inDeviceID == DEVICE_ID_IO4KPLUS  ||  inDeviceID == DEVICE_ID_IO4K)
-		return NTV2AudioSystem(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
+        return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 2);
 	return NTV2_AUDIOSYSTEM_INVALID;
 }
 
