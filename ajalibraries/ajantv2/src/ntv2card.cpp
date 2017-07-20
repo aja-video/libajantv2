@@ -718,7 +718,7 @@ bool CNTV2Card::GetNumericParam (const NTV2NumericParamID inParamID, uint32_t & 
 		case kDeviceGetNumAnalogAudioOutputChannels:	outValue = ::NTV2DeviceGetNumAnalogAudioOutputChannels		(GetDeviceID());	break;
 		case kDeviceGetNumAnalogVideoInputs:			outValue = ::NTV2DeviceGetNumAnalogVideoInputs				(GetDeviceID());	break;
 		case kDeviceGetNumAnalogVideoOutputs:			outValue = ::NTV2DeviceGetNumAnalogVideoOutputs				(GetDeviceID());	break;
-		case kDeviceGetNumAudioSystems:					outValue = ::NTV2DeviceGetNumAudioSystems					(GetDeviceID());	break;
+		case kDeviceGetNumAudioSystems:					outValue = (::NTV2DeviceGetNumAudioSystems					(GetDeviceID()) + (DeviceCanDoAudioMixer() ? 1 : 0));	break;
 		case kDeviceGetNumCrossConverters:				outValue = ::NTV2DeviceGetNumCrossConverters				(GetDeviceID());	break;
 		case kDeviceGetNumCSCs:							outValue = ::NTV2DeviceGetNumCSCs							(GetDeviceID());	break;
 		case kDeviceGetNumDownConverters:				outValue = ::NTV2DeviceGetNumDownConverters					(GetDeviceID());	break;

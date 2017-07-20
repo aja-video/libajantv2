@@ -101,7 +101,7 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 {
 	outAbsByteOffset = 0;
 	const NTV2DeviceID	deviceID	(GetDeviceID());
-	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(deviceID))
+	if (UWord(inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems(deviceID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;	//	Invalid audio system
 
 	if (::NTV2DeviceCanDoStackedAudio(deviceID))
