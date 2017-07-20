@@ -122,11 +122,11 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 		std::string									m_bitfilePath;			///< @brief	Absolute path to bitfile on host that's to be flashed into device
 		bool										m_updateSuccessful;		///< @brief	Initially False, is set True if firmware successfully installed
 		const bool									m_verbose;				///< @brief	Verbose logging to cout/cerr?
-		const bool									m_forceUpdate;				///< @brief	Force the install of the bitfile
+		const bool									m_forceUpdate;			///< @brief	Force the install of the bitfile
 		mutable CNTV2Card							m_device;				///< @brief	Talks to the AJA device
 		mutable SSC_GET_FIRMWARE_PROGRESS_STRUCT	m_statusStruct;			///< @brief	Firmware update progress
 
-};	//	FirmwareInstallerThread
+};	//	CNTV2FirmwareInstallerThread
 
 
 #endif	//	__NTV2FIRMWAREINSTALLERTHREAD_H__

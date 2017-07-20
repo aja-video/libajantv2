@@ -454,6 +454,12 @@ public:
 	AJA_VIRTUAL bool	DeviceCanDoAudioMixer ();
 
 	/**
+		@brief		Returns true if the device having the given ID supports the audio mixer.
+		@return		True if the device supports the given input source.
+	**/
+	AJA_VIRTUAL bool	DeviceIsDNxIV ();
+
+	/**
 		@brief		Fetches the requested boolean value. Typically called to determine device features.
 		@param[in]	inParamID	Specifies the NTV2BoolParamID of interest.
 		@param[out]	outValue	Receives the requested boolean value.

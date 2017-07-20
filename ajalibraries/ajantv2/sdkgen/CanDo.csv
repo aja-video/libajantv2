@@ -80,5 +80,6 @@ NTV2DeviceCanDoHDMIHDROut,Returns true if the device having the given ID support
 NTV2DeviceCanDoJ2K,Returns true if the device supports the JPEG 2000 codec,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,-,-,-
 NTV2DeviceCanDo2110,Returns true if the device supports SMPTE 2110,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X
 NTV2DeviceHasXilinxDMA,Returns true if the device has Xilinx DMA engine,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-
-NTV2DeviceCanDo12GSDI,Returns true if the device supports 12G SDI,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-
+NTV2DeviceCanDo12GSDI,Returns true if the device supports 12G SDI,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-
 NTV2DeviceHasSPIv5,Returns true if the device having the given ID uses version 5 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-
+NTV2DeviceCanDoAudioMixer,Returns true if the device supports an audio mixer – firmware dependent,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-

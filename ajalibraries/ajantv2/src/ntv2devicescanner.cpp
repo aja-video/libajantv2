@@ -812,7 +812,7 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 		}
 	}	//	for each video format
 
-	assert ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
+	NTV2_ASSERT ((isOkay && !outFormats.empty())  ||  (!isOkay && outFormats.empty()));
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedVideoFormats
