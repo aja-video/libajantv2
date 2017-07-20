@@ -289,7 +289,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     //if (!mDevice.IsKonaIPDevice ())
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
-    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
+    //	Wait for device ready
     while (!mDevice.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
@@ -297,13 +297,14 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         if (mDevice.IsMBSystemReady ())
         {
             cout << "## NOTE:  Device is ready" << endl;
+        }
+    }
+
             if (!mDevice.IsMBSystemValid())
             {
                 cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
                 return false;
             }
-        }
-    }
 
     enable2022_7 = false;
     CNTV2Config2022	config2022 (mDevice);
@@ -322,7 +323,10 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         SFPStruct sfp = sfpIter.next();
         if ( sfp.mSFPDesignator == "top")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_TOP,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool rv = config2022.SetNetworkConfiguration (SFP_TOP,
+                                                          sfp.mIPAddress.toStdString(),
+                                                          sfp.mSubnetMask.toStdString(),
+                                                          sfp.mRouter.toStdString());
             if (!rv)
             {
                 cerr << "Error: " << config2022.getLastError() << endl;
@@ -332,7 +336,10 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         }
         else if ( sfp.mSFPDesignator == "bottom")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_BOTTOM,    sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool rv = config2022.SetNetworkConfiguration (SFP_BOTTOM,
+                                                          sfp.mIPAddress.toStdString(),
+                                                          sfp.mSubnetMask.toStdString(),
+                                                          sfp.mRouter.toStdString());
             if (!rv)
             {
                 cerr << "Error: " << config2022.getLastError() << endl;
