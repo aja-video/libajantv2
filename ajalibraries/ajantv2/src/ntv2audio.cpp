@@ -586,7 +586,7 @@ bool CNTV2Card::SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const N
 {
 	if (ULWord (inChannel) >= ::NTV2DeviceGetNumVideoOutputs (_boardID))
 		return false;	//	Invalid channel
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
+	if (UWord (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
 		return false;	//	Invalid audio system
 
 	ULWord	value	(inAudioSystem);
@@ -1548,7 +1548,7 @@ bool CNTV2Card::GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bo
 	outEraseModeEnabled = false;
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
 		return false;
-	if (inAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;
 	ULWord	regValue	(0);
 	if (!ReadRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], &regValue))
@@ -1562,7 +1562,7 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 {
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
 		return false;
-	if (inAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;
 	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
 }
