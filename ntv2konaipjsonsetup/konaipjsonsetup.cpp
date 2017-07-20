@@ -201,11 +201,15 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
-        {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
+     {
+        cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;
+        return false;
+    }
+
     //if (!mDevice.IsKonaIPDevice ())
     //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
 
-    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
+    //	Wait for device ready
     while (!mDevice.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
@@ -213,12 +217,13 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         if (mDevice.IsMBSystemReady ())
         {
             cout << "## NOTE:  Device is ready" << endl;
-            if (!mDevice.IsMBSystemValid())
-            {
-                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
-                return false;
-            }
         }
+    }
+
+    if (!mDevice.IsMBSystemValid())
+    {
+        cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+        return false;
     }
 
     enable2022_7 = false;
