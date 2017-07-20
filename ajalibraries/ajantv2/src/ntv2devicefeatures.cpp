@@ -247,7 +247,7 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 		default:
 			return true;
 		}
-		
+
 	case DEVICE_ID_KONA3GQUAD:
 	case DEVICE_ID_CORVID24:
 	case DEVICE_ID_IO4K:
@@ -255,15 +255,9 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 	case DEVICE_ID_CORVID88:
 	case DEVICE_ID_CORVID44:
 	case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_4CH_1SFP:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_CORVIDHBR:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
 	case DEVICE_ID_IO4KIP:
-	case DEVICE_ID_KONAIP_4TX_2110:
 		switch (inStandard)
 		{
 		case NTV2_STANDARD_525:
@@ -273,12 +267,32 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		boardID,
 		default:
 			return true;		// pretty much everything else
 		}
+		
+	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_4CH_2SFP:
+	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+	case DEVICE_ID_KONAIP_1RX_1TX_2110:
+	case DEVICE_ID_KONAIP_4TX_2110:
+		switch (inStandard)
+		{
+		case NTV2_STANDARD_525:
+			return (inFrameRate != NTV2_FRAMERATE_2398 && inFrameRate != NTV2_FRAMERATE_2400);	// eg NTV2_FORMAT_525_2398 requires conversion which is not available
+		case NTV2_STANDARD_720:
+			return (inFrameRate != NTV2_FRAMERATE_2398 && inFrameRate != NTV2_FRAMERATE_2500);	// eg NTV2_FORMAT_720p_2398 requires conversion which is not available
+		case NTV2_STANDARD_3840x2160p:
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_3840HFR:
+		case NTV2_STANDARD_4096HFR:
+			return false;		//	No 4K/UHD
+		default:
+			return true;		// pretty much everything else
+		}
 
 	default:
 		return false;
 	}
 }
-
 
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
