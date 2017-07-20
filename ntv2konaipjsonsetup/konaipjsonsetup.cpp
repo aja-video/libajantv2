@@ -76,6 +76,7 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         receiveStruct.mStream = receiveChannelObject["stream"].toString();
         if (!receiveStruct.mStream.isEmpty())
             cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
+
         receiveStruct.mPrimarySrcPort = receiveChannelObject["primarySrcPort"].toString();
         if (!receiveStruct.mPrimarySrcPort.isEmpty())
             cout << "PrimarySrcPort " << receiveStruct.mPrimarySrcPort.toStdString() << endl;
@@ -300,11 +301,11 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         }
     }
 
-            if (!mDevice.IsMBSystemValid())
-            {
-                cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
-                return false;
-            }
+    if (!mDevice.IsMBSystemValid())
+    {
+        cerr << "## ERROR: board firmware package is incompatible with this application" << endl;
+        return false;
+    }
 
     enable2022_7 = false;
     CNTV2Config2022	config2022 (mDevice);

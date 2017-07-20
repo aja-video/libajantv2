@@ -243,7 +243,7 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     //if (!mDevice.IsKonaIPDevice ())
     //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
 
-    //	Read MicroBlaze Uptime in Seconds, to see if it's running...
+    // Wait for device ready
     while (!mDevice.IsMBSystemReady())
     {
         std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
@@ -251,12 +251,13 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
         if (mDevice.IsMBSystemReady ())
         {
             std::cout << "## NOTE:  Device is ready" << std::endl;
-            if (!mDevice.IsMBSystemValid())
-            {
-                std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
-                return false;
-            }
         }
+    }
+
+    if (!mDevice.IsMBSystemValid())
+    {
+        std::cerr << "## ERROR: board firmware package is incompatible with this application" << std::endl;
+        return false;
     }
 
     if (pKonaIpJ2kParams->mDecoder.size() == 0)
