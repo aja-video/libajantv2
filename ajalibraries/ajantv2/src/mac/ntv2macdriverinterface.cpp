@@ -265,12 +265,12 @@ class DeviceMap
 			}
 
 			//	Wait for IORegistry to settle down (if busy)...
-			//if (!WaitForBusToSettle ())
-			//{
-			//	MDIWARN ("IORegistry unstable, resetting DeviceMap");
-			//	Reset ();
-			//	return 0;
-			//}
+            if (!WaitForBusToSettle ())
+            {
+                MDIWARN ("IORegistry unstable, resetting DeviceMap");
+                Reset ();
+                return 0;
+            }
 
 			//	Make a new connection...
 			UWord			ndx			(inDeviceIndex);
@@ -842,7 +842,6 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 		{
 			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
 											<< " -- reg=" << registerNumber << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift) << ", WILL RESET DEVICE MAP");
-			gDeviceMap.Reset (kernResult == MACH_SEND_INVALID_DEST);	//	Reset masterPort for MACH_SEND_INVALID_DEST failures
 			return false;
 		}
 	}
