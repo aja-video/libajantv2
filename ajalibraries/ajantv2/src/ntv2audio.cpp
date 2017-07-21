@@ -1375,28 +1375,31 @@ bool CNTV2Card::GetSuspendHostAudio (bool & outIsSuspended)
 //		0xE:	NTV2_AUDIOSYSTEM_4	NTV2_AudioChannel9_12
 //		0xF:	NTV2_AUDIOSYSTEM_4	NTV2_AudioChannel13_16
 
+static const unsigned	gAESChannelMappingShifts [4]	=	{0, 4, 8, 12};
+
+
 bool CNTV2Card::GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels)
 {
-	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels (_boardID));
-	static const unsigned	kShifts [4]	=	{0, 4, 8, 12};
+	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
+	const UWord	maxNumAudioChannelsForQuad	((inAESAudioChannels + 1) * 4);
 
 	outSrcAudioSystem	= NTV2_AUDIOSYSTEM_INVALID;
 	outSrcAudioChannels	= NTV2_AUDIO_CHANNEL_QUAD_INVALID;
 
 	if (!numAESAudioOutputChannels)
 		return false;	//	Fail, device doesn't support AES output
-	if (!NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (inAESAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
+	if (maxNumAudioChannelsForQuad > numAESAudioOutputChannels)
+		return false;	//	Fail, illegal inAESAudioChannels value
 
 	ULWord	regValue	(0);
 	if (!ReadRegister (kRegAudioOutputSourceMap, &regValue))
 		return false;	//	Failed in ReadRegister
 
-	regValue = (regValue >> kShifts [inAESAudioChannels]) & 0x0000000F;
-	outSrcAudioSystem = NTV2AudioSystem (regValue / 4);
+	regValue = (regValue >> gAESChannelMappingShifts[inAESAudioChannels]) & 0x0000000F;
+	outSrcAudioSystem = NTV2AudioSystem(regValue / 4);
 	NTV2_ASSERT (NTV2_IS_VALID_AUDIO_SYSTEM (outSrcAudioSystem));
 
-	outSrcAudioChannels = NTV2Audio4ChannelSelect (regValue % 4);
+	outSrcAudioChannels = NTV2Audio4ChannelSelect(regValue % 4);
 	NTV2_ASSERT (NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (outSrcAudioChannels));
 	return true;
 }
@@ -1404,20 +1407,95 @@ bool CNTV2Card::GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChan
 
 bool CNTV2Card::SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels)
 {
-	if (!::NTV2DeviceGetNumAESAudioOutputChannels (_boardID))
-		return false;	//	Fail, device doesn't support AES output
-	if (!NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (inAESAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
-	if (inSrcAudioSystem >= ::NTV2DeviceGetNumAudioSystems (_boardID))
-		return false;	//	Fail, illegal NTV2AudioSystem
-	if (!NTV2_IS_VALID_AUDIO_CHANNEL_QUAD (inSrcAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
+	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
+	const UWord	maxNumAESAudioChlsForQuad	((inAESAudioChannels + 1) * 4);
+	const UWord	maxNumDeviceAudioChannels	(::NTV2DeviceGetMaxAudioChannels(_boardID));
+	const UWord	maxNumSrcAudioChlsForQuad	((inSrcAudioChannels + 1) * 4);
 
-	static const unsigned	kShifts [4]	=	{0, 4, 8, 12};
-	const ULWord	mask	(0xF << kShifts[inAESAudioChannels]);
-	ULWord			nibble	((ULWord(inSrcAudioSystem) * 4  +  ULWord(inSrcAudioChannels))  <<  kShifts[inAESAudioChannels]);
-	return WriteRegister (kRegAudioOutputSourceMap, nibble, mask, kShifts[inAESAudioChannels]);
+	if (!numAESAudioOutputChannels)
+		return false;	//	Fail, device doesn't support AES output
+	if (maxNumAESAudioChlsForQuad > numAESAudioOutputChannels)
+		return false;	//	Fail, illegal inAESAudioChannels value
+	if (inSrcAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;	//	Fail, illegal NTV2AudioSystem
+	if (maxNumSrcAudioChlsForQuad > maxNumDeviceAudioChannels)
+		return false;	//	Fail, illegal inSrcAudioChannels value
+
+	const ULWord	nibble	(ULWord(inSrcAudioSystem) * 4  +  ULWord(inSrcAudioChannels));
+	return WriteRegister (kRegAudioOutputSourceMap,											//	reg
+							nibble,															//	value
+							ULWord(0xF << gAESChannelMappingShifts[inAESAudioChannels]),	//	mask
+							gAESChannelMappingShifts[inAESAudioChannels]);					//	shift
 }
+
+#if defined (AJA_NTV2_SetAESOutputSource_VALIDATION)
+	//	REQUIRES #include "ntv2registerexpert.h"
+	//	OPTIONAL #define SHOW_PASSED (true)
+	//	REQUIRES #include "ntv2bft.h"
+
+	bool VALIDATION_SetAESOutputSource (CNTV2Card & inCard)
+	{
+		NTV2AudioSystem			audSys	(NTV2_AUDIOSYSTEM_INVALID);
+		NTV2Audio4ChannelSelect	quad	(NTV2_AUDIO_CHANNEL_QUAD_INVALID);
+
+		//	RANGE CHECKS
+		SHOULD_BE_FALSE(inCard.GetAESOutputSource (NTV2_AudioChannel17_20, audSys, quad));
+		SHOULD_BE_FALSE(inCard.SetAESOutputSource (NTV2_AudioChannel17_20, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel1_4));	//	AES channel quad out of range
+		SHOULD_BE_FALSE(inCard.SetAESOutputSource (NTV2_AudioChannel5_8,  NTV2_AUDIOSYSTEM_6, NTV2_AudioChannel1_4));	//	Src audio system out of range
+		SHOULD_BE_FALSE(inCard.SetAESOutputSource (NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel17_20));	//	Src channel quad out of range
+
+		//	SET INITIAL STATE
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_1, NTV2_AudioChannel1_4));	//	Reg val changes from 0xXXXXXXXX to 0xXXXXXXX0
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel5_8));	//	Reg val changes from 0xXXXXXXX0 to 0xXXXXXX50
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_3, NTV2_AudioChannel9_12));	//	Reg val changes from 0xXXXXXX50 to 0xXXXXXA50
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel13_16, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel13_16));//	Reg val changes from 0xXXXXXA50 to 0xXXXXFA50
+
+		//	CHANGE 1ST AES QUAD
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel13_16));	//	Reg val changes from 0xXXXXFA50 to 0xXXXXFA57
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel1_4, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel13_16);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel5_8, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel5_8);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel9_12, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_3  &&  quad == NTV2_AudioChannel9_12);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel13_16, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_4  &&  quad == NTV2_AudioChannel13_16);
+
+		//	CHANGE 2ND AES QUAD
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel9_12));	//	Reg val changes from 0xXXXXFA57 to 0xXXXXFA67
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel1_4, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel13_16);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel5_8, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel9_12);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel9_12, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_3  &&  quad == NTV2_AudioChannel9_12);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel13_16, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_4  &&  quad == NTV2_AudioChannel13_16);
+
+		//	CHANGE 3RD AES QUAD
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel5_8));	//	Reg val changes from 0xXXXXFA67 to 0xXXXXF567
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel1_4, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel13_16);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel5_8, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel9_12);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel9_12, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel5_8);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel13_16, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_4  &&  quad == NTV2_AudioChannel13_16);
+
+		//	CHANGE 4TH AES QUAD
+		SHOULD_BE_TRUE (inCard.SetAESOutputSource (NTV2_AudioChannel13_16, NTV2_AUDIOSYSTEM_2, NTV2_AudioChannel1_4));	//	Reg val changes from 0xXXXXF567 to 0xXXXX4567
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel1_4, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel13_16);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel5_8, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel9_12);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel9_12, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel5_8);
+		SHOULD_BE_TRUE(inCard.GetAESOutputSource (NTV2_AudioChannel13_16, audSys, quad));
+		SHOULD_BE_TRUE(audSys == NTV2_AUDIOSYSTEM_2  &&  quad == NTV2_AudioChannel1_4);
+		return true;
+	}
+#endif	//	AJA_NTV2_SetAESOutputSource_VALIDATION
 
 
 static NTV2AudioChannelPairs BitMasksToNTV2AudioChannelPairs (const ULWord inBitMask, const ULWord inExtendedBitMask)
