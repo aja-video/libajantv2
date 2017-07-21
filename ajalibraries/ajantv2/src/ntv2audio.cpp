@@ -1194,28 +1194,31 @@ bool CNTV2Card::GetSuspendHostAudio (bool & outIsSuspended)
 //		0xE:	NTV2_AUDIOSYSTEM_4	NTV2_AudioChannel9_12
 //		0xF:	NTV2_AUDIOSYSTEM_4	NTV2_AudioChannel13_16
 
+static const unsigned	gAESChannelMappingShifts [4]	=	{0, 4, 8, 12};
+
+
 bool CNTV2Card::GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels)
 {
-	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels (_boardID));
-	static const unsigned	kShifts [4]	=	{0, 4, 8, 12};
+	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
+	const UWord	maxNumAudioChannelsForQuad	((inAESAudioChannels + 1) * 4);
 
 	outSrcAudioSystem	= NTV2_AUDIOSYSTEM_INVALID;
 	outSrcAudioChannels	= NTV2_AUDIO_CHANNEL_QUAD_INVALID;
 
-	if (!numAESAudioOutputChannels)
+	if (numAESAudioOutputChannels < 4)
 		return false;	//	Fail, device doesn't support AES output
-	if (!NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (inAESAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
+	if (maxNumAudioChannelsForQuad > numAESAudioOutputChannels)
+		return false;	//	Fail, illegal inAESAudioChannels value
 
 	ULWord	regValue	(0);
 	if (!ReadRegister (kRegAudioOutputSourceMap, &regValue))
 		return false;	//	Failed in ReadRegister
 
-	regValue = (regValue >> kShifts [inAESAudioChannels]) & 0x0000000F;
-	outSrcAudioSystem = NTV2AudioSystem (regValue / 4);
+	regValue = (regValue >> gAESChannelMappingShifts[inAESAudioChannels]) & 0x0000000F;
+	outSrcAudioSystem = NTV2AudioSystem(regValue / 4);
 	NTV2_ASSERT (NTV2_IS_VALID_AUDIO_SYSTEM (outSrcAudioSystem));
 
-	outSrcAudioChannels = NTV2Audio4ChannelSelect (regValue % 4);
+	outSrcAudioChannels = NTV2Audio4ChannelSelect(regValue % 4);
 	NTV2_ASSERT (NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (outSrcAudioChannels));
 	return true;
 }
@@ -1223,19 +1226,25 @@ bool CNTV2Card::GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChan
 
 bool CNTV2Card::SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels)
 {
-	if (!::NTV2DeviceGetNumAESAudioOutputChannels (_boardID))
-		return false;	//	Fail, device doesn't support AES output
-	if (!NTV2_IS_NORMAL_AUDIO_CHANNEL_QUAD (inAESAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
-	if (inSrcAudioSystem >= ::NTV2DeviceGetNumAudioSystems (_boardID))
-		return false;	//	Fail, illegal NTV2AudioSystem
-	if (!NTV2_IS_VALID_AUDIO_CHANNEL_QUAD (inSrcAudioChannels))
-		return false;	//	Fail, illegal NTV2Audio4ChannelSelect value
+	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
+	const UWord	maxNumAESAudioChlsForQuad	((inAESAudioChannels + 1) * 4);
+	const UWord	maxNumDeviceAudioChannels	(::NTV2DeviceGetMaxAudioChannels(_boardID));
+	const UWord	maxNumSrcAudioChlsForQuad	((inSrcAudioChannels + 1) * 4);
 
-	static const unsigned	kShifts [4]	=	{0, 4, 8, 12};
-	const ULWord	mask	(0xF << kShifts[inAESAudioChannels]);
-	ULWord			nibble	((ULWord(inSrcAudioSystem) * 4  +  ULWord(inSrcAudioChannels))  <<  kShifts[inAESAudioChannels]);
-	return WriteRegister (kRegAudioOutputSourceMap, nibble, mask, kShifts[inAESAudioChannels]);
+	if (numAESAudioOutputChannels < 4)
+		return false;	//	Fail, device doesn't support AES output
+	if (maxNumAESAudioChlsForQuad > numAESAudioOutputChannels)
+		return false;	//	Fail, illegal inAESAudioChannels value
+	if (inSrcAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;	//	Fail, illegal NTV2AudioSystem
+	if (maxNumSrcAudioChlsForQuad > maxNumDeviceAudioChannels)
+		return false;	//	Fail, illegal inSrcAudioChannels value
+
+	const ULWord	nibble	(ULWord(inSrcAudioSystem) * 4  +  ULWord(inSrcAudioChannels));
+	return WriteRegister (kRegAudioOutputSourceMap,											//	reg
+							nibble,															//	value
+							ULWord(0xF << gAESChannelMappingShifts[inAESAudioChannels]),	//	mask
+							gAESChannelMappingShifts[inAESAudioChannels]);					//	shift
 }
 
 

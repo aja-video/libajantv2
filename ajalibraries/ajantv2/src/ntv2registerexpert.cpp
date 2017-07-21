@@ -145,7 +145,7 @@ public:
 		DefineRegister (kRegSDIOut6Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut7Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut8Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8,	kRegClass_NULL);
-		
+
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -300,6 +300,8 @@ private:
 		DefineRegClass (kRegPCMControl4321, kRegClass_Channel3);	DefineRegClass (kRegPCMControl4321, kRegClass_Channel4);
 		DefineRegClass (kRegPCMControl8765, kRegClass_Channel7);	DefineRegClass (kRegPCMControl8765, kRegClass_Channel8);
 		DefineRegister (kRegAud1Counter,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Audio,	kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegAudioOutputSourceMap,"",mDecodeAudOutputSrcMap,		READWRITE,	kRegClass_Audio,	kRegClass_Output,	kRegClass_AES);
+		DefineRegClass (kRegAudioOutputSourceMap, kRegClass_HDMI);
 	}
 	
 	void SetupDMARegs(void)
@@ -1192,7 +1194,7 @@ private:
 			return oss.str();
 		}
 	}	mDecodeSysmonVccIntDieTemp;
-	
+
 	struct DecodeVidControlReg : public Decoder		//	Bit31=Is16x9 | Bit30=IsMono
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1374,6 +1376,55 @@ private:
 			return oss.str();
 		}
 	}	mDecodeAudSourceSelectReg;
+	
+	struct DecodeAudOutputSrcMap : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			static const string	AESOutputStrs[]	= {	"AES Outputs 1-4",	"AES Outputs 5-8",	"AES Outputs 9-12",	"AES Outputs 13-16", ""};
+			static const string	SrcStrs[]		= {	"AudSys1, Audio Channels 1-4",	"AudSys1, Audio Channels 5-8",
+													"AudSys1, Audio Channels 9-12",	"AudSys1, Audio Channels 13-16",
+													"AudSys2, Audio Channels 1-4",	"AudSys2, Audio Channels 5-8",
+													"AudSys2, Audio Channels 9-12",	"AudSys2, Audio Channels 13-16",
+													"AudSys3, Audio Channels 1-4",	"AudSys3, Audio Channels 5-8",
+													"AudSys3, Audio Channels 9-12",	"AudSys3, Audio Channels 13-16",
+													"AudSys4, Audio Channels 1-4",	"AudSys4, Audio Channels 5-8",
+													"AudSys4, Audio Channels 9-12",	"AudSys4, Audio Channels 13-16",	""};
+			static const unsigned		AESChlMappingShifts [4]	=	{0, 4, 8, 12};
+
+			ostringstream	oss;
+			const uint32_t				AESOutMapping	(inRegValue & 0x0000FFFF);
+			const uint32_t				AnlgMonInfo		((inRegValue & kRegMaskMonitorSource) >> kRegShiftMonitorSource);
+			const NTV2AudioSystem		AnlgMonAudSys	(NTV2AudioSystem(AnlgMonInfo >> 4));
+			const NTV2AudioChannelPair	AnlgMonChlPair	(NTV2AudioChannelPair(AnlgMonInfo & 0xF));
+			for (unsigned AESOutputQuad(0);  AESOutputQuad < 4;  AESOutputQuad++)
+				oss	<< AESOutputStrs[AESOutputQuad] << " Source: " << SrcStrs[(AESOutMapping >> AESChlMappingShifts[AESOutputQuad]) & 0x0000000F] << endl;
+			oss	<< "Analog Audio Monitor Output Source: " << ::NTV2AudioSystemToString(AnlgMonAudSys,true) << ", Channels " << ::NTV2AudioChannelPairToString(AnlgMonChlPair,true) << endl;
+
+			//	HDMI Audio Output Mapping -- interpretation depends on bit 29 of register 125 kRegHDMIOutControl		MULTIREG_SPARSE_BITS
+			const uint32_t				HDMIMonInfo		((inRegValue & kRegMaskHDMIOutAudioSource) >> kRegShiftHDMIOutAudioSource);
+			{
+				//	HDMI Audio 2-channel Mode:
+				const NTV2AudioSystem		HDMIMonAudSys	(NTV2AudioSystem(HDMIMonInfo >> 4));
+				const NTV2AudioChannelPair	HDMIMonChlPair	(NTV2AudioChannelPair(HDMIMonInfo & 0xF));
+				oss	<< "HDMI 2-Chl Audio Output Source: " << ::NTV2AudioSystemToString(HDMIMonAudSys,true) << ", Channels " << ::NTV2AudioChannelPairToString(HDMIMonChlPair,true) << endl;
+			}
+			{
+				//	HDMI Audio 8-channel Mode:
+				const uint32_t					HDMIMon1234Info		(HDMIMonInfo & 0x0F);
+				const NTV2AudioSystem			HDMIMon1234AudSys	(NTV2AudioSystem(HDMIMon1234Info >> 2));
+				const NTV2Audio4ChannelSelect	HDMIMon1234SrcPairs	(NTV2Audio4ChannelSelect(HDMIMon1234Info & 0x3));
+				const uint32_t					HDMIMon5678Info		((HDMIMonInfo >> 4) & 0x0F);
+				const NTV2AudioSystem			HDMIMon5678AudSys	(NTV2AudioSystem(HDMIMon5678Info >> 2));
+				const NTV2Audio4ChannelSelect	HDMIMon5678SrcPairs	(NTV2Audio4ChannelSelect(HDMIMon5678Info & 0x3));
+				oss	<< "or HDMI 8-Chl Audio Output 1-4 Source: " << ::NTV2AudioSystemToString(HDMIMon1234AudSys,true) << ", Channels " << ::NTV2AudioChannelQuadToString(HDMIMon1234SrcPairs,true) << endl
+					<< "or HDMI 8-Chl Audio Output 5-8 Source: " << ::NTV2AudioSystemToString(HDMIMon5678AudSys,true) << ", Channels " << ::NTV2AudioChannelQuadToString(HDMIMon5678SrcPairs,true);
+			}
+			return oss.str();
+		}
+	}	mDecodeAudOutputSrcMap;
 	
 	struct DecodePCMControlReg : public Decoder
 	{
@@ -1802,6 +1853,7 @@ private:
 			(void) inDeviceID;
 			const uint16_t	gen		((inRegValue & (BIT(20)|BIT(21)|BIT(22)|BIT(23))) >> 20);
 			const uint16_t	lanes	((inRegValue & (BIT(16)|BIT(17)|BIT(18)|BIT(19))) >> 16);
+			const uint16_t	fwRev	((inRegValue & 0x0000FF00) >> 8);
 			ostringstream	oss;
 			for (uint16_t engine(0);  engine < 4;  engine++)
 				oss	<< "DMA " << (engine+1) << " Int Active?: "	<< YesNo(inRegValue & BIT(27+engine))						<< endl;
@@ -1809,6 +1861,7 @@ private:
 			for (uint16_t engine(0);  engine < 4;  engine++)
 				oss	<< "DMA " << (engine+1) << " Busy?: "		<< YesNo(inRegValue & BIT(27+engine))						<< endl;
 			oss	<< "Strap: "									<< ((inRegValue & BIT(7)) ? "Installed" : "Not Installed")	<< endl
+				<< "Firmware Rev: "								<< xHEX0N(fwRev, 2) << " (" << DEC(fwRev) << ")"			<< endl
 			<< "Gen: "										<< gen << ((gen > 0 && gen < 4) ? "" : " <invalid>")		<< endl
 			<< "Lanes: "									<< lanes << ((lanes >= 0  &&  lanes < 9) ? "" : " <invalid>");
 			return oss.str();
