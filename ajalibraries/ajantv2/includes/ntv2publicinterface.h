@@ -710,7 +710,19 @@ typedef enum
 	kRegAudioMixerMainGain,		//2305
 	kRegAudioMixerAux1Gain,	//2306
 	kRegAudioMixerAux2Gain,	//2307
-	kRegAudioMixerChannelSelect			//2308
+	kRegAudioMixerChannelSelect,			//2308
+	kRegAudioMixerMutes,
+	kRegAudioMixerAux1InputLevels,
+	kRegAudioMixerAux2InputLevels,
+	kRegAudioMixerMainInputLevelsPair0,
+	kRegAudioMixerMainInputLevelsPair1,
+	kRegAudioMixerMainInputLevelsPair2,
+	kRegAudioMixerMainInputLevelsPair3,
+	kRegAudioMixerMainInputLevelsPair4,
+	kRegAudioMixerMainInputLevelsPair5,
+	kRegAudioMixerMainInputLevelsPair6,
+	kRegAudioMixerMainInputLevelsPair7,
+	kRegAudioMixerMixedChannelOutputLevels
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
@@ -2295,7 +2307,50 @@ typedef enum
 	kRegMaskAudioMixerMainInputSelect = BIT(2) + BIT(1) + BIT(0),
 	kRegMaskAudioMixerAux1x2CHInput = BIT(6) + BIT(5) + BIT(4),
 	kRegMaskAudioMixerAux2x2CHInput = BIT(10) + BIT(9) + BIT(8),
-	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0)
+	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0),
+	kRegMaskAudioMixerOutputChannel1Mute =  BIT(0),
+	kRegMaskAudioMixerOutputChannel2Mute = BIT(1),
+	kRegMaskAudioMixerOutputChannel3Mute = BIT(2),
+	kRegMaskAudioMixerOutputChannel4Mute = BIT(3),
+	kRegMaskAudioMixerOutputChannel5Mute = BIT(4),
+	kRegMaskAudioMixerOutputChannel6Mute = BIT(5),
+	kRegMaskAudioMixerOutputChannel7Mute = BIT(6),
+	kRegMaskAudioMixerOutputChannel8Mute = BIT(7),
+	kRegMaskAudioMixerOutputChannel9Mute = BIT(8),
+	kRegMaskAudioMixerOutputChannel10Mute = BIT(9),
+	kRegMaskAudioMixerOutputChannel11Mute = BIT(10),
+	kRegMaskAudioMixerOutputChannel12Mute = BIT(11),
+	kRegMaskAudioMixerOutputChannel13Mute = BIT(12),
+	kRegMaskAudioMixerOutputChannel14Mute = BIT(13),
+	kRegMaskAudioMixerOutputChannel15Mute = BIT(14),
+	kRegMaskAudioMixerOutputChannel16Mute = BIT(15),
+	kRegMaskAudioMixerMainInputEnable = BIT(16)+BIT(17),
+	kRegMaskAudioMixerAux1InputEnable = BIT(18)+BIT(19),
+	kRegMaskAudioMixerAux2InputEnable = BIT(20)+BIT(21),
+	kRegMaskAudioMixerAux1Channel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerAux1Channel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerAux2Channel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerAux2Channel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel3Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel4Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel5Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel6Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel7Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel8Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel9Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel10Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel11Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel12Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel13Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel14Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel15Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel16Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainMixedOutputChannel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainMixedOutputChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+
+
 } RegisterMask;
 
 typedef enum
@@ -3326,7 +3381,49 @@ typedef enum
 	kRegShiftAudioMixerMainInputSelect = 0,
 	kRegShiftAudioMixerAux1x2CHInput = 4,
 	kRegShiftAudioMixerAux2x2CHInput = 8,
-	kRegShiftAudioMixerChannelSelect = 0
+	kRegShiftAudioMixerChannelSelect = 0,
+	kRegShiftAudioMixerOutputChannel1Mute =  0,
+	kRegShiftAudioMixerOutputChannel2Mute = 1,
+	kRegShiftAudioMixerOutputChannel3Mute = 2,
+	kRegShiftAudioMixerOutputChannel4Mute = 3,
+	kRegShiftAudioMixerOutputChannel5Mute = 4,
+	kRegShiftAudioMixerOutputChannel6Mute = 5,
+	kRegShiftAudioMixerOutputChannel7Mute = 6,
+	kRegShiftAudioMixerOutputChannel8Mute = 7,
+	kRegShiftAudioMixerOutputChannel9Mute = 8,
+	kRegShiftAudioMixerOutputChannel10Mute = 9,
+	kRegShiftAudioMixerOutputChannel11Mute = 10,
+	kRegShiftAudioMixerOutputChannel12Mute = 11,
+	kRegShiftAudioMixerOutputChannel13Mute = 12,
+	kRegShiftAudioMixerOutputChannel14Mute = 13,
+	kRegShiftAudioMixerOutputChannel15Mute = 14,
+	kRegShiftAudioMixerOutputChannel16Mute = 15,
+	kRegShiftAudioMixerMainInputEnable = 16,
+	kRegShiftAudioMixerAux1InputEnable = 18,
+	kRegShiftAudioMixerAux2InputEnable = 20,
+	kRegShiftAudioMixerAux1Channel1Level = 0,
+	kRegShiftAudioMixerAux1Channel2Level = 16,
+	kRegShiftAudioMixerAux2Channel1Level = 0,
+	kRegShiftAudioMixerAux2Channel2Level = 16,
+	kRegShiftAudioMixerMainChannel1Level = 0,
+	kRegShiftAudioMixerMainChannel2Level = 16,
+	kRegShiftAudioMixerMainChannel3Level = 0,
+	kRegShiftAudioMixerMainChannel4Level = 16,
+	kRegShiftAudioMixerMainChannel5Level = 0,
+	kRegShiftAudioMixerMainChannel6Level = 16,
+	kRegShiftAudioMixerMainChannel7Level = 0,
+	kRegShiftAudioMixerMainChannel8Level = 16,
+	kRegShiftAudioMixerMainChannel9Level = 0,
+	kRegShiftAudioMixerMainChannel10Level = 16,
+	kRegShiftAudioMixerMainChannel11Level = 0,
+	kRegShiftAudioMixerMainChannel12Level = 16,
+	kRegShiftAudioMixerMainChannel13Level = 0,
+	kRegShiftAudioMixerMainChannel14Level = 16,
+	kRegShiftAudioMixerMainChannel15Level = 0,
+	kRegShiftAudioMixerMainChannel16Level = 16,
+	kRegShiftAudioMixerMainMixedOutputChannel1Level = 0,
+	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16
+
 } RegisterShift;
 
 
