@@ -1019,7 +1019,18 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
 	(void) inDeviceID;
 	(void) inInputXpt;
 	(void) inOutputXpt;
-	return true;
+    switch(inDeviceID)
+    {
+        case DEVICE_ID_CORVID44:
+            return xpt_c44MatrixYCbCr[inInputXpt][inOutputXpt];
+            break;
+        case DEVICE_ID_CORVID88:
+            return xpt_c88MatrixYCbCr[inInputXpt][inOutputXpt];
+            break;
+        default:
+            return false;
+
+    }
 }
 
 
