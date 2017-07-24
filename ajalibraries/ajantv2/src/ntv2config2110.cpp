@@ -356,7 +356,7 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
     //WriteRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
 
     // payload type
-    mDevice. WriteRegister(kRegDecap_match_payload, rxConfig.payloadType);
+    mDevice. WriteRegister(kRegDecap_match_payload + decapBaseAddr, rxConfig.payloadType);
 
     // matching
     mDevice.WriteRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
