@@ -859,7 +859,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payloadType);
 
         // ssrc
-        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
+        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
 
     }
     return rv;
@@ -928,6 +928,9 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // payload type
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, &val);
         txConfig.payloadType = (uint16_t)val;
+
+        // ssrc
+        mDevice.ReadRegister(kReg3190_pkt_ssrc + baseAddrPacketizer, &txConfig.ssrc);
     }
     return true;
 }
