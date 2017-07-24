@@ -2730,6 +2730,30 @@ typedef NTV2AudioChannelPair	NTV2Audio2ChannelSelect;
 #define	NTV2_IS_NORMAL_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel1_2	&& (__p__) <= NTV2_AudioChannel15_16)
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel17_18	&& (__p__) < NTV2_MAX_NUM_AudioChannelPair)
 
+typedef enum
+{
+	NTV2_AudioMixerChannel1,
+	NTV2_AudioMixerChannel2,
+	NTV2_AudioMixerChannel3,
+	NTV2_AudioMixerChannel4,
+	NTV2_AudioMixerChannel5,
+	NTV2_AudioMixerChannel6,
+	NTV2_AudioMixerChannel7,
+	NTV2_AudioMixerChannel8,
+	NTV2_AudioMixerChannel9,
+	NTV2_AudioMixerChannel10,
+	NTV2_AudioMixerChannel11,
+	NTV2_AudioMixerChannel12,
+	NTV2_AudioMixerChannel13,
+	NTV2_AudioMixerChannel14,
+	NTV2_AudioMixerChannel15,
+	NTV2_AudioMixerChannel16,
+	NTV2_MAX_NUM_AudioMixerChannel,
+	NTV2_AUDIO_MIXER_CHANNEL_INVALID	=	NTV2_MAX_NUM_AudioMixerChannel
+} NTV2AudioMixerChannel;
+
+#define	NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(__p__)				((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) < NTV2_MAX_NUM_AudioMixerChannel)
+#define	NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) <= NTV2_AudioMixerChannel2)
 
 typedef enum
 {
