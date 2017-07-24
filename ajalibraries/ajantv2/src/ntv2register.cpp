@@ -788,6 +788,22 @@ static const ULWord	gChannelToSmpte372Masks []				= {	kRegMaskSmpte372Enable,		k
 																kRegMaskSmpte372Enable6,	kRegMaskSmpte372Enable6,	kRegMaskSmpte372Enable8,	kRegMaskSmpte372Enable8,	0};
 static const ULWord	gChannelToSmpte372Shifts []				= {	kRegShiftSmpte372,			kRegShiftSmpte372,		kRegShiftSmpte372Enable4,	kRegShiftSmpte372Enable4,
 																kRegShiftSmpte372Enable6,	kRegShiftSmpte372Enable6,	kRegShiftSmpte372Enable8,	kRegShiftSmpte372Enable8,	0};
+static const ULWord	gChannelToSDIIn3GModeMask []	= {	kRegMaskSDIIn3GbpsMode,		kRegMaskSDIIn23GbpsMode,	kRegMaskSDIIn33GbpsMode,	kRegMaskSDIIn43GbpsMode,
+														kRegMaskSDIIn53GbpsMode,	kRegMaskSDIIn63GbpsMode,	kRegMaskSDIIn73GbpsMode,	kRegMaskSDIIn83GbpsMode,	0};
+
+static const ULWord	gChannelToSDIIn3GModeShift []	= {	kRegShiftSDIIn3GbpsMode,	kRegShiftSDIIn23GbpsMode,	kRegShiftSDIIn33GbpsMode,	kRegShiftSDIIn43GbpsMode,
+														kRegShiftSDIIn53GbpsMode,	kRegShiftSDIIn63GbpsMode,	kRegShiftSDIIn73GbpsMode,	kRegShiftSDIIn83GbpsMode,	0};
+static const ULWord	gChannelToSDIIn6GModeMask []	= {	kRegMaskSDIIn16GbpsMode,		kRegMaskSDIIn26GbpsMode,	kRegMaskSDIIn36GbpsMode,	kRegMaskSDIIn46GbpsMode,
+														kRegMaskSDIIn56GbpsMode,	kRegMaskSDIIn66GbpsMode,	kRegMaskSDIIn76GbpsMode,	kRegMaskSDIIn86GbpsMode,	0};
+
+static const ULWord	gChannelToSDIIn6GModeShift []	= {	kRegShiftSDIIn16GbpsMode,	kRegShiftSDIIn26GbpsMode,	kRegShiftSDIIn36GbpsMode,	kRegShiftSDIIn46GbpsMode,
+														kRegShiftSDIIn56GbpsMode,	kRegShiftSDIIn66GbpsMode,	kRegShiftSDIIn76GbpsMode,	kRegShiftSDIIn86GbpsMode,	0};
+
+static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,		kRegMaskSDIIn212GbpsMode,	kRegMaskSDIIn312GbpsMode,	kRegMaskSDIIn412GbpsMode,
+														kRegMaskSDIIn512GbpsMode,	kRegMaskSDIIn612GbpsMode,	kRegMaskSDIIn712GbpsMode,	kRegMaskSDIIn812GbpsMode,	0};
+
+static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
+														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
 
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
@@ -5351,7 +5367,21 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		if (ReadRegister (kRegInputStatus, &status))
 		{
 			///Now it is really ugly
-			if (::NTV2DeviceCanDo3GOut (_boardID, 0) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
+			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
+			{
+				NTV2VideoFormat format =  GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
+									((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
+									((status & BIT_7) >> 7),										//progressive transport
+									(threeGStatus & BIT_0),											//3G
+									inIsProgressivePicture);
+				bool is6G = false, is12G = false;
+				GetSDIInput6GPresent(is6G, inChannel);
+				GetSDIInput12GPresent(is12G, inChannel);
+				if(is6G || is12G)
+					return GetQuadSizedVideoFormat(format);
+
+			}
+			else if (::NTV2DeviceCanDo3GOut (_boardID, 0) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 			{
 				return GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
@@ -5942,12 +5972,6 @@ NTV2VideoFormat CNTV2Card::GetReferenceVideoFormat()
 
 }
 
-static const ULWord	gChannelToSDIIn3GModeMask []	= {	kRegMaskSDIIn3GbpsMode,		kRegMaskSDIIn23GbpsMode,	kRegMaskSDIIn33GbpsMode,	kRegMaskSDIIn43GbpsMode,
-														kRegMaskSDIIn53GbpsMode,	kRegMaskSDIIn63GbpsMode,	kRegMaskSDIIn73GbpsMode,	kRegMaskSDIIn83GbpsMode,	0};
-
-static const ULWord	gChannelToSDIIn3GModeShift []	= {	kRegShiftSDIIn3GbpsMode,	kRegShiftSDIIn23GbpsMode,	kRegShiftSDIIn33GbpsMode,	kRegShiftSDIIn43GbpsMode,
-														kRegShiftSDIIn53GbpsMode,	kRegShiftSDIIn63GbpsMode,	kRegShiftSDIIn73GbpsMode,	kRegShiftSDIIn83GbpsMode,	0};
-
 
 bool CNTV2Card::GetSDIInput3GPresent (bool & outValue, const NTV2Channel channel)
 {
@@ -5977,6 +6001,30 @@ bool CNTV2Card::GetSDIInput3GbPresent (bool & outValue, const NTV2Channel channe
 
 	ULWord	value	(0);
 	bool	result	(ReadRegister (gChannelToSDIInput3GStatusRegNum [channel], &value, gChannelToSDIIn3GbModeMask [channel], gChannelToSDIIn3GbModeShift [channel]));
+	outValue = static_cast <bool> (value);
+	return result;
+
+}	//	GetSDIInput3GPresent
+
+bool CNTV2Card::GetSDIInput6GPresent (bool & outValue, const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return false;
+
+	ULWord	value	(0);
+	bool	result	(ReadRegister (gChannelToSDIInput3GStatusRegNum [channel], &value, gChannelToSDIIn6GModeMask [channel], gChannelToSDIIn6GModeShift [channel]));
+	outValue = static_cast <bool> (value);
+	return result;
+
+}	//	GetSDIInput3GPresent
+
+bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return false;
+
+	ULWord	value	(0);
+	bool	result	(ReadRegister (gChannelToSDIInput3GStatusRegNum [channel], &value, gChannelToSDIIn12GModeMask [channel], gChannelToSDIIn12GModeShift [channel]));
 	outValue = static_cast <bool> (value);
 	return result;
 

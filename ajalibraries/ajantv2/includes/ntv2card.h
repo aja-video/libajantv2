@@ -3547,6 +3547,10 @@ public:
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool	GetSDIInput3GbPresent (bool & outValue, const NTV2Channel channel);
+
+	AJA_VIRTUAL bool	GetSDIInput6GPresent (bool & outValue, const NTV2Channel channel);
+	AJA_VIRTUAL bool	GetSDIInput12GPresent (bool & outValue, const NTV2Channel channel);
+
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIInput3GbPresent (bool* value, NTV2Channel channel);	///< @deprecated	Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI1Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
