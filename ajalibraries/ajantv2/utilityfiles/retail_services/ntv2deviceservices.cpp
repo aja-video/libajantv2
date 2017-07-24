@@ -480,6 +480,11 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		if (hostAudioSystemVal < NTV2_MAX_NUM_AudioSystemEnums)
 			audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
 	}
+	
+	if (mCard->DeviceCanDoAudioMixer() == true && mode == NTV2_MODE_DISPLAY)
+	{
+		audioSystem = NTV2_AUDIOSYSTEM_6;
+	}
 
 	// Setup the SDI Outputs audio source
 	switch(NTV2DeviceGetNumVideoOutputs(deviceID))
