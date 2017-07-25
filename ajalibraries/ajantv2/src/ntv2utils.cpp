@@ -3554,7 +3554,7 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 
 
 //	More UI-friendly versions of above (used in Cables app)...
-AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
+AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS+1] =
 {
 	"10 Bit YCbCr",						//	NTV2_FBF_10BIT_YCBCR			//	0
 	"8 Bit YCbCr - UYVY",				//	NTV2_FBF_8BIT_YCBCR				//	1
@@ -3588,6 +3588,7 @@ AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS
 	"10 Bit YCbCr 422 Planar",			//	NTV2_FBF_10BIT_YCBCR_422PL		//	29
 	"8 Bit YCbCr 420 Planar",			//	NTV2_FBF_8BIT_YCBCR_420PL		//	30
 	"8 Bit YCbCr 422 Planar",			//	NTV2_FBF_8BIT_YCBCR_422PL		//	31
+	""									//	NTV2_FBF_INVALID				//	32
 };
 
 
@@ -6887,7 +6888,7 @@ string NTV2StandardToString (const NTV2Standard inValue, const bool inForRetailD
 		case NTV2_STANDARD_4096x2160p:	return inForRetailDisplay ? "4K"		: "NTV2_STANDARD_4096x2160p";
 		case NTV2_STANDARD_3840HFR:		return inForRetailDisplay ? "UHD HFR"	: "NTV2_STANDARD_3840HFR";
 		case NTV2_STANDARD_4096HFR:		return inForRetailDisplay ? "4K HFR"	: "NTV2_STANDARD_4096HFR";
-		case NTV2_NUM_STANDARDS:		break;
+		case NTV2_STANDARD_INVALID:		return inForRetailDisplay ? ""			: "NTV2_STANDARD_INVALID";
 	}
 	return string ();
 }
@@ -6932,7 +6933,7 @@ string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const
 		case NTV2_FBF_10BIT_YCBCR_422PL:		return "NTV2_FBF_10BIT_YCBCR_422PL";
 		case NTV2_FBF_8BIT_YCBCR_420PL:			return "NTV2_FBF_8BIT_YCBCR_420PL";
 		case NTV2_FBF_8BIT_YCBCR_422PL:			return "NTV2_FBF_8BIT_YCBCR_422PL";
-		case NTV2_FBF_NUMFRAMEBUFFERFORMATS:	break;
+		case NTV2_FBF_INVALID:					return "NTV2_FBF_INVALID";
 	}
 	return string ();
 }
