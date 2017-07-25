@@ -291,6 +291,20 @@ AJAExport double GetFrameTime(NTV2FrameRate frameRate);
 AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator);
 
 /**
+	@deprecated	Call NTV2DeviceCanDoVideoFormat instead.
+	@param[in]	inDeviceID		Specifies the ID of the device of interest.
+	@param[in]	inFrameRate		Specifies the frame rate.
+	@param[in]	inFrameGeometry	Specifies the frame geometry.
+	@param[in]	inStandard		Specifies the video standard.
+	@note		This function was moved from the C-only "ntv2devicefeatures" module because its implementation now uses functions in the C++ "ntv2utils" module.
+	@return		True if the device having the given NTV2DeviceID supports the given NTV2VideoFormat as specified by frame rate, geometry and standard.
+**/
+AJAExport NTV2_DEPRECATED bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
+													NTV2FrameRate		inFrameRate,
+													NTV2FrameGeometry	inFrameGeometry, 
+													NTV2Standard		inStandard);
+
+/**
 	@brief	Returns the number of audio samples for a given video frame rate, audio sample rate, and frame number.
 			This is useful since AJA devices use fixed audio sample rates (typically 48KHz), and some video frame
 			rates will necessarily result in some frames having more audio samples than others.
@@ -310,6 +324,11 @@ AJAExport ULWord				GetVaricamRepeatCount (NTV2FrameRate sequenceRate, NTV2Frame
 AJAExport ULWord				GetScaleFromFrameRate (NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (NTV2VideoFormat videoFormat);
+/**
+	@return	The equivalent non-VANC NTV2FrameGeometry value for the given frame geometry.
+	@param[in]	inFrameGeometry	Specifies the frame geometry to be normalized to its non-VANC equivalent.
+**/
+AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry);
 AJAExport ULWord				GetNTV2FrameGeometryWidth (NTV2FrameGeometry geometry);
 AJAExport ULWord				GetNTV2FrameGeometryHeight (NTV2FrameGeometry geometry);
 AJAExport ULWord				GetDisplayWidth (NTV2VideoFormat videoFormat);

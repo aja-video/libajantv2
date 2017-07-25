@@ -738,6 +738,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // height
         uint32_t height = fd.GetRasterHeight();
+        if (interlaced)
+        {
+            height /= 2;
+        }
         mDevice.WriteRegister(kReg4175_pkt_height + baseAddrPacketizer,height);
 
         // video format = sampling

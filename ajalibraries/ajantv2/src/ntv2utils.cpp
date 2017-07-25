@@ -2978,6 +2978,72 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 }	//	GetNTV2FrameRateFromVideoFormat
 
 
+NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry)
+{
+	switch (inFrameGeometry)
+	{
+		case NTV2_FG_1920x1080:	//	1080i, 1080p
+		case NTV2_FG_1280x720:	//	720p
+		case NTV2_FG_720x486:	//	ntsc 525i, 525p60
+		case NTV2_FG_720x576:	//	pal 625i
+			return inFrameGeometry;	//	No change
+
+		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
+		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
+		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
+		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
+		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
+		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
+
+		case NTV2_FG_2048x1080:	//	2k1080p
+		case NTV2_FG_2048x1556:	//	2k1556psf
+			return inFrameGeometry;	//	No change
+
+		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
+		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
+		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
+		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+		case NTV2_FG_4x1920x1080:	//	UHD
+		case NTV2_FG_4x2048x1080:	//	4K
+			return inFrameGeometry;	//	No change
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:
+			return inFrameGeometry;	//	No change
+#else
+		default:
+			return NTV2_FG_INVALID;	//	fail
+#endif
+	}
+}
+
+
+bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
+						  NTV2FrameRate		inFrameRate,
+  			              NTV2FrameGeometry inFrameGeometry,
+						  NTV2Standard		inStandard)
+{
+	//	This implementation is very inefficient, but...
+	//	a)	this function is deprecated;
+	//	b)	nobody should be calling it (they should be calling NTV2DeviceCanDoVideoFormat instead)
+	//	c)	they shouldn't be calling it every frame.
+	//	We could make it efficient by creating a static global rate/geometry/standard-to-videoFormat
+	//	map, but that has race/deadlock issues.
+
+	const NTV2FrameGeometry	fg	(::GetNormalizedFrameGeometry(inFrameGeometry));
+	//	Look for a video format that matches the given frame rate, geometry and standard...
+	for (NTV2VideoFormat vFmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
+	{
+		if (!NTV2_IS_VALID_VIDEO_FORMAT(vFmt))
+			continue;
+		const NTV2FrameRate		fr	(::GetNTV2FrameRateFromVideoFormat(vFmt));
+		const NTV2Standard		std	(::GetNTV2StandardFromVideoFormat(vFmt));
+		const NTV2FrameGeometry	geo	(::GetNTV2FrameGeometryFromVideoFormat(vFmt));
+		if (fr == inFrameRate  &&  std == inStandard  &&  fg == geo)
+			return ::NTV2DeviceCanDoVideoFormat(inDeviceID, vFmt);
+	}
+	return false;
+}
+
 ULWord GetNTV2FrameGeometryHeight(NTV2FrameGeometry geometry)
 {
 	switch (geometry)
