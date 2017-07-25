@@ -31,10 +31,6 @@
 //	The script writes the implementations into 'ntv2devicefeatures.hpp', and the declarations into 'ntv2devicefeatures.hh'...
 #include "ntv2devicefeatures.hh"
 
-AJAExport bool NTV2DeviceCanDoFormat(NTV2DeviceID boardID,
-									NTV2FrameRate		framerate,
-									NTV2FrameGeometry framegeometry, 
-									NTV2Standard		standard);
 
 AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
@@ -166,7 +162,7 @@ AJAExport NTV2_DEPRECATED bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDevic
 	#define	NTV2BoardCanDoDSKOpacity					NTV2DeviceCanDoDSKOpacity						///< @deprecated	Use NTV2DeviceCanDoDSKOpacity instead.
 	#define	NTV2BoardCanDoDualLink						NTV2DeviceCanDoDualLink							///< @deprecated	Use NTV2DeviceCanDoDualLink instead.
 	#define	NTV2BoardCanDoDVCProHD						NTV2DeviceCanDoDVCProHD							///< @deprecated	Use NTV2DeviceCanDoDVCProHD instead.
-	#define	NTV2BoardCanDoFormat						NTV2DeviceCanDoFormat							///< @deprecated	Use NTV2DeviceCanDoFormat instead.
+	#define	NTV2BoardCanDoFormat						NTV2DeviceCanDoFormat							///< @deprecated	Use NTV2DeviceCanDoVideoFormat instead.
 	#define	NTV2BoardCanDoFrameBufferFormat				NTV2DeviceCanDoFrameBufferFormat				///< @deprecated	Use NTV2DeviceCanDoFrameBufferFormat instead.
 	#define	NTV2BoardCanDoFreezeOutput					NTV2DeviceCanDoFreezeOutput						///< @deprecated	Use NTV2DeviceCanDoFreezeOutput instead.
 	#define	NTV2BoardCanDoHDMIOutStereo					NTV2DeviceCanDoHDMIOutStereo					///< @deprecated	Use NTV2DeviceCanDoHDMIOutStereo instead.
