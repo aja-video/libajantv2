@@ -710,7 +710,19 @@ typedef enum
 	kRegAudioMixerMainGain,		//2305
 	kRegAudioMixerAux1Gain,	//2306
 	kRegAudioMixerAux2Gain,	//2307
-	kRegAudioMixerChannelSelect			//2308
+	kRegAudioMixerChannelSelect,			//2308
+	kRegAudioMixerMutes,
+	kRegAudioMixerAux1InputLevels,
+	kRegAudioMixerAux2InputLevels,
+	kRegAudioMixerMainInputLevelsPair0,
+	kRegAudioMixerMainInputLevelsPair1,
+	kRegAudioMixerMainInputLevelsPair2,
+	kRegAudioMixerMainInputLevelsPair3,
+	kRegAudioMixerMainInputLevelsPair4,
+	kRegAudioMixerMainInputLevelsPair5,
+	kRegAudioMixerMainInputLevelsPair6,
+	kRegAudioMixerMainInputLevelsPair7,
+	kRegAudioMixerMixedChannelOutputLevels
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
@@ -2071,6 +2083,8 @@ typedef enum
 	kRegMaskSDIIn3GbpsMode = BIT(0),
 	kRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
 	kRegMaskSDIIn1LevelBtoLevelA = BIT(2),
+	kRegMaskSDIIn16GbpsMode = BIT(6),
+	kRegMaskSDIIn112GbpsMode = BIT(7),
 	kRegMaskSDIInVPIDLinkAValid = BIT(4),
 	kRegMaskSDIInVPIDLinkBValid = BIT(5),
 	kRegMaskSDIIn23GbpsMode = BIT(8),
@@ -2078,6 +2092,9 @@ typedef enum
 	kRegMaskSDIIn2LevelBtoLevelA = BIT(10),
 	kRegMaskSDIIn2VPIDLinkAValid = BIT(12),
 	kRegMaskSDIIn2VPIDLinkBValid = BIT(13),
+	kRegMaskSDIIn26GbpsMode = BIT(14),
+	kRegMaskSDIIn212GbpsMode = BIT(15),
+
 
 	// kRegSDIInput3GStatus2
 	kRegMaskSDIIn33GbpsMode = BIT(0),
@@ -2085,11 +2102,15 @@ typedef enum
 	kRegMaskSDIIn3LevelBtoLevelA = BIT(2),
 	kRegMaskSDIIn3VPIDLinkAValid = BIT(4),
 	kRegMaskSDIIn3VPIDLinkBValid = BIT(5),
+	kRegMaskSDIIn36GbpsMode = BIT(6),
+	kRegMaskSDIIn312GbpsMode = BIT(7),
 	kRegMaskSDIIn43GbpsMode = BIT(8),
 	kRegMaskSDIIn43GbpsSMPTELevelBMode = BIT(9),
 	kRegMaskSDIIn4LevelBtoLevelA = BIT(10),
 	kRegMaskSDIIn4VPIDLinkAValid = BIT(12),
 	kRegMaskSDIIn4VPIDLinkBValid = BIT(13),
+	kRegMaskSDIIn46GbpsMode = BIT(14),
+	kRegMaskSDIIn412GbpsMode = BIT(15),
 
 	// kRegSDI5678Input3GStatus
 	kRegMaskSDIIn53GbpsMode = BIT(0),
@@ -2097,21 +2118,29 @@ typedef enum
 	kRegMaskSDIIn5LevelBtoLevelA = BIT(2),
 	kRegMaskSDIIn5VPIDLinkAValid = BIT(4),
 	kRegMaskSDIIn5VPIDLinkBValid = BIT(5),
+	kRegMaskSDIIn56GbpsMode = BIT(6),
+	kRegMaskSDIIn512GbpsMode = BIT(7),
 	kRegMaskSDIIn63GbpsMode = BIT(8),
 	kRegMaskSDIIn63GbpsSMPTELevelBMode = BIT(9),
 	kRegMaskSDIIn6LevelBtoLevelA = BIT(10),
 	kRegMaskSDIIn6VPIDLinkAValid = BIT(12),
 	kRegMaskSDIIn6VPIDLinkBValid = BIT(13),
+	kRegMaskSDIIn66GbpsMode = BIT(14),
+	kRegMaskSDIIn612GbpsMode = BIT(15),
 	kRegMaskSDIIn73GbpsMode = BIT(16),
 	kRegMaskSDIIn73GbpsSMPTELevelBMode = BIT(17),
 	kRegMaskSDIIn7LevelBtoLevelA = BIT(18),
 	kRegMaskSDIIn7VPIDLinkAValid = BIT(20),
 	kRegMaskSDIIn7VPIDLinkBValid = BIT(21),
+	kRegMaskSDIIn76GbpsMode = BIT(22),
+	kRegMaskSDIIn712GbpsMode = BIT(23),
 	kRegMaskSDIIn83GbpsMode = BIT(24),
 	kRegMaskSDIIn83GbpsSMPTELevelBMode = BIT(25),
 	kRegMaskSDIIn8LevelBtoLevelA = BIT(26),
 	kRegMaskSDIIn8VPIDLinkAValid = BIT(28),
 	kRegMaskSDIIn8VPIDLinkBValid = BIT(29),
+	kRegMaskSDIIn86GbpsMode = BIT(30),
+	kRegMaskSDIIn812GbpsMode = BIT(31),
 
 	// kRegVPID
 	kRegMaskVPIDBitDepth				= BIT(1)+BIT(0),
@@ -2295,7 +2324,50 @@ typedef enum
 	kRegMaskAudioMixerMainInputSelect = BIT(2) + BIT(1) + BIT(0),
 	kRegMaskAudioMixerAux1x2CHInput = BIT(6) + BIT(5) + BIT(4),
 	kRegMaskAudioMixerAux2x2CHInput = BIT(10) + BIT(9) + BIT(8),
-	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0)
+	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0),
+	kRegMaskAudioMixerOutputChannel1Mute =  BIT(0),
+	kRegMaskAudioMixerOutputChannel2Mute = BIT(1),
+	kRegMaskAudioMixerOutputChannel3Mute = BIT(2),
+	kRegMaskAudioMixerOutputChannel4Mute = BIT(3),
+	kRegMaskAudioMixerOutputChannel5Mute = BIT(4),
+	kRegMaskAudioMixerOutputChannel6Mute = BIT(5),
+	kRegMaskAudioMixerOutputChannel7Mute = BIT(6),
+	kRegMaskAudioMixerOutputChannel8Mute = BIT(7),
+	kRegMaskAudioMixerOutputChannel9Mute = BIT(8),
+	kRegMaskAudioMixerOutputChannel10Mute = BIT(9),
+	kRegMaskAudioMixerOutputChannel11Mute = BIT(10),
+	kRegMaskAudioMixerOutputChannel12Mute = BIT(11),
+	kRegMaskAudioMixerOutputChannel13Mute = BIT(12),
+	kRegMaskAudioMixerOutputChannel14Mute = BIT(13),
+	kRegMaskAudioMixerOutputChannel15Mute = BIT(14),
+	kRegMaskAudioMixerOutputChannel16Mute = BIT(15),
+	kRegMaskAudioMixerMainInputEnable = BIT(16)+BIT(17),
+	kRegMaskAudioMixerAux1InputEnable = BIT(18)+BIT(19),
+	kRegMaskAudioMixerAux2InputEnable = BIT(20)+BIT(21),
+	kRegMaskAudioMixerAux1Channel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerAux1Channel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerAux2Channel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerAux2Channel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel3Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel4Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel5Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel6Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel7Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel8Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel9Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel10Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel11Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel12Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel13Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel14Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainChannel15Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainChannel16Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerMainMixedOutputChannel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerMainMixedOutputChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+
+
 } RegisterMask;
 
 typedef enum
@@ -3106,11 +3178,15 @@ typedef enum
 	kRegShiftSDIIn1LevelBtoLevelA		= 2,
 	kRegShiftSDIInVPIDLinkAValid 		= 4,
 	kRegShiftSDIInVPIDLinkBValid 		= 5,
+	kRegShiftSDIIn16GbpsMode			= 6,
+	kRegShiftSDIIn112GbpsMode			= 7,
 	kRegShiftSDIIn23GbpsMode 			= 8,
 	kRegShiftSDIIn23GbpsSMPTELevelBMode = 9,
 	kRegShiftSDIIn2LevelBtoLevelA		= 10,
 	kRegShiftSDIIn2VPIDLinkAValid 		= 12,
 	kRegShiftSDIIn2VPIDLinkBValid 		= 13,
+	kRegShiftSDIIn26GbpsMode			= 14,
+	kRegShiftSDIIn212GbpsMode			= 15,
 
 	// kRegSDIInput3GStatus2
 	kRegShiftSDIIn33GbpsMode 			= 0,
@@ -3118,11 +3194,15 @@ typedef enum
 	kRegShiftSDIIn3LevelBtoLevelA		= 2,
 	kRegShiftSDIIn3VPIDLinkAValid 		= 4,
 	kRegShiftSDIIn3VPIDLinkBValid 		= 5,
+	kRegShiftSDIIn36GbpsMode			= 6,
+	kRegShiftSDIIn312GbpsMode			= 7,
 	kRegShiftSDIIn43GbpsMode 			= 8,
 	kRegShiftSDIIn43GbpsSMPTELevelBMode = 9,
 	kRegShiftSDIIn4LevelBtoLevelA		= 10,
 	kRegShiftSDIIn4VPIDLinkAValid 		= 12,
 	kRegShiftSDIIn4VPIDLinkBValid 		= 13,
+	kRegShiftSDIIn46GbpsMode			= 14,
+	kRegShiftSDIIn412GbpsMode			= 15,
 
 	// kRegSDI5678Input3GStatus
 	kRegShiftSDIIn53GbpsMode			= 0,
@@ -3130,21 +3210,29 @@ typedef enum
 	kRegShiftSDIIn5LevelBtoLevelA		= 2,
 	kRegShiftSDIIn5VPIDLinkAValid		= 4,
 	kRegShiftSDIIn5VPIDLinkBValid		= 5,
+	kRegShiftSDIIn56GbpsMode			= 6,
+	kRegShiftSDIIn512GbpsMode			= 7,
 	kRegShiftSDIIn63GbpsMode			= 8,
 	kRegShiftSDIIn63GbpsSMPTELevelBMode	= 9,
 	kRegShiftSDIIn6LevelBtoLevelA		= 10,
 	kRegShiftSDIIn6VPIDLinkAValid		= 12,
 	kRegShiftSDIIn6VPIDLinkBValid		= 13,
+	kRegShiftSDIIn66GbpsMode			= 14,
+	kRegShiftSDIIn612GbpsMode			= 15,
 	kRegShiftSDIIn73GbpsMode			= 16,
 	kRegShiftSDIIn73GbpsSMPTELevelBMode	= 17,
 	kRegShiftSDIIn7LevelBtoLevelA		= 18,
 	kRegShiftSDIIn7VPIDLinkAValid		= 20,
 	kRegShiftSDIIn7VPIDLinkBValid		= 21,
+	kRegShiftSDIIn76GbpsMode			= 22,
+	kRegShiftSDIIn712GbpsMode			= 23,
 	kRegShiftSDIIn83GbpsMode			= 24,
 	kRegShiftSDIIn83GbpsSMPTELevelBMode	= 25,
 	kRegShiftSDIIn8LevelBtoLevelA		= 26,
 	kRegShiftSDIIn8VPIDLinkAValid		= 28,
 	kRegShiftSDIIn8VPIDLinkBValid		= 29,
+	kRegShiftSDIIn86GbpsMode			= 30,
+	kRegShiftSDIIn812GbpsMode			= 31,
 
 	// kRegVPID
 	kRegShiftVPIDBitDepth				= 0,
@@ -3326,7 +3414,49 @@ typedef enum
 	kRegShiftAudioMixerMainInputSelect = 0,
 	kRegShiftAudioMixerAux1x2CHInput = 4,
 	kRegShiftAudioMixerAux2x2CHInput = 8,
-	kRegShiftAudioMixerChannelSelect = 0
+	kRegShiftAudioMixerChannelSelect = 0,
+	kRegShiftAudioMixerOutputChannel1Mute =  0,
+	kRegShiftAudioMixerOutputChannel2Mute = 1,
+	kRegShiftAudioMixerOutputChannel3Mute = 2,
+	kRegShiftAudioMixerOutputChannel4Mute = 3,
+	kRegShiftAudioMixerOutputChannel5Mute = 4,
+	kRegShiftAudioMixerOutputChannel6Mute = 5,
+	kRegShiftAudioMixerOutputChannel7Mute = 6,
+	kRegShiftAudioMixerOutputChannel8Mute = 7,
+	kRegShiftAudioMixerOutputChannel9Mute = 8,
+	kRegShiftAudioMixerOutputChannel10Mute = 9,
+	kRegShiftAudioMixerOutputChannel11Mute = 10,
+	kRegShiftAudioMixerOutputChannel12Mute = 11,
+	kRegShiftAudioMixerOutputChannel13Mute = 12,
+	kRegShiftAudioMixerOutputChannel14Mute = 13,
+	kRegShiftAudioMixerOutputChannel15Mute = 14,
+	kRegShiftAudioMixerOutputChannel16Mute = 15,
+	kRegShiftAudioMixerMainInputEnable = 16,
+	kRegShiftAudioMixerAux1InputEnable = 18,
+	kRegShiftAudioMixerAux2InputEnable = 20,
+	kRegShiftAudioMixerAux1Channel1Level = 0,
+	kRegShiftAudioMixerAux1Channel2Level = 16,
+	kRegShiftAudioMixerAux2Channel1Level = 0,
+	kRegShiftAudioMixerAux2Channel2Level = 16,
+	kRegShiftAudioMixerMainChannel1Level = 0,
+	kRegShiftAudioMixerMainChannel2Level = 16,
+	kRegShiftAudioMixerMainChannel3Level = 0,
+	kRegShiftAudioMixerMainChannel4Level = 16,
+	kRegShiftAudioMixerMainChannel5Level = 0,
+	kRegShiftAudioMixerMainChannel6Level = 16,
+	kRegShiftAudioMixerMainChannel7Level = 0,
+	kRegShiftAudioMixerMainChannel8Level = 16,
+	kRegShiftAudioMixerMainChannel9Level = 0,
+	kRegShiftAudioMixerMainChannel10Level = 16,
+	kRegShiftAudioMixerMainChannel11Level = 0,
+	kRegShiftAudioMixerMainChannel12Level = 16,
+	kRegShiftAudioMixerMainChannel13Level = 0,
+	kRegShiftAudioMixerMainChannel14Level = 16,
+	kRegShiftAudioMixerMainChannel15Level = 0,
+	kRegShiftAudioMixerMainChannel16Level = 16,
+	kRegShiftAudioMixerMainMixedOutputChannel1Level = 0,
+	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16
+
 } RegisterShift;
 
 
@@ -3512,22 +3642,6 @@ typedef enum
 } NwlRegisterShift;
 
 // XLNX Registers
-
-// For the Mac we define an offset.  This is done so that read/write register can easily identify any of the Xilinx registers from a VP register.
-// This is necessary since the Xilinx registers live in another PCI BAR and these offsets conflict with normal VP registers.  With this
-// offset the driver knows which mapped BAR to use.  Windows maps individual registers at start so this isn't necessary for Windows.
-#ifdef AJAMac
-#define XILINX_START							13000
-#define XILINX_CHANNEL_START					13100
-#define XILINX_IRQ_START						13200
-#define XLINIX_DMA_START						13300
-#else
-#define XILINX_START							0
-#define XILINX_CHANNEL_START					0
-#define XILINX_IRQ_START						0
-#define XLINIX_DMA_START						0
-#endif
-
 #define XLNX_MAX_CHANNELS						4
 #define XLNX_REG_TARGET_SIZE					0x400
 #define XLNX_REG_CHANNEL_SIZE					0x40
@@ -3535,54 +3649,54 @@ typedef enum
 
 typedef enum
 {
-	kRegXlnxTargetChannelH2C					= 0x0+(XILINX_START),
-	kRegXlnxTargetChannelC2H					= 0x1+(XILINX_START),
-	kRegXlnxTargetIRQ							= 0x2+(XILINX_START),
-	kRegXlnxTargetConfig						= 0x3+(XILINX_START),
-	kRegXlnxTargetSgdmaH2C						= 0x4+(XILINX_START),
-	kRegXlnxTargetSgdmaC2H						= 0x5+(XILINX_START),
-	kRegXlnxTargetSgdmaCommon					= 0x6+(XILINX_START),
-	kRegXlnxTargetMsiX							= 0x8+(XILINX_START)
+	kRegXlnxTargetChannelH2C					= 0x0,
+	kRegXlnxTargetChannelC2H					= 0x1,
+	kRegXlnxTargetIRQ							= 0x2,
+	kRegXlnxTargetConfig						= 0x3,
+	kRegXlnxTargetSgdmaH2C						= 0x4,
+	kRegXlnxTargetSgdmaC2H						= 0x5,
+	kRegXlnxTargetSgdmaCommon					= 0x6,
+	kRegXlnxTargetMsiX							= 0x8
 } XlnxRegisterTarget;
 
 typedef enum
 {
-	kRegXlnxChannelIdentifier					= 0x00+(XILINX_CHANNEL_START),
-	kRegXlnxChannelControl						= 0x01+(XILINX_CHANNEL_START),
-	kRegXlnxChannelControlW1S					= 0x02+(XILINX_CHANNEL_START),
-	kRegXlnxChannelControlW1C					= 0x03+(XILINX_CHANNEL_START),
-	kRegXlnxChannelStatus						= 0x10+(XILINX_CHANNEL_START),
-	kRegXlnxChannelStatusRC						= 0x11+(XILINX_CHANNEL_START),
-	kRegXlnxChannelDescCompleteCount			= 0x12+(XILINX_CHANNEL_START),
-	kRegXlnxChannelAlignments					= 0x13+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPollModeAddressLow			= 0x22+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPollModeAddressHigh			= 0x23+(XILINX_CHANNEL_START),
-	kRegXlnxChannelInterruptEnable				= 0x24+(XILINX_CHANNEL_START),
-	kRegXlnxChannelInterruptEnableW1S			= 0x25+(XILINX_CHANNEL_START),
-	kRegXlnxChannelInterruptEnableW1C			= 0x26+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPerfControl					= 0x30+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPerfCycleCountLow			= 0x31+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPerfCycleCountHigh			= 0x32+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPerfDataCountLow				= 0x33+(XILINX_CHANNEL_START),
-	kRegXlnxChannelPerfDataCountHigh			= 0x34+(XILINX_CHANNEL_START),
+	kRegXlnxChannelIdentifier					= 0x00,
+	kRegXlnxChannelControl						= 0x01,
+	kRegXlnxChannelControlW1S					= 0x02,
+	kRegXlnxChannelControlW1C					= 0x03,
+	kRegXlnxChannelStatus						= 0x10,
+	kRegXlnxChannelStatusRC						= 0x11,
+	kRegXlnxChannelDescCompleteCount			= 0x12,
+	kRegXlnxChannelAlignments					= 0x13,
+	kRegXlnxChannelPollModeAddressLow			= 0x22,
+	kRegXlnxChannelPollModeAddressHigh			= 0x23,
+	kRegXlnxChannelInterruptEnable				= 0x24,
+	kRegXlnxChannelInterruptEnableW1S			= 0x25,
+	kRegXlnxChannelInterruptEnableW1C			= 0x26,
+	kRegXlnxChannelPerfControl					= 0x30,
+	kRegXlnxChannelPerfCycleCountLow			= 0x31,
+	kRegXlnxChannelPerfCycleCountHigh			= 0x32,
+	kRegXlnxChannelPerfDataCountLow				= 0x33,
+	kRegXlnxChannelPerfDataCountHigh			= 0x34,
 
-	kRegXlnxIrqIdentifier						= 0x00+(XILINX_IRQ_START),
-	kRegXlnxIrqUserInterruptEnable				= 0x01+(XILINX_IRQ_START),
-	kRegXlnxIrqUserInterruptEnableW1S			= 0x02+(XILINX_IRQ_START),
-	kRegXlnxIrqUserInterruptEnableW1C			= 0x03+(XILINX_IRQ_START),
-	kRegXlnxIrqChannelInterruptEnable			= 0x04+(XILINX_IRQ_START),
-	kRegXlnxIrqChannelInterruptEnableW1S		= 0x05+(XILINX_IRQ_START),
-	kRegXlnxIrqChannelInterruptEnableW1C		= 0x06+(XILINX_IRQ_START),
-	kRegXlnxIrqUserInterruptRequest				= 0x10+(XILINX_IRQ_START),
-	kRegXlnxIrqChannelInterruptRequest			= 0x11+(XILINX_IRQ_START),
-	kRegXlnxIrqUserInterruptPending				= 0x12+(XILINX_IRQ_START),
-	kRegXlnxIrqChannelInterruptPending			= 0x13+(XILINX_IRQ_START),
+	kRegXlnxIrqIdentifier						= 0x00,
+	kRegXlnxIrqUserInterruptEnable				= 0x01,
+	kRegXlnxIrqUserInterruptEnableW1S			= 0x02,
+	kRegXlnxIrqUserInterruptEnableW1C			= 0x03,
+	kRegXlnxIrqChannelInterruptEnable			= 0x04,
+	kRegXlnxIrqChannelInterruptEnableW1S		= 0x05,
+	kRegXlnxIrqChannelInterruptEnableW1C		= 0x06,
+	kRegXlnxIrqUserInterruptRequest				= 0x10,
+	kRegXlnxIrqChannelInterruptRequest			= 0x11,
+	kRegXlnxIrqUserInterruptPending				= 0x12,
+	kRegXlnxIrqChannelInterruptPending			= 0x13,
 
-	kRegXlnxSgdmaIdentifier						= 0x00+(XLINIX_DMA_START),
-	kRegXlnxSgdmaDescAddressLow					= 0x20+(XLINIX_DMA_START),
-	kRegXlnxSgdmaDescAddressHigh				= 0x21+(XLINIX_DMA_START),
-	kRegXlnxSgdmaDescAdjacent					= 0x22+(XLINIX_DMA_START),
-	kRegXlnxSgdmaDescCredits					= 0x23+(XLINIX_DMA_START)
+	kRegXlnxSgdmaIdentifier						= 0x00,
+	kRegXlnxSgdmaDescAddressLow					= 0x20,
+	kRegXlnxSgdmaDescAddressHigh				= 0x21,
+	kRegXlnxSgdmaDescAdjacent					= 0x22,
+	kRegXlnxSgdmaDescCredits					= 0x23
 
 } XlnxRegisterNum;
 

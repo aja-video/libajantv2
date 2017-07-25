@@ -1959,6 +1959,18 @@ public:
 	AJA_VIRTUAL bool		GetAudioMixerAux2InputGain(ULWord & outGainValue);
 	AJA_VIRTUAL bool		SetAudioMixerAux2InputGain(const ULWord inGainValue);
 
+	AJA_VIRTUAL bool		GetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool & outChannelMuted);
+	AJA_VIRTUAL bool		SetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool inMuteChannel);
+
+	AJA_VIRTUAL bool		GetAudioMixerMainInputEnable(bool & outEnabled);
+	AJA_VIRTUAL bool		SetAudioMixerMainInputEnable(bool inEnabled);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux1InputEnable(bool & outEnabled);
+	AJA_VIRTUAL bool		SetAudioMixerAux1InputEnable(bool inEnabled);
+
+	AJA_VIRTUAL bool		GetAudioMixerAux2InputEnable(bool & outEnabled);
+	AJA_VIRTUAL bool		SetAudioMixerAux2InputEnable(bool inEnabled);
+
 	///@}
 
 	//
@@ -3535,6 +3547,10 @@ public:
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool	GetSDIInput3GbPresent (bool & outValue, const NTV2Channel channel);
+
+	AJA_VIRTUAL bool	GetSDIInput6GPresent (bool & outValue, const NTV2Channel channel);
+	AJA_VIRTUAL bool	GetSDIInput12GPresent (bool & outValue, const NTV2Channel channel);
+
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIInput3GbPresent (bool* value, NTV2Channel channel);	///< @deprecated	Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
 		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI1Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
