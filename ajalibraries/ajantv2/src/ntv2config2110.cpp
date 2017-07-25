@@ -388,7 +388,7 @@ void  CNTV2Config2110::EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream 
 
 void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream)
 {
-	(void) channel;
+    (void) channel;
     if (stream == NTV2_AUDIO1_STREAM)
     {
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
@@ -528,37 +528,37 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
 
     // source ip address
-    ReadChannelRegister(kRegDecap_match_src_ip + decapBaseAddr, &val);
+    mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, &val);
     struct in_addr in;
     in.s_addr = NTV2EndianSwap32(val);
     char * ip = inet_ntoa(in);
     rxConfig.sourceIP = ip;
 
     // dest ip address
-    ReadChannelRegister(kRegDecap_match_dst_ip + decapBaseAddr, &val);
+    mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, &val);
     in.s_addr = NTV2EndianSwap32(val);
     ip = inet_ntoa(in);
     rxConfig.destIP = ip;
 
     // source port
-    ReadChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.sourcePort);
+    mDevice.ReadRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.sourcePort);
 
     // dest port
-    ReadChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
+    mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
 
     // ssrc
-    ReadChannelRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
+    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
 
     // vlan
-    //ReadChannelRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
+    //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
     //rxConfig.VLAN = val & 0xffff;
 
     // payload type
-    ReadChannelRegister(kRegDecap_match_payload + decapBaseAddr,&val);
+    mDevice.ReadRegister(kRegDecap_match_payload + decapBaseAddr,&val);
     rxConfig.payloadType = val & 0x7f;
 
     // matching
-    ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
+    mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
@@ -605,7 +605,7 @@ bool CNTV2Config2110::GetRxStreamEnable(const NTV2Channel channel, NTV2Stream st
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
 
     uint32_t val;
-    ReadChannelRegister(kRegDecap_chan_enable + decapBaseAddr,&val);
+    mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr,&val);
     enabled = (val & 0x01);
 
     return true;
@@ -1159,7 +1159,7 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(NTV2Channel channel, NTV2Stream stream)
 {
-	(void) stream;
+    (void) stream;
     uint32_t iChannel = (uint32_t) channel;
 
     if (iChannel > _numTxChans)
