@@ -4409,11 +4409,9 @@ public:
 
 	AJA_VIRTUAL bool		SetSDIOut6GEnable(NTV2Channel inChannel, bool enable);
 	AJA_VIRTUAL bool		GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled);
-	AJA_VIRTUAL inline bool	GetSDIOut6GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut6GEnable(inChannel, *pOutIsEnabled) : false; }
 
 	AJA_VIRTUAL bool		SetSDIOut12GEnable(NTV2Channel inChannel, bool enable);
 	AJA_VIRTUAL bool		GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled);
-	AJA_VIRTUAL inline bool	GetSDIOut12GEnable(NTV2Channel inChannel, bool* pOutIsEnabled)			{ return pOutIsEnabled ? GetSDIOut12GEnable(inChannel, *pOutIsEnabled) : false; }
 
 
 	/**
@@ -4633,33 +4631,45 @@ public:
 
 
 	/**
-		@brief		Enables or disables 3G level b to 3G level a conversion at the SDI output widget (assuming the AJA device can do so).
+		@brief		Enables or disables 3G level B to 3G level A conversion at the SDI input widget (assuming the AJA device can do so).
 		@return		True if successful; otherwise false.
-		@param[in]	inOutputSpigot	Specifies the SDI output spigot to be affected (where 0 is "SDI Out 1").
-		@param[in]	inEnable		If true, incomming 3g level b signal converted to 3g level a signal at SDI output widget.
-									If false, specifies normal operation.
+		@param[in]	inInputSpigot	Specifies the SDI input spigot to be affected (where 0 == SDIIn1, 1 == SDIIn2, etc.).
+		@param[in]	inEnable		Specify true to automatically convert incoming 3g level B signals to 3g level A.
+									Specify false for normal operation.
 	**/
-	AJA_VIRTUAL bool		SetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, const bool inEnable);
-
-	AJA_VIRTUAL bool		GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bool & outEnable);
-	AJA_VIRTUAL inline bool	GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bool* pOutEnable)	{return pOutEnable ? GetSDIInLevelBtoLevelAConversion (inOutputSpigot, *pOutEnable) : false;}
+	AJA_VIRTUAL bool		SetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, const bool inEnable);
 
 	/**
-		@brief		Enables or disables 3G level a to 3G level b conversion at the SDI output widget (assuming the AJA device can do so).
+		@brief		Answers with the device's current 3G level B to 3G level A conversion setting for the given SDI input spigot (assuming the device can do such a conversion).
 		@return		True if successful; otherwise false.
-		@param[in]	inOutputSpigot	Specifies the SDI output widget to be affected (where 0 == "SDI Out 1").
+		@param[in]	inInputSpigot	Specifies the SDI input widget of interest (0 == SDIIn1, 1 == SDIIn2, etc.).
+		@param[out]	outIsEnabled	Receives true if enabled, or false if disabled (normal operation).
+	**/
+	AJA_VIRTUAL bool		GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool* pOutIsEnabled)	{return pOutIsEnabled ? GetSDIInLevelBtoLevelAConversion (inInputSpigot, *pOutIsEnabled) : false;}
+
+	/**
+		@brief		Enables or disables 3G level A to 3G level B conversion at the SDI output widget (assuming the AJA device can do so).
+		@return		True if successful; otherwise false.
+		@param[in]	inOutputSpigot	Specifies the SDI output widget to be affected (where 0 == SDIOut1, 1 == SDIOut2, etc.).
 		@param[in]	inEnable		If true, outgoing 3g level a signal converted to 3g level b signal at SDI output widget.
 									If false, specifies normal operation.
 	**/
 	AJA_VIRTUAL bool		SetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, const bool inEnable);
 
-	AJA_VIRTUAL bool		GetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, bool & outEnable);
-	AJA_VIRTUAL inline bool	GetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, bool* pOutEnable)	{return pOutEnable ? GetSDIOutLevelAtoLevelBConversion (inOutputSpigot, *pOutEnable) : false;}
+	/**
+		@brief		Answers with the device's current 3G level A to 3G level B conversion setting for the given SDI output spigot (assuming the device can do such a conversion).
+		@return		True if successful; otherwise false.
+		@param[in]	inOutputSpigot	Specifies the SDI output widget of interest (0 == SDIOut1, 1 == SDIOut2, etc.).
+		@param[out]	outIsEnabled	Receives true if enabled, or false if disabled (normal operation).
+	**/
+	AJA_VIRTUAL bool		GetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, bool & outIsEnabled);
+	AJA_VIRTUAL inline bool	GetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, bool* pOutIsEnabled)	{return pOutIsEnabled ? GetSDIOutLevelAtoLevelBConversion (inOutputSpigot, *pOutIsEnabled) : false;}
 
 	/**
 		@brief		Enables or disables an RGB-over-3G-level-A conversion at the SDI output widget (assuming the AJA device can do so).
 		@return		True if successful; otherwise false.
-		@param[in]	inOutputSpigot	Specifies the SDI output to be affected (where 0 is "SDI Out 1").
+		@param[in]	inOutputSpigot	Specifies the SDI output to be affected (where 0 == SDIOut1, 1 == SDIOut2, etc.).
 		@param[in]	inEnable		If true, perform the conversion at the output SDI spigot;  otherwise have the SDI output spigot operate normally (no conversion).
 	**/
 	AJA_VIRTUAL bool		SetSDIOutRGBLevelAConversion (const UWord inOutputSpigot, const bool inEnable);
