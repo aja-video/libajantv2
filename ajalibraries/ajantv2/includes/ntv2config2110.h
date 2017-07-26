@@ -34,6 +34,7 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 #define PLL_CONFIG_PTP                  BIT(1)
+#define PLL_CONFIG_DCO_MODE             BIT(28)
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
@@ -54,11 +55,12 @@ public:
     uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
     uint16_t    payloadType;
+    uint32_t    ssrc;
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
-    uint32_t     pktsPerLine;
-    uint32_t     payloadLen;
-    uint32_t     lastPayLoadLen;
+    uint32_t     pktsPerLine;    // read-only
+    uint32_t     payloadLen;     // read0only
+    uint32_t     lastPayLoadLen; // read-only
 };
 
 /**

@@ -2978,6 +2978,72 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 }	//	GetNTV2FrameRateFromVideoFormat
 
 
+NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry)
+{
+	switch (inFrameGeometry)
+	{
+		case NTV2_FG_1920x1080:	//	1080i, 1080p
+		case NTV2_FG_1280x720:	//	720p
+		case NTV2_FG_720x486:	//	ntsc 525i, 525p60
+		case NTV2_FG_720x576:	//	pal 625i
+			return inFrameGeometry;	//	No change
+
+		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
+		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
+		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
+		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
+		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
+		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
+
+		case NTV2_FG_2048x1080:	//	2k1080p
+		case NTV2_FG_2048x1556:	//	2k1556psf
+			return inFrameGeometry;	//	No change
+
+		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
+		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
+		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
+		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+		case NTV2_FG_4x1920x1080:	//	UHD
+		case NTV2_FG_4x2048x1080:	//	4K
+			return inFrameGeometry;	//	No change
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:
+			return inFrameGeometry;	//	No change
+#else
+		default:
+			return NTV2_FG_INVALID;	//	fail
+#endif
+	}
+}
+
+
+bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
+						  NTV2FrameRate		inFrameRate,
+  			              NTV2FrameGeometry inFrameGeometry,
+						  NTV2Standard		inStandard)
+{
+	//	This implementation is very inefficient, but...
+	//	a)	this function is deprecated;
+	//	b)	nobody should be calling it (they should be calling NTV2DeviceCanDoVideoFormat instead)
+	//	c)	they shouldn't be calling it every frame.
+	//	We could make it efficient by creating a static global rate/geometry/standard-to-videoFormat
+	//	map, but that has race/deadlock issues.
+
+	const NTV2FrameGeometry	fg	(::GetNormalizedFrameGeometry(inFrameGeometry));
+	//	Look for a video format that matches the given frame rate, geometry and standard...
+	for (NTV2VideoFormat vFmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
+	{
+		if (!NTV2_IS_VALID_VIDEO_FORMAT(vFmt))
+			continue;
+		const NTV2FrameRate		fr	(::GetNTV2FrameRateFromVideoFormat(vFmt));
+		const NTV2Standard		std	(::GetNTV2StandardFromVideoFormat(vFmt));
+		const NTV2FrameGeometry	geo	(::GetNTV2FrameGeometryFromVideoFormat(vFmt));
+		if (fr == inFrameRate  &&  std == inStandard  &&  fg == geo)
+			return ::NTV2DeviceCanDoVideoFormat(inDeviceID, vFmt);
+	}
+	return false;
+}
+
 ULWord GetNTV2FrameGeometryHeight(NTV2FrameGeometry geometry)
 {
 	switch (geometry)
@@ -3488,7 +3554,7 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 
 
 //	More UI-friendly versions of above (used in Cables app)...
-AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
+AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS+1] =
 {
 	"10 Bit YCbCr",						//	NTV2_FBF_10BIT_YCBCR			//	0
 	"8 Bit YCbCr - UYVY",				//	NTV2_FBF_8BIT_YCBCR				//	1
@@ -3522,6 +3588,7 @@ AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS
 	"10 Bit YCbCr 422 Planar",			//	NTV2_FBF_10BIT_YCBCR_422PL		//	29
 	"8 Bit YCbCr 420 Planar",			//	NTV2_FBF_8BIT_YCBCR_420PL		//	30
 	"8 Bit YCbCr 422 Planar",			//	NTV2_FBF_8BIT_YCBCR_422PL		//	31
+	""									//	NTV2_FBF_INVALID				//	32
 };
 
 
@@ -3997,8 +4064,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
-		case DEVICE_ID_IO4KPLUS:				return "Io4KPLUS";
-		case DEVICE_ID_IO4KIP:					return "Io4KIP";
+		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "DNxIV" : "Io4KPLUS";
+		case DEVICE_ID_IO4KIP:					return inForRetailDisplay ? "DNxIP" : "Io4KIP";
 		case DEVICE_ID_KONAIP_4TX_2110:			return "KONA IP 4TX 2110";
 #if !defined (_DEBUG)
 	    default:					break;
@@ -6821,7 +6888,7 @@ string NTV2StandardToString (const NTV2Standard inValue, const bool inForRetailD
 		case NTV2_STANDARD_4096x2160p:	return inForRetailDisplay ? "4K"		: "NTV2_STANDARD_4096x2160p";
 		case NTV2_STANDARD_3840HFR:		return inForRetailDisplay ? "UHD HFR"	: "NTV2_STANDARD_3840HFR";
 		case NTV2_STANDARD_4096HFR:		return inForRetailDisplay ? "4K HFR"	: "NTV2_STANDARD_4096HFR";
-		case NTV2_NUM_STANDARDS:		break;
+		case NTV2_STANDARD_INVALID:		return inForRetailDisplay ? ""			: "NTV2_STANDARD_INVALID";
 	}
 	return string ();
 }
@@ -6866,7 +6933,7 @@ string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const
 		case NTV2_FBF_10BIT_YCBCR_422PL:		return "NTV2_FBF_10BIT_YCBCR_422PL";
 		case NTV2_FBF_8BIT_YCBCR_420PL:			return "NTV2_FBF_8BIT_YCBCR_420PL";
 		case NTV2_FBF_8BIT_YCBCR_422PL:			return "NTV2_FBF_8BIT_YCBCR_422PL";
-		case NTV2_FBF_NUMFRAMEBUFFERFORMATS:	break;
+		case NTV2_FBF_INVALID:					return "NTV2_FBF_INVALID";
 	}
 	return string ();
 }

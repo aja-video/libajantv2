@@ -356,7 +356,7 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
     //WriteRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
 
     // payload type
-    mDevice. WriteRegister(kRegDecap_match_payload, rxConfig.payloadType);
+    mDevice. WriteRegister(kRegDecap_match_payload + decapBaseAddr, rxConfig.payloadType);
 
     // matching
     mDevice.WriteRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
@@ -388,7 +388,7 @@ void  CNTV2Config2110::EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream 
 
 void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream)
 {
-	(void) channel;
+    (void) channel;
     if (stream == NTV2_AUDIO1_STREAM)
     {
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
@@ -528,37 +528,37 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
 
     // source ip address
-    ReadChannelRegister(kRegDecap_match_src_ip + decapBaseAddr, &val);
+    mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, &val);
     struct in_addr in;
     in.s_addr = NTV2EndianSwap32(val);
     char * ip = inet_ntoa(in);
     rxConfig.sourceIP = ip;
 
     // dest ip address
-    ReadChannelRegister(kRegDecap_match_dst_ip + decapBaseAddr, &val);
+    mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, &val);
     in.s_addr = NTV2EndianSwap32(val);
     ip = inet_ntoa(in);
     rxConfig.destIP = ip;
 
     // source port
-    ReadChannelRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.sourcePort);
+    mDevice.ReadRegister(kRegDecap_match_udp_src_port + decapBaseAddr, &rxConfig.sourcePort);
 
     // dest port
-    ReadChannelRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
+    mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
 
     // ssrc
-    ReadChannelRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
+    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
 
     // vlan
-    //ReadChannelRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
+    //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
     //rxConfig.VLAN = val & 0xffff;
 
     // payload type
-    ReadChannelRegister(kRegDecap_match_payload + decapBaseAddr,&val);
+    mDevice.ReadRegister(kRegDecap_match_payload + decapBaseAddr,&val);
     rxConfig.payloadType = val & 0x7f;
 
     // matching
-    ReadChannelRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
+    mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
@@ -605,7 +605,7 @@ bool CNTV2Config2110::GetRxStreamEnable(const NTV2Channel channel, NTV2Stream st
     uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
 
     uint32_t val;
-    ReadChannelRegister(kRegDecap_chan_enable + decapBaseAddr,&val);
+    mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr,&val);
     enabled = (val & 0x01);
 
     return true;
@@ -738,6 +738,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // height
         uint32_t height = fd.GetRasterHeight();
+        if (interlaced)
+        {
+            height /= 2;
+        }
         mDevice.WriteRegister(kReg4175_pkt_height + baseAddrPacketizer,height);
 
         // video format = sampling
@@ -803,6 +807,9 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // payload type
         mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,txConfig.payloadType);
 
+        // SSRC
+        mDevice.WriteRegister(kReg4175_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
+
         // pix per pkt
         int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
         mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
@@ -856,7 +863,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payloadType);
 
         // ssrc
-        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,0);
+        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
 
     }
     return rv;
@@ -893,11 +900,15 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, &val);
         txConfig.payloadType = (uint16_t)val;
 
+        // SSRC
+        mDevice.ReadRegister(kReg4175_pkt_ssrc + baseAddrPacketizer,&txConfig.ssrc);
+
         uint32_t width;
         mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, &width);
 
         uint32_t height;
         mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, &height);
+
 
         // pkts per line
         mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,&txConfig.pktsPerLine);
@@ -921,6 +932,9 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // payload type
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, &val);
         txConfig.payloadType = (uint16_t)val;
+
+        // ssrc
+        mDevice.ReadRegister(kReg3190_pkt_ssrc + baseAddrPacketizer, &txConfig.ssrc);
     }
     return true;
 }
@@ -1145,7 +1159,7 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(NTV2Channel channel, NTV2Stream stream)
 {
-	(void) stream;
+    (void) stream;
     uint32_t iChannel = (uint32_t) channel;
 
     if (iChannel > _numTxChans)
@@ -1224,7 +1238,7 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     mDevice.WriteRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
     mDevice.WriteRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
     mDevice.WriteRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
-    mDevice.WriteRegister(kRegPll_Config         + SAREK_PLL, PLL_CONFIG_PTP);
+    mDevice.WriteRegister(kRegPll_Config         + SAREK_PLL, PLL_CONFIG_PTP | PLL_CONFIG_DCO_MODE);
 
     //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
     //WriteChannelRegister(kRegPll_PTP_LclClkIdHi + SAREK_PLL, (macHi & 0xffffff00) | 0xff);
