@@ -21,10 +21,10 @@
 #include "xpt_io4k_ufc.h"
 #include "xpt_kip_4rxtx.h"
 #include "xpt_kip_2p2rxtc.h"
-#include "xpt_kip_j2k1rxt.h"
+#include "xpt_kip_j2k1rxtx.h"
 #include "xpt_kip_j2k2tx.h"
 #include "xpt_kip_2100_4tx.h"
-#include "xpt_kip_2100_1rxtx,h"
+#include "xpt_kip_2100_1rxtx.h"
 
 
 
