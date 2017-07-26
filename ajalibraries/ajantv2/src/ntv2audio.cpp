@@ -837,7 +837,7 @@ bool CNTV2Card::GetAudioMixerMainInputEnable(bool & outEnabled)
 	uint32_t channelEnable = 0;
 	if(!ReadRegister(kRegAudioMixerMutes, &channelEnable, kRegMaskAudioMixerMainInputEnable, kRegShiftAudioMixerMainInputEnable))
 		return false;
-	outEnabled = channelEnable > 0 ? true : false;
+	outEnabled = channelEnable > 0 ? false : true;
 	return true;
 }
 
@@ -859,7 +859,7 @@ bool CNTV2Card::GetAudioMixerAux1InputEnable(bool & outEnabled)
 	uint32_t channelEnable = 0;
 	if(!ReadRegister(kRegAudioMixerMutes, &channelEnable, kRegMaskAudioMixerAux1InputEnable, kRegShiftAudioMixerAux1InputEnable))
 		return false;
-	outEnabled = channelEnable > 0 ? true : false;
+	outEnabled = channelEnable > 0 ? false : true;
 	return true;
 }
 
@@ -881,7 +881,7 @@ bool CNTV2Card::GetAudioMixerAux2InputEnable(bool & outEnabled)
 	uint32_t channelEnable = 0;
 	if(!ReadRegister(kRegAudioMixerMutes, &channelEnable, kRegMaskAudioMixerAux2InputEnable, kRegShiftAudioMixerAux2InputEnable))
 		return false;
-	outEnabled = channelEnable > 0 ? true : false;
+	outEnabled = channelEnable > 0 ? false : true;
 	return true;
 }
 
