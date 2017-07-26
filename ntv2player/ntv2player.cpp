@@ -235,7 +235,15 @@ AJAStatus NTV2Player::SetUpVideo ()
 	}
 
 	mDevice.SetFrameBufferFormat (mOutputChannel, mPixelFormat);
-	mDevice.SetReference (NTV2_REFERENCE_FREERUN);
+	if(mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_2110 ||
+		mDeviceID == DEVICE_ID_KONAIP_4TX_2110)
+	{
+		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
+	}
+	else
+	{
+		mDevice.SetReference (NTV2_REFERENCE_FREERUN);
+	}
 	mDevice.EnableChannel (mOutputChannel);
 
 	if (mEnableVanc && !::IsRGBFormat (mPixelFormat) && NTV2_IS_HD_VIDEO_FORMAT (mVideoFormat))
