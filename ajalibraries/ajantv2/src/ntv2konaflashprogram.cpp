@@ -424,6 +424,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
 
 void CNTV2KonaFlashProgram::Program(bool verify)
 {
+	(void) verify;
 	if ( _bitFileBuffer == NULL )
 		throw "Bit File not Open";
 
