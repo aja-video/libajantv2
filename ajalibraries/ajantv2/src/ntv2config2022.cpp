@@ -782,6 +782,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
             ReleaseMailbox();
             if (!rv)
             {
+                SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
                 mError = "Failed to retrieve MAC address from ARP table";
                 return false;
             }
@@ -872,6 +873,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         ReleaseMailbox();
         if (!rv)
         {
+            SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
             mError = "Failed to retrieve MAC address from ARP table";
             return false;
         }
