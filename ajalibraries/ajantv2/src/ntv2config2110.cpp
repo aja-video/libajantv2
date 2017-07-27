@@ -185,19 +185,15 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
 
-    bool rv = AcquireMailbox();
-    if (rv)
-    {
-        rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
-        ReleaseMailbox();
-    }
+    bool rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
+    if (!rv) return false;
 
     if (port == SFP_TOP)
     {
         ConfigurePTP(port,localIPAddress);
     }
 
-    return rv;
+    return true;
 }
 
 bool CNTV2Config2110::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
@@ -682,16 +678,12 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
         // get MAC from ARP
         string macAddr;
-        rv = AcquireMailbox();
-        if (rv)
-        {
-            rv = GetRemoteMAC(txConfig.remoteIP,SFP_TOP,channel,stream,macAddr);
-            ReleaseMailbox();
-        }
+        rv = GetRemoteMAC(txConfig.remoteIP,SFP_TOP,channel,stream,macAddr);
         if (!rv)
         {
+            SetTxChannelEnable(channel, stream, false); // stop transmit
             mError = "Failed to retrieve MAC address from ARP table";
-            macAddr = "0:0:0:0:0:0";
+            return false;
         }
 
         istringstream ss(macAddr);

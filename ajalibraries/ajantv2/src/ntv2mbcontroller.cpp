@@ -45,227 +45,227 @@ CNTV2MBController::CNTV2MBController(CNTV2Card &device) : CNTV2MailBox(device)
 
 bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, string netmask, string gateway)
 {
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
+   if (!(getFeatures() & SAREK_MB_PRESENT))
+       return true;
+
+    bool rv = AcquireMailbox();
+    if (!rv) return false;
+
+    sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
+            (int)MB_CMD_SET_NET,(int)port,ipaddr.c_str(),netmask.c_str(),gateway.c_str());
+
+    rv = sendMsg(1000);
+    if (!rv)
     {
-        sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
-                      (int)MB_CMD_SET_NET,(int)port,ipaddr.c_str(),netmask.c_str(),gateway.c_str());
-
-        bool rv = sendMsg(1000);
-        if (!rv)
-        {
-            return false;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                return true;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 3)
-                {
-                    rv = getString(msg[2],"error",mError);
-                    return false;
-                }
-            }
-         }
-
-         mError = "Invalid response from MB";
-         return false;
+        ReleaseMailbox();
+        return false;
     }
-    else
-         return true;
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            ReleaseMailbox();
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mError);
+                ReleaseMailbox();
+                return false;
+            }
+        }
+    }
+
+    ReleaseMailbox();
+    mError = "Invalid response from MB";
+    return false;
 }
 
 bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 {
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
+    bool rv = sendMsg(250);
+    if (!rv)
     {
-        sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
-        bool rv = sendMsg(250);
-        if (!rv)
-        {
-            return false;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                return true;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 3)
-                {
-                    rv = getString(msg[2],"error",mError);
-                    return false;
-                }
-            }
-         }
-
-         mError = "Invalid response from MB";
-         return false;
+        return false;
     }
-    else
-         return true;
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mError);
+                return false;
+            }
+        }
+    }
+
+    mError = "Invalid response from MB";
+    return false;
 }
 
 bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
+    if (!(getFeatures()) & SAREK_MB_PRESENT)
+    return true;
+
+    bool rv = AcquireMailbox();
+    if (rv) return false;
+
+    int count = 30;
+    do
     {
-        int count = 30;
-        do
+        bool rv = SendArpRequest(remote_IPAddress,port);
+        if (!rv) return false;
+
+        mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
+        eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,port,channel,stream,MACaddress);
+        switch (as)
         {
-            bool rv = SendArpRequest(remote_IPAddress,port);
-            if (!rv) return false;
-            mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
-            eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,port,channel,stream,MACaddress);
-            switch (as)
-            {
-            case ARP_VALID:
-                return true;
-            case ARP_ERROR:
-                return false;
-            default:
-            case ARP_INCOMPLETE:
-            case ARP_NOT_FOUND:
-               break;
-            }
+        case ARP_VALID:
+            ReleaseMailbox();
+            return true;
+        case ARP_ERROR:
+            ReleaseMailbox();
+            return false;
+        default:
+        case ARP_INCOMPLETE:
+        case ARP_NOT_FOUND:
+            break;
+        }
 
-        } while (--count);
+    } while (--count);
 
-        return false;
-    }
-    else
-        return true;
+    ReleaseMailbox();
+    return false;
 }
 
 eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return ARP_VALID;
+
+    sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d,chan=%d,stream=%d",
+            (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
+            remote_IPAddress.c_str(),
+            (int)port,
+            (int)channel,
+            (int)stream);
+    bool rv = sendMsg(250);
+    if (!rv)
     {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d,chan=%d,stream=%d",
-                (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
-                remote_IPAddress.c_str(),
-                (int)port,
-                (int)channel,
-                (int)stream);
-        bool rv = sendMsg(250);
-        if (!rv)
-        {
-            return ARP_ERROR;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                if (msg.size() != 3)
-                {
-                    mError = "Invalid response size from MB";
-                    return ARP_ERROR;
-                }
-
-                rv = getString(msg[2],"MAC",MACaddress);
-                if (rv == false)
-                {
-                    mError = "MAC Address not found in response from MB";
-                    return ARP_ERROR;
-                }
-                return ARP_VALID;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 4)
-                {
-                    uint32_t state;
-                    rv = getString(msg[2],"error",mError);
-                    rv = getDecimal(msg[3],"state",state);
-                    return (eArpState)state;
-                }
-            }
-         }
-
-         mError = "Invalid response from MB";
-         return ARP_ERROR;
+        return ARP_ERROR;
     }
-    else
-         return ARP_VALID;
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            if (msg.size() != 3)
+            {
+                mError = "Invalid response size from MB";
+                return ARP_ERROR;
+            }
+
+            rv = getString(msg[2],"MAC",MACaddress);
+            if (rv == false)
+            {
+                mError = "MAC Address not found in response from MB";
+                return ARP_ERROR;
+            }
+            return ARP_VALID;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 4)
+            {
+                uint32_t state;
+                rv = getString(msg[2],"error",mError);
+                rv = getDecimal(msg[3],"state",state);
+                return (eArpState)state;
+            }
+        }
+    }
+
+    mError = "Invalid response from MB";
+    return ARP_ERROR;
 }
 
 bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
 {
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
-    {
-        sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d",
-                (int)MB_CMD_SEND_ARP_REQ,
-                remote_IPAddress.c_str(),
-                int(port));
-        bool rv = sendMsg(250);
-        if (!rv)
-        {
-            return ARP_ERROR;
-        }
-
-        string response;
-        getResponse(response);
-        vector<string> msg;
-        splitResponse(response, msg);
-        if (msg.size() >=1)
-        {
-            string status;
-            rv = getString(msg[0],"status",status);
-            if (rv && (status == "OK"))
-            {
-                if (msg.size() != 2)
-                {
-                    mError = "Invalid response size from MB";
-                    return false;
-                }
-                return true;
-            }
-            else if (rv && (status == "FAIL"))
-            {
-                if (msg.size() >= 4)
-                {
-                    rv = getString(msg[2],"error",mError);
-                    return false;
-                }
-            }
-        }
-
-        mError = "Invalid response from MB";
-        return false;
-    }
-    else
+    if (!getFeatures() & SAREK_MB_PRESENT)
         return true;
+
+    sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d",
+            (int)MB_CMD_SEND_ARP_REQ,
+            remote_IPAddress.c_str(),
+            int(port));
+
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        return ARP_ERROR;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            if (msg.size() != 2)
+            {
+                mError = "Invalid response size from MB";
+                return false;
+            }
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 4)
+            {
+                rv = getString(msg[2],"error",mError);
+                return false;
+            }
+        }
+    }
+
+    mError = "Invalid response from MB";
+    return false;
 }
 
 void CNTV2MBController::splitResponse(std::string response, std::vector<std::string> & results)
