@@ -311,11 +311,10 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
     }
 
     bool rv = AcquireMailbox();
-    if (rv)
-    {
-        rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
-        ReleaseMailbox();
-    }
+    if (!rv) return false;
+    rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
+    ReleaseMailbox();
+
     return rv;
 }
 
@@ -778,15 +777,13 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
             // get MAC from ARP
             string macAddr;
             rv = AcquireMailbox();
-            if (rv)
-            {
-                rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
-                ReleaseMailbox();
-            }
+            if (!rv) return false;
+            rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
+            ReleaseMailbox();
             if (!rv)
             {
                 mError = "Failed to retrieve MAC address from ARP table";
-                macAddr = "0:0:0:0:0:0";
+                return false;
             }
 
             istringstream ss(macAddr);
@@ -870,15 +867,13 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // get MAC from ARP
         string macAddr;
         rv = AcquireMailbox();
-        if (rv)
-        {
-            rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
-            ReleaseMailbox();
-        }
+        if (rv) return false;
+        rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
+        ReleaseMailbox();
         if (!rv)
         {
             mError = "Failed to retrieve MAC address from ARP table";
-            macAddr = "0:0:0:0:0:0";
+            return false;
         }
 
         istringstream ss(macAddr);
