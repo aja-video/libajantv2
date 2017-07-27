@@ -1982,6 +1982,58 @@ public:
 	AJA_VIRTUAL bool	VerifyMainFlash(const char *fileName);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 	AJA_VIRTUAL bool	WaitForFlashNOTBusy();
+
+	/**
+		@brief		Reports the revision number of the currently-running firmware.
+		@param[out]	outRevision		Receives the revision number.
+		@return		True if successful;  otherwise false.
+		@note		This may differ from the revision number of the installed firmware if, after
+					erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
+	**/
+	AJA_VIRTUAL bool	GetRunningFirmwareRevision (UWord & outRevision);
+
+	/**
+		@brief		Reports the (local Pacific) build date of the currently-running firmware.
+		@param[out]	outYear		Receives the year portion of the build date, an unsigned integer
+								representing a standard Gregorian calendar year (e.g., 2017).
+		@param[out]	outMonth	Receives the month portion of the build date, an unsigned integer
+								representing a standard 1-based Gregorian calendar month (e.g., 1 == January).
+		@param[out]	outDay		Receives the day portion of the build date, an unsigned integer
+								representing a standard 1-based Gregorian calendar day (i.e., 1 thru 31).
+		@return		True if successful;  otherwise false.
+		@note		This date may differ from the build date of the installed firmware if, after erasing
+					or reflashing, the device was never power-cycled to force its FPGA to reload.
+	**/
+	AJA_VIRTUAL bool	GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay);
+
+	/**
+		@brief		Reports the (local Pacific) build time of the currently-running firmware.
+		@param[out]	outHours	Receives the hours portion of the build time, an unsigned integer
+								representing the number of hours past the start of day (0 thru 23).
+		@param[out]	outMinutes	Receives the minutes portion of the build time, an unsigned integer
+								representing the number of minutes past the hour (0 thru 59).
+		@param[out]	outSeconds	Receives the seconds portion of the build time, an unsigned integer
+								representing the number of seconds past the minute (0 thru 59).
+		@return		True if successful;  otherwise false.
+		@note		This date may differ from the build date of the installed firmware if, after erasing
+					or reflashing, the device was never power-cycled to force its FPGA to reload.
+	**/
+	AJA_VIRTUAL bool	GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds);
+
+	/**
+		@brief		Reports the (local Pacific) build date and time of the currently-running firmware.
+		@param[out]	outDate		Receives a string containing the human-readable running firmware build date,
+								in the form 'YYYY/MM/DD', where YYYY, MM and DD are the numeric Gregorian year,
+								month and day values, expressed as unsigned decimal values (with leading zeroes).
+		@param[out]	outTime		Receives a string containing the human-readable running firmware build time,
+								in the form 'HH:MM:SS', where HH, MM and SS are the numeric hour, minute and second
+								values, expressed as unsigned decimal values (with leading zeroes), and a 24-hour
+								clock format.
+		@return		True if successful;  otherwise false.
+		@note		This date/time may differ from the build date/time of the installed firmware if, after erasing
+					or reflashing, the device was never power-cycled to force its FPGA to reload.
+	**/
+	AJA_VIRTUAL bool	GetRunningFirmwareDate (std::string & outDate, std::string & outTime);
 	///@}
 
 	//

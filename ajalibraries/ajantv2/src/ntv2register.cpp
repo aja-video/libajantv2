@@ -3098,6 +3098,87 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 }
 
 
+bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
+{
+	outRevision = 0;
+	if (!IsOpen())
+		return false;
+
+	uint32_t	regValue	(0);
+	if (!ReadRegister (kRegDMAControl, &regValue))
+		return false;
+
+	outRevision = uint16_t((regValue & 0x0000FF00) >> 8);
+	return true;
+}
+
+
+bool CNTV2Card::GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay)
+{
+	outYear = outMonth = outDay = 0;
+	uint32_t	regValue	(0);
+	if (!ReadRegister(kRegBitfileDate, &regValue))
+		return false;
+
+	const UWord	yearBCD		((regValue & 0xFFFF0000) >> 16);	//	Year number in BCD
+	const UWord	monthBCD	((regValue & 0x0000FF00) >> 8);		//	Month number in BCD
+	const UWord	dayBCD		 (regValue & 0x000000FF);			//	Day number in BCD
+
+	outYear =		((yearBCD & 0xF000) >> 12) * 1000
+				+   ((yearBCD & 0x0F00) >>  8) * 100
+				+   ((yearBCD & 0x00F0) >>  4) * 10
+				+    (yearBCD & 0x000F);
+
+	outMonth = ((monthBCD & 0x00F0) >> 4) * 10   +   (monthBCD & 0x000F);
+
+	outDay = ((dayBCD & 0x00F0) >> 4) * 10   +   (dayBCD & 0x000F);
+
+	return	outYear > 2010	&&  outYear < 2018
+		&&	outMonth > 0	&&  outMonth < 13
+		&&	outDay > 0		&&  outDay < 32;		//	If the date's valid, then it's supported;  otherwise, it ain't
+}
+
+
+bool CNTV2Card::GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds)
+{
+	outHours = outMinutes = outSeconds = 0;
+	uint32_t	regValue	(0);
+	if (!ReadRegister(kRegBitfileTime, &regValue))
+		return false;
+
+	const UWord	hoursBCD	((regValue & 0x00FF0000) >> 16);	//	Hours number in BCD
+	const UWord	minutesBCD	((regValue & 0x0000FF00) >> 8);		//	Minutes number in BCD
+	const UWord	secondsBCD	 (regValue & 0x000000FF);			//	Seconds number in BCD
+
+	outHours = ((hoursBCD & 0x00F0) >>  4) * 10   +    (hoursBCD & 0x000F);
+
+	outMinutes = ((minutesBCD & 0x00F0) >>  4) * 10   +    (minutesBCD & 0x000F);
+
+	outSeconds = ((secondsBCD & 0x00F0) >>  4) * 10   +    (secondsBCD & 0x000F);
+
+	return outHours < 24  &&  outMinutes < 60  &&  outSeconds < 60;	//	If the time's valid, then it's supported;  otherwise, it ain't
+}
+
+
+bool CNTV2Card::GetRunningFirmwareDate (std::string & outDate, std::string & outTime)
+{
+	outDate = outTime = string();
+	UWord	yr(0), mo(0), dy(0), hr(0), mn(0), sec(0);
+	if (!GetRunningFirmwareDate (yr, mo, dy))
+		return false;
+	if (!GetRunningFirmwareTime (hr, mn, sec))
+		return false;
+
+	ostringstream	date, time;
+	date	<< DEC0N(yr,4)	<< "/"	<< DEC0N(mo,2)	<< "/"	<< DEC0N(dy,2);
+	time	<< DEC0N(hr,2)	<< ":"	<< DEC0N(mn,2)	<< ":"	<< DEC0N(sec,2);
+
+	outDate = date.str();
+	outTime = time.str();
+	return true;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 
 bool CNTV2Card::ReadStatusRegister (ULWord *value)						{return ReadRegister (kRegStatus, value);}
