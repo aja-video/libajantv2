@@ -6783,7 +6783,7 @@ typedef enum
 					AutoCircVidProcInfo				acVidProcInfo;				///< @brief	Specifies the mixer/keyer transition to make.  Ignored if AUTOCIRCULATE_WITH_VIDPROC option is not set.
 					NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand;	///< @brief	Turns on the "quarter-size expand" (2x H + 2x V) hardware. Defaults to off (1:1).
 
-					NTV2_POINTER					acReserved001;
+					NTV2_POINTER					acHDR10PlusDynamicMetaData;
 
 					/**
 						@name	Lesser-used and Deprecated Members
@@ -6840,7 +6840,7 @@ typedef enum
 				NTV2_BEGIN_PRIVATE
 					inline explicit					AUTOCIRCULATE_TRANSFER (const AUTOCIRCULATE_TRANSFER & inObj)
 																									:	acHeader(0xFEFEFEFE, 0), acVideoBuffer(0), acAudioBuffer(0),
-																										acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acReserved001(0)
+																										acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acHDR10PlusDynamicMetaData(0)
 																										{(void) inObj;}		///< @brief	You cannot construct an AUTOCIRCULATE_TRANSFER from another.
 					inline AUTOCIRCULATE_TRANSFER &	operator = (const AUTOCIRCULATE_TRANSFER & inRHS)	{(void) inRHS; return *this;}	///< @brief	You cannot assign AUTOCIRCULATE_TRANSFERs.
 				NTV2_END_PRIVATE
@@ -6928,7 +6928,7 @@ typedef enum
 					@return	True if successful;  otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,
-																		ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0);
+																		ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0 );
 				/**
 					@return		My video buffer.
 				**/
