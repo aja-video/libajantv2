@@ -1634,11 +1634,11 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	bool is6G = false;
 	bool is12G = false;
 	mCard->GetSDIInput6GPresent(is6G, NTV2_CHANNEL1);
-	mCard->GetSDIInput6GPresent(is12G, NTV2_CHANNEL1);
+	mCard->GetSDIInput12GPresent(is12G, NTV2_CHANNEL1);
 	if(is6G)
 		b425_2wire = true;
 	if(is12G)
-		b425_4wireB = true;
+		b425_4wireA = true;
 
 	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
 
