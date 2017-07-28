@@ -34,7 +34,11 @@
 			To use the latter, the \c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
 	@note	The newer custom Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for operating the Anc
-			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK.
+			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK/driver.
+
+	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
+			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate \c NTV2_CHANNEL3.
+			This will be fixed in a future SDK/driver.
 
 	@bug	Custom HANC insertion on playout doesn't currently work (firmware issue).
 

@@ -262,25 +262,22 @@ void CNTV2MailBox::getError(std::string & error)
 bool CNTV2MailBox::AcquireMailbox()
 {
     // If no MB do nothing, this is for Cochrane
-    uint32_t features = getFeatures();
-    if (features & SAREK_MB_PRESENT)
-    {
-        int waitCount = 20;
-        while (waitCount--)
-        {
-            if (mDevice.AcquireMailBoxLock())
-            {
-                return true;
-            }
-            mDevice.WaitForOutputVerticalInterrupt();
-        }
-
-        // timeout
-        mError = "Mailbox: AcquireMailBoxLock - TIMEOUT";
-        return false;
-    }
-    else
+    if (!(getFeatures() & SAREK_MB_PRESENT))
         return true;
+
+    int waitCount = 20;
+    while (waitCount--)
+    {
+        if (mDevice.AcquireMailBoxLock())
+        {
+            return true;
+        }
+        mDevice.WaitForOutputVerticalInterrupt();
+    }
+
+    // timeout
+    mError = "Mailbox: AcquireMailBoxLock - TIMEOUT";
+    return false;
 }
 
 void CNTV2MailBox::ReleaseMailbox()

@@ -44,6 +44,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	isStereo				= false;
 	bool	is6G					= false;
 	bool	is12G					= false;
+	VPIDChannel vpidChannel			= VPIDChannel_1;
 
 	uint8_t	byte1 = 0;
 	uint8_t	byte2 = 0;
@@ -64,12 +65,16 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	isStereo				= pInVPIDSpec->isStereo;
 	is6G					= pInVPIDSpec->isOutput6G;
 	is12G					= pInVPIDSpec->isOutput12G;
+	vpidChannel				= pInVPIDSpec->vpidChannel;
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
 	{
 		*pOutVPID = 0;
 		return true;
 	}
+
+	if (is6G || is12G)
+		vpidChannel = VPIDChannel_1;
 
 	frameRate				= GetNTV2FrameRateFromVideoFormat			(outputFormat);
 	isProgressivePicture	= NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (outputFormat);
@@ -392,14 +397,14 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if (pInVPIDSpec->isTwoSampleInterleave)
 	{
 		if (isLevelB && NTV2_IS_4K_HFR_VIDEO_FORMAT (outputFormat))
-			byte4 |= pInVPIDSpec->vpidChannel << 5;
+			byte4 |= vpidChannel << 5;
 		else
-			byte4 |= pInVPIDSpec->vpidChannel << 6;
+			byte4 |= vpidChannel << 6;
 	}
 	else
 	{
 		if (pInVPIDSpec->useChannel)
-			byte4 |= pInVPIDSpec->vpidChannel << 6;	
+			byte4 |= vpidChannel << 6;	
 	}
 
 	//	Audio

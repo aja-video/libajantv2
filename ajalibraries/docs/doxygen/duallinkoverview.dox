@@ -35,7 +35,7 @@
 	<b>Dual Stream 3G</b> has the bandwidth to embed two complete 1.5 Gb image streams into a single 3G signal, which can then be extracted and used without compromise.
 
 
-	@subsection		ajalevelb	Newer AJA Devices Handle Level B Differently
+	@section		ajalevelb	Newer AJA Devices Handle Level B Differently
 
 	On the wire, the speed of Level A and Level B are the same (148 MHz).
 	For Level A, the lines of the image are received at the AJA device's SDI input one at a time.
@@ -64,4 +64,10 @@
 			ingesting from Level B sources, as well as 3G LevelA-to-LevelB SDI output converters for valid 3G Level B signal transport playout,
 			all while using 3G Level A video formats.
 			<b>AJA strongly recommends using 3G Level A video formats exclusively, and deprecate the use of 3G Level B video formats.</b>
+
+
+	@section		aja6g12g	6G and 12G
+
+	Some newer AJA devices have SDI connectors that support 6G and 12G, which allows a single cable to carry 4K/UHD, even at high-frame-rates or bit depths.
+
 **/
