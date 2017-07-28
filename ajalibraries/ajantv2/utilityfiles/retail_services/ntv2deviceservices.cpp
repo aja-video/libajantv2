@@ -199,6 +199,20 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetVideoFormat(mFb1VideoFormat);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1FrameBufferFomat);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
+	
+    if (mCard->DeviceCanDoAudioMixer())
+	{
+		mCard->ReadRegister(kVRegAudioMixerOverrideState, (ULWord *) &mAudioMixerOverrideState);
+		mCard->ReadRegister(kVRegAudioMixerSourceMainEnable, (ULWord *) &mAudioMixerSourceMainEnable);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux1Enable, (ULWord *) &mAudioMixerSourceAux1Enable);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux2Enable, (ULWord *) &mAudioMixerSourceAux2Enable);
+		mCard->ReadRegister(kVRegAudioMixerSourceMainGain, (ULWord *) &mAudioMixerSourceMainGain);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux1Gain, (ULWord *) &mAudioMixerSourceAux1Gain);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux2Gain, (ULWord *) &mAudioMixerSourceAux2Gain);
+		mCard->ReadRegister(kVRegAudioMixerSourceMainSelect, (ULWord *) &mAudioMixerSourceMainSelect);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux1Select, (ULWord *) &mAudioMixerSourceAux1Select);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux2Select, (ULWord *) &mAudioMixerSourceAux2Select);
+	}
 
     if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
@@ -478,7 +492,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	if (hostAudioSystemVal >= NTV2_MAX_NUM_AudioSystemEnums)
 		hostAudioSystemVal = NTV2_AUDIOSYSTEM_1;
 	
-	// if host-audio not suspended - use host audio system
+	// if host-audio not suspended - use host-audio system
 	// note - historically host-audio was NTV2_AUDIOSYSTEM_1 only
 	// newer devices, host-audio use other systems.
 	// kVRegHostAudioSystem will always contain the host-audio system
@@ -486,8 +500,18 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
 	
 	// if we have a mixer, use it for output
-	if (mCard->DeviceCanDoAudioMixer() == true)
+	if (mCard->DeviceCanDoAudioMixer() == true )
 	{
+		if (mCard->DeviceCanDoAudioMixer() && mAudioMixerOverrideState == false)
+		{
+			mCard->GetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+			mCard->GetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
+			mCard->GetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
+			mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
+			mCard->SetAudioMixerAux1InputGain(mAudioMixerSourceAux1Gain);
+			mCard->SetAudioMixerAux2InputGain(mAudioMixerSourceAux2Gain);
+		}
+	
 		if (mode == NTV2_MODE_DISPLAY)
 		{
 			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
