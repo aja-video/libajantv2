@@ -473,17 +473,34 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	bool suspended = false;
 	mCard->GetSuspendHostAudio(suspended);
 	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
-	if (suspended == false)
-	{
-		ULWord hostAudioSystemVal = audioSystem;
-		mCard->ReadRegister(kVRegHostAudioSystem, &hostAudioSystemVal);
-		if (hostAudioSystemVal < NTV2_MAX_NUM_AudioSystemEnums)
-			audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
-	}
+	ULWord hostAudioSystemVal = audioSystem;
+	mCard->ReadRegister(kVRegHostAudioSystem, &hostAudioSystemVal);
+	if (hostAudioSystemVal >= NTV2_MAX_NUM_AudioSystemEnums)
+		hostAudioSystemVal = NTV2_AUDIOSYSTEM_1;
 	
-	if (mCard->DeviceCanDoAudioMixer() == true && mode == NTV2_MODE_DISPLAY)
+	// if host-audio not suspended - use host audio system
+	// note - historically host-audio was NTV2_AUDIOSYSTEM_1 only
+	// newer devices, host-audio use other systems.
+	// kVRegHostAudioSystem will always contain the host-audio system
+	if (suspended == false)
+		audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
+	
+	// if we have a mixer, use it for output
+	if (mCard->DeviceCanDoAudioMixer() == true)
 	{
-		audioSystem = NTV2_AUDIOSYSTEM_6;
+		if (mode == NTV2_MODE_DISPLAY)
+		{
+			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+			mCard->SetAudioMixerAux1x2chInputAudioSystem((NTV2AudioSystem)hostAudioSystemVal);
+			mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
+			audioSystem = NTV2_AUDIOSYSTEM_6;
+			
+			// TBD enable Aux1, Aux2
+		}
+		else
+		{
+			// TBD disable Aux1, Aux2
+		}
 	}
 
 	// Setup the SDI Outputs audio source
