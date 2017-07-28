@@ -2483,6 +2483,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 					switch(deviceID)
 					{
 					default:
+					case DEVICE_ID_IO4KPLUS:
 					case DEVICE_ID_IO4K:
 						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 						break;
