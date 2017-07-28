@@ -513,7 +513,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetAudioMixerAux1InputGain(mAudioMixerSourceAux1Gain);
 			mCard->SetAudioMixerAux2InputGain(mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
-			mCard->WriteRegister(kRegAudioMixerMutes,0x0000,0xffff,0);	// unmute all output channels
+			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
 		}
 	
 		if (mode == NTV2_MODE_DISPLAY)
