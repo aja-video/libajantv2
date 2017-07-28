@@ -258,15 +258,14 @@ It is possible (and sometimes even desireable) to transfer each field of interla
 by calling CNTV2Card::AutoCirculateTransfer every time through the loop (without checking the Buffer Level).
 See the NTV2FieldBurn demonstration application for more details.
 
-@subsection	autocirculatemon	Monitoring AutoCirculate Activity with "Watcher" Tool
+@subsection	autocirculatemon	Monitoring AutoCirculate Activity with "NTV2Watcher" Tool
 
-The "Watcher" tool has an "AutoCirculate" tab that shows AutoCirculate activity in near-real-time for all possible channels
+\ref usingntv2watcher has an \ref inspectorac that shows AutoCirculate activity in near-real-time for all possible channels
 on any AJA device attached to the host.
 
-@image	html	watcher-autocirculate.png
+@image	html	watcher-inspector-ac.png
 
-The "Command" menu at the bottom of each column can be used to control AutoCirculate activity on that channel.
-It is often handy for manually pausing and resuming AutoCirculate, or stopping AutoCirculate after a crashed application
-has left a channel running.
+You can right-click in the AutoCirculate channel column to pop up a menu to control AutoCirculate activity on that channel.
+This is handy for manually pausing, resuming, stopping or restarting AutoCirculate while your application runs.
 
 **/
