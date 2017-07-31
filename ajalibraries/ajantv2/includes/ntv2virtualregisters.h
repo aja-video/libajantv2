@@ -451,8 +451,18 @@ typedef enum
     kVRegKIPDecCfgError                     = VIRTUALREG_START+506,
 	
     kVRegHostAudioSystem                    = VIRTUALREG_START+507,
+	kVRegAudioMixerOverrideState            = VIRTUALREG_START+508,
+    kVRegAudioMixerSourceMainEnable         = VIRTUALREG_START+509,
+    kVRegAudioMixerSourceAux1Enable         = VIRTUALREG_START+510,
+    kVRegAudioMixerSourceAux2Enable         = VIRTUALREG_START+511,
+    kVRegAudioMixerSourceMainGain           = VIRTUALREG_START+512,
+    kVRegAudioMixerSourceAux1Gain           = VIRTUALREG_START+513,
+    kVRegAudioMixerSourceAux2Gain           = VIRTUALREG_START+514,
+    kVRegAudioMixerSourceMainSelect         = VIRTUALREG_START+515,
+    kVRegAudioMixerSourceAux1Select         = VIRTUALREG_START+516,
+    kVRegAudioMixerSourceAux2Select         = VIRTUALREG_START+517,
 
-    kVRegLastAJA							= VIRTUALREG_START+508,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+518,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

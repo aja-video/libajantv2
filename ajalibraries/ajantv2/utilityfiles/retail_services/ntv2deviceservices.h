@@ -216,6 +216,18 @@ public:
 	int32_t					mInputFormatSelect;			// set and read by device services only
 	bool					mInputFormatLock;
 	NTV2VideoFormat			mLastInputFormatSelect;
+	
+	// audio mixer
+	bool					mAudioMixerOverrideState;
+	bool					mAudioMixerSourceMainEnable;
+	bool					mAudioMixerSourceAux1Enable;
+	bool					mAudioMixerSourceAux2Enable;
+	int32_t					mAudioMixerSourceMainGain;
+	int32_t					mAudioMixerSourceAux1Gain;
+	int32_t					mAudioMixerSourceAux2Gain;
+	int32_t					mAudioMixerSourceMainSelect;
+	int32_t					mAudioMixerSourceAux1Select;
+	int32_t					mAudioMixerSourceAux2Select;
 
 	void SetCard (CNTV2VidProc* card)
 		{ mCard = card; }
