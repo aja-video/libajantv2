@@ -3124,7 +3124,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		if (b12g4k)
 			mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
 		else if (b6g4k)
-			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3,  b6g4k);
+			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
 	}
 
 	// HDMI output - initialization sequence
