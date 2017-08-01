@@ -515,24 +515,23 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
 			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
 		}
+		
+		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		mCard->SetAudioMixerAux1x2chInputAudioSystem((NTV2AudioSystem)hostAudioSystemVal);
+		mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 	
-		if (mode == NTV2_MODE_DISPLAY)
+		//if (mode == NTV2_MODE_DISPLAY)
 		{
 			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
 			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
 			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
-		
-			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
-			mCard->SetAudioMixerAux1x2chInputAudioSystem((NTV2AudioSystem)hostAudioSystemVal);
-			mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 		}
-		else
-		{
-			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
-			mCard->SetAudioMixerMainInputEnable(true);
-			mCard->SetAudioMixerAux1InputEnable(false);
-			mCard->SetAudioMixerAux2InputEnable(false);
-		}
+		//else
+		//{
+			//mCard->SetAudioMixerMainInputEnable(true);
+			//mCard->SetAudioMixerAux1InputEnable(false);
+			//mCard->SetAudioMixerAux2InputEnable(false);
+		//}
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
 	}
