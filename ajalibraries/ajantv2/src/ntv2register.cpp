@@ -5460,6 +5460,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 				GetSDIInput12GPresent(is12G, inChannel);
 				if(is6G || is12G)
 					return GetQuadSizedVideoFormat(format);
+				else
+					return format;
 
 			}
 			else if (::NTV2DeviceCanDo3GOut (_boardID, 0) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
