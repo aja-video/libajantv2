@@ -2619,6 +2619,13 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	// don't let the DSK be ON if we're in Mac Desktop mode
 	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(deviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
+	
+	if (mCard->DeviceCanDoAudioMixer())
+	{
+		uint32_t audioInputSelect;
+		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
+		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
+	}
 
 	if(bDSKOn)
 	{
