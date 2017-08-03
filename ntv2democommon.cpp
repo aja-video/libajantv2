@@ -218,8 +218,7 @@ class DemoCommonInitializer
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("yuv10dpx",		NTV2_FBF_10BIT_YCBCR_DPX));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("ycbcr10dpx",	NTV2_FBF_10BIT_YCBCR_DPX));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("dvcpro8",		NTV2_FBF_8BIT_DVCPRO));
-			gString2PixelFormatMap.insert (String2PixelFormatPair ("qrez",			NTV2_FBF_8BIT_QREZ));
-			gString2PixelFormatMap.insert (String2PixelFormatPair ("qrez8",			NTV2_FBF_8BIT_QREZ));
+			gString2PixelFormatMap.insert (String2PixelFormatPair ("i420",			NTV2_FBF_8BIT_YCBCR_420PL3));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("hdv",			NTV2_FBF_8BIT_HDV));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("hdv8",			NTV2_FBF_8BIT_HDV));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb24",			NTV2_FBF_24BIT_RGB));
@@ -698,7 +697,7 @@ AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat 
 		case NTV2_FBF_10BIT_DPX:				return AJA_PixelFormat_RGB_DPX;
 		case NTV2_FBF_10BIT_YCBCR_DPX:			return AJA_PixelFormat_YCbCr_DPX;
 		case NTV2_FBF_8BIT_DVCPRO:				return AJA_PixelFormat_DVCPRO;
-		case NTV2_FBF_8BIT_QREZ:				return AJA_PixelFormat_QREZ;
+		case NTV2_FBF_8BIT_YCBCR_420PL3:		return AJA_PixelFormat_YCBCR8_420PL;
 		case NTV2_FBF_8BIT_HDV:					return AJA_PixelFormat_HDV;
 		case NTV2_FBF_24BIT_RGB:				return AJA_PixelFormat_RGB8_PACK;
 		case NTV2_FBF_24BIT_BGR:				return AJA_PixelFormat_BGR8_PACK;
