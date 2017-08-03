@@ -1902,6 +1902,7 @@ typedef enum				// used in Virtual Register: kVRegInputSelect
     NTV2_DualLinkInputSelect,
     NTV2_DualLink2xSdi4k,
     NTV2_DualLink4xSdi4k,
+	NTV2_DualLink1xSdi4k,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
@@ -1984,6 +1985,8 @@ typedef enum
     NTV2_SDITransport_QuadLink_3Gb,			// Quad Link, 2 wire 3Gb (4K YUV or Stereo RGB)
     NTV2_SDITransport_QuadLink_3Ga,			// Quad Link, 4 wire 3Ga (4K HFR)
     NTV2_SDITransport_OctLink_3Gb,			// Oct Link, 4 wire 3Gb (4K RGB, HFR)
+    NTV2_SDITransport_6G,					// 6G see Quad Link
+    NTV2_SDITransport_12G,					// 12G see Oct Link
     NTV2_MAX_NUM_SDITransportTypes
 } NTV2SDITransportType;
 
@@ -1994,6 +1997,7 @@ typedef enum
     NTV2_4kTransport_Quadrants_4wire,        // square division
     NTV2_4kTransport_PixelInterleave,		 // SMPTE 425-5 & 425-3
     NTV2_4kTransport_Quarter_1wire,          // quarter size
+	NTV2_4kTransport_12g_6g_1wire,		     // 12G / 6G 1wire
     NTV2_MAX_NUM_4kTransportTypes
 } NTV24kTransportType;
 
