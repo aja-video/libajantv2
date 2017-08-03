@@ -1165,10 +1165,10 @@ typedef enum
 		kRegDNX_NumberOfRegisters = ((kRegDNX_MaximumRegister - DNX_REG_START) + 1)
 	} DNXRegisterNum;
 #endif	//	!defined (NTV2_DEPRECATE)
-#if defined (NTV2_DEPRECATE_13_1)
+#if defined (NTV2_DEPRECATE_13_0)
 	#define	kRegAuxInterruptDelay	kRegBitfileDate			///< @deprecated		Use kRegBitfileDate instead.
 	#define	kRegReserved89			kRegBitfileTime			///< @deprecated		Use kRegBitfileTime instead.
-#endif	//	NTV2_DEPRECATE_13_1
+#endif	//	NTV2_DEPRECATE_13_0
 
 // Virtual registers
 #include "ntv2virtualregisters.h"
