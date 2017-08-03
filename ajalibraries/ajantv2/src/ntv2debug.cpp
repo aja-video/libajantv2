@@ -233,42 +233,42 @@ const char *NTV2FrameBufferFormatString (NTV2FrameBufferFormat fmt)
 	
 	switch (fmt)
 	{
-		case NTV2_FBF_10BIT_YCBCR:				result = "NTV2_FBF_10BIT_YCBCR";		break;
-		case NTV2_FBF_8BIT_YCBCR:				result = "NTV2_FBF_8BIT_YCBCR";			break;
-		case NTV2_FBF_ARGB:						result = "NTV2_FBF_ARGB";				break;
-		case NTV2_FBF_RGBA:						result = "NTV2_FBF_RGBA";				break;
-		case NTV2_FBF_10BIT_RGB:				result = "NTV2_FBF_10BIT_RGB";			break;
-		case NTV2_FBF_8BIT_YCBCR_YUY2:			result = "NTV2_FBF_8BIT_YCBCR_YUY2";	break;
-		case NTV2_FBF_ABGR:						result = "NTV2_FBF_ABGR";				break;
-		case NTV2_FBF_10BIT_DPX:				result = "NTV2_FBF_10BIT_DPX";			break;
-		case NTV2_FBF_10BIT_YCBCR_DPX:			result = "NTV2_FBF_10BIT_YCBCR_DPX";	break;
-		case NTV2_FBF_8BIT_DVCPRO:				result = "NTV2_FBF_8BIT_DVCPRO";		break;
-		case NTV2_FBF_8BIT_QREZ:				result = "NTV2_FBF_8BIT_QREZ";			break;
-		case NTV2_FBF_8BIT_HDV:					result = "NTV2_FBF_8BIT_HDV";			break;
-		case NTV2_FBF_24BIT_RGB:				result = "NTV2_FBF_24BIT_RGB";			break;
-		case NTV2_FBF_24BIT_BGR:				result = "NTV2_FBF_24BIT_BGR";			break;
-		case NTV2_FBF_10BIT_YCBCRA:				result = "NTV2_FBF_10BIT_YCBCRA";		break;
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:	result = "NTV2_FBF_10BIT_DPX_LITTLEENDIAN";	break;
-		case NTV2_FBF_48BIT_RGB:				result = "NTV2_FBF_48BIT_RGB";			break;
-		case NTV2_FBF_PRORES:					result = "NTV2_FBF_PRORES";				break;
-		case NTV2_FBF_PRORES_DVCPRO:			result = "NTV2_FBF_PRORES_DVCPRO";		break;
-		case NTV2_FBF_PRORES_HDV:				result = "NTV2_FBF_PRORES_HDV";			break;
-		case NTV2_FBF_10BIT_RGB_PACKED:			result = "NTV2_FBF_10BIT_RGB_PACKED";	break;
-		case NTV2_FBF_10BIT_ARGB:				result = "NTV2_FBF_10BIT_ARGB";			break;
-		case NTV2_FBF_16BIT_ARGB:				result = "NTV2_FBF_16BIT_ARGB";			break;
-		case NTV2_FBF_10BIT_RAW_RGB:			result = "NTV2_FBF_10BIT_RAW_RGB";		break;
-		case NTV2_FBF_10BIT_RAW_YCBCR:			result = "NTV2_FBF_10BIT_RAW_YCBCR";	break;
-		case NTV2_FBF_10BIT_YCBCR_420PL:		result = "NTV2_FBF_10BIT_YCBCR_420PL";	break;
-		case NTV2_FBF_10BIT_YCBCR_422PL:		result = "NTV2_FBF_10BIT_YCBCR_422PL";	break;
-		case NTV2_FBF_8BIT_YCBCR_420PL:			result = "NTV2_FBF_8BIT_YCBCR_420PL";	break;
-		case NTV2_FBF_8BIT_YCBCR_422PL:			result = "NTV2_FBF_8BIT_YCBCR_422PL";	break;
+		case NTV2_FBF_10BIT_YCBCR:				result = "NTV2_FBF_10BIT_YCBCR";			break;
+		case NTV2_FBF_8BIT_YCBCR:				result = "NTV2_FBF_8BIT_YCBCR";				break;
+		case NTV2_FBF_ARGB:						result = "NTV2_FBF_ARGB";					break;
+		case NTV2_FBF_RGBA:						result = "NTV2_FBF_RGBA";					break;
+		case NTV2_FBF_10BIT_RGB:				result = "NTV2_FBF_10BIT_RGB";				break;
+		case NTV2_FBF_8BIT_YCBCR_YUY2:			result = "NTV2_FBF_8BIT_YCBCR_YUY2";		break;
+		case NTV2_FBF_ABGR:						result = "NTV2_FBF_ABGR";					break;
+		case NTV2_FBF_10BIT_DPX:				result = "NTV2_FBF_10BIT_DPX";				break;
+		case NTV2_FBF_10BIT_YCBCR_DPX:			result = "NTV2_FBF_10BIT_YCBCR_DPX";		break;
+		case NTV2_FBF_8BIT_DVCPRO:				result = "NTV2_FBF_8BIT_DVCPRO";			break;
+		case NTV2_FBF_8BIT_YCBCR_420PL3:		result = "NTV2_FBF_8BIT_YCBCR_420PL3";		break;	//	was NTV2_FBF_8BIT_QREZ
+		case NTV2_FBF_8BIT_HDV:					result = "NTV2_FBF_8BIT_HDV";				break;
+		case NTV2_FBF_24BIT_RGB:				result = "NTV2_FBF_24BIT_RGB";				break;
+		case NTV2_FBF_24BIT_BGR:				result = "NTV2_FBF_24BIT_BGR";				break;
+		case NTV2_FBF_10BIT_YCBCRA:				result = "NTV2_FBF_10BIT_YCBCRA";			break;
+		case NTV2_FBF_10BIT_DPX_LE:				result = "NTV2_FBF_10BIT_DPX_LE";			break;
+		case NTV2_FBF_48BIT_RGB:				result = "NTV2_FBF_48BIT_RGB";				break;
+		case NTV2_FBF_PRORES:					result = "NTV2_FBF_PRORES";					break;
+		case NTV2_FBF_PRORES_DVCPRO:			result = "NTV2_FBF_PRORES_DVCPRO";			break;
+		case NTV2_FBF_PRORES_HDV:				result = "NTV2_FBF_PRORES_HDV";				break;
+		case NTV2_FBF_10BIT_RGB_PACKED:			result = "NTV2_FBF_10BIT_RGB_PACKED";		break;
+		case NTV2_FBF_10BIT_ARGB:				result = "NTV2_FBF_10BIT_ARGB";				break;
+		case NTV2_FBF_16BIT_ARGB:				result = "NTV2_FBF_16BIT_ARGB";				break;
+		case NTV2_FBF_8BIT_YCBCR_422PL3:		result = "NTV2_FBF_8BIT_YCBCR_422PL3";		break;	//	was NTV2_FBF_UNUSED_23
+		case NTV2_FBF_10BIT_RAW_RGB:			result = "NTV2_FBF_10BIT_RAW_RGB";			break;
+		case NTV2_FBF_10BIT_RAW_YCBCR:			result = "NTV2_FBF_10BIT_RAW_YCBCR";		break;
+		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	result = "NTV2_FBF_10BIT_YCBCR_420PL3_LE";	break;	//	was NTV2_FBF_UNUSED_26
+		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	result = "NTV2_FBF_10BIT_YCBCR_422PL3_LE";	break;	//	was NTV2_FBF_UNUSED_27
+		case NTV2_FBF_10BIT_YCBCR_420PL:		result = "NTV2_FBF_10BIT_YCBCR_420PL";		break;
+		case NTV2_FBF_10BIT_YCBCR_422PL:		result = "NTV2_FBF_10BIT_YCBCR_422PL";		break;
+		case NTV2_FBF_8BIT_YCBCR_420PL:			result = "NTV2_FBF_8BIT_YCBCR_420PL";		break;
+		case NTV2_FBF_8BIT_YCBCR_422PL:			result = "NTV2_FBF_8BIT_YCBCR_422PL";		break;
 #if !defined (_DEBUG)
 		default:
 #endif
-		case NTV2_FBF_UNUSED_23:
-		case NTV2_FBF_UNUSED_26:
-		case NTV2_FBF_UNUSED_27:
-		case NTV2_FBF_INVALID:					result = "NTV2_FBF_INVALID";			break;
+		case NTV2_FBF_INVALID:					result = "NTV2_FBF_INVALID";				break;
 	}
 	
 	return (result);

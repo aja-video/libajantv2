@@ -746,7 +746,7 @@ GeneralFrameFormat DeviceServices::GetGeneralFrameFormat(NTV2FrameBufferFormat f
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_8BIT_DVCPRO:
-		case NTV2_FBF_8BIT_QREZ:
+		//case NTV2_FBF_8BIT_QREZ:
 		case NTV2_FBF_8BIT_HDV:
 			genFmt = FORMAT_COMPRESSED;
 			break;

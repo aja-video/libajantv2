@@ -345,12 +345,12 @@ typedef enum
     NTV2_FBF_10BIT_DPX				= 7,
     NTV2_FBF_10BIT_YCBCR_DPX		= 8,
     NTV2_FBF_8BIT_DVCPRO			= 9,
-    NTV2_FBF_8BIT_QREZ				= 10,
+    NTV2_FBF_8BIT_YCBCR_420PL3		= 10,	///< @brief	"I420" format, 8-bit Y plane followed by 8-bit 2x2 subsampled U and V planes, 12 bpp.
     NTV2_FBF_8BIT_HDV				= 11,
     NTV2_FBF_24BIT_RGB				= 12,
     NTV2_FBF_24BIT_BGR				= 13,
     NTV2_FBF_10BIT_YCBCRA			= 14,
-    NTV2_FBF_10BIT_DPX_LITTLEENDIAN	= 15,
+    NTV2_FBF_10BIT_DPX_LE			= 15,
     NTV2_FBF_48BIT_RGB				= 16,
     NTV2_FBF_PRORES					= 17,
     NTV2_FBF_PRORES_DVCPRO			= 18,
@@ -358,39 +358,52 @@ typedef enum
     NTV2_FBF_10BIT_RGB_PACKED		= 20,
     NTV2_FBF_10BIT_ARGB				= 21,
     NTV2_FBF_16BIT_ARGB				= 22,
-    NTV2_FBF_UNUSED_23				= 23,
+    NTV2_FBF_8BIT_YCBCR_422PL3		= 23,	///< @brief	"Weitek" or "Y42B" format, identical to I420, but horizontal-only chroma subsampling, 16 bpp.
     NTV2_FBF_10BIT_RAW_RGB			= 24,
     NTV2_FBF_10BIT_RAW_YCBCR		= 25,
-    NTV2_FBF_UNUSED_26				= 26,
-    NTV2_FBF_UNUSED_27				= 27,
-    NTV2_FBF_10BIT_YCBCR_420PL		= 28,
-    NTV2_FBF_10BIT_YCBCR_422PL		= 29,
-    NTV2_FBF_8BIT_YCBCR_420PL		= 30,
-    NTV2_FBF_8BIT_YCBCR_422PL		= 31,
+    NTV2_FBF_10BIT_YCBCR_420PL3_LE	= 26,	///< @brief	"I420_10LE" 10-bit 4:2:0 format, same plane order & layout as I420, but uses 16-bit LE samples, 24 bpp.
+    NTV2_FBF_10BIT_YCBCR_422PL3_LE	= 27,	///< @brief	"I422_10LE" 10-bit 4:2:2 format, same as I420_10LE, but horizontal-only chroma subsampling, 32 bpp.
+    NTV2_FBF_10BIT_YCBCR_420PL2		= 28,
+    NTV2_FBF_10BIT_YCBCR_422PL2		= 29,
+    NTV2_FBF_8BIT_YCBCR_420PL2		= 30,
+    NTV2_FBF_8BIT_YCBCR_422PL2		= 31,
     NTV2_FBF_LAST					= 31,
-
     ///note, if you add more you need to add another  bit in the channel control register.
     ///and an entry in ntv2utils.cpp in frameBufferFormats[].
     NTV2_FBF_NUMFRAMEBUFFERFORMATS,
     NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
+#if !defined(NTV2_DEPRECATE_14_0)
+	,
+	NTV2_FBF_8BIT_QREZ				= NTV2_FBF_8BIT_YCBCR_420PL3,
+    NTV2_FBF_10BIT_DPX_LITTLEENDIAN	= NTV2_FBF_10BIT_DPX_LE,
+	NTV2_FBF_UNUSED_23				= NTV2_FBF_8BIT_YCBCR_422PL3,
+	NTV2_FBF_UNUSED_26				= NTV2_FBF_10BIT_YCBCR_420PL3_LE,
+	NTV2_FBF_UNUSED_27				= NTV2_FBF_10BIT_YCBCR_422PL3_LE,
+    NTV2_FBF_10BIT_YCBCR_420PL		= NTV2_FBF_10BIT_YCBCR_420PL2,
+    NTV2_FBF_10BIT_YCBCR_422PL		= NTV2_FBF_10BIT_YCBCR_422PL2,
+    NTV2_FBF_8BIT_YCBCR_420PL		= NTV2_FBF_8BIT_YCBCR_420PL2,
+    NTV2_FBF_8BIT_YCBCR_422PL		= NTV2_FBF_8BIT_YCBCR_422PL2
+#endif	//	NTV2_DEPRECATE_14_0
 } NTV2FrameBufferFormat;
 
 typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2FrameBufferFormat.
 
 
-#define	NTV2_IS_VALID_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) != NTV2_FBF_UNUSED_23	\
-                                                                                      &&  (__s__) != NTV2_FBF_UNUSED_26	\
-                                                                                      &&  (__s__) != NTV2_FBF_UNUSED_27	\
-                                                                                      &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
+#define	NTV2_IS_VALID_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
 
-#define	NTV2_IS_VALID_FBF(__s__)					((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) != NTV2_FBF_UNUSED_23	\
-                                                                                      &&  (__s__) != NTV2_FBF_UNUSED_26	\
-                                                                                      &&  (__s__) != NTV2_FBF_UNUSED_27	\
-                                                                                      &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
+#define	NTV2_IS_VALID_FBF(__s__)					((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
 
-#define	NTV2_IS_VALID_PLANAR_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR_420PL && (__s__) <= NTV2_FBF_8BIT_YCBCR_422PL)
+#define	NTV2_IS_FBF_PLANAR(__s__)					(		(__s__) == NTV2_FBF_8BIT_YCBCR_420PL3		\
+														||	(__s__) == NTV2_FBF_8BIT_YCBCR_422PL3		\
+														||	(__s__) == NTV2_FBF_10BIT_YCBCR_420PL3_LE	\
+														||	(__s__) == NTV2_FBF_10BIT_YCBCR_422PL3_LE	\
+														||	(__s__) == NTV2_FBF_10BIT_YCBCR_420PL2		\
+														||	(__s__) == NTV2_FBF_10BIT_YCBCR_422PL2		\
+														||	(__s__) == NTV2_FBF_8BIT_YCBCR_420PL2		\
+														||	(__s__) == NTV2_FBF_8BIT_YCBCR_422PL2		\
+													)
 
-#define	NTV2_IS_FBF_PLANAR(__fbf__)		((__fbf__) >= NTV2_FBF_10BIT_YCBCR_420PL && (__fbf__) <= NTV2_FBF_8BIT_YCBCR_422PL)
+#define	NTV2_IS_VALID_PLANAR_FRAME_BUFFER_FORMAT(__s__)		(NTV2_IS_FBF_PLANAR(__s__))
 
 #define NTV2_IS_FBF_PRORES(__fbf__) 	(		(__fbf__) == NTV2_FBF_PRORES					\
                                             ||	(__fbf__) == NTV2_FBF_PRORES_DVCPRO				\
@@ -418,7 +431,6 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
                                             ||	(__fbf__) == NTV2_FBF_8BIT_YCBCR_YUY2			\
                                             ||	(__fbf__) == NTV2_FBF_ABGR						\
                                             ||	(__fbf__) == NTV2_FBF_8BIT_DVCPRO				\
-                                            ||	(__fbf__) == NTV2_FBF_8BIT_QREZ					\
                                         )
 
 #define	NTV2_FBF_HAS_ALPHA(__fbf__)		(		(__fbf__) == NTV2_FBF_ARGB						\
@@ -1888,9 +1900,8 @@ typedef enum				// used in Virtual Register: kVRegInputSelect
     NTV2_Input4Select,
     NTV2_Input5Select,
     NTV2_DualLinkInputSelect,
-    NTV2_DualLink4xSdi4k,
     NTV2_DualLink2xSdi4k,
-    NTV2_DualLink1xSdi4k,
+    NTV2_DualLink4xSdi4k,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
@@ -1973,8 +1984,6 @@ typedef enum
     NTV2_SDITransport_QuadLink_3Gb,			// Quad Link, 2 wire 3Gb (4K YUV or Stereo RGB)
     NTV2_SDITransport_QuadLink_3Ga,			// Quad Link, 4 wire 3Ga (4K HFR)
     NTV2_SDITransport_OctLink_3Gb,			// Oct Link, 4 wire 3Gb (4K RGB, HFR)
-    NTV2_SDITransport_6G,					// 6G see Quad Link
-    NTV2_SDITransport_12G,					// 12G see Oct Link
     NTV2_MAX_NUM_SDITransportTypes
 } NTV2SDITransportType;
 
@@ -1985,7 +1994,6 @@ typedef enum
     NTV2_4kTransport_Quadrants_4wire,        // square division
     NTV2_4kTransport_PixelInterleave,		 // SMPTE 425-5 & 425-3
     NTV2_4kTransport_Quarter_1wire,          // quarter size
-    NTV2_4kTransport_12g_6g_1wire,		     // 12G / 6G 1wire
     NTV2_MAX_NUM_4kTransportTypes
 } NTV24kTransportType;
 
