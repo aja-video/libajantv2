@@ -610,8 +610,8 @@ const char * ntv2RegStrings[] =
 	"kRegFS1ProcAmpC1CR_C2CB",						//  85
 	"kRegFS1ProcAmpC2CROffsetY",					//  86
 	"kRegAud2Delay",								//  87
-	"kRegAuxInterruptDelay",						//  88
-	"kRegReserved89",								//  89
+	"kRegBitfileDate",								//  88
+	"kRegBitfileTime",								//  89
 
 	"kRegFS1I2CControl",							//  90
 	"kRegFS1I2C1Address",							//  91
