@@ -41,10 +41,10 @@ const M31VideoPreset kCodecPreset[] = {
 
 static int gNumCodecFormats = 0;
 const NTV2FrameBufferFormat kCodecFormat[] = {
-    NTV2_FBF_8BIT_YCBCR_420PL,
-    NTV2_FBF_10BIT_YCBCR_420PL,
-    NTV2_FBF_8BIT_YCBCR_422PL,
-    NTV2_FBF_10BIT_YCBCR_422PL
+    NTV2_FBF_8BIT_YCBCR_420PL2,
+    NTV2_FBF_10BIT_YCBCR_420PL2,
+    NTV2_FBF_8BIT_YCBCR_422PL2,
+    NTV2_FBF_10BIT_YCBCR_422PL2
 };
 
 static void SignalHandler (int inSignal)

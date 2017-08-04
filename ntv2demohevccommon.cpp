@@ -56,12 +56,12 @@ AJA_PixelFormat CNTV2DemoHevcCommon::GetAJAPixelFormat(NTV2FrameBufferFormat pix
 {
     switch (pixelFormat)
     {
-        case NTV2_FBF_8BIT_YCBCR: return AJA_PixelFormat_YCbCr8;
-        case NTV2_FBF_10BIT_YCBCR: return AJA_PixelFormat_YCbCr10;
-        case NTV2_FBF_10BIT_YCBCR_420PL: return AJA_PixelFormat_YCBCR10_420PL;
-        case NTV2_FBF_10BIT_YCBCR_422PL: return AJA_PixelFormat_YCBCR10_422PL;
-        case NTV2_FBF_8BIT_YCBCR_420PL: return AJA_PixelFormat_YCBCR8_420PL;
-        case NTV2_FBF_8BIT_YCBCR_422PL: return AJA_PixelFormat_YCBCR8_422PL;
+        case NTV2_FBF_8BIT_YCBCR:			return AJA_PixelFormat_YCbCr8;
+        case NTV2_FBF_10BIT_YCBCR:			return AJA_PixelFormat_YCbCr10;
+        case NTV2_FBF_10BIT_YCBCR_420PL2:	return AJA_PixelFormat_YCBCR10_420PL;
+        case NTV2_FBF_10BIT_YCBCR_422PL2:	return AJA_PixelFormat_YCBCR10_422PL;
+        case NTV2_FBF_8BIT_YCBCR_420PL2:	return AJA_PixelFormat_YCBCR8_420PL;
+        case NTV2_FBF_8BIT_YCBCR_422PL2:	return AJA_PixelFormat_YCBCR8_422PL;
         default: break;
     }
     
