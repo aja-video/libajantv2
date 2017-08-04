@@ -1902,7 +1902,6 @@ typedef enum				// used in Virtual Register: kVRegInputSelect
     NTV2_DualLinkInputSelect,
     NTV2_DualLink2xSdi4k,
     NTV2_DualLink4xSdi4k,
-	NTV2_DualLink1xSdi4k,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
