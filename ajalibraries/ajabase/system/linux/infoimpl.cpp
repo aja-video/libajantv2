@@ -93,6 +93,8 @@ std::string aja_productname()
 {
     std::string out;
     out = aja_cmd("lsb_release -d -s");
+    out = aja::strip(out);
+    out = aja::strip(out, "\"");
 
     if (out.empty())
     {
