@@ -155,9 +155,11 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 										Must exceed zero.
 	@param[in]	inDstTotalLines			The total number of raster lines to set to legal black. Must exceed zero.
 	@bug		Need implementations for NTV2_FBF_8BIT_YCBCR_YUY2, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX, NTV2_FBF_24BIT_RGB,
-				NTV2_FBF_24BIT_BGR, NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LITTLEENDIAN, NTV2_FBF_48BIT_RGB, NTV2_FBF_10BIT_RGB_PACKED,
-				NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB, NTV2_FBF_10BIT_YCBCR_420PL, NTV2_FBF_10BIT_YCBCR_422PL, NTV2_FBF_8BIT_YCBCR_420PL,
-				and NTV2_FBF_8BIT_YCBCR_422PL.
+				NTV2_FBF_24BIT_BGR, NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_48BIT_RGB, NTV2_FBF_10BIT_RGB_PACKED,
+				NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB, the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3,
+				NTV2_FBF_8BIT_YCBCR_422PL3, NTV2_FBF_10BIT_YCBCR_420PL3_LE, and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane
+				planar formats NTV2_FBF_10BIT_YCBCR_420PL2, NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and
+				NTV2_FBF_8BIT_YCBCR_422PL2.
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
@@ -214,8 +216,10 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 	@note		The use of unsigned values precludes positioning the source raster above the top line of the destination raster,
 				or to the left of the destination raster's left edge. This function will, however, clip the source raster if it
 				overhangs the bottom and/or right edge of the destination raster.
-	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB,
-				NTV2_FBF_10BIT_YCBCR_420PL, NTV2_FBF_10BIT_YCBCR_422PL, NTV2_FBF_8BIT_YCBCR_420PL, and NTV2_FBF_8BIT_YCBCR_422PL.
+	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB,
+				NTV2_FBF_16BIT_ARGB, the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3, NTV2_FBF_8BIT_YCBCR_422PL3,
+				NTV2_FBF_10BIT_YCBCR_420PL3_LE, and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane planar formats
+				NTV2_FBF_10BIT_YCBCR_420PL2, NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and NTV2_FBF_8BIT_YCBCR_422PL2.
 **/
 AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							UByte *						pDstBuffer,

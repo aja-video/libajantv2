@@ -261,10 +261,10 @@ const char *NTV2FrameBufferFormatString (NTV2FrameBufferFormat fmt)
 		case NTV2_FBF_10BIT_RAW_YCBCR:			result = "NTV2_FBF_10BIT_RAW_YCBCR";		break;
 		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	result = "NTV2_FBF_10BIT_YCBCR_420PL3_LE";	break;	//	was NTV2_FBF_UNUSED_26
 		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	result = "NTV2_FBF_10BIT_YCBCR_422PL3_LE";	break;	//	was NTV2_FBF_UNUSED_27
-		case NTV2_FBF_10BIT_YCBCR_420PL:		result = "NTV2_FBF_10BIT_YCBCR_420PL";		break;
-		case NTV2_FBF_10BIT_YCBCR_422PL:		result = "NTV2_FBF_10BIT_YCBCR_422PL";		break;
-		case NTV2_FBF_8BIT_YCBCR_420PL:			result = "NTV2_FBF_8BIT_YCBCR_420PL";		break;
-		case NTV2_FBF_8BIT_YCBCR_422PL:			result = "NTV2_FBF_8BIT_YCBCR_422PL";		break;
+		case NTV2_FBF_10BIT_YCBCR_420PL2:		result = "NTV2_FBF_10BIT_YCBCR_420PL2";		break;
+		case NTV2_FBF_10BIT_YCBCR_422PL2:		result = "NTV2_FBF_10BIT_YCBCR_422PL2";		break;
+		case NTV2_FBF_8BIT_YCBCR_420PL2:		result = "NTV2_FBF_8BIT_YCBCR_420PL2";		break;
+		case NTV2_FBF_8BIT_YCBCR_422PL2:		result = "NTV2_FBF_8BIT_YCBCR_422PL2";		break;
 #if !defined (_DEBUG)
 		default:
 #endif
