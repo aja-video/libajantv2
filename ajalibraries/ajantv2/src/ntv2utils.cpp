@@ -7365,6 +7365,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc.bit";
 			case DEVICE_ID_IO4K:						return "io4k_pcie.bit";
 			case DEVICE_ID_IO4KUFC:						return "io4k_ufc_pcie.bit";
+			case DEVICE_ID_IO4KPLUS:					return "IO_FLINT.bit";
 			case DEVICE_ID_IOEXPRESS:					return "ioexpress_pcie.bit";
 			case DEVICE_ID_IOXT:						return "ioxt_pcie.bit";
 			case DEVICE_ID_KONA3G:						return "kona3g_pcie.bit";
@@ -7444,6 +7445,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc.bit";
 			case DEVICE_ID_IO4K:						return "IO_XT_4K.bit";
 			case DEVICE_ID_IO4KUFC:						return "IO_XT_4K_UFC.bit";
+			case DEVICE_ID_IO4KPLUS:					return "IO_FLINT.bit";
 			case DEVICE_ID_IOEXPRESS:					return "chekov_00_pcie.bit";
 			case DEVICE_ID_IOXT:						return "top_io_tx.bit";
 			case DEVICE_ID_KONA3G:						return "k3g_top.bit";
