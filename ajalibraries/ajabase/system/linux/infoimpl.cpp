@@ -82,7 +82,7 @@ std::string aja_uptime()
 
     if (out.empty())
     {
-        out = aja_cmd("uptime -s");
+        out = aja_cmd("uptime -s 2>/dev/null");
         out = aja::strip(out);
     }
 
@@ -92,7 +92,7 @@ std::string aja_uptime()
 std::string aja_productname()
 {
     std::string out;
-    out = aja_cmd("lsb_release -d -s");
+    out = aja_cmd("lsb_release -d -s 2>/dev/null");
     out = aja::strip(out);
     out = aja::strip(out, "\"");
 
@@ -102,11 +102,11 @@ std::string aja_productname()
 
         if (f.FileExists("/etc/redhat-release"))
         {
-            out = aja_cmd("cat /etc/redhat-release");
+            out = aja_cmd("cat /etc/redhat-release 2>/dev/null");
         }
         else if(f.FileExists("/etc/os-release"))
         {
-            out = aja_cmd("cat /etc/os-release | grep 'PRETTY_NAME' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
+            out = aja_cmd("cat /etc/os-release 2>/dev/null | grep 'PRETTY_NAME' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
         }
     }
 
@@ -117,7 +117,7 @@ std::string aja_productname()
 std::string aja_osversion()
 {
     std::string out;
-    out = aja_cmd("lsb_release -r -s");
+    out = aja_cmd("lsb_release -r -s 2>/dev/null");
 
     if (out.empty())
     {
@@ -125,7 +125,7 @@ std::string aja_osversion()
 
         if(f.FileExists("/etc/os-release"))
         {
-            out = aja_cmd("cat /etc/os-release | grep 'VERSION_ID' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
+            out = aja_cmd("cat /etc/os-release 2>/dev/null | grep 'VERSION_ID' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
         }
     }
 
