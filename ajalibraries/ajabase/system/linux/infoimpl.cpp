@@ -4,9 +4,10 @@
     @brief		Implements the AJASystemInfoImpl class on the Linux platform.
 **/
 
-#include "ajabase/system/system.h"
+#include "ajabase/system/file_io.h"
 #include "ajabase/system/info.h"
 #include "ajabase/system/linux/infoimpl.h"
+#include "ajabase/system/system.h"
 
 #include <cstdlib>
 #include <stdexcept>
@@ -68,6 +69,68 @@ std::string aja_procfs(const char* procfs_file, const char* value_key)
     return aja_cmd(oss.str().c_str());
 }
 
+std::string aja_uptime()
+{
+    // Centos6 / Redhat 6 does not have the uptime -s command so
+    // first try using /proc/uptime
+
+    std::string out;
+    std::ostringstream oss;
+    oss << "date -d \"`cut -f1 -d. /proc/uptime` seconds ago\" \"+%Y-%m-%d %H:%M:%S\"";
+    out = aja_cmd(oss.str().c_str());
+    out = aja::strip(out);
+
+    if (out.empty())
+    {
+        out = aja_cmd("uptime -s");
+        out = aja::strip(out);
+    }
+
+    return out;
+}
+
+std::string aja_productname()
+{
+    std::string out;
+    out = aja_cmd("lsb_release -d -s");
+
+    if (out.empty())
+    {
+        AJAFileIO f;
+
+        if (f.FileExists("/etc/redhat-release"))
+        {
+            out = aja_cmd("cat /etc/redhat-release");
+        }
+        else if(f.FileExists("/etc/os-release"))
+        {
+            out = aja_cmd("cat /etc/os-release | grep 'PRETTY_NAME' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
+        }
+    }
+
+    out = aja::strip(out);
+    return out;
+}
+
+std::string aja_osversion()
+{
+    std::string out;
+    out = aja_cmd("lsb_release -r -s");
+
+    if (out.empty())
+    {
+        AJAFileIO f;
+
+        if(f.FileExists("/etc/os-release"))
+        {
+            out = aja_cmd("cat /etc/os-release | grep 'VERSION_ID' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
+        }
+    }
+
+    out = aja::strip(out);
+    return out;
+}
+
 AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
     mMemoryUnits = units;
@@ -88,12 +151,9 @@ AJASystemInfoImpl::Rescan()
     mValueMap[int(AJA_SystemInfoTag_System_Model)] = aja_cmd("uname -m | tr -d '\n'");
     gethostname(tmp_buf, sizeof(tmp_buf));
     mValueMap[int(AJA_SystemInfoTag_System_Name)] = tmp_buf;
-    mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_cmd("uptime -s | tr -d '\n'");
-    mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_cmd("cat /etc/os-release | grep 'PRETTY_NAME' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
-    // alt way == mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_cmd("cat /etc/lsb-release | grep 'DISTRIB_DESCRIPTION' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
-    mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_cmd("cat /etc/os-release | grep 'VERSION_ID' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
-    // alt way == mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_cmd("cat /etc/LSB-release | grep 'DISTRIB_RELEASE' | head -n 1 | cut -d '=' -f 2 | tr -d '\"' | tr -d '\n'");
-
+    mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_uptime();
+    mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_productname();
+    mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_osversion();
     mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = aja_cmd("uname -v | tr -d '\n'");
     mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = aja_cmd("uname -r | tr -d '\n'");
     mValueMap[int(AJA_SystemInfoTag_CPU_Type)] = aja_procfs("cpuinfo", "model name");
