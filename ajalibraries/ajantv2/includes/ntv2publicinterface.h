@@ -7127,6 +7127,9 @@ typedef enum
 			typedef std::set <NTV2FrameBufferFormat>			NTV2FrameBufferFormatSet;			///< @brief	A set of distinct NTV2FrameBufferFormat values.
 			typedef NTV2FrameBufferFormatSet::const_iterator	NTV2FrameBufferFormatSetConstIter;	///< @brief	A handy const iterator for iterating over an NTV2FrameBufferFormatSet.
 
+			typedef std::set <NTV2Standard>						NTV2StandardSet;					///< @brief	A set of distinct NTV2Standard values.
+			typedef NTV2StandardSet::const_iterator				NTV2StandardSetConstIter;			///< @brief	A handy const iterator for iterating over an NTV2StandardSet.
+
 			typedef std::set <NTV2InputSource>					NTV2InputSourceSet;					///< @brief	A set of distinct NTV2InputSource values.
 			typedef NTV2InputSourceSet::const_iterator			NTV2InputSourceSetConstIter;		///< @brief	A handy const interator for iterating over an NTV2InputSourceSet.
 
@@ -7177,6 +7180,31 @@ typedef enum
 				@return		A reference to the modified set.
 			**/
 			AJAExport NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inSet);
+
+			/**
+				@brief	Returns a set of distinct NTV2Standard values supported on the given device.
+				@param[in]	inDeviceID		Specifies the NTV2DeviceID of the device of interest.
+				@param[out]	outStandards	Receives the set of distinct NTV2Standard values supported by the device.
+				@return		True if successful;  otherwise false.
+				@todo	This needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2StandardSet & outStandards);
+
+			/**
+				@brief		Prints the given NTV2StandardSet's contents into the given output stream.
+				@param		inOStream		The stream into which the human-readable list will be written.
+				@param[in]	inStandards		Specifies the set of NTV2Standard values to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2StandardSet & inStandards);
+
+			/**
+				@brief		Appends the given NTV2StandardSet's contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet);
 
 			/**
 				@brief		Prints the given NTV2InputSourceSet's contents into the given output stream.

@@ -252,7 +252,7 @@ typedef struct NTV2FormatDescriptor
 		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
 		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
 		UWord					mNumPlanes;			///< @brief	Number of planes
-		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating video geometry
+		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
 
 } NTV2FormatDescriptor;
 

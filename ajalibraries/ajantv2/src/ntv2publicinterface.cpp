@@ -431,6 +431,32 @@ NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, con
 }
 
 
+//	Implementation of NTV2StandardSet's ostream writer...
+ostream & operator << (ostream & inOStream, const NTV2StandardSet & inStandards)
+{
+	NTV2StandardSetConstIter	iter	(inStandards.begin ());
+
+	inOStream	<< inStandards.size ()
+				<< (inStandards.size () == 1 ? " standard:  " : " standards:  ");
+
+	while (iter != inStandards.end ())
+	{
+		inOStream << ::NTV2StandardToString(*iter);
+		inOStream << (++iter == inStandards.end ()  ?  ""  :  ", ");
+	}
+
+	return inOStream;
+}
+
+
+NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet)
+{
+	for (NTV2StandardSetConstIter iter(inSet.begin ());  iter != inSet.end();  ++iter)
+		inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 {
