@@ -484,7 +484,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
-	if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
+	if (numLines  &&  NTV2_IS_FBF_PLANAR(inFrameBufferFormat))
 		FinalizePlanar();
 
 }	//	construct from NTV2Standard & NTV2VANCMode
@@ -492,18 +492,33 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 
 void NTV2FormatDescriptor::FinalizePlanar (void)
 {
-	NTV2_ASSERT (NTV2_IS_FBF_PLANAR (mPixelFormat));
+	NTV2_ASSERT(NTV2_IS_FBF_PLANAR(mPixelFormat));
+	NTV2_ASSERT(numLines);
 	switch (mPixelFormat)
 	{
 		case NTV2_FBF_10BIT_YCBCR_420PL2:		mNumPlanes = 2;		mLinePitch[0] = 20;			mLinePitch[1] = 20;								break;
 		case NTV2_FBF_10BIT_YCBCR_422PL2:		mNumPlanes = 2;		mLinePitch[0] = 20;			mLinePitch[1] = 20;								break;
 		case NTV2_FBF_8BIT_YCBCR_420PL2:		mNumPlanes = 2;		mLinePitch[0] = numPixels;	mLinePitch[1] = numPixels / 2;					break;
 		case NTV2_FBF_8BIT_YCBCR_422PL2:		mNumPlanes = 2;		mLinePitch[0] = 20;			mLinePitch[1] = 20;								break;
-		case NTV2_FBF_8BIT_YCBCR_420PL3:		mNumPlanes = 3;		mLinePitch[0] = numPixels;	mLinePitch[1] = mLinePitch[2] = numPixels / 2;	break;
+
+		case NTV2_FBF_8BIT_YCBCR_420PL3:
+		{
+			mNumPlanes = 3;
+			mLinePitch[0] = numPixels;
+			const ULWord	lumaRasterBytes		(numLines * numPixels);
+			const ULWord	chromaRasterBytes	(lumaRasterBytes / 4);
+			if (lumaRasterBytes % 4)
+				{MakeInvalid();	break;}
+			mLinePitch[1] = mLinePitch[2] = chromaRasterBytes / numLines;
+			if (chromaRasterBytes % numLines)
+				MakeInvalid();
+			break;
+		}
 		case NTV2_FBF_8BIT_YCBCR_422PL3:		mNumPlanes = 3;		mLinePitch[0] = numPixels;	mLinePitch[1] = mLinePitch[2] = numPixels / 2;	break;
 		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	mNumPlanes = 3;		mLinePitch[0] = numPixels;	mLinePitch[1] = mLinePitch[2] = numPixels / 2;	break;
 		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	mNumPlanes = 3;		mLinePitch[0] = numPixels;	mLinePitch[1] = mLinePitch[2] = numPixels / 2;	break;
-		default:								MakeInvalid ();
+
+		default:	MakeInvalid();	break;
 	}
 }
 
@@ -808,29 +823,33 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 	UWord	plane	(0);
 	if (!IsValid ())
 		inOutStream << "INVALID: ";
-	inOutStream	<< GetFullRasterHeight() << " lines, "
-				<< GetRasterWidth() << " pixels/line, ";
-	if (IsPlanar())
-		inOutStream << GetNumPlanes() << " plane(s)";
+	inOutStream	<< DEC(GetFullRasterHeight()) << " lines, "
+				<< DEC(GetRasterWidth()) << " px/line,";
 	do
 	{
 		if (IsPlanar())
-			inOutStream << ", PL" << plane << ": ";
-		inOutStream << GetBytesPerRow(plane) << " bytes/line";
+			inOutStream << " PL" << plane << "=";
+		inOutStream << DEC(GetBytesPerRow(plane)) << " bytes/line";
 	} while (++plane < GetNumPlanes());
-	inOutStream << ", 1stAct=" << firstActiveLine;
+	inOutStream << ", 1stAct=" << DEC(firstActiveLine);
 	if (inDetailed)
 	{
-		inOutStream	<< " (";
-		if (NTV2_IS_VALID_VIDEO_FORMAT (mVideoFormat))
-			inOutStream << "'" << ::NTV2VideoFormatToString (mVideoFormat) << "'";
+		plane = 0;
+		if (IsPlanar())
+			do
+			{
+				inOutStream << ", PL" << plane << " bytes=" << xHEX0N(GetTotalRasterBytes(plane),8);
+			} while (++plane < GetNumPlanes());
 		else
-			inOutStream << ::NTV2StandardToString (mStandard, true) << (m2Kby1080 ? " 2K" : "");
-		if (mVancMode != NTV2_VANCMODE_OFF && mVancMode < NTV2_VANCMODE_INVALID)
-			inOutStream << (mVancMode == NTV2_VANCMODE_TALLER ? " TallerVANC" : " TallVANC");
-		if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT (mPixelFormat))
-			inOutStream << " '" << ::NTV2FrameBufferFormatToString (mPixelFormat, true) << "'";
-		inOutStream << ")";
+			inOutStream << ", bytes=" << xHEX0N(GetTotalRasterBytes(),8);
+		if (NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))
+			inOutStream << " '" << ::NTV2VideoFormatToString(mVideoFormat) << "'";
+		else
+			inOutStream << ", " << ::NTV2StandardToString(mStandard) << (m2Kby1080 ? " 2K" : "");
+		if (NTV2_IS_VANCMODE_ON(mVancMode))
+			inOutStream << (NTV2_IS_VANCMODE_TALLER(mVancMode) ? " TallerVANC" : " TallVANC");
+		if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))
+			inOutStream << ", " << ::NTV2FrameBufferFormatToString (mPixelFormat);
 	}
 	return inOutStream;
 }

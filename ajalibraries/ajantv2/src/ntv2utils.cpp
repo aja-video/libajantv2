@@ -3566,7 +3566,7 @@ AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS
 	"10 Bit RGB - DPX compatible",		//	NTV2_FBF_10BIT_DPX				//	7
 	"10 Bit YCbCr - DPX compatible",	//	NTV2_FBF_10BIT_YCBCR_DPX		//	8
 	"8 Bit DVCPro YCbCr - UYVY",		//	NTV2_FBF_8BIT_DVCPRO			//	9
-	"8 Bit YCbCr 420 Planar - I420",	//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
+	"8 Bit YCbCr 420 3-plane [I420]",	//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
 	"8 Bit HDV YCbCr - UYVY",			//	NTV2_FBF_8BIT_HDV				//	11
 	"24 Bit RGB",						//	NTV2_FBF_24BIT_RGB				//	12
 	"24 Bit BGR",						//	NTV2_FBF_24BIT_BGR				//	13
@@ -3579,15 +3579,15 @@ AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS
 	"10 Bit RGB Packed",				//	NTV2_FBF_10BIT_RGB_PACKED		//	20
 	"10 Bit ARGB",						//	NTV2_FBF_10BIT_ARGB				//	21
 	"16 Bit ARGB",						//	NTV2_FBF_16BIT_ARGB				//	22
-	"8 Bit YCbCr 422 Planar",			//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
+	"8 Bit YCbCr 422 3-plane [Y42B]",	//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
 	"10 Bit Raw RGB",					//	NTV2_FBF_10BIT_RGB				//	24
 	"10 Bit Raw YCbCr",					//	NTV2_FBF_10BIT_YCBCR			//	25
-	"10 Bit YCbCr 420 Planar LE",		//	NTV2_FBF_10BIT_YCBCR_420PL3_LE	//	26
-	"10 Bit YCbCr 422 Planar LE",		//	NTV2_FBF_10BIT_YCBCR_422PL3_LE	//	27
-	"10 Bit YCbCr 420 Planar (2 Plane)",//	NTV2_FBF_10BIT_YCBCR_420PL2		//	28
-	"10 Bit YCbCr 422 Planar (2 Plane)",//	NTV2_FBF_10BIT_YCBCR_422PL2		//	29
-	"8 Bit YCbCr 420 Planar (2 Plane)",	//	NTV2_FBF_8BIT_YCBCR_420PL2		//	30
-	"8 Bit YCbCr 422 Planar (2 Plane)",	//	NTV2_FBF_8BIT_YCBCR_422PL2		//	31
+	"10 Bit YCbCr 420 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_420PL3_LE	//	26
+	"10 Bit YCbCr 422 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_422PL3_LE	//	27
+	"10 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_420PL2		//	28
+	"10 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_422PL2		//	29
+	"8 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_420PL2		//	30
+	"8 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_422PL2		//	31
 	""									//	NTV2_FBF_INVALID				//	32
 };
 
