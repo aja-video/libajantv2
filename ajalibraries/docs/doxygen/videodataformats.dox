@@ -110,7 +110,7 @@ All AJA devices support these basic frame buffer formats:
 	<tr><td><b>8-Bit YCbCr [UYVY]</b>	<td>\c NTV2_FBF_8BIT_YCBCR
 </table>
 
-Newer AJA devices support most of these additional frame buffer formats:
+Many AJA devices support most of these additional frame buffer formats:
 <table>
 	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>\c NTV2_FBF_ARGB
 	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>\c NTV2_FBF_RGBA
@@ -127,6 +127,36 @@ Newer AJA devices support most of these additional frame buffer formats:
 	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>\c NTV2_FBF_48BIT_RGB
 	<tr><td><b>10-Bit Raw YCbCr</b>				<td>\c NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
 	<tr><td><b>10-Bit Raw RGB</b>				<td>\c NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
+</table>
+
+<table>
+	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>\c NTV2_FBF_ARGB
+	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>\c NTV2_FBF_RGBA
+	<tr><td><b>10-Bit RGB</b>					<td>\c NTV2_FBF_10BIT_RGB
+	<tr><td><b>Alternate 8-Bit YCbCr [YUY2]</b>	<td>\c NTV2_FBF_8BIT_YCBCR_YUY2
+	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>\c NTV2_FBF_ABGR
+	<tr><td><b>10-Bit RGB - DPX</b>				<td>\c NTV2_FBF_10BIT_DPX
+	<tr><td><b>10-Bit YCbCr - DPX</b>			<td>\c NTV2_FBF_10BIT_YCBCR_DPX
+	<tr><td><b>8-Bit DVCPro</b>					<td>\c NTV2_FBF_8BIT_DVCPRO
+	<tr><td><b>8-Bit HDV</b>					<td>\c NTV2_FBF_8BIT_HDV
+	<tr><td><b>24-Bit RGB</b>					<td>\c NTV2_FBF_24BIT_RGB
+	<tr><td><b>24-Bit BGR</b>					<td>\c NTV2_FBF_24BIT_BGR
+	<tr><td><b>10-Bit DPX LE</b>				<td>\c NTV2_FBF_10BIT_DPX_LITTLEENDIAN
+	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>\c NTV2_FBF_48BIT_RGB
+	<tr><td><b>10-Bit Raw YCbCr</b>				<td>\c NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
+	<tr><td><b>10-Bit Raw RGB</b>				<td>\c NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
+</table>
+
+Recently, some AJA devices started supporting planar frame buffer formats:
+<table>
+	<tr><td><b>8-Bit YCbCr 420 3-Plane [I420]</b>	<td>\c NTV2_FBF_8BIT_YCBCR_420PL3	<i>new in 14.0</i>, \ref corvid44
+	<tr><td><b>8-Bit YCbCr 422 3-Plane [Y42B]</b>	<td>\c NTV2_FBF_8BIT_YCBCR_422PL3	<i>new in 14.0</i>, \ref corvid44
+	<tr><td><b>10-Bit YCbCr 420 3-Plane LE</b>		<td>\c NTV2_FBF_10BIT_YCBCR_420PL3_LE	<i>new in 14.0</i>, \ref corvid44
+	<tr><td><b>10-Bit YCbCr 422 3-Plane LE</b>		<td>\c NTV2_FBF_10BIT_YCBCR_422PL3_LE	<i>new in 14.0</i>, \ref corvid44
+	<tr><td><b>10-Bit YCbCr 420 2-Plane</b>			<td>\c NTV2_FBF_10BIT_YCBCR_420PL2	<i>new in 12.4.2</i>, \ref corvidhevc
+	<tr><td><b>10-Bit YCbCr 422 2-Plane</b>			<td>\c NTV2_FBF_10BIT_YCBCR_422PL2	<i>new in 12.4.2</i>, \ref corvidhevc
+	<tr><td><b>8-Bit YCbCr 420 2-Plane</b>			<td>\c NTV2_FBF_8BIT_YCBCR_420PL2	<i>new in 12.4.2</i>, \ref corvidhevc
+	<tr><td><b>8-Bit YCbCr 422 2-Plane</b>			<td>\c NTV2_FBF_8BIT_YCBCR_422PL2	<i>new in 12.4.2</i>, \ref corvidhevc
 </table>
 
 To determine if a given device can handle a particular frame buffer format, call ::NTV2DeviceCanDoFrameBufferFormat.
@@ -268,93 +298,8 @@ CION data using NTV2 devices. The \ref ntv2qtrawcapture demonstration app in the
 For each format, video is arranged differently in memory. This means that for each format, there's a different number of 32-bit words per horizontal line
 (i.e., "line pitch") for each standard.
 
-This information can be obtained programmatically from the \c NTV2FormatDescriptor structure returned by the SDK function ::GetFormatDescriptor.
-The following table has this information:
-<table>
-	<tr><td><b>Standard</b>	<td><b>Format</b>	<td><b>Pixel Count</b>	<td><b>Line Pitch</b><i>(32-bit words)</i>
-	<tr><td>525		<td>8-Bit YCbCr – UYVY				<td>720		<td>360
-	<tr><td>525		<td>8-Bit YCbCr – YUY2				<td>720		<td>360
-	<tr><td>525		<td>10-Bit YCbCr					<td>720		<td>480
-	<tr><td>525		<td>10-Bit YCbCr – DPX-compatible	<td>720		<td>480
-	<tr><td>525		<td>8-Bit BGR						<td>720		<td>540
-	<tr><td>525		<td>8-Bit RGB						<td>720		<td>540
-	<tr><td>525		<td>10-Bit RGB						<td>720		<td>720
-	<tr><td>525		<td>10-Bit RGB – DPX-compatible		<td>720		<td>720
-	<tr><td>525		<td>10-Bit RGB – DPX Little-Endian	<td>720		<td>720
-	<tr><td>525		<td>10-Bit YCbCrA					<td>720		<td>720
-	<tr><td>525		<td>8-Bit ABGR						<td>720		<td>720
-	<tr><td>525		<td>8-Bit ARGB						<td>720		<td>720
-	<tr><td>525		<td>8-Bit RGBA						<td>720		<td>720
-	<tr><td>525		<td>48-Bit RGB						<td>720		<td>1080
-	<tr><td>625		<td>8-Bit YCbCr – UYVY				<td>720		<td>360
-	<tr><td>625		<td>8-Bit YCbCr – YUY2				<td>720		<td>360
-	<tr><td>625		<td>10-Bit YCbCr					<td>720		<td>480
-	<tr><td>625		<td>10-Bit YCbCr – DPX-compatible	<td>720		<td>480
-	<tr><td>625		<td>8-Bit BGR						<td>720		<td>540
-	<tr><td>625		<td>8-Bit RGB						<td>720		<td>540
-	<tr><td>625		<td>10-Bit RGB						<td>720		<td>720
-	<tr><td>625		<td>10-Bit RGB – DPX-compatible		<td>720		<td>720
-	<tr><td>625		<td>10-Bit RGB – DPX Little-Endian	<td>720		<td>720
-	<tr><td>625		<td>10-Bit YCbCrA					<td>720		<td>720
-	<tr><td>625		<td>8-Bit ABGR						<td>720		<td>720
-	<tr><td>625		<td>8-Bit ARGB						<td>720		<td>720
-	<tr><td>625		<td>8-Bit RGBA						<td>720		<td>720
-	<tr><td>625		<td>48-Bit RGB						<td>720		<td>1080
-	<tr><td>720		<td>8-Bit YCbCr – UYVY				<td>1280	<td>640
-	<tr><td>720		<td>8-Bit YCbCr – YUY2				<td>1280	<td>640
-	<tr><td>720		<td>10-Bit YCbCr					<td>1280	<td>864
-	<tr><td>720		<td>10-Bit YCbCr – DPX-compatible	<td>1280	<td>864
-	<tr><td>720		<td>8-Bit BGR						<td>1280	<td>960
-	<tr><td>720		<td>8-Bit RGB						<td>1280	<td>960
-	<tr><td>720		<td>10-Bit RGB						<td>1280	<td>1280
-	<tr><td>720		<td>10-Bit RGB – DPX-compatible		<td>1280	<td>1280
-	<tr><td>720		<td>10-Bit RGB – DPX Little-Endian	<td>1280	<td>1280
-	<tr><td>720		<td>10-Bit YCbCrA					<td>1280	<td>1280
-	<tr><td>720		<td>8-Bit ABGR						<td>1280	<td>1280
-	<tr><td>720		<td>8-Bit ARGB						<td>1280	<td>1280
-	<tr><td>720		<td>8-Bit RGBA						<td>1280	<td>1280
-	<tr><td>720		<td>48-Bit RGB						<td>1280	<td>1920
-	<tr><td>1080	<td>8-Bit YCbCr – UYVY				<td>1920	<td>960
-	<tr><td>1080	<td>8-Bit YCbCr – YUY2				<td>1920	<td>960
-	<tr><td>1080	<td>10-Bit YCbCr					<td>1920	<td>1280
-	<tr><td>1080	<td>10-Bit YCbCr – DPX-compatible	<td>1920	<td>1280
-	<tr><td>1080	<td>8-Bit BGR						<td>1920	<td>1440
-	<tr><td>1080	<td>8-Bit RGB						<td>1920	<td>1440
-	<tr><td>1080	<td>10-Bit RGB						<td>1920	<td>1920
-	<tr><td>1080	<td>10-Bit RGB – DPX-compatible		<td>1920	<td>1920
-	<tr><td>1080	<td>10-Bit RGB – DPX Little-Endian	<td>1920	<td>1920
-	<tr><td>1080	<td>10-Bit YCbCrA					<td>1920	<td>1920
-	<tr><td>1080	<td>8-Bit ABGR						<td>1920	<td>1920
-	<tr><td>1080	<td>8-Bit ARGB						<td>1920	<td>1920
-	<tr><td>1080	<td>8-Bit RGBA						<td>1920	<td>1920
-	<tr><td>1080	<td>48-Bit RGB						<td>1920	<td>2880
-	<tr><td>1080p	<td>8-Bit YCbCr – UYVY				<td>1920	<td>960
-	<tr><td>1080p	<td>8-Bit YCbCr – YUY2				<td>1920	<td>960
-	<tr><td>1080p	<td>10-Bit YCbCr					<td>1920	<td>1280
-	<tr><td>1080p	<td>10-Bit YCbCr – DPX-compatible	<td>1920	<td>1280
-	<tr><td>1080p	<td>8-Bit BGR						<td>1920	<td>1440
-	<tr><td>1080p	<td>8-Bit RGB						<td>1920	<td>1440
-	<tr><td>1080p	<td>10-Bit RGB						<td>1920	<td>1920
-	<tr><td>1080p	<td>10-Bit RGB – DPX-compatible		<td>1920	<td>1920
-	<tr><td>1080p	<td>10-Bit RGB – DPX Little-Endian	<td>1920	<td>1920
-	<tr><td>1080p	<td>10-Bit YCbCrA					<td>1920	<td>1920
-	<tr><td>1080p	<td>8-Bit ABGR						<td>1920	<td>1920
-	<tr><td>1080p	<td>8-Bit ARGB						<td>1920	<td>1920
-	<tr><td>1080p	<td>8-Bit RGBA						<td>1920	<td>1920
-	<tr><td>1080p	<td>48-Bit RGB						<td>1920	<td>2880
-	<tr><td>2K		<td>8-Bit YCbCr – UYVY				<td>2048	<td>1024
-	<tr><td>2K		<td>8-Bit YCbCr – YUY2				<td>2048	<td>1024
-	<tr><td>2K		<td>10-Bit YCbCr					<td>2048	<td>1376
-	<tr><td>2K		<td>8-Bit BGR						<td>2048	<td>1536
-	<tr><td>2K		<td>8-Bit RGB						<td>2048	<td>1536
-	<tr><td>2K		<td>10-Bit RGB						<td>2048	<td>2048
-	<tr><td>2K		<td>10-Bit RGB – DPX-compatible		<td>2048	<td>2048
-	<tr><td>2K		<td>10-Bit RGB – DPX Little-Endian	<td>2048	<td>2048
-	<tr><td>2K		<td>10-Bit YCbCr – DPX-compatible	<td>2048	<td>2048
-	<tr><td>2K		<td>10-Bit YCbCrA					<td>2048	<td>2048
-	<tr><td>2K		<td>8-Bit ABGR						<td>2048	<td>2048
-	<tr><td>2K		<td>8-Bit ARGB						<td>2048	<td>2048
-	<tr><td>2K		<td>8-Bit RGBA						<td>2048	<td>2048
-	<tr><td>2K		<td>48-Bit RGB						<td>2048	<td>3072
-</table>
+The \c NTV2FormatDescriptor class is used to inquire about rasters of any NTV2Standard and NTV2FrameBufferFormat.
+Once constructed, it can tell you the frame pixel dimensions (with or without VANC lines), the number of bytes per row,
+the byte count required to hold the frame, the byte offset to a particular line, etc.
+
 **/

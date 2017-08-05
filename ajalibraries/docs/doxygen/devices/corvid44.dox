@@ -27,6 +27,11 @@
 	-	1GB SDRAM
 	-	128 x 8MB frames
 	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	Support for planar formats added in firmware rev 0xNN and SDK 14.0:
+		-	\c NTV2_FBF_8BIT_YCBCR_420PL3
+		-	\c NTV2_FBF_8BIT_YCBCR_422PL3
+		-	\c NTV2_FBF_10BIT_YCBCR_420PL3_LE
+		-	\c NTV2_FBF_10BIT_YCBCR_422PL3_LE
 
 	@par	Audio
 

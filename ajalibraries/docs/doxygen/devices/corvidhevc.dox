@@ -61,6 +61,10 @@ TBD
 -	Operating Altitude: under 3,000 meters (under 10,000 feet)
 -	Safe Storage Temperature (Power OFF): -40 to 70 degrees Celcius (-40 to 158 degrees Fahrenheit)
 
+@par	SDK/Driver Support
+
+-	NTV2 SDK versions 12.4.2 and later
+
 <b>See Also:</b>  \ref hevcsupplement
 
 **/

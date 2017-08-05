@@ -103,6 +103,9 @@ Except in its Image view, the raster content display always highlights changed c
 	-	<b>VFlip</b> -- Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
 		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
 		When unchecked, raster lines are read/written normally (top-to-bottom).
+	-	<b>VancShift</b> -- Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
+		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
+		When unchecked, raster lines are read/written normally (top-to-bottom).
 
 @par	Navigation and Data Selection
 	-	<b>Scrolling</b> -- The display can be scrolled horizontally and/or vertically.

@@ -78,4 +78,8 @@ It's a flexible platform that can support, via future firmware upgrades, J2K (JP
 -	Operating Altitude: under 3,000 meters (under 10,000 feet)
 -	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
+@par	SDK/Driver Support
+
+-	NTV2 SDK versions 12.4.2 and later
+
 **/
