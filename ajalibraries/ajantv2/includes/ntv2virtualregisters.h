@@ -461,9 +461,10 @@ typedef enum
     kVRegAudioMixerSourceMainSelect         = VIRTUALREG_START+515,
     kVRegAudioMixerSourceAux1Select         = VIRTUALREG_START+516,
     kVRegAudioMixerSourceAux2Select         = VIRTUALREG_START+517,
-	kVRegSizzle4kInput						= VIRTUALREG_START+519,
+	kVRegSwizzle4kInput						= VIRTUALREG_START+519,
+	kVRegSwizzle4kOutput					= VIRTUALREG_START+520,
 
-	kVRegLastAJA							= VIRTUALREG_START+520,		///< @brief	The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+521,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
