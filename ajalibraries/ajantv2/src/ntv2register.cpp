@@ -5656,7 +5656,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat()
 												false);												// progressive picture
 				}
 			}
-			else if(hdmiVersion == 2 || hdmiVersion == 3)
+			else if(hdmiVersion == 2 || hdmiVersion == 3 || hdmiVersion == 4)
 			{
 				NTV2FrameRate hdmiRate = (NTV2FrameRate)((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 				NTV2Standard hdmiStandard = static_cast <NTV2Standard> ((status & kRegMaskInputStatusV2Std) >> kRegShiftHDMIInputStatusV2Std);
