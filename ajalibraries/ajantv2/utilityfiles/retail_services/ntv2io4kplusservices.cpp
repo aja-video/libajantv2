@@ -105,7 +105,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2wire4k			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	//bool						b6g4k				= (b4K && !b4kHfr && !bSdiRgbOut && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool						b6g4k				= (b4K && !b4kHfr && !bSdiRgbOut && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool						b12g4k				= (b4K && (b4kHfr || bSdiRgbOut) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	int							bCh1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bCh2Disable			= 1;						// Assume Channel 2 IS disabled by default
@@ -123,7 +123,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
     bool						bCh1HDR_RGB			= (fbFormatCh1 == NTV2_FBF_48BIT_RGB) ? true : false;
     bool						bCh2HDR_RGB			= (fbFormatCh2 == NTV2_FBF_48BIT_RGB) ? true : false;
 
-	if(b12g4k)b2pi = true;
+	if(b12g4k || b6g4k)b2pi = true;
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || bLevelBFormat || bStereoOut)
 	{
@@ -1536,7 +1536,6 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	mCard->Connect(NTV2_Xpt425Mux3BInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4BInput, NTV2_XptBlack);
-			
 
 }
 
@@ -3126,6 +3125,11 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 			mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
 		else if (b6g4k)
 			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
+		else
+		{
+			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, false);
+			mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, false);
+		}
 	}
 
 	// HDMI output - initialization sequence

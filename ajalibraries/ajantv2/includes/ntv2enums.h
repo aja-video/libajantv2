@@ -329,7 +329,7 @@ typedef enum
 
 
 /**
-    @brief	Identifies a particular video frame buffer format.
+    @brief	Identifies a particular video frame buffer format. See \ref devicefbformats for details.
 **/
 typedef enum
 {
