@@ -822,7 +822,7 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 		kern_return_t 	kernResult			= KERN_FAILURE;
 
 		uint64_t	scalarI_64[2];
-		uint64_t	scalarO_64 = 0;
+		uint64_t	scalarO_64 = registerValue ? *registerValue : 0;
 		uint32_t	outputCount = 1;
 
 		scalarI_64[0] = registerNumber;
