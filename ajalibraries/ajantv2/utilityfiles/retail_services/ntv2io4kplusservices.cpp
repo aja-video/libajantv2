@@ -1536,6 +1536,15 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	mCard->Connect(NTV2_Xpt425Mux3BInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4BInput, NTV2_XptBlack);
+
+	if(b12g4k)
+	{
+		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+	}
+	else
+	{
+		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, false);
+	}
 			
 
 }

@@ -8738,8 +8738,7 @@ bool CNTV2Card::SetSDIOut12GEnable(NTV2Channel inChannel, bool enable)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if (enable)
-		WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], 0, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
 	return WriteRegister(gChannelToSDIOutControlRegNum[NTV2_CHANNEL3], enable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
 
