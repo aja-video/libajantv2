@@ -753,6 +753,23 @@ bool NTV2FormatDescriptor::operator == (const NTV2FormatDescriptor & inRHS) cons
 }
 
 
+UWord NTV2FormatDescriptor::GetPlaneFromByteOffset (const ULWord inByteOffset) const
+{
+	if (!IsPlanar())
+		return 0;
+
+	ULWord	byteOffset	(0);
+	UWord	plane		(0);
+	do
+	{
+		byteOffset += GetTotalRasterBytes(plane);
+		if (inByteOffset < byteOffset)
+			return plane;
+	} while (++plane < GetNumPlanes());
+	return 0;
+}
+
+
 const void * NTV2FormatDescriptor::GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0, const UWord inPlaneIndex0) const
 {
 	if (inRowIndex0 >= numLines)

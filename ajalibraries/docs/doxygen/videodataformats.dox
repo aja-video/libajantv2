@@ -293,6 +293,13 @@ See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgeba
 "How to Capture Raw Bayer Data from the CION Camera" for detailed information about capturing raw
 CION data using NTV2 devices. The \ref ntv2qtrawcapture demonstration app in the SDK also shows how to capture raw video into 'DNG' files.
 
+@subsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar
+
+This format, identified by the \c NTV2_FBF_8BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
+
+@image	html	fbf-8bitycbcr420planar-75.png
+
+
 @section	fbframegeometries		Frame Buffer Geometries
 
 For each format, video is arranged differently in memory. This means that for each format, there's a different number of 32-bit words per horizontal line

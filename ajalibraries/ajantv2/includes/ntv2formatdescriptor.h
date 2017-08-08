@@ -124,6 +124,12 @@ typedef struct NTV2FormatDescriptor
 	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}		///< @return	The number of planes in the raster.
 
 	/**
+		@return		The zero-based index number of the plane that contains the byte at the given offset.
+		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the frame.
+	**/
+	UWord			GetPlaneFromByteOffset (const ULWord inByteOffset) const;
+
+	/**
 		@return	The height of the raster, in lines.
 		@param[in]	inVisibleOnly	Specify true to return just the visible height;  otherwise false (the default) to return the full height.
 	**/
