@@ -708,11 +708,13 @@ typedef enum
 {
 	kRegAudioMixerInputSelects = 2304,	//2304
 	kRegAudioMixerMainGain,		//2305
-	kRegAudioMixerAux1Gain,	//2306
-	kRegAudioMixerAux2Gain,	//2307
+	kRegAudioMixerAux1GainCh1,	//2306
+	kRegAudioMixerAux2GainCh1,	//2307
 	kRegAudioMixerChannelSelect,			//2308
 	kRegAudioMixerMutes,
-	kRegAudioMixerAux1InputLevels,
+	kRegAudioMixerAux1GainCh2,
+	kRegAudioMixerAux2GainCh2,
+	kRegAudioMixerAux1InputLevels = 2318,
 	kRegAudioMixerAux2InputLevels,
 	kRegAudioMixerMainInputLevelsPair0,
 	kRegAudioMixerMainInputLevelsPair1,
@@ -2366,7 +2368,8 @@ typedef enum
 	kRegMaskAudioMixerMainChannel16Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 	kRegMaskAudioMixerMainMixedOutputChannel1Level = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskAudioMixerMainMixedOutputChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
-
+	kRegMaskAudioMixerInputLeftLevel = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	kRegMaskAudioMixerInputRightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
 } RegisterMask;
 
@@ -3455,7 +3458,9 @@ typedef enum
 	kRegShiftAudioMixerMainChannel15Level = 0,
 	kRegShiftAudioMixerMainChannel16Level = 16,
 	kRegShiftAudioMixerMainMixedOutputChannel1Level = 0,
-	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16
+	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16,
+	kRegShiftAudioMixerInputLeftLevel = 0,
+	kRegShiftAudioMixerInputRightLevel = 16
 
 } RegisterShift;
 

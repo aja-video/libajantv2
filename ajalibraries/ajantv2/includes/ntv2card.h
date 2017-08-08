@@ -1950,14 +1950,14 @@ public:
 	AJA_VIRTUAL bool		GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
 	AJA_VIRTUAL bool		SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux1InputGain(ULWord & outGainValue);
-	AJA_VIRTUAL bool		SetAudioMixerAux1InputGain(const ULWord inGainValue);
+	AJA_VIRTUAL bool		GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
 
 	AJA_VIRTUAL bool		GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
 	AJA_VIRTUAL bool		SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux2InputGain(ULWord & outGainValue);
-	AJA_VIRTUAL bool		SetAudioMixerAux2InputGain(const ULWord inGainValue);
+	AJA_VIRTUAL bool		GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
 
 	AJA_VIRTUAL bool		GetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool & outChannelMuted);
 	AJA_VIRTUAL bool		SetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool inMuteChannel);
@@ -1970,6 +1970,10 @@ public:
 
 	AJA_VIRTUAL bool		GetAudioMixerAux2InputEnable(bool & outEnabled);
 	AJA_VIRTUAL bool		SetAudioMixerAux2InputEnable(bool inEnabled);
+
+	AJA_VIRTUAL ULWord		GetAudioMixerMainInputChannelLevel(NTV2AudioMixerChannel inChannel);
+	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel(NTV2AudioMixerChannel inChannel);
+	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inChannel);
 
 	///@}
 
