@@ -120,8 +120,9 @@ typedef struct NTV2FormatDescriptor
 	**/
 	inline ULWord	GetBytesPerRow (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? mLinePitch[inPlaneIndex0] : 0;}
 
-	inline ULWord	GetRasterWidth (void) const			{return numPixels;}			///< @return	The width of the raster, in pixels.
-	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}		///< @return	The number of planes in the raster.
+	inline ULWord	GetRasterWidth (void) const			{return numPixels;}		///< @return	The width of the raster, in pixels.
+	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}	///< @return	The number of planes in the raster.
+	std::string		GetPlaneLabel (const UWord inPlaneIndex0) const;			///< @return	A string containing a human-readable name for the specified plane.
 
 	/**
 		@return		The zero-based index number of the plane that contains the byte at the given offset.
