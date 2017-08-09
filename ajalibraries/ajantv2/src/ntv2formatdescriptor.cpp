@@ -28,7 +28,7 @@ using namespace std;
 
 const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
 {
-	{/////	NTV2_STANDARD_1080											inNumLines						inNumPixels							inLinePitch								inFirstActiveLine
+	{/////	NTV2_STANDARD_1080											inNumLines						inNumPixels							inLinePitch [ULWords per line]			inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_YCBCRLINEPITCH_1080,					AJA_FD_END,
 		/* NTV2_FBF_8BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080*2/4,			AJA_FD_END,
 		/* NTV2_FBF_ARGB */						AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_NUMCOMPONENTPIXELS_1080,				AJA_FD_END,
@@ -509,7 +509,7 @@ void NTV2FormatDescriptor::FinalizePlanar (void)
 			const ULWord	chromaRasterBytes	(lumaRasterBytes / 4);
 			if (lumaRasterBytes % 4)
 				{MakeInvalid();	break;}
-			mLinePitch[1] = mLinePitch[2] = chromaRasterBytes / numLines;
+			mLinePitch[1] = mLinePitch[2] = chromaRasterBytes / numLines;	//	For HD1080i: 1920 px/line ==> 1920/4 ==> 480 bytes/line
 			if (chromaRasterBytes % numLines)
 				MakeInvalid();
 			break;
@@ -784,7 +784,7 @@ const void * NTV2FormatDescriptor::GetRowAddress (const void * pInStartAddress, 
 		pStart += GetTotalRasterBytes(1);
 	if (inPlaneIndex0 > 2)
 		pStart += GetTotalRasterBytes(2);
-	return pStart + inRowIndex0 * GetBytesPerRow (inPlaneIndex0);
+	return pStart + inRowIndex0 * GetBytesPerRow(inPlaneIndex0);
 }
 
 
@@ -797,14 +797,17 @@ bool NTV2FormatDescriptor::GetFirstChangedRow (const void * pInStartAddress1, co
 		return false;	//	NULL start address 2
 	if (pInStartAddress1 == pInStartAddress2)
 		return false;	//	same start addresses
-	if (!IsValid ())
+	if (!IsValid())
 		return false;	//	invalid
 
-//	TODO:	COMPARE OTHER PLANES
-	for (outFirstChangedRowNum = 0;  outFirstChangedRowNum < GetFullRasterHeight ();  outFirstChangedRowNum++)
-		if (::memcmp (GetRowAddress ((UByte *) pInStartAddress1, outFirstChangedRowNum), GetRowAddress (pInStartAddress2, outFirstChangedRowNum), GetBytesPerRow ()))
-			return true;	//	Success
-	outFirstChangedRowNum = 0xFFFFFFFF;	//	No changes
+	UWord	plane	(0);
+	do
+	{
+		for (outFirstChangedRowNum = 0;  outFirstChangedRowNum < GetFullRasterHeight();  outFirstChangedRowNum++)
+			if (::memcmp(GetRowAddress((UByte*) pInStartAddress1, outFirstChangedRowNum, plane), GetRowAddress(pInStartAddress2, outFirstChangedRowNum, plane), GetBytesPerRow(plane)))
+				return true;	//	CHANGE FOUND -- Success!
+	} while (++plane < GetNumPlanes());
+	outFirstChangedRowNum = 0xFFFFFFFF;	//	NO CHANGES FOUND
 	return true;	//	Success
 }
 
@@ -812,7 +815,7 @@ bool NTV2FormatDescriptor::GetFirstChangedRow (const void * pInStartAddress1, co
 bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, const void * pInBuffer1, const void * pInBuffer2, const ULWord inMaxLines) const
 {
 	outDiffs.clear ();
-	if (!IsValid ())
+	if (!IsValid())
 		return false;	//	Invalid format descriptor
 	if (!pInBuffer1 || !pInBuffer2)
 		return false;	//	NULL or empty buffers
@@ -824,13 +827,17 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 		return false;	//	buffer too small to fetch given rowOffset
 	if (pInBuffer1 == pInBuffer2)
 		return true;	//	Same buffer -- no diffs (success!)
-	ULWord	maxLines	(inMaxLines ? inMaxLines : GetFullRasterHeight ());
+	ULWord	maxLines	(inMaxLines ? inMaxLines : GetFullRasterHeight());
 	if (maxLines > GetFullRasterHeight())
-		maxLines = GetFullRasterHeight();
-//	TODO:	FIX PLANAR
-	for (ULWord rowOffset (0);  rowOffset < maxLines;  rowOffset++)
-		if (::memcmp (GetRowAddress (pStartAddress1, rowOffset), GetRowAddress (pStartAddress2, rowOffset), GetBytesPerRow ()))
-			outDiffs.push_back (rowOffset);
+		maxLines = GetFullRasterHeight();	//	Clamp maxLines to full raster height
+
+	UWord	plane	(0);
+	do
+	{
+		for (ULWord rowOffset(0);  rowOffset < maxLines;  rowOffset++)
+			if (::memcmp(GetRowAddress(pStartAddress1, rowOffset, plane), GetRowAddress(pStartAddress2, rowOffset, plane), GetBytesPerRow(plane)))
+				outDiffs.push_back(rowOffset);
+	} while (++plane < GetNumPlanes());
 	return true;
 }
 
