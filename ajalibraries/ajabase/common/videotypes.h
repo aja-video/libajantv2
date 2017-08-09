@@ -131,6 +131,10 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_YCBCR8_420PL,		/**< Pixel format YCbCr 8 bit 420 packed planer */
 	AJA_PixelFormat_YCBCR8_422PL,		/**< Pixel format YCbCr 8 bit 422 packed planer */
 
+	AJA_PixelFormat_YCBCR8_420PL3,		/**< Pixel format YCbCr 8 bit 420 planar */
+	AJA_PixelFormat_YCBCR8_422PL3,		/**< Pixel format YCbCr 8 bit 422 planar */
+	AJA_PixelFormat_YCBCR10_420PL3LE,	/**< Pixel format YCbCr 10 bit 420 little-endian planar */
+	AJA_PixelFormat_YCBCR10_422PL3LE,	/**< Pixel format YCbCr 10 bit 422 little-endian planar */
 
     /// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...
             AJA_PixelFormat_S0226_720p50,
