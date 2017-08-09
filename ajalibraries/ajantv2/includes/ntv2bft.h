@@ -31,6 +31,7 @@
 						STDERR << "Stop" << ENDL;
 						char *	pByte	(NULL);
 						char	byte	(*pByte);
+						byte++;
 					#endif	//	not Windows
 				}
 		};
