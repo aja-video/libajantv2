@@ -739,7 +739,7 @@ bool CNTV2Card::GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel
 	if (inChannel > NTV2_AudioMixerChannel2)
 		return false;
 
-	if (!ReadRegister((inChannel == NTV2_AudioMixerChannel1 ? kRegAudioMixerAux1GainCh1 : kRegAudioMixerAux1GainCh2), &outGainValue))
+	if (!ReadRegister(kRegAudioMixerAux1GainCh1, &outGainValue))
 		return false;
 	return true;
 }
@@ -755,7 +755,10 @@ bool CNTV2Card::SetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel
 	if (inGainValue > 0x1ffff)
 		return false;
 
-	if (!WriteRegister((inChannel == NTV2_AudioMixerChannel1 ? kRegAudioMixerAux1GainCh1 : kRegAudioMixerAux1GainCh2), inGainValue))
+	if (!WriteRegister(kRegAudioMixerAux1GainCh1, inGainValue))
+		return false;
+
+	if (!WriteRegister(kRegAudioMixerAux1GainCh2, inGainValue))
 		return false;
 
 	return true;
@@ -795,7 +798,7 @@ bool CNTV2Card::GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel
 {
 	if (!DeviceCanDoAudioMixer())
 		return false;
-	if (!ReadRegister((inChannel == NTV2_AudioMixerChannel1 ? kRegAudioMixerAux2GainCh1 : kRegAudioMixerAux2GainCh2), &outGainValue))
+	if (!ReadRegister(kRegAudioMixerAux2GainCh1, &outGainValue))
 		return false;
 	return true;
 }
@@ -808,7 +811,10 @@ bool CNTV2Card::SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel
 	if (inGainValue > 0x1ffff)
 		return false;
 
-	if (!WriteRegister((inChannel == NTV2_AudioMixerChannel1 ? kRegAudioMixerAux2GainCh1 : kRegAudioMixerAux2GainCh2), inGainValue))
+	if (!WriteRegister(kRegAudioMixerAux2GainCh1, inGainValue))
+		return false;
+
+	if (!WriteRegister(kRegAudioMixerAux2GainCh2, inGainValue))
 		return false;
 
 	return true;
