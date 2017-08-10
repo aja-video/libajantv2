@@ -1880,6 +1880,9 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	rx_2022_channel chan;
 	struct in_addr addr;
 	bool enable;
+	
+	target->SetRxChannelEnable(channel,false,false);
+
 	switch ((int)channel)
 	{
 		case NTV2_CHANNEL2:
@@ -1957,6 +1960,8 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	struct in_addr addr;
 	bool enable;
 	
+	target->SetTxChannelEnable(channel,false,false);
+
 	switch((int)channel)
 	{
 		case NTV2_CHANNEL2:
