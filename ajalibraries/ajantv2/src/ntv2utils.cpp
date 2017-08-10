@@ -3007,13 +3007,12 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 		case NTV2_FG_4x2048x1080:	//	4K
 			return inFrameGeometry;	//	No change
 #if defined (_DEBUG)
-		case NTV2_FG_INVALID:
-			return inFrameGeometry;	//	No change
+		case NTV2_FG_INVALID:	break;
 #else
-		default:
-			return NTV2_FG_INVALID;	//	fail
+		default:				break;
 #endif
 	}
+	return NTV2_FG_INVALID;	//	fail
 }
 
 
