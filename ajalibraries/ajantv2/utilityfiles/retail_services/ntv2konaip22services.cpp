@@ -3296,6 +3296,9 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
     rx_2022_channel chan;
     struct in_addr addr;
     bool enable;
+	
+	target->SetRxChannelEnable(channel,false,m2022_7Mode);
+
     switch ((int)channel)
     {
         case NTV2_CHANNEL2:
@@ -3372,6 +3375,8 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
     tx_2022_channel chan;
     struct in_addr addr;
     bool enable;
+    
+	target->SetTxChannelEnable(channel,false,m2022_7Mode);
     
     switch((int)channel)
     {
