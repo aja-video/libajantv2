@@ -718,7 +718,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     // select channel
 
-    if (_is2022_7 && enable2022_7)
+    if (_is2022_7)
     {
         // Select secondary channel
         rv = SelectTxChannel(channel, false, baseAddr);
