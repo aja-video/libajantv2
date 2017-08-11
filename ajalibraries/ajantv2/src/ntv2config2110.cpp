@@ -296,20 +296,9 @@ bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Strea
 
 bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
-    // disable decasulator
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
-    mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x00);
-
+    // make IGMP subsciption if needed
     eSFP port = GetRxPort(channel);
 
-    if (stream == NTV2_VIDEO_STREAM)
-    {
-        // reset and setup video depacketizer
-        ResetDepacketizer(channel,stream);
-        SetupDepacketizer(channel,stream,rxConfig);
-    }
-
-    // make IGMP subsciption if needed
     uint32_t destIp = inet_addr(rxConfig.destIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
 
@@ -317,7 +306,6 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
     srcIp = NTV2EndianSwap32(srcIp);
 
     uint8_t ip0 = (destIp & 0xff000000)>> 24;
-
     if (ip0 >= 224 && ip0 <= 239)
     {
         // is multicast
@@ -328,8 +316,23 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
         UnsetIGMPGroup(port, channel, stream);
     }
 
-    // reset the depacketizer
-    //ResetDepacketizer(channel,stream);
+    DisableDecapsulatorStream(channel,stream);
+
+    SetupDecapsulatorStream(channel,stream, rxConfig);
+
+    ResetDepacketizer(channel,stream);
+
+    SetupDepacketizer(channel,stream,rxConfig);
+
+    EnableDecapsulatorStream(channel,stream);
+
+    return true;
+}
+
+
+void  CNTV2Config2110::SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
+{
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
 
     // source ip address
     uint32_t sourceIp = inet_addr(rxConfig.sourceIP.c_str());
@@ -337,6 +340,8 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
     mDevice.WriteRegister(kRegDecap_match_src_ip + decapBaseAddr, sourceIp);
 
     // dest ip address
+    uint32_t destIp = inet_addr(rxConfig.destIP.c_str());
+    destIp = NTV2EndianSwap32(destIp);
     mDevice.WriteRegister(kRegDecap_match_dst_ip + decapBaseAddr, destIp);
 
     // source port
@@ -356,16 +361,6 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
 
     // matching
     mDevice.WriteRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
-
-    // enable Decapsulator
-    mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x01);
-
-    if (stream == NTV2_AUDIO1_STREAM)
-    {
-        SetupDepacketizer(channel,stream,rxConfig);
-    }
-
-    return true;
 }
 
 void  CNTV2Config2110::DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream)
@@ -421,11 +416,11 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
 
     uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
 
-    mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
     if (stream == NTV2_VIDEO_STREAM)
     {
         // setup 4175 depacketizer
+        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
@@ -505,6 +500,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 depacketizer
+        mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
 
         uint32_t num_samples  = rxConfig.audioSamplesPerPkt;
         uint32_t num_channels = rxConfig.audioChannels;
