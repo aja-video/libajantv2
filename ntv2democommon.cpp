@@ -697,7 +697,6 @@ AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat 
 		case NTV2_FBF_10BIT_DPX:				return AJA_PixelFormat_RGB_DPX;
 		case NTV2_FBF_10BIT_YCBCR_DPX:			return AJA_PixelFormat_YCbCr_DPX;
 		case NTV2_FBF_8BIT_DVCPRO:				return AJA_PixelFormat_DVCPRO;
-		case NTV2_FBF_8BIT_YCBCR_420PL3:		return AJA_PixelFormat_YCBCR8_420PL;
 		case NTV2_FBF_8BIT_HDV:					return AJA_PixelFormat_HDV;
 		case NTV2_FBF_24BIT_RGB:				return AJA_PixelFormat_RGB8_PACK;
 		case NTV2_FBF_24BIT_BGR:				return AJA_PixelFormat_BGR8_PACK;
@@ -709,18 +708,20 @@ AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat 
 		case NTV2_FBF_PRORES_HDV:				return AJA_PixelFormat_PRORES_HDV;
 		case NTV2_FBF_10BIT_RGB_PACKED:			return AJA_PixelFormat_RGB10_PACK;
 
+		case NTV2_FBF_8BIT_YCBCR_420PL2:		return AJA_PixelFormat_YCBCR8_420PL;
+		case NTV2_FBF_8BIT_YCBCR_422PL2:		return AJA_PixelFormat_YCBCR8_422PL;
+		case NTV2_FBF_10BIT_YCBCR_420PL2:		return AJA_PixelFormat_YCBCR10_420PL;
+		case NTV2_FBF_10BIT_YCBCR_422PL2:		return AJA_PixelFormat_YCBCR10_422PL;
+
+		case NTV2_FBF_8BIT_YCBCR_420PL3:		return AJA_PixelFormat_YCBCR8_420PL3;
+		case NTV2_FBF_8BIT_YCBCR_422PL3:		return AJA_PixelFormat_YCBCR8_422PL3;
+		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	return AJA_PixelFormat_YCBCR10_420PL3LE;
+		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	return AJA_PixelFormat_YCBCR10_422PL3LE;
+
 		case NTV2_FBF_10BIT_RAW_RGB:
 		case NTV2_FBF_10BIT_RAW_YCBCR:
 		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_16BIT_ARGB:
-		case NTV2_FBF_8BIT_YCBCR_420PL2:
-		case NTV2_FBF_8BIT_YCBCR_422PL2:
-		case NTV2_FBF_10BIT_YCBCR_420PL2:
-		case NTV2_FBF_10BIT_YCBCR_422PL2:		break;
-
-		case NTV2_FBF_8BIT_YCBCR_422PL3:
-		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
-		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
 		case NTV2_FBF_INVALID:					break;
 	}
 	return AJA_PixelFormat_Unknown;
