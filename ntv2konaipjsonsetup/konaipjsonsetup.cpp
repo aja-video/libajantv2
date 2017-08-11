@@ -193,9 +193,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
             cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << endl;
 
+        transmitStruct.mSSRC = transmitChannelObject["ssrc"].toString();
+        if (!transmitStruct.mSSRC.isEmpty())
+            cout << "SSRC " << transmitStruct.mSSRC.toStdString() << endl;
+
         transmitStruct.mPayload = transmitChannelObject["payload"].toString();
         if (!transmitStruct.mPayload.isEmpty())
             cout << "Payload " << transmitStruct.mPayload.toStdString() << endl;
+
         transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
         if (!transmitStruct.mVideoFormat.isEmpty())
             cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
@@ -570,6 +575,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
         txChannelConfig.payloadType  = transmit.mPayload.toUInt();
+        txChannelConfig.ssrc         = transmit.mSSRC.toUInt();
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
 

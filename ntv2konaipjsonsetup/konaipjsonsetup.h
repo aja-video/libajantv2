@@ -51,6 +51,7 @@ typedef struct
     QString mSecondaryLocalPort;
     QString mSecondaryRemoteIPAddress;
     QString mSecondaryRemotePort;
+    QString mSSRC;
     QString mPayload;
     QString mVideoFormat;
     QString mEnable;
