@@ -745,60 +745,64 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // dest port
         WriteChannelRegister(kReg2022_6_tx_udp_dest_port + baseAddr,txConfig.secondaryRemotePort);
 
-        // dest MAC
-        // is remote address muticast
-        ip0 = (destIp & 0xff000000)>> 24;
-        if (ip0 >= 224 && ip0 <= 239)
-        {
-            // generate multicast MAC
-            mac = destIp & 0x7fffff;  // lower 23 bits
+		// Get or generate a Mac address if we have 2022-7 enabled.
+		if (enable2022_7)
+		{
+			// dest MAC
+			// is remote address muticast
+			ip0 = (destIp & 0xff000000)>> 24;
+			if (ip0 >= 224 && ip0 <= 239)
+			{
+				// generate multicast MAC
+				mac = destIp & 0x7fffff;  // lower 23 bits
 
-            macaddr.mac[0] = 0x01;
-            macaddr.mac[1] = 0x00;
-            macaddr.mac[2] = 0x5e;
-            macaddr.mac[3] =  mac >> 16;
-            macaddr.mac[4] = (mac & 0xffff) >> 8;
-            macaddr.mac[5] =  mac & 0xff;
+				macaddr.mac[0] = 0x01;
+				macaddr.mac[1] = 0x00;
+				macaddr.mac[2] = 0x5e;
+				macaddr.mac[3] =  mac >> 16;
+				macaddr.mac[4] = (mac & 0xffff) >> 8;
+				macaddr.mac[5] =  mac & 0xff;
 
-            hi  = macaddr.mac[0]  << 8;
-            hi += macaddr.mac[1];
+				hi  = macaddr.mac[0]  << 8;
+				hi += macaddr.mac[1];
 
-            lo  = macaddr.mac[2] << 24;
-            lo += macaddr.mac[3] << 16;
-            lo += macaddr.mac[4] << 8;
-            lo += macaddr.mac[5];
-        }
-        else
-        {
-            // get MAC from ARP
-            string macAddr;
-            rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
-            if (!rv)
-            {
-                SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
-                mError = "Failed to retrieve MAC address from ARP table";
-                return false;
-            }
+				lo  = macaddr.mac[2] << 24;
+				lo += macaddr.mac[3] << 16;
+				lo += macaddr.mac[4] << 8;
+				lo += macaddr.mac[5];
+			}
+			else
+			{
+				// get MAC from ARP
+				string macAddr;
+				rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
+				if (!rv)
+				{
+					SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
+					mError = "Failed to retrieve MAC address from ARP table";
+					return false;
+				}
 
-            istringstream ss(macAddr);
-            string token;
-            int i=0;
-            while (i < 6)
-            {
-                getline (ss, token, ':');
-                macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
-            }
+				istringstream ss(macAddr);
+				string token;
+				int i=0;
+				while (i < 6)
+				{
+					getline (ss, token, ':');
+					macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
+				}
 
-            hi  = macaddr.mac[0]  << 8;
-            hi += macaddr.mac[1];
+				hi  = macaddr.mac[0]  << 8;
+				hi += macaddr.mac[1];
 
-            lo  = macaddr.mac[2] << 24;
-            lo += macaddr.mac[3] << 16;
-            lo += macaddr.mac[4] << 8;
-            lo += macaddr.mac[5];
-        }
-        WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
-        WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
+				lo  = macaddr.mac[2] << 24;
+				lo += macaddr.mac[3] << 16;
+				lo += macaddr.mac[4] << 8;
+				lo += macaddr.mac[5];
+			}
+			WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
+			WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
+		}
 
         // enable  register updates
         ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
