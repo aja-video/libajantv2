@@ -3025,8 +3025,8 @@ bool CNTV2Card::EraseFlashBlock(ULWord numSectors, ULWord sectorSize)
 	WaitForFlashNOTBusy();
 	
 	uint32_t baseAddress = 0;
-
-	for (ULWord sectorCount = 0; sectorCount < numSectors; sectorCount++ )
+	uint32_t numBankSectors = NTV2DeviceHasSPIv5(_boardID) ? numSectors/2 : numSectors;
+	for (ULWord sectorCount = 0; sectorCount < numBankSectors; sectorCount++ )
 	{
 		for (int i=0; i<4; i++ , baseAddress += (64*1024))
 		{
@@ -3046,7 +3046,7 @@ bool CNTV2Card::EraseFlashBlock(ULWord numSectors, ULWord sectorSize)
 		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
 		WaitForFlashNOTBusy();
 		baseAddress = 0;
-		for (ULWord sectorCount = 0; sectorCount < numSectors; sectorCount++ )
+		for (ULWord sectorCount = numBankSectors; sectorCount < numSectors; sectorCount++ )
 		{
 			for (int i=0; i<4; i++ , baseAddress += (64*1024))
 			{
