@@ -125,6 +125,7 @@ public:
     void SetVideoOutputStandard(NTV2Channel channel);
 	
 	uint32_t GetAudioDelayOffset(double frames);
+	NTV2AudioSystem GetHostAudioSystem();
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
 

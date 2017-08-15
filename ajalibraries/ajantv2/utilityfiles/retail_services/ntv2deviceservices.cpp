@@ -493,16 +493,12 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	bool suspended = false;
 	mCard->GetSuspendHostAudio(suspended);
 	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
-	ULWord hostAudioSystemVal = audioSystem;
-	mCard->ReadRegister(kVRegHostAudioSystem, &hostAudioSystemVal);
-	if (hostAudioSystemVal >= NTV2_MAX_NUM_AudioSystemEnums)
-		hostAudioSystemVal = NTV2_AUDIOSYSTEM_1;
+	NTV2AudioSystem hostAudioSystem = GetHostAudioSystem();
 	
 	// if host-audio not suspended - use host-audio system
 	// note - historically host-audio was NTV2_AUDIOSYSTEM_1 only. Newer devices, host-audio use other systems.
-	// kVRegHostAudioSystem will always contain the host-audio system
 	if (suspended == false)
-		audioSystem = (NTV2AudioSystem) hostAudioSystemVal;
+		audioSystem = (NTV2AudioSystem) hostAudioSystem;
 	
 	// mixer - support
 	if (mCard->DeviceCanDoAudioMixer() == true )
@@ -517,7 +513,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		}
 		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
-		mCard->SetAudioMixerAux1x2chInputAudioSystem((NTV2AudioSystem)hostAudioSystemVal);
+		mCard->SetAudioMixerAux1x2chInputAudioSystem(hostAudioSystem);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 	
 		//if (mode == NTV2_MODE_DISPLAY)
@@ -2454,6 +2450,20 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	
 	return offset;
 }
+
+
+NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
+{
+	NTV2AudioSystem hostAudioSystem = NTV2_AUDIOSYSTEM_1;
+	if (mCard->DeviceCanDoAudioMixer())
+	{
+		NTV2DeviceID deviceID = mCard->GetDeviceID();
+		uint32_t audioSystem = NTV2DeviceGetNumAudioSystems(deviceID);
+		hostAudioSystem = (NTV2AudioSystem)audioSystem;
+	}
+	return hostAudioSystem;
+}
+
 
 //
 // MARK: Base Service -
