@@ -1264,11 +1264,15 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			// Configure tx for ch1
 			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
 			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable,enable2022_7);
+            uint32_t txErr;
+            getIPError(NTV2_CHANNEL1,kErrTxConfig,txErr);
 			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
 
 			if (rv && rv2)
 			{
-				if ((enable != (enableSv ? true : false)) || notEqual(txHwConfig,mTx2022Config3))
+                if (  (enable != (enableSv ? true : false))
+                    || notEqual(txHwConfig,mTx2022Config3)
+                    || txErr)
 				{
 					// Special case we handle channel enables at service level automatically
 					mTx2022Config3.txc_enable32 = enableSv;
@@ -1314,11 +1318,15 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
 				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable,enable2022_7);
-				mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
+                uint32_t txErr;
+                getIPError(NTV2_CHANNEL2,kErrTxConfig,txErr);
+                mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
 
 				if (rv && rv2)
 				{
-					if ((enable != (enableSv ? true : false)) || notEqual(txHwConfig,mTx2022Config4))
+                    if (  (enable != (enableSv ? true : false))
+                        || notEqual(txHwConfig,mTx2022Config4)
+                        || txErr)
 					{
 						// Special case we handle channel enables at service level automatically
 						mTx2022Config4.txc_enable32 = enableSv;
@@ -1993,18 +2001,22 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			enable                      = mTx2022Config3.txc_enable32;
 			break;
 	}
-	
-	if (target->SetTxChannelConfiguration(channel,chan,false) == true)
-	{
-		printf("set TxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
-	}
-	else
-	{
-		printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrTxConfig, 1);
-	}
-	target->SetTxChannelEnable(channel,enable,false);
+
+    if (enable)
+    {
+        // only configure if enabled
+        if (target->SetTxChannelConfiguration(channel,chan,false) == true)
+        {
+            printf("set TxConfig chn=%d OK\n",(int)channel);
+            setIPError(channel, kErrTxConfig, 0);
+        }
+        else
+        {
+            printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+            setIPError(channel, kErrTxConfig, 1);
+        }
+        target->SetTxChannelEnable(channel,enable,false);
+    }
 }
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
@@ -2053,6 +2065,54 @@ void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uin
 	}
 	
 	mCard->WriteRegister(reg, errCode);
+}
+
+void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
+{
+    uint32_t errCode;
+    uint32_t value = val & 0xff;
+    uint32_t reg;
+
+    switch( configType )
+    {
+        default:
+        case kErrTxConfig:
+            reg = kVRegKIPTxCfgError;
+            break;
+        case kErrRxConfig:
+            reg = kVRegKIPRxCfgError;
+            break;
+        case kErrJ2kEncoderConfig:
+            reg = kVRegKIPEncCfgError;
+            break;
+        case kErrJ2kDecoderConfig:
+            reg = kVRegKIPDecCfgError;
+            break;
+    }
+
+    mCard->ReadRegister(reg, &errCode);
+
+    switch( channel )
+    {
+        default:
+        case NTV2_CHANNEL1:
+            errCode = (errCode & 0xff);
+            break;
+
+        case NTV2_CHANNEL2:
+            errCode = (errCode & 0xff00) >> 8;
+            break;
+
+        case NTV2_CHANNEL3:
+            errCode = (errCode & 0xff0000) >> 16;
+            break;
+
+        case NTV2_CHANNEL4:
+            errCode = (errCode & 0xff000000) >> 24;
+            break;
+    }
+
+    val = errCode;
 }
 
 bool  KonaIPJ2kServices::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
