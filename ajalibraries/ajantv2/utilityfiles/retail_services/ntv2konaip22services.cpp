@@ -5,6 +5,7 @@
 //
 
 #include "ntv2konaip22services.h"
+
 #if defined (AJALinux) || defined (AJAMac)
 	#include <stdlib.h>
 	#include <sys/socket.h>
@@ -3412,12 +3413,18 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
 	
 	if (target->SetTxChannelConfiguration(channel,chan,m2022_7Mode) == true)
 	{
-		printf("set TxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
+        char buf[132];
+        memset(buf,0,132);
+        sprintf(buf,"set TxConfig chn=%d OK\n",(int)channel);
+        OutputDebugStringA(buf);
+        setIPError(channel, kErrTxConfig, 0);
 	}
 	else
 	{
-		printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+        char buf[132];
+        memset(buf,0,132);
+        sprintf(buf,"set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+        OutputDebugStringA(buf);
 		setIPError(channel, kErrTxConfig, 1);
 	}
 	target->SetTxChannelEnable(channel,enable,m2022_7Mode);

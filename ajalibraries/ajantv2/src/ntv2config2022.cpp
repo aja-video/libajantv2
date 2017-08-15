@@ -872,7 +872,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // get MAC from ARP
         string macAddr;
         rv = AcquireMailbox();
-        if (rv) return false;
+        if (!rv) return false;
         rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
         ReleaseMailbox();
         if (!rv)
