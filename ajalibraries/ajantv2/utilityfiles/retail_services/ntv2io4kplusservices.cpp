@@ -2575,8 +2575,15 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
-		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+		if(is12G)
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptSDIIn1);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+		}
 	}
 	
 	
@@ -2603,8 +2610,15 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
-		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+		if(is12G)
+		{
+			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptSDIIn2);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+		}
 	}
 	
 	
@@ -2660,8 +2674,15 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptBlack);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			if(is12G)
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn3);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			}
 		}
 	}
 	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
@@ -2759,8 +2780,15 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			if(is12G)
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn4);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
 		}
 	}
 	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
