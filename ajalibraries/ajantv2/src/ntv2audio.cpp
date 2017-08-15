@@ -1561,15 +1561,15 @@ bool CNTV2Card::GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChan
 
 bool CNTV2Card::SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels)
 {
-	const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
-	const UWord	maxNumAESAudioChlsForQuad	((inAESAudioChannels + 1) * 4);
+	//const UWord	numAESAudioOutputChannels	(::NTV2DeviceGetNumAESAudioOutputChannels(_boardID));
+	//const UWord	maxNumAESAudioChlsForQuad	((inAESAudioChannels + 1) * 4);
 	const UWord	maxNumDeviceAudioChannels	(::NTV2DeviceGetMaxAudioChannels(_boardID));
 	const UWord	maxNumSrcAudioChlsForQuad	((inSrcAudioChannels + 1) * 4);
 
-	if (!numAESAudioOutputChannels)
-		return false;	//	Fail, device doesn't support AES output
-	if (maxNumAESAudioChlsForQuad > numAESAudioOutputChannels)
-		return false;	//	Fail, illegal inAESAudioChannels value
+	//if (!numAESAudioOutputChannels)
+	//	return false;	//	Fail, device doesn't support AES output
+	//if (maxNumAESAudioChlsForQuad > numAESAudioOutputChannels)
+	//	return false;	//	Fail, illegal inAESAudioChannels value
 	if (inSrcAudioSystem >= ::NTV2DeviceGetNumAudioSystems(_boardID))
 		return false;	//	Fail, illegal NTV2AudioSystem
 	if (maxNumSrcAudioChlsForQuad > maxNumDeviceAudioChannels)
