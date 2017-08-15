@@ -2156,7 +2156,7 @@ typedef enum
 	kRegMaskVPIDPictureRate				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
 	kRegMaskVPIDProgressivePicture		= BIT(22),
 	kRegMaskVPIDProgressiveTransport	= BIT(23),
-	kRegMaskVPIDStandard				= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30),
+	kRegMaskVPIDStandard				= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 	kRegMaskVPIDVersionID				= BIT(31),
 	
 	//Borg Test Pattern Generator

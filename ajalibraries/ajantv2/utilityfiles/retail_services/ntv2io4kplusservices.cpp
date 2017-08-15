@@ -3082,6 +3082,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_6Gb:
+					b6g4k = true;
 					b4xIo = false;
 					b2pi  = true;
 					break;
@@ -3091,6 +3092,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
                     b2pi  = true;
 					break;
 				case VPIDStandard_2160_Single_12Gb:
+					b12g4k = true;
 				case VPIDStandard_2160_QuadLink_3Ga:
 				case VPIDStandard_2160_QuadDualLink_3Gb:
 					b4xIo = true;
@@ -3120,16 +3122,22 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xIo);		// 1,2 are for capture, unless 4K playback
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);
-		
-		if (b12g4k)
-			mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
-		else if (b6g4k)
-			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
-		else
-		{
-			mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, false);
-			mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, false);
-		}
+	}
+
+	if (b12g4k)
+	{
+		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+	}
+	else if (b6g4k)
+	{
+		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+	}
+	else
+	{
+		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, false);
+		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, false);
 	}
 
 	// HDMI output - initialization sequence
