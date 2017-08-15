@@ -134,7 +134,7 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NT
     return true;
 
     bool rv = AcquireMailbox();
-    if (rv) return false;
+    if (!rv) return false;
 
     int count = 30;
     do
