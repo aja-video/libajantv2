@@ -27,6 +27,9 @@ void tx_2022_channel::init()
     secondaryLocalPort  = 0;
     secondaryRemoteIP.erase();
     secondaryRemotePort = 0;
+    tos                 = 0x64;
+    ttl                 = 0x80;
+    ssrc                = 0;
 }
 
 bool tx_2022_channel::operator != ( const tx_2022_channel &other )
@@ -724,7 +727,10 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
 
         // initialise
-        WriteChannelRegister(kReg2022_6_tx_ip_header + baseAddr, 0x6480);
+        uint32_t val = (txConfig.tos << 8) | txConfig.ttl;
+        WriteChannelRegister(kReg2022_6_tx_ip_header + baseAddr, val);
+        WriteChannelRegister(kReg2022_6_tx_ssrc + baseAddr, txConfig.ssrc);
+
         if (_is2022_6)
         {
             WriteChannelRegister(kReg2022_6_tx_video_para_config + baseAddr, 0x01);     // include video timestamp
@@ -816,7 +822,9 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
 
     // initialise
-    WriteChannelRegister(kReg2022_6_tx_ip_header + baseAddr, 0x6480);
+    uint32_t val = (txConfig.tos << 8) | txConfig.ttl;
+    WriteChannelRegister(kReg2022_6_tx_ip_header + baseAddr, val);
+    WriteChannelRegister(kReg2022_6_tx_ssrc + baseAddr, txConfig.ssrc);
     if (_is2022_6)
     {
         WriteChannelRegister(kReg2022_6_tx_video_para_config + baseAddr, 0x01);     // include video timestamp
@@ -910,6 +918,11 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
         // select secondary channel
         rv = SelectTxChannel(channel, false, baseAddr);
         if (!rv) return false;
+
+        ReadChannelRegister(kReg2022_6_tx_ip_header + baseAddr,&val);
+        txConfig.ttl = val & 0xff;
+        txConfig.tos = (val & 0xff00) >> 8;
+        ReadChannelRegister(kReg2022_6_tx_ssrc + baseAddr,&txConfig.ssrc);
 
         // dest ip address
         ReadChannelRegister(kReg2022_6_tx_dest_ip_addr + baseAddr,&val);
