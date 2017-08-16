@@ -24,6 +24,9 @@
             "secondaryRemoteIPAddress":"239.0.4.21",
             "secondaryRemotePort":"6021",
             "secondaryLocalPort":"5021",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"true"
     },
     {
@@ -34,6 +37,9 @@
             "secondaryRemoteIPAddress":"239.0.4.22",
             "secondaryRemotePort":"6022",
             "secondaryLocalPort":"5022",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"false"
     },
     {
@@ -44,6 +50,9 @@
             "secondaryRemoteIPAddress":"239.0.4.23",
             "secondaryRemotePort":"6023",
             "secondaryLocalPort":"5023",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"false"
     },
     {
@@ -54,6 +63,9 @@
             "secondaryRemoteIPAddress":"239.0.4.24",
             "secondaryRemotePort":"6024",
             "secondaryLocalPort":"5024",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"false"
     }
     ]

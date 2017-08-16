@@ -39,6 +39,9 @@
             "primaryRemoteIPAddress":"239.0.4.10",
             "primaryRemotePort":"6010",
             "primaryLocalPort":"5010",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"true"
     },
     {
@@ -46,6 +49,9 @@
             "primaryRemoteIPAddress":"239.0.4.11",
             "primaryRemotePort":"6011",
             "primaryLocalPort":"5011",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
             "Enable":"false"
     }
     ]

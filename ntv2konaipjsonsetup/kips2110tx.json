@@ -18,6 +18,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -28,6 +30,8 @@
             "primaryRemotePort":"6010",
             "payload":"100",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -39,6 +43,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -49,6 +55,8 @@
             "primaryRemotePort":"6011",
             "payload":"100",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -60,6 +68,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -70,6 +80,8 @@
             "primaryRemotePort":"6012",
             "payload":"100",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -81,6 +93,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         },
         {
@@ -91,6 +105,8 @@
             "primaryRemotePort":"6013",
             "payload":"100",
             "ssrc":"1000",
+            "tos":"100",
+            "ttl":"128",
             "Enable":"true"
         }
     ]
