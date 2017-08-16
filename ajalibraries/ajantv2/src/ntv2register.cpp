@@ -5656,7 +5656,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat()
 												false);												// progressive picture
 				}
 			}
-			else if(hdmiVersion == 2 || hdmiVersion == 3 || hdmiVersion == 4)
+			else if(hdmiVersion > 1)
 			{
 				NTV2FrameRate hdmiRate = (NTV2FrameRate)((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 				NTV2Standard hdmiStandard = static_cast <NTV2Standard> ((status & kRegMaskInputStatusV2Std) >> kRegShiftHDMIInputStatusV2Std);
@@ -8072,7 +8072,7 @@ bool CNTV2Card::GetHDMIOut3DMode					(NTV2HDMIOut3DMode & outValue)			{return Re
 bool CNTV2Card::SetHDMIOutVideoStandard (const NTV2Standard inValue)
 {
 	const ULWord	hdmiVers	(::NTV2DeviceGetHDMIVersion(GetDeviceID()));
-	if (hdmiVers > 0  &&  hdmiVers < 4)
+	if (hdmiVers > 0)
 		return WriteRegister (kRegHDMIOutControl,	(ULWord)inValue,	hdmiVers == 1  ?  kRegMaskHDMIOutVideoStd  :  kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
 	return false;
 }
@@ -8080,7 +8080,7 @@ bool CNTV2Card::SetHDMIOutVideoStandard (const NTV2Standard inValue)
 bool CNTV2Card::GetHDMIOutVideoStandard (NTV2Standard & outValue)
 {
 	const ULWord	hdmiVers	(::NTV2DeviceGetHDMIVersion(GetDeviceID()));
-	if (hdmiVers > 0  &&  hdmiVers < 4)
+	if (hdmiVers > 0)
 		return ReadRegister  (kRegHDMIOutControl,	(ULWord*)&outValue,		hdmiVers == 1  ?  kRegMaskHDMIOutVideoStd  :  kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
 	else
 		outValue = NTV2_STANDARD_INVALID;

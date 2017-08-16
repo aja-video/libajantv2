@@ -1717,7 +1717,7 @@ private:
 			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
 			const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID) & 0x00000003);
 			const ULWord	rawVideoStd		(inRegValue & sMasks[hdmiVers]);
-			const string	hdmiVidStdStr	(hdmiVers == 2 || hdmiVers == 3 ? sHDMIStdV2V3[rawVideoStd] : (hdmiVers == 1 ? sHDMIStdV1[rawVideoStd] : ""));
+			const string	hdmiVidStdStr	(hdmiVers > 1 ? sHDMIStdV2V3[rawVideoStd] : (hdmiVers == 1 ? sHDMIStdV1[rawVideoStd] : ""));
 			const string	vidStdStr		(::NTV2StandardToString (NTV2Standard(rawVideoStd), true));
 			oss << "Video Standard: " << hdmiVidStdStr;
 			if (hdmiVidStdStr != vidStdStr)
