@@ -2561,7 +2561,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         {
             if (    (enable != (enableSv ? true : false))
                  || ((enable == true) && (enable2022_7 != m2022_7Mode))
-                 ||  notEqual(txHwConfig,mTx2022Config4)
+                 ||  notEqual(txHwConfig,mTx2022Config3)
                  ||  txErr)            {
 				//printf("enable2022_7 %d, m2022_7Mode %d\n", enable2022_7, m2022_7Mode);
 				//printf("enable %d, enableSv %d\n", enable, (enableSv ? true : false));
