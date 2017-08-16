@@ -512,9 +512,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
 		}
 		
-		//mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
-		//mCard->SetAudioOutputMonitorSource(NTV2_AudioMonitor1_2, NTV2_CHANNEL4);
-		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(hostAudioSystem);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
@@ -526,11 +523,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
 		}
 		//else
-		//{
-			//mCard->SetAudioMixerMainInputEnable(true);
-			//mCard->SetAudioMixerAux1InputEnable(false);
-			//mCard->SetAudioMixerAux2InputEnable(false);
-		//}
+		//{}
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
 	}
