@@ -284,10 +284,10 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 									// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ = 0;			// A
-										*pRenderMap++ = val;		// R
-										*pRenderMap++ = val;		// G
 										*pRenderMap++ = val;		// B
+										*pRenderMap++ = val;		// G
+										*pRenderMap++ = val;		// R
+										*pRenderMap++ = 0;			// A
 									}
 								}
 
@@ -305,10 +305,10 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 									// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
+										*pRenderMap++ = 0;			// A
 										*pRenderMap++ = val;		// R
 										*pRenderMap++ = val;		// G
 										*pRenderMap++ = val;		// B
-										*pRenderMap++ = 0;			// A
 									}
 								}
 
