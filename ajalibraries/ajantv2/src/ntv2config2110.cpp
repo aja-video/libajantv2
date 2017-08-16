@@ -30,9 +30,12 @@ void tx_2110Config::init()
     remoteIP.erase();
     videoFormat  = NTV2_FORMAT_UNKNOWN;
     videoSamples = VPIDSampling_YUV_422;
-    payloadLen = 0;
+    payloadLen     = 0;
     lastPayLoadLen = 0;
-    pktsPerLine = 0;
+    pktsPerLine    = 0;
+    ttl            = 0x80;
+    tos            = 0x64;
+    ssrc           = 0;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
@@ -637,6 +640,9 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     // hold off access while we update channel regs
     AcquireFramerControlAccess(baseAddrFramer);
 
+    uint32_t val = (txConfig.tos << 8) | txConfig.ttl;
+    WriteChannelRegister(kRegFramer_ip_hdr_media + baseAddrFramer, val);
+
     // dest ip address
     destIp = inet_addr(txConfig.remoteIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
@@ -866,6 +872,10 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
     // Select channel
     SelectTxFramerChannel(channel, stream, baseAddrFramer);
+
+    ReadChannelRegister(kRegFramer_ip_hdr_media + baseAddrFramer,&val);
+    txConfig.ttl = val & 0xff;
+    txConfig.tos = (val & 0xff00) >> 8;
 
     // dest ip address
     ReadChannelRegister(kRegFramer_dst_ip + baseAddrFramer,&val);

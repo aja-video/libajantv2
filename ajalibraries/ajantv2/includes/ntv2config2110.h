@@ -55,6 +55,8 @@ public:
     uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
     uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
     uint16_t    payloadType;
+    uint8_t     tos;            // type of service
+    uint8_t     ttl;            // time to live
     uint32_t    ssrc;
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
