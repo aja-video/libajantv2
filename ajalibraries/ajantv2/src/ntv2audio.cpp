@@ -59,8 +59,15 @@ static const ULWord	gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift []=
 															kRegShiftAudioMixerOutputChannel5Mute,	kRegShiftAudioMixerOutputChannel6Mute,	kRegShiftAudioMixerOutputChannel7Mute,	kRegShiftAudioMixerOutputChannel8Mute,
 															kRegShiftAudioMixerOutputChannel9Mute,	kRegShiftAudioMixerOutputChannel10Mute,	kRegShiftAudioMixerOutputChannel11Mute,	kRegShiftAudioMixerOutputChannel12Mute,
 															kRegShiftAudioMixerOutputChannel13Mute,	kRegShiftAudioMixerOutputChannel14Mute,	kRegShiftAudioMixerOutputChannel15Mute,	kRegShiftAudioMixerOutputChannel16Mute,	0};
-static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelRegNum [] = {kRegAudioMixerMainInputLevelsPair0,	kRegAudioMixerMainInputLevelsPair1,	kRegAudioMixerMainInputLevelsPair2,	kRegAudioMixerMainInputLevelsPair3,
-																			 kRegAudioMixerMainInputLevelsPair4,	kRegAudioMixerMainInputLevelsPair5,	kRegAudioMixerMainInputLevelsPair6,	kRegAudioMixerMainInputLevelsPair7,	0};
+static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelRegNum [] = {kRegAudioMixerMainInputLevelsPair0,kRegAudioMixerMainInputLevelsPair0,
+																			 kRegAudioMixerMainInputLevelsPair1,kRegAudioMixerMainInputLevelsPair1,
+																			 kRegAudioMixerMainInputLevelsPair2,kRegAudioMixerMainInputLevelsPair2,
+																			 kRegAudioMixerMainInputLevelsPair3,kRegAudioMixerMainInputLevelsPair3,
+																			 kRegAudioMixerMainInputLevelsPair4,kRegAudioMixerMainInputLevelsPair4,
+																			 kRegAudioMixerMainInputLevelsPair5,kRegAudioMixerMainInputLevelsPair5,
+																			 kRegAudioMixerMainInputLevelsPair6,kRegAudioMixerMainInputLevelsPair6,
+																			 kRegAudioMixerMainInputLevelsPair7,kRegAudioMixerMainInputLevelsPair7,
+																			 0};
 static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelMask [] = {kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,
 																			 kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	0};
 static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelShift [] = {kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,	kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,
@@ -919,7 +926,9 @@ ULWord CNTV2Card::GetAudioMixerMainInputChannelLevel(NTV2AudioMixerChannel inCha
 		return false;
 
 	uint32_t channelLevel = 0;
-	if(!ReadRegister(gAudioMixerChannelToAudioMixerMainInputLevelRegNum[inChannel], &channelLevel, gAudioMixerChannelToAudioMixerMainInputLevelMask[inChannel], gAudioMixerChannelToAudioMixerMainInputLevelShift[inChannel]))
+	if(!ReadRegister(gAudioMixerChannelToAudioMixerMainInputLevelRegNum[inChannel], &channelLevel,
+					 (inChannel%2 == 0) ? kRegMaskAudioMixerInputLeftLevel : kRegMaskAudioMixerInputRightLevel,
+					 (inChannel%2 == 0) ? kRegShiftAudioMixerInputLeftLevel : kRegShiftAudioMixerInputRightLevel))
 		return false;
 	return channelLevel;
 }
