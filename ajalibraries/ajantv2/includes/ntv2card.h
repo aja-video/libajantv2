@@ -905,8 +905,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inNewValue		Specifies the new NTV2FrameRate value the AJA device is to be configured with.
 		@param[in]	inChannel		Specifies the NTV2Channel of interest.
-		@details	This function changes bits 0, 1, 2 and 22 of the AJA device's Global Control Register (register 0),
-					to change the device's frame rate configuration.
+		@note		The frame rate setting for NTV2_CHANNEL1 dictates the device reference clock for both single
+					and multi-format mode (see \ref deviceclockingandsync).
 	**/
 	AJA_VIRTUAL bool	SetFrameRate (NTV2FrameRate inNewValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -915,8 +915,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out]	outValue	Receives the device's current NTV2FrameRate value.
 		@param[in]	inChannel	Specifies the NTV2Channel of interest.
-		@details	This function queries the AJA device's Global Control Register (register 0), and inspects bits 0, 1, 2 and 22,
-					to determine the device's current frame rate configuration.
+		@note		The frame rate setting for NTV2_CHANNEL1 dictates the device reference clock for both single
+					and multi-format mode (see \ref deviceclockingandsync).
 	**/
 	AJA_VIRTUAL bool		GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL inline bool	GetFrameRate (NTV2FrameRate * pOutValue, NTV2Channel inChannel = NTV2_CHANNEL1)		{return pOutValue ? GetFrameRate (*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
@@ -2795,7 +2795,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel				Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-												channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+												channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 												are on the device.
 
 		@param[in]		inFrameCount			Specifies the number of contiguous device frame buffers to be continuously cycled through.
@@ -2855,7 +2855,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel				Specifies the NTV2Channel to use. Some devices will not have all of the possible output
-												channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+												channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 												are on the device.
 
 		@param[in]		inFrameCount			Specifies the number of contiguous device frame buffers to be continuously cycled through.
@@ -2914,7 +2914,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@param[in]		inStartTime		Optionally specifies a future start time as an unsigned 64-bit "tick count" value that
@@ -2950,7 +2950,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@param[in]		inAbort			Specifies if AutoCirculate is to be immediately stopped, not gracefully.
@@ -2972,7 +2972,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@details	When pausing, if the channel is in the "running" state, it will be set to "paused", and at the next VBI, the driver
@@ -2986,7 +2986,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@param[in]		inClearDropCount	Specify 'true' to clear the AUTOCIRCULATE_STATUS::acFramesDropped counter; otherwise
@@ -3003,7 +3003,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
         @param[in]		inClearDropCount	Specify 'true' to clear the AUTOCIRCULATE_STATUS::acFramesDropped counter; otherwise
@@ -3024,7 +3024,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@param[in]		inPreRollFrames	Specifies the number of frames to skip (ignore) before starting AutoCirculate.
@@ -3045,7 +3045,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel		Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-										channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+										channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 										are on the device.
 
 		@param[out]		outStatus		Receives the AUTOCIRCULATE_STATUS information for the channel.
@@ -3063,7 +3063,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel				Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-												channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+												channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 												are on the device.
 
 		@param[in]		inFrameNumber			Specifies the zero-based frame number of interest. This value must be no less than <i>acStartFrame</i>
@@ -3085,7 +3085,7 @@ public:
 		@return		True if successful; otherwise false.
 
 		@param[in]		inChannel			Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-											channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+											channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 											are on the device.
 
 		@param[in]		inNewActiveFrame	Specifies the zero-based frame number to use. This value must be no less than <i>acStartFrame</i>
@@ -3105,7 +3105,7 @@ public:
 		@brief		Transfers all or part of a frame as specified in the given AUTOCIRCULATE_TRANSFER object to/from the host.
 
 		@param[in]		inChannel				Specifies the NTV2Channel to use. Some devices will not have all of the possible input
-												channels. Use the NTV2DeviceGetNumFrameStores function to discover how many frame stores
+												channels. Use the ::NTV2DeviceGetNumFrameStores function to discover how many frame stores
 												are on the device.
 
 		@param[in]		inOutTransferInfo		Specifies the AUTOCIRCULATE_TRANSFER information to use, which specifies the transfer
@@ -3280,9 +3280,9 @@ public:
 									Each vertical increment/decrement moves the output relative to the reference by one line.
 		@param[in]	inOutputSpigot	Optionally specifies the SDI output of interest. Defaults to zero (SDI Out 1).
 		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
-		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see NTV2DeviceCanDoMultiFormat)
-					and the device is currently in multi-format mode (see GetMultiFormatMode and SetMultiFormatMode). Otherwise,
-					the timing is changed for all SDI outputs.
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, the timing is changed for all SDI outputs.
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	WriteOutputTimingControl (const ULWord inValue, const UWord inOutputSpigot = 0);
@@ -3291,9 +3291,9 @@ public:
 		@brief	Returns the current output timing control value for the given SDI output spigot.
 		@param[out]	outValue		Receives the current output timing control value.
 		@param[in]	inOutputSpigot	Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
-		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see NTV2DeviceCanDoMultiFormat)
-					and the device is currently in multi-format mode (see GetMultiFormatMode and SetMultiFormatMode). Otherwise,
-					this function only reports the timing for SDI Output 1 (i.e., the "global" output timing).
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function only reports the timing for SDI Output 1 (i.e., the "global" output timing).
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	ReadOutputTimingControl (ULWord & outValue, const UWord inOutputSpigot = 0);
@@ -4340,7 +4340,7 @@ public:
 		@param[out]	outChannel		Receives the NTV2Channel that is currently providing the clock reference for reading the given analog LTC input.
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
-					and GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
 	**/
 	AJA_VIRTUAL bool	GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel & outChannel);
 
@@ -4351,7 +4351,7 @@ public:
 		@param[in]	inChannel		Specifies the NTV2Channel that should provide the clock reference for reading the given analog LTC input.
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
-					and GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
 	**/
 	AJA_VIRTUAL bool	SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Channel inChannel);
 
@@ -4372,7 +4372,7 @@ public:
 		@param[out]	outChannel		Receives the NTV2Channel that is currently providing the clock reference for writing the given analog LTC output.
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
-					and GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
 	**/
 	AJA_VIRTUAL bool	GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channel & outChannel);
 
@@ -4383,7 +4383,7 @@ public:
 		@param[in]	inChannel		Specifies the NTV2Channel that should provide the clock reference for writing the given analog LTC output.
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
-					and GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
 	**/
 	AJA_VIRTUAL bool	SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2Channel inChannel);
 	///@}
@@ -4799,9 +4799,9 @@ public:
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
 
 	/**
-		@brief		Answers if the device is operating in multi-format (per channel) mode or not.
-					If enabled, each device channel can handle a different video format (provided it's in the same clock family).
-					If disabled, all device channels have the same video format. See \ref clockingandsync for more information.
+		@brief		Answers if the device is operating in multiple-format per channel (independent channel) mode or not.
+					If enabled, each device channel can accommodate a different video format (provided it's in the same clock family).
+					If disabled, all device channels have the same video format. See \ref deviceclockingandsync for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
