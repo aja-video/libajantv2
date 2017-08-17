@@ -161,7 +161,10 @@ public:
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		
+		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
+
 		//	Anc Ins/Ext
 		SetupAncInsExt();
 		
@@ -1206,6 +1209,35 @@ private:
 			return oss.str();
 		}
 	}	mDecodeSysmonVccIntDieTemp;
+	
+	struct DecodeSDITransmitCtrl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			ostringstream	oss;
+			if (::NTV2DeviceHasBiDirectionalSDI(inDeviceID))
+			{
+				const uint32_t	txEnableBits	(((inRegValue & 0x0F000000) >> 20) | ((inRegValue & 0xF0000000) >> 28));
+				const UWord		numInputs		(::NTV2DeviceGetNumVideoInputs(inDeviceID));
+				const UWord		numOutputs		(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
+				const UWord		numSpigots		(numInputs > numOutputs  ?  numInputs  :  numOutputs);
+				if (numSpigots)
+					for (UWord spigot(0);  spigot < numSpigots;  )
+					{
+						const bool	txEnabled	(txEnableBits & BIT(spigot));
+						oss	<< "SDI " << DEC(spigot+1) << ": " << (txEnabled ? "Output/Transmit" : "Input/Receive");
+						if (++spigot < numSpigots)
+							oss << endl;
+					}
+				else
+					oss << "(No SDI inputs or outputs)";
+			}
+			else
+				oss	<< "(Bi-directional SDI not supported)";
+			return oss.str();
+		}
+	}	mDecodeSDITransmitCtrl;
 
 	struct DecodeBitfileDateTime : public Decoder
 	{

@@ -795,7 +795,7 @@ const char * ntv2RegStrings[] =
 	"kRegLTC2OutBits32_63",							// 253
 	"kRegLTC2InBits0_31",							// 254
 	"kRegLTC2InBits32_63",							// 255
-	"kRegSDIDirectionControl",						// 256
+	"kRegSDITransmitControl",						// 256
 	"kRegCh3Control",								// 257
 	"kRegCh3OutputFrame",							// 258
 	"kRegCh3InputFrame",							// 259
