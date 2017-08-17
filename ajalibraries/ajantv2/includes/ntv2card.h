@@ -458,6 +458,7 @@ public:
 		@return		True if the device supports the given input source.
 	**/
 	AJA_VIRTUAL bool	DeviceIsDNxIV ();
+	AJA_VIRTUAL bool	DeviceHasMicInput ();
 
 	/**
 		@brief		Fetches the requested boolean value. Typically called to determine device features.

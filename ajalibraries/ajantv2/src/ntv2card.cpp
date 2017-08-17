@@ -570,11 +570,18 @@ bool CNTV2Card::DeviceCanDoAudioMixer ()
 
 bool CNTV2Card::DeviceIsDNxIV ()
 {
-	ULWord isMixerSupported = 0;
-	if(GetDeviceID() == DEVICE_ID_IO4KPLUS)
+	ULWord isMicSupported = 0;
+	ReadRegister(kRegGlobalControl2, &isMicSupported, BIT(19), 19);
+	if(isMicSupported == 1)
 		return true;
-	ReadRegister(kRegGlobalControl2, &isMixerSupported, BIT(19), 19);
-	if(isMixerSupported == 1)
+	return false;
+}
+
+bool CNTV2Card::DeviceHasMicInput ()
+{
+	ULWord isMicSupported = 0;
+	ReadRegister(kRegGlobalControl2, &isMicSupported, BIT(19), 19);
+	if(isMicSupported == 1)
 		return true;
 	return false;
 }
