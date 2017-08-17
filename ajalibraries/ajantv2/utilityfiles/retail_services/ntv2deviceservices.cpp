@@ -512,8 +512,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
 		}
 		
-		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
-		mCard->SetAudioOutputMonitorSource(NTV2_AudioMonitor1_2, NTV2_CHANNEL4);
+		//mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
+		//mCard->SetAudioOutputMonitorSource(NTV2_AudioMonitor1_2, NTV2_CHANNEL4);
 		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(hostAudioSystem);
@@ -582,6 +582,25 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	case 1:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL1, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 		break;
+	}
+	
+	// audio monitor
+	ULWord chSelect = NTV2_AudioMonitor1_2;
+	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, &chSelect);
+	if (deviceID == DEVICE_ID_KONA3G || deviceID == DEVICE_ID_KONA3GQUAD ||
+		deviceID == DEVICE_ID_KONA4  || deviceID == DEVICE_ID_KONA4UFC ||
+		deviceID == DEVICE_ID_IO4K   || deviceID == DEVICE_ID_IOXT)
+	{
+		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
+	}
+	else if (deviceID == DEVICE_ID_IO4KPLUS)
+	{
+		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
+		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel5_8);
+	}
+	else
+	{
+		mCard->WriteRegister(kRegAud1Control, chSelect, kK2RegMaskKBoxAnalogMonitor, kK2RegShiftKBoxAnalogMonitor);
 	}
 
 	//Setup LUTs

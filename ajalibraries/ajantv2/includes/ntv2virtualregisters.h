@@ -450,7 +450,7 @@ typedef enum
     kVRegKIPEncCfgError                     = VIRTUALREG_START+505,
     kVRegKIPDecCfgError                     = VIRTUALREG_START+506,
 	
-    kVRegHostAudioSystem                    = VIRTUALREG_START+507,
+    kVRegAudioMonitorChannelSelect          = VIRTUALREG_START+507,
 	kVRegAudioMixerOverrideState            = VIRTUALREG_START+508,
     kVRegAudioMixerSourceMainEnable         = VIRTUALREG_START+509,
     kVRegAudioMixerSourceAux1Enable         = VIRTUALREG_START+510,

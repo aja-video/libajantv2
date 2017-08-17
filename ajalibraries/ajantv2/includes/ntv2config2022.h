@@ -57,6 +57,10 @@ public:
     uint32_t	secondaryLocalPort;		///< @brief	Specifies the local (source) port number.
     std::string	secondaryRemoteIP;      ///< @brief	Specifies remote (destination) IP address.
     uint32_t	secondaryRemotePort;	///< @brief	Specifies the remote (destination) port number.
+
+    uint8_t     tos;            // type of service
+    uint8_t     ttl;            // time to live
+    uint32_t    ssrc;
 };
 
 /**
