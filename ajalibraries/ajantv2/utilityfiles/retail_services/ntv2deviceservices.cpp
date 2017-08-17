@@ -509,7 +509,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
 			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
-			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
+			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);			// unmute all output channels
+			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
 		}
 		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
