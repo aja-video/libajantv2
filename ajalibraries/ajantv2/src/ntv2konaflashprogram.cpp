@@ -472,14 +472,14 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 
-//		if (verify)
-//		{
-//  			if ( !VerifyFlash(_flashID) )
-//			{
-//				SetBankSelect(BANK_0);
-//  				throw "Program Didn't Verify";
-//			}
-//		}
+		if (verify)
+		{
+			if ( !VerifyFlash(_flashID) )
+			{
+				SetBankSelect(BANK_0);
+				throw "Program Didn't Verify";
+			}
+		}
 		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x9C);
@@ -620,8 +620,22 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 	uint32_t* bitFilePtr = (uint32_t*)_bitFileBuffer;
 	uint32_t dwordSizeCount = (_bitFileSize+4)/4;
 	int32_t percentComplete = 0;
-	for (uint32_t count = 0; count < dwordSizeCount; count += 100, baseAddress += 400, bitFilePtr += 100)//count++, baseAddress += 4 )
+	for (uint32_t count = 0; count < dwordSizeCount; count += 64, baseAddress += 256, bitFilePtr += 64)//count++, baseAddress += 4 )
 	{
+		if (NTV2DeviceHasSPIv5(_boardID) && baseAddress == _bankSize)
+		{
+			baseAddress = 0;
+			switch(_flashID)
+			{
+			default:
+			case MAIN_FLASHBLOCK:
+				SetBankSelect(BANK_1);
+				break;
+			case FAILSAFE_FLASHBLOCK:
+				SetBankSelect(BANK_3);
+				break;
+			}
+		}
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
 		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
 		WaitForFlashNOTBusy();
@@ -642,6 +656,8 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 			fflush(stdout);
 		}
 	}
+
+	SetBankSelect(BANK_0);
 
 	if ( errorCount )
 	{
