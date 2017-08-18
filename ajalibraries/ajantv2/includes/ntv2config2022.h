@@ -50,6 +50,9 @@ public:
     bool operator == ( const tx_2022_channel &other );
     
 public:
+    bool        linkAEnable;
+    bool        linkBEnable;
+
     uint32_t	primaryLocalPort;		///< @brief	Specifies the local (source) port number.
     std::string	primaryRemoteIP;        ///< @brief	Specifies remote (destination) IP address.
     uint32_t	primaryRemotePort;		///< @brief	Specifies the remote (destination) port number.
@@ -78,6 +81,9 @@ public:
     bool operator == ( const rx_2022_channel &other );
     
 public:
+    bool        linkAEnable;
+    bool        linkBEnable;
+
     uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
     std::string	primarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2022_SOURCE_IP set). If it's in the multiclass range, then
                                         ///			by default, the IGMP multicast group will be joined (see CNTV2Config2022::SetIGMPDisable).
@@ -184,14 +190,14 @@ public:
     bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2022_channel & rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig);
 
-    bool        SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
+    bool        SetRxChannelEnable(const NTV2Channel channel, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig);
 
-    bool        SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7);
-    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled, bool & enable2022_7);
+    bool        SetTxChannelEnable(const NTV2Channel channel, bool enable);
+    bool        GetTxChannelEnable(const NTV2Channel channel, bool & enabled);
 
     bool        SetJ2KEncoderConfiguration(const NTV2Channel channel, const j2kEncoderConfig & j2kConfig);
     bool        GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kEncoderConfig &j2kConfig);

@@ -21,12 +21,17 @@ using namespace std;
 
 void tx_2022_channel::init()
 {
-    primaryLocalPort    = 0;
+    linkAEnable         = true;
+    linkBEnable         = false;
+
     primaryRemoteIP.erase();
+    primaryLocalPort    = 0;
     primaryRemotePort   = 0;
-    secondaryLocalPort  = 0;
+
     secondaryRemoteIP.erase();
+    secondaryLocalPort  = 0;
     secondaryRemotePort = 0;
+
     tos                 = 0x64;
     ttl                 = 0x80;
     ssrc                = 0;
@@ -57,6 +62,9 @@ bool tx_2022_channel::operator == ( const tx_2022_channel &other )
 
 void rx_2022_channel::init()
 {
+    linkAEnable         = true;
+    linkBEnable         = false;
+
     primaryRxMatch  = 0;
     primarySourceIP.erase();
     primaryDestIP.erase();
@@ -64,6 +72,7 @@ void rx_2022_channel::init()
     primaryDestPort = 0;
     primarySsrc = 0;
     primaryVlan = 0;
+
     secondaryRxMatch  = 0;
     secondarySourceIP.erase();
     secondaryDestIP.erase();
@@ -71,6 +80,7 @@ void rx_2022_channel::init()
     secondaryDestPort = 0;
     secondarySsrc = 0;
     secondaryVlan = 0;
+
     networkPathDiff = 50;
     playoutDelay = 50;
 }
@@ -630,7 +640,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     return true;
 }
 
-bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
 {
     uint32_t    baseAddr;
     bool        rv;
@@ -639,21 +649,18 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
 
     if (enable && _biDirectionalChannels)
     {
-        bool txEnabled, tx20227Enabled;
-        GetTxChannelEnable(channel, txEnabled, tx20227Enabled);
+        bool txEnabled;
+        GetTxChannelEnable(channel, txEnabled);
         if (txEnabled)
         {
             // disable tx channel
-            SetTxChannelEnable(channel,false, enable2022_7);
+            SetTxChannelEnable(channel,false);
         }
         mDevice.SetSDITransmitEnable(channel, false);
     }
 
-    // select primary channel
-    rv = SelectRxChannel(channel, true, baseAddr);
-    if (!rv) return false;
-
-    if (_is2022_7 && enable2022_7)
+    bool linkBEnable = false;
+    if (_is2022_7 && linkBEnable)
     {
         // IGMP subscription for secondary channel
         port = SFP_BOTTOM;
@@ -665,14 +672,22 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable,
         }
     }
 
-    // IGMP subscription for primary channel
-    port = GetRxPort(channel);
-    GetIGMPDisable(port, disableIGMP);
-
-    if (!disableIGMP)
+    bool linkAEnable = true;
+    if (linkAEnable)
     {
-        EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,enable);
+        // IGMP subscription for primary channel
+        port = GetRxPort(channel);
+        GetIGMPDisable(port, disableIGMP);
+
+        if (!disableIGMP)
+        {
+            EnableIGMPGroup(port,channel,NTV2_VIDEO_STREAM,enable);
+        }
     }
+
+    // select primary channel core
+    rv = SelectRxChannel(channel, true, baseAddr);
+    if (!rv) return false;
 
     if (enable)
     {
@@ -784,7 +799,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 				rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
 				if (!rv)
 				{
-					SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
+                    SetTxChannelEnable(channel, false); // stop transmit
 					mError = "Failed to retrieve MAC address from ARP table";
 					return false;
 				}
@@ -875,7 +890,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
         if (!rv)
         {
-            SetTxChannelEnable(channel, false, enable2022_7); // stop transmit
+            SetTxChannelEnable(channel, false); // stop transmit
             mError = "Failed to retrieve MAC address from ARP table";
             return false;
         }
@@ -958,33 +973,14 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
     return true;
 }
 
-bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable, bool enable2022_7)
+bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 {
     uint32_t    baseAddr;
     bool        rv;
     uint32_t    localIp;
 
-    if (!enable)
-    {
-        if (_is2022_7)
-        {
-            // always disable secondary channel if there is one
-            rv = SelectTxChannel(channel, false, baseAddr);
-            if (!rv) return false;
-
-            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-        }
-
-        // disable the primary
-        rv = SelectTxChannel(channel, true, baseAddr);
-        if (!rv) return false;
-
-        WriteChannelRegister(kReg2022_6_tx_hitless_config + baseAddr,0x01);  // 1 disables hitless mode
-        WriteChannelRegister(kReg2022_6_tx_tx_enable      + baseAddr,0x01);  // enables tx over mac1/mac2
-        WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
-        return true;
-    }
-
+    bool linkA = false;
+    bool linkB = true;
 
     if (_biDirectionalChannels)
     {
@@ -993,12 +989,51 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         if (rxEnabled)
         {
             // disable rx channel
-            SetRxChannelEnable(channel,false, enable2022_7);
+            SetRxChannelEnable(channel,false);
         }
         mDevice.SetSDITransmitEnable(channel, true);
     }
 
-    if (_is2022_7 && enable2022_7)
+    // select primary channel
+    rv = SelectTxChannel(channel, true, baseAddr);
+    if (!rv) return false;
+
+    if (!enable)
+    {
+        rv = SelectTxChannel(channel, true, baseAddr);
+        if (!rv) return false;
+
+        WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
+    }
+
+    // hold off access while we update channel regs
+    ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
+
+     WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
+
+    if (enable && linkA)
+    {
+        if (GetTxPort(channel) == SFP_TOP)
+        {
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
+        }
+        else
+        {
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+        }
+        WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
+
+        WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
+    }
+    else
+    {
+            WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x00);  // enables tx over mac1/mac2
+    }
+
+    // enable  register updates
+    ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
+
+    if (_is2022_7)
     {
         // Select secondary channel
         rv = SelectTxChannel(channel, false, baseAddr);
@@ -1007,69 +1042,40 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable,
         // hold off access while we update channel regs
         ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
 
-        if (enable)
+        WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
+
+        if (linkB && enable)
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
             WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
 
-            // enables
+            // enable
             WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
         }
         else
         {
             // disable
             WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x0);   // disables tx over mac1/mac2
-            WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x0);   // disables channel
         }
 
         // enable  register updates
         ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
     }
 
-    // select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
-    if (!rv) return false;
-
-    // hold off access while we update channel regs
-    ChannelSemaphoreClear(kReg2022_6_tx_control, baseAddr);
-
-    if (GetTxPort(channel) == SFP_TOP)
+    if (enable)
     {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
+        WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
     }
-    else
-    {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
-    }
-    WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
-
-    if (_is2022_7 && enable2022_7)
-    {
-        WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
-    }
-    else
-    {
-        WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x01); // 1 disables hitless mode
-    }
-
-    // enables
-    WriteChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr,0x01);  // enables tx over mac1/mac2
-    WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
-
-
-    // enable  register updates
-    ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
 
     return true;
 }
 
-bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled, bool & enable2022_7)
+bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabled)
 {
     uint32_t baseAddr;
     uint32_t val;
     bool rv;
-
+#if 0
     if (_is2022_7)
     {
         // Select secondary channel
@@ -1083,7 +1089,7 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
     {
         enable2022_7 = false;
     }
-
+#endif
     // select primary channel
     rv = SelectTxChannel(channel, true, baseAddr);
     if (!rv) return false;
