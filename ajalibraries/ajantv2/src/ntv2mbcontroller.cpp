@@ -130,7 +130,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 
 bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
-    if (!(getFeatures()) & SAREK_MB_PRESENT)
+    if ( (getFeatures() & SAREK_MB_PRESENT) == 0)
     return true;
 
     bool rv = AcquireMailbox();
@@ -223,7 +223,7 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
 
 bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
 {
-    if (!getFeatures() & SAREK_MB_PRESENT)
+    if ( (getFeatures() & SAREK_MB_PRESENT) == 0)
         return true;
 
     sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d",

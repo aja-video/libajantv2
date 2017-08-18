@@ -232,8 +232,8 @@ private:
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
+    bool        SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
+    bool        SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 

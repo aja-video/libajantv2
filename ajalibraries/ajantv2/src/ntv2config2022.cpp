@@ -408,7 +408,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     if (_is2022_7)
     {
         // select secondary channel
-        rv = SelectRxChannel(channel, false, baseAddr);
+        rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
@@ -461,7 +461,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     }
 
     // select primary channel
-    rv = SelectRxChannel(channel, true, baseAddr);
+    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
@@ -573,7 +573,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectRxChannel(channel, false, baseAddr);
+        rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
         if (!rv) return false;
 
         // source ip address
@@ -607,7 +607,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     }
 
     // select primary channel
-    rv = SelectRxChannel(channel, true, baseAddr);
+    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     // source ip address
@@ -697,7 +697,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // select primary channel core
-    rv = SelectRxChannel(channel, true, baseAddr);
+    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     if (enable)
@@ -717,7 +717,7 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     uint32_t baseAddr;
 
     // select primary channel
-    bool rv = SelectRxChannel(channel, true, baseAddr);
+    bool rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     uint32_t val;
@@ -746,7 +746,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
+        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
@@ -841,7 +841,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     }
 
     // select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
@@ -942,7 +942,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
     if (_is2022_7)
     {
         // select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
+        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
         if (!rv) return false;
 
         ReadChannelRegister(kReg2022_6_tx_ip_header + baseAddr,&val);
@@ -965,7 +965,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
     }
 
     // Select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     // dest ip address
@@ -1006,12 +1006,12 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     if (!enable)
     {
-        rv = SelectTxChannel(channel, true, baseAddr);
+        rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
         if (!rv) return false;
 
         WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
@@ -1047,7 +1047,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectTxChannel(channel, false, baseAddr);
+        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
@@ -1102,7 +1102,7 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
     }
 #endif
     // select primary channel
-    rv = SelectTxChannel(channel, true, baseAddr);
+    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
     ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
@@ -1274,7 +1274,7 @@ eSFP  CNTV2Config2022::GetTxPort(NTV2Channel chan)
 }
 
 
-bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr)
+bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1309,7 +1309,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    if (!primaryChannel)
+    if (!link)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1318,7 +1318,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, bool primaryChannel, 
     return true;
 }
 
-bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr)
+bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1353,7 +1353,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, bool primaryChannel, 
         }
     }
 
-    if (!primaryChannel)
+    if (!link)
         channelIndex |= 0x80000000;
 
     // select channel

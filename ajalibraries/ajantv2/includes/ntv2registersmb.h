@@ -63,7 +63,7 @@
 #define kRegSarekNET1               23
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
-#define kRegSarekunused26           26
+#define kRegSarekLinkModes          26
 #define kRegSarekunused27           27
 #define kRegSarekunused28           28
 #define kRegSarekunused29           29
