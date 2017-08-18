@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2022.h
     @brief		Declares the CNTV2Config2022 class.
-	@copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2022CONFIG_H
@@ -48,7 +48,7 @@ public:
 
     bool operator != ( const tx_2022_channel &other );
     bool operator == ( const tx_2022_channel &other );
-    
+
 public:
     bool        linkAEnable;
     bool        linkBEnable;
@@ -79,7 +79,7 @@ public:
 
     bool operator != ( const rx_2022_channel &other );
     bool operator == ( const rx_2022_channel &other );
-    
+
 public:
     bool        linkAEnable;
     bool        linkBEnable;
@@ -132,15 +132,15 @@ public:
 class j2kDecoderConfig
 {
 public:
-	typedef enum
-	{
-		eProgSel_Off,
-		eProgSel_AutoFirstProg,
-		eProgSel_LowestProgNum,
-		eProgSel_SpecificProgNum,
-		eProgSel_SpecificProgPID,
-		eProgSel_Default = eProgSel_AutoFirstProg,
-	} eProgSelMode_t;
+    typedef enum
+    {
+        eProgSel_Off,
+        eProgSel_AutoFirstProg,
+        eProgSel_LowestProgNum,
+        eProgSel_SpecificProgNum,
+        eProgSel_SpecificProgPID,
+        eProgSel_Default = eProgSel_AutoFirstProg,
+    } eProgSelMode_t;
 
     j2kDecoderConfig() {init();}
     void init();
@@ -223,16 +223,17 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
-    bool        SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
 
-	// If method returns false call this to get details
+    // If method returns false call this to get details
     std::string getLastError();
-	
+
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+
+    bool        SelectRxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
+    bool        SelectTxChannel(NTV2Channel channel, bool primaryChannel, uint32_t & baseAddr);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
