@@ -232,7 +232,7 @@ class TSGenerator
         void put16( uint16_t val, int &pos )
         {
             _pkt8[pos++] = (uint8_t)(val>>8);
-            _pkt8[pos++] = val;
+            _pkt8[pos++] = (uint8_t)val;
         }
 
         void put32( uint32_t val, int &pos )
@@ -240,7 +240,7 @@ class TSGenerator
             _pkt8[pos++] = (uint8_t)(val>>24);
             _pkt8[pos++] = (uint8_t)(val>>16);
             _pkt8[pos++] = (uint8_t)(val>>8);
-            _pkt8[pos++] = val;
+            _pkt8[pos++] = (uint8_t)val;
         }
 };
 
