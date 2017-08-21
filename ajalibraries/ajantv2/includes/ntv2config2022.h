@@ -193,7 +193,7 @@ public:
     bool        SetRxChannelEnable(const NTV2Channel channel, bool enable);
     bool        GetRxChannelEnable(const NTV2Channel channel, bool & enabled);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig, bool enable2022_7);
+    bool        SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, tx_2022_channel & txConfig);
 
     bool        SetTxChannelEnable(const NTV2Channel channel, bool enable);
@@ -234,6 +234,9 @@ private:
 
     bool        SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
+
+    bool        SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
+    bool        GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
