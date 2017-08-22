@@ -6844,6 +6844,7 @@ string NTV2AudioSourceToString (const NTV2AudioSource inValue,  const bool inCom
 		case NTV2_AUDIO_AES:		return inCompactDisplay ? "AES"		: "NTV2_AUDIO_AES";
 		case NTV2_AUDIO_ANALOG:		return inCompactDisplay ? "Analog"	: "NTV2_AUDIO_ANALOG";
 		case NTV2_AUDIO_HDMI:		return inCompactDisplay ? "HDMI"	: "NTV2_AUDIO_HDMI";
+		case NTV2_AUDIO_MIC:		return inCompactDisplay ? "Mic"		: "NTV2_AUDIO_MIC";
 		default:					break;
 	}
 	return inCompactDisplay ? "" : "NTV2_AUDIO_SOURCE_INVALID";
