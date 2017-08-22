@@ -1325,7 +1325,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (!link)
+    if (link == SFP_BOTTOM)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1369,7 +1369,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (!link)
+    if (link == SFP_BOTTOM)
         channelIndex |= 0x80000000;
 
     // select channel
