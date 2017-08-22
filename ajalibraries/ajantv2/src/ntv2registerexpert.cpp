@@ -317,6 +317,26 @@ private:
 		DefineRegister (kRegAud1Counter,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Audio,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegAudioOutputSourceMap,"",mDecodeAudOutputSrcMap,		READWRITE,	kRegClass_Audio,	kRegClass_Output,	kRegClass_AES);
 		DefineRegClass (kRegAudioOutputSourceMap, kRegClass_HDMI);
+
+		DefineRegister (kRegAudioMixerInputSelects,				"kRegAudioMixerInputSelects",				mAudMxrInputSelDecoder,	READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainGain,					"kRegAudioMixerMainGain",					mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux1GainCh1,				"kRegAudioMixerAux1GainCh1",				mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux2GainCh1,				"kRegAudioMixerAux2GainCh1",				mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerChannelSelect,			"kRegAudioMixerChannelSelect",				mAudMxrChanSelDecoder,	READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMutes,					"kRegAudioMixerMutes",						mAudMxrMutesDecoder,	READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux1GainCh2,				"kRegAudioMixerAux1GainCh2",				mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux2GainCh2,				"kRegAudioMixerAux2GainCh2",				mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux1InputLevels,			"kRegAudioMixerAux1InputLevels",			mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerAux2InputLevels,			"kRegAudioMixerAux2InputLevels",			mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair0,		"kRegAudioMixerMainInputLevelsPair0",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair1,		"kRegAudioMixerMainInputLevelsPair1",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair2,		"kRegAudioMixerMainInputLevelsPair2",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair3,		"kRegAudioMixerMainInputLevelsPair3",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair4,		"kRegAudioMixerMainInputLevelsPair4",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair5,		"kRegAudioMixerMainInputLevelsPair5",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair6,		"kRegAudioMixerMainInputLevelsPair6",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainInputLevelsPair7,		"kRegAudioMixerMainInputLevelsPair7",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMixedChannelOutputLevels,	"kRegAudioMixerMixedChannelOutputLevels",	mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
 	}
 	
 	void SetupDMARegs(void)
@@ -841,6 +861,19 @@ private:
 		DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");
 		DefineRegName	(kVRegZeroHostAncPostCapture,			"kVRegZeroHostAncPostCapture");
 		DefineRegName	(kVRegZeroDeviceAncPostCapture,			"kVRegZeroDeviceAncPostCapture");
+		DefineRegName	(kVRegAudioMonitorChannelSelect,		"kVRegAudioMonitorChannelSelect");
+		DefineRegName	(kVRegAudioMixerOverrideState,			"kVRegAudioMixerOverrideState");
+		DefineRegName	(kVRegAudioMixerSourceMainEnable,		"kVRegAudioMixerSourceMainEnable");
+		DefineRegName	(kVRegAudioMixerSourceAux1Enable,		"kVRegAudioMixerSourceAux1Enable");
+		DefineRegName	(kVRegAudioMixerSourceAux2Enable,		"kVRegAudioMixerSourceAux2Enable");
+		DefineRegName	(kVRegAudioMixerSourceMainGain,			"kVRegAudioMixerSourceMainGain");
+		DefineRegName	(kVRegAudioMixerSourceAux1Gain,			"kVRegAudioMixerSourceAux1Gain");
+		DefineRegName	(kVRegAudioMixerSourceAux2Gain,			"kVRegAudioMixerSourceAux2Gain");
+		DefineRegName	(kVRegAudioMixerSourceMainSelect,		"kVRegAudioMixerSourceMainSelect");
+		DefineRegName	(kVRegAudioMixerSourceAux1Select,		"kVRegAudioMixerSourceAux1Select");
+		DefineRegName	(kVRegAudioMixerSourceAux2Select,		"kVRegAudioMixerSourceAux2Select");
+		DefineRegName	(kVRegSwizzle4kInput,					"kVRegSwizzle4kInput");
+		DefineRegName	(kVRegSwizzle4kOutput,					"kVRegSwizzle4kOutput");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 		
@@ -941,6 +974,16 @@ public:
 			const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_SDIError));
 			for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
 				result.insert (*it);
+		}
+		if (::NTV2DeviceCanDoAudioMixer(inDeviceID))
+		{
+			for (ULWord regNum(kRegAudioMixerInputSelects);  regNum <= kRegAudioMixerAux2GainCh2;  regNum++)
+				result.insert(regNum);
+			for (ULWord regNum(kRegAudioMixerAux1InputLevels);  regNum <= kRegAudioMixerMixedChannelOutputLevels; regNum++)
+				result.insert(regNum);
+		}
+		if (::NTV2DeviceHasXilinxDMA(inDeviceID))
+		{
 		}
 		if (inIncludeVirtuals)
 		{
@@ -1500,7 +1543,7 @@ private:
 			return oss.str();
 		}
 	}	mDecodeAudOutputSrcMap;
-	
+
 	struct DecodePCMControlReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1527,7 +1570,66 @@ private:
 			return oss.str();
 		}
 	}	mDecodePCMControlReg;
-	
+
+	struct DecodeAudioMixerInputSelectReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;	(void) inRegNum;
+			const UWord	mainInputSelect	((inRegValue     ) & 0x0000000F);
+			const UWord	input1_2Channel	((inRegValue >> 4) & 0x0000000F);
+			const UWord	input2_2Channel	((inRegValue >> 8) & 0x0000000F);
+			ostringstream	oss;
+			oss	<< "Main Input Select: " << (mainInputSelect+1)	<< endl
+				<< "Input 1 - 2 channel: " << (input1_2Channel+1) << endl
+				<< "INput 2 - 2 channel: " << (input2_2Channel+1);
+			return oss.str();
+		}
+	}	mAudMxrInputSelDecoder;
+
+	struct DecodeAudioMixerGainRegs : public Decoder
+	{
+		//DefineRegister (kRegAudioMixerMainGain,
+		//DefineRegister (kRegAudioMixerAux1GainCh1,
+		//DefineRegister (kRegAudioMixerAux2GainCh1,				
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			ostringstream	oss;
+			return oss.str();
+		}
+	}	mAudMxrGainDecoder;
+
+	struct DecodeAudioMixerChannelSelectReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			ostringstream	oss;
+			return oss.str();
+		}
+	}	mAudMxrChanSelDecoder;
+
+	struct DecodeAudioMixerMutesReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			ostringstream	oss;
+			return oss.str();
+		}
+	}	mAudMxrMutesDecoder;
+
+	struct DecodeAudioMixerLevelsReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			ostringstream	oss;
+			return oss.str();
+		}
+	}	mAudMxrLevelDecoder;
+
 	struct DecodeAncExtControlReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
