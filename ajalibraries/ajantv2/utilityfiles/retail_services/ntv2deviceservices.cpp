@@ -594,7 +594,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	else if (deviceID == DEVICE_ID_IO4KPLUS)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
+		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
 		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel5_8);
+		mCard->SetAESOutputSource(NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel9_12);
+		mCard->SetAESOutputSource(NTV2_AudioChannel13_16, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel13_16);
 	}
 	else
 	{
