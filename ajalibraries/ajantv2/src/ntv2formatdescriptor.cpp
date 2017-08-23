@@ -812,7 +812,7 @@ UWord NTV2FormatDescriptor::GetPlaneFromByteOffset (const ULWord inByteOffset) c
 		if (inByteOffset < byteOffset)
 			return plane;
 	} while (++plane < GetNumPlanes());
-	return 0;
+	return 0xFFFF;
 }
 
 
