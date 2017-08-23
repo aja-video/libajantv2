@@ -64,8 +64,8 @@
 #define kRegSarekGATE0              24
 #define kRegSarekGATE1              25
 #define kRegSarekLinkModes          26
-#define kRegSarekunused27           27
-#define kRegSarekunused28           28
+#define kRegSarekRxMatchesA         27
+#define kRegSarekRxMatchesB         28
 #define kRegSarekunused29           29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
