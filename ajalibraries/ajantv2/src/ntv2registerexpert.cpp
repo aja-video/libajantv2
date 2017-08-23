@@ -1147,7 +1147,6 @@ private:
 			<< "Channel 1-4 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode)			<< endl
 			<< "Channel 5-8 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode2)		<< endl
 			<< "Independent Channel Mode: "		<< SetNotset(inRegValue & kRegMaskIndependentMode)	<< endl
-			<< "2M frame support: "				<< (inRegValue & kRegMask2MFrameSupport		? "Supported" : "Not Supported") << endl
 			<< "Audio 1 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud1PlayCapMode)		<< endl
 			<< "Audio 2 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud2PlayCapMode)		<< endl
 			<< "Audio 3 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud3PlayCapMode)		<< endl
@@ -1165,7 +1164,9 @@ private:
 			<< "Ch 1/2 425: "					<< EnabDisab(inRegValue & kRegMask425FB12)			<< endl
 			<< "Ch 3/4 425: "					<< EnabDisab(inRegValue & kRegMask425FB34)			<< endl
 			<< "Ch 5/6 425: "					<< EnabDisab(inRegValue & kRegMask425FB56)			<< endl
-			<< "Ch 7/8 425: "					<< EnabDisab(inRegValue & kRegMask425FB78);
+			<< "Ch 7/8 425: "					<< EnabDisab(inRegValue & kRegMask425FB78)			<< endl
+			<< "DnxIv: "						<< YesNo(inRegValue & kRegMaskIsDNXIV)				<< endl
+			<< "Has audio mixer: "				<< YesNo(inRegValue & kRegMaskAudioMixerPresent)	<< endl;
 			return oss.str();
 		}
 	}	mDecodeGlobalControl2;
@@ -1998,6 +1999,8 @@ private:
 			oss	<< "Video Standard : "			<< sStds[vidStd]										<< endl
 			<< "2Kx1080 mode: "				<< (inRegValue & BIT(3) ? "2048x1080" : "1920x1080")	<< endl
 			<< "HBlank RGB Range: Black="	<< (inRegValue & BIT(7) ? "0x40" : "0x04")				<< endl
+			<< "12G enable: "				<< YesNo(inRegValue & BIT(17))							<< endl
+			<< "6G enalbe: "				<< YesNo(inRegValue & BIT(16))							<< endl
 			<< "3G enable: "				<< YesNo(inRegValue & BIT(24))							<< endl
 			<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
 			<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl
