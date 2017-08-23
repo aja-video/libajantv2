@@ -1077,11 +1077,55 @@ public:
 	AJA_VIRTUAL bool		GetPCIAccessFrame (NTV2Channel inChannel, ULWord & outValue);
 	AJA_VIRTUAL inline bool	GetPCIAccessFrame (NTV2Channel inChannel, ULWord * pOutValue)					{return pOutValue ? GetPCIAccessFrame (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
-	AJA_VIRTUAL bool		SetOutputFrame (NTV2Channel inChannel, ULWord value);
+	/**
+		@brief		Sets the frame number of the frame to be output for the given FrameStore (expressed as an NTV2Channel).
+		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
+								and in playout mode.)
+		@param[out]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
+								8MB or 16MB block of SDRAM on the device.
+		@return		True if successful;  otherwise false.
+		@note		Setting a new value takes effect at the next output VBI. For example, if line 300 of frame 5 is currently
+					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
+					until the output VBI fires after the last line of frame 5 has gone out the spigot.
+	**/
+	AJA_VIRTUAL bool		SetOutputFrame (NTV2Channel inChannel, ULWord inValue);
+
+	/**
+		@brief		Answers with the current output frame number for the given FrameStore (expressed as an NTV2Channel).
+		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
+								and in playout mode.)
+		@param[out]	outValue	Receives the current output frame number, a zero-based index into each 8MB or 16MB
+								block of SDRAM on the device.
+		@return		True if successful;  otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetOutputFrame (NTV2Channel inChannel, ULWord & outValue);
 	AJA_VIRTUAL inline bool	GetOutputFrame (NTV2Channel inChannel, ULWord * pOutValue)						{return pOutValue ? GetOutputFrame (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
-	AJA_VIRTUAL bool		SetInputFrame (NTV2Channel inChannel, ULWord value);
+	/**
+		@brief		Sets the current input frame number for the given FrameStore (expressed as an NTV2Channel).
+		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
+								and in capture mode.)
+		@param[out]	inValue		Receives the current input frame number, a zero-based index into each 8MB or 16MB
+								block of SDRAM on the device.
+		@return		True if successful;  otherwise false.
+		@note		Setting a new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
+					currently being written in device memory at the instant this function is called with frame 6,
+					video won't be written into frame 6 in device memory until the input VBI fires after the last line
+					of frame 5 has been written.
+	**/
+	AJA_VIRTUAL bool		SetInputFrame (NTV2Channel inChannel, ULWord inValue);
+
+	/**
+		@brief		Answers with the current input frame number for the given FrameStore (expressed as an NTV2Channel).
+		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
+								and in capture mode.)
+		@param[out]	outValue	Receives the current input frame number. This number is a zero-based index into each
+								8MB or 16MB block of SDRAM on the device. If the designated FrameStore is routed from
+								an SDI or HDMI input (with no intervening widgets that add any frame delay), then the
+								input frame is also the frame that's currently being written into frame buffer memory
+								on the device.
+		@return		True if successful;  otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetInputFrame (NTV2Channel inChannel, ULWord & outValue);
 	AJA_VIRTUAL inline bool	GetInputFrame (NTV2Channel inChannel, ULWord * pOutValue)						{return pOutValue ? GetInputFrame (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 

@@ -509,28 +509,26 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
 			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
-			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);	// unmute all output channels
+			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);			// unmute all output channels
+			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
 		}
-		
-		//mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
-		//mCard->SetAudioOutputMonitorSource(NTV2_AudioMonitor1_2, NTV2_CHANNEL4);
 		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(hostAudioSystem);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 	
-		//if (mode == NTV2_MODE_DISPLAY)
+		if (mode == NTV2_MODE_DISPLAY)
 		{
 			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
 			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
 			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
 		}
-		//else
-		//{
-			//mCard->SetAudioMixerMainInputEnable(true);
-			//mCard->SetAudioMixerAux1InputEnable(false);
-			//mCard->SetAudioMixerAux2InputEnable(false);
-		//}
+		else
+		{
+			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
+			mCard->SetAudioMixerAux2InputEnable(false);	// disable on capture
+		}
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
 	}
@@ -596,7 +594,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	else if (deviceID == DEVICE_ID_IO4KPLUS)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
+		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
 		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel5_8);
+		mCard->SetAESOutputSource(NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel9_12);
+		mCard->SetAESOutputSource(NTV2_AudioChannel13_16, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel13_16);
 	}
 	else
 	{
@@ -643,8 +644,7 @@ void DeviceServices::SetDeviceMiscRegisters (NTV2Mode mode)
 }
 
 
-// MARK: -
-// MARK: support
+// MARK: support -
 
 
 bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
@@ -2496,7 +2496,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 	(void) format;
 	NTV2DeviceID deviceID = mCard->GetDeviceID();
 
-	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
+	//mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
 
 	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
