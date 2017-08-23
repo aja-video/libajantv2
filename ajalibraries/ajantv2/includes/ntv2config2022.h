@@ -34,10 +34,10 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 
-
 /**
     @brief	Configures a SMPTE 2022 Transmit Channel.
 **/
+
 
 class tx_2022_channel
 {
@@ -84,7 +84,7 @@ public:
     bool        linkAEnable;
     bool        linkBEnable;
 
-    uint32_t	primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
+    uint8_t	    primaryRxMatch;         ///< @brief	Bitmap of rxMatch criteria used
     std::string	primarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2022_SOURCE_IP set). If it's in the multiclass range, then
                                         ///			by default, the IGMP multicast group will be joined (see CNTV2Config2022::SetIGMPDisable).
     std::string	primaryDestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
@@ -93,7 +93,7 @@ public:
     uint32_t	primarySsrc;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
     uint16_t	primaryVlan;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
-    uint32_t	secondaryRxMatch;       ///< @brief	Bitmap of rxMatch criteria used
+    uint8_t	    secondaryRxMatch;       ///< @brief	Bitmap of rxMatch criteria used
     std::string	secondarySourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2022_SOURCE_IP set). If it's in the multiclass range, then
                                         ///			by default, the IGMP multicast group will be joined (see CNTV2Config2022::SetIGMPDisable).
     std::string	secondaryDestIP;        ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
@@ -170,7 +170,6 @@ public:
 /**
     @brief	The CNTV2Config2022 class is the interface to Kona-IP network I/O using SMPTE 2022
 **/
-
 class AJAExport CNTV2Config2022 : public CNTV2MBController
 {
 public:
@@ -230,13 +229,17 @@ public:
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
     void        ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseaddr);
-    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
     bool        SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
 
     bool        SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
     bool        GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+    bool        SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
+    bool        GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+
+    bool        SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
+    bool        GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
@@ -254,7 +257,6 @@ private:
     bool        _is2022_7;
     bool        _biDirectionalChannels;             // logically bi-directional channels
     bool        _is_txTop34;
-
 };	//	CNTV2Config2022
 
 #endif // NTV2_2022CONFIG_H

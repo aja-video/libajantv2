@@ -325,7 +325,12 @@ void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream 
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, mcast_addr);
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_SRC_ADDR,   src_addr);
 
-    EnableIGMPGroup(port,channel,stream,enable);
+    uint32_t val = IGMPCB_STATE_USED;
+    if (enable)
+    {
+        val += IGMPCB_STATE_ENABLED;
+    }
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
 }
 
 void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream)
@@ -336,14 +341,20 @@ void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Strea
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable)
 {
+    uint32_t val = 0;
     uint32_t offset = getIGMPCBOffset(port,channel,stream);
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
-    uint32_t val = IGMPCB_STATE_USED;
-    if (enable)
+    mDevice.ReadRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE,&val);
+    if (val != 0)
     {
-        val += IGMPCB_STATE_ENABLED;
+        // is used or busy, so can enable/disable
+        mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
+        uint32_t val = IGMPCB_STATE_USED;
+        if (enable)
+        {
+            val += IGMPCB_STATE_ENABLED;
+        }
+        mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
     }
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
 }
 
 uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream)
