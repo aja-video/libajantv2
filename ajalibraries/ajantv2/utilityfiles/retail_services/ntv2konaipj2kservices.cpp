@@ -1148,7 +1148,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-	bool					rv, rv2, enable, enable2022_7;
+	bool					rv, rv2, enable;
 	uint32_t				enableSv;
 	
 	mCard->GetStandard(&primaryStandard);
@@ -1263,7 +1263,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		{
 			// Configure tx for ch1
 			rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL1,txHwConfig);
-			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable,enable2022_7);
+			rv2 = target->GetTxChannelEnable(NTV2_CHANNEL1,enable);
             uint32_t txErr;
             getIPError(NTV2_CHANNEL1,kErrTxConfig,txErr);
 			mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
@@ -1317,7 +1317,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			{
 
 				rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL2,txHwConfig);
-				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable,enable2022_7);
+				rv2 = target->GetTxChannelEnable(NTV2_CHANNEL2,enable);
                 uint32_t txErr;
                 getIPError(NTV2_CHANNEL2,kErrTxConfig,txErr);
                 mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
@@ -1889,7 +1889,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	struct in_addr addr;
 	bool enable;
 	
-	target->SetRxChannelEnable(channel,false,false);
+	target->SetRxChannelEnable(channel,false);
 
 	switch ((int)channel)
 	{
@@ -1958,7 +1958,7 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 		printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrRxConfig, 1);
 	}
-	target->SetRxChannelEnable(channel,enable,false);
+	target->SetRxChannelEnable(channel,enable);
 }
 
 void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
@@ -1968,7 +1968,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	struct in_addr addr;
 	bool enable;
 	
-	target->SetTxChannelEnable(channel,false,false);
+	target->SetTxChannelEnable(channel,false);
 
 	switch((int)channel)
 	{
@@ -2005,7 +2005,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
     if (enable)
     {
         // only configure if enabled
-        if (target->SetTxChannelConfiguration(channel,chan,false) == true)
+        if (target->SetTxChannelConfiguration(channel,chan) == true)
         {
             printf("set TxConfig chn=%d OK\n",(int)channel);
             setIPError(channel, kErrTxConfig, 0);
@@ -2015,7 +2015,7 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
             printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
             setIPError(channel, kErrTxConfig, 1);
         }
-        target->SetTxChannelEnable(channel,enable,false);
+        target->SetTxChannelEnable(channel,enable);
     }
 }
 

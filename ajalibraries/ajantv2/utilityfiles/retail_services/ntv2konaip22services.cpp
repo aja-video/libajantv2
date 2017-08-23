@@ -2553,7 +2553,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP output configurations
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable,enable2022_7);
+        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
         uint32_t txErr;
         getIPError(NTV2_CHANNEL3,kErrTxConfig,txErr);
 		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
@@ -2574,7 +2574,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
 
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable,enable2022_7);
+        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enable);
         getIPError(NTV2_CHANNEL4,kErrTxConfig,txErr);
 		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
         if (rv && rv2)
@@ -3306,7 +3306,7 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
     struct in_addr addr;
     bool enable;
 	
-	target->SetRxChannelEnable(channel,false,m2022_7Mode);
+	target->SetRxChannelEnable(channel,false);
 
     switch ((int)channel)
     {
@@ -3375,7 +3375,7 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
 		printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrRxConfig, 1);
 	}
-	target->SetRxChannelEnable(channel,enable,m2022_7Mode);
+	target->SetRxChannelEnable(channel,enable);
 }
 
 void KonaIP22Services::setTxConfig(NTV2Channel channel)
@@ -3385,10 +3385,8 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
     struct in_addr addr;
     bool enable;
 	
-	target->SetTxChannelEnable(channel,false,m2022_7Mode);
-    
-	target->SetTxChannelEnable(channel,false,m2022_7Mode);
-    
+	target->SetTxChannelEnable(channel,false);
+	
     switch((int)channel)
     {
 		case NTV2_CHANNEL4:
@@ -3424,7 +3422,7 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
     if (enable)
     {
         // only configure if enabled
-        if (target->SetTxChannelConfiguration(channel,chan,m2022_7Mode) == true)
+        if (target->SetTxChannelConfiguration(channel,chan) == true)
         {
             printf("set TxConfig chn=%d OK\n",(int)channel);
             setIPError(channel, kErrTxConfig, 0);
@@ -3434,7 +3432,7 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
             setIPError(channel, kErrTxConfig, 1);
         }
-        target->SetTxChannelEnable(channel,enable,m2022_7Mode);
+        target->SetTxChannelEnable(channel,enable);
     }
 }
 

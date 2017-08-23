@@ -44,7 +44,10 @@ bool tx_2022_channel::operator != ( const tx_2022_channel &other )
 
 bool tx_2022_channel::operator == ( const tx_2022_channel &other )
 {
-    if ((primaryLocalPort       == other.primaryLocalPort)      &&
+    if ((linkAEnable			= other.linkAEnable)			&&
+		(linkBEnable			= other.linkBEnable)			&&
+		
+		(primaryLocalPort       == other.primaryLocalPort)      &&
         (primaryRemoteIP        == other.primaryRemoteIP)       &&
         (primaryRemotePort      == other.primaryRemotePort)     &&
 
@@ -92,22 +95,27 @@ bool rx_2022_channel::operator != ( const rx_2022_channel &other )
 
 bool rx_2022_channel::operator == ( const rx_2022_channel &other )
 {
-    if ((primaryRxMatch        == other.primaryRxMatch)       &&
-        (primarySourceIP       == other.primarySourceIP)      &&
-        (primaryDestIP         == other.primaryDestIP)        &&
-        (primarySourcePort     == other.primarySourcePort)    &&
-        (primaryDestPort       == other.primaryDestPort)      &&
-        (primarySsrc           == other.primarySsrc)          &&
-        (primaryVlan           == other.primaryVlan)          &&
-        (secondaryRxMatch      == other.secondaryRxMatch)     &&
-        (secondarySourceIP     == other.secondarySourceIP)    &&
-        (secondaryDestIP       == other.secondaryDestIP)      &&
-        (secondarySourcePort   == other.secondarySourcePort)  &&
-        (secondaryDestPort     == other.secondaryDestPort)    &&
-        (secondarySsrc         == other.secondarySsrc)        &&
-        (secondaryVlan         == other.secondaryVlan)        &&
-        (networkPathDiff       == other.networkPathDiff)      &&
-        (playoutDelay          == other.playoutDelay))
+	if ((linkAEnable			== other.linkAEnable)			&&
+		(linkBEnable			== other.linkBEnable)			&&
+		
+		(primaryRxMatch			== other.primaryRxMatch)		&&
+        (primarySourceIP		== other.primarySourceIP)		&&
+        (primaryDestIP			== other.primaryDestIP)			&&
+        (primarySourcePort		== other.primarySourcePort)		&&
+        (primaryDestPort		== other.primaryDestPort)		&&
+        (primarySsrc			== other.primarySsrc)			&&
+        (primaryVlan			== other.primaryVlan)			&&
+		
+        (secondaryRxMatch		== other.secondaryRxMatch)		&&
+        (secondarySourceIP		== other.secondarySourceIP)		&&
+        (secondaryDestIP		== other.secondaryDestIP)		&&
+        (secondarySourcePort	== other.secondarySourcePort)	&&
+        (secondaryDestPort		== other.secondaryDestPort)		&&
+        (secondarySsrc			== other.secondarySsrc)			&&
+        (secondaryVlan			== other.secondaryVlan)			&&
+		
+        (networkPathDiff		== other.networkPathDiff)		&&
+        (playoutDelay			== other.playoutDelay))
     {
         return true;
     }
