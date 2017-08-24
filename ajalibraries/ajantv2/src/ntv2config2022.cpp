@@ -416,6 +416,18 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     uint32_t    baseAddr;
     bool        rv;
 
+    if (rxConfig.linkAEnable && (GetLinkActive(SFP_TOP) == false))
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
+    if (rxConfig.linkBEnable && (GetLinkActive(SFP_BOTTOM) == false))
+    {
+        mError = "SFP Bottom (Link B) not configured";
+        return false;
+    }
+
     if (_is2022_7)
     {
         // select secondary channel
@@ -822,7 +834,18 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     uint32_t    mac;
     bool        rv;
 
-    // select channel
+    if (txConfig.linkAEnable && (GetLinkActive(SFP_TOP) == false))
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
+    if (txConfig.linkBEnable && (GetLinkActive(SFP_BOTTOM) == false))
+    {
+        mError = "SFP Bottom (Link B) not configured";
+        return false;
+    }
+
 
     if (_is2022_7)
     {
@@ -886,12 +909,6 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
             }
             else
             {
-                if (GetLinkActive(SFP_BOTTOM) == false)
-                {
-                    mError = "SFP Bottom (Link B) not configured";
-                    return false;
-                }
-
                 // get MAC from ARP
                 string macAddr;
                 rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
@@ -991,12 +1008,6 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         }
         else
         {
-            if (GetLinkActive(SFP_TOP) == false)
-            {
-                mError = "SFP Top (Link A) not configured";
-                return false;
-            }
-
             // get MAC from ARP
             string macAddr;
             rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);

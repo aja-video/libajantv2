@@ -277,6 +277,12 @@ bool CNTV2Config2110::GetNetworkConfiguration(std::string & localIPAddress0, std
 
 bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Stream stream)
 {
+    if (GetLinkActive(SFP_TOP) == false)
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
     // disable IGMP subscription
     eSFP port = GetRxPort(channel);
     bool disableIGMP;
@@ -305,6 +311,12 @@ bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Strea
 
 bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
+    if (GetLinkActive(SFP_TOP) == false)
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
     // make IGMP subsciption if needed
     eSFP port = GetRxPort(channel);
 
@@ -636,6 +648,12 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     uint32_t    mac;
     bool        rv = true;
 
+    if (GetLinkActive(SFP_TOP) == false)
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
     // get frame address
     uint32_t baseAddrFramer = GetFramerAddress(channel,stream);
 
@@ -945,6 +963,12 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
 bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable)
 {
+    if (GetLinkActive(SFP_TOP) == false)
+    {
+        mError = "SFP Top (Link A) not configured";
+        return false;
+    }
+
     // ** Framer
     // get frame address
     uint32_t baseAddrFramer = GetFramerAddress(channel,stream);
