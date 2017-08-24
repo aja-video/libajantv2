@@ -72,7 +72,6 @@ void rx_2022_channel::init()
     primaryDestIP.erase();
     primarySourcePort = 0;
     primaryDestPort = 0;
-    primarySsrc = 0;
     primaryVlan = 0;
 
     secondaryRxMatch  = 0;
@@ -80,9 +79,9 @@ void rx_2022_channel::init()
     secondaryDestIP.erase();
     secondarySourcePort = 0;
     secondaryDestPort = 0;
-    secondarySsrc = 0;
     secondaryVlan = 0;
 
+    ssrc = 0;
     networkPathDiff = 50;
     playoutDelay = 50;
 }
@@ -102,7 +101,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
         (primaryDestIP			== other.primaryDestIP)			&&
         (primarySourcePort		== other.primarySourcePort)		&&
         (primaryDestPort		== other.primaryDestPort)		&&
-        (primarySsrc			== other.primarySsrc)			&&
         (primaryVlan			== other.primaryVlan)			&&
 		
         (secondaryRxMatch		== other.secondaryRxMatch)		&&
@@ -110,9 +108,9 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
         (secondaryDestIP		== other.secondaryDestIP)		&&
         (secondarySourcePort	== other.secondarySourcePort)	&&
         (secondaryDestPort		== other.secondaryDestPort)		&&
-        (secondarySsrc			== other.secondarySsrc)			&&
         (secondaryVlan			== other.secondaryVlan)			&&
 		
+        (ssrc                   == other.ssrc)                  &&
         (networkPathDiff		== other.networkPathDiff)		&&
         (playoutDelay			== other.playoutDelay))
     {
@@ -452,9 +450,6 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         // dest port
         WriteChannelRegister(kReg2022_6_rx_match_dest_port + baseAddr, rxConfig.secondaryDestPort);
 
-        // ssrc
-        WriteChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, rxConfig.secondarySsrc);
-
         // vlan
         WriteChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, rxConfig.secondaryVlan);
 
@@ -512,7 +507,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     WriteChannelRegister(kReg2022_6_rx_match_dest_port + baseAddr, rxConfig.primaryDestPort);
 
     // ssrc
-    WriteChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, rxConfig.primarySsrc);
+    WriteChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, rxConfig.ssrc);
 
     // vlan
     WriteChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, rxConfig.primaryVlan);
@@ -625,9 +620,6 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
         // dest port
         ReadChannelRegister(kReg2022_6_rx_match_dest_port + baseAddr, &rxConfig.secondaryDestPort);
 
-        // ssrc
-        ReadChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, &rxConfig.secondarySsrc);       // PSM fix this, this is a shared reg
-
         // vlan
         ReadChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, &val);
         rxConfig.secondaryVlan = val & 0xffff;
@@ -665,7 +657,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     ReadChannelRegister(kReg2022_6_rx_match_dest_port + baseAddr, &rxConfig.primaryDestPort);
 
     // ssrc
-    ReadChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, &rxConfig.primarySsrc);
+    ReadChannelRegister(kReg2022_6_rx_match_ssrc + baseAddr, &rxConfig.ssrc);
 
     // vlan
     ReadChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, &val);

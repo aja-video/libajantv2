@@ -1,47 +1,72 @@
 /**
-@page	ntv2konaipjsonsetup		NTV2 KonaIP JSON Setup Demo
+@page   ntv2konaipjsonsetup     NTV2 KonaIP JSON Setup Demo
 
 This Qt-based command-line program shows how to configure the network parameters for any of the KONA IP's physical SFP cages from a JSON data file.
 
 The program demonstrates...
--	how to detect if the AJA device is an IP device;
--	how to determine if the MicroBlaze on the device is up and running;
--	how to set the network configuration parameters for each of the SFP cages on the device.
+-   how to detect if the AJA device is an IP device;
+-   how to determine if the MicroBlaze on the device is up and running;
+-   how to set the network configuration parameters for each of the SFP cages on the device.
+
+For SDK 14.0 the use of 'Enable2022_7' is depreacted. For 2022-6 Tx and Rx can be on the top SFP (linkAEnable=true, linkBEnable=false),
+the bottom SFP (linkAEnable=false, linkBEnable=true), or for 2022-7 both (linkAEnable=true, linkBEnable=true)
+
+In the list of keyords below, an 'IP string' refers to something like '239.0.1.123'
 
 Keywords in the scripts:
-sfps
-    designator              top,bottom
-    IPAddress
-    SubnetMask
-    Router
-    Enable2022_7            true,false
+
+sfps                        2022-6 2022-2   2110
+    designator                x      x       x      top | bottom
+    IPAddress                 x      x       x      IP string
+    SubnetMask                x      x       x      IP string
+    Router                    x      x       x      IP string
+    Enable2022_7              x                     true | false (DEPRECATED)
 
 receive
-    designator              channel1,channel2,channel3,channel4
-    primarySrcPort
-    primarySrcIPAddress
-    primaryDestPort
-    primaryDestIPAddress
-    primaryFilter           vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20
-    secondarySrcPort
-    secondarySrcIPAddress
-    secondaryDestPort
-    secondaryDestIPAddress
-    secondaryFilter         vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20
-    networkPathDifferential
-    networkPathDifferential
-    playoutDelay
-    vlan
-    ssrc
-    Enable                  true,false
+    designator                x      x        x     channel1 | channel2 | channel3 | channel4
+    stream                                    x     video | audio1
+    LinkAEnable               x      x              true | false
+    primarySrcPort            x      x        x     decimal number
+    primarySrcIPAddress       x      x        x     IP string
+    primaryDestPort           x      x        x     decimal number
+    primaryDestIPAddress      x      x        x     IP string
+    primaryFilter             x      x        x     hex number (vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20)
+    LinkBEnable               x      x              true | false
+    secondarySrcPort          x                     decimal number
+    secondarySrcIPAddress     x                     IP string
+    secondaryDestPort         x                     decimal number
+    secondaryDestIPAddress    x                     IP string
+    secondaryFilter           x                     hex number (vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20)
+    networkPathDifferential   x                     decimal number (milliseconds)
+    playoutDelay              x      x        x     decimal number (milliseconds)
+    vlan                      x      x        x     decimal number
+    ssrc                      x      x        x     decimal number
+    payload                                   x     decimal number (payload type)
+    videoFormat                               x     format string (e.g. NTV2_FORMAT_1080i_5994)
+    payloadLen                                x     decimal number (expert use only)
+    lastPayloadLen                            x     decimal number (expert use only)
+    pktsPerLine                               x     decimal number (expert use only)
+    Enable                    x      x        x     true | false
 
 transmit
-    designator              channel1,channel2,channel3,channel4
-    primaryLocalPort
-    primaryRemoteIPAddress
-    primaryRemotePort
-    secondaryLocalPort
-    secondaryRemoteIPAddress
-    secondaryRemotePort
-    Enable                  true,false
+    designator                x      x        x     channel1 | channel2 | channel3 | channel4
+    stream                                    x     video | audio 1
+    LinkAEnable               x      x              true | false
+    primaryLocalPort          x      x        x     decimal number
+    primaryRemoteIPAddress    x      x        x     IP string
+    primaryRemotePort         x      x        x     decimal number
+    LinkBEnable               x      x              true | false
+    secondaryLocalPort        x                     decimal number
+    secondaryRemoteIPAddress  x                     IP string
+    secondaryRemotePort       x                     IP string
+    ssrc                      x      x        x     decimnal number
+    ttl                       x      x        x     decimal number
+    tos                       x      x        x     decimal number
+    payload                                   x     decimal number (payload type)
+    videoFormat                               x     format string (e.g. NTV2_FORMAT_1080i_5994)
+    payloadLen                                x     decimal number (expert use only)
+    lastPayloadLen                            x     decimal number (expert use only)
+    pktsPerLine                               x     decimal number (expert use only)
+    Enable                    x      x        x     true | false
 **/
+

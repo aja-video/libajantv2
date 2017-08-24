@@ -90,7 +90,6 @@ public:
     std::string	primaryDestIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
     uint32_t	primarySourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_2022_SOURCE_PORT set)
     uint32_t	primaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2022_DEST_PORT set)
-    uint32_t	primarySsrc;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
     uint16_t	primaryVlan;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
     uint8_t	    secondaryRxMatch;       ///< @brief	Bitmap of rxMatch criteria used
@@ -99,9 +98,9 @@ public:
     std::string	secondaryDestIP;        ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2022_DEST_IP set)
     uint32_t	secondarySourcePort;	///< @brief	Specifies the source (sender) port number (if RX_MATCH_2022_SOURCE_PORT set)
     uint32_t	secondaryDestPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2022_DEST_PORT set)
-    uint32_t	secondarySsrc;          ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
     uint16_t	secondaryVlan;          ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
+    uint32_t    ssrc;                   ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
     uint32_t	networkPathDiff;        ///< @brief	Specifies the max accepted delay in milliseconds between 2 steams in hitless operation (0-150).
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
 };
