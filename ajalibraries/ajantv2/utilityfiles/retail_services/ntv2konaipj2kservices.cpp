@@ -1891,6 +1891,10 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	
 	target->SetRxChannelEnable(channel,false);
 
+	// Only enable link A in J2K mode
+	chan.linkAEnable	= true;
+	chan.linkBEnable	= false;
+
 	switch ((int)channel)
 	{
 		case NTV2_CHANNEL2:
@@ -1969,6 +1973,10 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	bool enable;
 	
 	target->SetTxChannelEnable(channel,false);
+	
+	// Only enable link A in J2K mode
+	chan.linkAEnable	= true;
+	chan.linkBEnable	= false;
 
 	switch((int)channel)
 	{
@@ -2002,21 +2010,18 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			break;
 	}
 
-    if (enable)
-    {
-        // only configure if enabled
-        if (target->SetTxChannelConfiguration(channel,chan) == true)
-        {
-            printf("set TxConfig chn=%d OK\n",(int)channel);
-            setIPError(channel, kErrTxConfig, 0);
-        }
-        else
-        {
-            printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-            setIPError(channel, kErrTxConfig, 1);
-        }
-        target->SetTxChannelEnable(channel,enable);
-    }
+	// only configure if enabled
+	if (target->SetTxChannelConfiguration(channel,chan) == true)
+	{
+		printf("set TxConfig chn=%d OK\n",(int)channel);
+		setIPError(channel, kErrTxConfig, 0);
+	}
+	else
+	{
+		printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+		setIPError(channel, kErrTxConfig, 1);
+	}
+	target->SetTxChannelEnable(channel,enable);
 }
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
@@ -2147,6 +2152,9 @@ bool  KonaIPJ2kServices::notEqual(const tx_2022_channel & hw_channel, const tx20
 
 void KonaIPJ2kServices::printRxConfig(rx_2022_channel chan)
 {
+	printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+	printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+
 	printf("primarySourceIP			%s\n", chan.primarySourceIP.c_str());
 	printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
 	printf("primarySourcePort		%d\n", chan.primarySourcePort);
@@ -2166,10 +2174,12 @@ void KonaIPJ2kServices::printRxConfig(rx_2022_channel chan)
 
 void KonaIPJ2kServices::printTxConfig(tx_2022_channel chan)
 {
+	printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+	printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+
 	printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
 	printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
 	printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
-
 
 	printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
 	printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
