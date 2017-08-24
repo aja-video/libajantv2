@@ -2464,7 +2464,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	NTV2FrameBufferFormat   primaryPixelFormat;
-	bool					rv, rv2, enable, enable2022_7;
+	bool					rv, rv2, enable;
 	uint32_t				enableSv;
 
 	mCard->GetStandard(&primaryStandard);
@@ -2531,6 +2531,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             if ((enable != (enableSv ? true : false)) || notEqual(rxHwConfig,mRx2022Config1))
             {
 				mRx2022Config1.rxc_enable32 = enableSv;
+				printRxConfig(rxHwConfig);
+
                 setRxConfig(NTV2_CHANNEL1);
             }
         }
@@ -2545,6 +2547,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             if ((enable != (enableSv ? true : false)) || notEqual(rxHwConfig,mRx2022Config2))
             {
 				mRx2022Config2.rxc_enable32 = enableSv;
+				
+				printRxConfig(rxHwConfig);
+
                 setRxConfig(NTV2_CHANNEL2);
             }
         }
@@ -2559,10 +2564,10 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if (    (enable != (enableSv ? true : false))
-                 || ((enable == true) && (enable2022_7 != m2022_7Mode))
-                 ||  notEqual(txHwConfig,mTx2022Config3)
-                 ||  txErr)            {
+            if ((enable != (enableSv ? true : false)) ||
+                 notEqual(txHwConfig,mTx2022Config3) ||
+                 txErr)
+			{
 				//printf("enable2022_7 %d, m2022_7Mode %d\n", enable2022_7, m2022_7Mode);
 				//printf("enable %d, enableSv %d\n", enable, (enableSv ? true : false));
 				mTx2022Config3.txc_enable32 = enableSv;
@@ -2579,10 +2584,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableSv);
         if (rv && rv2)
         {
-            if (    (enable != (enableSv ? true : false))
-                 || ((enable == true) && (enable2022_7 != m2022_7Mode))
-                 ||  notEqual(txHwConfig,mTx2022Config4)
-                 ||  txErr)
+            if ((enable != (enableSv ? true : false)) ||
+				 notEqual(txHwConfig,mTx2022Config4) ||
+                 txErr)
             {
 				//printf("enable2022_7 %d, m2022_7Mode %d\n", enable2022_7, m2022_7Mode);
 				//printf("enable %d, enableSv %d\n", enable, (enableSv ? true : false));
@@ -3300,14 +3304,18 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
 
 void   KonaIP22Services::setRxConfig(NTV2Channel channel)
 {
-    printf("set RxConfig chn=%d\n",(int)channel);
-    
+    printf("set RxConfig chn=%d mode %d\n",(int)channel, (int)m2022_7Mode);
+	
     rx_2022_channel chan;
     struct in_addr addr;
     bool enable;
 	
 	target->SetRxChannelEnable(channel,false);
-
+	
+	// Always enable link A only enable link B if 2022_7 enabled
+	chan.linkAEnable	= true;
+	chan.linkBEnable	= m2022_7Mode;
+	
     switch ((int)channel)
     {
         case NTV2_CHANNEL2:
@@ -3365,27 +3373,35 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             break;
     }
 	
-	if (target->SetRxChannelConfiguration(channel,chan) == true)
+	if (enable)
 	{
-		printf("set RxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrRxConfig, 0);
+		if (target->SetRxChannelConfiguration(channel,chan) == true)
+		{
+			printf("set RxConfig chn=%d OK\n",(int)channel);
+			setIPError(channel, kErrRxConfig, 0);
+		}
+		else
+		{
+			printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+			setIPError(channel, kErrRxConfig, 1);
+		}
+		target->SetRxChannelEnable(channel,enable);
 	}
-	else
-	{
-		printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrRxConfig, 1);
-	}
-	target->SetRxChannelEnable(channel,enable);
 }
 
 void KonaIP22Services::setTxConfig(NTV2Channel channel)
 {
-    printf("set TxConfig chn=%d\n",(int)channel);
+	printf("set TxConfig chn=%d mode %d\n",(int)channel, (int)m2022_7Mode);
+
     tx_2022_channel chan;
     struct in_addr addr;
     bool enable;
 	
 	target->SetTxChannelEnable(channel,false);
+	
+	// Always enable link A only enable link B if 2022_7 enabled
+	chan.linkAEnable	= true;
+	chan.linkBEnable	= m2022_7Mode;
 	
     switch((int)channel)
     {
@@ -3419,21 +3435,21 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             break;
     }
 	
-    if (enable)
-    {
-        // only configure if enabled
-        if (target->SetTxChannelConfiguration(channel,chan) == true)
-        {
-            printf("set TxConfig chn=%d OK\n",(int)channel);
-            setIPError(channel, kErrTxConfig, 0);
-        }
-        else
-        {
-            printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-            setIPError(channel, kErrTxConfig, 1);
-        }
-        target->SetTxChannelEnable(channel,enable);
-    }
+	if (enable)
+	{
+		// only configure if enabled
+		if (target->SetTxChannelConfiguration(channel,chan) == true)
+		{
+			printf("set TxConfig chn=%d OK\n",(int)channel);
+			setIPError(channel, kErrTxConfig, 0);
+		}
+		else
+		{
+			printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+			setIPError(channel, kErrTxConfig, 1);
+		}
+		target->SetTxChannelEnable(channel,enable);
+	}
 }
 
 void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
@@ -3535,7 +3551,10 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
 bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
 {
     uint32_t addr;
-    
+	
+	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
+	if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
+	
     if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
     if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
 	if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
@@ -3546,18 +3565,23 @@ bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx202
     addr = inet_addr(hw_channel.primarySourceIP.c_str());
     if (virtual_config.rxc_primarySourceIp != addr) return true;
 	
-	if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
-	if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
-	if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
-	
-	addr = inet_addr(hw_channel.secondaryDestIP.c_str());
-	if (virtual_config.rxc_secondaryDestIp != addr) return true;
-	
-	addr = inet_addr(hw_channel.secondarySourceIP.c_str());
-	if (virtual_config.rxc_secondarySourceIp != addr) return true;
-	
-	if (virtual_config.rxc_networkPathDiff != hw_channel.networkPathDiff) return true;
 	if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
+
+	// We only care about looking at secondary settings if we are doing 2022_7
+	if (m2022_7Mode)
+	{
+		if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
+		if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
+		if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
+		
+		addr = inet_addr(hw_channel.secondaryDestIP.c_str());
+		if (virtual_config.rxc_secondaryDestIp != addr) return true;
+		
+		addr = inet_addr(hw_channel.secondarySourceIP.c_str());
+		if (virtual_config.rxc_secondarySourceIp != addr) return true;
+		
+		if (virtual_config.rxc_networkPathDiff != hw_channel.networkPathDiff) return true;
+	}
 
     return false;
 }
@@ -3565,17 +3589,62 @@ bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx202
 bool  KonaIP22Services::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
     uint32_t addr;
-    if (virtual_config.txc_primaryLocalPort			!= hw_channel.primaryLocalPort)  return true;
-    if (virtual_config.txc_primaryRemotePort		!= hw_channel.primaryRemotePort) return true;
+	
+	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
+	if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
+
+
+    if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
+    if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
 	
     addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
-    if (virtual_config.txc_primaryRemoteIp     != addr) return true;
+    if (virtual_config.txc_primaryRemoteIp != addr) return true;
 	
-	if (virtual_config.txc_secondaryLocalPort			!= hw_channel.secondaryLocalPort)  return true;
-	if (virtual_config.txc_secondaryRemotePort			!= hw_channel.secondaryRemotePort) return true;
+	// We only care about looking at secondary settings if we are doing 2022_7
+	if (m2022_7Mode)
+	{
+		if (virtual_config.txc_secondaryLocalPort != hw_channel.secondaryLocalPort)  return true;
+		if (virtual_config.txc_secondaryRemotePort != hw_channel.secondaryRemotePort) return true;
 	
-	addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
-	if (virtual_config.txc_secondaryRemoteIp     != addr) return true;
+		addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
+		if (virtual_config.txc_secondaryRemoteIp != addr) return true;
+	}
 
     return false;
+}
+
+void KonaIP22Services::printRxConfig(rx_2022_channel chan)
+{
+	printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+	printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+	
+	printf("primarySourceIP			%s\n", chan.primarySourceIP.c_str());
+	printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
+	printf("primarySourcePort		%d\n", chan.primarySourcePort);
+	printf("primaryDestPort			%d\n", chan.primaryDestPort);
+	printf("primarySsrc				%d\n", chan.primarySsrc);
+	printf("primaryVlan				%d\n", chan.primaryVlan);
+	printf("primaryRxMatch			%d\n", chan.primaryRxMatch);
+	
+	printf("secondarySourceIP		%s\n", chan.secondarySourceIP.c_str());
+	printf("secondaryDestIP			%s\n", chan.secondaryDestIP.c_str());
+	printf("secondarySourcePort		%d\n", chan.secondarySourcePort);
+	printf("secondaryDestPort		%d\n", chan.secondaryDestPort);
+	printf("secondarySsrc			%d\n", chan.secondarySsrc);
+	printf("secondaryVlan			%d\n", chan.secondaryVlan);
+	printf("secondaryRxMatch		%d\n\n", chan.secondaryRxMatch);
+}
+
+void KonaIP22Services::printTxConfig(tx_2022_channel chan)
+{
+	printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+	printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+	
+	printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
+	printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
+	printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
+	
+	printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
+	printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
+	printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
 }
