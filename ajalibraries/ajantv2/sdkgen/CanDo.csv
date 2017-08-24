@@ -34,7 +34,7 @@ NTV2DeviceCanDoLTC,Returns true if the device having the given ID can take in LT
 NTV2DeviceCanDoLTCInOnRefPort,Returns true if the device having the given ID can read LTC (Linear TimeCode) from its reference input.,-,X,X,X,X,-,X,-,-,-,X,X,-,X,X,X,-,-,X,X,-,-,-,X,X,X,-,X,X,-
 NTV2DeviceCanDoMSI,Returns true if the DMA hardware on the device having the given ID supports MSI (Message Signaled Interrupts).,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoMultiFormat,Returns true if the device having the given ID can simultaneously handle different video formats on more than one SDI input or output.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,X,X,-,X,X,-,X,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoPCMControl,Returns true if the audio system(s) on the device having the given ID can disable PCM (Pulse Code Modulation) normalization on a per-channel-pair basis.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X
+NTV2DeviceCanDoPCMControl,Returns true if the audio system(s) on the device having the given ID can set the per-audio-channel-pair non-PCM (Pulse Code Modulation) bits in outgoing embedded audio.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X
 NTV2DeviceCanDoPCMDetection,Returns true if the device having the given ID has per-audio-channel-pair PCM detection capabilities.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,-,X,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoPIO,Returns true if the device having the given ID supports Programmed I/O.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoPlayback,Returns true if the device having the given ID can output (play) video.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X
