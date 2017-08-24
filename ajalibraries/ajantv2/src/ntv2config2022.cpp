@@ -1452,7 +1452,21 @@ bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     {
         // unicast - get MAC from ARP
         string macAddr;
-        bool rv = GetRemoteMAC(remoteIP, port, channel, stream, macAddr);
+        bool rv;
+        // is destination on the same subnet?
+        IPVNetConfig nc;
+        GetNetworkConfiguration(port,nc);
+        if ( (destIp & nc.ipc_subnet) != (nc.ipc_ip & nc.ipc_subnet))
+        {
+            struct in_addr addr;
+            addr.s_addr  = NTV2EndianSwap32(nc.ipc_gateway);
+            string gateIp = inet_ntoa(addr);
+            rv = GetRemoteMAC(gateIp, port, channel, stream, macAddr);
+        }
+        else
+        {
+            rv = GetRemoteMAC(remoteIP, port, channel, stream, macAddr);
+        }
         if (!rv)
         {
             SetTxChannelEnable(channel, false); // stop transmit
