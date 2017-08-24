@@ -514,8 +514,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		}
 		
 		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
-		mCard->SetAudioMixerAux1x2chInputAudioSystem(hostAudioSystem);
-		mCard->SetAudioMixerAux2x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
+		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
+		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
 	
 		if (mode == NTV2_MODE_DISPLAY)
 		{
@@ -526,8 +526,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		else
 		{
 			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
-			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
-			mCard->SetAudioMixerAux2InputEnable(false);	// disable on capture
+			mCard->SetAudioMixerAux1InputEnable(false);
+			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
 		}
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
