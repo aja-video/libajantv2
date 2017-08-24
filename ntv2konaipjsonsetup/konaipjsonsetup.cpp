@@ -414,6 +414,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rxChannelConfig.secondaryRxMatch    = receive.mSecondaryFilter.toUInt(&ok, 16);
         rxChannelConfig.networkPathDiff     = receive.mNetworkPathDifferential.toUInt();
         rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
+        rxChannelConfig.ssrc                = receive.mSSRC.toUInt();
 
         config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
         config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable));
