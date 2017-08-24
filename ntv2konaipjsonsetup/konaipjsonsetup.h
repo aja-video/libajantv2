@@ -18,6 +18,8 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mLinkAEnable;
+    QString mLinkBEnable;
     QString mStream;
     QString mPrimarySrcPort;
     QString mPrimarySrcIPAddress;
@@ -44,6 +46,8 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
+    QString mLinkAEnable;
+    QString mLinkBEnable;
     QString mStream;
     QString mPrimaryLocalPort;
     QString mPrimaryRemoteIPAddress;

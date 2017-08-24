@@ -150,6 +150,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
 
+        receiveStruct.mLinkAEnable = receiveChannelObject["LinkAEnable"].toString();
+        if (!receiveStruct.mLinkAEnable.isEmpty())
+            cout << "Link A Enable " << receiveStruct.mLinkAEnable.toStdString() << endl;
+
+        receiveStruct.mLinkBEnable = receiveChannelObject["LinkBEnable"].toString();
+        if (!receiveStruct.mLinkBEnable.isEmpty())
+            cout << "Link B Enable " << receiveStruct.mLinkBEnable.toStdString() << endl;
+
         receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
@@ -224,6 +232,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         transmitStruct.mPktsPerLine = transmitChannelObject["pktsPerLine"].toString();
         if (!transmitStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << transmitStruct.mPktsPerLine.toStdString() << endl;
+
+        transmitStruct.mLinkAEnable = transmitChannelObject["LinkAEnable"].toString();
+        if (!transmitStruct.mLinkAEnable.isEmpty())
+            cout << "Link A Enable " << transmitStruct.mLinkAEnable.toStdString() << endl;
+
+        transmitStruct.mLinkBEnable = transmitChannelObject["LinkBEnable"].toString();
+        if (!transmitStruct.mLinkBEnable.isEmpty())
+            cout << "Link B Enable " << transmitStruct.mLinkBEnable.toStdString() << endl;
 
         transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
@@ -373,6 +389,19 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rx_2022_channel rxChannelConfig;
         bool ok;
         NTV2Channel channel                 = getChannel(receive.mChannelDesignator);
+
+        if (enable2022_7)
+        {
+            rxChannelConfig.linkAEnable = true;
+            rxChannelConfig.linkBEnable = true;
+        }
+        else
+        {
+            if (!receive.mLinkAEnable.isEmpty())
+                rxChannelConfig.linkAEnable = (getEnable(receive.mLinkAEnable));
+            if (!receive.mLinkBEnable.isEmpty())
+                rxChannelConfig.linkBEnable = (getEnable(receive.mLinkBEnable));
+        }
         rxChannelConfig.primarySourceIP     = receive.mPrimarySrcIPAddress.toStdString();
         rxChannelConfig.primarySourcePort   = receive.mPrimarySrcPort.toUInt();
         rxChannelConfig.primaryDestIP       = receive.mPrimaryDestIPAddress.toStdString();
@@ -387,7 +416,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
 
         config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
-        config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable),enable2022_7);
+        config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable));
     }
     cerr << "## transmitIter" << endl;
 
@@ -400,6 +429,18 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         tx_2022_channel txChannelConfig;
 
         NTV2Channel channel                 = getChannel(transmit.mChannelDesignator);
+        if (enable2022_7)
+        {
+            txChannelConfig.linkAEnable = true;
+            txChannelConfig.linkBEnable = true;
+        }
+        else
+        {
+            if (!transmit.mLinkAEnable.isEmpty())
+                txChannelConfig.linkAEnable = (getEnable(transmit.mLinkAEnable));
+            if (!transmit.mLinkBEnable.isEmpty())
+                txChannelConfig.linkBEnable = (getEnable(transmit.mLinkBEnable));
+        }
         txChannelConfig.primaryLocalPort    = transmit.mPrimaryLocalPort.toUInt();
         txChannelConfig.primaryRemoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
         txChannelConfig.primaryRemotePort   = transmit.mPrimaryRemotePort.toUInt();
@@ -409,8 +450,8 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         txChannelConfig.tos                 = transmit.mTOS.toUInt();
         txChannelConfig.ttl                 = transmit.mTTL.toUInt();
 
-        config2022.SetTxChannelConfiguration (channel, txChannelConfig,enable2022_7);
-        config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable),enable2022_7);
+        config2022.SetTxChannelConfiguration (channel, txChannelConfig);
+        config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable));
     }
 
     return true;
