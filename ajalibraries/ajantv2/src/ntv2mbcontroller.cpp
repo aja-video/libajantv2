@@ -72,6 +72,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
         if (rv && (status == "OK"))
         {
             ReleaseMailbox();
+            SetLinkActive(port);
             return true;
         }
         else if (rv && (status == "FAIL"))
@@ -374,4 +375,152 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
         return reg;
     }
     return 0;
+}
+
+bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t val = 0;
+    if (linkAEnable) val |= 0x2;
+    if (linkBEnable) val |= 0x1;
+    val <<= (chan * 2);
+
+    uint32_t state;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (!rv) return false;
+    state   &= ~( 0x3 << (chan * 2) );
+    state  |= val;
+    rv = mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return rv;
+}
+
+bool CNTV2MBController::GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t state;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (!rv) return false;
+    state  &=  ( 0x3 << (chan * 2) );
+    state >>= (chan * 2);
+    linkAEnable = (state & 0x02) ? true : false;
+    linkBEnable = (state & 0x01) ? true : false;
+    return true;
+}
+
+
+bool CNTV2MBController::SetRxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t val = 0;
+    if (linkAEnable) val |= 0x2;
+    if (linkBEnable) val |= 0x1;
+    val <<= (chan * 2);
+
+    uint32_t state;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (!rv) return false;
+    state   &= ~( (0x3 << (chan * 2)) << 8 );
+    state  |= (val << 8);
+    rv = mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return rv;
+}
+
+bool CNTV2MBController::GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t state;
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (!rv) return false;
+    state >>= 8;
+    state  &=  ( 0x3 << (chan * 2) );
+    state >>= (chan * 2);
+    linkAEnable = (state & 0x02) ? true : false;
+    linkBEnable = (state & 0x01) ? true : false;
+    return true;
+}
+
+bool  CNTV2MBController::SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t val;
+    if (link == SFP_TOP)
+    {
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
+    }
+    else
+    {
+       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
+    }
+
+    val  &= ~( 0xff << (chan * 8));
+    val  |= ( match << (chan * 8) );
+
+    if (link == SFP_TOP)
+    {
+        mDevice.WriteRegister(SAREK_REGS + kRegSarekRxMatchesA, val);
+    }
+    else
+    {
+       mDevice.WriteRegister(SAREK_REGS + kRegSarekRxMatchesB, val);
+    }
+    return true;
+}
+
+bool  CNTV2MBController::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match)
+{
+    uint32_t chan = (uint32_t)channel;
+
+    uint32_t val;
+    if (link == SFP_TOP)
+    {
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
+    }
+    else
+    {
+       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
+    }
+
+    val >>= (chan * 8);
+    val &=  0xff;
+    match = (uint8_t)val;
+    return true;
+}
+
+
+bool CNTV2MBController::SetLinkActive(eSFP link)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (link == SFP_BOTTOM)
+    {
+        state  |= LINK_B_ACTIVE;
+    }
+    else
+    {
+        state  |= LINK_A_ACTIVE;
+    }
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return true;
+}
+
+bool CNTV2MBController::GetLinkActive(eSFP link)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (link == SFP_BOTTOM)
+    {
+        if (state & LINK_B_ACTIVE)
+            return true;
+    }
+    else
+    {
+        if (state & LINK_A_ACTIVE)
+            return true;
+    }
+    return false;
 }

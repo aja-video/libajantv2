@@ -56,6 +56,9 @@ typedef struct
 #define IGMPCB_STATE_ENABLED  BIT(1)
 #define IGMPCB_STATE_BUSY     BIT(31)   // ignore when busy
 
+#define LINK_A_ACTIVE         BIT(31)
+#define LINK_B_ACTIVE         BIT(30)
+
 class IPVNetConfig
 {
 public:
@@ -85,6 +88,17 @@ protected:
     void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
     void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
+
+    bool SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
+    bool GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+    bool SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
+    bool GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+
+    bool SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
+    bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
+
+    bool SetLinkActive(eSFP Link);
+    bool GetLinkActive(eSFP link);
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);

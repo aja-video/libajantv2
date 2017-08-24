@@ -263,6 +263,12 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
 
 bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
+    if (!mDevice.IsMBSystemReady())
+    {
+        mError = "KonaIP card not ready.";
+        return false;
+    }
+
     if (!mDevice.IsMBSystemValid())
     {
         mError = "Host software does not match device firmware. Firmware update required.";
@@ -674,6 +680,29 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     bool        rv;
     bool        disableIGMP;
 
+    //get link enables
+    bool linkAEnable;
+    bool linkBEnable;
+    GetRxLinkState(channel,linkAEnable, linkBEnable);
+
+    if (enable && linkAEnable)
+    {
+        if (GetLinkActive(SFP_TOP) == false)
+        {
+            mError = "SFP Top (Link A) not configured";
+            return false;
+        }
+    }
+
+    if (enable && linkBEnable)
+    {
+        if (GetLinkActive(SFP_BOTTOM) == false)
+        {
+            mError = "SFP Bottom (Link B) not configured";
+            return false;
+        }
+    }
+
     if (enable && _biDirectionalChannels)
     {
         bool txEnabled;
@@ -685,11 +714,6 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
         }
         mDevice.SetSDITransmitEnable(channel, false);
     }
-
-    //get link enables
-    bool linkAEnable;
-    bool linkBEnable;
-    GetRxLinkState(channel,linkAEnable, linkBEnable);
 
     if (linkBEnable)
     {
@@ -862,6 +886,12 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
             }
             else
             {
+                if (GetLinkActive(SFP_BOTTOM) == false)
+                {
+                    mError = "SFP Bottom (Link B) not configured";
+                    return false;
+                }
+
                 // get MAC from ARP
                 string macAddr;
                 rv = GetRemoteMAC(txConfig.secondaryRemoteIP,SFP_BOTTOM, channel, NTV2_VIDEO_STREAM,macAddr);
@@ -897,6 +927,10 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         ChannelSemaphoreSet(kReg2022_6_tx_control, baseAddr);
 
         SetTxLinkState(channel, txConfig.linkAEnable,txConfig.linkBEnable);
+    }
+    else
+    {
+        SetTxLinkState(channel, true, false);
     }
 
     // select primary channel
@@ -957,6 +991,12 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         }
         else
         {
+            if (GetLinkActive(SFP_TOP) == false)
+            {
+                mError = "SFP Top (Link A) not configured";
+                return false;
+            }
+
             // get MAC from ARP
             string macAddr;
             rv = GetRemoteMAC(txConfig.primaryRemoteIP,SFP_TOP,channel,NTV2_VIDEO_STREAM,macAddr);
@@ -1060,8 +1100,28 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     bool        rv;
     uint32_t    localIp;
 
-    bool linkA = false;
-    bool linkB = true;
+    //get link enables
+    bool linkAEnable;
+    bool linkBEnable;
+    GetTxLinkState(channel,linkAEnable, linkBEnable);
+
+    if (enable && linkAEnable)
+    {
+        if (GetLinkActive(SFP_TOP) == false)
+        {
+            mError = "SFP Top (Link A) not configured";
+            return false;
+        }
+    }
+
+    if (enable && linkBEnable)
+    {
+        if (GetLinkActive(SFP_BOTTOM) == false)
+        {
+            mError = "SFP Bottom (Link B) not configured";
+            return false;
+        }
+    }
 
     if (_biDirectionalChannels)
     {
@@ -1092,7 +1152,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
      WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
 
-    if (enable && linkA)
+    if (enable && linkAEnable)
     {
         if (GetTxPort(channel) == SFP_TOP)
         {
@@ -1125,7 +1185,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
         WriteChannelRegister(kReg2022_6_tx_hitless_config   + baseAddr,0x0);  // 0 enables hitless mode
 
-        if (linkB && enable)
+        if (enable && linkBEnable)
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
             WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
@@ -1175,7 +1235,7 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
     rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
-    ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
+    ReadChannelRegister(kReg2022_6_tx_tx_enable + baseAddr, &val);
     if (val == 0x01)
     {
         enabled = true;
@@ -1457,116 +1517,3 @@ void CNTV2Config2022::ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseAd
 }
 
 
-bool CNTV2Config2022::SetTxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t val = 0;
-    if (linkAEnable) val |= 0x2;
-    if (linkBEnable) val |= 0x1;
-    val <<= (chan * 2);
-
-    uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (!rv) return false;
-    state   &= ~( 0x3 << (chan * 2) );
-    state  |= val;
-    rv = mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
-    return rv;
-}
-
-bool CNTV2Config2022::GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (!rv) return false;
-    state  &=  ( 0x3 << (chan * 2) );
-    state >>= (chan * 2);
-    linkAEnable = (state & 0x02) ? true : false;
-    linkBEnable = (state & 0x01) ? true : false;
-    return true;
-}
-
-
-bool CNTV2Config2022::SetRxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t val = 0;
-    if (linkAEnable) val |= 0x2;
-    if (linkBEnable) val |= 0x1;
-    val <<= (chan * 2);
-
-    uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (!rv) return false;
-    state   &= ~( (0x3 << (chan * 2)) << 8 );
-    state  |= (val << 8);
-    rv = mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
-    return rv;
-}
-
-bool CNTV2Config2022::GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (!rv) return false;
-    state >>= 8;
-    state  &=  ( 0x3 << (chan * 2) );
-    state >>= (chan * 2);
-    linkAEnable = (state & 0x02) ? true : false;
-    linkBEnable = (state & 0x01) ? true : false;
-    return true;
-}
-
-bool  CNTV2Config2022::SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t val;
-    if (link == SFP_TOP)
-    {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
-    }
-    else
-    {
-       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
-    }
-
-    val  &= ~( 0xff << (chan * 8));
-    val  |= ( match << (chan * 8) );
-
-    if (link == SFP_TOP)
-    {
-        mDevice.WriteRegister(SAREK_REGS + kRegSarekRxMatchesA, val);
-    }
-    else
-    {
-       mDevice.WriteRegister(SAREK_REGS + kRegSarekRxMatchesB, val);
-    }
-    return true;
-}
-
-bool  CNTV2Config2022::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match)
-{
-    uint32_t chan = (uint32_t)channel;
-
-    uint32_t val;
-    if (link == SFP_TOP)
-    {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
-    }
-    else
-    {
-       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
-    }
-
-    val >>= (chan * 8);
-    val &=  0xff;
-    match = (uint8_t)val;
-    return true;
-}

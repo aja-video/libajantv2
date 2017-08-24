@@ -233,14 +233,6 @@ private:
     bool        SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr);
 
-    bool        SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool        GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
-    bool        SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool        GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
-
-    bool        SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
-    bool        GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
-
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
     eSFP        GetRxPort(NTV2Channel chan);

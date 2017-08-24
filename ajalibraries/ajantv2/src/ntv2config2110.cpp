@@ -143,6 +143,12 @@ bool CNTV2Config2110::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
 
 bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
+    if (!mDevice.IsMBSystemReady())
+    {
+        mError = "KonaIP card not ready.";
+        return false;
+    }
+
     if (!mDevice.IsMBSystemValid())
     {
         mError = "Host software does not match device firmware. Firmware update required.";
