@@ -125,10 +125,17 @@ typedef struct NTV2FormatDescriptor
 	std::string		GetPlaneLabel (const UWord inPlaneIndex0) const;			///< @return	A string containing a human-readable name for the specified plane.
 
 	/**
-		@return		The zero-based index number of the plane that contains the byte at the given offset.
+		@return		The zero-based index number of the plane that contains the byte at the given offset,
+					or 0xFFFF if the offset is not within any plane in the buffer.
 		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the frame.
 	**/
 	UWord			GetPlaneFromByteOffset (const ULWord inByteOffset) const;
+
+	/**
+		@return		True if the given byte offset is at the start of a new line/row;  otherwise false.
+		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the frame.
+	**/
+	bool			IsAtLineStart (ULWord inByteOffset) const;
 
 	/**
 		@return	The height of the raster, in lines.
