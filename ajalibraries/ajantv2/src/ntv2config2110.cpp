@@ -642,10 +642,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 {
     uint32_t    hi;
     uint32_t    lo;
-    MACAddr     macaddr;
-    uint8_t     ip0;
     uint32_t    destIp;
-    uint32_t    mac;
     bool        rv = true;
 
     if (GetLinkActive(SFP_TOP) == false)
@@ -678,58 +675,9 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     // dest port
     WriteChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,txConfig.remotePort);
 
-    // is remote address muticast
-    ip0 = (destIp & 0xff000000)>> 24;
-    if (ip0 >= 224 && ip0 <= 239)
-    {
-        // generate multicast MAC
-        mac = destIp & 0x7fffff;  // lower 23 bits
-
-        macaddr.mac[0] = 0x01;
-        macaddr.mac[1] = 0x00;
-        macaddr.mac[2] = 0x5e;
-        macaddr.mac[3] =  mac >> 16;
-        macaddr.mac[4] = (mac & 0xffff) >> 8;
-        macaddr.mac[5] =  mac & 0xff;
-
-        hi  = macaddr.mac[0]  << 8;
-        hi += macaddr.mac[1];
-
-        lo  = macaddr.mac[2] << 24;
-        lo += macaddr.mac[3] << 16;
-        lo += macaddr.mac[4] << 8;
-        lo += macaddr.mac[5];
-    }
-    else
-    {
-        // get MAC from ARP
-        string macAddr;
-        rv = GetRemoteMAC(txConfig.remoteIP,SFP_TOP,channel,stream,macAddr);
-        if (!rv)
-        {
-            SetTxChannelEnable(channel, stream, false); // stop transmit
-            mError = "Failed to retrieve MAC address from ARP table";
-            return false;
-        }
-
-        istringstream ss(macAddr);
-        string token;
-        int i=0;
-        while (i < 6)
-        {
-            getline (ss, token, ':');
-            macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
-        }
-
-        hi  = macaddr.mac[0]  << 8;
-        hi += macaddr.mac[1];
-
-        lo  = macaddr.mac[2] << 24;
-        lo += macaddr.mac[3] << 16;
-        lo += macaddr.mac[4] << 8;
-        lo += macaddr.mac[5];
-    }
-
+    // MAC address
+    rv = GetMACAddress(SFP_TOP,channel,stream,txConfig.remoteIP,hi,lo);
+    if (!rv) return false;
     WriteChannelRegister(kRegFramer_dest_mac_lo  + baseAddrFramer,lo);
     WriteChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer,hi);
 
@@ -837,8 +785,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
         // end setup 4175 packetizer
-
-
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -882,7 +828,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
-
     }
     return rv;
 }
@@ -1313,5 +1258,60 @@ bool  CNTV2Config2110::decompose2110TxStream(uint32_t istream, NTV2Channel & ch,
     int channel = istream >> 1;
     ch          = (NTV2Channel) channel;
     str         = (NTV2Stream)  stream;
+    return true;
+}
+
+bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
+{
+    uint32_t destIp = inet_addr(remoteIP.c_str());
+    destIp = NTV2EndianSwap32(destIp);
+
+    uint32_t    mac;
+    MACAddr     macaddr;
+
+     // is remote address muticast?
+    uint8_t ip0 = (destIp & 0xff000000)>> 24;
+    if (ip0 >= 224 && ip0 <= 239)
+    {
+        // multicast - generate MAC
+        mac = destIp & 0x7fffff;  // lower 23 bits
+
+        macaddr.mac[0] = 0x01;
+        macaddr.mac[1] = 0x00;
+        macaddr.mac[2] = 0x5e;
+        macaddr.mac[3] =  mac >> 16;
+        macaddr.mac[4] = (mac & 0xffff) >> 8;
+        macaddr.mac[5] =  mac & 0xff;
+    }
+    else
+    {
+        // unicast - get MAC from ARP
+        string macAddr;
+        bool rv = GetRemoteMAC(remoteIP, port, channel, stream, macAddr);
+        if (!rv)
+        {
+            SetTxChannelEnable(channel, stream, false); // stop transmit
+            mError = "Failed to retrieve MAC address from ARP table";
+            return false;
+        }
+
+        istringstream ss(macAddr);
+        string token;
+        int i=0;
+        while (i < 6)
+        {
+            getline (ss, token, ':');
+            macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
+        }
+    }
+
+    hi  = macaddr.mac[0]  << 8;
+    hi += macaddr.mac[1];
+
+    lo  = macaddr.mac[2] << 24;
+    lo += macaddr.mac[3] << 16;
+    lo += macaddr.mac[4] << 8;
+    lo += macaddr.mac[5];
+
     return true;
 }
