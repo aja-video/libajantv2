@@ -71,7 +71,7 @@ The <b>Frame Buffer</b> inspector monitors the contents of frame buffer memory o
 Frame buffer memory contents can be displayed in four ways:
 	-	<b>Line</b> -- The full raster, line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
 	-	<b>Raw</b> -- The entire buffer in fixed-length "lines", grouped by 1, 2, 4 or 8 byte chunks. The line length is adjustable.
-		Boundaries between raster lines are marked with a blue indicator.
+		By default, unless disabled, boundaries between raster lines are indicated with a blue marker.
 		Regions and planes are indicated by color:  green for audio, yellow for Ancillary data, etc.
 	-	<b>Component</b> -- The full raster, line-by-line, in component format, dictated by the frame store's frame buffer format, in hex or decimal.
 	-	<b>Image</b> -- The visible raster, as an image.
@@ -167,6 +167,7 @@ Except in its Image view, the raster content display always highlights changed c
 		-	<b>Compare to Frame...</b> -- (<b>Auto</b> mode OFF only) -- Compares the current frame with another, highlighting the differences. To cancel this mode, toggle the "Auto" setting.
 		-	<b>Bytes/Line</b> -- (<b>Raw</b> view only) -- Changes the number of bytes to display in each line of the Raw data view. Choose from 64 bytes up to 32K bytes by powers of 2.
 			Note that larger values make for fewer lines and many more columns. Smaller values show many more lines with fewer columns.
+		-	<b>Show/Hide Line Boundaries</b> -- (<b>Raw</b> view only) -- Shows or hides the line boundary markers.
 
 @par	Data Operations
 	-	<b>Save As...</b> -- Saves the frame buffer contents to a file.
