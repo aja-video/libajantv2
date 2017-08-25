@@ -232,15 +232,14 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcPrimaryDestIp1,			&mRx2022Config1.rxc_primaryDestIp);
         mCard->ReadRegister(kVRegRxcPrimarySourcePort1,		&mRx2022Config1.rxc_primarySourcePort);
         mCard->ReadRegister(kVRegRxcPrimaryDestPort1,		&mRx2022Config1.rxc_primaryDestPort);
-        mCard->ReadRegister(kVRegRxcPrimarySsrc1,			&mRx2022Config1.rxc_primarySsrc);
         mCard->ReadRegister(kVRegRxcPrimaryVlan1,			&mRx2022Config1.rxc_primaryVlan);
         mCard->ReadRegister(kVRegRxcSecondaryRxMatch1,		&mRx2022Config1.rxc_secondaryRxMatch);
         mCard->ReadRegister(kVRegRxcSecondarySourceIp1,		&mRx2022Config1.rxc_secondarySourceIp);
         mCard->ReadRegister(kVRegRxcSecondaryDestIp1,		&mRx2022Config1.rxc_secondaryDestIp);
         mCard->ReadRegister(kVRegRxcSecondarySourcePort1,	&mRx2022Config1.rxc_secondarySourcePort);
         mCard->ReadRegister(kVRegRxcSecondaryDestPort1,		&mRx2022Config1.rxc_secondaryDestPort);
-        mCard->ReadRegister(kVRegRxcSecondarySsrc1,			&mRx2022Config1.rxc_secondarySsrc);
         mCard->ReadRegister(kVRegRxcSecondaryVlan1,			&mRx2022Config1.rxc_secondaryVlan);
+		mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcNetworkPathDiff1,		&mRx2022Config1.rxc_networkPathDiff);
         mCard->ReadRegister(kVRegRxcPlayoutDelay1,			&mRx2022Config1.rxc_playoutDelay);
 
@@ -250,18 +249,16 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcPrimaryDestIp2,			&mRx2022Config2.rxc_primaryDestIp);
         mCard->ReadRegister(kVRegRxcPrimarySourcePort2,		&mRx2022Config2.rxc_primarySourcePort);
         mCard->ReadRegister(kVRegRxcPrimaryDestPort2,		&mRx2022Config2.rxc_primaryDestPort);
-        mCard->ReadRegister(kVRegRxcPrimarySsrc2,			&mRx2022Config2.rxc_primarySsrc);
         mCard->ReadRegister(kVRegRxcPrimaryVlan2,			&mRx2022Config2.rxc_primaryVlan);
         mCard->ReadRegister(kVRegRxcSecondaryRxMatch2,		&mRx2022Config2.rxc_secondaryRxMatch);
         mCard->ReadRegister(kVRegRxcSecondarySourceIp2,		&mRx2022Config2.rxc_secondarySourceIp);
         mCard->ReadRegister(kVRegRxcSecondaryDestIp2,		&mRx2022Config2.rxc_secondaryDestIp);
         mCard->ReadRegister(kVRegRxcSecondarySourcePort2,	&mRx2022Config2.rxc_secondarySourcePort);
         mCard->ReadRegister(kVRegRxcSecondaryDestPort2,		&mRx2022Config2.rxc_secondaryDestPort);
-        mCard->ReadRegister(kVRegRxcSecondarySsrc2,			&mRx2022Config2.rxc_secondarySsrc);
         mCard->ReadRegister(kVRegRxcSecondaryVlan2,			&mRx2022Config2.rxc_secondaryVlan);
+		mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcNetworkPathDiff2,		&mRx2022Config2.rxc_networkPathDiff);
         mCard->ReadRegister(kVRegRxcPlayoutDelay2,			&mRx2022Config2.rxc_playoutDelay);
-
 
         mCard->ReadRegister(kVRegTxcEnable3,				&mTx2022Config3.txc_enable32);
         mCard->ReadRegister(kVRegTxcPrimaryLocalPort3,		&mTx2022Config3.txc_primaryLocalPort);

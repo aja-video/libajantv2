@@ -3326,7 +3326,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch & 0x7fffffff;
             chan.primarySourcePort      = mRx2022Config2.rxc_primarySourcePort;
             chan.primaryDestPort        = mRx2022Config2.rxc_primaryDestPort;
-            chan.primarySsrc            = mRx2022Config2.rxc_primarySsrc;
             chan.primaryVlan            = mRx2022Config2.rxc_primaryVlan;
             
             addr.s_addr                 = mRx2022Config2.rxc_secondarySourceIp;
@@ -3336,9 +3335,9 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch & 0x7fffffff;
             chan.secondarySourcePort    = mRx2022Config2.rxc_secondarySourcePort;
             chan.secondaryDestPort      = mRx2022Config2.rxc_secondaryDestPort;
-            chan.secondarySsrc          = mRx2022Config2.rxc_secondarySsrc;
             chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
-            
+			
+			chan.ssrc					= mRx2022Config2.rxc_ssrc;
             chan.networkPathDiff        = mRx2022Config2.rxc_networkPathDiff;
             chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
 
@@ -3353,7 +3352,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch  & 0x7fffffff;
             chan.primarySourcePort      = mRx2022Config1.rxc_primarySourcePort;
             chan.primaryDestPort        = mRx2022Config1.rxc_primaryDestPort;
-            chan.primarySsrc            = mRx2022Config1.rxc_primarySsrc;
             chan.primaryVlan            = mRx2022Config1.rxc_primaryVlan;
             
             addr.s_addr                 = mRx2022Config1.rxc_secondarySourceIp;
@@ -3363,9 +3361,9 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch & 0x7fffffff;
             chan.secondarySourcePort    = mRx2022Config1.rxc_secondarySourcePort;
             chan.secondaryDestPort      = mRx2022Config1.rxc_secondaryDestPort;
-            chan.secondarySsrc          = mRx2022Config1.rxc_secondarySsrc;
             chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
             
+			chan.ssrc					= mRx2022Config1.rxc_ssrc;
             chan.networkPathDiff        = mRx2022Config1.rxc_networkPathDiff;
             chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
 
@@ -3622,7 +3620,6 @@ void KonaIP22Services::printRxConfig(rx_2022_channel chan)
 	printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
 	printf("primarySourcePort		%d\n", chan.primarySourcePort);
 	printf("primaryDestPort			%d\n", chan.primaryDestPort);
-	printf("primarySsrc				%d\n", chan.primarySsrc);
 	printf("primaryVlan				%d\n", chan.primaryVlan);
 	printf("primaryRxMatch			%d\n", chan.primaryRxMatch);
 	
@@ -3630,7 +3627,6 @@ void KonaIP22Services::printRxConfig(rx_2022_channel chan)
 	printf("secondaryDestIP			%s\n", chan.secondaryDestIP.c_str());
 	printf("secondarySourcePort		%d\n", chan.secondarySourcePort);
 	printf("secondaryDestPort		%d\n", chan.secondaryDestPort);
-	printf("secondarySsrc			%d\n", chan.secondarySsrc);
 	printf("secondaryVlan			%d\n", chan.secondaryVlan);
 	printf("secondaryRxMatch		%d\n\n", chan.secondaryRxMatch);
 }
