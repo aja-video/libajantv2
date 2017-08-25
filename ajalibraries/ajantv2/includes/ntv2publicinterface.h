@@ -894,6 +894,12 @@ typedef enum
 
 } NTV2EnhancedCSCRegisters;
 
+typedef enum
+{
+	kRegHDMIOutputAudioConfig = 0x1d40
+}NTV2HDMIOutAudioRegisters;
+
+
 
 #if !defined (NTV2_DEPRECATE)
 	#define	KRegDMA1HostAddr			kRegDMA1HostAddr			///< @deprecated		Use kRegDMA1HostAddr instead.
@@ -2373,6 +2379,11 @@ typedef enum
 	kRegMaskAudioMixerInputLeftLevel = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskAudioMixerInputRightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
+	kRegMaskHDMIOutAudioEngineSelect = BIT(0) + BIT(1) + BIT(2) + BIT(3),
+	kRegMaskHDMIOutAudio8ChannelSelect = BIT(4),
+	kRegMaskHDMIOutAudioChannelMode = BIT(5),
+	kRegMaskHDMIOutAudio2ChannelSelect = BIT(8) + BIT(9)
+
 } RegisterMask;
 
 typedef enum
@@ -3464,7 +3475,12 @@ typedef enum
 	kRegShiftAudioMixerMainMixedOutputChannel1Level = 0,
 	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16,
 	kRegShiftAudioMixerInputLeftLevel = 0,
-	kRegShiftAudioMixerInputRightLevel = 16
+	kRegShiftAudioMixerInputRightLevel = 16,
+
+	kRegShiftHDMIOutAudioEngineSelect = 0,
+	kRegShiftHDMIOutAudio8ChannelSelect = 4,
+	kRegShiftHDMIOutAudioChannelMode = 5,
+	kRegShiftHDMIOutAudio2ChannelSelect = 8
 
 } RegisterShift;
 
