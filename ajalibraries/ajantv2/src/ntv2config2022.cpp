@@ -517,14 +517,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
     // playout delay in 27MHz clocks or 90kHz clocks
     uint32_t delay;
-    if (_is2022_2)
-    {
-        delay = (rxConfig.playoutDelay * 90) << 9;  // 90 kHz clocks
-    }
-    else
-    {
-        delay = rxConfig.playoutDelay * 27000;  // 27 MhZ CLOCKS
-    }
+    delay = (_is2022_2) ? (rxConfig.playoutDelay * 90) << 9 : rxConfig.playoutDelay * 27000;
     WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, delay);
 
     // network path differential in 27MHz or 90kHz clocks
