@@ -867,9 +867,12 @@ private:
 		DefineRegName	(kVRegAudioMixerSourceMainGain,			"kVRegAudioMixerSourceMainGain");
 		DefineRegName	(kVRegAudioMixerSourceAux1Gain,			"kVRegAudioMixerSourceAux1Gain");
 		DefineRegName	(kVRegAudioMixerSourceAux2Gain,			"kVRegAudioMixerSourceAux2Gain");
-		DefineRegName	(kVRegAudioMixerSourceMainSelect,		"kVRegAudioMixerSourceMainSelect");
-		DefineRegName	(kVRegAudioMixerSourceAux1Select,		"kVRegAudioMixerSourceAux1Select");
-		DefineRegName	(kVRegAudioMixerSourceAux2Select,		"kVRegAudioMixerSourceAux2Select");
+		DefineRegName	(kVRegAudioCapMixerSourceMainEnable,	"kVRegAudioCapMixerSourceMainEnable");
+		DefineRegName	(kVRegAudioCapMixerSourceAux1Enable,	"kVRegAudioCapMixerSourceAux1Enable");
+		DefineRegName	(kVRegAudioCapMixerSourceAux2Enable,	"kVRegAudioCapMixerSourceAux2Enable");
+		DefineRegName	(kVRegAudioCapMixerSourceMainGain,		"kVRegAudioCapMixerSourceMainGain");
+		DefineRegName	(kVRegAudioCapMixerSourceAux1Gain,		"kVRegAudioCapMixerSourceAux1Gain");
+		DefineRegName	(kVRegAudioCapMixerSourceAux2Gain,		"kVRegAudioCapMixerSourceAux2Gain");
 		DefineRegName	(kVRegSwizzle4kInput,					"kVRegSwizzle4kInput");
 		DefineRegName	(kVRegSwizzle4kOutput,					"kVRegSwizzle4kOutput");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");

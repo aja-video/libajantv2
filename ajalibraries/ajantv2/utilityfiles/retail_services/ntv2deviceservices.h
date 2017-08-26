@@ -226,9 +226,14 @@ public:
 	int32_t					mAudioMixerSourceMainGain;
 	int32_t					mAudioMixerSourceAux1Gain;
 	int32_t					mAudioMixerSourceAux2Gain;
-	int32_t					mAudioMixerSourceMainSelect;
-	int32_t					mAudioMixerSourceAux1Select;
-	int32_t					mAudioMixerSourceAux2Select;
+	
+	bool					mAudioCapMixerSourceMainEnable;
+	bool					mAudioCapMixerSourceAux1Enable;
+	bool					mAudioCapMixerSourceAux2Enable;
+	int32_t					mAudioCapMixerSourceMainGain;
+	int32_t					mAudioCapMixerSourceAux1Gain;
+	int32_t					mAudioCapMixerSourceAux2Gain;
+
 
 	void SetCard (CNTV2VidProc* card)
 		{ mCard = card; }

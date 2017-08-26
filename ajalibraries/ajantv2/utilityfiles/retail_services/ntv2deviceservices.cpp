@@ -209,9 +209,13 @@ void DeviceServices::ReadDriverState (void)
 		mCard->ReadRegister(kVRegAudioMixerSourceMainGain, (ULWord *) &mAudioMixerSourceMainGain);
 		mCard->ReadRegister(kVRegAudioMixerSourceAux1Gain, (ULWord *) &mAudioMixerSourceAux1Gain);
 		mCard->ReadRegister(kVRegAudioMixerSourceAux2Gain, (ULWord *) &mAudioMixerSourceAux2Gain);
-		mCard->ReadRegister(kVRegAudioMixerSourceMainSelect, (ULWord *) &mAudioMixerSourceMainSelect);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux1Select, (ULWord *) &mAudioMixerSourceAux1Select);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux2Select, (ULWord *) &mAudioMixerSourceAux2Select);
+		
+		mCard->ReadRegister(kVRegAudioCapMixerSourceMainEnable, (ULWord *) &mAudioCapMixerSourceMainEnable);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Enable, (ULWord *) &mAudioCapMixerSourceAux1Enable);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Enable, (ULWord *) &mAudioCapMixerSourceAux2Enable);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceMainGain, (ULWord *) &mAudioCapMixerSourceMainGain);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Gain, (ULWord *) &mAudioCapMixerSourceAux1Gain);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
 	}
 
     if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
