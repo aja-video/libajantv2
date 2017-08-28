@@ -3045,19 +3045,6 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	bool					bSdiRgbOut			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	bool					b6g4k				= (b4K && !b4kHfr && !bSdiRgbOut && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool					b12g4k				= (b4K && (b4kHfr || bSdiRgbOut) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	//bool					vpid16x9			= ! NTV2_IS_SD_VIDEO_FORMAT(primaryVideoFormat);
-
-	//VPIDChannel			vpidChannela;
-	//ULWord				vpidOut1a(0);
-	//ULWord				vpidOut1b(0);
-	//ULWord				vpidOut2a(0);
-	//ULWord				vpidOut2b(0);
-	//ULWord				vpidOut3a(0);
-	//ULWord				vpidOut3b(0);
-	//ULWord				vpidOut4a(0);
-	//ULWord				vpidOut4b(0);
-	//ULWord				vpidOut5a(0);
-	//ULWord				vpidOut5b(0);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat			= NTV2_FORMAT_UNKNOWN;
 	
@@ -3109,6 +3096,11 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				VPIDStandard std = parser.GetStandard();
 				switch (std)
 				{
+				case VPIDStandard_2160_Single_12Gb:
+					b12g4k = true;
+					b4xIo = true;
+					b2pi = true;
+					break;
 				case VPIDStandard_2160_Single_6Gb:
 					b6g4k = true;
 					b4xIo = false;
@@ -3119,8 +3111,6 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
                     b4xIo = false;
                     b2pi  = true;
 					break;
-				case VPIDStandard_2160_Single_12Gb:
-					b12g4k = true;
 				case VPIDStandard_2160_QuadLink_3Ga:
 				case VPIDStandard_2160_QuadDualLink_3Gb:
 					b4xIo = true;
@@ -3131,7 +3121,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				}
 			}
 
-			if (b2wire4kIn)
+			if (b2wire4kIn || b6g4k || b12g4k)
 				b4xIo = false;
 
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
@@ -3143,7 +3133,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	else
 	{
 		b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		if (b2pi && !bSdiRgbOut && !b4kHfr)
+		if ((b2pi && !bSdiRgbOut && !b4kHfr) || b6g4k || b12g4k)
 			b4xIo = false;										// low frame rate two pixel interleave YUV
 		
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
@@ -3155,12 +3145,14 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	if (b12g4k)
 	{
 		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+		//mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+		//mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
 	}
 	else if (b6g4k)
 	{
 		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+		//mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
+		//mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
 	}
 	else
 	{
