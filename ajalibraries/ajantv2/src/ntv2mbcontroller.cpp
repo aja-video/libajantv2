@@ -377,6 +377,8 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
     return 0;
 }
 
+
+
 bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
 {
     uint32_t chan = (uint32_t)channel;
@@ -498,11 +500,11 @@ bool CNTV2MBController::SetLinkActive(eSFP link)
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
     if (link == SFP_BOTTOM)
     {
-        state  |= LINK_B_ACTIVE;
+        state  |= S2022_LINK_B_ACTIVE;
     }
     else
     {
-        state  |= LINK_A_ACTIVE;
+        state  |= S2022_LINK_A_ACTIVE;
     }
     mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
     return true;
@@ -514,13 +516,37 @@ bool CNTV2MBController::GetLinkActive(eSFP link)
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
     if (link == SFP_BOTTOM)
     {
-        if (state & LINK_B_ACTIVE)
+        if (state & S2022_LINK_B_ACTIVE)
             return true;
     }
     else
     {
-        if (state & LINK_A_ACTIVE)
+        if (state & S2022_LINK_A_ACTIVE)
             return true;
     }
     return false;
+}
+
+bool CNTV2MBController::SetDualLinkMode(bool enable)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (enable)
+    {
+        state  |= S2022_DUAL_LINK;
+    }
+    else
+    {
+        state &= ~S2022_DUAL_LINK;
+    }
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return true;
+}
+
+bool CNTV2MBController::GetDualLinkMode(bool & enable)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    enable = (state & S2022_DUAL_LINK);
+    return true;
 }

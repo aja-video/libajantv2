@@ -82,7 +82,6 @@ void rx_2022_channel::init()
     secondaryVlan = 0;
 
     ssrc = 0;
-    networkPathDiff = 50;
     playoutDelay = 50;
 }
 
@@ -111,7 +110,6 @@ bool rx_2022_channel::operator == ( const rx_2022_channel &other )
         (secondaryVlan			== other.secondaryVlan)			&&
 		
         (ssrc                   == other.ssrc)                  &&
-        (networkPathDiff		== other.networkPathDiff)		&&
         (playoutDelay			== other.playoutDelay))
     {
         return true;
@@ -413,13 +411,25 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     uint32_t    baseAddr;
     bool        rv;
 
-    if (rxConfig.linkAEnable && (GetLinkActive(SFP_TOP) == false))
+    bool enabled_7  = false;
+    uint32_t unused = 0;
+    Set2022_7_Mode(enabled_7,unused);
+
+    bool linkA =  rxConfig.linkAEnable;
+    bool linkB =  rxConfig.linkBEnable;
+    if (enabled_7)
+    {
+        linkA = true;
+        linkB = true;
+    }
+
+    if (linkA && (GetLinkActive(SFP_TOP) == false))
     {
         mError = "SFP Top (Link A) not configured";
         return false;
     }
 
-    if (rxConfig.linkBEnable && (GetLinkActive(SFP_BOTTOM) == false))
+    if (linkB && (GetLinkActive(SFP_BOTTOM) == false))
     {
         mError = "SFP Bottom (Link B) not configured";
         return false;
@@ -461,7 +471,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
         // update IGMP subscriptions
         uint8_t ip0 = (destIp & 0xff000000)>> 24;
-        if ((ip0 >= 224 && ip0 <= 239) && rxConfig.linkBEnable)
+        if ((ip0 >= 224 && ip0 <= 239) && linkB)
         {
             // is multicast
             bool enabled = false;
@@ -476,7 +486,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
             UnsetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM);
         }
 
-         SetRxLinkState(channel, rxConfig.linkAEnable,rxConfig.linkBEnable);
+         SetRxLinkState(channel, linkA, linkB);
     }
     else
     {
@@ -520,16 +530,11 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     delay = (_is2022_2) ? (rxConfig.playoutDelay * 90) << 9 : rxConfig.playoutDelay * 27000;
     WriteChannelRegister(kReg2022_6_rx_playout_delay + baseAddr, delay);
 
-    // network path differential in 27MHz or 90kHz clocks
-    if (rxConfig.linkAEnable && rxConfig.linkBEnable)
+    // network path differential
+    if (_is2022_2 || (enabled_7 == false))
     {
-        delay = (_is2022_2) ? (rxConfig.networkPathDiff * 90) << 9 : rxConfig.networkPathDiff * 27000;
+        WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
     }
-    else
-    {
-        delay = 0;
-    }
-    WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, delay);
 
     // some constants
     WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x0000ffff);
@@ -561,7 +566,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
     // update IGMP subscriptions
     uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    if ((ip0 >= 224 && ip0 <= 239) && rxConfig.linkAEnable)
+    if ((ip0 >= 224 && ip0 <= 239) && linkA)
     {
         // is multicast
         bool enabled = false;
@@ -663,9 +668,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     ReadChannelRegister(kReg2022_6_rx_playout_delay + baseAddr,  &val);
     rxConfig.playoutDelay = (_is2022_2) ? (val >>9)/90 : val/27000;
 
-    // network path differential in ms
-    ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
-    rxConfig.networkPathDiff = (_is2022_2) ? (val>>9)/90 : val/27000;
+
 
     return true;
 }
@@ -1135,6 +1138,71 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
         enabled = true;
     }
 
+    return true;
+}
+
+bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDifferential)
+{
+    if (enable)
+    {
+        if (!_is2022_7)
+        {
+            mError = "2022-7 not supported for by this firmware";
+            return false;
+        }
+        SetDualLinkMode(true);
+        if (_numRxChans)
+        {
+            uint32_t delay = rx_networkPathDifferential * 27000;
+            uint32_t baseAddr;
+            SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+            // network path differential in 27MHz clocks
+            WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, delay);
+        }
+    }
+    else
+    {
+        if (!_is2022_7)
+        {
+            mError = "2022-7 not supported for by this firmware";
+            return false;
+        }
+
+        SetDualLinkMode(false);
+
+        if (_numRxChans)
+        {
+            uint32_t delay = rx_networkPathDifferential * 27000;
+            uint32_t baseAddr;
+            SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+            WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
+        }
+    }
+    return true;
+}
+
+bool  CNTV2Config2022::Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDifferential)
+{
+    enable = false;
+    rx_networkPathDifferential = 0;
+
+    if (!_is2022_7)
+    {
+        mError = "2022-7 not supported for by this firmware";
+        return false;
+    }
+
+    GetDualLinkMode(enable);
+
+    if (_numRxChans)
+    {
+        // network path differential in ms
+        uint32_t val;
+        uint32_t baseAddr;
+        SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
+        rx_networkPathDifferential = val/27000;
+    }
     return true;
 }
 
