@@ -3144,15 +3144,11 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	if (b12g4k)
 	{
-		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, b12g4k);
-		//mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
-		//mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
+		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, true);
 	}
 	else if (b6g4k)
 	{
-		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, b6g4k);
-		//mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
-		//mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
+		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, true);
 	}
 	else
 	{
