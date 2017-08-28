@@ -132,7 +132,14 @@ typedef struct NTV2FormatDescriptor
 	UWord			GetPlaneFromByteOffset (const ULWord inByteOffset) const;
 
 	/**
-		@return		True if the given byte offset is at the start of a new line/row;  otherwise false.
+		@return		The zero-based index number of the raster line (row) that contains the byte at the given offset,
+					or 0xFFFF if the offset does not fall within any plane or line in the buffer.
+		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the raster buffer.
+	**/
+	UWord			GetLineOffsetFromByteOffset (const ULWord inByteOffset) const;
+
+	/**
+		@return		True if the given byte offset is at the start of a new raster line (row);  otherwise false.
 		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the frame.
 	**/
 	bool			IsAtLineStart (ULWord inByteOffset) const;

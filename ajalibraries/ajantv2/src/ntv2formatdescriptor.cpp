@@ -831,6 +831,21 @@ UWord NTV2FormatDescriptor::GetPlaneFromByteOffset (const ULWord inByteOffset) c
 }
 
 
+UWord NTV2FormatDescriptor::GetLineOffsetFromByteOffset (const ULWord inByteOffset) const
+{
+	const UWord	origPlane	(GetPlaneFromByteOffset(inByteOffset));
+	if (origPlane == 0xFFFF)
+		return 0xFFFF;
+	ULWord	byteOffsetToStartOfPlane (0);
+	UWord	plane	(origPlane);
+	while (plane)
+		byteOffsetToStartOfPlane += GetTotalRasterBytes(--plane);
+	NTV2_ASSERT(inByteOffset >= byteOffsetToStartOfPlane);
+	UWord	lineOffset	((inByteOffset - byteOffsetToStartOfPlane) / GetBytesPerRow(origPlane));
+	return lineOffset;
+}
+
+
 bool NTV2FormatDescriptor::IsAtLineStart (ULWord inByteOffset) const
 {
 	if (!IsValid())
