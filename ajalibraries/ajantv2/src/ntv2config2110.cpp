@@ -20,6 +20,7 @@
 
 uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
 uint32_t CNTV2Config2110::a_packetizers[4] = {SAREK_3190_TX_PACKETIZER_1,SAREK_3190_TX_PACKETIZER_2,SAREK_3190_TX_PACKETIZER_3,SAREK_3190_TX_PACKETIZER_4};
+uint32_t CNTV2Config2110::m_packetizers[4] = {SAREK_ANC_TX_PACKETIZER_1, SAREK_ANC_TX_PACKETIZER_2, SAREK_ANC_TX_PACKETIZER_3, SAREK_ANC_TX_PACKETIZER_4};
 
 using namespace std;
 
@@ -829,6 +830,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
     }
+    else if (stream == NTV2_METADATA_STREAM)
+    {
+
+    }
     return rv;
 }
 
@@ -894,7 +899,7 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t  ilace;
         mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
     }
-    else
+    else if (stream == NTV2_AUDIO1_STREAM)
     {
         // payload type
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, &val);
@@ -902,6 +907,10 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         // ssrc
         mDevice.ReadRegister(kReg3190_pkt_ssrc + baseAddrPacketizer, &txConfig.ssrc);
+    }
+    else if (stream == NTV2_METADATA_STREAM)
+    {
+
     }
     return true;
 }
@@ -1176,6 +1185,11 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream str
         baseAddrPacketizer  = a_packetizers[iChannel];
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
     }
+    else if (stream == NTV2_METADATA_STREAM)
+    {
+        baseAddrPacketizer  = m_packetizers[iChannel];
+        //mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
+    }
     else
         return false;
 
@@ -1246,16 +1260,17 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
 uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,NTV2Stream str )
 {
     // this stream number is a core 'channel' number
-    uint32_t iStream =  ( (int(ch) * 2) + (int)str );
+    uint32_t iStream =  ( (int(ch) * 3) + (int)str );
     return iStream;
 }
 
 bool  CNTV2Config2110::decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
 {
-    if (istream > 7) return false;
+    if (istream > 11)
+        return false;
 
-    int stream  = istream & 1;
-    int channel = istream >> 1;
+    int channel = istream / 3;
+    int stream  = istream - (channel * 3);
     ch          = (NTV2Channel) channel;
     str         = (NTV2Stream)  stream;
     return true;
