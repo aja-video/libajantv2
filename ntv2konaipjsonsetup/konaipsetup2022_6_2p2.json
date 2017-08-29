@@ -5,14 +5,12 @@
             "IPAddress":"172.16.19.10",
             "SubnetMask":"255.255.0.0",
             "Router":"255.255.255.255",
-            "Enable2022_7":"false"
     },
     {
             "designator":"bottom",
             "IPAddress":"172.16.19.11",
             "SubnetMask":"255.255.0.0",
             "Router":"255.255.255.255",
-            "Enable2022_7":"false"
     }
     ],
     "receive":[
@@ -31,27 +29,25 @@
             "primaryFilter":"0x14",
             "playoutDelay":"50",
             "Enable":"false"
-    }
-    ],
-    "transmit":[
-    {
+    },
+	{
             "designator":"channel3",
-            "primaryRemoteIPAddress":"239.0.4.10",
-            "primaryRemotePort":"6010",
-            "primaryLocalPort":"5010",
-            "tos":"100",
-            "ttl":"128",
-            "ssrc":"1000",
+            "secondaryDestIPAddress":"239.0.4.16",
+            "secondaryDestPort":"20016",
+            "secondaryFilter":"0x14",
+            "playoutDelay":"50",
+			"LinkAEnable":"false",
+			"LinkBEnable":"true",
             "Enable":"true"
     },
     {
             "designator":"channel4",
-            "primaryRemoteIPAddress":"239.0.4.11",
-            "primaryRemotePort":"6011",
-            "primaryLocalPort":"5011",
-            "tos":"100",
-            "ttl":"128",
-            "ssrc":"1000",
+            "secondaryDestIPAddress":"239.0.4.17",
+            "secondaryDestPort":"20017",
+            "secondaryFilter":"0x14",
+            "playoutDelay":"50",
+			"LinkAEnable":"false",
+			"LinkBEnable":"true",
             "Enable":"false"
     }
     ]
