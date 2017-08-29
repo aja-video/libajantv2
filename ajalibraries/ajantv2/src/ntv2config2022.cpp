@@ -413,7 +413,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
     bool enabled_7  = false;
     uint32_t unused = 0;
-    Set2022_7_Mode(enabled_7,unused);
+    Get2022_7_Mode(enabled_7,unused);
 
     bool linkA =  rxConfig.linkAEnable;
     bool linkB =  rxConfig.linkBEnable;
