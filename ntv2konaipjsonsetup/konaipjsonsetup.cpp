@@ -25,8 +25,9 @@ bool getEnable(QString enableBoolString);
 
 CKonaIpJsonSetup::CKonaIpJsonSetup()
 {
-    is2110       = false;
-    enable2022_7 = false;
+    mIs2110       = false;
+    mEnable2022_7 = false;
+    mNetworkPathDifferential = 50;
 }
 
 bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
@@ -52,12 +53,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         sfpStruct.mRouter = sfpObject["Router"].toString();
         cout << "Router " << sfpStruct.mRouter.toStdString() << endl;
 
-        sfpStruct.mEnable2022_7 = sfpObject["Enable2022_7"].toString();
-        if (!sfpStruct.mEnable2022_7.isEmpty())
-            cout << "Enable2022_7 " << sfpStruct.mEnable2022_7.toStdString() << endl << endl;
-        else
-            cout << endl;
+        QString enable2022_7 = sfpObject["Enable2022_7"].toString();
+        if (!enable2022_7.isEmpty())
+        {
+            cout << "ERROR: Enable2022_7 is now moved to global settings" << endl;
+            return false;
+        }
 
+        cout << endl;
         mKonaIPParams.mSFPs.append(sfpStruct);
     }
 
@@ -114,9 +117,12 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mSecondaryFilter.isEmpty())
             cout << "SecondaryFilter " << receiveStruct.mSecondaryFilter.toStdString() << endl;
 
-        receiveStruct.mNetworkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
-        if (!receiveStruct.mNetworkPathDifferential.isEmpty())
-            cout << "NetworkPathDifferential " << receiveStruct.mNetworkPathDifferential.toStdString() << endl;
+        QString networkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
+        if (!networkPathDifferential.isEmpty())
+        {
+            cout << "ERROR: NetworkPathDifferential is now part of global settings" << endl;
+            return false;
+        }
 
         receiveStruct.mPlayoutDelay = receiveChannelObject["playoutDelay"].toString();
         if (!receiveStruct.mPlayoutDelay.isEmpty())
@@ -277,27 +283,50 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         QString protocol = qjv.toString();
         if (protocol == "2110")
         {
-            is2110 = true;
+            mIs2110 = true;
             cout << "Protocol 2110 " << endl;
         }
         else
             cout << "Protocol 2022 " << endl;
     }
 
-    qjv = json.value("PTPMaster");
-    if (qjv != QJsonValue::Undefined)
+    if (mIs2110)
     {
-        PTPMasterAddr = qjv.toString();
-        cout << "PTP Master Address " << PTPMasterAddr.toStdString() << endl;
+        qjv = json.value("PTPMaster");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mPTPMasterAddr = qjv.toString();
+            cout << "PTP Master Address " << mPTPMasterAddr.toStdString() << endl;
+        }
     }
-
+    else
+    {
+        qjv = json.value("Enable2022_7");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mEnable2022_7 = getEnable(qjv.toString());
+        }
+        else
+        {
+            mEnable2022_7 = false;
+        }
+        qjv = json.value("networkPathDifferential");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mNetworkPathDifferential = qjv.toString().toUInt();
+        }
+        else
+        {
+            mNetworkPathDifferential = 50;
+        }
+    }
 
     return readJson(json);
 }
 
 bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 {
-    if (is2110)
+    if (mIs2110)
     {
         return setupBoard2110(deviceSpec);
     }
@@ -336,7 +365,6 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         return false;
     }
 
-    enable2022_7 = false;
     CNTV2Config2022	config2022 (mDevice);
 
     if (mKonaIPParams.mSFPs.size() < 1)
@@ -362,7 +390,6 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
                 cerr << "Error: " << config2022.getLastError() << endl;
                 return false;
             }
-            enable2022_7 = getEnable(sfp.mEnable2022_7);
         }
         else if ( sfp.mSFPDesignator == "bottom")
         {
@@ -378,6 +405,14 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     	}
     }
 
+
+    bool rv = config2022.Set2022_7_Mode(mEnable2022_7,mNetworkPathDifferential);
+    if (!rv)
+    {
+        cerr << "Error: " << config2022.getLastError() << endl;
+        return false;
+    }
+
     cerr << "## receiveIter" << endl;
 
     QListIterator<ReceiveStruct> receiveIter(mKonaIPParams.mReceiveChannels);
@@ -390,7 +425,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         bool ok;
         NTV2Channel channel                 = getChannel(receive.mChannelDesignator);
 
-        if (enable2022_7)
+        if (mEnable2022_7)
         {
             rxChannelConfig.linkAEnable = true;
             rxChannelConfig.linkBEnable = true;
@@ -412,12 +447,21 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rxChannelConfig.secondaryDestIP     = receive.mSecondaryDestIPAddress.toStdString();
         rxChannelConfig.secondaryDestPort   = receive.mSecondaryDestPort.toUInt();
         rxChannelConfig.secondaryRxMatch    = receive.mSecondaryFilter.toUInt(&ok, 16);
-        rxChannelConfig.networkPathDiff     = receive.mNetworkPathDifferential.toUInt();
         rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
         rxChannelConfig.ssrc                = receive.mSSRC.toUInt();
 
-        config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
-        config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable));
+        rv = config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
+        if (!rv)
+        {
+            cerr << "Error (config2022.SetRxChannelConfiguration) " << config2022.getLastError() << endl;
+            return false;
+        }
+        rv = config2022.SetRxChannelEnable (channel, getEnable(receive.mEnable));
+        if (!rv)
+        {
+            cerr << "Error (config2022.SetRxChannelConfiguration) " << config2022.getLastError() << endl;
+            return false;
+        }
     }
     cerr << "## transmitIter" << endl;
 
@@ -430,7 +474,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         tx_2022_channel txChannelConfig;
 
         NTV2Channel channel                 = getChannel(transmit.mChannelDesignator);
-        if (enable2022_7)
+        if (mEnable2022_7)
         {
             txChannelConfig.linkAEnable = true;
             txChannelConfig.linkBEnable = true;
@@ -451,8 +495,18 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         txChannelConfig.tos                 = transmit.mTOS.toUInt();
         txChannelConfig.ttl                 = transmit.mTTL.toUInt();
 
-        config2022.SetTxChannelConfiguration (channel, txChannelConfig);
-        config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable));
+        rv = config2022.SetTxChannelConfiguration (channel, txChannelConfig);
+        if (!rv)
+        {
+            cerr << "Error (config2022.SetTxChannelConfiguration) " << config2022.getLastError() << endl;
+            return false;
+        }
+        rv = config2022.SetTxChannelEnable (channel, getEnable(transmit.mEnable));
+        if (!rv)
+        {
+            cerr << "Error (config2022.SetTxChannelEnable) " << config2022.getLastError() << endl;
+            return false;
+        }
     }
 
     return true;
@@ -489,10 +543,10 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     //config2110.SetIGMPVersion(eIGMPVersion_2);
 #endif
 
-    if (!PTPMasterAddr.isEmpty())
+    if (!mPTPMasterAddr.isEmpty())
     {
         device.SetReference(NTV2_REFERENCE_SFP1_PTP);
-        config2110.SetPTPMaster(PTPMasterAddr.toStdString());
+        config2110.SetPTPMaster(mPTPMasterAddr.toStdString());
     }
     else
     {

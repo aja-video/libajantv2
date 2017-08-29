@@ -1,4 +1,7 @@
 {
+    "protocol" : "2022",
+    "Enable2022_7":"true",
+    "networkPathDifferential":"50",
     "sfps":[
     {
             "designator":"top",

@@ -12,7 +12,7 @@ typedef struct
     QString mIPAddress;
     QString mSubnetMask;
     QString mRouter;
-    QString mEnable2022_7;
+
 }SFPStruct;
 
 typedef struct
@@ -89,9 +89,10 @@ protected:
     KonaIPParamSetupStruct mKonaIPParams;
 
 private:
-    bool        enable2022_7;
-    bool        is2110;
-    QString     PTPMasterAddr;
+    bool        mEnable2022_7;
+    bool        mIs2110;
+    uint32_t    mNetworkPathDifferential;
+    QString     mPTPMasterAddr;
 };
 
 #endif // KONAIPBOARD_H
