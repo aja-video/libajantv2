@@ -48,7 +48,7 @@
 		#define AJA_ASSERT(_expression_) \
             if (!(_expression_)) AJADebug::AssertWithMessage(__FILE__, __LINE__, #_expression_);
 		#define AJA_PRINT(...) \
-			AJADebug::Report(0, AJA_DebugSeverity_Error, NULL, 0, __VA_ARGS__)
+			AJADebug::Report(0, AJA_DebugSeverity_Debug, NULL, 0, __VA_ARGS__)
 	#else
 		#define AJA_ASSERT(_expression_)
 		#define AJA_PRINT(...)
