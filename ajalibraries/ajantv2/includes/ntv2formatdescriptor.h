@@ -172,7 +172,15 @@ typedef struct NTV2FormatDescriptor
 		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	const void *	GetRowAddress (const void * pInStartAddress, const ULWord inRowIndex0, const UWord inPlaneIndex0 = 0) const;
+	const void *					GetRowAddress (const void * pInStartAddress,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
+
+	/**
+		@return		The absolute byte offset to the start of the given raster line in the given plane, or 0xFFFFFFFF if the row index is bad.
+		@note		This function assumes that the planes contiguously abut each other in memory, in order.
+		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+	**/
+	ULWord							GetRowOffset (const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
 
 	/**
 		@return		A pointer to the start of the first visible row in the given buffer, or NULL if invalid

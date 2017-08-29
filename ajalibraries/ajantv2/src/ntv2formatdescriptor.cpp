@@ -879,6 +879,24 @@ const void * NTV2FormatDescriptor::GetRowAddress (const void * pInStartAddress, 
 }
 
 
+ULWord NTV2FormatDescriptor::GetRowOffset (const ULWord inRowIndex0, const UWord inPlaneIndex0) const
+{
+	if (inRowIndex0 >= numLines)
+		return 0xFFFFFFFF;
+	if (inPlaneIndex0 >= mNumPlanes)
+		return 0xFFFFFFFF;
+
+	ULWord	offset (0);
+	if (inPlaneIndex0 > 0)
+		offset += GetTotalRasterBytes(0);
+	if (inPlaneIndex0 > 1)
+		offset += GetTotalRasterBytes(1);
+	if (inPlaneIndex0 > 2)
+		offset += GetTotalRasterBytes(2);
+	return offset + inRowIndex0 * GetBytesPerRow(inPlaneIndex0);
+}
+
+
 bool NTV2FormatDescriptor::GetFirstChangedRow (const void * pInStartAddress1, const void * pInStartAddress2, ULWord & outFirstChangedRowNum) const
 {
 	outFirstChangedRowNum = 0xFFFFFFFF;
