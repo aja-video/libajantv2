@@ -162,6 +162,7 @@ public:
 
     static uint32_t v_packetizers[4];
     static uint32_t a_packetizers[4];
+    static uint32_t m_packetizers[4];
 
 protected:
     uint32_t    GetFramerAddress(NTV2Channel channel, NTV2Stream stream);
