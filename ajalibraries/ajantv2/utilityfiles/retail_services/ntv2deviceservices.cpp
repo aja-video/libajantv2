@@ -221,6 +221,7 @@ void DeviceServices::ReadDriverState (void)
     if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
         mCard->ReadRegister(kVReg2022_7Enable, (ULWord*)&m2022_7Mode);
+        mCard->ReadRegister(kVReg2022_7NetworkPathDiff, (ULWord*)&mNetworkPathDiff);
         
         mCard->ReadRegister(kVRegIPAddrEth0, &mEth0.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth0, &mEth0.ipc_subnet);
@@ -244,7 +245,6 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcSecondaryDestPort1,		&mRx2022Config1.rxc_secondaryDestPort);
         mCard->ReadRegister(kVRegRxcSecondaryVlan1,			&mRx2022Config1.rxc_secondaryVlan);
 		mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
-        mCard->ReadRegister(kVRegRxcNetworkPathDiff1,		&mRx2022Config1.rxc_networkPathDiff);
         mCard->ReadRegister(kVRegRxcPlayoutDelay1,			&mRx2022Config1.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegRxcEnable2,				&mRx2022Config2.rxc_enable32);
@@ -261,7 +261,6 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcSecondaryDestPort2,		&mRx2022Config2.rxc_secondaryDestPort);
         mCard->ReadRegister(kVRegRxcSecondaryVlan2,			&mRx2022Config2.rxc_secondaryVlan);
 		mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
-        mCard->ReadRegister(kVRegRxcNetworkPathDiff2,		&mRx2022Config2.rxc_networkPathDiff);
         mCard->ReadRegister(kVRegRxcPlayoutDelay2,			&mRx2022Config2.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegTxcEnable3,				&mTx2022Config3.txc_enable32);
