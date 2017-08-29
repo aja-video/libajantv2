@@ -44,6 +44,8 @@ enum AJATestPatternSelectEx
 /**
 	@brief	Another NTV2 test pattern generator. "Ex" was added to differentiate this
             generator from the one in 'ajabase'.
+	@bug	Won't work for planar formats. Needs a new DrawTestPattern method that accepts
+			an NTV2FormatDescriptor and NTV2_POINTER (see below).
 **/
 class AJAExport AJATestPatternGenEx
 {
@@ -56,6 +58,7 @@ public:
 	virtual ~AJATestPatternGenEx();
 
 	virtual bool DrawTestPattern(AJATestPatternSelectEx pattNum, uint32_t frameWidth, uint32_t frameHeight, NTV2FrameBufferFormat pixelFormat, AJATestPatternBufferEx &testPatternBuffer);
+	//virtual bool DrawTestPattern(AJATestPatternSelectEx pattNum, const NTV2FormatDescriptor & inFBFormat, NTV2_POINTER & inOutBuffer);
 
 	void setSignalMask(NTV2SignalMask signalMask) { _signalMask = signalMask;}
 	void setUseRGBSmpteRange(bool useRGBSmpteRange) {_bRGBSmpteRange = useRGBSmpteRange;}
