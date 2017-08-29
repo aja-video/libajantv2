@@ -56,8 +56,9 @@ typedef struct
 #define IGMPCB_STATE_ENABLED  BIT(1)
 #define IGMPCB_STATE_BUSY     BIT(31)   // ignore when busy
 
-#define LINK_A_ACTIVE         BIT(31)
-#define LINK_B_ACTIVE         BIT(30)
+#define S2022_LINK_A_ACTIVE   BIT(31)
+#define S2022_LINK_B_ACTIVE   BIT(30)
+#define S2022_DUAL_LINK       BIT(29)
 
 class IPVNetConfig
 {
@@ -93,6 +94,9 @@ protected:
     bool GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
     bool SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
     bool GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+
+    bool SetDualLinkMode(bool enable);
+    bool GetDualLinkMode(bool & enable);
 
     bool SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
     bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);

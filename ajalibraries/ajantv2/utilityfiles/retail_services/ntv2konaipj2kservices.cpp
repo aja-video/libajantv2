@@ -1917,7 +1917,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
 			
 			chan.ssrc					= mRx2022Config2.rxc_ssrc;
-			chan.networkPathDiff        = mRx2022Config2.rxc_networkPathDiff;
 			chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
 			
 			enable                      = mRx2022Config2.rxc_enable32;
@@ -1943,7 +1942,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
 			
 			chan.ssrc					= mRx2022Config1.rxc_ssrc;
-			chan.networkPathDiff        = mRx2022Config1.rxc_networkPathDiff;
 			chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
 			
 			enable                      = mRx2022Config1.rxc_enable32;

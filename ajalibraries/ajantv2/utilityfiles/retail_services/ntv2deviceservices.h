@@ -181,6 +181,7 @@ public:
     IPVNetConfig            mEth0;
     IPVNetConfig            mEth1;
     bool                    m2022_7Mode;
+    uint32_t				mNetworkPathDiff;
 
 	// real register state - common
 	NTV2VideoFormat			mFb1VideoFormat;

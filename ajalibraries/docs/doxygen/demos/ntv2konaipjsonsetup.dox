@@ -8,19 +8,31 @@ The program demonstrates...
 -   how to determine if the MicroBlaze on the device is up and running;
 -   how to set the network configuration parameters for each of the SFP cages on the device.
 
-For SDK 14.0 the use of 'Enable2022_7' is depreacted. For 2022-6 Tx and Rx can be on the top SFP (linkAEnable=true, linkBEnable=false),
-the bottom SFP (linkAEnable=false, linkBEnable=true), or for 2022-7 both (linkAEnable=true, linkBEnable=true)
+Changes in SDK 14.0
+-    'Enable2022_7' is moved from the 'sfps' block to a global setting
+-    'networkPathDifferential' is moved from the 'receive' block to a global settin
+-    'Protocol' is added.  It is required to configure 2110 channels.  Various 2110 only
+      fields have been added too
+-    'LinkAEnable' and 'LinkBEnable' fields have been added to both 'receive' and 'transmit'
+     sections.  If 'Enable2022_7' is set true, then both these settings are automatically
+     true. For 2022-6 Tx and Rx can be on the top SFP (linkAEnable=true, linkBEnable=false)
+     or on the bottom SFP.  Since this functionality is now supported using the '4 channel rx/tx'
+     firmware, support for the '2 plus 2' firmware is now discontinued.
 
 In the list of keyords below, an 'IP string' refers to something like '239.0.1.123'
 
 Keywords in the scripts:
 
-sfps                        2022-6 2022-2   2110
+                            2022-6 2022-2   2110
+Protocol                                     x      2110 | 2022
+Enable2022_7                  x                     true | false
+networkPathDifferential       x                     decimal number (milliseconds)
+
+sfps
     designator                x      x       x      top | bottom
     IPAddress                 x      x       x      IP string
     SubnetMask                x      x       x      IP string
     Router                    x      x       x      IP string
-    Enable2022_7              x                     true | false (DEPRECATED)
 
 receive
     designator                x      x        x     channel1 | channel2 | channel3 | channel4
@@ -37,7 +49,6 @@ receive
     secondaryDestPort         x                     decimal number
     secondaryDestIPAddress    x                     IP string
     secondaryFilter           x                     hex number (vlan 0x01 | SrcIP 0x02 | DestIP 0x04 | SrcPort 0x08 | DestPort 0x10 | ssrc 0x20)
-    networkPathDifferential   x                     decimal number (milliseconds)
     playoutDelay              x      x        x     decimal number (milliseconds)
     vlan                      x      x        x     decimal number
     ssrc                      x      x        x     decimal number

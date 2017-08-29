@@ -817,7 +817,6 @@ private:
 		DefineRegName	(kVRegRxcSecondaryDestPort1,			"kVRegRxcSecondaryDestPort1");
 		DefineRegName	(kVRegRxcSecondaryVlan1,				"kVRegRxcSecondaryVlan1");
 		DefineRegName	(kVRegRxcSsrc1,							"kVRegRxcSsrc1");
-		DefineRegName	(kVRegRxcNetworkPathDiff1,				"kVRegRxcNetworkPathDiff1");
 		DefineRegName	(kVRegRxcPlayoutDelay1,					"kVRegRxcPlayoutDelay1");
 		DefineRegName	(kVRegRxcEnable2,						"kVRegRxcEnable2");
 		DefineRegName	(kVRegRxcPrimaryRxMatch2,				"kVRegRxcPrimaryRxMatch2");
@@ -833,7 +832,6 @@ private:
 		DefineRegName	(kVRegRxcSecondaryDestPort2,			"kVRegRxcSecondaryDestPort2");
 		DefineRegName	(kVRegRxcSecondaryVlan2,				"kVRegRxcSecondaryVlan2");
 		DefineRegName	(kVRegRxcSsrc2,							"kVRegRxcSsrc2");
-		DefineRegName	(kVRegRxcNetworkPathDiff2,				"kVRegRxcNetworkPathDiff2");
 		DefineRegName	(kVRegRxcPlayoutDelay2,					"kVRegRxcPlayoutDelay2");
 		DefineRegName	(kVRegTxcEnable3,						"kVRegTxcEnable3");
 		DefineRegName	(kVRegTxcPrimaryLocalPort3,				"kVRegTxcPrimaryLocalPort3");
@@ -854,6 +852,7 @@ private:
 		DefineRegName	(kVRegMailBoxAbort,						"kVRegMailBoxAbort");
 		DefineRegName	(kVRegMailBoxTimeoutNS,					"kVRegMailBoxTimeoutNS");
 		DefineRegName	(kVReg2022_7Enable,						"kVReg2022_7Enable");
+        DefineRegName   (kVReg2022_7NetworkPathDiff,            "kVReg2022_7NetworkPathDiff");
 		DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 		DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
 		DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");

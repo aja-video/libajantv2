@@ -101,7 +101,6 @@ public:
     uint16_t	secondaryVlan;          ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2022_VLAN set)
 
     uint32_t    ssrc;                   ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2022_SSRC set)
-    uint32_t	networkPathDiff;        ///< @brief	Specifies the max accepted delay in milliseconds between 2 steams in hitless operation (0-150).
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
 };
 
@@ -203,6 +202,9 @@ public:
     bool        SetJ2KDecoderConfiguration(const j2kDecoderConfig & j2kConfig);
     bool        GetJ2KDecoderConfiguration(j2kDecoderConfig &j2kConfig);
     bool        GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus);
+
+    bool        Set2022_7_Mode(bool enable, uint32_t rx_networkPathDifferential);
+    bool        Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDifferential);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels

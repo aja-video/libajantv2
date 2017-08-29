@@ -3338,7 +3338,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
 			
 			chan.ssrc					= mRx2022Config2.rxc_ssrc;
-            chan.networkPathDiff        = mRx2022Config2.rxc_networkPathDiff;
             chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
 
             enable                      = mRx2022Config2.rxc_enable32;
@@ -3364,7 +3363,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
             
 			chan.ssrc					= mRx2022Config1.rxc_ssrc;
-            chan.networkPathDiff        = mRx2022Config1.rxc_networkPathDiff;
             chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
 
             enable                      = mRx2022Config1.rxc_enable32;
@@ -3577,8 +3575,6 @@ bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx202
 		
 		addr = inet_addr(hw_channel.secondarySourceIP.c_str());
 		if (virtual_config.rxc_secondarySourceIp != addr) return true;
-		
-		if (virtual_config.rxc_networkPathDiff != hw_channel.networkPathDiff) return true;
 	}
 
     return false;
