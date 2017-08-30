@@ -2522,6 +2522,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         else
             printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
 
+#if 0
         // KonaIP input configurations
 		rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
 		rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enable);
@@ -2555,7 +2556,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         }
         else
             printf("RxConfig CHAN 2read FAILED");
-
+#endif
+        
+#if 0
         // KonaIP output configurations
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enable);
@@ -2596,6 +2599,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         }
         else
             printf("txConfig CHAN 4 read FAILED");
+#endif
 
     }
 
