@@ -505,9 +505,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	{
 		if (mAudioMixerOverrideState == false)
 		{
-			mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
-			mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
-			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
 			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);			// unmute all output channels
 			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
@@ -519,15 +516,29 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 		if (mode == NTV2_MODE_DISPLAY)
 		{
+			if (mAudioMixerOverrideState == false)
+			{
+				mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
+				mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
+				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
+			}
+		
 			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
 			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
 			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
 		}
 		else
 		{
-			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+			if (mAudioMixerOverrideState == false)
+			{
+				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
+				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
+				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux2Gain);
+			}
+		
+			mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
 			mCard->SetAudioMixerAux1InputEnable(false);
-			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
+			mCard->SetAudioMixerAux2InputEnable(mAudioCapMixerSourceAux2Enable);
 		}
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
