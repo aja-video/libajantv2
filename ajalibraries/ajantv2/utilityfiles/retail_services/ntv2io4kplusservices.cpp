@@ -1188,7 +1188,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					XPt3 = NTV2_XptLUT3Out;
 					XPt4 = NTV2_XptLUT4Out;
 					break;
-				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
+				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT5Out; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
@@ -1201,18 +1201,18 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				{
 				case NTV2_PrimaryOutputSelect:
 					// can't do RGB at high frame rate quad
-					XPt1 = NTV2_XptFrameBuffer1YUV;
-					XPt2 = NTV2_XptFrameBuffer2YUV;
-					XPt3 = NTV2_XptFrameBuffer3YUV;
-					XPt4 = NTV2_XptFrameBuffer4YUV;
-					break;
+//					XPt1 = NTV2_XptFrameBuffer1YUV;
+//					XPt2 = NTV2_XptFrameBuffer2YUV;
+//					XPt3 = NTV2_XptFrameBuffer3YUV;
+//					XPt4 = NTV2_XptFrameBuffer4YUV;
+//					break;
 				default:
 				case NTV2_4kHalfFrameRate:
-					XPt1 = NTV2_XptLUT1RGB;
-					XPt2 = NTV2_XptLUT2RGB;
-					XPt3 = NTV2_XptLUT3Out;
-					XPt4 = NTV2_XptLUT4Out;
-					break;
+//					XPt1 = NTV2_XptLUT1RGB;
+//					XPt2 = NTV2_XptLUT2RGB;
+//					XPt3 = NTV2_XptLUT3Out;
+//					XPt4 = NTV2_XptLUT4Out;
+//					break;
 				case NTV2_Quarter4k:       XPt1 = (b4kHfr) ? NTV2_Xpt4KDownConverterOut : NTV2_Xpt4KDownConverterOutRGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
@@ -1228,27 +1228,35 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			{
 			default:
 			case NTV2_PrimaryOutputSelect:
-                if (b4kHfr)
-                {
-                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
-                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptCSC2VidYUV;
-                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptCSC3VidYUV;
-                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptCSC4VidYUV;
-                }
-                else
-                {
-                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
-                }
-				break;
+				if(b2pi)
+				{
+					XPt1 = NTV2_Xpt425Mux1AYUV;
+					XPt2 = NTV2_Xpt425Mux1BYUV;
+					XPt3 = NTV2_Xpt425Mux2AYUV;
+					XPt4 = NTV2_Xpt425Mux2BYUV;
+					break;
+				}
+//                if (b4kHfr)
+//                {
+//                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
+//                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptCSC2VidYUV;
+//                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptCSC3VidYUV;
+//                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptCSC4VidYUV;
+//                }
+//                else
+//                {
+//                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+//                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
+//                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
+//                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
+//                }
+//				break;
 			case NTV2_4kHalfFrameRate:
-                XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-                XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-                XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-                XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
-				break;
+//                XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+//                XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
+//                XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
+//                XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
+//				break;
 			case NTV2_Quarter4k:
 				if (b2pi)
 				{
