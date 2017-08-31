@@ -3315,6 +3315,25 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	{
 		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
 		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
+		
+		// Host System Audio Input
+		NTV2AudioSource audioSource;
+		NTV2EmbeddedAudioInput embedVideo = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1;
+		switch (input)
+		{
+			default:
+			case NTV2_Input1Embedded1_8Select:		audioSource = NTV2_AUDIO_EMBEDDED;  break;
+			case NTV2_Input1Embedded9_16Select:		audioSource = NTV2_AUDIO_EMBEDDED;  break;
+			case NTV2_Input2Embedded1_8Select:		audioSource = NTV2_AUDIO_EMBEDDED;  embedVideo = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2; break;
+			case NTV2_Input2Embedded9_16Select:		audioSource = NTV2_AUDIO_EMBEDDED;  embedVideo = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2; break;
+			case NTV2_HDMISelect:					audioSource = NTV2_AUDIO_HDMI;		break;
+			case NTV2_MicInSelect:					audioSource = NTV2_AUDIO_MIC;		break;
+			case NTV2_AnalogSelect:					audioSource = NTV2_AUDIO_ANALOG;	break;
+			case NTV2_AES_EBU_XLRSelect:			audioSource = NTV2_AUDIO_AES;		break;
+			case NTV2_AES_EBU_BNCSelect:			audioSource = NTV2_AUDIO_AES;		break;
+		}
+		NTV2AudioSystem hostAudioSystem = GetHostAudioSystem();
+		mCard->SetAudioSystemInputSource(hostAudioSystem, audioSource, embedVideo);
 	}
 
 	// in addition, if this is an AES input select the correct physical layer
