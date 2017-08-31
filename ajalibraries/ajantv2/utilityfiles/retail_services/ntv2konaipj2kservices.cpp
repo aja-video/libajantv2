@@ -1883,7 +1883,7 @@ void  KonaIPJ2kServices::setNetConfig(eSFP  port)
 
 void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 {
-	printf("set RxConfig chn=%d\n",(int)channel);
+	printf("setRxConfig chn=%d\n",(int)channel);
 	
 	rx_2022_channel chan;
 	struct in_addr addr;
@@ -1950,20 +1950,20 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	
 	if (target->SetRxChannelConfiguration(channel,chan) == true)
 	{
-		printf("set RxConfig chn=%d OK\n",(int)channel);
+		printf("setRxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
+        target->SetRxChannelEnable(channel,enable);
 	}
 	else
 	{
-		printf("set RxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+		printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrRxConfig, 1);
 	}
-	target->SetRxChannelEnable(channel,enable);
 }
 
 void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 {
-	printf("set TxConfig chn=%d\n",(int)channel);
+	printf("setTxConfig chn=%d\n",(int)channel);
 	tx_2022_channel chan;
 	struct in_addr addr;
 	bool enable;
@@ -2009,15 +2009,15 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	// only configure if enabled
 	if (target->SetTxChannelConfiguration(channel,chan) == true)
 	{
-		printf("set TxConfig chn=%d OK\n",(int)channel);
+		printf("setTxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
+        target->SetTxChannelEnable(channel,enable);
 	}
 	else
 	{
-		printf("set TxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+		printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
 		setIPError(channel, kErrTxConfig, 1);
 	}
-	target->SetTxChannelEnable(channel,enable);
 }
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)

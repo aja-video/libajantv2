@@ -474,7 +474,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsTimer(const NTV2Channel channel)
     // Set PTS_MUX depending on streamtype
     if (streamType == kJ2KStreamTypeNonElsm)
     {
-        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x4));
+        mDevice.WriteRegister(addr + (0x800*ENCODE_TS_TIMER) + kRegTsTimerJ2kTsPtsMux, (0x2));
     }
     else
     {
