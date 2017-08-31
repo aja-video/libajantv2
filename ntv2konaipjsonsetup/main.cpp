@@ -2,10 +2,12 @@
 #include <QCommandLineParser>
 #include "konaipjsonsetup.h"
 #include "QDebug"
+#include "keywords.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
     QCommandLineParser parser;
     parser.setApplicationDescription("Kona IP Json Setup");
     parser.addHelpOption();
@@ -14,9 +16,18 @@ int main(int argc, char *argv[])
     parser.addOption(deviceOption);
     const QCommandLineOption boardOption("b", "which device to use", "board");
     parser.addOption(boardOption);
+    const QCommandLineOption keywordsOption("k", "list supported JSON keywords");
+    parser.addOption(keywordsOption);
     parser.addPositionalArgument("InputJsonFile", QCoreApplication::translate("main", "Json File to Open."));
 
     parser.process(a);
+
+    if (parser.isSet(keywordsOption))
+    {
+        std::cout << keywordList.toStdString() << std::endl;
+        exit(0);
+    }
+
 
     QString device = "0";
     if (parser.isSet(deviceOption))
