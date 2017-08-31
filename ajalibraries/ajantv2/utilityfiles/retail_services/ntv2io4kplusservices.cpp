@@ -1501,10 +1501,37 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			bCh1Disable = bCh2Disable = bCh3Disable = bCh4Disable = 0;
 		}
 	}
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, bCh3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	if(bCh1Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL1);
+		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL1);
+
+	if(bCh2Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL2);
+		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL2);
+
+	if(bCh3Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL3);
+		mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL3);
+
+	if(bCh4Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL4);
+		mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL4);
 
 
 	// connect muxes
@@ -3103,7 +3130,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	if (mode == NTV2_MODE_CAPTURE)
 	{
 		// special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
-		if (bHdmiIn == true && b4K == true)
+		if (bHdmiIn == true && (b4K == true && !(b6g4k || b12g4k)))
 		{
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
@@ -3125,7 +3152,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				{
 				case VPIDStandard_2160_Single_12Gb:
 					b12g4k = true;
-					b4xIo = true;
+					b4xIo = false;
 					b2pi = true;
 					break;
 				case VPIDStandard_2160_Single_6Gb:
@@ -3148,7 +3175,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 				}
 			}
 
-			if (b2wire4kIn || b6g4k || b12g4k)
+			if (b2wire4kIn)
 				b4xIo = false;
 
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
