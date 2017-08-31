@@ -2911,6 +2911,11 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 		}
 	}
+	else
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+	}
 	
 	
 	// HDMI Out
@@ -2964,7 +2969,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 						XPt3 = NTV2_XptLUT3Out;
 						XPt4 = NTV2_XptLUT4Out;
 						break;
-					case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
+					case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT5Out; break;
 					case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 					case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 					case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
@@ -2973,27 +2978,28 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				}
 				else
 				{
-					switch (mVirtualHDMIOutputSelect)
-					{
-					default:
-					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_XptSDIIn1;
-						XPt2 = NTV2_XptSDIIn2;
-						XPt3 = NTV2_XptSDIIn3;
-						XPt4 = NTV2_XptSDIIn4;
-						break;
-					case NTV2_4kHalfFrameRate:
-						XPt1 = NTV2_XptLUT1RGB;
-						XPt2 = NTV2_XptLUT2RGB;
-						XPt3 = NTV2_XptLUT3Out;
-						XPt4 = NTV2_XptLUT4Out;
-						break;
-					case NTV2_Quarter4k:       XPt1 = NTV2_Xpt4KDownConverterOut; break;
-					case NTV2_Quadrant1Select: XPt1 = NTV2_XptSDIIn1; break;
-					case NTV2_Quadrant2Select: XPt1 = NTV2_XptSDIIn2; break;
-					case NTV2_Quadrant3Select: XPt1 = NTV2_XptSDIIn3; break;
-					case NTV2_Quadrant4Select: XPt1 = NTV2_XptSDIIn4; break;
-					}
+					XPt1 = NTV2_Xpt4KDownConverterOut;
+//					switch (mVirtualHDMIOutputSelect)
+//					{
+//					default:
+//					case NTV2_PrimaryOutputSelect:
+//						XPt1 = NTV2_XptSDIIn1;
+//						XPt2 = NTV2_XptSDIIn2;
+//						XPt3 = NTV2_XptSDIIn3;
+//						XPt4 = NTV2_XptSDIIn4;
+//						break;
+//					case NTV2_4kHalfFrameRate:
+//						XPt1 = NTV2_XptLUT1RGB;
+//						XPt2 = NTV2_XptLUT2RGB;
+//						XPt3 = NTV2_XptLUT3Out;
+//						XPt4 = NTV2_XptLUT4Out;
+//						break;
+//					case NTV2_Quarter4k:       XPt1 = NTV2_Xpt4KDownConverterOut; break;
+//					case NTV2_Quadrant1Select: XPt1 = NTV2_XptSDIIn1; break;
+//					case NTV2_Quadrant2Select: XPt1 = NTV2_XptSDIIn2; break;
+//					case NTV2_Quadrant3Select: XPt1 = NTV2_XptSDIIn3; break;
+//					case NTV2_Quadrant4Select: XPt1 = NTV2_XptSDIIn4; break;
+//					}
 				}
 			}
 			else
@@ -3004,12 +3010,12 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				default:
 				case NTV2_4kHalfFrameRate:
 				case NTV2_PrimaryOutputSelect:
-					XPt1 = NTV2_XptLUT1RGB;
-					XPt2 = NTV2_XptLUT2RGB;
-					XPt3 = NTV2_XptLUT3Out;
-					XPt4 = NTV2_XptLUT4Out;
-					break;
-				case NTV2_Quarter4k:       XPt1 = (b425) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB; break;
+//					XPt1 = NTV2_XptLUT1RGB;
+//					XPt2 = NTV2_XptLUT2RGB;
+//					XPt3 = NTV2_XptLUT3Out;
+//					XPt4 = NTV2_XptLUT4Out;
+//					break;
+				case NTV2_Quarter4k:       XPt1 = NTV2_Xpt4KDownConverterOutRGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
@@ -3031,10 +3037,10 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		XPt1 = NTV2_XptLUT1RGB;
 		mCard->SetHDMIV2TxBypass(false);
 	}
-//	mCard->Connect (NTV2_XptHDMIOutInput, XPt1);
-//	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
-//	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
-//	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
+	mCard->Connect (NTV2_XptHDMIOutInput, XPt1);
+	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
+	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
+	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
 }
 
 
