@@ -6,6 +6,12 @@
 
 int main(int argc, char *argv[])
 {
+// This will tell the application at runtime to look in the 'qtlibs' directory
+// for the QPA platform library, on Linux something like libqxcb.so
+#if defined(AJA_BUNDLE_QT_LIBS_FOR_SDK)
+     qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", QByteArray("qtlibs"));
+#endif
+
     QCoreApplication a(argc, argv);
 
     QCommandLineParser parser;
