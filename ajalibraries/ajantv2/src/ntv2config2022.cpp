@@ -1143,40 +1143,55 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
 
 bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDifferential)
 {
-    if (enable)
+    if (!mDevice.IsMBSystemReady())
     {
-        if (!_is2022_7)
-        {
-            mError = "2022-7 not supported for by this firmware";
-            return false;
-        }
-        SetDualLinkMode(true);
-        if (_numRxChans)
+        mError = "KonaIP card not ready.";
+        return false;
+    }
+
+    if (!_is2022_7)
+    {
+        mError = "2022-7 not supported for by this firmware";
+        return false;
+    }
+
+    bool old_enable = false;
+    uint32_t unused = 0;
+    Get2022_7_Mode(old_enable, unused);
+
+    bool enableChange = (old_enable != enable);
+
+    SetDualLinkMode(enable);
+
+    if (_numRxChans)
+    {
+        uint32_t baseAddr;
+        SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        if (enable)
         {
             uint32_t delay = rx_networkPathDifferential * 27000;
-            uint32_t baseAddr;
-            SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
             // network path differential in 27MHz clocks
             WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, delay);
         }
-    }
-    else
-    {
-        if (!_is2022_7)
+        else
         {
-            mError = "2022-7 not supported for by this firmware";
-            return false;
-        }
-
-        SetDualLinkMode(false);
-
-        if (_numRxChans)
-        {
-            uint32_t delay = rx_networkPathDifferential * 27000;
-            uint32_t baseAddr;
-            SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
             WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
         }
+        if (enableChange)
+        {
+            // reset
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
+        }
+    }
+
+    if (_numTxChans && enableChange)
+    {
+        uint32_t baseAddr;
+        SelectTxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        // reset
+        WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x01);
+        WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x00);
     }
     return true;
 }
