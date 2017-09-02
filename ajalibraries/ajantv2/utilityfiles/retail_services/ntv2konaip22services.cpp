@@ -2538,7 +2538,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) || notEqual(rxHwConfig,mRx2022Config1))
+            if ((enableChCard != (enableChServices ? true : false)) ||
+                notEqual(rxHwConfig,mRx2022Config1) ||
+                enable2022_7Card != m2022_7Mode)
             {
 				mRx2022Config1.rxc_enable32 = enableChServices;
 				//printRxConfig(rxHwConfig);
@@ -2553,8 +2555,9 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) || notEqual(rxHwConfig,mRx2022Config2))
-
+            if ((enableChCard != (enableChServices ? true : false)) ||
+                notEqual(rxHwConfig,mRx2022Config2) ||
+                enable2022_7Card != m2022_7Mode)
             {
 				mRx2022Config2.rxc_enable32 = enableChServices;
 				//printRxConfig(rxHwConfig);
@@ -2574,7 +2577,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         {
             if ((enableChCard != (enableChServices ? true : false)) ||
                  notEqual(txHwConfig,mTx2022Config3) ||
-                 txErr)
+                 txErr ||
+                enable2022_7Card != m2022_7Mode)
 			{
 				mTx2022Config3.txc_enable32 = enableChServices;
                 setTxConfig(NTV2_CHANNEL3);
@@ -2591,7 +2595,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         {
             if ((enableChCard != (enableChServices ? true : false)) ||
 				 notEqual(txHwConfig,mTx2022Config4) ||
-                 txErr)
+                 txErr ||
+                enable2022_7Card != m2022_7Mode)
             {
 				mTx2022Config4.txc_enable32 = enableChServices;
                 setTxConfig(NTV2_CHANNEL4);
