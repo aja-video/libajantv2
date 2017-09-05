@@ -1115,24 +1115,11 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
     bool rv;
 
     enabled = false;
-    if (_is2022_7)
-    {
-        // Select secondary channel
-        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
-        if (!rv) return false;
 
-        ReadChannelRegister(kReg2022_6_tx_tx_enable   + baseAddr, &val);
-        if (val == 0x01)
-        {
-            enabled = true;
-        }
-    }
-
-    // select primary channel
     rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
     if (!rv) return false;
 
-    ReadChannelRegister(kReg2022_6_tx_tx_enable + baseAddr, &val);
+    ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
     if (val == 0x01)
     {
         enabled = true;
