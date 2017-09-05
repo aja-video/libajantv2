@@ -3393,20 +3393,17 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             break;
     }
 	
-	if (enable)
-	{
-		if (target->SetRxChannelConfiguration(channel,chan) == true)
-		{
-			printf("setRxConfig chn=%d OK\n",(int)channel);
-			setIPError(channel, kErrRxConfig, 0);
-            target->SetRxChannelEnable(channel,enable);
-		}
-		else
-		{
-			printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-			setIPError(channel, kErrRxConfig, 1);
-		}
-	}
+    if (target->SetRxChannelConfiguration(channel,chan) == true)
+    {
+        printf("setRxConfig chn=%d OK\n",(int)channel);
+        setIPError(channel, kErrRxConfig, 0);
+        target->SetRxChannelEnable(channel,enable);
+    }
+    else
+    {
+        printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+        setIPError(channel, kErrRxConfig, 1);
+    }
 }
 
 void KonaIP22Services::setTxConfig(NTV2Channel channel)
@@ -3455,21 +3452,17 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             break;
     }
 	
-	if (enable)
-	{
-		// only configure if enabled
-		if (target->SetTxChannelConfiguration(channel,chan) == true)
-		{
-			printf("setTxConfig chn=%d OK\n",(int)channel);
-			setIPError(channel, kErrTxConfig, 0);
-            target->SetTxChannelEnable(channel,enable);
-		}
-		else
-		{
-			printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-			setIPError(channel, kErrTxConfig, 1);
-		}
-	}
+    if (target->SetTxChannelConfiguration(channel,chan) == true)
+    {
+        printf("setTxConfig chn=%d OK\n",(int)channel);
+        setIPError(channel, kErrTxConfig, 0);
+        target->SetTxChannelEnable(channel,enable);
+    }
+    else
+    {
+        printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
+        setIPError(channel, kErrTxConfig, 1);
+    }
 }
 
 void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
