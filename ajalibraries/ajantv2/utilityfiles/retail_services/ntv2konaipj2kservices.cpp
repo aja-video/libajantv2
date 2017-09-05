@@ -1150,6 +1150,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enable;
 	uint32_t				enableSv;
+    uint32_t                configErr;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
@@ -1881,16 +1882,13 @@ void  KonaIPJ2kServices::setNetConfig(eSFP  port)
     target->SetNetworkConfiguration(port,ip,sub,gate);
 }
 
-void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
+void KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 {
 	printf("setRxConfig chn=%d\n",(int)channel);
 	
 	rx_2022_channel chan;
 	struct in_addr addr;
-	bool enable;
 	
-	target->SetRxChannelEnable(channel,false);
-
 	// Only enable link A in J2K mode
 	chan.linkAEnable	= true;
 	chan.linkBEnable	= false;
@@ -1918,8 +1916,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			
 			chan.ssrc					= mRx2022Config2.rxc_ssrc;
 			chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
-			
-			enable                      = mRx2022Config2.rxc_enable32;
 			break;
 		default:
 		case NTV2_CHANNEL1:
@@ -1943,8 +1939,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 			
 			chan.ssrc					= mRx2022Config1.rxc_ssrc;
 			chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
-			
-			enable                      = mRx2022Config1.rxc_enable32;
 			break;
 	}
 	
@@ -1952,7 +1946,6 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	{
 		printf("setRxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
-        target->SetRxChannelEnable(channel,enable);
 	}
 	else
 	{
@@ -1961,15 +1954,12 @@ void   KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	}
 }
 
-void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
+void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 {
 	printf("setTxConfig chn=%d\n",(int)channel);
 	tx_2022_channel chan;
 	struct in_addr addr;
-	bool enable;
-	
-	target->SetTxChannelEnable(channel,false);
-	
+		
 	// Only enable link A in J2K mode
 	chan.linkAEnable	= true;
 	chan.linkBEnable	= false;
@@ -1986,8 +1976,6 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			chan.secondaryRemoteIP      = inet_ntoa(addr);
 			chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
 			chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
-			
-			enable                      = mTx2022Config4.txc_enable32;
 			break;
 		default:
 			
@@ -2001,8 +1989,6 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 			chan.secondaryRemoteIP      = inet_ntoa(addr);
 			chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
 			chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
-			
-			enable                      = mTx2022Config3.txc_enable32;
 			break;
 	}
 
@@ -2011,7 +1997,6 @@ void  KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	{
 		printf("setTxConfig chn=%d OK\n",(int)channel);
 		setIPError(channel, kErrTxConfig, 0);
-        target->SetTxChannelEnable(channel,enable);
 	}
 	else
 	{
@@ -2071,7 +2056,6 @@ void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uin
 void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
 {
     uint32_t errCode;
-    uint32_t value = val & 0xff;
     uint32_t reg;
 
     switch( configType )

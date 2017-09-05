@@ -2467,6 +2467,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool					rv, rv2, enableChCard, enable2022_7Card;
 	uint32_t				enableChServices;
     uint32_t				networkPathDiffCard, networkPathDiffServices;
+    uint32_t                configErr;
 
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
@@ -2538,13 +2539,35 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) ||
-                notEqual(rxHwConfig,mRx2022Config1) ||
-                enable2022_7Card != m2022_7Mode)
+            // if the channel enable toggled
+            if (enableChCard != (enableChServices ? true : false))
             {
-				mRx2022Config1.rxc_enable32 = enableChServices;
-				//printRxConfig(rxHwConfig);
-                setRxConfig(NTV2_CHANNEL1);
+                target->SetRxChannelEnable(NTV2_CHANNEL1,false);
+
+                // if the channel is enabled
+                if (enableChServices)
+                {
+                    setRxConfig(NTV2_CHANNEL1);
+                    getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetRxChannelEnable(NTV2_CHANNEL1,true);
+                    }
+                }
+            }
+            else if (enableChServices)
+            {
+                if (notEqual(rxHwConfig,mRx2022Config1) ||
+                    enable2022_7Card != m2022_7Mode)
+                {
+                    target->SetRxChannelEnable(NTV2_CHANNEL1,false);
+                    setRxConfig(NTV2_CHANNEL1);
+                    getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetRxChannelEnable(NTV2_CHANNEL1,true);
+                    }
+                }
             }
         }
         else
@@ -2555,13 +2578,35 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) ||
-                notEqual(rxHwConfig,mRx2022Config2) ||
-                enable2022_7Card != m2022_7Mode)
+            // if the channel enable toggled
+            if (enableChCard != (enableChServices ? true : false))
             {
-				mRx2022Config2.rxc_enable32 = enableChServices;
-				//printRxConfig(rxHwConfig);
-                setRxConfig(NTV2_CHANNEL2);
+                target->SetRxChannelEnable(NTV2_CHANNEL2,false);
+                
+                // if the channel is enabled
+                if (enableChServices)
+                {
+                    setRxConfig(NTV2_CHANNEL2);
+                    getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                    }
+                }
+            }
+            else if (enableChServices)
+            {
+                if (notEqual(rxHwConfig,mRx2022Config2) ||
+                    enable2022_7Card != m2022_7Mode)
+                {
+                    target->SetRxChannelEnable(NTV2_CHANNEL2,false);
+                    setRxConfig(NTV2_CHANNEL2);
+                    getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                    }
+                }
             }
         }
         else
@@ -2570,18 +2615,40 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         // KonaIP output configurations
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enableChCard);
-        uint32_t txErr;
-        getIPError(NTV2_CHANNEL3,kErrTxConfig,txErr);
+        getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
 		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableChServices);
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) ||
-                 notEqual(txHwConfig,mTx2022Config3) ||
-                 txErr ||
-                enable2022_7Card != m2022_7Mode)
-			{
-				mTx2022Config3.txc_enable32 = enableChServices;
-                setTxConfig(NTV2_CHANNEL3);
+            // if the channel enable toggled
+            if (enableChCard != (enableChServices ? true : false))
+            {
+                target->SetTxChannelEnable(NTV2_CHANNEL3,false);
+                
+                // if the channel is enabled
+                if (enableChServices)
+                {
+                    setTxConfig(NTV2_CHANNEL3);
+                    getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                    }
+                }
+            }
+            else if (enableChServices)
+            {
+                if (notEqual(txHwConfig,mTx2022Config3) ||
+                    configErr ||
+                    enable2022_7Card != m2022_7Mode)
+                {
+                    target->SetTxChannelEnable(NTV2_CHANNEL3,false);
+                    setTxConfig(NTV2_CHANNEL3);
+                    getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                    }
+                }
             }
         }
         else
@@ -2589,17 +2656,40 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
         rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enableChCard);
-        getIPError(NTV2_CHANNEL4,kErrTxConfig,txErr);
+        getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
 		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableChServices);
         if (rv && rv2)
         {
-            if ((enableChCard != (enableChServices ? true : false)) ||
-				 notEqual(txHwConfig,mTx2022Config4) ||
-                 txErr ||
-                enable2022_7Card != m2022_7Mode)
+            // if the channel enable toggled
+            if (enableChCard != (enableChServices ? true : false))
             {
-				mTx2022Config4.txc_enable32 = enableChServices;
-                setTxConfig(NTV2_CHANNEL4);
+                target->SetTxChannelEnable(NTV2_CHANNEL4,false);
+                
+                // if the channel is enabled
+                if (enableChServices)
+                {
+                    setTxConfig(NTV2_CHANNEL4);
+                    getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                    }
+                }
+            }
+            else if (enableChServices)
+            {
+                if (notEqual(txHwConfig,mTx2022Config4) ||
+                    configErr ||
+                    enable2022_7Card != m2022_7Mode)
+                {
+                    target->SetTxChannelEnable(NTV2_CHANNEL4,false);
+                    setTxConfig(NTV2_CHANNEL4);
+                    getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                    if (!configErr)
+                    {
+                        target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                    }
+                }
             }
         }
         else
@@ -3310,7 +3400,7 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
     target->SetNetworkConfiguration(port,ip,sub,gate);
 }
 
-void   KonaIP22Services::setRx2022_7Mode(bool mode, uint32_t networkPathDiff)
+void KonaIP22Services::setRx2022_7Mode(bool mode, uint32_t networkPathDiff)
 {
     printf("setRx2022_7Mode mode=%d networkPathDiff %d\n",(int)mode, (int)networkPathDiff);
 
@@ -3326,16 +3416,13 @@ void   KonaIP22Services::setRx2022_7Mode(bool mode, uint32_t networkPathDiff)
     }
 }
 
-void   KonaIP22Services::setRxConfig(NTV2Channel channel)
+void KonaIP22Services::setRxConfig(NTV2Channel channel)
 {
     printf("setRxConfig chn=%d mode %d\n",(int)channel, (int)m2022_7Mode);
 	
     rx_2022_channel chan;
     struct in_addr addr;
-    bool enable;
-	
-	target->SetRxChannelEnable(channel,false);
-	
+		
 	// Always enable link A only enable link B if 2022_7 enabled
 	chan.linkAEnable	= true;
 	chan.linkBEnable	= m2022_7Mode;
@@ -3363,8 +3450,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
 			
 			chan.ssrc					= mRx2022Config2.rxc_ssrc;
             chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
-
-            enable                      = mRx2022Config2.rxc_enable32;
             break;
         default:
         case NTV2_CHANNEL1:
@@ -3388,8 +3473,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
             
 			chan.ssrc					= mRx2022Config1.rxc_ssrc;
             chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
-
-            enable                      = mRx2022Config1.rxc_enable32;
             break;
     }
 	
@@ -3397,7 +3480,6 @@ void   KonaIP22Services::setRxConfig(NTV2Channel channel)
     {
         printf("setRxConfig chn=%d OK\n",(int)channel);
         setIPError(channel, kErrRxConfig, 0);
-        target->SetRxChannelEnable(channel,enable);
     }
     else
     {
@@ -3412,9 +3494,6 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
 
     tx_2022_channel chan;
     struct in_addr addr;
-    bool enable;
-	
-	target->SetTxChannelEnable(channel,false);
 	
 	// Always enable link A only enable link B if 2022_7 enabled
 	chan.linkAEnable	= true;
@@ -3432,8 +3511,6 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             chan.secondaryRemoteIP      = inet_ntoa(addr);
             chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
             chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
-            
-            enable                      = mTx2022Config4.txc_enable32;
             break;
         default:
             
@@ -3447,8 +3524,6 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
             chan.secondaryRemoteIP      = inet_ntoa(addr);
             chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
             chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
-            
-            enable                      = mTx2022Config3.txc_enable32;
             break;
     }
 	
@@ -3456,7 +3531,6 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
     {
         printf("setTxConfig chn=%d OK\n",(int)channel);
         setIPError(channel, kErrTxConfig, 0);
-        target->SetTxChannelEnable(channel,enable);
     }
     else
     {
@@ -3516,7 +3590,6 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
 {
     uint32_t errCode;
-    uint32_t value = val & 0xff;
     uint32_t reg;
 
     switch( configType )
