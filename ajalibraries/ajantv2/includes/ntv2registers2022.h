@@ -123,7 +123,7 @@
 #define kReg2022_6_tx_udp_dest_port             45                     // 0x00B4
 #define kReg2022_6_tx_tx_pkt_cnt                48                     // 0x00C0
 #define kReg2022_6_tx_channel_stat_reset        51                     // 0x00CC
-#define kReg2022_6_tx_tx_enable                 52                     // 0x00D0
+#define kReg2022_6_tx_link_enable               52                     // 0x00D0
 #define kReg2022_6_tx_ip_header_fec             54                     // 0x00D8
 
 // channel common
