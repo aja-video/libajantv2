@@ -1316,11 +1316,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                             }
                         }
                     }
-                    
+                    else printf("rxConfig ch 2 read failed\n");
                 }
-				else printf("rxConfig ch 2 read failed\n");
+                else printf("rxConfig ch 2 invalid configuration\n");
 			}
-            else printf("rxConfig ch 2 invalid configuration\n");
 		}
 		
 		// KonaIP output configurations
