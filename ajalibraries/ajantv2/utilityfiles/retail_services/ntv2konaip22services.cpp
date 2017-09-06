@@ -3639,7 +3639,7 @@ bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx202
     uint32_t addr;
 	
 	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
-	if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
+    //if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
 	
     if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
     if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
@@ -3675,7 +3675,7 @@ bool  KonaIP22Services::notEqual(const tx_2022_channel & hw_channel, const tx202
     uint32_t addr;
 	
 	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
-	if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
+    //if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
 
 
     if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
