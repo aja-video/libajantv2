@@ -2452,6 +2452,7 @@ void KonaIP22Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 	}
 }
 
+#define WAIT_1 (50)
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
@@ -2477,7 +2478,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
     if (mCard->IsDeviceReady(true) == true)
     {
 		rx_2022_channel		rxHwConfig;
-		tx_2022_channel		txHwConfig;
+		tx_2022_channel		txHwConfig, txHwConfig2;
 
         if (target == NULL)
         {
@@ -2533,168 +2534,183 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         }
         
         // KonaIP Input configurations
-        rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
-        rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
-        mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableChServices);
-
-        if (rv && rv2)
+        if (isValidConfig(mRx2022Config1))
         {
-            // if the channel enable toggled
-            if (enableChCard != (enableChServices ? true : false))
+            rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
+            rv2 = target->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
+            mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableChServices);
+            if (rv && rv2)
             {
-                target->SetRxChannelEnable(NTV2_CHANNEL1,false);
-
-                // if the channel is enabled
-                if (enableChServices)
-                {
-                    setRxConfig(NTV2_CHANNEL1);
-                    getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                    if (!configErr)
-                    {
-                        target->SetRxChannelEnable(NTV2_CHANNEL1,true);
-                    }
-                }
-            }
-            else if (enableChServices)
-            {
-                if (notEqual(rxHwConfig,mRx2022Config1) ||
-                    enable2022_7Card != m2022_7Mode)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
                     target->SetRxChannelEnable(NTV2_CHANNEL1,false);
-                    setRxConfig(NTV2_CHANNEL1);
-                    getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                    if (!configErr)
-                    {
-                        target->SetRxChannelEnable(NTV2_CHANNEL1,true);
-                    }
-                }
-            }
-        }
-        else
-            printf("RxConfig CHAN 1 read FAILED");
 
-        rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
-        rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enableChCard);
-		mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
-        if (rv && rv2)
-        {
-            // if the channel enable toggled
-            if (enableChCard != (enableChServices ? true : false))
-            {
-                target->SetRxChannelEnable(NTV2_CHANNEL2,false);
-                
-                // if the channel is enabled
-                if (enableChServices)
-                {
-                    setRxConfig(NTV2_CHANNEL2);
-                    getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                    if (!configErr)
+                    // if the channel is enabled
+                    if (enableChServices)
                     {
-                        target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                        setRxConfig(NTV2_CHANNEL1);
+                        getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetRxChannelEnable(NTV2_CHANNEL1,true);
+                        }
+                    }
+                }
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
+                {
+                    if (notEqual(rxHwConfig,mRx2022Config1) ||
+                        enable2022_7Card != m2022_7Mode)
+                    {
+                        target->SetRxChannelEnable(NTV2_CHANNEL1,false);
+                        setRxConfig(NTV2_CHANNEL1);
+                        getIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetRxChannelEnable(NTV2_CHANNEL1,true);
+                        }
                     }
                 }
             }
-            else if (enableChServices)
+            else printf("rxConfig ch 1 read failed\n");
+        }
+        else printf("rxConfig ch 1 invalid configuration\n");
+
+        if (isValidConfig(mRx2022Config2))
+        {
+            rv  = target->GetRxChannelConfiguration(NTV2_CHANNEL2,rxHwConfig);
+            rv2 = target->GetRxChannelEnable(NTV2_CHANNEL2,enableChCard);
+            mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
+            if (rv && rv2)
             {
-                if (notEqual(rxHwConfig,mRx2022Config2) ||
-                    enable2022_7Card != m2022_7Mode)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
                     target->SetRxChannelEnable(NTV2_CHANNEL2,false);
-                    setRxConfig(NTV2_CHANNEL2);
-                    getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                    if (!configErr)
+                    
+                    // if the channel is enabled
+                    if (enableChServices)
                     {
-                        target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                        setRxConfig(NTV2_CHANNEL2);
+                        getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                        }
                     }
                 }
-            }
-        }
-        else
-            printf("RxConfig CHAN 2read FAILED");
-        
-        // KonaIP output configurations
-        rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enableChCard);
-        getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-		mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableChServices);
-        if (rv && rv2)
-        {
-            // if the channel enable toggled
-            if (enableChCard != (enableChServices ? true : false))
-            {
-                target->SetTxChannelEnable(NTV2_CHANNEL3,false);
-                
-                // if the channel is enabled
-                if (enableChServices)
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
                 {
-                    setTxConfig(NTV2_CHANNEL3);
-                    getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                    if (!configErr)
+                    if (notEqual(rxHwConfig,mRx2022Config2) ||
+                        enable2022_7Card != m2022_7Mode)
                     {
-                        target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                        target->SetRxChannelEnable(NTV2_CHANNEL2,false);
+                        setRxConfig(NTV2_CHANNEL2);
+                        getIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetRxChannelEnable(NTV2_CHANNEL2,true);
+                        }
                     }
                 }
             }
-            else if (enableChServices)
+            else printf("rxConfig ch 2 config read failed\n");
+        }
+        else printf("rxConfig ch 2 invalid configuration\n");
+
+        // KonaIP output configurations
+        if (isValidConfig(mTx2022Config3))
+        {
+            rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL3,txHwConfig);
+            rv2 = target->GetTxChannelEnable(NTV2_CHANNEL3,enableChCard);
+            getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+            mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableChServices);
+            if (rv && rv2)
             {
-                if (notEqual(txHwConfig,mTx2022Config3) ||
-                    configErr ||
-                    enable2022_7Card != m2022_7Mode)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
                     target->SetTxChannelEnable(NTV2_CHANNEL3,false);
-                    setTxConfig(NTV2_CHANNEL3);
-                    getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                    if (!configErr)
+                    
+                    // if the channel is enabled
+                    if (enableChServices)
                     {
-                        target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                        setTxConfig(NTV2_CHANNEL3);
+                        getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                        }
                     }
                 }
-            }
-        }
-        else
-            printf("txConfig CHAN 3 read FAILED");
-
-        rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig);
-        rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enableChCard);
-        getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-		mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableChServices);
-        if (rv && rv2)
-        {
-            // if the channel enable toggled
-            if (enableChCard != (enableChServices ? true : false))
-            {
-                target->SetTxChannelEnable(NTV2_CHANNEL4,false);
-                
-                // if the channel is enabled
-                if (enableChServices)
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
                 {
-                    setTxConfig(NTV2_CHANNEL4);
-                    getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                    if (!configErr)
+                    if (notEqual(txHwConfig,mTx2022Config3) ||
+                        configErr ||
+                        enable2022_7Card != m2022_7Mode)
                     {
-                        target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                        target->SetTxChannelEnable(NTV2_CHANNEL3,false);
+                        setTxConfig(NTV2_CHANNEL3);
+                        getIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetTxChannelEnable(NTV2_CHANNEL3,true);
+                        }
                     }
                 }
             }
-            else if (enableChServices)
+            else printf("txConfig ch 3 read failed\n");
+        }
+        else printf("txConfig ch 3 invalid configuration\n");
+
+        if (isValidConfig(mTx2022Config4))
+        {
+
+            rv  = target->GetTxChannelConfiguration(NTV2_CHANNEL4,txHwConfig2);
+            rv2 = target->GetTxChannelEnable(NTV2_CHANNEL4,enableChCard);
+            getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+            mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableChServices);
+            if (rv && rv2)
             {
-                if (notEqual(txHwConfig,mTx2022Config4) ||
-                    configErr ||
-                    enable2022_7Card != m2022_7Mode)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
                     target->SetTxChannelEnable(NTV2_CHANNEL4,false);
-                    setTxConfig(NTV2_CHANNEL4);
-                    getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                    if (!configErr)
+                    
+                    // if the channel is enabled
+                    if (enableChServices)
                     {
-                        target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                        setTxConfig(NTV2_CHANNEL4);
+                        getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                        }
+                    }
+                }
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
+                {
+                    if (notEqual(txHwConfig2,mTx2022Config4) ||
+                        configErr ||
+                        enable2022_7Card != m2022_7Mode)
+                    {
+                        target->SetTxChannelEnable(NTV2_CHANNEL4,false);
+                        setTxConfig(NTV2_CHANNEL4);
+                        getIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            target->SetTxChannelEnable(NTV2_CHANNEL4,true);
+                        }
                     }
                 }
             }
+            else printf("txConfig ch 4 read failed\n");
         }
-        else
-            printf("txConfig CHAN 4 read FAILED");
-
+        else printf("txConfig ch 3 invalid configuration\n");
     }
 
 	// VPID
@@ -3634,13 +3650,38 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     val = errCode;
 }
 
-bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
+bool KonaIP22Services::isValidConfig(const rx2022Config & virtual_config)
+{
+    if (virtual_config.rxc_primaryRxMatch == 0) return false;
+    if (virtual_config.rxc_primaryDestIp == 0) return false;
+
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (m2022_7Mode)
+    {
+        if (virtual_config.rxc_secondaryRxMatch == 0) return false;
+        if (virtual_config.rxc_secondaryDestIp == 0) return false;
+    }
+    return true;
+}
+
+bool KonaIP22Services::isValidConfig(const tx2022Config & virtual_config)
+{
+    if (virtual_config.txc_primaryRemoteIp == 0) return false;
+    if (virtual_config.txc_primaryRemotePort == 0) return false;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (m2022_7Mode)
+    {
+        if (virtual_config.txc_secondaryRemoteIp == 0) return false;
+        if (virtual_config.txc_secondaryRemotePort == 0) return false;
+    }
+    return true;
+}
+
+bool KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
 {
     uint32_t addr;
-	
-	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
-    //if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
-	
+		
     if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
     if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
 	if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
@@ -3670,14 +3711,10 @@ bool  KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx202
     return false;
 }
 
-bool  KonaIP22Services::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
+bool KonaIP22Services::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
 {
     uint32_t addr;
 	
-	// if we are suppose to be in 2020_7 mode but either link is off then we need to reconfigure
-    //if (m2022_7Mode && (!hw_channel.linkAEnable || !hw_channel.linkBEnable)) return true;
-
-
     if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
     if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
 	
