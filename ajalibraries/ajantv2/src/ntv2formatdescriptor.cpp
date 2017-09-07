@@ -805,7 +805,7 @@ bool NTV2FormatDescriptor::operator == (const NTV2FormatDescriptor & inRHS) cons
 }
 
 
-string NTV2FormatDescriptor::GetPlaneLabel (const UWord inPlaneIndex0) const
+string NTV2FormatDescriptor::PlaneToString (const UWord inPlaneIndex0) const
 {
 	static string	emptyString;
 	if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat)  &&  inPlaneIndex0 < GetNumPlanes())
@@ -814,7 +814,7 @@ string NTV2FormatDescriptor::GetPlaneLabel (const UWord inPlaneIndex0) const
 }
 
 
-UWord NTV2FormatDescriptor::GetPlaneFromByteOffset (const ULWord inByteOffset) const
+UWord NTV2FormatDescriptor::ByteOffsetToPlane (const ULWord inByteOffset) const
 {
 	if (!IsPlanar())
 		return 0;
@@ -831,9 +831,9 @@ UWord NTV2FormatDescriptor::GetPlaneFromByteOffset (const ULWord inByteOffset) c
 }
 
 
-UWord NTV2FormatDescriptor::GetLineOffsetFromByteOffset (const ULWord inByteOffset) const
+UWord NTV2FormatDescriptor::ByteOffsetToRasterLine (const ULWord inByteOffset) const
 {
-	const UWord	origPlane	(GetPlaneFromByteOffset(inByteOffset));
+	const UWord	origPlane	(ByteOffsetToPlane(inByteOffset));
 	if (origPlane == 0xFFFF)
 		return 0xFFFF;
 	ULWord	byteOffsetToStartOfPlane (0);
@@ -850,7 +850,7 @@ bool NTV2FormatDescriptor::IsAtLineStart (ULWord inByteOffset) const
 {
 	if (!IsValid())
 		return false;
-	UWord	plane	(GetPlaneFromByteOffset(inByteOffset));
+	UWord	plane	(ByteOffsetToPlane(inByteOffset));
 	if (plane >= GetNumPlanes())
 		return false;
 	if (plane > 0)
@@ -879,7 +879,7 @@ const void * NTV2FormatDescriptor::GetRowAddress (const void * pInStartAddress, 
 }
 
 
-ULWord NTV2FormatDescriptor::GetRowOffset (const ULWord inRowIndex0, const UWord inPlaneIndex0) const
+ULWord NTV2FormatDescriptor::RasterLineToByteOffset (const ULWord inRowIndex0, const UWord inPlaneIndex0) const
 {
 	if (inRowIndex0 >= numLines)
 		return 0xFFFFFFFF;

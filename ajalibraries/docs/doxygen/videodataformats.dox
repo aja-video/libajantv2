@@ -293,11 +293,73 @@ See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgeba
 "How to Capture Raw Bayer Data from the CION Camera" for detailed information about capturing raw
 CION data using NTV2 devices. The \ref ntv2qtrawcapture demonstration app in the SDK also shows how to capture raw video into 'DNG' files.
 
-@subsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar
+
+@subsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar ('I420')
 
 This format, identified by the \c NTV2_FBF_8BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
 
 @image	html	fbf-8bitycbcr420planar-75.png
+
+For all planes, the left-to-right, top-to-bottom pixel values are laid out in memory in increasing address order.
+
+The luminance plane is a sequence of 8-bit (0-255) luminance values, one byte per pixel. Thus, the size, in bytes, of the luma plane
+is WxH bytes, where W is the raster width (in pixels), and H is the raster height (in lines). The Luma Plane should terminate on
+a 32-bit (4-byte) boundary.
+
+The chroma planes immediately follow the luma plane in memory, each being one-fourth the size of the luma plane,
+the Cb plane preceding the Cr plane. Chroma values are 8-bit (0-255) values, one per 2x2 pixel quad (horizontal and vertical subsampling).
+
+Since all values are byte values, there are no endianness issues.
+
+
+@subsection		fbformats8bitycbcr422pl3	8-Bit YCbCr 4:2:2 Planar (Weitek 'Y42B')
+
+This format, identified by the \c NTV2_FBF_8BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
+
+@image	html	fbf-8bitycbcr422planar-75.png
+
+For all planes, the left-to-right, top-to-bottom pixel values are laid out in memory in increasing address order.
+
+The luminance plane is a sequence of 8-bit (0-255) luminance values, one byte per pixel. Thus, the size, in bytes, of the luma plane
+is WxH bytes, where W is the raster width (in pixels), and H is the raster height (in lines). The luma plane should terminate on
+a 32-bit (4-byte) boundary.
+
+The chroma planes immediately follow the luma plane in memory, each half the size of the luma plane, the Cb plane preceding the Cr plane.
+Chroma values are 8-bit (0-255) values, one per horizontal pixel pair (horizontal-only subsampling).
+
+Since all values are byte values, there are no endianness issues.
+
+
+@subsection		fbformats10bitycbcr420pl3	10-Bit YCbCr 4:2:0 Planar ('I420_10LE')
+
+This format, identified by the \c NTV2_FBF_10BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
+
+@image	html	fbf-10bitycbcr420planar-75.png
+
+For all planes, the left-to-right, top-to-bottom pixel values are laid out in memory in increasing address order.
+
+The luminance plane is a sequence of 10-bit (0-1023) luminance values, each stored in a 16-bit word per pixel in little-endian byte order,
+with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the luma plane is WxHx2 bytes, where W is the raster width
+(in pixels), and H is the raster height (in lines). The Luma Plane should terminate on a 64-bit (8-byte) boundary.
+
+The chroma planes immediately follow the luma plane in memory, each being one-fourth the size of the luma plane, the Cb plane preceding the Cr plane.
+Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per 2x2 pixel quad (horizontal and vertical subsampling).
+
+
+@subsection		fbformats10bitycbcr422pl3	10-Bit YCbCr 4:2:2 Planar ('I422_10LE')
+
+This format, identified by the \c NTV2_FBF_10BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
+
+@image	html	fbf-10bitycbcr422planar-75.png
+
+For all planes, the left-to-right, top-to-bottom pixel values are laid out in memory in increasing address order.
+
+The luminance plane is a sequence of 10-bit (0-1023) luminance values, each stored in a 16-bit word per pixel in little-endian byte order,
+with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the luma plane is WxHx2 bytes, where W is the raster width
+(in pixels), and H is the raster height (in lines). The luma plane should terminate on a 64-bit (8-byte) boundary.
+
+The chroma planes immediately follow the luma plane in memory, each half the size of the luma plane, the Cb plane preceding the Cr plane.
+Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per horizontal pixel pair (horizontal-only subsampling).
 
 
 @section	fbframegeometries		Frame Buffer Geometries

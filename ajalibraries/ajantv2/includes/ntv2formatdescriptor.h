@@ -122,21 +122,21 @@ typedef struct NTV2FormatDescriptor
 
 	inline ULWord	GetRasterWidth (void) const			{return numPixels;}		///< @return	The width of the raster, in pixels.
 	inline UWord	GetNumPlanes (void) const			{return mNumPlanes;}	///< @return	The number of planes in the raster.
-	std::string		GetPlaneLabel (const UWord inPlaneIndex0) const;			///< @return	A string containing a human-readable name for the specified plane.
+	std::string		PlaneToString (const UWord inPlaneIndex0) const;			///< @return	A string containing a human-readable name for the specified plane.
 
 	/**
 		@return		The zero-based index number of the plane that contains the byte at the given offset,
 					or 0xFFFF if the offset is not within any plane in the buffer.
 		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the frame.
 	**/
-	UWord			GetPlaneFromByteOffset (const ULWord inByteOffset) const;
+	UWord			ByteOffsetToPlane (const ULWord inByteOffset) const;
 
 	/**
 		@return		The zero-based index number of the raster line (row) that contains the byte at the given offset,
 					or 0xFFFF if the offset does not fall within any plane or line in the buffer.
 		@param[in]	inByteOffset	The offset, in bytes, to the byte of interest in the raster buffer.
 	**/
-	UWord			GetLineOffsetFromByteOffset (const ULWord inByteOffset) const;
+	UWord			ByteOffsetToRasterLine (const ULWord inByteOffset) const;
 
 	/**
 		@return		True if the given byte offset is at the start of a new raster line (row);  otherwise false.
@@ -175,12 +175,13 @@ typedef struct NTV2FormatDescriptor
 	const void *					GetRowAddress (const void * pInStartAddress,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
 
 	/**
-		@return		The absolute byte offset to the start of the given raster line in the given plane, or 0xFFFFFFFF if the row index is bad.
-		@note		This function assumes that the planes contiguously abut each other in memory, in order.
+		@return		The absolute byte offset from the start of the frame buffer to the start of the given raster line
+					in the given plane (or 0xFFFFFFFF if the row and/or plane indexes are bad).
+		@note		This function assumes that the planes contiguously abut each other in memory, in ascending address order.
 		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	ULWord							GetRowOffset (const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
+	ULWord							RasterLineToByteOffset (const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
 
 	/**
 		@return		A pointer to the start of the first visible row in the given buffer, or NULL if invalid
