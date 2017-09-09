@@ -832,7 +832,7 @@ bool CNTV2Card::GetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, 
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
-	if(!NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16(inChannel))
+	if(!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
 		return false;
 	uint32_t channelEnable = 0;
 	if(!ReadRegister(kRegAudioMixerMutes, &channelEnable, gAudioMixerChannelToAudioMixerMainOutputChannelMuteMask[inChannel], gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift[inChannel]))
@@ -846,7 +846,7 @@ bool CNTV2Card::SetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, 
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
-	if(inChannel > NTV2_AudioMixerChannel16)
+	if(!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
 		return false;
 
 	if(!WriteRegister(kRegAudioMixerMutes, inMuteChannel ? 1 : 0, gAudioMixerChannelToAudioMixerMainOutputChannelMuteMask[inChannel], gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift[inChannel]))

@@ -2768,7 +2768,7 @@ typedef enum
 	NTV2_AUDIO_MIXER_CHANNEL_INVALID	=	NTV2_MAX_NUM_AudioMixerChannel
 } NTV2AudioMixerChannel;
 
-#define	NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(__p__)				((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) < NTV2_MAX_NUM_AudioMixerChannel)
+#define	NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) < NTV2_MAX_NUM_AudioMixerChannel)
 #define	NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) <= NTV2_AudioMixerChannel2)
 
 typedef enum
