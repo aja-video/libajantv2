@@ -2660,40 +2660,40 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// SDI Out 3 - acts like SDI 1
 	if (bHdmiIn && b4K)
 	{
-//		if (bSdiRgbOut)
-//		{
-//			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
-//			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
-//		}
-//		else
-//		{
-//			if (inputFormatSelect == NTV2_RGBSelect)
-//			{
-//				if (b2wire4k)
-//				{
-//					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
-//					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptCSC2VidYUV);
-//				}
-//				else
-//				{
-//					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
-//					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
-//				}
-//			}
-//			else
-//			{
-//				if (b2wire4k)
-//				{
-//					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptHDMIIn);
-//					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptHDMIInQ2);
-//				}
-//				else
-//				{
-//					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptHDMIInQ3);
-//					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
-//				}
-//			}
-//		}
+		if (bSdiRgbOut)
+		{
+			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
+		}
+		else
+		{
+			if (inputFormatSelect == NTV2_RGBSelect)
+			{
+				if (b2wire4k)
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptCSC2VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+				}
+			}
+			else
+			{
+				if (b2wire4k)
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptHDMIIn);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptHDMIInQ2);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptHDMIInQ3);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+				}
+			}
+		}
 	}
 	else if (b4K)
 	{
@@ -2774,41 +2774,40 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// SDI Out 4 - acts like SDI 2
 	if (bHdmiIn && b4K)
 	{
-//		if (bSdiRgbOut)
-//		{
-//			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
-//			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
-//		}
-//		else
-//		{
-//			if (inputFormatSelect == NTV2_RGBSelect)
-//			{
-//				if (b2wire4k)
-//				{
-//					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC3VidYUV);
-//					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptCSC4VidYUV);
-//				}
-//				else
-//				{
-//					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
-//					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
-//				}
-//			}
-//			else
-//			{
-//				if (b2wire4k)
-//				{
-//					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptHDMIInQ3);
-//					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptHDMIInQ4);
-//				}
-//				else
-//				{
-//					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptHDMIInQ4);
-//					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
-//				}
-//			}
-			
-//		}
+		if (bSdiRgbOut)
+		{
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
+		}
+		else
+		{
+			if (inputFormatSelect == NTV2_RGBSelect)
+			{
+				if (b2wire4k)
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptCSC4VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+				}
+			}
+			else
+			{
+				if (b2wire4k)
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptHDMIInQ3);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptHDMIInQ4);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptHDMIInQ4);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+				}
+			}
+		}
 	}
 	else if (b4K)
 	{
@@ -2974,11 +2973,10 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 					XPt1 = XPt1 = (b425) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB;
 					mCard->SetHDMIV2TxBypass(false);
 					break;
-				//The modes below are not supported yet. Requires 4k hdmi in -> hd hdmi out
- 				//case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIIn); break;
- 				//case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ2); break;
- 				//case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ3); break;
-				//case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ4); break;
+				case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIIn); break;
+				case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ2); break;
+				case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ3); break;
+				case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptHDMIInQ4); break;
 			}
 		}
 		else
