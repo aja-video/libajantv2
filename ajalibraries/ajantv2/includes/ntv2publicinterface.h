@@ -896,7 +896,7 @@ typedef enum
 
 typedef enum
 {
-	kRegHDMIOutputAudioConfig = 0x1d40
+	kRegHDMIOutputAudioConfig = 0x1d4B
 }NTV2HDMIOutAudioRegisters;
 
 
@@ -1597,6 +1597,7 @@ typedef enum
 	//kRegHDMIOutControl
 	kRegMaskHDMIOutVideoStd		= BIT(2)+BIT(1)+BIT(0),
 	kRegMaskHDMIOutV2VideoStd	= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskHDMIOut8ChGroupSelect	= BIT(5),
 	kRegMaskHDMIV2TxBypass		= BIT(7),
 	kLHIRegMaskHDMIOutColorSpace = BIT(8),
 	kLHIRegMaskHDMIOutFPS		= BIT(12)+BIT(11)+BIT(10)+BIT(9),
@@ -2379,10 +2380,9 @@ typedef enum
 	kRegMaskAudioMixerInputLeftLevel = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskAudioMixerInputRightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 
-	kRegMaskHDMIOutAudioEngineSelect = BIT(0) + BIT(1) + BIT(2) + BIT(3),
-	kRegMaskHDMIOutAudio8ChannelSelect = BIT(4),
-	kRegMaskHDMIOutAudioChannelMode = BIT(5),
-	kRegMaskHDMIOutAudio2ChannelSelect = BIT(8) + BIT(9)
+	kRegMaskHDMIOutAudioEngineSelect = BIT(20) + BIT(21) + BIT(22) + BIT(23),
+	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
+	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30)
 
 } RegisterMask;
 
@@ -2732,6 +2732,7 @@ typedef enum
 	
 	//kRegHDMIOutControl
 	kRegShiftHDMIOutVideoStd			= 0,
+	kRegShiftHDMIOut8ChGroupSelect		= 5,
 	kLHIRegShiftHDMIDownStreamDeviceYCbCrMode = 6,
 	kLHIRegShiftHDMIDownStreamDevice10BitMode = 7,
 	kRegShiftHDMIV2TxBypass				= 7,
@@ -3477,10 +3478,9 @@ typedef enum
 	kRegShiftAudioMixerInputLeftLevel = 0,
 	kRegShiftAudioMixerInputRightLevel = 16,
 
-	kRegShiftHDMIOutAudioEngineSelect = 0,
-	kRegShiftHDMIOutAudio8ChannelSelect = 4,
-	kRegShiftHDMIOutAudioChannelMode = 5,
-	kRegShiftHDMIOutAudio2ChannelSelect = 8
+	kRegShiftHDMIOutAudioEngineSelect = 20,
+	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
+	kRegShiftHDMIOutAudio2ChannelSelect = 29
 
 } RegisterShift;
 
