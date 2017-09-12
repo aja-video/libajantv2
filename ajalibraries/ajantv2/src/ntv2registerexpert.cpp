@@ -26,19 +26,6 @@ using namespace std;
 	#define	AJA_LOCAL_STATIC
 #endif	//	!defined (NTV2_DEPRECATE)
 
-
-#define	DefineRegName(__rn__,__cstr__)																\
-	do																								\
-	{																								\
-		const string __regName__ (__cstr__);														\
-		if (!__regName__.empty())																	\
-			if (mRegNumToStringMap.find ((__rn__)) == mRegNumToStringMap.end())						\
-			{																						\
-				mRegNumToStringMap.insert (RegNumToStringPair ((__rn__), __regName__));				\
-				mStringToRegNumMap.insert (StringToRegNumPair (ToLower (__regName__), (__rn__)));	\
-			}																						\
-	} while (false)
-
 #define	DefineRegDecoder(__rn__,__dec__)															\
 	mRegNumToDecoderMap.insert (RegNumToDecoderPair ((__rn__), &(__dec__)))
 
@@ -200,6 +187,18 @@ public:
 	}	//	constructor
 	
 private:
+    void DefineRegName(uint32_t regNumber, const string& regName)
+    {
+        if (!regName.empty())
+        {
+            if (mRegNumToStringMap.find ((regNumber)) == mRegNumToStringMap.end())
+            {
+                mRegNumToStringMap.insert (RegNumToStringPair ((regNumber), regName));
+                mStringToRegNumMap.insert (StringToRegNumPair (ToLower (regName), (regNumber)));
+            }
+        }
+    }
+
 	void SetupTimecodeRegs(void)
 	{
 		DefineRegister	(kRegRP188InOut1DBB,			"",	mRP188InOutDBBRegDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_Channel1,	kRegClass_NULL);
@@ -1595,6 +1594,8 @@ private:
 		//DefineRegister (kRegAudioMixerAux2GainCh1,				
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1605,6 +1606,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1615,6 +1618,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1625,6 +1630,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
