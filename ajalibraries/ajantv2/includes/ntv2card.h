@@ -4813,53 +4813,57 @@ public:
 
 
 	/**
-		@brief		Answers with the TRS error status from a given input channel.
-		@return		True if the input channel is currently reporting TRS errors, otherwise false.
-		@param[in]	inChannel		Specifies the channel of interest.
+		@name	SDI Input Error Detection
+	**/
+	///@{
+	/**
+		@return		True if the given SDI input is currently reporting TRS errors;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
 	**/
 	AJA_VIRTUAL bool		GetSDITRSError (const NTV2Channel inChannel);
 
 	/**
-		@brief		Returns SDI Lock Status from inputs.
-		@return		True if locked, false if not
-		@param[in]	inChannel		Specifies the channel of interest.
+		@return		The SDI Lock count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL bool		GetSDILock (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI Unlock count from inputs.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The SDI Unlock count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetSDIUnlockCount(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetSDIUnlockCount (const NTV2Channel inChannel);
 	
 	/**
-	@brief		Returns SDI VPID link A Status from inputs.
-	@return		True if valid, false if not
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		True if the SDI VPID link A input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL bool		GetVPIDValidA(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		GetVPIDValidA (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI VPID link B Status from inputs.
-	@return		True if valid, false if not
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		True if the SDI VPID link B input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL bool		GetVPIDValidB(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		GetVPIDValidB (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI CRC error count from link A.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The current Link A error count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetCRCErrorCountA(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetCRCErrorCountA (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI CRC error count from link B.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The current Link B error count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetCRCErrorCountB(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetCRCErrorCountB (const NTV2Channel inChannel);
+	///@}
 
 	/**
 		@brief		Enables or disables multi-format (per channel) device operation.
