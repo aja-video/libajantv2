@@ -1418,13 +1418,6 @@ typedef enum
 	kRegMaskInput1GeometryHigh		= BIT(30),
 	kRegMaskInput2GeometryHigh		= BIT(31),
 
-#if !defined (NTV2_DEPRECATE)
-	// Pan (2K crop) - Xena 2
-	kRegMaskPanMode			= BIT(30) + BIT(31),
-	kRegMaskPanOffsetH		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11),
-	kRegMaskPanOffsetV		= BIT(12)+BIT(13)+BIT(14)+BIT(15)+BIT(16)+BIT(17)+BIT(18)+BIT(19)+BIT(20)+BIT(21)+BIT(22)+BIT(23),
-#endif	//	!defined (NTV2_DEPRECATE)
-
 	// RP-188 Source
 	kRegMaskRP188SourceSelect = BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 	kRegMaskRP188DBB = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7),
@@ -1931,164 +1924,10 @@ typedef enum
 	kRegMaskLTC1InBypass = BIT(4),
 	kRegMaskLTC2InPresent	= BIT(8),
 	kRegMaskLTC2InBypass = BIT(12),
- 
-#if !defined (NTV2_DEPRECATE)
-	//
-	// Borg Fusion Registers
-	//
-
-	// Boot FPGA and BoardID
-	kRegMaskBorgFusionBootFPGAVer = BIT(4)+BIT(5)+BIT(6)+BIT(7),
-	kRegMaskBorgFusionBoardID = BIT(0)+BIT(1)+BIT(2),
-
-	// Codec and convert FPGA configuration control
-	kRegMaskBorgFusionCodecFPGAProgram = BIT(0),
-	kRegMaskBorgFusionCodecFPGAInit = BIT(1),
-	kRegMaskBorgFusionCodecFPGADone = BIT(2),
-
-	kRegMaskBorgFusionConvertFPGAProgram = BIT(4),
-	kRegMaskBorgFusionConvertFPGAInit = BIT(5),
-	kRegMaskBorgFusionConvertFPGADone = BIT(6),
-
-	// Panel Push buttons debounced and SATA drive present state
-	kRegMaskBorgFusionPushButtonSlotDebounced = BIT(0),
-	kRegMaskBorgFusionPushButtonAdjustDownDebounced = BIT(1),
-	kRegMaskBorgFusionPushButtonAdjustUpDebounced = BIT(2),
-	kRegMaskBorgFusionPushButtonDeleteClipDebounced = BIT(3),
-	kRegMaskBorgFusionPushButtonSelectDownDebounced = BIT(4),
-	kRegMaskBorgFusionPushButtonSelectUpDebounced = BIT(5),
-	kRegMaskBorgFusionPushButtonFastFwdDebounced = BIT(6),
-	kRegMaskBorgFusionPushButtonRecordDebounced = BIT(7),
-	kRegMaskBorgFusionPushButtonPlayDebounced = BIT(8),
-	kRegMaskBorgFusionPushButtonStopDebounced = BIT(9),
-	kRegMaskBorgFusionPushButtonRewindDebounced = BIT(10),
-	kRegMaskBorgFusionPushButtonMediaDebounced = BIT(11),
-	kRegMaskBorgFusionPushButtonConfigDebounced = BIT(12),
-	kRegMaskBorgFusionPushButtonStatusDebounced = BIT(13),
-	kRegMaskBorgFusionPushButtonSATADrivePresentDebounced = BIT(14),
-	kRegMaskBorgFusionPushButtonPowerDebounced = BIT(15),
-
-	// Panel Push buttons and SATA drive present changes
-	kRegMaskBorgFusionPushButtonSlotChange = BIT(0),
-	kRegMaskBorgFusionPushButtonAdjustDownChange = BIT(1),
-	kRegMaskBorgFusionPushButtonAdjustUpChange = BIT(2),
-	kRegMaskBorgFusionPushButtonDeleteClipChange = BIT(3),
-	kRegMaskBorgFusionPushButtonSelectDownChange = BIT(4),
-	kRegMaskBorgFusionPushButtonSelectUpChange = BIT(5),
-	kRegMaskBorgFusionPushButtonFastFwdChange = BIT(6),
-	kRegMaskBorgFusionPushButtonRecordChange = BIT(7),
-	kRegMaskBorgFusionPushButtonPlayChange = BIT(8),
-	kRegMaskBorgFusionPushButtonStopChange = BIT(9),
-	kRegMaskBorgFusionPushButtonRewindChange = BIT(10),
-	kRegMaskBorgFusionPushButtonMediaChange = BIT(11),
-	kRegMaskBorgFusionPushButtonConfigChange = BIT(12),
-	kRegMaskBorgFusionPushButtonStatusChange = BIT(13),
-	kRegMaskBorgFusionPushButtonSATADrivePresentChange = BIT(14),
-	kRegMaskBorgFusionPushButtonPowerButtonChange = BIT(15),
-
-	// LED Pulse Width Modulation Threshholds
-	kRegMaskBorgFusionPWMThreshExpressCard2 = BIT(0)+BIT(1)+BIT(2)+BIT(3),
-	kRegMaskBorgFusionPWMThreshExpressCard1 = BIT(4)+BIT(5)+BIT(6)+BIT(7),
-	kRegMaskBorgFusionPWMThreshPower = BIT(8)+BIT(9)+BIT(10)+BIT(11),
-	kRegMaskBonesFusionPWMThreshLCDBacklightLED = BIT(12)+BIT(13)+BIT(14)+BIT(15),
-
-	// Power control - System
-	kRegMaskBorgFusionPowerCtrlWiFiReset = BIT(0),
-	kRegMaskBorgFusionPowerCtrlFirewirePower = BIT(1),
-	kRegMaskBorgFusionPowerCtrlGigEthReset = BIT(2),
-	kRegMaskBorgFusionPowerCtrlPCIExpClockStop = BIT(3),
-
-	// Power control - Storage devices - Borg Fusion
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1_3_3vPower = BIT(8),	// Express Card 1 3.3v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1_1_5vPower = BIT(9),	// Express Card 1 1.5v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2_3_3vPower = BIT(10),	// Express Card 2 3.3v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2_1_5vPower = BIT(11),	// Express Card 2 1.5v power
-	kRegMaskBorgFusionPowerCtrlSata_12vPower = BIT(12),			// SATA Drive 12v power
-
-	// Power control - Storage devices - Bones Actel
-	kRegMaskBonesActelPowerCtrlCFSlot2_BridgeReset   = BIT(8),	// Bones Actel CF Slot 2 (CPU) Bridge Reset
-	kRegMaskBonesActelPowerCtrlCFSlot2_Power         = BIT(9),	// Bones Actel CF Slot 2 (CPU) Power
-	kRegMaskBonesActelPowerCtrlCFSlot1_Power         = BIT(10),	// Bones Actel CF Slot 1 (VIDeo) Power
-	kRegMaskBonesActelPowerCtrlCFSlot1_BridgeReset   = BIT(11),	// Bones Actel CF Slot 1 (VIDeo) Bridge Reset
-
-	// Power control - Storage devices - Barclay Actel Fusion
-	kRegMaskBarclayFusionPowerCtrlPS1Active = BIT(6), 			// Barclay Fusion Power Supply 1 active bit
-	kRegMaskBarclayFusionPowerCtrlPS2Active = BIT(5), 			// Barclay Fusion Power Supply 2 active bit
-
-	kRegMaskBarclayFusionIdentifyLEDCtrl = BIT(1), 	//Barclay Identify LED On/Off bit, Rear LED //RS
-
-	// Power control - Pushbutton LEDs
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2LED = BIT(13),
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1LED = BIT(14),
-	kRegMaskBorgFusionPowerCtrlPowerButtonLED = BIT(15),
-
-	// IRQ3n Interrupt control
-	kRegMaskBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = BIT(0),
-	kRegMaskBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = BIT(1),
-	kRegMaskBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = BIT(2),
-	kRegMaskBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = BIT(3),
-	kRegMaskBorgFusionIRQ3nIntCtrlTemp1HighEnable = BIT(4),
-	kRegMaskBorgFusionIRQ3nIntCtrlTemp2HighEnable = BIT(5),
-	kRegMaskBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = BIT(6),
-
-	// IRQ3n Interrupt source
-	kRegMaskBorgFusionIRQ3nIntSrcPushButtonChange= BIT(0),
-	kRegMaskBorgFusionIRQ3nIntSrcInputVoltageLow9v= BIT(1),
-	kRegMaskBorgFusionIRQ3nIntSrcDisplayFIFOFull= BIT(2),
-	kRegMaskBorgFusionIRQ3nIntSrcSATAPresentChange= BIT(3),
-	kRegMaskBorgFusionIRQ3nIntSrcTemp1High= BIT(4),
-	kRegMaskBorgFusionIRQ3nIntSrcTemp2High= BIT(5),
-	kRegMaskBorgFusionIRQ3nIntSrcPowerButtonChange= BIT(6),
-
-	// Noritake Display Control/Status
-	kRegMaskBorgFusionDisplayCtrlReset = BIT (0),
-	kRegMaskBorgFusionDisplayStatusBusyRaw = BIT (1),		// Not needed by CPU, used internally by FPGA
-	kRegMaskBorgFusionDisplayStatusInterfaceBusy = BIT (7),	// FIFO full
-
-	// Analog ADC flags - battery
-	kRegMaskBorgFusionAnalogFlagsPowerLTE9v = BIT(0),	// +12 v supply <= 9.0 v battery critical
-	kRegMaskBorgFusionAnalogFlagsPowerLTE10v = BIT(1),	// +12 v supply <= 10.0 v battery depleting
-	kRegMaskBorgFusionAnalogFlagsPowerLTE11v = BIT(2),	// +12 v supply <= 11.0 v battery depleting
-	kRegMaskBorgFusionAnalogFlagsPowerGTE13v = BIT(3),	// +12 v supply >= 13.0 v battery charging
-
-	// Analog ADC flags - temperature sensor
-	kRegMaskBorgFusionAnalogFlagsPowerTemp1High = BIT(4),	// Temp sensor 1 > 65 C
-	kRegMaskBorgFusionAnalogFlagsPowerTemp2High = BIT(5),	// Temp sensor 2 > 65 C
-	
-	// Bones Actel Compact Flash Slot Debounced Card Present
-	kRegMaskBonesActelCFSlot1_Present   = BIT(1)+BIT(0),
-	kRegMaskBonesActelCFSlot2_Present   = BIT(3)+BIT(2),
-
-	// Bones Actel Compact Flash Slot Changes Present
-	kRegMaskBonesActelCFSlot1_Changes   = BIT(1)+BIT(0),
-	kRegMaskBonesActelCFSlot2_Changes   = BIT(3)+BIT(2),
-#endif	//	!defined (NTV2_DEPRECATE)
 
 	// kRegAudioOutputSourceMap
 	kRegMaskMonitorSource				= BIT(21)+BIT(20)+BIT(19)+BIT(18)+BIT(17)+BIT(16),
 	kRegMaskHDMIOutAudioSource			= BIT(31)+BIT(30)+BIT(29)+BIT(28)+BIT(27)+BIT(26)+BIT(25)+BIT(24),
-	
-#if !defined (NTV2_DEPRECATE)
-	// kRegSDIInput3GStatus
-	kLHIRegMaskSDIIn3GbpsMode = BIT(0),
-	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
-	kLHIRegMaskSDIInVPIDLinkAValid = BIT(4),
-	kLHIRegMaskSDIInVPIDLinkBValid = BIT(5),
-	kLHIRegMaskSDIIn23GbpsMode = BIT(8),
-	kLHIRegMaskSDIIn23GbpsSMPTELevelBMode = BIT(9),
-	kLHIRegMaskSDIIn2VPIDLinkAValid = BIT(12),
-	kLHIRegMaskSDIIn2VPIDLinkBValid = BIT(13),
-
-	// kRegSDIInput3GStatus2
-	kLHIRegMaskSDIIn33GbpsMode = BIT(0),
-	kLHIRegMaskSDIIn33GbpsSMPTELevelBMode = BIT(1),
-	kLHIRegMaskSDIIn3VPIDLinkAValid = BIT(4),
-	kLHIRegMaskSDIIn3VPIDLinkBValid = BIT(5),
-	kLHIRegMaskSDIIn43GbpsMode = BIT(8),
-	kLHIRegMaskSDIIn43GbpsSMPTELevelBMode = BIT(9),
-	kLHIRegMaskSDIIn4VPIDLinkAValid = BIT(12),
-	kLHIRegMaskSDIIn4VPIDLinkBValid = BIT(13),
-#endif
 
 	// kRegSDIInput3GStatus
 	kRegMaskSDIIn3GbpsMode = BIT(0),
@@ -2382,7 +2221,164 @@ typedef enum
 
 	kRegMaskHDMIOutAudioEngineSelect = BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
-	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30)
+	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30),
+	kRegMaskHDMIOutUserOveride = BIT(1),
+	kRegMaskHDMIOutCropMode = BIT(4)
+
+#if !defined (NTV2_DEPRECATE)
+	// kRegSDIInput3GStatus
+	,kLHIRegMaskSDIIn3GbpsMode = BIT(0),
+	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
+	kLHIRegMaskSDIInVPIDLinkAValid = BIT(4),
+	kLHIRegMaskSDIInVPIDLinkBValid = BIT(5),
+	kLHIRegMaskSDIIn23GbpsMode = BIT(8),
+	kLHIRegMaskSDIIn23GbpsSMPTELevelBMode = BIT(9),
+	kLHIRegMaskSDIIn2VPIDLinkAValid = BIT(12),
+	kLHIRegMaskSDIIn2VPIDLinkBValid = BIT(13),
+
+	// kRegSDIInput3GStatus2
+	kLHIRegMaskSDIIn33GbpsMode = BIT(0),
+	kLHIRegMaskSDIIn33GbpsSMPTELevelBMode = BIT(1),
+	kLHIRegMaskSDIIn3VPIDLinkAValid = BIT(4),
+	kLHIRegMaskSDIIn3VPIDLinkBValid = BIT(5),
+	kLHIRegMaskSDIIn43GbpsMode = BIT(8),
+	kLHIRegMaskSDIIn43GbpsSMPTELevelBMode = BIT(9),
+	kLHIRegMaskSDIIn4VPIDLinkAValid = BIT(12),
+	kLHIRegMaskSDIIn4VPIDLinkBValid = BIT(13),
+	//
+	// Borg Fusion Registers
+	//
+
+	// Boot FPGA and BoardID
+	kRegMaskBorgFusionBootFPGAVer = BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kRegMaskBorgFusionBoardID = BIT(0)+BIT(1)+BIT(2),
+
+	// Codec and convert FPGA configuration control
+	kRegMaskBorgFusionCodecFPGAProgram = BIT(0),
+	kRegMaskBorgFusionCodecFPGAInit = BIT(1),
+	kRegMaskBorgFusionCodecFPGADone = BIT(2),
+
+	kRegMaskBorgFusionConvertFPGAProgram = BIT(4),
+	kRegMaskBorgFusionConvertFPGAInit = BIT(5),
+	kRegMaskBorgFusionConvertFPGADone = BIT(6),
+
+	// Panel Push buttons debounced and SATA drive present state
+	kRegMaskBorgFusionPushButtonSlotDebounced = BIT(0),
+	kRegMaskBorgFusionPushButtonAdjustDownDebounced = BIT(1),
+	kRegMaskBorgFusionPushButtonAdjustUpDebounced = BIT(2),
+	kRegMaskBorgFusionPushButtonDeleteClipDebounced = BIT(3),
+	kRegMaskBorgFusionPushButtonSelectDownDebounced = BIT(4),
+	kRegMaskBorgFusionPushButtonSelectUpDebounced = BIT(5),
+	kRegMaskBorgFusionPushButtonFastFwdDebounced = BIT(6),
+	kRegMaskBorgFusionPushButtonRecordDebounced = BIT(7),
+	kRegMaskBorgFusionPushButtonPlayDebounced = BIT(8),
+	kRegMaskBorgFusionPushButtonStopDebounced = BIT(9),
+	kRegMaskBorgFusionPushButtonRewindDebounced = BIT(10),
+	kRegMaskBorgFusionPushButtonMediaDebounced = BIT(11),
+	kRegMaskBorgFusionPushButtonConfigDebounced = BIT(12),
+	kRegMaskBorgFusionPushButtonStatusDebounced = BIT(13),
+	kRegMaskBorgFusionPushButtonSATADrivePresentDebounced = BIT(14),
+	kRegMaskBorgFusionPushButtonPowerDebounced = BIT(15),
+
+	// Panel Push buttons and SATA drive present changes
+	kRegMaskBorgFusionPushButtonSlotChange = BIT(0),
+	kRegMaskBorgFusionPushButtonAdjustDownChange = BIT(1),
+	kRegMaskBorgFusionPushButtonAdjustUpChange = BIT(2),
+	kRegMaskBorgFusionPushButtonDeleteClipChange = BIT(3),
+	kRegMaskBorgFusionPushButtonSelectDownChange = BIT(4),
+	kRegMaskBorgFusionPushButtonSelectUpChange = BIT(5),
+	kRegMaskBorgFusionPushButtonFastFwdChange = BIT(6),
+	kRegMaskBorgFusionPushButtonRecordChange = BIT(7),
+	kRegMaskBorgFusionPushButtonPlayChange = BIT(8),
+	kRegMaskBorgFusionPushButtonStopChange = BIT(9),
+	kRegMaskBorgFusionPushButtonRewindChange = BIT(10),
+	kRegMaskBorgFusionPushButtonMediaChange = BIT(11),
+	kRegMaskBorgFusionPushButtonConfigChange = BIT(12),
+	kRegMaskBorgFusionPushButtonStatusChange = BIT(13),
+	kRegMaskBorgFusionPushButtonSATADrivePresentChange = BIT(14),
+	kRegMaskBorgFusionPushButtonPowerButtonChange = BIT(15),
+
+	// LED Pulse Width Modulation Threshholds
+	kRegMaskBorgFusionPWMThreshExpressCard2 = BIT(0)+BIT(1)+BIT(2)+BIT(3),
+	kRegMaskBorgFusionPWMThreshExpressCard1 = BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kRegMaskBorgFusionPWMThreshPower = BIT(8)+BIT(9)+BIT(10)+BIT(11),
+	kRegMaskBonesFusionPWMThreshLCDBacklightLED = BIT(12)+BIT(13)+BIT(14)+BIT(15),
+
+	// Power control - System
+	kRegMaskBorgFusionPowerCtrlWiFiReset = BIT(0),
+	kRegMaskBorgFusionPowerCtrlFirewirePower = BIT(1),
+	kRegMaskBorgFusionPowerCtrlGigEthReset = BIT(2),
+	kRegMaskBorgFusionPowerCtrlPCIExpClockStop = BIT(3),
+
+	// Power control - Storage devices - Borg Fusion
+	kRegMaskBorgFusionPowerCtrlPCIExpCard1_3_3vPower = BIT(8),	// Express Card 1 3.3v power
+	kRegMaskBorgFusionPowerCtrlPCIExpCard1_1_5vPower = BIT(9),	// Express Card 1 1.5v power
+	kRegMaskBorgFusionPowerCtrlPCIExpCard2_3_3vPower = BIT(10),	// Express Card 2 3.3v power
+	kRegMaskBorgFusionPowerCtrlPCIExpCard2_1_5vPower = BIT(11),	// Express Card 2 1.5v power
+	kRegMaskBorgFusionPowerCtrlSata_12vPower = BIT(12),			// SATA Drive 12v power
+
+	// Power control - Storage devices - Bones Actel
+	kRegMaskBonesActelPowerCtrlCFSlot2_BridgeReset   = BIT(8),	// Bones Actel CF Slot 2 (CPU) Bridge Reset
+	kRegMaskBonesActelPowerCtrlCFSlot2_Power         = BIT(9),	// Bones Actel CF Slot 2 (CPU) Power
+	kRegMaskBonesActelPowerCtrlCFSlot1_Power         = BIT(10),	// Bones Actel CF Slot 1 (VIDeo) Power
+	kRegMaskBonesActelPowerCtrlCFSlot1_BridgeReset   = BIT(11),	// Bones Actel CF Slot 1 (VIDeo) Bridge Reset
+
+	// Power control - Storage devices - Barclay Actel Fusion
+	kRegMaskBarclayFusionPowerCtrlPS1Active = BIT(6), 			// Barclay Fusion Power Supply 1 active bit
+	kRegMaskBarclayFusionPowerCtrlPS2Active = BIT(5), 			// Barclay Fusion Power Supply 2 active bit
+
+	kRegMaskBarclayFusionIdentifyLEDCtrl = BIT(1), 	//Barclay Identify LED On/Off bit, Rear LED //RS
+
+	// Power control - Pushbutton LEDs
+	kRegMaskBorgFusionPowerCtrlPCIExpCard2LED = BIT(13),
+	kRegMaskBorgFusionPowerCtrlPCIExpCard1LED = BIT(14),
+	kRegMaskBorgFusionPowerCtrlPowerButtonLED = BIT(15),
+
+	// IRQ3n Interrupt control
+	kRegMaskBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = BIT(0),
+	kRegMaskBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = BIT(1),
+	kRegMaskBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = BIT(2),
+	kRegMaskBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = BIT(3),
+	kRegMaskBorgFusionIRQ3nIntCtrlTemp1HighEnable = BIT(4),
+	kRegMaskBorgFusionIRQ3nIntCtrlTemp2HighEnable = BIT(5),
+	kRegMaskBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = BIT(6),
+
+	// IRQ3n Interrupt source
+	kRegMaskBorgFusionIRQ3nIntSrcPushButtonChange= BIT(0),
+	kRegMaskBorgFusionIRQ3nIntSrcInputVoltageLow9v= BIT(1),
+	kRegMaskBorgFusionIRQ3nIntSrcDisplayFIFOFull= BIT(2),
+	kRegMaskBorgFusionIRQ3nIntSrcSATAPresentChange= BIT(3),
+	kRegMaskBorgFusionIRQ3nIntSrcTemp1High= BIT(4),
+	kRegMaskBorgFusionIRQ3nIntSrcTemp2High= BIT(5),
+	kRegMaskBorgFusionIRQ3nIntSrcPowerButtonChange= BIT(6),
+
+	// Noritake Display Control/Status
+	kRegMaskBorgFusionDisplayCtrlReset = BIT (0),
+	kRegMaskBorgFusionDisplayStatusBusyRaw = BIT (1),		// Not needed by CPU, used internally by FPGA
+	kRegMaskBorgFusionDisplayStatusInterfaceBusy = BIT (7),	// FIFO full
+
+	// Analog ADC flags - battery
+	kRegMaskBorgFusionAnalogFlagsPowerLTE9v = BIT(0),	// +12 v supply <= 9.0 v battery critical
+	kRegMaskBorgFusionAnalogFlagsPowerLTE10v = BIT(1),	// +12 v supply <= 10.0 v battery depleting
+	kRegMaskBorgFusionAnalogFlagsPowerLTE11v = BIT(2),	// +12 v supply <= 11.0 v battery depleting
+	kRegMaskBorgFusionAnalogFlagsPowerGTE13v = BIT(3),	// +12 v supply >= 13.0 v battery charging
+
+	// Analog ADC flags - temperature sensor
+	kRegMaskBorgFusionAnalogFlagsPowerTemp1High = BIT(4),	// Temp sensor 1 > 65 C
+	kRegMaskBorgFusionAnalogFlagsPowerTemp2High = BIT(5),	// Temp sensor 2 > 65 C
+
+	// Bones Actel Compact Flash Slot Debounced Card Present
+	kRegMaskBonesActelCFSlot1_Present   = BIT(1)+BIT(0),
+	kRegMaskBonesActelCFSlot2_Present   = BIT(3)+BIT(2),
+
+	// Bones Actel Compact Flash Slot Changes Present
+	kRegMaskBonesActelCFSlot1_Changes   = BIT(1)+BIT(0),
+	kRegMaskBonesActelCFSlot2_Changes   = BIT(3)+BIT(2),
+	// Pan (2K crop) - Xena 2
+	kRegMaskPanMode			= BIT(30) + BIT(31),
+	kRegMaskPanOffsetH		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11),
+	kRegMaskPanOffsetV		= BIT(12)+BIT(13)+BIT(14)+BIT(15)+BIT(16)+BIT(17)+BIT(18)+BIT(19)+BIT(20)+BIT(21)+BIT(22)+BIT(23)
+#endif	//	!defined (NTV2_DEPRECATE)
 
 } RegisterMask;
 
@@ -2557,13 +2553,6 @@ typedef enum
 	kRegShiftInput2FrameRateHigh		= 29,
 	kRegShiftInput1GeometryHigh			= 30,
 	kRegShiftInput2GeometryHigh			= 31,
-
-#if !defined (NTV2_DEPRECATE)
-	// Pan (2K crop) - Xena 2
-	kRegShiftPanMode					= 30,
-	kRegShiftPanOffsetV					= 0,
-	kRegShiftPanOffsetH					= 12,
-#endif	//	!defined (NTV2_DEPRECATE)
 
 	// RP-188 Source
 	kRegShiftRP188Source				= 24,
@@ -3047,149 +3036,9 @@ typedef enum
 	kRegShiftLTC2InPresent	= 8,
 	kRegShiftLTC2Bypass = 12,
 
-
-
-	#if !defined (NTV2_DEPRECATE)
-		//
-		// Borg Fusion Registers
-		//
-
-		// Boot FPGA and BoardID
-		kRegShiftBorgFusionBootFPGAVer = 4,
-		kRegShiftBorgFusionBoardID = 0,
-
-		// Codec and convert FPGA configuration control
-		kRegShiftBorgFusionCodecFPGAProgram = 0,
-		kRegShiftBorgFusionCodecFPGAInit = 1,
-		kRegShiftBorgFusionCodecFPGADone = 2,
-
-		kRegShiftBorgFusionConvertFPGAProgram = 4,
-		kRegShiftBorgFusionConvertFPGAInit = 5,
-		kRegShiftBorgFusionConvertFPGADone = 6,
-
-		// Panel Push buttons debounced and SATA drive present state
-		kRegShiftBorgFusionPushButtonStatusDebounced = 0,
-		kRegShiftBorgFusionPushButtonConfigDebounced = 1,
-		kRegShiftBorgFusionPushButtonMediaDebounced = 2,
-		kRegShiftBorgFusionPushButtonRewindDebounced = 3,
-		kRegShiftBorgFusionPushButtonStopDebounced = 4,
-		kRegShiftBorgFusionPushButtonPlayDebounced = 5,
-		kRegShiftBorgFusionPushButtonRecordDebounced = 6,
-		kRegShiftBorgFusionPushButtonFastFwdDebounced = 7,
-		kRegShiftBorgFusionPushButtonSelectUpDebounced = 8,
-		kRegShiftBorgFusionPushButtonSelectDownDebounced = 9,
-		kRegShiftBorgFusionPushButtonDeleteClipDebounced = 10,
-		kRegShiftBorgFusionPushButtonAdjustUpDebounced = 11,
-		kRegShiftBorgFusionPushButtonAdjustDownDebounced = 12,
-		kRegShiftBorgFusionPushButtonSlotDebounced = 13,
-		kRegShiftBorgFusionPushButtonSATADrivePresentDebounced = 14,
-
-		// Panel Push buttons and SATA drive present changes
-		kRegShiftBorgFusionPushButtonStatusChange = 0,
-		kRegShiftBorgFusionPushButtonConfigChange = 1,
-		kRegShiftBorgFusionPushButtonMediaChange = 2,
-		kRegShiftBorgFusionPushButtonRewindChange = 3,
-		kRegShiftBorgFusionPushButtonStopChange = 4,
-		kRegShiftBorgFusionPushButtonPlayChange = 5,
-		kRegShiftBorgFusionPushButtonRecordChange = 6,
-		kRegShiftBorgFusionPushButtonFastFwdChange = 7,
-		kRegShiftBorgFusionPushButtonSelectUpChange = 8,
-		kRegShiftBorgFusionPushButtonSelectDownChange = 9,
-		kRegShiftBorgFusionPushButtonDeleteClipChange = 10,
-		kRegShiftBorgFusionPushButtonAdjustUpChange = 11,
-		kRegShiftBorgFusionPushButtonAdjustDownChange = 12,
-		kRegShiftBorgFusionPushButtonSlotChange = 13,
-		kRegShiftBorgFusionPushButtonSATADrivePresentChange = 14,
-
-		// LED Pulse Width Modulation Threshholds
-		kRegShiftBorgFusionPWMThreshExpressCard2 = 0,
-		kRegShiftBorgFusionPWMThreshExpressCard1 = 4,
-		kRegShiftBorgFusionPWMThreshPower = 8,
-		kRegShiftBorgFusionPWMThreshLCDBacklightLED = 12,
-
-
-		// Power control - System
-		kRegShiftBorgFusionPowerCtrlWiFiReset = 0,
-		kRegShiftBorgFusionPowerCtrlFirewirePower = 1,
-		kRegShiftBorgFusionPowerCtrlGigEthReset = 2,
-		kRegShiftBorgFusionPowerCtrlPCIExpClockStop = 3,
-
-		// Power control - Storage devices
-		kRegShiftBorgFusionPowerCtrlPCIExpCard1_3_3vPower = 8,	// Express Card 1 3.3v power
-		kRegShiftBorgFusionPowerCtrlPCIExpCard1_1_5vPower = 9,	// Express Card 1 1.5v power
-		kRegShiftBorgFusionPowerCtrlPCIExpCard2_3_3vPower = 10,	// Express Card 2 3.3v power
-		kRegShiftBorgFusionPowerCtrlPCIExpCard2_1_5vPower = 11,	// Express Card 2 1.5v power
-		kRegShiftBorgFusionPowerCtrlSata_12vPower = 12,			// SATA Drive 12v power
-
-		kRegShiftBonesActelPowerCtrlCFSlot2_BridgeReset = 8,
-		kRegShiftBonesActelPowerCtrlCFSlot2_Power = 9,   // Compact Flash S2 Power
-		kRegShiftBonesActelPowerCtrlCFSlot1_Power = 10,  // Compact Flash S1 Power
-		kRegShiftBonesActelPowerCtrlCFSlot1_BridgeReset = 11,
-
-		// Power control - Pushbutton LEDs
-		kRegShiftBorgFusionPowerCtrlPCIExpCard2LED = 13,
-		kRegShiftBorgFusionPowerCtrlPCIExpCard1LED = 14,
-		kRegShiftBorgFusionPowerCtrlPowerButtonLED = 15,
-
-		// IRQ3n Interrupt control
-		kRegShiftBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = 0,
-		kRegShiftBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = 1,
-		kRegShiftBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = 2,
-		kRegShiftBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = 3,
-		kRegShiftBorgFusionIRQ3nIntCtrlTemp1HighEnable = 4,
-		kRegShiftBorgFusionIRQ3nIntCtrlTemp2HighEnable = 5,
-		kRegShiftBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = 6,
-
-		// IRQ3n Interrupt source
-		kRegShiftBorgFusionIRQ3nIntSrcPushButtonChange= 0,
-		kRegShiftBorgFusionIRQ3nIntSrcInputVoltageLow9v= 1,
-		kRegShiftBorgFusionIRQ3nIntSrcDisplayFIFOFull= 2,
-		kRegShiftBorgFusionIRQ3nIntSrcSATAPresentChange= 3,
-		kRegShiftBorgFusionIRQ3nIntSrcTemp1High= 4,
-		kRegShiftBorgFusionIRQ3nIntSrcTemp2High= 5,
-		kRegShiftBorgFusionIRQ3nIntSrcPowerButtonChange= 6,
-
-		// Noritake Display Control/Status
-		kRegShiftBorgFusionDisplayCtrlReset = 0,
-		kRegShiftBorgFusionDisplayStatusBusyRaw = 1,		// Not needed by CPU, used internally by FPGA
-		kRegShiftBorgFusionDisplayStatusInterfaceBusy = 7,	// FIFO full
-
-		// Analog ADC flags - battery
-		kRegShiftBorgFusionAnalogFlagsPowerLTE9v = 0,	// +12 v supply <= 9.0 v battery critical
-		kRegShiftBorgFusionAnalogFlagsPowerLTE10v = 1,	// +12 v supply <= 10.0 v battery depleting
-		kRegShiftBorgFusionAnalogFlagsPowerLTE11v = 2,	// +12 v supply <= 11.0 v battery depleting
-		kRegShiftBorgFusionAnalogFlagsPowerGTE13v = 3,	// +12 v supply >= 13.0 v battery charging
-
-		// Analog ADC flags - temperature sensor
-		kRegShiftBorgFusionAnalogFlagsPowerTemp1High = 4,	// Temp sensor 1 > 65 C
-		kRegShiftBorgFusionAnalogFlagsPowerTemp2High = 5,	// Temp sensor 2 > 65 C
-	#endif	//	!defined (NTV2_DEPRECATE)
-
 	// kRegAudioOutputSourceMap
 	kRegShiftMonitorSource					= 16,
 	kRegShiftHDMIOutAudioSource				= 24,
-	
-	#if !defined (NTV2_DEPRECATE)
-		// kRegSDIInput3GStatus
-		kLHIRegShiftSDIIn3GbpsMode 				= 0,
-		kLHIRegShiftSDIIn3GbpsSMPTELevelBMode 	= 1,
-		kLHIRegShiftSDIInVPIDLinkAValid 		= 4,
-		kLHIRegShiftSDIInVPIDLinkBValid 		= 5,
-		kLHIRegShiftSDIIn23GbpsMode 			= 8,
-		kLHIRegShiftSDIIn23GbpsSMPTELevelBMode 	= 9,
-		kLHIRegShiftSDIIn2VPIDLinkAValid 		= 12,
-		kLHIRegShiftSDIIn2VPIDLinkBValid 		= 13,
-
-		// kRegSDIInput3GStatus2
-		kLHIRegShiftSDIIn33GbpsMode 			= 0,
-		kLHIRegShiftSDIIn33GbpsSMPTELevelBMode 	= 1,
-		kLHIRegShiftSDIIn3VPIDLinkAValid 		= 4,
-		kLHIRegShiftSDIIn3VPIDLinkBValid 		= 5,
-		kLHIRegShiftSDIIn43GbpsMode 			= 8,
-		kLHIRegShiftSDIIn43GbpsSMPTELevelBMode 	= 9,
-		kLHIRegShiftSDIIn4VPIDLinkAValid 		= 12,
-		kLHIRegShiftSDIIn4VPIDLinkBValid 		= 13,
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	// kRegSDIInput3GStatus
 	kRegShiftSDIIn3GbpsMode 			= 0,
@@ -3480,7 +3329,149 @@ typedef enum
 
 	kRegShiftHDMIOutAudioEngineSelect = 20,
 	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
-	kRegShiftHDMIOutAudio2ChannelSelect = 29
+	kRegShiftHDMIOutAudio2ChannelSelect = 29,
+	kRegShiftHDMIOutUserOveride = 1,
+	kRegShiftHDMIOutCropMode = 4
+
+
+#if !defined (NTV2_DEPRECATE)
+	// kRegSDIInput3GStatus
+	.kLHIRegShiftSDIIn3GbpsMode 				= 0,
+	kLHIRegShiftSDIIn3GbpsSMPTELevelBMode 	= 1,
+	kLHIRegShiftSDIInVPIDLinkAValid 		= 4,
+	kLHIRegShiftSDIInVPIDLinkBValid 		= 5,
+	kLHIRegShiftSDIIn23GbpsMode 			= 8,
+	kLHIRegShiftSDIIn23GbpsSMPTELevelBMode 	= 9,
+	kLHIRegShiftSDIIn2VPIDLinkAValid 		= 12,
+	kLHIRegShiftSDIIn2VPIDLinkBValid 		= 13,
+
+	// kRegSDIInput3GStatus2
+	kLHIRegShiftSDIIn33GbpsMode 			= 0,
+	kLHIRegShiftSDIIn33GbpsSMPTELevelBMode 	= 1,
+	kLHIRegShiftSDIIn3VPIDLinkAValid 		= 4,
+	kLHIRegShiftSDIIn3VPIDLinkBValid 		= 5,
+	kLHIRegShiftSDIIn43GbpsMode 			= 8,
+	kLHIRegShiftSDIIn43GbpsSMPTELevelBMode 	= 9,
+	kLHIRegShiftSDIIn4VPIDLinkAValid 		= 12,
+	kLHIRegShiftSDIIn4VPIDLinkBValid 		= 13,
+	//
+	// Borg Fusion Registers
+	//
+
+	// Boot FPGA and BoardID
+	kRegShiftBorgFusionBootFPGAVer = 4,
+	kRegShiftBorgFusionBoardID = 0,
+
+	// Codec and convert FPGA configuration control
+	kRegShiftBorgFusionCodecFPGAProgram = 0,
+	kRegShiftBorgFusionCodecFPGAInit = 1,
+	kRegShiftBorgFusionCodecFPGADone = 2,
+
+	kRegShiftBorgFusionConvertFPGAProgram = 4,
+	kRegShiftBorgFusionConvertFPGAInit = 5,
+	kRegShiftBorgFusionConvertFPGADone = 6,
+
+	// Panel Push buttons debounced and SATA drive present state
+	kRegShiftBorgFusionPushButtonStatusDebounced = 0,
+	kRegShiftBorgFusionPushButtonConfigDebounced = 1,
+	kRegShiftBorgFusionPushButtonMediaDebounced = 2,
+	kRegShiftBorgFusionPushButtonRewindDebounced = 3,
+	kRegShiftBorgFusionPushButtonStopDebounced = 4,
+	kRegShiftBorgFusionPushButtonPlayDebounced = 5,
+	kRegShiftBorgFusionPushButtonRecordDebounced = 6,
+	kRegShiftBorgFusionPushButtonFastFwdDebounced = 7,
+	kRegShiftBorgFusionPushButtonSelectUpDebounced = 8,
+	kRegShiftBorgFusionPushButtonSelectDownDebounced = 9,
+	kRegShiftBorgFusionPushButtonDeleteClipDebounced = 10,
+	kRegShiftBorgFusionPushButtonAdjustUpDebounced = 11,
+	kRegShiftBorgFusionPushButtonAdjustDownDebounced = 12,
+	kRegShiftBorgFusionPushButtonSlotDebounced = 13,
+	kRegShiftBorgFusionPushButtonSATADrivePresentDebounced = 14,
+
+	// Panel Push buttons and SATA drive present changes
+	kRegShiftBorgFusionPushButtonStatusChange = 0,
+	kRegShiftBorgFusionPushButtonConfigChange = 1,
+	kRegShiftBorgFusionPushButtonMediaChange = 2,
+	kRegShiftBorgFusionPushButtonRewindChange = 3,
+	kRegShiftBorgFusionPushButtonStopChange = 4,
+	kRegShiftBorgFusionPushButtonPlayChange = 5,
+	kRegShiftBorgFusionPushButtonRecordChange = 6,
+	kRegShiftBorgFusionPushButtonFastFwdChange = 7,
+	kRegShiftBorgFusionPushButtonSelectUpChange = 8,
+	kRegShiftBorgFusionPushButtonSelectDownChange = 9,
+	kRegShiftBorgFusionPushButtonDeleteClipChange = 10,
+	kRegShiftBorgFusionPushButtonAdjustUpChange = 11,
+	kRegShiftBorgFusionPushButtonAdjustDownChange = 12,
+	kRegShiftBorgFusionPushButtonSlotChange = 13,
+	kRegShiftBorgFusionPushButtonSATADrivePresentChange = 14,
+
+	// LED Pulse Width Modulation Threshholds
+	kRegShiftBorgFusionPWMThreshExpressCard2 = 0,
+	kRegShiftBorgFusionPWMThreshExpressCard1 = 4,
+	kRegShiftBorgFusionPWMThreshPower = 8,
+	kRegShiftBorgFusionPWMThreshLCDBacklightLED = 12,
+
+
+	// Power control - System
+	kRegShiftBorgFusionPowerCtrlWiFiReset = 0,
+	kRegShiftBorgFusionPowerCtrlFirewirePower = 1,
+	kRegShiftBorgFusionPowerCtrlGigEthReset = 2,
+	kRegShiftBorgFusionPowerCtrlPCIExpClockStop = 3,
+
+	// Power control - Storage devices
+	kRegShiftBorgFusionPowerCtrlPCIExpCard1_3_3vPower = 8,	// Express Card 1 3.3v power
+	kRegShiftBorgFusionPowerCtrlPCIExpCard1_1_5vPower = 9,	// Express Card 1 1.5v power
+	kRegShiftBorgFusionPowerCtrlPCIExpCard2_3_3vPower = 10,	// Express Card 2 3.3v power
+	kRegShiftBorgFusionPowerCtrlPCIExpCard2_1_5vPower = 11,	// Express Card 2 1.5v power
+	kRegShiftBorgFusionPowerCtrlSata_12vPower = 12,			// SATA Drive 12v power
+
+	kRegShiftBonesActelPowerCtrlCFSlot2_BridgeReset = 8,
+	kRegShiftBonesActelPowerCtrlCFSlot2_Power = 9,   // Compact Flash S2 Power
+	kRegShiftBonesActelPowerCtrlCFSlot1_Power = 10,  // Compact Flash S1 Power
+	kRegShiftBonesActelPowerCtrlCFSlot1_BridgeReset = 11,
+
+	// Power control - Pushbutton LEDs
+	kRegShiftBorgFusionPowerCtrlPCIExpCard2LED = 13,
+	kRegShiftBorgFusionPowerCtrlPCIExpCard1LED = 14,
+	kRegShiftBorgFusionPowerCtrlPowerButtonLED = 15,
+
+	// IRQ3n Interrupt control
+	kRegShiftBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = 0,
+	kRegShiftBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = 1,
+	kRegShiftBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = 2,
+	kRegShiftBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = 3,
+	kRegShiftBorgFusionIRQ3nIntCtrlTemp1HighEnable = 4,
+	kRegShiftBorgFusionIRQ3nIntCtrlTemp2HighEnable = 5,
+	kRegShiftBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = 6,
+
+	// IRQ3n Interrupt source
+	kRegShiftBorgFusionIRQ3nIntSrcPushButtonChange= 0,
+	kRegShiftBorgFusionIRQ3nIntSrcInputVoltageLow9v= 1,
+	kRegShiftBorgFusionIRQ3nIntSrcDisplayFIFOFull= 2,
+	kRegShiftBorgFusionIRQ3nIntSrcSATAPresentChange= 3,
+	kRegShiftBorgFusionIRQ3nIntSrcTemp1High= 4,
+	kRegShiftBorgFusionIRQ3nIntSrcTemp2High= 5,
+	kRegShiftBorgFusionIRQ3nIntSrcPowerButtonChange= 6,
+
+	// Noritake Display Control/Status
+	kRegShiftBorgFusionDisplayCtrlReset = 0,
+	kRegShiftBorgFusionDisplayStatusBusyRaw = 1,		// Not needed by CPU, used internally by FPGA
+	kRegShiftBorgFusionDisplayStatusInterfaceBusy = 7,	// FIFO full
+
+	// Analog ADC flags - battery
+	kRegShiftBorgFusionAnalogFlagsPowerLTE9v = 0,	// +12 v supply <= 9.0 v battery critical
+	kRegShiftBorgFusionAnalogFlagsPowerLTE10v = 1,	// +12 v supply <= 10.0 v battery depleting
+	kRegShiftBorgFusionAnalogFlagsPowerLTE11v = 2,	// +12 v supply <= 11.0 v battery depleting
+	kRegShiftBorgFusionAnalogFlagsPowerGTE13v = 3,	// +12 v supply >= 13.0 v battery charging
+
+	// Analog ADC flags - temperature sensor
+	kRegShiftBorgFusionAnalogFlagsPowerTemp1High = 4,	// Temp sensor 1 > 65 C
+	kRegShiftBorgFusionAnalogFlagsPowerTemp2High = 5,	// Temp sensor 2 > 65 C
+	// Pan (2K crop) - Xena 2
+	kRegShiftPanMode					= 30,
+	kRegShiftPanOffsetV					= 0,
+	kRegShiftPanOffsetH					= 12
+#endif	//	!defined (NTV2_DEPRECATE)
 
 } RegisterShift;
 

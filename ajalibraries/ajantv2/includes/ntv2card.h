@@ -4133,6 +4133,34 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
 
+	/**
+		@brief						Allows user to force output parameters
+		@param[in]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	EnableHDMIOutUserOverride(bool enable);
+
+	/**
+		@brief						Reports force user output parameters enalbed
+		@param[out]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride(bool & isEnabled);
+
+	/**
+		@brief						Allows user to center crop 4k/2k -> UHD/HD
+		@param[in]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop(bool enable);
+
+	/**
+		@brief						Reports center crop 4k/2k -> UHD/HD enabled
+		@param[out]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & isEnabled);
+
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
 		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIV2OutVideoStandard (NTV2V2Standard * pOutValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
