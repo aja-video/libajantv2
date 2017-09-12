@@ -2223,7 +2223,7 @@ typedef enum
 	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
 	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30),
 	kRegMaskHDMIOutUserOveride = BIT(1),
-	kRegMaskHDMIOutCropMode = BIT(4)
+	kRegMaskHDMIOutCropMode = BIT(24)
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
@@ -3331,7 +3331,7 @@ typedef enum
 	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
 	kRegShiftHDMIOutAudio2ChannelSelect = 29,
 	kRegShiftHDMIOutUserOveride = 1,
-	kRegShiftHDMIOutCropMode = 4
+	kRegShiftHDMIOutCropMode = 24
 
 
 #if !defined (NTV2_DEPRECATE)

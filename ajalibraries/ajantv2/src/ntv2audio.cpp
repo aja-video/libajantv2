@@ -1085,32 +1085,6 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 	return result;
 }
 
-bool CNTV2Card::EnableHDMIOutUserOverride(bool enable)
-{
-	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutUserOveride, kRegShiftHDMIOutUserOveride);
-}
-
-bool CNTV2Card::GetEnableHDMIOutUserOverride(bool & isEnabled)
-{
-	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIInputControl, &enable, kRegMaskHDMIOutUserOveride, kRegShiftHDMIOutUserOveride);
-	isEnabled = enable ? true : false;
-	return status;
-}
-
-bool CNTV2Card::EnableHDMIOutCenterCrop(bool enable)
-{
-	return WriteRegister(kRegHDMIOutControl, enable ? 1 : 0, kRegMaskHDMIOutCropMode, kRegShiftHDMIOutCropMode);
-}
-
-bool CNTV2Card::GetEnableHDMIOutCenterCrop(bool & isEnabled)
-{
-	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIOutControl, &enable, kRegMaskHDMIOutCropMode, kRegShiftHDMIOutCropMode);
-	isEnabled = enable ? true : false;
-	return status;
-}
-
 bool CNTV2Card::SetAudioOutputMonitorSource (NTV2AudioMonitorSelect value, NTV2Channel channel)
 {
 	const ULWord	encoding	((::GetIndexForNTV2Channel (channel) << 4) | value);
