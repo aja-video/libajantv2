@@ -2020,6 +2020,9 @@ public:
 	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel(NTV2AudioMixerChannel inChannel);
 	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inChannel);
 
+	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration);
+	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration);
+
 	///@}
 
 	//

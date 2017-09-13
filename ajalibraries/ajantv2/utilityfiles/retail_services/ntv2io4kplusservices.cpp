@@ -3576,4 +3576,8 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
+
+	ULWord analogIOConfig = 0;
+	mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, &analogIOConfig);
+	mCard->SetAnalogAudioIOConfiguration(NTV2_AnalogAudioIO_4Out_4In);
 }

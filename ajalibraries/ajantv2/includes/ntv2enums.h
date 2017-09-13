@@ -3777,6 +3777,14 @@ typedef enum
 
 #define	NTV2_IS_VALID_DIETEMP_SCALE(_x_)	((_x_) >= NTV2DieTempScale_Celsius  &&  (_x_) < NTV2DieTempScale_INVALID)
 
+typedef enum
+{
+	NTV2_AnalogAudioIO_8Out,
+	NTV2_AnalogAudioIO_4Out_4In,
+	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_8In
+}NTV2AnalogAudioIO;
+
 
 #if !defined (NTV2_DEPRECATE)
     typedef		NTV2AnalogBlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use NTV2AnalogBlackLevel instead.

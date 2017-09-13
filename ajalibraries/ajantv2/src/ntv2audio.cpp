@@ -1688,6 +1688,19 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
 }
 
+bool CNTV2Card::SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration)
+{
+	return WriteRegister (kRegGlobalControl3, inAudioIOConfiguration, kRegMaskAnalogIOControl, kRegShiftAnalogIOControl);
+}
+
+bool CNTV2Card::GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration)
+{
+	ULWord tmpValue = 0;
+	bool status = ReadRegister (kRegGlobalControl3, &tmpValue, kRegMaskAnalogIOControl, kRegShiftAnalogIOControl);
+	inAudioIOConfiguration = static_cast <NTV2AnalogAudioIO> (tmpValue);
+	return status;
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable)

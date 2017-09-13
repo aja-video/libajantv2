@@ -142,7 +142,7 @@ typedef enum
 	kRegDMA4HostAddrHigh,			// 106
 	kRegDMA4NextDescHigh,			// 107
 
-	kRegReserved108,				// 108	//kRegTestPatternGenerator = kRegReserved108, // Borg
+	kRegGlobalControl3,				// 108
 	kRegReserved109,				// 109	//	Used for camera record flag		kRegLANCAndLensTap = kRegReserved109, // Borg	//Note:  Lens Tap is no longer supported by software. ref bug 3342. 4/5/2012
 	kRegLTCEmbeddedBits0_31,        // 110
 	kRegLTCEmbeddedBits32_63,       // 111
@@ -1295,6 +1295,9 @@ typedef enum
 	kRegMaskRP188ModeCh7		= BIT(26),
 	kRegMaskRP188ModeCh8		= BIT(27),
 
+	// Global Control 3
+	kRegMaskAnalogIOControl			= BIT(1) + BIT(0),
+
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegMaskMode				= BIT(0),
@@ -2431,6 +2434,9 @@ typedef enum
 	kRegShiftRP188ModeCh6				= 31,
 	kRegShiftRP188ModeCh7				= 26,
 	kRegShiftRP188ModeCh8				= 27,
+
+	// Global Control 3
+	kRegShiftAnalogIOControl			= 0,
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,
