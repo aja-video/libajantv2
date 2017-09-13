@@ -1661,37 +1661,41 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	bool b425_2wire        = false;
 	bool b425_4wireA       = false;
 	bool b425_4wireB       = false;
+	bool is6G = false;
+	bool is12G = false;
+	bool b425 = false;
 		
 	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	CNTV2VPID parser;
-	parser.SetVPID(vpida);
-	VPIDStandard std = parser.GetStandard();
-	b425_2wire  = (std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb);
-	b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb);
-	b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
-	bool is6G = false;
-	bool is12G = false;
-	mCard->GetSDIInput6GPresent(is6G, NTV2_CHANNEL1);
-	mCard->GetSDIInput12GPresent(is12G, NTV2_CHANNEL1);
-	if(is6G && !bHdmiIn)
-		b425_2wire = true;
-	if(is12G && !bHdmiIn)
-		b425_4wireA = true;
-
-	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
-
-	// override inputFormatSelect for SMTE425
-	if (b425)
+	if(!bHdmiIn)
 	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
+		CNTV2VPID parser;
+		parser.SetVPID(vpida);
+		VPIDStandard std = parser.GetStandard();
+		b425_2wire  = (std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb);
+		b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb);
+		b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+		mCard->GetSDIInput6GPresent(is6G, NTV2_CHANNEL1);
+		mCard->GetSDIInput12GPresent(is12G, NTV2_CHANNEL1);
+		if(is6G)
+			b425_2wire = true;
+		if(is12G)
+			b425_4wireA = true;
+
+		b425 = (b425_2wire || b425_4wireA || b425_4wireB);
+
+		// override inputFormatSelect for SMTE425
+		if (b425)
 		{
-			inputFormatSelect = NTV2_YUVSelect;
-		}
-		else
-		{
-			inputFormatSelect = NTV2_RGBSelect;
+			VPIDSampling sample = parser.GetSampling();
+			if (sample == VPIDSampling_YUV_422)
+			{
+				inputFormatSelect = NTV2_YUVSelect;
+			}
+			else
+			{
+				inputFormatSelect = NTV2_RGBSelect;
+			}
 		}
 	}
 
