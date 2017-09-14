@@ -6753,8 +6753,9 @@ typedef enum
 								freeing it. If the pointer is NULL or the size is zero, no ancillary data will be transferred.
 								Use the AUTOCIRCULATE_TRANSFER::SetAncBuffers method to set or reset this field.
 						@note	If non-empty (i.e., non-NULL), be sure that the pointer address is aligned to the nearest 8-byte boundary. AJA recommends
-								using a full 2048-byte buffer. Note there is no need to fill the entire buffer, but whatever bytes it contains should be
-								compatible with what's documented in \ref ancillarydata.
+								using a full 2048-byte buffer. For playout, its content should be compatible with what's documented in \ref ancillarydata
+								and all subsequent bytes in the buffer should be zero. For capture, AJA recommends clearing (zeroing) the buffer prior to
+								each transfer.
 					**/
 					NTV2_POINTER					acANCBuffer;
 
@@ -6763,8 +6764,9 @@ typedef enum
 								and/or freeing it. If the pointer is NULL or the size is zero, no "Field 2" ancillary data will be transferred.
 								Use the AUTOCIRCULATE_TRANSFER::SetAncBuffers method to set or reset this field.
 						@note	If non-empty (i.e., non-NULL), be sure that the pointer address is aligned to the nearest 8-byte boundary. AJA recommends
-								using a full 2048-byte buffer. Note there is no need to fill the entire buffer, but whatever bytes it contains should be
-								compatible with what's documented in \ref ancillarydata.
+								using a full 2048-byte buffer. For playout, its content should be compatible with what's documented in \ref ancillarydata
+								and all subsequent bytes in the buffer should be zero. For capture, AJA recommends clearing (zeroing) the buffer prior to
+								each transfer.
 					**/
 					NTV2_POINTER					acANCField2Buffer;
 
