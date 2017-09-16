@@ -98,7 +98,7 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::GetLine (uint8_t & fieldNum, uint8_t & l
 
 AJAStatus AJAAncillaryData_Cea608_Vanc::ParsePayloadData (void)
 {
-	if (m_pPayload == NULL_PTR  ||  m_DC < AJAAncillaryData_Cea608_Vanc_PayloadSize)
+	if (GetDC() < AJAAncillaryData_Cea608_Vanc_PayloadSize)
 	{
 		Init();						// load default values
 		m_rcvDataValid = false;
@@ -106,11 +106,11 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::ParsePayloadData (void)
 	}
 
 	// we have some kind of payload data - try to parse it
-	m_fieldNum = (m_pPayload[0] >> 7) & 0x01;	// the field number (flag) is bit 7 of the 1st payload word
-	m_lineNum  = (m_pPayload[0] & 0x1F);		// the line number is bits [4:0] of the 1st payload word
+	m_fieldNum = (m_payload[0] >> 7) & 0x01;	// the field number (flag) is bit 7 of the 1st payload word
+	m_lineNum  = (m_payload[0] & 0x1F);		// the line number is bits [4:0] of the 1st payload word
 
-	m_char1	   = m_pPayload[1];		// the 1st character
-	m_char2    = m_pPayload[2];		// the 2nd character
+	m_char1	   = m_payload[1];		// the 1st character
+	m_char2    = m_payload[2];		// the 2nd character
 
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
@@ -125,9 +125,9 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::GeneratePayloadData (void)
 	AJAStatus status = AllocDataMemory (AJAAncillaryData_Cea608_Vanc_PayloadSize);
 	if (AJA_SUCCESS (status))
 	{
-		m_pPayload[0] = ((m_fieldNum & 0x01) << 7) | (m_lineNum & 0x1F);	// fieldNum goes in bit 7, line num goes in bits [4:0]
-		m_pPayload[1] = m_char1;
-		m_pPayload[2] = m_char2;
+		m_payload[0] = ((m_fieldNum & 0x01) << 7) | (m_lineNum & 0x1F);	// fieldNum goes in bit 7, line num goes in bits [4:0]
+		m_payload[1] = m_char1;
+		m_payload[2] = m_char2;
 	}
 
 	m_checksum = Calculate8BitChecksum();

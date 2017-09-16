@@ -56,10 +56,7 @@ void AJAAncillaryData_Cea708::Init (void)
 AJAAncillaryData_Cea708 & AJAAncillaryData_Cea708::operator = (const AJAAncillaryData_Cea708 & rhs)
 {
 	if (this != &rhs)		// ignore self-assignment
-	{
 		AJAAncillaryData::operator= (rhs);		// copy the base class stuff
-	}
-
 	return *this;
 }
 
@@ -73,7 +70,7 @@ void AJAAncillaryData_Cea708::Clear (void)
 
 AJAStatus AJAAncillaryData_Cea708::ParsePayloadData (void)
 {
-	if (m_pPayload == NULL_PTR || m_DC == 0)
+	if (IsEmpty())
 	{
 		Init();						// load default values
 		m_rcvDataValid = false;

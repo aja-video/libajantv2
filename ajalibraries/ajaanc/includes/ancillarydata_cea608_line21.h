@@ -147,27 +147,30 @@ protected:
 	/**
 		@brief		Checks for the existence of a CEA-608 "analog" waveform and, if found, returns a pointer
 					to the start of the data bits.
-		@param[in]	pLine		The start of the payload buffer.
+		@param[in]	pInLine		The start of the payload buffer.
 		@param[out]	outGotClock	Receives 'true' if a valid CEA-608 ("Line 21") clock waveform was found.
 		@return					Pointer to the middle of the first data bit (used by DecodeCharacters function).
 	**/
-	virtual uint8_t *	CheckDecodeClock (uint8_t * pLine, bool & outGotClock);
+	static const uint8_t *	CheckDecodeClock (const uint8_t * pInLine, bool & outGotClock);
 
 
 	/**
 		@brief		Decodes the two CEA-608 data characters for this line.
-		@param[in]	ptr			initially points to the middle of the first data bit in the waveform
+		@param[in]	ptr			Points to the middle of the first data bit in the waveform
+								(i.e. the one following the '1' start bit).
 		@param[out]	outChar1	Receives data byte 1.
 		@param[out]	outChar2	Receives data byte 2.
 		@return		AJA_STATUS_SUCCESS if successful.
+		@note		This function returns the parity bit of each character in the MS bit position.
+					It makes no calculation or value judgment as to the correctness of the parity.
 	**/
-	virtual AJAStatus	DecodeCharacters (uint8_t * ptr, uint8_t & outChar1, uint8_t & outChar2);
+	static AJAStatus	DecodeCharacters (const uint8_t * ptr, uint8_t & outChar1, uint8_t & outChar2);
 
 
 protected:
 	// Note: if you make a change to the local member data, be sure to ALSO make the appropriate
 	//		 changes in the Init() and operator= methods!
-	bool		m_bEncodeBufferInitialized;		///< @brief		Set 'true' after successfully allocating and initializing the m_pPayload buffer for encoding
+	bool		m_bEncodeBufferInitialized;		///< @brief		Set 'true' after successfully allocating and initializing the m_payload buffer for encoding
 	uint32_t	m_dataStartOffset;				///< @brief		Offset into the encode buffer where data starts
 
 };	//	AJAAncillaryData_Cea608_Line21

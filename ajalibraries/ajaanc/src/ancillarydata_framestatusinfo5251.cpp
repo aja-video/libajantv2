@@ -87,7 +87,7 @@ AJAAncillaryData_FrameStatusInfo5251 & AJAAncillaryData_FrameStatusInfo5251::ope
 AJAStatus AJAAncillaryData_FrameStatusInfo5251::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_FrameStatusInfo5251_PayloadSize))
+	if (GetDC() != AJAAncillaryData_FrameStatusInfo5251_PayloadSize)
 	{
 		// Load default values
 		Init();
@@ -96,12 +96,12 @@ AJAStatus AJAAncillaryData_FrameStatusInfo5251::ParsePayloadData (void)
 	}
 
 	// This is valid for the Canon C500
-	m_IsRecording  = (((m_pPayload[0] & 0x60) == 0x20) ? true : false);
+	m_IsRecording  = (((m_payload[0] & 0x60) == 0x20) ? true : false);
 
 	// This is in the Canon specification, but the Canon C500 doesn't set
 	// this, thus we're placing this here just for completion in order 
 	// to follow the DID:52h SDID:51h packet format.
-	m_IsValidFrame = (((m_pPayload[0] & 0x80) == 0x00) ? true : false);
+	m_IsValidFrame = (((m_payload[0] & 0x80) == 0x00) ? true : false);
 
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;

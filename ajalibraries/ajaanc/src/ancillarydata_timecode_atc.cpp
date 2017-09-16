@@ -134,7 +134,7 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
 	// reality check...
-	if (m_pPayload == NULL_PTR || m_DC < AJAAncillaryData_SMPTE12M_PayloadSize)
+	if (GetDC() < AJAAncillaryData_SMPTE12M_PayloadSize)
 	{
 		Init();						// load default values
 		status = AJA_STATUS_FAIL;
@@ -146,25 +146,25 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 		// we have some kind of payload data - try to parse it
 			// extract the time digits from the even payload words, bits[7:4]
 			// (note: SetTimeHexValue() does the needed masking)
-		SetTimeHexValue(kTcFrameUnits,  (m_pPayload[ 0] >> 4));		// frame units);
-		SetTimeHexValue(kTcFrameTens,   (m_pPayload[ 2] >> 4));		// frame tens
-		SetTimeHexValue(kTcSecondUnits, (m_pPayload[ 4] >> 4));		// second units
-		SetTimeHexValue(kTcSecondTens,  (m_pPayload[ 6] >> 4));		// second tens
-		SetTimeHexValue(kTcMinuteUnits, (m_pPayload[ 8] >> 4));		// minute units
-		SetTimeHexValue(kTcMinuteTens,  (m_pPayload[10] >> 4));		// minute tens
-		SetTimeHexValue(kTcHourUnits,   (m_pPayload[12] >> 4));		// hour units
-		SetTimeHexValue(kTcHourTens,    (m_pPayload[14] >> 4));		// hour tens
+		SetTimeHexValue(kTcFrameUnits,  (m_payload[ 0] >> 4));		// frame units);
+		SetTimeHexValue(kTcFrameTens,   (m_payload[ 2] >> 4));		// frame tens
+		SetTimeHexValue(kTcSecondUnits, (m_payload[ 4] >> 4));		// second units
+		SetTimeHexValue(kTcSecondTens,  (m_payload[ 6] >> 4));		// second tens
+		SetTimeHexValue(kTcMinuteUnits, (m_payload[ 8] >> 4));		// minute units
+		SetTimeHexValue(kTcMinuteTens,  (m_payload[10] >> 4));		// minute tens
+		SetTimeHexValue(kTcHourUnits,   (m_payload[12] >> 4));		// hour units
+		SetTimeHexValue(kTcHourTens,    (m_payload[14] >> 4));		// hour tens
 
 		// extract the binary group values from the odd payload words, bits[7:4]
 		// (note: SetBinaryGroupHexValue() does the needed masking)
-		SetBinaryGroupHexValue(kBg1, (m_pPayload[ 1] >> 4));		// BG 1
-		SetBinaryGroupHexValue(kBg2, (m_pPayload[ 3] >> 4));		// BG 2
-		SetBinaryGroupHexValue(kBg3, (m_pPayload[ 5] >> 4));		// BG 3
-		SetBinaryGroupHexValue(kBg4, (m_pPayload[ 7] >> 4));		// BG 4
-		SetBinaryGroupHexValue(kBg5, (m_pPayload[ 9] >> 4));		// BG 5
-		SetBinaryGroupHexValue(kBg6, (m_pPayload[11] >> 4));		// BG 6
-		SetBinaryGroupHexValue(kBg7, (m_pPayload[13] >> 4));		// BG 7
-		SetBinaryGroupHexValue(kBg8, (m_pPayload[15] >> 4));		// BG 8
+		SetBinaryGroupHexValue(kBg1, (m_payload[ 1] >> 4));		// BG 1
+		SetBinaryGroupHexValue(kBg2, (m_payload[ 3] >> 4));		// BG 2
+		SetBinaryGroupHexValue(kBg3, (m_payload[ 5] >> 4));		// BG 3
+		SetBinaryGroupHexValue(kBg4, (m_payload[ 7] >> 4));		// BG 4
+		SetBinaryGroupHexValue(kBg5, (m_payload[ 9] >> 4));		// BG 5
+		SetBinaryGroupHexValue(kBg6, (m_payload[11] >> 4));		// BG 6
+		SetBinaryGroupHexValue(kBg7, (m_payload[13] >> 4));		// BG 7
+		SetBinaryGroupHexValue(kBg8, (m_payload[15] >> 4));		// BG 8
 
 		// extract the distributed bits from bit[3] of all UDW
 		uint8_t i;
@@ -172,7 +172,7 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 		for (i = 0; i < 8; i++)
 		{
 			dbb = dbb >> 1;
-			dbb |= (m_pPayload[i] << 4) & 0x80;
+			dbb |= (m_payload[i] << 4) & 0x80;
 		}
 		m_dbb1 = dbb;
 
@@ -180,7 +180,7 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 		for (i = 8; i < 16; i++)
 		{
 			dbb = dbb >> 1;
-			dbb |= (m_pPayload[i] << 4) & 0x80;
+			dbb |= (m_payload[i] << 4) & 0x80;
 		}
 		m_dbb2 = dbb;
 
@@ -203,38 +203,38 @@ AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 	if (AJA_SUCCESS(status))
 	{
 		// time digits in the even payload words
-		m_pPayload[ 0] = (m_timeDigits[kTcFrameUnits]  & 0x0F) << 4;
-		m_pPayload[ 2] = (m_timeDigits[kTcFrameTens]   & 0x0F) << 4;
-		m_pPayload[ 4] = (m_timeDigits[kTcSecondUnits] & 0x0F) << 4;
-		m_pPayload[ 6] = (m_timeDigits[kTcSecondTens]  & 0x0F) << 4;
-		m_pPayload[ 8] = (m_timeDigits[kTcMinuteUnits] & 0x0F) << 4;
-		m_pPayload[10] = (m_timeDigits[kTcMinuteTens]  & 0x0F) << 4;
-		m_pPayload[12] = (m_timeDigits[kTcHourUnits]   & 0x0F) << 4;
-		m_pPayload[14] = (m_timeDigits[kTcHourTens]    & 0x0F) << 4;
+		m_payload[ 0] = (m_timeDigits[kTcFrameUnits]  & 0x0F) << 4;
+		m_payload[ 2] = (m_timeDigits[kTcFrameTens]   & 0x0F) << 4;
+		m_payload[ 4] = (m_timeDigits[kTcSecondUnits] & 0x0F) << 4;
+		m_payload[ 6] = (m_timeDigits[kTcSecondTens]  & 0x0F) << 4;
+		m_payload[ 8] = (m_timeDigits[kTcMinuteUnits] & 0x0F) << 4;
+		m_payload[10] = (m_timeDigits[kTcMinuteTens]  & 0x0F) << 4;
+		m_payload[12] = (m_timeDigits[kTcHourUnits]   & 0x0F) << 4;
+		m_payload[14] = (m_timeDigits[kTcHourTens]    & 0x0F) << 4;
 
 		// binary group data in the odd payload words
-		m_pPayload[ 1] = (m_binaryGroup[kBg1] & 0x0F) << 4;	
-		m_pPayload[ 3] = (m_binaryGroup[kBg2] & 0x0F) << 4;
-		m_pPayload[ 5] = (m_binaryGroup[kBg3] & 0x0F) << 4;
-		m_pPayload[ 7] = (m_binaryGroup[kBg4] & 0x0F) << 4;
-		m_pPayload[ 9] = (m_binaryGroup[kBg5] & 0x0F) << 4;
-		m_pPayload[11] = (m_binaryGroup[kBg6] & 0x0F) << 4;
-		m_pPayload[13] = (m_binaryGroup[kBg7] & 0x0F) << 4;
-		m_pPayload[15] = (m_binaryGroup[kBg8] & 0x0F) << 4;
+		m_payload[ 1] = (m_binaryGroup[kBg1] & 0x0F) << 4;	
+		m_payload[ 3] = (m_binaryGroup[kBg2] & 0x0F) << 4;
+		m_payload[ 5] = (m_binaryGroup[kBg3] & 0x0F) << 4;
+		m_payload[ 7] = (m_binaryGroup[kBg4] & 0x0F) << 4;
+		m_payload[ 9] = (m_binaryGroup[kBg5] & 0x0F) << 4;
+		m_payload[11] = (m_binaryGroup[kBg6] & 0x0F) << 4;
+		m_payload[13] = (m_binaryGroup[kBg7] & 0x0F) << 4;
+		m_payload[15] = (m_binaryGroup[kBg8] & 0x0F) << 4;
 
 		// add the distributed bits
 		uint8_t i;
 		uint8_t dbb = m_dbb1;		// DBB1 goes into UDW1 - 8, ls bit first
 		for (i = 0; i < 8; i++)
 		{
-			m_pPayload[i] |= (dbb & 0x01) << 3;
+			m_payload[i] |= (dbb & 0x01) << 3;
 			dbb = dbb >> 1;
 		}
 
 		dbb = m_dbb2;				// DBB2 goes into UDW9 - 16, ls bit first
 		for (i = 8; i < 16; i++)
 		{
-			m_pPayload[i] |= (dbb & 0x01) << 3;
+			m_payload[i] |= (dbb & 0x01) << 3;
 			dbb = dbb >> 1;
 		}
 	}

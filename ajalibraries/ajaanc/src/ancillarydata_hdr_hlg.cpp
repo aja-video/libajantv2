@@ -84,7 +84,7 @@ AJAAncillaryData_HDR_HLG & AJAAncillaryData_HDR_HLG::operator = (const AJAAncill
 AJAStatus AJAAncillaryData_HDR_HLG::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_HDR_HLG_PayloadSize))
+	if (GetDC() != AJAAncillaryData_HDR_HLG_PayloadSize)
 	{
 		// Load default values
 		Init();

@@ -339,7 +339,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 		//	Tell the Anc Data object to init itself from the next set of input data...
 		uint32_t	packetSize	(0);		//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
 
-		status = newAncData.InitWithReceivedData (pInputData, remainingSize, &defaultLoc, packetSize);
+		status = newAncData.InitWithReceivedData (pInputData, remainingSize, defaultLoc, packetSize);
 
 		//	NOTE:	Right now we're just bailing if there is a detected error in the raw data stream.
 		//			Theoretically one could try to get back "in sync" and recover any following data, but
@@ -414,17 +414,26 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 }	//	AddReceivedAncillaryData
 
 
-AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataVideoStream inStream)
+AJAStatus AJAAncillaryList::AppendReceivedRTPAncillaryData (const std::vector<uint8_t> & inRTPPacketData)
+{
+	(void) inRTPPacketData;		//	TODO:	FINISH THIS
+	return AJA_STATUS_UNSUPPORTED;
+}
+
+
+static AJAStatus AppendUWordPacketToGump (vector<uint8_t> & outGumpPkt, const vector<uint16_t> & inPacketWords, const AJAAncillaryDataLocation inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC))
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	if (inPacketWords.size () < 7)
 		return AJA_STATUS_RANGE;
+	if (!inLoc.IsValid())
+		return AJA_STATUS_BAD_PARAM;
 
 	//	Use this as an uninitialized template...
-	AJAAncillaryDataLocation	defaultLoc		(AJAAncillaryDataLink_A, inStream, AJAAncillaryDataSpace_VANC, inLineNum);
 	vector<uint16_t>::const_iterator	iter	(inPacketWords.begin());
 
+	//	Anc packet must start with 0x000 0x3FF 0x3FF sequence...
 	if (*iter != 0x0000)
 		return AJA_STATUS_FAIL;
 	++iter;
@@ -435,35 +444,48 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 		return AJA_STATUS_FAIL;
 	++iter;	//	Now pointing at DID
 
-	vector<uint8_t>		packetBytes;
-	packetBytes.reserve (inPacketWords.size());
-
-	packetBytes.push_back(0xFF);				//	[0]	First byte always 0xFF
-	packetBytes.push_back(0x80);				//	[1]	Location data byte 1:	"location valid" bit always set
-	packetBytes[1] |= (inLineNum >> 7) & 0x0F;	//	[1]	Location data byte 1:	LS 4 bits == MS 4 bits of 11-bit line number
-	if (inStream == AJAAncillaryDataVideoStream_Y)
-		packetBytes[1] |= 0x20;					//	[1]	Location data byte 1:	set Y/C bit for luma channel;  clear for chroma
-	packetBytes.push_back (inLineNum & 0x7F);	//	[2]	Location data byte 2:	MSB reserved; LS 7 bits == LS 7 bits of 11-bit line number
+	outGumpPkt.reserve (outGumpPkt.size() + inPacketWords.size());	//	Expand outGumpPkt's capacity in one step
+	const vector<uint8_t>::size_type	dataByte1Ndx	(outGumpPkt.size()+1);	//	Index of byte[1] in outgoing Gump packet
+	outGumpPkt.push_back(0xFF);											//	[0]	First byte always 0xFF
+	outGumpPkt.push_back(0x80);											//	[1]	Location data byte 1:	"location valid" bit always set
+	outGumpPkt[dataByte1Ndx] |= (inLoc.GetLineNumber() >> 7) & 0x0F;	//	[1]	Location data byte 1:	LS 4 bits == MS 4 bits of 11-bit line number
+	if (inLoc.IsLumaChannel())
+		outGumpPkt[dataByte1Ndx] |= 0x20;								//	[1]	Location data byte 1:	set Y/C bit for Y/luma channel
+	if (inLoc.IsHanc())
+		outGumpPkt[dataByte1Ndx] |= 0x10;								//	[1]	Location data byte 1:	set H/V bit for HANC
+	outGumpPkt.push_back (inLoc.GetLineNumber() & 0x7F);				//	[2]	Location data byte 2:	MSB reserved; LS 7 bits == LS 7 bits of 11-bit line number
 
 	while (iter != inPacketWords.end())
 	{
-		packetBytes.push_back(*iter & 0xFF);	//	Mask off upper byte
+		outGumpPkt.push_back(*iter & 0xFF);	//	Mask off upper byte
 		++iter;
 	}
+	return status;
+}
+
+
+AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataVideoStream inStream)
+{
+	vector<uint8_t>		gumpPacketData;
+	AJAStatus	status	(AppendUWordPacketToGump (gumpPacketData,  inPacketWords,
+													AJAAncillaryDataLocation(AJAAncillaryDataLink_A,  inStream,
+																			 AJAAncillaryDataSpace_VANC,  inLineNum)));
+	if (AJA_FAILURE(status))
+		return status;
 
 	AJAAncillaryData	newAncData;
-	status = newAncData.InitWithReceivedData (packetBytes, defaultLoc);
-	if (AJA_SUCCESS (status))
-	{
-		AJAAncillaryDataFactory	factory;
-		AJAAncillaryDataType	newAncType	(factory.GuessAncillaryDataType (&newAncData));
-		AJAAncillaryData *		pData		(factory.Create (newAncType, &newAncData));
-		if (pData)
-			m_ancList.push_back (pData);	//	Add it to my list
-		else
-			status = AJA_STATUS_FAIL;
-	}
-	return status;
+	status = newAncData.InitWithReceivedData (gumpPacketData, AJAAncillaryDataLocation());
+	if (AJA_FAILURE(status))
+		return status;
+
+	AJAAncillaryDataFactory	factory;
+	AJAAncillaryDataType	newAncType	(factory.GuessAncillaryDataType(&newAncData));
+	AJAAncillaryData *		pData		(factory.Create (newAncType, &newAncData));
+	if (!pData)
+		return AJA_STATUS_FAIL;
+
+	m_ancList.push_back(pData);	//	Append to my list		//	TODO:	Needs try/catch for bad_alloc
+	return AJA_STATUS_SUCCESS;
 
 }	//	AddVANCData
 

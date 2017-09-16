@@ -84,7 +84,7 @@ AJAAncillaryData_HDR_HDR10 & AJAAncillaryData_HDR_HDR10::operator = (const AJAAn
 AJAStatus AJAAncillaryData_HDR_HDR10::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_HDR_HDR10_PayloadSize))
+	if (GetDC() != AJAAncillaryData_HDR_HDR10_PayloadSize)
 	{
 		// Load default values
 		Init();

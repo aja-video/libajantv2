@@ -193,6 +193,15 @@ public:	//	INSTANCE METHODS
 
 
 	/**
+		@brief		Parses the RTP packet extracted by an AJA NTV2 IP device's Extractor Widget into zero or more AJAAncillaryData
+					objects, and appends them onto me.
+		@param[in]	inRTPPacketData		Contains the RTP packet data as captured from an AJA IP device.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						AppendReceivedRTPAncillaryData (const std::vector<uint8_t> & inRTPPacketData);
+
+
+	/**
 		@brief		Adds the packet that originated in the VANC lines of an NTV2 frame buffer to my list.
 		@param[in]	inPacketWords		Specifies the "raw" 16-bit word packet to be added. The first six elements must be
 										0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS. Each word will have
@@ -307,5 +316,14 @@ protected:
 													///			ancillary data are likely to be found. For example, in 525i systems, analog ancillary
 													///			data captured on Line 21 are likely to be AJAAncillaryDataType_Cea608_Line21 type.
 };	//	AJAAncillaryList
+
+
+/**
+	@brief		Writes a human-readable rendition of the given AJAAncillaryList into the given output stream.
+	@param		inOutStream		Specifies the output stream to be written.
+	@param[in]	inList			Specifies the AJAAncillaryList to be rendered into the output stream.
+	@return		A non-constant reference to the specified output stream.
+**/
+inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryList & inList)		{return inList.Print(inOutStream);}
 
 #endif	// AJA_ANCILLARYLIST_H

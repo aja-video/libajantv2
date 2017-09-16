@@ -79,7 +79,7 @@ void AJAAncillaryData_Cea608_Line21::Clear (void)
 
 AJAStatus AJAAncillaryData_Cea608_Line21::ParsePayloadData (void)
 {
-	if (m_pPayload == NULL_PTR)// || m_DC != AJAAncillaryData_Cea608_Line21_PayloadSize)
+	if (IsEmpty())// || m_DC != AJAAncillaryData_Cea608_Line21_PayloadSize)
 	{
 		Init();						// load default values
 		return AJA_STATUS_FAIL;
@@ -112,7 +112,7 @@ AJAStatus AJAAncillaryData_Cea608_Line21::GeneratePayloadData (void)
 	// the first time through we're going to allocate the payload data and initialize the "unchanging" pixels
 	// (run-in clock, etc.). After that we're going to assume: (a) the payload size never changes; and (b) the
 	// unchanging bits don't change.
-	if (!m_bEncodeBufferInitialized || m_pPayload == NULL || m_DC != AJAAncillaryData_Cea608_Line21_PayloadSize || m_dataStartOffset == 0)
+	if (!m_bEncodeBufferInitialized || GetDC() != AJAAncillaryData_Cea608_Line21_PayloadSize || m_dataStartOffset == 0)
 		status = AllocEncodeBuffer ();
 
 	// encode the payload data
@@ -208,18 +208,6 @@ const uint32_t TRANSITION_WIDTH = (TRANSITION_PRE + TRANSITION_POST);
 uint8_t cc_clock[27] = { 16,  17,  22,  29,  38,  49,  61,  74,  86,  98, 108, 116, 122, 125,
 								 125, 122, 116, 108,  98,  86,  74,  61,  49,  38,  29,  22,  17      };
 	
-// 4 possible transition types:
-// Low -> Low
-uint8_t cc_trans_lo_lo[TRANSITION_WIDTH] = { CC_LEVEL_LO, CC_LEVEL_LO, CC_LEVEL_LO };
-
-// Low -> High
-uint8_t cc_trans_lo_hi[TRANSITION_WIDTH] = { CC_LEVEL_LO+CC_LEVEL_TRANS, CC_LEVEL_MID, CC_LEVEL_HI-CC_LEVEL_TRANS };
-
-// High -> Low
-uint8_t cc_trans_hi_lo[TRANSITION_WIDTH] = { CC_LEVEL_HI-CC_LEVEL_TRANS, CC_LEVEL_MID, CC_LEVEL_LO+CC_LEVEL_TRANS };
-
-// High -> High
-uint8_t cc_trans_hi_hi[TRANSITION_WIDTH] = { CC_LEVEL_HI, CC_LEVEL_HI, CC_LEVEL_HI };
 
 
 // Initialize a prototype Line 21 buffer with the parts that DON'T change:
@@ -227,58 +215,45 @@ uint8_t cc_trans_hi_hi[TRANSITION_WIDTH] = { CC_LEVEL_HI, CC_LEVEL_HI, CC_LEVEL_
 AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOffset, uint32_t & dataStartOffset)
 {
 	// sanity check...
-	if (m_pPayload == NULL || m_DC < AJAAncillaryData_Cea608_Line21_PayloadSize)
+	if (GetDC() < AJAAncillaryData_Cea608_Line21_PayloadSize)
 		return AJA_STATUS_FAIL;
 
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
 	uint32_t i, j;
-	uint8_t *ptr = m_pPayload;
-	
+	ByteVectorIndex	pos(0);
+	const uint8_t	kSMPTE_Y_Black	(0x10);
+	uint8_t *ptr = &m_payload[0];
+
 	// fill Black until beginning of Clock Run-In
 	// both the user-supplied offset to the first bit-cell, plus the "missing" quarter-cycle of the clock
-	for (i = 0; i < (lineStartOffset + CLOCK_RUN_IN_OFFSET); i++)
-	{
-		*ptr++ = 0x10;		// Note: assuming SMPTE "Y" black!
-	}
+	for (i = 0;  i < (lineStartOffset + CLOCK_RUN_IN_OFFSET);  i++)
+		m_payload[pos++] = kSMPTE_Y_Black;	// Note: assuming SMPTE "Y" black!
 
 	// 7 cycles of 503,496 Hz clock run-in
-	for (j = 0; j < 7; j++)
-	{
-		for (i = 0; i < CC_BIT_WIDTH; i++)
-		{
-			*ptr++ = cc_clock[i];	// clock
-		}
-	}
-	
+	for (j = 0;  j < 7;  j++)
+		for (i = 0;  i < CC_BIT_WIDTH;  i++)
+			m_payload[pos++] = cc_clock[i];	// clock
+
 	// Start bit: 1 CC bits of '0' (reduced width because the last cycle of the clock run-in overlaps)
 	for (i = 0; i < (CC_BIT_WIDTH - CLOCK_RUN_IN_OFFSET); i++)
-	{
-		*ptr++ = CC_LEVEL_LO;
-	}
-	
+		m_payload[pos++] = CC_LEVEL_LO;
+
 	// Start bit: 1 CC bit of '0' (full width)
-	for (i = 0; i < CC_BIT_WIDTH - TRANSITION_POST; i++)
-	{
-		*ptr++ = CC_LEVEL_LO;
-	}
-	
+	for (i = 0;  i < CC_BIT_WIDTH - TRANSITION_POST;  i++)
+		m_payload[pos++] = CC_LEVEL_LO;
+
 	// encode transition between low and high
 	ptr = EncodeTransition (ptr, 0, 1);
-	
+
 	// Start bit: 1 CC bit of '1'
 	for (i = 0; i < CC_BIT_WIDTH - TRANSITION_PRE; i++)
-	{
-		*ptr++ = CC_LEVEL_HI;
-	}
-	
-	// just fill in black for the rest of the buffer - this will be overwritten with "real" data bits later
-	uint8_t *pLastAddr = m_pPayload + m_DC;
-	while (ptr < pLastAddr)
-	{
-		*ptr++ = 0x10;		// Note: assuming SMPTE "Y" black!
-	}
-	
+		m_payload[pos++] = CC_LEVEL_HI;
+
+	//	Fill in black for the rest of the buffer - this will be overwritten with "real" data bits later
+	while (pos < GetDC())
+		m_payload[pos++] = kSMPTE_Y_Black;		// Note: assuming SMPTE "Y" black!
+
 	// the first data bit cell starts 10 bit cells after the initial offset
 	// (note: does NOT include slop for needed rise-time)
 	dataStartOffset = lineStartOffset + (10 * CC_BIT_WIDTH);
@@ -292,7 +267,7 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 uint8_t * AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t char2, uint32_t dataStartOffset)
 {
 	// pointer to first data bit, minus room for transition
-	uint8_t *ptr = m_pPayload + (dataStartOffset - TRANSITION_PRE);
+	uint8_t *ptr = &m_payload[0] + (dataStartOffset - TRANSITION_PRE);
 	
 	// encode transition from last start bit to first bit of first character
 	ptr = EncodeTransition (ptr, 1, (char1 & 0x01) );
@@ -310,7 +285,7 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t cha
 	ptr = EncodeTransition (ptr, (char2 & 0x80), 0);
 	
 	// return ptr to the beginning of the encode buffer
-	return m_pPayload;
+	return &m_payload[0];
 }
 
 
@@ -341,25 +316,30 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeCharacter (uint8_t * ptr, uint8_
 	return ptr;
 }
 
-// encodes from the beginning of the transition of one bit ("from") to the next ("to")
+// encodes from the beginning of the transition of one bit ("inStartLevel") to the next ("inEndLevel")
 // returns the pointer to the next pixel following the transition
-uint8_t * AJAAncillaryData_Cea608_Line21::EncodeTransition (uint8_t * ptr, uint8_t from, uint8_t to)
+uint8_t * AJAAncillaryData_Cea608_Line21::EncodeTransition (uint8_t * ptr, const uint8_t inStartLevel, const uint8_t inEndLevel)
 {
-	uint8_t *pTrans;
-	
-	// which kind of transition are we talking about?
-	if (from == 0 && to == 0)
+	// 4 possible transition types:
+	static const uint8_t cc_trans_lo_lo[TRANSITION_WIDTH] = { CC_LEVEL_LO, CC_LEVEL_LO, CC_LEVEL_LO };	// Low -> Low
+	static const uint8_t cc_trans_lo_hi[TRANSITION_WIDTH] = { CC_LEVEL_LO+CC_LEVEL_TRANS, CC_LEVEL_MID, CC_LEVEL_HI-CC_LEVEL_TRANS };	// Low -> High
+	static const uint8_t cc_trans_hi_lo[TRANSITION_WIDTH] = { CC_LEVEL_HI-CC_LEVEL_TRANS, CC_LEVEL_MID, CC_LEVEL_LO+CC_LEVEL_TRANS };	// High -> Low
+	static const uint8_t cc_trans_hi_hi[TRANSITION_WIDTH] = { CC_LEVEL_HI, CC_LEVEL_HI, CC_LEVEL_HI };	// High -> High
+
+	const uint8_t *	pTrans	(NULL);
+
+	if (inStartLevel == 0  &&  inEndLevel == 0)
 		pTrans = cc_trans_lo_lo;
-	else if (from == 0 && to != 0)
+	else if (inStartLevel == 0  &&  inEndLevel != 0)
 		pTrans = cc_trans_lo_hi;
-	else if (from != 0 && to == 0)
+	else if (inStartLevel != 0  &&  inEndLevel == 0)
 		pTrans = cc_trans_hi_lo;
 	else
 		pTrans = cc_trans_hi_hi;
-		
-	for (uint32_t i = 0; i < TRANSITION_WIDTH; i++)
+
+	for (uint32_t i = 0;  i < TRANSITION_WIDTH;  i++)
 		*ptr++ = pTrans[i];
-	
+
 	return ptr;
 }
 
@@ -374,48 +354,39 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeTransition (uint8_t * ptr, uint8
 // try to make a reasonable attempt to discover whether captioning data is present or not,
 // and if it decides that the line does NOT contain encoded captioning info, will return 'false'
 // and set the characters to 0.
-AJAStatus AJAAncillaryData_Cea608_Line21::DecodeLine(uint8_t& char1, uint8_t& char2, bool& bGotClock)
+AJAStatus AJAAncillaryData_Cea608_Line21::DecodeLine (uint8_t & outChar1, uint8_t & outChar2, bool & outGotClock)
 {
-	// sanity check...
-	if (m_pPayload == NULL || m_DC < AJAAncillaryData_Cea608_Line21_PayloadSize)
+	outChar1 = outChar2 = 0xFF;
+	outGotClock = false;
+	if (GetDC() < AJAAncillaryData_Cea608_Line21_PayloadSize)
 		return AJA_STATUS_FAIL;
 
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
 	// see if the line contains a captioning clock run-in, signifying a valid captioning line
-	// If successful, CheckDecodeClock() will return a pointer to the middle of the first data
-	// bit (i.e. the one following the last '1' start bit) and will set bGotClock to 'true'.
-	// If CheckDecodeClock() cannot find a valid clock run-in, it will return with bGotClock
+	// If successful, CheckDecodeClock will return a pointer to the middle of the first data
+	// bit (i.e. the one following the last '1' start bit) and will set outGotClock to 'true'.
+	// If CheckDecodeClock cannot find a valid clock run-in, it will return with outGotClock
 	// set to 'false'.
-	uint8_t *pFirstDataBit = CheckDecodeClock (m_pPayload, bGotClock);
-	
-	if (bGotClock)
-	{
-		status = DecodeCharacters(pFirstDataBit, char1, char2);		// decode characters
-	}
-	else
-	{
-		// couldn't find a valid clock - set the returned characters to 0xff
-		char1 = 0xff;
-		char2 = 0xff;
+	const uint8_t * pFirstDataBit = CheckDecodeClock (GetPayloadData(), outGotClock);
+	if (outGotClock)
+		return DecodeCharacters(pFirstDataBit, outChar1, outChar2);		// decode characters
 
-		// note: we're NOT returning an error if no clock was found. In fact, this is a fairly
-		// normal happening (a lot of programs are not captioned), so the caller should be sure
-		// to check bGotClock upon return to make sure the returned characters are valid.
-		status = AJA_STATUS_SUCCESS;
-	}
-	return status;
+	// note: we're NOT returning an error if no clock was found. In fact, this is a fairly
+	// normal happening (a lot of programs are not captioned), so the caller should be sure
+	// to check bGotClock upon return to make sure the returned characters are valid.
+	return AJA_STATUS_SUCCESS;
 }
 
 
-uint8_t * AJAAncillaryData_Cea608_Line21::CheckDecodeClock (uint8_t * pLine, bool & bGotClock)
+const uint8_t * AJAAncillaryData_Cea608_Line21::CheckDecodeClock (const uint8_t * pInLine, bool & bGotClock)
 {	
 	bGotClock = false;		// assume the worst...
+	if (!pInLine)
+		return NULL;
 	
-	uint8_t *pFirstYSample = pLine;		// point to first pixel in line
-	uint8_t *pFirstClockEdge;
-	uint8_t *pLastClockEdge;
-	uint8_t *pFirstDataBit = pLine;
+	const uint8_t *pFirstYSample = pInLine;		// point to first pixel in line
+	const uint8_t *pFirstClockEdge	= NULL;
+	const uint8_t *pLastClockEdge	= NULL;
+	const uint8_t *pFirstDataBit = pFirstYSample;
 	
 	// The rising edge of the first clock run-in cycle should happen approx 10.5 usecs from the leading
 	// edge of sync, which translates to approx. 20 pixels from the left-hand edge of active video.
@@ -423,56 +394,53 @@ uint8_t * AJAAncillaryData_Cea608_Line21::CheckDecodeClock (uint8_t * pLine, boo
 	// find the first leading clock edge and use that as our reference.
 		
 	// Start looking for a low->high transition starting at pixel 10, give up if we haven't found it by pixel 30.
-	uint32_t i;
+	uint32_t pos(0);
 	uint32_t startSearch = 10;
 	uint32_t stopSearch  = 30;
-	for (i = startSearch; i < stopSearch; i++)
-	{
-		if ( (pFirstYSample[i] < CC_LEVEL_MID) && (pFirstYSample[(i+1)] >= CC_LEVEL_MID) )
+	for (pos = startSearch;  pos < stopSearch;  pos++)
+		if (pFirstYSample[pos] < CC_LEVEL_MID  &&  pFirstYSample[pos+1] >= CC_LEVEL_MID)
 			break;
-	}
-	
+
 	// did we find it?
-	if (i < stopSearch)
+	if (pos < stopSearch)
 	{
-		pFirstClockEdge = &pFirstYSample[i];
-//		odprintf ("CheckDecodeClock() - found first clock edge at pixel %d\n", i);
+		pFirstClockEdge = &pFirstYSample[pos];
+//		cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: found first clock edge at pixel " << i << endl;
 		
 		// if this is the leading edge of the first sine wave, then the crest of this wave will
 		// be approx 7 pixels from here, and the trough of this wave will be approx 13 clocks after that.
 		// This pattern will repeat every 27 pixels for 7 cycles.
-		for (i = 0; i < 7; i++)
+		for (pos = 0;  pos < 7;  pos++)
 		{
-			int hi = (i * CC_BIT_WIDTH) + 7;
-			int lo = (i * CC_BIT_WIDTH) + 20;
+			uint32_t hi = (pos * CC_BIT_WIDTH) + 7;
+			uint32_t lo = (pos * CC_BIT_WIDTH) + 20;
 			
 			if ( (pFirstClockEdge[hi] < CC_LEVEL_MID) || (pFirstClockEdge[lo] >= CC_LEVEL_MID) )
 				break;
 		}
-		
-		if (i < 7)
+
+		if (pos < 7)
 		{
-			// we failed to find an expected clock crest or trough - abort
-//			odprintf ("CheckDecodeClock() - failed clock run-in test at cycle %d\n", i);
+			//	Failed to find an expected clock crest or trough - abort
+//			cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: failed clock run-in test at cycle " << pos << endl;
 		}
-		
 		else
 		{
-//			odprintf ("CheckDecodeClock() - confirmed 7 cycles of clock run-in\n");
-			
-				// the 7 cycles of clock looks OK, now let's specifically find the leading edge
-				// of the last clock. This will serve as our reference sample point for the data bits
+//			cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: confirmed 7 cycles of clock run-in" << endl;
+
+			// the 7 cycles of clock looks OK, now let's specifically find the leading edge
+			// of the last clock. This will serve as our reference sample point for the data bits
 			startSearch = (5 * CC_BIT_WIDTH) + 20;		// the lo point of the 6th cycle
 			stopSearch  = (6 * CC_BIT_WIDTH) +  7;		// the hi point of the 7th cycle
-			for (i = startSearch; i < stopSearch; i++)
+			for (pos = startSearch;  pos < stopSearch;  pos++)
 			{
-				if ( (pFirstClockEdge[i] < CC_LEVEL_MID) && (pFirstClockEdge[(i+1)] >= CC_LEVEL_MID) )
+				if ( (pFirstClockEdge[pos] < CC_LEVEL_MID) && (pFirstClockEdge[pos+1] >= CC_LEVEL_MID) )
 					break;
 			}
 			
 			// the mid-point of each sample bit will occur on bit-cell multiples from here
-			pLastClockEdge = &pFirstClockEdge[(i+1)];
-//			odprintf ("CheckDecodeClock() - the leading edge of the last clock cycle is at pixel %d\n", ((uint32_t)pLastClockEdge - (uint32_t)pFirstYSample));
+			pLastClockEdge = &pFirstClockEdge[pos+1];
+//			cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: leading edge of last clock cycle at pixel " << uint64_t(pLastClockEdge - pFirstYSample) << endl;
 			
 			// the next three bit cells are the start bits, which should be 0, 0, 1
 			if (   (pLastClockEdge[(CC_BIT_WIDTH * 1)] <  CC_LEVEL_MID)
@@ -483,20 +451,19 @@ uint8_t * AJAAncillaryData_Cea608_Line21::CheckDecodeClock (uint8_t * pLine, boo
 				// past the last start bit
 				pFirstDataBit = &pLastClockEdge[(CC_BIT_WIDTH * 4)];
 				
-//				odprintf ("CheckDecodeClock() - start bits are correct, first data bit is at pixel %d\n", ((uint32_t)pFirstDataBit - (uint32_t)pFirstYSample));
+//				cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: start bits correct, first data bit at pixel " << uint64_t(pFirstDataBit - pFirstYSample) << endl;
 				bGotClock = true;
 			}
 			else
 			{
-//				odprintf ("CheckDecodeClock() - bad start bits: %d, %d, %d\n", (pLastClockEdge[(CC_BIT_WIDTH * 1)] >= CC_LEVEL_MID),
-//																			   (pLastClockEdge[(CC_BIT_WIDTH * 2)] >= CC_LEVEL_MID),
-//																			   (pLastClockEdge[(CC_BIT_WIDTH * 3)] >= CC_LEVEL_MID) );
+//				cerr	<< "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: bad start bits: "
+//						<< pLastClockEdge[(CC_BIT_WIDTH * 1)] >= CC_LEVEL_MID << ", "
+//						<< pLastClockEdge[(CC_BIT_WIDTH * 2)] >= CC_LEVEL_MID << ", "
+//						<< pLastClockEdge[(CC_BIT_WIDTH * 3)] >= CC_LEVEL_MID << endl;
 			}
 		}
 	}
-	
-//	else
-//		odprintf ("CheckDecodeClock() - couldn't find first clock edge\n");
+//	else cerr << "AJAAncillaryData_Cea608_Line21::CheckDecodeClock: couldn't find first clock edge" << endl;
 	
 	return pFirstDataBit;
 }
@@ -506,37 +473,34 @@ uint8_t * AJAAncillaryData_Cea608_Line21::CheckDecodeClock (uint8_t * pLine, boo
 // This method will read the two characters and return 'true' if successful.
 // Note: this routine will return the parity bit of each character in the ms bit position. It
 // makes no calculation or value judgment as to the correctness of the parity.
-AJAStatus AJAAncillaryData_Cea608_Line21::DecodeCharacters (uint8_t *ptr, uint8_t& char1, uint8_t& char2)
+AJAStatus AJAAncillaryData_Cea608_Line21::DecodeCharacters (const uint8_t *ptr, uint8_t & outChar1, uint8_t & outChar2)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
 	// first character, ls bit first
-	char1 = 0;
-	for (uint8_t i = 0; i < 8; i++)
+	outChar1 = 0;
+	for (uint8_t i = 0;  i < 8;  i++)
 	{
-		uint8_t bit = (ptr[(i * CC_BIT_WIDTH)] > CC_LEVEL_MID) ? 1 : 0;
-		char1 += (bit << i);
+		const uint8_t	bit	((ptr[i * CC_BIT_WIDTH] > CC_LEVEL_MID)  ?  1  :  0);
+		outChar1 += (bit << i);
 	}
 	
 	// advance ptr to middle of first data bit in second character
 	ptr += (8 * CC_BIT_WIDTH);
-	
+
 	// second character, ls bit first
-	char2 = 0;
-	for (uint8_t i = 0; i < 8; i++)
+	outChar2 = 0;
+	for (uint8_t i = 0;  i < 8;  i++)
 	{
-		uint8_t bit = (ptr[(i * CC_BIT_WIDTH)] > CC_LEVEL_MID) ? 1 : 0;
-		char2 += (bit << i);
+		const uint8_t	bit	((ptr[i * CC_BIT_WIDTH] > CC_LEVEL_MID)  ?  1  :  0);
+		outChar2 += (bit << i);
 	}
 
 #if 0	// debug
 	if (char1 == 0x80 && char2 == 0x80)
-		printf ("--- DecodeCharacters() returned: NULL\n");
-	else if (((char1 & 0x7f) >= 0x20) && ((char2 & 0x7f) >= 0x20))
-		printf ("--- DecodeCharacters() returned: '%c', '%c'\n", (char1 & 0x7f), (char2 & 0x7f) );
+		cerr << "--- AJAAncillaryData_Cea608_Line21::DecodeCharacters: returned NULL" << endl;
+	else if (((outChar1 & 0x7f) >= 0x20) && ((outChar2 & 0x7f) >= 0x20))
+		cerr << "--- AJAAncillaryData_Cea608_Line21::DecodeCharacters: returned '" << (outChar1 & 0x7f) << "' '" << (outChar2 & 0x7f) << endl;
 	else
-		printf ("--- DecodeCharacters() returned: 0x%02x, 0x%02x\n", char1, char2);
+		cerr << "--- AJAAncillaryData_Cea608_Line21::DecodeCharacters: returned " << xHEX0N(outChar1,2) << " " << xHEX0N(outChar2) << endl;
 #endif
-	
-	return status;
+	return AJA_STATUS_SUCCESS;
 }

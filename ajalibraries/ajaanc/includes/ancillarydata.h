@@ -12,6 +12,7 @@
 #include "ajaexport.h"
 #include "ajabase/common/common.h"
 #include <sstream>
+#include <vector>
 
 
 /**
@@ -192,7 +193,7 @@ typedef struct AJAAncillaryDataLocation
 
 		inline bool		IsValid (void) const
 		{
-			return IS_VALID_AJAAncillaryDataLink (link) && IS_VALID_AJAAncillaryDataVideoStream (stream) && IS_VALID_AJAAncillaryDataSpace (ancSpace);
+			return IS_VALID_AJAAncillaryDataLink(link) && IS_VALID_AJAAncillaryDataVideoStream(stream) && IS_VALID_AJAAncillaryDataSpace(ancSpace);
 		}
 
 		inline void		Set (	const AJAAncillaryDataLink			inLink,
@@ -313,34 +314,98 @@ AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillary
 class AJAExport AJAAncillaryData
 {
 public:
+	/**
+		@name	Construction, Destruction, Copying
+	**/
+	///@{
+
 	AJAAncillaryData ();	///< @brief	My default constructor.
 
 	/**
-		@brief	My copy constructor.
+		@brief	My copy constructor (from reference).
 		@param[in]	inClone	The AJAAncillaryData object to be cloned.
 	**/
 	AJAAncillaryData (const AJAAncillaryData & inClone);
 
 	/**
-		@brief	My copy constructor.
+		@brief	My copy constructor (from pointer).
 		@param[in]	pInClone	A valid pointer to the AJAAncillaryData object to be cloned.
 	**/
 	AJAAncillaryData (const AJAAncillaryData * pInClone);
 
 	virtual									~AJAAncillaryData ();	///< @brief		My destructor.
-
 	virtual void							Clear (void);			///< @brief	Frees my allocated memory, if any, and resets my members to their default values.
+	virtual AJAAncillaryData *				Clone (void) const;	//	@return	A clone of myself.
+	///@}
 
 
 	/**
-		@brief	Assignment operator -- replaces my contents with the right-hand-side value.
-		@param[in]	inRHS	The value to be assigned to me.
-		@return		A reference to myself.
+		@name	Inquiry
 	**/
-	virtual AJAAncillaryData &				operator = (const AJAAncillaryData & inRHS);
+	///@{
 
-	virtual AJAAncillaryData *				Clone (void) const;	//	@return	A clone of myself.
+	virtual inline uint8_t					GetDID (void) const							{return m_DID;}		///< @return	My Data ID (DID).
+	virtual inline uint8_t					GetSID (void) const							{return m_SID;}		///< @return	My secondary data ID (SID).
+	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
+	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}	///< @return	My current payload byte count.
+	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const		{return m_ancType;}	///< @return	My anc data type (if known).
 
+	virtual inline AJAStatus				GetDataLocation (AJAAncillaryDataLocation & outLocInfo) const		///< @deprecated	Use the inline version instead.
+																						{outLocInfo = GetDataLocation ();	return AJA_STATUS_SUCCESS;}
+	virtual AJAStatus						GetDataLocation (AJAAncillaryDataLink & link,
+															AJAAncillaryDataVideoStream & stream,
+															AJAAncillaryDataSpace & ancSpace,
+															uint16_t & lineNum);			///< @deprecated	Use the inline GetDataLocation() instead.
+	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}	///< @brief	My ancillary data "location" within the video stream.
+	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return m_location.link;}	///< @return	My current anc data video link value (A or B).
+	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return m_location.ancSpace;}				///< @return	My current ancillary data space (HANC or VANC).
+	virtual inline AJAAncillaryDataVideoStream	GetLocationVideoStream (void) const		{return m_location.stream;}	///< @return	My current anc data location's video stream (Y or C).
+	virtual inline uint16_t					GetLocationLineNumber (void) const			{return m_location.lineNum;}	///< @return	My current frame line number value (SMPTE line numbering).
+	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}	///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
+	virtual uint8_t							GetChecksum (void) const					{return m_checksum;}	///< @return	My 8-bit checksum.
+
+	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}	///< @return	True if I have an empty payload.
+	virtual inline bool						IsLumaChannel (void) const					{return m_location.IsLumaChannel ();}		///< @return	True if my location component stream is Y (luma).
+	virtual inline bool						IsChromaChannel (void) const				{return m_location.IsChromaChannel ();}		///< @return	True if my location component stream is C (chroma).
+	virtual inline bool						IsVanc (void) const							{return m_location.IsVanc ();}				///< @return	True if my location data space is VANC.
+	virtual inline bool						IsHanc (void) const							{return m_location.IsHanc ();}				///< @return	True if my location data space is HANC.
+	virtual inline bool						IsDigital (void) const						{return m_coding == AJAAncillaryDataCoding_Digital;}	///< @return	True if my coding type is digital.
+	virtual inline bool						IsRaw (void) const							{return m_coding == AJAAncillaryDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
+	virtual inline bool						IsAnalog (void) const						{return m_coding == AJAAncillaryDataCoding_Raw;}		///< @deprecated	Use IsRaw instead.
+
+	/**
+		@brief	Generates an 8-bit checksum from the DID + SID + DC + payload data.
+		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
+		@note	The calculated checksum is NOT stored in my m_checksum member variable. Call SetChecksum to store it.
+		@return		The calculated 8-bit checksum.
+	**/
+	virtual uint8_t							Calculate8BitChecksum (void) const;
+
+	/**
+		@brief	Compares the received 8-bit checksum with a newly calculated 8-bit checksum. Returns 'true' if they match.
+		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
+		@return	True if the calculated checksum matches received checksum; otherwise false.
+	**/
+	virtual bool							ChecksumOK (void) const						{return m_checksum == Calculate8BitChecksum ();}
+
+	/**
+		@param[in]	inRHS	The packet I am to be compared with.
+		@return		True if I'm identical to the RHS packet.
+	**/
+	virtual bool							operator == (const AJAAncillaryData & inRHS) const;
+
+	/**
+		@param[in]	inRHS	The packet I am to be compared with.
+		@return		True if I differ from the RHS packet.
+	**/
+	virtual inline bool						operator != (const AJAAncillaryData & inRHS) const		{return !(*this == inRHS);}
+	///@}
+
+
+	/**
+		@name	Modification
+	**/
+	///@{
 
 	/**
 		@brief		Sets my Data ID (DID).
@@ -349,20 +414,12 @@ public:
 	**/
 	virtual AJAStatus						SetDID (const uint8_t inDataID);
 
-	virtual inline uint8_t					GetDID (void) const					{return m_DID;}		///< @return	My Data ID (DID).
-
-
 	/**
 		@brief		Sets/Gets the Secondary Data ID (SID) - (aka the Data Block Number (DBN) for "Type 1" SMPTE-291 packets).
 		@param[in]	inSID		Secondary Data ID (for digital ancillary data, usually the "official" SMPTE packet ID)
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetSID (const uint8_t inSID);
-
-	virtual inline uint8_t					GetSID (void) const					{return m_SID;}		///< @return	My secondary data ID (SID).
-
-	virtual inline uint32_t					GetDC (void) const					{return m_DC;}		///< @return	My payload data count, in bytes.
-
 
 	/**
 		@brief		Sets my 8-bit checksum. Note that it is not usually necessary to generate an 8-bit checksum, since the ANC Insertion
@@ -372,39 +429,12 @@ public:
 	**/
 	virtual AJAStatus						SetChecksum (const uint8_t checksum8)	{m_checksum = checksum8;  return AJA_STATUS_SUCCESS;}
 
-	virtual uint8_t							GetChecksum (void) const				{return m_checksum;}	///< @return	My 8-bit checksum.
-
-	/**
-		@brief	Generates an 8-bit checksum from the DID + SID + DC + payload data.
-		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
-		@return		The calculated 8-bit checksum.
-	**/
-	virtual uint8_t							Calculate8BitChecksum (void) const;
-
-
-	/**
-		@brief	Compares the received 8-bit checksum with a newly calculated 8-bit checksum. Returns 'true' if they match.
-		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
-		@return	True if the calculated checksum matches received checksum; otherwise false.
-	**/
-	virtual bool							ChecksumOK (void) const				{return m_checksum == Calculate8BitChecksum ();}
-
-
-
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
 		@param[in]	inLoc		Specifies the new AJAAncillaryDataLocation value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetDataLocation (const AJAAncillaryDataLocation & inLoc);
-
-	virtual inline AJAStatus				GetDataLocation (AJAAncillaryDataLocation & outLocInfo) const		///< @deprecated	Use the inline version instead.
-																						{outLocInfo = GetDataLocation ();	return AJA_STATUS_SUCCESS;}
-	virtual AJAStatus						GetDataLocation (AJAAncillaryDataLink & link,
-															AJAAncillaryDataVideoStream & stream,
-															AJAAncillaryDataSpace & ancSpace,
-															uint16_t & lineNum);			///< @deprecated	Use the inline GetDataLocation() instead.
-	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const		{return m_location;}	///< @brief	My ancillary data "location" within the video stream.
 
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
@@ -416,7 +446,6 @@ public:
 	**/
 	virtual AJAStatus						SetDataLocation (const AJAAncillaryDataLink inLink, const AJAAncillaryDataVideoStream inStream, const AJAAncillaryDataSpace inAncSpace, const uint16_t inLineNum);
 
-
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
 		@param[in]	inLink	Specifies the new video link value (A or B).
@@ -424,16 +453,12 @@ public:
 	**/
 	virtual AJAStatus						SetLocationVideoLink (const AJAAncillaryDataLink inLink);
 
-	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return m_location.link;}	///< @return	My current anc data video link value (A or B).
-
 	/**
 		@brief	Sets my ancillary data "location" video stream value (Y or C).
 		@param[in]	inStream	Specifies my new video stream (Y or C) value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus SetLocationVideoStream (const AJAAncillaryDataVideoStream inStream);
-
-	virtual inline AJAAncillaryDataVideoStream	GetLocationVideoStream (void) const		{return m_location.stream;}	///< @return	My current anc data location's video stream (Y or C).
+	virtual AJAStatus						SetLocationVideoStream (const AJAAncillaryDataVideoStream inStream);
 
 	/**
 		@brief		Sets my ancillary data "location" data space value.
@@ -442,16 +467,6 @@ public:
 	**/
 	virtual AJAStatus						SetLocationVideoSpace (const AJAAncillaryDataSpace inAncSpace);
 
-	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return m_location.ancSpace;}				///< @return	My current ancillary data space (HANC or VANC).
-
-	virtual inline bool						IsLumaChannel (void) const					{return m_location.IsLumaChannel ();}		///< @return	True if my location component stream is Y (luma).
-	virtual inline bool						IsChromaChannel (void) const				{return m_location.IsChromaChannel ();}		///< @return	True if my location component stream is C (chroma).
-	virtual inline bool						IsVanc (void) const							{return m_location.IsVanc ();}				///< @return	True if my location data space is VANC.
-	virtual inline bool						IsHanc (void) const							{return m_location.IsHanc ();}				///< @return	True if my location data space is HANC.
-	virtual inline bool						IsDigital (void) const						{return m_coding == AJAAncillaryDataCoding_Digital;}	///< @return	True if my coding type is digital.
-	virtual inline bool						IsRaw (void) const							{return m_coding == AJAAncillaryDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
-	virtual inline bool						IsAnalog (void) const						{return m_coding == AJAAncillaryDataCoding_Raw;}		///< @deprecated	Use IsRaw instead.
-
 	/**
 		@brief	Sets my ancillary data "location" frame line number.
 		@param[in]	inLineNum	Specifies the new frame line number value (SMPTE line numbering).
@@ -459,17 +474,52 @@ public:
 	**/
 	virtual AJAStatus						SetLocationLineNumber (const uint16_t inLineNum);
 
-	virtual inline uint16_t					GetLocationLineNumber (void) const			{return m_location.lineNum;}	///< @return	My current frame line number value (SMPTE line numbering).
-
 	/**
 		@brief		Sets my ancillary data coding type (e.g. digital or analog/raw waveform).
 		@param[in]	inCodingType	AJAAncillaryDataCoding
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetDataCoding (const AJAAncillaryDataCoding inCodingType);
+	///@}
 
-	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}	///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
 
+	/**
+		@name	Payload Data Inquiry
+	**/
+	///@{
+
+	/**
+		@param[in]	inIndex0	Specifies the zero-based index value. This should be less than GetDC's result.
+		@return		The payload data byte at the given zero-based index (or zero if the index value is invalid).
+	**/
+	virtual uint8_t							GetPayloadByteAtIndex (const uint32_t inIndex0) const;
+
+	/**
+		@return		A const pointer to my payload buffer.
+	**/
+	virtual inline const uint8_t *			GetPayloadData (void) const					{return &(m_payload[0]);}
+
+	/**
+		@brief	Copies my payload data into an external buffer.
+		@param[in]	pBuffer			Specifies a valid, non-null starting address to where the payload data is to be copied.
+		@param[in]	inByteCapacity	Specifies the maximum number of bytes that can be safely copied into the external buffer.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetPayloadData (uint8_t * pBuffer, const uint32_t inByteCapacity) const;
+	///@}
+
+
+	/**
+		@name	Payload Data Modification
+	**/
+	///@{
+
+	/**
+		@param[in]	inDataByte	Specifies the data byte to be stored in my payload buffer.
+		@param[in]	inIndex0	Specifies the zero-based index value. This should be less than GetDC's result.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						SetPayloadByteAtIndex (const uint8_t inDataByte, const uint32_t inIndex0);
 
 	/**
 		@brief		Copy data from external memory into my local payload memory.
@@ -483,14 +533,14 @@ public:
 		@brief		Appends data from an external buffer onto the end of my existing payload.
 		@param[in]	pInBuffer		Specifies a valid, non-NULL starting address of the external buffer from which the payload data will be copied.
 		@param[in]	inByteCount		Specifies the number of bytes to append.
-		@return		AJA_STATUS_SUCCESS
+		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AppendPayloadData (const uint8_t * pInBuffer, const uint32_t inByteCount);
 
 	/**
 		@brief		Appends payload data from another AJAAncillaryData object to my existing payload.
 		@param[in]	inAncData	The AJAAncillaryData object whose payload data is to be appended to my own.
-		@return		AJA_STATUS_SUCCESS
+		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AppendPayload (const AJAAncillaryData & inAncData);
 
@@ -499,40 +549,22 @@ public:
 	**/
 	virtual inline AJAStatus				AppendPayload (const AJAAncillaryData * pInAncData)		{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
 
-
 	/**
-	 	@brief	Copy data from external memory to local payload memory.
+	 	@brief	Copies payload data from an external 16-bit source into local payload memory.
 		@param[in]	pInData		A valid, non-NULL pointer to the external payload data to be copied (source).
 								The upper 8 bits of each 16-bit word will be skipped and ignored.
 		@param[in]	inNumWords	Specifies the number of 16-bit words of payload data to copy.
 		@param[in]	inLocInfo	Specifies the anc data location information.
-		@return					AJA_STATUS_SUCCESS
+		@return					AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetFromSMPTE334 (const uint16_t * pInData, const uint32_t inNumWords, const AJAAncillaryDataLocation & inLocInfo);
 
 	/**
-		@brief	Copies my payload data into an external buffer.
-		@param[in]	pBuffer			Specifies a valid, non-null starting address to where the payload data is to be copied.
-		@param[in]	inByteCapacity	Specifies the maximum number of bytes that can be safely copied into the external buffer.
-		@return		AJA_STATUS_SUCCESS
-	**/
-	virtual AJAStatus						GetPayloadData (uint8_t * pBuffer, const uint32_t inByteCapacity) const;
-
-	/**
-		@param[in]	inIndex0	Specifies the zero-based index value. This should be less than GetPayloadByteCount's result.
-		@return		The payload data byte at the given zero-based index (or zero if the index value is invalid).
-	**/
-	virtual uint8_t							GetPayloadByteAtIndex (const uint32_t inIndex0) const;
-
-	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const		{return m_ancType;}	///< @return	My anc data type (if known).
-
-
-	/**
-		@brief		Parses out (interprets) the "local" ancillary data from my payload data.
+		@brief		Parses (interprets) the "local" ancillary data from my payload data.
+		@note		This abstract method is overridden for specific Anc data types.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						ParsePayloadData (void);
-
 
 	/**
 		@brief		Used following ParsePayloadData() to determine whether or not the object thinks it contains
@@ -543,41 +575,40 @@ public:
 	**/
 	virtual inline bool						GotValidReceiveData (void) const			{return m_rcvDataValid;}
 
-
 	/**
-		@brief		Generate the payload data from the "local" ancillary data.
-		@note		This method is overridden for the specific Anc data type.
+		@brief		Generates the payload data from the "local" ancillary data.
+		@note		This abstract method is overridden for specific Anc data types.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual inline AJAStatus				GeneratePayloadData (void)					{return AJA_STATUS_SUCCESS;}
+	///@}
 
 
 	/**
-		@brief		Initializes me from "raw" ancillary data received from hardware (ingest).
+		@name	Transmit/Receive To/From AJA Hardware
+	**/
+	///@{
+
+	/**
+		@brief		Initializes me from "raw" ancillary data received from hardware (ingest) -- see \ref ancgumpformat.
 		@param[in]	pInData				Specifies the starting address of the "raw" packet data that was received from the AJA device.
 		@param[in]	inMaxBytes			Specifies the maximum number of bytes left in the source buffer.
 		@param[in]	inLocationInfo		Specifies the default location info.
 		@param[out]	outPacketByteCount	Receives the size (in bytes) of the parsed packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation & inLocationInfo, uint32_t & outPacketByteCount);
-
+	virtual AJAStatus						InitWithReceivedData (	const uint8_t *						pInData,
+																	const uint32_t						inMaxBytes,
+																	const AJAAncillaryDataLocation &	inLocationInfo,
+																	uint32_t &							outPacketByteCount);
 	/**
-		@brief		Initializes me from "raw" ancillary data received from hardware (ingest).
+		@brief		Initializes me from "raw" ancillary data received from hardware (ingest) -- see \ref ancgumpformat.
 		@param[in]	inData				Specifies the "raw" packet data.
 		@param[in]	inLocationInfo		Specifies the default location info.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						InitWithReceivedData (const std::vector<uint8_t> & inData, const AJAAncillaryDataLocation & inLocationInfo);
-
-	/**
-		@deprecated	Use InitWithReceivedData(const uint8_t *, const uint32_t, const AJAAncillaryDataLocation &, uint32_t &) instead.
-	**/
-	virtual inline AJAStatus				InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation * pInLoc, uint32_t & outPacketByteCount)
-	{
-		return pInLoc ? InitWithReceivedData (pInData, inMaxBytes, *pInLoc, outPacketByteCount) : AJA_STATUS_NULL;
-	}
-
+	virtual AJAStatus						InitWithReceivedData (	const std::vector<uint8_t> &		inData,
+																	const AJAAncillaryDataLocation &	inLocationInfo);
 
 	/**
 		@brief		Returns the number of "raw" ancillary data bytes that will be generated by GenerateTransmitData() (playback).
@@ -587,17 +618,20 @@ public:
 	virtual AJAStatus						GetRawPacketSize (uint32_t & outPacketSize);
 
 	/**
-		@brief		Generates "raw" ancillary data from my internal ancillary data (playback).
-		@param[in]	pData			Pointer to "raw" packet data buffer.
-		@param[in]	maxData			Maximum number of bytes left in the given data buffer.
-		@param[out]	outPacketSize	Receives the size, in bytes, of the generated packet.
+		@brief		Generates "raw" ancillary data from my internal ancillary data (playback) -- see \ref ancgumpformat.
+		@param[in]	pBuffer				Pointer to "raw" packet data buffer to be filled.
+		@param[in]	inMaxBytes			Maximum number of bytes left in the given data buffer.
+		@param[out]	outPacketSize		Receives the size, in bytes, of the generated packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (uint8_t * pData, uint32_t maxData, uint32_t & outPacketSize);
+	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, uint32_t inMaxBytes, uint32_t & outPacketSize);
+	///@}
 
-	virtual inline const uint8_t *			GetPayloadData (void) const					{return m_pPayload;}		///< @return	A const pointer to my payload buffer.
 
-	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t (m_DC);}		///< @return	My current payload byte count.
+	/**
+		@name	Printing & Debugging
+	**/
+	///@{
 
 	/**
 		@brief		Streams a human-readable representation of me to the given output stream.
@@ -624,38 +658,31 @@ public:
 		@param[in]	inSDID	Specifies the Secondary Data ID value.
 	**/
 	static std::string						DIDSIDToString (const uint8_t inDID, const uint8_t inSDID);
+	///@}
 
-	/**
-		@param[in]	inRHS	The packet I am to be compared with.
-		@return		True if I'm identical to the RHS packet.
-	**/
-	virtual bool							operator == (const AJAAncillaryData & inRHS) const;
-
-	/**
-		@param[in]	inRHS	The packet I am to be compared with.
-		@return		True if I differ from the RHS packet.
-	**/
-	virtual inline bool						operator != (const AJAAncillaryData & inRHS) const		{return !(*this == inRHS);}
 
 	protected:
+		typedef std::vector<uint8_t>		ByteVector;
+		typedef ByteVector::size_type		ByteVectorIndex;
+		typedef ByteVector::const_iterator	ByteVectorConstIter;
+
 		void								Init (void);	// NOT virtual - called by constructors
 
 		AJAStatus							AllocDataMemory (const uint32_t inNumBytes);
 		AJAStatus							FreeDataMemory (void);
 
-		uint8_t								GetHeaderByte1 (void) const		{return 0xFF;}
-		uint8_t								GetHeaderByte2 (void) const;
-		uint8_t								GetHeaderByte3 (void) const;
+		static inline uint8_t				GetGUMPHeaderByte1 (void)			{return 0xFF;}
+		virtual uint8_t						GetGUMPHeaderByte2 (void) const;
+		virtual inline uint8_t				GetGUMPHeaderByte3 (void) const		{return GetLocationLineNumber() & 0x7F;}	// ls 7 bits [6:0] of line num
 
 	//	Instance Data
 	protected:
 		uint8_t						m_DID;			///< @brief	Official SMPTE ancillary packet ID (w/o parity)
 		uint8_t						m_SID;			///< @brief	Official SMPTE secondary ID (or DBN - w/o parity)
-		uint32_t					m_DC;			///< @brief	Number of bytes in payload (w/o parity). This may be LARGER than the traditional 255-byte ANC packet limit!
 		uint8_t						m_checksum;		///< @brief	My 8-bit checksum: DID + SID + DC + payload (w/o parity) [note: NOT the same as the 9-bit checksum in a SMPTE-291 packet!]
 		AJAAncillaryDataLocation	m_location;		///< @brief	Location of the ancillary data in the video stream (Y or C, HANC or VANC, etc.)
 		AJAAncillaryDataCoding		m_coding;		///< @brief	Analog or digital data
-		uint8_t *					m_pPayload;		///< @brief	Pointer to my payload data (DC = size)
+		ByteVector					m_payload;		///< @brief	My payload data (DC = size)
 		bool						m_rcvDataValid;	///< @brief	This is set true (or not) by ParsePayloadData()
 		AJAAncillaryDataType		m_ancType;		///< @brief	One of a known set of ancillary data types (or "Custom" if not identified)
 

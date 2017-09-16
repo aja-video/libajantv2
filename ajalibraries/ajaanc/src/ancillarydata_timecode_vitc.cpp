@@ -73,7 +73,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::ParsePayloadData (void)
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
 	// reality check...
-	if (m_pPayload == NULL_PTR || m_DC < AJAAncillaryData_VITC_PayloadSize)
+	if (GetDC() < AJAAncillaryData_VITC_PayloadSize)
 	{
 		Init();						// load default values
 		status = AJA_STATUS_FAIL;
@@ -82,7 +82,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::ParsePayloadData (void)
 	else
 	{
 		// we have some kind of payload data - try to parse it
-		m_rcvDataValid = DecodeLine (m_pPayload);
+		m_rcvDataValid = DecodeLine(GetPayloadData());
 	}
 	return status;
 }
@@ -98,7 +98,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::GeneratePayloadData (void)
 	status = AllocDataMemory(AJAAncillaryData_VITC_PayloadSize);
 	if (AJA_SUCCESS(status))
 	{
-		EncodeLine(m_pPayload);
+		EncodeLine(&m_payload[0]);
 
 		// round-trip: TEST ONLY!
 		//bool bResult = DecodeLine (m_pPayload);
@@ -541,7 +541,7 @@ bool AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine)
 	DoNormalTransition(pLine, pixelIndex, bPrevBit, 0);
 
 	// fill the remainder of the line with Black (note that we're assuming 720 active pixels!)
-	int32_t remainingPixels = m_DC - pixelIndex;
+	uint32_t remainingPixels = GetDC() - pixelIndex;
 	
 	if (remainingPixels > 0)
 	{

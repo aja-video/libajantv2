@@ -24,14 +24,12 @@ const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID +
 
 AJAAncillaryData::AJAAncillaryData()
 {
-	m_pPayload = NULL;
 	Init();
 }
 
 
 AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData & inClone)
 {
-	m_pPayload = NULL;
 	Init();
 	*this = inClone;
 }
@@ -39,7 +37,6 @@ AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData & inClone)
 
 AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData * pClone)
 {
-	m_pPayload = NULL;
 	Init();
 	if (pClone)
 		*this = *pClone;
@@ -58,7 +55,6 @@ void AJAAncillaryData::Init()
 
 	m_DID = 0x00;
 	m_SID = 0x00;
-	m_DC  = 0;
 
 	m_checksum = 0;
 
@@ -80,32 +76,6 @@ void AJAAncillaryData::Clear (void)
 }
 
 
-AJAAncillaryData & AJAAncillaryData::operator= (const AJAAncillaryData & rhs)
-{
-	if (this != &rhs)		// ignore self-assignment
-	{
-		m_DID		= rhs.m_DID;
-		m_SID		= rhs.m_SID;
-		m_checksum	= rhs.m_checksum;
-		m_location	= rhs.m_location;
-		m_coding	= rhs.m_coding;
-
-		m_ancType	= rhs.m_ancType;
-		m_rcvDataValid = rhs.m_rcvDataValid;
-
-		if (rhs.m_DC > 0)
-		{
-			AJAStatus status = AllocDataMemory(rhs.m_DC);
-
-			if (status == AJA_STATUS_SUCCESS && m_pPayload != NULL)
-				rhs.GetPayloadData(m_pPayload, m_DC);
-		}
-	}
-
-	return *this;
-}
-
-
 AJAAncillaryData * AJAAncillaryData::Clone (void) const
 {
 	return new AJAAncillaryData (this);
@@ -115,41 +85,27 @@ AJAAncillaryData * AJAAncillaryData::Clone (void) const
 AJAStatus AJAAncillaryData::AllocDataMemory(uint32_t numBytes)
 {
 	AJAStatus status;
-
-	if (m_pPayload)
-		FreeDataMemory ();
-
-	uint8_t *	pPayload = NULL;
-	if (numBytes > 0)
-		pPayload = new uint8_t[numBytes];
-
-	if (pPayload)
+	FreeDataMemory();
+	try
 	{
-		m_pPayload = pPayload;
-		m_DC = numBytes;
+		m_payload.reserve(numBytes);
+		for (uint32_t ndx(0);  ndx < numBytes;  ndx++)
+			m_payload.push_back(0);
+assert(m_payload.size() == numBytes);
 		status = AJA_STATUS_SUCCESS;
 	}
-	else
+	catch(bad_alloc)
 	{
-		m_pPayload = NULL;
-		m_DC = 0;
+		m_payload.clear();
 		status = AJA_STATUS_FAIL;
 	}
-
 	return status;
 }
 
 
 AJAStatus AJAAncillaryData::FreeDataMemory (void)
 {
-	if (m_pPayload)
-	{
-		delete[] m_pPayload;
-		m_pPayload = NULL;
-	}
-
-	m_DC = 0;
-
+	m_payload.clear();
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -170,19 +126,15 @@ AJAStatus AJAAncillaryData::SetSID (const uint8_t inSID)
 
 uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 {
-	// note: this is NOT the "real" 9-bit checksum used in SMPTE 299 Ancillary packets,
-	//       but it's calculated the same way and should be the same as the ls 8-bits
-	//       of the 9-bit checksum.
-	uint8_t sum = 0;
-
-	sum += m_DID;
+	//	NOTE:	This is NOT the "real" 9-bit checksum used in SMPTE 299 Ancillary packets,
+	//			but it's calculated the same way and should be the same as the LS 8-bits
+	//			of the 9-bit checksum...
+	uint8_t	sum	(m_DID);
 	sum += m_SID;
-	sum += m_DC;
-
-	if (m_pPayload  &&  m_DC > 0)
-		for (uint32_t i = 0;  i < m_DC;  i++)
-			sum += m_pPayload[i];
-
+	sum += m_payload.size();
+	if (!m_payload.empty())
+		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
+			sum += m_payload[ndx];
 	return sum;
 }
 
@@ -192,13 +144,13 @@ uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 //
 AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & loc)
 {
-	AJAStatus	status	(SetLocationVideoLink (loc.link));
-	if (AJA_SUCCESS (status))
-		status = SetLocationVideoStream (loc.stream);
-	if (AJA_SUCCESS (status))
-		status = SetLocationVideoSpace (loc.ancSpace);
-	if (AJA_SUCCESS (status))
-		status = SetLocationLineNumber (loc.lineNum);
+	AJAStatus	status	(SetLocationVideoLink(loc.link));
+	if (AJA_SUCCESS(status))
+		status = SetLocationVideoStream(loc.stream);
+	if (AJA_SUCCESS(status))
+		status = SetLocationVideoSpace(loc.ancSpace);
+	if (AJA_SUCCESS(status))
+		status = SetLocationLineNumber(loc.lineNum);
 	return status;
 }
 
@@ -219,13 +171,13 @@ AJAStatus AJAAncillaryData::GetDataLocation (AJAAncillaryDataLink &			outLink,
 //
 AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink link, const AJAAncillaryDataVideoStream stream, const AJAAncillaryDataSpace ancSpace, const uint16_t lineNum)
 {
-	AJAStatus	status	(SetLocationVideoLink (link));
-	if (AJA_SUCCESS (status))
-		status = SetLocationVideoStream (stream);
-	if (AJA_SUCCESS (status))
-		status = SetLocationVideoSpace (ancSpace);
-	if (AJA_SUCCESS (status))
-		status = SetLocationLineNumber (lineNum);
+	AJAStatus	status	(SetLocationVideoLink(link));
+	if (AJA_SUCCESS(status))
+		status = SetLocationVideoStream(stream);
+	if (AJA_SUCCESS(status))
+		status = SetLocationVideoSpace(ancSpace);
+	if (AJA_SUCCESS(status))
+		status = SetLocationLineNumber(lineNum);
 	return status;
 }
 
@@ -234,7 +186,7 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink link, co
 //
 AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncillaryDataLink inLinkValue)
 {
-	if (!IS_VALID_AJAAncillaryDataLink (inLinkValue))
+	if (!IS_VALID_AJAAncillaryDataLink(inLinkValue))
 		return AJA_STATUS_RANGE;
 
 	m_location.link = inLinkValue;
@@ -296,17 +248,14 @@ AJAStatus AJAAncillaryData::SetPayloadData (const uint8_t * pInData, const uint3
 	if (pInData == NULL || inNumBytes == 0)
 		return AJA_STATUS_NULL;
 
-	//	Free any existing data...
-	FreeDataMemory ();
+	//	[Re]Allocate...
+	AJAStatus status (AllocDataMemory(inNumBytes));
+	if (AJA_FAILURE(status))
+		return status;
 
-	//	Allocate new memory...
-	AJAStatus status = AllocDataMemory (inNumBytes);
-
-	//	Copy payload into new memory...
-	if (status == AJA_STATUS_SUCCESS  &&  m_pPayload)
-		::memcpy (m_pPayload, pInData, inNumBytes);
-	
-	return status;
+	//	Copy payload into memory...
+	::memcpy (&m_payload[0], pInData, inNumBytes);
+	return AJA_STATUS_SUCCESS;
 }
 
 
@@ -317,30 +266,24 @@ AJAStatus AJAAncillaryData::SetFromSMPTE334 (const uint16_t * pInData, const uin
 	if (inNumWords < 7)
 		return AJA_STATUS_RANGE;
 
-	const uint32_t	payloadByteCount	(uint32_t (pInData [5] & 0x00FF));
+	const uint32_t	payloadByteCount	(uint32_t(pInData[5] & 0x00FF));
 	if ((inNumWords - 7) > payloadByteCount)
 		return AJA_STATUS_RANGE;
 
-	//	Free any existing data...
-	FreeDataMemory ();
-
-	//	Allocate new memory...
-	const AJAStatus status	(AllocDataMemory (payloadByteCount));
-	if (AJA_FAILURE (status))
+	//	[Re]Allocate...
+	const AJAStatus status	(AllocDataMemory(payloadByteCount));
+	if (AJA_FAILURE(status))
 		return status;
-
-	if (!m_pPayload)
-		return AJA_STATUS_MEMORY;
 
 	//	Copy payload into new memory...
 	for (uint32_t numWord (0);  numWord < payloadByteCount;  numWord++)
-		m_pPayload [numWord] = UByte (pInData [6 + numWord] & 0x00FF);
+		m_payload[numWord] = UByte(pInData[6+numWord] & 0x00FF);
 
-	SetDataCoding (AJAAncillaryDataCoding_Digital);
-	SetDataLocation (inLocInfo);
-	SetChecksum (UByte (pInData [payloadByteCount + 6] & 0x00FF));
-	SetDID (UByte (pInData[3] & 0x00FF));
-	SetSID (UByte (pInData[4] & 0x00FF));
+	SetDataCoding(AJAAncillaryDataCoding_Digital);
+	SetDataLocation(inLocInfo);
+	SetChecksum(UByte(pInData[6+payloadByteCount] & 0x00FF));
+	SetDID(UByte(pInData[3] & 0x00FF));
+	SetSID(UByte(pInData[4] & 0x00FF));
 
 	return AJA_STATUS_SUCCESS;
 }
@@ -355,17 +298,15 @@ AJAStatus AJAAncillaryData::AppendPayloadData (const uint8_t * pInData, const ui
 	if (pInData == NULL || inNumBytes == 0)
 		return AJA_STATUS_NULL;
 
-	//	See if we can grow (or make) the existing payload buffer...
-	uint8_t * pNewPtr = (uint8_t *) ::realloc (m_pPayload, m_DC + inNumBytes);
-
-	//	If realloc fails, return an error but leave the original data intact...
-	if (pNewPtr == NULL)
-		return AJA_STATUS_FAIL;
-
-	//	We now have our original data in a larger payload buffer
-	m_pPayload = pNewPtr;
-	::memcpy ((m_pPayload + m_DC), pInData, inNumBytes);	//	Append the new stuff
-	m_DC += inNumBytes; 
+	try
+	{
+		for (uint32_t ndx(0);  ndx < inNumBytes;  ndx++)
+			m_payload.push_back(pInData[ndx]);
+	}
+	catch(bad_alloc)
+	{
+		return AJA_STATUS_MEMORY;
+	}
 	
 	return AJA_STATUS_SUCCESS;
 }
@@ -376,19 +317,18 @@ AJAStatus AJAAncillaryData::AppendPayloadData (const uint8_t * pInData, const ui
 
 AJAStatus AJAAncillaryData::AppendPayload (const AJAAncillaryData & inAnc)
 {
-	//	See if we can grow (or make) the existing payload buffer...
-	uint8_t *	pNewPtr	= (uint8_t *) ::realloc (m_pPayload, (m_DC + inAnc.m_DC));
+	try
+	{
+		const uint8_t *	pInData		(inAnc.GetPayloadData());
+		const uint32_t	numBytes	(uint32_t(inAnc.GetPayloadByteCount()));
+		for (uint32_t ndx(0);  ndx < numBytes;  ndx++)
+			m_payload.push_back(pInData[ndx]);
+	}
+	catch(bad_alloc)
+	{
+		return AJA_STATUS_MEMORY;
+	}
 
-	//	If realloc fails, return an error but leave the original data intact...
-	if (pNewPtr == NULL)
-		return AJA_STATUS_FAIL;
-
-	m_pPayload = pNewPtr;	//	Original data is now in a larger payload buffer
-	AJAStatus	status	= inAnc.GetPayloadData ((m_pPayload + m_DC), inAnc.m_DC);	//	Copy new data from append source
-	if (status != AJA_STATUS_SUCCESS)
-		return status;
-
-	m_DC += inAnc.m_DC; 
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -401,23 +341,30 @@ AJAStatus AJAAncillaryData::GetPayloadData (uint8_t * pOutData, const uint32_t i
 	if (pOutData == NULL)
 		return AJA_STATUS_NULL;
 
-	if (inNumBytes > m_DC)
+	if (ByteVectorIndex(inNumBytes) > m_payload.size())
 		return AJA_STATUS_RANGE;
 
-	if (m_pPayload == NULL)
-		return AJA_STATUS_NULL;
-
-	::memcpy (pOutData, m_pPayload, inNumBytes);
+	::memcpy (pOutData, GetPayloadData(), inNumBytes);
 	return AJA_STATUS_SUCCESS;
 }
 
 
 uint8_t AJAAncillaryData::GetPayloadByteAtIndex (const uint32_t inIndex0) const
 {
-	if (m_pPayload && inIndex0 < m_DC)
-		return m_pPayload [inIndex0];
+	if (ByteVectorIndex(inIndex0) < m_payload.size())
+		return m_payload[inIndex0];
 	else
 		return 0;
+}
+
+
+AJAStatus AJAAncillaryData::SetPayloadByteAtIndex (const uint8_t inDataByte, const uint32_t inIndex0)
+{
+	if (inIndex0 >= GetDC())
+		return AJA_STATUS_RANGE;
+
+	m_payload[inIndex0] = inDataByte;
+	return AJA_STATUS_SUCCESS;
 }
 
 
@@ -432,11 +379,14 @@ AJAStatus AJAAncillaryData::ParsePayloadData (void)
 
 //**********
 // Initializes the AJAAncillaryData object from "raw" ancillary data received from hardware (ingest)
-AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation & inLocationInfo, uint32_t & outPacketByteCount)
+AJAStatus AJAAncillaryData::InitWithReceivedData (	const uint8_t *						pInData,
+													const uint32_t						inMaxBytes,
+													const AJAAncillaryDataLocation &	inLocationInfo,
+													uint32_t &							outPacketByteCount)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
-	// if all is well, pInData points to the beginning of a packet that is laid out like this:
+	// if all is well, pInData points to the beginning of a "GUMP" packet:
 	//
 	//	pInData ->	0:	0xFF			// 1st byte is always FF
 	//				1:  Hdr data1		// location data byte #1
@@ -444,26 +394,26 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t * pInData, const
 	//				3:  DID				// ancillary packet Data ID
 	//				4:  SID				// ancillary packet Secondary ID (or DBN)
 	//				5:  DC				// ancillary packet Data Count (size of payload: 0 - 255)
-	//				6:  Payload[0]		// 1st byte of payload
-	//				7:  Payload[1]		// 2nd byte of payload
+	//				6:  Payload[0]		// 1st byte of payload UDW
+	//				7:  Payload[1]		// 2nd byte of payload UDW
 	//             ...    ...
-	//		 (5 + DC):  Payload[DC-1]	// last byte of payload
-	//		 (6 + DC):	checksum		// 8-bit sum of (DID + SID + DC + Payload[0] + ... + Payload[DC-1])
+	//		 (5 + DC):  Payload[DC-1]	// last byte of payload UDW
+	//		 (6 + DC):	CS (checksum)	// 8-bit sum of (DID + SID + DC + Payload[0] + ... + Payload[DC-1])
 	//
 	//		 (7 + DC):  (start of next packet, if any...) returned in packetSize.
 	//
 	// Note that this is the layout of the data as returned from the ANCExtractor hardware, and
-	// is NOT exactly the same as SMPTE-291. 
+	// is NOT exactly the same as SMPTE-291.
 	//
 	// The inMaxBytes input gives us an indication of how many "valid" bytes remain in the caller's TOTAL
 	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
 	// of the captured data.
 	//
 	// The caller provides an AJAAncillaryDataLocation struct with all of the information filled in
-	// except the line number. We decode it 
+	// except the line number.
 	//
-	// When we have extracted the useful data from the packet, we return the size of the packet so the
-	// caller can find the beginning of the next packet.
+	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
+	// caller can find the start of the next packet (if any).
 
 	if (pInData == NULL)
 	{
@@ -520,9 +470,10 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t * pInData, const
 	uint32_t payloadSize = pInData[5];	// SMPTE-291 Data Count
 	if (payloadSize)
 	{
-		status = AllocDataMemory (payloadSize);					// note: this also sets our local "DC" value
-		if (status == AJA_STATUS_SUCCESS && m_pPayload)
-			::memcpy (m_pPayload, &pInData[6], payloadSize);
+		status = AllocDataMemory(payloadSize);					// note: this also sets our local "DC" value
+		if (AJA_SUCCESS(status))
+			for (uint32_t ndx(0);  ndx < payloadSize;  ndx++)
+				m_payload[ndx] = pInData[ndx+6];
 	}
 
 	outPacketByteCount = totalSize;
@@ -531,88 +482,12 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t * pInData, const
 }
 
 
-AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint8_t> & inData, const AJAAncillaryDataLocation & inLocationInfo)
+AJAStatus AJAAncillaryData::InitWithReceivedData (const ByteVector & inData, const AJAAncillaryDataLocation & inLocationInfo)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
-	// if all is well, inData contains a packet that's laid out like this:
-	//
-	//	pInData ->	0:	0xFF			// 1st byte is always FF
-	//				1:  Hdr data1		// location data byte #1
-	//				2:  Hdr data2		// location data byte #2
-	//				3:  DID				// ancillary packet Data ID
-	//				4:  SID				// ancillary packet Secondary ID (or DBN)
-	//				5:  DC				// ancillary packet Data Count (size of payload: 0 - 255)
-	//				6:  Payload[0]		// 1st byte of payload
-	//				7:  Payload[1]		// 2nd byte of payload
-	//             ...    ...
-	//		 (5 + DC):  Payload[DC-1]	// last byte of payload
-	//		 (6 + DC):	checksum		// 8-bit sum of (DID + SID + DC + Payload[0] + ... + Payload[DC-1])
-	//
-	//		 (7 + DC):  (start of next packet, if any...) returned in packetSize.
-	//
-	// Note that this is the layout of the data as returned from the ANCExtractor hardware, and
-	// is NOT exactly the same as SMPTE-291. 
-	//
-	// The inMaxBytes input gives us an indication of how many "valid" bytes remain in the caller's TOTAL
-	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
-	// of the captured data.
-	//
-	// The caller provides an AJAAncillaryDataLocation struct with all of the information filled in
-	// except the line number. We decode it 
-	//
-	// When we have extracted the useful data from the packet, we return the size of the packet so the
-	// caller can find the beginning of the next packet.
-
+	uint32_t	pktByteCount(0);
 	if (inData.empty())
 		return AJA_STATUS_NULL;
-
-	//	The minimum size for a packet (i.e. no payload) is 7 bytes
-	if (inData.size() < size_t(AJAAncillaryDataWrapperSize))
-		return AJA_STATUS_RANGE;
-
-	//	The first byte should be 0xFF. If it's not, then the Anc data stream may be broken...
-	if (inData[0] != 0xFF)
-		return AJA_STATUS_BAD_PARAM;
-
-	//	So we have at least enough bytes for a minimum packet, and the first byte is what we expect.
-	//	Let's see what size this packet actually reports...
-	uint32_t totalSize = inData[5] + AJAAncillaryDataWrapperSize;
-
-	//	If the reported packet size extends beyond the end of the buffer, we're toast...
-	if (size_t(totalSize) > inData.size())
-		return AJA_STATUS_RANGE;
-
-	//	OK... we have enough data in the buffer to contain the packet, and everything else checks out,
-	//	so go ahead and parse the data...
-
-	m_DID	   = inData[3];				// SMPTE-291 Data ID
-	m_SID	   = inData[4];				// SMPTE-291 Secondary ID (or DBN)
-//	DC		   = inData[5];
-	m_checksum = inData[totalSize-1];	// reported checksum
-
-	//	Caller provides all of the "location" information as a default. If the packet header info is "real", overwrite it...
-	m_location = inLocationInfo;
-
-	if ((inData[1] & 0x80) != 0)
-	{
-		m_coding            = ((inData[1] & 0x40) == 0) ? AJAAncillaryDataCoding_Digital : AJAAncillaryDataCoding_Analog;	// byte 1, bit 6
-		m_location.stream   = ((inData[1] & 0x20) == 0) ? AJAAncillaryDataVideoStream_C : AJAAncillaryDataVideoStream_Y;	// byte 1, bit 5
-		m_location.ancSpace = ((inData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC;			// byte 1, bit 4
-		m_location.lineNum  = ((inData[1] & 0x0F) << 7) + (inData[2] & 0x7F);												// byte 1, bits 3:0 + byte 2, bits 6:0
-	}
-
-	//	Allocate space for the payload and copy it in...
-	uint32_t payloadSize = inData[5];	// SMPTE-291 Data Count
-	if (payloadSize)
-	{
-		status = AllocDataMemory (payloadSize);					// note: this also sets our local "DC" value
-		if (status == AJA_STATUS_SUCCESS && m_pPayload)
-			for (uint32_t ndx(0);  ndx < payloadSize;  ndx++)
-				m_pPayload[ndx] = inData[ndx+6];
-	}
-
-	return status;
+	return InitWithReceivedData (&inData[0], uint32_t(inData.size()), inLocationInfo, pktByteCount);
 }
 
 
@@ -620,7 +495,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint8_t> & inData
 // This returns the number of bytes that will be returned by GenerateTransmitData(). This is usually
 // called first so the caller can allocate a buffer large enough to hold the results.
 
-AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & packetSize)
+AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
@@ -628,34 +503,34 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & packetSize)
 	// seven bytes (3 bytes header + DID + SID + DC + Checksum) plus the payload size.
 	if (m_coding == AJAAncillaryDataCoding_Digital)
 	{
-		if (m_DC <= 255)
-			packetSize = m_DC + AJAAncillaryDataWrapperSize;
+		if (GetDC() <= 255)
+			outPacketSize = GetDC() + AJAAncillaryDataWrapperSize;
 
 		else		// this is an error condition: if we have more than 255 bytes of payload in a "digital" packet, truncate the payload
-			packetSize = 255 + AJAAncillaryDataWrapperSize;
+			outPacketSize = 255 + AJAAncillaryDataWrapperSize;
 	}
 	else if (m_coding == AJAAncillaryDataCoding_Raw)
 	{
 		// if this is analog/raw ancillary data then we need to figure out how many "packets" we need
 		// to generate in order to pass all of the payload data (max 255 bytes per packet)
 		// special case: if DC is zero, there's no reason to generate ANY output!
-		if (m_DC == 0)
-			packetSize = 0;
+		if (IsEmpty())
+			outPacketSize = 0;
 		else	// DC > 0
 		{
-			uint32_t numPackets = (m_DC + 254) / 255;
+			uint32_t numPackets = (GetDC() + 254) / 255;
 
 			// all packets will have a 255-byte payload except the last one
-			uint32_t lastPacketDC = m_DC % 255;
+			uint32_t lastPacketDC = GetDC() % 255;
 
 			// each packet has a 7-byte "wrapper" + the payload size
-			packetSize =  ((numPackets - 1) * (255 + AJAAncillaryDataWrapperSize))	// all packets except the last one have a payload of 255 bytes
-						+ (lastPacketDC + AJAAncillaryDataWrapperSize);			// the last packet carries the remainder
+			outPacketSize =  ((numPackets - 1) * (255 + AJAAncillaryDataWrapperSize))	// all packets except the last one have a payload of 255 bytes
+							+ (lastPacketDC + AJAAncillaryDataWrapperSize);				// the last packet carries the remainder
 		}
 	}
 	else	// huh? (coding not set)
 	{
-		packetSize = 0;
+		outPacketSize = 0;
 		status = AJA_STATUS_FAIL;
 	}
 	
@@ -666,7 +541,7 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & packetSize)
 //**********
 // Generates "raw" ancillary data from the internal ancillary data (playback)
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t maxData, uint32_t & packetSize)
+AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
@@ -674,22 +549,22 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 	uint32_t myPacketSize;
 	GetRawPacketSize(myPacketSize);
 
-	if (myPacketSize > maxData || myPacketSize == 0)
+	if (myPacketSize > inMaxBytes  ||  myPacketSize == 0)
 	{
-		packetSize = 0;		// it won't fit: generate no data and return zero size
+		outPacketSize = 0;		// it won't fit: generate no data and return zero size
 		return AJA_STATUS_FAIL;
 	}
 
 	if (m_coding == AJAAncillaryDataCoding_Digital)
 	{
-		pData[0] = GetHeaderByte1();
-		pData[1] = GetHeaderByte2();
-		pData[2] = GetHeaderByte3();
+		pData[0] = GetGUMPHeaderByte1();
+		pData[1] = GetGUMPHeaderByte2();
+		pData[2] = GetGUMPHeaderByte3();
 
 		pData[3] = m_DID;
 		pData[4] = m_SID;
 
-		uint8_t payloadSize = (m_DC > 255) ? 255 : m_DC;	// truncate payload to max 255 bytes
+		uint8_t payloadSize = (GetDC() > 255) ? 255 : GetDC();	// truncate payload to max 255 bytes
 		pData[5] = payloadSize;	
 
 		// copy payload data to raw stream
@@ -701,26 +576,26 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		pData[6+payloadSize] = Calculate8BitChecksum();
 
 		// all done!
-		packetSize = myPacketSize;
+		outPacketSize = myPacketSize;
 	}
 	else if (m_coding == AJAAncillaryDataCoding_Raw)
 	{
 		// "analog" or "raw" ancillary data is special in that it may generate multiple output packets,
 		// depending on the length of the payload data.
 		// NOTE: we're assuming that zero-length payloads have already been screened out (above)!
-		uint32_t numPackets = (m_DC + 254) / 255;
+		uint32_t numPackets = (GetDC() + 254) / 255;
 
 		// all packets will have a 255-byte payload except the last one
 		//Note: Unused --  uint32_t lastPacketDC = m_DC % 255;
 
-		uint8_t *payloadPtr = m_pPayload;
-		uint32_t remainingPayloadData = m_DC;
+		const uint8_t *	payloadPtr = GetPayloadData();
+		uint32_t remainingPayloadData = GetDC();
 
-		for (uint32_t i = 0; i < numPackets; i++)
+		for (uint32_t i = 0;  i < numPackets;  i++)
 		{
-			pData[0] = GetHeaderByte1();
-			pData[1] = GetHeaderByte2();
-			pData[2] = GetHeaderByte3();
+			pData[0] = GetGUMPHeaderByte1();
+			pData[1] = GetGUMPHeaderByte2();
+			pData[2] = GetGUMPHeaderByte3();
 
 			pData[3] = m_DID;
 			pData[4] = m_SID;
@@ -746,11 +621,11 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		}
 
 		// all done!
-		packetSize = myPacketSize;
+		outPacketSize = myPacketSize;
 	}
 	else	// huh? coding param not set - don't generate anything
 	{
-		packetSize = 0;
+		outPacketSize = 0;
 		status = AJA_STATUS_FAIL;
 	}
 
@@ -758,12 +633,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 }
 
 
-uint8_t AJAAncillaryData::GetHeaderByte2 (void) const
+uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 {
-	uint8_t result = 0;
-
-	if (true)
-		result |= 0x80;		// LE bit is always active
+	uint8_t result	(0x80);	// LE bit is always active
 
 	if (m_coding == AJAAncillaryDataCoding_Raw)
 		result |= 0x40;		// analog/raw (1) or digital (0) ancillary data
@@ -777,13 +649,6 @@ uint8_t AJAAncillaryData::GetHeaderByte2 (void) const
 	// ms 4 bits of line number
 	result |= (m_location.lineNum >> 7) & 0x0F;	// ms 4 bits [10:7] of line number
 
-	return result;
-}
-
-
-uint8_t AJAAncillaryData::GetHeaderByte3 (void) const
-{
-	uint8_t result = m_location.lineNum & 0x7F;	// ls 7 bits [6:0] of line number
 	return result;
 }
 
@@ -861,13 +726,13 @@ const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue,
 
 ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPayload) const
 {
-	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString (m_DID, m_SID) << endl	//	::AJAAncillaryDataTypeToString (GetAncillaryDataType ()) << endl
-				<< "DID:\t\t0x"	<< hex << setfill ('0') << setw (2) << uint32_t (m_DID) << endl
-				<< "SID:\t\t0x"	<< hex << setfill ('0') << setw (2) << uint32_t (m_SID) << endl
-				<< "DC:\t\t"	<< dec << m_DC << endl
-				<< "CS:\t\t0x"	<< hex << setfill ('0') << setw (2) << uint32_t (m_checksum) << dec << endl
-				<< m_location	<< endl
-				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString (m_coding) << endl
+	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)	<< endl	//	::AJAAncillaryDataTypeToString (GetAncillaryDataType ()) << endl
+				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)						<< endl
+				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
+				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
+				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
+				<< m_location														<< endl
+				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)		<< endl
 				<< "Valid:\t\t"	<< (m_rcvDataValid ? "Yes" : "No");
 	if (inDumpPayload)
 		{inOutStream << endl;  DumpPayload (inOutStream);}
@@ -880,14 +745,14 @@ string AJAAncillaryData::AsString (uint16_t inDumpMaxBytes) const
 	ostringstream	oss;
 	oss	<< "[" << ::AJAAncillaryDataCodingToString(GetDataCoding())
 		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation()) << "|" << GetDIDSIDPair() << "]";
-	if (inDumpMaxBytes  &&  m_pPayload)
+	if (inDumpMaxBytes  &&  GetDC())
 	{
 		uint16_t	byteCount	= uint16_t(GetPayloadByteCount());
 		oss << byteCount << " bytes: ";
 		if (inDumpMaxBytes > byteCount)
 			inDumpMaxBytes = byteCount;
 		for (uint16_t ndx(0);  ndx < inDumpMaxBytes;  ndx++)
-			oss << HEX0N(uint16_t(m_pPayload[ndx]),2);
+			oss << HEX0N(uint16_t(m_payload[ndx]),2);
 	}
 	return oss.str();
 }
@@ -902,19 +767,21 @@ ostream & operator << (ostream & inOutStream, const AJAAncillaryDIDSIDPair & inD
 
 ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 {
-	if (m_pPayload)
+	if (IsEmpty())
+		inOutStream	<< "(NULL payload)" << endl;
+	else
 	{
 		const int32_t	kBytesPerLine	(32);
-		int32_t			count			(m_DC);
-		uint8_t *		pData			(m_pPayload);
+		uint32_t		count			(GetDC());
+		const uint8_t *	pData			(GetPayloadData());
 
 		while (count > 0)
 		{
-			const uint8_t	numBytes	((count >= kBytesPerLine) ? kBytesPerLine : count);
-			inOutStream << ((pData == m_pPayload) ? "Payload:  " : "          ");
-			for (uint8_t num (0);  num < numBytes;  num++)
+			const uint32_t	numBytes	((count >= kBytesPerLine) ? kBytesPerLine : count);
+			inOutStream << ((count == GetDC()) ? "Payload:  " : "          ");
+			for (uint8_t num(0);  num < numBytes;  num++)
 			{
-				inOutStream << " " << hex << setfill ('0') << setw (2) << uint32_t (pData [num]);
+				inOutStream << " " << HEX0N(uint32_t(pData[num]),2);
 				if (num % 4 == 3)
 					inOutStream << " ";		// an extra space every four bytes for readability
 			}
@@ -923,8 +790,6 @@ ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 			count -= numBytes;
 		}	//	loop til break
 	}
-	else
-		inOutStream	<< "(NULL payload)" << endl;
 	return inOutStream;
 }
 
@@ -938,7 +803,9 @@ bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
 		&&  GetDataLocation() == inRHS.GetDataLocation()
 		&&  GetDataCoding() == inRHS.GetDataCoding())
 		{
-			if (m_pPayload  &&  inRHS.m_pPayload  &&  ::memcmp (m_pPayload, inRHS.m_pPayload, GetPayloadByteCount()) == 0)
+			if (IsEmpty())
+				return true;
+			if (::memcmp (GetPayloadData(), inRHS.GetPayloadData(), GetPayloadByteCount()) == 0)
 				return true;
 		}
 	return false;
