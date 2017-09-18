@@ -203,7 +203,7 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
             cout << "SecondaryRemoteIPAddress " << transmitStruct.mSecondaryRemoteIPAddress.toStdString() << endl;
 
-        transmitStruct.mSecondaryRemoteIPAddress = transmitChannelObject["secondaryRemotePort"].toString();
+        transmitStruct.mSecondaryRemotePort = transmitChannelObject["secondaryRemotePort"].toString();
         if (!transmitStruct.mSecondaryRemoteIPAddress.isEmpty())
             cout << "SecondaryRemotePort " << transmitStruct.mSecondaryRemotePort.toStdString() << endl;
 
@@ -405,12 +405,17 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     	}
     }
 
-
-    bool rv = config2022.Set2022_7_Mode(mEnable2022_7,mNetworkPathDifferential);
-    if (!rv)
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
+    bool supports2022_7 = ((val & SAREK_2022_7) != 0);
+    if (supports2022_7)
     {
-        cerr << "Error: " << config2022.getLastError() << endl;
-        return false;
+        bool rv = config2022.Set2022_7_Mode(mEnable2022_7,mNetworkPathDifferential);
+        if (!rv)
+        {
+            cerr << "Error: " << config2022.getLastError() << endl;
+            return false;
+        }
     }
 
     cerr << "## receiveIter" << endl;
@@ -450,7 +455,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
         rxChannelConfig.ssrc                = receive.mSSRC.toUInt();
 
-        rv = config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
+        bool rv = config2022.SetRxChannelConfiguration (channel, rxChannelConfig);
         if (!rv)
         {
             cerr << "Error (config2022.SetRxChannelConfiguration) " << config2022.getLastError() << endl;
@@ -491,11 +496,12 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         txChannelConfig.primaryRemotePort   = transmit.mPrimaryRemotePort.toUInt();
         txChannelConfig.secondaryLocalPort  = transmit.mSecondaryLocalPort.toUInt();
         txChannelConfig.secondaryRemoteIP   = transmit.mSecondaryRemoteIPAddress.toStdString();
+        txChannelConfig.secondaryRemotePort = transmit.mSecondaryRemotePort.toUInt();
         txChannelConfig.ssrc                = transmit.mSSRC.toUInt();
         txChannelConfig.tos                 = transmit.mTOS.toUInt();
         txChannelConfig.ttl                 = transmit.mTTL.toUInt();
 
-        rv = config2022.SetTxChannelConfiguration (channel, txChannelConfig);
+        bool rv = config2022.SetTxChannelConfiguration (channel, txChannelConfig);
         if (!rv)
         {
             cerr << "Error (config2022.SetTxChannelConfiguration) " << config2022.getLastError() << endl;

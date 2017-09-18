@@ -1,14 +1,13 @@
 {
     "protocol" : "2022",
-    "Enable2022_7":"true",
+    "Enable2022_7":"false",
     "networkPathDifferential":"50",
     "sfps":[
     {
             "designator":"top",
-            "IPAddress":"172.16.19.11",
+            "IPAddress":"172.16.0.14",
             "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-            "Enable2022_7":"false"
+            "Router":"255.255.255.255"
     }
     ],
     "receive":[

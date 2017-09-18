@@ -4,13 +4,7 @@
             "designator":"top",
             "IPAddress":"172.16.45.10",
             "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-    },
-    {
-            "designator":"bottom",
-            "IPAddress":"172.16.45.11",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
+            "Router":"255.255.255.255"
     }
     ],
     "transmit":[
