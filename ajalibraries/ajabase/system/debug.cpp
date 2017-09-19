@@ -525,7 +525,7 @@ AJADebug::GetMessageTime(int32_t sequenceNumber, uint64_t* pTime)
 }
 
 AJAStatus
-AJADebug::GetMessageWallTime(int32_t sequenceNumber, int64_t* pTime)
+AJADebug::GetMessageWallClockTime(int32_t sequenceNumber, int64_t* pTime)
 {
     if(spShare == NULL)
     {

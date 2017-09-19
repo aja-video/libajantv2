@@ -320,7 +320,7 @@ public:
      *				AJA_STATUS_RANGE		index out of range
      *				AJA_STATUS_NULL			null output pointer
      */
-    static AJAStatus GetMessageWallTime(int32_t sequenceNumber, int64_t *pTime);
+    static AJAStatus GetMessageWallClockTime(int32_t sequenceNumber, int64_t *pTime);
 
 
 	/**
