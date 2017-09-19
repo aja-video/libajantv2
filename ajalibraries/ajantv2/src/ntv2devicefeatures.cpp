@@ -145,6 +145,7 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_IO4KPLUS:
 	case DEVICE_ID_IO4KIP:
 	case DEVICE_ID_KONAIP_4TX_2110:
+	case DEVICE_ID_KONAALPHA:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
 	default:
@@ -177,6 +178,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_CORVID3G:
 	case DEVICE_ID_IOXT:
 	case DEVICE_ID_TTAP:
+	case DEVICE_ID_KONAALPHA:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_2048x1080:
@@ -290,6 +292,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_LHI:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID3G:
+	case DEVICE_ID_KONAALPHA:
 		return 32;
 	case DEVICE_ID_IOXT:
 		return 24;
@@ -342,6 +345,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVID3G:
 	case DEVICE_ID_IOXT:
 	case DEVICE_ID_TTAP:
+	case DEVICE_ID_KONAALPHA:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_2048x1080:
