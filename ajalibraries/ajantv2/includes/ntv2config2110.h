@@ -184,7 +184,8 @@ protected:
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    bool        GenSDPStream(std::ofstream & sdp, NTV2Channel channel, NTV2Stream stream);
+    bool        GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel);
+    bool        GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);

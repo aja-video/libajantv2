@@ -104,6 +104,11 @@ protected:
     bool SetLinkActive(eSFP Link);
     bool GetLinkActive(eSFP link);
 
+    bool SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt);
+    bool GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt);
+
+    uint64_t GetNTPTimestamp();
+
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SendArpRequest(std::string remote_IPAddress, eSFP port);
