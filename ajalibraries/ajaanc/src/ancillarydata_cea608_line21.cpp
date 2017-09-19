@@ -53,6 +53,7 @@ void AJAAncillaryData_Cea608_Line21::Init (void)
 	m_SID	  = AJAAncillaryData_Cea608_Line21_SID;
 	m_bEncodeBufferInitialized = false;
 	m_dataStartOffset = 0;
+	SetLocationLineNumber(21);	//	Assume F1	otherwise SetLocationLineNumber(284);
 }
 
 

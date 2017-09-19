@@ -47,6 +47,10 @@ public:	//	CLASS METHODS
 															AJAAncillaryList & outF2Packets);
 
 public:	//	INSTANCE METHODS
+	/**
+		@name	Construction, Destruction, Assignment & Copying
+	**/
+	///@{
 											AJAAncillaryList ();			///< @brief	Instantiate and initialize with a default set of values.
 
 	virtual									~AJAAncillaryList ();			///< @brief	My destructor.
@@ -57,13 +61,19 @@ public:	//	INSTANCE METHODS
 		@return		A reference to myself.
 	**/
 	virtual AJAAncillaryList &				operator = (const AJAAncillaryList & inRHS);
+	///@}
+
 
 	/**
-		@brief	Removes and frees all of my AJAAncillaryData objects.
-		@return	AJA_STATUS_SUCCESS if successful.
+		@name	Fetching, Searching & Enumerating Packets
 	**/
-	virtual AJAStatus						Clear (void);
+	///@{
 
+	/**
+		@brief	Answers with the number of AJAAncillaryData objects I contain (any/all types).
+		@return	The number of AJAAncillaryData objects I contain.
+	**/
+	virtual inline uint32_t					CountAncillaryData (void) const				{return uint32_t (m_ancList.size ());}
 
 	/**
 		@brief		Answers with the AJAAncillaryData object at the given index.
@@ -73,30 +83,11 @@ public:	//	INSTANCE METHODS
 	virtual AJAAncillaryData *				GetAncillaryDataAtIndex (const uint32_t inIndex) const;
 
 	/**
-		@return		A constant reference to my list.
-	**/
-//	virtual inline const AJAAncillaryDataList &	GetAncillaryDataList (void) const		{return (m_ancList);}
-
-	/**
-		@brief		Sends a "Parse" command to all of my AJAAncillaryData objects.
-		@return		AJA_STATUS_SUCCESS if all items parse successfully;  otherwise the last failure result.
-	**/
-	virtual AJAStatus						ParseAllAncillaryData (void);
-
-	/**
-		@brief	Answers with the number of AJAAncillaryData objects I contain (any/all types).
-		@return	The number of AJAAncillaryData objects I contain.
-	**/
-	virtual inline uint32_t					CountAncillaryData (void) const				{return uint32_t (m_ancList.size ());}
-
-
-	/**
 		@brief		Answers with the number of AJAAncillaryData objects having the given type.
 		@param[in]	inMatchType		Specifies the AJAAncillaryDataType to match.
 		@return		The number of AJAAncillaryData objects having the given type.
 	**/
 	virtual uint32_t						CountAncillaryDataWithType (const AJAAncillaryDataType inMatchType) const;
-
 
 	/**
 		@brief		Answers with the AJAAncillaryData object having the given type and index.
@@ -106,7 +97,6 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithType (const AJAAncillaryDataType inMatchType, const uint32_t inIndex = 0) const;
 
-
 	/**
 		@brief		Answers with the number of AncillaryData objects having the given DataID and SecondaryID.
 		@param[in]	inDID	Specifies the DataID to match. Use AJAAncillaryDataWildcard_DID to match any/all DIDs.
@@ -114,7 +104,6 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual uint32_t						CountAncillaryDataWithID (const uint8_t inDID, const uint8_t inSID) const;
-
 
 	/**
 		@brief		Answers with the AJAAncillaryData object having the given DataID and SecondaryID, at the given index.
@@ -124,15 +113,26 @@ public:	//	INSTANCE METHODS
 		@return		The AJAAncillaryData object having the given DID, SID and index.
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithID (const uint8_t inDID, const uint8_t inSID, const uint32_t inIndex = 0) const;
+	///@}
 
 
 	/**
-		@brief		Adds a copy of the AJAAncillaryData object to me.
+		@name	Adding & Removing Packets
+	**/
+	///@{
+
+	/**
+		@brief	Removes and frees all of my AJAAncillaryData objects.
+		@return	AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						Clear (void);
+
+	/**
+		@brief		Adds (appends) a copy (using AJAAncillaryData::Clone) of the AJAAncillaryData object to me.
 		@param[in]	pInAncData	Specifies the AJAAncillaryData object to be copied and added to me.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddAncillaryData (const AJAAncillaryData * pInAncData);
-
 
 	/**
 		@brief		Adds a copy of the AJAAncillaryData object to me.
@@ -141,24 +141,27 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual inline AJAStatus				AddAncillaryData (const AJAAncillaryData & inAncData)	{return AddAncillaryData (&inAncData);}
 
-
 	/**
-		@brief		Removes all copies of the designated AJAAncillaryData object from the list.
+		@brief		Removes all copies of the AJAAncillaryData object from me.
+		@note		The given AJAAncillaryData object is not freed/deleted -- it's only removed from my list.
 		@param[in]	pInAncData	Specifies the AJAAncillaryData object to remove.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						RemoveAncillaryData (AJAAncillaryData * pInAncData);
 
-
 	/**
-		@brief		Removes all copies of the designated AJAAncillaryData object from the list
-					and deletes the object itself.
+		@brief		Removes all copies of the AJAAncillaryData object from me and deletes the object itself.
 		@param[in]	pInAncData	Specifies the AJAAncillaryData object to remove and delete.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						DeleteAncillaryData (AJAAncillaryData * pInAncData);
+	///@}
 
 
+	/**
+		@name	Sorting
+	**/
+	///@{
 
 	/**
 		@brief		Sort the AncillaryDataList by DataID (DID) value.
@@ -166,13 +169,11 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						SortListByDID (void);
 
-
 	/**
 		@brief		Sort the AncillaryDataList by Secondary ID (SID) value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SortListBySID (void);
-
 
 	/**
 		@brief		Sort the AncillaryDataList by "location", i.e. where in the video (field, line num, HANC/VANC)
@@ -180,7 +181,13 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SortListByLocation (void);
+	///@}
 
+
+	/**
+		@name	Transmit/Receive To/From AJA Hardware
+	**/
+	///@{
 
 	/**
 		@brief		Parse "raw" ancillary data bytes extracted by an Anc Extractor Widget into separate AJAAncillaryData objects
@@ -243,8 +250,18 @@ public:	//	INSTANCE METHODS
 	virtual AJAStatus						GetAncillaryDataTransmitData (const bool inIsProgressive, const uint32_t inF2StartLine,
 																			uint8_t * pOutF1AncData, const uint32_t inF1ByteCountMax,
 																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax) const;
+	/**
+		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.
+		@return		AJA_STATUS_SUCCESS if all items parse successfully;  otherwise the last failure result.
+	**/
+	virtual AJAStatus						ParseAllAncillaryData (void);
+	///@}
 
-	
+
+	/**
+		@name	Analog Anc Type Mapping
+	**/
+	///@{
 
 //--------------------------------------------------------
 	/**
@@ -298,8 +315,16 @@ public:	//	INSTANCE METHODS
 		@return		The ancillary data type associated with the designated line, if known, or AJAAncillaryDataType_Unknown.
 	**/
 	virtual AJAAncillaryDataType			GetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum) const;
+	///@}
+
+
+	/**
+		@name	Printing & Debugging
+	**/
+	///@{
 
 	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = false) const;
+	///@}
 
 
 protected:
@@ -311,7 +336,7 @@ protected:
 	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
 	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
 
-	AJAAncillaryDataList		m_ancList;			///< @brief	My STL list
+	AJAAncillaryDataList		m_ancList;			///< @brief	My packet list
 	AJAAncillaryAnalogTypeMap	m_analogTypeMap;	///< @brief	My "Analog Type Map" can be set by users to suggest where certain types of "analog"
 													///			ancillary data are likely to be found. For example, in 525i systems, analog ancillary
 													///			data captured on Line 21 are likely to be AJAAncillaryDataType_Cea608_Line21 type.

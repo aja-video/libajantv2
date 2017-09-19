@@ -44,20 +44,6 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 }
 
 
-AJAStatus AJAAncillaryList::Clear (void)
-{
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
-	{
-		AJAAncillaryData *	pAncData (*it);
-		if (pAncData)
-			delete (pAncData);
-	}
-
-	m_ancList.clear ();
-	return AJA_STATUS_SUCCESS;
-}
-
-
 AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t index) const
 {
 	AJAAncillaryData *	pAncData	(NULL);
@@ -101,7 +87,7 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncillaryDataTyp
 	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
 	{
 		AJAAncillaryData *		pAncData	(*it);
-		AJAAncillaryDataType	ancType		(pAncData->GetAncillaryDataType ());
+		AJAAncillaryDataType	ancType		(pAncData->GetAncillaryDataType());
 
 		if (matchType == ancType)
 			count++;
@@ -116,10 +102,10 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithType (const AJAAncillar
 	AJAAncillaryData *	pResult	(NULL);
 	uint32_t count = 0;
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *		pAncData (*it);
-		AJAAncillaryDataType	ancType  (pAncData->GetAncillaryDataType ());
+		AJAAncillaryDataType	ancType  (pAncData->GetAncillaryDataType());
 
 		if (matchType == ancType)
 		{
@@ -140,13 +126,13 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithID (const uint8_t DID, const ui
 {
 	uint32_t count = 0;
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData = *it;
 
-		if (DID == AJAAncillaryDataWildcard_DID  ||  DID == pAncData->GetDID ())
+		if (DID == AJAAncillaryDataWildcard_DID  ||  DID == pAncData->GetDID())
 		{
-			if (SID == AJAAncillaryDataWildcard_SID  ||  SID == pAncData->GetSID ())
+			if (SID == AJAAncillaryDataWildcard_SID  ||  SID == pAncData->GetSID())
 				count++;
 		}
 	}
@@ -160,16 +146,16 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithID (const uint8_t DID, 
 	AJAAncillaryData *	pResult	(NULL);
 	uint32_t count = 0;
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData = *it;
 
 		// Note: Unused
 		//AJAAncillaryDataType ancType = pAncData->GetAncillaryDataType();
 
-		if (DID == AJAAncillaryDataWildcard_DID  ||  DID == pAncData->GetDID ())
+		if (DID == AJAAncillaryDataWildcard_DID  ||  DID == pAncData->GetDID())
 		{
-			if (SID == AJAAncillaryDataWildcard_SID  ||  SID == pAncData->GetSID ())
+			if (SID == AJAAncillaryDataWildcard_SID  ||  SID == pAncData->GetSID())
 			{
 				if (index == count)
 				{
@@ -188,20 +174,36 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithID (const uint8_t DID, 
 
 AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
+	if (!pInAncData)
+		return AJA_STATUS_NULL;
 
 	// Note: this makes a clone of the incoming AJAAncillaryData object and
 	// saves it in the List. The caller is responsible for deleting the original,
-	// and the List will take ownership of the clone.
-	AJAAncillaryData *	pData = pInAncData->Clone ();
+	// and the List owns the clone.
+	AJAAncillaryData *	pData = pInAncData->Clone();
+	if (!pData)
+		return AJA_STATUS_FAIL;
 
 	// add it to the list
 	if (pData)
-		m_ancList.push_back (pData);
+		m_ancList.push_back(pData);
 
-	return status;
+	return AJA_STATUS_SUCCESS;
 }
 
+
+AJAStatus AJAAncillaryList::Clear (void)
+{
+	for (AJAAncDataListConstIter it (m_ancList.begin());  it != m_ancList.end();  ++it)
+	{
+		AJAAncillaryData *	pAncData(*it);
+		if (pAncData)
+			delete (pAncData);
+	}
+
+	m_ancList.clear();
+	return AJA_STATUS_SUCCESS;
+}
 
 
 AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
@@ -209,23 +211,25 @@ AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
 	if (!pAncData)
 		return AJA_STATUS_NULL;
 	else
-		m_ancList.remove (pAncData);	// note:	there's no feedback as to whether one or more elements existed or not
-										// note:	pAncData is NOT deleted!
+		m_ancList.remove(pAncData);	//	note:	there's no feedback as to whether one or more elements existed or not
+									//	note:	pAncData is NOT deleted!
 	return AJA_STATUS_SUCCESS;
 }
 
 
 AJAStatus AJAAncillaryList::DeleteAncillaryData (AJAAncillaryData * pAncData)
 {
-	if (pAncData == NULL)
+	if (!pAncData)
 		return AJA_STATUS_NULL;
 
-	RemoveAncillaryData (pAncData);
-	delete pAncData;
-
-	return AJA_STATUS_SUCCESS;
+	AJAStatus status (RemoveAncillaryData(pAncData));
+	if (AJA_SUCCESS(status))
+		delete pAncData;
+	return status;
 }
 
+
+//	Sort Predicates
 
 static bool SortByDID (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 {
@@ -257,9 +261,11 @@ static bool SortByLocation (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 				bResult = true;
 		}
 	}
-
 	return bResult;
 }
+
+
+//	Sort Methods
 
 AJAStatus AJAAncillaryList::SortListByDID (void)
 {
@@ -495,16 +501,19 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 {
 	outF1Packets.Clear();
 	outF2Packets.Clear();
+
 	if (inFrameBuffer.IsNULL())
 		return AJA_STATUS_BAD_PARAM;
 	if (!inFormatDesc.IsValid())
 		return AJA_STATUS_BAD_PARAM;
 	if (!inFormatDesc.IsVANC())
 		return AJA_STATUS_BAD_PARAM;
-	const ULWord	vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
+
+	const ULWord			vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
+	const NTV2PixelFormat	fbf			(inFormatDesc.GetPixelFormat());
+	const bool				isSD		(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()));
 	if (inFrameBuffer.GetByteCount() < vancBytes)
 		return AJA_STATUS_FAIL;
-	const NTV2PixelFormat	fbf	(inFormatDesc.GetPixelFormat());
 	if (fbf != NTV2_FBF_10BIT_YCBCR  &&  fbf != NTV2_FBF_8BIT_YCBCR)
 		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
 
@@ -513,7 +522,6 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 		UWordSequence		uwords;
 		bool				isF2			(false);
 		ULWord				smpteLineNum	(0);
-		UWordVANCPacketList	yPackets, cPackets;
 
 		inFormatDesc.GetSMPTELineNumber (line, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
@@ -522,21 +530,34 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 		else
 			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
 																	uwords,  inFormatDesc.GetRasterWidth());
+		if (isSD)
+		{
+			UWordVANCPacketList	ycPackets;
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets);
+			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it)
+				if (isF2)
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+				else
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+		}
+		else
+		{
+			UWordVANCPacketList	yPackets, cPackets;
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
 
-		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
-		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
+			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
+				if (isF2)
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+				else
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
 
-		for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
-			if (isF2)
-				outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
-			else
-				outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
-
-		for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it)
-			if (isF2)
-				outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
-			else
-				outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it)
+				if (isF2)
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+				else
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+		}
 	}	//	for each VANC line
 
 	return AJA_STATUS_SUCCESS;

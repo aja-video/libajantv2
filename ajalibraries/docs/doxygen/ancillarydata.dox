@@ -35,6 +35,7 @@
 			or CNTV2Card::AutoCirculateInitForOutput.
 	@note	The newer custom Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for operating the Anc
 			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK/driver.
+	@note	\ref ajaanc can make it easier to pack/unpack the data to/from the host Anc data buffer(s).
 
 	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
 			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate \c NTV2_CHANNEL3.
@@ -78,7 +79,7 @@
 	provide per-SDI-input ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
 	packet data into a separate host data buffer independent of the video buffer (see the new \c AUTOCIRCULATE_TRANSFER class).
 
-	@subsection	ancgumpformat	Anc Buffer Data Format
+	@subsection	ancgumpformat	Anc Buffer Data Format (SDI Devices)
 	The data bytes in the buffer consist of one or more packets having the following format:
 	<table>
 		<tr><td>Byte[0]		<td>\c 0xFF (start-of-packet marker). Note that \c 0xFF can be found in packet data, so you should use the packet data count (<b>DC</b>) to find subsequent packets in the Anc buffer.
@@ -122,15 +123,15 @@
 
 	The easiest format to use is \c NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
 	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the \c NTV2_VANCDATA_8BITSHIFT_ENABLE
-	mode, VANC lines can be readily parsed for Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
+	mode, VANC lines can be easily parsed into Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
 	found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
 	The CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc, etc.) to help with this.
-	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into the \ref ajaanc.
+	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into \ref ajaanc.
+
+	@bug	VANC Shift Mode is not implemented for SD video formats.
 
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
 	However, dual-link RGB video to/from RGB frame buffers will work.
-
-	@note	VANC Shift Mode is not implemented for SD video formats.
 
 	The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
 

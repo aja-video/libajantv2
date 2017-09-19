@@ -46,6 +46,7 @@ void AJAAncillaryData_Timecode_VITC::Init (void)
 	m_SID	  = AJAAncillaryData_VITC_SID;
 
 	m_vitcType = AJAAncillaryData_Timecode_VITC_Type_Unknown;	// note: "Unknown" defaults to "Timecode" for transmit
+	SetLocationLineNumber(14);	//	Assume F1	otherwise SetLocationLineNumber(277);
 }
 
 

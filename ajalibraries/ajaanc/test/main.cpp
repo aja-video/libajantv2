@@ -322,7 +322,7 @@ class CNTV2AncDataTester
 				SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 0);
 
 				SHOULD_BE_EQUAL (pDefaultPkt, NULL);
-				pDefaultPkt = AJAAncillaryDataFactory::Create (AJAAncillaryDataType_Unknown);
+				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);
 				SHOULD_BE_TRUE (pDefaultPkt != NULL);
 				SHOULD_BE_TRUE (pDefaultPkt);
 				SHOULD_BE_FALSE (pDefaultPkt->GotValidReceiveData());
@@ -370,31 +370,64 @@ class CNTV2AncDataTester
 				defaultPkt.SetPayloadByteAtIndex(0x1F, defaultPkt.GetDC()/2);
 				SHOULD_BE_UNEQUAL (*pDefaultPkt, defaultPkt);
 
-				pClone = defaultPkt.Clone();
-				SHOULD_BE_EQUAL(*pClone, defaultPkt);
+				if (true)	/////	Clone, GeneratePayloadData and GuessAncillaryDataType Tests
+				{
+					static const AJAAncillaryDataType	gDataTypes[]	=	{	AJAAncillaryDataType_Unknown
+																				//	,AJAAncillaryDataType_Smpte2016_3
+																				,AJAAncillaryDataType_Timecode_ATC
+																				,AJAAncillaryDataType_Timecode_VITC
+																				,AJAAncillaryDataType_Cea708
+																				,AJAAncillaryDataType_Cea608_Vanc
+																				,AJAAncillaryDataType_Cea608_Line21
+																				//	,AJAAncillaryDataType_Smpte352
+																				//	,AJAAncillaryDataType_Smpte2051
+																				//	,AJAAncillaryDataType_FrameStatusInfo524D
+																				//	,AJAAncillaryDataType_FrameStatusInfo5251
+																				//	,AJAAncillaryDataType_HDR_SDR
+																				//	,AJAAncillaryDataType_HDR_HDR10
+																				//	,AJAAncillaryDataType_HDR_HLG
+																				};
+					pClone = defaultPkt.Clone();
+					SHOULD_BE_EQUAL(*pClone, defaultPkt);
 
-				pClone->Clear();
-				SHOULD_BE_UNEQUAL(*pClone, defaultPkt);
-				SHOULD_BE_EQUAL(*pClone, AJAAncillaryData());
-				SHOULD_BE_EQUAL (pClone->GetDID(), 0);
-				SHOULD_BE_EQUAL (pClone->GetSID(), 0);
-				SHOULD_BE_TRUE (pClone->IsEmpty());
-				SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Digital);
-				SHOULD_SUCCEED(pClone->SetDataCoding(AJAAncillaryDataCoding_Raw));
-				SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Raw);
-				SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 0);
-				SHOULD_SUCCEED(pClone->SetLocationLineNumber(100));
-				SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 100);
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-				SHOULD_SUCCEED(pClone->SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
-				SHOULD_SUCCEED(pClone->SetLocationVideoStream(AJAAncillaryDataVideoStream_C));
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_C);
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
-				SHOULD_SUCCEED(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B));
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);
+					pClone->Clear();
+					SHOULD_BE_UNEQUAL(*pClone, defaultPkt);
+					SHOULD_BE_EQUAL(*pClone, AJAAncillaryData());
+					SHOULD_BE_EQUAL (pClone->GetDID(), 0);
+					SHOULD_BE_EQUAL (pClone->GetSID(), 0);
+					SHOULD_BE_TRUE (pClone->IsEmpty());
+					SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Digital);
+					SHOULD_SUCCEED(pClone->SetDataCoding(AJAAncillaryDataCoding_Raw));
+					SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Raw);
+					SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 0);
+					SHOULD_SUCCEED(pClone->SetLocationLineNumber(100));
+					SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 100);
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+					SHOULD_SUCCEED(pClone->SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
+					SHOULD_SUCCEED(pClone->SetLocationVideoStream(AJAAncillaryDataVideoStream_C));
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_C);
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
+					SHOULD_SUCCEED(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B));
+					SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);
 
+					for (unsigned ndx(0);  ndx < sizeof(gDataTypes)/sizeof(AJAAncillaryDataType);  ndx++)
+					{
+						const AJAAncillaryDataType	dataType	(gDataTypes[ndx]);
+						cerr << ::AJAAncillaryDataTypeToString(dataType) << endl;
+						AJAAncillaryData *	pDefaultPkt	= AJAAncillaryDataFactory::Create(dataType);
+						SHOULD_BE_UNEQUAL(pDefaultPkt, NULL);
+						SHOULD_SUCCEED(pDefaultPkt->GeneratePayloadData());
+						AJAAncillaryData *	pClonePkt	= pDefaultPkt->Clone();
+						SHOULD_BE_UNEQUAL(pClonePkt, NULL);
+						SHOULD_BE_UNEQUAL(pDefaultPkt, pClonePkt);
+						SHOULD_BE_EQUAL(*pDefaultPkt, *pClonePkt);
+						SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
+					}
+				}	//	Clone Tests
+
+				//	Append Test
 				SHOULD_SUCCEED(defaultPkt.SetPayloadData(buffer4K.data(), buffer4K.size()));
 				SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096);
 				SHOULD_SUCCEED(defaultPkt.AppendPayload(pDefaultPkt));
@@ -406,14 +439,16 @@ class CNTV2AncDataTester
 				SHOULD_SUCCEED(defaultPkt.AppendPayload(defaultPkt));
 				SHOULD_BE_EQUAL (defaultPkt.GetDC(), 2*(4096 + 2*sizeof(pTestBytes)));
 
-				//for (uint32_t n (0);  n < pDefaultPkt->GetPayloadByteCount ();  n++)
-				//	SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteAtIndex(n), pTestBytes[n]);
-				SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pDefaultPkt), AJAAncillaryDataType_Unknown);
-
+				//	Test CEA608Vanc
 				SHOULD_BE_TRUE (BFT_AncDataCEA608Vanc());
-				//	NOT YET READY FOR PRIME-TIME:			SHOULD_BE_TRUE (BFT_AncDataCEA608Raw());
+
+				//	Test CEA608Raw		-- NOT READY YET --
+				//	SHOULD_BE_TRUE (BFT_AncDataCEA608Raw());
+
+				//	Test CEA708
 				SHOULD_BE_TRUE (BFT_AncDataCEA708());
 
+				//	Test SMPTEAncData
 				SHOULD_BE_TRUE (BFT_SMPTEAncData());
 			}
 			return true;

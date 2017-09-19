@@ -110,7 +110,7 @@ AJAStatus AJAAncillaryData_FrameStatusInfo5251::ParsePayloadData (void)
 
 AJAStatus AJAAncillaryData_FrameStatusInfo5251::GeneratePayloadData (void)
 {
-	return AJA_STATUS_FAIL;
+	return AJA_STATUS_FAIL;	//	Unimplemented
 }
 
 

@@ -22,18 +22,19 @@
 	ancillary data using nearly any NTV2-compatible AJA device using the C++ programming language.
 	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
 
-	The purpose of the library is to enable third-parties to easily access and/or control the ancillary data entering or leaving
-	an AJA NTV2 device. The library currently is very focused on CEA-608.
+	The purpose of the library is to enable third-parties to easily access and/or control ancillary data bytes entering or leaving
+	an AJA NTV2 device. It's currently very much tied to the 8-bit \ref ancgumpformat that's expected by the inserter/extractor
+	widgets introduced in NTV2 SDK 12.3.
 
-	For examples on how to use this library, please see the \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications.
+	The \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications show how to use this library.
 
 	<b>Principal Classes</b>
-	- AJAAncillaryData:  Container that holds a single Anc packet (or scan line of "analog" anc data).
+	- AJAAncillaryData:  A single, generic Anc packet (or "raw" raster line of "analog" waveform data).
 		- AJAAncillaryData_Cea608:  A CEA-608 data packet.
-			- AJAAncillaryData_Cea608_Line21:  An "analog" CEA-608 data packet (decoded from or encoded to line 21).
+			- AJAAncillaryData_Cea608_Line21:  An "analog" CEA-608 data packet (decoded/encoded from/to line 21 or 284 of a 525i raster).
 			- AJAAncillaryData_Cea608_Vanc:  A CEA-608 data packet sourced from or destined to a frame buffer using a tall (or taller) frame geometry.
-		- AJAAncillaryData_Cea708:  Container that holds a single CEA-708 SMPTE 334 packet.
-		- AJAAncillaryData_Timecode:  Container that holds a single timecode packet.
+		- AJAAncillaryData_Cea708:  A single CEA-708 SMPTE 334 packet.
+		- AJAAncillaryData_Timecode:  A single timecode packet.
 			- AJAAncillaryData_Timecode_ATC:  An "analog" (ATC) timecode packet.
 			- AJAAncillaryData_Timecode_VITC:  A VITC timecode packet.
 		- AJAAncillaryData_FrameStatusInfo524D:  A "524D" frame status info packet.
@@ -305,11 +306,23 @@ AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillary
 
 
 /**
-	@brief	An AJAAncillaryData object typically holds the contents of one (1) SMPTE-291 SDI
-			ancillary packet OR the digitized contents of one (1) "analog" scan line (e.g. line 21
-			captions or VITC). While AJAAncillaryData is payload-agnostic, it can serve as the
-			generic base class for more specific objects that know how to decode/parse given types
-			of ancillary data.
+	@brief	I am the principal class that stores a single SMPTE-291 SDI ancillary data packet OR the
+			digitized contents of one "analog" raster line (e.g. line 21 captions or VITC). Since I'm
+			payload-agnostic, I serve as the generic base class for more specific objects that know
+			how to decode/parse specific types of ancillary data.
+
+			My \c m_payload member stores the User Data Words (UDWs) as an ordered collection of 8-bit data bytes.
+			Because it's an STL vector, it knows how many UDW elements it contains. Thus, it stores the SMPTE "DC"
+			(data count) value.
+
+			I also have several member variables for metadata -- i.e., information about the packet -- including
+			my data ID (DID), secondary data ID (SDID), checksum (CS), location in the video stream, etc.
+
+			<b>Transmit -- Packet Creation</b>
+			-	Use AJAAncillaryDataFactory::Create to instantiate a specific type of data packet.
+
+			<b>Receive -- Packet Detection</b>
+			-	Use AJAAncillaryDataFactory::GuessAncillaryDataType to detect the Anc packet type.
 **/
 class AJAExport AJAAncillaryData
 {
@@ -348,7 +361,7 @@ public:
 	virtual inline uint8_t					GetSID (void) const							{return m_SID;}		///< @return	My secondary data ID (SID).
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
 	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}	///< @return	My current payload byte count.
-	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const		{return m_ancType;}	///< @return	My anc data type (if known).
+	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}	///< @return	My anc data type (if known).
 
 	virtual inline AJAStatus				GetDataLocation (AJAAncillaryDataLocation & outLocInfo) const		///< @deprecated	Use the inline version instead.
 																						{outLocInfo = GetDataLocation ();	return AJA_STATUS_SUCCESS;}
@@ -375,7 +388,7 @@ public:
 
 	/**
 		@brief	Generates an 8-bit checksum from the DID + SID + DC + payload data.
-		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
+		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware embedder.
 		@note	The calculated checksum is NOT stored in my m_checksum member variable. Call SetChecksum to store it.
 		@return		The calculated 8-bit checksum.
 	**/

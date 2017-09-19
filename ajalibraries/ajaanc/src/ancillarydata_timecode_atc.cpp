@@ -5,6 +5,7 @@
 **/
 
 #include "ancillarydata_timecode_atc.h"
+#include "ntv2publicinterface.h"
 #include <ios>
 #include <iomanip>
 
@@ -295,7 +296,7 @@ ostream & AJAAncillaryData_Timecode_ATC::Print (ostream & debugStream, const boo
 	//debugStream << "SMPTE 12M ATC Anc Pkt (" << ((m_coding == AJAAncillaryDataCoding_Digital) ? "Digital" : ((m_coding == AJAAncillaryDataCoding_Analog) ? "Analog" : "???????")) << ")" << endl;
 	AJAAncillaryData_Timecode::Print (debugStream, bShowDetail);	// print the generic stuff
 	debugStream << endl
-				<< "DBB1: 0x" << hex << setw(2) << setfill('0') << uint16_t(m_dbb1) << dec << endl
-				<< "DBB2: 0x" << hex << setw(2) << setfill('0') << uint16_t(m_dbb2) << dec;
+				<< "DBB1: " << xHEX0N(uint16_t(m_dbb1),2) << endl
+				<< "DBB2: " << xHEX0N(uint16_t(m_dbb2),2);
 	return debugStream;
 }
