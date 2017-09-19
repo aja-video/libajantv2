@@ -1344,3 +1344,38 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
 
     return true;
 }
+
+bool CNTV2Config2110::GenSDP(NTV2Channel channel)
+{
+#if 0
+    qDebug() << "gen channel" << channel;
+    string directory = le_sdp[channel]->text().toStdString();
+    string filename = directory + "/sdp_channel" + std::to_string(channel) + ".sdp";
+
+    std::ofstream sdp;
+    sdp.open(filename, std::ios::out | std::ios::trunc);
+    // protocol version
+
+    // owner/creator & session id
+
+    // session name
+
+    // time the session is active
+
+
+    sdp.close();
+#endif
+
+    return false;
+}
+
+bool CNTV2Config2110::GenSDPStream(std::ofstream & sdp, NTV2Channel channel, NTV2Stream stream)
+{
+    // media name
+
+    // connection information
+
+    // rtpmap
+
+    return false;
+}

@@ -11,7 +11,9 @@
 #include "ntv2enums.h"
 #include "ntv2registers2110.h"
 #include "ntv2mbcontroller.h"
-#include <string.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #define RX_MATCH_2110_VLAN                   BIT(0)
 #define RX_MATCH_2110_SOURCE_IP              BIT(1)
@@ -152,6 +154,7 @@ public:
 
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
+    bool        GenSDP(NTV2Channel channel);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
@@ -180,6 +183,8 @@ protected:
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+
+    bool        GenSDPStream(std::ofstream & sdp, NTV2Channel channel, NTV2Stream stream);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);
