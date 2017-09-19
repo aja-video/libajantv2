@@ -148,7 +148,7 @@ typedef enum _AJADebugUnit
 	@ingroup	AJAGroupDebug
 **/
 ///@{
-#define AJA_DEBUG_VERSION				100					/**< Version of the debug system */
+#define AJA_DEBUG_VERSION				110					/**< Version of the debug system */
 #define AJA_DEBUG_UNIT_ARRAY_SIZE		65536				/**< Number of unit destinations */
 #define AJA_DEBUG_SEVERITY_ARRAY_SIZE	64					/**< Number of severity destinations */
 #define AJA_DEBUG_MESSAGE_MAX_SIZE		512					/**< Maximum size of a message */
@@ -156,7 +156,7 @@ typedef enum _AJADebugUnit
 #define AJA_DEBUG_FILE_NAME_MAX_SIZE	256					/**< Maximum size of a file name */
 #define AJA_DEBUG_SHARE_NAME            "aja-shm-debug"     /**< Name of the shared memory for the debug messages */
 #define AJA_DEBUG_TICK_RATE				1000000				/**< Resolution of debug time in ticks/second */
-#define AJA_DEBUG_STATE_FILE_VERSION	500					/**< Version number of the state file format */
+#define AJA_DEBUG_STATE_FILE_VERSION	510					/**< Version number of the state file format */
 ///@}
 
 /**
@@ -166,6 +166,7 @@ typedef enum _AJADebugUnit
 typedef struct _AJADebugMessage
 {
 	int64_t		time;										/**< Time this message was generated (microseconds) */
+    int64_t     wallTime;									/**< Time this message was generated as returned by time() */
 	int32_t		sequenceNumber;								/**< Sequence number of this message */
 	int32_t		groupIndex;									/**< Group that generated this message */
 	uint32_t	destinationMask;							/**< Destination of the message */

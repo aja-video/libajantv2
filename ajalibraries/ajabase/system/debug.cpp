@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 static std::vector<std::string> sGroupLabelArray;
 static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
@@ -299,6 +300,7 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 		spShare->messageRing[messageIndex].groupIndex = index;
 		spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
 		spShare->messageRing[messageIndex].time = DebugTime();
+        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
 		strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
 		spShare->messageRing[messageIndex].lineNumber = lineNumber;
 		spShare->messageRing[messageIndex].severity = severity;
@@ -356,6 +358,7 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
 		spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
 		spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
 		spShare->messageRing[messageIndex].time = DebugTime();
+        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
 		strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
 		spShare->messageRing[messageIndex].lineNumber = lineNumber;
 		spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
@@ -521,6 +524,33 @@ AJADebug::GetMessageTime(int32_t sequenceNumber, uint64_t* pTime)
 	return AJA_STATUS_SUCCESS;
 }
 
+AJAStatus
+AJADebug::GetMessageWallTime(int32_t sequenceNumber, int64_t* pTime)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pTime == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pTime = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].wallTime;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
 
 AJAStatus 
 AJADebug::GetMessageFileName(int32_t sequenceNumber, const char** ppFileName)
@@ -754,7 +784,10 @@ AJADebug::SaveState(char* pFileName)
 			// write groups with destinations enabled
 			if (spShare->unitArray[i] != 0)
 			{
-				fprintf(pFile, "GroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
+                if (i < AJA_DebugUnit_Size)
+                    fprintf(pFile, "GroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
+                else
+                    fprintf(pFile, "CustomGroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
 			}
 		}
 	}
@@ -828,6 +861,26 @@ AJADebug::RestoreState(char* pFileName)
 			// update the destination
 			spShare->unitArray[index] = destination;
 		}
+
+        rewind(pFile);
+        while(true)
+        {
+            // read groups that have destinations
+            count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
+            if(count != 2)
+            {
+                break;
+            }
+
+            // index must be in range
+            if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
+            {
+                continue;
+            }
+
+            // update the destination
+            spShare->unitArray[index] = destination;
+        }
 	}
 	catch(...)
 	{

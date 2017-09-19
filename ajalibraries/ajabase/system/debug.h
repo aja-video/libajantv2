@@ -310,6 +310,19 @@ public:
 	 */
 	static AJAStatus GetMessageTime(int32_t sequenceNumber, uint64_t* pTime);
 
+    /**
+     *	Get the wall clock time the message was reported.
+     *
+     *	@param[in]	sequenceNumber			Sequence number of the message.
+     *	@param[out]	pTime					Wall clock time the message was reported, as returned from time()
+     *	@return		AJA_STATUS_SUCCESS		message time returned
+     *				AJA_STATUS_OPEN			debug system not open
+     *				AJA_STATUS_RANGE		index out of range
+     *				AJA_STATUS_NULL			null output pointer
+     */
+    static AJAStatus GetMessageWallTime(int32_t sequenceNumber, int64_t *pTime);
+
+
 	/**
 	 *	Get the source file name that reported the message.
 	 *
