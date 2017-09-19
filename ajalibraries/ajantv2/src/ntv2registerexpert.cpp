@@ -1268,9 +1268,9 @@ private:
 				if (numSpigots)
 					for (UWord spigot(0);  spigot < numSpigots;  )
 					{
-						const bool	txEnabled	(txEnableBits & BIT(spigot));
-						oss	<< "SDI " << DEC(spigot+1) << ": " << (txEnabled ? "Output/Transmit" : "Input/Receive");
-						if (++spigot < numSpigots)
+						const uint32_t	txEnabled	(txEnableBits & BIT(spigot));
+						oss	<< "SDI " << DEC(++spigot) << ": " << (txEnabled ? "Output/Transmit" : "Input/Receive");
+						if (spigot < numSpigots)
 							oss << endl;
 					}
 				else
