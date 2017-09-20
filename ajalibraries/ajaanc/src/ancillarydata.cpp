@@ -60,10 +60,11 @@ void AJAAncillaryData::Init()
 
 	m_coding = AJAAncillaryDataCoding_Digital;
 
-	m_location.link		= AJAAncillaryDataLink_A;
-	m_location.stream   = AJAAncillaryDataVideoStream_Y;
-	m_location.ancSpace = AJAAncillaryDataSpace_VANC;
-	m_location.lineNum  = 0;
+	m_location.SetDataLink(AJAAncillaryDataLink_A);
+	m_location.SetDataStream(AJAAncillaryDataStream_1);
+	m_location.SetDataChannel(AJAAncillaryDataChannel_Y);
+	m_location.SetDataSpace(AJAAncillaryDataSpace_VANC);
+	m_location.SetLineNumber(0);
 
 	m_ancType	   = AJAAncillaryDataType_Unknown;
 	m_rcvDataValid = false;
@@ -144,40 +145,45 @@ uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 //
 AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & loc)
 {
-	AJAStatus	status	(SetLocationVideoLink(loc.link));
+	AJAStatus	status	(SetLocationVideoLink(loc.GetDataLink()));
 	if (AJA_SUCCESS(status))
-		status = SetLocationVideoStream(loc.stream);
+		status = SetLocationDataStream(loc.GetDataStream());
 	if (AJA_SUCCESS(status))
-		status = SetLocationVideoSpace(loc.ancSpace);
+		status = SetLocationDataChannel(loc.GetDataChannel());
 	if (AJA_SUCCESS(status))
-		status = SetLocationLineNumber(loc.lineNum);
+		status = SetLocationVideoSpace(loc.GetDataSpace());
+	if (AJA_SUCCESS(status))
+		status = SetLocationLineNumber(loc.GetLineNumber());
 	return status;
 }
 
 
+//	DEPRECATED
 AJAStatus AJAAncillaryData::GetDataLocation (AJAAncillaryDataLink &			outLink,
 											AJAAncillaryDataVideoStream &	outStream,
 											AJAAncillaryDataSpace &			outAncSpace,
 											uint16_t &						outLineNum)
 {
-	outLink		= m_location.link;
-	outStream	= m_location.stream;
-	outAncSpace	= m_location.ancSpace;
-	outLineNum	= m_location.lineNum;
+	outLink		= m_location.GetDataLink();
+	outStream	= m_location.GetDataChannel();
+	outAncSpace	= m_location.GetDataSpace();
+	outLineNum	= m_location.GetLineNumber();
 	return AJA_STATUS_SUCCESS;
 }
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink link, const AJAAncillaryDataVideoStream stream, const AJAAncillaryDataSpace ancSpace, const uint16_t lineNum)
+AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink inLink, const AJAAncillaryDataChannel inChannel, const AJAAncillaryDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncillaryDataStream inStream)
 {
-	AJAStatus	status	(SetLocationVideoLink(link));
+	AJAStatus	status	(SetLocationVideoLink(inLink));
 	if (AJA_SUCCESS(status))
-		status = SetLocationVideoStream(stream);
+		status = SetLocationDataStream(inStream);
 	if (AJA_SUCCESS(status))
-		status = SetLocationVideoSpace(ancSpace);
+		status = SetLocationDataChannel(inChannel);
 	if (AJA_SUCCESS(status))
-		status = SetLocationLineNumber(lineNum);
+		status = SetLocationVideoSpace(inAncSpace);
+	if (AJA_SUCCESS(status))
+		status = SetLocationLineNumber(inLineNum);
 	return status;
 }
 
@@ -189,41 +195,53 @@ AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncillaryDataLink inL
 	if (!IS_VALID_AJAAncillaryDataLink(inLinkValue))
 		return AJA_STATUS_RANGE;
 
-	m_location.link = inLinkValue;
+	m_location.SetDataLink(inLinkValue);
 	return AJA_STATUS_SUCCESS;
 }
 
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationVideoStream (const AJAAncillaryDataVideoStream stream)
+AJAStatus AJAAncillaryData::SetLocationDataStream (const AJAAncillaryDataStream inStream)
 {
-	if (stream != AJAAncillaryDataVideoStream_C  &&  stream != AJAAncillaryDataVideoStream_Y)
+	if (!IS_VALID_AJAAncillaryDataStream(inStream))
 		return AJA_STATUS_RANGE;
 
-	m_location.stream = stream;
+	m_location.SetDataStream(inStream);
 	return AJA_STATUS_SUCCESS;
 }
 
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncillaryDataSpace space)
+AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncillaryDataChannel inChannel)
 {
-	if (space != AJAAncillaryDataSpace_VANC  &&  space != AJAAncillaryDataSpace_HANC)
+	if (!IS_VALID_AJAAncillaryDataChannel(inChannel))
 		return AJA_STATUS_RANGE;
 
-	m_location.ancSpace = space;
+	m_location.SetDataChannel(inChannel);
 	return AJA_STATUS_SUCCESS;
 }
 
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationLineNumber (const uint16_t lineNum)
+AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncillaryDataSpace inSpace)
+{
+	if (!IS_VALID_AJAAncillaryDataSpace(inSpace))
+		return AJA_STATUS_RANGE;
+
+	m_location.SetDataSpace(inSpace);
+	return AJA_STATUS_SUCCESS;
+}
+
+
+//-------------
+//
+AJAStatus AJAAncillaryData::SetLocationLineNumber (const uint16_t inLineNum)
 {
 	//	No range checking here because we don't know how big the frame is
-	m_location.lineNum = lineNum;
+	m_location.SetLineNumber(inLineNum);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -461,9 +479,10 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (	const uint8_t *						pInData,
 	if ((pInData[1] & 0x80) != 0)
 	{
 		m_coding            = ((pInData[1] & 0x40) == 0) ? AJAAncillaryDataCoding_Digital : AJAAncillaryDataCoding_Analog;	// byte 1, bit 6
-		m_location.stream   = ((pInData[1] & 0x20) == 0) ? AJAAncillaryDataVideoStream_C : AJAAncillaryDataVideoStream_Y;	// byte 1, bit 5
-		m_location.ancSpace = ((pInData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC;			// byte 1, bit 4
-		m_location.lineNum  = ((pInData[1] & 0x0F) << 7) + (pInData[2] & 0x7F);												// byte 1, bits 3:0 + byte 2, bits 6:0
+		m_location.SetDataStream(AJAAncillaryDataStream_1);	//	???	GUMP doesn't tell us the data stream it came from
+		m_location.SetDataChannel(((pInData[1] & 0x20) == 0) ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);		// byte 1, bit 5
+		m_location.SetDataSpace(((pInData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC);		// byte 1, bit 4
+		m_location.SetLineNumber(((pInData[1] & 0x0F) << 7) + (pInData[2] & 0x7F));											// byte 1, bits 3:0 + byte 2, bits 6:0
 	}
 
 	//	Allocate space for the payload and copy it in...
@@ -640,14 +659,14 @@ uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 	if (m_coding == AJAAncillaryDataCoding_Raw)
 		result |= 0x40;		// analog/raw (1) or digital (0) ancillary data
 
-	if (m_location.stream == AJAAncillaryDataVideoStream_Y)
+	if (m_location.IsLumaChannel())
 		result |= 0x20;		// carried in Y (1) or C stream
 
-	if (m_location.ancSpace == AJAAncillaryDataSpace_HANC)
+	if (m_location.IsHanc())
 		result |= 0x10;
 
 	// ms 4 bits of line number
-	result |= (m_location.lineNum >> 7) & 0x0F;	// ms 4 bits [10:7] of line number
+	result |= (m_location.GetLineNumber() >> 7) & 0x0F;	// ms 4 bits [10:7] of line number
 
 	return result;
 }
@@ -661,16 +680,26 @@ const string & AJAAncillaryDataLinkToString (const AJAAncillaryDataLink inValue,
 	static const string		gAncDataLinkToStr []			= {"A", "B", "?"};
 	static const string		gDAncDataLinkToStr []			= {"AJAAncillaryDataLink_A", "AJAAncillaryDataLink_B", "AJAAncillaryDataLink_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataLink (inValue) ? (inCompact ? gAncDataLinkToStr [inValue] : gDAncDataLinkToStr [inValue]) : gEmptyString;
+	return IS_VALID_AJAAncillaryDataLink(inValue) ? (inCompact ? gAncDataLinkToStr[inValue] : gDAncDataLinkToStr[inValue]) : gEmptyString;
 }
 
 
-const string & AJAAncillaryDataVideoStreamToString (const AJAAncillaryDataVideoStream inValue, const bool inCompact)
+const string &	AJAAncillaryDataStreamToString (const AJAAncillaryDataStream inValue, const bool inCompact)
 {
-	static const string		gAncDataVideoStreamToStr []		= {"Chr", "Lum", ""};
-	static const string		gDAncDataVideoStreamToStr []	= {"AJAAncillaryDataVideoStream_C", "AJAAncillaryDataVideoStream_Y", "AJAAncillaryDataVideoStream_Unknown"};
+	static const string		gAncDataStreamToStr []			= {"DS1", "DS2", "DS3", "DS4", "?"};
+	static const string		gDAncDataStreamToStr []			= {"AJAAncillaryDataStream_1", "AJAAncillaryDataStream_2",
+																"AJAAncillaryDataStream_3", "AJAAncillaryDataStream_4", "AJAAncillaryDataStream_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataVideoStream (inValue) ? (inCompact ? gAncDataVideoStreamToStr [inValue] : gDAncDataVideoStreamToStr [inValue]) : gEmptyString;
+	return IS_VALID_AJAAncillaryDataStream(inValue) ? (inCompact ? gAncDataStreamToStr[inValue] : gDAncDataStreamToStr[inValue]) : gEmptyString;
+}
+
+
+const string & AJAAncillaryDataChannelToString (const AJAAncillaryDataChannel inValue, const bool inCompact)
+{
+	static const string		gAncDataChannelToStr []		= {"C", "Y", "?"};
+	static const string		gDAncDataChannelToStr []	= {"AJAAncillaryDataChannel_C", "AJAAncillaryDataChannel_Y", "AJAAncillaryDataChannel_Unknown"};
+
+	return IS_VALID_AJAAncillaryDataChannel(inValue) ? (inCompact ? gAncDataChannelToStr[inValue] : gDAncDataChannelToStr[inValue]) : gEmptyString;
 }
 
 
@@ -679,24 +708,28 @@ const string & AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValu
 	static const string		gAncDataSpaceToStr []			= {"VANC", "HANC", "????"};
 	static const string		gDAncDataSpaceToStr []			= {"AJAAncillaryDataSpace_VANC", "AJAAncillaryDataSpace_HANC", "AJAAncillaryDataSpace_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataSpace (inValue) ? (inCompact ? gAncDataSpaceToStr [inValue] : gDAncDataSpaceToStr [inValue]) : gEmptyString;
+	return IS_VALID_AJAAncillaryDataSpace(inValue) ? (inCompact ? gAncDataSpaceToStr[inValue] : gDAncDataSpaceToStr[inValue]) : gEmptyString;
 }
 
 
 string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValue, const bool inCompact)
 {
 	ostringstream	oss;
-	oss	<< ::AJAAncillaryDataLinkToString (inValue.link, inCompact) << "|" << ::AJAAncillaryDataVideoStreamToString (inValue.stream, inCompact)
-		<< "|" << ::AJAAncillaryDataSpaceToString (inValue.ancSpace, inCompact) << "|" << inValue.lineNum;
+	oss	<< ::AJAAncillaryDataLinkToString(inValue.GetDataLink(), inCompact)
+		<< "|" << ::AJAAncillaryDataStreamToString(inValue.GetDataStream(), inCompact)
+		<< "|" << ::AJAAncillaryDataChannelToString(inValue.GetDataChannel(), inCompact)
+		<< "|" << ::AJAAncillaryDataSpaceToString(inValue.GetDataSpace(), inCompact)
+		<< "|" << DEC(inValue.GetLineNumber());
 	return oss.str ();
 }
 
 ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & inValue)
 {
-	inOutStream	<< "Data Link:\t" << ::AJAAncillaryDataLinkToString (inValue.link) << endl
-				<< "Video Stream:\t" << ::AJAAncillaryDataVideoStreamToString (inValue.stream) << endl
-				<< "Data Space:\t" << ::AJAAncillaryDataSpaceToString (inValue.ancSpace) << endl
-				<< "Line Number:\t" << inValue.lineNum;
+	inOutStream	<< "Data Link:\t" << ::AJAAncillaryDataLinkToString (inValue.GetDataLink()) << endl
+				<< "Data Stream:\t" << ::AJAAncillaryDataStreamToString (inValue.GetDataStream()) << endl
+				<< "Data Channel:\t" << ::AJAAncillaryDataChannelToString (inValue.GetDataChannel()) << endl
+				<< "Data Space:\t" << ::AJAAncillaryDataSpaceToString (inValue.GetDataSpace()) << endl
+				<< "Line Number:\t" << DEC(inValue.GetLineNumber());
 	return inOutStream;
 }
 

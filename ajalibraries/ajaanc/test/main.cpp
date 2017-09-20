@@ -117,7 +117,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x02);
 			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0xF2);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
+			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
 			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
@@ -181,7 +181,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0);
 			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
+			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
 			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Raw);
@@ -207,7 +207,7 @@ class CNTV2AncDataTester
 			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
 			SHOULD_BE_TRUE (pLine21Packet != NULL);
 			SHOULD_SUCCEED (pLine21Packet->GeneratePayloadData());
-			SHOULD_SUCCEED (pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC, 21)));
+			SHOULD_SUCCEED (pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21)));
 			SHOULD_SUCCEED (pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b')));
 			SHOULD_SUCCEED (pLine21Packet->SetDID(AJAAncillaryData_Cea608_Vanc_DID));
 			SHOULD_SUCCEED (pLine21Packet->SetSID(AJAAncillaryData_Cea608_Vanc_SID));
@@ -237,7 +237,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x01);
 			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0xB4);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
+			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
 			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
@@ -280,7 +280,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));
 			SHOULD_BE_FALSE (u16Pkts.empty());
 			SHOULD_BE_EQUAL (u16Pkts.size(), 1);
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataVideoStream_Y));
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Y));
 			cerr << pktList << endl;
 			return true;
 		}
@@ -293,7 +293,7 @@ class CNTV2AncDataTester
 				AJAAncillaryData *					pDefaultPkt		(NULL);
 				AJAAncillaryData *					pClone			(NULL);
 				AJAAncillaryData_Cea608_Line21		line21Packet;
-				AJAAncillaryDataLocation			nullLocation;
+				const AJAAncillaryDataLocation		nullLocation;
 				static const UByte					pTestBytes []	=	{	0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
 																			0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F	};
 				static const uint8_t				p2vuyLumaSamples[]=	{	0x00,	0xFF,	0xFF,	0x61,	0x01,	0x52,	0x96,	0x69,	0x52,	0x4F,	0x67,	0xA9,	0x7E,	0x72,	0xF4,	0xFC,
@@ -320,6 +320,24 @@ class CNTV2AncDataTester
 				SHOULD_BE_TRUE (defaultPkt.IsVanc());
 				SHOULD_BE_FALSE (defaultPkt.IsHanc());
 				SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 0);
+				SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_A);
+				SHOULD_BE_EQUAL(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_1);
+				SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+				SHOULD_BE_EQUAL(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+				{
+					const AJAAncillaryDataLocation savedLoc(defaultPkt.GetDataLocation());
+						SHOULD_SUCCEED(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_B));
+						SHOULD_SUCCEED(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_4));
+						SHOULD_SUCCEED(defaultPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
+						SHOULD_SUCCEED(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_C));
+						SHOULD_SUCCEED(defaultPkt.SetLocationLineNumber(225));
+						SHOULD_BE_EQUAL(defaultPkt.GetLocationLineNumber(), 225);
+						SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_B);
+						SHOULD_BE_EQUAL(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_4);
+						SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
+						SHOULD_BE_EQUAL(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_C);
+					SHOULD_SUCCEED(defaultPkt.SetDataLocation(savedLoc));
+				}
 
 				SHOULD_BE_EQUAL (pDefaultPkt, NULL);
 				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);
@@ -405,9 +423,9 @@ class CNTV2AncDataTester
 					SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 					SHOULD_SUCCEED(pClone->SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
 					SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-					SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_Y);
-					SHOULD_SUCCEED(pClone->SetLocationVideoStream(AJAAncillaryDataVideoStream_C));
-					SHOULD_BE_EQUAL(pClone->GetLocationVideoStream(), AJAAncillaryDataVideoStream_C);
+					SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+					SHOULD_SUCCEED(pClone->SetLocationVideoStream(AJAAncillaryDataChannel_C));
+					SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_C);
 					SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
 					SHOULD_SUCCEED(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B));
 					SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);

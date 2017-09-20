@@ -257,7 +257,7 @@ static bool SortByLocation (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 		else if (lhs->GetLocationVideoSpace () == rhs->GetLocationVideoSpace ())
 		{
 			//	Same line, same ANC space -- let's do Y before C...
-			if ( (lhs->GetLocationVideoStream() == AJAAncillaryDataVideoStream_Y)  &&  (rhs->GetLocationVideoStream() == AJAAncillaryDataVideoStream_C))
+			if ( (lhs->GetLocationDataChannel() == AJAAncillaryDataChannel_Y)  &&  (rhs->GetLocationDataChannel() == AJAAncillaryDataChannel_C))
 				bResult = true;
 		}
 	}
@@ -305,10 +305,11 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 	//	Compare...
 	if (   (prevCoding == AJAAncillaryDataCoding_Analog)
 		&& (newCoding  == AJAAncillaryDataCoding_Analog)
-		&& (prevLoc.lineNum  == newLoc.lineNum)
-		&& (prevLoc.ancSpace == newLoc.ancSpace)		// technically, these should ALWAYS be the same for "analog"...?
-		&& (prevLoc.link     == newLoc.link)			//
-		&& (prevLoc.stream   == newLoc.stream) )		//
+		&& (prevLoc.GetLineNumber()  == newLoc.GetLineNumber())
+		&& (prevLoc.GetDataSpace()   == newLoc.GetDataSpace())		// technically, these should ALWAYS be the same for "analog"...?
+		&& (prevLoc.GetDataLink()    == newLoc.GetDataLink())		//
+		&& (prevLoc.GetDataStream()  == newLoc.GetDataStream())		//
+		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//
 	{
 		bResult = true;
 	}
@@ -329,7 +330,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 
 	//	Use this as an uninitialized template...
 	AJAAncillaryData			newAncData;
-	AJAAncillaryDataLocation	defaultLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC, 9);
+	AJAAncillaryDataLocation	defaultLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9);
 	int32_t						remainingSize	(static_cast <int32_t> (dataSize));
 	const uint8_t *				pInputData		(pRcvData);
 	bool						bMoreData		(true);
@@ -337,29 +338,27 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 
 	while (bMoreData)
 	{
+		bool					bInsertNew	(false);		//	We'll set this 'true' if/when we find a new Anc packet to insert
+		AJAAncillaryDataType	newAncType	(AJAAncillaryDataType_Unknown);	//	We'll set this to the proper type once we know it
+		uint32_t				packetSize	(0);			//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
+
+		//	Reset the AncData object, then load itself from the next GUMP packet...
 		newAncData.Clear();
-
-		bool bInsertNew = false;	// this will be set 'true' when (if) we find a new AJAAncillaryData to insert to the list
-		AJAAncillaryDataType newAncType = AJAAncillaryDataType_Unknown;
-
-		//	Tell the Anc Data object to init itself from the next set of input data...
-		uint32_t	packetSize	(0);		//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
-
 		status = newAncData.InitWithReceivedData (pInputData, remainingSize, defaultLoc, packetSize);
 
 		//	NOTE:	Right now we're just bailing if there is a detected error in the raw data stream.
 		//			Theoretically one could try to get back "in sync" and recover any following data, but
 		//			we'll save that for another day...
-		if (AJA_FAILURE (status))
+		if (AJA_FAILURE(status))
 			break;
 		else
 		{
 			//	Determine what type of anc data we have, and create an object of the appropriate class...
-			if (newAncData.GetDataCoding () == AJAAncillaryDataCoding_Digital)
+			if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Digital)
 			{
 				//	Digital anc packets are fairly easy to categorize: you just have to look at their DID/SID.
 				//	Also, they are (by definition) independent packets which become independent AJAAncillaryData objects.
-				newAncType = factory.GuessAncillaryDataType (&newAncData);
+				newAncType = factory.GuessAncillaryDataType(&newAncData);
 				bInsertNew = true;		//	Add it to the list
 			}	// digital anc data
 			else if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Analog)
@@ -405,7 +404,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 				//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
 				AJAAncillaryData *	pData	(factory.Create (newAncType, &newAncData));
 				if (pData)
-					m_ancList.push_back(pData);		//	Add it to the list
+					m_ancList.push_back(pData);		//	Add it to my list
 			}
 
 			remainingSize -= packetSize;		//	Decrease the remaining data size by the amount we just "consumed"
@@ -427,7 +426,12 @@ AJAStatus AJAAncillaryList::AppendReceivedRTPAncillaryData (const std::vector<ui
 }
 
 
-static AJAStatus AppendUWordPacketToGump (vector<uint8_t> & outGumpPkt, const vector<uint16_t> & inPacketWords, const AJAAncillaryDataLocation inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC))
+static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
+											const vector<uint16_t> &		inPacketWords,
+											const AJAAncillaryDataLocation	inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A,
+																											AJAAncillaryDataChannel_Y,
+																											AJAAncillaryDataSpace_VANC,
+																											0))
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
@@ -470,12 +474,12 @@ static AJAStatus AppendUWordPacketToGump (vector<uint8_t> & outGumpPkt, const ve
 }
 
 
-AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataVideoStream inStream)
+AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
 {
 	vector<uint8_t>		gumpPacketData;
 	AJAStatus	status	(AppendUWordPacketToGump (gumpPacketData,  inPacketWords,
-													AJAAncillaryDataLocation(AJAAncillaryDataLink_A,  inStream,
-																			 AJAAncillaryDataSpace_VANC,  inLineNum)));
+													AJAAncillaryDataLocation(AJAAncillaryDataLink_A,  inChannel,
+																			AJAAncillaryDataSpace_VANC,  inLineNum)));
 	if (AJA_FAILURE(status))
 		return status;
 
@@ -536,9 +540,9 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets);
 			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it)
 				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Both);
 				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Both);
 		}
 		else
 		{
@@ -548,15 +552,15 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 
 			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
 				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Y);
 				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_Y);
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Y);
 
 			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it)
 				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_C);
 				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataVideoStream_C);
+					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_C);
 		}
 	}	//	for each VANC line
 

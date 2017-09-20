@@ -190,8 +190,8 @@ public:	//	INSTANCE METHODS
 	///@{
 
 	/**
-		@brief		Parse "raw" ancillary data bytes extracted by an Anc Extractor Widget into separate AJAAncillaryData objects
-					and add to list.
+		@brief		Parse "raw" ancillary data bytes received from hardware (ingest) -- see \ref ancgumpformat --
+					into separate AJAAncillaryData objects and appends them to me.
 		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
 		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
 		@return		AJA_STATUS_SUCCESS if successful.
@@ -218,7 +218,7 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
-														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataVideoStream_Y);
+														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y);
 
 
 	/**
