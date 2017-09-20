@@ -226,7 +226,7 @@ AJAAtomic::Increment(uint64_t volatile* pTarget)
 {
     // increment target
 #if defined(AJA_WINDOWS)
-    return (uint64_t)InterlockedIncrement((LONGLONG volatile*)pTarget);
+    return (uint64_t)InterlockedIncrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
@@ -244,7 +244,7 @@ AJAAtomic::Decrement(uint64_t volatile* pTarget)
 {
     // decrement target
 #if defined(AJA_WINDOWS)
-    return (uint64_t)InterlockedDecrement((LONGLONG volatile*)pTarget);
+    return (uint64_t)InterlockedDecrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
