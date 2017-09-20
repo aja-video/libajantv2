@@ -7341,10 +7341,22 @@ std::string NTV2InterruptEnumToString (const INTERRUPT_ENUMS inInterruptEnumValu
 static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue)
 {
     static const char *	sIpErrorEnumStrings []	=   {	"",
-                                                        "Ip Error 1",
-                                                        "Ip Error 2",
-                                                        "Ip Error 3"};
-    if (inIpErrorEnumValue >= NTV2IpErrorNone && inIpErrorEnumValue < NTV2IpNumErrorTypes)
+                                                        "Invalid channel",
+                                                        "Invalid format",
+                                                        "Invalid bit depth",
+                                                        "Invalid height in ull mode",
+                                                        "Invalid number of levels in ull mode",
+                                                        "Ull mode not supported",
+                                                        "KonaIP card not ready",
+                                                        "Host software does not match device firmware. Firmware update required",
+                                                        "SFP Top (Link A) not configured",
+                                                        "Invalid IGMP version",
+                                                        "Failed to retrieve MAC address from ARP table",
+                                                        "",
+                                                        "",
+                                                        ""};
+
+    if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)
         return sIpErrorEnumStrings [inIpErrorEnumValue];
     else
         return NULL;

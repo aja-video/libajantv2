@@ -7,6 +7,7 @@
 #include "ntv2config2022.h"
 #include "ntv2configts2022.h"
 #include "ntv2endian.h"
+#include "ntv2utils.h"
 #include "ntv2card.h"
 #include <sstream>
 
@@ -1458,8 +1459,8 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
 
 string CNTV2Config2022::getLastError()
 {
-    string astring = mError;
-    mError.clear();
+    string astring = NTV2IpErrorEnumToString(mIpErrorCode);
+    mIpErrorCode = NTV2IpErrNone;
     return astring;
 }
 

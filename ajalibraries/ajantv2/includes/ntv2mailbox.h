@@ -73,7 +73,7 @@ protected:
 
     CNTV2Card   &mDevice;
 
-    NTV2IpError mErrorCode;
+    NTV2IpError mIpErrorCode;
     std::string mError;
 
 private:
