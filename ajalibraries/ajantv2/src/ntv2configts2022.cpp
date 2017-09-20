@@ -617,11 +617,11 @@ uint32_t CNTV2ConfigTs2022::GetFeatures()
 }
 
 
-string CNTV2ConfigTs2022::getLastError()
+NTV2IpError CNTV2ConfigTs2022::getLastErrorCode()
 {
-    string astring = NTV2IpErrorEnumToString(mIpErrorCode);
+    NTV2IpError error = mIpErrorCode;
     mIpErrorCode = NTV2IpErrNone;
-    return astring;
+    return error;
 }
 
 
