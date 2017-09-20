@@ -22,7 +22,6 @@
 
 static std::vector<std::string> sGroupLabelArray;
 static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
-static int sRefCount = 0;
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
@@ -51,9 +50,6 @@ AJADebug::Open()
 
 	try
 	{
-		// increment reference count;
-		sRefCount++;
-
 		// allocate the shared data structure for messages
 		if (spShare == NULL)
 		{
@@ -77,7 +73,15 @@ AJADebug::Open()
 			if (spShare->version == 0)
 			{
 				memset(spShare, 0, sizeof(AJADebugShare));
-				spShare->version = AJA_DEBUG_VERSION;
+                spShare->magicId                 = AJA_DEBUG_MAGIC_ID;
+                spShare->version                 = AJA_DEBUG_VERSION;
+                spShare->messageRingCapacity     = AJA_DEBUG_MESSAGE_RING_SIZE;
+                spShare->messageTextCapacity     = AJA_DEBUG_MESSAGE_MAX_SIZE;
+                spShare->messageFileNameCapacity = AJA_DEBUG_FILE_NAME_MAX_SIZE;
+                spShare->unitArraySize           = AJA_DEBUG_UNIT_ARRAY_SIZE;
+                spShare->statsMessagesAccepted   = 0;
+                spShare->statsMessagesIgnored    = 0;
+
 				spShare->unitArray[AJA_DebugUnit_Critical] = AJA_DEBUG_DESTINATION_CONSOLE;
 			}
 
@@ -87,6 +91,9 @@ AJADebug::Open()
 				Close();
 				return AJA_STATUS_FAIL;
 			}
+
+            // increment reference count;
+            spShare->clientRefCount++;
 		}
 	}
 	catch(...)
@@ -105,19 +112,23 @@ AJADebug::Close()
 	AJAAutoLock lock(&sLock);
 
 	try
-	{
-		// decrement reference count
-		sRefCount--;
-		if(sRefCount <= 0)
-		{
-			sRefCount = 0;
+	{		
+        if(spShare != NULL)
+        {
+            // decrement reference count
+            spShare->clientRefCount--;
 
-			// free the shared data structure
-			if(spShare != NULL)
-			{
-				AJAMemory::FreeShared(spShare);
-			}
-		}
+            if(spShare->clientRefCount <= 0)
+            {
+                spShare->clientRefCount = 0;
+
+                // free the shared data structure
+                if(spShare != NULL)
+                {
+                    AJAMemory::FreeShared(spShare);
+                }
+            }
+        }
 	}
 	catch(...)
 	{
@@ -277,6 +288,7 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 		// check for destination
 		if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
 		{
+            AJAAtomic::Increment(&spShare->statsMessagesIgnored);
 			return;
 		}
 		// check for valid severity
@@ -319,6 +331,8 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 
 		// set last to indicate message complete
 		spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
+
+        AJAAtomic::Increment(&spShare->statsMessagesAccepted);
 	}
 	catch (...)
 	{
@@ -369,6 +383,8 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
 
 		// set last to indicate message complete
 		spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
+
+        AJAAtomic::Increment(&spShare->statsMessagesAccepted);
 	}
 	catch (...)
 	{
@@ -380,6 +396,30 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
     AJA_UNUSED(lineNumber);
     AJA_UNUSED(pExpression);
 #endif
+}
+
+
+AJAStatus
+AJADebug::GetClientReferenceCount(int32_t *pRefCount)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(pRefCount == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+    try
+    {
+        *pRefCount = spShare->clientRefCount;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
 }
 
 
@@ -665,6 +705,58 @@ AJADebug::GetMessageText(int32_t sequenceNumber, const char** ppMessage)
 	}
 
 	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetMessagesAccepted(uint64_t* pCount)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+
+    if(pCount == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pCount = spShare->statsMessagesAccepted;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetMessagesIgnored(uint64_t* pCount)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+
+    if(pCount == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pCount = spShare->statsMessagesIgnored;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
 }
 
 
