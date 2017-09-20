@@ -4235,4 +4235,14 @@ typedef enum
 
 #endif	//	!defined (NTV2_DEPRECATE)
 
+typedef enum
+{
+    NTV2IpErrorNone,                                       //	0
+    NTV2IpError_1,                                         //	1
+    NTV2IpError_2,                                         //	2
+    NTV2IpError_3,                                         //	3
+    NTV2IpNumErrorTypes                                    //	4
+} NTV2IpError;
+
+
 #endif //NTV2ENUMS_H

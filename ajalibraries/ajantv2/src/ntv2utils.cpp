@@ -7322,11 +7322,8 @@ static const char * NTV2InterruptEnumStrings (const INTERRUPT_ENUMS inInterruptE
 														"eOutput5",
 														"eOutput6",
 														"eOutput7",
-														"eOutput8",
-														"<invalid>",
-														"<invalid>",
-														"<invalid>"};
-	if (inInterruptEnumValue >= eOutput1 && inInterruptEnumValue <= eNumInterruptTypes)
+                                                        "eOutput8"};
+    if (inInterruptEnumValue >= eOutput1 && inInterruptEnumValue < eNumInterruptTypes)
 		return sInterruptEnumStrings [inInterruptEnumValue];
 	else
 		return NULL;
@@ -7338,6 +7335,26 @@ std::string NTV2InterruptEnumToString (const INTERRUPT_ENUMS inInterruptEnumValu
 {
 	const char *	pString	(::NTV2InterruptEnumStrings (inInterruptEnumValue));
 	return std::string (pString ? pString : "");
+}
+
+
+static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue)
+{
+    static const char *	sIpErrorEnumStrings []	=   {	"",
+                                                        "Ip Error 1",
+                                                        "Ip Error 2",
+                                                        "Ip Error 3"};
+    if (inIpErrorEnumValue >= NTV2IpErrorNone && inIpErrorEnumValue < NTV2IpNumErrorTypes)
+        return sIpErrorEnumStrings [inIpErrorEnumValue];
+    else
+        return NULL;
+}
+
+
+std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
+{
+    const char *	pString	(::NTV2IpErrorEnumStrings (inIpErrorEnumValue));
+    return std::string (pString ? pString : "");
 }
 
 
