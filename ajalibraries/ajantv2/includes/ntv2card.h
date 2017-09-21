@@ -2020,6 +2020,9 @@ public:
 	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel(NTV2AudioMixerChannel inChannel);
 	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inChannel);
 
+	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration);
+	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration);
+
 	///@}
 
 	//
@@ -4133,6 +4136,34 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
 
+	/**
+		@brief						Allows user to force output parameters
+		@param[in]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	EnableHDMIOutUserOverride(bool enable);
+
+	/**
+		@brief						Reports force user output parameters enalbed
+		@param[out]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride(bool & isEnabled);
+
+	/**
+		@brief						Allows user to center crop 4k/2k -> UHD/HD
+		@param[in]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop(bool enable);
+
+	/**
+		@brief						Reports center crop 4k/2k -> UHD/HD enabled
+		@param[out]	bool			enabled
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & isEnabled);
+
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
 		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIV2OutVideoStandard (NTV2V2Standard * pOutValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
@@ -4785,53 +4816,57 @@ public:
 
 
 	/**
-		@brief		Answers with the TRS error status from a given input channel.
-		@return		True if the input channel is currently reporting TRS errors, otherwise false.
-		@param[in]	inChannel		Specifies the channel of interest.
+		@name	SDI Input Error Detection
+	**/
+	///@{
+	/**
+		@return		True if the given SDI input is currently reporting TRS errors;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
 	**/
 	AJA_VIRTUAL bool		GetSDITRSError (const NTV2Channel inChannel);
 
 	/**
-		@brief		Returns SDI Lock Status from inputs.
-		@return		True if locked, false if not
-		@param[in]	inChannel		Specifies the channel of interest.
+		@return		The SDI Lock count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL bool		GetSDILock (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI Unlock count from inputs.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The SDI Unlock count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetSDIUnlockCount(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetSDIUnlockCount (const NTV2Channel inChannel);
 	
 	/**
-	@brief		Returns SDI VPID link A Status from inputs.
-	@return		True if valid, false if not
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		True if the SDI VPID link A input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL bool		GetVPIDValidA(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		GetVPIDValidA (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI VPID link B Status from inputs.
-	@return		True if valid, false if not
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		True if the SDI VPID link B input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL bool		GetVPIDValidB(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		GetVPIDValidB (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI CRC error count from link A.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The current Link A error count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetCRCErrorCountA(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetCRCErrorCountA (const NTV2Channel inChannel);
 
 	/**
-	@brief		Returns SDI CRC error count from link B.
-	@return		count
-	@param[in]	inChannel		Specifies the channel of interest.
+		@return		The current Link B error count for the given SDI input.
+		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
+		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
-	AJA_VIRTUAL ULWord		GetCRCErrorCountB(const NTV2Channel inChannel);
+	AJA_VIRTUAL ULWord		GetCRCErrorCountB (const NTV2Channel inChannel);
+	///@}
 
 	/**
 		@brief		Enables or disables multi-format (per channel) device operation.

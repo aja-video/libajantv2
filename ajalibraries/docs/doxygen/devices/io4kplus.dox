@@ -24,11 +24,12 @@ which supports 4K ingest or playout through a Thunderbolt III port.
 	-#	Bi-directional 3G-SDI (under software control)
 -	1 x 3G-SDI monitor output
 -	1 x HDMI 2.0 input
--	1 x HDMI 2.0 output
+-	1 x HDMI 2.0 output (supports HDR InfoFrame metadata and UHD/4Kp60 4:4:4)
 -	1 x Reference/LTC input (Ref supports 1V analog color black, 2/4V composite sync, or 1V HD tri-level sync)
 -	1 x LTC output
 -	1 x RS-422 serial port
--	1 x DB-25 connector for audio
+-	1 x Microphone input
+-	1 x DB-25 connector for audio (8 channels in, or 8 channels out, or 4-in/4-out)
 
 @par	Frame Buffer
 

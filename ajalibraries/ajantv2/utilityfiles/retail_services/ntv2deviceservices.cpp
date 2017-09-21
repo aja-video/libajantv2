@@ -202,20 +202,20 @@ void DeviceServices::ReadDriverState (void)
 	
     if (mCard->DeviceCanDoAudioMixer())
 	{
-		mCard->ReadRegister(kVRegAudioMixerOverrideState, (ULWord *) &mAudioMixerOverrideState);
+		mCard->ReadRegister(kVRegAudioMixerOverrideState,    (ULWord *) &mAudioMixerOverrideState);
 		mCard->ReadRegister(kVRegAudioMixerSourceMainEnable, (ULWord *) &mAudioMixerSourceMainEnable);
 		mCard->ReadRegister(kVRegAudioMixerSourceAux1Enable, (ULWord *) &mAudioMixerSourceAux1Enable);
 		mCard->ReadRegister(kVRegAudioMixerSourceAux2Enable, (ULWord *) &mAudioMixerSourceAux2Enable);
-		mCard->ReadRegister(kVRegAudioMixerSourceMainGain, (ULWord *) &mAudioMixerSourceMainGain);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux1Gain, (ULWord *) &mAudioMixerSourceAux1Gain);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux2Gain, (ULWord *) &mAudioMixerSourceAux2Gain);
+		mCard->ReadRegister(kVRegAudioMixerSourceMainGain,   (ULWord *) &mAudioMixerSourceMainGain);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux1Gain,   (ULWord *) &mAudioMixerSourceAux1Gain);
+		mCard->ReadRegister(kVRegAudioMixerSourceAux2Gain,   (ULWord *) &mAudioMixerSourceAux2Gain);
 		
 		mCard->ReadRegister(kVRegAudioCapMixerSourceMainEnable, (ULWord *) &mAudioCapMixerSourceMainEnable);
 		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Enable, (ULWord *) &mAudioCapMixerSourceAux1Enable);
 		mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Enable, (ULWord *) &mAudioCapMixerSourceAux2Enable);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceMainGain, (ULWord *) &mAudioCapMixerSourceMainGain);
+		mCard->ReadRegister(kVRegAudioCapMixerSourceMainGain,   (ULWord *) &mAudioCapMixerSourceMainGain);
 		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Gain, (ULWord *) &mAudioCapMixerSourceAux1Gain);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
+		//mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
 	}
 
     if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
@@ -229,7 +229,7 @@ void DeviceServices::ReadDriverState (void)
         
         mCard->ReadRegister(kVRegIPAddrEth1,	&mEth1.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth1,	&mEth1.ipc_subnet);
-        mCard->ReadRegister(kVRegGatewayEth1,&mEth1.ipc_gateway);
+        mCard->ReadRegister(kVRegGatewayEth1,	&mEth1.ipc_gateway);
         
         mCard->ReadRegister(kVRegRxcEnable1,				&mRx2022Config1.rxc_enable32);
         mCard->ReadRegister(kVRegRxcPrimaryRxMatch1,		&mRx2022Config1.rxc_primaryRxMatch);
@@ -533,7 +533,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			{
 				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
 				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
-				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux2Gain);
+				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			}
 		
 			mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
@@ -605,10 +605,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	else if (deviceID == DEVICE_ID_IO4KPLUS)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
-		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel1_4);
-		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel5_8);
-		mCard->SetAESOutputSource(NTV2_AudioChannel9_12, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel9_12);
-		mCard->SetAESOutputSource(NTV2_AudioChannel13_16, NTV2_AUDIOSYSTEM_4, NTV2_AudioChannel13_16);
+		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
+		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
 	}
 	else
 	{

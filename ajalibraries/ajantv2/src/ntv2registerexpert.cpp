@@ -26,19 +26,6 @@ using namespace std;
 	#define	AJA_LOCAL_STATIC
 #endif	//	!defined (NTV2_DEPRECATE)
 
-
-#define	DefineRegName(__rn__,__cstr__)																\
-	do																								\
-	{																								\
-		const string __regName__ (__cstr__);														\
-		if (!__regName__.empty())																	\
-			if (mRegNumToStringMap.find ((__rn__)) == mRegNumToStringMap.end())						\
-			{																						\
-				mRegNumToStringMap.insert (RegNumToStringPair ((__rn__), __regName__));				\
-				mStringToRegNumMap.insert (StringToRegNumPair (ToLower (__regName__), (__rn__)));	\
-			}																						\
-	} while (false)
-
 #define	DefineRegDecoder(__rn__,__dec__)															\
 	mRegNumToDecoderMap.insert (RegNumToDecoderPair ((__rn__), &(__dec__)))
 
@@ -190,7 +177,7 @@ public:
 		
 		//	HDMI
 		SetupHDMIRegs();
-		
+
 		SetupSDIError();
 		
 		//	Virtuals
@@ -200,6 +187,18 @@ public:
 	}	//	constructor
 	
 private:
+    void DefineRegName(uint32_t regNumber, const string& regName)
+    {
+        if (!regName.empty())
+        {
+            if (mRegNumToStringMap.find ((regNumber)) == mRegNumToStringMap.end())
+            {
+                mRegNumToStringMap.insert (RegNumToStringPair ((regNumber), regName));
+                mStringToRegNumMap.insert (StringToRegNumPair (ToLower (regName), (regNumber)));
+            }
+        }
+    }
+
 	void SetupTimecodeRegs(void)
 	{
 		DefineRegister	(kRegRP188InOut1DBB,			"",	mRP188InOutDBBRegDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_Channel1,	kRegClass_NULL);
@@ -1119,19 +1118,19 @@ private:
 																					 | ((inRegValue & kRegMaskFrameRateHiBit) >> (kRegShiftFrameRateHiBit - 3))));
 			ostringstream	oss;
 			oss	<< "Frame Rate: "				<< ::NTV2FrameRateToString (frameRate, true)				<< endl
-			<< "Frame Geometry: "			<< ::NTV2FrameGeometryToString (frameGeometry, true)		<< endl
-			<< "Standard: "					<< ::NTV2StandardToString (videoStandard, true)				<< endl
-			<< "Reference Source: "			<< ::NTV2ReferenceSourceToString (referenceSource, true)	<< endl
-			<< "Ch 2 link B 1080p 50/60: "	<< ((inRegValue & kRegMaskSmpte372Enable) ? "On" : "Off")	<< endl
-			<< "LEDs ";
+				<< "Frame Geometry: "			<< ::NTV2FrameGeometryToString (frameGeometry, true)		<< endl
+				<< "Standard: "					<< ::NTV2StandardToString (videoStandard, true)				<< endl
+				<< "Reference Source: "			<< ::NTV2ReferenceSourceToString (referenceSource, true)	<< endl
+				<< "Ch 2 link B 1080p 50/60: "	<< ((inRegValue & kRegMaskSmpte372Enable) ? "On" : "Off")	<< endl
+				<< "LEDs ";
 			for (int led(0);  led < 4;  ++led)
 				oss	<< (((inRegValue & kRegMaskLED) >> (16 + led))  ?  "*"  :  ".");
 			oss	<< endl
-			<< "Register Clocking: "		<< ::NTV2RegisterWriteModeToString (registerWriteMode, true).c_str() << endl
-			<< "Ch 1 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh1 ? "Enabled" : "Disabled") << endl
-			<< "Ch 2 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh2 ? "Enabled" : "Disabled") << endl
-			<< "Color Correction: "			<< "Channel: " << ((inRegValue & BIT(31)) ? "2" : "1")
-			<< " Bank " << ((inRegValue & BIT (30)) ? "1" : "0");
+				<< "Register Clocking: "		<< ::NTV2RegisterWriteModeToString (registerWriteMode, true).c_str() << endl
+				<< "Ch 1 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh1 ? "Enabled" : "Disabled") << endl
+				<< "Ch 2 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh2 ? "Enabled" : "Disabled") << endl
+				<< "Color Correction: "			<< "Channel: " << ((inRegValue & BIT(31)) ? "2" : "1")
+				<< " Bank " << ((inRegValue & BIT (30)) ? "1" : "0");
 			return oss.str();
 		}
 	}	mDecodeGlobalControlReg;
@@ -1144,29 +1143,29 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			oss << "Reference source bit 4: "		<< SetNotset(inRegValue & kRegMaskRefSource2)		<< endl
-			<< "Channel 1-4 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode)			<< endl
-			<< "Channel 5-8 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode2)		<< endl
-			<< "Independent Channel Mode: "		<< SetNotset(inRegValue & kRegMaskIndependentMode)	<< endl
-			<< "Audio 1 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud1PlayCapMode)		<< endl
-			<< "Audio 2 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud2PlayCapMode)		<< endl
-			<< "Audio 3 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud3PlayCapMode)		<< endl
-			<< "Audio 4 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud4PlayCapMode)		<< endl
-			<< "Audio 5 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud5PlayCapMode)		<< endl
-			<< "Audio 6 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud6PlayCapMode)		<< endl
-			<< "Audio 7 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud7PlayCapMode)		<< endl
-			<< "Audio 8 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud8PlayCapMode)		<< endl
-			<< "Ch 3 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh3)		<< endl
-			<< "Ch 4 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh4)		<< endl
-			<< "Ch 5 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh5)		<< endl
-			<< "Ch 6 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh6)		<< endl
-			<< "Ch 7 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh7)		<< endl
-			<< "Ch 8 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh8)		<< endl
-			<< "Ch 1/2 425: "					<< EnabDisab(inRegValue & kRegMask425FB12)			<< endl
-			<< "Ch 3/4 425: "					<< EnabDisab(inRegValue & kRegMask425FB34)			<< endl
-			<< "Ch 5/6 425: "					<< EnabDisab(inRegValue & kRegMask425FB56)			<< endl
-			<< "Ch 7/8 425: "					<< EnabDisab(inRegValue & kRegMask425FB78)			<< endl
-			<< "DnxIv: "						<< YesNo(inRegValue & kRegMaskIsDNXIV)				<< endl
-			<< "Has audio mixer: "				<< YesNo(inRegValue & kRegMaskAudioMixerPresent)	<< endl;
+				<< "Channel 1-4 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode)			<< endl
+				<< "Channel 5-8 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode2)		<< endl
+				<< "Independent Channel Mode: "		<< SetNotset(inRegValue & kRegMaskIndependentMode)	<< endl
+				<< "Audio 1 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud1PlayCapMode)		<< endl
+				<< "Audio 2 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud2PlayCapMode)		<< endl
+				<< "Audio 3 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud3PlayCapMode)		<< endl
+				<< "Audio 4 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud4PlayCapMode)		<< endl
+				<< "Audio 5 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud5PlayCapMode)		<< endl
+				<< "Audio 6 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud6PlayCapMode)		<< endl
+				<< "Audio 7 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud7PlayCapMode)		<< endl
+				<< "Audio 8 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud8PlayCapMode)		<< endl
+				<< "Ch 3 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh3)		<< endl
+				<< "Ch 4 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh4)		<< endl
+				<< "Ch 5 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh5)		<< endl
+				<< "Ch 6 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh6)		<< endl
+				<< "Ch 7 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh7)		<< endl
+				<< "Ch 8 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh8)		<< endl
+				<< "Ch 1/2 425: "					<< EnabDisab(inRegValue & kRegMask425FB12)			<< endl
+				<< "Ch 3/4 425: "					<< EnabDisab(inRegValue & kRegMask425FB34)			<< endl
+				<< "Ch 5/6 425: "					<< EnabDisab(inRegValue & kRegMask425FB56)			<< endl
+				<< "Ch 7/8 425: "					<< EnabDisab(inRegValue & kRegMask425FB78)			<< endl
+				<< "DnxIv: "						<< YesNo(inRegValue & kRegMaskIsDNXIV)				<< endl
+				<< "Has audio mixer: "				<< YesNo(inRegValue & kRegMaskAudioMixerPresent)	<< endl;
 			return oss.str();
 		}
 	}	mDecodeGlobalControl2;
@@ -1179,7 +1178,7 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			oss	<< "Mode: "		<< (inRegValue & kRegMaskMode ? "Capture" : "Display") << endl
-			<< "Format: ";
+				<< "Format: ";
 			if (inRegValue & kRegMaskFrameFormatHiBit)
 			{
 				if ((inRegValue & kRegMaskFrameFormat) == 0)
@@ -1208,15 +1207,15 @@ private:
 				case 16:	oss << "16-bit ARGB";					break;
 			}
 			oss								<< (inRegValue & kRegMaskFrameFormatHiBit	? " (extended)"			: " (normal)")					<< endl
-			<< "Channel: "				<< (inRegValue & kRegMaskChannelDisable		? "Disabled"			: "Enabled")					<< endl
-			<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
-			<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
-			<< "DRT Display: "			<< (inRegValue & kRegMaskQuarterSizeMode	? "On"					: "Off")						<< endl
-			<< "Frame Buffer Mode: "	<< (inRegValue & kRegMaskFrameBufferMode	? "Field"				: "Frame")						<< endl
-			<< "Dither: "				<< (inRegValue & kRegMaskDitherOn8BitInput	? "Dither 8-bit inputs"	: "No dithering")				<< endl
-			<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl
-			<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
-			<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
+				<< "Channel: "				<< (inRegValue & kRegMaskChannelDisable		? "Disabled"			: "Enabled")					<< endl
+				<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
+				<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
+				<< "DRT Display: "			<< (inRegValue & kRegMaskQuarterSizeMode	? "On"					: "Off")						<< endl
+				<< "Frame Buffer Mode: "	<< (inRegValue & kRegMaskFrameBufferMode	? "Field"				: "Frame")						<< endl
+				<< "Dither: "				<< (inRegValue & kRegMaskDitherOn8BitInput	? "Dither 8-bit inputs"	: "No dithering")				<< endl
+				<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl
+				<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
+				<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
 			return oss.str();
 		}
 	}	mDecodeChannelControl;
@@ -1231,7 +1230,7 @@ private:
 			const uint16_t	format	((inRegValue >> 15) & 0x1F);
 			ostringstream	oss;
 			oss << OnOff(isOn)	<< endl
-			<< "Format: "	<< xHEX0N(format,4) << " (" << DEC(format) << ")";
+				<< "Format: "	<< xHEX0N(format,4) << " (" << DEC(format) << ")";
 			return oss.str();
 		}
 	}	mDecodeFBControlReg;
@@ -1249,7 +1248,7 @@ private:
 			const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 			ostringstream	oss;
 			oss << "Die Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit"	<< endl
-			<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
+				<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
 			return oss.str();
 		}
 	}	mDecodeSysmonVccIntDieTemp;
@@ -1269,9 +1268,9 @@ private:
 				if (numSpigots)
 					for (UWord spigot(0);  spigot < numSpigots;  )
 					{
-						const bool	txEnabled	(txEnableBits & BIT(spigot));
-						oss	<< "SDI " << DEC(spigot+1) << ": " << (txEnabled ? "Output/Transmit" : "Input/Receive");
-						if (++spigot < numSpigots)
+						const uint32_t	txEnabled	(txEnableBits & BIT(spigot));
+						oss	<< "SDI " << DEC(++spigot) << ": " << (txEnabled ? "Output/Transmit" : "Input/Receive");
+						if (spigot < numSpigots)
 							oss << endl;
 					}
 				else
@@ -1324,7 +1323,7 @@ private:
 			const bool		isMono	((inRegValue & (1 << 30)) != 0);
 			ostringstream	oss;
 			oss << "Aspect Ratio: " << (is16x9 ? "16x9" : "4x3") << endl
-			<< "Depth: " << (isMono ? "Monochrome" : "Color");
+				<< "Depth: " << (isMono ? "Monochrome" : "Color");
 			return oss.str();
 		}
 	}	mDecodeVidControlReg;
@@ -1340,7 +1339,7 @@ private:
 			NTV2FrameRate	fRateRf	(NTV2FrameRate(((inRegValue & (BIT(16)|BIT(17)|BIT(18)|BIT(19))) >> 16)                                      ));
 			ostringstream	oss;
 			oss	<< "Input 1 Frame Rate: " << ::NTV2FrameRateToString(fRate1, true) << endl
-			<< "Input 1 Geometry: ";
+				<< "Input 1 Geometry: ";
 			if (BIT(30) & inRegValue)
 				switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
 			{
@@ -1361,9 +1360,9 @@ private:
 				default:			oss << "Invalid LO";	break;
 			}
 			oss	<< endl
-			<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
-			<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
-			<< "Input 2 Geometry: ";
+				<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
+				<< "Input 2 Geometry: ";
 			if (BIT(30) & inRegValue)
 				switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
 			{
@@ -1384,9 +1383,9 @@ private:
 				default:			oss << "Invalid LO";	break;
 			}
 			oss	<< endl
-			<< "Input 2 Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
-			<< "Reference Frame Rate: " << ::NTV2FrameRateToString(fRateRf, true) << endl
-			<< "Reference Geometry: ";
+				<< "Input 2 Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< "Reference Frame Rate: " << ::NTV2FrameRateToString(fRateRf, true) << endl
+				<< "Reference Geometry: ";
 			switch (((BIT(20)|BIT(21)|BIT(22)|BIT(23)) & inRegValue) >> 20)
 			{
 				case 0:					oss << "Unknown";		break;
@@ -1398,11 +1397,11 @@ private:
 				default:				oss << "Invalid";		break;
 			}
 			oss	<< endl
-			<< "Reference Scan Mode: " << ((BIT(23) & inRegValue) ? "Progressive" : "Interlaced") << endl
-			<< "AES Channel 1-2: " << ((BIT(24) & inRegValue) ? "Invalid" : "Valid") << endl
-			<< "AES Channel 3-4: " << ((BIT(25) & inRegValue) ? "Invalid" : "Valid") << endl
-			<< "AES Channel 5-6: " << ((BIT(26) & inRegValue) ? "Invalid" : "Valid") << endl
-			<< "AES Channel 7-8: " << ((BIT(27) & inRegValue) ? "Invalid" : "Valid");
+				<< "Reference Scan Mode: " << ((BIT(23) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< "AES Channel 1-2: " << ((BIT(24) & inRegValue) ? "Invalid" : "Valid") << endl
+				<< "AES Channel 3-4: " << ((BIT(25) & inRegValue) ? "Invalid" : "Valid") << endl
+				<< "AES Channel 5-6: " << ((BIT(26) & inRegValue) ? "Invalid" : "Valid") << endl
+				<< "AES Channel 7-8: " << ((BIT(27) & inRegValue) ? "Invalid" : "Valid");
 			return oss.str();
 		}
 	}	mDecodeInputStatusReg;
@@ -1452,25 +1451,25 @@ private:
 			
 			ostringstream		oss;
 			oss		<< "Audio Capture: "		<< (BIT(0) & inRegValue ? "Enabled" : "Disabled")	<< endl
-			<< "Audio Loopback: "		<< (BIT(3) & inRegValue ? "Enabled" : "Disabled")	<< endl
-			<< "Audio Input: "			<< (BIT(8) & inRegValue ? "Disabled" : "Enabled")	<< endl
-			<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+					<< "Audio Loopback: "		<< (BIT(3) & inRegValue ? "Enabled" : "Disabled")	<< endl
+					<< "Audio Input: "			<< (BIT(8) & inRegValue ? "Disabled" : "Enabled")	<< endl
+					<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
 			if (sdiOutput)
 				oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
-				<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+					<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
 			
 			oss		<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
-			<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
-			<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
-			<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
-			<< (BIT(18) & inRegValue ? "96kHz Support" : "48kHz Support")					<< endl
-			<< (BIT(22) & inRegValue ? "Embedded Support" : "No Embedded Support")			<< endl
-			<< (BIT(23) & inRegValue ? "8-Channel Support" : "6-Channel Support")			<< endl
-			<< "K-box, Monitor: "		<< ChStrs [(BIT(24) & BIT(25) & inRegValue) >> 24]	<< endl
-			<< "K-Box Input: "			<< (BIT(26) & inRegValue ? "XLR" : "BNC")			<< endl
-			<< "K-Box: "				<< (BIT(27) & inRegValue ? "Present" : "Absent")	<< endl
-			<< "Cable: "				<< (BIT(28) & inRegValue ? "XLR" : "BNC")			<< endl
-			<< "Audio Buffer Size: "	<< (BIT(31) & inRegValue ? "4 MB" : "1 MB");
+					<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
+					<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
+					<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
+					<< (BIT(18) & inRegValue ? "96kHz Support" : "48kHz Support")					<< endl
+					<< (BIT(22) & inRegValue ? "Embedded Support" : "No Embedded Support")			<< endl
+					<< (BIT(23) & inRegValue ? "8-Channel Support" : "6-Channel Support")			<< endl
+					<< "K-box, Monitor: "		<< ChStrs [(BIT(24) & BIT(25) & inRegValue) >> 24]	<< endl
+					<< "K-Box Input: "			<< (BIT(26) & inRegValue ? "XLR" : "BNC")			<< endl
+					<< "K-Box: "				<< (BIT(27) & inRegValue ? "Present" : "Absent")	<< endl
+					<< "Cable: "				<< (BIT(28) & inRegValue ? "XLR" : "BNC")			<< endl
+					<< "Audio Buffer Size: "	<< (BIT(31) & inRegValue ? "4 MB" : "1 MB");
 			return oss.str();
 		}
 	}	mDecodeAudControlReg;
@@ -1487,11 +1486,11 @@ private:
 			//	WARNING!  BIT(23) had better be clear on 0 & 1-input boards!!
 			ostringstream	oss;
 			oss	<< "Audio Source: "	<< SrcStrs [SrcStrMap [(BIT(0) | BIT(1) | BIT(2) | BIT(3)) & inRegValue]]	<< endl
-			<< "Embedded Source Select: Video Input " << (1 + vidInput)										<< endl
-			<< "PCM disabled: "				<< YesNo(inRegValue & BIT(17))									<< endl
-			<< "Erase head enable: "		<< YesNo(inRegValue & BIT(19))									<< endl
-			<< "Embedded Clock Select: "	<< (inRegValue & BIT(22) ? "Video Input" : "Board Reference")	<< endl
-			<< "3G audio source: "			<< (inRegValue & BIT(21) ? "Data stream 2" : "Data stream 1");
+				<< "Embedded Source Select: Video Input " << (1 + vidInput)										<< endl
+				<< "PCM disabled: "				<< YesNo(inRegValue & BIT(17))									<< endl
+				<< "Erase head enable: "		<< YesNo(inRegValue & BIT(19))									<< endl
+				<< "Embedded Clock Select: "	<< (inRegValue & BIT(22) ? "Video Input" : "Board Reference")	<< endl
+				<< "3G audio source: "			<< (inRegValue & BIT(21) ? "Data stream 2" : "Data stream 1");
 			return oss.str();
 		}
 	}	mDecodeAudSourceSelectReg;
@@ -1595,6 +1594,8 @@ private:
 		//DefineRegister (kRegAudioMixerAux2GainCh1,				
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1605,6 +1606,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1615,6 +1618,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1625,6 +1630,8 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
+            (void) inRegNum;
+            (void) inRegValue;
 			(void) inDeviceID;
 			ostringstream	oss;
 			return oss.str();
@@ -1640,13 +1647,13 @@ private:
 			ostringstream	oss;
 			static const string	SyncStrs []	=	{	"field",	"frame",	"immediate",	"unknown"	};
 			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))	<< endl
-			<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
-			<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
-			<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
-			<< "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
-			<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
-			<< "Memory writes "			<< (inRegValue & BIT(28) ? "disabled" : "enabled")	<< endl
-			<< "Metadata from "			<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
+				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
+				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
+				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
+				<< "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
+				<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
+				<< "Memory writes "			<< (inRegValue & BIT(28) ? "disabled" : "enabled")	<< endl
+				<< "Metadata from "			<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
 			return oss.str();
 		}
 	}	mDecodeAncExtControlReg;
@@ -1663,16 +1670,16 @@ private:
 			switch (which)
 			{
 				case 5:		oss << "F1 cutoff line: "			<< valueLow	<< endl		//	regAncExtFieldCutoffLine
-					<< "F2 cutoff line: "			<< valueHigh;
+								<< "F2 cutoff line: "			<< valueHigh;
 					break;
 				case 9:		oss	<< "F1 VBL start line: "		<< valueLow	<< endl		//	regAncExtFieldVBLStartLine
-					<< "F2 VBL start line: "		<< valueHigh;
+								<< "F2 VBL start line: "		<< valueHigh;
 					break;
 				case 11:	oss	<< "Field ID high on line: "	<< valueLow	<< endl		//	regAncExtFID
-					<< "Field ID low on line: "		<< valueHigh;
+								<< "Field ID low on line: "		<< valueHigh;
 					break;
 				case 17:	oss	<< "F1 analog start line: "		<< valueLow	<< endl		//	regAncExtAnalogStartLine
-					<< "F2 analog start line: "		<< valueHigh;
+								<< "F2 analog start line: "		<< valueHigh;
 					break;
 				default:
 					oss	<< "Invalid register type";
@@ -1712,9 +1719,9 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			oss	<< "Ignoring DIDs " << HEX0N((inRegValue >> 0) & 0xFF, 2)
-			<< ", " << HEX0N((inRegValue >> 8) & 0xFF, 2)
-			<< ", " << HEX0N((inRegValue >> 16) & 0xFF, 2)
-			<< ", " << HEX0N((inRegValue >> 24) & 0xFF, 2);
+				<< ", " << HEX0N((inRegValue >> 8) & 0xFF, 2)
+				<< ", " << HEX0N((inRegValue >> 16) & 0xFF, 2)
+				<< ", " << HEX0N((inRegValue >> 24) & 0xFF, 2);
 			return oss.str();
 		}
 	}	mDecodeAncExtIgnoreDIDs;
@@ -1754,22 +1761,22 @@ private:
 			switch (which)
 			{
 				case 0:		oss	<< "F1 byte count: "				<< valueLow				<< endl
-					<< "F2 byte count: "				<< valueHigh;
+								<< "F2 byte count: "				<< valueHigh;
 					break;
 				case 4:		oss	<< "HANC pixel delay: "				<< (valueLow & 0x3FF)	<< endl
-					<< "VANC pixel delay: "				<< (valueHigh & 0x7FF);
+								<< "VANC pixel delay: "				<< (valueHigh & 0x7FF);
 					break;
 				case 5:		oss	<< "F1 first active line: "			<< (valueLow & 0x7FF)	<< endl
-					<< "F2 first active line: "			<< (valueHigh & 0x7FF);
+								<< "F2 first active line: "			<< (valueHigh & 0x7FF);
 					break;
 				case 6:		oss	<< "Active line length: "			<< (valueLow & 0x7FF)	<< endl
-					<< "Total line length: "			<< (valueHigh & 0xFFF);
+								<< "Total line length: "			<< (valueHigh & 0xFFF);
 					break;
 				case 8:		oss	<< "Field ID high on line: "		<< (valueLow & 0x7FF)	<< endl
-					<< "Field ID low on line: "			<< (valueHigh & 0x7FF);
+								<< "Field ID low on line: "			<< (valueHigh & 0x7FF);
 					break;
 				case 11:	oss	<< "F1 chroma blnk start line: "	<< (valueLow & 0x7FF)	<< endl
-					<< "F2 chroma blnk start line: "	<< (valueHigh & 0x7FF);
+								<< "F2 chroma blnk start line: "	<< (valueHigh & 0x7FF);
 					break;
 				default:	return "Invalid register type";
 			}
@@ -1785,15 +1792,15 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))	<< endl
-			<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
-			<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
-			<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
-			<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))	<< endl
-			<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))	<< endl
-			<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))	<< endl
-			<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))	<< endl
-			<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))	<< endl
-			<< "Memory writes: "		<< ((inRegValue & BIT(28)) ? "disabled" : "enabled");
+				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
+				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
+				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
+				<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))	<< endl
+				<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))	<< endl
+				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))	<< endl
+				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))	<< endl
+				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))	<< endl
+				<< "Memory writes: "		<< ((inRegValue & BIT(28)) ? "disabled" : "enabled");
 			return oss.str();
 		}
 	}	mDecodeAncInsControlReg;
@@ -1858,14 +1865,14 @@ private:
 			if (hdmiVidStdStr != vidStdStr)
 				oss << " (" << vidStdStr << ")";
 			oss	<< endl
-			<< "Color Mode: "		<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
-			<< "Video Rate: "		<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
-			<< "Scan Mode: "		<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
-			<< "Bit Depth: "		<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
-			<< "Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
-			<< "Output Range: "		<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
-			<< "Audio Channels: "	<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
-			<< "Output: "			<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI")		<< endl
+				<< "Color Mode: "		<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
+				<< "Video Rate: "		<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
+				<< "Scan Mode: "		<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
+				<< "Bit Depth: "		<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
+				<< "Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
+				<< "Output Range: "		<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
+				<< "Audio Channels: "	<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
+				<< "Output: "			<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI")		<< endl
 			<< "Audio Loopback: "	<< OnOff(inRegValue & BIT(31));
 			return oss.str();
 		}
@@ -1883,16 +1890,16 @@ private:
 			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "SXGA", "6", "7", "3840p", "4096p"};
 			static const string	sRates[32] = {"invalid", "60.00", "59.94", "30.00", "29.97", "25.00", "24.00", "23.98"};
 			oss	<< "HDMI Input: " << (inRegValue & BIT(0) ? "Locked" : "Unlocked")			<< endl
-			<< "HDMI Input: " << (inRegValue & BIT(1) ? "Stable" : "Unstable")			<< endl
-			<< "Color Mode: " << (inRegValue & BIT(2) ? "RGB" : "YCbCr")				<< endl
-			<< "Bitdepth: " << (inRegValue & BIT(3) ? "10-bit" : "8-bit")				<< endl
-			<< "Audio Channels: " << (inRegValue & BIT(12) ? 8 : 2)						<< endl
-			<< "Scan Mode: " << (inRegValue & BIT(13) ? "Progressive" : "Interlaced")	<< endl
-			<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl;
+				<< "HDMI Input: " << (inRegValue & BIT(1) ? "Stable" : "Unstable")			<< endl
+				<< "Color Mode: " << (inRegValue & BIT(2) ? "RGB" : "YCbCr")				<< endl
+				<< "Bitdepth: " << (inRegValue & BIT(3) ? "10-bit" : "8-bit")				<< endl
+				<< "Audio Channels: " << (inRegValue & BIT(12) ? 8 : 2)						<< endl
+				<< "Scan Mode: " << (inRegValue & BIT(13) ? "Progressive" : "Interlaced")	<< endl
+				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl;
 			if (hdmiVers == 1 || hdmiVers == 2)
 				oss << "Video Standard: " << sStds[vidStd]									<< endl;
 			oss	<< "Receiving: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
-			<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
+				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
 	}	mDecodeHDMIInputStatus;
@@ -1978,10 +1985,10 @@ private:
 				const uint16_t	EOTFvalue				((inRegValue & kRegMaskElectroOpticalTransferFunction) >> kRegShiftElectroOpticalTransferFunction);
 				const uint16_t	staticMetaDataDescID	((inRegValue & kRegMaskHDRStaticMetadataDescriptorID) >> kRegShiftHDRStaticMetadataDescriptorID);
 				oss	<< "HDMI Out Dolby Vision Enabled: " << YesNo(inRegValue & kRegMaskHDMIHDRDolbyVisionEnable)     << endl
-				<< "HDMI HDR Out Enabled: "		     << YesNo(inRegValue & kRegMaskHDMIHDREnable)				<< endl
-				<< "Constant Luminance: "		     << YesNo(inRegValue & kRegMaskHDMIHDRNonContantLuminance)	<< endl
-				<< "EOTF: "						     << sEOTFs[(EOTFvalue < 3) ? EOTFvalue : 3]					<< endl
-				<< "Static MetaData Desc ID: "	     << HEX0N(staticMetaDataDescID, 2) << " (" << DEC(staticMetaDataDescID) << ")";
+					<< "HDMI HDR Out Enabled: "		     << YesNo(inRegValue & kRegMaskHDMIHDREnable)				<< endl
+					<< "Constant Luminance: "		     << YesNo(inRegValue & kRegMaskHDMIHDRNonContantLuminance)	<< endl
+					<< "EOTF: "						     << sEOTFs[(EOTFvalue < 3) ? EOTFvalue : 3]					<< endl
+					<< "Static MetaData Desc ID: "	     << HEX0N(staticMetaDataDescID, 2) << " (" << DEC(staticMetaDataDescID) << ")";
 			}
 			return oss.str();
 		}
@@ -1997,15 +2004,15 @@ private:
 			const uint32_t		vidStd	(inRegValue & (BIT(0)|BIT(1)|BIT(2)));
 			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "1556i", "6", "7"};
 			oss	<< "Video Standard : "			<< sStds[vidStd]										<< endl
-			<< "2Kx1080 mode: "				<< (inRegValue & BIT(3) ? "2048x1080" : "1920x1080")	<< endl
-			<< "HBlank RGB Range: Black="	<< (inRegValue & BIT(7) ? "0x40" : "0x04")				<< endl
-			<< "12G enable: "				<< YesNo(inRegValue & BIT(17))							<< endl
-			<< "6G enalbe: "				<< YesNo(inRegValue & BIT(16))							<< endl
-			<< "3G enable: "				<< YesNo(inRegValue & BIT(24))							<< endl
-			<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
-			<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl
-			<< "VPID overwrite enable: "	<< YesNo(inRegValue & BIT(27))							<< endl
-			<< "DS 1 audio source: Subsystem ";
+				<< "2Kx1080 mode: "				<< (inRegValue & BIT(3) ? "2048x1080" : "1920x1080")	<< endl
+				<< "HBlank RGB Range: Black="	<< (inRegValue & BIT(7) ? "0x40" : "0x04")				<< endl
+				<< "12G enable: "				<< YesNo(inRegValue & BIT(17))							<< endl
+				<< "6G enalbe: "				<< YesNo(inRegValue & BIT(16))							<< endl
+				<< "3G enable: "				<< YesNo(inRegValue & BIT(24))							<< endl
+				<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
+				<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl
+				<< "VPID overwrite enable: "	<< YesNo(inRegValue & BIT(27))							<< endl
+				<< "DS 1 audio source: Subsystem ";
 			switch ((inRegValue & (BIT(28)|BIT(30))) >> 28)
 			{
 				case 0:	oss << (inRegValue & BIT(18) ? 5 : 1);	break;
@@ -2073,9 +2080,9 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			oss	<< "RP188: "	<< ((inRegValue & BIT(16)) ? (inRegValue & BIT(17) ? "Selected" : "Unselected") : "No") << " RP-188 received"	<< endl
-			<< "Bypass: "	<< (inRegValue & BIT(23) ? (inRegValue & BIT(22) ? "SDI In 2" : "SDI In 1") : "Disabled")						<< endl
-			<< "Filter: "	<< HEX0N((inRegValue & 0xFF000000) >> 24, 2)																		<< endl
-			<< "DBB: "		<< HEX0N((inRegValue & 0x0000FF00) >> 8, 2) << " " << HEX0N(inRegValue & 0x000000FF, 2);
+				<< "Bypass: "	<< (inRegValue & BIT(23) ? (inRegValue & BIT(22) ? "SDI In 2" : "SDI In 1") : "Disabled")						<< endl
+				<< "Filter: "	<< HEX0N((inRegValue & 0xFF000000) >> 24, 2)																		<< endl
+				<< "DBB: "		<< HEX0N((inRegValue & 0x0000FF00) >> 8, 2) << " " << HEX0N(inRegValue & 0x000000FF, 2);
 			return oss.str();
 		}
 	}	mRP188InOutDBBRegDecoder;
@@ -2089,13 +2096,13 @@ private:
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
 			oss	<< "Limiting: "		<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-			<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
-			<< "FG Matte: "		<< (inRegValue & kRegMaskVidProcFGMatteEnable ? "Enabled" : "Disabled")											<< endl
-			<< "BG Matte: "		<< (inRegValue & kRegMaskVidProcBGMatteEnable ? "Enabled" : "Disabled")											<< endl
-			<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-			<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-			<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
-			<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
+				<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+				<< "FG Matte: "		<< (inRegValue & kRegMaskVidProcFGMatteEnable ? "Enabled" : "Disabled")											<< endl
+				<< "BG Matte: "		<< (inRegValue & kRegMaskVidProcBGMatteEnable ? "Enabled" : "Disabled")											<< endl
+				<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}
 	}	mVidProcControlRegDecoder;
@@ -2111,10 +2118,10 @@ private:
 			const uint32_t	slopemask	(0x3FFF0000);	//	14 bits / high order byte
 			const uint32_t	fractionmask(0x00000007);	//	3 bits for fractions
 			oss	<< "Split Start: "	<< HEX0N((inRegValue & startmask) & ~fractionmask, 4) << " "
-			<< HEX0N((inRegValue & startmask) & fractionmask, 4)					<< endl
-			<< "Split Slope: "	<< HEX0N(((inRegValue & slopemask) >> 16) & ~fractionmask, 4) << " "
-			<< HEX0N(((inRegValue & slopemask) >> 16) & fractionmask, 4)			<< endl
-			<< "Split Type: "	<< ((inRegValue & BIT(30)) ? "Vertical" : "Horizontal");
+				<< HEX0N((inRegValue & startmask) & fractionmask, 4)					<< endl
+				<< "Split Slope: "	<< HEX0N(((inRegValue & slopemask) >> 16) & ~fractionmask, 4) << " "
+				<< HEX0N(((inRegValue & slopemask) >> 16) & fractionmask, 4)			<< endl
+				<< "Split Type: "	<< ((inRegValue & BIT(30)) ? "Vertical" : "Horizontal");
 			return oss.str();
 		}
 	}	mSplitControlRegDecoder;
@@ -2128,8 +2135,8 @@ private:
 			ostringstream	oss;
 			const uint32_t	mask	(0x000003FF);	//	10 bits
 			oss	<< "Flat Matte Cb: "	<< HEX0N(inRegValue & mask, 3)					<< endl
-			<< "Flat Matte Y: "		<< HEX0N(((inRegValue >> 10) & mask) - 0x40, 3)	<< endl
-			<< "Flat Matte Cr: "	<< HEX0N((inRegValue >> 20) & mask, 3);
+				<< "Flat Matte Y: "		<< HEX0N(((inRegValue >> 10) & mask) - 0x40, 3)	<< endl
+				<< "Flat Matte Cr: "	<< HEX0N((inRegValue >> 20) & mask, 3);
 			return oss.str();
 		}
 	}	mFlatMatteValueRegDecoder;
@@ -2141,11 +2148,12 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "Lock Count: "			<< DEC(inRegValue & 0x7FFF)		<< endl
-			<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
-			<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
-			<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl
-			<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
+			if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
+				oss	<< "Lock Count: "			<< DEC(inRegValue & 0x7FFF)		<< endl
+					<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
+					<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
+					<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl
+					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
 			return oss.str();
 		}
 	}	mSDIErrorStatusRegDecoder;
@@ -2157,8 +2165,9 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "Link A: "		<< DEC(inRegValue & 0x0000FFFF)			<< endl
-			<< "Link B: "		<< DEC((inRegValue & 0xFFFF0000) >> 16);
+			if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
+				oss	<< "Link A: "		<< DEC(inRegValue & 0x0000FFFF)			<< endl
+					<< "Link B: "		<< DEC((inRegValue & 0xFFFF0000) >> 16);
 			return oss.str();
 		}
 	}	mSDIErrorCountRegDecoder;

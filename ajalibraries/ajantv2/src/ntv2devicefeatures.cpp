@@ -15,10 +15,11 @@
 #include "ntv2devicefeatures.hpp"
 #include "xpt_c44.h"
 #include "xpt_c88.h"
-#include "xpt_kona4_ufc.h"
-#include "xpt_kona4.h"
 #include "xpt_io4k.h"
 #include "xpt_io4k_ufc.h"
+#include "xpt_io4kplus.h"
+#include "xpt_kona4_ufc.h"
+#include "xpt_kona4.h"
 #include "xpt_kip_4rxtx.h"
 #include "xpt_kip_2p2rxtc.h"
 #include "xpt_kip_j2k1rxtx.h"
@@ -762,8 +763,10 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_io4kMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_IO4KUFC:
             return xpt_io4k_ufcMatrix[inInputXpt][inOutputXpt];
+        case DEVICE_ID_IO4KPLUS:
+            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONA4:
-            return xpt_kona_4Matrix[inInputXpt][inOutputXpt];
+            return xpt_kona4Matrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONA4UFC:
             return xpt_kona4_ufcMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_4CH_1SFP:
