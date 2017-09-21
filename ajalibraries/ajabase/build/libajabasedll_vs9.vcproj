@@ -630,6 +630,10 @@
 				RelativePath="..\system\windows\processimpl.h"
 				>
 			</File>
+            <File
+                RelativePath="..\system\system.cpp"
+                >
+            </File>
 			<File
 				RelativePath="..\system\system.h"
 				>

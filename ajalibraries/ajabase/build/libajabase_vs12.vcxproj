@@ -221,6 +221,7 @@
     <ClCompile Include="..\pnp\windows\pnpimpl.cpp" />
     <ClCompile Include="..\system\process.cpp" />
     <ClCompile Include="..\system\windows\processimpl.cpp" />
+    <ClCompile Include="..\system\system.cpp" />
     <ClCompile Include="..\system\systemtime.cpp" />
     <ClCompile Include="..\system\thread.cpp" />
     <ClCompile Include="..\system\windows\threadimpl.cpp" />

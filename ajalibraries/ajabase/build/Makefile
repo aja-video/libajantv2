@@ -47,6 +47,7 @@ AJA_LIB_SRCS =\
 	pnpimpl.cpp \
 	process.cpp \
 	processimpl.cpp \
+    system.cpp \
 	systemtime.cpp \
 	testpatterngen.cpp \
 	thread.cpp \
