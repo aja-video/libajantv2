@@ -689,7 +689,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
 {
     bool busy  = true;
-
+	SleepMs(10);
     do
     {
         uint32_t regValue;
