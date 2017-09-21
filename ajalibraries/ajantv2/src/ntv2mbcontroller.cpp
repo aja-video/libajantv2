@@ -9,18 +9,8 @@
 
 #if defined(AJALinux)
 #include <stdlib.h>
-#include <
 #endif
 
-#if defined(MSWindows)
-#include <time.h>
-#include <windows.h> //I've ommited this line.
-#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
-  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
-#else
-  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
-#endif
-#endif
 
 using namespace std;
 
@@ -638,33 +628,12 @@ bool CNTV2MBController::GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt)
 
 uint64_t CNTV2MBController::GetNTPTimestamp()
 {
-#if defined(MSWindows)
+    uint32_t secsLo;
+    uint32_t nanosecs;
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpSecLo, &secsLo);
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpNSec, &nanosecs);
 
-    static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
-
-    struct timeval tv;
-
-    SYSTEMTIME  system_time;
-    FILETIME    file_time;
-    uint64_t    time;
-
-    GetSystemTime( &system_time );
-    SystemTimeToFileTime( &system_time, &file_time );
-    time =  ((uint64_t)file_time.dwLowDateTime )      ;
-    time += ((uint64_t)file_time.dwHighDateTime) << 32;
-
-    tv.tv_sec  = (long) ((time - EPOCH) / 10000000L);
-    tv.tv_usec = (long) (system_time.wMilliseconds * 1000);
-#endif
-
-#if defined(AJALinux) || defined(AJAMac)
-    struct timeval tv;
-    struct timezone tz;
-
-    gettimeofday( &tv, &tz );
-#endif
-
-    uint64_t ntpts;
-    ntpts = (((uint64_t)tv.tv_sec + 2208988800u) << 32) + ((uint32_t)tv.tv_usec * 4294.967296);
-    return (ntpts);
+    uint64_t res = secsLo;
+    res = (res << 32) + nanosecs;
+    return res;
 }

@@ -1524,7 +1524,7 @@ bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel
     sdp << endl;
 
     // PTP
-    sdp << "a=tsrefclk:ptp=IEEE1588:2008" << macaddr << ":" << domain << endl;
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << macaddr << ":" << domain << endl;
     sdp << "a=mediaclk:direct=0" << endl;
     sdp << "a=mid:VID" << endl;
 
@@ -1586,7 +1586,7 @@ bool CNTV2Config2110::GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel
     }
     sdp << endl;
 
-    sdp << "a=tsrefclk:ptp=IEEE1588:2008" << macaddr << ":" << domain << endl;
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << macaddr << ":" << domain << endl;
     sdp << "a=mediaclk:direct=0" << endl;
     sdp << "a=mid:AUD" << endl;
 
