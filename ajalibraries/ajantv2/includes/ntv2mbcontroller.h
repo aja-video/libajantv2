@@ -8,11 +8,12 @@
 
 enum eMBCmd
 {
-    MB_CMD_SET_NET      = 0,
+    MB_CMD_SET_NET                = 0,
     MB_CMD_GET_MAC_FROM_ARP_TABLE = 3,
-    MB_CMD_SEND_ARP_REQ        = 4,
-    MB_CMD_UNKNOWN             = 5,
-    MB_CMD_SET_IGMP_VERSION    = 6
+    MB_CMD_SEND_ARP_REQ           = 4,
+    MB_CMD_UNKNOWN                = 5,
+    MB_CMD_SET_IGMP_VERSION       = 6,
+    MB_CMD_FETCH_GM_INFO          = 7
 };
 
 enum eSFP
@@ -85,6 +86,7 @@ protected:
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
+    bool FetchGrandMasterInfo(uint32_t & domain, std::string & macAddr);
 
     void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);

@@ -140,6 +140,56 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
     return false;
 }
 
+bool CNTV2MBController::FetchGrandMasterInfo(uint32_t & domain, string & macAddr)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_FETCH_GM_INFO);
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=4)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            rv = getString(msg[2],"MAC",macAddr);
+            if (rv == false)
+            {
+                mError = "MAC Address not found in response from MB";
+                return false;
+            }
+            rv = getDecimal(msg[3],"DOMAIN",domain);
+            if (rv == false)
+            {
+                mError = "DOMAIN not found in response from MB";
+                return false;
+            }
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mError);
+                return false;
+            }
+        }
+    }
+
+    mError = "Invalid response from MB";
+    return false;
+}
+
 bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
 {
     if ( (getFeatures() & SAREK_MB_PRESENT) == 0)

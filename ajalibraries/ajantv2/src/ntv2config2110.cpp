@@ -1385,15 +1385,20 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     // time the session is active
     sdp << "t=0 0" <<endl;
 
-    GenSDPVideoStream(sdp,channel);
-    GenSDPAudioStream(sdp,channel);
+    // PTP
+    uint32_t domain;
+    string macaddr;
+    bool rv = FetchGrandMasterInfo(domain, macaddr);
+
+    GenSDPVideoStream(sdp,channel,macaddr,domain);
+    GenSDPAudioStream(sdp,channel, macaddr,domain);
 
     sdp.close();
 
     return false;
 }
 
-bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel)
+bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
 {
     bool enabled;
     GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabled);
@@ -1518,11 +1523,16 @@ bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel
     }
     sdp << endl;
 
+    // PTP
+    sdp << "a=tsrefclk:ptp=IEEE1588:2008" << macaddr << ":" << domain << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:VID" << endl;
+
     return true;
 }
 
 
-bool CNTV2Config2110::GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel)
+bool CNTV2Config2110::GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
 {
     bool enabled;
     GetTxChannelEnable(channel,NTV2_AUDIO1_STREAM,enabled);
@@ -1574,9 +1584,11 @@ bool CNTV2Config2110::GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel
         sdp << "SGRP,SGRP,SGRP,SGRP)";
         break;
     }
-
-
     sdp << endl;
+
+    sdp << "a=tsrefclk:ptp=IEEE1588:2008" << macaddr << ":" << domain << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:AUD" << endl;
 
     return true;
 }
