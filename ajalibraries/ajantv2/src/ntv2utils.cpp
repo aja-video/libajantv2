@@ -7323,11 +7323,8 @@ static const char * NTV2InterruptEnumStrings (const INTERRUPT_ENUMS inInterruptE
 														"eOutput5",
 														"eOutput6",
 														"eOutput7",
-														"eOutput8",
-														"<invalid>",
-														"<invalid>",
-														"<invalid>"};
-	if (inInterruptEnumValue >= eOutput1 && inInterruptEnumValue <= eNumInterruptTypes)
+                                                        "eOutput8"};
+    if (inInterruptEnumValue >= eOutput1 && inInterruptEnumValue < eNumInterruptTypes)
 		return sInterruptEnumStrings [inInterruptEnumValue];
 	else
 		return NULL;
@@ -7339,6 +7336,51 @@ std::string NTV2InterruptEnumToString (const INTERRUPT_ENUMS inInterruptEnumValu
 {
 	const char *	pString	(::NTV2InterruptEnumStrings (inInterruptEnumValue));
 	return std::string (pString ? pString : "");
+}
+
+
+static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue)
+{
+    static const char *	sIpErrorEnumStrings []	=   {	"",
+                                                        "Invalid channel",
+                                                        "Invalid format",
+                                                        "Invalid bit depth",
+                                                        "Invalid height in ull mode",
+                                                        "Invalid number of levels in ull mode",
+                                                        "Ull mode not supported",
+                                                        "KonaIP card not ready",
+                                                        "Host software does not match device firmware. Firmware update required",
+                                                        "SFP Top (Link A) not configured",
+                                                        "SFP Bottom (Link B) not configured",
+                                                        "Invalid IGMP version",
+                                                        "Failed to retrieve MAC address from ARP table",
+                                                        "2022-7 not supported for by this firmware",
+                                                        "Could not write SOM to MB",
+                                                        "Could not write sequence number to MB",
+                                                        "Could not write count to MB",
+                                                        "MB response timeout (no SOM)",
+                                                        "MB response timeout (no sequence number)",
+                                                        "MB response timeout (no bytecount)",
+                                                        "Response exceeds FIFO length",
+                                                        "No response from MB",
+                                                        "AcquireMailBoxLock timeout",
+                                                        "Invalid response from MB",
+                                                        "Invalid response size from MB",
+                                                        "MAC Address not found in response from MB",
+                                                        "MB Status Failure",
+                                                        ""};
+
+    if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)
+        return sIpErrorEnumStrings [inIpErrorEnumValue];
+    else
+        return NULL;
+}
+
+
+std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
+{
+    const char *	pString	(::NTV2IpErrorEnumStrings (inIpErrorEnumValue));
+    return std::string (pString ? pString : "");
 }
 
 

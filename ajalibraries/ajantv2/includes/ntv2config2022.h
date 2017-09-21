@@ -38,7 +38,6 @@
     @brief	Configures a SMPTE 2022 Transmit Channel.
 **/
 
-
 class tx_2022_channel
 {
 public:

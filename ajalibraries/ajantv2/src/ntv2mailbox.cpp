@@ -5,6 +5,7 @@
 **/
 
 #include "ntv2mailbox.h"
+#include "ntv2utils.h"
 #include <string.h>
 
 #if defined(AJA_MAC)
@@ -64,19 +65,19 @@ bool CNTV2MailBox::sendMsg(uint32_t timeout)
     bool rv = writeMB(0xffffffff);  // SOM
     if (!rv)
     {
-        mError = "Write timeout: could not write SOM to MB";
+        mIpErrorCode = NTV2IpErrWriteSOMToMB;
         return false;
     }
     rv = writeMB(nextSeqNum());  // sequence number
     if (!rv)
     {
-        mError = "Write timeout: could not write sequence number to MB";
+        mIpErrorCode = NTV2IpErrWriteSeqToMB;
         return false;
     }
     rv = writeMB(word_len);    // write wordcount
     if (!rv)
     {
-        mError = "Write timeout: could not write count to MB";
+        mIpErrorCode = NTV2IpErrWriteCountToMB;
         return false;
     }
 
@@ -110,7 +111,7 @@ bool CNTV2MailBox::rcvMsg(uint32_t timeout)
         rv = waitSOM(timeout);
         if (!rv)
         {
-            mError = "MB response timeout (no SOM)";
+            mIpErrorCode = NTV2IpErrTimeoutNoSOM;
             return false;
         }
 
@@ -118,7 +119,7 @@ bool CNTV2MailBox::rcvMsg(uint32_t timeout)
         rv = readMB(seqNum);
         if (!rv)
         {
-            mError = "MB response timeout (no sequence number)";
+            mIpErrorCode = NTV2IpErrTimeoutNoSeq;
             return false;
         }
         if (seqNum == currentSeqNum())
@@ -131,20 +132,19 @@ bool CNTV2MailBox::rcvMsg(uint32_t timeout)
     rv = readMB(count);
     if (!rv)
     {
-        mError = "MB response timeout (no bytecount)";
+        mIpErrorCode = NTV2IpErrTimeoutNoBytecount;
         return false;
     }
 
     if (count > FIFO_SIZE)
     {
-        // error
-        mError = "Response exceeds FIFO length";
+        mIpErrorCode = NTV2IpErrExceedsFifo;
         return false;
     }
 
     if (count == 0)
     {
-        mError = "No response from MB";
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -255,8 +255,8 @@ void CNTV2MailBox::SetChannel(ULWord channelOffset, ULWord channelNumber)
 
 void CNTV2MailBox::getError(std::string & error)
 {
-    error = mError;
-    mError.clear();
+    error = NTV2IpErrorEnumToString(mIpErrorCode);
+    mIpErrorCode = NTV2IpErrNone;
 }
 
 bool CNTV2MailBox::AcquireMailbox()
@@ -276,7 +276,7 @@ bool CNTV2MailBox::AcquireMailbox()
     }
 
     // timeout
-    mError = "Mailbox: AcquireMailBoxLock - TIMEOUT";
+    mIpErrorCode = NTV2IpErrAcquireMBTimeout;
     return false;
 }
 
