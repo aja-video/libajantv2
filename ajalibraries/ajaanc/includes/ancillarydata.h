@@ -215,8 +215,8 @@ typedef struct AJAAncillaryDataLocation
 
 		inline bool		operator < (const AJAAncillaryDataLocation & inRHS) const
 		{
-			const uint32_t	lhs	((      link << 14) | (      stream << 12) | (      channel << 10) | (      ancSpace << 8) |       lineNum);
-			const uint32_t	rhs	((inRHS.link << 14) | (inRHS.stream << 12) | (inRHS.channel << 10) | (inRHS.ancSpace << 8) | inRHS.lineNum);
+			const uint32_t	lhs	((      lineNum << 14) | (      ancSpace << 12) | (      channel << 10) | (      stream << 8) |       link);
+			const uint32_t	rhs	((inRHS.lineNum << 14) | (inRHS.ancSpace << 12) | (inRHS.channel << 10) | (inRHS.stream << 8) | inRHS.link);
 			return lhs < rhs;
 		}
 
@@ -566,7 +566,7 @@ public:
 
 
 	/**
-		@name	Payload Data Inquiry
+		@name	Payload Data Access
 	**/
 	///@{
 
@@ -582,12 +582,20 @@ public:
 	virtual inline const uint8_t *			GetPayloadData (void) const					{return &(m_payload[0]);}
 
 	/**
-		@brief	Copies my payload data into an external buffer.
+		@brief		Copies my payload data into an external buffer.
 		@param[in]	pBuffer			Specifies a valid, non-null starting address to where the payload data is to be copied.
 		@param[in]	inByteCapacity	Specifies the maximum number of bytes that can be safely copied into the external buffer.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetPayloadData (uint8_t * pBuffer, const uint32_t inByteCapacity) const;
+
+	/**
+		@brief		Appends my payload data onto the given UDW vector as 10-bit User Data Words (UDWs), adding parity as needed.
+		@param[out]	outUDWs			The 10-bit UDW vector to be appended to.
+		@param[in]	inAddParity		If true, each UDW will have even parity added.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetPayloadData (std::vector<uint16_t> & outUDWs, const bool inAddParity = true) const;
 	///@}
 
 

@@ -101,6 +101,118 @@ static string AJAStatusToString (const AJAStatus inStatus)
 class CNTV2AncDataTester
 {
 	public:
+		static bool BFT_AncEnums (void)
+		{
+			//	AJAAncillaryDataType
+			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataType_Size;  ordinal++)
+			{
+				const AJAAncillaryDataType	ancType = AJAAncillaryDataType(ordinal);
+				//cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataTypeToString(ancType,false) << "\t" << ::AJAAncillaryDataTypeToString(ancType,true) << endl;
+				SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataType(ancType));
+			}
+
+			//	AJAAncillaryDataLink
+			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataLink_Size;  ordinal++)
+			{
+				const AJAAncillaryDataLink	link = AJAAncillaryDataLink(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataLinkToString(link,false) << "\t" << ::AJAAncillaryDataLinkToString(link,true) << endl;
+				if (link == AJAAncillaryDataLink_Unknown)
+					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataLink(link));
+				else
+					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataLink(link));
+			}
+
+			//	AJAAncillaryDataStream
+			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataStream_Size;  ordinal++)
+			{
+				const AJAAncillaryDataStream	stream = AJAAncillaryDataStream(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataStreamToString(stream,false) << "\t" << ::AJAAncillaryDataStreamToString(stream,true) << endl;
+				if (stream == AJAAncillaryDataStream_Unknown)
+					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataStream(stream));
+				else
+					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataStream(stream));
+			}
+
+			//	AJAAncillaryDataChannel
+			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataChannel_Size;  ordinal++)
+			{
+				const AJAAncillaryDataChannel	chan = AJAAncillaryDataChannel(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataChannelToString(chan,false) << "\t" << ::AJAAncillaryDataChannelToString(chan,true) << endl;
+				if (chan == AJAAncillaryDataChannel_Unknown)
+					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataChannel(chan));
+				else
+					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataChannel(chan));
+			}
+
+			//	AJAAncillaryDataSpace
+			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataSpace_Size;  ordinal++)
+			{
+				const AJAAncillaryDataSpace	space = AJAAncillaryDataSpace(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataSpaceToString(space,false) << "\t" << ::AJAAncillaryDataSpaceToString(space,true) << endl;
+				if (space == AJAAncillaryDataSpace_Unknown)
+					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataSpace(space));
+				else
+					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataSpace(space));
+			}
+			return true;
+		}
+
+		static bool BFT_DataLocation (void)
+		{
+			typedef	std::set<AJAAncillaryDataLocation>	AncLocationSet;
+			typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
+			AncLocationSet	ancLocations;
+			static const uint16_t					lines[]		=	{9,		16,		220,	285,	1910,	2320};
+			static const AJAAncillaryDataSpace		spaces[]	=	{AJAAncillaryDataSpace_VANC,	AJAAncillaryDataSpace_HANC};
+			static const AJAAncillaryDataChannel	channels[]	=	{AJAAncillaryDataChannel_C,		AJAAncillaryDataChannel_Y};
+			static const AJAAncillaryDataStream		streams[]	=	{AJAAncillaryDataStream_1,		AJAAncillaryDataStream_2,	AJAAncillaryDataStream_3,	AJAAncillaryDataStream_4};
+			static const AJAAncillaryDataLink		links[]		=	{AJAAncillaryDataLink_A,		AJAAncillaryDataLink_B};
+			AJAAncillaryDataLocation	nullLoc;
+			AJAAncillaryDataLocation	a, toSetAllAtOnce, toBeSet;
+			for (unsigned lineNdx(0);  lineNdx < sizeof(lines)/sizeof(lines[0]);  lineNdx++)
+			{
+				const uint16_t lineNum(lines[lineNdx]);
+				toBeSet.SetLineNumber(lineNum);
+				for (unsigned spaceNdx(0);  spaceNdx < sizeof(spaces)/sizeof(spaces[0]);  spaceNdx++)
+				{
+					toBeSet.SetDataSpace(spaces[spaceNdx]);
+					for (unsigned chanNdx(0);  chanNdx < sizeof(channels)/sizeof(channels[0]);  chanNdx++)
+					{
+						toBeSet.SetDataChannel(channels[chanNdx]);
+						for (unsigned streamNdx(0);  streamNdx < sizeof(streams)/sizeof(streams[0]);  streamNdx++)
+						{
+							toBeSet.SetDataStream(streams[streamNdx]);
+							for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
+							{
+								const AJAAncillaryDataLocation	b(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, streams[streamNdx]);
+								toBeSet.SetDataLink(links[linkNdx]);
+								toSetAllAtOnce.Set(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, streams[streamNdx]);
+								a.SetLineNumber(lineNum).SetDataSpace(spaces[spaceNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
+								SHOULD_BE_TRUE(b == toBeSet);
+								SHOULD_BE_TRUE(a == b);
+								SHOULD_BE_TRUE(a == toSetAllAtOnce);
+								SHOULD_BE_TRUE(a.IsValid());
+								SHOULD_BE_EQUAL(a.GetDataLink(), links[linkNdx]);
+								SHOULD_BE_EQUAL(b.GetDataStream(), streams[streamNdx]);
+								SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
+								SHOULD_BE_EQUAL(toSetAllAtOnce.GetDataSpace(), spaces[spaceNdx]);
+								SHOULD_BE_EQUAL(a.GetLineNumber(), lineNum);
+								a.Reset();
+								SHOULD_BE_FALSE(a == b);
+								SHOULD_BE_FALSE(a.IsValid());
+								ancLocations.insert(b);
+							}	//	for each AJAAncillaryDataLink
+						}	//	for each AJAAncillaryDataStream
+					}	//	for each AJAAncillaryDataChannel
+				}	//	for each AJAAncillaryDataSpace
+			}
+			cerr << endl << endl;
+			for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)
+				cerr << *it << endl;
+			cerr << endl << endl;
+			return true;
+		}
+
 		static bool	BFT_AncDataCEA608Vanc (void)
 		{
 			static const uint8_t			pGump608Vanc[]	=	{	0xFF,	0xA0,	0x09,	0x61,	0x02,	0x03,
@@ -253,6 +365,8 @@ class CNTV2AncDataTester
 
 			//	Test GUMP encoding...
 			SHOULD_SUCCEED (pktTX.SetPayloadData(pktRX.GetPayloadData(), pktRX.GetPayloadByteCount()));
+			SHOULD_BE_EQUAL(::memcmp(pktTX.GetPayloadData(), pktRX.GetPayloadData(), pktTX.GetDC()), 0);
+			//SHOULD_BE_EQUAL(pktRX, pktTX);
 			return true;
 		}
 
@@ -288,6 +402,12 @@ class CNTV2AncDataTester
 		static bool BFT (void)
 		{
 			if (true)
+				SHOULD_BE_TRUE (BFT_AncEnums());
+
+			if (true)
+				SHOULD_BE_TRUE (BFT_DataLocation());
+
+			if (true)
 			{
 				AJAAncillaryData					defaultPkt;
 				AJAAncillaryData *					pDefaultPkt		(NULL);
@@ -303,6 +423,38 @@ class CNTV2AncDataTester
 																			0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0x73,	0x91,	0xE1,	0x00,	0x00,
 																			0x00,	0xC1,	0x3F,	0xFF,	0x74,	0xA9,	0x7E,	0xE2,	0xB4,	//	end of packet
 																			0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
+				static const uint8_t				pTestBytes2 []	=	{	0x00,	0x01,	0x02,	0x03,	0x04,	0x05,	0x06,	0x07,	0x08,	0x09,	0x0A,	0x0B,	0x0C,	0x0D,	0x0E,	0x0F,
+																			0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
+																			0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F,
+																			0x30,	0x31,	0x32,	0x33,	0x34,	0x35,	0x36,	0x37,	0x38,	0x39,	0x3A,	0x3B,	0x3C,	0x3D,	0x3E,	0x3F,
+																			0x40,	0x41,	0x42,	0x43,	0x44,	0x45,	0x46,	0x47,	0x48,	0x49,	0x4A,	0x4B,	0x4C,	0x4D,	0x4E,	0x4F,
+																			0x50,	0x51,	0x52,	0x53,	0x54,	0x55,	0x56,	0x57,	0x58,	0x59,	0x5A,	0x5B,	0x5C,	0x5D,	0x5E,	0x5F,
+																			0x60,	0x61,	0x62,	0x63,	0x64,	0x65,	0x66,	0x67,	0x68,	0x69,	0x6A,	0x6B,	0x6C,	0x6D,	0x6E,	0x6F,
+																			0x70,	0x71,	0x72,	0x73,	0x74,	0x75,	0x76,	0x77,	0x78,	0x79,	0x7A,	0x7B,	0x7C,	0x7D,	0x7E,	0x7F,
+																			0x80,	0x81,	0x82,	0x83,	0x84,	0x85,	0x86,	0x87,	0x88,	0x89,	0x8A,	0x8B,	0x8C,	0x8D,	0x8E,	0x8F,
+																			0x90,	0x91,	0x92,	0x93,	0x94,	0x95,	0x96,	0x97,	0x98,	0x99,	0x9A,	0x9B,	0x9C,	0x9D,	0x9E,	0x9F,
+																			0xA0,	0xA1,	0xA2,	0xA3,	0xA4,	0xA5,	0xA6,	0xA7,	0xA8,	0xA9,	0xAA,	0xAB,	0xAC,	0xAD,	0xAE,	0xAF,
+																			0xB0,	0xB1,	0xB2,	0xB3,	0xB4,	0xB5,	0xB6,	0xB7,	0xB8,	0xB9,	0xBA,	0xBB,	0xBC,	0xBD,	0xBE,	0xBF,
+																			0xC0,	0xC1,	0xC2,	0xC3,	0xC4,	0xC5,	0xC6,	0xC7,	0xC8,	0xC9,	0xCA,	0xCB,	0xCC,	0xCD,	0xCE,	0xCF,
+																			0xD0,	0xD1,	0xD2,	0xD3,	0xD4,	0xD5,	0xD6,	0xD7,	0xD8,	0xD9,	0xDA,	0xDB,	0xDC,	0xDD,	0xDE,	0xDF,
+																			0xE0,	0xE1,	0xE2,	0xE3,	0xE4,	0xE5,	0xE6,	0xE7,	0xE8,	0xE9,	0xEA,	0xEB,	0xEC,	0xED,	0xEE,	0xEF,
+																			0xF0,	0xF1,	0xF2,	0xF3,	0xF4,	0xF5,	0xF6,	0xF7,	0xF8,	0xF9,	0xFA,	0xFB,	0xFC,	0xFD,	0xFE,	0xFF	};
+				static const uint16_t				pTestWords2 []	=	{	0x200,	0x101,	0x102,	0x203,	0x104,	0x205,	0x206,	0x107,	0x108,	0x209,	0x20A,	0x10B,	0x20C,	0x10D,	0x10E,	0x20F,
+																			0x110,	0x211,	0x212,	0x113,	0x214,	0x115,	0x116,	0x217,	0x218,	0x119,	0x11A,	0x21B,	0x11C,	0x21D,	0x21E,	0x11F,
+																			0x120,	0x221,	0x222,	0x123,	0x224,	0x125,	0x126,	0x227,	0x228,	0x129,	0x12A,	0x22B,	0x12C,	0x22D,	0x22E,	0x12F,
+																			0x230,	0x131,	0x132,	0x233,	0x134,	0x235,	0x236,	0x137,	0x138,	0x239,	0x23A,	0x13B,	0x23C,	0x13D,	0x13E,	0x23F,
+																			0x140,	0x241,	0x242,	0x143,	0x244,	0x145,	0x146,	0x247,	0x248,	0x149,	0x14A,	0x24B,	0x14C,	0x24D,	0x24E,	0x14F,
+																			0x250,	0x151,	0x152,	0x253,	0x154,	0x255,	0x256,	0x157,	0x158,	0x259,	0x25A,	0x15B,	0x25C,	0x15D,	0x15E,	0x25F,
+																			0x260,	0x161,	0x162,	0x263,	0x164,	0x265,	0x266,	0x167,	0x168,	0x269,	0x26A,	0x16B,	0x26C,	0x16D,	0x16E,	0x26F,
+																			0x170,	0x271,	0x272,	0x173,	0x274,	0x175,	0x176,	0x277,	0x278,	0x179,	0x17A,	0x27B,	0x17C,	0x27D,	0x27E,	0x17F,
+																			0x180,	0x281,	0x282,	0x183,	0x284,	0x185,	0x186,	0x287,	0x288,	0x189,	0x18A,	0x28B,	0x18C,	0x28D,	0x28E,	0x18F,
+																			0x290,	0x191,	0x192,	0x293,	0x194,	0x295,	0x296,	0x197,	0x198,	0x299,	0x29A,	0x19B,	0x29C,	0x19D,	0x19E,	0x29F,
+																			0x2A0,	0x1A1,	0x1A2,	0x2A3,	0x1A4,	0x2A5,	0x2A6,	0x1A7,	0x1A8,	0x2A9,	0x2AA,	0x1AB,	0x2AC,	0x1AD,	0x1AE,	0x2AF,
+																			0x1B0,	0x2B1,	0x2B2,	0x1B3,	0x2B4,	0x1B5,	0x1B6,	0x2B7,	0x2B8,	0x1B9,	0x1BA,	0x2BB,	0x1BC,	0x2BD,	0x2BE,	0x1BF,
+																			0x2C0,	0x1C1,	0x1C2,	0x2C3,	0x1C4,	0x2C5,	0x2C6,	0x1C7,	0x1C8,	0x2C9,	0x2CA,	0x1CB,	0x2CC,	0x1CD,	0x1CE,	0x2CF,
+																			0x1D0,	0x2D1,	0x2D2,	0x1D3,	0x2D4,	0x1D5,	0x1D6,	0x2D7,	0x2D8,	0x1D9,	0x1DA,	0x2DB,	0x1DC,	0x2DD,	0x2DE,	0x1DF,
+																			0x1E0,	0x2E1,	0x2E2,	0x1E3,	0x2E4,	0x1E5,	0x1E6,	0x2E7,	0x2E8,	0x1E9,	0x1EA,	0x2EB,	0x1EC,	0x2ED,	0x2EE,	0x1EF,
+																			0x2F0,	0x1F1,	0x1F2,	0x2F3,	0x1F4,	0x2F5,	0x2F6,	0x1F7,	0x1F8,	0x2F9,	0x2FA,	0x1FB,	0x2FC,	0x1FD,	0x1FE,	0x2FF	};
 				vector<uint8_t>						buffer4K;
 				buffer4K.resize(4096, 0x65);
 				SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());
@@ -456,6 +608,14 @@ class CNTV2AncDataTester
 				SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096 + 2*sizeof(pTestBytes));
 				SHOULD_SUCCEED(defaultPkt.AppendPayload(defaultPkt));
 				SHOULD_BE_EQUAL (defaultPkt.GetDC(), 2*(4096 + 2*sizeof(pTestBytes)));
+
+				//	Test 10-bit UDW conversion (with parity)...
+				vector<uint16_t>	UDWs;
+				SHOULD_SUCCEED(defaultPkt.SetPayloadData(pTestBytes2, sizeof(pTestBytes2)/sizeof(UByte)));
+				SHOULD_SUCCEED(defaultPkt.GetPayloadData(UDWs, true));
+				//for (unsigned ndx(0);  ndx < UDWs.size();  )	{	cerr << xHEX0N(UDWs[ndx],3) << ",\t";	if (++ndx % 16 == 0) cerr << endl;	}
+				SHOULD_BE_EQUAL(UDWs.size(), sizeof(pTestWords2)/sizeof(uint16_t));
+				SHOULD_BE_EQUAL(::memcmp(UDWs.data(), pTestWords2, sizeof(pTestWords2)), 0);
 
 				//	Test CEA608Vanc
 				SHOULD_BE_TRUE (BFT_AncDataCEA608Vanc());

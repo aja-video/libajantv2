@@ -6,6 +6,8 @@
 
 #include "ntv2publicinterface.h"
 #include "ancillarydata.h"
+#include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
+												//	CNTV2SMPTEAncData::AddEvenParity
 #if defined(AJA_LINUX)
 	#include <string.h>				// For memcpy
 	#include <stdlib.h>				// For realloc
@@ -367,6 +369,28 @@ AJAStatus AJAAncillaryData::GetPayloadData (uint8_t * pOutData, const uint32_t i
 }
 
 
+AJAStatus AJAAncillaryData::GetPayloadData (vector<uint16_t> & outUDWs, const bool inAddParity) const
+{
+	AJAStatus	status	(AJA_STATUS_SUCCESS);
+	const vector<uint16_t>::size_type	origSize	(outUDWs.size());
+	for (ByteVectorConstIter iter(m_payload.begin());  iter != m_payload.end()  &&  AJA_SUCCESS(status);  ++iter)
+	{
+		const uint16_t	UDW	(inAddParity ? CNTV2SMPTEAncData::AddEvenParity(*iter) : *iter);
+		try
+		{
+			outUDWs.push_back(UDW);	//	Copy 8-bit data into LS 8 bits, add even parity to bit 8, and ~bit 8 to bit 9
+		}
+		catch(...)
+		{
+			status = AJA_STATUS_MEMORY;
+		}
+	}	//	for each packet byte
+	if (AJA_FAILURE(status))
+		outUDWs.resize(origSize);
+	return status;
+}
+
+
 uint8_t AJAAncillaryData::GetPayloadByteAtIndex (const uint32_t inIndex0) const
 {
 	if (ByteVectorIndex(inIndex0) < m_payload.size())
@@ -725,11 +749,7 @@ string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValu
 
 ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & inValue)
 {
-	inOutStream	<< "Data Link:\t" << ::AJAAncillaryDataLinkToString (inValue.GetDataLink()) << endl
-				<< "Data Stream:\t" << ::AJAAncillaryDataStreamToString (inValue.GetDataStream()) << endl
-				<< "Data Channel:\t" << ::AJAAncillaryDataChannelToString (inValue.GetDataChannel()) << endl
-				<< "Data Space:\t" << ::AJAAncillaryDataSpaceToString (inValue.GetDataSpace()) << endl
-				<< "Line Number:\t" << DEC(inValue.GetLineNumber());
+	inOutStream	<< "Data Location:\t" << ::AJAAncillaryDataLocationToString(inValue, true);
 	return inOutStream;
 }
 
@@ -739,7 +759,7 @@ const string & AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inVa
 	static const string		gAncDataCodingToStr []			= {"Dig", "Ana", "???"};
 	static const string		gDAncDataCodingToStr []			= {"AJAAncillaryDataCoding_Digital", "AJAAncillaryDataCoding_Raw", "AJAAncillaryDataCoding_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataCoding (inValue) ? (inCompact ? gAncDataCodingToStr [inValue] : gDAncDataCodingToStr [inValue]) : gEmptyString;
+	return IS_VALID_AJAAncillaryDataCoding (inValue) ? (inCompact ? gAncDataCodingToStr[inValue] : gDAncDataCodingToStr[inValue]) : gEmptyString;
 }
 
 
@@ -753,7 +773,7 @@ const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue,
 																"AJAAncillaryDataType_Cea608_Line21", "AJAAncillaryDataType_Smpte352", "AJAAncillaryDataType_Smpte2051",
 																"AJAAncillaryDataType_FrameStatusInfo524D", "AJAAncillaryDataType_FrameStatusInfo5251", "?"};
 
-	return inValue < AJAAncillaryDataType_Size ? (inCompact ? gAncDataTypeToStr [inValue] : gDAncDataTypeToStr [inValue]) : gEmptyString;
+	return inValue < AJAAncillaryDataType_Size ? (inCompact ? gAncDataTypeToStr[inValue] : gDAncDataTypeToStr[inValue]) : gEmptyString;
 }
 
 
@@ -831,7 +851,7 @@ bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
 {
 	if (GetDID() == inRHS.GetDID()
 		&&  GetSID() == inRHS.GetSID()
-		&&  GetPayloadByteCount() == inRHS.GetPayloadByteCount()
+		&&  GetDC() == inRHS.GetDC()
 		&&  GetChecksum() == inRHS.GetChecksum()
 		&&  GetDataLocation() == inRHS.GetDataLocation()
 		&&  GetDataCoding() == inRHS.GetDataCoding())
