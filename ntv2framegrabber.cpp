@@ -558,23 +558,43 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_4K_CAPTURE);		//	Allow 4K HDMI capture
 			for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL5;  channel = NTV2Channel(channel+1))
 			{
-				mNTV2Card.EnableChannel (channel);
-				mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
-				mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
-				if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
-				{
-					mNTV2Card.Connect (::GetCSCInputXptFromChannel (channel),
-										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
-										::GetCSCOutputXptFromChannel (channel, false/*isKey*/, true/*isRGB*/));
-				}
-				else
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
-										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
-				if (!NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
-					break;
-			}	//	loop once for single channel, or 4 times for 4K/UHD
-			mChannel = NTV2_CHANNEL1;
+                if ((channel == NTV2_CHANNEL1) || NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
+                {
+                    mNTV2Card.EnableChannel (channel);
+                    mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
+                    mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
+                    if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
+                    {
+                        mNTV2Card.Connect (::GetCSCInputXptFromChannel (channel),
+                                            ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
+                        mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
+                                            ::GetCSCOutputXptFromChannel (channel, false/*isKey*/, true/*isRGB*/));
+                    }
+                    else
+                    {
+                        mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
+                                            ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
+                    }
+                }
+                else
+                {
+                    mNTV2Card.SetMode (channel, NTV2_MODE_DISPLAY);
+                }
+            }	//	loop once for each channel (4 times for 4K/UHD)
+
+            // configure the qrc if present
+            if (NTV2DeviceGetHDMIVersion(mDeviceID) == 2)
+            {
+                if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
+                {
+                    mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_4K_CAPTURE);
+                }
+                else
+                {
+                    mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
+                }
+            }
+            mChannel = NTV2_CHANNEL1;
 		}
 		else
 			qDebug () << "## DEBUG:  NTV2FrameGrabber::SetupInput:  Bad mInputSource switch value " << ::NTV2InputSourceToChannelSpec (mInputSource);
