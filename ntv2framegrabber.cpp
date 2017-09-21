@@ -31,6 +31,7 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
 		mBoardNumber			(0),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mChannel				(NTV2_CHANNEL1),
+        mNumChannels            (0),
 		mCurrentVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mLastVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mDebounceCounter		(0),
@@ -531,8 +532,10 @@ bool NTV2FrameGrabber::SetupInput (void)
 
 		if (NTV2_INPUT_SOURCE_IS_SDI (mInputSource))
 		{
+            mNumChannels = 0;
 			for (unsigned offset (0);  offset < 4;  offset++)
 			{
+                mNumChannels++;
 				mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetSDIInputOutputXptFromChannel (NTV2Channel (mChannel + offset)));
 				mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetCSCOutputXptFromChannel (NTV2Channel (mChannel + offset), false/*isKey*/, true/*isRGB*/));
 				mNTV2Card.SetFrameBufferFormat (NTV2Channel (mChannel + offset), mFrameBufferFormat);
@@ -549,6 +552,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mNTV2Card.SetFrameBufferFormat (NTV2_CHANNEL1, mFrameBufferFormat);
 			mNTV2Card.SetReference (NTV2_REFERENCE_ANALOG_INPUT);
 			mChannel = NTV2_CHANNEL1;
+            mNumChannels = 1;
 		}
 		else if (mInputSource == NTV2_INPUTSOURCE_HDMI)
 		{
@@ -556,30 +560,27 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mNTV2Card.GetHDMIInputColor (hdmiColor);
 			mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT);
 			mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_4K_CAPTURE);		//	Allow 4K HDMI capture
+            mNumChannels = 0;
 			for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL5;  channel = NTV2Channel(channel+1))
 			{
-                if ((channel == NTV2_CHANNEL1) || NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
+                mNumChannels++;
+                mNTV2Card.EnableChannel (channel);
+                mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
+                mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
+                if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
                 {
-                    mNTV2Card.EnableChannel (channel);
-                    mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
-                    mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
-                    if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
-                    {
-                        mNTV2Card.Connect (::GetCSCInputXptFromChannel (channel),
-                                            ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
-                        mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
-                                            ::GetCSCOutputXptFromChannel (channel, false/*isKey*/, true/*isRGB*/));
-                    }
-                    else
-                    {
-                        mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
-                                            ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
-                    }
+                    mNTV2Card.Connect (::GetCSCInputXptFromChannel (channel),
+                                        ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
+                    mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
+                                        ::GetCSCOutputXptFromChannel (channel, false/*isKey*/, true/*isRGB*/));
                 }
                 else
                 {
-                    mNTV2Card.SetMode (channel, NTV2_MODE_DISPLAY);
+                    mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (channel),
+                                        ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
                 }
+                if (!NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
+                    break;
             }	//	loop once for each channel (4 times for 4K/UHD)
 
             // configure the qrc if present
@@ -610,7 +611,10 @@ void NTV2FrameGrabber::StopAutoCirculate (void)
 	if (mNTV2Card.IsOpen ())
 	{
 		mNTV2Card.AutoCirculateStop (mChannel);
-		mNTV2Card.SetMode (mChannel, NTV2_MODE_DISPLAY);
+        for (ULWord i = 0; i < mNumChannels; i++)
+        {
+            mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
+        }
 	}
 	ClearCaptionBuffer (true);
 
