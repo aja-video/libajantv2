@@ -4,24 +4,12 @@
 	@brief		Declaration of GetNumber, GetString and GetCharAsInt functions.
 **/
 
-#ifndef __CLI_UTILS_H
-#define __CLI_UTILS_H
+#ifndef AJA_CLI_UTILS_H
+#define AJA_CLI_UTILS_H
 
-// Includes
-#include "ajabase/common/types.h"
-#include <iostream>
-#include <string>
+/*
+ * This file has been removed the functionality is available elsewhere in ajabase
+ * see common.h
+ */
 
-
-// Defines
-#define INVALID_CHOICE(c) \
-	cout << "The choice '" << char(c) << "' is not valid" << endl
-
-
-// Declarations
-bool GetNumber(const std::string& prompt, uint32_t& value);
-bool GetString(const std::string& prompt, std::string& value);
-bool GetCharAsInt(const std::string& prompt, int& value);
-
-
-#endif	// __CLI_UTILS_H
+#endif // AJA_CLI_UTILS_H

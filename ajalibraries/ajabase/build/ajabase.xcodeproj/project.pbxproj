@@ -103,8 +103,7 @@
 		B4CE1FC116E802870092B564 /* audioutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB416E802870092B564 /* audioutilities.h */; };
 		B4CE1FC216E802870092B564 /* bytestream.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB516E802870092B564 /* bytestream.h */; };
 		B4CE1FC316E802870092B564 /* circularbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB616E802870092B564 /* circularbuffer.h */; };
-		B4CE1FC416E802870092B564 /* cli_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FB716E802870092B564 /* cli_utils.cpp */; };
-		B4CE1FC516E802870092B564 /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB816E802870092B564 /* cli_utils.h */; };
+        B4CE1FC516E802870092B564 /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB816E802870092B564 /* cli_utils.h */; };
 		B4CE1FC616E802870092B564 /* performance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FB916E802870092B564 /* performance.cpp */; };
 		B4CE1FC716E802870092B564 /* performance.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBA16E802870092B564 /* performance.h */; };
 		B4CE1FC816E802870092B564 /* rawfile.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBB16E802870092B564 /* rawfile.h */; };
@@ -210,8 +209,7 @@
 		B4CE1FB416E802870092B564 /* audioutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audioutilities.h; path = ../common/audioutilities.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB516E802870092B564 /* bytestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bytestream.h; path = ../common/bytestream.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB616E802870092B564 /* circularbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = circularbuffer.h; path = ../common/circularbuffer.h; sourceTree = SOURCE_ROOT; };
-		B4CE1FB716E802870092B564 /* cli_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cli_utils.cpp; path = ../common/cli_utils.cpp; sourceTree = SOURCE_ROOT; };
-		B4CE1FB816E802870092B564 /* cli_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cli_utils.h; path = ../common/cli_utils.h; sourceTree = SOURCE_ROOT; };
+        B4CE1FB816E802870092B564 /* cli_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cli_utils.h; path = ../common/cli_utils.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB916E802870092B564 /* performance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = performance.cpp; path = ../common/performance.cpp; sourceTree = SOURCE_ROOT; };
 		B4CE1FBA16E802870092B564 /* performance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = performance.h; path = ../common/performance.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FBB16E802870092B564 /* rawfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rawfile.h; path = ../common/rawfile.h; sourceTree = SOURCE_ROOT; };
@@ -270,8 +268,7 @@
 				B4CE1FB416E802870092B564 /* audioutilities.h */,
 				B4CE1FB516E802870092B564 /* bytestream.h */,
 				B4CE1FB616E802870092B564 /* circularbuffer.h */,
-				B4CE1FB716E802870092B564 /* cli_utils.cpp */,
-				B4CE1FB816E802870092B564 /* cli_utils.h */,
+                B4CE1FB816E802870092B564 /* cli_utils.h */,
 				A411D88511DE8E40003E7E53 /* buffer.cpp */,
 				A411D88611DE8E40003E7E53 /* buffer.h */,
 				B4FF311D1EDDDB180084915F /* common.cpp */,
@@ -524,8 +521,7 @@
 				A401624B1EBCDC23001B8830 /* infoimpl.mm in Sources */,
 				B4CE1FC016E802870092B564 /* audioutilities.cpp in Sources */,
 				A411D89711DE8E40003E7E53 /* buffer.cpp in Sources */,
-				B4CE1FC416E802870092B564 /* cli_utils.cpp in Sources */,
-				A411D8D111DE8E56003E7E53 /* debug.cpp in Sources */,
+                A411D8D111DE8E56003E7E53 /* debug.cpp in Sources */,
 				A486D74816CDB4A900797C2F /* diskstatus.cpp in Sources */,
 				A411D8D411DE8E56003E7E53 /* event.cpp in Sources */,
 				A411D8DE11DE8E56003E7E53 /* eventimpl.cpp in Sources */,
