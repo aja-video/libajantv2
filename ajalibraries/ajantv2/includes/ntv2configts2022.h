@@ -73,7 +73,6 @@ public:
     // If method returns false call this to get the error code
     NTV2IpError getLastErrorCode();
 
-
  private:
 
     // Setup the J2K encoder and TS

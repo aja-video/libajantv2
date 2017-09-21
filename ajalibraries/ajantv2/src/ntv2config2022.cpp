@@ -1459,9 +1459,14 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
 
 string CNTV2Config2022::getLastError()
 {
-    string astring = NTV2IpErrorEnumToString(mIpErrorCode);
+    return NTV2IpErrorEnumToString(getLastErrorCode());
+}
+
+NTV2IpError CNTV2Config2022::getLastErrorCode()
+{
+    NTV2IpError error = mIpErrorCode;
     mIpErrorCode = NTV2IpErrNone;
-    return astring;
+    return error;
 }
 
 void CNTV2Config2022::ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseAddr)
