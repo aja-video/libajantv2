@@ -226,6 +226,7 @@ public:
 
     // If method returns false call this to get details
     std::string getLastError();
+    NTV2IpError getLastErrorCode();
 
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
