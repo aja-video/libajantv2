@@ -7341,10 +7341,35 @@ std::string NTV2InterruptEnumToString (const INTERRUPT_ENUMS inInterruptEnumValu
 static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue)
 {
     static const char *	sIpErrorEnumStrings []	=   {	"",
-                                                        "Ip Error 1",
-                                                        "Ip Error 2",
-                                                        "Ip Error 3"};
-    if (inIpErrorEnumValue >= NTV2IpErrorNone && inIpErrorEnumValue < NTV2IpNumErrorTypes)
+                                                        "Invalid channel",
+                                                        "Invalid format",
+                                                        "Invalid bit depth",
+                                                        "Invalid height in ull mode",
+                                                        "Invalid number of levels in ull mode",
+                                                        "Ull mode not supported",
+                                                        "KonaIP card not ready",
+                                                        "Host software does not match device firmware. Firmware update required",
+                                                        "SFP Top (Link A) not configured",
+                                                        "SFP Bottom (Link B) not configured",
+                                                        "Invalid IGMP version",
+                                                        "Failed to retrieve MAC address from ARP table",
+                                                        "2022-7 not supported for by this firmware",
+                                                        "Could not write SOM to MB",
+                                                        "Could not write sequence number to MB",
+                                                        "Could not write count to MB",
+                                                        "MB response timeout (no SOM)",
+                                                        "MB response timeout (no sequence number)",
+                                                        "MB response timeout (no bytecount)",
+                                                        "Response exceeds FIFO length",
+                                                        "No response from MB",
+                                                        "AcquireMailBoxLock timeout",
+                                                        "Invalid response from MB",
+                                                        "Invalid response size from MB",
+                                                        "MAC Address not found in response from MB",
+                                                        "MB Status Failure",
+                                                        ""};
+
+    if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)
         return sIpErrorEnumStrings [inIpErrorEnumValue];
     else
         return NULL;

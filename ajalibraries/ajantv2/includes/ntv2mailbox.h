@@ -73,8 +73,8 @@ protected:
 
     CNTV2Card   &mDevice;
 
-    NTV2IpError mErrorCode;
-    std::string mError;
+    NTV2IpError mIpErrorCode;
+    std::string mIpInternalErrorString;
 
 private:
     void        startTimer();

@@ -4237,11 +4237,34 @@ typedef enum
 
 typedef enum
 {
-    NTV2IpErrorNone,                                       //	0
-    NTV2IpError_1,                                         //	1
-    NTV2IpError_2,                                         //	2
-    NTV2IpError_3,                                         //	3
-    NTV2IpNumErrorTypes                                    //	4
+    NTV2IpErrNone,
+    NTV2IpErrInvalidChannel,
+    NTV2IpErrInvalidFormat,
+    NTV2IpErrInvalidBitdepth,
+    NTV2IpErrInvalidUllHeight,
+    NTV2IpErrInvalidUllLevels,
+    NTV2IpErrUllNotSupported,
+    NTV2IpErrNotReady,
+    NTV2IpErrSoftwareMismatch,
+    NTV2IpErrLinkANotConfigured,
+    NTV2IpErrLinkBNotConfigured,
+    NTV2IpErrInvalidIGMPVersion,
+    NTV2IpErrCannotGetMacAddress,
+    NTV2IpErr2022_7NotSupported,
+    NTV2IpErrWriteSOMToMB,
+    NTV2IpErrWriteSeqToMB,
+    NTV2IpErrWriteCountToMB,
+    NTV2IpErrTimeoutNoSOM,
+    NTV2IpErrTimeoutNoSeq,
+    NTV2IpErrTimeoutNoBytecount,
+    NTV2IpErrExceedsFifo,
+    NTV2IpErrNoResponseFromMB,
+    NTV2IpErrAcquireMBTimeout,
+    NTV2IpErrInvalidMBResponse,
+    NTV2IpErrInvalidMBResponseSize,
+    NTV2IpErrInvalidMBResponseNoMac,
+    NTV2IpErrMBStatusFail,
+    NTV2IpNumErrTypes
 } NTV2IpError;
 
 

@@ -79,7 +79,8 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
         {
             if (msg.size() >= 3)
             {
-                rv = getString(msg[2],"error",mError);
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
                 ReleaseMailbox();
                 return false;
             }
@@ -87,7 +88,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     }
 
     ReleaseMailbox();
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return false;
 }
 
@@ -119,13 +120,14 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
         {
             if (msg.size() >= 3)
             {
-                rv = getString(msg[2],"error",mError);
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
                 return false;
             }
         }
     }
 
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return false;
 }
 
@@ -194,14 +196,14 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
         {
             if (msg.size() != 3)
             {
-                mError = "Invalid response size from MB";
+                mIpErrorCode = NTV2IpErrInvalidMBResponseSize;
                 return ARP_ERROR;
             }
 
             rv = getString(msg[2],"MAC",MACaddress);
             if (rv == false)
             {
-                mError = "MAC Address not found in response from MB";
+                mIpErrorCode = NTV2IpErrInvalidMBResponseNoMac;
                 return ARP_ERROR;
             }
             return ARP_VALID;
@@ -211,14 +213,15 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
             if (msg.size() >= 4)
             {
                 uint32_t state;
-                rv = getString(msg[2],"error",mError);
+                rv = getString(msg[2],"error",mIpInternalErrorString);
                 rv = getDecimal(msg[3],"state",state);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
                 return (eArpState)state;
             }
         }
     }
 
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return ARP_ERROR;
 }
 
@@ -250,7 +253,7 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
         {
             if (msg.size() != 2)
             {
-                mError = "Invalid response size from MB";
+                mIpErrorCode = NTV2IpErrInvalidMBResponseSize;
                 return false;
             }
             return true;
@@ -259,13 +262,14 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
         {
             if (msg.size() >= 4)
             {
-                rv = getString(msg[2],"error",mError);
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
                 return false;
             }
         }
     }
 
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return false;
 }
 
