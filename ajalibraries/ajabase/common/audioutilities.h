@@ -11,10 +11,6 @@
 
 #define AJA_MAX_AUDIO_CHANNELS 16
 
-#ifndef M_PI
-#define M_PI (3.14159265358979323846)
-#endif
-
 uint32_t AJA_EXPORT AJA_GenerateAudioTone (
 							uint32_t*	audioBuffer,
 							uint32_t	numSamples,
