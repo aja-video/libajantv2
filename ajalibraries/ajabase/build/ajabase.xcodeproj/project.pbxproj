@@ -61,6 +61,7 @@
 		A4C509231EB3C58F00947CA3 /* infoimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = A4C509211EB3C58F00947CA3 /* infoimpl.h */; };
 		A4C509261EB3C5A800947CA3 /* info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4C509241EB3C5A800947CA3 /* info.cpp */; };
 		A4C509271EB3C5A800947CA3 /* info.h in Headers */ = {isa = PBXBuildFile; fileRef = A4C509251EB3C5A800947CA3 /* info.h */; };
+		A4DCB75E1F747E6200298F68 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4DCB75D1F747E6200298F68 /* system.cpp */; };
 		A4E3581D16C9AAEE000A649E /* file_io.h in Headers */ = {isa = PBXBuildFile; fileRef = A4E3581C16C9AAEE000A649E /* file_io.h */; };
 		A4E3582016C9AB02000A649E /* file_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4E3581F16C9AB02000A649E /* file_io.cpp */; };
 		B40C6FC216682EF90080F00F /* videotypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B40C6FC116682EF90080F00F /* videotypes.h */; };
@@ -103,7 +104,7 @@
 		B4CE1FC116E802870092B564 /* audioutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB416E802870092B564 /* audioutilities.h */; };
 		B4CE1FC216E802870092B564 /* bytestream.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB516E802870092B564 /* bytestream.h */; };
 		B4CE1FC316E802870092B564 /* circularbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB616E802870092B564 /* circularbuffer.h */; };
-        B4CE1FC516E802870092B564 /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB816E802870092B564 /* cli_utils.h */; };
+		B4CE1FC516E802870092B564 /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FB816E802870092B564 /* cli_utils.h */; };
 		B4CE1FC616E802870092B564 /* performance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FB916E802870092B564 /* performance.cpp */; };
 		B4CE1FC716E802870092B564 /* performance.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBA16E802870092B564 /* performance.h */; };
 		B4CE1FC816E802870092B564 /* rawfile.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBB16E802870092B564 /* rawfile.h */; };
@@ -165,6 +166,7 @@
 		A4C509211EB3C58F00947CA3 /* infoimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = infoimpl.h; sourceTree = "<group>"; };
 		A4C509241EB3C5A800947CA3 /* info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = info.cpp; sourceTree = "<group>"; };
 		A4C509251EB3C5A800947CA3 /* info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = info.h; sourceTree = "<group>"; };
+		A4DCB75D1F747E6200298F68 /* system.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = system.cpp; sourceTree = "<group>"; };
 		A4E3581C16C9AAEE000A649E /* file_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_io.h; path = ../system/file_io.h; sourceTree = SOURCE_ROOT; };
 		A4E3581F16C9AB02000A649E /* file_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_io.cpp; path = ../system/mac/file_io.cpp; sourceTree = SOURCE_ROOT; };
 		B40C6FC116682EF90080F00F /* videotypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = videotypes.h; path = ../common/videotypes.h; sourceTree = SOURCE_ROOT; };
@@ -209,7 +211,7 @@
 		B4CE1FB416E802870092B564 /* audioutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audioutilities.h; path = ../common/audioutilities.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB516E802870092B564 /* bytestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bytestream.h; path = ../common/bytestream.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB616E802870092B564 /* circularbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = circularbuffer.h; path = ../common/circularbuffer.h; sourceTree = SOURCE_ROOT; };
-        B4CE1FB816E802870092B564 /* cli_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cli_utils.h; path = ../common/cli_utils.h; sourceTree = SOURCE_ROOT; };
+		B4CE1FB816E802870092B564 /* cli_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cli_utils.h; path = ../common/cli_utils.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FB916E802870092B564 /* performance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = performance.cpp; path = ../common/performance.cpp; sourceTree = SOURCE_ROOT; };
 		B4CE1FBA16E802870092B564 /* performance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = performance.h; path = ../common/performance.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FBB16E802870092B564 /* rawfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rawfile.h; path = ../common/rawfile.h; sourceTree = SOURCE_ROOT; };
@@ -268,7 +270,7 @@
 				B4CE1FB416E802870092B564 /* audioutilities.h */,
 				B4CE1FB516E802870092B564 /* bytestream.h */,
 				B4CE1FB616E802870092B564 /* circularbuffer.h */,
-                B4CE1FB816E802870092B564 /* cli_utils.h */,
+				B4CE1FB816E802870092B564 /* cli_utils.h */,
 				A411D88511DE8E40003E7E53 /* buffer.cpp */,
 				A411D88611DE8E40003E7E53 /* buffer.h */,
 				B4FF311D1EDDDB180084915F /* common.cpp */,
@@ -335,6 +337,7 @@
 				A411D8C211DE8E56003E7E53 /* memory.h */,
 				B4A35BEF144CDBD900957C64 /* process.cpp */,
 				B4A35BF0144CDBD900957C64 /* process.h */,
+				A4DCB75D1F747E6200298F68 /* system.cpp */,
 				A411D8C311DE8E56003E7E53 /* system.h */,
 				A411D8C411DE8E56003E7E53 /* systemtime.cpp */,
 				A411D8C511DE8E56003E7E53 /* systemtime.h */,
@@ -521,7 +524,7 @@
 				A401624B1EBCDC23001B8830 /* infoimpl.mm in Sources */,
 				B4CE1FC016E802870092B564 /* audioutilities.cpp in Sources */,
 				A411D89711DE8E40003E7E53 /* buffer.cpp in Sources */,
-                A411D8D111DE8E56003E7E53 /* debug.cpp in Sources */,
+				A411D8D111DE8E56003E7E53 /* debug.cpp in Sources */,
 				A486D74816CDB4A900797C2F /* diskstatus.cpp in Sources */,
 				A411D8D411DE8E56003E7E53 /* event.cpp in Sources */,
 				A411D8DE11DE8E56003E7E53 /* eventimpl.cpp in Sources */,
@@ -534,6 +537,7 @@
 				B4CE1FB016E802460092B564 /* options_popt.cpp in Sources */,
 				B4148CA91B29EB2100617891 /* guid.cpp in Sources */,
 				B4CE1FC616E802870092B564 /* performance.cpp in Sources */,
+				A4DCB75E1F747E6200298F68 /* system.cpp in Sources */,
 				B4A35B92144CDAA100957C64 /* persistence.cpp in Sources */,
 				B4A35B7C144CDA6900957C64 /* pixelformat.cpp in Sources */,
 				B4A35BF1144CDBD900957C64 /* process.cpp in Sources */,
