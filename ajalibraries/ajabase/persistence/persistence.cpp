@@ -744,7 +744,6 @@ bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, 
 
 AJAPersistence::AJAPersistence()		
 {
-    //AJADebug::Open();
     SetParams("device 1");
 }
 
