@@ -404,6 +404,7 @@ AJADebug::GetClientReferenceCount(int32_t *pRefCount)
 {
     if(spShare == NULL)
     {
+        *pRefCount = 0;
         return AJA_STATUS_INITIALIZE;
     }
     if(pRefCount == NULL)
@@ -416,6 +417,7 @@ AJADebug::GetClientReferenceCount(int32_t *pRefCount)
     }
     catch(...)
     {
+        *pRefCount = 0;
         return AJA_STATUS_FAIL;
     }
 
