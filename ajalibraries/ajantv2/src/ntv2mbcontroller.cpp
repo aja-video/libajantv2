@@ -640,18 +640,15 @@ uint64_t CNTV2MBController::GetNTPTimestamp()
 }
 
 
-bool CNTV2MBController::PushSDP(std::string filename)
+bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
 {
     if (!(getFeatures() & SAREK_MB_PRESENT))
         return true;
 
-    std::ifstream t(filename);
-    std::stringstream buffer;
-    buffer << t.rdbuf();
+    string sdp = sdpstream.str();
 
     string from = ",";
     string to   = "&comma;";
-    string sdp = buffer.str();
     size_t start_pos = 0;
     while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
     {
@@ -659,14 +656,12 @@ bool CNTV2MBController::PushSDP(std::string filename)
         start_pos += to.length();
     }
 
-    buffer.seekg(0, ios::end);
-    int size = (int)buffer.tellg();
+    int size = sdp.size();
     if (size >= ((FIFO_SIZE*4)-128))
     {
         mError = "SDP file too long";
         return false;
     }
-    buffer.seekg(0, ios::beg);
 
     sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
     bool rv = sendMsg(250);

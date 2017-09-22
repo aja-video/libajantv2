@@ -1354,12 +1354,22 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
+string CNTV2Config2110::GetTxSDP(NTV2Channel chan)
+{
+    if (txsdp[(int)chan].str().empty())
+    {
+        GenSDP(chan);
+    }
+    return txsdp[(int)chan].str();
+}
+
 bool CNTV2Config2110::GenSDP(NTV2Channel channel)
 {
     string filename = "txch" + to_string((int)channel+1) + ".sdp";
+    stringstream & sdp = txsdp[(int)channel];
 
-    ofstream sdp;
-    sdp.open(filename, ios::out | ios::trunc);
+    sdp.str("");
+    sdp.clear();
 
     // protocol version
     sdp << "v=0" << endl;
@@ -1393,14 +1403,12 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     GenSDPVideoStream(sdp,channel,macaddr,domain);
     GenSDPAudioStream(sdp,channel, macaddr,domain);
 
-    sdp.close();
-
-    PushSDP(filename);
+    PushSDP(filename,sdp);
 
     return false;
 }
 
-bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
+bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
 {
     bool enabled;
     GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabled);
@@ -1534,7 +1542,7 @@ bool CNTV2Config2110::GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel
 }
 
 
-bool CNTV2Config2110::GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
+bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel, string macaddr, uint32_t domain)
 {
     bool enabled;
     GetTxChannelEnable(channel,NTV2_AUDIO1_STREAM,enabled);

@@ -135,6 +135,8 @@ public:
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
 
+    std::string GetTxSDP(NTV2Channel chan);
+
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
         @param[in]	port                Specifies SFP connector used.
@@ -154,7 +156,6 @@ public:
 
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
-    bool        GenSDP(NTV2Channel channel);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
@@ -184,12 +185,15 @@ protected:
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    bool        GenSDPVideoStream(std::ofstream & sdp, NTV2Channel channel, std::string macaddr, uint32_t domain);
-    bool        GenSDPAudioStream(std::ofstream & sdp, NTV2Channel channel, std::string macaddr, uint32_t domain);
+    bool        GenSDP(NTV2Channel channel);
+    bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string macaddr, uint32_t domain);
+    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, std::string macaddr, uint32_t domain);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
+
+    std::stringstream txsdp[4]; // one SDP per channel
 
     int         LeastCommonMultiple(int a,int b);
 
