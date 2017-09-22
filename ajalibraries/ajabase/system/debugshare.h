@@ -197,6 +197,8 @@ typedef struct _AJADebugShare
     uint64_t volatile   statsMessagesAccepted;                          /**< The number of messages accepted into the ring since creation */
     uint64_t volatile   statsMessagesIgnored;                           /**< The number of messages ignored since creation, filtered out */
 
+    uint32_t            reserved[128];                                  /**< Reserved */
+
 	uint32_t			unitArray[AJA_DEBUG_UNIT_ARRAY_SIZE];			/**< Array of message destinations by unit */
 	AJADebugMessage		messageRing[AJA_DEBUG_MESSAGE_RING_SIZE];		/**< Message ring holding current message data */
 } AJADebugShare;
