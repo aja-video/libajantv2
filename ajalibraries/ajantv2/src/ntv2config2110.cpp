@@ -1356,7 +1356,7 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
 
 bool CNTV2Config2110::GenSDP(NTV2Channel channel)
 {
-    string filename = "txch" + to_string(channel) + ".sdp";
+    string filename = "txch" + to_string((int)channel+1) + ".sdp";
 
     ofstream sdp;
     sdp.open(filename, ios::out | ios::trunc);
@@ -1394,6 +1394,8 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     GenSDPAudioStream(sdp,channel, macaddr,domain);
 
     sdp.close();
+
+    PushSDP(filename);
 
     return false;
 }

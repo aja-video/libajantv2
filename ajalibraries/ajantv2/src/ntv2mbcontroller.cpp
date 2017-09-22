@@ -6,6 +6,7 @@
 
 #include "ntv2mbcontroller.h"
 #include <sstream>
+#include <fstream>
 
 #if defined(AJALinux)
 #include <stdlib.h>
@@ -636,4 +637,66 @@ uint64_t CNTV2MBController::GetNTPTimestamp()
     uint64_t res = secsLo;
     res = (res << 32) + nanosecs;
     return res;
+}
+
+
+bool CNTV2MBController::PushSDP(std::string filename)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    std::ifstream t(filename);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+
+    string from = ",";
+    string to   = "&comma;";
+    string sdp = buffer.str();
+    size_t start_pos = 0;
+    while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
+    {
+        sdp.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+
+    buffer.seekg(0, ios::end);
+    int size = (int)buffer.tellg();
+    if (size >= ((FIFO_SIZE*4)-128))
+    {
+        mError = "SDP file too long";
+        return false;
+    }
+    buffer.seekg(0, ios::beg);
+
+    sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mError);
+                return false;
+            }
+        }
+    }
+
+    mError = "Invalid response from MB";
+    return false;
 }

@@ -13,7 +13,9 @@ enum eMBCmd
     MB_CMD_SEND_ARP_REQ           = 4,
     MB_CMD_UNKNOWN                = 5,
     MB_CMD_SET_IGMP_VERSION       = 6,
-    MB_CMD_FETCH_GM_INFO          = 7
+    MB_CMD_FETCH_GM_INFO          = 7,
+    MB_CMD_TAKE_SDP               = 8,
+    MB_CMD_FETCH_SDP              = 9
 };
 
 enum eSFP
@@ -110,6 +112,7 @@ protected:
     bool GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt);
 
     uint64_t GetNTPTimestamp();
+    bool PushSDP(std::string filename);
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
