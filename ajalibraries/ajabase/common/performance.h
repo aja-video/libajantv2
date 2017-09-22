@@ -4,8 +4,8 @@
 	@brief		Declaration of the AJAPerformance class.
 **/
 
-#ifndef __PERFORMANCE_H
-#define __PERFORMANCE_H
+#ifndef AJA_PERFORMANCE_H
+#define AJA_PERFORMANCE_H
 
 /////////////////////////////
 // Includes
@@ -111,6 +111,6 @@ extern bool AJAPerformaceTracking_stop(AJAPerformanceTracking& stats, std::strin
 extern bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string title = "");
 
 
-#endif // __PERFORMANCE_H
+#endif // AJA_PERFORMANCE_H
 //////////////////////// End of performance.h ///////////////////////
 
