@@ -2531,6 +2531,11 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
         if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != networkPathDiffServices))))
         {
             setRx2022_7Mode(m2022_7Mode, networkPathDiffServices);
+            
+            // Setting 2022-7 mode resets the RX and TX channels and this causes the mac addresses to be zeroed out.
+            // So we need to force a call to set the network configuration for both top and bottom SFP.
+            setNetConfig(SFP_TOP);
+            setNetConfig(SFP_BOTTOM);
         }
         
         // KonaIP Input configurations
