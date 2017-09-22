@@ -425,6 +425,31 @@ AJADebug::GetClientReferenceCount(int32_t *pRefCount)
 }
 
 
+AJAStatus
+AJADebug::SetClientReferenceCount(int32_t refCount)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    try
+    {
+        spShare->clientRefCount = refCount;
+        if (refCount <= 0)
+        {
+            // this will handle shuting everything down if ref count goes to 0 or less
+            AJADebug::Close();
+        }
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
 AJAStatus 
 AJADebug::GetSequenceNumber(int32_t* pSequenceNumber)
 {

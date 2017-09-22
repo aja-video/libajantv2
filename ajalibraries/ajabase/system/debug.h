@@ -262,6 +262,18 @@ public:
      */
     static AJAStatus GetClientReferenceCount(int32_t* pRefCount);
 
+    /**
+     *	Set the reference count for the number of clients accessing shared debug info
+     *  NOTE: in normal circumstances this should never be used, if set to 0 or less
+     *        the debug system will be closed (shared memory cleaned up)
+     *
+     *	@param[in]	refCount                    The client reference count to set.
+     *	@return		AJA_STATUS_SUCCESS			Reference count set
+     *				AJA_STATUS_OPEN				Debug system not open
+     *				AJA_STATUS_RANGE			Index out of range
+     */
+    static AJAStatus SetClientReferenceCount(int32_t refCount);
+
 	/**
 	 *	Get the sequence number of the latest message
 	 *
