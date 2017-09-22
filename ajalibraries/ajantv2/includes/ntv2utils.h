@@ -85,6 +85,16 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSeq
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels);
 
+/**
+	@brief		Packs a line of 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) video into 10-bit-per-component YCbCr data.
+	@param[in]	in16BitYUVLine		The UWordSequence that contains the 16-bit-per-component YUV data to be converted into
+									10-bit-per-component YUV.
+	@param[out]	pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
+	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
+
 
 #if !defined (NTV2_DEPRECATE)
 	AJAExport NTV2_DEPRECATED	void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels);	///< @deprecated	Replaced by UnpackLine_10BitYUVto16BitYUV.

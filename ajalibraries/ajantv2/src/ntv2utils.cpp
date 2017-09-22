@@ -533,6 +533,28 @@ void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, con
 }
 
 
+bool PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels)
+{
+	if (!pOut10BitYUVLine)
+		return false;	//	NULL buffer pointer
+	if (!inNumPixels)
+		return false;	//	Zero pixel count
+	if (ULWord(in16BitYUVLine.size()) < inNumPixels*2)
+		return false;	//	UWordSequence too small
+
+	for (ULWord inputCount = 0,  outputCount = 0;
+		  inputCount < (inNumPixels * 2);
+		  outputCount += 4,  inputCount += 12)
+	{
+		pOut10BitYUVLine[outputCount    ] = ULWord(in16BitYUVLine[inputCount + 0]) + (ULWord(in16BitYUVLine[inputCount + 1]) << 10) + (ULWord(in16BitYUVLine[inputCount + 2]) << 20);
+		pOut10BitYUVLine[outputCount + 1] = ULWord(in16BitYUVLine[inputCount + 3]) + (ULWord(in16BitYUVLine[inputCount + 4]) << 10) + (ULWord(in16BitYUVLine[inputCount + 5]) << 20);
+		pOut10BitYUVLine[outputCount + 2] = ULWord(in16BitYUVLine[inputCount + 6]) + (ULWord(in16BitYUVLine[inputCount + 7]) << 10) + (ULWord(in16BitYUVLine[inputCount + 8]) << 20);
+		pOut10BitYUVLine[outputCount + 3] = ULWord(in16BitYUVLine[inputCount + 9]) + (ULWord(in16BitYUVLine[inputCount +10]) << 10) + (ULWord(in16BitYUVLine[inputCount +11]) << 20);
+	}	//	for each component in the line
+	return true;
+}
+
+
 // RePackLineDataForYCbCrDPX
 void RePackLineDataForYCbCrDPX(ULWord *packedycbcrLine, ULWord numULWords )
 {
