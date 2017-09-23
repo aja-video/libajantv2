@@ -251,6 +251,29 @@ public:
 	 */
     static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression);
 
+    /**
+     *	Get the reference count for the number of clients accessing shared debug info
+     *
+     *	@param[out]	pRefCount                   The current client reference count.
+     *	@return		AJA_STATUS_SUCCESS			Reference count returned
+     *				AJA_STATUS_OPEN				Debug system not open
+     *				AJA_STATUS_RANGE			Index out of range
+     *				AJA_STATUS_NULL				Null output pointer
+     */
+    static AJAStatus GetClientReferenceCount(int32_t* pRefCount);
+
+    /**
+     *	Set the reference count for the number of clients accessing shared debug info
+     *  NOTE: in normal circumstances this should never be used, if set to 0 or less
+     *        the debug system will be closed (shared memory cleaned up)
+     *
+     *	@param[in]	refCount                    The client reference count to set.
+     *	@return		AJA_STATUS_SUCCESS			Reference count set
+     *				AJA_STATUS_OPEN				Debug system not open
+     *				AJA_STATUS_RANGE			Index out of range
+     */
+    static AJAStatus SetClientReferenceCount(int32_t refCount);
+
 	/**
 	 *	Get the sequence number of the latest message
 	 *
@@ -310,6 +333,19 @@ public:
 	 */
 	static AJAStatus GetMessageTime(int32_t sequenceNumber, uint64_t* pTime);
 
+    /**
+     *	Get the wall clock time the message was reported.
+     *
+     *	@param[in]	sequenceNumber			Sequence number of the message.
+     *	@param[out]	pTime					Wall clock time the message was reported, as returned from time()
+     *	@return		AJA_STATUS_SUCCESS		message time returned
+     *				AJA_STATUS_OPEN			debug system not open
+     *				AJA_STATUS_RANGE		index out of range
+     *				AJA_STATUS_NULL			null output pointer
+     */
+    static AJAStatus GetMessageWallClockTime(int32_t sequenceNumber, int64_t *pTime);
+
+
 	/**
 	 *	Get the source file name that reported the message.
 	 *
@@ -357,6 +393,30 @@ public:
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
 	static AJAStatus GetMessageText(int32_t sequenceNumber, const char** ppMessage);
+
+    /**
+     *	Get the number of messages accepted into the ring since creation.
+     *
+     *	@param[in]	sequenceNumber				Sequence number of the message.
+     *	@param[out]	pCount                      The number of messages
+     *	@return		AJA_STATUS_SUCCESS			Number of messages returned
+     *				AJA_STATUS_OPEN				Debug system not open
+     *				AJA_STATUS_RANGE			Index out of range
+     *				AJA_STATUS_NULL				Null output pointer
+     */
+    static AJAStatus GetMessagesAccepted(uint64_t* pCount);
+
+    /**
+     *	Get the number of messages ignored and not put into the ring since creation.
+     *
+     *	@param[in]	sequenceNumber				Sequence number of the message.
+     *	@param[out]	pCount                      The number of messages
+     *	@return		AJA_STATUS_SUCCESS			Number of messages returned
+     *				AJA_STATUS_OPEN				Debug system not open
+     *				AJA_STATUS_RANGE			Index out of range
+     *				AJA_STATUS_NULL				Null output pointer
+     */
+    static AJAStatus GetMessagesIgnored(uint64_t* pCount);
 
 	/**
 	 *	Read the group label definitions from a file.

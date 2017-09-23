@@ -50,6 +50,7 @@ HEADERS += $$NTV4_DIR/ajabase/system/memory.h
 SOURCES += $$NTV4_DIR/ajabase/system/process.cpp
 HEADERS += $$NTV4_DIR/ajabase/system/process.h
 HEADERS += $$NTV4_DIR/ajabase/system/system.h
+SOURCES += $$NTV4_DIR/ajabase/system/system.cpp
 SOURCES += $$NTV4_DIR/ajabase/system/systemtime.cpp
 HEADERS += $$NTV4_DIR/ajabase/system/systemtime.h
 SOURCES += $$NTV4_DIR/ajabase/system/thread.cpp

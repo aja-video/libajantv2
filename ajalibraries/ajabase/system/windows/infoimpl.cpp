@@ -11,11 +11,10 @@
 // need to link with Shlwapi.lib & Netapi32.lib
 #pragma warning(disable:4996)
 #include <io.h>
-#include <Lm.h>
-#include <Shlobj.h>
+#include <LM.h>
+#include <ShlObj.h>
 #include <Shlwapi.h>
 #include <time.h>
-#include <Windows.h>
 
 #include <iomanip>
 
@@ -41,65 +40,18 @@ const WindowsVersionEntry WindowsVersionTable[] =
 const int WindowsVersionTableSize = sizeof(WindowsVersionTable) / sizeof(WindowsVersionEntry);
 
 std::string
-aja_read_registry_string(HKEY hkey, std::string key_path, std::string key)
-{
-    std::string outValue;
-
-    const DWORD buffSize = 128;
-    char szBuff[buffSize];
-    memset(szBuff, 0, buffSize);
-
-    DWORD dwType = 0;
-    DWORD dwInOutSize = buffSize;
-
-    HKEY openedPathHkey;
-    long lResult = RegOpenKeyExA(hkey, key_path.c_str(), 0, KEY_QUERY_VALUE|KEY_WOW64_64KEY, &openedPathHkey);
-    if(ERROR_SUCCESS == lResult)
-    {
-        lResult = RegQueryValueExA(openedPathHkey, key.c_str(), NULL, &dwType, (BYTE*)szBuff, &dwInOutSize);
-        if (lResult == ERROR_SUCCESS)
-        {
-            outValue = szBuff;
-        }
-
-        RegCloseKey(openedPathHkey);
-    }
-
-    return outValue;
-}
-
-DWORD
-aja_read_registry_dword(HKEY hkey, std::string key_path, std::string key)
-{
-    DWORD outValue=0;
-
-    DWORD dwType = 0;
-    DWORD dwInOutSize = sizeof(outValue);
-
-    HKEY openedPathHkey;
-    long lResult = RegOpenKeyExA(hkey, key_path.c_str(), 0, KEY_QUERY_VALUE|KEY_WOW64_64KEY, &openedPathHkey);
-    if(ERROR_SUCCESS == lResult)
-    {
-        lResult = RegQueryValueExA(openedPathHkey, key.c_str(), NULL, &dwType, (BYTE*)&outValue, &dwInOutSize);
-        RegCloseKey(openedPathHkey);
-    }
-
-    return outValue;
-}
-
-std::string
 aja_getsystemmodel()
 {
     std::string outVal;
     std::string key_path = "HARDWARE\\DESCRIPTION\\System\\BIOS";
 
-    outVal = aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemManufacturer");
+    outVal = aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemManufacturer");
     if (outVal.empty() == false)
         outVal += " ";
-    outVal += aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemProductName");
+    outVal += aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemProductName");
     if (outVal.empty() == false)
         outVal += " (";
-    outVal += aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemFamily");
+    outVal += aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "SystemFamily");
     if (outVal.empty() == false)
         outVal += ")";
 
@@ -111,13 +63,13 @@ aja_getsystembios()
 {
     std::string outVal;
     std::string key_path = "HARDWARE\\DESCRIPTION\\System\\BIOS";
-    outVal = aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSVendor");
+    outVal = aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSVendor");
     if (outVal.empty() == false)
         outVal += " ";
-    outVal += aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSVersion");
+    outVal += aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSVersion");
     if (outVal.empty() == false)
         outVal += ", ";
-    outVal += aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSReleaseDate");
+    outVal += aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "BIOSReleaseDate");
 
     return outVal;
 }
@@ -336,7 +288,7 @@ std::string
 aja_getosversion()
 {
     std::string outVal;
-    outVal = aja_read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+    outVal = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
                                       "ReleaseId");
 
     return outVal;
@@ -347,8 +299,8 @@ aja_getosversionbuild()
 {
     std::ostringstream oss;
     std::string key_path = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
-    oss << aja_read_registry_string(HKEY_LOCAL_MACHINE, key_path, "CurrentBuild") <<
-        "." << aja_read_registry_dword(HKEY_LOCAL_MACHINE, key_path, "UBR");
+    oss << aja::read_registry_string(HKEY_LOCAL_MACHINE, key_path, "CurrentBuild") <<
+        "." << aja::read_registry_dword(HKEY_LOCAL_MACHINE, key_path, "UBR");
 
     return oss.str();
 }
@@ -390,7 +342,7 @@ AJASystemInfoImpl::Rescan()
     // calls to get the user name return SYSTEM
 
     // Method 1 of getting username from registry
-    std::string tmpStr = aja_read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
+    std::string tmpStr = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
                                                   "LastLoggedOnUser");
 
     path.erase();
@@ -414,7 +366,7 @@ AJASystemInfoImpl::Rescan()
         path.erase();
         path.append(getenv("SystemDrive"));
         path.append("\\Users\\");
-        path.append(aja_read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
+        path.append(aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
                                              "LastUsedUsername"));
     }
 
