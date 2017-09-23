@@ -152,7 +152,7 @@ class NTV2Capture
 		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
 		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2FormatDescriptor		mFormatDesc;
+		NTV2FormatDescriptor		mFormatDesc;			///< @brief	Describes my video/pixel format
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
 		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using (if any)
 		bool						mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
