@@ -255,7 +255,14 @@ void CNTV2MailBox::SetChannel(ULWord channelOffset, ULWord channelNumber)
 
 void CNTV2MailBox::getError(std::string & error)
 {
-    error = NTV2IpErrorEnumToString(mIpErrorCode);
+    if (mIpErrorCode == NTV2IpErrMBStatusFail)
+    {
+        error = mIpInternalErrorString;
+    }
+    else
+    {
+        error = NTV2IpErrorEnumToString(mIpErrorCode);
+    }
     mIpErrorCode = NTV2IpErrNone;
 }
 
