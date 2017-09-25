@@ -448,12 +448,18 @@ public:
 	AJA_VIRTUAL bool	DeviceCanDoInputSource (const NTV2InputSource inInputSource);
 
 	/**
-		@brief		Returns true if the device having the given ID supports the audio mixer.
-		@return		True if the device supports the given input source.
+        @brief		Returns true if the supports the audio mixer.
+        @return		True if the device supports the audio mixer.
 	**/
 	AJA_VIRTUAL bool	DeviceCanDoAudioMixer ();
 
-	/**
+    /**
+        @brief		Returns true if the device can convert HDMI tsi to/from quad raster.
+        @return		True if the device supports quad raster conversion.
+    **/
+    AJA_VIRTUAL inline bool	DeviceCanDoHDMIQuadRasterConversion () { return !DeviceCanDoAudioMixer (); }
+
+    /**
 		@brief		Returns true if the device having the given ID supports the audio mixer.
 		@return		True if the device supports the given input source.
 	**/

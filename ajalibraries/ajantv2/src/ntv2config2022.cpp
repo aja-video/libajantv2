@@ -538,7 +538,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     }
 
     // some constants
-    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x0000ffff);
+    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x07ffffff);
     WriteChannelRegister(kReg2022_6_rx_media_pkt_buf_size  + baseAddr, 0x0000ffff);
     WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0x10000000 * channel);
 
@@ -1459,9 +1459,14 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
 
 string CNTV2Config2022::getLastError()
 {
-    string astring = NTV2IpErrorEnumToString(mIpErrorCode);
+    return NTV2IpErrorEnumToString(getLastErrorCode());
+}
+
+NTV2IpError CNTV2Config2022::getLastErrorCode()
+{
+    NTV2IpError error = mIpErrorCode;
     mIpErrorCode = NTV2IpErrNone;
-    return astring;
+    return error;
 }
 
 void CNTV2Config2022::ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseAddr)

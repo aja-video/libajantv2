@@ -1962,38 +1962,44 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 //-------------------------------------------------------------------------------------------------------
 void  KonaIPJ2kServices::setNetConfig(eSFP  port)
 {
-    printf("set NetConfig port=%d\n",(int)port);
-
-    string ip,sub,gate;
-    struct in_addr addr;
-
+    string  ip,sub,gate;
+    struct  in_addr addr;
+    
     switch (port)
     {
-    case SFP_BOTTOM:
-        addr.s_addr = mEth1.ipc_ip;
-        ip = inet_ntoa(addr);
-        addr.s_addr = mEth1.ipc_subnet;
-        sub = inet_ntoa(addr);
-        addr.s_addr = mEth1.ipc_gateway;
-        gate = inet_ntoa(addr);
-        break;
-    case SFP_TOP:
-    default:
-        addr.s_addr = mEth0.ipc_ip;
-        ip = inet_ntoa(addr);
-        addr.s_addr = mEth0.ipc_subnet;
-        sub = inet_ntoa(addr);
-        addr.s_addr = mEth0.ipc_gateway;
-        gate = inet_ntoa(addr);
-        break;
+        case SFP_BOTTOM:
+            addr.s_addr = mEth1.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
+        case SFP_TOP:
+        default:
+            addr.s_addr = mEth0.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
     }
-    target->SetNetworkConfiguration(port,ip,sub,gate);
+    
+    if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
+    {
+        printf("SetNetworkConfiguration port=%d OK\n",(int)port);
+        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, NTV2IpErrNone);
+    }
+    else
+    {
+        printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
+        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, target->getLastErrorCode());
+    }
 }
 
 void KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 {
-	printf("setRxConfig chn=%d\n",(int)channel);
-	
 	rx_2022_channel chan;
 	struct in_addr addr;
 	
@@ -2053,18 +2059,17 @@ void KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	if (target->SetRxChannelConfiguration(channel,chan) == true)
 	{
 		printf("setRxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
+		setIPError(channel, kErrTxConfig, NTV2IpErrNone);
 	}
 	else
 	{
 		printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrRxConfig, 1);
+		setIPError(channel, kErrRxConfig, target->getLastErrorCode());
 	}
 }
 
 void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 {
-	printf("setTxConfig chn=%d\n",(int)channel);
 	tx_2022_channel chan;
 	struct in_addr addr;
 		
@@ -2104,12 +2109,12 @@ void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	if (target->SetTxChannelConfiguration(channel,chan) == true)
 	{
 		printf("setTxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
+		setIPError(channel, kErrTxConfig, NTV2IpErrNone);
 	}
 	else
 	{
 		printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrTxConfig, 1);
+		setIPError(channel, kErrTxConfig, target->getLastErrorCode());
 	}
 }
 
@@ -2134,6 +2139,9 @@ void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uin
 		case kErrJ2kDecoderConfig:
 			reg = kVRegKIPDecCfgError;
 			break;
+        case kErrJ2kNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
 	}
 	
 	mCard->ReadRegister(reg, &errCode);
@@ -2180,6 +2188,9 @@ void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uin
             break;
         case kErrJ2kDecoderConfig:
             reg = kVRegKIPDecCfgError;
+            break;
+        case kErrJ2kNetworkConfig:
+            reg = kVRegKIPNetCfgError;
             break;
     }
 

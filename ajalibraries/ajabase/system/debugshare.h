@@ -148,7 +148,8 @@ typedef enum _AJADebugUnit
 	@ingroup	AJAGroupDebug
 **/
 ///@{
-#define AJA_DEBUG_VERSION				100					/**< Version of the debug system */
+#define AJA_DEBUG_MAGIC_ID              AJA_FOURCC('D','B','U','G') /**< Magic identifier of the debug system */
+#define AJA_DEBUG_VERSION				110					/**< Version of the debug system */
 #define AJA_DEBUG_UNIT_ARRAY_SIZE		65536				/**< Number of unit destinations */
 #define AJA_DEBUG_SEVERITY_ARRAY_SIZE	64					/**< Number of severity destinations */
 #define AJA_DEBUG_MESSAGE_MAX_SIZE		512					/**< Maximum size of a message */
@@ -156,7 +157,7 @@ typedef enum _AJADebugUnit
 #define AJA_DEBUG_FILE_NAME_MAX_SIZE	256					/**< Maximum size of a file name */
 #define AJA_DEBUG_SHARE_NAME            "aja-shm-debug"     /**< Name of the shared memory for the debug messages */
 #define AJA_DEBUG_TICK_RATE				1000000				/**< Resolution of debug time in ticks/second */
-#define AJA_DEBUG_STATE_FILE_VERSION	500					/**< Version number of the state file format */
+#define AJA_DEBUG_STATE_FILE_VERSION	510					/**< Version number of the state file format */
 ///@}
 
 /**
@@ -166,12 +167,13 @@ typedef enum _AJADebugUnit
 typedef struct _AJADebugMessage
 {
 	int64_t		time;										/**< Time this message was generated (microseconds) */
+    int64_t     wallTime;									/**< Time this message was generated as returned by time() */
 	int32_t		sequenceNumber;								/**< Sequence number of this message */
 	int32_t		groupIndex;									/**< Group that generated this message */
 	uint32_t	destinationMask;							/**< Destination of the message */
 	int32_t		severity;									/**< Severity of the message */
 	int32_t		lineNumber;									/**< Source file line number that generated this message */
-	uint32_t	reserved;									/**< Reserved */
+    uint32_t	reserved[4];							    /**< Reserved */
 	char		fileName[AJA_DEBUG_FILE_NAME_MAX_SIZE];		/**< Source file name that generated this message */
 	char		messageText[AJA_DEBUG_MESSAGE_MAX_SIZE];	/**< Text generated for this message */
 } AJADebugMessage;
@@ -182,9 +184,21 @@ typedef struct _AJADebugMessage
 **/
 typedef struct _AJADebugShare
 {
+    uint32_t            magicId;                                        /**< Magic cookie identifier used to id this as an AJADebugShare structure */
 	uint32_t			version;										/**< Version of the debug system */
 	int32_t volatile	writeIndex;										/**< Write index for the message ring */
-	uint32_t			severityArray[AJA_DEBUG_SEVERITY_ARRAY_SIZE];	/**< Array of message destinations by severity */
+    int32_t volatile    clientRefCount;                                 /**< A count of current number of clients using structure*/
+
+    uint32_t            messageRingCapacity;                            /**< The number of messages that can be in the ring*/
+    uint32_t            messageTextCapacity;                            /**< The maximum text capacity of message in bytes */
+    uint32_t            messageFileNameCapacity;                        /**< The maximum text capacity of message filename in bytes */
+    uint32_t            unitArraySize;                                  /**< The number of unit destinations */
+
+    uint64_t volatile   statsMessagesAccepted;                          /**< The number of messages accepted into the ring since creation */
+    uint64_t volatile   statsMessagesIgnored;                           /**< The number of messages ignored since creation, filtered out */
+
+    uint32_t            reserved[128];                                  /**< Reserved */
+
 	uint32_t			unitArray[AJA_DEBUG_UNIT_ARRAY_SIZE];			/**< Array of message destinations by unit */
 	AJADebugMessage		messageRing[AJA_DEBUG_MESSAGE_RING_SIZE];		/**< Message ring holding current message data */
 } AJADebugShare;

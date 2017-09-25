@@ -209,7 +209,6 @@
   <ItemGroup>
     <ClCompile Include="..\common\audioutilities.cpp" />
     <ClCompile Include="..\common\buffer.cpp" />
-    <ClCompile Include="..\common\cli_utils.cpp" />
     <ClCompile Include="..\common\common.cpp" />
     <ClCompile Include="..\common\dpx_hdr.cpp" />
     <ClCompile Include="..\common\dpxfileio.cpp" />
@@ -240,6 +239,7 @@
     <ClCompile Include="..\pnp\windows\pnpimpl.cpp" />
     <ClCompile Include="..\system\process.cpp" />
     <ClCompile Include="..\system\windows\processimpl.cpp" />
+    <ClCompile Include="..\system\system.cpp" />
     <ClCompile Include="..\system\systemtime.cpp" />
     <ClCompile Include="..\system\thread.cpp" />
     <ClCompile Include="..\system\windows\threadimpl.cpp" />

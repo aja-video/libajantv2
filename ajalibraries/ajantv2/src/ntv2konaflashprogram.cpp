@@ -689,10 +689,16 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
 {
     bool busy  = true;
-
+	int i = 0;
+	uint32_t regValue;
+	while(i<100)
+	{
+		ReadRegister(kRegBoardID, &regValue);
+		i++;
+	}
+	regValue = 0;
     do
     {
-        uint32_t regValue;
 		ReadRegister(kRegXenaxFlashControlStatus, &regValue);
         if( !(regValue & BIT(8)) )
         {
