@@ -163,6 +163,7 @@ class NTV2FrameGrabber : public QThread
 		NTV2DeviceID				mDeviceID;				///< @brief	Device ID of the device I'm using
         NTV2Channel					mChannel;				///< @brief	AutoCirculate capture
         ULWord                      mNumChannels;           ///< @brief Number of capture frame channels
+        bool                        mTsi;                   ///< @brief Channels in tsi mode
 		NTV2VideoFormat				mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
 		NTV2VideoFormat				mLastVideoFormat;		///< @brief	Used to detect input video format changes
 		ULWord						mDebounceCounter;		///< @brief	Used for detecting stable input video
