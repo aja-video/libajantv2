@@ -3780,8 +3780,8 @@ typedef enum
 typedef enum
 {
 	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_8In
 }NTV2AnalogAudioIO;
 
@@ -4234,5 +4234,38 @@ typedef enum
     #define IS_VALID_NTV2ReferenceSource(__x__)			((__x__) >= NTV2_REFERENCE_EXTERNAL && (__x__) < NTV2_NUM_REFERENCE_INPUTS)
 
 #endif	//	!defined (NTV2_DEPRECATE)
+
+typedef enum
+{
+    NTV2IpErrNone,
+    NTV2IpErrInvalidChannel,
+    NTV2IpErrInvalidFormat,
+    NTV2IpErrInvalidBitdepth,
+    NTV2IpErrInvalidUllHeight,
+    NTV2IpErrInvalidUllLevels,
+    NTV2IpErrUllNotSupported,
+    NTV2IpErrNotReady,
+    NTV2IpErrSoftwareMismatch,
+    NTV2IpErrLinkANotConfigured,
+    NTV2IpErrLinkBNotConfigured,
+    NTV2IpErrInvalidIGMPVersion,
+    NTV2IpErrCannotGetMacAddress,
+    NTV2IpErr2022_7NotSupported,
+    NTV2IpErrWriteSOMToMB,
+    NTV2IpErrWriteSeqToMB,
+    NTV2IpErrWriteCountToMB,
+    NTV2IpErrTimeoutNoSOM,
+    NTV2IpErrTimeoutNoSeq,
+    NTV2IpErrTimeoutNoBytecount,
+    NTV2IpErrExceedsFifo,
+    NTV2IpErrNoResponseFromMB,
+    NTV2IpErrAcquireMBTimeout,
+    NTV2IpErrInvalidMBResponse,
+    NTV2IpErrInvalidMBResponseSize,
+    NTV2IpErrInvalidMBResponseNoMac,
+    NTV2IpErrMBStatusFail,
+    NTV2IpNumErrTypes
+} NTV2IpError;
+
 
 #endif //NTV2ENUMS_H

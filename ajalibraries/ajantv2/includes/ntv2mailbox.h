@@ -40,40 +40,41 @@ public:
     CNTV2MailBox(CNTV2Card & device);
     ~CNTV2MailBox();
 
-    bool    sendMsg(char * msg, uint32_t timeout); // returns response
-    bool    sendMsg(uint32_t timeout);
+    bool        sendMsg(char * msg, uint32_t timeout); // returns response
+    bool        sendMsg(uint32_t timeout);
 
-    void    getError(std::string & error);
-    void    getResponse(std::string & response);
+    void        getError(std::string & error);
+    void        getResponse(std::string & response);
 
-    bool    WriteChannelRegister (ULWord reg, ULWord value,  ULWord mask = 0xFFFFFFFF, ULWord shift = 0x0);
+    bool        WriteChannelRegister (ULWord reg, ULWord value,  ULWord mask = 0xFFFFFFFF, ULWord shift = 0x0);
 
-    bool    ReadChannelRegister  (const ULWord inReg, ULWord & outValue, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0x0);
-    inline bool    ReadChannelRegister  (ULWord inReg, ULWord *pOutValue, ULWord mask = 0xFFFFFFFF, ULWord shift = 0x0)	{return pOutValue ? ReadChannelRegister (inReg, *pOutValue, mask, shift) : false;}
+    bool        ReadChannelRegister  (const ULWord inReg, ULWord & outValue, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0x0);
+    inline bool ReadChannelRegister  (ULWord inReg, ULWord *pOutValue, ULWord mask = 0xFFFFFFFF, ULWord shift = 0x0)	{return pOutValue ? ReadChannelRegister (inReg, *pOutValue, mask, shift) : false;}
 
-    void    SetChannel(ULWord channelOffset, ULWord channelNumber);
+    void        SetChannel(ULWord channelOffset, ULWord channelNumber);
 
-    bool    AcquireMailbox();
-    void    ReleaseMailbox();
+    bool        AcquireMailbox();
+    void        ReleaseMailbox();
 
 protected:
-    bool    rcvMsg(uint32_t timeout);
+    bool        rcvMsg(uint32_t timeout);
 
-    bool    writeMB(uint32_t val,  uint32_t timeout = MB_TIMEOUT);
-    bool    readMB(uint32_t & val, uint32_t timeout = MB_TIMEOUT);
+    bool        writeMB(uint32_t val,  uint32_t timeout = MB_TIMEOUT);
+    bool        readMB(uint32_t & val, uint32_t timeout = MB_TIMEOUT);
 
-    bool    waitSOM(uint32_t timeout);
-    bool    waitRxReady(uint32_t timeout);
-    bool    waitTxReady(uint32_t timeout);
+    bool        waitSOM(uint32_t timeout);
+    bool        waitRxReady(uint32_t timeout);
+    bool        waitTxReady(uint32_t timeout);
 
-    bool    rxReady();
+    bool        rxReady();
 
-    uint32_t getStatus();
-    uint32_t getFeatures();
+    uint32_t    getStatus();
+    uint32_t    getFeatures();
 
-    CNTV2Card  &mDevice;
+    CNTV2Card   &mDevice;
 
-    std::string mError;
+    NTV2IpError mIpErrorCode;
+    std::string mIpInternalErrorString;
 
 private:
     void        startTimer();

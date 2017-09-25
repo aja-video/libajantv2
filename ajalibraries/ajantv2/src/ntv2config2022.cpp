@@ -7,6 +7,7 @@
 #include "ntv2config2022.h"
 #include "ntv2configts2022.h"
 #include "ntv2endian.h"
+#include "ntv2utils.h"
 #include "ntv2card.h"
 #include <sstream>
 
@@ -260,13 +261,13 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
 {
     if (!mDevice.IsMBSystemReady())
     {
-        mError = "KonaIP card not ready.";
+        mIpErrorCode = NTV2IpErrNotReady;
         return false;
     }
 
     if (!mDevice.IsMBSystemValid())
     {
-        mError = "Host software does not match device firmware. Firmware update required.";
+        mIpErrorCode = NTV2IpErrSoftwareMismatch;
         return false;
     }
 
@@ -425,13 +426,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
     if (linkA && (GetLinkActive(SFP_TOP) == false))
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
     if (linkB && (GetLinkActive(SFP_BOTTOM) == false))
     {
-        mError = "SFP Bottom (Link B) not configured";
+        mIpErrorCode = NTV2IpErrLinkBNotConfigured;
         return false;
     }
 
@@ -537,7 +538,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     }
 
     // some constants
-    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x0000ffff);
+    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x07ffffff);
     WriteChannelRegister(kReg2022_6_rx_media_pkt_buf_size  + baseAddr, 0x0000ffff);
     WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0x10000000 * channel);
 
@@ -688,7 +689,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     {
         if (GetLinkActive(SFP_TOP) == false)
         {
-            mError = "SFP Top (Link A) not configured";
+            mIpErrorCode = NTV2IpErrLinkANotConfigured;
             return false;
         }
     }
@@ -697,7 +698,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     {
         if (GetLinkActive(SFP_BOTTOM) == false)
         {
-            mError = "SFP Bottom (Link B) not configured";
+            mIpErrorCode = NTV2IpErrLinkBNotConfigured;
             return false;
         }
     }
@@ -823,13 +824,13 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     if (txConfig.linkAEnable && (GetLinkActive(SFP_TOP) == false))
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
     if (txConfig.linkBEnable && (GetLinkActive(SFP_BOTTOM) == false))
     {
-        mError = "SFP Bottom (Link B) not configured";
+        mIpErrorCode = NTV2IpErrLinkBNotConfigured;
         return false;
     }
 
@@ -1002,7 +1003,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     {
         if (GetLinkActive(SFP_TOP) == false)
         {
-            mError = "SFP Top (Link A) not configured";
+            mIpErrorCode = NTV2IpErrLinkANotConfigured;
             return false;
         }
     }
@@ -1011,7 +1012,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     {
         if (GetLinkActive(SFP_BOTTOM) == false)
         {
-            mError = "SFP Bottom (Link B) not configured";
+            mIpErrorCode = NTV2IpErrLinkBNotConfigured;
             return false;
         }
     }
@@ -1129,13 +1130,13 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
 {
     if (!mDevice.IsMBSystemReady())
     {
-        mError = "KonaIP card not ready.";
+        mIpErrorCode = NTV2IpErrNotReady;
         return false;
     }
 
     if (!_is2022_7)
     {
-        mError = "2022-7 not supported for by this firmware";
+        mIpErrorCode = NTV2IpErr2022_7NotSupported;
         return false;
     }
 
@@ -1151,6 +1152,12 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
     {
         uint32_t baseAddr;
         SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        if (enableChange)
+        {
+            // reset
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
+        }
         if (enable)
         {
             uint32_t delay = rx_networkPathDifferential * 27000;
@@ -1161,22 +1168,56 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
         {
             WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
         }
-        if (enableChange)
-        {
-            // reset
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
-        }
     }
 
     if (_numTxChans && enableChange)
     {
+        // save
+        uint32_t addr;
+        mDevice.ReadRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_0,&addr);
+
+        // reset the tx core
         uint32_t baseAddr;
         SelectTxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
-        // reset
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x01);
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x00);
+
+        // restore everything
+        uint32_t macLo;
+        uint32_t macHi;
+
+        // get primaray mac address
+        uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
+        mDevice.ReadRegister(macAddressRegister, &macHi);
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macLo);
+
+        uint32_t boardHi = (macHi & 0xffff0000) >>16;
+        uint32_t boardLo = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
+
+        // get secondary mac address
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macHi);
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macLo);
+
+        uint32_t boardHi2 = (macHi & 0xffff0000) >>16;
+        uint32_t boardLo2 = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
+
+        // initialise constants
+        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + SAREK_2022_6_TX_CORE_0, 0x04);
+        mDevice.WriteRegister(kReg2022_6_tx_hitless_config   + SAREK_2022_6_TX_CORE_0, 0x01); // disable
+
+        // source ip address
+        mDevice.WriteRegister(kReg2022_6_tx_src_ip_addr      + SAREK_2022_6_TX_CORE_0,addr);
+
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo);
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi);
+
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo2);
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi2);
     }
+
     return true;
 }
 
@@ -1187,7 +1228,7 @@ bool  CNTV2Config2022::Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDi
 
     if (!_is2022_7)
     {
-        mError = "2022-7 not supported for by this firmware";
+        mIpErrorCode = NTV2IpErr2022_7NotSupported;
         return false;
     }
 
@@ -1248,7 +1289,7 @@ bool CNTV2Config2022::SetIGMPVersion(eIGMPVersion_t version)
         mbversion = 3;
         break;
     default:
-        mError = "Invalid IGMP version";
+        mIpErrorCode = NTV2IpErrInvalidIGMPVersion;
         return false;
     }
     return CNTV2MBController::SetIGMPVersion(mbversion);
@@ -1268,7 +1309,7 @@ bool CNTV2Config2022::SetJ2KEncoderConfiguration(const NTV2Channel channel, cons
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KEncoder(channel, j2kConfig);
-        mError = tsConfig.getLastError();
+        mIpErrorCode = tsConfig.getLastErrorCode();
         return rv;
     }
     return false;
@@ -1280,7 +1321,7 @@ bool CNTV2Config2022::GetJ2KEncoderConfiguration(const NTV2Channel channel, j2kE
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KEncoder(channel, j2kConfig);
-        mError = tsConfig.getLastError();
+        mIpErrorCode = tsConfig.getLastErrorCode();
         return rv;
     }
     return false;
@@ -1293,7 +1334,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
         mDevice.SetAudioSystemInputSource(NTV2_AUDIOSYSTEM_1,NTV2_AUDIO_AES,NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
-        mError = tsConfig.getLastError();
+        mIpErrorCode = tsConfig.getLastErrorCode();
         return rv;
     }
     return false;
@@ -1305,7 +1346,7 @@ bool CNTV2Config2022::GetJ2KDecoderConfiguration(j2kDecoderConfig & j2kConfig)
     {
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.ReadbackJ2KDecoder(j2kConfig);
-        mError = tsConfig.getLastError();
+        mIpErrorCode = tsConfig.getLastErrorCode();
         return rv;
     }
     return false;
@@ -1458,9 +1499,14 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
 
 string CNTV2Config2022::getLastError()
 {
-    string astring = mError;
-    mError.clear();
-    return astring;
+    return NTV2IpErrorEnumToString(getLastErrorCode());
+}
+
+NTV2IpError CNTV2Config2022::getLastErrorCode()
+{
+    NTV2IpError error = mIpErrorCode;
+    mIpErrorCode = NTV2IpErrNone;
+    return error;
 }
 
 void CNTV2Config2022::ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseAddr)
@@ -1522,7 +1568,7 @@ bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         if (!rv)
         {
             SetTxChannelEnable(channel, false); // stop transmit
-            mError = "Failed to retrieve MAC address from ARP table";
+            mIpErrorCode = NTV2IpErrCannotGetMacAddress;
             return false;
         }
 

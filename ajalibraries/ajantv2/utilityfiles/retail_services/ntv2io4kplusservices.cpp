@@ -3579,5 +3579,5 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	ULWord analogIOConfig = 0;
 	mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, &analogIOConfig);
-	mCard->SetAnalogAudioIOConfiguration(NTV2_AnalogAudioIO_4Out_4In);
+	mCard->SetAnalogAudioIOConfiguration(NTV2_AnalogAudioIO_4In_4Out);
 }

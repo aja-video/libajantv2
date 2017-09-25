@@ -40,20 +40,20 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
     // Check for a proper channnel (we only configure NTV2_CHANNEL1 and NTV2_CHANNEL2)
     if ((channel != NTV2_CHANNEL2) && (channel != NTV2_CHANNEL1))
     {
-        mError = "Invalid channel";
+        mIpErrorCode = NTV2IpErrInvalidChannel;
         return false;
     }
 
     // Before we do anything lets make sure video format and bitdepth are in valid ranges
     if (!IsVideoFormatJ2KSupported(config.videoFormat))
     {
-        mError = "Invalid format";
+        mIpErrorCode = NTV2IpErrInvalidFormat;
         return false;
     }
     
     if ((config.bitDepth != 8) && (config.bitDepth != 10))
     {
-        mError = "Invalid bit depth";
+        mIpErrorCode = NTV2IpErrInvalidBitdepth;
         return false;
     }
 
@@ -180,7 +180,7 @@ bool CNTV2ConfigTs2022::ReadbackJ2KEncoder(const NTV2Channel channel, j2kEncoder
     }
     else
     {
-        mError = "Invalid channel";
+        mIpErrorCode = NTV2IpErrInvalidChannel;
         return false;
     }
 }
@@ -297,23 +297,23 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
         // Sanity checks
         if ((height != 1080) && (height != 540))
         {
-            mError = "Setup J2K Failed because height not supported in ull mode";
+            mIpErrorCode = NTV2IpErrInvalidUllHeight;
             return false;
         }
 
         if ((height == 1080) && (num_levels > 4))
         {
-            mError = "Setup J2K Failed because no more than 4 levels is supported in 1080p ull";
+            mIpErrorCode = NTV2IpErrInvalidUllLevels;
             return false;
         }
 
         if ((height == 540) && (num_levels > 3))
         {
-            mError = "Setup J2K Failed because no more than 3 levels is supported in 1080i ull";
+            mIpErrorCode = NTV2IpErrInvalidUllLevels;
             return false;
         }
 
-        mError = "Setup J2K Failed because ull mode not yet supported";
+        mIpErrorCode = NTV2IpErrUllNotSupported;
         return false;
     }
 
@@ -617,11 +617,11 @@ uint32_t CNTV2ConfigTs2022::GetFeatures()
 }
 
 
-string CNTV2ConfigTs2022::getLastError()
+NTV2IpError CNTV2ConfigTs2022::getLastErrorCode()
 {
-    string astring = mError;
-    mError.clear();
-    return astring;
+    NTV2IpError error = mIpErrorCode;
+    mIpErrorCode = NTV2IpErrNone;
+    return error;
 }
 
 
@@ -1079,7 +1079,7 @@ bool CNTV2ConfigTs2022::WriteJ2KConfigReg(const NTV2Channel channel, const uint3
         rv = mDevice.WriteRegister(SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
     }
     else
-        mError = "Invalid channel";
+        mIpErrorCode = NTV2IpErrInvalidChannel;
 
     //printf("CNTV2ConfigTs2022::WriteJ2KConfigReg reg = %08x %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
     return rv;
@@ -1095,7 +1095,7 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
         rv = mDevice.ReadRegister(SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
     }
     else
-        mError = "Invalid channel";
+        mIpErrorCode = NTV2IpErrInvalidChannel;
 
     //printf("CNTV2ConfigTs2022::ReadJ2KConfigVReg reg = %08x %d\n", SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), *value);
     return rv;

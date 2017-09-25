@@ -163,6 +163,7 @@ public:
 
     // If method returns false call this to get details
     std::string getLastError();
+    NTV2IpError getLastErrorCode();
 
     static uint32_t v_packetizers[4];
     static uint32_t a_packetizers[4];

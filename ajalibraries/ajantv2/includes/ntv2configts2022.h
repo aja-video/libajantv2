@@ -70,9 +70,8 @@ public:
     bool    ReadbackJ2KDecoder(j2kDecoderConfig &config);
     bool    GetJ2KDecoderStatus(j2kDecoderStatus &status);
 
-    // If method returns false call this to get details
-    std::string getLastError();
-
+    // If method returns false call this to get the error code
+    NTV2IpError getLastErrorCode();
 
  private:
 

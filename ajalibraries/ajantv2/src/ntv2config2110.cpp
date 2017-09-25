@@ -146,13 +146,13 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
 {
     if (!mDevice.IsMBSystemReady())
     {
-        mError = "KonaIP card not ready.";
+        mIpErrorCode = NTV2IpErrNotReady;
         return false;
     }
 
     if (!mDevice.IsMBSystemValid())
     {
-        mError = "Host software does not match device firmware. Firmware update required.";
+        mIpErrorCode = NTV2IpErrSoftwareMismatch;
         return false;
     }
 
@@ -280,7 +280,7 @@ bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Strea
 {
     if (GetLinkActive(SFP_TOP) == false)
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
@@ -314,7 +314,7 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
 {
     if (GetLinkActive(SFP_TOP) == false)
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
@@ -648,7 +648,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
     if (GetLinkActive(SFP_TOP) == false)
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
@@ -925,7 +925,7 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
 {
     if (GetLinkActive(SFP_TOP) == false)
     {
-        mError = "SFP Top (Link A) not configured";
+        mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
@@ -1066,7 +1066,7 @@ bool CNTV2Config2110::SetIGMPVersion(eIGMPVersion_t version)
         mbversion = 3;
         break;
     default:
-        mError = "Invalid IGMP version";
+        mIpErrorCode = NTV2IpErrInvalidIGMPVersion;
         return false;
     }
     return CNTV2MBController::SetIGMPVersion(mbversion);
@@ -1244,9 +1244,14 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
 
 string CNTV2Config2110::getLastError()
 {
-    std::string err;
-    getError(err);
-    return err;
+    return NTV2IpErrorEnumToString(getLastErrorCode());
+}
+
+NTV2IpError CNTV2Config2110::getLastErrorCode()
+{
+    NTV2IpError error = mIpErrorCode;
+    mIpErrorCode = NTV2IpErrNone;
+    return error;
 }
 
 void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
@@ -1329,7 +1334,7 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         if (!rv)
         {
             SetTxChannelEnable(channel, stream, false); // stop transmit
-            mError = "Failed to retrieve MAC address from ARP table";
+            mIpErrorCode = NTV2IpErrCannotGetMacAddress;
             return false;
         }
 

@@ -335,10 +335,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\cli_utils.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\common\cli_utils.h"
 				>
 			</File>
@@ -594,6 +590,10 @@
 				RelativePath="..\system\windows\processimpl.h"
 				>
 			</File>
+            <File
+                RelativePath="..\system\system.cpp"
+                >
+            </File>
 			<File
 				RelativePath="..\system\system.h"
 				>

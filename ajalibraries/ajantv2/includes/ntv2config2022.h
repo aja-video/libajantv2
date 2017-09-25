@@ -38,7 +38,6 @@
     @brief	Configures a SMPTE 2022 Transmit Channel.
 **/
 
-
 class tx_2022_channel
 {
 public:
@@ -227,6 +226,7 @@ public:
 
     // If method returns false call this to get details
     std::string getLastError();
+    NTV2IpError getLastErrorCode();
 
 private:
     void        ChannelSemaphoreSet(uint32_t controlReg, uint32_t baseaddr);
