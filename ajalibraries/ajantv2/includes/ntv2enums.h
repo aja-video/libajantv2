@@ -3519,20 +3519,20 @@ typedef enum
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2TCIndex, NTV2TimecodeIndex;
 
-#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				((__x__) >= NTV2_TCINDEX_DEFAULT && (__x__) < NTV2_MAX_NUM_TIMECODE_INDEXES)
+#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				((__x__) >= NTV2_TCINDEX_DEFAULT  &&  (__x__) < NTV2_MAX_NUM_TIMECODE_INDEXES)
 
 #define	NTV2_IS_ANALOG_TIMECODE_INDEX(__x__)			((__x__) == NTV2_TCINDEX_LTC1 || (__x__) == NTV2_TCINDEX_LTC2)
 
-#define	NTV2_IS_ATC_VITC1_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI1 && (__x__) <= NTV2_TCINDEX_SDI4	)	\
-                                                            ||  (__x__) >= NTV2_TCINDEX_SDI5 && (__x__) <= NTV2_TCINDEX_SDI8	)
+#define	NTV2_IS_ATC_VITC1_TIMECODE_INDEX(__x__)			(	    ((__x__) >= NTV2_TCINDEX_SDI1  &&  (__x__) <= NTV2_TCINDEX_SDI4)	\
+                                                            ||  ((__x__) >= NTV2_TCINDEX_SDI5  &&  (__x__) <= NTV2_TCINDEX_SDI8)	)
 
-#define	NTV2_IS_ATC_VITC2_TIMECODE_INDEX(__x__)			(	(__x__) >= NTV2_TCINDEX_SDI1_2 && (__x__) <= NTV2_TCINDEX_SDI8_2	)
+#define	NTV2_IS_ATC_VITC2_TIMECODE_INDEX(__x__)			(	(__x__) >= NTV2_TCINDEX_SDI1_2  &&  (__x__) <= NTV2_TCINDEX_SDI8_2	)
 
-#define	NTV2_IS_ATC_LTC_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI3_LTC && (__x__) <= NTV2_TCINDEX_SDI8_LTC	)	\
-                                                            ||  (__x__) == NTV2_TCINDEX_SDI1_LTC											\
-                                                            ||	(__x__) == NTV2_TCINDEX_SDI2_LTC	)
+#define	NTV2_IS_ATC_LTC_TIMECODE_INDEX(__x__)			(	    ((__x__) >= NTV2_TCINDEX_SDI3_LTC  &&  (__x__) <= NTV2_TCINDEX_SDI8_LTC)	\
+                                                            ||  ((__x__) == NTV2_TCINDEX_SDI1_LTC)											\
+                                                            ||	((__x__) == NTV2_TCINDEX_SDI2_LTC)	)
 
-#define	NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX (__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX (__x__))
+#define	NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX(__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX(__x__))
 
 
 //	These will be deprecated in the SDK 13 era		#if !defined (NTV2_DEPRECATE)
