@@ -3780,8 +3780,8 @@ typedef enum
 typedef enum
 {
 	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_8In
 }NTV2AnalogAudioIO;
 
