@@ -25,7 +25,6 @@ AJA_LIB_SRCS =\
 	atomic.cpp \
 	audioutilities.cpp \
 	buffer.cpp \
-	cli_utils.cpp \
 	common.cpp \
 	debug.cpp \
 	dpx_hdr.cpp \
@@ -48,6 +47,7 @@ AJA_LIB_SRCS =\
 	pnpimpl.cpp \
 	process.cpp \
 	processimpl.cpp \
+    system.cpp \
 	systemtime.cpp \
 	testpatterngen.cpp \
 	thread.cpp \

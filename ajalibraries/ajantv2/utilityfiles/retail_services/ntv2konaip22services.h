@@ -29,7 +29,6 @@ public:
 protected:
     void	setNetConfig(eSFP  port);
     void	setRxConfig(NTV2Channel channel);
-    void    setRx2022_7Mode(bool mode, uint32_t networkPathDiff);
     void	setTxConfig(NTV2Channel channel);
 	void	setIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
     void	getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val);

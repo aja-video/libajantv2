@@ -1,28 +1,48 @@
-/**	@file system.h
- *	System include for aja api classes.
- *
- *	Copyright (C) 2009 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
- */
+/**
+    @file		system.h
+    @copyright	Copyright (C) 2009-2017 AJA Video Systems, Inc.  All rights reserved.
+    @brief		System specific functions
+**/
 
 #ifndef AJA_SYSTEM_H
 #define AJA_SYSTEM_H
+
+#include "ajabase/common/public.h"
 
 #if defined(AJA_WINDOWS)
 	#pragma warning (disable:4996)
 	#if !defined(_WIN32_WINNT)
         #define _WIN32_WINNT 0x0600
 	#endif
-	#include <windows.h>
+    #include <Windows.h>
 	#include <stdio.h>
 	#include <tchar.h>
 	#include <winioctl.h>
-	#include <setupapi.h>
+    #include <SetupAPI.h>
 	#include <initguid.h>
+
+    namespace aja
+    {
+        AJA_EXPORT bool write_registry_string(HKEY hkey, std::string key_path, std::string key, std::string value);
+
+        AJA_EXPORT bool write_registry_dword(HKEY hkey, std::string key_path, std::string key, DWORD value);
+
+        AJA_EXPORT std::string read_registry_string(HKEY hkey, std::string key_path, std::string key);
+
+        AJA_EXPORT DWORD read_registry_dword(HKEY hkey, std::string key_path, std::string key);
+
+    } //end aja namespace
+
 #endif
 
-#ifdef AJA_MAC
+#if defined(AJA_MAC)
 	#include <Carbon/Carbon.h>
 	#include <CoreServices/CoreServices.h>
 #endif
+
+#if defined(AJA_LINUX)
+
+#endif
+
 
 #endif
