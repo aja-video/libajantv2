@@ -88,7 +88,7 @@ protected:
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
-    bool FetchGrandMasterInfo(uint32_t & domain, std::string & macAddr);
+    bool FetchGrandMasterInfo(std::string & grandmasterInfo);
 
     void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);

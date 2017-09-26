@@ -7367,6 +7367,8 @@ static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue
                                                         "Invalid response size from MB",
                                                         "MAC Address not found in response from MB",
                                                         "MB Status Failure",
+                                                        "SDP too long",
+                                                        "PTP Grand Master Info not found",
                                                         ""};
 
     if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)

@@ -133,7 +133,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
     return false;
 }
 
-bool CNTV2MBController::FetchGrandMasterInfo(uint32_t & domain, string & macAddr)
+bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
 {
     if (!(getFeatures() & SAREK_MB_PRESENT))
         return true;
@@ -149,22 +149,16 @@ bool CNTV2MBController::FetchGrandMasterInfo(uint32_t & domain, string & macAddr
     getResponse(response);
     vector<string> msg;
     splitResponse(response, msg);
-    if (msg.size() >=4)
+    if (msg.size() >=3)
     {
         string status;
         rv = getString(msg[0],"status",status);
         if (rv && (status == "OK"))
         {
-            rv = getString(msg[2],"MAC",macAddr);
+            rv = getString(msg[2],"INFO",grandmasterInfo);
             if (rv == false)
             {
-                mError = "MAC Address not found in response from MB";
-                return false;
-            }
-            rv = getDecimal(msg[3],"DOMAIN",domain);
-            if (rv == false)
-            {
-                mError = "DOMAIN not found in response from MB";
+                mIpErrorCode = NTV2IpErrGrandMasterInfo;
                 return false;
             }
             return true;
@@ -173,13 +167,14 @@ bool CNTV2MBController::FetchGrandMasterInfo(uint32_t & domain, string & macAddr
         {
             if (msg.size() >= 3)
             {
-                rv = getString(msg[2],"error",mError);
-                return false;
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
             }
         }
     }
 
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+
     return false;
 }
 
@@ -660,10 +655,10 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
         start_pos += to.length();
     }
 
-    int size = sdp.size();
+    int size = (int)sdp.size();
     if (size >= ((FIFO_SIZE*4)-128))
     {
-        mError = "SDP file too long";
+        mIpErrorCode = NTV2IpErrSDPTooLong;;
         return false;
     }
 
@@ -690,12 +685,13 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
         {
             if (msg.size() >= 3)
             {
-                rv = getString(msg[2],"error",mError);
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
                 return false;
             }
         }
     }
 
-    mError = "Invalid response from MB";
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return false;
 }
