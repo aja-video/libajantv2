@@ -691,7 +691,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
     bool busy  = true;
 	int i = 0;
 	uint32_t regValue;
-	while(i<100)
+	while(i<1)
 	{
 		ReadRegister(kRegBoardID, &regValue);
 		i++;
