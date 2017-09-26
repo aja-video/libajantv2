@@ -1152,6 +1152,12 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
     {
         uint32_t baseAddr;
         SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        if (enableChange)
+        {
+            // reset
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
+        }
         if (enable)
         {
             uint32_t delay = rx_networkPathDifferential * 27000;
@@ -1161,12 +1167,6 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
         else
         {
             WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
-        }
-        if (enableChange)
-        {
-            // reset
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
         }
     }
 
