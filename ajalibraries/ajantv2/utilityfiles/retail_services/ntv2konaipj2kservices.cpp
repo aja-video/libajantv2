@@ -1989,12 +1989,12 @@ void  KonaIPJ2kServices::setNetConfig(eSFP  port)
     if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
     {
         printf("SetNetworkConfiguration port=%d OK\n",(int)port);
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, NTV2IpErrNone);
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
     }
     else
     {
         printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, target->getLastErrorCode());
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, target->getLastErrorCode());
     }
 }
 
@@ -2120,63 +2120,16 @@ void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
 {
-	uint32_t errCode;
-	uint32_t value = val & 0xff;
-	uint32_t reg;
-	
-	switch( configType )
-	{
-		default:
-		case kErrTxConfig:
-			reg = kVRegKIPTxCfgError;
-			break;
-		case kErrRxConfig:
-			reg = kVRegKIPRxCfgError;
-			break;
-		case kErrJ2kEncoderConfig:
-			reg = kVRegKIPEncCfgError;
-			break;
-		case kErrJ2kDecoderConfig:
-			reg = kVRegKIPDecCfgError;
-			break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
-	}
-	
-	mCard->ReadRegister(reg, &errCode);
-	
-	switch( channel )
-	{
-		default:
-		case NTV2_CHANNEL1:
-			errCode = (errCode & 0xffffff00) | value;
-			break;
-			
-		case NTV2_CHANNEL2:
-			errCode = (errCode & 0xffff00ff) | (value << 8);
-			break;
-			
-		case NTV2_CHANNEL3:
-			errCode = (errCode & 0xff00ffff) | (value << 16);
-			break;
-			
-		case NTV2_CHANNEL4:
-			errCode = (errCode & 0x00ffffff) | (value << 24);
-			break;
-	}
-	
-	mCard->WriteRegister(reg, errCode);
-}
-
-void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
-{
     uint32_t errCode;
+    uint32_t value = val & 0xff;
     uint32_t reg;
-
+    
     switch( configType )
     {
         default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
         case kErrTxConfig:
             reg = kVRegKIPTxCfgError;
             break;
@@ -2189,33 +2142,80 @@ void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uin
         case kErrJ2kDecoderConfig:
             reg = kVRegKIPDecCfgError;
             break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
     }
-
+    
     mCard->ReadRegister(reg, &errCode);
-
+    
     switch( channel )
     {
         default:
         case NTV2_CHANNEL1:
-            errCode = (errCode & 0xff);
+            errCode = (errCode & 0xffffff00) | value;
             break;
-
+            
         case NTV2_CHANNEL2:
-            errCode = (errCode & 0xff00) >> 8;
+            errCode = (errCode & 0xffff00ff) | (value << 8);
             break;
-
+            
         case NTV2_CHANNEL3:
-            errCode = (errCode & 0xff0000) >> 16;
+            errCode = (errCode & 0xff00ffff) | (value << 16);
             break;
-
+            
         case NTV2_CHANNEL4:
-            errCode = (errCode & 0xff000000) >> 24;
+            errCode = (errCode & 0x00ffffff) | (value << 24);
             break;
     }
+    
+    mCard->WriteRegister(reg, errCode);
+}
 
+void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
+{
+    uint32_t errCode;
+    uint32_t reg;
+    
+    switch( configType )
+    {
+        default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
+        case kErrTxConfig:
+            reg = kVRegKIPTxCfgError;
+            break;
+        case kErrRxConfig:
+            reg = kVRegKIPRxCfgError;
+            break;
+        case kErrJ2kEncoderConfig:
+            reg = kVRegKIPEncCfgError;
+            break;
+        case kErrJ2kDecoderConfig:
+            reg = kVRegKIPDecCfgError;
+            break;
+    }
+    
+    mCard->ReadRegister(reg, &errCode);
+    
+    switch( channel )
+    {
+        default:
+        case NTV2_CHANNEL1:
+            errCode = errCode & 0xff;
+            break;
+            
+        case NTV2_CHANNEL2:
+            errCode = (errCode >> 8) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL3:
+            errCode = (errCode >> 16) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL4:
+            errCode = (errCode >> 24) & 0xff;
+            break;
+    }
+    
     val = errCode;
 }
 

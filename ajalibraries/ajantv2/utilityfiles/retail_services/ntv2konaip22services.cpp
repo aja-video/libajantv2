@@ -2534,11 +2534,6 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
             {
                 printf("Set 2022_7Mode OK\n");
                 setIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
-                
-                // Setting 2022-7 mode resets the RX and TX channels and this causes the mac addresses to be zeroed out.
-                // So we need to force a call to set the network configuration for both top and bottom SFP.
-                setNetConfig(SFP_TOP);
-                setNetConfig(SFP_BOTTOM);
             }
             else
             {
@@ -3429,12 +3424,12 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
     if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
     {
         printf("SetNetworkConfiguration port=%d OK\n",(int)port);
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, NTV2IpErrNone);
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
     }
     else
     {
         printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, target->getLastErrorCode());
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, target->getLastErrorCode());
     }
 }
 
@@ -3566,6 +3561,9 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 	switch( configType )
 	{
 		default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
 		case kErrTxConfig:
 			reg = kVRegKIPTxCfgError;
 			break;
@@ -3578,9 +3576,6 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 		case kErrJ2kDecoderConfig:
 			reg = kVRegKIPDecCfgError;
 			break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
 	}
 	
 	mCard->ReadRegister(reg, &errCode);
@@ -3616,6 +3611,9 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     switch( configType )
     {
         default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
         case kErrTxConfig:
             reg = kVRegKIPTxCfgError;
             break;
@@ -3628,9 +3626,6 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
         case kErrJ2kDecoderConfig:
             reg = kVRegKIPDecCfgError;
             break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
     }
 
     mCard->ReadRegister(reg, &errCode);
@@ -3639,19 +3634,19 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     {
         default:
         case NTV2_CHANNEL1:
-            errCode = (errCode & 0xff);
+            errCode = errCode & 0xff;
             break;
 
         case NTV2_CHANNEL2:
-            errCode = (errCode & 0xff00) >> 8;
+            errCode = (errCode >> 8) & 0xff;
             break;
 
         case NTV2_CHANNEL3:
-            errCode = (errCode & 0xff0000) >> 16;
+            errCode = (errCode >> 16) & 0xff;
             break;
 
         case NTV2_CHANNEL4:
-            errCode = (errCode & 0xff000000) >> 24;
+            errCode = (errCode >> 24) & 0xff;
             break;
     }
 
