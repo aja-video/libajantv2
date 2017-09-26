@@ -2394,11 +2394,6 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		return false;
 
 	const ULWord	regNum	(gChannelToControlRegNum [channel]);
-
-	// might as well put in this check while i'm here
-	if ( newFormat == NTV2_FBF_8BIT_QREZ && channel == NTV2_CHANNEL2 )
-		return false;
-
 	NTV2FrameGeometry currentGeometry;
 	NTV2FrameBufferFormat currentFormat; // save for call to IsBufferSizeChangeRequired below
 	bool status = GetFrameInfo(channel,&currentGeometry,&currentFormat);
