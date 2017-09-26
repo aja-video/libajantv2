@@ -306,7 +306,8 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 	if (   (prevCoding == AJAAncillaryDataCoding_Analog)
 		&& (newCoding  == AJAAncillaryDataCoding_Analog)
 		&& (prevLoc.GetLineNumber()  == newLoc.GetLineNumber())
-		&& (prevLoc.GetDataSpace()   == newLoc.GetDataSpace())		// technically, these should ALWAYS be the same for "analog"...?
+		&& (prevLoc.GetHorizontalOffset()  == newLoc.GetHorizontalOffset())	// technically, these should ALWAYS be the same for "analog"...?
+		&& (prevLoc.GetDataSpace()   == newLoc.GetDataSpace())		//
 		&& (prevLoc.GetDataLink()    == newLoc.GetDataLink())		//
 		&& (prevLoc.GetDataStream()  == newLoc.GetDataStream())		//
 		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//

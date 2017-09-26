@@ -199,24 +199,33 @@ AJAExport const std::string &	AJAAncillaryDataSpaceToString (const AJAAncillaryD
 typedef struct AJAAncillaryDataLocation
 {
 	public:
-		inline	AJAAncillaryDataLocation (	const AJAAncillaryDataLink		inLink		= AJAAncillaryDataLink_Unknown,
-											const AJAAncillaryDataChannel	inChannel	= AJAAncillaryDataChannel_Unknown,
-											const AJAAncillaryDataSpace		inAncSpace	= AJAAncillaryDataSpace_Unknown,
-											const uint16_t					inLineNum	= 0,
-											const AJAAncillaryDataStream	inStream	= AJAAncillaryDataStream_1)
+		inline	AJAAncillaryDataLocation (	const AJAAncillaryDataLink		inLink			= AJAAncillaryDataLink_Unknown,
+											const AJAAncillaryDataChannel	inChannel		= AJAAncillaryDataChannel_Unknown,
+											const AJAAncillaryDataSpace		inAncSpace		= AJAAncillaryDataSpace_Unknown,
+											const uint16_t					inLineNum		= 0,
+											const uint16_t					inHorizOffset	= AJAAncDataHorizOffset_Default,
+											const AJAAncillaryDataStream	inStream		= AJAAncillaryDataStream_1)
 		{
-			Set(inLink, inChannel, inAncSpace, inLineNum, inStream);
+			Set(inLink, inChannel, inAncSpace, inLineNum, inHorizOffset, inStream);
 		}
 
 		inline bool		operator == (const AJAAncillaryDataLocation & inRHS) const
 		{
-			return link == inRHS.link && stream == inRHS.stream && channel == inRHS.channel && ancSpace == inRHS.ancSpace && lineNum == inRHS.lineNum;
+			//	Everything must match exactly:
+			return link == inRHS.link
+					&&  stream == inRHS.stream
+						&&  channel == inRHS.channel
+							&&  ancSpace == inRHS.ancSpace
+								&&  lineNum == inRHS.lineNum
+									&&  horizOffset == inRHS.horizOffset;
 		}
 
 		inline bool		operator < (const AJAAncillaryDataLocation & inRHS) const
 		{
-			const uint32_t	lhs	((      lineNum << 14) | (      ancSpace << 12) | (      channel << 10) | (      stream << 8) |       link);
-			const uint32_t	rhs	((inRHS.lineNum << 14) | (inRHS.ancSpace << 12) | (inRHS.channel << 10) | (inRHS.stream << 8) | inRHS.link);
+			//	64-bit unsigned compare:	LLLLLLLLLLLLSSSHHHHHHHHHHHHCCCDDDDDDDKK
+			//	...where L=lineNumber (most significant), S=VANC/HANC, H=horizOffset, C=Y/C channel, D=dataStream, K=link A/B (least significant)
+			const uint64_t	lhs	((uint64_t(      lineNum) << 27) | (uint64_t(      ancSpace) << 24) | (uint64_t(      horizOffset) << 12) | (uint64_t(      channel) << 9) | (uint64_t(      stream) << 2) | uint64_t(      link));
+			const uint64_t	rhs	((uint64_t(inRHS.lineNum) << 27) | (uint64_t(inRHS.ancSpace) << 24) | (uint64_t(inRHS.horizOffset) << 12) | (uint64_t(inRHS.channel) << 9) | (uint64_t(inRHS.stream) << 2) | uint64_t(inRHS.link));
 			return lhs < rhs;
 		}
 
@@ -229,6 +238,7 @@ typedef struct AJAAncillaryDataLocation
 								const AJAAncillaryDataChannel	inChannel,
 								const AJAAncillaryDataSpace		inAncSpace,
 								const uint16_t					inLineNum,
+								const uint16_t					inHorizOffset = AJAAncDataHorizOffset_Default,
 								const AJAAncillaryDataStream	inStream = AJAAncillaryDataStream_1)
 		{
 			link		= inLink;
@@ -236,6 +246,7 @@ typedef struct AJAAncillaryDataLocation
 			channel		= inChannel;
 			ancSpace	= inAncSpace;
 			lineNum		= inLineNum;
+			horizOffset	= inHorizOffset;
 		}
 
 		inline void		Reset (void)
@@ -245,6 +256,7 @@ typedef struct AJAAncillaryDataLocation
 			channel		= AJAAncillaryDataChannel_Unknown;
 			ancSpace	= AJAAncillaryDataSpace_Unknown;
 			lineNum		= 0;
+			horizOffset	= AJAAncDataHorizOffset_Default;
 		}
 
 		inline AJAAncillaryDataLink			GetDataLink (void) const				{return link;}
@@ -262,6 +274,17 @@ typedef struct AJAAncillaryDataLocation
 		inline bool							IsHanc (void) const						{return ancSpace == AJAAncillaryDataSpace_HANC;}
 
 		inline uint16_t						GetLineNumber (void) const				{return lineNum;}
+
+		/**
+			@return		The 12-bit horizontal offset of the packet.
+						For HD, this is the number of luma samples (see SMPTE ST274).
+						For SD, this is the number of Y/C muxed words (see SMPTE ST125).
+						Can also be one of these predefined values:
+						AJAAncDataHorizOffset_Default -- i.e., immediately after SAV.
+						AJAAncDataHorizOffset_Anywhere -- i.e., any legal area of the raster line after SAV.
+						AJAAncDataHorizOffset_AnyHanc -- i.e., any legal area of the raster line after EAV.
+		**/
+		inline uint16_t						GetHorizontalOffset (void) const		{return horizOffset & 0x0FFF;}
 
 		/**
 			@brief	Sets my data link value to the given value (if valid).
@@ -299,11 +322,29 @@ typedef struct AJAAncillaryDataLocation
 		**/
 		inline AJAAncillaryDataLocation &	SetLineNumber (const uint16_t inLineNum)							{lineNum = inLineNum; return *this;}
 
-		AJAAncillaryDataLink		link;		///< @brief	Which data link (A or B)?
-		AJAAncillaryDataStream		stream;		///< @brief	Which data stream (DS1, DS2... etc.)?
-		AJAAncillaryDataChannel		channel;	///< @brief	Which channel (Y or C)?
-		AJAAncillaryDataSpace		ancSpace;	///< @brief	Which raster section (HANC or VANC)?
-		uint16_t					lineNum;	///< @brief	Which SMPTE line number?
+		/**
+			@brief		Specifies the horizontal offset of the packet.
+						For HD, this is the number of luma samples (see SMPTE ST274).
+						For SD, this is the number of Y/C muxed words (see SMPTE ST125).
+						Use AJAAncDataHorizOffset_Default for zero -- i.e., immediately after SAV.
+						Use AJAAncDataHorizOffset_Anywhere for any legal area of the raster line after SAV.
+						Use AJAAncDataHorizOffset_AnyHanc for any legal area of the raster line after EAV.
+			@param[in]	inOffset		Specifies my new horizontal offset.
+			@return		A non-const reference to myself.
+		**/
+		inline AJAAncillaryDataLocation &	SetHorizontalOffset (const uint16_t inOffset)						{horizOffset = inOffset & 0x0FFF; return *this;}
+
+		AJAAncillaryDataLink		link;			///< @brief	Which data link (A or B)?
+		AJAAncillaryDataStream		stream;			///< @brief	Which data stream (DS1, DS2... etc.)?
+		AJAAncillaryDataChannel		channel;		///< @brief	Which channel (Y or C)?
+		AJAAncillaryDataSpace		ancSpace;		///< @brief	Which raster section (HANC or VANC)?
+		uint16_t					lineNum;		///< @brief	Which SMPTE line number?
+		uint16_t					horizOffset;	///< @brief	12-bit horizontal offset (from SAV) on raster line
+
+		//	Special horizOffset values:
+		static const uint16_t	AJAAncDataHorizOffset_Default	=	0x0000;	///< @brief	Packet placed/found immediately after SAV.
+		static const uint16_t	AJAAncDataHorizOffset_Anywhere	=	0x0FFF;	///< @brief	Packet placed/found in any legal area of raster line after SAV.
+		static const uint16_t	AJAAncDataHorizOffset_AnyHanc	=	0x0FFE;	///< @brief	Packet placed/found in any legal area of raster line after EAV (in HANC).
 
 } AJAAncillaryDataLocation, *AJAAncillaryDataLocationPtr;
 
@@ -414,6 +455,7 @@ public:
 	virtual inline AJAAncillaryDataChannel	GetLocationDataChannel (void) const			{return GetDataLocation().GetDataChannel();}	///< @return	My current anc data location's video stream (Y or C).
 	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}		///< @return	My current ancillary data space (HANC or VANC).
 	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}		///< @return	My current frame line number value (SMPTE line numbering).
+	virtual inline uint16_t					GetLocationHorizOffset (void) const			{return GetDataLocation().GetHorizontalOffset();}		///< @return	My current horizontal offset value.
 
 	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}							///< @return	True if I have an empty payload.
 	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}	///< @return	True if my location component stream is Y (luma).
@@ -547,6 +589,13 @@ public:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetLocationLineNumber (const uint16_t inLineNum);
+
+	/**
+		@brief	Sets my ancillary data "location" horizontal offset.
+		@param[in]	inOffset	Specifies the new horizontal offset value. \sa AJAAncillaryDataLocation::SetHorizontalOffset.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						SetLocationHorizOffset (const uint16_t inOffset);
 
 	/**
 		@brief		Sets my ancillary data coding type (e.g. digital or analog/raw waveform).

@@ -163,12 +163,17 @@ class CNTV2AncDataTester
 			typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
 			AncLocationSet	ancLocations;
 			static const uint16_t					lines[]		=	{9,		16,		220,	285,	1910,	2320};
+			static const uint16_t					hOffsets[]	=	{AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
 			static const AJAAncillaryDataSpace		spaces[]	=	{AJAAncillaryDataSpace_VANC,	AJAAncillaryDataSpace_HANC};
 			static const AJAAncillaryDataChannel	channels[]	=	{AJAAncillaryDataChannel_C,		AJAAncillaryDataChannel_Y};
 			static const AJAAncillaryDataStream		streams[]	=	{AJAAncillaryDataStream_1,		AJAAncillaryDataStream_2,	AJAAncillaryDataStream_3,	AJAAncillaryDataStream_4};
 			static const AJAAncillaryDataLink		links[]		=	{AJAAncillaryDataLink_A,		AJAAncillaryDataLink_B};
 			AJAAncillaryDataLocation	nullLoc;
 			AJAAncillaryDataLocation	a, toSetAllAtOnce, toBeSet;
+
+			SHOULD_BE_FALSE(nullLoc.IsValid());	//	Invalid, because default constructor makes everything "unknown"
+			SHOULD_BE_TRUE(nullLoc == a);
+
 			for (unsigned lineNdx(0);  lineNdx < sizeof(lines)/sizeof(lines[0]);  lineNdx++)
 			{
 				const uint16_t lineNum(lines[lineNdx]);
@@ -182,30 +187,36 @@ class CNTV2AncDataTester
 						for (unsigned streamNdx(0);  streamNdx < sizeof(streams)/sizeof(streams[0]);  streamNdx++)
 						{
 							toBeSet.SetDataStream(streams[streamNdx]);
-							for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
+							for (unsigned hOffNdx(0);  hOffNdx < sizeof(hOffsets)/sizeof(hOffsets[0]);  hOffNdx++)
 							{
-								const AJAAncillaryDataLocation	b(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, streams[streamNdx]);
-								toBeSet.SetDataLink(links[linkNdx]);
-								toSetAllAtOnce.Set(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, streams[streamNdx]);
-								a.SetLineNumber(lineNum).SetDataSpace(spaces[spaceNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
-								SHOULD_BE_TRUE(b == toBeSet);
-								SHOULD_BE_TRUE(a == b);
-								SHOULD_BE_TRUE(a == toSetAllAtOnce);
-								SHOULD_BE_TRUE(a.IsValid());
-								SHOULD_BE_EQUAL(a.GetDataLink(), links[linkNdx]);
-								SHOULD_BE_EQUAL(b.GetDataStream(), streams[streamNdx]);
-								SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
-								SHOULD_BE_EQUAL(toSetAllAtOnce.GetDataSpace(), spaces[spaceNdx]);
-								SHOULD_BE_EQUAL(a.GetLineNumber(), lineNum);
-								a.Reset();
-								SHOULD_BE_FALSE(a == b);
-								SHOULD_BE_FALSE(a.IsValid());
-								ancLocations.insert(b);
-							}	//	for each AJAAncillaryDataLink
+								const uint16_t hOffset(hOffsets[hOffNdx]);
+								toBeSet.SetHorizontalOffset(hOffset);
+								for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
+								{
+									const AJAAncillaryDataLocation	b(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, hOffset, streams[streamNdx]);
+									toBeSet.SetDataLink(links[linkNdx]);
+									toSetAllAtOnce.Set(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, hOffset, streams[streamNdx]);
+									a.SetLineNumber(lineNum).SetHorizontalOffset(hOffset).SetDataSpace(spaces[spaceNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
+									SHOULD_BE_TRUE(b == toBeSet);
+									SHOULD_BE_TRUE(a == b);
+									SHOULD_BE_TRUE(a == toSetAllAtOnce);
+									SHOULD_BE_TRUE(a.IsValid());
+									SHOULD_BE_EQUAL(a.GetDataLink(), links[linkNdx]);
+									SHOULD_BE_EQUAL(b.GetDataStream(), streams[streamNdx]);
+									SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
+									SHOULD_BE_EQUAL(toSetAllAtOnce.GetDataSpace(), spaces[spaceNdx]);
+									SHOULD_BE_EQUAL(a.GetLineNumber(), lineNum);
+									SHOULD_BE_EQUAL(a.GetHorizontalOffset(), hOffset);
+									a.Reset();
+									SHOULD_BE_FALSE(a == b);
+									SHOULD_BE_FALSE(a.IsValid());
+									ancLocations.insert(b);
+								}	//	for each AJAAncillaryDataLink
+							}	//	for each horizOffset
 						}	//	for each AJAAncillaryDataStream
 					}	//	for each AJAAncillaryDataChannel
 				}	//	for each AJAAncillaryDataSpace
-			}
+			}	//	for each line number
 			cerr << endl << endl;
 			for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)
 				cerr << *it << endl;
@@ -232,6 +243,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
+			SHOULD_BE_EQUAL (defaultPkt.GetLocationHorizOffset(), 0);
 			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
 			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
 			SHOULD_BE_EQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);

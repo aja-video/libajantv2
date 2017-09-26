@@ -67,6 +67,7 @@ void AJAAncillaryData::Init()
 	m_location.SetDataChannel(AJAAncillaryDataChannel_Y);
 	m_location.SetDataSpace(AJAAncillaryDataSpace_VANC);
 	m_location.SetLineNumber(0);
+	m_location.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default);
 
 	m_ancType	   = AJAAncillaryDataType_Unknown;
 	m_rcvDataValid = false;
@@ -247,6 +248,16 @@ AJAStatus AJAAncillaryData::SetLocationLineNumber (const uint16_t inLineNum)
 	return AJA_STATUS_SUCCESS;
 }
 
+
+//-------------
+//
+AJAStatus AJAAncillaryData::SetLocationHorizOffset (const uint16_t inOffset)
+{
+	//	No range checking here because we don't know how wide the frame is
+	m_location.SetHorizontalOffset(inOffset);
+	return AJA_STATUS_SUCCESS;
+}
+
 //-------------
 //
 AJAStatus AJAAncillaryData::SetDataCoding (const AJAAncillaryDataCoding inCodingType)
@@ -421,10 +432,10 @@ AJAStatus AJAAncillaryData::ParsePayloadData (void)
 
 //**********
 // Initializes the AJAAncillaryData object from "raw" ancillary data received from hardware (ingest)
-AJAStatus AJAAncillaryData::InitWithReceivedData (	const uint8_t *						pInData,
-													const uint32_t						inMaxBytes,
-													const AJAAncillaryDataLocation &	inLocationInfo,
-													uint32_t &							outPacketByteCount)
+AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
+													const uint32_t					inMaxBytes,
+													const AJAAncillaryDataLocation & inLocationInfo,
+													uint32_t &						outPacketByteCount)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
@@ -507,6 +518,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (	const uint8_t *						pInData,
 		m_location.SetDataChannel(((pInData[1] & 0x20) == 0) ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);		// byte 1, bit 5
 		m_location.SetDataSpace(((pInData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC);		// byte 1, bit 4
 		m_location.SetLineNumber(((pInData[1] & 0x0F) << 7) + (pInData[2] & 0x7F));											// byte 1, bits 3:0 + byte 2, bits 6:0
+		//m_location.SetHorizontalOffset(hOffset);	//	??? GUMP doesn't tell us the horiz offset of where the packet started in the raster line
 	}
 
 	//	Allocate space for the payload and copy it in...
@@ -743,13 +755,23 @@ string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValu
 		<< "|" << ::AJAAncillaryDataStreamToString(inValue.GetDataStream(), inCompact)
 		<< "|" << ::AJAAncillaryDataChannelToString(inValue.GetDataChannel(), inCompact)
 		<< "|" << ::AJAAncillaryDataSpaceToString(inValue.GetDataSpace(), inCompact)
-		<< "|" << DEC(inValue.GetLineNumber());
+		<< "|L" << DEC(inValue.GetLineNumber());
+	if (inValue.GetHorizontalOffset() != AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default)
+	{
+		oss	<< "|";
+		if (inValue.GetHorizontalOffset() == AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc)
+			oss	<< "EAV*";
+		else if (inValue.GetHorizontalOffset() == AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere)
+			oss	<< "SAV*";
+		else
+			oss << "SAV+" << DEC(inValue.GetHorizontalOffset());
+	}
 	return oss.str ();
 }
 
 ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & inValue)
 {
-	inOutStream	<< "Data Location:\t" << ::AJAAncillaryDataLocationToString(inValue, true);
+	inOutStream	<< ::AJAAncillaryDataLocationToString(inValue, true);
 	return inOutStream;
 }
 
@@ -784,7 +806,7 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
 				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
 				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
-				<< m_location														<< endl
+				<< "Loc:\t\t"	<< m_location										<< endl
 				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)		<< endl
 				<< "Valid:\t\t"	<< (m_rcvDataValid ? "Yes" : "No");
 	if (inDumpPayload)
