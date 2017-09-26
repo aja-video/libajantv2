@@ -3159,6 +3159,14 @@ bool CNTV2Card::VerifyMainFlash(const char *fileName)
 bool CNTV2Card::WaitForFlashNOTBusy()
 {
 	bool busy  = true;
+	int i = 0;
+	uint32_t regValue;
+	while(i<1)
+	{
+		ReadRegister(kRegBoardID, &regValue);
+		i++;
+	}
+	regValue = 0;
 	do
 	{
 		ULWord regValue = BIT(8);
