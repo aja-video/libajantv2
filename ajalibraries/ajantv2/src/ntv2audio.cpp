@@ -986,7 +986,7 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_PAIR (inValue))
 		return false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
 	{
 		WriteRegister (kRegHDMIInputControl, inAudioSystem, kRegMaskHDMIOutAudioEngineSelect, kRegShiftHDMIOutAudioEngineSelect);
 		WriteRegister (kRegHDMIInputControl, inValue, kRegMaskHDMIOutAudio2ChannelSelect, kRegShiftHDMIOutAudio2ChannelSelect);
@@ -1003,7 +1003,7 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem)
 {
 	bool	result = false;
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
 	{
 		ULWord engineSelect (0), channelSelect(0);
 		result = ReadRegister(kRegHDMIInputControl, &engineSelect,  kRegMaskHDMIOutAudioEngineSelect, kRegShiftHDMIOutAudioEngineSelect);
@@ -1033,7 +1033,7 @@ bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inV
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_OCTET (inValue))
 		return false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
 	{
 		NTV2Audio8ChannelSelect channelSelect = inValue == NTV2_AudioChannel9_16 ? NTV2_AudioChannel9_16 : NTV2_AudioChannel1_8;
 		WriteRegister (kRegHDMIInputControl, inAudioSystem, kRegMaskHDMIOutAudioEngineSelect, kRegShiftHDMIOutAudioEngineSelect);
@@ -1057,7 +1057,7 @@ bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inV
 bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem)
 {
 	bool result = false;
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
 	{
 		ULWord engineSelect (0), channelSelect(0);
 		result = ReadRegister(kRegHDMIOutputAudioConfig, &channelSelect, kRegMaskHDMIOutAudio8Of16SelectMode, kRegShiftHDMIOutAudio8Of16SelectMode);
