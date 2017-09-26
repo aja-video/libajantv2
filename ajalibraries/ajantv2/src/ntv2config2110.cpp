@@ -9,6 +9,7 @@
 #include "ntv2card.h"
 #include "ntv2formatdescriptor.h"
 #include <sstream>
+#include <algorithm>
 
 #if defined (AJALinux) || defined (AJAMac)
 #include <stdlib.h>
@@ -1403,6 +1404,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     // PTP
     string gmInfo;
     bool rv = FetchGrandMasterInfo(gmInfo);
+    gmInfo.erase(remove(gmInfo.begin(), gmInfo.end(), '\n'), gmInfo.end());
 
     GenSDPVideoStream(sdp,channel,gmInfo);
     GenSDPAudioStream(sdp,channel,gmInfo);
