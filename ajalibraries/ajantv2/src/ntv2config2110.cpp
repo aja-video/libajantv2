@@ -218,6 +218,11 @@ bool CNTV2Config2110::SetNetworkConfiguration (string localIPAddress0, string ne
     return rv;
 }
 
+bool  CNTV2Config2110::DisableNetworkInterface(eSFP port)
+{
+    return DisableNetworkConfiguration(port);
+}
+
 bool CNTV2Config2110::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;

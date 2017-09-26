@@ -348,6 +348,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string ne
     return rv;
 }
 
+bool  CNTV2Config2022::DisableNetworkInterface(eSFP port)
+{
+    return DisableNetworkConfiguration(port);
+}
+
 bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;

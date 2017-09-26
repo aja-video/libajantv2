@@ -94,6 +94,55 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     return false;
 }
 
+bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
+{
+   if (!(getFeatures() & SAREK_MB_PRESENT))
+       return true;
+
+    bool rv = AcquireMailbox();
+    if (!rv) return false;
+
+    sprintf((char*)txBuf,"cmd=%d,port=%d",
+            (int)MB_CMD_DISABLE_NET_IF,(int)port);
+
+    rv = sendMsg(1000);
+    if (!rv)
+    {
+        ReleaseMailbox();
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            ReleaseMailbox();
+            SetLinkInactive(port);
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
+                ReleaseMailbox();
+                return false;
+            }
+        }
+    }
+
+    ReleaseMailbox();
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+
 bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 {
     if (!(getFeatures() & SAREK_MB_PRESENT))
@@ -560,6 +609,23 @@ bool CNTV2MBController::SetLinkActive(eSFP link)
     mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
     return true;
 }
+
+bool CNTV2MBController::SetLinkInactive(eSFP link)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (link == SFP_BOTTOM)
+    {
+        state  &= ~S2022_LINK_B_ACTIVE;
+    }
+    else
+    {
+        state  &= ~S2022_LINK_A_ACTIVE;
+    }
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return true;
+}
+
 
 bool CNTV2MBController::GetLinkActive(eSFP link)
 {
