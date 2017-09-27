@@ -7341,7 +7341,6 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
 {
     switch (inIpErrorEnumValue)
     {
-        default:
         case NTV2IpErrNone:                         return "";
         case NTV2IpErrInvalidChannel:               return "Invalid channel";
         case NTV2IpErrInvalidFormat:                return "Invalid format";
@@ -7371,6 +7370,7 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrMBStatusFail:                 return "MB Status Failure";
         case NTV2IpErrSDPTooLong:                   return "SDP too long";
         case NTV2IpErrGrandMasterInfo:              return "PTP Grand Master Info not found";
+        default:                                    return "Unknown IP error";
     }
 }
 
