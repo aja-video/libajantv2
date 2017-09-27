@@ -425,30 +425,20 @@ public:
     static AJAStatus GetMessagesIgnored(uint64_t* pCount);
 
 	/**
-	 *	Read the group label definitions from a file.
-	 *
-	 *	@param[in]	pFilename				The group definition file name.
-	 *	@return		AJA_STATUS_SUCCESS		Group definition file read
-	 *				AJA_STATUS_OPEN			Debug system not open
-	 *				AJA_STATUS_RANGE		Index out of range
-	 */
-	static AJAStatus ReadGroupFile(char* pFilename);
-
-	/**
-	 *	Get the string associated with a debug group.
-	 *
-	 *	@param[in]	index	Index of the group string to return.
-	 *	@return				Group string
-	 */
-	static const char* GetGroupString(int32_t index);
-
-	/**
 	 *	Get the string associated with a debug severity.
 	 *
 	 *	@param[in]	severity	Index of the severity string to return.
 	 *	@return				Severity string
 	 */
 	static const char* GetSeverityString(int32_t severity);
+
+    /**
+     *	Get the string associated with a debug message group.
+     *
+     *	@param[in]	group	Index of the message group string to return.
+     *	@return				Group string
+     */
+    static const char* GetGroupString(int32_t group);
 
 	/**
 	 *	Write group state to a file.

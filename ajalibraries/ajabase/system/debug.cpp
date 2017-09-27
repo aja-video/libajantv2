@@ -20,12 +20,13 @@
 #include <stdio.h>
 #include <time.h>
 
-static std::vector<std::string> sGroupLabelArray;
+static std::vector<std::string> sGroupLabelVector;
 static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
 
+#define addDebugGroupToLabelVector(x) sGroupLabelVector.push_back(#x)
 
 AJADebug::AJADebug()
 {
@@ -97,6 +98,37 @@ AJADebug::Open(bool incrementRefCount)
                 // increment reference count;
                 spShare->clientRefCount++;
             }
+
+            // Create the Unit Label Vector
+            sGroupLabelVector.clear();
+            addDebugGroupToLabelVector(AJA_DebugUnit_Unknown);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Critical);
+            addDebugGroupToLabelVector(AJA_DebugUnit_DriverGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_ServiceGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_UserGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_VideoGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AudioGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_TimecodeGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AncGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_RoutingGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Application);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AJACCLib);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncLib);
+            addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
+            addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
+
+            for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
+            {
+                std::string name("AJA_DebugUnit_Unused_");
+                name += aja::to_string(i);
+                sGroupLabelVector.push_back(name);
+            }
+
+            assert(sGroupLabelVector.size() == AJA_DebugUnit_Size);
 		}
 	}
 	catch(...)
@@ -804,81 +836,6 @@ AJADebug::GetMessagesIgnored(uint64_t* pCount)
 }
 
 
-AJAStatus 
-AJADebug::ReadGroupFile(char* pFileName)
-{
-	FILE* pGroup = NULL;
-	char Label[256];
-    int32_t index = 0;
-
-	// must have a file name
-	if(pFileName == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
-	// open label file
-	pGroup = fopen(pFileName, "r");
-	if(pGroup == NULL)
-	{
-		return AJA_STATUS_FAIL;
-	}
-
-	try
-	{
-		// scan until no more groups
-		while(true)
-		{
-			// parse a group label
-            if(fscanf(pGroup, " #%d %s", (int32_t *)&index, Label) != 2)
-			{
-				break;
-			}
-
-			// index must be in range
-			if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-			{
-				continue;
-			}
-
-			// assign label
-			sGroupLabelArray[index] = Label;
-		}
-	}
-	catch(...)
-	{
-		return AJA_STATUS_FAIL;
-	}
-
-	// cleanup
-	fclose(pGroup);
-
-	return AJA_STATUS_SUCCESS;
-}
-
-
-const char* 
-AJADebug::GetGroupString(int32_t index)
-{
-	if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-	{
-		return "index range error";
-	}
-
-	if(index >= (int32_t)sGroupLabelArray.size())
-	{
-		return "label range error";
-	}
-
-	if(sGroupLabelArray[index].empty())
-	{
-		return "no label";
-	}
-
-	return sGroupLabelArray[index].c_str();
-}
-
-
 const char* 
 AJADebug::GetSeverityString(int32_t severity)
 {
@@ -888,6 +845,23 @@ AJADebug::GetSeverityString(int32_t severity)
 	}
 
 	return sSeverityString[severity];
+}
+
+
+const char*
+AJADebug::GetGroupString(int32_t group)
+{
+    if(group < 0 || group >= (int32_t)sGroupLabelVector.size())
+    {
+        return "index range error";
+    }
+
+    if(sGroupLabelVector.at(group).empty())
+    {
+        return "no label";
+    }
+
+    return sGroupLabelVector.at(group).c_str();
 }
 
 
