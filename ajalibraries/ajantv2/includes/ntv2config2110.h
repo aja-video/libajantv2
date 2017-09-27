@@ -196,6 +196,7 @@ protected:
 private:
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
+    std::string To_String(int val);
 
     std::stringstream txsdp[4]; // one SDP per channel
 

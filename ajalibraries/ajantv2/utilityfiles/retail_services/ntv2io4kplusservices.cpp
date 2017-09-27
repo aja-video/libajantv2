@@ -3113,6 +3113,8 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mode == NTV2_MODE_CAPTURE)
 	{
+		//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
+		mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 		// special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
 		if (bHdmiIn == true && (b4K == true && !(b6g4k || b12g4k)))
 		{
