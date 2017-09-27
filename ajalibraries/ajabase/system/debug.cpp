@@ -38,7 +38,7 @@ AJADebug::~AJADebug()
 
 
 AJAStatus 
-AJADebug::Open()
+AJADebug::Open(bool incrementRefCount)
 {
 	AJAAutoLock lock(&sLock);
 
@@ -92,8 +92,11 @@ AJADebug::Open()
 				return AJA_STATUS_FAIL;
 			}
 
-            // increment reference count;
-            spShare->clientRefCount++;
+            if (incrementRefCount)
+            {
+                // increment reference count;
+                spShare->clientRefCount++;
+            }
 		}
 	}
 	catch(...)
@@ -107,7 +110,7 @@ AJADebug::Open()
 
 
 AJAStatus 
-AJADebug::Close()
+AJADebug::Close(bool decrementRefCount)
 {
 	AJAAutoLock lock(&sLock);
 
@@ -115,18 +118,21 @@ AJADebug::Close()
 	{		
         if(spShare != NULL)
         {
-            // decrement reference count
-            spShare->clientRefCount--;
-
-            if(spShare->clientRefCount <= 0)
+            if (decrementRefCount)
             {
-                spShare->clientRefCount = 0;
+                // decrement reference count
+                spShare->clientRefCount--;
 
-                // free the shared data structure
-                if(spShare != NULL)
+                if(spShare->clientRefCount <= 0)
                 {
-                    AJAMemory::FreeShared(spShare);
+                    spShare->clientRefCount = 0;
                 }
+            }
+
+            // free the shared data structure
+            if(spShare != NULL)
+            {
+                AJAMemory::FreeShared(spShare);
             }
         }
 	}
@@ -280,6 +286,13 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 
 	try
 	{
+        // check for active client to receive messages
+        if (spShare->clientRefCount <= 0)
+        {
+            // nobody is listening so bail quickly
+            return;
+        }
+
 		// check for valid index
 		if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
 		{
@@ -303,7 +316,7 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 		}
 
 		// increment the message write index
-		int32_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+        uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
 
 		// modulo the ring size to determine the message array index
 		int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
@@ -351,40 +364,44 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
 
 	try
 	{
-		// check for valid file name
-		if (pFileName == NULL)
-		{
-			pFileName = (char*) "unknown";
-		}
-		// check for valid expression
-		if (pExpression == NULL)
-		{
-			pExpression = (char*) "no expression";
-		}
+        // check for active client to receive messages
+        if (spShare->clientRefCount > 0)
+        {
+            // check for valid file name
+            if (pFileName == NULL)
+            {
+                pFileName = (char*) "unknown";
+            }
+            // check for valid expression
+            if (pExpression == NULL)
+            {
+                pExpression = (char*) "no expression";
+            }
 
-		// increment the message write index
-		int32_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+            // increment the message write index
+            int64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
 
-		// modulo the ring size to determine the message array index
-		int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
+            // modulo the ring size to determine the message array index
+            int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
 
-		// save the message data
-		spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
-		spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
-		spShare->messageRing[messageIndex].time = DebugTime();
-        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
-		strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
-		spShare->messageRing[messageIndex].lineNumber = lineNumber;
-		spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
+            // save the message data
+            spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
+            spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
+            spShare->messageRing[messageIndex].time = DebugTime();
+            spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
+            strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
+            spShare->messageRing[messageIndex].lineNumber = lineNumber;
+            spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
 
-		// format the message
-		sprintf(spShare->messageRing[messageIndex].messageText, "assertion failed (file %s, line %d):  %s\n",
-			pFileName, lineNumber, pExpression);
+            // format the message
+            sprintf(spShare->messageRing[messageIndex].messageText, "assertion failed (file %s, line %d):  %s\n",
+                pFileName, lineNumber, pExpression);
 
-		// set last to indicate message complete
-		spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
+            // set last to indicate message complete
+            spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
 
-        AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+        }
 	}
 	catch (...)
 	{
@@ -451,7 +468,7 @@ AJADebug::SetClientReferenceCount(int32_t refCount)
 
 
 AJAStatus 
-AJADebug::GetSequenceNumber(int32_t* pSequenceNumber)
+AJADebug::GetSequenceNumber(uint64_t *pSequenceNumber)
 {
 	if(spShare == NULL)
 	{
@@ -477,7 +494,7 @@ AJADebug::GetSequenceNumber(int32_t* pSequenceNumber)
 
 
 AJAStatus
-AJADebug::GetMessageSequenceNumber(int32_t sequenceNumber, int32_t* pSequenceNumber)
+AJADebug::GetMessageSequenceNumber(uint64_t sequenceNumber, uint64_t* pSequenceNumber)
 {
 	if(spShare == NULL)
 	{
@@ -506,7 +523,7 @@ AJADebug::GetMessageSequenceNumber(int32_t sequenceNumber, int32_t* pSequenceNum
 
 
 AJAStatus
-AJADebug::GetMessageGroup(int32_t sequenceNumber, int32_t* pGroupIndex)
+AJADebug::GetMessageGroup(uint64_t sequenceNumber, int32_t* pGroupIndex)
 {
 	if(spShare == NULL)
 	{
@@ -535,7 +552,7 @@ AJADebug::GetMessageGroup(int32_t sequenceNumber, int32_t* pGroupIndex)
 
 
 AJAStatus
-AJADebug::GetMessageDestination(int32_t sequenceNumber, uint32_t* pDestination)
+AJADebug::GetMessageDestination(uint64_t sequenceNumber, uint32_t* pDestination)
 {
 	if(spShare == NULL)
 	{
@@ -564,7 +581,7 @@ AJADebug::GetMessageDestination(int32_t sequenceNumber, uint32_t* pDestination)
 
 
 AJAStatus 
-AJADebug::GetMessageTime(int32_t sequenceNumber, uint64_t* pTime)
+AJADebug::GetMessageTime(uint64_t sequenceNumber, uint64_t* pTime)
 {
 	if(spShare == NULL)
 	{
@@ -592,7 +609,7 @@ AJADebug::GetMessageTime(int32_t sequenceNumber, uint64_t* pTime)
 }
 
 AJAStatus
-AJADebug::GetMessageWallClockTime(int32_t sequenceNumber, int64_t* pTime)
+AJADebug::GetMessageWallClockTime(uint64_t sequenceNumber, int64_t* pTime)
 {
     if(spShare == NULL)
     {
@@ -620,7 +637,7 @@ AJADebug::GetMessageWallClockTime(int32_t sequenceNumber, int64_t* pTime)
 }
 
 AJAStatus 
-AJADebug::GetMessageFileName(int32_t sequenceNumber, const char** ppFileName)
+AJADebug::GetMessageFileName(uint64_t sequenceNumber, const char** ppFileName)
 {
 	if(spShare == NULL)
 	{
@@ -649,7 +666,7 @@ AJADebug::GetMessageFileName(int32_t sequenceNumber, const char** ppFileName)
 
 
 AJAStatus
-AJADebug::GetMessageLineNumber(int32_t sequenceNumber, int32_t* pLineNumber)
+AJADebug::GetMessageLineNumber(uint64_t sequenceNumber, int32_t* pLineNumber)
 {
 	if(spShare == NULL)
 	{
@@ -678,7 +695,7 @@ AJADebug::GetMessageLineNumber(int32_t sequenceNumber, int32_t* pLineNumber)
 
 
 AJAStatus
-AJADebug::GetMessageSeverity(int32_t sequenceNumber, int32_t* pSeverity)
+AJADebug::GetMessageSeverity(uint64_t sequenceNumber, int32_t* pSeverity)
 {
 	if(spShare == NULL)
 	{
@@ -707,7 +724,7 @@ AJADebug::GetMessageSeverity(int32_t sequenceNumber, int32_t* pSeverity)
 
 
 AJAStatus 
-AJADebug::GetMessageText(int32_t sequenceNumber, const char** ppMessage)
+AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
 {
 	if(spShare == NULL)
 	{
