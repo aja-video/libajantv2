@@ -4266,6 +4266,8 @@ typedef enum
     NTV2IpErrMBStatusFail,
     NTV2IpErrSDPTooLong,
     NTV2IpErrGrandMasterInfo,
+    NTV2IpErrSDP,
+    NTV2IpErrInvalidURL,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

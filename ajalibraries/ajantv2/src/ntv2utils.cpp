@@ -7369,6 +7369,8 @@ static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue
                                                         "MB Status Failure",
                                                         "SDP too long",
                                                         "PTP Grand Master Info not found",
+                                                        "SDP not found",
+                                                        "Invalid URL",
                                                         ""};
 
     if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)

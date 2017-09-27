@@ -1613,3 +1613,13 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
 
     return true;
 }
+
+bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
+{
+    return GetSDP(url, sdp);
+}
+
+bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig)
+{
+    return false;
+}

@@ -137,6 +137,8 @@ public:
     bool        GetPTPMaster(std::string & ptpMaster);
 
     std::string GetTxSDP(NTV2Channel chan);
+    bool        GetRxSDP(std::string url, std::string & sdp);
+    bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels

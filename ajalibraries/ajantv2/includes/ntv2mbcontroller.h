@@ -116,6 +116,7 @@ protected:
 
     uint64_t GetNTPTimestamp();
     bool PushSDP(std::string filename, std::stringstream & sdpstream);
+    bool GetSDP(std::string url, std::string & sdp);
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
