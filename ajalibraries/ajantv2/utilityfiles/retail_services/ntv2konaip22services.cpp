@@ -2467,7 +2467,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enableChCard, enable2022_7Card;
 	uint32_t				enableChServices;
-    uint32_t				networkPathDiffCard, networkPathDiffServices;
+    uint32_t				networkPathDiffCard;
     uint32_t                configErr;
 
 	mCard->GetStandard(&primaryStandard);
@@ -2527,10 +2527,11 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP look for changes in 2022-7 mode and NPD if enabled
         rv  = target->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-        mCard->ReadRegister(kVReg2022_7NetworkPathDiff, (ULWord*)&networkPathDiffServices);
-        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != networkPathDiffServices))))
+        
+        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
         {
-            if (target->Set2022_7_Mode(m2022_7Mode, networkPathDiffServices) == true)
+            printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
+            if (target->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
             {
                 printf("Set 2022_7Mode OK\n");
                 setIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
