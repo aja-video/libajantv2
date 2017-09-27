@@ -1374,9 +1374,16 @@ string CNTV2Config2110::GetTxSDP(NTV2Channel chan)
     return txsdp[(int)chan].str();
 }
 
+string CNTV2Config2110::To_String(int val)
+{
+    ostringstream oss;
+    oss << val;
+    return oss.str();
+}
+
 bool CNTV2Config2110::GenSDP(NTV2Channel channel)
 {
-    string filename = "txch" + to_string((int)channel+1) + ".sdp";
+    string filename = "txch" + To_String((int)channel+1) + ".sdp";
     stringstream & sdp = txsdp[(int)channel];
 
     sdp.str("");
@@ -1389,7 +1396,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     sdp << "o=- ";
 
     uint64_t t = GetNTPTimestamp();
-    sdp <<  to_string(t);
+    sdp <<  To_String(t);
 
     sdp << " 0 IN IPV4 ";
 
@@ -1508,27 +1515,27 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     // media name
     sdp << "m=video ";
-    sdp << to_string(config.remotePort);
+    sdp << To_String(config.remotePort);
     sdp << " RTP/AVP ";
-    sdp << to_string(config.payloadType) << endl;
+    sdp << To_String(config.payloadType) << endl;
 
     // connection information
     sdp << "c=IN IPV4 ";
     sdp << config.remoteIP;
-    sdp << "/" << to_string(config.ttl) << endl;
+    sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
     sdp << "a=rtpmap:";
-    sdp << to_string(config.payloadType);
+    sdp << To_String(config.payloadType);
     sdp << " raw/90000" << endl;
 
     //fmtp
     sdp << "a=fmtp:";
-    sdp << to_string(config.payloadType);
+    sdp << To_String(config.payloadType);
     sdp << " sampling=YCbCr-4:2:2; width=";
-    sdp << to_string(width);
+    sdp << To_String(width);
     sdp << "; height=";
-    sdp << to_string(height);
+    sdp << To_String(height);
     sdp << "; exactframerate=";
     sdp << rateString;
     sdp << "; depth=10; TCS=SDR; colorimtery=";
@@ -1573,24 +1580,24 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
 
     // media name
     sdp << "m=audio ";
-    sdp << to_string(config.remotePort);
+    sdp << To_String(config.remotePort);
     sdp << " RTP/AVP ";
-    sdp << to_string(config.payloadType) << endl;
+    sdp << To_String(config.payloadType) << endl;
 
     // connection information
     sdp << "c=IN IPV4 ";
     sdp << config.remoteIP;
-    sdp << "/" << to_string(config.ttl) << endl;
+    sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
     sdp << "a=rtpmap:";
-    sdp << to_string(config.payloadType);
+    sdp << To_String(config.payloadType);
     sdp << " L24/48000/";
-    sdp << to_string(audioChans) << endl;
+    sdp << To_String(audioChans) << endl;
 
     //fmtp
     sdp << "a=fmtp:";
-    sdp << to_string(config.payloadType);
+    sdp << To_String(config.payloadType);
     sdp << " channel-order=SMPTE2110.(";
     switch (audioChans)
     {
