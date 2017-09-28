@@ -1682,12 +1682,12 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             return false;
         }
         tokens = split(value.c_str(), ' ');
-        if (!tokens[0].empty())
+        if ((tokens.size() >= 1) && !tokens[0].empty())
         {
             rxConfig.destPort    = stoi(tokens[0]);
             rxMatch |= RX_MATCH_2110_DEST_PORT;
         }
-        if (!tokens[2].empty())
+        if ((tokens.size() >= 3) && !tokens[2].empty())
         {
             rxConfig.payloadType = stoi(tokens[2]);
             rxMatch |= RX_MATCH_2110_PAYLOAD;
@@ -1697,11 +1697,14 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         if (rv >= index)
         {
             tokens = split(value.c_str(), ' ');
-            tokens = split(tokens[1].c_str(), '/');
-            if (!tokens[0].empty())
+            if (tokens.size() >= 2)
             {
-                rxConfig.destIP = tokens[0];
-                rxMatch |= RX_MATCH_2110_DEST_IP;
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1) && !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
             }
         }
 
@@ -1709,12 +1712,13 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         if (rv > index)
         {
             tokens = split(value.c_str(), ' ');
-            if (!tokens[0].empty())
+            if ((tokens.size() >= 1) && !tokens[0].empty())
             {
                 rxConfig.payloadType = stoi(tokens[0]);
                 rxMatch |= RX_MATCH_2110_PAYLOAD;
             }
         }
+
         rv = getDescriptionValue(index,"a=fmtp",value);
         if (rv > index)
         {
@@ -1750,7 +1754,53 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         index = getDescriptionValue(index,"m=audio",value);
         if (index == -1)
         {
+            // does not contain audio
             return false;
+        }
+        tokens = split(value.c_str(), ' ');
+        if ((tokens.size() >= 1) && !tokens[0].empty())
+        {
+            rxConfig.destPort    = stoi(tokens[0]);
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+        if ((tokens.size() >= 3) && !tokens[2].empty())
+        {
+            rxConfig.payloadType = stoi(tokens[2]);
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = index = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1)&& !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1)&& !tokens[0].empty())
+            {
+                rxConfig.payloadType = stoi(tokens[0]);
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 3) && !tokens[2].empty())
+                {
+                    rxConfig.audioChannels = stoi(tokens[2]);
+                }
+            }
         }
         rxConfig.rxMatch = rxMatch;
         return true;
