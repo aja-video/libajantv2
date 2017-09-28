@@ -76,6 +76,8 @@ AJADebug::Open(bool incrementRefCount)
 				memset(spShare, 0, sizeof(AJADebugShare));
                 spShare->magicId                 = AJA_DEBUG_MAGIC_ID;
                 spShare->version                 = AJA_DEBUG_VERSION;
+                spShare->writeIndex              = 0;
+                spShare->clientRefCount          = 0;
                 spShare->messageRingCapacity     = AJA_DEBUG_MESSAGE_RING_SIZE;
                 spShare->messageTextCapacity     = AJA_DEBUG_MESSAGE_MAX_SIZE;
                 spShare->messageFileNameCapacity = AJA_DEBUG_FILE_NAME_MAX_SIZE;
@@ -411,7 +413,7 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
             }
 
             // increment the message write index
-            int64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+            uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
 
             // modulo the ring size to determine the message array index
             int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
