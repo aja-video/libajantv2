@@ -1,7 +1,7 @@
 /**
-    @file		ntv2config2110.cpp
-    @brief		Implements the CNTV2Config2110 class.
-    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file       ntv2config2110.cpp
+    @brief      Implements the CNTV2Config2110 class.
+    @copyright  (C) 2014-2017 AJA Video Systems, Inc.   Proprietary and confidential information.
 **/
 
 #include "ntv2config2110.h"
@@ -27,11 +27,11 @@ using namespace std;
 
 void tx_2110Config::init()
 {
-    localPort    = 0;
-    remotePort   = 0;
+    localPort      = 0;
+    remotePort     = 0;
     remoteIP.erase();
-    videoFormat  = NTV2_FORMAT_UNKNOWN;
-    videoSamples = VPIDSampling_YUV_422;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
     payloadLen     = 0;
     lastPayLoadLen = 0;
     pktsPerLine    = 0;
@@ -63,18 +63,18 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
 
 void rx_2110Config::init()
 {
-    rxMatch     = 0;
-    sourceIP    = "";
-    destIP      = "";
-    sourcePort  = 0;
-    destPort    = 0;
-    SSRC        = 0;
-    VLAN        = 0;
-    videoFormat   = NTV2_FORMAT_UNKNOWN;
-    videoSamples  = VPIDSampling_YUV_422;
-    payloadLen = 0;
+    rxMatch        = 0;
+    sourceIP.erase();
+    destIP.erase();
+    sourcePort     = 0;
+    destPort       = 0;
+    SSRC           = 1000;
+    VLAN           = 1;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
+    payloadLen     = 0;
     lastPayloadLen = 0;
-    pktsPerLine = 0;
+    pktsPerLine    = 0;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -1457,61 +1457,11 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     NTV2VideoFormat vfmt;
     GetTxFormat(channel,vfmt);
-    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
     NTV2Standard  vstd  = GetNTV2StandardFromVideoFormat(vfmt);
-    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
     //NTV2Standard  vstd = NTV2VideoFormatStandards[vfmt];
-
-    string rateString;
-    switch (frate)
-    {
-     default:
-     case   NTV2_FRAMERATE_UNKNOWN	:
-        rateString = "00";
-        break;
-     case   NTV2_FRAMERATE_6000		:
-        rateString = "60";
-        break;
-     case   NTV2_FRAMERATE_5994		:
-        rateString = "60000/1001";
-        break;
-     case   NTV2_FRAMERATE_3000		:
-        rateString = "30";
-        break;
-     case   NTV2_FRAMERATE_2997		:
-        rateString = "30000/1001";
-        break;
-     case   NTV2_FRAMERATE_2500		:
-        rateString = "25";
-        break;
-     case   NTV2_FRAMERATE_2400		:
-        rateString = "24";
-        break;
-     case   NTV2_FRAMERATE_2398		:
-        rateString = "24000/1001";
-        break;
-     case   NTV2_FRAMERATE_5000		:
-        rateString = "50";
-        break;
-     case   NTV2_FRAMERATE_4800		:
-        rateString = "48";
-        break;
-     case   NTV2_FRAMERATE_4795		:
-        rateString = "48000/1001";
-        break;
-     case   NTV2_FRAMERATE_12000	:
-        rateString = "12";
-        break;
-     case   NTV2_FRAMERATE_11988	:
-        rateString = "12000/1001";
-        break;
-     case   NTV2_FRAMERATE_1500		:
-        rateString = "15";
-        break;
-     case   NTV2_FRAMERATE_1498		:
-        rateString = "1500/1001";
-        break;
-    }
+    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    string rateString   = rateToString(frate);
 
     // media name
     sdp << "m=video ";
@@ -1626,7 +1576,545 @@ bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
     return GetSDP(url, sdp);
 }
 
+
+int CNTV2Config2110::getDescriptionValue(int startLine, string type, string & value)
+{
+    for (int i=startLine; i < sdpLines.size(); i++)
+    {
+        string line = sdpLines[i];
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            value = line.substr(pos + type.size() + 1);
+            return i;
+        }
+    }
+    return -1; // not found
+}
+
+string CNTV2Config2110::getVideoDescriptionValue(string type)
+{
+    vector<string>::iterator it;
+    for (it = tokens.begin(); it != tokens.end(); it++)
+    {
+        string line = *it;
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            line = line.substr(pos + type.size());
+            line.erase(remove(line.begin(), line.end(), ';'), line.end());
+            return  line;
+        }
+    }
+    string result;
+    return result; // not found
+}
+
+vector<string> CNTV2Config2110::split(const char *str, char delim)
+{
+    vector<string> result;
+    do
+    {
+        const char * begin = str;
+        while(*str != delim && *str)
+        {
+            str++;
+        }
+        result.push_back(string(begin, str));
+    } while (0 != *str++);
+    return result;
+}
+
 bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig)
 {
+    if (sdp.empty())
+    {
+        return false;
+    }
+
+    uint32_t rxMatch = 0;
+
+    // break into a vector of lines and then into tokenw
+
+    sdpLines.clear();
+    stringstream ss(sdp);
+    string to;
+
+    while(getline(ss,to,'\n'))
+    {
+        sdpLines.push_back(to);
+    }
+
+    // rudimentary check it is an sdp file
+    int index;
+    string value;
+
+    // is this really an SDP
+    index = getDescriptionValue(0,"v=",value);
+    if (index == -1)
+    {
+        return false;
+    }
+
+    // originator
+    index = getDescriptionValue(index,"o=-",value);
+    if (index == -1)
+    {
+        return false;
+    }
+
+    tokens = split(value.c_str(), ' ');
+    if ((tokens.size() >= 5) && (tokens[2] == "IN") && (tokens[3] == "IPV4"))
+    {
+        if (!tokens[4].empty())
+        {
+            rxConfig.sourceIP = tokens[4];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
+
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        index = getDescriptionValue(index,"m=video",value);
+        if (index == -1)
+        {
+            // does not contain video
+            return false;
+        }
+        tokens = split(value.c_str(), ' ');
+        if (!tokens[0].empty())
+        {
+            rxConfig.destPort    = stoi(tokens[0]);
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+        if (!tokens[2].empty())
+        {
+            rxConfig.payloadType = stoi(tokens[2]);
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = index = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            tokens = split(value.c_str(), ' ');
+            tokens = split(tokens[1].c_str(), '/');
+            if (!tokens[0].empty())
+            {
+                rxConfig.destIP = tokens[0];
+                rxMatch |= RX_MATCH_2110_DEST_IP;
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if (!tokens[0].empty())
+            {
+                rxConfig.payloadType = stoi(tokens[0]);
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+        }
+        rv = getDescriptionValue(index,"a=fmtp",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            string sampling = getVideoDescriptionValue("sampling=");
+            if (sampling ==  "YCbCr-4:2:2")
+            {
+                rxConfig.videoSamples = VPIDSampling_YUV_422;
+            }
+            string width    = getVideoDescriptionValue("width=");
+            string height   = getVideoDescriptionValue("height=");
+            string rate     = getVideoDescriptionValue("exactframerate=");
+            bool interlace = false;
+            vector<string>::iterator it;
+            for (it = tokens.begin(); it != tokens.end(); it++)
+            {
+                if (*it == "interlace")
+                {
+                    interlace = true;
+                }
+            }
+            int w = stoi(width);
+            int h = stoi(height);
+            NTV2FrameRate r = stringToRate(rate);
+            NTV2VideoFormat vf = getVideoFormat(r,h,w,interlace);
+            rxConfig.videoFormat = vf;
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
+    else if (stream == NTV2_AUDIO1_STREAM )
+    {
+        index = getDescriptionValue(index,"m=audio",value);
+        if (index == -1)
+        {
+            return false;
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
     return false;
 }
+
+
+std::string CNTV2Config2110::rateToString(NTV2FrameRate rate)
+{
+    string rateString;
+    switch (rate)
+    {
+     default:
+     case   NTV2_FRAMERATE_UNKNOWN  :
+        rateString = "00";
+        break;
+     case   NTV2_FRAMERATE_6000     :
+        rateString = "60";
+        break;
+     case   NTV2_FRAMERATE_5994     :
+        rateString = "60000/1001";
+        break;
+     case   NTV2_FRAMERATE_3000     :
+        rateString = "30";
+        break;
+     case   NTV2_FRAMERATE_2997     :
+        rateString = "30000/1001";
+        break;
+     case   NTV2_FRAMERATE_2500     :
+        rateString = "25";
+        break;
+     case   NTV2_FRAMERATE_2400     :
+        rateString = "24";
+        break;
+     case   NTV2_FRAMERATE_2398     :
+        rateString = "24000/1001";
+        break;
+     case   NTV2_FRAMERATE_5000     :
+        rateString = "50";
+        break;
+     case   NTV2_FRAMERATE_4800     :
+        rateString = "48";
+        break;
+     case   NTV2_FRAMERATE_4795     :
+        rateString = "48000/1001";
+        break;
+     case   NTV2_FRAMERATE_12000    :
+        rateString = "12";
+        break;
+     case   NTV2_FRAMERATE_11988    :
+        rateString = "12000/1001";
+        break;
+     case   NTV2_FRAMERATE_1500     :
+        rateString = "15";
+        break;
+     case   NTV2_FRAMERATE_1498     :
+        rateString = "1500/1001";
+        break;
+    }
+    return rateString;
+}
+
+NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
+{
+    NTV2FrameRate rate;
+    if (rateString == "60")
+        rate = NTV2_FRAMERATE_6000;
+    else if (rateString == "60000/1001")
+        rate = NTV2_FRAMERATE_5994;
+    else if (rateString == "30")
+        rate = NTV2_FRAMERATE_3000;
+    else if (rateString == "30000/1001")
+        rate = NTV2_FRAMERATE_2997;
+    else if (rateString == "25")
+        rate = NTV2_FRAMERATE_2500;
+    else if (rateString == "24")
+        rate = NTV2_FRAMERATE_2400;
+    else if (rateString == "24000/1001")
+        rate = NTV2_FRAMERATE_2398;
+    else if (rateString == "50")
+        rate = NTV2_FRAMERATE_5000;
+    else if (rateString == "48")
+        rate = NTV2_FRAMERATE_4800;
+    else if (rateString == "48000/1001")
+        rate = NTV2_FRAMERATE_4795;
+    else if (rateString == "12")
+        rate = NTV2_FRAMERATE_12000;
+    else if (rateString == "12000/1001")
+        rate = NTV2_FRAMERATE_11988;
+    else if (rateString == "15")
+        rate = NTV2_FRAMERATE_1500;
+    else if (rateString == "1500/1001")
+        rate = NTV2_FRAMERATE_1498;
+    else
+        rate = NTV2_FRAMERATE_UNKNOWN;
+    return rate;
+}
+
+NTV2Standard CNTV2Config2110::getVideoStandard(int lines, int width, bool interlaced)
+{
+    NTV2Standard std =  NTV2_STANDARD_UNDEFINED;
+    if (lines == 480)
+    {
+        std =  NTV2_STANDARD_525;
+    }
+    else if (lines == 576)
+    {
+        std =  NTV2_STANDARD_625;
+    }
+    else if (lines == 720)
+    {
+        std =  NTV2_STANDARD_720;
+    }
+    else if (lines == 1080)
+    {
+        if (interlaced)
+        {
+            if (width == 1920)
+                std =  NTV2_STANDARD_1080;
+            else if (width == 2048)
+                std = NTV2_STANDARD_2Kx1080p;
+        }
+        else
+        {
+            if (width == 1920)
+                std =  NTV2_STANDARD_1080p;
+            else if (width == 2048)
+                std = NTV2_STANDARD_2Kx1080i;
+        }
+    }
+    else if (lines == 2160)
+    {
+        if (width == 4096)
+            std =  NTV2_STANDARD_4096x2160p;
+        else if (width == 3840)
+            std =  NTV2_STANDARD_3840x2160p;
+    }
+    return std;
+}
+
+ NTV2VideoFormat CNTV2Config2110::getVideoFormat(NTV2FrameRate rate,int lines, int width, bool interlaced)
+ {
+     NTV2Standard std = getVideoStandard(lines, width, interlaced);
+
+     NTV2VideoFormat fmt = NTV2_FORMAT_UNKNOWN;
+
+     if (std == NTV2_STANDARD_525)
+     {
+         if (rate == NTV2_FRAMERATE_5994)
+             fmt = NTV2_FORMAT_525_5994;
+     }
+     else if (std == NTV2_STANDARD_625)
+     {
+         if (rate == NTV2_FRAMERATE_5000)
+             fmt = NTV2_FORMAT_625_5000;
+     }
+     else if (std == NTV2_STANDARD_720)
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+             fmt = NTV2_FORMAT_720p_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+             fmt = NTV2_FORMAT_720p_5994;
+             break;
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_720p_2500;
+             break;
+         case NTV2_FRAMERATE_2398:
+             fmt = NTV2_FORMAT_720p_2398;
+             break;
+         case NTV2_FRAMERATE_5000:
+             fmt = NTV2_FORMAT_720p_5000;
+             break;
+         default:
+             break;
+         }
+
+     }
+     else if (std == NTV2_STANDARD_1080)
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+         case NTV2_FRAMERATE_3000:
+             fmt = NTV2_FORMAT_1080i_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+         case NTV2_FRAMERATE_2997:
+             fmt = NTV2_FORMAT_1080i_5994;
+             break;
+         case NTV2_FRAMERATE_5000:
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_1080i_5000;
+             break;
+         default:
+             break;
+         }
+     }
+     else if (std == NTV2_STANDARD_1080p)
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+             fmt = NTV2_FORMAT_1080p_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+             fmt = NTV2_FORMAT_1080p_5994;
+             break;
+         case NTV2_FRAMERATE_3000:
+             fmt = NTV2_FORMAT_1080p_3000;
+             break;
+         case NTV2_FRAMERATE_2997:
+             fmt = NTV2_FORMAT_1080p_2997;
+             break;
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_1080p_2500;
+             break;
+         case NTV2_FRAMERATE_2400:
+             fmt = NTV2_FORMAT_1080p_2400;
+             break;
+         case NTV2_FRAMERATE_2398:
+             fmt = NTV2_FORMAT_1080p_2398;
+             break;
+         case NTV2_FRAMERATE_5000:
+             fmt = NTV2_FORMAT_1080p_5000;
+             break;
+         default:
+             break;
+         }
+     }
+     else if (std == NTV2_STANDARD_2Kx1080i) // psf
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+         case NTV2_FRAMERATE_5994:
+         case NTV2_FRAMERATE_3000:
+         case NTV2_FRAMERATE_2997:
+         case NTV2_FRAMERATE_2500:
+         case NTV2_FRAMERATE_2400:
+         case NTV2_FRAMERATE_2398:
+         case NTV2_FRAMERATE_5000:
+         case NTV2_FRAMERATE_4800:
+         case NTV2_FRAMERATE_4795:
+         default:
+             break;
+         }
+     }
+     else if (std == NTV2_STANDARD_2Kx1080p)
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+             fmt = NTV2_FORMAT_1080p_2K_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+             fmt = NTV2_FORMAT_1080p_2K_5994;
+             break;
+         case NTV2_FRAMERATE_3000:
+             fmt = NTV2_FORMAT_1080p_2K_3000;
+             break;
+         case NTV2_FRAMERATE_2997:
+             fmt = NTV2_FORMAT_1080p_2K_2997;
+             break;
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_2K_2500;
+             break;
+         case NTV2_FRAMERATE_2400:
+             fmt = NTV2_FORMAT_2K_2400;
+             break;
+         case NTV2_FRAMERATE_2398:
+             fmt = NTV2_FORMAT_2K_2398;
+             break;
+         case NTV2_FRAMERATE_5000:
+             fmt = NTV2_FORMAT_1080p_2K_5000;
+             break;
+         case NTV2_FRAMERATE_4800:
+             fmt = NTV2_FORMAT_1080p_2K_4800;
+             break;
+         case NTV2_FRAMERATE_4795:
+             fmt = NTV2_FORMAT_1080p_2K_4795;
+             break;
+         case NTV2_FRAMERATE_1500:
+             fmt = NTV2_FORMAT_2K_1500;
+             break;
+         case NTV2_FRAMERATE_1498:
+             fmt = NTV2_FORMAT_2K_1498;
+             break;
+         default:
+             break;
+         }
+     }
+     else if (std == NTV2_STANDARD_3840x2160p)
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+             fmt = NTV2_FORMAT_4x1920x1080p_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+             fmt = NTV2_FORMAT_4x1920x1080p_5994;
+             break;
+         case NTV2_FRAMERATE_3000:
+             fmt = NTV2_FORMAT_4x1920x1080p_3000;
+             break;
+         case NTV2_FRAMERATE_2997:
+             fmt = NTV2_FORMAT_4x1920x1080p_2997;
+             break;
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_4x1920x1080p_2500;
+             break;
+         case NTV2_FRAMERATE_2400:
+             fmt = NTV2_FORMAT_4x1920x1080p_2400;
+             break;
+         case NTV2_FRAMERATE_2398:
+             fmt = NTV2_FORMAT_4x1920x1080p_2398;
+             break;
+         case NTV2_FRAMERATE_5000:
+             fmt = NTV2_FORMAT_4x1920x1080p_5000;
+             break;
+         default:
+             break;
+         }
+     }
+     else if (std == NTV2_STANDARD_4096x2160p )
+     {
+         switch (rate)
+         {
+         case NTV2_FRAMERATE_6000:
+             fmt = NTV2_FORMAT_4x2048x1080p_6000;
+             break;
+         case NTV2_FRAMERATE_5994:
+             fmt = NTV2_FORMAT_4x2048x1080p_5994;
+             break;
+         case NTV2_FRAMERATE_3000:
+             fmt =  NTV2_FORMAT_4x2048x1080p_3000;
+             break;
+         case NTV2_FRAMERATE_2997:
+             fmt =  NTV2_FORMAT_4x2048x1080p_2997;
+             break;
+         case NTV2_FRAMERATE_2500:
+             fmt = NTV2_FORMAT_4x2048x1080p_2500;
+             break;
+         case NTV2_FRAMERATE_2400:
+             fmt = NTV2_FORMAT_4x2048x1080p_2400;
+             break;
+         case NTV2_FRAMERATE_2398:
+             fmt = NTV2_FORMAT_4x2048x1080p_2398;
+             break;
+         case NTV2_FRAMERATE_5000:
+             fmt = NTV2_FORMAT_4x2048x1080p_5000;
+             break;
+         case NTV2_FRAMERATE_4800:
+             fmt = NTV2_FORMAT_4x2048x1080p_4800;
+             break;
+         case NTV2_FRAMERATE_4795:
+             fmt = NTV2_FORMAT_4x2048x1080p_4795;
+             break;
+         default:
+             break;
+         }
+     }
+     return fmt;
+ }

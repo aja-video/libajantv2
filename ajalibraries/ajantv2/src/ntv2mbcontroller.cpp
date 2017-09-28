@@ -802,6 +802,14 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
                  mIpErrorCode = NTV2IpErrSDP;
                  return false;
              }
+             string to   = ",";
+             string from = "&comma;";
+             size_t start_pos = 0;
+             while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
+             {
+                 sdp.replace(start_pos, from.length(), to);
+                 start_pos += to.length();
+             }
              return true;
          }
          else if (rv && (status == "FAIL"))

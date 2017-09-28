@@ -198,9 +198,19 @@ private:
     eSFP        GetTxPort(NTV2Channel chan);
     std::string To_String(int val);
 
-    std::stringstream txsdp[4]; // one SDP per channel
+    std::vector<std::string> split(const char *str, char delim);
+
+    std::string rateToString(NTV2FrameRate rate);
+    NTV2FrameRate stringToRate(std::string str);
+
+    NTV2Standard getVideoStandard(int lines, int width, bool interlaced);
+    NTV2VideoFormat getVideoFormat(NTV2FrameRate rate,int lines, int width, bool interlaced);
 
     int         LeastCommonMultiple(int a,int b);
+    int         getDescriptionValue(int startLine, std::string type, std::string & value);
+    std::string getVideoDescriptionValue(std::string type);
+
+    std::stringstream txsdp[4]; // one SDP per channel
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;
@@ -209,6 +219,9 @@ private:
     uint32_t    _numRxChans;
     uint32_t    _numTxChans;
     bool        _biDirectionalChannels;             // logically bi-directional channels
+
+    std::vector<std::string> sdpLines;
+    std::vector<std::string> tokens;
 
 };	//	CNTV2Config2110
 
