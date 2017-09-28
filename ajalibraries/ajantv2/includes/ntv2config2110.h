@@ -200,10 +200,8 @@ private:
 
     std::vector<std::string> split(const char *str, char delim);
 
-    std::string rateToString(NTV2FrameRate rate);
-    NTV2FrameRate stringToRate(std::string str);
-
-    NTV2Standard getVideoStandard(int lines, int width, bool interlaced);
+    std::string     rateToString(NTV2FrameRate rate);
+    NTV2FrameRate   stringToRate(std::string str);
     NTV2VideoFormat getVideoFormat(NTV2FrameRate rate,int lines, int width, bool interlaced);
 
     int         LeastCommonMultiple(int a,int b);
