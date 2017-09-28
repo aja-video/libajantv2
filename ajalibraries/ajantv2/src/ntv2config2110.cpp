@@ -9,6 +9,7 @@
 #include "ntv2card.h"
 #include "ntv2formatdescriptor.h"
 #include <sstream>
+#include <algorithm>
 
 #if defined (AJALinux) || defined (AJAMac)
 #include <stdlib.h>
@@ -36,7 +37,7 @@ void tx_2110Config::init()
     pktsPerLine    = 0;
     ttl            = 0x80;
     tos            = 0x64;
-    ssrc           = 0;
+    ssrc           = 1000;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
@@ -215,6 +216,11 @@ bool CNTV2Config2110::SetNetworkConfiguration (string localIPAddress0, string ne
 
     rv = SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
     return rv;
+}
+
+bool  CNTV2Config2110::DisableNetworkInterface(eSFP port)
+{
+    return DisableNetworkConfiguration(port);
 }
 
 bool CNTV2Config2110::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
@@ -786,6 +792,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
         // end setup 4175 packetizer
+        SetTxFormat(channel, txConfig.videoFormat);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -834,6 +841,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
 
     }
+
+    // Generate and push the SDP
+    GenSDP(channel);
+
     return rv;
 }
 
@@ -881,7 +892,6 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t height;
         mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, &height);
 
-
         // pkts per line
         mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,&txConfig.pktsPerLine);
 
@@ -898,6 +908,8 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // interlace
         uint32_t  ilace;
         mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
+
+        GetTxFormat(channel, txConfig.videoFormat);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -976,6 +988,9 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
     {
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
+
+    GenSDP(channel);
+
     return true;
 }
 
@@ -1346,6 +1361,262 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     lo += macaddr.mac[3] << 16;
     lo += macaddr.mac[4] << 8;
     lo += macaddr.mac[5];
+
+    return true;
+}
+
+string CNTV2Config2110::GetTxSDP(NTV2Channel chan)
+{
+    if (txsdp[(int)chan].str().empty())
+    {
+        GenSDP(chan);
+    }
+    return txsdp[(int)chan].str();
+}
+
+string CNTV2Config2110::To_String(int val)
+{
+    ostringstream oss;
+    oss << val;
+    return oss.str();
+}
+
+bool CNTV2Config2110::GenSDP(NTV2Channel channel)
+{
+    string filename = "txch" + To_String((int)channel+1) + ".sdp";
+    stringstream & sdp = txsdp[(int)channel];
+
+    sdp.str("");
+    sdp.clear();
+
+    // protocol version
+    sdp << "v=0" << endl;
+
+    // username session-id  version network-type address-type address
+    sdp << "o=- ";
+
+    uint64_t t = GetNTPTimestamp();
+    sdp <<  To_String(t);
+
+    sdp << " 0 IN IPV4 ";
+
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
+    struct in_addr addr;
+    addr.s_addr = val;
+    string localIPAddress = inet_ntoa(addr);
+    sdp << localIPAddress << endl;
+
+    // session name
+    sdp << "s=AJA KonaIP 2110" << endl;
+
+    // time the session is active
+    sdp << "t=0 0" <<endl;
+
+    // PTP
+    string gmInfo;
+    bool rv = FetchGrandMasterInfo(gmInfo);
+    gmInfo.erase(remove(gmInfo.begin(), gmInfo.end(), '\n'), gmInfo.end());
+
+    GenSDPVideoStream(sdp,channel,gmInfo);
+    GenSDPAudioStream(sdp,channel,gmInfo);
+
+    rv = PushSDP(filename,sdp);
+
+    return rv;
+}
+
+bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel, string gmInfo)
+{
+    bool enabled;
+    GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabled);
+    if (!enabled)
+    {
+        return true;
+    }
+
+    tx_2110Config config;
+    GetTxChannelConfiguration(channel, NTV2_VIDEO_STREAM, config);
+
+    uint32_t baseAddrPacketizer;
+    SetTxPacketizerChannel(channel,NTV2_VIDEO_STREAM,baseAddrPacketizer);
+
+    uint32_t width;
+    mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer,&width);
+
+    uint32_t height;
+    mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer,&height);
+
+    uint32_t  ilace;
+    mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
+
+    if (ilace == 1)
+    {
+        height *= 2;
+    }
+
+    NTV2VideoFormat vfmt;
+    GetTxFormat(channel,vfmt);
+    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
+    NTV2Standard  vstd  = GetNTV2StandardFromVideoFormat(vfmt);
+    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    //NTV2Standard  vstd = NTV2VideoFormatStandards[vfmt];
+
+    string rateString;
+    switch (frate)
+    {
+     default:
+     case   NTV2_FRAMERATE_UNKNOWN	:
+        rateString = "00";
+        break;
+     case   NTV2_FRAMERATE_6000		:
+        rateString = "60";
+        break;
+     case   NTV2_FRAMERATE_5994		:
+        rateString = "60000/1001";
+        break;
+     case   NTV2_FRAMERATE_3000		:
+        rateString = "30";
+        break;
+     case   NTV2_FRAMERATE_2997		:
+        rateString = "30000/1001";
+        break;
+     case   NTV2_FRAMERATE_2500		:
+        rateString = "25";
+        break;
+     case   NTV2_FRAMERATE_2400		:
+        rateString = "24";
+        break;
+     case   NTV2_FRAMERATE_2398		:
+        rateString = "24000/1001";
+        break;
+     case   NTV2_FRAMERATE_5000		:
+        rateString = "50";
+        break;
+     case   NTV2_FRAMERATE_4800		:
+        rateString = "48";
+        break;
+     case   NTV2_FRAMERATE_4795		:
+        rateString = "48000/1001";
+        break;
+     case   NTV2_FRAMERATE_12000	:
+        rateString = "12";
+        break;
+     case   NTV2_FRAMERATE_11988	:
+        rateString = "12000/1001";
+        break;
+     case   NTV2_FRAMERATE_1500		:
+        rateString = "15";
+        break;
+     case   NTV2_FRAMERATE_1498		:
+        rateString = "1500/1001";
+        break;
+    }
+
+    // media name
+    sdp << "m=video ";
+    sdp << To_String(config.remotePort);
+    sdp << " RTP/AVP ";
+    sdp << To_String(config.payloadType) << endl;
+
+    // connection information
+    sdp << "c=IN IPV4 ";
+    sdp << config.remoteIP;
+    sdp << "/" << To_String(config.ttl) << endl;
+
+    // rtpmap
+    sdp << "a=rtpmap:";
+    sdp << To_String(config.payloadType);
+    sdp << " raw/90000" << endl;
+
+    //fmtp
+    sdp << "a=fmtp:";
+    sdp << To_String(config.payloadType);
+    sdp << " sampling=YCbCr-4:2:2; width=";
+    sdp << To_String(width);
+    sdp << "; height=";
+    sdp << To_String(height);
+    sdp << "; exactframerate=";
+    sdp << rateString;
+    sdp << "; depth=10; TCS=SDR; colorimtery=";
+    sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vstd)) ? "BT601" : "BT709");
+    sdp << "; PM=2110GPM; SSN=\"ST2110-20:2017\"; ";
+    if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
+    {
+        sdp << "interlace";
+    }
+    else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
+    {
+        sdp << "interlace segmented";
+    }
+    sdp << endl;
+
+    // PTP
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:VID" << endl;
+
+    return true;
+}
+
+
+bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel, string gmInfo)
+{
+    bool enabled;
+    GetTxChannelEnable(channel,NTV2_AUDIO1_STREAM,enabled);
+    if (!enabled)
+    {
+        return true;
+    }
+
+    tx_2110Config config;
+    GetTxChannelConfiguration(channel, NTV2_AUDIO1_STREAM, config);
+
+    uint32_t baseAddrPacketizer;
+    SetTxPacketizerChannel(channel,NTV2_AUDIO1_STREAM ,baseAddrPacketizer);
+
+    uint32_t audioChans;
+    mDevice.ReadRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, &audioChans);
+
+    // media name
+    sdp << "m=audio ";
+    sdp << To_String(config.remotePort);
+    sdp << " RTP/AVP ";
+    sdp << To_String(config.payloadType) << endl;
+
+    // connection information
+    sdp << "c=IN IPV4 ";
+    sdp << config.remoteIP;
+    sdp << "/" << To_String(config.ttl) << endl;
+
+    // rtpmap
+    sdp << "a=rtpmap:";
+    sdp << To_String(config.payloadType);
+    sdp << " L24/48000/";
+    sdp << To_String(audioChans) << endl;
+
+    //fmtp
+    sdp << "a=fmtp:";
+    sdp << To_String(config.payloadType);
+    sdp << " channel-order=SMPTE2110.(";
+    switch (audioChans)
+    {
+    case 2:
+        sdp << "ST)";
+        break;
+    default:
+    case 8:
+        sdp << "SGRP,SGRP)";
+        break;
+    case 16:
+        sdp << "SGRP,SGRP,SGRP,SGRP)";
+        break;
+    }
+    sdp << endl;
+
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:AUD" << endl;
 
     return true;
 }

@@ -11,7 +11,9 @@
 #include "ntv2enums.h"
 #include "ntv2registers2110.h"
 #include "ntv2mbcontroller.h"
-#include <string.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #define RX_MATCH_2110_VLAN                   BIT(0)
 #define RX_MATCH_2110_SOURCE_IP              BIT(1)
@@ -114,6 +116,7 @@ public:
     bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
     bool        SetNetworkConfiguration(std::string localIPAddress0, std::string subnetMask0, std::string gateway0,
                                         std::string localIPAddress1, std::string subnetMask1, std::string gateway1);
+    bool        DisableNetworkInterface(eSFP port);
 
     bool        GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig);
     bool        GetNetworkConfiguration(eSFP port, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
@@ -132,6 +135,8 @@ public:
 
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
+
+    std::string GetTxSDP(NTV2Channel chan);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -182,9 +187,16 @@ protected:
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
+    bool        GenSDP(NTV2Channel channel);
+    bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
+    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
+
 private:
     eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
+    std::string To_String(int val);
+
+    std::stringstream txsdp[4]; // one SDP per channel
 
     int         LeastCommonMultiple(int a,int b);
 

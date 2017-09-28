@@ -3109,6 +3109,9 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	GeneralFrameFormat genFormat = GetGeneralFrameFormat(primaryPixelFormat);
 	bool b4xIo = b4K == true || genFormat == FORMAT_RAW_UHFR;
 	bool b2pi  = false;
+
+	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
+	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mode == NTV2_MODE_CAPTURE)

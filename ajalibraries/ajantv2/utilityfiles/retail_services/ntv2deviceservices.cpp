@@ -220,16 +220,16 @@ void DeviceServices::ReadDriverState (void)
 
     if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
-        mCard->ReadRegister(kVReg2022_7Enable, (ULWord*)&m2022_7Mode);
-        mCard->ReadRegister(kVReg2022_7NetworkPathDiff, (ULWord*)&mNetworkPathDiff);
+        mCard->ReadRegister(kVReg2022_7Enable,              (ULWord*)&m2022_7Mode);
+        mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     (ULWord*)&mNetworkPathDiff);
         
-        mCard->ReadRegister(kVRegIPAddrEth0, &mEth0.ipc_ip);
-        mCard->ReadRegister(kVRegSubnetEth0, &mEth0.ipc_subnet);
-        mCard->ReadRegister(kVRegGatewayEth0,&mEth0.ipc_gateway);
+        mCard->ReadRegister(kVRegIPAddrEth0,                &mEth0.ipc_ip);
+        mCard->ReadRegister(kVRegSubnetEth0,                &mEth0.ipc_subnet);
+        mCard->ReadRegister(kVRegGatewayEth0,               &mEth0.ipc_gateway);
         
-        mCard->ReadRegister(kVRegIPAddrEth1,	&mEth1.ipc_ip);
-        mCard->ReadRegister(kVRegSubnetEth1,	&mEth1.ipc_subnet);
-        mCard->ReadRegister(kVRegGatewayEth1,	&mEth1.ipc_gateway);
+        mCard->ReadRegister(kVRegIPAddrEth1,                &mEth1.ipc_ip);
+        mCard->ReadRegister(kVRegSubnetEth1,                &mEth1.ipc_subnet);
+        mCard->ReadRegister(kVRegGatewayEth1,               &mEth1.ipc_gateway);
         
         mCard->ReadRegister(kVRegRxcEnable1,				&mRx2022Config1.rxc_enable32);
         mCard->ReadRegister(kVRegRxcPrimaryRxMatch1,		&mRx2022Config1.rxc_primaryRxMatch);
