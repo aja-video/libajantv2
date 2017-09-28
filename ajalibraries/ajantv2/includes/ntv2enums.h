@@ -334,8 +334,8 @@ typedef enum
 typedef enum
 {
     NTV2_FBF_FIRST					= 0,
-    NTV2_FBF_10BIT_YCBCR			= 0,
-    NTV2_FBF_8BIT_YCBCR				= 1,
+    NTV2_FBF_10BIT_YCBCR			= 0,	///< @brief	This is the 'v210' format -- 12 x 10-bit unsigned components packed into 4 32-bit little-endian words (6 pixels per 16 bytes).
+    NTV2_FBF_8BIT_YCBCR				= 1,	///< @brief	This is the 'UYVY' format on Windows and '2vuy' on MacOS/QuickTime.
     NTV2_FBF_ARGB					= 2,
     NTV2_FBF_RGBA					= 3,
     NTV2_FBF_10BIT_RGB				= 4,
