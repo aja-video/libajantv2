@@ -290,6 +290,14 @@ AJAExport NTV2FrameGeometry Get4xSizedGeometry(NTV2FrameGeometry geometry);
 
 AJAExport double GetFramesPerSecond(NTV2FrameRate frameRate);
 AJAExport double GetFrameTime(NTV2FrameRate frameRate);
+/**
+	@return		The first NTV2VideoFormat that matches the given frame rate and raster dimensions (and whether it's interlaced or not).
+	@param[in]	inFrameRate		Specifies the frame rate of interest.
+	@param[in]	inHeightLines	Specifies the raster height, in lines of visible video.
+	@param[in]	inWidthPixels	Specifies the raster width, in pixels.
+	@param[in]	inIsInterlaced	Specify true for interlaced/psf video, or false for progressive.
+**/
+AJAExport NTV2VideoFormat	GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced);
 
 /**
 	@brief		Answers with the given frame rate, in frames per second, as two components:

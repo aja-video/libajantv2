@@ -1743,7 +1743,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             int w = stoi(width);
             int h = stoi(height);
             NTV2FrameRate r = stringToRate(rate);
-            NTV2VideoFormat vf = getVideoFormat(r,h,w,interlace);
+            NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace);
             rxConfig.videoFormat = vf;
         }
         rxConfig.rxMatch = rxMatch;
@@ -1898,28 +1898,4 @@ NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
     else
         rate = NTV2_FRAMERATE_UNKNOWN;
     return rate;
-}
-
-NTV2VideoFormat CNTV2Config2110::getVideoFormat(NTV2FrameRate rate,int lines, int width, bool interlaced)
-{
-    NTV2VideoFormat fmt;
-    for (int i=1; i < NTV2_MAX_NUM_VIDEO_FORMATS; i++)
-    {
-        fmt = (NTV2VideoFormat) i;
-        if (rate == GetNTV2FrameRateFromVideoFormat(fmt))
-        {
-            if (lines == GetDisplayHeight(fmt))
-            {
-                if (width == GetDisplayWidth(fmt))
-                {
-                    if (interlaced == !IsProgressiveTransport(fmt))
-                    {
-                        return fmt;
-                    }
-                }
-
-            }
-        }
-    }
-    return NTV2_FORMAT_UNKNOWN;
 }
