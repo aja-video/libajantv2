@@ -1398,7 +1398,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     uint64_t t = GetNTPTimestamp();
     sdp <<  To_String(t);
 
-    sdp << " 0 IN IPV4 ";
+    sdp << " 0 IN IP4 ";
 
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
@@ -1470,7 +1470,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << To_String(config.payloadType) << endl;
 
     // connection information
-    sdp << "c=IN IPV4 ";
+    sdp << "c=IN IP4 ";
     sdp << config.remoteIP;
     sdp << "/" << To_String(config.ttl) << endl;
 
@@ -1629,6 +1629,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
 {
     if (sdp.empty())
     {
+        mIpErrorCode = NTV2IpErrSDPEmpty;
         return false;
     }
 
@@ -1653,6 +1654,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
     index = getDescriptionValue(0,"v=",value);
     if (index == -1)
     {
+        mIpErrorCode = NTV2IpErrSDPInvalid;
         return false;
     }
 
@@ -1660,16 +1662,32 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
     index = getDescriptionValue(index,"o=-",value);
     if (index == -1)
     {
+        mIpErrorCode = NTV2IpErrSDPInvalid;
         return false;
     }
 
     tokens = split(value.c_str(), ' ');
-    if ((tokens.size() >= 5) && (tokens[2] == "IN") && (tokens[3] == "IPV4"))
+    if ((tokens.size() >= 5) && (tokens[2] == "IN") && (tokens[3] == "IP4"))
     {
         if (!tokens[4].empty())
         {
             rxConfig.sourceIP = tokens[4];
             rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
+
+    int rv = getDescriptionValue(0,"c=IN",value);
+    if (rv >= index)
+    {
+        tokens = split(value.c_str(), ' ');
+        if (tokens.size() >= 2)
+        {
+            tokens = split(tokens[1].c_str(), '/');
+            if ((tokens.size() >= 1) && !tokens[0].empty())
+            {
+                rxConfig.destIP = tokens[0];
+                rxMatch |= RX_MATCH_2110_DEST_IP;
+            }
         }
     }
 
@@ -1679,6 +1697,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         if (index == -1)
         {
             // does not contain video
+            mIpErrorCode = NTV2IpErrSDPNoVideo;
             return false;
         }
         tokens = split(value.c_str(), ' ');
@@ -1693,9 +1712,10 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = index = getDescriptionValue(index,"c=IN",value);
+        int rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
+            // this overwrites if found before
             tokens = split(value.c_str(), ' ');
             if (tokens.size() >= 2)
             {
@@ -1755,23 +1775,27 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         if (index == -1)
         {
             // does not contain audio
+            mIpErrorCode = NTV2IpErrSDPNoAudio;
             return false;
         }
+
         tokens = split(value.c_str(), ' ');
         if ((tokens.size() >= 1) && !tokens[0].empty())
         {
             rxConfig.destPort    = atoi(tokens[0].c_str());
             rxMatch |= RX_MATCH_2110_DEST_PORT;
         }
+
         if ((tokens.size() >= 3) && !tokens[2].empty())
         {
             rxConfig.payloadType = atoi(tokens[2].c_str());
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = index = getDescriptionValue(index,"c=IN",value);
+        int rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
+            // this overwrites if found before
             tokens = split(value.c_str(), ' ');
             if ((tokens.size() >= 2))
             {

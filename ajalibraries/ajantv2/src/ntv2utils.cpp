@@ -7380,10 +7380,15 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrInvalidMBResponseSize:        return "Invalid response size from MB";
         case NTV2IpErrInvalidMBResponseNoMac:       return "MAC Address not found in response from MB";
         case NTV2IpErrMBStatusFail:                 return "MB Status Failure";
-        case NTV2IpErrSDPTooLong:                   return "SDP too long";
         case NTV2IpErrGrandMasterInfo:              return "PTP Grand Master Info not found";
-        case NTV2IpErrSDP:                          return "SDP not found";
-        case NTV2IpErrInvalidURL:                   return "Invalid URL";
+        case NTV2IpErrSDPTooLong:                   return "SDP too long";
+        case NTV2IpErrSDPNotFound:                  return "SDP not found";
+        case NTV2IpErrSDPEmpty:                     return "SDP is empty";
+        case NTV2IpErrSDPInvalid:                   return "SDP is not valid";
+        case NTV2IpErrSDPURLInvalid:                return "Invalid SDP URL";
+        case NTV2IpErrSDPNoVideo:                   return "SDP does not contain video";
+        case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
+        case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
         default:                                    return "Unknown IP error";
     }
 }
