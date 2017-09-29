@@ -2479,6 +2479,13 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
+		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
+					WaitForOutputVerticalInterrupt. This is historically different from Linux and MacOS, where the event
+					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
+					-	Call GetOutputVerticalInterruptCount before and after calling this function to verify that an
+						interrupt really occurred;
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
+						event before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForOutputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
@@ -2490,17 +2497,31 @@ public:
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 		@note		This function assumes an interlaced video format on the given channel on the device.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
+		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
+					WaitForOutputFieldID. This is historically different from Linux and MacOS, where the event
+					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
+					-	Call GetOutputVerticalInterruptCount before and after calling this function to verify that an
+						interrupt really occurred;
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
+						event before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Efficiently sleeps the calling thread/process until the next input Vertical Blanking Interrupt
 					for the given input channel occurs on the AJA device.
-		@param[in]	inChannel		Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel		Identifies the Frame Store of interest, specified as an NTV2Channel. Defaults to NTV2_CHANNEL1.
 		@param[in]	inRepeatCount	Specifies the number of input VBIs to wait for until returning. Defaults to 1.
 		@return		True if successful; otherwise false.
-		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
+					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
+		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a previous call to
+					Wait. Unfortunately, this is historically different from Linux and MacOS, where the event is always
+					cleared before the Wait. Each method has advantages and disadvantages. To work around this:
+					-	Call GetInputVerticalInterruptCount before and after calling this function to verify that an
+						interrupt really occurred;
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
+						event before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForInputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
@@ -2509,10 +2530,17 @@ public:
 		@param[in]	inFieldID	Specifies the field identifier of interest.
 		@param[in]	channel		Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
-		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 		@note		This function assumes an interlaced video format on the given channel on the device. Calling this
 					function with a progressive signal will give unpredictable results (although 24psf works).
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
+					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
+		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a previous call to
+					Wait. Unfortunately, this is historically different from Linux and MacOS, where the event is always
+					cleared before the Wait. Each method has advantages and disadvantages. To work around this:
+					-	Call GetInputVerticalInterruptCount before and after calling this function to verify that an
+						interrupt really occurred;
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
+						event before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel = NTV2_CHANNEL1);
 
