@@ -1659,7 +1659,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
     }
 
     // originator
-    index = getDescriptionValue(index,"o=-",value);
+    index = getDescriptionValue(index,"o=",value);
     if (index == -1)
     {
         mIpErrorCode = NTV2IpErrSDPInvalid;
@@ -1667,11 +1667,11 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
     }
 
     tokens = split(value.c_str(), ' ');
-    if ((tokens.size() >= 5) && (tokens[2] == "IN") && (tokens[3] == "IP4"))
+    if ((tokens.size() >= 6) && (tokens[3] == "IN") && (tokens[4] == "IP4"))
     {
-        if (!tokens[4].empty())
+        if (!tokens[5].empty())
         {
-            rxConfig.sourceIP = tokens[4];
+            rxConfig.sourceIP = tokens[5];
             rxMatch |= RX_MATCH_2110_SOURCE_IP;
         }
     }
