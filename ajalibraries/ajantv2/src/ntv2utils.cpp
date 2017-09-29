@@ -1653,6 +1653,18 @@ NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTra
 }
 
 
+NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced)
+{
+	for (NTV2VideoFormat fmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
+		if (inFrameRate == ::GetNTV2FrameRateFromVideoFormat(fmt))
+			if (inHeightLines == ::GetDisplayHeight(fmt))
+				if (inWidthPixels == ::GetDisplayWidth(fmt))
+					if (inIsInterlaced == !::IsProgressiveTransport(fmt))
+						return fmt;
+	return NTV2_FORMAT_UNKNOWN;
+}
+
+
 NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
 {
 	NTV2VideoFormat quaterSizedFormat;
