@@ -1684,12 +1684,12 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         tokens = split(value.c_str(), ' ');
         if ((tokens.size() >= 1) && !tokens[0].empty())
         {
-            rxConfig.destPort    = stoi(tokens[0]);
+            rxConfig.destPort    = atoi(tokens[0].c_str());
             rxMatch |= RX_MATCH_2110_DEST_PORT;
         }
         if ((tokens.size() >= 3) && !tokens[2].empty())
         {
-            rxConfig.payloadType = stoi(tokens[2]);
+            rxConfig.payloadType = atoi(tokens[2].c_str());
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
@@ -1714,7 +1714,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             tokens = split(value.c_str(), ' ');
             if ((tokens.size() >= 1) && !tokens[0].empty())
             {
-                rxConfig.payloadType = stoi(tokens[0]);
+                rxConfig.payloadType = atoi(tokens[0].c_str());
                 rxMatch |= RX_MATCH_2110_PAYLOAD;
             }
         }
@@ -1740,8 +1740,8 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
                     interlace = true;
                 }
             }
-            int w = stoi(width);
-            int h = stoi(height);
+            int w = atoi(width.c_str());
+            int h = atoi(height.c_str());
             NTV2FrameRate r = stringToRate(rate);
             NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace);
             rxConfig.videoFormat = vf;
@@ -1760,12 +1760,12 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         tokens = split(value.c_str(), ' ');
         if ((tokens.size() >= 1) && !tokens[0].empty())
         {
-            rxConfig.destPort    = stoi(tokens[0]);
+            rxConfig.destPort    = atoi(tokens[0].c_str());
             rxMatch |= RX_MATCH_2110_DEST_PORT;
         }
         if ((tokens.size() >= 3) && !tokens[2].empty())
         {
-            rxConfig.payloadType = stoi(tokens[2]);
+            rxConfig.payloadType = atoi(tokens[2].c_str());
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
@@ -1790,7 +1790,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             tokens = split(value.c_str(), ' ');
             if ((tokens.size() >= 1)&& !tokens[0].empty())
             {
-                rxConfig.payloadType = stoi(tokens[0]);
+                rxConfig.payloadType = atoi(tokens[0].c_str());
                 rxMatch |= RX_MATCH_2110_PAYLOAD;
             }
             if ((tokens.size() >= 2))
@@ -1798,7 +1798,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
                 tokens = split(tokens[1].c_str(), '/');
                 if ((tokens.size() >= 3) && !tokens[2].empty())
                 {
-                    rxConfig.audioChannels = stoi(tokens[2]);
+                    rxConfig.audioChannels = atoi(tokens[2].c_str());
                 }
             }
         }
