@@ -716,7 +716,7 @@ const string & AJAAncillaryDataLinkToString (const AJAAncillaryDataLink inValue,
 	static const string		gAncDataLinkToStr []			= {"A", "B", "?"};
 	static const string		gDAncDataLinkToStr []			= {"AJAAncillaryDataLink_A", "AJAAncillaryDataLink_B", "AJAAncillaryDataLink_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataLink(inValue) ? (inCompact ? gAncDataLinkToStr[inValue] : gDAncDataLinkToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncillaryDataLink(inValue) ? (inCompact ? gAncDataLinkToStr[inValue] : gDAncDataLinkToStr[inValue]) : gAncDataLinkToStr[2];
 }
 
 
@@ -766,6 +766,7 @@ string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValu
 		else
 			oss << "SAV+" << DEC(inValue.GetHorizontalOffset());
 	}
+	//else oss << DEC(inValue.GetHorizontalOffset());	//	DON'T SHOW ANYTHING FOR ZERO (DEFAULT)
 	return oss.str ();
 }
 

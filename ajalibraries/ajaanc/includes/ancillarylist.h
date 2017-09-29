@@ -214,11 +214,24 @@ public:	//	INSTANCE METHODS
 										0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS. Each word will have
 										its upper byte masked off.
 		@param[in]	inLineNum			Specifies the SMPTE line number where the packet was found.
-		@param[in]	inStream			Specifies the video stream where the packet was found. Defaults to the Y (luma) stream.
+		@param[in]	inStream			Optionally specifies the video stream where the packet was found.
+										Defaults to the Y (luma) stream.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
 														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y);
+
+
+	/**
+		@brief		Adds the packet that originated in the VANC lines of an NTV2 frame buffer to my list.
+		@param[in]	inPacketWords		Specifies the "raw" 16-bit word packet to be added. The first six elements must be
+										0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS. Each word will have
+										its upper byte masked off.
+		@param[in]	inLocation			Specifies where the packet was found.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords,
+														const AJAAncillaryDataLocation & inLocation);
 
 
 	/**

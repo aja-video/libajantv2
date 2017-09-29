@@ -438,7 +438,7 @@ static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
 
 	if (inPacketWords.size () < 7)
 		return AJA_STATUS_RANGE;
-	if (!inLoc.IsValid())
+	if (false)	//	!inLoc.IsValid())		//	NOTE: Tough call. Decided not to validate the AJAAncillaryDataLocation here.
 		return AJA_STATUS_BAD_PARAM;
 
 	//	Use this as an uninitialized template...
@@ -475,17 +475,15 @@ static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
 }
 
 
-AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
+AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const AJAAncillaryDataLocation & inLocation)
 {
 	vector<uint8_t>		gumpPacketData;
-	AJAStatus	status	(AppendUWordPacketToGump (gumpPacketData,  inPacketWords,
-													AJAAncillaryDataLocation(AJAAncillaryDataLink_A,  inChannel,
-																			AJAAncillaryDataSpace_VANC,  inLineNum)));
+	AJAStatus	status	(AppendUWordPacketToGump (gumpPacketData,  inPacketWords, inLocation));
 	if (AJA_FAILURE(status))
 		return status;
 
 	AJAAncillaryData	newAncData;
-	status = newAncData.InitWithReceivedData (gumpPacketData, AJAAncillaryDataLocation());
+	status = newAncData.InitWithReceivedData (gumpPacketData, inLocation);
 	if (AJA_FAILURE(status))
 		return status;
 
@@ -496,7 +494,15 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 		return AJA_STATUS_FAIL;
 
 	m_ancList.push_back(pData);	//	Append to my list		//	TODO:	Needs try/catch for bad_alloc
+
 	return AJA_STATUS_SUCCESS;
+
+}	//	AddVANCData
+
+
+AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
+{
+	return AddVANCData (inPacketWords, AJAAncillaryDataLocation (AJAAncillaryDataLink_A,  inChannel, AJAAncillaryDataSpace_VANC,  inLineNum));
 
 }	//	AddVANCData
 
@@ -524,9 +530,10 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 
 	for (ULWord line (0);  line < inFormatDesc.GetFirstActiveLine();  line++)
 	{
-		UWordSequence		uwords;
-		bool				isF2			(false);
-		ULWord				smpteLineNum	(0);
+		UWordSequence	uwords;
+		bool			isF2			(false);
+		ULWord			smpteLineNum	(0);
+		unsigned		ndx				(0);
 
 		inFormatDesc.GetSMPTELineNumber (line, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
@@ -537,34 +544,47 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 																	uwords,  inFormatDesc.GetRasterWidth());
 		if (isSD)
 		{
-			UWordVANCPacketList	ycPackets;
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets);
-			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it)
+			UWordVANCPacketList			ycPackets;
+			UWordSequence				ycHOffsets;
+			AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, smpteLineNum);
+
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets, ycHOffsets);
+			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
+
+			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
 				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Both);
+					outF2Packets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
 				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Both);
+					outF1Packets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
 		}
 		else
 		{
-			UWordVANCPacketList	yPackets, cPackets;
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
+			UWordVANCPacketList			yPackets, cPackets;
+			UWordSequence				yHOffsets, cHOffsets;
+			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, smpteLineNum);
+			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, smpteLineNum);
 
-			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
-				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Y);
-				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_Y);
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
+			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
+			NTV2_ASSERT(cPackets.size() == cHOffsets.size());
 
-			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it)
+			unsigned	ndx(0);
+			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it, ndx++)
 				if (isF2)
-					outF2Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_C);
+					outF2Packets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
 				else
-					outF1Packets.AddVANCData (*it, smpteLineNum, AJAAncillaryDataChannel_C);
+					outF1Packets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
+
+			ndx = 0;
+			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it, ndx++)
+				if (isF2)
+					outF2Packets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
+				else
+					outF1Packets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
 		}
 	}	//	for each VANC line
-
+	//cerr << "AJAAncillaryList::SetFromVANCData: returning " << DEC(outF1Packets.CountAncillaryData()) << "/" << DEC(outF2Packets.CountAncillaryData()) << " F1/F2 pkts:" << endl << outF1Packets << endl << outF2Packets << endl;
 	return AJA_STATUS_SUCCESS;
 }
 
