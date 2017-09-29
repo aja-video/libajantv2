@@ -6,10 +6,12 @@
 
 #include "ntv2mbcontroller.h"
 #include <sstream>
+#include <fstream>
 
 #if defined(AJALinux)
 #include <stdlib.h>
 #endif
+
 
 using namespace std;
 
@@ -58,6 +60,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     if (!rv)
     {
         ReleaseMailbox();
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -92,15 +95,22 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     return false;
 }
 
-bool CNTV2MBController::SetIGMPVersion(uint32_t version)
+bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
 {
-    if (!(getFeatures() & SAREK_MB_PRESENT))
-        return true;
+   if (!(getFeatures() & SAREK_MB_PRESENT))
+       return true;
 
-    sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
-    bool rv = sendMsg(250);
+    bool rv = AcquireMailbox();
+    if (!rv) return false;
+
+    sprintf((char*)txBuf,"cmd=%d,port=%d",
+            (int)MB_CMD_DISABLE_NET_IF,(int)port);
+
+    rv = sendMsg(1000);
     if (!rv)
     {
+        ReleaseMailbox();
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -114,6 +124,96 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
         rv = getString(msg[0],"status",status);
         if (rv && (status == "OK"))
         {
+            ReleaseMailbox();
+            SetLinkInactive(port);
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
+                ReleaseMailbox();
+                return false;
+            }
+        }
+    }
+
+    ReleaseMailbox();
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+
+bool CNTV2MBController::SetIGMPVersion(uint32_t version)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
+                return false;
+            }
+        }
+    }
+
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+
+bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_FETCH_GM_INFO);
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=3)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            rv = getString(msg[2],"INFO",grandmasterInfo);
+            if (rv == false)
+            {
+                mIpErrorCode = NTV2IpErrGrandMasterInfo;
+                return false;
+            }
             return true;
         }
         else if (rv && (status == "FAIL"))
@@ -514,6 +614,23 @@ bool CNTV2MBController::SetLinkActive(eSFP link)
     return true;
 }
 
+bool CNTV2MBController::SetLinkInactive(eSFP link)
+{
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    if (link == SFP_BOTTOM)
+    {
+        state  &= ~S2022_LINK_B_ACTIVE;
+    }
+    else
+    {
+        state  &= ~S2022_LINK_A_ACTIVE;
+    }
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekLinkModes, state);
+    return true;
+}
+
+
 bool CNTV2MBController::GetLinkActive(eSFP link)
 {
     uint32_t state;
@@ -551,6 +668,161 @@ bool CNTV2MBController::GetDualLinkMode(bool & enable)
 {
     uint32_t state;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    enable = (state & S2022_DUAL_LINK);
+    enable = ((state & S2022_DUAL_LINK) != 0);
     return true;
 }
+
+
+bool CNTV2MBController::SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt)
+{
+    uint32_t shift = 8 * (int)chan;
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, &state);
+    state  &= ~(0xff << shift);
+    state  |= (uint8_t(fmt) << shift );
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekTxFmts, state);
+    return true;
+}
+
+bool CNTV2MBController::GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt)
+{
+    uint32_t shift = 8 * (int)chan;
+    uint32_t state;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, &state);
+    state  &= (0xff << shift);
+    state >>= shift;
+    fmt = (NTV2VideoFormat)state;
+    return true;
+}
+
+
+uint64_t CNTV2MBController::GetNTPTimestamp()
+{
+    uint32_t secsLo;
+    uint32_t nanosecs;
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpSecLo, &secsLo);
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpNSec, &nanosecs);
+
+    uint64_t res = secsLo;
+    res = (res << 32) + nanosecs;
+    return res;
+}
+
+
+bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    string sdp = sdpstream.str();
+
+    string from = ",";
+    string to   = "&comma;";
+    size_t start_pos = 0;
+    while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
+    {
+        sdp.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+
+    int size = (int)sdp.size();
+    if (size >= ((FIFO_SIZE*4)-128))
+    {
+        mIpErrorCode = NTV2IpErrSDPTooLong;;
+        return false;
+    }
+
+    sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
+    bool rv = sendMsg(250);
+    if (!rv)
+    {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
+                return false;
+            }
+        }
+    }
+
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+
+ bool CNTV2MBController::GetSDP(string url, string & sdp)
+ {
+     if (!(getFeatures() & SAREK_MB_PRESENT))
+         return true;
+
+     if (url.empty())
+     {
+        mIpErrorCode = NTV2IpErrInvalidURL;
+        return false;
+     }
+
+     sprintf((char*)txBuf,"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
+     bool rv = sendMsg(1000);
+     if (!rv)
+     {
+         mIpErrorCode = NTV2IpErrNoResponseFromMB;
+         return false;
+     }
+
+     string response;
+     getResponse(response);
+     vector<string> msg;
+     splitResponse(response, msg);
+     if (msg.size() >=3)
+     {
+         string status;
+         rv = getString(msg[0],"status",status);
+         if (rv && (status == "OK"))
+         {
+             rv = getString(msg[2],"SDP",sdp);
+             if (rv == false)
+             {
+                 mIpErrorCode = NTV2IpErrSDP;
+                 return false;
+             }
+             string to   = ",";
+             string from = "&comma;";
+             size_t start_pos = 0;
+             while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
+             {
+                 sdp.replace(start_pos, from.length(), to);
+                 start_pos += to.length();
+             }
+             return true;
+         }
+         else if (rv && (status == "FAIL"))
+         {
+             if (msg.size() >= 3)
+             {
+                 rv = getString(msg[2],"error",mIpInternalErrorString);
+                 mIpErrorCode = NTV2IpErrMBStatusFail;
+                 return false;
+             }
+         }
+     }
+
+     mIpErrorCode = NTV2IpErrInvalidMBResponse;
+     return false;
+ }

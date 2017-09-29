@@ -1,7 +1,7 @@
 /**
-    @file		ntv2config2110.cpp
-    @brief		Implements the CNTV2Config2110 class.
-    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file       ntv2config2110.cpp
+    @brief      Implements the CNTV2Config2110 class.
+    @copyright  (C) 2014-2017 AJA Video Systems, Inc.   Proprietary and confidential information.
 **/
 
 #include "ntv2config2110.h"
@@ -9,6 +9,7 @@
 #include "ntv2card.h"
 #include "ntv2formatdescriptor.h"
 #include <sstream>
+#include <algorithm>
 
 #if defined (AJALinux) || defined (AJAMac)
 #include <stdlib.h>
@@ -26,17 +27,17 @@ using namespace std;
 
 void tx_2110Config::init()
 {
-    localPort    = 0;
-    remotePort   = 0;
+    localPort      = 0;
+    remotePort     = 0;
     remoteIP.erase();
-    videoFormat  = NTV2_FORMAT_UNKNOWN;
-    videoSamples = VPIDSampling_YUV_422;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
     payloadLen     = 0;
     lastPayLoadLen = 0;
     pktsPerLine    = 0;
     ttl            = 0x80;
     tos            = 0x64;
-    ssrc           = 0;
+    ssrc           = 1000;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
@@ -62,18 +63,18 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
 
 void rx_2110Config::init()
 {
-    rxMatch     = 0;
-    sourceIP    = "";
-    destIP      = "";
-    sourcePort  = 0;
-    destPort    = 0;
-    SSRC        = 0;
-    VLAN        = 0;
-    videoFormat   = NTV2_FORMAT_UNKNOWN;
-    videoSamples  = VPIDSampling_YUV_422;
-    payloadLen = 0;
+    rxMatch        = 0;
+    sourceIP.erase();
+    destIP.erase();
+    sourcePort     = 0;
+    destPort       = 0;
+    SSRC           = 1000;
+    VLAN           = 1;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
+    payloadLen     = 0;
     lastPayloadLen = 0;
-    pktsPerLine = 0;
+    pktsPerLine    = 0;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -215,6 +216,11 @@ bool CNTV2Config2110::SetNetworkConfiguration (string localIPAddress0, string ne
 
     rv = SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
     return rv;
+}
+
+bool  CNTV2Config2110::DisableNetworkInterface(eSFP port)
+{
+    return DisableNetworkConfiguration(port);
 }
 
 bool CNTV2Config2110::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
@@ -786,6 +792,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
         // end setup 4175 packetizer
+        SetTxFormat(channel, txConfig.videoFormat);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -834,6 +841,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
 
     }
+
+    // Generate and push the SDP
+    GenSDP(channel);
+
     return rv;
 }
 
@@ -881,7 +892,6 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t height;
         mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, &height);
 
-
         // pkts per line
         mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,&txConfig.pktsPerLine);
 
@@ -898,6 +908,8 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // interlace
         uint32_t  ilace;
         mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
+
+        GetTxFormat(channel, txConfig.videoFormat);
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -976,6 +988,9 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
     {
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
+
+    GenSDP(channel);
+
     return true;
 }
 
@@ -1348,4 +1363,563 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     lo += macaddr.mac[5];
 
     return true;
+}
+
+string CNTV2Config2110::GetTxSDP(NTV2Channel chan)
+{
+    if (txsdp[(int)chan].str().empty())
+    {
+        GenSDP(chan);
+    }
+    return txsdp[(int)chan].str();
+}
+
+string CNTV2Config2110::To_String(int val)
+{
+    ostringstream oss;
+    oss << val;
+    return oss.str();
+}
+
+bool CNTV2Config2110::GenSDP(NTV2Channel channel)
+{
+    string filename = "txch" + To_String((int)channel+1) + ".sdp";
+    stringstream & sdp = txsdp[(int)channel];
+
+    sdp.str("");
+    sdp.clear();
+
+    // protocol version
+    sdp << "v=0" << endl;
+
+    // username session-id  version network-type address-type address
+    sdp << "o=- ";
+
+    uint64_t t = GetNTPTimestamp();
+    sdp <<  To_String(t);
+
+    sdp << " 0 IN IPV4 ";
+
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
+    struct in_addr addr;
+    addr.s_addr = val;
+    string localIPAddress = inet_ntoa(addr);
+    sdp << localIPAddress << endl;
+
+    // session name
+    sdp << "s=AJA KonaIP 2110" << endl;
+
+    // time the session is active
+    sdp << "t=0 0" <<endl;
+
+    // PTP
+    string gmInfo;
+    bool rv = FetchGrandMasterInfo(gmInfo);
+    gmInfo.erase(remove(gmInfo.begin(), gmInfo.end(), '\n'), gmInfo.end());
+
+    GenSDPVideoStream(sdp,channel,gmInfo);
+    GenSDPAudioStream(sdp,channel,gmInfo);
+
+    rv = PushSDP(filename,sdp);
+
+    return rv;
+}
+
+bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel, string gmInfo)
+{
+    bool enabled;
+    GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabled);
+    if (!enabled)
+    {
+        return true;
+    }
+
+    tx_2110Config config;
+    GetTxChannelConfiguration(channel, NTV2_VIDEO_STREAM, config);
+
+    uint32_t baseAddrPacketizer;
+    SetTxPacketizerChannel(channel,NTV2_VIDEO_STREAM,baseAddrPacketizer);
+
+    uint32_t width;
+    mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer,&width);
+
+    uint32_t height;
+    mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer,&height);
+
+    uint32_t  ilace;
+    mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,&ilace);
+
+    if (ilace == 1)
+    {
+        height *= 2;
+    }
+
+    NTV2VideoFormat vfmt;
+    GetTxFormat(channel,vfmt);
+    NTV2Standard  vstd  = GetNTV2StandardFromVideoFormat(vfmt);
+    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
+    //NTV2Standard  vstd = NTV2VideoFormatStandards[vfmt];
+    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    string rateString   = rateToString(frate);
+
+    // media name
+    sdp << "m=video ";
+    sdp << To_String(config.remotePort);
+    sdp << " RTP/AVP ";
+    sdp << To_String(config.payloadType) << endl;
+
+    // connection information
+    sdp << "c=IN IPV4 ";
+    sdp << config.remoteIP;
+    sdp << "/" << To_String(config.ttl) << endl;
+
+    // rtpmap
+    sdp << "a=rtpmap:";
+    sdp << To_String(config.payloadType);
+    sdp << " raw/90000" << endl;
+
+    //fmtp
+    sdp << "a=fmtp:";
+    sdp << To_String(config.payloadType);
+    sdp << " sampling=YCbCr-4:2:2; width=";
+    sdp << To_String(width);
+    sdp << "; height=";
+    sdp << To_String(height);
+    sdp << "; exactframerate=";
+    sdp << rateString;
+    sdp << "; depth=10; TCS=SDR; colorimtery=";
+    sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vstd)) ? "BT601" : "BT709");
+    sdp << "; PM=2110GPM; SSN=\"ST2110-20:2017\"; ";
+    if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
+    {
+        sdp << "interlace";
+    }
+    else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
+    {
+        sdp << "interlace segmented";
+    }
+    sdp << endl;
+
+    // PTP
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:VID" << endl;
+
+    return true;
+}
+
+
+bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel, string gmInfo)
+{
+    bool enabled;
+    GetTxChannelEnable(channel,NTV2_AUDIO1_STREAM,enabled);
+    if (!enabled)
+    {
+        return true;
+    }
+
+    tx_2110Config config;
+    GetTxChannelConfiguration(channel, NTV2_AUDIO1_STREAM, config);
+
+    uint32_t baseAddrPacketizer;
+    SetTxPacketizerChannel(channel,NTV2_AUDIO1_STREAM ,baseAddrPacketizer);
+
+    uint32_t audioChans;
+    mDevice.ReadRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, &audioChans);
+
+    // media name
+    sdp << "m=audio ";
+    sdp << To_String(config.remotePort);
+    sdp << " RTP/AVP ";
+    sdp << To_String(config.payloadType) << endl;
+
+    // connection information
+    sdp << "c=IN IPV4 ";
+    sdp << config.remoteIP;
+    sdp << "/" << To_String(config.ttl) << endl;
+
+    // rtpmap
+    sdp << "a=rtpmap:";
+    sdp << To_String(config.payloadType);
+    sdp << " L24/48000/";
+    sdp << To_String(audioChans) << endl;
+
+    //fmtp
+    sdp << "a=fmtp:";
+    sdp << To_String(config.payloadType);
+    sdp << " channel-order=SMPTE2110.(";
+    switch (audioChans)
+    {
+    case 2:
+        sdp << "ST)";
+        break;
+    default:
+    case 8:
+        sdp << "SGRP,SGRP)";
+        break;
+    case 16:
+        sdp << "SGRP,SGRP,SGRP,SGRP)";
+        break;
+    }
+    sdp << endl;
+
+    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+    sdp << "a=mediaclk:direct=0" << endl;
+    sdp << "a=mid:AUD" << endl;
+
+    return true;
+}
+
+bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
+{
+    return GetSDP(url, sdp);
+}
+
+
+int CNTV2Config2110::getDescriptionValue(int startLine, string type, string & value)
+{
+    for (int i=startLine; i < sdpLines.size(); i++)
+    {
+        string line = sdpLines[i];
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            value = line.substr(pos + type.size() + 1);
+            return i;
+        }
+    }
+    return -1; // not found
+}
+
+string CNTV2Config2110::getVideoDescriptionValue(string type)
+{
+    vector<string>::iterator it;
+    for (it = tokens.begin(); it != tokens.end(); it++)
+    {
+        string line = *it;
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            line = line.substr(pos + type.size());
+            line.erase(remove(line.begin(), line.end(), ';'), line.end());
+            return  line;
+        }
+    }
+    string result;
+    return result; // not found
+}
+
+vector<string> CNTV2Config2110::split(const char *str, char delim)
+{
+    vector<string> result;
+    do
+    {
+        const char * begin = str;
+        while(*str != delim && *str)
+        {
+            str++;
+        }
+        result.push_back(string(begin, str));
+    } while (0 != *str++);
+    return result;
+}
+
+bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig)
+{
+    if (sdp.empty())
+    {
+        return false;
+    }
+
+    uint32_t rxMatch = 0;
+
+    // break into a vector of lines and then into tokenw
+
+    sdpLines.clear();
+    stringstream ss(sdp);
+    string to;
+
+    while(getline(ss,to,'\n'))
+    {
+        sdpLines.push_back(to);
+    }
+
+    // rudimentary check it is an sdp file
+    int index;
+    string value;
+
+    // is this really an SDP
+    index = getDescriptionValue(0,"v=",value);
+    if (index == -1)
+    {
+        return false;
+    }
+
+    // originator
+    index = getDescriptionValue(index,"o=-",value);
+    if (index == -1)
+    {
+        return false;
+    }
+
+    tokens = split(value.c_str(), ' ');
+    if ((tokens.size() >= 5) && (tokens[2] == "IN") && (tokens[3] == "IPV4"))
+    {
+        if (!tokens[4].empty())
+        {
+            rxConfig.sourceIP = tokens[4];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
+
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        index = getDescriptionValue(index,"m=video",value);
+        if (index == -1)
+        {
+            // does not contain video
+            return false;
+        }
+        tokens = split(value.c_str(), ' ');
+        if ((tokens.size() >= 1) && !tokens[0].empty())
+        {
+            rxConfig.destPort    = stoi(tokens[0]);
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+        if ((tokens.size() >= 3) && !tokens[2].empty())
+        {
+            rxConfig.payloadType = stoi(tokens[2]);
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = index = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if (tokens.size() >= 2)
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1) && !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1) && !tokens[0].empty())
+            {
+                rxConfig.payloadType = stoi(tokens[0]);
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=fmtp",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            string sampling = getVideoDescriptionValue("sampling=");
+            if (sampling ==  "YCbCr-4:2:2")
+            {
+                rxConfig.videoSamples = VPIDSampling_YUV_422;
+            }
+            string width    = getVideoDescriptionValue("width=");
+            string height   = getVideoDescriptionValue("height=");
+            string rate     = getVideoDescriptionValue("exactframerate=");
+            bool interlace = false;
+            vector<string>::iterator it;
+            for (it = tokens.begin(); it != tokens.end(); it++)
+            {
+                if (*it == "interlace")
+                {
+                    interlace = true;
+                }
+            }
+            int w = stoi(width);
+            int h = stoi(height);
+            NTV2FrameRate r = stringToRate(rate);
+            NTV2VideoFormat vf = getVideoFormat(r,h,w,interlace);
+            rxConfig.videoFormat = vf;
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
+    else if (stream == NTV2_AUDIO1_STREAM )
+    {
+        index = getDescriptionValue(index,"m=audio",value);
+        if (index == -1)
+        {
+            // does not contain audio
+            return false;
+        }
+        tokens = split(value.c_str(), ' ');
+        if ((tokens.size() >= 1) && !tokens[0].empty())
+        {
+            rxConfig.destPort    = stoi(tokens[0]);
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+        if ((tokens.size() >= 3) && !tokens[2].empty())
+        {
+            rxConfig.payloadType = stoi(tokens[2]);
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = index = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1)&& !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1)&& !tokens[0].empty())
+            {
+                rxConfig.payloadType = stoi(tokens[0]);
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 3) && !tokens[2].empty())
+                {
+                    rxConfig.audioChannels = stoi(tokens[2]);
+                }
+            }
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
+    return false;
+}
+
+
+std::string CNTV2Config2110::rateToString(NTV2FrameRate rate)
+{
+    string rateString;
+    switch (rate)
+    {
+     default:
+     case   NTV2_FRAMERATE_UNKNOWN  :
+        rateString = "00";
+        break;
+     case   NTV2_FRAMERATE_6000     :
+        rateString = "60";
+        break;
+     case   NTV2_FRAMERATE_5994     :
+        rateString = "60000/1001";
+        break;
+     case   NTV2_FRAMERATE_3000     :
+        rateString = "30";
+        break;
+     case   NTV2_FRAMERATE_2997     :
+        rateString = "30000/1001";
+        break;
+     case   NTV2_FRAMERATE_2500     :
+        rateString = "25";
+        break;
+     case   NTV2_FRAMERATE_2400     :
+        rateString = "24";
+        break;
+     case   NTV2_FRAMERATE_2398     :
+        rateString = "24000/1001";
+        break;
+     case   NTV2_FRAMERATE_5000     :
+        rateString = "50";
+        break;
+     case   NTV2_FRAMERATE_4800     :
+        rateString = "48";
+        break;
+     case   NTV2_FRAMERATE_4795     :
+        rateString = "48000/1001";
+        break;
+     case   NTV2_FRAMERATE_12000    :
+        rateString = "12";
+        break;
+     case   NTV2_FRAMERATE_11988    :
+        rateString = "12000/1001";
+        break;
+     case   NTV2_FRAMERATE_1500     :
+        rateString = "15";
+        break;
+     case   NTV2_FRAMERATE_1498     :
+        rateString = "1500/1001";
+        break;
+    }
+    return rateString;
+}
+
+NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
+{
+    NTV2FrameRate rate;
+    if (rateString == "60")
+        rate = NTV2_FRAMERATE_6000;
+    else if (rateString == "60000/1001")
+        rate = NTV2_FRAMERATE_5994;
+    else if (rateString == "30")
+        rate = NTV2_FRAMERATE_3000;
+    else if (rateString == "30000/1001")
+        rate = NTV2_FRAMERATE_2997;
+    else if (rateString == "25")
+        rate = NTV2_FRAMERATE_2500;
+    else if (rateString == "24")
+        rate = NTV2_FRAMERATE_2400;
+    else if (rateString == "24000/1001")
+        rate = NTV2_FRAMERATE_2398;
+    else if (rateString == "50")
+        rate = NTV2_FRAMERATE_5000;
+    else if (rateString == "48")
+        rate = NTV2_FRAMERATE_4800;
+    else if (rateString == "48000/1001")
+        rate = NTV2_FRAMERATE_4795;
+    else if (rateString == "12")
+        rate = NTV2_FRAMERATE_12000;
+    else if (rateString == "12000/1001")
+        rate = NTV2_FRAMERATE_11988;
+    else if (rateString == "15")
+        rate = NTV2_FRAMERATE_1500;
+    else if (rateString == "1500/1001")
+        rate = NTV2_FRAMERATE_1498;
+    else
+        rate = NTV2_FRAMERATE_UNKNOWN;
+    return rate;
+}
+
+NTV2VideoFormat CNTV2Config2110::getVideoFormat(NTV2FrameRate rate,int lines, int width, bool interlaced)
+{
+    NTV2VideoFormat fmt;
+    for (int i=1; i < NTV2_MAX_NUM_VIDEO_FORMATS; i++)
+    {
+        fmt = (NTV2VideoFormat) i;
+        if (rate == GetNTV2FrameRateFromVideoFormat(fmt))
+        {
+            if (lines == GetDisplayHeight(fmt))
+            {
+                if (width == GetDisplayWidth(fmt))
+                {
+                    if (interlaced == !IsProgressiveTransport(fmt))
+                    {
+                        return fmt;
+                    }
+                }
+
+            }
+        }
+    }
+    return NTV2_FORMAT_UNKNOWN;
 }

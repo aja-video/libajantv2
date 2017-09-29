@@ -8,11 +8,15 @@
 
 enum eMBCmd
 {
-    MB_CMD_SET_NET      = 0,
+    MB_CMD_SET_NET                = 0,
     MB_CMD_GET_MAC_FROM_ARP_TABLE = 3,
-    MB_CMD_SEND_ARP_REQ        = 4,
-    MB_CMD_UNKNOWN             = 5,
-    MB_CMD_SET_IGMP_VERSION    = 6
+    MB_CMD_SEND_ARP_REQ           = 4,
+    MB_CMD_UNKNOWN                = 5,
+    MB_CMD_SET_IGMP_VERSION       = 6,
+    MB_CMD_FETCH_GM_INFO          = 7,
+    MB_CMD_TAKE_SDP               = 8,
+    MB_CMD_FETCH_SDP              = 9,
+    MB_CMD_DISABLE_NET_IF         = 10
 };
 
 enum eSFP
@@ -83,8 +87,10 @@ public:
 protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
+    bool DisableNetworkConfiguration (eSFP port);
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
+    bool FetchGrandMasterInfo(std::string & grandmasterInfo);
 
     void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
@@ -102,7 +108,15 @@ protected:
     bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
 
     bool SetLinkActive(eSFP Link);
+    bool SetLinkInactive(eSFP Link);
     bool GetLinkActive(eSFP link);
+
+    bool SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt);
+    bool GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt);
+
+    uint64_t GetNTPTimestamp();
+    bool PushSDP(std::string filename, std::stringstream & sdpstream);
+    bool GetSDP(std::string url, std::string & sdp);
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);

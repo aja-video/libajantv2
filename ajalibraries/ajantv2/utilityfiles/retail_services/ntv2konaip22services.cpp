@@ -2467,7 +2467,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enableChCard, enable2022_7Card;
 	uint32_t				enableChServices;
-    uint32_t				networkPathDiffCard, networkPathDiffServices;
+    uint32_t				networkPathDiffCard;
     uint32_t                configErr;
 
 	mCard->GetStandard(&primaryStandard);
@@ -2527,18 +2527,14 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP look for changes in 2022-7 mode and NPD if enabled
         rv  = target->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-        mCard->ReadRegister(kVReg2022_7NetworkPathDiff, (ULWord*)&networkPathDiffServices);
-        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != networkPathDiffServices))))
+        
+        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
         {
-            if (target->Set2022_7_Mode(m2022_7Mode, networkPathDiffServices) == true)
+            printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
+            if (target->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
             {
                 printf("Set 2022_7Mode OK\n");
                 setIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
-                
-                // Setting 2022-7 mode resets the RX and TX channels and this causes the mac addresses to be zeroed out.
-                // So we need to force a call to set the network configuration for both top and bottom SFP.
-                setNetConfig(SFP_TOP);
-                setNetConfig(SFP_BOTTOM);
             }
             else
             {
@@ -3429,12 +3425,12 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
     if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
     {
         printf("SetNetworkConfiguration port=%d OK\n",(int)port);
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, NTV2IpErrNone);
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
     }
     else
     {
         printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
-        setIPError(NTV2_CHANNEL1, kErrJ2kNetworkConfig, target->getLastErrorCode());
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, target->getLastErrorCode());
     }
 }
 
@@ -3566,6 +3562,9 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 	switch( configType )
 	{
 		default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
 		case kErrTxConfig:
 			reg = kVRegKIPTxCfgError;
 			break;
@@ -3578,9 +3577,6 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 		case kErrJ2kDecoderConfig:
 			reg = kVRegKIPDecCfgError;
 			break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
 	}
 	
 	mCard->ReadRegister(reg, &errCode);
@@ -3616,6 +3612,9 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     switch( configType )
     {
         default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
         case kErrTxConfig:
             reg = kVRegKIPTxCfgError;
             break;
@@ -3628,9 +3627,6 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
         case kErrJ2kDecoderConfig:
             reg = kVRegKIPDecCfgError;
             break;
-        case kErrJ2kNetworkConfig:
-            reg = kVRegKIPNetCfgError;
-            break;
     }
 
     mCard->ReadRegister(reg, &errCode);
@@ -3639,19 +3635,19 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     {
         default:
         case NTV2_CHANNEL1:
-            errCode = (errCode & 0xff);
+            errCode = errCode & 0xff;
             break;
 
         case NTV2_CHANNEL2:
-            errCode = (errCode & 0xff00) >> 8;
+            errCode = (errCode >> 8) & 0xff;
             break;
 
         case NTV2_CHANNEL3:
-            errCode = (errCode & 0xff0000) >> 16;
+            errCode = (errCode >> 16) & 0xff;
             break;
 
         case NTV2_CHANNEL4:
-            errCode = (errCode & 0xff000000) >> 24;
+            errCode = (errCode >> 24) & 0xff;
             break;
     }
 
