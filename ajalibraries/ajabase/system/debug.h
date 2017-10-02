@@ -153,21 +153,29 @@ public:
 	 *	Initialize the debug system.  
 	 *
 	 *	Invoke before reporting debug messages.
+     *
+     *  @param[in]  incrementRefCount   If true will increment the ref count in the shared memory,
+     *                                  NOTE that this should only be true when used in something that is
+     *                                  processing the log messages, like ajalogger.
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	Debug system initialized
 	 *				AJA_STATUS_FAIL		Initialization failed
 	 */
-	static AJAStatus Open();
+    static AJAStatus Open(bool incrementRefCount = false);
 
 	/** 
 	 *	Release resources used by the debug system.  
 	 *
 	 *	Invoke before application terminates. 
 	 *
+     *  @param[in]  decrementRefCount   If true will decrement the ref count in the shared memory,
+     *                                  NOTE that this should only be true when used in something that is
+     *                                  processing the log messages, like ajalogger.
+     *
 	 *	@return		AJA_STATUS_SUCCESS	Debug system closed
 	 *				AJA_STATUS_FAIL		Close failed
 	 */
-	static AJAStatus Close();
+    static AJAStatus Close(bool decrementRefCount = false);
 
 	/**
 	 *	Enable delivery of messages to the destination index.
@@ -283,19 +291,19 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetSequenceNumber(int32_t* pSequenceNumber);
+    static AJAStatus GetSequenceNumber(uint64_t* pSequenceNumber);
 
 	/**
 	 *	Get the sequence number recorded in the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	pSequenceNumber					Sequence number recorded in the message.
+     *	@param[out]	pSequenceNumber				Sequence number recorded in the message.
 	 *	@return		AJA_STATUS_SUCCESS			Group index returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageSequenceNumber(int32_t sequenceNumber, int32_t* pSequenceNumber);
+    static AJAStatus GetMessageSequenceNumber(uint64_t sequenceNumber, uint64_t *pSequenceNumber);
 
 	/**
 	 *	Get the group index that reported the message.
@@ -307,7 +315,7 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageGroup(int32_t sequenceNumber, int32_t* pGroupIndex);
+    static AJAStatus GetMessageGroup(uint64_t sequenceNumber, int32_t* pGroupIndex);
 
 	/**
 	 *	Get the destination of the message.
@@ -319,7 +327,7 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageDestination(int32_t sequenceNumber, uint32_t* pDestination);
+    static AJAStatus GetMessageDestination(uint64_t sequenceNumber, uint32_t* pDestination);
 
 	/**
 	 *	Get the time the message was reported.
@@ -331,7 +339,7 @@ public:
 	 *				AJA_STATUS_RANGE		index out of range
 	 *				AJA_STATUS_NULL			null output pointer
 	 */
-	static AJAStatus GetMessageTime(int32_t sequenceNumber, uint64_t* pTime);
+    static AJAStatus GetMessageTime(uint64_t sequenceNumber, uint64_t* pTime);
 
     /**
      *	Get the wall clock time the message was reported.
@@ -343,7 +351,7 @@ public:
      *				AJA_STATUS_RANGE		index out of range
      *				AJA_STATUS_NULL			null output pointer
      */
-    static AJAStatus GetMessageWallClockTime(int32_t sequenceNumber, int64_t *pTime);
+    static AJAStatus GetMessageWallClockTime(uint64_t sequenceNumber, int64_t *pTime);
 
 
 	/**
@@ -356,7 +364,7 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageFileName(int32_t sequenceNumber, const char** ppFileName);
+    static AJAStatus GetMessageFileName(uint64_t sequenceNumber, const char** ppFileName);
 
 	/**
 	 *	Get the source line number that reported the message.
@@ -368,7 +376,7 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageLineNumber(int32_t sequenceNumber, int32_t* pLineNumber);
+    static AJAStatus GetMessageLineNumber(uint64_t sequenceNumber, int32_t* pLineNumber);
 
 	/**
 	 *	Get the severity of the reported message.
@@ -380,7 +388,7 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageSeverity(int32_t sequenceNumber, int32_t* pSeverity);
+    static AJAStatus GetMessageSeverity(uint64_t sequenceNumber, int32_t* pSeverity);
 
 	/**
 	 *	Get the message.
@@ -392,12 +400,11 @@ public:
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetMessageText(int32_t sequenceNumber, const char** ppMessage);
+    static AJAStatus GetMessageText(uint64_t sequenceNumber, const char** ppMessage);
 
     /**
      *	Get the number of messages accepted into the ring since creation.
      *
-     *	@param[in]	sequenceNumber				Sequence number of the message.
      *	@param[out]	pCount                      The number of messages
      *	@return		AJA_STATUS_SUCCESS			Number of messages returned
      *				AJA_STATUS_OPEN				Debug system not open
@@ -409,7 +416,6 @@ public:
     /**
      *	Get the number of messages ignored and not put into the ring since creation.
      *
-     *	@param[in]	sequenceNumber				Sequence number of the message.
      *	@param[out]	pCount                      The number of messages
      *	@return		AJA_STATUS_SUCCESS			Number of messages returned
      *				AJA_STATUS_OPEN				Debug system not open
@@ -419,30 +425,20 @@ public:
     static AJAStatus GetMessagesIgnored(uint64_t* pCount);
 
 	/**
-	 *	Read the group label definitions from a file.
-	 *
-	 *	@param[in]	pFilename				The group definition file name.
-	 *	@return		AJA_STATUS_SUCCESS		Group definition file read
-	 *				AJA_STATUS_OPEN			Debug system not open
-	 *				AJA_STATUS_RANGE		Index out of range
-	 */
-	static AJAStatus ReadGroupFile(char* pFilename);
-
-	/**
-	 *	Get the string associated with a debug group.
-	 *
-	 *	@param[in]	index	Index of the group string to return.
-	 *	@return				Group string
-	 */
-	static const char* GetGroupString(int32_t index);
-
-	/**
 	 *	Get the string associated with a debug severity.
 	 *
 	 *	@param[in]	severity	Index of the severity string to return.
 	 *	@return				Severity string
 	 */
 	static const char* GetSeverityString(int32_t severity);
+
+    /**
+     *	Get the string associated with a debug message group.
+     *
+     *	@param[in]	group	Index of the message group string to return.
+     *	@return				Group string
+     */
+    static const char* GetGroupString(int32_t group);
 
 	/**
 	 *	Write group state to a file.
