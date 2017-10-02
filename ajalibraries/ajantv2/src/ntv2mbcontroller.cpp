@@ -774,7 +774,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
 
      if (url.empty())
      {
-        mIpErrorCode = NTV2IpErrInvalidURL;
+        mIpErrorCode = NTV2IpErrSDPURLInvalid;
         return false;
      }
 
@@ -799,7 +799,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
              rv = getString(msg[2],"SDP",sdp);
              if (rv == false)
              {
-                 mIpErrorCode = NTV2IpErrSDP;
+                 mIpErrorCode = NTV2IpErrSDPNotFound;
                  return false;
              }
              string to   = ",";
