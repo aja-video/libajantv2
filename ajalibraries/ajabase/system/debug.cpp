@@ -961,8 +961,12 @@ AJADebug::RestoreState(char* pFileName)
 			count = fscanf(pFile, " GroupDestination: %d : %x", &index, &destination);
 			if(count != 2)
 			{
-				break;
-			}
+                count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
+                if(count != 2)
+                {
+                    break;
+                }
+			}          
 
 			// index must be in range
 			if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
@@ -973,26 +977,6 @@ AJADebug::RestoreState(char* pFileName)
 			// update the destination
 			spShare->unitArray[index] = destination;
 		}
-
-        rewind(pFile);
-        while(true)
-        {
-            // read groups that have destinations
-            count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
-            if(count != 2)
-            {
-                break;
-            }
-
-            // index must be in range
-            if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-            {
-                continue;
-            }
-
-            // update the destination
-            spShare->unitArray[index] = destination;
-        }
 	}
 	catch(...)
 	{
