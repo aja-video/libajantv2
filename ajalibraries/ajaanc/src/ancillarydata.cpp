@@ -927,7 +927,7 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 					break;
 		case 0x45:	if (inSID > 0  &&  inSID < 0x0A)	return "RP-2020 Compr/Dolby Aud MetaD";
 					break;
-		case 0x46:	if (inSID == 0x01)
+	//	case 0x46:	if (inSID == 0x01)
 		case 0x50:	if (inSID == 0x01)		return "RDD08 WSS Data";
 					else if (inSID == 0x51)	return "CineLink-2 Link Encryp MetaD";
 					break;

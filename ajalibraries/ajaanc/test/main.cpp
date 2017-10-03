@@ -11,6 +11,9 @@
 #include "ancillarylist.h"
 #include "ntv2smpteancdata.h"
 #include <iomanip>
+#if defined(AJA_LINUX)
+	#include <string.h>
+#endif
 
 using namespace std;
 
