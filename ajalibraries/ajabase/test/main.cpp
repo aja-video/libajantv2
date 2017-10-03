@@ -15,6 +15,7 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/persistence/persistence.h"
+#include "ajabase/system/atomic.h"
 
 #include <clocale>
 #include <iostream>
@@ -546,3 +547,42 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
     }
 
 TEST_SUITE_END(); //persistence
+
+void atomic_marker() {}
+TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
+
+    TEST_CASE("Increment")
+    {
+        int32_t aInt32 = 0;
+        int64_t aInt64 = 0;
+        uint32_t aUInt32 = 0;
+        uint64_t aUInt64 = 0;
+
+        CHECK(AJAAtomic::Increment(&aInt32) == 1);
+        CHECK(aInt32 == 1);
+        CHECK(AJAAtomic::Increment(&aInt64) == 1);
+        CHECK(aInt64 == 1);
+        CHECK(AJAAtomic::Increment(&aUInt32) == 1);
+        CHECK(aUInt32 == 1);
+        CHECK(AJAAtomic::Increment(&aUInt64) == 1);
+        CHECK(aUInt64 == 1);
+    }
+
+    TEST_CASE("Decrement")
+    {
+        int32_t aInt32 = 1;
+        int64_t aInt64 = 1;
+        uint32_t aUInt32 = 1;
+        uint64_t aUInt64 = 1;
+
+        CHECK(AJAAtomic::Decrement(&aInt32) == 0);
+        CHECK(aInt32 == 0);
+        CHECK(AJAAtomic::Decrement(&aInt64) == 0);
+        CHECK(aInt64 == 0);
+        CHECK(AJAAtomic::Decrement(&aUInt32) == 0);
+        CHECK(aUInt32 == 0);
+        CHECK(AJAAtomic::Decrement(&aUInt64) == 0);
+        CHECK(aUInt64 == 0);
+    }
+
+TEST_SUITE_END(); //atomic
