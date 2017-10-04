@@ -12,6 +12,9 @@
 using namespace std;
 
 
+static bool	gIncludeZeroLengthPackets	(false);
+
+
 AJAAncillaryList::AJAAncillaryList ()
 {
 	Clear ();
@@ -493,7 +496,15 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 	if (!pData)
 		return AJA_STATUS_FAIL;
 
-	m_ancList.push_back(pData);	//	Append to my list		//	TODO:	Needs try/catch for bad_alloc
+	if (gIncludeZeroLengthPackets  ||  pData->GetDC())
+	try
+	{
+		m_ancList.push_back(pData);		//	Append to my list
+	}
+	catch (...)
+	{
+		return AJA_STATUS_FAIL;
+	}
 
 	return AJA_STATUS_SUCCESS;
 
