@@ -246,6 +246,25 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(joined == "A-B-C");
     }
 
+    TEST_CASE("aja::safer_strncpy")
+    {
+        const int maxSize = 32;
+        char target[maxSize];
+        const char* source = "The quick brown fox jumps over the lazy dog";
+
+        char *retVal = aja::safer_strncpy(target, source, strlen(source), maxSize);
+        CHECK(retVal == target);
+        CHECK(strlen(target) == maxSize-1);
+        CHECK(strcmp(target, "The quick brown fox jumps over ") == 0);
+
+        char* target2 = NULL;
+        char *retVal2 = aja::safer_strncpy(target2, source, 0, maxSize);
+        CHECK(retVal2 == target2);
+
+        char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
+        CHECK(retVal3 == target2);
+    }
+
 TEST_SUITE_END(); //common
 
 

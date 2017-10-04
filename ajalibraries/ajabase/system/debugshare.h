@@ -174,7 +174,7 @@ typedef enum _AJADebugUnit
 #define AJA_DEBUG_SEVERITY_ARRAY_SIZE	64					/**< Number of severity destinations */
 #define AJA_DEBUG_MESSAGE_MAX_SIZE		512					/**< Maximum size of a message */
 #define AJA_DEBUG_MESSAGE_RING_SIZE		4096				/**< Size of the message ring */
-#define AJA_DEBUG_FILE_NAME_MAX_SIZE	256					/**< Maximum size of a file name */
+#define AJA_DEBUG_FILE_NAME_MAX_SIZE	512					/**< Maximum size of a file name */
 #define AJA_DEBUG_SHARE_NAME            "aja-shm-debug"     /**< Name of the shared memory for the debug messages */
 #define AJA_DEBUG_TICK_RATE				1000000				/**< Resolution of debug time in ticks/second */
 #define AJA_DEBUG_STATE_FILE_VERSION	510					/**< Version number of the state file format */
@@ -184,6 +184,10 @@ typedef enum _AJADebugUnit
 	Structure representing the debug message.
 	@ingroup	AJAGroupDebug
 **/
+
+// force 1 byte alignment so can work across 32/64 bit apps
+#pragma pack(push,1)
+
 typedef struct _AJADebugMessage
 {
     uint64_t	sequenceNumber;								/**< Sequence number of this message */
@@ -222,5 +226,7 @@ typedef struct _AJADebugShare
 	uint32_t			unitArray[AJA_DEBUG_UNIT_ARRAY_SIZE];			/**< Array of message destinations by unit */
 	AJADebugMessage		messageRing[AJA_DEBUG_MESSAGE_RING_SIZE];		/**< Message ring holding current message data */
 } AJADebugShare;
+
+#pragma pack(pop)
 
 #endif	//	AJA_DEBUGSHARE_H

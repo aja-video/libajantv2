@@ -309,6 +309,64 @@ AJADebug::IsDebugBuild()
 }
 
 
+inline uint64_t report_common(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, uint64_t& writeIndex, int32_t& messageIndex)
+{
+    bool isGood = false;
+    if (spShare)
+    {
+        // check for active client to receive messages
+        if (spShare->clientRefCount <= 0)
+        {
+            // nobody is listening so bail quickly
+            return isGood;
+        }
+
+        // check for valid index
+        if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
+        {
+            index = AJA_DebugUnit_Unknown;
+        }
+        // check for destination
+        if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
+        {
+            AJAAtomic::Increment(&spShare->statsMessagesIgnored);
+            return isGood;
+        }
+
+        // check for valid severity
+        if ((severity < 0) || (severity >= AJA_DebugSeverity_Size))
+        {
+            severity = AJA_DebugSeverity_Warning;
+        }
+
+        // check for valid file name
+        if (pFileName == NULL)
+        {
+            pFileName = (char*) "unknown";
+        }
+
+        // increment the message write index
+        writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+
+        // modulo the ring size to determine the message array index
+        messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
+
+        // save the message data
+        spShare->messageRing[messageIndex].groupIndex = index;
+        spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
+        spShare->messageRing[messageIndex].time = AJADebug::DebugTime();
+        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
+        aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
+        spShare->messageRing[messageIndex].lineNumber = lineNumber;
+        spShare->messageRing[messageIndex].severity = severity;
+
+        isGood = true;
+    }
+
+    return isGood;
+}
+
+
 void 
 AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...)
 {
@@ -320,74 +378,65 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 
 	try
 	{
-        // check for active client to receive messages
-        if (spShare->clientRefCount <= 0)
+        uint64_t writeIndex = 0;
+        int32_t messageIndex = 0;
+        if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
         {
-            // nobody is listening so bail quickly
-            return;
+            // format the message
+            va_list vargs;
+            va_start(vargs, lineNumber);
+            const char* pFormat = va_arg(vargs, const char*);
+            // check for valid message
+            if (pFormat == NULL)
+            {
+                pFormat = (char*) "no message";
+            }
+            ajavsnprintf(spShare->messageRing[messageIndex].messageText,
+                         AJA_DEBUG_MESSAGE_MAX_SIZE,
+                         pFormat, vargs);
+            va_end(vargs);
+
+            // set last to indicate message complete
+            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
+            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
         }
-
-		// check for valid index
-		if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-		{
-			index = AJA_DebugUnit_Unknown;
-		}
-		// check for destination
-		if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
-		{
-            AJAAtomic::Increment(&spShare->statsMessagesIgnored);
-			return;
-		}
-		// check for valid severity
-		if ((severity < 0) || (severity >= AJA_DebugSeverity_Size))
-		{
-			severity = AJA_DebugSeverity_Warning;
-		}
-		// check for valid file name
-		if (pFileName == NULL)
-		{
-			pFileName = (char*) "unknown";
-		}
-
-		// increment the message write index
-        uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
-
-		// modulo the ring size to determine the message array index
-		int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
-
-		// save the message data
-		spShare->messageRing[messageIndex].groupIndex = index;
-		spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
-		spShare->messageRing[messageIndex].time = DebugTime();
-        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
-		strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
-		spShare->messageRing[messageIndex].lineNumber = lineNumber;
-		spShare->messageRing[messageIndex].severity = severity;
-
-		// format the message
-		va_list vargs;
-		va_start(vargs, lineNumber);
-		const char* pFormat = va_arg(vargs, const char*);
-		// check for valid message
-		if (pFormat == NULL)
-		{
-			pFormat = (char*) "no message";
-		}
-        ajavsnprintf(spShare->messageRing[messageIndex].messageText, AJA_DEBUG_MESSAGE_MAX_SIZE, pFormat, vargs);
-		va_end(vargs);
-
-		// set last to indicate message complete
-		spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
-
-        AJAAtomic::Increment(&spShare->statsMessagesAccepted);
 	}
 	catch (...)
 	{
 	}
 }
 
-void 
-AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression)
+
+void
+AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message)
+{
+    // check for open
+    if (spShare == NULL)
+    {
+        return;
+    }
+
+    try
+    {
+        uint64_t writeIndex = 0;
+        int32_t messageIndex = 0;
+        if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
+        {
+            // copy the message
+            aja::safer_strncpy(spShare->messageRing[messageIndex].messageText, message.c_str(), message.length()+1, AJA_DEBUG_MESSAGE_MAX_SIZE);
+
+            // set last to indicate message complete
+            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
+            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+        }
+    }
+    catch (...)
+    {
+    }
+}
+
+void
+AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const std::string& pExpression)
 {
 #if defined(AJA_DEBUG)
 	// check for open
@@ -406,11 +455,6 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
             {
                 pFileName = (char*) "unknown";
             }
-            // check for valid expression
-            if (pExpression == NULL)
-            {
-                pExpression = (char*) "no expression";
-            }
 
             // increment the message write index
             uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
@@ -423,17 +467,18 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const cha
             spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
             spShare->messageRing[messageIndex].time = DebugTime();
             spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
-            strncpy(spShare->messageRing[messageIndex].fileName, pFileName, AJA_DEBUG_FILE_NAME_MAX_SIZE);
+            aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
             spShare->messageRing[messageIndex].lineNumber = lineNumber;
             spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
 
             // format the message
-            sprintf(spShare->messageRing[messageIndex].messageText, "assertion failed (file %s, line %d):  %s\n",
-                pFileName, lineNumber, pExpression);
+            ajasnprintf(spShare->messageRing[messageIndex].messageText,
+                        AJA_DEBUG_MESSAGE_MAX_SIZE,
+                        "assertion failed (file %s, line %d):  %s\n",
+                        pFileName, lineNumber, pExpression.c_str());
 
             // set last to indicate message complete
-            spShare->messageRing[messageIndex].sequenceNumber = writeIndex;
-
+            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
             AJAAtomic::Increment(&spShare->statsMessagesAccepted);
         }
 	}
@@ -544,7 +589,7 @@ AJADebug::GetMessageSequenceNumber(uint64_t sequenceNumber, uint64_t* pSequenceN
 	}
 
 	try
-	{
+	{        
 		*pSequenceNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].sequenceNumber;
 	}
 	catch(...)

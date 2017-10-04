@@ -247,6 +247,17 @@ AJA_EXPORT std::string& strip(std::string& str, const std::string& ws=aja::WHITE
  */
 AJA_EXPORT std::string join(std::vector<std::string> parts, const std::string& delim=" ");
 
+/**
+ *	Like strncpy() but always adds a null-character at last index of target string
+ *
+ *  @param[in,out]  target  Pointer to the destination array where the content is to be copied.
+ *  @param[in]      source  C string to be copied.
+ *  @param[in]      num     Maximum number of characters to be copied from source.
+ *  @param[in]      maxSize Maximum size of the destination array pointed to by target.
+ *	@return target is returned
+ */
+AJA_EXPORT char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize);
+
 } //end aja namespace
 
 #endif	//	AJA_COMMON_H
