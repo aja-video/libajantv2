@@ -125,8 +125,8 @@
 #endif
 
 //	Handy ostream-based macros...
-#define	AJA_sASSERT(_expr_)                 do {std::ostringstream	__ss__;  __ss__ << #_expr_;  AJADebug::AssertWithMessage(__FILE__, __LINE__, __ss__.str().c_str());} while (false)
-#define	AJA_sREPORT(_ndx_,_sev_,_expr_)		do {std::ostringstream	__ss__;  __ss__ << _expr_;  AJADebug::Report((_ndx_), (_sev_), __FILE__, __LINE__, "%s", __ss__.str().c_str());} while (false)
+#define	AJA_sASSERT(_expr_)                 do {std::ostringstream	__ss__;  __ss__ << #_expr_;  AJADebug::AssertWithMessage(__FILE__, __LINE__, __ss__.str());} while (false)
+#define	AJA_sREPORT(_ndx_,_sev_,_expr_)		do {std::ostringstream	__ss__;  __ss__ << _expr_;  AJADebug::Report((_ndx_), (_sev_), __FILE__, __LINE__, __ss__.str());} while (false)
 #define	AJA_sEMERGENCY(_ndx_,_expr_)		AJA_sREPORT((_ndx_), AJA_DebugSeverity_Emergency,	_expr_)
 #define	AJA_sALERT(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Alert,		_expr_)
 #define	AJA_sERROR(_ndx_,_expr_)			AJA_sREPORT((_ndx_), AJA_DebugSeverity_Error,		_expr_)
@@ -250,6 +250,17 @@ public:
 	 */
 	static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...);
 
+    /**
+     *	Report debug message to the specified destination index.
+     *
+     *	@param[in]	index		Report the message to this destination index.
+     *	@param[in]	severity	Severity (\c AJA_DEBUG_SEVERITY) of the message to report.
+     *	@param[in]	pFileName	The source filename reporting the message.
+     *	@param[in]	lineNumber	The line number in the source file reporting the message.
+     *  @param[in]	message		The message to report.
+     */
+    static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message);
+
 	/**
      *	Assert that an unexpected error has occurred.
 	 *
@@ -257,7 +268,7 @@ public:
 	 *	@param[in]	lineNumber		The line number in the source file reporting the assertion.
 	 *  @param[in]	pExpression		Expression that caused the assertion.
 	 */
-    static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const char* pExpression);
+    static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const std::string& pExpression);
 
     /**
      *	Get the reference count for the number of clients accessing shared debug info

@@ -7,6 +7,7 @@
 #include "common.h"
 
 #include <algorithm>
+#include <cstring>
 #include <sstream>
 #include <string>
 
@@ -272,6 +273,25 @@ std::string join(std::vector<std::string> parts, const std::string& delim)
         count++;
     }
     return oss.str();
+}
+
+char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize)
+{
+    int32_t lastIndex = (int32_t)maxSize-1;
+
+    if (lastIndex < 0 || target == NULL)
+    {
+        return target;
+    }
+
+    if (num >= maxSize)
+        num = (size_t)lastIndex;
+
+    char *retVal = strncpy(target, source, num);
+    // make sure always null terminated
+    target[lastIndex] = '\0';
+
+    return retVal;
 }
 
 } //end aja namespace
