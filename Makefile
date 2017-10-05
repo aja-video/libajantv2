@@ -4,6 +4,11 @@
 # Copyright (C) 2017 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 #
+# Control Flags for Make
+#
+# AJA_NO_QT - if this environment variable is defined the demo applications
+#             that build against the Qt libraries will be skipped.
+
 
 SUBDIRS = ntv2burn \
 		  ntv2burn4kquadrant \
