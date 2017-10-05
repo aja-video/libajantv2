@@ -3579,20 +3579,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
 		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
 		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (&bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-				
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-					
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
+			mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
 		}
 		
 		// set color space bits as specified
