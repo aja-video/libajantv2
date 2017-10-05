@@ -1653,6 +1653,18 @@ NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTra
 }
 
 
+NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced)
+{
+	for (NTV2VideoFormat fmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
+		if (inFrameRate == ::GetNTV2FrameRateFromVideoFormat(fmt))
+			if (inHeightLines == ::GetDisplayHeight(fmt))
+				if (inWidthPixels == ::GetDisplayWidth(fmt))
+					if (inIsInterlaced == !::IsProgressiveTransport(fmt))
+						return fmt;
+	return NTV2_FORMAT_UNKNOWN;
+}
+
+
 NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
 {
 	NTV2VideoFormat quaterSizedFormat;
@@ -7368,12 +7380,18 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrInvalidMBResponseSize:        return "Invalid response size from MB";
         case NTV2IpErrInvalidMBResponseNoMac:       return "MAC Address not found in response from MB";
         case NTV2IpErrMBStatusFail:                 return "MB Status Failure";
-        case NTV2IpErrSDPTooLong:                   return "SDP too long";
         case NTV2IpErrGrandMasterInfo:              return "PTP Grand Master Info not found";
+        case NTV2IpErrSDPTooLong:                   return "SDP too long";
+        case NTV2IpErrSDPNotFound:                  return "SDP not found";
+        case NTV2IpErrSDPEmpty:                     return "SDP is empty";
+        case NTV2IpErrSDPInvalid:                   return "SDP is not valid";
+        case NTV2IpErrSDPURLInvalid:                return "Invalid SDP URL";
+        case NTV2IpErrSDPNoVideo:                   return "SDP does not contain video";
+        case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
+        case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
         default:                                    return "Unknown IP error";
     }
 }
-
 
 ostream & operator << (ostream & inOutStream, const RP188_STRUCT & inObj)
 {

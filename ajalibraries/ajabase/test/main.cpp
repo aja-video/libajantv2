@@ -15,6 +15,7 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/persistence/persistence.h"
+#include "ajabase/system/atomic.h"
 
 #include <clocale>
 #include <iostream>
@@ -243,6 +244,25 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         parts.push_back("C");
         std::string joined = aja::join(parts, "-");
         CHECK(joined == "A-B-C");
+    }
+
+    TEST_CASE("aja::safer_strncpy")
+    {
+        const int maxSize = 32;
+        char target[maxSize];
+        const char* source = "The quick brown fox jumps over the lazy dog";
+
+        char *retVal = aja::safer_strncpy(target, source, strlen(source), maxSize);
+        CHECK(retVal == target);
+        CHECK(strlen(target) == maxSize-1);
+        CHECK(strcmp(target, "The quick brown fox jumps over ") == 0);
+
+        char* target2 = NULL;
+        char *retVal2 = aja::safer_strncpy(target2, source, 0, maxSize);
+        CHECK(retVal2 == target2);
+
+        char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
+        CHECK(retVal3 == target2);
     }
 
 TEST_SUITE_END(); //common
@@ -546,3 +566,42 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
     }
 
 TEST_SUITE_END(); //persistence
+
+void atomic_marker() {}
+TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
+
+    TEST_CASE("Increment")
+    {
+        int32_t aInt32 = 0;
+        int64_t aInt64 = 0;
+        uint32_t aUInt32 = 0;
+        uint64_t aUInt64 = 0;
+
+        CHECK(AJAAtomic::Increment(&aInt32) == 1);
+        CHECK(aInt32 == 1);
+        CHECK(AJAAtomic::Increment(&aInt64) == 1);
+        CHECK(aInt64 == 1);
+        CHECK(AJAAtomic::Increment(&aUInt32) == 1);
+        CHECK(aUInt32 == 1);
+        CHECK(AJAAtomic::Increment(&aUInt64) == 1);
+        CHECK(aUInt64 == 1);
+    }
+
+    TEST_CASE("Decrement")
+    {
+        int32_t aInt32 = 1;
+        int64_t aInt64 = 1;
+        uint32_t aUInt32 = 1;
+        uint64_t aUInt64 = 1;
+
+        CHECK(AJAAtomic::Decrement(&aInt32) == 0);
+        CHECK(aInt32 == 0);
+        CHECK(AJAAtomic::Decrement(&aInt64) == 0);
+        CHECK(aInt64 == 0);
+        CHECK(AJAAtomic::Decrement(&aUInt32) == 0);
+        CHECK(aUInt32 == 0);
+        CHECK(AJAAtomic::Decrement(&aUInt64) == 0);
+        CHECK(aUInt64 == 0);
+    }
+
+TEST_SUITE_END(); //atomic

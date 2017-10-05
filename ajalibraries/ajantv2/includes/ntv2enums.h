@@ -4264,8 +4264,15 @@ typedef enum
     NTV2IpErrInvalidMBResponseSize,
     NTV2IpErrInvalidMBResponseNoMac,
     NTV2IpErrMBStatusFail,
-    NTV2IpErrSDPTooLong,
     NTV2IpErrGrandMasterInfo,
+    NTV2IpErrSDPTooLong,
+    NTV2IpErrSDPNotFound,
+    NTV2IpErrSDPEmpty,
+    NTV2IpErrSDPInvalid,
+    NTV2IpErrSDPURLInvalid,
+    NTV2IpErrSDPNoVideo,
+    NTV2IpErrSDPNoAudio,
+    NTV2IpErrSDPNoANC,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

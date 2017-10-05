@@ -1,7 +1,7 @@
 /**
-    @file		ntv2config2110.cpp
-    @brief		Implements the CNTV2Config2110 class.
-    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file       ntv2config2110.cpp
+    @brief      Implements the CNTV2Config2110 class.
+    @copyright  (C) 2014-2017 AJA Video Systems, Inc.   Proprietary and confidential information.
 **/
 
 #include "ntv2config2110.h"
@@ -27,11 +27,11 @@ using namespace std;
 
 void tx_2110Config::init()
 {
-    localPort    = 0;
-    remotePort   = 0;
+    localPort      = 0;
+    remotePort     = 0;
     remoteIP.erase();
-    videoFormat  = NTV2_FORMAT_UNKNOWN;
-    videoSamples = VPIDSampling_YUV_422;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
     payloadLen     = 0;
     lastPayLoadLen = 0;
     pktsPerLine    = 0;
@@ -63,18 +63,18 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
 
 void rx_2110Config::init()
 {
-    rxMatch     = 0;
-    sourceIP    = "";
-    destIP      = "";
-    sourcePort  = 0;
-    destPort    = 0;
-    SSRC        = 0;
-    VLAN        = 0;
-    videoFormat   = NTV2_FORMAT_UNKNOWN;
-    videoSamples  = VPIDSampling_YUV_422;
-    payloadLen = 0;
+    rxMatch        = 0;
+    sourceIP.erase();
+    destIP.erase();
+    sourcePort     = 0;
+    destPort       = 0;
+    SSRC           = 1000;
+    VLAN           = 1;
+    videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
+    payloadLen     = 0;
     lastPayloadLen = 0;
-    pktsPerLine = 0;
+    pktsPerLine    = 0;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -1398,7 +1398,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     uint64_t t = GetNTPTimestamp();
     sdp <<  To_String(t);
 
-    sdp << " 0 IN IPV4 ";
+    sdp << " 0 IN IP4 ";
 
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
@@ -1457,61 +1457,11 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     NTV2VideoFormat vfmt;
     GetTxFormat(channel,vfmt);
-    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
     NTV2Standard  vstd  = GetNTV2StandardFromVideoFormat(vfmt);
-    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
     //NTV2Standard  vstd = NTV2VideoFormatStandards[vfmt];
-
-    string rateString;
-    switch (frate)
-    {
-     default:
-     case   NTV2_FRAMERATE_UNKNOWN	:
-        rateString = "00";
-        break;
-     case   NTV2_FRAMERATE_6000		:
-        rateString = "60";
-        break;
-     case   NTV2_FRAMERATE_5994		:
-        rateString = "60000/1001";
-        break;
-     case   NTV2_FRAMERATE_3000		:
-        rateString = "30";
-        break;
-     case   NTV2_FRAMERATE_2997		:
-        rateString = "30000/1001";
-        break;
-     case   NTV2_FRAMERATE_2500		:
-        rateString = "25";
-        break;
-     case   NTV2_FRAMERATE_2400		:
-        rateString = "24";
-        break;
-     case   NTV2_FRAMERATE_2398		:
-        rateString = "24000/1001";
-        break;
-     case   NTV2_FRAMERATE_5000		:
-        rateString = "50";
-        break;
-     case   NTV2_FRAMERATE_4800		:
-        rateString = "48";
-        break;
-     case   NTV2_FRAMERATE_4795		:
-        rateString = "48000/1001";
-        break;
-     case   NTV2_FRAMERATE_12000	:
-        rateString = "12";
-        break;
-     case   NTV2_FRAMERATE_11988	:
-        rateString = "12000/1001";
-        break;
-     case   NTV2_FRAMERATE_1500		:
-        rateString = "15";
-        break;
-     case   NTV2_FRAMERATE_1498		:
-        rateString = "1500/1001";
-        break;
-    }
+    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
+    string rateString   = rateToString(frate);
 
     // media name
     sdp << "m=video ";
@@ -1520,7 +1470,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << To_String(config.payloadType) << endl;
 
     // connection information
-    sdp << "c=IN IPV4 ";
+    sdp << "c=IN IP4 ";
     sdp << config.remoteIP;
     sdp << "/" << To_String(config.ttl) << endl;
 
@@ -1619,4 +1569,357 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     sdp << "a=mid:AUD" << endl;
 
     return true;
+}
+
+bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
+{
+    return GetSDP(url, sdp);
+}
+
+
+int CNTV2Config2110::getDescriptionValue(int startLine, string type, string & value)
+{
+    for (int i=startLine; i < sdpLines.size(); i++)
+    {
+        string line = sdpLines[i];
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            value = line.substr(pos + type.size() + 1);
+            return i;
+        }
+    }
+    return -1; // not found
+}
+
+string CNTV2Config2110::getVideoDescriptionValue(string type)
+{
+    vector<string>::iterator it;
+    for (it = tokens.begin(); it != tokens.end(); it++)
+    {
+        string line = *it;
+        size_t pos = line.find(type);
+        if (pos != string::npos)
+        {
+            line = line.substr(pos + type.size());
+            line.erase(remove(line.begin(), line.end(), ';'), line.end());
+            return  line;
+        }
+    }
+    string result;
+    return result; // not found
+}
+
+vector<string> CNTV2Config2110::split(const char *str, char delim)
+{
+    vector<string> result;
+    do
+    {
+        const char * begin = str;
+        while(*str != delim && *str)
+        {
+            str++;
+        }
+        result.push_back(string(begin, str));
+    } while (0 != *str++);
+    return result;
+}
+
+bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig)
+{
+    if (sdp.empty())
+    {
+        mIpErrorCode = NTV2IpErrSDPEmpty;
+        return false;
+    }
+
+    uint32_t rxMatch = 0;
+
+    // break into a vector of lines and then into tokenw
+
+    sdpLines.clear();
+    stringstream ss(sdp);
+    string to;
+
+    while(getline(ss,to,'\n'))
+    {
+        sdpLines.push_back(to);
+    }
+
+    // rudimentary check it is an sdp file
+    int index;
+    string value;
+
+    // is this really an SDP
+    index = getDescriptionValue(0,"v=",value);
+    if (index == -1)
+    {
+        mIpErrorCode = NTV2IpErrSDPInvalid;
+        return false;
+    }
+
+    // originator
+    index = getDescriptionValue(index,"o=",value);
+    if (index == -1)
+    {
+        mIpErrorCode = NTV2IpErrSDPInvalid;
+        return false;
+    }
+
+    tokens = split(value.c_str(), ' ');
+    if ((tokens.size() >= 6) && (tokens[3] == "IN") && (tokens[4] == "IP4"))
+    {
+        if (!tokens[5].empty())
+        {
+            rxConfig.sourceIP = tokens[5];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
+
+    int rv = getDescriptionValue(0,"c=IN",value);
+    if (rv >= index)
+    {
+        tokens = split(value.c_str(), ' ');
+        if (tokens.size() >= 2)
+        {
+            tokens = split(tokens[1].c_str(), '/');
+            if ((tokens.size() >= 1) && !tokens[0].empty())
+            {
+                rxConfig.destIP = tokens[0];
+                rxMatch |= RX_MATCH_2110_DEST_IP;
+            }
+        }
+    }
+
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        index = getDescriptionValue(index,"m=video",value);
+        if (index == -1)
+        {
+            // does not contain video
+            mIpErrorCode = NTV2IpErrSDPNoVideo;
+            return false;
+        }
+        tokens = split(value.c_str(), ' ');
+        if ((tokens.size() >= 1) && !tokens[0].empty())
+        {
+            rxConfig.destPort    = atoi(tokens[0].c_str());
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+        if ((tokens.size() >= 3) && !tokens[2].empty())
+        {
+            rxConfig.payloadType = atoi(tokens[2].c_str());
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            // this overwrites if found before
+            tokens = split(value.c_str(), ' ');
+            if (tokens.size() >= 2)
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1) && !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1) && !tokens[0].empty())
+            {
+                rxConfig.payloadType = atoi(tokens[0].c_str());
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=fmtp",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            string sampling = getVideoDescriptionValue("sampling=");
+            if (sampling ==  "YCbCr-4:2:2")
+            {
+                rxConfig.videoSamples = VPIDSampling_YUV_422;
+            }
+            string width    = getVideoDescriptionValue("width=");
+            string height   = getVideoDescriptionValue("height=");
+            string rate     = getVideoDescriptionValue("exactframerate=");
+            bool interlace = false;
+            vector<string>::iterator it;
+            for (it = tokens.begin(); it != tokens.end(); it++)
+            {
+                if (*it == "interlace")
+                {
+                    interlace = true;
+                }
+            }
+            int w = atoi(width.c_str());
+            int h = atoi(height.c_str());
+            NTV2FrameRate r = stringToRate(rate);
+            NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace);
+            rxConfig.videoFormat = vf;
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
+    else if (stream == NTV2_AUDIO1_STREAM )
+    {
+        index = getDescriptionValue(index,"m=audio",value);
+        if (index == -1)
+        {
+            // does not contain audio
+            mIpErrorCode = NTV2IpErrSDPNoAudio;
+            return false;
+        }
+
+        tokens = split(value.c_str(), ' ');
+        if ((tokens.size() >= 1) && !tokens[0].empty())
+        {
+            rxConfig.destPort    = atoi(tokens[0].c_str());
+            rxMatch |= RX_MATCH_2110_DEST_PORT;
+        }
+
+        if ((tokens.size() >= 3) && !tokens[2].empty())
+        {
+            rxConfig.payloadType = atoi(tokens[2].c_str());
+            rxMatch |= RX_MATCH_2110_PAYLOAD;
+        }
+
+        int rv = getDescriptionValue(index,"c=IN",value);
+        if (rv >= index)
+        {
+            // this overwrites if found before
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 1)&& !tokens[0].empty())
+                {
+                    rxConfig.destIP = tokens[0];
+                    rxMatch |= RX_MATCH_2110_DEST_IP;
+                }
+            }
+        }
+
+        rv = getDescriptionValue(index,"a=rtpmap",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1)&& !tokens[0].empty())
+            {
+                rxConfig.payloadType = atoi(tokens[0].c_str());
+                rxMatch |= RX_MATCH_2110_PAYLOAD;
+            }
+            if ((tokens.size() >= 2))
+            {
+                tokens = split(tokens[1].c_str(), '/');
+                if ((tokens.size() >= 3) && !tokens[2].empty())
+                {
+                    rxConfig.audioChannels = atoi(tokens[2].c_str());
+                }
+            }
+        }
+        rxConfig.rxMatch = rxMatch;
+        return true;
+    }
+    return false;
+}
+
+
+std::string CNTV2Config2110::rateToString(NTV2FrameRate rate)
+{
+    string rateString;
+    switch (rate)
+    {
+     default:
+     case   NTV2_FRAMERATE_UNKNOWN  :
+        rateString = "00";
+        break;
+     case   NTV2_FRAMERATE_6000     :
+        rateString = "60";
+        break;
+     case   NTV2_FRAMERATE_5994     :
+        rateString = "60000/1001";
+        break;
+     case   NTV2_FRAMERATE_3000     :
+        rateString = "30";
+        break;
+     case   NTV2_FRAMERATE_2997     :
+        rateString = "30000/1001";
+        break;
+     case   NTV2_FRAMERATE_2500     :
+        rateString = "25";
+        break;
+     case   NTV2_FRAMERATE_2400     :
+        rateString = "24";
+        break;
+     case   NTV2_FRAMERATE_2398     :
+        rateString = "24000/1001";
+        break;
+     case   NTV2_FRAMERATE_5000     :
+        rateString = "50";
+        break;
+     case   NTV2_FRAMERATE_4800     :
+        rateString = "48";
+        break;
+     case   NTV2_FRAMERATE_4795     :
+        rateString = "48000/1001";
+        break;
+     case   NTV2_FRAMERATE_12000    :
+        rateString = "12";
+        break;
+     case   NTV2_FRAMERATE_11988    :
+        rateString = "12000/1001";
+        break;
+     case   NTV2_FRAMERATE_1500     :
+        rateString = "15";
+        break;
+     case   NTV2_FRAMERATE_1498     :
+        rateString = "1500/1001";
+        break;
+    }
+    return rateString;
+}
+
+NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
+{
+    NTV2FrameRate rate;
+    if (rateString == "60")
+        rate = NTV2_FRAMERATE_6000;
+    else if (rateString == "60000/1001")
+        rate = NTV2_FRAMERATE_5994;
+    else if (rateString == "30")
+        rate = NTV2_FRAMERATE_3000;
+    else if (rateString == "30000/1001")
+        rate = NTV2_FRAMERATE_2997;
+    else if (rateString == "25")
+        rate = NTV2_FRAMERATE_2500;
+    else if (rateString == "24")
+        rate = NTV2_FRAMERATE_2400;
+    else if (rateString == "24000/1001")
+        rate = NTV2_FRAMERATE_2398;
+    else if (rateString == "50")
+        rate = NTV2_FRAMERATE_5000;
+    else if (rateString == "48")
+        rate = NTV2_FRAMERATE_4800;
+    else if (rateString == "48000/1001")
+        rate = NTV2_FRAMERATE_4795;
+    else if (rateString == "12")
+        rate = NTV2_FRAMERATE_12000;
+    else if (rateString == "12000/1001")
+        rate = NTV2_FRAMERATE_11988;
+    else if (rateString == "15")
+        rate = NTV2_FRAMERATE_1500;
+    else if (rateString == "1500/1001")
+        rate = NTV2_FRAMERATE_1498;
+    else
+        rate = NTV2_FRAMERATE_UNKNOWN;
+    return rate;
 }

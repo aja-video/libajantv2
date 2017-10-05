@@ -60,6 +60,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     if (!rv)
     {
         ReleaseMailbox();
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -109,6 +110,7 @@ bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
     if (!rv)
     {
         ReleaseMailbox();
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -152,6 +154,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
     bool rv = sendMsg(250);
     if (!rv)
     {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -191,6 +194,7 @@ bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
     bool rv = sendMsg(250);
     if (!rv)
     {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -218,12 +222,12 @@ bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
             {
                 rv = getString(msg[2],"error",mIpInternalErrorString);
                 mIpErrorCode = NTV2IpErrMBStatusFail;
+                return false;
             }
         }
     }
 
     mIpErrorCode = NTV2IpErrInvalidMBResponse;
-
     return false;
 }
 
@@ -732,6 +736,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
     bool rv = sendMsg(250);
     if (!rv)
     {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
         return false;
     }
 
@@ -761,3 +766,63 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
     mIpErrorCode = NTV2IpErrInvalidMBResponse;
     return false;
 }
+
+ bool CNTV2MBController::GetSDP(string url, string & sdp)
+ {
+     if (!(getFeatures() & SAREK_MB_PRESENT))
+         return true;
+
+     if (url.empty())
+     {
+        mIpErrorCode = NTV2IpErrSDPURLInvalid;
+        return false;
+     }
+
+     sprintf((char*)txBuf,"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
+     bool rv = sendMsg(1000);
+     if (!rv)
+     {
+         mIpErrorCode = NTV2IpErrNoResponseFromMB;
+         return false;
+     }
+
+     string response;
+     getResponse(response);
+     vector<string> msg;
+     splitResponse(response, msg);
+     if (msg.size() >=3)
+     {
+         string status;
+         rv = getString(msg[0],"status",status);
+         if (rv && (status == "OK"))
+         {
+             rv = getString(msg[2],"SDP",sdp);
+             if (rv == false)
+             {
+                 mIpErrorCode = NTV2IpErrSDPNotFound;
+                 return false;
+             }
+             string to   = ",";
+             string from = "&comma;";
+             size_t start_pos = 0;
+             while((start_pos = sdp.find(from, start_pos)) != std::string::npos)
+             {
+                 sdp.replace(start_pos, from.length(), to);
+                 start_pos += to.length();
+             }
+             return true;
+         }
+         else if (rv && (status == "FAIL"))
+         {
+             if (msg.size() >= 3)
+             {
+                 rv = getString(msg[2],"error",mIpInternalErrorString);
+                 mIpErrorCode = NTV2IpErrMBStatusFail;
+                 return false;
+             }
+         }
+     }
+
+     mIpErrorCode = NTV2IpErrInvalidMBResponse;
+     return false;
+ }
