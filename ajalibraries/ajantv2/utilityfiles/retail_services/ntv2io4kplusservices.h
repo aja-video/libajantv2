@@ -18,7 +18,7 @@ class Io4KPlusServices : public DeviceServices
 	
 public:
 	Io4KPlusServices();
-	~Io4KPlusServices() {}
+	~Io4KPlusServices();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);

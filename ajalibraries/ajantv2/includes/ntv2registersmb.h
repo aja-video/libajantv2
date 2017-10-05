@@ -66,7 +66,7 @@
 #define kRegSarekLinkModes          26
 #define kRegSarekRxMatchesA         27
 #define kRegSarekRxMatchesB         28
-#define kRegSarekunused29           29
+#define kRegSarekTxFmts             29
 #define kSarekRegIGMPDisable        30
 #define kSarekRegIGMPDisable2       31
 #define kRegSarekFwCfg              32

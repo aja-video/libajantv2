@@ -2467,7 +2467,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enableChCard, enable2022_7Card;
 	uint32_t				enableChServices;
-    uint32_t				networkPathDiffCard, networkPathDiffServices;
+    uint32_t				networkPathDiffCard;
     uint32_t                configErr;
 
 	mCard->GetStandard(&primaryStandard);
@@ -2527,10 +2527,20 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 
         // KonaIP look for changes in 2022-7 mode and NPD if enabled
         rv  = target->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-        mCard->ReadRegister(kVReg2022_7NetworkPathDiff, (ULWord*)&networkPathDiffServices);
-        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != networkPathDiffServices))))
+        
+        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
         {
-            setRx2022_7Mode(m2022_7Mode, networkPathDiffServices);
+            printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
+            if (target->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
+            {
+                printf("Set 2022_7Mode OK\n");
+                setIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
+            }
+            else
+            {
+                printf("Set 2022_7Mode ERROR %s\n",target->getLastError().c_str());
+                setIPError(NTV2_CHANNEL1, kErrRxConfig, target->getLastErrorCode());
+            }
         }
         
         // KonaIP Input configurations
@@ -3388,10 +3398,8 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 //-------------------------------------------------------------------------------------------------------
 void  KonaIP22Services::setNetConfig(eSFP  port)
 {
-    printf("setNetConfig port=%d\n",(int)port);
-
-    string ip,sub,gate;
-    struct in_addr addr;
+    string  ip,sub,gate;
+    struct  in_addr addr;
 
     switch (port)
     {
@@ -3413,29 +3421,21 @@ void  KonaIP22Services::setNetConfig(eSFP  port)
         gate = inet_ntoa(addr);
         break;
     }
-    target->SetNetworkConfiguration(port,ip,sub,gate);
-}
-
-void KonaIP22Services::setRx2022_7Mode(bool mode, uint32_t networkPathDiff)
-{
-    printf("setRx2022_7Mode mode=%d networkPathDiff %d\n",(int)mode, (int)networkPathDiff);
-
-    if (target->Set2022_7_Mode(mode, networkPathDiff) == true)
+    
+    if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
     {
-        printf("setRx2022_7Mode OK\n");
-        setIPError(NTV2_CHANNEL1, kErrRxConfig, 0);
+        printf("SetNetworkConfiguration port=%d OK\n",(int)port);
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
     }
     else
     {
-        printf("setRx2022_7Mode ERROR %s\n",target->getLastError().c_str());
-        setIPError(NTV2_CHANNEL1, kErrRxConfig, 1);
+        printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, target->getLastErrorCode());
     }
 }
 
 void KonaIP22Services::setRxConfig(NTV2Channel channel)
 {
-    printf("setRxConfig chn=%d mode %d\n",(int)channel, (int)m2022_7Mode);
-	
     rx_2022_channel chan;
     struct in_addr addr;
 		
@@ -3495,19 +3495,17 @@ void KonaIP22Services::setRxConfig(NTV2Channel channel)
     if (target->SetRxChannelConfiguration(channel,chan) == true)
     {
         printf("setRxConfig chn=%d OK\n",(int)channel);
-        setIPError(channel, kErrRxConfig, 0);
+        setIPError(channel, kErrRxConfig, NTV2IpErrNone);
     }
     else
     {
         printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-        setIPError(channel, kErrRxConfig, 1);
+        setIPError(channel, kErrRxConfig, target->getLastErrorCode());
     }
 }
 
 void KonaIP22Services::setTxConfig(NTV2Channel channel)
 {
-	printf("setTxConfig chn=%d mode %d\n",(int)channel, (int)m2022_7Mode);
-
     tx_2022_channel chan;
     struct in_addr addr;
 	
@@ -3546,12 +3544,12 @@ void KonaIP22Services::setTxConfig(NTV2Channel channel)
     if (target->SetTxChannelConfiguration(channel,chan) == true)
     {
         printf("setTxConfig chn=%d OK\n",(int)channel);
-        setIPError(channel, kErrTxConfig, 0);
+        setIPError(channel, kErrTxConfig, NTV2IpErrNone);
     }
     else
     {
         printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-        setIPError(channel, kErrTxConfig, 1);
+        setIPError(channel, kErrTxConfig, target->getLastErrorCode());
     }
 }
 
@@ -3564,6 +3562,9 @@ void KonaIP22Services::setIPError(NTV2Channel channel, uint32_t configType, uint
 	switch( configType )
 	{
 		default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
 		case kErrTxConfig:
 			reg = kVRegKIPTxCfgError;
 			break;
@@ -3611,6 +3612,9 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     switch( configType )
     {
         default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
         case kErrTxConfig:
             reg = kVRegKIPTxCfgError;
             break;
@@ -3631,19 +3635,19 @@ void KonaIP22Services::getIPError(NTV2Channel channel, uint32_t configType, uint
     {
         default:
         case NTV2_CHANNEL1:
-            errCode = (errCode & 0xff);
+            errCode = errCode & 0xff;
             break;
 
         case NTV2_CHANNEL2:
-            errCode = (errCode & 0xff00) >> 8;
+            errCode = (errCode >> 8) & 0xff;
             break;
 
         case NTV2_CHANNEL3:
-            errCode = (errCode & 0xff0000) >> 16;
+            errCode = (errCode >> 16) & 0xff;
             break;
 
         case NTV2_CHANNEL4:
-            errCode = (errCode & 0xff000000) >> 24;
+            errCode = (errCode >> 24) & 0xff;
             break;
     }
 

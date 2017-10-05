@@ -13,7 +13,7 @@
 extern "C"
 {
 	#if defined(AJA_WINDOWS)
-		#include <Rpc.h>
+        #include <rpc.h>
 	#elif defined(AJA_LINUX)
 		#include <stdio.h>
 	#else

@@ -3782,8 +3782,8 @@ typedef enum
 typedef enum
 {
 	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_8In
 }NTV2AnalogAudioIO;
 
@@ -4266,6 +4266,15 @@ typedef enum
     NTV2IpErrInvalidMBResponseSize,
     NTV2IpErrInvalidMBResponseNoMac,
     NTV2IpErrMBStatusFail,
+    NTV2IpErrGrandMasterInfo,
+    NTV2IpErrSDPTooLong,
+    NTV2IpErrSDPNotFound,
+    NTV2IpErrSDPEmpty,
+    NTV2IpErrSDPInvalid,
+    NTV2IpErrSDPURLInvalid,
+    NTV2IpErrSDPNoVideo,
+    NTV2IpErrSDPNoAudio,
+    NTV2IpErrSDPNoANC,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

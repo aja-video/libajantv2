@@ -434,22 +434,21 @@ typedef enum
 
     kVReg2022_7Enable						= VIRTUALREG_START+493,
     kVReg2022_7NetworkPathDiff              = VIRTUALREG_START+494,
-    kVRegUnused495                          = VIRTUALREG_START+495,
-    kVRegUnused496                          = VIRTUALREG_START+496,
-    kVRegUnused497                          = VIRTUALREG_START+497,
-
-    kVRegUserDefinedDBB						= VIRTUALREG_START+498,
-
-    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+499,
-    kVRegHDMIOutRGBRange					= VIRTUALREG_START+500,
-    kVRegZeroHostAncPostCapture				= VIRTUALREG_START+501,
-    kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+502,
-
-    kVRegKIPRxCfgError                      = VIRTUALREG_START+503,
-    kVRegKIPTxCfgError                      = VIRTUALREG_START+504,
-    kVRegKIPEncCfgError                     = VIRTUALREG_START+505,
-    kVRegKIPDecCfgError                     = VIRTUALREG_START+506,
-	
+    
+    kVRegKIPRxCfgError                      = VIRTUALREG_START+495,
+    kVRegKIPTxCfgError                      = VIRTUALREG_START+496,
+    kVRegKIPEncCfgError                     = VIRTUALREG_START+497,
+    kVRegKIPDecCfgError                     = VIRTUALREG_START+498,
+    kVRegKIPNetCfgError                     = VIRTUALREG_START+499,
+    kVRegUnused500                          = VIRTUALREG_START+500,
+    kVRegUnused501                          = VIRTUALREG_START+501,
+    
+    kVRegUserDefinedDBB						= VIRTUALREG_START+502,
+    
+    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
+    kVRegHDMIOutRGBRange					= VIRTUALREG_START+504,
+    kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
+    kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
     kVRegAudioMonitorChannelSelect          = VIRTUALREG_START+507,
 	kVRegAudioMixerOverrideState            = VIRTUALREG_START+508,
     kVRegAudioMixerSourceMainEnable         = VIRTUALREG_START+509,

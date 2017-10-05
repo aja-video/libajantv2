@@ -8,6 +8,10 @@
 #include "audioutilities.h"
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 uint32_t AJA_GenerateAudioTone (uint32_t*	audioBuffer,
 								uint32_t	numSamples,
 								uint32_t	numChannels,

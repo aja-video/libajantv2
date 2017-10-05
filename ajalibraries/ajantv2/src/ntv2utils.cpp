@@ -1653,6 +1653,18 @@ NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTra
 }
 
 
+NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced)
+{
+	for (NTV2VideoFormat fmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
+		if (inFrameRate == ::GetNTV2FrameRateFromVideoFormat(fmt))
+			if (inHeightLines == ::GetDisplayHeight(fmt))
+				if (inWidthPixels == ::GetDisplayWidth(fmt))
+					if (inIsInterlaced == !::IsProgressiveTransport(fmt))
+						return fmt;
+	return NTV2_FORMAT_UNKNOWN;
+}
+
+
 NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
 {
 	NTV2VideoFormat quaterSizedFormat;
@@ -7338,51 +7350,49 @@ std::string NTV2InterruptEnumToString (const INTERRUPT_ENUMS inInterruptEnumValu
 	return std::string (pString ? pString : "");
 }
 
-
-static const char * NTV2IpErrorEnumStrings (const NTV2IpError inIpErrorEnumValue)
-{
-    static const char *	sIpErrorEnumStrings []	=   {	"",
-                                                        "Invalid channel",
-                                                        "Invalid format",
-                                                        "Invalid bit depth",
-                                                        "Invalid height in ull mode",
-                                                        "Invalid number of levels in ull mode",
-                                                        "Ull mode not supported",
-                                                        "KonaIP card not ready",
-                                                        "Host software does not match device firmware. Firmware update required",
-                                                        "SFP Top (Link A) not configured",
-                                                        "SFP Bottom (Link B) not configured",
-                                                        "Invalid IGMP version",
-                                                        "Failed to retrieve MAC address from ARP table",
-                                                        "2022-7 not supported for by this firmware",
-                                                        "Could not write SOM to MB",
-                                                        "Could not write sequence number to MB",
-                                                        "Could not write count to MB",
-                                                        "MB response timeout (no SOM)",
-                                                        "MB response timeout (no sequence number)",
-                                                        "MB response timeout (no bytecount)",
-                                                        "Response exceeds FIFO length",
-                                                        "No response from MB",
-                                                        "AcquireMailBoxLock timeout",
-                                                        "Invalid response from MB",
-                                                        "Invalid response size from MB",
-                                                        "MAC Address not found in response from MB",
-                                                        "MB Status Failure",
-                                                        ""};
-
-    if (inIpErrorEnumValue >= NTV2IpErrNone && inIpErrorEnumValue < NTV2IpNumErrTypes)
-        return sIpErrorEnumStrings [inIpErrorEnumValue];
-    else
-        return NULL;
-}
-
-
 std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
 {
-    const char *	pString	(::NTV2IpErrorEnumStrings (inIpErrorEnumValue));
-    return std::string (pString ? pString : "");
+    switch (inIpErrorEnumValue)
+    {
+        case NTV2IpErrNone:                         return "";
+        case NTV2IpErrInvalidChannel:               return "Invalid channel";
+        case NTV2IpErrInvalidFormat:                return "Invalid format";
+        case NTV2IpErrInvalidBitdepth:              return "Invalid bit depth";
+        case NTV2IpErrInvalidUllHeight:             return "Invalid height in ull mode";
+        case NTV2IpErrInvalidUllLevels:             return "Invalid number of levels in ull mode";
+        case NTV2IpErrUllNotSupported:              return "Ull mode not supported";
+        case NTV2IpErrNotReady:                     return "KonaIP card not ready";
+        case NTV2IpErrSoftwareMismatch:             return "Host software does not match device firmware";
+        case NTV2IpErrLinkANotConfigured:           return "SFP Top (Link A) not configured";
+        case NTV2IpErrLinkBNotConfigured:           return "SFP Bottom (Link B) not configured";
+        case NTV2IpErrInvalidIGMPVersion:           return "Invalid IGMP version";
+        case NTV2IpErrCannotGetMacAddress:          return "Failed to retrieve MAC address from ARP table";
+        case NTV2IpErr2022_7NotSupported:           return "2022-7 not supported for by this firmware";
+        case NTV2IpErrWriteSOMToMB:                 return "Could not write SOM to MB";
+        case NTV2IpErrWriteSeqToMB:                 return "Could not write sequence number to MB";
+        case NTV2IpErrWriteCountToMB:               return "Could not write count to MB";
+        case NTV2IpErrTimeoutNoSOM:                 return "MB response timeout (no SOM)";
+        case NTV2IpErrTimeoutNoSeq:                 return "MB response timeout (no sequence number)";
+        case NTV2IpErrTimeoutNoBytecount:           return "MB response timeout (no bytecount)";
+        case NTV2IpErrExceedsFifo:                  return "Response exceeds FIFO length";
+        case NTV2IpErrNoResponseFromMB:             return "No response from MB";
+        case NTV2IpErrAcquireMBTimeout:             return "AcquireMailBoxLock timeout";
+        case NTV2IpErrInvalidMBResponse:            return "Invalid response from MB";
+        case NTV2IpErrInvalidMBResponseSize:        return "Invalid response size from MB";
+        case NTV2IpErrInvalidMBResponseNoMac:       return "MAC Address not found in response from MB";
+        case NTV2IpErrMBStatusFail:                 return "MB Status Failure";
+        case NTV2IpErrGrandMasterInfo:              return "PTP Grand Master Info not found";
+        case NTV2IpErrSDPTooLong:                   return "SDP too long";
+        case NTV2IpErrSDPNotFound:                  return "SDP not found";
+        case NTV2IpErrSDPEmpty:                     return "SDP is empty";
+        case NTV2IpErrSDPInvalid:                   return "SDP is not valid";
+        case NTV2IpErrSDPURLInvalid:                return "Invalid SDP URL";
+        case NTV2IpErrSDPNoVideo:                   return "SDP does not contain video";
+        case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
+        case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
+        default:                                    return "Unknown IP error";
+    }
 }
-
 
 ostream & operator << (ostream & inOutStream, const RP188_STRUCT & inObj)
 {

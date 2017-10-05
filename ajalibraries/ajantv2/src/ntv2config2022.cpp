@@ -348,6 +348,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string ne
     return rv;
 }
 
+bool  CNTV2Config2022::DisableNetworkInterface(eSFP port)
+{
+    return DisableNetworkConfiguration(port);
+}
+
 bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
@@ -538,7 +543,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     }
 
     // some constants
-    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x0000ffff);
+    WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x12ffffff);
     WriteChannelRegister(kReg2022_6_rx_media_pkt_buf_size  + baseAddr, 0x0000ffff);
     WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0x10000000 * channel);
 
@@ -1152,6 +1157,12 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
     {
         uint32_t baseAddr;
         SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        if (enableChange)
+        {
+            // reset
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
+            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
+        }
         if (enable)
         {
             uint32_t delay = rx_networkPathDifferential * 27000;
@@ -1162,22 +1173,56 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
         {
             WriteChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, 0);
         }
-        if (enableChange)
-        {
-            // reset
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x01);
-            WriteChannelRegister(kReg2022_6_rx_reset + baseAddr, 0x00);
-        }
     }
 
     if (_numTxChans && enableChange)
     {
+        // save
+        uint32_t addr;
+        mDevice.ReadRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_0,&addr);
+
+        // reset the tx core
         uint32_t baseAddr;
         SelectTxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
-        // reset
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x01);
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x00);
+
+        // restore everything
+        uint32_t macLo;
+        uint32_t macHi;
+
+        // get primaray mac address
+        uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
+        mDevice.ReadRegister(macAddressRegister, &macHi);
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macLo);
+
+        uint32_t boardHi = (macHi & 0xffff0000) >>16;
+        uint32_t boardLo = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
+
+        // get secondary mac address
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macHi);
+        macAddressRegister++;
+        mDevice.ReadRegister(macAddressRegister, &macLo);
+
+        uint32_t boardHi2 = (macHi & 0xffff0000) >>16;
+        uint32_t boardLo2 = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
+
+        // initialise constants
+        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + SAREK_2022_6_TX_CORE_0, 0x04);
+        mDevice.WriteRegister(kReg2022_6_tx_hitless_config   + SAREK_2022_6_TX_CORE_0, 0x01); // disable
+
+        // source ip address
+        mDevice.WriteRegister(kReg2022_6_tx_src_ip_addr      + SAREK_2022_6_TX_CORE_0,addr);
+
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo);
+        mDevice.WriteRegister(kReg2022_6_tx_pri_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi);
+
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_low_addr + SAREK_2022_6_TX_CORE_0,boardLo2);
+        mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + SAREK_2022_6_TX_CORE_0,boardHi2);
     }
+
     return true;
 }
 

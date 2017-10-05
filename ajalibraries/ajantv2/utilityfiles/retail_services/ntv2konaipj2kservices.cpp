@@ -1962,38 +1962,44 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 //-------------------------------------------------------------------------------------------------------
 void  KonaIPJ2kServices::setNetConfig(eSFP  port)
 {
-    printf("set NetConfig port=%d\n",(int)port);
-
-    string ip,sub,gate;
-    struct in_addr addr;
-
+    string  ip,sub,gate;
+    struct  in_addr addr;
+    
     switch (port)
     {
-    case SFP_BOTTOM:
-        addr.s_addr = mEth1.ipc_ip;
-        ip = inet_ntoa(addr);
-        addr.s_addr = mEth1.ipc_subnet;
-        sub = inet_ntoa(addr);
-        addr.s_addr = mEth1.ipc_gateway;
-        gate = inet_ntoa(addr);
-        break;
-    case SFP_TOP:
-    default:
-        addr.s_addr = mEth0.ipc_ip;
-        ip = inet_ntoa(addr);
-        addr.s_addr = mEth0.ipc_subnet;
-        sub = inet_ntoa(addr);
-        addr.s_addr = mEth0.ipc_gateway;
-        gate = inet_ntoa(addr);
-        break;
+        case SFP_BOTTOM:
+            addr.s_addr = mEth1.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
+        case SFP_TOP:
+        default:
+            addr.s_addr = mEth0.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
     }
-    target->SetNetworkConfiguration(port,ip,sub,gate);
+    
+    if (target->SetNetworkConfiguration(port,ip,sub,gate) == true)
+    {
+        printf("SetNetworkConfiguration port=%d OK\n",(int)port);
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+    }
+    else
+    {
+        printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, target->getLastError().c_str());
+        setIPError(NTV2_CHANNEL1, kErrNetworkConfig, target->getLastErrorCode());
+    }
 }
 
 void KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 {
-	printf("setRxConfig chn=%d\n",(int)channel);
-	
 	rx_2022_channel chan;
 	struct in_addr addr;
 	
@@ -2053,18 +2059,17 @@ void KonaIPJ2kServices::setRxConfig(NTV2Channel channel)
 	if (target->SetRxChannelConfiguration(channel,chan) == true)
 	{
 		printf("setRxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
+		setIPError(channel, kErrTxConfig, NTV2IpErrNone);
 	}
 	else
 	{
 		printf("setRxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrRxConfig, 1);
+		setIPError(channel, kErrRxConfig, target->getLastErrorCode());
 	}
 }
 
 void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 {
-	printf("setTxConfig chn=%d\n",(int)channel);
 	tx_2022_channel chan;
 	struct in_addr addr;
 		
@@ -2104,71 +2109,27 @@ void KonaIPJ2kServices::setTxConfig(NTV2Channel channel)
 	if (target->SetTxChannelConfiguration(channel,chan) == true)
 	{
 		printf("setTxConfig chn=%d OK\n",(int)channel);
-		setIPError(channel, kErrTxConfig, 0);
+		setIPError(channel, kErrTxConfig, NTV2IpErrNone);
 	}
 	else
 	{
 		printf("setTxConfig chn=%d ERROR %s\n",(int)channel, target->getLastError().c_str());
-		setIPError(channel, kErrTxConfig, 1);
+		setIPError(channel, kErrTxConfig, target->getLastErrorCode());
 	}
 }
 
 void KonaIPJ2kServices::setIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
 {
-	uint32_t errCode;
-	uint32_t value = val & 0xff;
-	uint32_t reg;
-	
-	switch( configType )
-	{
-		default:
-		case kErrTxConfig:
-			reg = kVRegKIPTxCfgError;
-			break;
-		case kErrRxConfig:
-			reg = kVRegKIPRxCfgError;
-			break;
-		case kErrJ2kEncoderConfig:
-			reg = kVRegKIPEncCfgError;
-			break;
-		case kErrJ2kDecoderConfig:
-			reg = kVRegKIPDecCfgError;
-			break;
-	}
-	
-	mCard->ReadRegister(reg, &errCode);
-	
-	switch( channel )
-	{
-		default:
-		case NTV2_CHANNEL1:
-			errCode = (errCode & 0xffffff00) | value;
-			break;
-			
-		case NTV2_CHANNEL2:
-			errCode = (errCode & 0xffff00ff) | (value << 8);
-			break;
-			
-		case NTV2_CHANNEL3:
-			errCode = (errCode & 0xff00ffff) | (value << 16);
-			break;
-			
-		case NTV2_CHANNEL4:
-			errCode = (errCode & 0x00ffffff) | (value << 24);
-			break;
-	}
-	
-	mCard->WriteRegister(reg, errCode);
-}
-
-void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
-{
     uint32_t errCode;
+    uint32_t value = val & 0xff;
     uint32_t reg;
-
+    
     switch( configType )
     {
         default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
         case kErrTxConfig:
             reg = kVRegKIPTxCfgError;
             break;
@@ -2182,29 +2143,79 @@ void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uin
             reg = kVRegKIPDecCfgError;
             break;
     }
-
+    
     mCard->ReadRegister(reg, &errCode);
-
+    
     switch( channel )
     {
         default:
         case NTV2_CHANNEL1:
-            errCode = (errCode & 0xff);
+            errCode = (errCode & 0xffffff00) | value;
             break;
-
+            
         case NTV2_CHANNEL2:
-            errCode = (errCode & 0xff00) >> 8;
+            errCode = (errCode & 0xffff00ff) | (value << 8);
             break;
-
+            
         case NTV2_CHANNEL3:
-            errCode = (errCode & 0xff0000) >> 16;
+            errCode = (errCode & 0xff00ffff) | (value << 16);
             break;
-
+            
         case NTV2_CHANNEL4:
-            errCode = (errCode & 0xff000000) >> 24;
+            errCode = (errCode & 0x00ffffff) | (value << 24);
             break;
     }
+    
+    mCard->WriteRegister(reg, errCode);
+}
 
+void KonaIPJ2kServices::getIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
+{
+    uint32_t errCode;
+    uint32_t reg;
+    
+    switch( configType )
+    {
+        default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
+        case kErrTxConfig:
+            reg = kVRegKIPTxCfgError;
+            break;
+        case kErrRxConfig:
+            reg = kVRegKIPRxCfgError;
+            break;
+        case kErrJ2kEncoderConfig:
+            reg = kVRegKIPEncCfgError;
+            break;
+        case kErrJ2kDecoderConfig:
+            reg = kVRegKIPDecCfgError;
+            break;
+    }
+    
+    mCard->ReadRegister(reg, &errCode);
+    
+    switch( channel )
+    {
+        default:
+        case NTV2_CHANNEL1:
+            errCode = errCode & 0xff;
+            break;
+            
+        case NTV2_CHANNEL2:
+            errCode = (errCode >> 8) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL3:
+            errCode = (errCode >> 16) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL4:
+            errCode = (errCode >> 24) & 0xff;
+            break;
+    }
+    
     val = errCode;
 }
 

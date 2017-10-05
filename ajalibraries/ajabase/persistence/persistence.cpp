@@ -9,6 +9,8 @@
 #include "stdlib.h"
 //#include "ajabase/system/debug.h"
 
+#include "ajabase/system/file_io.h"
+
 // Mac defines
 #if !defined(AJA_MAC) && defined(AJAMac)
 #define AJA_MAC
@@ -742,7 +744,6 @@ bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, 
 
 AJAPersistence::AJAPersistence()		
 {
-    //AJADebug::Open();
     SetParams("device 1");
 }
 
@@ -871,15 +872,7 @@ bool AJAPersistence::GetValuesDouble(const std::string& key_query, std::vector<s
 
 bool AJAPersistence::FileExists()
 {
-#if defined(AJA_WINDOWS)
-	int val = _access(mstateKeyName.c_str(),F_OK);
-#elif defined (AJA_MAC)
-	int val = access(mstateKeyName.c_str(),R_OK);
-#else
-	int val = access(mstateKeyName.c_str(),F_OK);
-#endif
-	bool bExists = (val != -1);
-	return bExists;
+    return AJAFileIO::FileExists(mstateKeyName.c_str());
 }
 
 // delete pref file
