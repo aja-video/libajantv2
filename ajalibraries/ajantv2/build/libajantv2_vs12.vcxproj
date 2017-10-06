@@ -252,6 +252,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2verticalfilter.cpp" />
     <ClCompile Include="..\src\ntv2vidproc.cpp" />
     <ClCompile Include="..\src\ntv2vpid.cpp" />
     <ClCompile Include="..\src\ntv2vpidfromspec.cpp" />
@@ -279,6 +280,7 @@
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
     <ClInclude Include="..\includes\ntv2formatdescriptor.h" />
     <ClInclude Include="..\includes\ntv2registerexpert.h" />
+    <ClInclude Include="..\includes\ntv2verticalfilter.h" />
     <ClInclude Include="..\src\ntv2devicefeatures.hpp" />
     <ClInclude Include="..\includes\ntv2devicescanner.h" />
     <ClInclude Include="..\includes\ntv2discover.h" />
@@ -311,7 +313,6 @@
     <ClInclude Include="..\includes\testpatterngen.h" />
     <ClInclude Include="..\includes\testpatterngendata.h" />
     <ClInclude Include="..\includes\ntv2transcode.h" />
-    <ClInclude Include="..\includes\verticalfilter.h" />
     <ClInclude Include="..\includes\xena2vidproc.h" />
     <ClInclude Include="..\includes\ntv2serialcontrol.h" />
     <ClInclude Include="..\src\win\ntv2windriverinterface.h" />

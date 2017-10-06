@@ -171,6 +171,9 @@
     <ClCompile Include="..\src\ntv2registerexpert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2verticalfilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\includes\ajaexport.h">
@@ -254,9 +257,6 @@
     <ClInclude Include="..\includes\ntv2transcode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\verticalfilter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\includes\xena2vidproc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -333,6 +333,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2registerexpert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ntv2verticalfilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
