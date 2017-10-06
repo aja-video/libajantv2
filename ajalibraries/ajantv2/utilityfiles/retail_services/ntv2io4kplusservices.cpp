@@ -1236,10 +1236,14 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			case NTV2_PrimaryOutputSelect:
 				if(b2pi)
 				{
-					XPt1 = NTV2_Xpt425Mux1AYUV;
-					XPt2 = NTV2_Xpt425Mux1BYUV;
-					XPt3 = NTV2_Xpt425Mux2AYUV;
-					XPt4 = NTV2_Xpt425Mux2BYUV;
+					//XPt1 = NTV2_Xpt425Mux1AYUV;
+					//XPt2 = NTV2_Xpt425Mux1BYUV;
+					//XPt3 = NTV2_Xpt425Mux2AYUV;
+					//XPt4 = NTV2_Xpt425Mux2BYUV;
+					XPt1 = NTV2_XptLUT1RGB;
+					XPt2 = NTV2_XptLUT2RGB;
+					XPt3 = NTV2_XptLUT3Out;
+					XPt4 = NTV2_XptLUT4Out;
 					break;
 				}
 //                if (b4kHfr)
