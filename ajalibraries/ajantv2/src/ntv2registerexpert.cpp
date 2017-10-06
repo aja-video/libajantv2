@@ -1800,7 +1800,8 @@ private:
 				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))	<< endl
 				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))	<< endl
 				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))	<< endl
-				<< "Memory writes: "		<< ((inRegValue & BIT(28)) ? "disabled" : "enabled");
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))
+				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}
 	}	mDecodeAncInsControlReg;
