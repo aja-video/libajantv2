@@ -1104,7 +1104,7 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
 void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bEnable, bool bMDEnable )
 {
 #ifdef COCHRANE
-	mDevice.WriteRegister( 0x20000, (bEnable?BIT(16):0)|(bMDEnable?BIT(17):0), BIT(16)|BIT(17));
+    mDevice.WriteRegister( 0x20000, (bEnable?BIT(16):0)|(bMDEnable?BIT(17):0)|(bMDEnable?BIT(18):0), BIT(16)|BIT(17)|BIT(18));
 #else
 	uint32_t encoderBit(0), mdBit(0);
     if (channel == NTV2_CHANNEL2)
