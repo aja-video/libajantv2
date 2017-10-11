@@ -68,13 +68,14 @@ void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
 
 void AJAPreviewWidget::updateFrame (const QImage &image,bool clear)
 {
+    qDebug() << "Update Frame";
 	_unscaledImageSize.setHeight(image.height());
 	_unscaledImageSize.setWidth(image.width());
 
     if ( image.width() > this->width())
-        _pixmap = QPixmap::fromImage(image.scaledToWidth(this->width(),Qt::FastTransformation),0);
+        _pixmap = QPixmap::fromImage(image.scaledToWidth(this->width(),Qt::SmoothTransformation),0);
     else if ( image.height() > this->height())
-        _pixmap = QPixmap::fromImage(image.scaledToHeight(this->height(),Qt::FastTransformation),0);
+        _pixmap = QPixmap::fromImage(image.scaledToHeight(this->height(),Qt::SmoothTransformation),0);
     else
         _pixmap = QPixmap::fromImage(image,0);
 
@@ -85,15 +86,17 @@ void AJAPreviewWidget::updateFrame (const QImage &image,bool clear)
 
 void AJAPreviewWidget::updateFrameWithStatus (const QImage &image,const QString& statusString,bool clear)
 {
+    qDebug() << "Update Frame With Status";
+
 	_statusString = statusString;
 	_unscaledImageSize.setHeight(image.height());
 	_unscaledImageSize.setWidth(image.width());
 
 	QPixmap tempPixmap = QPixmap::fromImage(image,0);
 	if ( image.width() > this->width())
-		_pixmap = tempPixmap.scaledToWidth(this->width(),Qt::FastTransformation);
+        _pixmap = tempPixmap.scaledToWidth(this->width(),Qt::SmoothTransformation);
 	else if ( image.height() > this->height())
-		_pixmap = tempPixmap.scaledToHeight(this->height(),Qt::FastTransformation);
+        _pixmap = tempPixmap.scaledToHeight(this->height(),Qt::SmoothTransformation);
 	else
 		_pixmap = tempPixmap;
 
