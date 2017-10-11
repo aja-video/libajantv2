@@ -77,7 +77,8 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex (	NTV2VideoFormat *		pOutVal
 
 AJAExport bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);	///< @note	!!! NOT IMPLEMENTED YET !!!
 AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex.
-
+AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);
+AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);
 AJAExport NTV2_DEPRECATED UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID);		///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
 AJAExport NTV2_DEPRECATED bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0);	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
 AJAExport NTV2_DEPRECATED bool NTV2DeviceCanDoLTCOutN (NTV2DeviceID boardID, UWord index0);	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCOutputs instead.
