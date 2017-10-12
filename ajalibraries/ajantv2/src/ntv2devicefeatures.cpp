@@ -876,7 +876,7 @@ NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 {
-	if (::NTV2DeviceHasSPIv3(inDeviceID) || ::NTV2DeviceHasSPIv4(inDeviceID) || ::NTV2DeviceHasSPIv5(inDeviceID))
+	if (NTV2DeviceHasSPIv3(inDeviceID) || NTV2DeviceHasSPIv4(inDeviceID) || NTV2DeviceHasSPIv5(inDeviceID))
 		return true;
 	else
 		return false;
