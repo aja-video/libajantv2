@@ -4,8 +4,28 @@
 This simple command-line program performs HDR configuration on the HDMI output for a compatible AJA device on the local host.
 
 The program shows how to...
-- determine if the device supports HDMI-HDR;
-- enables or disables HDMI-HDR on the device;
-- how to configure for BT-2020 and/or constant luminance;
-- how to configure for HLG or ST-2084 compliance.
+-	determine if the device supports HDMI-HDR;
+-	enables or disables HDMI-HDR on the device;
+-	how to configure for BT-2020 and/or constant luminance;
+-	how to configure for HLG or ST-2084 compliance.
+
+<b>Command line usage:</b>
+@code
+	ntv2hdrsetup  [options...]
+	
+	-d|--device	{spec}			Specifies the device to use by index number, serial number or generic model name.
+								Defaults to first device (index 0).
+								If model name specified, uses lowest-numbered matching device.
+	-e|--eotf	{spec}			Specifies the EOTF to use:
+									0:	Traditional gamma SD
+									1:	Traditional gamma HD
+									2:	SMPTE ST 2084
+									3:	HLG
+	-l|--luminance {lumaSpec}	Specifies the luminance to use:
+									0:	Non-constant luminance
+									1:	Constant luminance.
+	--dolbyvision				Uses Dolby Vision.
+	--nohdr						Disables HDMI HDR output.
+	-?|--help|--usage			Shows how to use this command.
+@endcode
 **/

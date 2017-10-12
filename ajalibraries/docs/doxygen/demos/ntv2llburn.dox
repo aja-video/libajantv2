@@ -13,4 +13,19 @@ The NTV2LLBurn class demonstrates...
 -	the proper acquire/release semantics for using an AJA device exclusively;
 -	programmatic device configuration and signal routing;
 -	how to "burn" timecode into a buffer containing a frame of video data.
+
+<b>Command line usage:</b>
+@code
+	ntv2llburn  [options...]
+	
+	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
+										Defaults to first device (index 0).
+										If model name specified, uses lowest-numbered matching device.
+	-i|--input	{inputSource}			Specifies the SDI video source as an unsigned integer number 1 thru 8.
+	-t|--tcsource {timecodeSource}		Specifies the timecode source. Use '?' or 'list' to list available sources.
+	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio							Omits audio.
+	--rgb								Uses an RGB frame buffer format (instead of YCbCr).
+	-?|--help|--usage					Shows how to use this command.
+@endcode
 **/

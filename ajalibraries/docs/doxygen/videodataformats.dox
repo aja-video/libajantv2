@@ -291,7 +291,7 @@ The packing cadence is 16 Bayer pixels in 20 bytes.
 
 See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/145>
 "How to Capture Raw Bayer Data from the CION Camera" for detailed information about capturing raw
-CION data using NTV2 devices. The \ref ntv2qtrawcapture demonstration app in the SDK also shows how to capture raw video into 'DNG' files.
+CION data using NTV2 devices.
 
 
 @subsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar ('I420')
