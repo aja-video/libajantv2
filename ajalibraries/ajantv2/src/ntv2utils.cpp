@@ -9,8 +9,8 @@
 #include "videodefines.h"
 #include "audiodefines.h"
 #include "ntv2endian.h"
-#include "ntv2transcode.h"
 #include "ntv2debug.h"
+#include "ntv2transcode.h"
 #include "ntv2devicefeatures.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
