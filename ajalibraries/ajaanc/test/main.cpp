@@ -477,8 +477,14 @@ class CNTV2AncDataTester
 				::SetDefaultCaptionLogOutputStream(cerr);
 				//::SetDefaultCaptionLogMask(kCaptionLog_SMPTEAncErrors | kCaptionLog_SMPTEAncSuccess | kCaptionLog_SMPTEAncDebug);
 				SHOULD_BE_TRUE(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, packets, hOffsets));
-				cerr << packets << endl;
-				cerr << hOffsets << endl;
+				SHOULD_BE_EQUAL(packets.size(), 2);
+				SHOULD_BE_EQUAL(packets.size(), hOffsets.size());
+				const UWordSequence	rawPktComponents1	(packets.at(0));
+				const UWordSequence	rawPktComponents2	(packets.at(1));
+				SHOULD_BE_EQUAL(rawPktComponents1.size(), 223);
+				SHOULD_BE_EQUAL(rawPktComponents2.size(), 9);
+				cerr << "BFT_SMPTEAncData:  PACKETS:  " << packets << endl
+					 << "HOFFSETS:  " << hOffsets << endl;
 				//	TBD:	Validate hOffsets
 				//	TBD:	Validate packets
 				return false;
