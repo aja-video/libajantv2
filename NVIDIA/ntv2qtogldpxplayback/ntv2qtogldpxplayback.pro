@@ -65,7 +65,7 @@ win32 {
 	DEFINES +=  AJADLL_BUILD
 	DEFINES +=  AJA_BASE_OBJ
 	DEFINES +=  QT_LARGEFILE_SUPPORT
-	DEFINES -= UNICODE
+	DEFINES -= UNICODE _UNICODE
 
 
 	#disable all-warnings-on flags, which is the default (i.e. -Wall -W)
