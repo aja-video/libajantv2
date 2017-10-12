@@ -491,7 +491,10 @@ void NTV2Player4K::RouteHDMIOutput (void)
 {
 	const bool			isRGB			(::IsRGBFormat (mPixelFormat));
 
-	if (mUseHDMIOut && ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2))
+	if (mUseHDMIOut &&
+		(::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2)
+			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3)
+			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4)) )
 	{
 		if (isRGB)
 		{
