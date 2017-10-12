@@ -12,4 +12,23 @@ The NTV2Player4K class demonstrates everything NTV2Player does, plus...
 -	how to generate a 4K/UHD test pattern and get it into a 4K/UHD frame buffer;
 -	how to configure the device to use quads or Tsi;
 -	how to use AutoCirculate to efficiently stream 4K/UHD video with audio and timecode.
+
+<b>Command line usage:</b>
+@code
+	ntv2player4k  [options...]
+	
+	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
+										Defaults to first device (index 0).
+										If model name specified, uses lowest-numbered matching device.
+	-c|--channel {channelSpec}			Specifies the framestore/channel as an unsigned integer number 1 or 5.
+	-v|--videoFormat {vidFormat}		Specifies the video format to use. Use '?' or 'list' to list available formats.
+	-p|--pixelFormat {pixFormat}		Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-x|--hdrType {hdrSpec}				Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+	-t|--tsi							Uses Two Sample Interleave instead of squares/quads.
+	-h|--hdmi							Enables HDMI playout.
+	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio							Omits audio.
+	--rgb								Uses an RGB frame buffer format (instead of YUV).
+	-?|--help|--usage					Shows how to use this command.
+@endcode
 **/

@@ -55,7 +55,6 @@
 	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
 	-	\ref	ntv2qtpreview
 	-	\ref	ntv2qtmultiinput
-	-	\ref	ntv2qtrawcapture
 
 	@subsection	demoscrvhevc	Demo Apps, Alphabetical
 	-	\ref	ntv2burn
@@ -75,5 +74,4 @@
 	-	\ref	ntv2player4k
 	-	\ref	ntv2qtmultiinput
 	-	\ref	ntv2qtpreview
-	-	\ref	ntv2qtrawcapture
 **/

@@ -14,4 +14,33 @@ The NTV2OutputTestPattern class demonstrates...
 -	how to transfer a single frame to an AJA device using DMA;
 -	how to programmatically perform device configuration and signal routing;
 -	how to be a "good citizen" to detect if another application is already using the device.
+
+<b>Command line usage:</b>
+@code
+	ntv2outputtestpattern  [options...]
+	
+	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
+										Defaults to first device (index 0).
+										If model name specified, uses lowest-numbered matching device.
+	-c|--channel	{channelSpec}		Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	-p|--pattern {patternSpec}			Specifies the test pattern to show as an unsigned integer number 0 thru 16:
+										0:	100% ColorBars
+										1:	75% ColorBars
+										2:	Ramp
+										3:	Multiburst
+										4:	Linesweep
+										5:	Check Field
+										6:	Flat Field
+										7:	Multi Pattern
+										8:	Black
+										9:	White
+										10:	Border
+										11:	Linear Ramp
+										12:	Slant Ramp
+										13:	Zone Plate
+										14:	Color Quadrant
+										15:	Color Quadrant Border
+										16:	Color Quadrant Tsi
+	-?|--help|--usage					Shows how to use this command.
+@endcode
 **/

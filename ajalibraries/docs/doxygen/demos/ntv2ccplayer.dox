@@ -17,8 +17,10 @@ The NTV2CCPlayer class demonstrates...
 
 ntv2ccplayer \[<i>options</i>\] \[<i>filePath</i> \[...\]\]
 
-Plays video containing closed-caption data sourced from standard input (if "-" used as a file argument),
-or from the contents of one or more specified files, or, if no file arguments are provided, from an internal text source.
+Plays video containing closed-caption data sourced from...
+-	the contents of one or more files specified as path arguments on the command line,
+-	standard input (if "-" used as a file argument),
+-	an internal text source (if no file arguments provided).
 
 ...where...
 <table>

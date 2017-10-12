@@ -17,4 +17,20 @@ The NTV2Player class demonstrates...
 -	how to properly acquire and release an AJA device in order to use it exclusively;
 -	how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
 -	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
+
+<b>Command line usage:</b>
+@code
+	ntv2player  [options...]
+	
+	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
+										Defaults to first device (index 0).
+										If model name specified, uses lowest-numbered matching device.
+	-c|--channel {channelSpec}			Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	-v|--videoFormat {vidFormat}		Specifies the video format to use. Use '?' or 'list' to list available formats.
+	-p|--pixelFormat {pixFormat}		Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-t|--hdrType {hdrSpec}				Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio							Omits audio.
+	-?|--help|--usage					Shows how to use this command.
+@endcode
 **/
