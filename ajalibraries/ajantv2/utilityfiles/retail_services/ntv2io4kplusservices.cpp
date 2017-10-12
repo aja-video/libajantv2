@@ -1236,10 +1236,14 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			case NTV2_PrimaryOutputSelect:
 				if(b2pi)
 				{
-					XPt1 = NTV2_Xpt425Mux1AYUV;
-					XPt2 = NTV2_Xpt425Mux1BYUV;
-					XPt3 = NTV2_Xpt425Mux2AYUV;
-					XPt4 = NTV2_Xpt425Mux2BYUV;
+					//XPt1 = NTV2_Xpt425Mux1AYUV;
+					//XPt2 = NTV2_Xpt425Mux1BYUV;
+					//XPt3 = NTV2_Xpt425Mux2AYUV;
+					//XPt4 = NTV2_Xpt425Mux2BYUV;
+					XPt1 = NTV2_XptLUT1RGB;
+					XPt2 = NTV2_XptLUT2RGB;
+					XPt3 = NTV2_XptLUT3Out;
+					XPt4 = NTV2_XptLUT4Out;
 					break;
 				}
 //                if (b4kHfr)
@@ -3216,7 +3220,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //					XPt3 = NTV2_XptLUT3Out;
 //					XPt4 = NTV2_XptLUT4Out;
 //					break;
-				case NTV2_Quarter4k:       XPt1 = NTV2_Xpt4KDownConverterOutRGB; break;
+				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
@@ -3579,20 +3583,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
 		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
 		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (&bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-				
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-					
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
+			mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
 		}
 		
 		// set color space bits as specified

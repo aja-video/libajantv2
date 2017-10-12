@@ -986,10 +986,13 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_PAIR (inValue))
 		return false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
 	{
+		NTV2Audio8ChannelSelect bankSelect = (inValue >= NTV2_AudioChannel9_10) ? NTV2_AudioChannel9_16 : NTV2_AudioChannel1_8;
+		ULWord channelSelect = static_cast<ULWord>(inValue) % 4;
 		WriteRegister (kRegHDMIInputControl, inAudioSystem, kRegMaskHDMIOutAudioEngineSelect, kRegShiftHDMIOutAudioEngineSelect);
-		WriteRegister (kRegHDMIInputControl, inValue, kRegMaskHDMIOutAudio2ChannelSelect, kRegShiftHDMIOutAudio2ChannelSelect);
+		WriteRegister (kRegHDMIOutControl, bankSelect, kRegMaskHDMIOutAudio8Of16SelectMode, kRegShiftHDMIOutAudio8Of16SelectMode);
+		WriteRegister (kRegHDMIInputControl, channelSelect, kRegMaskHDMIOutAudio2ChannelSelect, kRegShiftHDMIOutAudio2ChannelSelect);
 		return SetHDMIOutAudioChannels(NTV2_HDMIAudio2Channels);
 	}
 	else
@@ -1003,15 +1006,16 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem)
 {
 	bool	result = false;
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3 || DeviceCanDoAudioMixer())
+	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
 	{
-		ULWord engineSelect (0), channelSelect(0);
+		ULWord engineSelect (0), channelSelect(0), bankSelect(0);
 		result = ReadRegister(kRegHDMIInputControl, &engineSelect,  kRegMaskHDMIOutAudioEngineSelect, kRegShiftHDMIOutAudioEngineSelect);
 		if (result)
 		{
 			outAudioSystem = static_cast <NTV2AudioSystem> (engineSelect);
 			result = ReadRegister(kRegHDMIInputControl, &channelSelect,  kRegMaskHDMIOutAudio2ChannelSelect, kRegShiftHDMIOutAudio2ChannelSelect);
-			outValue = static_cast <NTV2AudioChannelPair> (channelSelect);
+			result = ReadRegister(kRegHDMIOutControl, &bankSelect,  kRegMaskHDMIOutAudio8Of16SelectMode, kRegShiftHDMIOutAudio8Of16SelectMode);
+			outValue = static_cast <NTV2AudioChannelPair> ( (bankSelect == 0 ? 0 : 4) + channelSelect );
 		}
 	}
 	else

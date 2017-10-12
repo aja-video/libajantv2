@@ -28,8 +28,6 @@
 #include "xpt_kip_2100_1rxtx.h"
 
 
-
-
 //	The rest of the non-auto-generated function implementations follow...
 
 
@@ -874,6 +872,14 @@ NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 	if (inDeviceID == DEVICE_ID_IO4KPLUS  ||  inDeviceID == DEVICE_ID_IO4K)
         return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
 	return NTV2_AUDIOSYSTEM_INVALID;
+}
+
+bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
+{
+	if (::NTV2DeviceHasSPIv3(inDeviceID) || ::NTV2DeviceHasSPIv4(inDeviceID) || ::NTV2DeviceHasSPIv5(inDeviceID))
+		return true;
+	else
+		return false;
 }
 
 #if !defined (NTV2_DEPRECATE)

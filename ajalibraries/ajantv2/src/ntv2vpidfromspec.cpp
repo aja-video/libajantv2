@@ -86,7 +86,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if (NTV2_IS_PSF_VIDEO_FORMAT (outputFormat))
 		isProgressiveTransport = false;										//	PSF is never a progressive transport
 
-	if ( ! isRGB && isDualLink )
+	if ( ! isRGB && isDualLink &&  ! isTSI)
 		isProgressiveTransport = false;										//	Dual link YCbCr is not a progressive transport
 
 	if (isTSI && NTV2_IS_4K_HFR_VIDEO_FORMAT (outputFormat) && isLevelB)

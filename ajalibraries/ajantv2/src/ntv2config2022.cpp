@@ -777,6 +777,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // always on
+    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x01);
 
     return rv;
