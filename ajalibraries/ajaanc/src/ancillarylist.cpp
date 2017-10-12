@@ -518,11 +518,11 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 }	//	AddVANCData
 
 
-AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer, const NTV2FormatDescriptor & inFormatDesc,
-											AJAAncillaryList & outF1Packets, AJAAncillaryList & outF2Packets)
+AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffer,
+											const NTV2FormatDescriptor &	inFormatDesc,
+											AJAAncillaryList &				outPackets)
 {
-	outF1Packets.Clear();
-	outF2Packets.Clear();
+	outPackets.Clear();
 
 	if (inFrameBuffer.IsNULL())
 		return AJA_STATUS_BAD_PARAM;
@@ -563,10 +563,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
 
 			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
-				if (isF2)
-					outF2Packets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
-				else
-					outF1Packets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
+				outPackets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
 		}
 		else
 		{
@@ -582,20 +579,14 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 
 			unsigned	ndx(0);
 			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it, ndx++)
-				if (isF2)
-					outF2Packets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
-				else
-					outF1Packets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
+				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
 
 			ndx = 0;
 			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it, ndx++)
-				if (isF2)
-					outF2Packets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
-				else
-					outF1Packets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
+				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
 		}
 	}	//	for each VANC line
-	//cerr << "AJAAncillaryList::SetFromVANCData: returning " << DEC(outF1Packets.CountAncillaryData()) << "/" << DEC(outF2Packets.CountAncillaryData()) << " F1/F2 pkts:" << endl << outF1Packets << endl << outF2Packets << endl;
+	//cerr << "AJAAncillaryList::SetFromVANCData: returning " << DEC(outPackets.CountAncillaryData()) << " pkts:" << endl << outPackets << endl;
 	return AJA_STATUS_SUCCESS;
 }
 

@@ -22,10 +22,31 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 
 
 /**
-	@brief	I hold a collection of (pointers to) AJAAncillaryData instances which represent all of the
-			ancillary data for one video field or frame. I can be built from the ancillary data received
-			by hardware during one field/frame, and/or built "from scratch" and used as the source of
-			outgoing ancillary data to hardware.
+	@brief		I am an ordered collection of AJAAncillaryData instances which represent one or more SMPTE 291
+				data packets that were captured from, or destined to be played into, one video field or frame.
+				I can be built from the ancillary data received by the hardware during one field/frame, and/or
+				built "from scratch" and used as the source of outgoing ancillary data to hardware.
+
+	@details	By default, packets (AJAAncillaryData instances) remain in the order added to me. I have methods to sort
+				my contents by DID, SDID or location.
+
+				<b>Transmit:</b> Put My Packets Into Other Buffer Destinations
+				-	Call AJAAncillaryList::AddAncillaryData for each packet to be added to me.
+				-	For AJA hardware, it's best to call AJAAncillaryList::SortListByLocation before sending it to another buffer.
+				-	There is no method yet for encoding packets into a "tall" or "taller" VANC frame geometry.
+				-	For newer devices with Anc inserters, call AJAAncillaryList::GetAncillaryDataTransmitData to fill the Anc buffer
+					used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call (see \ref ancgumpformat).
+
+				<b>Receive:</b> Create Packet List(s) From Other Buffer Sources
+				-	For a "tall" or "taller" VANC frame geometry, call the AJAAncillaryList::SetFromVANCData class method,
+					passing it an NTV2_POINTER that references the frame buffer, and an NTV2FormatDescriptor that describes the raster.
+					It will return two packet lists.
+				-	For newer devices with Anc extractors, call AJAAncillaryList::AddReceivedAncillaryData (SDI devices) or
+					AJAAncillaryList::AppendReceivedRTPAncillaryData (IP devices), passing it the buffer used in the
+					AUTOCIRCULATE_TRANSFER::SetAncBuffers call. (SDI devices will use \ref ancgumpformat).
+
+	@note		I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
+				methods from any other thread.
 **/
 class AJAExport AJAAncillaryList
 {
@@ -34,8 +55,7 @@ public:	//	CLASS METHODS
 		@brief		Returns all packets found in the VANC lines of the given NTV2 frame buffer.
 		@param[in]	inFrameBuffer		Specifies the NTV2 frame buffer (or the portion containing the VANC lines).
 		@param[in]	inFormatDesc		Describes the frame buffer (pixel format, video standard, etc.).
-		@param[out]	outF1Packets		Receives the Field1 packets found.
-		@param[out]	outF2Packets		Receives the Field2 packets found (interlaced video only).
+		@param[out]	outPackets			Receives the packets found.
 		@return		AJA_STATUS_SUCCESS if successful.
 		@bug		The \c AJAAncillaryDataLink in the \c AJAAncillaryDataLocation in each of the returned packets
 					is currently \c AJAAncillaryDataLink_A, which will be incorrect if, for example, the FrameStore
@@ -43,8 +63,7 @@ public:	//	CLASS METHODS
 	**/
 	static AJAStatus						SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 															const NTV2FormatDescriptor & inFormatDesc,
-															AJAAncillaryList & outF1Packets,
-															AJAAncillaryList & outF2Packets);
+															AJAAncillaryList & outPackets);
 
 public:	//	INSTANCE METHODS
 	/**
@@ -79,6 +98,7 @@ public:	//	INSTANCE METHODS
 		@brief		Answers with the AJAAncillaryData object at the given index.
 		@param[in]	inIndex		Specifies the zero-based index position.
 		@return		The AJAAncillaryData object at the given index (or NULL if not found).
+		@note		The AJAAncillaryList owns the returned object. If the list gets Cleared or deleted, the returned pointer will become invalid.
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataAtIndex (const uint32_t inIndex) const;
 
@@ -94,6 +114,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inMatchType		Specifies the AJAAncillaryDataType to match.
 		@param[in]	inIndex			Specifies the desired instance of the given type (use zero for the first one).
 		@return		The AJAAncillaryData object (or NULL if not found).
+		@note		The AJAAncillaryList owns the returned object. If the list gets Cleared or deleted, the returned pointer will become invalid.
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithType (const AJAAncillaryDataType inMatchType, const uint32_t inIndex = 0) const;
 
@@ -111,6 +132,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inSID		Secondary ID to match (use AJAAncillaryDataWildcard_SID to match "any" SID)
 		@param[in]	inIndex		Specifies which instance among those having the given DID and SID (use zero for the first one).
 		@return		The AJAAncillaryData object having the given DID, SID and index.
+		@note		The AJAAncillaryList owns the returned object. If the list gets Cleared or deleted, the returned pointer will become invalid.
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithID (const uint8_t inDID, const uint8_t inSID, const uint32_t inIndex = 0) const;
 	///@}
@@ -209,14 +231,7 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@brief		Adds the packet that originated in the VANC lines of an NTV2 frame buffer to my list.
-		@param[in]	inPacketWords		Specifies the "raw" 16-bit word packet to be added. The first six elements must be
-										0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS. Each word will have
-										its upper byte masked off.
-		@param[in]	inLineNum			Specifies the SMPTE line number where the packet was found.
-		@param[in]	inStream			Optionally specifies the video stream where the packet was found.
-										Defaults to the Y (luma) stream.
-		@return		AJA_STATUS_SUCCESS if successful.
+		@deprecated	Use the 2-parameter version of this function instead.
 	**/
 	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
 														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y);
@@ -224,9 +239,9 @@ public:	//	INSTANCE METHODS
 
 	/**
 		@brief		Adds the packet that originated in the VANC lines of an NTV2 frame buffer to my list.
-		@param[in]	inPacketWords		Specifies the "raw" 16-bit word packet to be added. The first six elements must be
-										0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS. Each word will have
-										its upper byte masked off.
+		@param[in]	inPacketWords		Specifies the "raw" 16-bit User Data Words of the packet to be added. The first
+										six elements must be 0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS.
+										Each word will have its upper byte masked off.
 		@param[in]	inLocation			Specifies where the packet was found.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/

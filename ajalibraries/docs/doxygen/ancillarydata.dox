@@ -79,7 +79,7 @@
 	provide per-SDI-input ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
 	packet data into a separate host data buffer independent of the video buffer (see the new \c AUTOCIRCULATE_TRANSFER class).
 
-	@subsection	ancgumpformat	Anc Buffer Data Format (SDI Devices)
+	@subsection	ancgumpformat	SDI Device Anc Buffer Data Format
 	The data bytes in the buffer consist of one or more packets having the following format:
 	<table>
 		<tr><td>Byte[0]		<td>\c 0xFF (start-of-packet marker). Note that \c 0xFF can be found in packet data, so you should use the packet data count (<b>DC</b>) to find subsequent packets in the Anc buffer.
