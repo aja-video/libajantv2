@@ -708,6 +708,42 @@ uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 }
 
 
+AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawComponents) const
+{
+	AJAStatus							status		(AJA_STATUS_SUCCESS);
+	const vector<uint16_t>::size_type	origSize	(outRawComponents.size());
+	const uint8_t						dataCount	((GetDC() > 255) ? 255 : GetDC());	//	Truncate payload to max 255 bytes
+
+	try
+	{
+		outRawComponents.push_back(0x000);													//	000
+		outRawComponents.push_back(0x3FF);													//	3FF
+		outRawComponents.push_back(0x3FF);													//	3FF
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));				//	DID
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));				//	SDID
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));			//	DC
+	}
+	catch(...)
+	{
+		status = AJA_STATUS_MEMORY;
+	}
+	if (AJA_FAILURE(status))
+	{
+		outRawComponents.resize(origSize);
+		return status;
+	}
+
+	//	Copy payload data into output vector...
+	status = GetPayloadData(outRawComponents);												//	UDWs
+	if (AJA_FAILURE(status))
+		return status;
+
+	//	The hardware automatically recalcs the CS, but still needs to be there...
+	outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(Calculate8BitChecksum()));	//	CS
+	return AJA_STATUS_SUCCESS;
+}
+
+
 static const string		gEmptyString;
 
 

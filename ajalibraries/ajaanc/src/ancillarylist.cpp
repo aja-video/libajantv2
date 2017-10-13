@@ -707,6 +707,65 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 }
 
 
+AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const
+{
+	if (inFrameBuffer.IsNULL())
+		return AJA_STATUS_NULL;
+	if (!inFormatDesc.IsValid())
+		return AJA_STATUS_BAD_PARAM;
+	if (!inFormatDesc.IsVANC())
+		return AJA_STATUS_BAD_PARAM;
+	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR  &&  inFormatDesc.GetPixelFormat() != NTV2_FBF_8BIT_YCBCR)
+		return AJA_STATUS_UNSUPPORTED;
+
+	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
+	const bool	isSD	(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()) || NTV2_IS_SD_VIDEO_FORMAT(inFormatDesc.GetVideoFormat()));
+
+	//	For each VANC line...
+	for (UWord fbLineOffset(0);  fbLineOffset < inFormatDesc.GetFirstActiveLine();  fbLineOffset++)
+	{
+		ULWord smpteLine (0);		bool isF2 (false);
+		inFormatDesc.GetSMPTELineNumber (fbLineOffset, smpteLine, isF2);
+
+		//	Look for non-HANC packets destined for this line...
+		for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
+		{
+			const AJAAncillaryData &			ancData (**iter);
+			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
+			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)
+				continue;	//	Ignore "Raw" or "Analog" or "Unknown" packets
+			if (loc.GetDataSpace() != AJAAncillaryDataSpace_VANC)
+				continue;	//	Ignore "HANC" or "Unknown" packets
+			if (loc.GetLineNumber() != smpteLine)
+				continue;	//	Wrong line number
+			if (!IS_VALID_AJAAncillaryDataChannel(loc.GetDataChannel()))
+				continue;	//	Bad data channel
+
+			vector<uint16_t>	pktComponentData;
+			AJAStatus status (ancData.GenerateTransmitData (pktComponentData));
+			if (AJA_FAILURE(status))
+				return status;
+
+			//	TBD:	NEED TO TAKE INTO CONSIDERATION	loc.GetHorizontalOffset()
+			if (isSD && loc.GetDataChannel() == AJAAncillaryDataChannel_Both)
+			{
+				//	Mux into UYVY
+			}
+			else if (loc.GetDataChannel() == AJAAncillaryDataChannel_C)
+			{
+				//	Mux into C
+			}
+			else if (loc.GetDataChannel() == AJAAncillaryDataChannel_Y)
+			{
+				//	Mux into Y
+			}
+			cerr << ancData << endl;
+		}	//	for each packet
+	}	//	for each VANC line
+	return AJA_STATUS_UNSUPPORTED;
+}
+
+
 ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPayload) const
 {
 	unsigned	num	(0);

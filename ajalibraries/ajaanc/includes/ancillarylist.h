@@ -207,7 +207,51 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@name	Transmit/Receive To/From AJA Hardware
+		@name	Transmit to AJA Hardware
+	**/
+	///@{
+
+	/**
+		@brief		Answers with the sizes of the buffers (one for field 1, one for field 2) needed to hold the anc data inserter
+					"transmit" data for all of my AJAAncillaryData objects.
+		@param[in]	inIsProgressive		Specify true for insertion into Progressive (transport) frames, or false for interlaced or psf.
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where "field 2" begins;  otherwise ignored.
+		@param[out]	outF1ByteCount		Receives the size (in bytes) of the buffer needed to hold the "Field 1" anc data.
+		@param[out]	outF2ByteCount		Receives the size (in bytes) of the buffer needed to hold the "Field 2" anc data.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetAncillaryDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
+																			uint32_t & outF1ByteCount, uint32_t & outF2ByteCount) const;
+
+
+	/**
+		@brief		Builds one or two ancillary data buffers (one for field 1, one for field 2) with the anc data inserter
+					"transmit" data for all of my AJAAncillaryData objects.
+		@param[in]	inIsProgressive		Specify true for insertion into Progressive (transport) frames, or false for interlaced or psf.
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where "field 2" begins;  otherwise ignored.
+		@param		pOutF1AncData		Specifies the valid, non-NULL starting address of the "Field 1" ancillary data buffer.
+										Note that this buffer is written for Progressive frames.
+		@param[in]	inF1ByteCountMax	Specifies the capacity (in bytes) of the Field 1 buffer (may be larger than needed).
+		@param		pOutF2AncData		Specifies the valid, non-NULL starting address of the "Field 2" ancillary data buffer.
+										Note that this buffer is not written for Progressive frames.
+		@param[in]	inF2ByteCountMax	Specifies the capacity (in bytes) of the Field 2 buffer (may be larger than needed).
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetAncillaryDataTransmitData (const bool inIsProgressive, const uint32_t inF2StartLine,
+																			uint8_t * pOutF1AncData, const uint32_t inF1ByteCountMax,
+																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax) const;
+
+	/**
+		@brief		Writes my AJAAncillaryData objects into the given tall/taller frame buffer having the given raster/format.
+		@note		It's a good idea to always call AJAAncillaryList::SortListByLocation before calling this function.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const;
+	///@}
+
+
+	/**
+		@name	Receive from AJA Hardware
 	**/
 	///@{
 
@@ -248,36 +292,6 @@ public:	//	INSTANCE METHODS
 	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords,
 														const AJAAncillaryDataLocation & inLocation);
 
-
-	/**
-		@brief		Answers with the sizes of the buffers (one for field 1, one for field 2) needed to hold the anc data inserter
-					"transmit" data for all of my AJAAncillaryData objects.
-		@param[in]	inIsProgressive		Specify true for insertion into Progressive (transport) frames, or false for interlaced or psf.
-		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where "field 2" begins;  otherwise ignored.
-		@param[out]	outF1ByteCount		Receives the size (in bytes) of the buffer needed to hold the "Field 1" anc data.
-		@param[out]	outF2ByteCount		Receives the size (in bytes) of the buffer needed to hold the "Field 2" anc data.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GetAncillaryDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
-																			uint32_t & outF1ByteCount, uint32_t & outF2ByteCount) const;
-
-
-	/**
-		@brief		Builds one or two ancillary data buffers (one for field 1, one for field 2) with the anc data inserter
-					"transmit" data for all of my AJAAncillaryData objects.
-		@param[in]	inIsProgressive		Specify true for insertion into Progressive (transport) frames, or false for interlaced or psf.
-		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where "field 2" begins;  otherwise ignored.
-		@param		pOutF1AncData		Specifies the valid, non-NULL starting address of the "Field 1" ancillary data buffer.
-										Note that this buffer is written for Progressive frames.
-		@param[in]	inF1ByteCountMax	Specifies the capacity (in bytes) of the Field 1 buffer (may be larger than needed).
-		@param		pOutF2AncData		Specifies the valid, non-NULL starting address of the "Field 2" ancillary data buffer.
-										Note that this buffer is not written for Progressive frames.
-		@param[in]	inF2ByteCountMax	Specifies the capacity (in bytes) of the Field 2 buffer (may be larger than needed).
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GetAncillaryDataTransmitData (const bool inIsProgressive, const uint32_t inF2StartLine,
-																			uint8_t * pOutF1AncData, const uint32_t inF1ByteCountMax,
-																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax) const;
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.
 		@return		AJA_STATUS_SUCCESS if all items parse successfully;  otherwise the last failure result.
