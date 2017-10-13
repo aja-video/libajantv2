@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #define RX_MATCH_2110_VLAN                   BIT(0)
 #define RX_MATCH_2110_SOURCE_IP              BIT(1)

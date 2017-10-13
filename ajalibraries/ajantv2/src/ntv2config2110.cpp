@@ -416,9 +416,21 @@ void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream s
     {
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x1);
     }
-    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+    // Wait
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (500);
+    #else
+        usleep (500 * 1000);
+    #endif
+
     mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x0);
-    mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,30);
+
+    // Wait
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (500);
+    #else
+        usleep (500 * 1000);
+    #endif
 }
 
 void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
@@ -1267,7 +1279,13 @@ void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
     mDevice.ReadRegister(kRegFramer_status + baseAddr,&val);
     while (val & BIT(1))
     {
-        mDevice.WaitForOutputVerticalInterrupt();
+        // Wait
+        #if defined(AJAWindows) || defined(MSWindows)
+            ::Sleep (10);
+        #else
+            usleep (10 * 1000);
+        #endif
+
         mDevice.ReadRegister(kRegFramer_status + baseAddr,&val);
     }
 }
@@ -1457,10 +1475,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     NTV2VideoFormat vfmt;
     GetTxFormat(channel,vfmt);
-    NTV2Standard  vstd  = GetNTV2StandardFromVideoFormat(vfmt);
     NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
-    //NTV2Standard  vstd = NTV2VideoFormatStandards[vfmt];
-    //NTV2FrameRate frate = NTV2VideoFormatFrameRates[vfmt];
     string rateString   = rateToString(frate);
 
     // media name
@@ -1489,7 +1504,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << "; exactframerate=";
     sdp << rateString;
     sdp << "; depth=10; TCS=SDR; colorimtery=";
-    sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vstd)) ? "BT601" : "BT709");
+    sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vfmt)) ? "BT601" : "BT709");
     sdp << "; PM=2110GPM; SSN=\"ST2110-20:2017\"; ";
     if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
     {
