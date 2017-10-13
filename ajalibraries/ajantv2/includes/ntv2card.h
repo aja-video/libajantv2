@@ -2787,22 +2787,6 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
-
-	//
-	// Color Correction Functions (KHD only )
-	//
-	AJA_VIRTUAL bool	SetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode mode);
-	AJA_VIRTUAL bool	GetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode *mode);
-	AJA_VIRTUAL bool	SetColorCorrectionOutputBank (NTV2Channel channel, ULWord bank);
-	AJA_VIRTUAL bool	GetColorCorrectionOutputBank (NTV2Channel channel, ULWord *bank);
-	AJA_VIRTUAL bool	SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank value);
-	AJA_VIRTUAL bool	GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	SetColorCorrectionSaturation (NTV2Channel channel, ULWord value);
-	AJA_VIRTUAL bool	GetColorCorrectionSaturation (NTV2Channel channel, ULWord *value);
-
-	AJA_VIRTUAL bool	SetDitherFor8BitInputs (NTV2Channel channel, ULWord dither);
-	AJA_VIRTUAL bool	GetDitherFor8BitInputs (NTV2Channel channel, ULWord* dither);
-
 	AJA_VIRTUAL bool	SetForce64(ULWord force64);
 	AJA_VIRTUAL bool	GetForce64(ULWord* force64);
 	AJA_VIRTUAL bool	Get64BitAutodetect(ULWord* autodetect64);
@@ -3505,7 +3489,7 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@name	Color Space Conversion & LUTs
+		@name	CSCs, LUTs & Color Correction
 	**/
 	///@{
 
@@ -3539,13 +3523,17 @@ public:
 		@param[in]	pInTable	A valid, non-null pointer to an array of 1,024 double-precision floating-point values.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	LoadLUTTable(const double * pInTable);
-	AJA_VIRTUAL bool	LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
-	AJA_VIRTUAL void	GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
-	AJA_VIRTUAL bool	SetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank value);
-	AJA_VIRTUAL bool	GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel);
-	AJA_VIRTUAL bool	SetLUTV2OutputBank (NTV2Channel channel, ULWord bank);
-	AJA_VIRTUAL bool	GetLUTV2OutputBank (NTV2Channel channel, ULWord *bank);
+	AJA_VIRTUAL bool		LoadLUTTable (const double * pInTable);
+	AJA_VIRTUAL bool		LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
+	AJA_VIRTUAL void		GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
+
+	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
+	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL inline bool	GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank * pOutValue, const NTV2Channel inChannel)	{return pOutValue ? GetLUTV2HostAccessBank(*pOutValue, inChannel) : false;}
+
+	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL inline bool	GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord * pOutBank)	{return pOutBank ? GetLUTV2OutputBank(inChannel, *pOutBank) : false;}
 
 	/**
 		@brief		Sets the RGB range for the given CSC.
@@ -3586,6 +3574,29 @@ public:
 	AJA_VIRTUAL bool	SetLUTControlSelect(NTV2LUTControlSelect inLUTSelect);
 	AJA_VIRTUAL bool	GetLUTControlSelect(NTV2LUTControlSelect * pOutLUTSelect)			{return pOutLUTSelect ? GetLUTControlSelect (*pOutLUTSelect) : false;}
 	AJA_VIRTUAL bool	GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect);
+
+	//
+	// Color Correction Functions (KHD only )
+	//
+	AJA_VIRTUAL bool		SetColorCorrectionMode(const NTV2Channel inChannel, const NTV2ColorCorrectionMode inMode);
+	AJA_VIRTUAL bool		GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode & outMode);
+	AJA_VIRTUAL inline bool	GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode * pOutMode)	{return pOutMode ? GetColorCorrectionMode(inChannel, *pOutMode) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL inline bool	GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord * pOutBank)	{return pOutBank ? GetColorCorrectionOutputBank(inChannel,*pOutBank) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
+	AJA_VIRTUAL bool		GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL inline bool	GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? GetColorCorrectionHostAccessBank(*pOutValue, inChannel) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionSaturation (const NTV2Channel inChannel, const ULWord inValue);
+	AJA_VIRTUAL bool		GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord & outValue);
+	AJA_VIRTUAL inline bool	GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord * pOutValue)	{return pOutValue ? GetColorCorrectionSaturation(inChannel, *pOutValue) : false;}
+
+	AJA_VIRTUAL bool		SetDitherFor8BitInputs (const NTV2Channel inChannel, const ULWord inDither);
+	AJA_VIRTUAL bool		GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord & outDither);
+	AJA_VIRTUAL inline bool	GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord * pOutDither)	{return pOutDither ? GetDitherFor8BitInputs(inChannel, *pOutDither) : false;}
 	///@}
 
 
