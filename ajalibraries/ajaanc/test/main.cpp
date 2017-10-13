@@ -387,7 +387,7 @@ class CNTV2AncDataTester
 
 
 			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
-			SHOULD_BE_TRUE (pLine21Packet != NULL);
+			SHOULD_BE_NON_NULL (pLine21Packet);
 			SHOULD_SUCCEED (pLine21Packet->GeneratePayloadData());
 			SHOULD_SUCCEED (pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21)));
 			SHOULD_SUCCEED (pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b')));
@@ -509,7 +509,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x00);
 			SHOULD_BE_TRUE (defaultPkt.IsEmpty());
 			SHOULD_BE_EQUAL (defaultPkt.GetPayloadByteCount(), 0);
-			SHOULD_BE_EQUAL (defaultPkt.GetPayloadData(), NULL);
+			SHOULD_BE_NULL (defaultPkt.GetPayloadData());
 			SHOULD_BE_UNEQUAL (defaultPkt.GetDataLocation(), nullLocation);
 			SHOULD_BE_TRUE (defaultPkt.GetDataLocation().IsValid());
 			SHOULD_BE_TRUE (defaultPkt.IsLumaChannel());
@@ -542,16 +542,16 @@ class CNTV2AncDataTester
 			}
 
 			//	Validate new "Unknown" packet from AJAAncillaryDataFactory::Create...
-			SHOULD_BE_EQUAL (pDefaultPkt, NULL);
+			SHOULD_BE_NULL (pDefaultPkt);
 			pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);
-			SHOULD_BE_TRUE (pDefaultPkt != NULL);
+			SHOULD_BE_NON_NULL (pDefaultPkt);
 			SHOULD_BE_TRUE (pDefaultPkt);
 			SHOULD_BE_FALSE (pDefaultPkt->GotValidReceiveData());
 			SHOULD_BE_EQUAL (pDefaultPkt->GetDID(), 0x00);
 			SHOULD_BE_EQUAL (pDefaultPkt->GetSID(), 0x00);
 			SHOULD_BE_TRUE (pDefaultPkt->IsEmpty());
 			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteCount(), 0);
-			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadData(), NULL);
+			SHOULD_BE_NULL (pDefaultPkt->GetPayloadData());
 			SHOULD_BE_UNEQUAL (pDefaultPkt->GetDataLocation(), nullLocation);
 			SHOULD_BE_TRUE (pDefaultPkt->GetDataLocation().IsValid());
 			SHOULD_BE_TRUE (pDefaultPkt->IsLumaChannel());
@@ -577,7 +577,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (pDefaultPkt->GetSID(), 0x02);
 			SHOULD_BE_FALSE (pDefaultPkt->IsEmpty());
 			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteCount(), sizeof(pTestBytes));
-			SHOULD_BE_TRUE (pDefaultPkt->GetPayloadData() != NULL);
+			SHOULD_BE_NON_NULL (pDefaultPkt->GetPayloadData());
 			SHOULD_BE_EQUAL (pDefaultPkt->GetDC(), sizeof(pTestBytes));
 			SHOULD_BE_FALSE (pDefaultPkt->ChecksumOK());
 			SHOULD_SUCCEED (pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum()));
@@ -647,10 +647,10 @@ class CNTV2AncDataTester
 					const AJAAncillaryDataType	dataType	(gDataTypes[ndx]);
 					cerr << ::AJAAncillaryDataTypeToString(dataType) << endl;
 					AJAAncillaryData *	pDefaultPkt	= AJAAncillaryDataFactory::Create(dataType);
-					SHOULD_BE_UNEQUAL(pDefaultPkt, NULL);
+					SHOULD_BE_NON_NULL(pDefaultPkt);
 					SHOULD_SUCCEED(pDefaultPkt->GeneratePayloadData());
 					AJAAncillaryData *	pClonePkt	= pDefaultPkt->Clone();
-					SHOULD_BE_UNEQUAL(pClonePkt, NULL);
+					SHOULD_BE_NON_NULL(pClonePkt);
 					SHOULD_BE_UNEQUAL(pDefaultPkt, pClonePkt);
 					SHOULD_BE_EQUAL(*pDefaultPkt, *pClonePkt);
 					SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
@@ -946,7 +946,7 @@ cerr << "WILL ITERATE OVER " << fd.GetFirstActiveLine() << " VANC LINES AND " <<
 							if (pktList.CountAncillaryData() != ((YUVLine.size() < 240) ? 1 : 2))	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
 							SHOULD_BE_EQUAL(pktList.CountAncillaryData(),  YUVLine.size() < 240  ?  1  :  2);
 							pPkt1 = pktList.GetAncillaryDataWithID (0x45, 0x01);
-							SHOULD_BE_UNEQUAL(pPkt1, NULL);	//	Should have packet DID=0x41/SID=0x01
+							SHOULD_BE_NON_NULL(pPkt1);	//	Should have packet DID=0x41/SID=0x01
 							SHOULD_BE_EQUAL(pPkt1->GetDID(), 0x45);	//	Should have DID=0x41
 							SHOULD_BE_EQUAL(pPkt1->GetSID(), 0x01);	//	Should have SID=0x01
 							SHOULD_BE_EQUAL(pPkt1->GetDC(), 216);	//	Should have DC=216
@@ -965,7 +965,7 @@ cerr << "WILL ITERATE OVER " << fd.GetFirstActiveLine() << " VANC LINES AND " <<
 								if (pktList.CountAncillaryData() != 2)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
 								SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 2);	//	Should have two packets
 								pPkt2 = pktList.GetAncillaryDataWithID (0x45, 0x02);
-								SHOULD_BE_UNEQUAL(pPkt2, NULL);	//	Should have packet DID=0x41/SID=0x02
+								SHOULD_BE_NON_NULL(pPkt2);	//	Should have packet DID=0x41/SID=0x02
 								SHOULD_BE_EQUAL(pPkt2->GetDID(), 0x45);	//	Should have DID=0x41
 								SHOULD_BE_EQUAL(pPkt2->GetSID(), 0x02);	//	Should have SID=0x02
 								SHOULD_BE_EQUAL(pPkt2->GetDC(), 2);	//	Should have DC=2
