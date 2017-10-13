@@ -118,7 +118,9 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	int							bCh3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bCh4Disable			= 1;						// Assume Channel 4 IS disabled by default
 	bool						bCh2RGB				= IsFrameBufferFormatRGB(fbFormatCh2);
-	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
+	bool						bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+													  mDSKMode == NTV2_DSKModeGraphicOverFB;
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode);
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
