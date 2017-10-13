@@ -550,7 +550,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const ByteVector & inData, con
 // This returns the number of bytes that will be returned by GenerateTransmitData(). This is usually
 // called first so the caller can allocate a buffer large enough to hold the results.
 
-AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize)
+AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize) const
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
@@ -596,7 +596,7 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize)
 //**********
 // Generates "raw" ancillary data from the internal ancillary data (playback)
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize)
+AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize) const
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 

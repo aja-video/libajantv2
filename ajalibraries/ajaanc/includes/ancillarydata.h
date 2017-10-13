@@ -776,7 +776,7 @@ public:
 		@param[out]	outPacketSize	Receives the size (in bytes) of the packet I will generate.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GetRawPacketSize (uint32_t & outPacketSize);
+	virtual AJAStatus						GetRawPacketSize (uint32_t & outPacketSize) const;
 
 	/**
 		@brief		Generates "raw" ancillary data from my internal ancillary data (playback) -- see \ref ancgumpformat.
@@ -785,7 +785,7 @@ public:
 		@param[out]	outPacketSize		Receives the size, in bytes, of the generated packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, uint32_t inMaxBytes, uint32_t & outPacketSize);
+	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, uint32_t inMaxBytes, uint32_t & outPacketSize) const;
 
 	/**
 		@brief		Generates "raw" 10-bit ancillary packet component data from my internal ancillary data (playback).
