@@ -1503,7 +1503,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
     return true;
 }
 
-string CNTV2Config2022::getLastError()
+std::string CNTV2Config2022::getLastError()
 {
     return NTV2IpErrorEnumToString(getLastErrorCode());
 }

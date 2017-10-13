@@ -162,13 +162,13 @@ Once the device has been acquired and configured, the main thread then creates a
 
 The program flow surrounded by the dashed line is the capture thread. When it starts, CNTV2Card::AutoCirculateInitForInput
 is called to set up the AutoCirculate parameters for a specific NTV2Channel, which allocates a contiguous block of frame
-buffers on the card to be used by the AutoCirculate mechanism. At this point, it is started by calling CNTV2Card::StartAutoCirculate.
+buffers on the card to be used by the AutoCirculate mechanism. At this point, it is started by calling CNTV2Card::AutoCirculateStart.
 Once started, it remains in a loop, calling CNTV2Card::AutoCirculateGetStatus to determine if AutoCirculate is in the "running" state
 and if at least one frame is ready to transfer. If so, AutoCirculateTransfer is called to transfer the captured frame to host memory;
 otherwise the thread sleeps in CNTV2Card::WaitForInputVerticalInterrupt until the next VBI occurs.
 This process continues until a global quit flag is set, at which point the thread calls CNTV2Card::AutoCirculateStop and exits.
 
-After CNTV2Card::StartAutoCirculate is called, the AJA device's Active Frame will automatically change at every VBI to cycle
+After CNTV2Card::AutoCirculateStart is called, the AJA device's Active Frame will automatically change at every VBI to cycle
 continuously from the starting frame to the ending frame and back again until CNTV2Card::AutoCirculateStop is called.
 CNTV2Card::AutoCirculateTransfer is called repeatedly to transfer a buffered video frame (plus any associated audio, timecode,
 ancillary data, etc.) between the driver and the application. The Active Frame, buffer level, etc. are advanced automatically
