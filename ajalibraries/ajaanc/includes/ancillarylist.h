@@ -43,7 +43,7 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 					It will return two packet lists.
 				-	For newer devices with Anc extractors, call AJAAncillaryList::AddReceivedAncillaryData (SDI devices) or
 					AJAAncillaryList::AppendReceivedRTPAncillaryData (IP devices), passing it the buffer used in the
-					AUTOCIRCULATE_TRANSFER::SetAncBuffers call. (SDI devices will use \ref ancgumpformat).
+					AUTOCIRCULATE_TRANSFER::SetAncBuffers call. (Buffers on SDI devices will use \ref ancgumpformat).
 
 	@note		I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
@@ -243,10 +243,20 @@ public:	//	INSTANCE METHODS
 
 	/**
 		@brief		Writes my AJAAncillaryData objects into the given tall/taller frame buffer having the given raster/format.
-		@note		It's a good idea to always call AJAAncillaryList::SortListByLocation before calling this function.
+		@param		inFrameBuffer		Specifies the frame buffer memory on the host to modify.
+		@param[in]	inFormatDesc		Describes the frame buffer's raster and pixel format.
+		@note		It's a good idea to call AJAAncillaryList::SortListByLocation before calling this function.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const;
+
+	/**
+		@brief		Writes my AJAAncillaryData objects into the given buffer as an RTP packet suitable for Anc insertion.
+		@param		inRTPBuffer			Specifies the buffer memory into which the RTP packet will be written.
+		@note		It's a good idea to always call AJAAncillaryList::SortListByLocation before calling this function.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const;
 	///@}
 
 
@@ -271,7 +281,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inRTPPacketData		Contains the RTP packet data as captured from an AJA IP device.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AppendReceivedRTPAncillaryData (const std::vector<uint8_t> & inRTPPacketData);
+	virtual AJAStatus						AppendReceivedRTPAncillaryData (const std::vector<uint32_t> & inRTPPacketData);
 
 
 	/**

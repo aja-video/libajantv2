@@ -423,7 +423,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 }	//	AddReceivedAncillaryData
 
 
-AJAStatus AJAAncillaryList::AppendReceivedRTPAncillaryData (const std::vector<uint8_t> & inRTPPacketData)
+AJAStatus AJAAncillaryList::AppendReceivedRTPAncillaryData (const std::vector<uint32_t> & inRTPPacketData)
 {
 	(void) inRTPPacketData;		//	TODO:	FINISH THIS
 	return AJA_STATUS_UNSUPPORTED;
@@ -762,6 +762,15 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 			cerr << ancData << endl;
 		}	//	for each packet
 	}	//	for each VANC line
+	return AJA_STATUS_UNSUPPORTED;
+}
+
+
+AJAStatus AJAAncillaryList::WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const
+{
+	if (inRTPBuffer.IsNULL())
+		return AJA_STATUS_NULL;
+
 	return AJA_STATUS_UNSUPPORTED;
 }
 
