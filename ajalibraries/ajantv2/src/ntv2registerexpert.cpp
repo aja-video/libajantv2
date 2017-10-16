@@ -1652,8 +1652,9 @@ private:
 				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
 				<< "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
 				<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
-				<< "Memory writes "			<< (inRegValue & BIT(28) ? "disabled" : "enabled")	<< endl
-				<< "Metadata from "			<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))					<< endl
+				<< "SD Y+C Demux: "			<< EnabDisab(inRegValue & BIT(30))						<< endl
+				<< "Metadata from: "		<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
 			return oss.str();
 		}
 	}	mDecodeAncExtControlReg;
