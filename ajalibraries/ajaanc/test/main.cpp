@@ -275,10 +275,9 @@ class CNTV2AncDataTester
 					}	//	for each AJAAncillaryDataChannel
 				}	//	for each AJAAncillaryDataSpace
 			}	//	for each line number
-			cerr << endl << endl;
-			for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)
-				cerr << *it << endl;
-			cerr << endl << endl;
+			//cerr << endl << endl;		for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)	cerr << *it << endl;	cerr << endl << endl;
+
+			//	Ordering Tests
 			return true;
 		}
 
@@ -487,7 +486,7 @@ class CNTV2AncDataTester
 					 << "HOFFSETS:  " << hOffsets << endl;
 				//	TBD:	Validate hOffsets
 				//	TBD:	Validate packets
-				return false;
+				SHOULD_BE_TRUE(false);	//	TBD
 			}
 
 			return true;
