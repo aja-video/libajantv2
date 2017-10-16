@@ -1201,7 +1201,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					XPt3 = NTV2_XptLUT3Out;
 					XPt4 = NTV2_XptLUT4Out;
 					break;
-				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT5Out; break;
+				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
