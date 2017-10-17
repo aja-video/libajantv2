@@ -1792,16 +1792,17 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))	<< endl
-				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
-				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
-				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
-				<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))	<< endl
-				<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))	<< endl
-				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))	<< endl
-				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))	<< endl
-				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))	<< endl
-				<< "Memory writes: "		<< ((inRegValue & BIT(28)) ? "disabled" : "enabled");
+			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))			<< endl
+				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))			<< endl
+				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))			<< endl
+				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))			<< endl
+				<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))			<< endl
+				<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))			<< endl
+				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))			<< endl
+				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))			<< endl
+				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))			<< endl
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))	<< endl
+				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}
 	}	mDecodeAncInsControlReg;
