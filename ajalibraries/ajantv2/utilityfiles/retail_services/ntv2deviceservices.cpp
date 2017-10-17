@@ -503,6 +503,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// mixer - support
 	if (mCard->DeviceCanDoAudioMixer() == true )
 	{
+		//bool bHostAudioRouting = AppUsersHostAudio();
+	
 		if (mAudioMixerOverrideState == false)
 		{
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
@@ -2482,6 +2484,31 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	
 	return offset;
 }
+
+
+bool DeviceServices::AppUsersHostAudio()
+{
+	bool useHostAudio = false;
+
+	/*
+	ULWord appType = 0; 
+	int32_t pid = 0;
+	mCard->GetStreamingApplication(&appType, &pid);
+	
+	switch (appType)
+	{
+		case AJA_FOURCC('K','e','y','G'):
+			useHostAudio = true;
+			break;
+		default:
+			useHostAudio = false;
+			break;
+	}
+	*/
+	
+	return useHostAudio;
+}
+
 
 
 NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
