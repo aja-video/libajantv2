@@ -518,13 +518,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			if (mAudioMixerOverrideState == false)
 			{
 				mCard->WriteRegister(kRegAudioMixerMutes, mAudioMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
 				mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
 				mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
-				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			}
-		
-			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
-			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
 		}
 		else
@@ -532,13 +532,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			if (mAudioMixerOverrideState == false)
 			{
 				mCard->WriteRegister(kRegAudioMixerMutes, mAudioCapMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(false);
 				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
 				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
-				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			}
-		
-			mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
-			mCard->SetAudioMixerAux1InputEnable(false);
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerAux2InputEnable(mAudioCapMixerSourceAux2Enable);
 		}
 		

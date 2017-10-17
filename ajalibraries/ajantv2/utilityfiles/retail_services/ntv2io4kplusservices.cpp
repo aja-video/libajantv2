@@ -1189,10 +1189,10 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				switch (mVirtualHDMIOutputSelect)
 				{
 				case NTV2_PrimaryOutputSelect:
-					XPt1 = NTV2_Xpt425Mux1AYUV;
-					XPt2 = NTV2_Xpt425Mux1BYUV;
-					XPt3 = NTV2_Xpt425Mux2AYUV;
-					XPt4 = NTV2_Xpt425Mux2BYUV;
+					XPt1 = NTV2_XptLUT1RGB;
+					XPt2 = NTV2_XptLUT2RGB;
+					XPt3 = NTV2_XptLUT3Out;
+					XPt4 = NTV2_XptLUT4Out;
 					break;
 				default:
 				case NTV2_4kHalfFrameRate:
@@ -1201,7 +1201,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					XPt3 = NTV2_XptLUT3Out;
 					XPt4 = NTV2_XptLUT4Out;
 					break;
-				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT5Out; break;
+				case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
@@ -3189,10 +3189,10 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 					{
 					default:
 					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_XptSDIIn1;
-						XPt2 = NTV2_XptSDIIn2;
-						XPt3 = NTV2_XptSDIIn3;
-						XPt4 = NTV2_XptSDIIn4;
+						XPt1 = NTV2_XptLUT1RGB;
+						XPt2 = NTV2_XptLUT2RGB;
+						XPt3 = NTV2_XptLUT3Out;
+						XPt4 = NTV2_XptLUT4Out;
 						break;
 					case NTV2_4kHalfFrameRate:
 						XPt1 = NTV2_XptLUT1RGB;

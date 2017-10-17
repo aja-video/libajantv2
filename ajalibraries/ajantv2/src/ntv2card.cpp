@@ -340,12 +340,18 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outSerialNumberString = SerialNum64ToString (GetSerialNumber ());
-	if (outSerialNumberString.empty ())
+	outSerialNumberString = SerialNum64ToString(GetSerialNumber());
+	if (outSerialNumberString.empty())
 	{
 		outSerialNumberString = "INVALID?";
 		return false;
 	}
+
+	const ULWord	deviceID	(GetDeviceID());
+	if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
+		outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
+	else if (deviceID == DEVICE_ID_IO4KIP)						//	IoIP/DNxIP?
+		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
 	return true;
 
 }	//	GetSerialNumberString

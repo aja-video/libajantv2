@@ -5265,6 +5265,8 @@ typedef enum
 	shiftSyncro = 24,
 	maskDisableExtractor = BIT(28),
 	shiftDisableExtractor = 28,
+	maskEnableSDMux = BIT(30),
+	shiftEnableSDMux = 30,
 	maskGrabLSBs = BIT(31),
 	shiftGrabLSBs = 31,
 	maskField1CutoffLine = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10),
