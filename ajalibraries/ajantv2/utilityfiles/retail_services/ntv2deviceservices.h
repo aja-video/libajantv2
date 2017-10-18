@@ -125,7 +125,6 @@ public:
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
-	bool AppUsersHostAudio();
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
 
