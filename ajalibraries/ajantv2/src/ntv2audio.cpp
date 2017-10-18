@@ -633,7 +633,7 @@ bool CNTV2Card::SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudio
 	if(!DeviceCanDoAudioMixer())
 		return false;
 
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID))
+	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
 		return false;	//	Invalid audio system
 
 	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
