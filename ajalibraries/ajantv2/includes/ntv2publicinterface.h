@@ -5378,6 +5378,8 @@ typedef enum
 	shiftInsSetProgressive = 24,
 	maskInsDisableInserter = BIT(28),
 	shiftInsDisableInserter = 28,
+	maskInsEnablePktSplitSD = BIT(31),
+	shiftInsEnablePktSplitSD = 31,
 	maskInsHancDelay = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9),
 	shiftINsHancDelay = 0,
 	maskInsVancDelay = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
