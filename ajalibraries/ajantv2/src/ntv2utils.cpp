@@ -7746,11 +7746,7 @@ bool convertHDRRegisterToFloatValues(const HDRRegValues & inRegisterValues, HDRF
 		(inRegisterValues.redPrimaryX > 0xC350) ||
 		(inRegisterValues.redPrimaryY > 0xC350) ||
 		(inRegisterValues.whitePointX > 0xC350) ||
-		(inRegisterValues.whitePointY > 0xC350) ||
-        (inRegisterValues.maxMasteringLuminance < 0x0000) ||
-        (inRegisterValues.minMasteringLuminance < 0x0000) ||
-        (inRegisterValues.maxContentLightLevel < 0x0000)  ||
-        (inRegisterValues.maxFrameAverageLightLevel < 0x0000))
+        (inRegisterValues.whitePointY > 0xC350))
 		return false;
 	outFloatValues.greenPrimaryX = static_cast<float>(inRegisterValues.greenPrimaryX * 0.00002);
 	outFloatValues.greenPrimaryY = static_cast<float>(inRegisterValues.greenPrimaryY * 0.00002);
