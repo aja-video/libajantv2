@@ -285,13 +285,6 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@deprecated	Use the 2-parameter version of this function instead.
-	**/
-	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
-														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y);
-
-
-	/**
 		@brief		Adds the packet that originated in the VANC lines of an NTV2 frame buffer to my list.
 		@param[in]	inPacketWords		Specifies the "raw" 16-bit User Data Words of the packet to be added. The first
 										six elements must be 0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS.
@@ -301,6 +294,13 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords,
 														const AJAAncillaryDataLocation & inLocation);
+
+
+	/**
+		@deprecated	Use the 2-parameter version of this function instead.
+	**/
+	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
+														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y);
 
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.
