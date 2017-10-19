@@ -218,7 +218,7 @@ class CNTV2AncDataTester
 		static bool BFT_DataLocation (void)
 		{
 			typedef	std::set<AJAAncillaryDataLocation>	AncLocationSet;
-			typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
+			//typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
 			AncLocationSet	ancLocations;
 			static const uint16_t					lines[]		=	{9,		16,		220,	285,	1910,	2320};
 			static const uint16_t					hOffsets[]	=	{AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
@@ -450,43 +450,134 @@ class CNTV2AncDataTester
 															0x200,	0x200,	0x2FA,	0x200,	0x200,	0x2FA,	0x200,	0x200,	0x2FA,	0x200,	0x200,	0x173,	0x191,	0x2E1,	0x200,	0x200,
 															0x200,	0x1C1,	0x23F,	0x2FF,	0x274,	0x2A9,	0x27E,	0x2E2,	0x2B4,	//	end of packet
 															0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040,	0x040};
-			UWordSequence	v210VancLine;
+			UWordSequence				v210VancLine;
+			UWordVANCPacketList			u16Pkts;
+			AJAAncillaryList			pktList;
+			AJAAncillaryData *			pPkt	(NULL);
+			AJAAncillaryData_Cea708 *	p708Pkt	(NULL);
+			UWordSequence				u16s;
+
+			///////////////////////////////////////////////////////////////////////	BEGIN TEST SECTION 1
+			//	The following 3 tests perform a round-trip validation of:
+			//		UWordSequence (aka vector<uint16_t>)
+			//			...into...
+			//				CNTV2SMPTEAncData::GetAncPacketsFromVANCLine
+			//					...resulting in...
+			//						UWordVANCPacketList
+			//							...into...
+			//								AJAAncillaryList::AddVANCData
+			//									...resulting in...
+			//										AJAAncillaryList containing one AJAAncillaryData packet
+			//											...into...
+			//												AJAAncillaryDataFactory::GuessAncillaryDataType
+			//												AJAAncillaryDataFactory::Create
+			//													...resulting in...
+			//														AJAAncillaryData_Cea708 instance
+			//															...to call...
+			//																AJAAncillaryData::GetPayloadData
+			//																	...resulting in...
+			//																		UWordSequence (aka vector<uint16_t>)
+
+			//	TEST 1:		Y-Channel-only CEA708 PACKET
 			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
 			{
 				v210VancLine.push_back(0x040);				//	Chroma
 				v210VancLine.push_back(pv210YSamples[ndx]);	//	Luma
 			}
-			UWordVANCPacketList	u16Pkts;
-			AJAAncillaryList	pktList;
-			SHOULD_BE_FALSE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (UWordSequence(), kNTV2SMPTEAncChannel_Y, u16Pkts));
-			SHOULD_BE_TRUE (u16Pkts.empty());
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts));
-			SHOULD_BE_TRUE (u16Pkts.empty());
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));
-			SHOULD_BE_FALSE (u16Pkts.empty());
-			SHOULD_BE_EQUAL (u16Pkts.size(), 1);
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Y));
-			cerr << pktList << endl;
+			SHOULD_BE_FALSE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (UWordSequence(), kNTV2SMPTEAncChannel_Y, u16Pkts));	//	This should fail (empty UWordSequence)
+			SHOULD_BE_TRUE (u16Pkts.empty());		//	Returned UWordSequence should be empty
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts));	//	Should succeed, but no C-channel packets
+			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no C-channel packets
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));	//	Should succeed, 1 Y-channel packet
+			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 Y-channel packet
+			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y-channel packet
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Y));	//	Make a packet list from it
+			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
+			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
+			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
+			p708Pkt = reinterpret_cast <AJAAncillaryData_Cea708 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea708, pPkt));	//	Make a 708-specific packet instance
+			SHOULD_BE_NON_NULL(p708Pkt);								//	708-specific packet instance creation should work
+			SHOULD_SUCCEED(p708Pkt->GetPayloadData(u16s));				//	Get its packet data as uint16_t vector (with parity)
+			SHOULD_BE_EQUAL(uint32_t(u16s.size()), p708Pkt->GetDC());	//	Vector element count should match packet data count
+			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
+				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+
+			//	Start over...
+			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();
+			delete p708Pkt;			p708Pkt = NULL;		pPkt = NULL;
+
+			//	TEST 2:		C-channel-only CEA708 PACKET
+			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
+			{
+				v210VancLine.push_back(pv210YSamples[ndx]);	//	Chroma
+				v210VancLine.push_back(0x040);				//	Luma
+			}
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));	//	Should succeed, but no Y-channel packets
+			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no Y-channel packets
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts));	//	Should succeed, 1 C-channel packet
+			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 C-channel packet
+			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 C-channel packet
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_C));	//	Make a packet list from it
+			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
+			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
+			SHOULD_BE_UNEQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This should fail -- because it's not in Y channel
+			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
+			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
+			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
+				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+
+			//	Start over...
+			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = NULL;
+
+			//	TEST 3:		Y&C-channel CEA708 PACKET
+			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
+				v210VancLine.push_back(pv210YSamples[ndx]);	//	Both Chroma & Luma
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));	//	Should succeed, but no Y-channel-only packets
+			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no Y-channel-only packets
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts));	//	Should succeed, but no C-channel-only packets
+			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no C-channel-only packets
+			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Both, u16Pkts));	//	Should succeed, 1 Y&C-channel packet
+			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y&C-channel packet
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Both));	//	Make a packet list from it
+			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
+			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
+			SHOULD_BE_UNEQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This should fail -- because it's not in Y channel
+			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
+			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
+			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
+				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+			//p708Pkt->Print(cerr, true);
+			///////////////////////////////////////////////////////////////////////	END TEST SECTION 1
 
 			if (true)
 			{
+				//	Start over:
+				v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = NULL;
+
 				//	Test CNTV2SMPTEAncData::GetAncPacketsFromVANCLine...
-				UWordVANCPacketList	packets;
-				UWordSequence		hOffsets;
+				UWordSequence				hOffsets;
+				AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9);
 				::SetDefaultCaptionLogOutputStream(cerr);
 				//::SetDefaultCaptionLogMask(kCaptionLog_SMPTEAncErrors | kCaptionLog_SMPTEAncSuccess | kCaptionLog_SMPTEAncDebug);
-				SHOULD_BE_TRUE(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, packets, hOffsets));
-				SHOULD_BE_EQUAL(packets.size(), 2);
-				SHOULD_BE_EQUAL(packets.size(), hOffsets.size());
-				const UWordSequence	rawPktComponents1	(packets.at(0));
-				const UWordSequence	rawPktComponents2	(packets.at(1));
-				SHOULD_BE_EQUAL(rawPktComponents1.size(), 223);
-				SHOULD_BE_EQUAL(rawPktComponents2.size(), 9);
-				cerr << "BFT_SMPTEAncData:  PACKETS:  " << packets << endl
-					 << "HOFFSETS:  " << hOffsets << endl;
-				//	TBD:	Validate hOffsets
-				//	TBD:	Validate packets
-				SHOULD_BE_TRUE(false);	//	TBD
+				SHOULD_BE_TRUE(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));
+				SHOULD_BE_EQUAL(u16Pkts.size(), 2);
+				SHOULD_BE_EQUAL(u16Pkts.size(), hOffsets.size());
+				const UWordSequence	u16s_1	(u16Pkts.at(0));
+				const UWordSequence	u16s_2	(u16Pkts.at(1));
+				SHOULD_BE_EQUAL(u16s_1.size(), 223);
+				SHOULD_BE_EQUAL(u16s_2.size(), 9);
+				//cerr << "BFT_SMPTEAncData:  PACKETS:  " << u16Pkts << endl
+				//	 << "HOFFSETS:  " << hOffsets << endl
+				//	 << "RESULTING PACKET LIST:" << endl;
+				for (UWordVANCPacketList::size_type ndx(0);  ndx < u16Pkts.size();  ndx++)
+					SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.at(ndx), loc.SetHorizontalOffset(hOffsets.at(ndx))));	//	Add to packet list
+				//pktList.Print(cerr, true) << endl;
 			}
 
 			return true;
