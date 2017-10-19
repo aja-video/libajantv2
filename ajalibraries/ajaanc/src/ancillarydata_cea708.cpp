@@ -103,9 +103,11 @@ AJAStatus AJAAncillaryData_Cea708::GeneratePayloadData (void)
 
 AJAAncillaryDataType AJAAncillaryData_Cea708::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	if (pInAncData->GetDID() == AJAAncillaryData_CEA708_DID)
-		if (pInAncData->GetSID() == AJAAncillaryData_CEA708_SID)
-			return AJAAncillaryDataType_Cea708;
+	if (pInAncData->GetLocationVideoSpace() == AJAAncillaryDataSpace_VANC)			//	Must be VANC (per SMPTE 334-2)
+		if (pInAncData->GetLocationDataChannel() == AJAAncillaryDataChannel_Y)		//	Must be Y-channel (per SMPTE 334-2)
+			if (pInAncData->GetDID() == AJAAncillaryData_CEA708_DID)				//	DID == 0x61
+				if (pInAncData->GetSID() == AJAAncillaryData_CEA708_SID)			//	SDID == 0x01
+					return AJAAncillaryDataType_Cea708;
 	return AJAAncillaryDataType_Unknown;
 }
 
