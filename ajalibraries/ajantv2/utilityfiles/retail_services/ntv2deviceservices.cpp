@@ -2591,7 +2591,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	ReferenceSelect tempSelect = (mDisplayReferenceSelect == NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mDisplayReferenceSelect;
+	ReferenceSelect tempSelect = mDisplayReferenceSelect == NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mDisplayReferenceSelect;
 	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : tempSelect;
 	switch (refSelect)
 	{
