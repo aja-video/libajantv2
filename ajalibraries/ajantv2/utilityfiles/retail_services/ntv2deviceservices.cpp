@@ -28,6 +28,7 @@
 #include "ntv2io4kplusservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
+#include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
 
@@ -503,18 +504,24 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// mixer - support
 	if (mCard->DeviceCanDoAudioMixer() == true )
 	{
+		ULWord appType=0; int32_t pid=0;
+		mCard->GetStreamingApplication(&appType, &pid);
+		bool bHostAudioApp = AppUsesHostAudio(appType);
+	
 		if (mAudioMixerOverrideState == false)
 		{
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
 			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
 		}
 		
-		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		// shared source
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
 	
 		if (mode == NTV2_MODE_DISPLAY)
 		{
+			mCard->SetAudioMixerMainInputAudioSystem(bHostAudioApp ? hostAudioSystem : NTV2_AUDIOSYSTEM_1);
+		
 			if (mAudioMixerOverrideState == false)
 			{
 				mCard->WriteRegister(kRegAudioMixerMutes, mAudioMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
@@ -525,10 +532,12 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			}
 			
 			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
-			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
+			mCard->SetAudioMixerAux2InputEnable(bHostAudioApp ? false : mAudioMixerSourceAux2Enable);
 		}
 		else
 		{
+			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		
 			if (mAudioMixerOverrideState == false)
 			{
 				mCard->WriteRegister(kRegAudioMixerMutes, mAudioCapMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
