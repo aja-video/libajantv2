@@ -233,6 +233,14 @@ typedef struct NTV2FormatDescriptor
 	bool							GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const;
 
 	/**
+		@brief		Answers with the equivalent line offset into the raster I describe for the given SMPTE line number.
+		@param[in]	inSMPTELine		Specifies the SMPTE line number.
+		@param[out]	outLineOffset	Receives the zero-based line offset into the raster I describe.
+		@return		True if successful;  otherwise false.
+	**/
+	bool							GetLineOffsetFromSMPTELine (const ULWord inSMPTELine, ULWord & outLineOffset) const;
+
+	/**
 		@return	True if I'm equal to the given NTV2FormatDescriptor.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/

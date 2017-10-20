@@ -998,6 +998,8 @@ static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			56
 static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			8,			8,			8,			8,			0	};
 static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		9,			9,			9,			9,			0	};
 
+static const ULWord	MaxLineNumbers []	=	{	1123,	745,	525,	623,	1121,	0,		1121,		0,			0,			0,			0,			0,			0	};
+
 
 bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const
 {
@@ -1028,6 +1030,44 @@ bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord
 	}
 	outSMPTELine = inLineOffset/divisor + smpteLine;
 	return true;
+}
+
+
+bool NTV2FormatDescriptor::GetLineOffsetFromSMPTELine (const ULWord inSMPTELine, ULWord & outLineOffset) const
+{
+	outLineOffset = 0xFFFFFFFF;
+	if (!IsValid())
+		return false;
+	if (!NTV2_IS_VALID_STANDARD(mStandard))
+		return false;
+	if (!NTV2_IS_VALID_VANCMODE(mVancMode))
+		return false;
+
+	ULWord			F1Line(0),	F2Line(0);
+	const ULWord	maxLineNum	(MaxLineNumbers[mStandard]);
+	const bool		is525i		(mStandard == NTV2_STANDARD_525);
+
+	switch (mVancMode)
+	{
+		case NTV2_VANCMODE_OFF:		F1Line = LineNumbersF1[mStandard];		F2Line = LineNumbersF2[mStandard];		break;
+		case NTV2_VANCMODE_TALL:	F1Line = LineNumbersF1t[mStandard];		F2Line = LineNumbersF2t[mStandard];		break;
+		case NTV2_VANCMODE_TALLER:	F1Line = LineNumbersF1tt[mStandard];	F2Line = LineNumbersF2tt[mStandard];	break;
+		case NTV2_VANCMODE_INVALID:	return false;
+	}
+	if (inSMPTELine < F1Line)
+		return false;	//	Above first line in FB raster
+	if (!NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  &&  inSMPTELine < F2Line  &&  inSMPTELine > (F2Line - F1Line + 1))
+		return false;	//	Above F2 first line and past end of F1
+	if (maxLineNum  &&  inSMPTELine > maxLineNum)
+		return false;	//	Past last line
+
+	if (NTV2_IS_PROGRESSIVE_STANDARD(mStandard))
+		outLineOffset = inSMPTELine - F1Line;
+	else if (inSMPTELine >= F2Line)
+		outLineOffset = (inSMPTELine - F2Line) * 2;
+	else
+		outLineOffset = (inSMPTELine - F1Line) * 2;
+	return outLineOffset < GetFullRasterHeight();
 }
 
 
