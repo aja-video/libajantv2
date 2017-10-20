@@ -1032,7 +1032,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				}
 				else
 				{
-					mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_Xpt425Mux2BYUV : NTV2_Xpt425Mux2BYUV);
+					mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_Xpt425Mux1BYUV : NTV2_Xpt425Mux2BYUV);
 				}
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 			}
