@@ -74,7 +74,7 @@
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
 #define kRegSarekLicenseStatus      38
-#define kRegSareakunused39          39
+#define kRegSarakunused39           39
 #define kRegSarekRx1Drops           40
 #define kRegSarekRx2Drops           41
 #define kRegSarekRx3Drops           42
