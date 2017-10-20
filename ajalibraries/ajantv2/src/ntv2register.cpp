@@ -8411,8 +8411,8 @@ bool CNTV2Card::SetLTCInputEnable(bool value)
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
-		if(source == NTV2_REFERENCE_EXTERNAL)
-			SetReference(NTV2_REFERENCE_FREERUN);
+//		if(source == NTV2_REFERENCE_EXTERNAL)
+//			SetReference(NTV2_REFERENCE_FREERUN);
 	}
 	if(GetDeviceID() == DEVICE_ID_CORVID24)
 	{
@@ -8430,8 +8430,8 @@ bool CNTV2Card::SetLTCOnReference(bool value)
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
-		if(source == NTV2_REFERENCE_EXTERNAL)
-			SetReference(NTV2_REFERENCE_FREERUN);
+//		if(source == NTV2_REFERENCE_EXTERNAL)
+//			SetReference(NTV2_REFERENCE_FREERUN);
 	}
 	if(GetDeviceID() == DEVICE_ID_CORVID24)
 	{
