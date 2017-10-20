@@ -817,7 +817,7 @@ string NTV2FormatDescriptor::PlaneToString (const UWord inPlaneIndex0) const
 UWord NTV2FormatDescriptor::ByteOffsetToPlane (const ULWord inByteOffset) const
 {
 	if (!IsPlanar())
-		return 0;
+		return inByteOffset < GetTotalRasterBytes() ? 0 : 0xFFFF;
 
 	ULWord	byteOffset	(0);
 	UWord	plane		(0);
@@ -1007,11 +1007,13 @@ bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord
 		return false;
 	if (!NTV2_IS_VALID_STANDARD(mStandard))
 		return false;
-	if (!NTV2_IS_VALID_VANCMODE (mVancMode))
+	if (!NTV2_IS_VALID_VANCMODE(mVancMode))
+		return false;
+	if (inLineOffset >= GetFullRasterHeight())
 		return false;
 
 	const bool		is525i		(mStandard == NTV2_STANDARD_525);
-	if (!NTV2_IS_PROGRESSIVE_STANDARD (mStandard))
+	if (!NTV2_IS_PROGRESSIVE_STANDARD(mStandard))
 		outIsField2 = (inLineOffset & 1)  ?  !is525i  :  is525i;
 
 	const ULWord	divisor		(NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  ?  1  :  2);
