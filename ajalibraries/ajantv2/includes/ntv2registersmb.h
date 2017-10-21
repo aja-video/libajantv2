@@ -45,14 +45,12 @@
 #define kRegSarekSerialLow          7
 #define kRegSarekSerialHi           8
 #define kRegSarekIGMPVersion        9
-
 #define kRegSarekMiscState          10
 #define kRegSarekPackageVersion     11
 #define kRegSarekIfVersion          12
-#define kRegSarekunused13           13
-#define kRegSarekunused14           14
+#define kRegSFPStatus_A             13
+#define kRegSFPStatus_B             14
 #define kRegSarekunused15           15
-
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
 #define kRegSarekMAC2               18
@@ -72,12 +70,11 @@
 #define kRegSarekFwCfg              32
 #define kRegSarekDDRStatus          33
 #define kRegSarekXrefStatus         34
-
+#define kRegSareakunused35          35
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
 #define kRegSarekLicenseStatus      38
-#define kRegSareakunused39          39
-
+#define kRegSarakunused39           39
 #define kRegSarekRx1Drops           40
 #define kRegSarekRx2Drops           41
 #define kRegSarekRx3Drops           42

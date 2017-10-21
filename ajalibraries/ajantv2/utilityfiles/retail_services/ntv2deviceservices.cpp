@@ -2430,7 +2430,8 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-		switch (mCaptureReferenceSelect)
+		ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mCaptureReferenceSelect;
+		switch (tempSelect)
 		{
 		default:
 		case kFreeRun:
@@ -2590,7 +2591,8 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : mDisplayReferenceSelect;
+	ReferenceSelect tempSelect = mDisplayReferenceSelect == NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mDisplayReferenceSelect;
+	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : tempSelect;
 	switch (refSelect)
 	{
 	default:
