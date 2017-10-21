@@ -988,6 +988,8 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 }
 
 
+//	SMPTE LINE NUMBERS:
+
 //	NTV2_VANCMODE_OFF							1080i	720p	525i	625i	1080p	2K		2K1080p		2K1080i		3840x2160p	4096x2160p	3840HFR		4096HFR
 static const ULWord	LineNumbersF1 []	=	{	21,		26,		21,		23,		42,		211,	42,			21,			42,			42,			42,			42,			0	};
 static const ULWord	LineNumbersF2 []	=	{	584,	27,		283,	336,	43,		1201,	43,			584,		43,			43,			43,			43,			0	};
@@ -998,7 +1000,8 @@ static const ULWord	LineNumbersF2t []	=	{	568,	7,		272,	325,	11,		1201,	11,			56
 static const ULWord	LineNumbersF1tt []	=	{	4,		6,		7,		5,		8,		211,	8,			4,			8,			8,			8,			8,			0	};
 static const ULWord	LineNumbersF2tt []	=	{	567,	7,		269,	318,	9,		1201,	9,			567,		9,			9,			9,			9,			0	};
 
-static const ULWord	MaxLineNumbers []	=	{	1123,	745,	525,	623,	1121,	0,		1121,		0,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF1Last[]	=	{	560,	745,	263,	310,	1121,	0,		1121,		0,			0,			0,			0,			0,			0	};
+static const ULWord	LineNumbersF2Last[]	=	{	1123,	745,	525,	623,	1121,	0,		1121,		0,			0,			0,			0,			0,			0	};
 
 
 bool NTV2FormatDescriptor::GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const
@@ -1043,30 +1046,34 @@ bool NTV2FormatDescriptor::GetLineOffsetFromSMPTELine (const ULWord inSMPTELine,
 	if (!NTV2_IS_VALID_VANCMODE(mVancMode))
 		return false;
 
-	ULWord			F1Line(0),	F2Line(0);
-	const ULWord	maxLineNum	(MaxLineNumbers[mStandard]);
-	const bool		is525i		(mStandard == NTV2_STANDARD_525);
+	ULWord			firstF1Line(0),	firstF2Line(0);
+	const ULWord	lastF1Line	(LineNumbersF1Last[mStandard]);
+	const ULWord	lastF2Line	(LineNumbersF2Last[mStandard]);
+	const ULWord	is525i		(mStandard == NTV2_STANDARD_525  ?  1  :  0);
+	const ULWord	not525i		(mStandard != NTV2_STANDARD_525  ?  1  :  0);
 
 	switch (mVancMode)
 	{
-		case NTV2_VANCMODE_OFF:		F1Line = LineNumbersF1[mStandard];		F2Line = LineNumbersF2[mStandard];		break;
-		case NTV2_VANCMODE_TALL:	F1Line = LineNumbersF1t[mStandard];		F2Line = LineNumbersF2t[mStandard];		break;
-		case NTV2_VANCMODE_TALLER:	F1Line = LineNumbersF1tt[mStandard];	F2Line = LineNumbersF2tt[mStandard];	break;
+		case NTV2_VANCMODE_OFF:		firstF1Line = LineNumbersF1[mStandard];		firstF2Line = LineNumbersF2[mStandard];		break;
+		case NTV2_VANCMODE_TALL:	firstF1Line = LineNumbersF1t[mStandard];	firstF2Line = LineNumbersF2t[mStandard];	break;
+		case NTV2_VANCMODE_TALLER:	firstF1Line = LineNumbersF1tt[mStandard];	firstF2Line = LineNumbersF2tt[mStandard];	break;
 		case NTV2_VANCMODE_INVALID:	return false;
 	}
-	if (inSMPTELine < F1Line)
+	if (inSMPTELine < firstF1Line)
 		return false;	//	Above first line in FB raster
-	if (!NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  &&  inSMPTELine < F2Line  &&  inSMPTELine > (F2Line - F1Line + 1))
-		return false;	//	Above F2 first line and past end of F1
-	if (maxLineNum  &&  inSMPTELine > maxLineNum)
+	if (NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  &&  lastF1Line  &&  inSMPTELine > lastF1Line)
+		return false;	//	Past last line
+	if (!NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  &&  lastF1Line  &&  inSMPTELine < firstF2Line  &&  inSMPTELine > lastF1Line)
+		return false;	//	In the void past end of F1 and above F2 first line
+	if (!NTV2_IS_PROGRESSIVE_STANDARD(mStandard)  &&  lastF2Line  &&  inSMPTELine > lastF2Line)
 		return false;	//	Past last line
 
 	if (NTV2_IS_PROGRESSIVE_STANDARD(mStandard))
-		outLineOffset = inSMPTELine - F1Line;
-	else if (inSMPTELine >= F2Line)
-		outLineOffset = (inSMPTELine - F2Line) * 2;
+		outLineOffset = inSMPTELine - firstF1Line;
+	else if (inSMPTELine >= firstF2Line)
+		outLineOffset = (inSMPTELine - firstF2Line) * 2 + not525i;
 	else
-		outLineOffset = (inSMPTELine - F1Line) * 2;
+		outLineOffset = (inSMPTELine - firstF1Line) * 2 + is525i;
 	return outLineOffset < GetFullRasterHeight();
 }
 
@@ -1088,8 +1095,8 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 }
 
 
-//	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?
-//	TO USE THE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
+//	Q:	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?
+//	A:	TO USE THE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
 
 NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
 {
