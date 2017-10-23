@@ -642,7 +642,7 @@ public:
 	/**
 		@return		A const pointer to my payload buffer.
 	**/
-	virtual inline const uint8_t *			GetPayloadData (void) const					{return &(m_payload[0]);}
+	virtual inline const uint8_t *			GetPayloadData (void) const					{return m_payload.empty() ? NULL : &(m_payload[0]);}
 
 	/**
 		@brief		Copies my payload data into an external buffer.
