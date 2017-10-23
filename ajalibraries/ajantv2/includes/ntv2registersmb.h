@@ -70,7 +70,7 @@
 #define kRegSarekFwCfg              32
 #define kRegSarekDDRStatus          33
 #define kRegSarekXrefStatus         34
-#define kRegSarekSFPStatus         	35
+#define kRegSarekSFPStatus          35
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
 #define kRegSarekLicenseStatus      38
