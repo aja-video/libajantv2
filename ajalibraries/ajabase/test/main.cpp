@@ -12,10 +12,13 @@
 
 #include "ajabase/common/common.h"
 #include "ajabase/common/guid.h"
+#include "ajabase/common/performance.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
+#include "ajabase/common/timer.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/systemtime.h"
 
 #include <clocale>
 #include <iostream>
@@ -605,3 +608,36 @@ TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
     }
 
 TEST_SUITE_END(); //atomic
+
+void performance_marker() {}
+TEST_SUITE("performance -- functions in ajabase/common/performance.h");
+
+    TEST_CASE("AJAPerformance")
+    {
+        AJAPerformance p("unit_test", AJATimerPrecisionMilliseconds);
+        p.Start();
+        AJATime::SleepInMicroseconds(100 * 1000);
+        p.Stop();
+        p.Start();
+        AJATime::SleepInMicroseconds(200 * 1000);
+        p.Stop();
+        p.Start();
+        AJATime::SleepInMicroseconds(300 * 1000);
+        p.Stop();
+
+        CHECK(p.Entries() == 3);
+        CHECK(p.MinTime() != 0);
+        CHECK(p.MaxTime() != 0);
+        // There could be variablitiy in the sleep call, so make sure in range
+        CHECK(p.StandardDeviation() > 95);
+        CHECK(p.StandardDeviation() < 105);
+
+        AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
+        CHECK(p2.Entries() == 0);
+        CHECK(p2.MinTime() != 0);
+        CHECK(p2.MaxTime() == 0);
+        CHECK(p2.Mean() == 0.0);
+        CHECK(p2.StandardDeviation() == 0.0);
+    }
+
+TEST_SUITE_END(); //performance
