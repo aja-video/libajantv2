@@ -101,60 +101,6 @@ static string AJAStatusToString (const AJAStatus inStatus)
 	return "<bad AJAStatus>";
 }
 
-/**
-	@brief		Packs up to one raster line of uint16_t YUV components into an NTV2_FBF_10BIT_YCBCR frame buffer.
-	@param[in]	inYCbCrLine		The YUV components to be packed into the frame buffer. This must contain at least 12 values.
-	@param		inFrameBuffer	The frame buffer in host memory that is to be modified.
-	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
-	@param[in]	inLineOffset	The zero-based line offset into the frame buffer where the packed components will be written.
-	@return		True if successful;  otherwise false.
-	@note		Neighboring components in the packed output will be corrupted if input component values exceed 0x3FF.
-	@note		This is a safer version of the ::PackLine_UWordSequenceTo10BitYUV function.
-**/
-AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2_POINTER & inFrameBuffer,
-													const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
-
-
-bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine,  NTV2_POINTER & inFrameBuffer,
-											const NTV2FormatDescriptor & inDescriptor,  const UWord inLineOffset)
-{
-	if (inYCbCrLine.size() < 12)
-		return false;	//	Input vector needs at least 12 components
-	if (inFrameBuffer.IsNULL())
-		return false;	//	NULL frame buffer
-	if (!inDescriptor.IsValid())
-		return false;	//	Bad format descriptor
-	if (ULWord(inLineOffset) >= inDescriptor.GetFullRasterHeight())
-		return false;	//	Illegal line offset
-
-	const uint32_t	pixPerLineX2	(inDescriptor.GetRasterWidth() * 2);
-	uint32_t *		pOutPackedLine	(NULL);
-	if (inFrameBuffer.GetByteCount() < inDescriptor.GetBytesPerRow() * ULWord(inLineOffset+1))
-		return false;	//	Buffer too small
-
-	pOutPackedLine = (uint32_t*) inDescriptor.GetRowAddress(inFrameBuffer.GetHostAddress(0), inLineOffset);
-	if (pOutPackedLine == NULL)
-		return false;	//	Buffer too small
-
-	for (uint32_t inputCount = 0, outputCount = 0;   inputCount < pixPerLineX2;   outputCount += 4, inputCount += 12)
-	{
-		if ((inputCount+11) >= uint32_t(inYCbCrLine.size()))
-			break;	//	Early exit (not fatal)
-	#if defined(_DEBUG)	//	'at' throws upon bad index values
-		pOutPackedLine[outputCount]   = uint32_t(inYCbCrLine.at(inputCount+0)) | uint32_t(inYCbCrLine.at(inputCount+ 1)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 2)<<20);
-		pOutPackedLine[outputCount+1] = uint32_t(inYCbCrLine.at(inputCount+3)) | uint32_t(inYCbCrLine.at(inputCount+ 4)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 5)<<20);
-		pOutPackedLine[outputCount+2] = uint32_t(inYCbCrLine.at(inputCount+6)) | uint32_t(inYCbCrLine.at(inputCount+ 7)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 8)<<20);
-		pOutPackedLine[outputCount+3] = uint32_t(inYCbCrLine.at(inputCount+9)) | uint32_t(inYCbCrLine.at(inputCount+10)<<10) | uint32_t(inYCbCrLine.at(inputCount+11)<<20);
-	#else				//	'operator[]' doesn't throw
-		pOutPackedLine[outputCount]   = uint32_t(inYCbCrLine[inputCount+0]) | uint32_t(inYCbCrLine[inputCount+ 1]<<10) | uint32_t(inYCbCrLine[inputCount+ 2]<<20);
-		pOutPackedLine[outputCount+1] = uint32_t(inYCbCrLine[inputCount+3]) | uint32_t(inYCbCrLine[inputCount+ 4]<<10) | uint32_t(inYCbCrLine[inputCount+ 5]<<20);
-		pOutPackedLine[outputCount+2] = uint32_t(inYCbCrLine[inputCount+6]) | uint32_t(inYCbCrLine[inputCount+ 7]<<10) | uint32_t(inYCbCrLine[inputCount+ 8]<<20);
-		pOutPackedLine[outputCount+3] = uint32_t(inYCbCrLine[inputCount+9]) | uint32_t(inYCbCrLine[inputCount+10]<<10) | uint32_t(inYCbCrLine[inputCount+11]<<20);
-	#endif
-	}
-	return true;
-}
-
 
 class CNTV2AncDataTester
 {

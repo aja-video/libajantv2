@@ -4,6 +4,7 @@
 	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2formatdescriptor.h"
+#include "ntv2utils.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
 	#include <stdint.h>

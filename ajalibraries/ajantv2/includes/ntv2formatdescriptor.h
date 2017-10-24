@@ -10,12 +10,9 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2utils.h"
-#include "videodefines.h"
 #include "ntv2publicinterface.h"
 #include <string>
 #include <iostream>
-#include <vector>
 #if defined (AJALinux)
 	#include <stdint.h>
 #endif

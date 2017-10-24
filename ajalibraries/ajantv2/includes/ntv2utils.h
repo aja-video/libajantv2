@@ -12,6 +12,7 @@
 #include "ntv2enums.h"
 #include "videodefines.h"
 #include "ntv2publicinterface.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2m31publicinterface.h"
 #include "ntv2signalrouter.h"
 #include <string>
@@ -66,15 +67,6 @@ AJAExport void CopyToQuadrant (uint8_t* srcBuffer, uint32_t srcHeight, uint32_t 
 //////////////////////////////////////////////////////
 
 /**
-	@brief	An ordered sequence of UWord (uint16_t) values.
-**/
-typedef	std::vector <UWord>					UWordSequence;
-typedef	UWordSequence::const_iterator		UWordSequenceConstIter;
-typedef	UWordSequence::iterator				UWordSequenceIter;
-
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
-
-/**
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
 	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
 									to be converted.
@@ -94,6 +86,19 @@ AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
+
+/**
+	@brief		Packs up to one raster line of uint16_t YUV components into an NTV2_FBF_10BIT_YCBCR frame buffer.
+	@param[in]	inYCbCrLine		The YUV components to be packed into the frame buffer. This must contain at least 12 values.
+	@param		inFrameBuffer	The frame buffer in host memory that is to be modified.
+	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
+	@param[in]	inLineOffset	The zero-based line offset into the frame buffer where the packed components will be written.
+	@return		True if successful;  otherwise false.
+	@note		Neighboring components in the packed output will be corrupted if input component values exceed 0x3FF.
+	@note		This is a safer version of the ::PackLine_UWordSequenceTo10BitYUV function.
+**/
+AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2_POINTER & inFrameBuffer,
+													const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
 
 #if !defined (NTV2_DEPRECATE)

@@ -7,7 +7,7 @@
 #include "ntv2config2110.h"
 #include "ntv2endian.h"
 #include "ntv2card.h"
-#include "ntv2formatdescriptor.h"
+#include "ntv2utils.h"
 #include <sstream>
 #include <algorithm>
 

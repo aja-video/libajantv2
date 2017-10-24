@@ -15,6 +15,19 @@
 using namespace std;
 
 
+ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
+{
+	inOutStream << dec << inData.size() << " UWords: ";
+	for (UWordSequenceConstIter iter (inData.begin ());  iter != inData.end ();  )
+	{
+		inOutStream << hex << setw (4) << setfill ('0') << *iter;
+		if (++iter != inData.end())
+			inOutStream << " ";
+	}
+	return inOutStream << dec << "";
+}
+
+
 NTV2SDIInputStatus::NTV2SDIInputStatus ()
 {
 	Clear ();
