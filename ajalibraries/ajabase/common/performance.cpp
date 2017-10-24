@@ -15,6 +15,9 @@
 #include "ajabase/common/performance.h"
 #include "ajabase/system/debug.h"
 
+#include <iomanip>
+#include <math.h>
+
 using std::string;
 using std::map;
 
@@ -36,6 +39,8 @@ AJAPerformance::AJAPerformance(const std::string& name,
     mEntries    = 0;
     mMinTime    = UINT64_MAX;
     mMaxTime    = 0;
+    mMean       = 0.0;
+    mM2         = 0.0;
 }
 
 AJAPerformance::AJAPerformance(const std::string& name,
@@ -49,6 +54,8 @@ AJAPerformance::AJAPerformance(const std::string& name,
     mMinTime    = UINT64_MAX;
     mMaxTime    = 0;
     mExtras     = values;
+    mMean       = 0.0;
+    mM2         = 0.0;
 }
 
 AJAPerformance::AJAPerformance(AJATimerPrecision precision)
@@ -59,6 +66,8 @@ AJAPerformance::AJAPerformance(AJATimerPrecision precision)
     mEntries    = 0;
     mMinTime    = UINT64_MAX;
     mMaxTime    = 0;
+    mMean       = 0.0;
+    mM2         = 0.0;
 }
 
 AJAPerformance::~AJAPerformance(void)
@@ -101,6 +110,27 @@ uint64_t AJAPerformance::MaxTime(void)
     return mMaxTime;
 }
 
+double AJAPerformance::Mean(void)
+{
+    return mMean;
+}
+
+double AJAPerformance::Variance(void)
+{
+    uint64_t entries = Entries();
+    if (entries > 1)
+    {
+        return mM2/(entries-1);
+    }
+    else
+        return 0.0;
+}
+
+double AJAPerformance::StandardDeviation(void)
+{
+    return sqrt(Variance());
+}
+
 const AJAPerformaceExtraMap AJAPerformance::Extras(void)
 {
     return mExtras;
@@ -126,6 +156,15 @@ void AJAPerformance::Stop(void)
     mTotalTime += elapsedTime;
     mEntries++;
 
+    // calculate the running mean and sum of squares of differences from the current mean (mM2)
+    // mM2 is needed to calculate the variance and the standard deviation
+    // see: https://stackoverflow.com/a/17053010
+    //      http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+    double delta1 = elapsedTime - mMean;
+    mMean += delta1/mEntries;
+    double delta2 = elapsedTime - mMean;
+    mM2 += delta1 * delta2;
+
     if (elapsedTime > mMaxTime)
 	{
         mMaxTime = elapsedTime;
@@ -149,22 +188,21 @@ void AJAPerformance::Report(const std::string& name)
     int entries = (int)Entries();
     if (entries > 0)
     {
-        int min   = (int)MinTime();
-        int max   = (int)MaxTime();
-        float avg = ((float)TotalTime()/(float)entries);
+        int min      = (int)MinTime();
+        int max      = (int)MaxTime();
+        double mean  = Mean();
+        double stdev = StandardDeviation();
         string times = (entries == 1) ? "time,  " : "times, ";
+        string reportName = name.empty() ? Name() : name;
 
-        std::string reportName = name.empty() ? Name() : name;
-
-        AJA_REPORT(AJA_DebugUnit_StatsGeneric,
-                   AJA_DebugSeverity_Debug,
-                   "  [%-23s] called %4d %s min: %4d, avg: %5.2f, max: %4d",
-                   reportName.c_str(),
-                   entries,
-                   times.c_str(),
-                   min,
-                   avg,
-                   max);
+        AJA_sREPORT(AJA_DebugUnit_StatsGeneric,
+                    AJA_DebugSeverity_Debug,
+                    "  ["     << std::left  << std::setw(23) << std::setfill(' ') << reportName << "] " <<
+                    "called " << std::right << std::setw(4)  << entries << " "  << times <<
+                    "min: "   << std::right << std::setw(4)  << min     << ", " <<
+                    "mean: "  << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << mean  << ", " <<
+                    "stdev: " << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << stdev << ", " <<
+                    "max: "   << std::right << std::setw(4)  << max);
     }
 }
 
@@ -213,7 +251,8 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             title = "stats_report";
         }
 
-        AJA_REPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "%s, tracking %d {", title.c_str(), stats.size());
+        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
+                    title << ", tracking " << stats.size() << " {");
 
         string units;
         switch(stats.begin()->second.Precision())
@@ -223,7 +262,8 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             case AJATimerPrecisionMicroseconds: units = "microseconds"; break;
         }
 
-        AJA_REPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "time units are in %s", units.c_str());
+        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
+                    "time units are in " << units);
 
         AJAPerformanceTracking::iterator foundAt = stats.begin();
         while (foundAt != stats.end())
@@ -235,7 +275,7 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
 
             ++foundAt;
         }
-        AJA_REPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "}");
+        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "}");
 
         return true;
     }
