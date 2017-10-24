@@ -610,21 +610,19 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	// 4K Down Converter
 	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
-	
-	// DC applies only in this case
+	// DC applies only to 4K Quad - for now
 	if (b4K && !b2pi)
 	{
 		// SDIOut-RGB
 		if (bSdiOutRGB)
 		{
-			// (FB-RGB: FB<-LUT<-DC) or (FB-YUV: FB<-CSC<-LUT<-DC) or (FB-RGB12: FB<-DC)
+			// (FB-RGB: FB<-LUT<-DC) or (FB-YUV: FB<-CSC<-LUT<-DC)
 			XPt1 = NTV2_XptLUT1RGB;
 			XPt2 = NTV2_XptLUT2RGB;
 			XPt3 = NTV2_XptLUT3Out;
-			XPt4 = NTV2_XptLUT3Out;
+			XPt4 = NTV2_XptLUT4Out;
 			mCard->Enable4KDCRGBMode(true);
 		}
-		
 		// SDIOut-YUV
 		else
 		{
