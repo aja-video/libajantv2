@@ -84,6 +84,21 @@ class AJAPerformance
         uint64_t MaxTime(void);
 
         /**
+         *  Returns the mean (average) time of all start/stop pairs (in Precision units)
+         */
+        double Mean(void);
+
+        /**
+         *  Returns the variance of all start/stop pairs (in Precision units)
+         */
+        double Variance(void);
+
+        /**
+         *  Returns the standard deviation of all start/stop pairs (in Precision units)
+         */
+        double StandardDeviation(void);
+
+        /**
          *  Returns a map of any extra values stored in the performance object
          */
         const AJAPerformaceExtraMap Extras(void);
@@ -95,6 +110,8 @@ class AJAPerformance
         uint64_t                    mEntries;
         uint64_t                    mMinTime;
         uint64_t                    mMaxTime;
+        double                      mMean;
+        double                      mM2;
 
         AJAPerformaceExtraMap       mExtras;
 };

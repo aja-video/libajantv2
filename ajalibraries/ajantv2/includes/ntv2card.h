@@ -1491,10 +1491,6 @@ public:
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? ReadAudioSource (*pOutValue, inChannel) : false;}
 
-	AJA_VIRTUAL bool	SetAudioOutputMonitorSource (NTV2AudioMonitorSelect inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outValue, NTV2Channel & outChannel);
-	AJA_VIRTUAL bool	GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-
 	/**
 		@brief		Enables or disables the output of audio samples by the given Audio System, resetting
 					the playback position to the start of the audio output buffer.
@@ -1951,6 +1947,24 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
+
+	/**
+		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor is
+					typically the L+R RCA jacks.)
+		@param[in]	inAudioSystem	Specifies the audio system to use. (This really should be an NTV2AudioSystem.)
+		@param[in]	inChannelPair	Specifies the audio channel pair to use. (This really should be an NTV2AudioChannelPair.)
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (NTV2AudioMonitorSelect inChannelPair, NTV2Channel inAudioSystem = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks.)
+		@param[in]	outAudioSystem		Receives the current audio system being used. (This really should be an NTV2AudioSystem.)
+		@param[in]	outChannelPair		Receives the current audio channel pair being used. (This really should be an NTV2AudioChannelPair.)
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
+	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
 		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
