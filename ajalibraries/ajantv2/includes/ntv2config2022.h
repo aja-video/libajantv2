@@ -164,6 +164,23 @@ public:
     std::vector<uint32_t> availableAudioPIDs;
 };
 
+
+struct sLinkStatus
+{
+    bool SFP_present;
+    bool SFP_rx_los;    // loss of signal
+    bool SFP_tx_fault;
+    bool linkUp;
+};
+
+struct s2022RxChannelStatus
+{
+    uint32_t primaryRxPackets;
+    uint32_t primaryValidRxPackets;
+    uint32_t secondaryRxPackets;
+    uint32_t secondaryValidRxPackets;
+};
+
 /**
     @brief	The CNTV2Config2022 class is the interface to Kona-IP network I/O using SMPTE 2022
 **/
@@ -224,6 +241,10 @@ public:
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
+
+    bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
+    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
+    bool        Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & status);
 
     // If method returns false call this to get details
     std::string getLastError();
