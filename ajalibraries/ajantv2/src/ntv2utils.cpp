@@ -7433,8 +7433,9 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
-			case DEVICE_ID_IO4KIP:						return "io4kip_pcie.bit";
-			case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx.mcs";
+            case DEVICE_ID_IO4KIP_2022:					return "io4kip_pcie_2022.bit";
+            case DEVICE_ID_IO4KIP_2110:					return "io4kip_pcie_2110.bit";
+            case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx.mcs";
 			default:									return "";
 		}
 	#else
@@ -7609,8 +7610,9 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
-														DEVICE_ID_IO4KIP,
-														DEVICE_ID_KONAIP_4TX_2110,
+                                                        DEVICE_ID_IO4KIP_2022,
+                                                        DEVICE_ID_IO4KIP_2110,
+                                                        DEVICE_ID_KONAIP_4TX_2110,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
