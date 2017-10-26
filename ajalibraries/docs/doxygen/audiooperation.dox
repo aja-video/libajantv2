@@ -114,4 +114,31 @@
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single NTV2AudioChannelPair or an NTV2AudioChannelPairs set.
+
+
+	@section	audiomixer		Audio Mixer
+
+	Some newer NTV2 devices have firmware that implements a three-multichannel-input <b>Audio Mixer</b>.
+	To determine if a device can support this feature, call ::NTV2DeviceCanDoAudioMixer.
+	To determine if the device actually has this feature in its running firmware, call CNTV2Card::DeviceCanDoAudioMixer.
+
+	The mixer supports three multichannel input sources:
+	-	<b>Main</b> (primary) input (all audio channels);
+	-	<b>Auxiliary 1</b> input (2 audio channels only);
+	-	<b>Auxiliary 2</b> input (2 audio channels only).
+
+	Each of the three mixer inputs can be sourced from the output of any audio engine on the device by making these calls:
+	-	CNTV2Card::SetAudioMixerMainInputAudioSystem (all audio channels)
+	-	CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (two audio channels only)
+	-	CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (two audio channels only)
+
+	Any of the mixer inputs can be disabled (muted) or enabled (unmuted) by making these calls:
+	-	CNTV2Card::SetAudioMixerMainInputEnable
+	-	CNTV2Card::SetAudioMixerAux1InputEnable
+	-	CNTV2Card::SetAudioMixerAux2InputEnable
+
+	Each mixer input has a separate gain control that's controlled from these functions:
+	-	CNTV2Card::SetAudioMixerMainInputGain
+	-	CNTV2Card::SetAudioMixerAux1InputGain
+	-	CNTV2Card::SetAudioMixerAux2InputGain
 **/

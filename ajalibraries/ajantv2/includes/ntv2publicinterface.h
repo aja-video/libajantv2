@@ -706,25 +706,25 @@ typedef enum NTV2RXSDIStatusRegister
 
 typedef enum
 {
-	kRegAudioMixerInputSelects = 2304,	//2304
-	kRegAudioMixerMainGain,		//2305
-	kRegAudioMixerAux1GainCh1,	//2306
-	kRegAudioMixerAux2GainCh1,	//2307
-	kRegAudioMixerChannelSelect,			//2308
-	kRegAudioMixerMutes,
-	kRegAudioMixerAux1GainCh2,
-	kRegAudioMixerAux2GainCh2,
-	kRegAudioMixerAux1InputLevels = 2318,
-	kRegAudioMixerAux2InputLevels,
-	kRegAudioMixerMainInputLevelsPair0,
-	kRegAudioMixerMainInputLevelsPair1,
-	kRegAudioMixerMainInputLevelsPair2,
-	kRegAudioMixerMainInputLevelsPair3,
-	kRegAudioMixerMainInputLevelsPair4,
-	kRegAudioMixerMainInputLevelsPair5,
-	kRegAudioMixerMainInputLevelsPair6,
-	kRegAudioMixerMainInputLevelsPair7,
-	kRegAudioMixerMixedChannelOutputLevels
+	kRegAudioMixerInputSelects = 2304,		//	2304
+	kRegAudioMixerMainGain,					//	2305
+	kRegAudioMixerAux1GainCh1,				//	2306
+	kRegAudioMixerAux2GainCh1,				//	2307
+	kRegAudioMixerChannelSelect,			//	2308
+	kRegAudioMixerMutes,					//	2309
+	kRegAudioMixerAux1GainCh2,				//	2310
+	kRegAudioMixerAux2GainCh2,				//	2311
+	kRegAudioMixerAux1InputLevels = 2318,	//	2318
+	kRegAudioMixerAux2InputLevels,			//	2319
+	kRegAudioMixerMainInputLevelsPair0,		//	2320
+	kRegAudioMixerMainInputLevelsPair1,		//	2321
+	kRegAudioMixerMainInputLevelsPair2,		//	2322
+	kRegAudioMixerMainInputLevelsPair3,		//	2323
+	kRegAudioMixerMainInputLevelsPair4,		//	2324
+	kRegAudioMixerMainInputLevelsPair5,		//	2325
+	kRegAudioMixerMainInputLevelsPair6,		//	2326
+	kRegAudioMixerMainInputLevelsPair7,		//	2327
+	kRegAudioMixerMixedChannelOutputLevels	//	2328
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.

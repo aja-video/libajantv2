@@ -6,6 +6,7 @@
 #include "ajatypes.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
+#include "ntv2registerexpert.h"
 #include "videodefines.h"
 #include "audiodefines.h"
 #include "ntv2endian.h"
@@ -7652,10 +7653,13 @@ string NTV2RegisterNumberToString (const NTV2RegisterNumber inValue)
 	string	result	(::NTV2RegisterNameString (inValue));
 	if (result.empty ())
 	{
-		ostringstream	oss;
-		//oss << "0x" << hex << inValue << dec;
-		oss << inValue;
-		result = oss.str ();
+		result = CNTV2RegisterExpert::GetDisplayName(inValue);
+		if (result.empty())
+		{
+			ostringstream	oss;	//oss << "0x" << hex << inValue << dec;
+			oss << inValue;
+			result = oss.str();
+		}
 	}
 	return result;
 }

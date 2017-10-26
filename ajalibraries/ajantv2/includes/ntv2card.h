@@ -774,39 +774,37 @@ public:
 		AJA_VIRTUAL NTV2_DEPRECATED NTV2BitfileType	BitfileSwitchNeeded (NTV2DeviceID deviceID, NTV2VideoFormat value, bool ajaRetail = AJA_RETAIL_DEFAULT);	///< @deprecated	This function is obsolete.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
-	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource value);
-	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outValue);
+	/**
+		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
+		@return		True if successful; otherwise false.
+		@param[in]	inRefSource		Specifies the NTV2ReferenceSource to use.
+					
+	**/
+	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource);
+
+	/**
+		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.
+		@return			True if successful; otherwise false.
+		@param[out]		outRefSource	Receives the NTV2ReferenceSource value.
+	**/
+	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 	AJA_VIRTUAL inline bool	GetReference (NTV2ReferenceSource * pOutValue)									{return pOutValue ? GetReference (*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
-		@brief		Retrieves the device's current retail service task mode.
+		@brief		Retrieves the device's current "retail service" task mode. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[out]	outMode		Receives the device's current "every frame task mode" setting. If successful, the
 								variable will contain NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
-		@details	AJA's retail drivers come with a program that automatically and continuously configures the
-					device once-per-frame using settings that are dictated by the AJA Control Panel application.
-					The task runs as a service on Windows and as an agent on MacOS. It starts when a host user logs in,
-					restores the device configuration to its last known state (as set by that user via the AJA Control Panel),
-					then holds that setting while running in the background, until the user logs off the host.
-					Some OEM applications cannot assume that the user's Control Panel settings will be valid for their
-					proper operation, and thus may want to know if the retail service has control of the device.
 	**/
 	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
 	AJA_VIRTUAL inline bool	GetEveryFrameServices (NTV2EveryFrameTaskMode * pOutMode)						{return pOutMode ? GetEveryFrameServices (*pOutMode) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
 		@brief		Enables or disables all or part of the retail mode service task that continuously controls
-					the "retail mode" device configuration.
+					the "retail mode" device configuration. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	mode		Specifies the "every frame task mode" the device is to assume,
 								and must be one of the following values: NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
-		@details	AJA's retail software provides a program that automatically and continuously configures the device once per frame
-					using settings that are dictated by the AJA Control Panel application. This task runs as a service on Windows,
-					and as an agent on MacOS X. It starts when a host user logs in, restores the device configuration to its last
-					known state (as set by the user via the AJA Control Panel), then holds that setting while running in the background,
-					until the user logs off the host. Some OEM applications cannot assume that the user's Control Panel settings
-					will be valid for their proper operation, and thus will need to disable the service task as long as their
-					application is running.
 	**/
 	AJA_VIRTUAL bool	SetEveryFrameServices (NTV2EveryFrameTaskMode mode);
 
@@ -817,20 +815,18 @@ public:
 	/**
 		@brief		Determines if a given frame store on the AJA device will be used to capture or playout video.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest (which corresponds to the Frame Store of interest).
+		@param[in]	inChannel		Specifies the FrameStore of interest as an NTV2Channel value.
 		@param[in]	inNewValue		Specifies the desired mode for the frame store, which must be either NTV2_MODE_DISPLAY
 									or NTV2_MODE_CAPTURE.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration should be respected or not.
-									Defaults to false on all platforms other than MacOS, which defaults to true.
-		@note		Applications that acquire exclusive use of the AJA device, set its "every frame services" mode
-					to NTV2_OEM_TASKS, and use AutoCirculate won't need to call this function, since AutoCirculate
-					sets the frame store's mode automatically.
+									Defaults to false on all platforms other than MacOS.
+		@note		Applications that use AutoCirculate don't need to call this function, since AutoCirculate takes care of setting the mode.
 	**/
 	AJA_VIRTUAL bool	SetMode (NTV2Channel inChannel, NTV2Mode inNewValue, bool inIsAJARetail = AJA_RETAIL_DEFAULT);
 
 	/**
 		@brief		Returns the current mode (capture or playout) of the given frame store on the AJA device.
-		@param[in]	inChannel	Specifies the frame store of interest (NTV2_CHANNEL1 - NTV2_CHANNEL4).
+		@param[in]	inChannel	Specifies the FrameStore of interest as an NTV2Channel value.
 		@param[out]	outValue	Receives the current mode for the channel. If the function result is true,
 								it will contain either NTV2_MODE_DISPLAY or NTV2_MODE_CAPTURE.
 		@details	A frame store can either be set to record/capture or display/playout.
@@ -2002,7 +1998,12 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+	///@}
 
+	/**
+		@name	Audio Mixer
+	**/
+	///@{
 	AJA_VIRTUAL bool		GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem);
 	AJA_VIRTUAL bool		SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem);
 
@@ -2042,7 +2043,6 @@ public:
 
 	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration);
 	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration);
-
 	///@}
 
 	//
