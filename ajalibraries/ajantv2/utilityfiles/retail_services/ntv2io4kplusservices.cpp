@@ -2768,14 +2768,14 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// SDI Out 1
-	if (b4K)
+	if (b4K && !b425_2wire && !b2wire4k)
 	{
 		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
 		}
-		else // YUV
+		else
 		{
 			if (bInRGB)
 			{
@@ -2797,7 +2797,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// SDI Out 2
-	if (b4K)
+	if (b4K && !b425_2wire && !b2wire4k)
 	{
 		if (bSdiOutRGB)
 		{
@@ -2840,6 +2840,11 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 			{
 				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			}
+			else if (b2wire4k || b425_2wire)
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, in4kYUV2);
 			}
 			else
 			{
@@ -2904,6 +2909,11 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 			{
 				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
+			else if (b2wire4k || b425_2wire)
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV3);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, in4kYUV4);
 			}
 			else
 			{
