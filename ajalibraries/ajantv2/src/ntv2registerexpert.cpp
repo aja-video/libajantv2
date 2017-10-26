@@ -1580,9 +1580,9 @@ private:
 			const UWord	input1_2Channel	((inRegValue >> 4) & 0x0000000F);
 			const UWord	input2_2Channel	((inRegValue >> 8) & 0x0000000F);
 			ostringstream	oss;
-			oss	<< "Main Input Select: " << (mainInputSelect+1)	<< endl
-				<< "Input 1 - 2 channel: " << (input1_2Channel+1) << endl
-				<< "INput 2 - 2 channel: " << (input2_2Channel+1);
+			oss	<< "Main: "		<< "Audio System " << (mainInputSelect+1)				<< endl
+				<< "AuxIn1: "	<< "2 chls from Audio System " << (input1_2Channel+1)	<< endl
+				<< "AuxIn2: "	<< "2 chls from Audio System " << (input2_2Channel+1);
 			return oss.str();
 		}
 	}	mAudMxrInputSelDecoder;
