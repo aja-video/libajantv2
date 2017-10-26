@@ -1634,12 +1634,12 @@ bool CNTV2Config2022:: Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChanne
     uint32_t addr;
 
     SelectRxChannel(channel,SFP_BOTTOM,addr);
-    mDevice.ReadRegister(addr + kReg2022_6_rx_sec_recv_pkt_cnt, &chanStatus.secondaryRxPackets);
-    mDevice.ReadRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.secondaryValidRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_sec_recv_pkt_cnt, &chanStatus.secondaryRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.secondaryValidRxPackets);
 
     SelectRxChannel(channel,SFP_TOP,addr);
-    mDevice.ReadRegister(addr + kReg2022_6_rx_pri_recv_pkt_cnt, &chanStatus.primaryRxPackets);
-    mDevice.ReadRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.primaryValidRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_pri_recv_pkt_cnt, &chanStatus.primaryRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.primaryValidRxPackets);
 
     return true;
 }
