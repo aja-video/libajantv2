@@ -1677,8 +1677,8 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 			}
 			else
 			{
-				in4kYUV1 = NTV2_XptHDMIInRGB;	in4kYUV2 = NTV2_XptHDMIInQ2RGB;
-				in4kYUV3 = NTV2_XptHDMIInQ3RGB;	in4kYUV4 = NTV2_XptHDMIInQ4RGB;
+				in4kYUV1 = NTV2_XptHDMIIn;		in4kYUV2 = NTV2_XptHDMIInQ2;
+				in4kYUV3 = NTV2_XptHDMIInQ3;	in4kYUV4 = NTV2_XptHDMIInQ4;
 			}
 		}
 		else if (bInRGB)	// SDI-RGB
