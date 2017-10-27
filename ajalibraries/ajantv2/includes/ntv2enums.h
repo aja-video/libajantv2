@@ -215,7 +215,9 @@ typedef enum
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
 	DEVICE_ID_KONAIP_4TX_2110			= 0x10646706,
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
-	DEVICE_ID_IO4KIP					= 0x10710850,
+    DEVICE_ID_IO4KIP_2022               = 0x10710850,
+    DEVICE_ID_IO4KIP_2110               = 0x10710851,
+
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -2869,62 +2871,63 @@ typedef enum
 
 typedef enum
 {
-    NTV2_BITFILE_NO_CHANGE		= 0,		// no bitfile change needed
-    NTV2_BITFILE_TYPE_INVALID	= 0,
+    NTV2_BITFILE_NO_CHANGE          = 0,		// no bitfile change needed
+    NTV2_BITFILE_TYPE_INVALID       = 0,
 #if !defined (NTV2_DEPRECATE)
-    NTV2_BITFILE_XENAHS_SD		= 1,		// XENA_HS: load SD bitfile								//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENAHS_HD		= 2,		// XENA-HS: load HD bitfile								//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_KONA2_DNCVT	= 3,		// KONA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_KONA2_UPCVT	= 4,		// KONA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALH_SD		= 5,		// XENA_LH: load SD bitfile								//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALH_HD		= 6,		// XENA-LH: load HD bitfile								//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALS_UART	= 7,		// XENA-LS: with UART Support							//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALS_CH2		= 8,		// XENA-LS: with Video Processing and Channel 2 Support	//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENA2_DNCVT	= 9,		// XENA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENA2_UPCVT	= 10,		// XENA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENA2_XDCVT	= 11,		// XENA2: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENA2_XUCVT	= 12,		// XENA2: load cross upconverter (720->1080) bitfile	//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALH_HDQRZ	= 13,		// XENA-LH - HD Qrez bitfile							//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENALH_SDQRZ	= 14,		// XENA-LH - SD Qrez bitfile							//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENAHS2_SD		= 15,		// XENA_HS2: load SD bitfile							//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENAHS2_HD		= 16,		// XENA-HS2: load HD bitfile							//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_MOAB_DNCVT		= 17,		// MOAB: load downconverter bitfile						//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_MOAB_UPCVT		= 18,		// MOAB: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_MOAB_XDCVT		= 19,		// MOAB: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_MOAB_XUCVT		= 20,		// MOAB: load cross upconverter (720->1080) bitfile		//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_XENA2_CSCVT	= 21,		// XENA2: load color space converter bitfile			//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_BORG_CODEC		= 25,		// Borg CoDec bitfile									//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_BORG_UFC		= 26,		// Borg VidProc bitfile									//	DEPRECATION_CANDIDATE
-    NTV2_BITFILE_LHI_DVI_MAIN	= 34,		// LHi DVI main bitfile
+    NTV2_BITFILE_XENAHS_SD          = 1,		// XENA_HS: load SD bitfile								//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENAHS_HD          = 2,		// XENA-HS: load HD bitfile								//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_KONA2_DNCVT        = 3,		// KONA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_KONA2_UPCVT        = 4,		// KONA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALH_SD          = 5,		// XENA_LH: load SD bitfile								//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALH_HD          = 6,		// XENA-LH: load HD bitfile								//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALS_UART        = 7,		// XENA-LS: with UART Support							//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALS_CH2         = 8,		// XENA-LS: with Video Processing and Channel 2 Support	//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENA2_DNCVT        = 9,		// XENA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENA2_UPCVT        = 10,		// XENA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENA2_XDCVT        = 11,		// XENA2: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENA2_XUCVT        = 12,		// XENA2: load cross upconverter (720->1080) bitfile	//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALH_HDQRZ       = 13,		// XENA-LH - HD Qrez bitfile							//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENALH_SDQRZ       = 14,		// XENA-LH - SD Qrez bitfile							//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENAHS2_SD         = 15,		// XENA_HS2: load SD bitfile							//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENAHS2_HD         = 16,		// XENA-HS2: load HD bitfile							//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_MOAB_DNCVT         = 17,		// MOAB: load downconverter bitfile						//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_MOAB_UPCVT         = 18,		// MOAB: load upconverter bitfile						//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_MOAB_XDCVT         = 19,		// MOAB: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_MOAB_XUCVT         = 20,		// MOAB: load cross upconverter (720->1080) bitfile		//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_XENA2_CSCVT        = 21,		// XENA2: load color space converter bitfile			//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_BORG_CODEC         = 25,		// Borg CoDec bitfile									//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_BORG_UFC           = 26,		// Borg VidProc bitfile									//	DEPRECATION_CANDIDATE
+    NTV2_BITFILE_LHI_DVI_MAIN       = 34,		// LHi DVI main bitfile
 #endif	//	!defined (NTV2_DEPRECATE)
-    NTV2_BITFILE_CORVID1_MAIN	= 22,		// CORVID1 main bitfile
-    NTV2_BITFILE_CORVID22_MAIN	= 23,		// Corvid22 main bitfile
-    NTV2_BITFILE_KONA3G_MAIN	= 24,		// Kona3G main bitfile
-    NTV2_BITFILE_LHI_MAIN		= 27,		// LHi main bitfile
-    NTV2_BITFILE_IOEXPRESS_MAIN	= 28,		// IoExpress main bitfile
-    NTV2_BITFILE_CORVID3G_MAIN	= 29,		// Corvid3G main bitfile
-    NTV2_BITFILE_KONA3G_QUAD	= 30,		// Kona3G Quad bitfile
-    NTV2_BITFILE_KONALHE_PLUS	= 31,		// LHePlus bitfile
-    NTV2_BITFILE_IOXT_MAIN		= 32,		// IoXT bitfile
-    NTV2_BITFILE_CORVID24_MAIN	= 33,		// Corvid24 main bitfile
-    NTV2_BITFILE_TTAP_MAIN		= 35,		// T-Tap main bitfile
-    NTV2_BITFILE_LHI_T_MAIN		= 36,		// LHi T main bitfile
-    NTV2_BITFILE_IO4K_MAIN		= 37,
-    NTV2_BITFILE_IO4KUFC_MAIN	= 38,
-    NTV2_BITFILE_KONA4_MAIN		= 39,
-    NTV2_BITFILE_KONA4UFC_MAIN	= 40,
-    NTV2_BITFILE_CORVID88		= 41,
-    NTV2_BITFILE_CORVID44		= 42,
-    NTV2_BITFILE_CORVIDHEVC     = 43,
-    NTV2_BITFILE_KONAIP_4CH_1SFP= 44,
-    NTV2_BITFILE_KONAIP_4CH_2SFP= 45,
+    NTV2_BITFILE_CORVID1_MAIN       = 22,		// CORVID1 main bitfile
+    NTV2_BITFILE_CORVID22_MAIN      = 23,		// Corvid22 main bitfile
+    NTV2_BITFILE_KONA3G_MAIN        = 24,		// Kona3G main bitfile
+    NTV2_BITFILE_LHI_MAIN           = 27,		// LHi main bitfile
+    NTV2_BITFILE_IOEXPRESS_MAIN     = 28,		// IoExpress main bitfile
+    NTV2_BITFILE_CORVID3G_MAIN      = 29,		// Corvid3G main bitfile
+    NTV2_BITFILE_KONA3G_QUAD        = 30,		// Kona3G Quad bitfile
+    NTV2_BITFILE_KONALHE_PLUS       = 31,		// LHePlus bitfile
+    NTV2_BITFILE_IOXT_MAIN          = 32,		// IoXT bitfile
+    NTV2_BITFILE_CORVID24_MAIN      = 33,		// Corvid24 main bitfile
+    NTV2_BITFILE_TTAP_MAIN          = 35,		// T-Tap main bitfile
+    NTV2_BITFILE_LHI_T_MAIN         = 36,		// LHi T main bitfile
+    NTV2_BITFILE_IO4K_MAIN          = 37,
+    NTV2_BITFILE_IO4KUFC_MAIN       = 38,
+    NTV2_BITFILE_KONA4_MAIN         = 39,
+    NTV2_BITFILE_KONA4UFC_MAIN      = 40,
+    NTV2_BITFILE_CORVID88           = 41,
+    NTV2_BITFILE_CORVID44           = 42,
+    NTV2_BITFILE_CORVIDHEVC         = 43,
+    NTV2_BITFILE_KONAIP_4CH_1SFP    = 44,
+    NTV2_BITFILE_KONAIP_4CH_2SFP    = 45,
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
 	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,
-	NTV2_BITFILE_KONAIP_1RX_1TX_2110 = 49,
-	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
-	NTV2_BITFILE_IO4KIP_MAIN	= 51,
-	NTV2_BITFILE_KONAIP_RTX_2110 = 52,
+    NTV2_BITFILE_KONAIP_1RX_1TX_2110= 49,
+    NTV2_BITFILE_IO4KPLUS_MAIN      = 50,
+    NTV2_BITFILE_IO4KIP_2022        = 51,
+    NTV2_BITFILE_IO4KIP_2110        = 52,
+    NTV2_BITFILE_KONAIP_RTX_2110    = 53,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

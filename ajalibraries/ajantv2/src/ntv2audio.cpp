@@ -68,10 +68,6 @@ static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelRegNum [] = {kRe
 																			 kRegAudioMixerMainInputLevelsPair6,kRegAudioMixerMainInputLevelsPair6,
 																			 kRegAudioMixerMainInputLevelsPair7,kRegAudioMixerMainInputLevelsPair7,
 																			 0};
-static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelMask [] = {kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,
-																			 kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	kRegMaskAudioMixerInputLeftLevel,	kRegMaskAudioMixerInputRightLevel,	0};
-static const ULWord	gAudioMixerChannelToAudioMixerMainInputLevelShift [] = {kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,	kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,
-																			 kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,	kRegShiftAudioMixerInputLeftLevel,	kRegShiftAudioMixerInputRightLevel,	0};
 struct PCM_CONTROL_INFO{
 	ULWord pcmControlReg;
 	ULWord pcmControlMask;
