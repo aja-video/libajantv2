@@ -55,6 +55,9 @@ NTV2CCGrabber::NTV2CCGrabber (	const string			inDeviceSpecifier,
 		mPlayoutThread		(NULL)
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
+#if defined(_DEBUG)
+	SetDefaultCaptionLogMask(kCaptionLog_All);
+#endif
 
 	CNTV2CaptionDecoder608::Create (m608Decoder);
 	CNTV2CaptionDecoder708::Create (m708Decoder);
