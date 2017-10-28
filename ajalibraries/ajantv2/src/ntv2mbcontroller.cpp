@@ -826,3 +826,66 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
      mIpErrorCode = NTV2IpErrInvalidMBResponse;
      return false;
  }
+
+ bool CNTV2MBController::GetSFPInfo(eSFP port, SFPMSAData & sfpdata)
+ {
+     if (!(getFeatures() & SAREK_MB_PRESENT))
+         return true;
+
+     sprintf((char*)txBuf,"cmd=%d,port=%d",(int)MB_CMD_FETCH_SFP_INFO,(int)port);
+     bool rv = sendMsg(1000);
+     if (!rv)
+     {
+         mIpErrorCode = NTV2IpErrNoResponseFromMB;
+         return false;
+     }
+
+     string response;
+     getResponse(response);
+     vector<string> msg;
+     splitResponse(response, msg);
+     if (msg.size() >=3)
+     {
+         string status;
+         rv = getString(msg[0],"status",status);
+         if (rv && (status == "OK"))
+         {
+             string info;
+             rv = getString(msg[2],"SFP",info);
+             if (rv == false)
+             {
+                 mIpErrorCode = NTV2IpErrSFPNotFound;
+                 return false;
+             }
+             if (info.size() != 129)
+             {
+                 mIpErrorCode = NTV2IpErrSFPNotFound;
+                 return false;
+             }
+             int j = 0;
+             for (int i=0; i < 128; i+=2)
+             {
+                 char buf[3];
+                 char * end;
+                 memset(buf,0,3);
+                 buf[0] = info[i];
+                 buf[1] = info[i+1];
+                 uint8_t val = (uint8_t)strtol(buf,&end,16);
+                 sfpdata.data[j++]= val;
+             }
+             return true;
+         }
+         else if (rv && (status == "FAIL"))
+         {
+             if (msg.size() >= 3)
+             {
+                 rv = getString(msg[2],"error",mIpInternalErrorString);
+                 mIpErrorCode = NTV2IpErrSFPNotFound;
+                 return false;
+             }
+         }
+     }
+
+     mIpErrorCode = NTV2IpErrInvalidMBResponse;
+     return false;
+ }

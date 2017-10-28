@@ -122,6 +122,12 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
             addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
             addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Queue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Input);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Output);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Input);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Output);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {

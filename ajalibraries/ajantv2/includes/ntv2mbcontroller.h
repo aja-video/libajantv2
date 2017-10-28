@@ -16,7 +16,8 @@ enum eMBCmd
     MB_CMD_FETCH_GM_INFO          = 7,
     MB_CMD_TAKE_SDP               = 8,
     MB_CMD_FETCH_SDP              = 9,
-    MB_CMD_DISABLE_NET_IF         = 10
+    MB_CMD_DISABLE_NET_IF         = 10,
+    MB_CMD_FETCH_SFP_INFO         = 11
 };
 
 enum eSFP
@@ -48,6 +49,12 @@ typedef struct
 {
     uint8_t	mac[6];
 } MACAddr;
+
+
+typedef struct
+{
+    uint8_t data[64];
+} SFPMSAData;
 
 
 // IGMP Control Block
@@ -117,6 +124,9 @@ protected:
     uint64_t GetNTPTimestamp();
     bool PushSDP(std::string filename, std::stringstream & sdpstream);
     bool GetSDP(std::string url, std::string & sdp);
+
+    bool GetSFPInfo(eSFP port, SFPMSAData & sfpdata);
+
 
 private:
     eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
