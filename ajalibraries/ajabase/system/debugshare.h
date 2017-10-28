@@ -56,6 +56,12 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_ControlPanel				= 16,
     AJA_DebugUnit_Watcher				    = 17,
     AJA_DebugUnit_Plugins                   = 18,
+    AJA_DebugUnit_CC608Queue				= 19,
+    AJA_DebugUnit_CC608Input				= 20,
+    AJA_DebugUnit_CC608Output				= 21,
+    AJA_DebugUnit_CC708Input				= 22,
+    AJA_DebugUnit_CC708Output				= 23,
+    AJA_DebugUnit_CCFont					= 24,
 
     // to add a new unit:
     //
@@ -74,14 +80,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 19,
-    AJA_DebugUnit_Unused_19                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_20                 = 20,
-    AJA_DebugUnit_Unused_21                 = 21,
-    AJA_DebugUnit_Unused_22                 = 22,
-    AJA_DebugUnit_Unused_23                 = 23,
-    AJA_DebugUnit_Unused_24                 = 24,
-    AJA_DebugUnit_Unused_25                 = 25,
+    AJA_DebugUnit_FirstUnused               = 25,
+    AJA_DebugUnit_Unused_25                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_26                 = 26,
     AJA_DebugUnit_Unused_27                 = 27,
     AJA_DebugUnit_Unused_28                 = 28,
