@@ -414,6 +414,30 @@ public:
     static AJAStatus GetMessageText(uint64_t sequenceNumber, const char** ppMessage);
 
     /**
+     *	Get the Process Id that reported the message.
+     *
+     *	@param[in]	sequenceNumber			Sequence number of the message.
+     *	@param[out]	pPid                    Process Id that reported the message.
+     *	@return		AJA_STATUS_SUCCESS		message time returned
+     *				AJA_STATUS_OPEN			debug system not open
+     *				AJA_STATUS_RANGE		index out of range
+     *				AJA_STATUS_NULL			null output pointer
+     */
+    static AJAStatus GetProcessId(uint64_t sequenceNumber, uint64_t* pPid);
+
+    /**
+     *	Get the Thread Id that reported the message.
+     *
+     *	@param[in]	sequenceNumber			Sequence number of the message.
+     *	@param[out]	pTid                    Thread Id that reported the message.
+     *	@return		AJA_STATUS_SUCCESS		message time returned
+     *				AJA_STATUS_OPEN			debug system not open
+     *				AJA_STATUS_RANGE		index out of range
+     *				AJA_STATUS_NULL			null output pointer
+     */
+    static AJAStatus GetThreadId(uint64_t sequenceNumber, uint64_t* pTid);
+
+    /**
      *	Get the number of messages accepted into the ring since creation.
      *
      *	@param[out]	pCount                      The number of messages
