@@ -266,3 +266,8 @@ AJAStatus AJAThreadImpl::SetThreadName(const char *) {
 	// FIXME: This feature is not supported on windows yet.
 	return AJA_STATUS_FAIL;
 }
+
+uint64_t AJAThreadImpl::GetThreadId()
+{
+    return uint64_t(GetCurrentThreadId());
+}
