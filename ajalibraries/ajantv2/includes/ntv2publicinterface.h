@@ -5456,7 +5456,8 @@ typedef enum
 		#define	NTV2_IS_VALID_HEADER_TAG(_x_)	((_x_) == NTV2_HEADER_TAG)
 		#define	NTV2_IS_VALID_TRAILER_TAG(_x_)	((_x_) == NTV2_TRAILER_TAG)
 
-		#define	NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief	Identifies NTV2BankSelGetSetRegs struct
+        #define	NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief	Identifies NTV2VirtualData struct
+        #define	NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief	Identifies NTV2BankSelGetSetRegs struct
 		#define	AUTOCIRCULATE_TYPE_STATUS		NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief	Identifies AUTOCIRCULATE_STATUS struct
 		#define	AUTOCIRCULATE_TYPE_XFER			NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief	Identifies AUTOCIRCULATE_TRANSFER struct
 		#define	AUTOCIRCULATE_TYPE_XFERSTATUS	NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief	Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
@@ -5474,7 +5475,8 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_GETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
-													(_x_) == NTV2_TYPE_BANKGETSET			)
+                                                    (_x_) == NTV2_TYPE_BANKGETSET			||	\
+                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW      )
 
 
 		//	NTV2_POINTER FLAGS
@@ -6515,7 +6517,41 @@ typedef enum
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2BankSelGetSetRegs)
 
-		
+
+        /**
+            @brief	This is used to perform virtual data reads or writes.
+            @note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2VirtualData)
+            NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+                ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
+                ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
+                NTV2_POINTER	mVirtualData;		///< @brief	Pointer object to virtual data. The SDK owns this memory.
+            NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs an NTV2VirtualData struct for reading or writing virtual data.
+                    @param[in]	inTag               The tag to use.
+                    @param[in]	inVirtualData       Pointer to vitrual data.
+                    @param[in]	inVirtualDataSize   The size of the virtual data.
+                    @param[in]	inDoWrite           True if writing, false if reading.
+                **/
+                explicit	NTV2VirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize, const bool inDoWrite = false);
+
+                /**
+                    @brief	Prints a human-readable representation of me to the given output stream.
+                    @param	inOutStream		Specifies the output stream to use.
+                    @return	A reference to the output stream.
+                **/
+                std::ostream &	Print (std::ostream & inOutStream) const;
+
+                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2VirtualData)
+
+
 		/**
 			@brief	This is used by the CNTV2Card::ReadSDIStatistics function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.
