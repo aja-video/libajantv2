@@ -9415,7 +9415,7 @@ bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const
 		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inRegInfo, true);
 		//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
 		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
-		return result;
+        return result;
 	}
 }
 
@@ -9444,8 +9444,48 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
 		if (result && !bankSelGetSetMsg.mInRegInfos.IsNULL ())
 			inOutRegInfo = bankSelGetSetMsg.GetRegInfo ();
+        return result;
 	}
-	return result;
+}
+
+
+bool CNTV2Card::VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
+{
+    bool					result	(false);
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+    if (_remoteHandle != INVALID_NUB_HANDLE)
+    {
+        // NOTE: DO NOT REMOVE THIS
+        // It's needed for the nub client to work
+    }
+    else
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+    {
+        NTV2VirtualData	virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
+        //cerr << "## DEBUG:  CNTV2Card::VirtualDataWrite:  " << virtualDataMsg << endl;
+        result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        return result;
+    }
+}
+
+
+bool CNTV2Card::VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
+{
+    bool					result	(false);
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+    if (_remoteHandle != INVALID_NUB_HANDLE)
+    {
+        // NOTE: DO NOT REMOVE THIS
+        // It's needed for the nub client to work
+    }
+    else
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+    {
+        NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
+        //cerr << "## DEBUG:  CNTV2Card::VirtualDataRead:  " << virtualDataMsg << endl;
+        result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        return result;
+    }
 }
 
 
