@@ -104,7 +104,7 @@ AJATime::GetSystemCounter()
 #ifdef AJA_USE_CLOCK_GETTIME
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (ts.tv_sec * ((int64_t)1000000)) + (ts.tv_nsec);
+    return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
 #else
 	struct timeval tv;
 	struct timezone tz;
