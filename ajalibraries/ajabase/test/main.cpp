@@ -618,6 +618,35 @@ TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
 
 TEST_SUITE_END(); //atomic
 
+void time_marker() {}
+TEST_SUITE("time -- functions in ajabase/system/systemtime.h");
+
+    TEST_CASE("AJATime")
+    {
+        uint64_t startMs = AJATime::GetSystemMilliseconds();
+        uint64_t startUs = AJATime::GetSystemMicroseconds();
+        uint64_t startNs = AJATime::GetSystemNanoseconds();
+        AJATime::SleepInMicroseconds(100 * 1000); // 1/10th of a second
+        uint64_t endMs = AJATime::GetSystemMilliseconds();
+        uint64_t endUs = AJATime::GetSystemMicroseconds();
+        uint64_t endNs = AJATime::GetSystemNanoseconds();
+
+        uint64_t deltaMs = endMs - startMs;
+        uint64_t deltaUs = endUs - startUs;
+        uint64_t deltaNs = endNs - startNs;
+
+        // There could be variablitiy in the sleep call, so make sure in range
+        // check to make sure the units are correct
+        CHECK(deltaMs > 90);
+        CHECK(deltaMs < 150);
+        CHECK(deltaUs > 90000);
+        CHECK(deltaUs < 150000);
+        CHECK(deltaNs > 90000000);
+        CHECK(deltaNs < 150000000);
+    }
+
+TEST_SUITE_END(); //time
+
 void performance_marker() {}
 TEST_SUITE("performance -- functions in ajabase/common/performance.h");
 
