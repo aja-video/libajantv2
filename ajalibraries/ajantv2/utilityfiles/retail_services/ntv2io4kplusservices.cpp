@@ -1483,7 +1483,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		mCard->EnableChannel(NTV2_CHANNEL4);
 
 
-	// connect muxes
+	// 425 Mux
 	if (b2pi)
 	{
 		if (genFrameFormat == FORMAT_RGB)
