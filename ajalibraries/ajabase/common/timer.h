@@ -76,6 +76,15 @@ public:
      */
     AJATimerPrecision Precision(void);
 
+    /**
+     *	Return the display string for the given timer precision enum.
+     *
+     *  @param	precision	The precision enum to get the display string for.
+     *  @param	longName	If true the string is set to a long description, otherwise an abbreviation.
+     *	@return				string description
+     */
+    static std::string PrecisionName(AJATimerPrecision precision, bool longName = true);
+
 private:
 
     uint64_t            mStartTime;

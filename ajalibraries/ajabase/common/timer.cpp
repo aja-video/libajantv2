@@ -140,3 +140,30 @@ AJATimer::Precision(void)
 {
     return mPrecision;
 }
+
+std::string
+AJATimer::PrecisionName(AJATimerPrecision precision, bool longName)
+{
+    std::string retStr;
+    if (longName)
+    {
+        switch(precision)
+        {
+            default:
+            case AJATimerPrecisionMilliseconds: retStr = "milliseconds"; break;
+            case AJATimerPrecisionMicroseconds: retStr = "microseconds"; break;
+            case AJATimerPrecisionNanoseconds:  retStr = "nanoseconds";  break;
+        }
+    }
+    else
+    {
+        switch(precision)
+        {
+            default:
+            case AJATimerPrecisionMilliseconds: retStr = "ms"; break;
+            case AJATimerPrecisionMicroseconds: retStr = "us"; break;
+            case AJATimerPrecisionNanoseconds:  retStr = "ns"; break;
+        }
+    }
+    return retStr;
+}
