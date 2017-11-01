@@ -25,6 +25,8 @@
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
+#include "ntv2ioip2022services.h"
+#include "ntv2ioip2110services.h"
 #include "ntv2io4kplusservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
@@ -44,6 +46,12 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+        case DEVICE_ID_IO4KIP_2022:
+            pDeviceServices = new IoIP2022Services();
+            break;
+        case DEVICE_ID_IO4KIP_2110:
+            pDeviceServices = new IoIP2110Services();
+            break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;

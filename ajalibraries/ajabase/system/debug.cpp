@@ -4,13 +4,16 @@
 	@brief		Implements the AJADebug class.
 **/
 
-#include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/atomic.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/lock.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/system.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/atomic.h"
+#include "ajabase/system/thread.h"
+
 #if defined(AJA_LINUX)
 #include <stdarg.h>
 #endif
@@ -21,7 +24,7 @@
 #include <time.h>
 
 static std::vector<std::string> sGroupLabelVector;
-static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
+static const char* sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
@@ -116,18 +119,26 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
             addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
             addDebugGroupToLabelVector(AJA_DebugUnit_Application);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJACCLib);
             addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncLib);
             addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
             addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
             addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
             addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Queue);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Input);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Output);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Input);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Output);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DataQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608MsgQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeChannel);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeScreen);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708SvcBlkQue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
             addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
+            addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {
@@ -365,6 +376,8 @@ inline uint64_t report_common(int32_t index, int32_t severity, const char* pFile
         aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
         spShare->messageRing[messageIndex].lineNumber = lineNumber;
         spShare->messageRing[messageIndex].severity = severity;
+        spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+        spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
         isGood = true;
     }
@@ -476,6 +489,8 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const std
             aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
             spShare->messageRing[messageIndex].lineNumber = lineNumber;
             spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
+            spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+            spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
             // format the message
             ajasnprintf(spShare->messageRing[messageIndex].messageText,
@@ -834,6 +849,64 @@ AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
 	}
 
 	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetProcessId(uint64_t sequenceNumber, uint64_t* pPid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pPid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pPid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].pid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetThreadId(uint64_t sequenceNumber, uint64_t* pTid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pTid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pTid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].tid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
 }
 
 
