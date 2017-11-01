@@ -1,24 +1,24 @@
 //
-//  ntv2ioip2110services.h
+//  ntv2io4kip2022services.h
 //
 //  Copyright (c) 2013 AJA Video, Inc. All rights reserved.
 //
 
-#ifndef _IoIP2110Services_
-#define _IoIP2110Services_
+#ifndef _Io4KIP2022Services_
+#define _Io4KIP2022Services_
 
 
 #include "ntv2deviceservices.h"
 
 //-------------------------------------------------------------------------------------------------------
-//	class IoIP2110Services
+//	class Io4KIP2022Services
 //-------------------------------------------------------------------------------------------------------
-class IoIP2110Services : public DeviceServices
+class Io4KIP2022Services : public DeviceServices
 {
 	
 public:
-	IoIP2110Services();
-	~IoIP2110Services();
+	Io4KIP2022Services();
+	~Io4KIP2022Services();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
