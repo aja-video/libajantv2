@@ -116,18 +116,26 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
             addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
             addDebugGroupToLabelVector(AJA_DebugUnit_Application);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJACCLib);
             addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncLib);
             addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
             addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
             addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
             addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Queue);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Input);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Output);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Input);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Output);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DataQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608MsgQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeChannel);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeScreen);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708SvcBlkQue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
             addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
+            addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {
