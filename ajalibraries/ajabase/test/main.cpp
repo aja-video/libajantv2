@@ -668,7 +668,7 @@ TEST_SUITE("performance -- functions in ajabase/common/performance.h");
         CHECK(p.MaxTime() != 0);
         // There could be variablitiy in the sleep call, so make sure in range
         CHECK(p.StandardDeviation() > 95);
-        CHECK(p.StandardDeviation() < 105);
+        CHECK(p.StandardDeviation() < 110);
 
         AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
         CHECK(p2.Entries() == 0);
