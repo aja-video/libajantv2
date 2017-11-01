@@ -274,7 +274,6 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
 
         const char* source2 = "a dog!";
         aja::safer_strncpy(target3, source2, strlen(source2), maxSize2);
-        printf(target3);
         CHECK(strcmp(target3, source2) == 0);
     }
 
