@@ -254,14 +254,7 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
         AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
                     title << ", tracking " << stats.size() << " {");
 
-        string units;
-        switch(stats.begin()->second.Precision())
-        {
-            default:
-            case AJATimerPrecisionMilliseconds: units = "milliseconds"; break;
-            case AJATimerPrecisionMicroseconds: units = "microseconds"; break;
-            case AJATimerPrecisionNanoseconds:  units = "nanoseconds";  break;
-        }
+        string units = AJATimer::PrecisionName(stats.begin()->second.Precision(), true);
 
         AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
                     "time units are in " << units);
