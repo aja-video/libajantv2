@@ -260,6 +260,7 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             default:
             case AJATimerPrecisionMilliseconds: units = "milliseconds"; break;
             case AJATimerPrecisionMicroseconds: units = "microseconds"; break;
+            case AJATimerPrecisionNanoseconds:  units = "nanoseconds";  break;
         }
 
         AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,

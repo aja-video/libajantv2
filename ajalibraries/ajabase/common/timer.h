@@ -12,7 +12,8 @@
 enum AJATimerPrecision
 {
     AJATimerPrecisionMilliseconds,
-    AJATimerPrecisionMicroseconds
+    AJATimerPrecisionMicroseconds,
+    AJATimerPrecisionNanoseconds
 };
 
 /**
@@ -47,7 +48,7 @@ public:
 	 *	If the timer is running, return the elapsed time since Start() was called.  If Stop() 
 	 *	has been called, return the time between Start() and Stop().
 	 *
-	 *	@return		The elapsed time in milliseconds.
+     *	@return		The elapsed time in selected timer precision units
 	 */
 	uint32_t ElapsedTime();
 
@@ -56,7 +57,7 @@ public:
 	 *
 	 *	Timeout checks the ElapsedTime() and returns true if it is greater than interval.
 	 *
-	 *	@param	interval	Timeout interval in milliseconds.
+     *	@param	interval	Timeout interval in selected timer precision units.
 	 *	@return				true if elapsed time greater than interval.
 	 */
 	bool Timeout(uint32_t interval);
