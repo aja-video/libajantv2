@@ -681,9 +681,6 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 
 	NTV2_ASSERT (!inConfigData.fChannelGenerators.empty ());
 	gApp = this;
-#if defined(_DEBUG)
-	SetDefaultCaptionLogMask(kCaptionLog_All);
-#endif
 }	//	constructor
 
 

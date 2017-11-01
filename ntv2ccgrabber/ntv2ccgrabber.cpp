@@ -55,10 +55,6 @@ NTV2CCGrabber::NTV2CCGrabber (	const string			inDeviceSpecifier,
 		mPlayoutThread		(NULL)
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
-#if defined(_DEBUG)
-	SetDefaultCaptionLogMask(kCaptionLog_All);
-#endif
-
 	CNTV2CaptionDecoder608::Create (m608Decoder);
 	CNTV2CaptionDecoder708::Create (m708Decoder);
 	NTV2_ASSERT (m608Decoder && m708Decoder);
@@ -710,7 +706,7 @@ unsigned NTV2CCGrabber::ExtractClosedCaptionData (const NTV2VideoFormat inVideoF
 		}
 	}	//	if able to use Anc buffers
 
-	if (NTV2_IS_SD_VIDEO_FORMAT (inVideoFormat) && !gotCaptionPacket)
+	if (NTV2_IS_SD_VIDEO_FORMAT(inVideoFormat) && !gotCaptionPacket)
 	{
 		NTV2FrameGeometry	fg;
 		mDevice.GetFrameGeometry (fg);
@@ -721,17 +717,25 @@ unsigned NTV2CCGrabber::ExtractClosedCaptionData (const NTV2VideoFormat inVideoF
 			mErrorTally++;
 		//else	oss << "Using CNTV2CaptionDecoder608::DecodeCaptionData";
 	}	//	if SD
-	else if (NTV2_IS_HD_VIDEO_FORMAT (inVideoFormat))
+	else if (NTV2_IS_HD_VIDEO_FORMAT(inVideoFormat))
 	{
 		bool	hdCaptionsParsedOkay	(false);
 		if (!gotCaptionPacket)
 			gotCaptionPacket = m708Decoder->FindSMPTE334AncPacketInVideoFrame (GetVideoData (), inVideoFormat, mCaptureFBF);	//	Look in VANC area
 
 		if (gotCaptionPacket)
-			hdCaptionsParsedOkay = m708Decoder->ParseSMPTE334AncPacket ();
+		{
+			vector<UByte>	svcBlk;
+			size_t			blkSize(0), byteCount(0);
+			int				svcNum(0);
+			bool			isExtendedSvc(false);
+			hdCaptionsParsedOkay = m708Decoder->ParseSMPTE334AncPacket();
+			if (m708Decoder->GetNextServiceBlockInfoFromQueue (NTV2_CC708PrimaryCaptionServiceNum, blkSize, byteCount, svcNum, isExtendedSvc))
+				m708Decoder->GetNextServiceBlockFromQueue(NTV2_CC708PrimaryCaptionServiceNum, svcBlk);	//	Pop queued service block
+		}
 
 		if (gotCaptionPacket && hdCaptionsParsedOkay)
-			captionData = m708Decoder->GetCC608CaptionData ();	//	Extract the 608 caption byte pairs
+			captionData = m708Decoder->GetCC608CaptionData();	//	Extract the 608 caption byte pairs
 		else
 			mErrorTally++;
 
