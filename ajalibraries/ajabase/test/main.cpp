@@ -266,6 +266,16 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
 
         char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
         CHECK(retVal3 == target2);
+
+        const int maxSize2 = 8;
+        char target3[maxSize2];
+        strcpy(target3,"???????");
+        CHECK(strcmp(target3, "???????") == 0);
+
+        const char* source2 = "a dog!";
+        aja::safer_strncpy(target3, source2, strlen(source2), maxSize2);
+        printf(target3);
+        CHECK(strcmp(target3, source2) == 0);
     }
 
 TEST_SUITE_END(); //common

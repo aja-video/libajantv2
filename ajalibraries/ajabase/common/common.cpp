@@ -289,7 +289,7 @@ char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize
 
     char *retVal = strncpy(target, source, num);
     // make sure always null terminated
-    target[lastIndex] = '\0';
+    target[num] = '\0';
 
     return retVal;
 }

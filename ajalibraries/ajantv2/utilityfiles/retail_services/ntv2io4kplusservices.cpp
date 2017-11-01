@@ -3119,10 +3119,10 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	if (mode == NTV2_MODE_CAPTURE)
 	{
 		// special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
-		if (bHdmiIn == true && (b4K == true && !(b4k6gOut || b4k12gOut)))
+		if (bHdmiIn == true && (b4K == true && (b4k6gOut || b4k12gOut)))
 		{
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, !b4k6gOut);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, !b4k6gOut);
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);		// 3,4 are for playback, unless 4K capture
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);		// 3,4 are for playback, unless 4K capture
 		}
@@ -3130,7 +3130,6 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		{
 			ULWord vpida = 0;
 			ULWord vpidb = 0;
-			mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
 
 			if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
 			{

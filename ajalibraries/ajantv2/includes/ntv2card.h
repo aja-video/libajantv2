@@ -3261,6 +3261,26 @@ public:
 	**/
 	AJA_VIRTUAL bool	BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inRegInfo);
 
+    /**
+        @brief			Writes the block of virtual data.
+        @param[in]		inTag               Tag for the virtual data.
+        @param[in]		inVirtualData       Virtual data to be written
+        @param[in]		inVirtualDataSize   Virtual data size
+        @return			True if all requested registers were successfully written; otherwise false.
+        @note			This operation is not guaranteed to be performed atomically.
+    **/
+    AJA_VIRTUAL bool    VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize);
+
+    /**
+        @brief			Reads the block of virtual data for a specific tag
+        @param[in]		inTag               Tag for the virtual data.
+        @param[out]		inOutVirtualData    Virtual data buffer to be written
+        @param[in]		inVirtualDataSize   Virtual data size
+        @return			True if all requested registers were successfully written; otherwise false.
+        @note			This operation is not guaranteed to be performed atomically.
+    **/
+    AJA_VIRTUAL bool    VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize);
+
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
 						this function fetches the SDI statistics for all SDI input spigots.
