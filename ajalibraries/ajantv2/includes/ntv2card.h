@@ -2100,6 +2100,17 @@ public:
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 	AJA_VIRTUAL bool	WaitForFlashNOTBusy();
 
+    /**
+        @brief		Reports the revision number of the currently-running firmware package.
+                    KonaIP style boards have a package.
+        @param[out]	outRevision		Receives the revision number.
+        @return		True if successful;  otherwise false.
+        @note		This may differ from the revision number of the installed firmware package if, after
+                    erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
+    **/
+    AJA_VIRTUAL bool	GetRunningFirmwarePackageRevision (ULWord & outRevision);
+
+
 	/**
 		@brief		Reports the revision number of the currently-running firmware.
 		@param[out]	outRevision		Receives the revision number.

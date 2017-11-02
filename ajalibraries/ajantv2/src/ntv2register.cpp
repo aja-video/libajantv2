@@ -3177,6 +3177,17 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 	return true;
 }
 
+bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
+{
+    outRevision = 0;
+    if (!IsOpen())
+        return false;
+
+    if (!IsKonaIPDevice())
+        return false;
+
+    return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, &outRevision);
+}
 
 bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
 {
