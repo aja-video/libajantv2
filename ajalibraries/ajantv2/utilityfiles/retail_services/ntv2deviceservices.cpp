@@ -2601,8 +2601,11 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mDisplayReferenceSelect;
-	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : tempSelect;
+	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
+	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
+	if (lockV2 == true && refSelect == kFreeRun)
+		refSelect = kVideoIn;
+	
 	switch (refSelect)
 	{
 	default:
@@ -2653,7 +2656,10 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 				}
 				break;
 			case NTV2_Input5Select://Only used by io4k quad id
-				mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+				if (lockV2)
+					mCard->SetReference(NTV2_REFERENCE_FREERUN);
+				else
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 				break;
 			}
 		}
