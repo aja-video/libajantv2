@@ -197,7 +197,8 @@ typedef struct _AJADebugMessage
 	uint32_t	destinationMask;							/**< Destination of the message */
 	int32_t		severity;									/**< Severity of the message */
 	int32_t		lineNumber;									/**< Source file line number that generated this message */
-    uint32_t	reserved[4];							    /**< Reserved */
+    uint64_t    pid;                                        /**< Process ID that generated the message */
+    uint64_t    tid;                                        /**< Thread ID that generated the message */
 	char		fileName[AJA_DEBUG_FILE_NAME_MAX_SIZE];		/**< Source file name that generated this message */
 	char		messageText[AJA_DEBUG_MESSAGE_MAX_SIZE];	/**< Text generated for this message */
 } AJADebugMessage;

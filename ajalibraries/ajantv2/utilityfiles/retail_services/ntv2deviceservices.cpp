@@ -25,6 +25,8 @@
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
+#include "ntv2io4kip2022services.h"
+#include "ntv2io4kip2110services.h"
 #include "ntv2io4kplusservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
@@ -44,6 +46,12 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+        case DEVICE_ID_IO4KIP_2022:
+            pDeviceServices = new Io4KIP2022Services();
+            break;
+        case DEVICE_ID_IO4KIP_2110:
+            pDeviceServices = new Io4KIP2110Services();
+            break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
@@ -2593,8 +2601,11 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mDisplayReferenceSelect;
-	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : tempSelect;
+	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
+	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
+	if (lockV2 == true && refSelect == kFreeRun)
+		refSelect = kVideoIn;
+	
 	switch (refSelect)
 	{
 	default:
@@ -2645,7 +2656,10 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 				}
 				break;
 			case NTV2_Input5Select://Only used by io4k quad id
-				mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+				if (lockV2)
+					mCard->SetReference(NTV2_REFERENCE_FREERUN);
+				else
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 				break;
 			}
 		}

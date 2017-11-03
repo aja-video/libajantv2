@@ -440,7 +440,7 @@ typedef enum
     kVRegKIPEncCfgError                     = VIRTUALREG_START+497,
     kVRegKIPDecCfgError                     = VIRTUALREG_START+498,
     kVRegKIPNetCfgError                     = VIRTUALREG_START+499,
-    kVRegUnused500                          = VIRTUALREG_START+500,
+    kVRegUseHDMI420Mode                     = VIRTUALREG_START+500,
     kVRegUnused501                          = VIRTUALREG_START+501,
     
     kVRegUserDefinedDBB						= VIRTUALREG_START+502,

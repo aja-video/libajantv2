@@ -4,13 +4,16 @@
 	@brief		Implements the AJADebug class.
 **/
 
-#include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/atomic.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/lock.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/system.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/atomic.h"
+#include "ajabase/system/thread.h"
+
 #if defined(AJA_LINUX)
 #include <stdarg.h>
 #endif
@@ -21,7 +24,7 @@
 #include <time.h>
 
 static std::vector<std::string> sGroupLabelVector;
-static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
+static const char* sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
@@ -322,6 +325,15 @@ AJADebug::IsDebugBuild()
     return sDebug;
 }
 
+inline int64_t debug_time()
+{
+    int64_t ticks = AJATime::GetSystemCounter();
+    int64_t rate = AJATime::GetSystemFrequency();
+    int64_t time = ticks / rate * AJA_DEBUG_TICK_RATE;
+    time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
+
+    return time;
+}
 
 inline uint64_t report_common(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, uint64_t& writeIndex, int32_t& messageIndex)
 {
@@ -368,11 +380,13 @@ inline uint64_t report_common(int32_t index, int32_t severity, const char* pFile
         // save the message data
         spShare->messageRing[messageIndex].groupIndex = index;
         spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
-        spShare->messageRing[messageIndex].time = AJADebug::DebugTime();
+        spShare->messageRing[messageIndex].time = debug_time();
         spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
         aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
         spShare->messageRing[messageIndex].lineNumber = lineNumber;
         spShare->messageRing[messageIndex].severity = severity;
+        spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+        spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
         isGood = true;
     }
@@ -479,11 +493,13 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const std
             // save the message data
             spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
             spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
-            spShare->messageRing[messageIndex].time = DebugTime();
+            spShare->messageRing[messageIndex].time = debug_time();
             spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
             aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
             spShare->messageRing[messageIndex].lineNumber = lineNumber;
             spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
+            spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+            spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
             // format the message
             ajasnprintf(spShare->messageRing[messageIndex].messageText,
@@ -846,6 +862,64 @@ AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
 
 
 AJAStatus
+AJADebug::GetProcessId(uint64_t sequenceNumber, uint64_t* pPid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pPid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pPid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].pid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetThreadId(uint64_t sequenceNumber, uint64_t* pTid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pTid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pTid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].tid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
 AJADebug::GetMessagesAccepted(uint64_t* pCount)
 {
     if(spShare == NULL)
@@ -1052,12 +1126,6 @@ AJADebug::RestoreState(char* pFileName)
 int64_t
 AJADebug::DebugTime()
 {
-	int64_t ticks = AJATime::GetSystemCounter();
-	int64_t rate = AJATime::GetSystemFrequency();
-	int64_t time = 0;
-
-	time = ticks / rate * AJA_DEBUG_TICK_RATE;
-	time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
-
-	return time;
+    // wrapper around the inlined local version
+    return debug_time();
 }

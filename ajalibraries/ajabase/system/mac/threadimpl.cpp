@@ -7,8 +7,9 @@
 #include <errno.h>
 #include <sched.h>
 #include <signal.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/syscall.h>
+#include <sys/time.h>
 #include "ajabase/system/mac/pthreadsextra.h"
 #include "ajabase/system/mac/threadimpl.h"
 #include "ajabase/common/timer.h"
@@ -475,4 +476,11 @@ AJAStatus AJAThreadImpl::SetThreadName(const char *name) {
         return AJA_STATUS_FAIL;
     }
     return AJA_STATUS_SUCCESS;
+}
+
+uint64_t AJAThreadImpl::GetThreadId()
+{
+    uint64_t tid=0;
+    pthread_threadid_np(NULL, &tid);
+    return tid;
 }

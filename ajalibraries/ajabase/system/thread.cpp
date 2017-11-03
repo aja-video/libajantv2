@@ -167,3 +167,8 @@ AJAThread::Attach(AJAThreadFunction* pThreadFunction, void* pUserContext)
 AJAStatus AJAThread::SetThreadName(const char *name) {
 	return mpImpl ? mpImpl->SetThreadName(name) : AJA_STATUS_FAIL;
 }
+
+uint64_t AJAThread::GetThreadId()
+{
+    return AJAThreadImpl::GetThreadId();
+}

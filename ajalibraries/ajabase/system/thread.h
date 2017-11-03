@@ -200,6 +200,13 @@ public:
 	 */
 	virtual AJAStatus SetThreadName(const char *name);
 
+    /**
+     *	Get the Thread Id of the current running thread
+     *
+     *	@return The thread Id of the current thread, expressed as a 64 bit unsigned integer
+     */
+    static uint64_t	GetThreadId();
+
 private:
 
 	AJAThreadImpl* mpImpl;

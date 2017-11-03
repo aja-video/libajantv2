@@ -12,7 +12,8 @@
 enum AJATimerPrecision
 {
     AJATimerPrecisionMilliseconds,
-    AJATimerPrecisionMicroseconds
+    AJATimerPrecisionMicroseconds,
+    AJATimerPrecisionNanoseconds
 };
 
 /**
@@ -47,7 +48,7 @@ public:
 	 *	If the timer is running, return the elapsed time since Start() was called.  If Stop() 
 	 *	has been called, return the time between Start() and Stop().
 	 *
-	 *	@return		The elapsed time in milliseconds.
+     *	@return		The elapsed time in selected timer precision units
 	 */
 	uint32_t ElapsedTime();
 
@@ -56,7 +57,7 @@ public:
 	 *
 	 *	Timeout checks the ElapsedTime() and returns true if it is greater than interval.
 	 *
-	 *	@param	interval	Timeout interval in milliseconds.
+     *	@param	interval	Timeout interval in selected timer precision units.
 	 *	@return				true if elapsed time greater than interval.
 	 */
 	bool Timeout(uint32_t interval);
@@ -74,6 +75,15 @@ public:
      *	@return				precision enum that was used in the constructor.
      */
     AJATimerPrecision Precision(void);
+
+    /**
+     *	Return the display string for the given timer precision enum.
+     *
+     *  @param	precision	The precision enum to get the display string for.
+     *  @param	longName	If true the string is set to a long description, otherwise an abbreviation.
+     *	@return				string description
+     */
+    static std::string PrecisionName(AJATimerPrecision precision, bool longName = true);
 
 private:
 

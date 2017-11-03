@@ -33,6 +33,7 @@ public:
 	AJAStatus Attach(AJAThreadFunction* pThreadFunction, void* pUserContext);
 	AJAStatus SetThreadName(const char *name);
 
+    static uint64_t	GetThreadId();
 	static DWORD WINAPI ThreadProcStatic(void* pThreadImplContext);
 
 	AJAThread* mpThread;

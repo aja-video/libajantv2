@@ -34,6 +34,7 @@ public:
 
 	AJAStatus Attach(AJAThreadFunction* pThreadFunction, void* pUserContext);
 
+    static uint64_t	GetThreadId();
 	static void*  ThreadProcStatic(void* pThreadImplContext);
 	AJAStatus SetThreadName(const char *name);
 

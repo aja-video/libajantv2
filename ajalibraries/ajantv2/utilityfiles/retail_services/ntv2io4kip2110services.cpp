@@ -1,21 +1,21 @@
 //
-//  ntv2io4kplusservices.cpp
+//  ntv2io4kip2110services.cpp
 //
 //  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
 //
 
-#include "ntv2io4kplusservices.h"
+#include "ntv2io4kip2110services.h"
 
 
 //-------------------------------------------------------------------------------------------------------
-//	class Io4KServices
+//	class Io4KIP2110Services
 //-------------------------------------------------------------------------------------------------------
 
-Io4KPlusServices::Io4KPlusServices()
+Io4KIP2110Services::Io4KIP2110Services()
 {
 }
 
-Io4KPlusServices::~Io4KPlusServices()
+Io4KIP2110Services::~Io4KIP2110Services()
 {
 	for(uint32_t i = 0; i < 8; i++)
 		mCard->EnableChannel((NTV2Channel)i);
@@ -25,7 +25,7 @@ Io4KPlusServices::~Io4KPlusServices()
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::UpdateAutoState (void)
+void Io4KIP2110Services::UpdateAutoState (void)
 {
 	// auto mode from transport
 	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
@@ -43,7 +43,7 @@ void Io4KPlusServices::UpdateAutoState (void)
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
 //-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
+NTV2VideoFormat Io4KIP2110Services::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
 											NTV2SDIInputFormatSelect* inputFormatSelect)
 {
@@ -90,7 +90,7 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Io4KIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
@@ -1483,7 +1483,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		mCard->EnableChannel(NTV2_CHANNEL4);
 
 
-	// 425 Mux
+	// connect muxes
 	if (b2pi)
 	{
 		if (genFrameFormat == FORMAT_RGB)
@@ -1519,7 +1519,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Io4KIP2110Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
@@ -3060,7 +3060,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void Io4KIP2110Services::SetDeviceMiscRegisters (NTV2Mode mode)
 {
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters(mode);

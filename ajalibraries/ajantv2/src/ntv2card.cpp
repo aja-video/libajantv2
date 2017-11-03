@@ -829,11 +829,48 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 
 //										SDI Spigot:		   1	   2	   3	   4	   5	   6	   7	   8
+static const ULWord	sAncExtCtrlRegNums[]		=	{	4096,	4160,	4224,	4288,	4352,	4416,	4480,	4544,	0};
+static const ULWord	sAncInsCtrlRegNums[]		=	{	4609,	4673,	4737,	4801,	4865,	4929,	4993,	5057,	0};
 static const ULWord	sFirstIgnoreDIDRegNums[]	=	{	4108,	4172,	4236,	4300,	4364,	4428,	4492,	4556,	0};
 static const ULWord	sLastIgnoreDIDRegNums[]		=	{	4112,	4176,	4240,	4304,	4368,	4432,	4496,	4560,	0};
 static const ULWord	kNumIgnoreDIDRegisters			(sLastIgnoreDIDRegNums[0] - sFirstIgnoreDIDRegNums[0] + 1);
 static const ULWord	kNumDIDsPerRegister				(4);
 static const ULWord	kMaxNumIgnoreDIDs				(kNumDIDsPerRegister * kNumIgnoreDIDRegisters);
+
+
+bool CNTV2Card::GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning)
+{
+	outIsRunning = false;
+	if (!::NTV2DeviceCanDoCapture(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (inSDIInput >= ::NTV2DeviceGetNumVideoInputs(_boardID))
+		return false;
+
+	ULWord	value(0);
+	if (!ReadRegister(sAncExtCtrlRegNums[inSDIInput], &value))
+		return false;
+	outIsRunning = (value & BIT(28)) ? false : true;
+	return true;
+}
+
+bool CNTV2Card::GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning)
+{
+	outIsRunning = false;
+	if (!::NTV2DeviceCanDoPlayback(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (inSDIOutput >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
+		return false;
+
+	ULWord	value(0);
+	if (!ReadRegister(sAncInsCtrlRegNums[inSDIOutput], &value))
+		return false;
+	outIsRunning = (value & BIT(28)) ? false : true;
+	return true;
+}
 
 
 bool CNTV2Card::GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs)
