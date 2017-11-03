@@ -1801,7 +1801,7 @@ private:
 				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))			<< endl
 				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))			<< endl
 				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))			<< endl
-				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))	<< endl
+				<< "Memory reads: "			<< EnabDisab(!(inRegValue & BIT(28)))	<< endl
 				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}

@@ -5023,7 +5023,26 @@ public:
 	**/
 	///@{
 	/**
+		@brief		Answers with the run state of the given Anc extractor -- i.e. if its "memory writer" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outIsRunning	Receives 'true' if the Anc extractor is in the running state;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning);
+
+	/**
+		@brief		Answers with the run state of the given Anc inserter -- i.e. if its "memory reader" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest as a zero-based index value (e.g., 0 == SDIOut1).
+		@param[out]	outIsRunning	Receives 'true' if the Anc inserter is in the running state;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning);
+
+	/**
 		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
@@ -5032,6 +5051,7 @@ public:
 
 	/**
 		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[in]	inDIDs			Specifies the set of DIDs to be filtered for the given SDI input. Specify an
