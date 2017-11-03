@@ -412,9 +412,11 @@ CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const C
 
 bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, const std::string designName) const
 {
-    std::string name = GetPrimaryDesignName(inDeviceID);
+    std::string name;
 
 #if 0
+    printf("designName name %s\n", designName.c_str());
+
     name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP);
     printf("DEVICE_ID_KONAIP_4CH_1SFP name %s\n", name.c_str());
 
@@ -432,7 +434,15 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 
 	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110);
 	printf("DEVICE_ID_KONAIP_1RX_1TX_2110 name %s\n", name.c_str());
+
+    name = GetPrimaryDesignName(DEVICE_ID_IO4KIP_2022);
+    printf("DEVICE_ID_IO4KIP_2022 name %s\n", name.c_str());
+
+    name = GetPrimaryDesignName(DEVICE_ID_IO4KIP_2110);
+    printf("DEVICE_ID_IO4KIP_2110 name %s\n", name.c_str());
 #endif
+
+    name = GetPrimaryDesignName(inDeviceID);
 
     // Can always install over self
     if (designName == name)
@@ -499,7 +509,11 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
                 designName == "s2022_12_2ch_tx" ||
                 designName == "s2022_12_2ch_rx" ||
 				designName == "s2022_56_4ch_rxtx_fec" ||
-                designName == "s2110_1rx_1tx");
+                designName == "s2110_1rx_1tx"); 
+    case DEVICE_ID_IO4KIP_2022:
+    case DEVICE_ID_IO4KIP_2110:
+        return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KIP_2022) ||
+                designName == GetPrimaryDesignName(DEVICE_ID_IO4KIP_2110));
 	default: break;
 	}
 	return false;
