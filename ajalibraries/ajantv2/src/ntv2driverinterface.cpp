@@ -800,6 +800,8 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_IO4KIP_2022:
+    case DEVICE_ID_IO4KIP_2110:
 		return true;
 	default:
 		return false;
