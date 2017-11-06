@@ -217,6 +217,8 @@ typedef enum
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
     DEVICE_ID_IO4KIP_2022               = 0x10710850,
     DEVICE_ID_IO4KIP_2110               = 0x10710851,
+    DEVICE_ID_IOIP_2022                 = 0x10710850,
+    DEVICE_ID_IOIP_2110                 = 0x10710851,
 
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
