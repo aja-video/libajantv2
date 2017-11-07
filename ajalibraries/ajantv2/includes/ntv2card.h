@@ -3978,9 +3978,12 @@ public:
 		@param[in]	inInputXpt		Specifies the input (signal sink) to be connected to the given output.
 		@param[in]	inOutputXpt		Specifies the output (signal source) to be connected to the given input.
 									Specifying NTV2_XptBlack effects a disconnect.
+		@param[in]	inValidate		If true, calls NTV2Card::CanConnect to verify that the connection exists in firmware
+									before writing the crosspoint register;  otherwise writes the crosspoint register
+									regardless. Defaults to false.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);
+	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate = false);
 
 	/**
 		@brief		Disconnects the given widget signal input (sink) from whatever output (source) it may be connected.

@@ -88,10 +88,13 @@ bool NTV2DeviceHasBiDirectionalAnalogAudio(const NTV2DeviceID inDeviceID)
 {
     switch(inDeviceID)
     {
-        case DEVICE_ID_IO4KPLUS:	return true;
-        default:		            break;
+        case DEVICE_ID_IO4KPLUS:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
+            return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID)
@@ -841,6 +844,13 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_kip_2100_4txMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
             return xpt_kip_j2k1rxtxMatrix[inInputXpt][inOutputXpt];
+        // PSM for now lets use the 4kplus matrix
+        // TODO: need to generate these for IOIP cards
+        case DEVICE_ID_IOIP_2022:
+            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
+        case DEVICE_ID_IOIP_2110:
+            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
+
         default:
             return true;
     }
