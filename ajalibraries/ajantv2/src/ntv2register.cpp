@@ -6438,13 +6438,14 @@ bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV
 }
 
 
-bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
+bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
+	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
+	bool			canConnect	(true);
 
-	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (inInputXpt, regNum, ndx))
+	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
 		return false;
 
 	if (!regNum)
@@ -6454,7 +6455,12 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 	if (regNum > maxRegNum)
 		return false;	//	This device doesn't have that routing register
 
-	return WriteRegister (regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]);
+	if (inValidate)
+		CanConnect(inInputXpt, inOutputXpt, canConnect);
+	if (!canConnect)
+		return false;
+
+	return WriteRegister(regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]);
 }
 
 
