@@ -749,6 +749,11 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 {
 	if (IsKonaIPDevice())
 	{
+        // PSM Hack for pre MB IOIP
+        ULWord hexID = 0x0;
+        ReadRegister (kRegBoardID, &hexID);
+        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
+
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
         if (val == SAREK_IF_VERSION)
@@ -764,17 +769,22 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
 	{
-		uint32_t val;
-		ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
-		if (val != 0x01)
-		{
-			//MB not ready
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+        // PSM Hack for pre MB IOIP
+        ULWord hexID = 0x0;
+        ReadRegister (kRegBoardID, &hexID);
+        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
+
+        uint32_t val;
+        ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
+        if (val != 0x01)
+        {
+            //MB not ready
+            return false;
+        }
+        else
+        {
+            return true;
+        }
 	}
 	return false;
 }
