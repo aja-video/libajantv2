@@ -4049,7 +4049,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
-        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"DEVICE NOT FOUND"          : "(Not Found)";
+        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"AJA Device"                : "(Not Found)";
         case DEVICE_ID_CORVID1:                 return inForRetailDisplay ?	"Corvid 1"                  : "Corvid";
         case DEVICE_ID_CORVID22:                return inForRetailDisplay ?	"Corvid 22"                 : "Corvid22";
         case DEVICE_ID_CORVID3G:                return inForRetailDisplay ?	"Corvid 3G"                 : "Corvid3G";
@@ -4076,9 +4076,9 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return "KonaIP J2K 2I";
         case DEVICE_ID_KONAIP_1RX_1TX_2110:     return "KonaIP s2110 1I 1O";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
-        case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "DNxIV"                     : "Io4K PLUS";
-        case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "DNxIP s2022"               : "IoIP s2022";
-        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "DNxIP s2110"               : "IoIP s2110";
+        case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
+        case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
+        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
         case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
 #if !defined (_DEBUG)
 	    default:					break;
