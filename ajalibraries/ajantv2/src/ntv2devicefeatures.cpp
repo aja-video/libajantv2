@@ -40,8 +40,8 @@ bool NTV2DeviceHasLEDAudioMeters(const NTV2DeviceID inDeviceID)
         case DEVICE_ID_IO4K:
         case DEVICE_ID_IO4KUFC:
         case DEVICE_ID_IO4KPLUS:
-        case DEVICE_ID_IO4KIP_2022:
-        case DEVICE_ID_IO4KIP_2110:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
             return true;
         default:
             break;
@@ -59,8 +59,8 @@ bool NTV2DeviceHasHeadphoneJack(const NTV2DeviceID inDeviceID)
         case DEVICE_ID_IO4K:
         case DEVICE_ID_IO4KUFC:
         case DEVICE_ID_IO4KPLUS:
-        case DEVICE_ID_IO4KIP_2022:
-        case DEVICE_ID_IO4KIP_2110:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
             return true;
         default:
             break;
@@ -199,8 +199,8 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IO4KIP_2022:
-    case DEVICE_ID_IO4KIP_2110:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_4TX_2110:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
@@ -264,8 +264,8 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IO4KIP_2022:
-    case DEVICE_ID_IO4KIP_2110:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_4TX_2110:
         switch (inFrameGeometry)
 		{
@@ -368,8 +368,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IO4KIP_2022:
-    case DEVICE_ID_IO4KIP_2110:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_4TX_2110:
         return 111;
 	case DEVICE_ID_KONA3G:
@@ -431,8 +431,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IO4KIP_2022:
-    case DEVICE_ID_IO4KIP_2110:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_4TX_2110:
         switch (inFrameGeometry)
 		{
