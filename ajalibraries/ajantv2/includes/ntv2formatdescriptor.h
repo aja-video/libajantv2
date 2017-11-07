@@ -267,6 +267,7 @@ typedef struct NTV2FormatDescriptor
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
 	inline NTV2VANCMode				GetVANCMode (void) const		{return mVancMode;}							///< @return	The VANC mode I was created with.
 	inline bool						Is2KFormat (void) const			{return m2Kby1080;}							///< @return	True if I was created with a 2Kx1080 video format.
+	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());}	///< @return	True if I was created with an SD video format or standard.
 	inline bool						IsQuadRaster (void) const		{return NTV2_IS_QUAD_STANDARD(mStandard) || NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat);}	///< @return	True if I was created with a 4K/UHD video format or standard.
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.

@@ -139,6 +139,13 @@
 class AJAMemory;
 
 /** 
+ *  @param[in]  inStatus   The AJAStatus value of interest.
+ *	@return		A string containing the given AJAStatus value as human-readable text.
+ */
+AJA_EXPORT std::string AJAStatusToString (const AJAStatus inStatus);
+
+
+/** 
  *	Debug class to generate debug output and assertions.
  *	@ingroup AJAGroupDebug
  */
