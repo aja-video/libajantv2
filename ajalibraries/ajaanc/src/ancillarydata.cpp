@@ -6,6 +6,7 @@
 
 #include "ntv2publicinterface.h"
 #include "ancillarydata.h"
+#include "ajabase/system/debug.h"				//	This makes 'ajaanc' dependent upon 'ajabase'
 #include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
 												//	CNTV2SMPTEAncData::AddEvenParity
 #if defined(AJA_LINUX)
@@ -15,6 +16,12 @@
 #include <ios>
 
 using namespace std;
+
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
 
 const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
@@ -716,31 +723,32 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 
 	try
 	{
-		outRawComponents.push_back(0x000);													//	000
-		outRawComponents.push_back(0x3FF);													//	3FF
-		outRawComponents.push_back(0x3FF);													//	3FF
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));				//	DID
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));				//	SDID
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));			//	DC
+		outRawComponents.push_back(0x000);														//	000
+		outRawComponents.push_back(0x3FF);														//	3FF
+		outRawComponents.push_back(0x3FF);														//	3FF
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));					//	DID
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));					//	SDID
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));				//	DC
 	}
 	catch(...)
 	{
-		status = AJA_STATUS_MEMORY;
-	}
-	if (AJA_FAILURE(status))
-	{
 		outRawComponents.resize(origSize);
-		return status;
+		status = AJA_STATUS_MEMORY;
 	}
 
 	//	Copy payload data into output vector...
-	status = GetPayloadData(outRawComponents);												//	UDWs
-	if (AJA_FAILURE(status))
-		return status;
+	if (AJA_SUCCESS(status))
+		status = GetPayloadData(outRawComponents);												//	UDWs
 
 	//	The hardware automatically recalcs the CS, but still needs to be there...
-	outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(Calculate8BitChecksum()));	//	CS
-	return AJA_STATUS_SUCCESS;
+	if (AJA_SUCCESS(status))
+		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(Calculate8BitChecksum()));	//	CS
+
+	if (AJA_SUCCESS(status))
+		LOGMYDEBUG("Appended " << (outRawComponents.size()-origSize) << " elements: " << AsString(16));
+	else
+		LOGMYERROR("Failed: " << ::AJAStatusToString(status) << ": origSize=" << origSize << ", " << AsString(16));
+	return status;
 }
 
 

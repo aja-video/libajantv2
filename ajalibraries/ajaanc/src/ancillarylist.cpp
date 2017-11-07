@@ -6,10 +6,17 @@
 
 #include "ancillarylist.h"
 #include "ancillarydatafactory.h"
+#include "ajabase/system/debug.h"				//	This makes 'ajaanc' dependent upon 'ajabase'
 #include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
 												//	CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence
 												//	CNTV2SMPTEAncData::GetAncPacketsFromVANCLine
 using namespace std;
+
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
 
 static bool	gIncludeZeroLengthPackets	(false);
@@ -710,16 +717,17 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const
 {
 	if (inFrameBuffer.IsNULL())
-		return AJA_STATUS_NULL;
+		{LOGMYERROR("NULL frame buffer");  return AJA_STATUS_NULL;}
 	if (!inFormatDesc.IsValid())
-		return AJA_STATUS_BAD_PARAM;
+		{LOGMYERROR("Invalid format descriptor");  return AJA_STATUS_BAD_PARAM;}
 	if (!inFormatDesc.IsVANC())
-		return AJA_STATUS_BAD_PARAM;
+		{LOGMYERROR("Not a VANC geometry");  return AJA_STATUS_BAD_PARAM;}
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR  &&  inFormatDesc.GetPixelFormat() != NTV2_FBF_8BIT_YCBCR)
-		return AJA_STATUS_UNSUPPORTED;
+		{LOGMYERROR("Invalid pixel format: " << inFormatDesc);  return AJA_STATUS_UNSUPPORTED;}
 
 	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
-	const bool	isSD	(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()) || NTV2_IS_SD_VIDEO_FORMAT(inFormatDesc.GetVideoFormat()));
+	const bool	isSD	(inFormatDesc.IsSDFormat());
+	AJAAncillaryList	failures, successes;
 
 	//	For each VANC line...
 	for (UWord fbLineOffset(0);  fbLineOffset < inFormatDesc.GetFirstActiveLine();  fbLineOffset++)
@@ -730,6 +738,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 		//	Look for non-HANC packets destined for this line...
 		for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
 		{
+			bool								muxedOK	(false);
 			const AJAAncillaryData &			ancData (**iter);
 			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
 			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)
@@ -742,27 +751,34 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 				continue;	//	Bad data channel
 
 			vector<uint16_t>	pktComponentData;
-			AJAStatus status (ancData.GenerateTransmitData (pktComponentData));
+			AJAStatus status (ancData.GenerateTransmitData(pktComponentData));
 			if (AJA_FAILURE(status))
 				return status;
 
 			//	TBD:	NEED TO TAKE INTO CONSIDERATION	loc.GetHorizontalOffset()
-			if (isSD && loc.GetDataChannel() == AJAAncillaryDataChannel_Both)
+			if (isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_Both)	//	Mux into UYVY
 			{
-				//	Mux into UYVY
+				muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (pktComponentData, inFrameBuffer, inFormatDesc, fbLineOffset);
 			}
-			else if (loc.GetDataChannel() == AJAAncillaryDataChannel_C)
+			else if (!isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_C)
 			{
 				//	Mux into C
 			}
-			else if (loc.GetDataChannel() == AJAAncillaryDataChannel_Y)
+			else if (!isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_Y)
 			{
 				//	Mux into Y
 			}
-			cerr << ancData << endl;
+			if (muxedOK)
+				successes.AddAncillaryData(ancData);
+			else
+				failures.AddAncillaryData(ancData);
 		}	//	for each packet
 	}	//	for each VANC line
-	return AJA_STATUS_UNSUPPORTED;
+	if (successes.CountAncillaryData())
+		cerr << "AJAAncillaryList::WriteVANCData: SUCCESSES: " << successes << endl;
+	if (failures.CountAncillaryData())
+		cerr << "AJAAncillaryList::WriteVANCData: FAILURES: " << failures << endl;
+	return successes.CountAncillaryData() == 0  &&  failures.CountAncillaryData() > 0  ?  AJA_STATUS_FAIL  :  AJA_STATUS_SUCCESS;
 }
 
 
