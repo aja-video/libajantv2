@@ -4,18 +4,18 @@
 //  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
 //
 
-#include "ntv2io4kip2110services.h"
+#include "ntv2ioip2110services.h"
 
 
 //-------------------------------------------------------------------------------------------------------
-//	class Io4KIP2110Services
+//	class IoIP2110Services
 //-------------------------------------------------------------------------------------------------------
 
-Io4KIP2110Services::Io4KIP2110Services()
+IoIP2110Services::IoIP2110Services()
 {
 }
 
-Io4KIP2110Services::~Io4KIP2110Services()
+IoIP2110Services::~IoIP2110Services()
 {
 	for(uint32_t i = 0; i < 8; i++)
 		mCard->EnableChannel((NTV2Channel)i);
@@ -25,7 +25,7 @@ Io4KIP2110Services::~Io4KIP2110Services()
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
 //-------------------------------------------------------------------------------------------------------
-void Io4KIP2110Services::UpdateAutoState (void)
+void IoIP2110Services::UpdateAutoState (void)
 {
 	// auto mode from transport
 	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
@@ -43,7 +43,7 @@ void Io4KIP2110Services::UpdateAutoState (void)
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
 //-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat Io4KIP2110Services::GetSelectedInputVideoFormat(
+NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
 											NTV2SDIInputFormatSelect* inputFormatSelect)
 {
@@ -90,7 +90,7 @@ NTV2VideoFormat Io4KIP2110Services::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Io4KIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
@@ -1519,7 +1519,7 @@ void Io4KIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Io4KIP2110Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void IoIP2110Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
@@ -3060,7 +3060,7 @@ void Io4KIP2110Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameForm
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Io4KIP2110Services::SetDeviceMiscRegisters (NTV2Mode mode)
+void IoIP2110Services::SetDeviceMiscRegisters (NTV2Mode mode)
 {
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters(mode);
