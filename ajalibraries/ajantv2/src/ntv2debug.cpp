@@ -105,8 +105,8 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "DEVICE_ID_KONAIP_1RX_1TX_2110";			break;
 		case DEVICE_ID_KONAIP_4TX_2110:				return "DEVICE_ID_KONAIP_4TX_2110";				break;
 		case DEVICE_ID_IO4KPLUS:					return "DEVICE_ID_IO4KPLUS";					break;
-        case DEVICE_ID_IO4KIP_2022:					return "DEVICE_ID_IO4KIP_2022";					break;
-        case DEVICE_ID_IO4KIP_2110:					return "DEVICE_ID_IO4KIP_2110";					break;
+        case DEVICE_ID_IOIP_2022:					return "DEVICE_ID_IOIP_2022";					break;
+        case DEVICE_ID_IOIP_2110:					return "DEVICE_ID_IOIP_2110";					break;
         case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";					break;
 	}
 	return "";
@@ -192,8 +192,8 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "KonaIP_1RX_1TX_2110";		break;
 		case DEVICE_ID_KONAIP_4TX_2110:				return "KonaIP_4TX_2110";			break;
 		case DEVICE_ID_IO4KPLUS:					return "DNxIV";						break;
-        case DEVICE_ID_IO4KIP_2022:					return "DNxIP_2022";				break;
-        case DEVICE_ID_IO4KIP_2110:					return "DNxIP_2110";				break;
+        case DEVICE_ID_IOIP_2022:					return "DNxIP_2022";				break;
+        case DEVICE_ID_IOIP_2110:					return "DNxIP_2110";				break;
         case DEVICE_ID_NOTFOUND:					return "Unknown";					break;
 	}
 
