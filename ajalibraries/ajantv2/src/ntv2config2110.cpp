@@ -1025,7 +1025,18 @@ bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
 {
     uint32_t addr = inet_addr(ptpMaster.c_str());
     addr = NTV2EndianSwap32(addr);
-    return mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
+    if (addr != 0 && addr != 0xffffffff)
+    {
+        mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
+        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x09);
+        return true;
+    }
+    else
+    {
+        mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, 0);
+        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x01);
+        return false;
+    }
 }
 
 bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
