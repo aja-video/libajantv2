@@ -4099,7 +4099,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
-        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"DEVICE NOT FOUND"          : "(Not Found)";
+        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"AJA Device"                : "(Not Found)";
         case DEVICE_ID_CORVID1:                 return inForRetailDisplay ?	"Corvid 1"                  : "Corvid";
         case DEVICE_ID_CORVID22:                return inForRetailDisplay ?	"Corvid 22"                 : "Corvid22";
         case DEVICE_ID_CORVID3G:                return inForRetailDisplay ?	"Corvid 3G"                 : "Corvid3G";
@@ -4119,17 +4119,17 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ?	"Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ?	"Corvid 44"					: "Corvid44";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ?	"Corvid HEVC"				: "CorvidHEVC";
-		case DEVICE_ID_KONAIP_4CH_1SFP:			return inForRetailDisplay ? "KONA IP 4CH 1SFP"			: "KonaIP4Ch1SFP";
-		case DEVICE_ID_KONAIP_4CH_2SFP:			return inForRetailDisplay ? "KONA IP 4CH 2SFP"			: "KonaIP4Ch2SFP";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K"	: "KonaIP1Rx1Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K"		: "KonaIP2Tx1SFPJ2K";
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
+        case DEVICE_ID_KONAIP_4CH_1SFP:			return "KonaIP s2022";
+        case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return "KonaIP J2K 1I 1O";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
+        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return "KonaIP J2K 2I";
+        case DEVICE_ID_KONAIP_1RX_1TX_2110:     return "KonaIP s2110 1I 1O";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
-		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "DNxIV" : "Io4KPLUS";
-        case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "DNxIP_2022" : "IoIP_2022";
-        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "DNxIP_2110" : "IoIP_2110";
-        case DEVICE_ID_KONAIP_4TX_2110:			return "KONA IP 4TX 2110";
+        case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
+        case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
+        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
+        case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
 #if !defined (_DEBUG)
 	    default:					break;
 #endif

@@ -53,6 +53,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
             pDeviceServices = new IoIP2110Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+        case DEVICE_ID_KONAIP_4TX_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
         case DEVICE_ID_KONAIP_4CH_1SFP:
@@ -2666,7 +2667,8 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 		break;
 	}
 
-	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
+	if (mAudioMixerOverrideState == false)
+		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
 
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
@@ -3237,7 +3239,8 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	if(mCard->DeviceCanDoAudioMixer())
 	{
 		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
-		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
+		if (mAudioMixerOverrideState == false)
+			mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 		
 		// Host System Audio Input
 		NTV2AudioSource audioSource;
