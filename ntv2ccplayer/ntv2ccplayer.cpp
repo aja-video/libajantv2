@@ -979,7 +979,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 {
 	const NTV2Standard		outputStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
 	bool					isRGB			(::IsRGBFormat (mPixelFormat));
-	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  true/*isRGB*/));
+	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel));	//	Use CSC's YUV video output
 	NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel,  false/*isRGB*/,  false/*is425*/));
 
 	//	If device has no RGB conversion capability for the desired channel, use YUV instead
