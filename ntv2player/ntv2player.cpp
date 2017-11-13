@@ -347,7 +347,7 @@ void NTV2Player::RouteOutputSignal ()
 	if (UWord (mOutputChannel) > ::NTV2DeviceGetNumCSCs (mDeviceID))
 		isRGB = false;
 
-	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  isRGB/*isRGB*/));
+	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
 	NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	if (isRGB)
 		mDevice.Connect (::GetCSCInputXptFromChannel (mOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
