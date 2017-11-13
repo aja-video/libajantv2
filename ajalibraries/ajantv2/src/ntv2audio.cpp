@@ -781,6 +781,7 @@ bool CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inA
 
 bool CNTV2Card::GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
 {
+	(void) inChannel;	//	Reserved for future use
 	if (!DeviceCanDoAudioMixer())
 		return false;
 	if (!ReadRegister(kRegAudioMixerAux2GainCh1, &outGainValue))
@@ -790,6 +791,7 @@ bool CNTV2Card::GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel
 
 bool CNTV2Card::SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
 {
+	(void) inChannel;	//	Reserved for future use
 	if (!DeviceCanDoAudioMixer())
 		return false;
 
