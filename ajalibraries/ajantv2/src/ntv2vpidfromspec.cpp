@@ -143,7 +143,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 					byte1 = isStereo ? (uint8_t) VPIDStandard_1080_Stereo_3Gb : (uint8_t) VPIDStandard_1080_3Gb;	//	0x8F : 0x8C
 			}
 			else
+			{
 				byte1 = isStereo ? (uint8_t) VPIDStandard_1080_Stereo_3Ga : (uint8_t) VPIDStandard_1080_3Ga;	//	0x92 : 0x89
+			}
 		}
 		else
 		{
@@ -192,20 +194,30 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x2048x1080p_3000:
 		if (isTSI)
 		{
-            byte1 = is3G ? (uint8_t) VPIDStandard_2160_DualLink : (uint8_t) VPIDStandard_1080;	//	0x96 : 0x85
-		}
-		else
-		{
-			if (isDualLink)
+			if (is3G)
 			{
-				byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_DualLink;		//	0x8A : 0x87
+				if (isLevelB)
+					byte1 = isDualLink? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_DualLink;  //  0x98 : 0x96
+				else
+					byte1 = (uint8_t) VPIDStandard_2160_QuadLink_3Ga;  //  0x97
 			}
 			else
 			{
-				if (is3G)
-					byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_3Gb : (uint8_t) VPIDStandard_1080_3Ga;	   	//	0x8C : 0x89
+				byte1 = (uint8_t) VPIDStandard_1080;  //  0x85 (bogus if not 3G)
+			}
+		}
+		else
+		{
+			if (is3G)
+			{
+				if (isLevelB)
+					byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Gb;  //  8A : 8C
 				else
-					byte1 = (uint8_t) VPIDStandard_1080;		//	0x85
+					byte1 = (uint8_t) VPIDStandard_1080_3Ga;   // 89
+			}
+			else
+			{
+				byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink : (uint8_t) VPIDStandard_1080;  //  0x87 : 0x85
 			}
 		}
 		break;
