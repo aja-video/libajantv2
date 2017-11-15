@@ -3177,6 +3177,17 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 	return true;
 }
 
+bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
+{
+    outRevision = 0;
+    if (!IsOpen())
+        return false;
+
+    if (!IsKonaIPDevice())
+        return false;
+
+    return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, &outRevision);
+}
 
 bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
 {
@@ -3964,323 +3975,265 @@ bool CNTV2Card::GetXena2FlashBaseAddress ( ULWord **pXena2FlashAddress)
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods (KHD-22 only )
 //
-bool  CNTV2Card::SetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode mode)
+bool  CNTV2Card::SetColorCorrectionMode(const NTV2Channel inChannel, const NTV2ColorCorrectionMode inMode)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if ( channel == NTV2_CHANNEL1 )
-		return WriteRegister (kRegCh1ColorCorrectioncontrol,	mode,	kRegMaskCCMode,	kRegShiftCCMode);
-	else
-		return WriteRegister (kRegCh2ColorCorrectioncontrol,	mode,	kRegMaskCCMode,	kRegShiftCCMode);
+	return WriteRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectioncontrol  :  kRegCh2ColorCorrectioncontrol,
+							inMode,  kRegMaskCCMode,  kRegShiftCCMode);
 
 }
 
-bool  CNTV2Card::GetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode *mode)
+bool  CNTV2Card::GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode & outMode)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	if ( channel == NTV2_CHANNEL1 )
-		return ReadRegister (kRegCh1ColorCorrectioncontrol,	(ULWord*)mode,	kRegMaskCCMode,	kRegShiftCCMode);
-	else
-		return ReadRegister (kRegCh2ColorCorrectioncontrol,	(ULWord*)mode,	kRegMaskCCMode,	kRegShiftCCMode);
+	return ReadRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectioncontrol  :  kRegCh2ColorCorrectioncontrol,
+						reinterpret_cast<ULWord*> (&outMode),  kRegMaskCCMode,  kRegShiftCCMode);
 }
 
-bool CNTV2Card::SetColorCorrectionOutputBank (NTV2Channel channel, ULWord bank)
+bool CNTV2Card::SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
-		return SetLUTV2OutputBank(channel, bank);
-	else
+	if (::NTV2DeviceGetLUTVersion(_boardID) == 2)
+		return SetLUTV2OutputBank(inChannel, inBank);
+	switch(inChannel)
 	{
-		switch(channel)
-		{
-			case NTV2_CHANNEL1:		return WriteRegister (kRegCh1ColorCorrectioncontrol, bank, kRegMaskCCOutputBankSelect,	kRegShiftCCOutputBankSelect);
-			case NTV2_CHANNEL2:		return WriteRegister (kRegCh2ColorCorrectioncontrol, bank, kRegMaskCCOutputBankSelect,	kRegShiftCCOutputBankSelect);
-			case NTV2_CHANNEL3:		return WriteRegister (kRegCh2ColorCorrectioncontrol, bank, kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
-			case NTV2_CHANNEL4:		return WriteRegister (kRegCh2ColorCorrectioncontrol, bank, kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
-			case NTV2_CHANNEL5:		return WriteRegister (kRegCh1ColorCorrectioncontrol, bank, kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
-			default:				return false;
-		}
-	}
-}
-
-bool CNTV2Card::SetLUTV2OutputBank (NTV2Channel channel, ULWord bank)
-{
-	if (IS_CHANNEL_INVALID (channel))
-		return false;
-	switch (channel)
-	{
-		case NTV2_CHANNEL1:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT1OutputBankSelect, kRegShiftLUT1OutputBankSelect);
-		case NTV2_CHANNEL2:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
-		case NTV2_CHANNEL3:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
-		case NTV2_CHANNEL4:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
-		case NTV2_CHANNEL5:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
-		case NTV2_CHANNEL6:		return WriteRegister (kRegLUTV2Control,	bank, kRegMaskLUT6OutputBankSelect, kRegShiftLUT6OutputBankSelect);
-		case NTV2_CHANNEL7:		return WriteRegister (kRegLUTV2Control, bank, kRegMaskLUT7OutputBankSelect, kRegShiftLUT7OutputBankSelect);
-		case NTV2_CHANNEL8:		return WriteRegister (kRegLUTV2Control, bank, kRegMaskLUT8OutputBankSelect, kRegShiftLUT8OutputBankSelect);
+		case NTV2_CHANNEL1:		return WriteRegister (kRegCh1ColorCorrectioncontrol, inBank, kRegMaskCCOutputBankSelect,	kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL2:		return WriteRegister (kRegCh2ColorCorrectioncontrol, inBank, kRegMaskCCOutputBankSelect,	kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL3:		return WriteRegister (kRegCh2ColorCorrectioncontrol, inBank, kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
+		case NTV2_CHANNEL4:		return WriteRegister (kRegCh2ColorCorrectioncontrol, inBank, kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
+		case NTV2_CHANNEL5:		return WriteRegister (kRegCh1ColorCorrectioncontrol, inBank, kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
 		default:				return false;
 	}
 }
 
-bool CNTV2Card::GetColorCorrectionOutputBank (NTV2Channel channel, ULWord *bank)
+bool CNTV2Card::SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord inBank)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
-		return GetLUTV2OutputBank(channel, bank);
-	else
+	switch (inChannel)
 	{
-		switch(channel)
-		{
-			case NTV2_CHANNEL1:		return ReadRegister (kRegCh1ColorCorrectioncontrol,	(ULWord*) bank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
-			case NTV2_CHANNEL2:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	(ULWord*) bank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
-			case NTV2_CHANNEL3:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	(ULWord*) bank,	kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
-			case NTV2_CHANNEL4:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	(ULWord*) bank,	kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
-			case NTV2_CHANNEL5:		return ReadRegister (kRegCh1ColorCorrectioncontrol,	(ULWord*) bank,	kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
-			default:				return false;
-		}
-	}
-}
-
-bool CNTV2Card::GetLUTV2OutputBank (NTV2Channel channel, ULWord *bank)
-{
-	if (IS_CHANNEL_INVALID (channel))
-		return false;
-	switch(channel)
-	{
-		case NTV2_CHANNEL1:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT1OutputBankSelect,	kRegShiftLUT1OutputBankSelect);
-		case NTV2_CHANNEL2:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
-		case NTV2_CHANNEL3:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
-		case NTV2_CHANNEL4:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
-		case NTV2_CHANNEL5:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
-		case NTV2_CHANNEL6:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT6OutputBankSelect,	kRegShiftLUT6OutputBankSelect);
-		case NTV2_CHANNEL7:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT7OutputBankSelect,	kRegShiftLUT7OutputBankSelect);
-		case NTV2_CHANNEL8:		return ReadRegister (kRegLUTV2Control,	(ULWord*) bank,	kRegMaskLUT8OutputBankSelect,	kRegShiftLUT8OutputBankSelect);
+		case NTV2_CHANNEL1:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT1OutputBankSelect, kRegShiftLUT1OutputBankSelect);
+		case NTV2_CHANNEL2:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
+		case NTV2_CHANNEL3:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
+		case NTV2_CHANNEL4:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
+		case NTV2_CHANNEL5:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
+		case NTV2_CHANNEL6:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT6OutputBankSelect, kRegShiftLUT6OutputBankSelect);
+		case NTV2_CHANNEL7:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT7OutputBankSelect, kRegShiftLUT7OutputBankSelect);
+		case NTV2_CHANNEL8:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT8OutputBankSelect, kRegShiftLUT8OutputBankSelect);
 		default:				return false;
 	}
 }
 
-bool CNTV2Card::SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank value)
+bool CNTV2Card::GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank)
+{
+	if (IS_CHANNEL_INVALID (inChannel))
+		return false;
+	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
+		return GetLUTV2OutputBank(inChannel, outBank);
+	switch(inChannel)
+	{
+		case NTV2_CHANNEL1:		return ReadRegister (kRegCh1ColorCorrectioncontrol,	&outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL2:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	&outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL3:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	&outBank,	kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
+		case NTV2_CHANNEL4:		return ReadRegister (kRegCh2ColorCorrectioncontrol,	&outBank,	kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
+		case NTV2_CHANNEL5:		return ReadRegister (kRegCh1ColorCorrectioncontrol,	&outBank,	kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
+		default:				return false;
+	}
+}
+
+bool CNTV2Card::GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBank)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	switch(inChannel)
+	{
+		case NTV2_CHANNEL1:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT1OutputBankSelect,	kRegShiftLUT1OutputBankSelect);
+		case NTV2_CHANNEL2:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
+		case NTV2_CHANNEL3:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
+		case NTV2_CHANNEL4:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
+		case NTV2_CHANNEL5:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
+		case NTV2_CHANNEL6:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT6OutputBankSelect,	kRegShiftLUT6OutputBankSelect);
+		case NTV2_CHANNEL7:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT7OutputBankSelect,	kRegShiftLUT7OutputBankSelect);
+		case NTV2_CHANNEL8:		return ReadRegister (kRegLUTV2Control,	&outBank,	kRegMaskLUT8OutputBankSelect,	kRegShiftLUT8OutputBankSelect);
+		default:				return false;
+	}
+}
+
+bool CNTV2Card::SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
 {
 	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
-		return SetLUTV2HostAccessBank(value);
-	else
+		return SetLUTV2HostAccessBank(inValue);
+
+	switch(inValue)
 	{
-		switch(value)
-		{
 		case NTV2_CCHOSTACCESS_CH1BANK0:
 		case NTV2_CCHOSTACCESS_CH1BANK1:
 		case NTV2_CCHOSTACCESS_CH2BANK0:
 		case NTV2_CCHOSTACCESS_CH2BANK1:
-			{
-				if (::NTV2DeviceGetNumLUTs(GetDeviceID()) == 5 || GetDeviceID() == DEVICE_ID_IO4KUFC)
-					WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUT5Select, kRegShiftLUT5Select);
-				//Configure LUTs 1 and 2
-				WriteRegister(kRegCh1ColorCorrectioncontrol, NTV2_LUTCONTROL_1_2, kRegMaskLUTSelect, kRegShiftLUTSelect);
+			if (::NTV2DeviceGetNumLUTs(GetDeviceID()) == 5 || GetDeviceID() == DEVICE_ID_IO4KUFC)
+				if (!WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUT5Select, kRegShiftLUT5Select))
+					return false;
+			//Configure LUTs 1 and 2
+			return WriteRegister(kRegCh1ColorCorrectioncontrol, NTV2_LUTCONTROL_1_2, kRegMaskLUTSelect, kRegShiftLUTSelect)
+				&& WriteRegister (kRegGlobalControl, inValue, kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
 
-				return WriteRegister (kRegGlobalControl, value, kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
-			}
 		case NTV2_CCHOSTACCESS_CH3BANK0:
 		case NTV2_CCHOSTACCESS_CH3BANK1:
 		case NTV2_CCHOSTACCESS_CH4BANK0:
 		case NTV2_CCHOSTACCESS_CH4BANK1:
-			{
-				if (::NTV2DeviceGetNumLUTs(GetDeviceID()) == 5 || GetDeviceID() == DEVICE_ID_IO4KUFC)
-					WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUT5Select, kRegShiftLUT5Select);
-				//Configure LUTs 3 and 4
-				WriteRegister(kRegCh1ColorCorrectioncontrol, NTV2_LUTCONTROL_3_4, kRegMaskLUTSelect, kRegShiftLUTSelect);
+			if (::NTV2DeviceGetNumLUTs(GetDeviceID()) == 5 || GetDeviceID() == DEVICE_ID_IO4KUFC)
+				if (!WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUT5Select, kRegShiftLUT5Select))
+					return false;
+			//Configure LUTs 3 and 4
+			return WriteRegister(kRegCh1ColorCorrectioncontrol, NTV2_LUTCONTROL_3_4, kRegMaskLUTSelect, kRegShiftLUTSelect)
+				&& WriteRegister (kRegCh1ColorCorrectioncontrol, (inValue - NTV2_CCHOSTACCESS_CH3BANK0), kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
 
-				return WriteRegister (kRegCh1ColorCorrectioncontrol, (value - NTV2_CCHOSTACCESS_CH3BANK0), kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
-			}
 		case NTV2_CCHOSTACCESS_CH5BANK0:
 		case NTV2_CCHOSTACCESS_CH5BANK1:
-			{
-				WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUTSelect, kRegShiftLUTSelect);
+			return WriteRegister(kRegCh1ColorCorrectioncontrol, 0x0, kRegMaskLUTSelect, kRegShiftLUTSelect)
+				&& WriteRegister (kRegGlobalControl, 0x0, kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect)
+				&& WriteRegister(kRegCh1ColorCorrectioncontrol, 0x1, kRegMaskLUT5Select, kRegShiftLUT5Select)
+				&& WriteRegister(kRegCh1ColorCorrectioncontrol, (inValue - NTV2_CCHOSTACCESS_CH5BANK0), kRegMaskCC5HostAccessBankSelect, kRegShiftCC5HostAccessBankSelect);
 
-				WriteRegister (kRegGlobalControl, 0x0, kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
-
-				WriteRegister(kRegCh1ColorCorrectioncontrol, 0x1, kRegMaskLUT5Select, kRegShiftLUT5Select);
-
-				return WriteRegister(kRegCh1ColorCorrectioncontrol, (value - NTV2_CCHOSTACCESS_CH5BANK0), kRegMaskCC5HostAccessBankSelect, kRegShiftCC5HostAccessBankSelect);
-
-			}
-		default:
-			return false;
-		}
+		default:	return false;
 	}
 }
 
-bool CNTV2Card::SetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank value)
+bool CNTV2Card::SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
 {
-	switch(value)
+	switch(inValue)
 	{
 		case NTV2_CCHOSTACCESS_CH1BANK0:
-		case NTV2_CCHOSTACCESS_CH1BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH1BANK0),	kRegMaskLUT1HostAccessBankSelect,	kRegShiftLUT1HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH1BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH1BANK0),	kRegMaskLUT1HostAccessBankSelect,	kRegShiftLUT1HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH2BANK0:
-		case NTV2_CCHOSTACCESS_CH2BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH2BANK0),	kRegMaskLUT2HostAccessBankSelect,	kRegShiftLUT2HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH2BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH2BANK0),	kRegMaskLUT2HostAccessBankSelect,	kRegShiftLUT2HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH3BANK0:
-		case NTV2_CCHOSTACCESS_CH3BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH3BANK0),	kRegMaskLUT3HostAccessBankSelect,	kRegShiftLUT3HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH3BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH3BANK0),	kRegMaskLUT3HostAccessBankSelect,	kRegShiftLUT3HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH4BANK0:
-		case NTV2_CCHOSTACCESS_CH4BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH4BANK0),	kRegMaskLUT4HostAccessBankSelect,	kRegShiftLUT4HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH4BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH4BANK0),	kRegMaskLUT4HostAccessBankSelect,	kRegShiftLUT4HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH5BANK0:
-		case NTV2_CCHOSTACCESS_CH5BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH5BANK0),	kRegMaskLUT5HostAccessBankSelect,	kRegShiftLUT5HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH5BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH5BANK0),	kRegMaskLUT5HostAccessBankSelect,	kRegShiftLUT5HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH6BANK0:
-		case NTV2_CCHOSTACCESS_CH6BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH6BANK0),	kRegMaskLUT6HostAccessBankSelect,	kRegShiftLUT6HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH6BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH6BANK0),	kRegMaskLUT6HostAccessBankSelect,	kRegShiftLUT6HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH7BANK0:
-		case NTV2_CCHOSTACCESS_CH7BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH7BANK0),	kRegMaskLUT7HostAccessBankSelect,	kRegShiftLUT7HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH7BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH7BANK0),	kRegMaskLUT7HostAccessBankSelect,	kRegShiftLUT7HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH8BANK0:
-		case NTV2_CCHOSTACCESS_CH8BANK1:	return WriteRegister(kRegLUTV2Control,	(value - NTV2_CCHOSTACCESS_CH8BANK0),	kRegMaskLUT8HostAccessBankSelect,	kRegShiftLUT8HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH8BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH8BANK0),	kRegMaskLUT8HostAccessBankSelect,	kRegShiftLUT8HostAccessBankSelect);
+
 		default:							return false;
 	}
 }
 
-bool CNTV2Card::GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel)
+bool CNTV2Card::GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
-		return GetLUTV2HostAccessBank (value, channel);
-	else
+		return GetLUTV2HostAccessBank (outValue, inChannel);
+	switch(inChannel)
 	{
-		switch(channel)
-		{
 		case NTV2_CHANNEL1:
 		case NTV2_CHANNEL2:
-			return ReadRegister (kRegGlobalControl,	(ULWord*)value,	kRegMaskCCHostBankSelect,	kRegShiftCCHostAccessBankSelect);
+			return ReadRegister (kRegGlobalControl,	reinterpret_cast<ULWord*>(&outValue),	kRegMaskCCHostBankSelect,	kRegShiftCCHostAccessBankSelect);
+
 		case NTV2_CHANNEL3:
 		case NTV2_CHANNEL4:
-			{
-				ULWord tempVal = 0;
-				bool status = ReadRegister (kRegCh1ColorCorrectioncontrol,	&tempVal,	kRegMaskCCHostBankSelect,	kRegShiftCCHostAccessBankSelect);
-				*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
-				return status;
-			}
+		{
+			ULWord tempVal = 0;
+			bool status = ReadRegister (kRegCh1ColorCorrectioncontrol,	&tempVal,	kRegMaskCCHostBankSelect,	kRegShiftCCHostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
+			return status;
+		}
 		case NTV2_CHANNEL5:
-			{
-				ULWord tempVal = 0;
-				bool status = ReadRegister (kRegCh1ColorCorrectioncontrol,	&tempVal,	kRegMaskCC5HostAccessBankSelect,	kRegShiftCC5HostAccessBankSelect);
-				*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
-				return status;
-			}
-		default:
-			return false;
+		{
+			ULWord tempVal = 0;
+			bool status = ReadRegister (kRegCh1ColorCorrectioncontrol,	&tempVal,	kRegMaskCC5HostAccessBankSelect,	kRegShiftCC5HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
+			return status;
 		}
+		default:	return false;
 	}
 }
 
-bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel)
+bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	switch(channel)
+
+	ULWord	tempVal	(0);
+	bool	result	(false);
+	switch(inChannel)
 	{
-	case NTV2_CHANNEL1:
-		return ReadRegister (kRegLUTV2Control,
-							(ULWord*)value,
-							kRegMaskLUT1HostAccessBankSelect,
-							kRegShiftLUT1HostAccessBankSelect);
-	case NTV2_CHANNEL2:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT2HostAccessBankSelect,
-										kRegShiftLUT2HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH2BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL3:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT3HostAccessBankSelect,
-										kRegShiftLUT3HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL4:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT4HostAccessBankSelect,
-										kRegShiftLUT4HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL5:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT5HostAccessBankSelect,
-										kRegShiftLUT5HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL6:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT6HostAccessBankSelect,
-										kRegShiftLUT6HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL7:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT7HostAccessBankSelect,
-										kRegShiftLUT7HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
-			return status;
-		}
-	case NTV2_CHANNEL8:
-		{
-			ULWord tempVal = 0;
-			bool status = ReadRegister (kRegLUTV2Control,
-										&tempVal,
-										kRegMaskLUT8HostAccessBankSelect,
-										kRegShiftLUT8HostAccessBankSelect);
-			*value = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
-			return status;
-		}
-	default:
-		break;
+		case NTV2_CHANNEL1:
+			result = ReadRegister (kRegLUTV2Control, (ULWord*)&outValue,  kRegMaskLUT1HostAccessBankSelect,  kRegShiftLUT1HostAccessBankSelect);
+			break;
+
+		case NTV2_CHANNEL2:
+			result = ReadRegister (kRegLUTV2Control, &tempVal,  kRegMaskLUT2HostAccessBankSelect,  kRegShiftLUT2HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH2BANK0);
+			break;
+
+		case NTV2_CHANNEL3:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT3HostAccessBankSelect,  kRegShiftLUT3HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
+			break;
+
+		case NTV2_CHANNEL4:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT4HostAccessBankSelect,  kRegShiftLUT4HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
+			break;
+
+		case NTV2_CHANNEL5:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT5HostAccessBankSelect,  kRegShiftLUT5HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
+			break;
+
+		case NTV2_CHANNEL6:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT6HostAccessBankSelect,  kRegShiftLUT6HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
+			break;
+
+		case NTV2_CHANNEL7:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT7HostAccessBankSelect,  kRegShiftLUT7HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
+			break;
+
+		case NTV2_CHANNEL8:
+			result = ReadRegister (kRegLUTV2Control,  &tempVal,  kRegMaskLUT8HostAccessBankSelect,  kRegShiftLUT8HostAccessBankSelect);
+			outValue = static_cast <NTV2ColorCorrectionHostAccessBank> (tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
+			break;
+
+		default:	break;
 	}
-	return false;
+	return result;
 }
 
-bool CNTV2Card::SetColorCorrectionSaturation (NTV2Channel channel, ULWord value)
+bool CNTV2Card::SetColorCorrectionSaturation (const NTV2Channel inChannel, const ULWord inValue)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if ( channel == NTV2_CHANNEL1 )
-		return WriteRegister (kRegCh1ColorCorrectioncontrol,	value,	kRegMaskSaturationValue,	kRegShiftSaturationValue);
-	else
-		return WriteRegister (kRegCh2ColorCorrectioncontrol,	value,	kRegMaskSaturationValue,	kRegShiftSaturationValue);
+
+	return WriteRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectioncontrol  :  kRegCh2ColorCorrectioncontrol,
+							inValue,  kRegMaskSaturationValue,  kRegShiftSaturationValue);
 }
 
-bool CNTV2Card::GetColorCorrectionSaturation (NTV2Channel channel, ULWord *value)
+bool CNTV2Card::GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord & outValue)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if ( channel == NTV2_CHANNEL1 )
-		return ReadRegister (kRegCh1ColorCorrectioncontrol,		(ULWord*)value,	kRegMaskSaturationValue,	kRegShiftSaturationValue);
-	else
-		return ReadRegister (kRegCh2ColorCorrectioncontrol,		(ULWord*)value,	kRegMaskSaturationValue,	kRegShiftSaturationValue);
+
+	return ReadRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectioncontrol  :  kRegCh2ColorCorrectioncontrol,
+						&outValue,  kRegMaskSaturationValue,  kRegShiftSaturationValue);
 }
 
 bool CNTV2Card::SetLUTControlSelect(NTV2LUTControlSelect lutSelect)		{return WriteRegister(kRegCh1ColorCorrectioncontrol,	(ULWord)lutSelect,	kRegMaskLUTSelect,	kRegShiftLUTSelect);}
@@ -4322,18 +4275,18 @@ bool CNTV2Card::GetDualLinkInputEnable (bool & outIsEnabled)
 
 ///////////////////////////////////////////////////////////////////
 
-bool CNTV2Card::SetDitherFor8BitInputs(NTV2Channel channel, ULWord dither)
+bool CNTV2Card::SetDitherFor8BitInputs (const NTV2Channel inChannel, const ULWord inDither)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return WriteRegister (gChannelToControlRegNum [channel], dither, kRegMaskDitherOn8BitInput, kRegShiftDitherOn8BitInput);
+	return WriteRegister (gChannelToControlRegNum[inChannel], inDither, kRegMaskDitherOn8BitInput, kRegShiftDitherOn8BitInput);
 }
 
-bool CNTV2Card::GetDitherFor8BitInputs(NTV2Channel channel, ULWord* dither)
+bool CNTV2Card::GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord & outDither)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return ReadRegister(gChannelToControlRegNum [channel], dither, kRegMaskDitherOn8BitInput, kRegShiftDitherOn8BitInput);
+	return ReadRegister(gChannelToControlRegNum[inChannel], &outDither, kRegMaskDitherOn8BitInput, kRegShiftDitherOn8BitInput);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -6485,13 +6438,14 @@ bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV
 }
 
 
-bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
+bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
+	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
+	bool			canConnect	(true);
 
-	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (inInputXpt, regNum, ndx))
+	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
 		return false;
 
 	if (!regNum)
@@ -6501,7 +6455,12 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 	if (regNum > maxRegNum)
 		return false;	//	This device doesn't have that routing register
 
-	return WriteRegister (regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]);
+	if (inValidate)
+		CanConnect(inInputXpt, inOutputXpt, canConnect);
+	if (!canConnect)
+		return false;
+
+	return WriteRegister(regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]);
 }
 
 
@@ -8465,12 +8424,12 @@ bool CNTV2Card::GetLHIVideoDACMode(NTV2VideoDACMode *value)
 bool CNTV2Card::SetLTCInputEnable(bool value)
 {
 	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC
-				 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IO4KIP))
+                 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110))
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
-		if(source == NTV2_REFERENCE_EXTERNAL)
-			SetReference(NTV2_REFERENCE_FREERUN);
+//		if(source == NTV2_REFERENCE_EXTERNAL)
+//			SetReference(NTV2_REFERENCE_FREERUN);
 	}
 	if(GetDeviceID() == DEVICE_ID_CORVID24)
 	{
@@ -8484,12 +8443,12 @@ bool CNTV2Card::SetLTCOnReference(bool value)
 {
 
 	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC
-				 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IO4KIP))
+                 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110))
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
-		if(source == NTV2_REFERENCE_EXTERNAL)
-			SetReference(NTV2_REFERENCE_FREERUN);
+//		if(source == NTV2_REFERENCE_EXTERNAL)
+//			SetReference(NTV2_REFERENCE_FREERUN);
 	}
 	if(GetDeviceID() == DEVICE_ID_CORVID24)
 	{
@@ -9473,7 +9432,7 @@ bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const
 		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inRegInfo, true);
 		//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
 		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
-		return result;
+        return result;
 	}
 }
 
@@ -9502,8 +9461,48 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
 		if (result && !bankSelGetSetMsg.mInRegInfos.IsNULL ())
 			inOutRegInfo = bankSelGetSetMsg.GetRegInfo ();
+        return result;
 	}
-	return result;
+}
+
+
+bool CNTV2Card::VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
+{
+    bool	result	(false);
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+    if (_remoteHandle != INVALID_NUB_HANDLE)
+    {
+        // NOTE: DO NOT REMOVE THIS
+        // It's needed for the nub client to work
+    }
+    else
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+    {
+        NTV2VirtualData	virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
+        //cerr << "## DEBUG:  CNTV2Card::VirtualDataWrite:  " << virtualDataMsg << endl;
+        result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+    }
+    return result;
+}
+
+
+bool CNTV2Card::VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
+{
+    bool	result	(false);
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+    if (_remoteHandle != INVALID_NUB_HANDLE)
+    {
+        // NOTE: DO NOT REMOVE THIS
+        // It's needed for the nub client to work
+    }
+    else
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+    {
+        NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
+        //cerr << "## DEBUG:  CNTV2Card::VirtualDataRead:  " << virtualDataMsg << endl;
+        result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+    }
+    return result;
 }
 
 

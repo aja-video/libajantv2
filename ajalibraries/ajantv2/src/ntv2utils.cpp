@@ -6,11 +6,12 @@
 #include "ajatypes.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
+#include "ntv2registerexpert.h"
 #include "videodefines.h"
 #include "audiodefines.h"
 #include "ntv2endian.h"
-#include "ntv2transcode.h"
 #include "ntv2debug.h"
+#include "ntv2transcode.h"
 #include "ntv2devicefeatures.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
@@ -4048,7 +4049,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
-        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"DEVICE NOT FOUND"          : "(Not Found)";
+        case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"AJA Device"                : "(Not Found)";
         case DEVICE_ID_CORVID1:                 return inForRetailDisplay ?	"Corvid 1"                  : "Corvid";
         case DEVICE_ID_CORVID22:                return inForRetailDisplay ?	"Corvid 22"                 : "Corvid22";
         case DEVICE_ID_CORVID3G:                return inForRetailDisplay ?	"Corvid 3G"                 : "Corvid3G";
@@ -4068,13 +4069,17 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ?	"Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ?	"Corvid 44"					: "Corvid44";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ?	"Corvid HEVC"				: "CorvidHEVC";
-		case DEVICE_ID_KONAIP_4CH_1SFP:			return inForRetailDisplay ? "KONA IP 4CH 1SFP"			: "KonaIP4Ch1SFP";
-		case DEVICE_ID_KONAIP_4CH_2SFP:			return inForRetailDisplay ? "KONA IP 4CH 2SFP"			: "KonaIP4Ch2SFP";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return inForRetailDisplay ? "KONA IP 1RX 1TX 1SFP J2K"	: "KonaIP1Rx1Tx1SFPJ2K";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return inForRetailDisplay ? "KONA IP 2TX 1SFP J2K"		: "KonaIP2Tx1SFPJ2K";
-		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return inForRetailDisplay ? "KONA IP 2RX 1SFP J2K"      : "KonaIP2Rx1SFPJ2K";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:     return inForRetailDisplay ? "KONA IP 1RX 1TX 2110"      : "KonaIP1Rx1Tx2110";
+        case DEVICE_ID_KONAIP_4CH_1SFP:			return "KonaIP s2022";
+        case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return "KonaIP J2K 1I 1O";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
+        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return "KonaIP J2K 2I";
+        case DEVICE_ID_KONAIP_1RX_1TX_2110:     return "KonaIP s2110 1I 1O";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
+        case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
+        case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
+        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
+        case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "DNxIV" : "Io4KPLUS";
 		case DEVICE_ID_IO4KIP:					return inForRetailDisplay ? "DNxIP" : "Io4KIP";
 		case DEVICE_ID_KONAALPHA:				return "KONA ALPHA";
@@ -7390,6 +7395,7 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrSDPNoVideo:                   return "SDP does not contain video";
         case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
         case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
+        case NTV2IpErrSFPNotFound:                  return "SFP data not found";
         default:                                    return "Unknown IP error";
     }
 }
@@ -7424,17 +7430,18 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "kona3g_quad_pcie.bit";
 			case DEVICE_ID_KONA4:						return "kona4_pcie.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona4_ufc_pcie.bit";
-			case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx.mcs";
+            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx.mcs";
-			case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx.mcs";
+            case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
+            case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
 			case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
 			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
 			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
-			case DEVICE_ID_IO4KIP:						return "io4kip_pcie.bit";
-			case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx.mcs";
+            case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
+            case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
+            case DEVICE_ID_KONAIP_4TX_2110:				return "kip_s2110.mcs";
 			case DEVICE_ID_KONAALPHA:					return "kona_alpha.bit";
 			default:									return "";
 		}
@@ -7498,7 +7505,6 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc.bit";
 			case DEVICE_ID_IO4K:						return "IO_XT_4K.bit";
 			case DEVICE_ID_IO4KUFC:						return "IO_XT_4K_UFC.bit";
-			case DEVICE_ID_IO4KPLUS:					return "IO_FLINT.bit";
 			case DEVICE_ID_IOEXPRESS:					return "chekov_00_pcie.bit";
 			case DEVICE_ID_IOXT:						return "top_io_tx.bit";
 			case DEVICE_ID_KONA3G:						return "k3g_top.bit";
@@ -7512,6 +7518,9 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie.bit";
 			case DEVICE_ID_LHI:							return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
+            case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
+            case DEVICE_ID_IOIP_2022:					return "ioip_2022.bit";
+            case DEVICE_ID_IOIP_2110:					return "ioip_2110.bit";
 			default:									return "";
 		}
 	#endif	//	else not MSWindows
@@ -7610,7 +7619,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_IO4KPLUS,
-														DEVICE_ID_IO4KIP,
+                                                        DEVICE_ID_IOIP_2022,
+                                                        DEVICE_ID_IOIP_2110,
 														DEVICE_ID_KONAIP_4TX_2110,
 														DEVICE_ID_KONAALPHA,
 														DEVICE_ID_NOTFOUND	};
@@ -7652,10 +7662,13 @@ string NTV2RegisterNumberToString (const NTV2RegisterNumber inValue)
 	string	result	(::NTV2RegisterNameString (inValue));
 	if (result.empty ())
 	{
-		ostringstream	oss;
-		//oss << "0x" << hex << inValue << dec;
+		result = CNTV2RegisterExpert::GetDisplayName(inValue);
+		if (result.empty())
+		{
+			ostringstream	oss;	//oss << "0x" << hex << inValue << dec;
 		oss << inValue;
-		result = oss.str ();
+			result = oss.str();
+	}
 	}
 	return result;
 }
@@ -7727,11 +7740,7 @@ bool convertHDRRegisterToFloatValues(const HDRRegValues & inRegisterValues, HDRF
 		(inRegisterValues.redPrimaryX > 0xC350) ||
 		(inRegisterValues.redPrimaryY > 0xC350) ||
 		(inRegisterValues.whitePointX > 0xC350) ||
-		(inRegisterValues.whitePointY > 0xC350) ||
-        (inRegisterValues.maxMasteringLuminance < 0x0000) ||
-        (inRegisterValues.minMasteringLuminance < 0x0000) ||
-        (inRegisterValues.maxContentLightLevel < 0x0000)  ||
-        (inRegisterValues.maxFrameAverageLightLevel < 0x0000))
+        (inRegisterValues.whitePointY > 0xC350))
 		return false;
 	outFloatValues.greenPrimaryX = static_cast<float>(inRegisterValues.greenPrimaryX * 0.00002);
 	outFloatValues.greenPrimaryY = static_cast<float>(inRegisterValues.greenPrimaryY * 0.00002);

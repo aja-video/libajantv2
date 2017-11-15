@@ -438,7 +438,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_KONA3G:		return "K3G_top";			//	K3G_top.ncd
 		//case DEVICE_ID_KONA3G:	return "K3G_p2p";			//	K3G_p2p.ncd
 		case DEVICE_ID_KONA3GQUAD:	return "K3G_quad";			//	K3G_quad.ncd
-		//case DEVICE_ID_KONA3GQUAD:return "K3G_quad_p2p";		//	K3G_quad_p2p.ncd
+        //case DEVICE_ID_KONA3GQUAD:    return "K3G_quad_p2p";		//	K3G_quad_p2p.ncd
 		case DEVICE_ID_KONA4:		return "kona_4_quad";		//	kona_4_quad
 		case DEVICE_ID_KONA4UFC:	return "kona_4_ufc";		//	kona_4_ufc
 		case DEVICE_ID_IO4K:		return "IO_XT_4K";			//	IO_XT_4K
@@ -449,8 +449,9 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_LHI:			return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
-		case DEVICE_ID_IO4KPLUS:	return "IO_FLINT";
-		case DEVICE_ID_IO4KIP:		return "io4kip";
+        case DEVICE_ID_IO4KPLUS:        return "io4kp";
+        case DEVICE_ID_IOIP_2022:       return "ioip2022";
+        case DEVICE_ID_IOIP_2110:       return "ioip2110";
 		case DEVICE_ID_KONAALPHA:		return "kona_alpha";
 		default:
 			break;
@@ -486,7 +487,8 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_CORVIDHBR:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVIDHBR) == _designName
 											|| _designName == "ZARTAN";
 		case DEVICE_ID_IO4KPLUS:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == _designName;
-		case DEVICE_ID_IO4KIP:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KIP) == _designName;
+        case DEVICE_ID_IOIP_2022:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == _designName;
+        case DEVICE_ID_IOIP_2110:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
 		default:					break;
 	}
 	return false;

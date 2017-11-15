@@ -47,6 +47,12 @@ public:
 	**/
 	static uint64_t	GetSystemMicroseconds (void);
 
+    /**
+        @brief		Returns the current value of the host's high-resolution clock, in nanoseconds.
+        @return		Current value of the host's clock, in nanoseconds, based on GetSystemCounter() and GetSystemFrequency().
+    **/
+    static uint64_t	GetSystemNanoseconds (void);
+
 	/**
 		@brief		Suspends execution of the current thread for a given number of milliseconds.
 		@param		inMilliseconds		Specifies the sleep time, in milliseconds.

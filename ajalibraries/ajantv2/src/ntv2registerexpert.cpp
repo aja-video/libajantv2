@@ -1580,9 +1580,9 @@ private:
 			const UWord	input1_2Channel	((inRegValue >> 4) & 0x0000000F);
 			const UWord	input2_2Channel	((inRegValue >> 8) & 0x0000000F);
 			ostringstream	oss;
-			oss	<< "Main Input Select: " << (mainInputSelect+1)	<< endl
-				<< "Input 1 - 2 channel: " << (input1_2Channel+1) << endl
-				<< "INput 2 - 2 channel: " << (input2_2Channel+1);
+			oss	<< "Main: "		<< "Audio System " << (mainInputSelect+1)				<< endl
+				<< "AuxIn1: "	<< "2 chls from Audio System " << (input1_2Channel+1)	<< endl
+				<< "AuxIn2: "	<< "2 chls from Audio System " << (input2_2Channel+1);
 			return oss.str();
 		}
 	}	mAudMxrInputSelDecoder;
@@ -1652,8 +1652,9 @@ private:
 				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
 				<< "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
 				<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
-				<< "Memory writes "			<< (inRegValue & BIT(28) ? "disabled" : "enabled")	<< endl
-				<< "Metadata from "			<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))					<< endl
+				<< "SD Y+C Demux: "			<< EnabDisab(inRegValue & BIT(30))						<< endl
+				<< "Metadata from: "		<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
 			return oss.str();
 		}
 	}	mDecodeAncExtControlReg;
@@ -1791,16 +1792,17 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))	<< endl
-				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))	<< endl
-				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))	<< endl
-				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))	<< endl
-				<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))	<< endl
-				<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))	<< endl
-				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))	<< endl
-				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))	<< endl
-				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))	<< endl
-				<< "Memory writes: "		<< ((inRegValue & BIT(28)) ? "disabled" : "enabled");
+			oss	<< "HANC Y enable: "		<< YesNo(inRegValue & BIT( 0))			<< endl
+				<< "VANC Y enable: "		<< YesNo(inRegValue & BIT( 4))			<< endl
+				<< "HANC C enable: "		<< YesNo(inRegValue & BIT( 8))			<< endl
+				<< "VANC C enable: "		<< YesNo(inRegValue & BIT(12))			<< endl
+				<< "Payload Y insert: "		<< YesNo(inRegValue & BIT(16))			<< endl
+				<< "Payload C insert: "		<< YesNo(inRegValue & BIT(17))			<< endl
+				<< "Payload F1 insert: "	<< YesNo(inRegValue & BIT(20))			<< endl
+				<< "Payload F2 insert: "	<< YesNo(inRegValue & BIT(21))			<< endl
+				<< "Progressive video: "	<< YesNo(inRegValue & BIT(24))			<< endl
+				<< "Memory reads: "			<< EnabDisab(!(inRegValue & BIT(28)))	<< endl
+				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}
 	}	mDecodeAncInsControlReg;

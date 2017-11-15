@@ -1,21 +1,21 @@
 //
-//  ntv2io4kplusservices.cpp
+//  ntv2ioip2022services.cpp
 //
 //  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
 //
 
-#include "ntv2io4kplusservices.h"
+#include "ntv2ioip2022services.h"
 
 
 //-------------------------------------------------------------------------------------------------------
-//	class Io4KServices
+//	class IoIP2022Services
 //-------------------------------------------------------------------------------------------------------
 
-Io4KPlusServices::Io4KPlusServices()
+IoIP2022Services::IoIP2022Services()
 {
 }
 
-Io4KPlusServices::~Io4KPlusServices()
+IoIP2022Services::~IoIP2022Services()
 {
 	for(uint32_t i = 0; i < 8; i++)
 		mCard->EnableChannel((NTV2Channel)i);
@@ -25,7 +25,7 @@ Io4KPlusServices::~Io4KPlusServices()
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::UpdateAutoState (void)
+void IoIP2022Services::UpdateAutoState (void)
 {
 	// auto mode from transport
 	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
@@ -43,7 +43,7 @@ void Io4KPlusServices::UpdateAutoState (void)
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
 //-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
+NTV2VideoFormat IoIP2022Services::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
 											NTV2SDIInputFormatSelect* inputFormatSelect)
 {
@@ -90,7 +90,7 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void IoIP2022Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
@@ -1483,7 +1483,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		mCard->EnableChannel(NTV2_CHANNEL4);
 
 
-	// 425 Mux
+	// connect muxes
 	if (b2pi)
 	{
 		if (genFrameFormat == FORMAT_RGB)
@@ -1519,7 +1519,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void IoIP2022Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
@@ -1618,7 +1618,12 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		bHdmiInRGB = valRgb != 0;
 	}
 	
-	else // 425 or Quads
+	// Quad In
+	else if (b2xQuadIn && b4xQuadIn)
+	{
+	}
+	
+	else // 425
 	{
 		ULWord vpida = 0, vpidb	= 0;
 		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
@@ -1632,13 +1637,9 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		b4x425InB = std == VPIDStandard_2160_QuadDualLink_3Gb;
 		mCard->GetSDIInput6GPresent(b6G, NTV2_CHANNEL1);
 		mCard->GetSDIInput12GPresent(b12G, NTV2_CHANNEL1);
-		b2x425In	= b2x425In  || b6G;
-		b4x425InA	= b4x425InA || b12G;
-		b425In		= b2x425In  || b4x425InA || b4x425InB;
-		
-		// quad in
-		if (b425In)
-			b2xQuadIn = b4xQuadIn = false;
+		b2x425In	= b6G;
+		b4x425InA	= b12G;
+		b425In		= b2x425In || b4x425InA || b4x425InB;
 
 		// override inputFormatSelect for SMTE425
 		if (b425In)
@@ -2700,14 +2701,14 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			else if (!b4k6gOut && !b2xQuadOut && !b2xQuadIn)
 			{
-				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut1Input, in4kYUV1);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut1Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -2735,14 +2736,14 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			else if (!b4k6gOut && !b2xQuadOut && !b2xQuadIn)
 			{
-				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut2Input, in4kYUV2);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut2Input, in4kYUV2);
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -2771,7 +2772,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			else if (b4k6gOut || b2xQuadOut || b2xQuadIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV1);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, in4kYUV2);
@@ -2840,7 +2841,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			else if (b4k6gOut || b2xQuadOut || b2xQuadIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV3);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, in4kYUV4);
@@ -2904,12 +2905,6 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	else if (b4K && !b2pi)
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_Xpt4KDownConverterOut);
-		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
-	}
-	// YUV Out 4K 2pi 
-	else if (b4K && b2pi)
-	{
-		mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
 	// Stereo or LevelB
@@ -3065,7 +3060,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void IoIP2022Services::SetDeviceMiscRegisters (NTV2Mode mode)
 {
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters(mode);

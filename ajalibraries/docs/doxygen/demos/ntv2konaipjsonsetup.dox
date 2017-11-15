@@ -21,8 +21,8 @@ Changes in SDK 14.0
 
 In the list of keyords below, an 'IP string' refers to something like '239.0.1.123'
 
-Keywords in the scripts:
-
+<b>Keywords in the scripts:</b>
+@code
                             2022-6 2022-2   2110
 Protocol                                     x      2110 | 2022
 Enable2022_7                  x                     true | false
@@ -79,5 +79,6 @@ transmit
     lastPayloadLen                            x     decimal number (expert use only)
     pktsPerLine                               x     decimal number (expert use only)
     Enable                    x      x        x     true | false
+@endcode
 **/
 

@@ -706,25 +706,25 @@ typedef enum NTV2RXSDIStatusRegister
 
 typedef enum
 {
-	kRegAudioMixerInputSelects = 2304,	//2304
-	kRegAudioMixerMainGain,		//2305
-	kRegAudioMixerAux1GainCh1,	//2306
-	kRegAudioMixerAux2GainCh1,	//2307
-	kRegAudioMixerChannelSelect,			//2308
-	kRegAudioMixerMutes,
-	kRegAudioMixerAux1GainCh2,
-	kRegAudioMixerAux2GainCh2,
-	kRegAudioMixerAux1InputLevels = 2318,
-	kRegAudioMixerAux2InputLevels,
-	kRegAudioMixerMainInputLevelsPair0,
-	kRegAudioMixerMainInputLevelsPair1,
-	kRegAudioMixerMainInputLevelsPair2,
-	kRegAudioMixerMainInputLevelsPair3,
-	kRegAudioMixerMainInputLevelsPair4,
-	kRegAudioMixerMainInputLevelsPair5,
-	kRegAudioMixerMainInputLevelsPair6,
-	kRegAudioMixerMainInputLevelsPair7,
-	kRegAudioMixerMixedChannelOutputLevels
+	kRegAudioMixerInputSelects = 2304,		//	2304
+	kRegAudioMixerMainGain,					//	2305
+	kRegAudioMixerAux1GainCh1,				//	2306
+	kRegAudioMixerAux2GainCh1,				//	2307
+	kRegAudioMixerChannelSelect,			//	2308
+	kRegAudioMixerMutes,					//	2309
+	kRegAudioMixerAux1GainCh2,				//	2310
+	kRegAudioMixerAux2GainCh2,				//	2311
+	kRegAudioMixerAux1InputLevels = 2318,	//	2318
+	kRegAudioMixerAux2InputLevels,			//	2319
+	kRegAudioMixerMainInputLevelsPair0,		//	2320
+	kRegAudioMixerMainInputLevelsPair1,		//	2321
+	kRegAudioMixerMainInputLevelsPair2,		//	2322
+	kRegAudioMixerMainInputLevelsPair3,		//	2323
+	kRegAudioMixerMainInputLevelsPair4,		//	2324
+	kRegAudioMixerMainInputLevelsPair5,		//	2325
+	kRegAudioMixerMainInputLevelsPair6,		//	2326
+	kRegAudioMixerMainInputLevelsPair7,		//	2327
+	kRegAudioMixerMixedChannelOutputLevels	//	2328
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
@@ -5265,6 +5265,8 @@ typedef enum
 	shiftSyncro = 24,
 	maskDisableExtractor = BIT(28),
 	shiftDisableExtractor = 28,
+	maskEnableSDMux = BIT(30),
+	shiftEnableSDMux = 30,
 	maskGrabLSBs = BIT(31),
 	shiftGrabLSBs = 31,
 	maskField1CutoffLine = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10),
@@ -5376,6 +5378,8 @@ typedef enum
 	shiftInsSetProgressive = 24,
 	maskInsDisableInserter = BIT(28),
 	shiftInsDisableInserter = 28,
+	maskInsEnablePktSplitSD = BIT(31),
+	shiftInsEnablePktSplitSD = 31,
 	maskInsHancDelay = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9),
 	shiftINsHancDelay = 0,
 	maskInsVancDelay = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
@@ -5452,7 +5456,8 @@ typedef enum
 		#define	NTV2_IS_VALID_HEADER_TAG(_x_)	((_x_) == NTV2_HEADER_TAG)
 		#define	NTV2_IS_VALID_TRAILER_TAG(_x_)	((_x_) == NTV2_TRAILER_TAG)
 
-		#define	NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief	Identifies NTV2BankSelGetSetRegs struct
+        #define	NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief	Identifies NTV2VirtualData struct
+        #define	NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief	Identifies NTV2BankSelGetSetRegs struct
 		#define	AUTOCIRCULATE_TYPE_STATUS		NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief	Identifies AUTOCIRCULATE_STATUS struct
 		#define	AUTOCIRCULATE_TYPE_XFER			NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief	Identifies AUTOCIRCULATE_TRANSFER struct
 		#define	AUTOCIRCULATE_TYPE_XFERSTATUS	NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief	Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
@@ -5470,7 +5475,8 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_GETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
-													(_x_) == NTV2_TYPE_BANKGETSET			)
+                                                    (_x_) == NTV2_TYPE_BANKGETSET			||	\
+                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW      )
 
 
 		//	NTV2_POINTER FLAGS
@@ -6511,7 +6517,41 @@ typedef enum
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2BankSelGetSetRegs)
 
-		
+
+        /**
+            @brief	This is used to perform virtual data reads or writes.
+            @note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2VirtualData)
+            NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+                ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
+                ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
+                NTV2_POINTER	mVirtualData;		///< @brief	Pointer object to virtual data. The SDK owns this memory.
+            NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs an NTV2VirtualData struct for reading or writing virtual data.
+                    @param[in]	inTag               The tag to use.
+                    @param[in]	inVirtualData       Pointer to vitrual data.
+                    @param[in]	inVirtualDataSize   The size of the virtual data.
+                    @param[in]	inDoWrite           True if writing, false if reading.
+                **/
+                explicit	NTV2VirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize, const bool inDoWrite = false);
+
+                /**
+                    @brief	Prints a human-readable representation of me to the given output stream.
+                    @param	inOutStream		Specifies the output stream to use.
+                    @return	A reference to the output stream.
+                **/
+                std::ostream &	Print (std::ostream & inOutStream) const;
+
+                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2VirtualData)
+
+
 		/**
 			@brief	This is used by the CNTV2Card::ReadSDIStatistics function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.

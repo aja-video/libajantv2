@@ -499,7 +499,8 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 				case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2RX_1SFP_J2K;         break;
 				case DEVICE_ID_CORVIDHBR:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
 				case DEVICE_ID_IO4KPLUS:					bitFileInfo.bitFileType = NTV2_BITFILE_IO4KPLUS_MAIN;				break;
-				case DEVICE_ID_IO4KIP:						bitFileInfo.bitFileType = NTV2_BITFILE_IO4KIP_MAIN;					break;
+                case DEVICE_ID_IOIP_2022:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2022;					break;
+                case DEVICE_ID_IOIP_2110:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2110;					break;
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;			break;
 				case DEVICE_ID_KONAALPHA:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAALPHA;					break;
 				case DEVICE_ID_KONAIP_4TX_2110:
@@ -749,6 +750,11 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 {
 	if (IsKonaIPDevice())
 	{
+        // PSM Hack for pre MB IOIP
+        ULWord hexID = 0x0;
+        ReadRegister (kRegBoardID, &hexID);
+        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
+
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
         if (val == SAREK_IF_VERSION)
@@ -764,6 +770,11 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
 	{
+        // PSM Hack for pre MB IOIP
+        ULWord hexID = 0x0;
+        ReadRegister (kRegBoardID, &hexID);
+        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
+
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
 		if (val != 0x01)
@@ -800,6 +811,8 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
 		return true;
 	default:
 		return false;

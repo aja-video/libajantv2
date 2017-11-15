@@ -216,6 +216,9 @@ typedef enum
 	DEVICE_ID_KONAIP_4TX_2110			= 0x10646706,
 	DEVICE_ID_IO4KPLUS					= 0x10710800,
 	DEVICE_ID_IO4KIP					= 0x10710850,
+    DEVICE_ID_IOIP_2022                 = 0x10710850,
+    DEVICE_ID_IOIP_2110                 = 0x10710851,
+
 	DEVICE_ID_KONAALPHA					= 0x10756600,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
@@ -945,7 +948,10 @@ typedef enum
         (__f__) == NTV2_FORMAT_1080p_2K_2400 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2500 ||                     \
         (__f__) == NTV2_FORMAT_1080p_2K_2997 ||                     \
-        (__f__) == NTV2_FORMAT_1080p_2K_3000	)
+        (__f__) == NTV2_FORMAT_1080p_2K_3000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5000 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_5994 ||                     \
+        (__f__) == NTV2_FORMAT_1080p_2K_6000	)
 
 typedef enum
 {
@@ -2914,15 +2920,16 @@ typedef enum
     NTV2_BITFILE_CORVID88		= 41,
     NTV2_BITFILE_CORVID44		= 42,
     NTV2_BITFILE_CORVIDHEVC     = 43,
-    NTV2_BITFILE_KONAIP_4CH_1SFP= 44,
-    NTV2_BITFILE_KONAIP_4CH_2SFP= 45,
+    NTV2_BITFILE_KONAIP_4CH_1SFP    = 44,
+    NTV2_BITFILE_KONAIP_4CH_2SFP    = 45,
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
 	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,
-	NTV2_BITFILE_KONAIP_1RX_1TX_2110 = 49,
+    NTV2_BITFILE_KONAIP_1RX_1TX_2110= 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
-	NTV2_BITFILE_IO4KIP_MAIN	= 51,
-	NTV2_BITFILE_KONAIP_RTX_2110 = 52,
+    NTV2_BITFILE_IOIP_2022          = 51,
+    NTV2_BITFILE_IOIP_2110          = 52,
+    NTV2_BITFILE_KONAIP_RTX_2110    = 53,
 	NTV2_BITFILE_KONAALPHA,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
@@ -4275,6 +4282,7 @@ typedef enum
     NTV2IpErrSDPNoVideo,
     NTV2IpErrSDPNoAudio,
     NTV2IpErrSDPNoANC,
+    NTV2IpErrSFPNotFound,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

@@ -1943,3 +1943,22 @@ ostream & NTV2BankSelGetSetRegs::Print (ostream & inOutStream) const
 		inOutStream << *pRegInfo;
 	return inOutStream;
 }
+
+
+NTV2VirtualData::NTV2VirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize, const bool inDoWrite)
+    :	mHeader			(NTV2_TYPE_VIRTUAL_DATA_RW, sizeof (NTV2VirtualData)),
+        mTag            (inTag),                                //  setup tag
+        mIsWriting		(inDoWrite),                            //	setup write/read
+        mVirtualData	(inVirtualData, inVirtualDataSize)      //	setup virtual data
+{
+    NTV2_ASSERT_STRUCT_VALID;
+}
+
+
+ostream & NTV2VirtualData::Print (ostream & inOutStream) const
+{
+    NTV2_ASSERT_STRUCT_VALID;
+    inOutStream	<< mHeader << ", mTag=" << mTag << ", mIsWriting=" << mIsWriting;
+    return inOutStream;
+}
+

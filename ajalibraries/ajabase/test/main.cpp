@@ -12,10 +12,13 @@
 
 #include "ajabase/common/common.h"
 #include "ajabase/common/guid.h"
+#include "ajabase/common/performance.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
+#include "ajabase/common/timer.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/systemtime.h"
 
 #include <clocale>
 #include <iostream>
@@ -263,6 +266,15 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
 
         char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
         CHECK(retVal3 == target2);
+
+        const int maxSize2 = 8;
+        char target3[maxSize2];
+        strcpy(target3,"???????");
+        CHECK(strcmp(target3, "???????") == 0);
+
+        const char* source2 = "a dog!";
+        aja::safer_strncpy(target3, source2, strlen(source2), maxSize2);
+        CHECK(strcmp(target3, source2) == 0);
     }
 
 TEST_SUITE_END(); //common
@@ -605,3 +617,65 @@ TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
     }
 
 TEST_SUITE_END(); //atomic
+
+void time_marker() {}
+TEST_SUITE("time -- functions in ajabase/system/systemtime.h");
+
+    TEST_CASE("AJATime")
+    {
+        uint64_t startMs = AJATime::GetSystemMilliseconds();
+        uint64_t startUs = AJATime::GetSystemMicroseconds();
+        uint64_t startNs = AJATime::GetSystemNanoseconds();
+        AJATime::SleepInMicroseconds(100 * 1000); // 1/10th of a second
+        uint64_t endMs = AJATime::GetSystemMilliseconds();
+        uint64_t endUs = AJATime::GetSystemMicroseconds();
+        uint64_t endNs = AJATime::GetSystemNanoseconds();
+
+        uint64_t deltaMs = endMs - startMs;
+        uint64_t deltaUs = endUs - startUs;
+        uint64_t deltaNs = endNs - startNs;
+
+        // There could be variablitiy in the sleep call, so make sure in range
+        // check to make sure the units are correct
+        CHECK(deltaMs > 90);
+        CHECK(deltaMs < 150);
+        CHECK(deltaUs > 90000);
+        CHECK(deltaUs < 150000);
+        CHECK(deltaNs > 90000000);
+        CHECK(deltaNs < 150000000);
+    }
+
+TEST_SUITE_END(); //time
+
+void performance_marker() {}
+TEST_SUITE("performance -- functions in ajabase/common/performance.h");
+
+    TEST_CASE("AJAPerformance")
+    {
+        AJAPerformance p("unit_test", AJATimerPrecisionMilliseconds);
+        p.Start();
+        AJATime::SleepInMicroseconds(100 * 1000);
+        p.Stop();
+        p.Start();
+        AJATime::SleepInMicroseconds(200 * 1000);
+        p.Stop();
+        p.Start();
+        AJATime::SleepInMicroseconds(300 * 1000);
+        p.Stop();
+
+        CHECK(p.Entries() == 3);
+        CHECK(p.MinTime() != 0);
+        CHECK(p.MaxTime() != 0);
+        // There could be variablitiy in the sleep call, so make sure in range
+        CHECK(p.StandardDeviation() > 95);
+        CHECK(p.StandardDeviation() < 110);
+
+        AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
+        CHECK(p2.Entries() == 0);
+        CHECK(p2.MinTime() != 0);
+        CHECK(p2.MaxTime() == 0);
+        CHECK(p2.Mean() == 0.0);
+        CHECK(p2.StandardDeviation() == 0.0);
+    }
+
+TEST_SUITE_END(); //performance

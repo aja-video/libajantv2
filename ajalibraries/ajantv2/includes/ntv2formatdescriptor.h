@@ -233,6 +233,14 @@ typedef struct NTV2FormatDescriptor
 	bool							GetSMPTELineNumber (const ULWord inLineOffset, ULWord & outSMPTELine, bool & outIsField2) const;
 
 	/**
+		@brief		Answers with the equivalent line offset into the raster I describe for the given SMPTE line number.
+		@param[in]	inSMPTELine		Specifies the SMPTE line number.
+		@param[out]	outLineOffset	Receives the zero-based line offset into the raster I describe.
+		@return		True if successful;  otherwise false.
+	**/
+	bool							GetLineOffsetFromSMPTELine (const ULWord inSMPTELine, ULWord & outLineOffset) const;
+
+	/**
 		@return	True if I'm equal to the given NTV2FormatDescriptor.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/
@@ -259,6 +267,7 @@ typedef struct NTV2FormatDescriptor
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
 	inline NTV2VANCMode				GetVANCMode (void) const		{return mVancMode;}							///< @return	The VANC mode I was created with.
 	inline bool						Is2KFormat (void) const			{return m2Kby1080;}							///< @return	True if I was created with a 2Kx1080 video format.
+	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());}	///< @return	True if I was created with an SD video format or standard.
 	inline bool						IsQuadRaster (void) const		{return NTV2_IS_QUAD_STANDARD(mStandard) || NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat);}	///< @return	True if I was created with a 4K/UHD video format or standard.
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.

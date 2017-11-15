@@ -30,7 +30,16 @@
 
 #elif defined(AJALinux)
 
-    #define kipdprintf(...)
+    #if (KIPDPRINT==0)
+        // no log
+        #define kipdprintf(...)
+
+    #elif (KIPDPRINT==1)
+        // printf
+        #include <stdio.h>
+        #define kipdprintf(...) printf(__VA_ARGS__)
+
+    #endif
 
 #elif defined(AJAMac)
 

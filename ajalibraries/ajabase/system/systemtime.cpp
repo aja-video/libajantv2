@@ -104,7 +104,7 @@ AJATime::GetSystemCounter()
 #ifdef AJA_USE_CLOCK_GETTIME
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec * ((int64_t)1000000)) + (ts.tv_nsec / (int64_t)1000);
+    return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
 #else
 	struct timeval tv;
 	struct timezone tz;
@@ -154,7 +154,11 @@ AJATime::GetSystemFrequency()
 #endif
 
 #if defined(AJA_LINUX)
-	return 1000000;
+#ifdef AJA_USE_CLOCK_GETTIME
+    return 1000000000;
+#else
+    return 1000000;
+#endif
 #endif
 }
 
@@ -183,11 +187,25 @@ AJATime::GetSystemMicroseconds()
 	{
 		// floats are being used here to avoid the issue of overflow
 		// or inaccuracy when chosing where to apply the '1000000' correction
-		us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000.);
+        us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000.);
 	}
 	return us;
 }
 
+uint64_t
+AJATime::GetSystemNanoseconds()
+{
+    uint64_t ticks          = GetSystemCounter();
+    uint64_t ticksPerSecond = GetSystemFrequency();
+    uint64_t us             = 0;
+    if (ticksPerSecond)
+    {
+        // floats are being used here to avoid the issue of overflow
+        // or inaccuracy when chosing where to apply the '1000000000' correction
+        us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000000.);
+    }
+    return us;
+}
 
 // sleep time in milliseconds
 void 

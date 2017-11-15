@@ -4,13 +4,16 @@
 	@brief		Implements the AJADebug class.
 **/
 
-#include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/atomic.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/lock.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/system.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/atomic.h"
+#include "ajabase/system/thread.h"
+
 #if defined(AJA_LINUX)
 #include <stdarg.h>
 #endif
@@ -21,7 +24,7 @@
 #include <time.h>
 
 static std::vector<std::string> sGroupLabelVector;
-static const char* sSeverityString[] = {"emergency",  "alert", "assert", "error", "warning", "notice", "info", "debug"};
+static const char* sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
@@ -116,12 +119,27 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
             addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
             addDebugGroupToLabelVector(AJA_DebugUnit_Application);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJACCLib);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncLib);
             addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
             addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
             addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
             addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DataQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608MsgQueue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeChannel);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeScreen);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708SvcBlkQue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
+            addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncData);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {
@@ -308,6 +326,15 @@ AJADebug::IsDebugBuild()
     return sDebug;
 }
 
+inline int64_t debug_time()
+{
+    int64_t ticks = AJATime::GetSystemCounter();
+    int64_t rate = AJATime::GetSystemFrequency();
+    int64_t time = ticks / rate * AJA_DEBUG_TICK_RATE;
+    time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
+
+    return time;
+}
 
 inline uint64_t report_common(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, uint64_t& writeIndex, int32_t& messageIndex)
 {
@@ -354,11 +381,13 @@ inline uint64_t report_common(int32_t index, int32_t severity, const char* pFile
         // save the message data
         spShare->messageRing[messageIndex].groupIndex = index;
         spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
-        spShare->messageRing[messageIndex].time = AJADebug::DebugTime();
+        spShare->messageRing[messageIndex].time = debug_time();
         spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
         aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
         spShare->messageRing[messageIndex].lineNumber = lineNumber;
         spShare->messageRing[messageIndex].severity = severity;
+        spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+        spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
         isGood = true;
     }
@@ -465,11 +494,13 @@ AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const std
             // save the message data
             spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
             spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
-            spShare->messageRing[messageIndex].time = DebugTime();
+            spShare->messageRing[messageIndex].time = debug_time();
             spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
             aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
             spShare->messageRing[messageIndex].lineNumber = lineNumber;
             spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
+            spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+            spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
             // format the message
             ajasnprintf(spShare->messageRing[messageIndex].messageText,
@@ -832,6 +863,64 @@ AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
 
 
 AJAStatus
+AJADebug::GetProcessId(uint64_t sequenceNumber, uint64_t* pPid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pPid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pPid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].pid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJADebug::GetThreadId(uint64_t sequenceNumber, uint64_t* pTid)
+{
+    if(spShare == NULL)
+    {
+        return AJA_STATUS_INITIALIZE;
+    }
+    if(sequenceNumber > spShare->writeIndex)
+    {
+        return AJA_STATUS_RANGE;
+    }
+    if(pTid == NULL)
+    {
+        return AJA_STATUS_NULL;
+    }
+
+    try
+    {
+        *pTid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].tid;
+    }
+    catch(...)
+    {
+        return AJA_STATUS_FAIL;
+    }
+
+    return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
 AJADebug::GetMessagesAccepted(uint64_t* pCount)
 {
     if(spShare == NULL)
@@ -1038,12 +1127,47 @@ AJADebug::RestoreState(char* pFileName)
 int64_t
 AJADebug::DebugTime()
 {
-	int64_t ticks = AJATime::GetSystemCounter();
-	int64_t rate = AJATime::GetSystemFrequency();
-	int64_t time = 0;
+    // wrapper around the inlined local version
+    return debug_time();
+}
 
-	time = ticks / rate * AJA_DEBUG_TICK_RATE;
-	time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
 
-	return time;
+std::string AJAStatusToString (const AJAStatus inStatus)
+{
+	switch (inStatus)
+	{
+		case AJA_STATUS_SUCCESS:			return "AJA_STATUS_SUCCESS";
+		case AJA_STATUS_TRUE:				return "AJA_STATUS_TRUE";
+		case AJA_STATUS_UNKNOWN:			return "AJA_STATUS_UNKNOWN";
+		case AJA_STATUS_FAIL:				return "AJA_STATUS_FAIL";
+		case AJA_STATUS_TIMEOUT:			return "AJA_STATUS_TIMEOUT";
+		case AJA_STATUS_RANGE:				return "AJA_STATUS_RANGE";
+		case AJA_STATUS_INITIALIZE:			return "AJA_STATUS_INITIALIZE";
+		case AJA_STATUS_NULL:				return "AJA_STATUS_NULL";
+		case AJA_STATUS_OPEN:				return "AJA_STATUS_OPEN";
+		case AJA_STATUS_IO:					return "AJA_STATUS_IO";
+		case AJA_STATUS_DISABLED:			return "AJA_STATUS_DISABLED";
+		case AJA_STATUS_BUSY:				return "AJA_STATUS_BUSY";
+		case AJA_STATUS_BAD_PARAM:			return "AJA_STATUS_BAD_PARAM";
+		case AJA_STATUS_FEATURE:			return "AJA_STATUS_FEATURE";
+		case AJA_STATUS_UNSUPPORTED:		return "AJA_STATUS_UNSUPPORTED";
+		case AJA_STATUS_READONLY:			return "AJA_STATUS_READONLY";
+		case AJA_STATUS_WRITEONLY:			return "AJA_STATUS_WRITEONLY";
+		case AJA_STATUS_MEMORY:				return "AJA_STATUS_MEMORY";
+		case AJA_STATUS_ALIGN:				return "AJA_STATUS_ALIGN";
+		case AJA_STATUS_FLUSH:				return "AJA_STATUS_FLUSH";
+		case AJA_STATUS_NOINPUT:			return "AJA_STATUS_NOINPUT";
+		case AJA_STATUS_SURPRISE_REMOVAL:	return "AJA_STATUS_SURPRISE_REMOVAL";
+		case AJA_STATUS_NOBUFFER:			return "AJA_STATUS_NOBUFFER";
+		case AJA_STATUS_INVALID_TIME:		return "AJA_STATUS_INVALID_TIME";
+		case AJA_STATUS_NOSTREAM:			return "AJA_STATUS_NOSTREAM";
+		case AJA_STATUS_TIMEEXPIRED:		return "AJA_STATUS_TIMEEXPIRED";
+		case AJA_STATUS_BADBUFFERCOUNT:		return "AJA_STATUS_BADBUFFERCOUNT";
+		case AJA_STATUS_BADBUFFERSIZE:		return "AJA_STATUS_BADBUFFERSIZE";
+		case AJA_STATUS_STREAMCONFLICT:		return "AJA_STATUS_STREAMCONFLICT";
+		case AJA_STATUS_NOTINITIALIZED:		return "AJA_STATUS_NOTINITIALIZED";
+		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
+        case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
+	}
+	return "<bad AJAStatus>";
 }

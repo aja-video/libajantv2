@@ -27,34 +27,107 @@
 #include "xpt_kip_2100_4tx.h"
 #include "xpt_kip_2100_1rxtx.h"
 
+///////////////////////////////////////////////////////////////////////////
+//	The rest of the non-sdkgen-generated function implementations follow...
+///////////////////////////////////////////////////////////////////////////
 
+//	This needs to go into sdkgen's CanDo table...
+bool NTV2DeviceHasLEDAudioMeters(const NTV2DeviceID inDeviceID)
+{
+    switch(inDeviceID)
+    {
+        case DEVICE_ID_IOXT:
+        case DEVICE_ID_IO4K:
+        case DEVICE_ID_IO4KUFC:
+        case DEVICE_ID_IO4KPLUS:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
 
+//	This needs to go into sdkgen's CanDo table...
+bool NTV2DeviceHasHeadphoneJack(const NTV2DeviceID inDeviceID)
+{
+    switch(inDeviceID)
+    {
+        case DEVICE_ID_IOEXPRESS:
+        case DEVICE_ID_IOXT:
+        case DEVICE_ID_IO4K:
+        case DEVICE_ID_IO4KUFC:
+        case DEVICE_ID_IO4KPLUS:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
 
-//	The rest of the non-auto-generated function implementations follow...
+//	This needs to go into sdkgen's CanDo table...
+bool NTV2DeviceHasAudioMonitorRCAJacks(const NTV2DeviceID inDeviceID)
+{
+    switch(inDeviceID)
+    {
+        case DEVICE_ID_IOEXPRESS:
+        case DEVICE_ID_IO4K:
+        case DEVICE_ID_IO4KUFC:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
 
+//	This needs to go into sdkgen's CanDo table...
+bool NTV2DeviceHasBiDirectionalAnalogAudio(const NTV2DeviceID inDeviceID)
+{
+    switch(inDeviceID)
+    {
+        case DEVICE_ID_IO4KPLUS:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID)
+{
+    UWord outputs = 0;
+    outputs += NTV2DeviceGetNumVideoOutputs(inDeviceID);
+    outputs += NTV2DeviceGetNumHDMIAudioOutputChannels(inDeviceID);
+    outputs += NTV2DeviceGetNumAnalogAudioOutputChannels(inDeviceID);
+    return outputs > 0 ? true : false;
+}
+
+bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID)
+{
+    UWord inputs = 0;
+    inputs += NTV2DeviceGetNumVideoInputs(inDeviceID);
+    inputs += NTV2DeviceGetNumHDMIAudioInputChannels(inDeviceID);
+    inputs += NTV2DeviceGetNumAnalogAudioInputChannels(inDeviceID);
+    return inputs > 0 ? true : false;
+}
 
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)
 	{
-	case 0:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
-	case 1:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
-	case 2:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
-	case 3:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
-	case 4:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
-	case 5:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
-	case 6:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
-	case 7:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
-	default:
-		return false;
+		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
+		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
+		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
+		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
+		case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
+		case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
+		case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
+		case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
+		default:	return false;
 	}
 }	//	NTV2DeviceCanDo3GOut
 
@@ -62,16 +135,11 @@ bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)
 	{
-	case 0:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
-	case 1:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
-	case 2:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
-	case 3:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
-	default:
-		return false;
+		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
+		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
+		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
+		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
+		default:	return false;
 	}
 }	//	NTV2DeviceCanDo3GOut
 
@@ -80,24 +148,15 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)
 	{
-	case 0:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
-	case 1:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
-	case 2:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
-	case 3:
-		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
-	case 4:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
-	case 5:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
-	case 6:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
-	case 7:
-		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
-	default:
-		return false;
+		case 0:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
+		case 1:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
+		case 2:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
+		case 3:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
+		case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+		case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+		case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+		case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+		default:	return false;
 	}
 }	//	NTV2DeviceCanDoLTCEmbeddedN
 
@@ -143,7 +202,8 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-	case DEVICE_ID_IO4KIP:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
 	case DEVICE_ID_KONAALPHA:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
@@ -209,7 +269,8 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-	case DEVICE_ID_IO4KIP:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
         switch (inFrameGeometry)
 		{
@@ -313,7 +374,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-	case DEVICE_ID_IO4KIP:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
         return 111;
 	case DEVICE_ID_KONA3G:
@@ -376,7 +438,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVIDHBR:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_IO4KPLUS:
-	case DEVICE_ID_IO4KIP:
+    case DEVICE_ID_IOIP_2022:
+    case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_KONAIP_4TX_2110:
         switch (inFrameGeometry)
 		{
@@ -785,6 +848,13 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_kip_2100_4txMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
             return xpt_kip_j2k1rxtxMatrix[inInputXpt][inOutputXpt];
+        // PSM for now lets use the 4kplus matrix
+        // TODO: need to generate these for IOIP cards
+        case DEVICE_ID_IOIP_2022:
+            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
+        case DEVICE_ID_IOIP_2110:
+            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
+
         default:
             return true;
     }
@@ -878,6 +948,14 @@ NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 	if (inDeviceID == DEVICE_ID_IO4KPLUS  ||  inDeviceID == DEVICE_ID_IO4K)
         return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
 	return NTV2_AUDIOSYSTEM_INVALID;
+}
+
+bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
+{
+	if (NTV2DeviceHasSPIv3(inDeviceID) || NTV2DeviceHasSPIv4(inDeviceID) || NTV2DeviceHasSPIv5(inDeviceID))
+		return true;
+	else
+		return false;
 }
 
 #if !defined (NTV2_DEPRECATE)

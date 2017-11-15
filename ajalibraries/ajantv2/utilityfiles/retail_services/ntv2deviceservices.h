@@ -122,7 +122,6 @@ public:
 	bool CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
 	NTV2VideoFormat GetConversionCompatibleFormat(NTV2VideoFormat sourceFmt, NTV2VideoFormat secondaryFmt);
 	NTV2FrameRate HalfFrameRate(NTV2FrameRate rate);
-    void SetVideoOutputStandard(NTV2Channel channel);
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();

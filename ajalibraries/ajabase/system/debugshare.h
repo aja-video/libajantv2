@@ -50,12 +50,27 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_StatsGeneric				= 10,
     AJA_DebugUnit_Enumeration				= 11,
     AJA_DebugUnit_Application				= 12,
-    AJA_DebugUnit_AJACCLib					= 13,
-    AJA_DebugUnit_AJAAncLib					= 14,
-    AJA_DebugUnit_QuickTime					= 15,
-    AJA_DebugUnit_ControlPanel				= 16,
-    AJA_DebugUnit_Watcher				    = 17,
-    AJA_DebugUnit_Plugins                   = 18,
+    AJA_DebugUnit_QuickTime					= 13,
+    AJA_DebugUnit_ControlPanel				= 14,
+    AJA_DebugUnit_Watcher				    = 15,
+    AJA_DebugUnit_Plugins                   = 16,
+    AJA_DebugUnit_CCLine21Decode			= 17,
+    AJA_DebugUnit_CCLine21Encode			= 18,
+    AJA_DebugUnit_CC608DataQueue			= 19,
+    AJA_DebugUnit_CC608MsgQueue				= 20,
+    AJA_DebugUnit_CC608Decode				= 21,
+    AJA_DebugUnit_CC608DecodeChannel		= 22,
+    AJA_DebugUnit_CC608DecodeScreen			= 23,
+    AJA_DebugUnit_CC608Encode				= 24,
+    AJA_DebugUnit_CC708Decode				= 25,
+    AJA_DebugUnit_CC708Service				= 26,
+    AJA_DebugUnit_CC708ServiceBlockQueue	= 27,
+    AJA_DebugUnit_CC708Window				= 28,
+    AJA_DebugUnit_CC708Encode				= 29,
+    AJA_DebugUnit_CCFont					= 30,
+    AJA_DebugUnit_SMPTEAnc					= 31,
+    AJA_DebugUnit_AJAAncData				= 32,
+    AJA_DebugUnit_AJAAncList				= 33,
 
     // to add a new unit:
     //
@@ -74,23 +89,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 19,
-    AJA_DebugUnit_Unused_19                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_20                 = 20,
-    AJA_DebugUnit_Unused_21                 = 21,
-    AJA_DebugUnit_Unused_22                 = 22,
-    AJA_DebugUnit_Unused_23                 = 23,
-    AJA_DebugUnit_Unused_24                 = 24,
-    AJA_DebugUnit_Unused_25                 = 25,
-    AJA_DebugUnit_Unused_26                 = 26,
-    AJA_DebugUnit_Unused_27                 = 27,
-    AJA_DebugUnit_Unused_28                 = 28,
-    AJA_DebugUnit_Unused_29                 = 29,
-    AJA_DebugUnit_Unused_30                 = 30,
-    AJA_DebugUnit_Unused_31                 = 31,
-    AJA_DebugUnit_Unused_32                 = 32,
-    AJA_DebugUnit_Unused_33                 = 33,
-    AJA_DebugUnit_Unused_34                 = 34,
+    AJA_DebugUnit_FirstUnused               = 34,
+    AJA_DebugUnit_Unused_34                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_35                 = 35,
     AJA_DebugUnit_Unused_36                 = 36,
     AJA_DebugUnit_Unused_37                 = 37,
@@ -197,7 +197,8 @@ typedef struct _AJADebugMessage
 	uint32_t	destinationMask;							/**< Destination of the message */
 	int32_t		severity;									/**< Severity of the message */
 	int32_t		lineNumber;									/**< Source file line number that generated this message */
-    uint32_t	reserved[4];							    /**< Reserved */
+    uint64_t    pid;                                        /**< Process ID that generated the message */
+    uint64_t    tid;                                        /**< Thread ID that generated the message */
 	char		fileName[AJA_DEBUG_FILE_NAME_MAX_SIZE];		/**< Source file name that generated this message */
 	char		messageText[AJA_DEBUG_MESSAGE_MAX_SIZE];	/**< Text generated for this message */
 } AJADebugMessage;

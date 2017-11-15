@@ -25,9 +25,12 @@
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
+#include "ntv2ioip2022services.h"
+#include "ntv2ioip2110services.h"
 #include "ntv2io4kplusservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
+#include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
 
@@ -43,7 +46,14 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+        case DEVICE_ID_IOIP_2022:
+            pDeviceServices = new IoIP2022Services();
+            break;
+        case DEVICE_ID_IOIP_2110:
+            pDeviceServices = new IoIP2110Services();
+            break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+        case DEVICE_ID_KONAIP_4TX_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
         case DEVICE_ID_KONAIP_4CH_1SFP:
@@ -503,43 +513,54 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// mixer - support
 	if (mCard->DeviceCanDoAudioMixer() == true )
 	{
+		ULWord appType=0; int32_t pid=0;
+		mCard->GetStreamingApplication(&appType, &pid);
+		bool bHostAudioApp = AppUsesHostAudio(appType);
+	
 		if (mAudioMixerOverrideState == false)
 		{
 			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
-			mCard->WriteRegister(kRegAudioMixerMutes, 0x0000, 0xffff, 0);			// unmute all output channels
 			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
 		}
 		
-		mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		// shared source
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
 	
 		if (mode == NTV2_MODE_DISPLAY)
 		{
+			mCard->SetAudioMixerMainInputAudioSystem(bHostAudioApp ? hostAudioSystem : NTV2_AUDIOSYSTEM_1);
+		
 			if (mAudioMixerOverrideState == false)
 			{
+				mCard->WriteRegister(kRegAudioMixerMutes, mAudioMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
 				mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
 				mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
-				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			}
-		
-			mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
-			mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
-			mCard->SetAudioMixerAux2InputEnable(mAudioMixerSourceAux2Enable);
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
+			mCard->SetAudioMixerAux2InputEnable(bHostAudioApp ? false : mAudioMixerSourceAux2Enable);
 		}
 		else
 		{
+			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		
 			if (mAudioMixerOverrideState == false)
 			{
+				mCard->WriteRegister(kRegAudioMixerMutes, mAudioCapMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(false);
 				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
 				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
-				mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			}
-		
-			mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
-			mCard->SetAudioMixerAux1InputEnable(false);
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
 			mCard->SetAudioMixerAux2InputEnable(mAudioCapMixerSourceAux2Enable);
 		}
+		
+		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
 		
 		audioSystem = NTV2_AUDIOSYSTEM_6;
 	}
@@ -2361,109 +2382,6 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 
 #define XENA2_SEARCHTIMEOUT 5
 
-void DeviceServices::SetVideoOutputStandard(NTV2Channel channel)
-{
-	NTV2Standard standard = NTV2_NUM_STANDARDS;
-	NTV2VideoFormat videoFormat;
-	UWord searchTimeout = 0;
-    
-	NTV2OutputCrosspointID xptSelect;
-	mCard->GetConnectedOutput (channel == NTV2_CHANNEL1 ? NTV2_XptSDIOut1Input : NTV2_XptSDIOut2Input, xptSelect);
-
-	do {
-		switch ( xptSelect)
-		{
-            case NTV2_XptSDIIn1:
-                videoFormat = mCard->GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1);
-                standard = GetNTV2StandardFromVideoFormat(videoFormat);
-                if ( standard == NTV2_NUM_STANDARDS) 
-                    searchTimeout = XENA2_SEARCHTIMEOUT;
-                break;
-                
-            case NTV2_XptSDIIn2:
-                videoFormat = mCard->GetInputVideoFormat(NTV2_INPUTSOURCE_SDI2);
-                standard = GetNTV2StandardFromVideoFormat(videoFormat);
-                if ( standard == NTV2_NUM_STANDARDS) 
-                    searchTimeout = XENA2_SEARCHTIMEOUT;
-                break;
-                
-            case NTV2_XptFrameBuffer1YUV:
-            case NTV2_XptFrameBuffer1RGB:
-            case NTV2_XptFrameBuffer2YUV:
-            case NTV2_XptFrameBuffer2RGB:
-            case NTV2_XptBlack:
-                mCard->GetVideoFormat(&videoFormat);
-                standard = GetNTV2StandardFromVideoFormat(videoFormat);
-                break;
-                
-            case NTV2_XptDuallinkIn1:
-                videoFormat = mCard->GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1);
-                standard = GetNTV2StandardFromVideoFormat(videoFormat);
-                if ( standard == NTV2_NUM_STANDARDS) 
-                    searchTimeout = XENA2_SEARCHTIMEOUT;
-                break;
-                
-            case NTV2_XptConversionModule:
-                mCard->GetConverterOutStandard(&standard);
-                if ( standard >= NTV2_NUM_STANDARDS)
-                {
-                    standard = NTV2_NUM_STANDARDS;
-                    searchTimeout = XENA2_SEARCHTIMEOUT;
-                }
-                break;
-                
-            case NTV2_XptCSC1VidRGB:
-            case NTV2_XptCSC1VidYUV:
-            case NTV2_XptCSC1KeyYUV:
-                mCard->GetConnectedOutput (NTV2_XptCSC1VidInput, xptSelect);
-                break;
-                
-            case NTV2_XptCompressionModule:
-                mCard->GetConnectedOutput (NTV2_XptCompressionModInput, xptSelect);
-                break;
-                
-            case NTV2_XptDuallinkOut1:     
-                mCard->GetConnectedOutput (NTV2_XptDualLinkOut1Input, xptSelect);
-                break;
-                
-            case NTV2_XptLUT1RGB:
-                mCard->GetConnectedOutput (NTV2_XptLUT1Input, xptSelect);
-                break;
-                
-            case NTV2_XptLUT2RGB:
-                mCard->GetConnectedOutput (NTV2_XptLUT2Input, xptSelect);
-                break;
-                
-            case NTV2_XptCSC2VidYUV:
-            case NTV2_XptCSC2VidRGB:
-            case NTV2_XptCSC2KeyYUV:
-                mCard->GetConnectedOutput (NTV2_XptCSC2VidInput, xptSelect);
-                break;
-                
-            case NTV2_XptMixer1VidYUV:
-            case NTV2_XptMixer1KeyYUV:
-                mCard->GetConnectedOutput (NTV2_XptMixer1FGVidInput, xptSelect);
-                break;
-                
-            case NTV2_XptAlphaOut:
-            default:
-                searchTimeout = XENA2_SEARCHTIMEOUT;
-                break;
-                
-		}
-        
-	} while ( (standard == NTV2_NUM_STANDARDS) && (searchTimeout++ < XENA2_SEARCHTIMEOUT));
-    
-	if (standard != NTV2_NUM_STANDARDS)
-	{
-		if (channel == NTV2_CHANNEL1)
-			mCard->SetSDIOutputStandard(NTV2_CHANNEL1, standard);
-		else
-			mCard->SetSDIOutputStandard(NTV2_CHANNEL2, standard);
-	}
-} 
-
-
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {
 #define BYTES_PER_UNIT	512		// each hardware click is 64 bytes
@@ -2523,7 +2441,8 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-		switch (mCaptureReferenceSelect)
+		ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mCaptureReferenceSelect;
+		switch (tempSelect)
 		{
 		default:
 		case kFreeRun:
@@ -2683,7 +2602,11 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : mDisplayReferenceSelect;
+	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
+	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
+	//if (lockV2 == true && refSelect == kFreeRun)
+	//	refSelect = kVideoIn;
+	
 	switch (refSelect)
 	{
 	default:
@@ -2734,14 +2657,18 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 				}
 				break;
 			case NTV2_Input5Select://Only used by io4k quad id
-				mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+				if (lockV2)
+					mCard->SetReference(NTV2_REFERENCE_FREERUN);
+				else
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 				break;
 			}
 		}
 		break;
 	}
 
-	mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
+	if (mAudioMixerOverrideState == false)
+		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
 
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
@@ -3312,7 +3239,8 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	if(mCard->DeviceCanDoAudioMixer())
 	{
 		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
-		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
+		if (mAudioMixerOverrideState == false)
+			mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 		
 		// Host System Audio Input
 		NTV2AudioSource audioSource;

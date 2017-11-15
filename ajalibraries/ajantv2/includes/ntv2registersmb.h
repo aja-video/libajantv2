@@ -45,14 +45,12 @@
 #define kRegSarekSerialLow          7
 #define kRegSarekSerialHi           8
 #define kRegSarekIGMPVersion        9
-
 #define kRegSarekMiscState          10
 #define kRegSarekPackageVersion     11
 #define kRegSarekIfVersion          12
-#define kRegSarekunused13           13
+#define kRegSarekLinkStatus         13
 #define kRegSarekunused14           14
 #define kRegSarekunused15           15
-
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
 #define kRegSarekMAC2               18
@@ -72,12 +70,11 @@
 #define kRegSarekFwCfg              32
 #define kRegSarekDDRStatus          33
 #define kRegSarekXrefStatus         34
-
+#define kRegSarekSFPStatus          35
 #define kRegSarekDNALow             36
 #define kRegSarekDNAHi              37
 #define kRegSarekLicenseStatus      38
-#define kRegSareakunused39          39
-
+#define kRegSarekunused39           39
 #define kRegSarekRx1Drops           40
 #define kRegSarekRx2Drops           41
 #define kRegSarekRx3Drops           42
@@ -191,6 +188,17 @@
 #define SAREK_LICENSE_PRESENT       BIT(31)
 #define SAREK_LICENSE_VALID         BIT(30)
 #define SAREK_LICENSE_J2K           BIT(1)
+
+#define SFP_1_NOT_PRESENT           BIT(0)
+#define SFP_1_TX_FAULT              BIT(1)
+#define SFP_1_RX_LOS                BIT(2)
+#define SFP_2_NOT_PRESENT           BIT(16)
+#define SFP_2_TX_FAULT              BIT(17)
+#define SFP_2_RX_LOS                BIT(18)
+
+#define LINK_A_UP                   BIT(0)
+#define LINK_B_UP                   BIT(1)
+
 
 /////////////////////////////////////////////////////////////////////
 //

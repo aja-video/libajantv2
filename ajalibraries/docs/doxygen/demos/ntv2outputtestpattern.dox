@@ -7,11 +7,57 @@ video signal forever without further action needed by the host.
 @image	html	ntv2outputtestpattern.png
 
 Typical WFM display showing the output of an AJA device that's connected to a host running <b>ntv2outputtestpattern</b>.
-(The audio is simply playing through whatever audio happens to be embedded on the device's input signal.)
+(Audio playout is shown because "loopback" was enabled and an input signal was connected to the device's input.)
 
 The NTV2OutputTestPattern class demonstrates...
 -	how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
 -	how to transfer a single frame to an AJA device using DMA;
 -	how to programmatically perform device configuration and signal routing;
 -	how to be a "good citizen" to detect if another application is already using the device.
+
+The critical parts of the demo (for troubleshooting):
+-	Configuring the FrameStore/Channel being used:
+	-	Setting the FrameStore's mode to "playout" (as opposed to "capture") using CNTV2Card::SetMode.
+	-	Setting the FrameStore's raster pixel format using CNTV2Card::SetFrameBufferFormat (fixed at 8-bit YCbCr).
+-	Setting the output clocking reference to "free run" using CNTV2Card::SetReference.
+-	Routing the signal from the FrameStore to whatever video outputs are available on the device by calling CNTV2Card::Connect.
+-	Ensuring that bi-directional SDI connectors are configured for output by calling CNTV2Card::SetSDITransmitEnable.
+-	Transferring the test pattern image from the host to device memory using CNTV2Card::DMAWriteFrame.
+-	The frame being played by the FrameStore (and read from device memory) is dictated by the device's "output frame register"
+	(\c kRegCh<b>N</b>OutputFrame). This demo interrogates the frame number using CNTV2Card::GetOutputFrame, and writes the image
+	into that frame. Alternatively, the demo could have transferred the image into a specific frame number, and set the FrameStore
+	to play that frame using CNTV2Card::SetOutputFrame.
+
+
+<b>Command line usage:</b>
+@code
+	ntv2outputtestpattern  [options...]
+	
+	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
+										Defaults to first device (index 0).
+										If model name specified, uses lowest-numbered matching device.
+
+	-c|--channel	{channelSpec}		Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+
+	-p|--pattern {patternSpec}			Specifies the test pattern to show as an unsigned integer number 0 thru 16:
+										0:	100% ColorBars
+										1:	75% ColorBars
+										2:	Ramp
+										3:	Multiburst
+										4:	Linesweep
+										5:	Check Field
+										6:	Flat Field
+										7:	Multi Pattern
+										8:	Black
+										9:	White
+										10:	Border
+										11:	Linear Ramp
+										12:	Slant Ramp
+										13:	Zone Plate
+										14:	Color Quadrant
+										15:	Color Quadrant Border
+										16:	Color Quadrant Tsi
+
+	-?|--help|--usage					Shows how to use this command.
+@endcode
 **/

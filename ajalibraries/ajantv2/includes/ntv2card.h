@@ -774,39 +774,37 @@ public:
 		AJA_VIRTUAL NTV2_DEPRECATED NTV2BitfileType	BitfileSwitchNeeded (NTV2DeviceID deviceID, NTV2VideoFormat value, bool ajaRetail = AJA_RETAIL_DEFAULT);	///< @deprecated	This function is obsolete.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
-	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource value);
-	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outValue);
+	/**
+		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
+		@return		True if successful; otherwise false.
+		@param[in]	inRefSource		Specifies the NTV2ReferenceSource to use.
+					
+	**/
+	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource);
+
+	/**
+		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.
+		@return			True if successful; otherwise false.
+		@param[out]		outRefSource	Receives the NTV2ReferenceSource value.
+	**/
+	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 	AJA_VIRTUAL inline bool	GetReference (NTV2ReferenceSource * pOutValue)									{return pOutValue ? GetReference (*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
-		@brief		Retrieves the device's current retail service task mode.
+		@brief		Retrieves the device's current "retail service" task mode. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[out]	outMode		Receives the device's current "every frame task mode" setting. If successful, the
 								variable will contain NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
-		@details	AJA's retail drivers come with a program that automatically and continuously configures the
-					device once-per-frame using settings that are dictated by the AJA Control Panel application.
-					The task runs as a service on Windows and as an agent on MacOS. It starts when a host user logs in,
-					restores the device configuration to its last known state (as set by that user via the AJA Control Panel),
-					then holds that setting while running in the background, until the user logs off the host.
-					Some OEM applications cannot assume that the user's Control Panel settings will be valid for their
-					proper operation, and thus may want to know if the retail service has control of the device.
 	**/
 	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
 	AJA_VIRTUAL inline bool	GetEveryFrameServices (NTV2EveryFrameTaskMode * pOutMode)						{return pOutMode ? GetEveryFrameServices (*pOutMode) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	/**
 		@brief		Enables or disables all or part of the retail mode service task that continuously controls
-					the "retail mode" device configuration.
+					the "retail mode" device configuration. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	mode		Specifies the "every frame task mode" the device is to assume,
 								and must be one of the following values: NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
-		@details	AJA's retail software provides a program that automatically and continuously configures the device once per frame
-					using settings that are dictated by the AJA Control Panel application. This task runs as a service on Windows,
-					and as an agent on MacOS X. It starts when a host user logs in, restores the device configuration to its last
-					known state (as set by the user via the AJA Control Panel), then holds that setting while running in the background,
-					until the user logs off the host. Some OEM applications cannot assume that the user's Control Panel settings
-					will be valid for their proper operation, and thus will need to disable the service task as long as their
-					application is running.
 	**/
 	AJA_VIRTUAL bool	SetEveryFrameServices (NTV2EveryFrameTaskMode mode);
 
@@ -817,20 +815,18 @@ public:
 	/**
 		@brief		Determines if a given frame store on the AJA device will be used to capture or playout video.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest (which corresponds to the Frame Store of interest).
+		@param[in]	inChannel		Specifies the FrameStore of interest as an NTV2Channel value.
 		@param[in]	inNewValue		Specifies the desired mode for the frame store, which must be either NTV2_MODE_DISPLAY
 									or NTV2_MODE_CAPTURE.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration should be respected or not.
-									Defaults to false on all platforms other than MacOS, which defaults to true.
-		@note		Applications that acquire exclusive use of the AJA device, set its "every frame services" mode
-					to NTV2_OEM_TASKS, and use AutoCirculate won't need to call this function, since AutoCirculate
-					sets the frame store's mode automatically.
+									Defaults to false on all platforms other than MacOS.
+		@note		Applications that use AutoCirculate don't need to call this function, since AutoCirculate takes care of setting the mode.
 	**/
 	AJA_VIRTUAL bool	SetMode (NTV2Channel inChannel, NTV2Mode inNewValue, bool inIsAJARetail = AJA_RETAIL_DEFAULT);
 
 	/**
 		@brief		Returns the current mode (capture or playout) of the given frame store on the AJA device.
-		@param[in]	inChannel	Specifies the frame store of interest (NTV2_CHANNEL1 - NTV2_CHANNEL4).
+		@param[in]	inChannel	Specifies the FrameStore of interest as an NTV2Channel value.
 		@param[out]	outValue	Receives the current mode for the channel. If the function result is true,
 								it will contain either NTV2_MODE_DISPLAY or NTV2_MODE_CAPTURE.
 		@details	A frame store can either be set to record/capture or display/playout.
@@ -1491,10 +1487,6 @@ public:
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? ReadAudioSource (*pOutValue, inChannel) : false;}
 
-	AJA_VIRTUAL bool	SetAudioOutputMonitorSource (NTV2AudioMonitorSelect inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outValue, NTV2Channel & outChannel);
-	AJA_VIRTUAL bool	GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-
 	/**
 		@brief		Enables or disables the output of audio samples by the given Audio System, resetting
 					the playback position to the start of the audio output buffer.
@@ -1953,6 +1945,24 @@ public:
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
 	/**
+		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor is
+					typically the L+R RCA jacks.)
+		@param[in]	inAudioSystem	Specifies the audio system to use. (This really should be an NTV2AudioSystem.)
+		@param[in]	inChannelPair	Specifies the audio channel pair to use. (This really should be an NTV2AudioChannelPair.)
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (NTV2AudioMonitorSelect inChannelPair, NTV2Channel inAudioSystem = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks.)
+		@param[in]	outAudioSystem		Receives the current audio system being used. (This really should be an NTV2AudioSystem.)
+		@param[in]	outChannelPair		Receives the current audio channel pair being used. (This really should be an NTV2AudioChannelPair.)
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
+	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+
+	/**
 		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
 					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
 		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
@@ -1988,7 +1998,12 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+	///@}
 
+	/**
+		@name	Audio Mixer
+	**/
+	///@{
 	AJA_VIRTUAL bool		GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem);
 	AJA_VIRTUAL bool		SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem);
 
@@ -2028,7 +2043,6 @@ public:
 
 	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration);
 	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration);
-
 	///@}
 
 	//
@@ -2085,6 +2099,17 @@ public:
 	AJA_VIRTUAL bool	VerifyMainFlash(const char *fileName);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 	AJA_VIRTUAL bool	WaitForFlashNOTBusy();
+
+    /**
+        @brief		Reports the revision number of the currently-running firmware package.
+                    KonaIP style boards have a package.
+        @param[out]	outRevision		Receives the revision number.
+        @return		True if successful;  otherwise false.
+        @note		This may differ from the revision number of the installed firmware package if, after
+                    erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
+    **/
+    AJA_VIRTUAL bool	GetRunningFirmwarePackageRevision (ULWord & outRevision);
+
 
 	/**
 		@brief		Reports the revision number of the currently-running firmware.
@@ -2787,22 +2812,6 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
-
-	//
-	// Color Correction Functions (KHD only )
-	//
-	AJA_VIRTUAL bool	SetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode mode);
-	AJA_VIRTUAL bool	GetColorCorrectionMode(NTV2Channel channel, NTV2ColorCorrectionMode *mode);
-	AJA_VIRTUAL bool	SetColorCorrectionOutputBank (NTV2Channel channel, ULWord bank);
-	AJA_VIRTUAL bool	GetColorCorrectionOutputBank (NTV2Channel channel, ULWord *bank);
-	AJA_VIRTUAL bool	SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank value);
-	AJA_VIRTUAL bool	GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	SetColorCorrectionSaturation (NTV2Channel channel, ULWord value);
-	AJA_VIRTUAL bool	GetColorCorrectionSaturation (NTV2Channel channel, ULWord *value);
-
-	AJA_VIRTUAL bool	SetDitherFor8BitInputs (NTV2Channel channel, ULWord dither);
-	AJA_VIRTUAL bool	GetDitherFor8BitInputs (NTV2Channel channel, ULWord* dither);
-
 	AJA_VIRTUAL bool	SetForce64(ULWord force64);
 	AJA_VIRTUAL bool	GetForce64(ULWord* force64);
 	AJA_VIRTUAL bool	Get64BitAutodetect(ULWord* autodetect64);
@@ -3263,6 +3272,26 @@ public:
 	**/
 	AJA_VIRTUAL bool	BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inRegInfo);
 
+    /**
+        @brief			Writes the block of virtual data.
+        @param[in]		inTag               Tag for the virtual data.
+        @param[in]		inVirtualData       Virtual data to be written
+        @param[in]		inVirtualDataSize   Virtual data size
+        @return			True if all requested registers were successfully written; otherwise false.
+        @note			This operation is not guaranteed to be performed atomically.
+    **/
+    AJA_VIRTUAL bool    VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize);
+
+    /**
+        @brief			Reads the block of virtual data for a specific tag
+        @param[in]		inTag               Tag for the virtual data.
+        @param[out]		inOutVirtualData    Virtual data buffer to be written
+        @param[in]		inVirtualDataSize   Virtual data size
+        @return			True if all requested registers were successfully written; otherwise false.
+        @note			This operation is not guaranteed to be performed atomically.
+    **/
+    AJA_VIRTUAL bool    VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize);
+
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
 						this function fetches the SDI statistics for all SDI input spigots.
@@ -3505,7 +3534,7 @@ public:
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
-		@name	Color Space Conversion & LUTs
+		@name	CSCs, LUTs & Color Correction
 	**/
 	///@{
 
@@ -3539,13 +3568,17 @@ public:
 		@param[in]	pInTable	A valid, non-null pointer to an array of 1,024 double-precision floating-point values.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	LoadLUTTable(const double * pInTable);
-	AJA_VIRTUAL bool	LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
-	AJA_VIRTUAL void	GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
-	AJA_VIRTUAL bool	SetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank value);
-	AJA_VIRTUAL bool	GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank *value, NTV2Channel channel);
-	AJA_VIRTUAL bool	SetLUTV2OutputBank (NTV2Channel channel, ULWord bank);
-	AJA_VIRTUAL bool	GetLUTV2OutputBank (NTV2Channel channel, ULWord *bank);
+	AJA_VIRTUAL bool		LoadLUTTable (const double * pInTable);
+	AJA_VIRTUAL bool		LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
+	AJA_VIRTUAL void		GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
+
+	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
+	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL inline bool	GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank * pOutValue, const NTV2Channel inChannel)	{return pOutValue ? GetLUTV2HostAccessBank(*pOutValue, inChannel) : false;}
+
+	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL inline bool	GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord * pOutBank)	{return pOutBank ? GetLUTV2OutputBank(inChannel, *pOutBank) : false;}
 
 	/**
 		@brief		Sets the RGB range for the given CSC.
@@ -3586,6 +3619,29 @@ public:
 	AJA_VIRTUAL bool	SetLUTControlSelect(NTV2LUTControlSelect inLUTSelect);
 	AJA_VIRTUAL bool	GetLUTControlSelect(NTV2LUTControlSelect * pOutLUTSelect)			{return pOutLUTSelect ? GetLUTControlSelect (*pOutLUTSelect) : false;}
 	AJA_VIRTUAL bool	GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect);
+
+	//
+	// Color Correction Functions (KHD only )
+	//
+	AJA_VIRTUAL bool		SetColorCorrectionMode(const NTV2Channel inChannel, const NTV2ColorCorrectionMode inMode);
+	AJA_VIRTUAL bool		GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode & outMode);
+	AJA_VIRTUAL inline bool	GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode * pOutMode)	{return pOutMode ? GetColorCorrectionMode(inChannel, *pOutMode) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL inline bool	GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord * pOutBank)	{return pOutBank ? GetColorCorrectionOutputBank(inChannel,*pOutBank) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
+	AJA_VIRTUAL bool		GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL inline bool	GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank * pOutValue, const NTV2Channel inChannel = NTV2_CHANNEL1)	{return pOutValue ? GetColorCorrectionHostAccessBank(*pOutValue, inChannel) : false;}
+
+	AJA_VIRTUAL bool		SetColorCorrectionSaturation (const NTV2Channel inChannel, const ULWord inValue);
+	AJA_VIRTUAL bool		GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord & outValue);
+	AJA_VIRTUAL inline bool	GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord * pOutValue)	{return pOutValue ? GetColorCorrectionSaturation(inChannel, *pOutValue) : false;}
+
+	AJA_VIRTUAL bool		SetDitherFor8BitInputs (const NTV2Channel inChannel, const ULWord inDither);
+	AJA_VIRTUAL bool		GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord & outDither);
+	AJA_VIRTUAL inline bool	GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord * pOutDither)	{return pOutDither ? GetDitherFor8BitInputs(inChannel, *pOutDither) : false;}
 	///@}
 
 
@@ -3922,9 +3978,12 @@ public:
 		@param[in]	inInputXpt		Specifies the input (signal sink) to be connected to the given output.
 		@param[in]	inOutputXpt		Specifies the output (signal source) to be connected to the given input.
 									Specifying NTV2_XptBlack effects a disconnect.
+		@param[in]	inValidate		If true, calls NTV2Card::CanConnect to verify that the connection exists in firmware
+									before writing the crosspoint register;  otherwise writes the crosspoint register
+									regardless. Defaults to false.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);
+	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate = false);
 
 	/**
 		@brief		Disconnects the given widget signal input (sink) from whatever output (source) it may be connected.
@@ -4967,7 +5026,26 @@ public:
 	**/
 	///@{
 	/**
+		@brief		Answers with the run state of the given Anc extractor -- i.e. if its "memory writer" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outIsRunning	Receives 'true' if the Anc extractor is in the running state;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning);
+
+	/**
+		@brief		Answers with the run state of the given Anc inserter -- i.e. if its "memory reader" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest as a zero-based index value (e.g., 0 == SDIOut1).
+		@param[out]	outIsRunning	Receives 'true' if the Anc inserter is in the running state;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning);
+
+	/**
 		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
@@ -4976,6 +5054,7 @@ public:
 
 	/**
 		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[in]	inDIDs			Specifies the set of DIDs to be filtered for the given SDI input. Specify an

@@ -777,6 +777,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // always on
+    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
     WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x01);
 
     return rv;
@@ -1502,7 +1503,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
     return true;
 }
 
-string CNTV2Config2022::getLastError()
+std::string CNTV2Config2022::getLastError()
 {
     return NTV2IpErrorEnumToString(getLastErrorCode());
 }
@@ -1594,6 +1595,51 @@ bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     lo += macaddr.mac[3] << 16;
     lo += macaddr.mac[4] << 8;
     lo += macaddr.mac[5];
+
+    return true;
+}
+
+bool CNTV2Config2022::GetSFPMSAData(eSFP port, SFPMSAData & data)
+{
+    return GetSFPInfo(port,data);
+}
+
+bool CNTV2Config2022::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
+    uint32_t val2;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
+
+    if (port == SFP_BOTTOM)
+    {
+        linkStatus.linkUp          = (val & LINK_B_UP) ? true : false;
+        linkStatus.SFP_present     = (val & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val & SFP_2_TX_FAULT) ? true : false;
+    }
+    else
+    {
+        linkStatus.linkUp          = (val & LINK_A_UP) ? true : false;
+        linkStatus.SFP_present     = (val & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val & SFP_2_TX_FAULT) ? true : false;
+    }
+
+    return true;
+}
+
+bool CNTV2Config2022:: Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & chanStatus)
+{
+    uint32_t addr;
+
+    SelectRxChannel(channel,SFP_BOTTOM,addr);
+    ReadChannelRegister(addr + kReg2022_6_rx_sec_recv_pkt_cnt, &chanStatus.secondaryRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.secondaryValidRxPackets);
+
+    SelectRxChannel(channel,SFP_TOP,addr);
+    ReadChannelRegister(addr + kReg2022_6_rx_pri_recv_pkt_cnt, &chanStatus.primaryRxPackets);
+    ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.primaryValidRxPackets);
 
     return true;
 }
