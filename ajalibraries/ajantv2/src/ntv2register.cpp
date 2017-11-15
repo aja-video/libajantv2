@@ -1150,9 +1150,9 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 				case NTV2_FRAMERATE_2500:	videoFormat = NTV2_FORMAT_4x2048x1080p_2500;	break;
 				case NTV2_FRAMERATE_2997:	videoFormat = NTV2_FORMAT_4x2048x1080p_2997;	break;
 				case NTV2_FRAMERATE_3000:	videoFormat = NTV2_FORMAT_4x2048x1080p_3000;	break;
-				case NTV2_FRAMERATE_5000:	videoFormat = NTV2_FORMAT_4x2048x1080p_3000;	break;
-				case NTV2_FRAMERATE_5994:	videoFormat = NTV2_FORMAT_4x2048x1080p_3000;	break;
-				case NTV2_FRAMERATE_6000:	videoFormat = NTV2_FORMAT_4x2048x1080p_3000;	break;
+                case NTV2_FRAMERATE_5000:	videoFormat = NTV2_FORMAT_4x1920x1080p_5000;	break;
+                case NTV2_FRAMERATE_5994:	videoFormat = NTV2_FORMAT_4x1920x1080p_5994;	break;
+                case NTV2_FRAMERATE_6000:	videoFormat = NTV2_FORMAT_4x1920x1080p_6000;	break;
 				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
 			}
 			break;
