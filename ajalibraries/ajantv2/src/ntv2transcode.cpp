@@ -7,6 +7,8 @@
 #include "ntv2transcode.h"
 #include "ntv2endian.h"
 
+using namespace std;
+
 
 bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine, ULWord * pDstv210Line, const ULWord inNumPixels)
 {
@@ -45,6 +47,27 @@ bool ConvertLine_v210_to_2vuy (const ULWord * pSrcv210Line, UByte * pDst2vuyLine
 	return true;
 
 }	//	ConvertLine_v210_to_2vuy
+
+
+bool ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t> & outDstLine2vuy, const ULWord inNumPixels)
+{
+	const ULWord *	pInSrcLine	(reinterpret_cast<const ULWord*>(pInSrcLine_v210));
+	outDstLine2vuy.clear();
+	if (!pInSrcLine || !inNumPixels)
+		return false;
+
+	outDstLine2vuy.reserve(inNumPixels * 2);
+	for (ULWord sampleCount = 0, dataCount = 0;   sampleCount < (inNumPixels * 2);   sampleCount += 3, dataCount++)
+	{
+		const UByte *	pByte	(reinterpret_cast <const UByte *> (&pInSrcLine[dataCount]));
+
+		//	Endian-agnostic bit shifting...
+		outDstLine2vuy.push_back(((pByte[1] & 0x03) << 6) | (pByte[0] >> 2));		//	High-order 8 bits
+		outDstLine2vuy.push_back(((pByte[2] & 0x0F) << 4) | (pByte[1] >> 4));
+		outDstLine2vuy.push_back(((pByte[3] & 0x3F) << 2) | (pByte[2] >> 6));
+	}
+	return true;
+}
 
 
 bool ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitABGR, const ULWord inNumPixels)

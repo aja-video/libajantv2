@@ -10,6 +10,7 @@
 #include "ajatypes.h"
 #include "fixed.h"
 #include "videodefines.h"
+#include <vector>
 
 // TODO: DEBUG ONLY
 #include <stdio.h>
@@ -36,6 +37,15 @@ AJAExport bool	ConvertLine_2vuy_to_v210 (const UByte * pInSrcLine_2vuy, ULWord *
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool	ConvertLine_v210_to_2vuy (const ULWord * pInSrcLine_v210, UByte * pOutDstLine_2vuy, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 10-bit YCbCr 'v210' raster line to 8-bit YCbCr '2vuy' vector.
+	@param[in]	pInSrcLine_v210		Specifies a valid, non-NULL address of the first byte of the 'v210' raster line to be converted.
+	@param[out]	outDstLine2vuy		Receives the 8-bit '2vuy' vector. Will be cleared upon entry and filled upon exit.
+	@param[in]	inNumPixels			The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t> & outDstLine2vuy, const ULWord inNumPixels);
 
 /**
 	@brief		Converts a single 8-bit ABGR raster line to 10-bit ABGR.
