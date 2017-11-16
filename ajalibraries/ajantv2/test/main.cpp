@@ -193,7 +193,7 @@ TEST_SUITE("spi -- new spi flasher");
         */
 
         CNTV2AxiSpiFlash spiNew(0);
-        uint32_t flashSize = spiNew.size();
+        uint32_t flashSize = spiNew.Size();
         CHECK(flashSize == 0x2000000);
 
         uint32_t addr = 0x20000;
@@ -201,15 +201,15 @@ TEST_SUITE("spi -- new spi flasher");
         AJATime::Sleep(20);
 
         std::vector<uint8_t> dataBeforeErase;
-        spiNew.read(addr, dataBeforeErase, 10);
+        spiNew.Read(addr, dataBeforeErase, 10);
         CHECK(dataBeforeErase.size() == 10);
 
-        spiNew.erase(addr, 10);
+        spiNew.Erase(addr, 10);
 
         AJATime::Sleep(20);
 
         std::vector<uint8_t> dataAfterErase;
-        spiNew.read(addr, dataAfterErase, 10);
+        spiNew.Read(addr, dataAfterErase, 10);
         CHECK(dataAfterErase.size() == 10);
 
         AJATime::Sleep(20);
@@ -220,18 +220,18 @@ TEST_SUITE("spi -- new spi flasher");
             writeData.push_back(0x2A);
             writeData.push_back(0x55);
         }
-        spiNew.write(addr, writeData, 10);
+        spiNew.Write(addr, writeData, 10);
 
         AJATime::Sleep(20);
 
         std::vector<uint8_t> dataAfterWrite;
-        spiNew.read(addr, dataAfterWrite, 10);
+        spiNew.Read(addr, dataAfterWrite, 10);
         CHECK(dataAfterWrite.size() == 10);
         /*
-        spiNew.erase(addr, 16);
+        spiNew.Erase(addr, 16);
 
         std::vector<uint8_t> dataAfterErase;
-        spiNew.read(addr, dataAfterErase, 10);
+        spiNew.Read(addr, dataAfterErase, 10);
         CHECK(dataAfterErase.size() == 10);
 
         std::vector<uint8_t> writeData;
@@ -240,10 +240,10 @@ TEST_SUITE("spi -- new spi flasher");
             writeData.push_back(0x2A);
             writeData.push_back(0x55);
         }
-        spiNew.write(addr, writeData, 16);
+        spiNew.Write(addr, writeData, 16);
 
         std::vector<uint8_t> dataAfterWrite;
-        spiNew.read(addr, dataAfterWrite, 16);
+        spiNew.Read(addr, dataAfterWrite, 16);
         CHECK(dataAfterWrite.size() == 16);
         */
     }
