@@ -774,10 +774,41 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 				failures.AddAncillaryData(ancData);
 		}	//	for each packet
 	}	//	for each VANC line
+
+	//	Any analog packets?
+	set<uint16_t>	activeVideoLinesOverwritten;
+	for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
+	{
+		bool								success		(inFormatDesc.IsSDFormat());
+		const AJAAncillaryData &			ancData		(**iter);
+		const AJAAncillaryDataLocation &	loc			(ancData.GetDataLocation());
+		ULWord								lineOffset	(0);
+		if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Analog)
+			continue;	//	Ignore "Digital" or "Unknown" packets
+
+		if (success)
+			success = inFormatDesc.GetLineOffsetFromSMPTELine (loc.GetLineNumber(), lineOffset);
+		if (success)
+			success = false;	//	Blit the packet's analog waveform data into the frame buffer.
+								//	Currently, the "analog" data subclasses seem to all be '2vuy'
+								//	but don't have a common method to call to generate/encode themselves.
+								//	Then we have to convert to 'v210'
+		if (success)
+		{
+			activeVideoLinesOverwritten.insert(loc.GetLineNumber());	//	Remember which active video lines we overwrote
+			successes.AddAncillaryData(ancData);
+		}
+		else
+			failures.AddAncillaryData(ancData);
+	}	//	for each Analog packet
+
 	if (successes.CountAncillaryData())
 		cerr << "AJAAncillaryList::WriteVANCData: SUCCESSES: " << successes << endl;
 	if (failures.CountAncillaryData())
 		cerr << "AJAAncillaryList::WriteVANCData: FAILURES: " << failures << endl;
+
+	//	At least one success is considered SUCCESS.
+	//	Zero successes and one or more failures is considered FAIL...
 	return successes.CountAncillaryData() == 0  &&  failures.CountAncillaryData() > 0  ?  AJA_STATUS_FAIL  :  AJA_STATUS_SUCCESS;
 }
 
