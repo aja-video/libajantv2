@@ -159,10 +159,10 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 									ULWord* pDstBuffer, ULWord dstHeight, ULWord dstWidth);
 
 /**
-	@brief	Copies all or part of a source raster image into another raster at a given position.
+	@brief	Sets all or part of a destination raster image to legal black.
 	@param[in]	inPixelFormat			Specifies the NTV2FrameBufferFormat of the destination buffer.
 										(Note that many pixel formats are not currently supported.)
-	@param		pDstBuffer				Specifies the starting address of the destination buffer to be modified. Must be non-NULL.
+	@param		pDstBuffer				Specifies the address of the destination buffer to be modified. Must be non-NULL.
 	@param[in]	inDstBytesPerLine		The number of bytes per raster line of the destination buffer. Note that this value
 										is used to compute the maximum pixel width of the destination raster. Also note that
 										some pixel formats set constraints on this value (e.g., NTV2_FBF_10BIT_YCBCR requires
