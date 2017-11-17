@@ -542,9 +542,10 @@ bool AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine)
 	DoNormalTransition(pLine, pixelIndex, bPrevBit, 0);
 
 	// fill the remainder of the line with Black (note that we're assuming 720 active pixels!)
-	uint32_t remainingPixels = GetDC() - pixelIndex;
-	while (remainingPixels)
-		DoVITCPixel (pLine, pixelIndex++, VITC_YUV8_LO);
+	const uint32_t	remainingPixels	(GetDC() > pixelIndex  ?  GetDC() - pixelIndex  :  0);
+	if (remainingPixels)
+		for (i = 0; i < (uint32_t)remainingPixels; i++)
+			DoVITCPixel (pLine, pixelIndex++, VITC_YUV8_LO);
 
 	return bResult;
 }
