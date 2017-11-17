@@ -554,6 +554,8 @@ bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine, 
 		return false;	//	Bad format descriptor
 	if (ULWord(inLineOffset) >= inDescriptor.GetFullRasterHeight())
 		return false;	//	Illegal line offset
+	if (inDescriptor.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
+		return false;	//	Not 'v210' pixel format
 
 	const uint32_t	pixPerLineX2	(inDescriptor.GetRasterWidth() * 2);
 	uint32_t *		pOutPackedLine	(NULL);
