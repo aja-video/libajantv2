@@ -47,8 +47,7 @@ AJAAncillaryData_Timecode_ATC::~AJAAncillaryData_Timecode_ATC()
 }
 
 
-void
-AJAAncillaryData_Timecode_ATC::Init()
+void AJAAncillaryData_Timecode_ATC::Init()
 {
 	m_ancType = AJAAncillaryDataType_Timecode_ATC;
 	m_coding  = AJAAncillaryDataCoding_Digital;
@@ -60,8 +59,7 @@ AJAAncillaryData_Timecode_ATC::Init()
 }
 
 
-AJAAncillaryData_Timecode_ATC&
-AJAAncillaryData_Timecode_ATC::operator=(const AJAAncillaryData_Timecode_ATC& rhs)
+AJAAncillaryData_Timecode_ATC & AJAAncillaryData_Timecode_ATC::operator = (const AJAAncillaryData_Timecode_ATC & rhs)
 {
 	if (this != &rhs)		// ignore self-assignment
 	{
@@ -75,8 +73,7 @@ AJAAncillaryData_Timecode_ATC::operator=(const AJAAncillaryData_Timecode_ATC& rh
 }
 
 
-void
-AJAAncillaryData_Timecode_ATC::Clear()
+void AJAAncillaryData_Timecode_ATC::Clear()
 {
 	AJAAncillaryData_Timecode::Clear();
 
@@ -84,8 +81,7 @@ AJAAncillaryData_Timecode_ATC::Clear()
 }
 
 
-AJAStatus
-AJAAncillaryData_Timecode_ATC::SetDBB1(uint8_t dbb1)
+AJAStatus AJAAncillaryData_Timecode_ATC::SetDBB1(uint8_t dbb1)
 {
 	m_dbb1 = dbb1;
 
@@ -139,14 +135,13 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 	{
 		Init();						// load default values
 		status = AJA_STATUS_FAIL;
-
 		m_rcvDataValid = false;
 	}
 	else
 	{
 		// we have some kind of payload data - try to parse it
-			// extract the time digits from the even payload words, bits[7:4]
-			// (note: SetTimeHexValue() does the needed masking)
+		// extract the time digits from the even payload words, bits[7:4]
+		// (note: SetTimeHexValue() does the needed masking)
 		SetTimeHexValue(kTcFrameUnits,  (m_payload[ 0] >> 4));		// frame units);
 		SetTimeHexValue(kTcFrameTens,   (m_payload[ 2] >> 4));		// frame tens
 		SetTimeHexValue(kTcSecondUnits, (m_payload[ 4] >> 4));		// second units
@@ -184,7 +179,6 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 			dbb |= (m_payload[i] << 4) & 0x80;
 		}
 		m_dbb2 = dbb;
-
 		m_rcvDataValid = true;
 	}
 

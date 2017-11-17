@@ -362,6 +362,9 @@ class CNTV2AncDataTester
 			AJAAncillaryData_Cea708 *	p708Pkt	(NULL);
 			UWordSequence				u16s;
 
+			//	WHY TEST SMPTEAncData, which is in the AJACC library, here in the AJAANC BFT?
+			//	Because it's now used extensively by AJAANC.
+
 			///////////////////////////////////////////////////////////////////////	BEGIN TEST SECTION 1
 			//	The following 3 tests perform a round-trip validation of:
 			//		UWordSequence (aka vector<uint16_t>)
@@ -460,8 +463,24 @@ class CNTV2AncDataTester
 			//p708Pkt->Print(cerr, true);
 			///////////////////////////////////////////////////////////////////////	END TEST SECTION 1
 
-			if (true)	//	Test CNTV2SMPTEAncData::FindAnc permuting NTV2VideoFormat, NTV2FrameBufferFormat, and VANC line offset...
+			if (true)
 			{
+				///////////////////////////////////////////////////////////////////////	BEGIN  CNTV2SMPTEAncData::FindAnc  TEST
+				//	For each of a few NTV2VideoFormats (SD 525i, HD 720p, HD 1080i)
+				//		For each of two NTV2FrameBufferFormats '2vuy' and 'v210' . . .
+				//			For each VANC line in "Tall" mode . . .
+				//				For each channel C then Y (unless SD, in which case C means "both")...
+				//					Generate a test packet
+				//					Stuff the test packet into the VANC line
+				//					Call FindAnc at the start of the frame buffer...
+				//						-	Once looking in the C channel (or "both" channels for SD)
+				//						-	If HD, look again in the Y channel
+				//					Confirm that FindAnc...
+				//						-	found the packet in the channel it was supposed to;
+				//							-	on the correct line
+				//							-	at the correct pixel offset
+				//						-	failed to find the packet in the channel it wasn't supposed to
+				//
 				const NTV2VideoFormat				VFs[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994};
 				const NTV2PixelFormat				FBFs[]	=	{NTV2_FBF_8BIT_YCBCR, NTV2_FBF_10BIT_YCBCR};
 				const AJAAncillaryDataChannel		CHLs[]	=	{AJAAncillaryDataChannel_C, AJAAncillaryDataChannel_Y};
@@ -551,6 +570,7 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":
 						}	//	permute line offset
 					}	//	permute FBF
 				}	//	permute VF
+				///////////////////////////////////////////////////////////////////////	END  CNTV2SMPTEAncData::FindAnc  TEST
 			}	//	if test FindAnc
 
 			if (true)
