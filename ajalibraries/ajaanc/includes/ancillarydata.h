@@ -149,7 +149,7 @@ AJAExport const std::string &	AJAAncillaryDataStreamToString (const AJAAncillary
 enum AJAAncillaryDataChannel
 {
 	AJAAncillaryDataChannel_C,			///< @brief	The ancillary data is associated with the chrominance (C) channel of the video stream.
-	AJAAncillaryDataChannel_Both = AJAAncillaryDataChannel_C,	///< @brief	The ancillary data is associated with both the chroma and luma channels (SD only).
+	AJAAncillaryDataChannel_Both = AJAAncillaryDataChannel_C,	///< @brief	SD ONLY -- The ancillary data is associated with both the chroma and luma channels.
 	AJAAncillaryDataChannel_Y,			///< @brief	The ancillary data is associated with the luminance (Y) channel of the video stream.
 	AJAAncillaryDataChannel_Unknown,	///< @brief	It is not known which channel of the video stream the ancillary data is associated with.
 	AJAAncillaryDataChannel_Size

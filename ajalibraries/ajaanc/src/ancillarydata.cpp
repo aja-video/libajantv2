@@ -617,7 +617,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		return AJA_STATUS_FAIL;
 	}
 
-	if (m_coding == AJAAncillaryDataCoding_Digital)
+	if (IsDigital())
 	{
 		pData[0] = GetGUMPHeaderByte1();
 		pData[1] = GetGUMPHeaderByte2();
@@ -640,7 +640,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		// all done!
 		outPacketSize = myPacketSize;
 	}
-	else if (m_coding == AJAAncillaryDataCoding_Raw)
+	else if (IsRaw())
 	{
 		// "analog" or "raw" ancillary data is special in that it may generate multiple output packets,
 		// depending on the length of the payload data.
@@ -719,29 +719,32 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 {
 	AJAStatus							status		(AJA_STATUS_SUCCESS);
 	const vector<uint16_t>::size_type	origSize	(outRawComponents.size());
-	const uint8_t						dataCount	((GetDC() > 255) ? 255 : GetDC());	//	Truncate payload to max 255 bytes
 
-	try
+	if (IsDigital())
 	{
-		outRawComponents.push_back(0x000);														//	000
-		outRawComponents.push_back(0x3FF);														//	3FF
-		outRawComponents.push_back(0x3FF);														//	3FF
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));					//	DID
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));					//	SDID
-		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));				//	DC
-	}
-	catch(...)
-	{
-		outRawComponents.resize(origSize);
-		status = AJA_STATUS_MEMORY;
+		try
+		{
+			const uint8_t	dataCount	((GetDC() > 255) ? 255 : GetDC());	//	Truncate payload to max 255 bytes
+			outRawComponents.push_back(0x000);														//	000
+			outRawComponents.push_back(0x3FF);														//	3FF
+			outRawComponents.push_back(0x3FF);														//	3FF
+			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));					//	DID
+			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));					//	SDID
+			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));				//	DC
+		}
+		catch(...)
+		{
+			outRawComponents.resize(origSize);
+			status = AJA_STATUS_MEMORY;
+		}
 	}
 
 	//	Copy payload data into output vector...
 	if (AJA_SUCCESS(status))
-		status = GetPayloadData(outRawComponents);												//	UDWs
+		status = GetPayloadData(outRawComponents, IsDigital() /* Add parity for Digital only */);	//	UDWs
 
 	//	The hardware automatically recalcs the CS, but still needs to be there...
-	if (AJA_SUCCESS(status))
+	if (AJA_SUCCESS(status) && IsDigital())
 		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(Calculate8BitChecksum()));	//	CS
 
 	if (AJA_SUCCESS(status))
