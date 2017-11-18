@@ -17,7 +17,7 @@
 #elif defined(AJAWindows)
 	#include "ntv2device.h"
 	#define GetNTV2StandardFromVideoFormat	CNTV2Device::GetNTV2StandardFromVideoFormat
-	#define GetNTV2FrameRateFromVideoFormat	CNTV2Device::GetNTV2FrameRateFromVideoFormat
+	#define GetNTV2FrameRateFromVideoFormat	CNTV2Device::GetNTV2ActualFrameRateFromVideoFormat
 #elif defined(AJAMac)
 	#include "MacDriver.h"
 	#define GetNTV2StandardFromVideoFormat	MacDriver::GetNTV2StandardFromVideoFormat
