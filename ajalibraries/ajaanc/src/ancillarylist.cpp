@@ -724,10 +724,13 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 		{LOGMYERROR("Not a VANC geometry");  return AJA_STATUS_BAD_PARAM;}
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR  &&  inFormatDesc.GetPixelFormat() != NTV2_FBF_8BIT_YCBCR)
 		{LOGMYERROR("Invalid pixel format: " << inFormatDesc);  return AJA_STATUS_UNSUPPORTED;}
+	if (!CountAncillaryData())
+		{LOGMYWARN("List is empty");  return AJA_STATUS_SUCCESS;}
 
 	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
 	const bool	isSD	(inFormatDesc.IsSDFormat());
 	AJAAncillaryList	failures, successes;
+	set <uint16_t>		lineOffsetsWritten;
 
 	//	For each VANC line...
 	for (UWord fbLineOffset(0);  fbLineOffset < inFormatDesc.GetFirstActiveLine();  fbLineOffset++)
@@ -741,6 +744,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 			bool								muxedOK	(false);
 			const AJAAncillaryData &			ancData (**iter);
 			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
+			vector<uint16_t>					u16PktComponents;
 			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)
 				continue;	//	Ignore "Raw" or "Analog" or "Unknown" packets
 			if (loc.GetDataSpace() != AJAAncillaryDataSpace_VANC)
@@ -750,62 +754,93 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 			if (!IS_VALID_AJAAncillaryDataChannel(loc.GetDataChannel()))
 				continue;	//	Bad data channel
 
-			vector<uint16_t>	pktComponentData;
-			AJAStatus status (ancData.GenerateTransmitData(pktComponentData));
-			if (AJA_FAILURE(status))
-				return status;
+			//	For v210 buffers, generate 10-bit packet data and put into u16 vector...
+			muxedOK = AJA_SUCCESS(ancData.GenerateTransmitData(u16PktComponents));
+			if (muxedOK)
+			{
+				if (inFormatDesc.GetPixelFormat() == NTV2_FBF_8BIT_YCBCR)	//	2vuy buffers are simple -- just copy the data
+				{
+					uint8_t *	pLine	((uint8_t*)inFormatDesc.GetRowAddress(inFrameBuffer.GetHostPointer(), fbLineOffset));
+					if (isSD)
+					{	//	SD overwrites both Y & C channels in the frame buffer:
+						for (unsigned ndx(0);  ndx < u16PktComponents.size();  ndx++)
+							pLine[ndx] = uint8_t(u16PktComponents[ndx] & 0xFF);
+					}
+					else
+					{	//	HD overwrites only the Y or C channel data in the frame buffer:
+						unsigned	dstNdx(loc.IsLumaChannel() ? 1 : 0);
+						for (unsigned srcNdx(0);  srcNdx < u16PktComponents.size();  srcNdx++)
+							pLine[dstNdx + 2*srcNdx] = uint8_t(u16PktComponents[srcNdx] & 0x00FF);
+					}
+				}
+				else	//	v210 buffers require more complexity
+				{
+					if (isSD)
+					{	//	For SD, just pack the u16 components into the buffer...
+						muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (u16PktComponents, inFrameBuffer, inFormatDesc, fbLineOffset);
+					}
+					else
+					{
+						muxedOK = false;	//	UNIMPLEMENTED
+						//	TBD:	For HD, either figure out how to modify YUVComponentsTo10BitYUVPackedBuffer to skip Y or C values,
+						//			or we have to unpack the FB destination line into a vector<uint16_t>, then replace just the Y or C
+						//			values going in, then repack the whole thing into the FB.
+					}
+				}
+			}	//	if GenerateTransmitData OK
 
 			//	TBD:	NEED TO TAKE INTO CONSIDERATION	loc.GetHorizontalOffset()
-			if (isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_Both)	//	Mux into UYVY
-			{
-				muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (pktComponentData, inFrameBuffer, inFormatDesc, fbLineOffset);
-			}
-			else if (!isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_C)
-			{
-				//	Mux into C
-			}
-			else if (!isSD  &&  loc.GetDataChannel() == AJAAncillaryDataChannel_Y)
-			{
-				//	Mux into Y
-			}
+
 			if (muxedOK)
+			{
+				lineOffsetsWritten.insert(fbLineOffset);	//	Remember which FB line offsets we overwrote
 				successes.AddAncillaryData(ancData);
+			}
 			else
 				failures.AddAncillaryData(ancData);
 		}	//	for each packet
 	}	//	for each VANC line
 
 	//	Any analog packets?
-	set<uint16_t>	activeVideoLinesOverwritten;
 	for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
 	{
 		bool								success		(inFormatDesc.IsSDFormat());
 		const AJAAncillaryData &			ancData		(**iter);
 		const AJAAncillaryDataLocation &	loc			(ancData.GetDataLocation());
 		ULWord								lineOffset	(0);
-		if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Analog)
+		if (!ancData.IsRaw())
 			continue;	//	Ignore "Digital" or "Unknown" packets
 
 		if (success)
 			success = inFormatDesc.GetLineOffsetFromSMPTELine (loc.GetLineNumber(), lineOffset);
-		if (success)
-			success = false;	//	Blit the packet's analog waveform data into the frame buffer.
-								//	Currently, the "analog" data subclasses seem to all be '2vuy'
-								//	but don't have a common method to call to generate/encode themselves.
-								//	Then we have to convert to 'v210'
+		if (success  &&  lineOffsetsWritten.find(lineOffset) != lineOffsetsWritten.end())
+			success = false;	//	Line already written -- "analog" data overwrites entire line
 		if (success)
 		{
-			activeVideoLinesOverwritten.insert(loc.GetLineNumber());	//	Remember which active video lines we overwrote
+			if (inFormatDesc.GetPixelFormat() == NTV2_FBF_8BIT_YCBCR)
+				::memcpy((void*)inFormatDesc.GetRowAddress(inFrameBuffer.GetHostPointer(), lineOffset), ancData.GetPayloadData(), ancData.GetDC());	//	'2vuy' -- straight copy
+			else
+			{
+				vector<uint16_t>	pktComponentData;
+				success = AJA_SUCCESS(ancData.GenerateTransmitData(pktComponentData));
+				if (success)
+					success = ::YUVComponentsTo10BitYUVPackedBuffer (pktComponentData, inFrameBuffer, inFormatDesc, lineOffset);
+			}
+		}
+
+		if (success)
+		{
+			lineOffsetsWritten.insert(lineOffset);	//	Remember which FB line offsets we overwrote
 			successes.AddAncillaryData(ancData);
 		}
 		else
 			failures.AddAncillaryData(ancData);
 	}	//	for each Analog packet
 
-	if (successes.CountAncillaryData())
-		cerr << "AJAAncillaryList::WriteVANCData: SUCCESSES: " << successes << endl;
 	if (failures.CountAncillaryData())
-		cerr << "AJAAncillaryList::WriteVANCData: FAILURES: " << failures << endl;
+		LOGMYWARN("AJAAncillaryList::WriteVANCData: FAILURES: " << failures);
+	if (successes.CountAncillaryData())
+		LOGMYDEBUG("AJAAncillaryList::WriteVANCData: SUCCESSES: " << successes);
 
 	//	At least one success is considered SUCCESS.
 	//	Zero successes and one or more failures is considered FAIL...
