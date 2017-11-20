@@ -440,13 +440,11 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		return;
 	}
 	
-#if 0
 	// If tasks are disabled do nothing
 	if (mEveryFrameTaskFilter == NTV2_DISABLE_TASKS)
 	{
 		return;
 	}
-#endif
 
 	// OEM tasks
 	if (mEveryFrameTaskFilter & NTV2_OEM_TASKS)
