@@ -378,6 +378,34 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
 
 
 //-------------------------------------------------------------------------------------------------------
+//	GetCorrespondingAFormat
+//	Note:	Returns corresponding A level format for any B level format.  If the input format is not level B it
+//          will just return what you passed in.
+//-------------------------------------------------------------------------------------------------------
+NTV2VideoFormat DeviceServices::GetCorrespondingAFormat(NTV2VideoFormat inputFormat)
+{
+    if (inputFormat == NTV2_FORMAT_1080p_5000_B)
+        return NTV2_FORMAT_1080p_5000_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_5994_B)
+        return NTV2_FORMAT_1080p_5994_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_6000_B)
+        return NTV2_FORMAT_1080p_6000_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_2K_6000_B)
+        return NTV2_FORMAT_1080p_2K_6000_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_2K_5994_B)
+        return NTV2_FORMAT_1080p_2K_5994_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_2K_5000_B)
+        return NTV2_FORMAT_1080p_2K_5000_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_2K_4800_B)
+        return NTV2_FORMAT_1080p_2K_4800_A;
+    else if (inputFormat == NTV2_FORMAT_1080p_2K_4795_B)
+        return NTV2_FORMAT_1080p_2K_4795_A;
+    else
+        return inputFormat;
+}
+
+
+//-------------------------------------------------------------------------------------------------------
 //	SetDeviceEveryFrameRegs
 //-------------------------------------------------------------------------------------------------------
 
@@ -412,11 +440,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		return;
 	}
 	
+#if 0
 	// If tasks are disabled do nothing
 	if (mEveryFrameTaskFilter == NTV2_DISABLE_TASKS)
 	{
 		return;
 	}
+#endif
 
 	// OEM tasks
 	if (mEveryFrameTaskFilter & NTV2_OEM_TASKS)
