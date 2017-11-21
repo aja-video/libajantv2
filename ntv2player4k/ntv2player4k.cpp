@@ -210,6 +210,7 @@ AJAStatus NTV2Player4K::SetUpVideo ()
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+		mDevice.EnableChannel (NTV2_CHANNEL1);
 		mDevice.EnableChannel (NTV2_CHANNEL2);
 		mDevice.EnableChannel (NTV2_CHANNEL3);
 		mDevice.EnableChannel (NTV2_CHANNEL4);
