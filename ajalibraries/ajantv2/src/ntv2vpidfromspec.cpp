@@ -17,7 +17,7 @@
 #elif defined(AJAWindows)
 	#include "ntv2device.h"
 	#define GetNTV2StandardFromVideoFormat	CNTV2Device::GetNTV2StandardFromVideoFormat
-	#define GetNTV2FrameRateFromVideoFormat	CNTV2Device::GetNTV2FrameRateFromVideoFormat
+	#define GetNTV2FrameRateFromVideoFormat	CNTV2Device::GetNTV2ActualFrameRateFromVideoFormat
 #elif defined(AJAMac)
 	#include "MacDriver.h"
 	#define GetNTV2StandardFromVideoFormat	MacDriver::GetNTV2StandardFromVideoFormat
@@ -152,7 +152,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 					byte1 = isStereo ? (uint8_t) VPIDStandard_1080_Stereo_3Gb : (uint8_t) VPIDStandard_1080_3Gb;	//	0x8F : 0x8C
 			}
 			else
+			{
 				byte1 = isStereo ? (uint8_t) VPIDStandard_1080_Stereo_3Ga : (uint8_t) VPIDStandard_1080_3Ga;	//	0x92 : 0x89
+			}
 		}
 		else
 		{
@@ -205,19 +207,27 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 				byte1 = VPIDStandard_2160_Single_12Gb; //0xCE
 			else if(is6G)
 				byte1 = VPIDStandard_2160_Single_6Gb; //0xC0
-			else if (isLevelB)
-				byte1 = isRGB ? (uint8_t)VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t)VPIDStandard_2160_DualLink; //0x98 : 0x96
+			else if (is3G)
+			{
+				if (isLevelB)
+					byte1 = isDualLink? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_DualLink;  //  0x98 : 0x96
+				else
+					byte1 = (uint8_t) VPIDStandard_2160_QuadLink_3Ga;  //  0x97
+			}
 			else
-				byte1 = is3G ? (uint8_t)VPIDStandard_2160_QuadLink_3Ga : (uint8_t)VPIDStandard_1080;	//	0x96 : 0x85
+				byte1 = (uint8_t) VPIDStandard_1080;  //  0x85 (bogus if not 3G)
 		}
 		else
 		{
 			if (is3G)
 			{
-				byte1 = isDualLink ? (uint8_t)VPIDStandard_1080_DualLink_3Gb : (uint8_t)VPIDStandard_1080_3Gb;	//	0x8A : 0x8C
+				if (isLevelB)
+					byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Gb;  //  8A : 8C
+				else
+					byte1 = (uint8_t) VPIDStandard_1080_3Ga;   // 89
 			}
 			else
-				byte1 = (uint8_t) VPIDStandard_1080;		//	0x85
+				byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink : (uint8_t) VPIDStandard_1080;  //  0x87 : 0x85
 		}
 		break;
 
