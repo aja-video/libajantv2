@@ -66,6 +66,7 @@ public:
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+    virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw(GeneralFrameFormat format);
 	virtual void SetDeviceXPointCaptureRaw(GeneralFrameFormat format);
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
