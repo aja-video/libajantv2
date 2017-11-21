@@ -394,7 +394,22 @@ bool CNTV2MCSfile::FindExtendedLinearAddressRecord(uint16_t address /*= 0x0000*/
  	checksum = (~checksum) + 1;
 	std::vector<std::string>::iterator fileItr;
 	sprintf(&ELARString[13], "%02X", checksum);
-	mBaseELARLocation = std::find(mFileLines.begin(), mFileLines.end(), ELARString);
+
+    // Do a search for a match, don't search on the checksum
+    std::string needle(ELARString, 0, 13);
+    std::vector<std::string>::iterator it = mFileLines.begin();
+    mBaseELARLocation = mFileLines.end();
+    while(it != mFileLines.end())
+    {
+        std::string hay(*it, 0, 13);
+        if (needle == hay)
+        {
+            mBaseELARLocation = it;
+            break;
+        }
+        ++it;
+    }
+
 	if (mBaseELARLocation != mFileLines.end())
 		return true;
 	else
