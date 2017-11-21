@@ -560,7 +560,7 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":
 										if (bFound && isAMatch)
 											cerr << "HOORAY!" << endl;
 									}	//	vary the search channel select
-									break;	//	** MrBill **	FOR NOW
+									//break;	//	** MrBill **	FOR NOW
 								}	//	vary the starting search line offset
 								pkts.Clear();
 								pkt.Clear();

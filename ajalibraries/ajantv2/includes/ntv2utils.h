@@ -100,6 +100,20 @@ AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitY
 AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2_POINTER & inFrameBuffer,
 													const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
+/**
+	@brief		Unpacks up to one raster line of an NTV2_FBF_10BIT_YCBCR frame buffer into an array of uint16_t values
+				containing the 10-bit YUV data.
+	@param[out]	outYCbCrLine	The YUV components unpacked from the frame buffer. This will be cleared upon entry, and
+								if successful, will contain at least 12 values upon exit.
+	@param		inFrameBuffer	The frame buffer in host memory that is to be read.
+	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
+	@param[in]	inLineOffset	The zero-based line offset into the frame buffer.
+	@return		True if successful;  otherwise false.
+	@note		This is a safer version of the ::UnpackLine_10BitYUVtoUWordSequence function.
+**/
+AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+											const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
+
 
 #if !defined (NTV2_DEPRECATE)
 	AJAExport NTV2_DEPRECATED	void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels);	///< @deprecated	Replaced by UnpackLine_10BitYUVto16BitYUV.

@@ -735,7 +735,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 	//	For each VANC line...
 	for (UWord fbLineOffset(0);  fbLineOffset < inFormatDesc.GetFirstActiveLine();  fbLineOffset++)
 	{
-		ULWord smpteLine (0);		bool isF2 (false);
+		ULWord smpteLine (0);	bool isF2 (false);
 		inFormatDesc.GetSMPTELineNumber (fbLineOffset, smpteLine, isF2);
 
 		//	Look for non-HANC packets destined for this line...
@@ -772,21 +772,28 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 						for (unsigned srcNdx(0);  srcNdx < u16PktComponents.size();  srcNdx++)
 							pLine[dstNdx + 2*srcNdx] = uint8_t(u16PktComponents[srcNdx] & 0x00FF);
 					}
-				}
-				else	//	v210 buffers require more complexity
+				}	//	if 2vuy
+				else	/////////////	v210 FBF:
 				{
 					if (isSD)
 					{	//	For SD, just pack the u16 components into the buffer...
 						muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (u16PktComponents, inFrameBuffer, inFormatDesc, fbLineOffset);
 					}
 					else
-					{
-						muxedOK = false;	//	UNIMPLEMENTED
-						//	TBD:	For HD, either figure out how to modify YUVComponentsTo10BitYUVPackedBuffer to skip Y or C values,
-						//			or we have to unpack the FB destination line into a vector<uint16_t>, then replace just the Y or C
-						//			values going in, then repack the whole thing into the FB.
-					}
-				}
+					{	//	HD overwrites only the Y or C channel data:
+						vector<uint16_t>	YUV16Line;
+						unsigned			dstNdx	(loc.IsLumaChannel() ? 1 : 0);
+						//	Read original Y+C components from FB...
+						muxedOK = UnpackLine_10BitYUVtoU16s (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
+						//	Patch the Y or C channel...
+						if (muxedOK)
+							for (unsigned srcNdx(0);  srcNdx < u16PktComponents.size();  srcNdx++)
+								YUV16Line[dstNdx + 2*srcNdx] = u16PktComponents[srcNdx] & 0x00FF;
+						//	Repack the patched YUV16 line back into the FB...
+						if (muxedOK)
+							muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
+					}	//	else HD
+				}	//	else v210
 			}	//	if GenerateTransmitData OK
 
 			//	TBD:	NEED TO TAKE INTO CONSIDERATION	loc.GetHorizontalOffset()
@@ -845,7 +852,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 	//	At least one success is considered SUCCESS.
 	//	Zero successes and one or more failures is considered FAIL...
 	return successes.CountAncillaryData() == 0  &&  failures.CountAncillaryData() > 0  ?  AJA_STATUS_FAIL  :  AJA_STATUS_SUCCESS;
-}
+}	//	WriteVANCData
 
 
 AJAStatus AJAAncillaryList::WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const

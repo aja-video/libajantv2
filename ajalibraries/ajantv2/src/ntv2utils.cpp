@@ -586,6 +586,33 @@ bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine, 
 }
 
 
+bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+								const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset)
+{
+	outYCbCrLine.clear();
+	if (inFrameBuffer.IsNULL())
+		return false;	//	NULL frame buffer
+	if (!inDescriptor.IsValid())
+		return false;	//	Bad format descriptor
+	if (ULWord(inLineOffset) >= inDescriptor.GetFullRasterHeight())
+		return false;	//	Illegal line offset
+	if (inDescriptor.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
+		return false;	//	Not 'v210' pixel format
+	if (inDescriptor.GetRasterWidth () < 6)
+		return false;	//	bad width
+
+	const ULWord *	pInputLine	(reinterpret_cast<const ULWord*>(inDescriptor.GetRowAddress(inFrameBuffer.GetHostPointer(), inLineOffset)));
+
+	for (ULWord inputCount(0);  inputCount < inDescriptor.linePitch;  inputCount++)
+	{
+		outYCbCrLine.push_back((pInputLine[inputCount]      ) & 0x3FF);
+		outYCbCrLine.push_back((pInputLine[inputCount] >> 10) & 0x3FF);
+		outYCbCrLine.push_back((pInputLine[inputCount] >> 20) & 0x3FF);
+	}
+	return true;
+}
+
+
 // RePackLineDataForYCbCrDPX
 void RePackLineDataForYCbCrDPX(ULWord *packedycbcrLine, ULWord numULWords )
 {
