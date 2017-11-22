@@ -465,6 +465,8 @@ class CNTV2AncDataTester
 
 			if (true)
 			{
+				const uint8_t	TEST_DID	(0xAB);
+				const uint8_t	TEST_SID	(0xCD);
 				///////////////////////////////////////////////////////////////////////	BEGIN  CNTV2SMPTEAncData::FindAnc  TEST
 				//	For each of a few NTV2VideoFormats (SD 525i, HD 720p, HD 1080i)
 				//		For each of two NTV2FrameBufferFormats '2vuy' and 'v210' . . .
@@ -486,12 +488,10 @@ class CNTV2AncDataTester
 				const AJAAncillaryDataChannel		CHLs[]	=	{AJAAncillaryDataChannel_C, AJAAncillaryDataChannel_Y};
 				const NTV2_SMPTEAncChannelSelect	CHSs[]	=	{kNTV2SMPTEAncChannel_Both, kNTV2SMPTEAncChannel_Y, kNTV2SMPTEAncChannel_C};
 				static const string					sCHSs[]	=	{"Y", "C", "Y+C", ""};
-cerr << endl << endl << "===========================================================================================================================================" << endl;
 				for (unsigned VFndx(0);  VFndx < sizeof(VFs)/sizeof(VFs[0]);  VFndx++)
 				{
 					const NTV2VideoFormat	vf		(VFs[VFndx]);
 					const bool				isSD	(NTV2_IS_SD_VIDEO_FORMAT(vf));
-AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << ::NTV2VideoFormatToString(vf));
 					for (unsigned FBFndx(0);  FBFndx < sizeof(FBFs)/sizeof(FBFs[0]);  FBFndx++)
 					{
 						const NTV2PixelFormat		fbf	(FBFs[FBFndx]);
@@ -501,7 +501,9 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":
 						SHOULD_BE_TRUE(fd.IsVANC());
 						NTV2_POINTER				fb	(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just VANC lines
 						fb.Fill(UWord(0x8080));
+cerr << endl << endl << "===========================================================================================================================================" << endl;
 AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << fd);
+cerr << __FUNCTION__ << ":  " << fd << endl;
 						for (UWord pktLineOffset(0);  pktLineOffset < fd.GetFirstActiveLine();  pktLineOffset++)
 						{
 							AJAAncillaryData	pkt;
@@ -512,7 +514,7 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":
 							{
 								const AJAAncillaryDataChannel	chan	(CHLs[CHLndx]);
 								SHOULD_BE_TRUE(fd.GetSMPTELineNumber(pktLineOffset, smpteLine, isF2));
-								SHOULD_SUCCEED(pkt.SetDID(0xAB));	SHOULD_SUCCEED(pkt.SetSID(0xCD));
+								SHOULD_SUCCEED(pkt.SetDID(TEST_DID));	SHOULD_SUCCEED(pkt.SetSID(TEST_SID));
 								SHOULD_SUCCEED(pkt.SetDataCoding(AJAAncillaryDataCoding_Digital));
 								SHOULD_SUCCEED(pkt.SetLocationVideoLink(AJAAncillaryDataLink_A));
 								SHOULD_SUCCEED(pkt.SetLocationVideoSpace(AJAAncillaryDataSpace_VANC));
@@ -521,17 +523,60 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":
 								const uint8_t		pTestData[]	=	{0xAA, 0xBB, uint8_t(vf), uint8_t(fbf), uint8_t(pkt.GetLocationVideoLink()), uint8_t(pkt.GetLocationDataChannel()), uint8_t(pkt.GetLocationVideoSpace()), uint8_t(smpteLine), uint8_t(pkt.GetDataCoding()), 0xBB, 0xAA};
 								SHOULD_SUCCEED(pkt.SetPayloadData (pTestData, sizeof(pTestData)));
 								SHOULD_SUCCEED(pkts.AddAncillaryData(pkt));
+//cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") BEFORE WriteVANCData:" << endl;
+//CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
+fb.Fill(UWord(0x8080));	//	** MrBill **	FOR NOW
 								SHOULD_SUCCEED(pkts.WriteVANCData (fb,  fd));
 								//	At this point, the packet should be in the frame buffer's VANC area.
 AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Info,	__FUNCTION__ << ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
+cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") AFTER WriteVANCData:" << endl;
+CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
+cerr << __FUNCTION__ << ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")) << endl;
+vector<uint16_t>	u16pktComponents;
+
+SHOULD_SUCCEED(pkt.GenerateTransmitData(u16pktComponents));
+cerr << "U16 Packet Components returned from GenerateTransmitData:" << endl;  for(unsigned n(0);  n < u16pktComponents.size();  n++)	cerr << " " << HEX0N(u16pktComponents[n],4); cerr << endl;
+
+//	Round-trip test:
+	{
+		AJAAncillaryList	compPkts;
+		UWordSequence		uwords;
+		unsigned			ndx	(0);
+		if (NTV2_IS_FBF_8BIT(fbf))
+			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), uwords, fd.GetRasterWidth());
+		else
+			::UnpackLine_10BitYUVtoUWordSequence (fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), uwords, fd.GetRasterWidth());
+cerr << "UWordSequence returned from " << (NTV2_IS_FBF_8BIT(fbf)?"CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence:":"UnpackLine_10BitYUVtoUWordSequence:") << endl << uwords << endl;
+
+		UWordVANCPacketList	cPackets, yPackets;
+		UWordSequence		cHOffsets, yHOffsets;
+		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, isSD ? kNTV2SMPTEAncChannel_Both : kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
+		if (!isSD)
+			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
+		AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, isSD ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C,
+										AJAAncillaryDataSpace_VANC, uint16_t(smpteLine));
+		for (UWordVANCPacketListConstIter it(cPackets.begin());  it != cPackets.end();  ++it, ndx++)
+			compPkts.AddVANCData (*it, loc.SetHorizontalOffset(cHOffsets[ndx]));
+		ndx = 0;
+		loc.SetDataChannel(AJAAncillaryDataChannel_Y);
+		for (UWordVANCPacketListConstIter it(yPackets.begin());  it != yPackets.end();  ++it, ndx++)
+			compPkts.AddVANCData (*it, loc.SetHorizontalOffset(yHOffsets[ndx]));
+cerr << compPkts << endl;
+		SHOULD_BE_EQUAL(compPkts.CountAncillaryDataWithID (TEST_DID, TEST_SID), 1);
+		AJAAncillaryData *	pCompPkt	(compPkts.GetAncillaryDataWithID (TEST_DID, TEST_SID));
+		SHOULD_BE_NON_NULL(pCompPkt);
+		SHOULD_BE_EQUAL(*pCompPkt, pkt);
+	}
 
 								//	Search for the packet using FindAnc...
+								if (false)	//	** MrBill **	FOR NOW
 								for (UWord srchLineOffset(0);  srchLineOffset < fd.GetFirstActiveLine();  srchLineOffset++)
 								{
 									for (unsigned CHSndx(0);  CHSndx < sizeof(CHSs)/sizeof(CHSs[0]);  CHSndx++)
 									{
 										const NTV2_SMPTEAncChannelSelect	srchChan(CHSs[CHSndx]);
-										UWord	wordBuffer[256];
+										//UWord	wordBuffer[256];
+										UWordSequence	wordBuffer;
 										ULWord	numWordsCopied	(0);
 										UWord	lineOffset		(srchLineOffset);
 										UWord	pixelOffset		(0);
@@ -539,6 +584,16 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Info,	__FUNCTION__ << ":  
 										bool	foundIsF2		(false);
 										bool	hasParityErrors(false);
 										bool	bFound	(CNTV2SMPTEAncData::FindAnc (pkt.GetDID(),				//	inAncDID
+																					pkt.GetSID(),				//	inAncSID
+																					fb,							//	inFrameBuffer
+																					fd,							//	inFormatDesc
+																					srchChan,					//	inAncChannel
+																					wordBuffer,					//	outWords
+																					hasParityErrors,			//	outHasParityErrors
+																					1,							//	inLineIncrement
+																					lineOffset,					//	inOutLineStart
+																					pixelOffset));				//	inOutPixelStart
+/*										bool	bFound	(CNTV2SMPTEAncData::FindAnc (pkt.GetDID(),				//	inAncDID
 																					pkt.GetSID(),				//	inAncSID
 																					reinterpret_cast<const ULWord*>(fb.GetHostPointer()),	//	pInFrameBuffer
 																					srchChan,					//	inAncChannel
@@ -551,11 +606,12 @@ AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Info,	__FUNCTION__ << ":  
 																					1,							//	inLineIncrement
 																					lineOffset,					//	inOutLineStart
 																					pixelOffset));				//	inOutPixelStart
-										SHOULD_BE_TRUE(fd.GetSMPTELineNumber (lineOffset, foundSmpteLine, foundIsF2));
+*/										SHOULD_BE_TRUE(fd.GetSMPTELineNumber (lineOffset, foundSmpteLine, foundIsF2));
 										bool	isAMatch	= foundSmpteLine == smpteLine
 																&&	pktLineOffset == lineOffset
 																&&	numWordsCopied == pkt.GetDC();
 AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << sCHSs[srchChan] << " srchLn=" << srchLineOffset << " ln=" << lineOffset << " px=" << pixelOffset << " words=" << numWordsCopied);
+cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << sCHSs[srchChan] << " srchLn=" << srchLineOffset << " ln=" << lineOffset << " px=" << pixelOffset << " words=" << numWordsCopied << endl;
 										//SHOULD_BE_EQUAL(bFound, isAMatch);
 										if (bFound && isAMatch)
 											cerr << "HOORAY!" << endl;
