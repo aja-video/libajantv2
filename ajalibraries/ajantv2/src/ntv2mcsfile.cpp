@@ -353,6 +353,8 @@ void CNTV2MCSfile::IRecordOutput(const char *pIRecord)
 //   Return value < 0 indicates error
 uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 {
+    const uint32_t maxNumLines = 2000000;
+
 	std::string line;
 
 	if (!mMCSFileStream.is_open())
@@ -361,8 +363,8 @@ uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 	mMCSFileStream.seekg(0, std::ios::beg);
 	if (numberOfLines == 0)
 	{
-		mFileLines.resize(1370000);
-		numberOfLines = 1370000;
+        mFileLines.resize(maxNumLines);
+        numberOfLines = maxNumLines;
 	}
 	else
 	{
@@ -376,7 +378,7 @@ uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 		mFileLines[index] = line;
 		index++;
 	}
-	if (numberOfLines < 1370000)
+    if (numberOfLines < maxNumLines)
 		mFileLines[index] = ":00000001FF";
 	return mFileSize;
 
