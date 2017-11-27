@@ -7506,17 +7506,19 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "k3g_quad.bit";
 			case DEVICE_ID_KONA4:						return "kona_4_quad.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona_4_ufc.bit";
-			case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx.mcs";
+            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
-			case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx.mcs";
-			case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx.mcs";
-			case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie.bit";
+            case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
+            case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
+            case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
+            case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie.bit";
 			case DEVICE_ID_LHI:							return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
-            case DEVICE_ID_IOIP_2022:					return "ioip_2022.bit";
-            case DEVICE_ID_IOIP_2110:					return "ioip_2110.bit";
-			default:									return "";
+            case DEVICE_ID_IOIP_2022:					return "ioip_2022.mcs";
+            case DEVICE_ID_IOIP_2110:					return "ioip_2110.mcs";
+            case DEVICE_ID_KONAIP_4TX_2110:             return "kip_s2110.mcs";
+            default:									return "";
 		}
 	#endif	//	else not MSWindows
 	return "";
