@@ -2647,52 +2647,6 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 		else
 			mCard->SetReference(NTV2_REFERENCE_FREERUN);
 		break;
-	case kVideoIn:
-		{
-			//Some boards have HDMI some have analog LHi has both
-			switch (mVirtualInputSelect)
-			{
-			default:
-			case NTV2_Input1Select:
-				mCard->SetReference(NTV2_REFERENCE_INPUT1);
-				break;
-			case NTV2_Input2Select:
-				switch(deviceID)
-				{
-				case DEVICE_ID_LHI:
-				case DEVICE_ID_IOEXPRESS:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHE_PLUS:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				default:
-					mCard->SetReference(NTV2_REFERENCE_INPUT2);
-					break;
-				}
-				break;
-			case NTV2_Input3Select:
-				switch(deviceID)
-				{
-				default:
-				case DEVICE_ID_IOXT:
-				case DEVICE_ID_IO4KUFC:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHI:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				}
-				break;
-			case NTV2_Input5Select://Only used by io4k quad id
-				if (lockV2)
-					mCard->SetReference(NTV2_REFERENCE_FREERUN);
-				else
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-				break;
-			}
-		}
-		break;
 	}
 
 	if (mAudioMixerOverrideState == false)

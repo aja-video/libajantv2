@@ -5459,7 +5459,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		if (ReadRegister (kRegInputStatus2, &status))
 		{
 			///Now it is really ugly
-			if (::NTV2DeviceCanDo3GOut (_boardID, 2) && ReadRegister (kRegSDIInput3GStatus2, &threeGStatus))
+			if ((::NTV2DeviceCanDo3GOut(_boardID, 2) || ::NTV2DeviceCanDo12GOut(_boardID, 2)) && ReadRegister(kRegSDIInput3GStatus2, &threeGStatus))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry

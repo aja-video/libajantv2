@@ -232,6 +232,8 @@ CNTV2Config2022::CNTV2Config2022(CNTV2Card & device) : CNTV2MBController(device)
     {
         _tstreamConfig = new CNTV2ConfigTs2022(device);
     }
+
+    _isIoIp = (device.GetDeviceID() == DEVICE_ID_IOIP_2022);
 }
 
 CNTV2Config2022::~CNTV2Config2022()
@@ -312,7 +314,10 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
     if (_is2022_6)
     {
         // initialise constants
-        mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + core6, 0x04);
+        if (_isIoIp)
+            mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + core6, 0x10);    // IoIP
+        else
+            mDevice.WriteRegister(kReg2022_6_tx_sys_mem_conf     + core6, 0x04);    // KonaIP
         mDevice.WriteRegister(kReg2022_6_tx_hitless_config   + core6, 0x01); // disable
 
         // source ip address
@@ -545,7 +550,10 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     // some constants
     WriteChannelRegister(kReg2022_6_rx_chan_timeout        + baseAddr, 0x12ffffff);
     WriteChannelRegister(kReg2022_6_rx_media_pkt_buf_size  + baseAddr, 0x0000ffff);
-    WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0x10000000 * channel);
+    if (_isIoIp)
+        WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0xC0000000 + (0x10000000 * channel));    // IoIp
+    else
+        WriteChannelRegister(kReg2022_6_rx_media_buf_base_addr + baseAddr, 0x10000000 * channel);                   // KonaIp
 
     // enable  register updates
     ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);

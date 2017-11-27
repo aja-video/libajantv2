@@ -1605,7 +1605,7 @@ bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
 
 int CNTV2Config2110::getDescriptionValue(int startLine, string type, string & value)
 {
-    for (int i=startLine; i < sdpLines.size(); i++)
+    for (unsigned i(startLine);  i < sdpLines.size();  i++)
     {
         string line = sdpLines[i];
         size_t pos = line.find(type);
