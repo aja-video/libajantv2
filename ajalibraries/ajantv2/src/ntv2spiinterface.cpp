@@ -1,0 +1,950 @@
+/////////////////////////////////////////////////////////////////////////////
+// ntv2spiinterface.cpp
+//
+// Copyright (C) 2017 AJA Video Systems, Inc.  Proprietary and Confidential information.
+//
+#include "ntv2spiinterface.h"
+
+#include <cmath>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "ntv2registersmb.h"
+#include "ntv2mcsfile.h"
+
+using namespace std;
+
+// Flash commands
+const int64_t spi_timeout = 10000;
+
+// Cypress/Spansion
+const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND  = 0x01;
+const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
+const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
+const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
+const uint32_t CYPRESS_FLASH_READFAST_COMMAND      = 0x0C; //4 byte address
+const uint32_t CYPRESS_FLASH_PAGE_PROGRAM_COMMAND  = 0x12; //4 byte address
+const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
+const uint32_t CYPRESS_FLASH_READBANK_COMMAND      = 0x16;
+const uint32_t CYPRESS_FLASH_WRITEBANK_COMMAND     = 0x17;
+const uint32_t CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND= 0x21; //4 byte address
+const uint32_t CYPRESS_FLASH_READ_CONFIG_COMMAND   = 0x35;
+const uint32_t CYPRESS_FLASH_READ_JEDEC_ID_COMMAND = 0x9F;
+const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
+
+const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
+const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
+const uint32_t AXI_SPI_WRITE_FIFO_EMPTY = 0x04;
+const uint32_t AXI_SPI_WRITE_FIFO_FULL  = 0x08;
+
+inline bool has_4k_start_sectors(const uint32_t reportedSectorSize)
+{
+    if (reportedSectorSize <= 0x20000)
+        return true;
+    else
+        return false;
+}
+
+uint32_t size_for_sector_number(const uint32_t reportedSectorSize, const uint32_t sector)
+{
+    if (has_4k_start_sectors(reportedSectorSize) && sector < 32)
+        return 4 * 1024;
+    else
+        return reportedSectorSize;
+}
+
+uint32_t erase_cmd_for_sector(const uint32_t reportedSectorSize, const uint32_t sector)
+{
+    if (has_4k_start_sectors(reportedSectorSize) && sector < 32)
+        return CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND; // 4P4E command, 4byte
+    else
+        return CYPRESS_FLASH_SECTOR_ERASE_COMMAND; // 4SE command,  4byte
+}
+
+uint32_t sector_for_address(uint32_t sectorSizeBytes, uint32_t address)
+{
+    if (sectorSizeBytes == 0)
+        return 0;
+
+    uint32_t sector = 0;
+    if (has_4k_start_sectors(sectorSizeBytes))
+    {
+         if (address < 0x20000)
+         {
+             uint32_t sector4kSizeBytes = size_for_sector_number(sectorSizeBytes, 0);
+             sector = address / sector4kSizeBytes;
+         }
+         else
+         {
+             sector += 32;
+             sector += (address-0x20000) / sectorSizeBytes;
+         }
+    }
+    else
+    {
+        sector = address / sectorSizeBytes;
+    }
+
+    return sector;
+}
+
+uint32_t address_for_sector(uint32_t sectorSizeBytes, uint32_t sector)
+{
+    uint32_t address=0;
+    if (has_4k_start_sectors(sectorSizeBytes))
+    {
+        if (sector < 32)
+            address = sector * size_for_sector_number(sectorSizeBytes, 0);
+        else
+        {
+            address = 32 * size_for_sector_number(sectorSizeBytes, 0);
+            address += (sector - 32) * sectorSizeBytes;
+        }
+    }
+    else
+    {
+        address = sector * sectorSizeBytes;
+    }
+
+    return address;
+}
+
+CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
+    : mVerbose(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
+{
+    mSpiResetReg     = (mBaseByteAddress + 0x40) / 4;
+    mSpiControlReg   = (mBaseByteAddress + 0x60) / 4;
+    mSpiStatusReg    = (mBaseByteAddress + 0x64) / 4;
+    mSpiWriteReg     = (mBaseByteAddress + 0x68) / 4;
+    mSpiReadReg      = (mBaseByteAddress + 0x6c) / 4;
+    mSpiSlaveReg     = (mBaseByteAddress + 0x70) / 4;
+    mSpiGlobalIntReg = (mBaseByteAddress + 0x1c) / 4;
+
+    mDevice.Open(index);
+
+    if (NTV2DeviceOk())
+    {
+        mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, 0x1);
+    }
+
+    SpiReset();
+
+    uint8_t manufactureID;
+    uint8_t memInerfaceType;
+    uint8_t memDensity;
+    uint8_t sectorArchitecture;
+    uint8_t familyID;
+    bool good = FlashDeviceInfo(manufactureID, memInerfaceType, memDensity, sectorArchitecture, familyID);
+    if (good)
+    {
+        switch(memDensity)
+        {
+            case 0x18: mSize = 16 * 1024 * 1024; break;
+            case 0x19: mSize = 32 * 1024 * 1024; break;
+            default:   mSize = 0;                break;
+        }
+
+        switch(sectorArchitecture)
+        {
+            case 0x00: mSectorSize = 256 * 1024; break;
+            case 0x01: mSectorSize =  64 * 1024; break;
+            default:   mSectorSize = 0;          break;
+        }
+    }
+
+    uint8_t configValue;
+    good = FlashReadConfig(configValue);
+    uint8_t statusValue;
+    good = FlashReadStatus(statusValue);
+}
+
+CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
+{
+    if (NTV2DeviceOk())
+    {
+        mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, 0x0);
+    }
+}
+
+bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, uint32_t maxBytes)
+{
+    const uint32_t pageSize = 256;
+
+    uint32_t pageAddress = address;
+    uint32_t numPages = (uint32_t)ceil((double)maxBytes/(double)pageSize);
+
+    uint32_t bytesLeftToTransfer = maxBytes;
+    for(uint32_t p=0;p<numPages;p++)
+    {
+        vector<uint8_t> commandSequence;
+        commandSequence.push_back(CYPRESS_FLASH_READFAST_COMMAND);
+        FlashFixAddress(pageAddress, commandSequence);
+
+        uint32_t bytesToTransfer = pageSize;
+        if (bytesLeftToTransfer < pageSize)
+            bytesToTransfer = bytesLeftToTransfer;
+
+        if (mVerbose)
+            cout << "Reading bytes " << p*pageSize << " of " << maxBytes << "\r" << flush;
+
+        SpiTransfer(commandSequence, {}, data, bytesToTransfer);
+
+        bytesLeftToTransfer -= bytesToTransfer;
+        pageAddress += pageSize;
+    }
+
+    if (mVerbose)
+        cout << "Reading bytes " << maxBytes << " of " << maxBytes << endl;
+
+    return true;
+}
+
+bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes)
+{
+    const uint32_t pageSize = 256;
+
+    uint32_t maxWrite = maxBytes;
+    if (data.size() >= 0 && maxWrite > data.size())
+        maxWrite = (uint32_t)data.size();
+
+    std::vector<uint8_t> dummyOutput;
+
+    uint32_t pageAddress = address;
+    uint32_t numPages = (uint32_t)ceil((double)maxWrite/(double)pageSize);
+    for(uint32_t p=0;p<numPages;p++)
+    {
+        // enable write
+        SpiEnableWrite(true);
+
+        vector<uint8_t> commandSequence;
+        commandSequence.push_back(CYPRESS_FLASH_PAGE_PROGRAM_COMMAND);
+        FlashFixAddress(pageAddress, commandSequence);
+
+        vector<uint8_t> pageData;
+        for(int i=0;i<pageSize;i++)
+        {
+            uint32_t offset = (p*pageSize)+i;
+            if (offset >= data.size())
+                break;
+
+            pageData.push_back(data.at(offset));
+        }
+
+        if (mVerbose)
+            cout << "Writing bytes " << p*pageSize << " of " << maxWrite << "\r" << flush;
+
+        SpiTransfer(commandSequence, pageData, dummyOutput, (uint32_t)pageData.size());
+
+        // spin here until flash status bit 0 is clear
+        uint8_t fs=0x00;
+        do { FlashReadStatus(fs); } while(fs & 0x1);
+
+        pageAddress += pageSize;
+
+        // disable write
+        SpiEnableWrite(false);
+    }
+
+    if (mVerbose)
+        cout << "Writing bytes " << maxWrite << " of " << maxWrite << endl;
+
+    return true;
+}
+
+bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
+{
+    //testing
+#if 0
+    // 64k
+    uint32_t test1Addr = 0x20000;
+    uint32_t test1ExpectedSector = 32;
+
+    // 4k
+    uint32_t test2Addr = 0x1F000;
+    uint32_t test2ExpectedSector = 31;
+
+    // 64k
+    uint32_t test3Addr = 0x1FF0000;
+    uint32_t test3ExpectedSector = 541;
+
+    uint32_t test1Res = sector_for_address(mSectorSize, test1Addr);
+    uint32_t test2Res = sector_for_address(mSectorSize, test2Addr);
+    uint32_t test3Res = sector_for_address(mSectorSize, test3Addr);
+
+    uint32_t test1AddrRes = address_for_sector(mSectorSize, test1ExpectedSector);
+    uint32_t test2AddrRes = address_for_sector(mSectorSize, test2ExpectedSector);
+    uint32_t test3AddrRes = address_for_sector(mSectorSize, test3ExpectedSector);
+
+    uint32_t test1Cmd = erase_cmd_for_sector(mSectorSize, test1ExpectedSector);
+    uint32_t test2Cmd = erase_cmd_for_sector(mSectorSize, test2ExpectedSector);
+    uint32_t test3Cmd = erase_cmd_for_sector(mSectorSize, test3ExpectedSector);
+    return true;
+#endif
+
+    // enable write
+    SpiEnableWrite(true);
+
+    uint32_t startSector = sector_for_address(mSectorSize, address);
+    uint32_t endSector = sector_for_address(mSectorSize, address + bytes);
+
+    uint32_t cmd = erase_cmd_for_sector(mSectorSize, startSector);
+    uint32_t sectorAddress = address_for_sector(mSectorSize, startSector);
+
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(cmd);
+    FlashFixAddress(address, commandSequence);
+
+    if (endSector > startSector)
+    {
+        if (mVerbose)
+            cout << "Erasing sectors from " << 0 << " to " << endSector << "\r" << flush;
+    }
+    else
+    {
+        if (mVerbose)
+            cout << "Erasing sector " << startSector << endl;
+    }
+    vector<uint8_t> dummyOutput;
+    SpiTransfer(commandSequence, {}, dummyOutput, bytes);
+
+    // spin here until flash status bit 0 is clear
+    uint8_t fs=0x00;
+    do { FlashReadStatus(fs); } while(fs & 0x1);
+
+    // disable write
+    SpiEnableWrite(false);
+
+    // Handle the case of erase spanning sectors
+    if (endSector > startSector)
+    {
+        uint32_t start = startSector;
+        while (start < endSector)
+        {            
+            // enable write
+            SpiEnableWrite(true);
+
+            ++start;
+            cmd = erase_cmd_for_sector(mSectorSize, start);
+            sectorAddress = address_for_sector(mSectorSize, start);
+
+            vector<uint8_t> commandSequence2;
+            commandSequence2.push_back(cmd);
+            FlashFixAddress(sectorAddress, commandSequence2);
+
+            if (mVerbose)
+                cout << "Erasing sectors from " << startSector << " to " << endSector << ", at: " << start << "\r" << flush;
+
+            SpiTransfer(commandSequence2, {}, dummyOutput, bytes);
+
+            // spin here until flash status bit 0 is clear
+            fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+
+            // disable write
+            SpiEnableWrite(false);
+        }
+
+        if (mVerbose)
+            cout << "Erasing sectors from " << startSector << " to " << endSector << "               " << endl;
+    }
+
+    return true;
+}
+
+uint32_t CNTV2AxiSpiFlash::Size()
+{
+    return mSize;
+}
+
+bool CNTV2AxiSpiFlash::ProgramFile(const std::string& sourceFile, const uint32_t fileStartOffset,
+                                   const uint32_t address, const uint32_t maxBytes, bool verify)
+{
+    bool result = false;
+
+    if (maxBytes == 0)
+        return false;
+
+    bool mcsFile = false;
+    if (sourceFile.rfind(".mcs") != string::npos)
+        mcsFile = true;
+
+    vector<uint8_t> inputData;
+
+    // get the file data
+    if (mVerbose)
+        cout << "Reading file ... \r" << flush;
+
+    if (mcsFile)
+    {
+        // read the mcs file
+        CNTV2MCSfile mcsFile;
+        mcsFile.Open(sourceFile);
+
+        if (mcsFile.isReady())
+        {
+            uint16_t partitionOffset = 0;
+
+            inputData.reserve(maxBytes);
+            mcsFile.GetPartition(inputData, fileStartOffset, partitionOffset, false);
+
+            if (inputData.size() > maxBytes)
+            {
+                inputData.resize(maxBytes);
+                cout << "had to clamp file" << endl;
+            }
+
+            // temp debug
+            ostringstream filename;
+            filename << "dump_of_mcs_bytes_0x" << hex << fileStartOffset << dec << ".txt";
+
+            ofstream ofs(filename.str(), ofstream::out|ofstream::binary);
+            if (ofs)
+            {
+                ofs.write((char*)&inputData[0], inputData.size());
+                ofs.close();
+                //return false;
+            }
+            //temp debug
+        }
+    }
+    else
+    {
+        // read the file
+        ifstream ifs(sourceFile, ifstream::in|ifstream::binary);
+        if (ifs)
+        {
+            ifs.seekg(0, ifs.end);
+            int fileLen = int(ifs.tellg());
+            int bytesToRead = fileLen - fileStartOffset;
+            if (bytesToRead < 0)
+            {
+                ifs.close();
+                return false;
+            }
+
+            ifs.seekg(fileStartOffset, ifs.beg);
+
+            if (int(maxBytes) < bytesToRead)
+            {
+                bytesToRead = maxBytes;
+            }
+
+            inputData.resize(bytesToRead);
+
+            ifs.read((char*)&inputData[0], inputData.size());
+            ifs.close();
+        }
+    }
+
+    if (mVerbose)
+        cout << "Reading file ... done\n\n" << flush;
+
+    if (inputData.empty() == false)
+    {
+        if (mVerbose)
+            cout << "Erasing flash ... \r" << flush;
+
+        Erase(address, uint32_t(inputData.size()));
+
+        if (mVerbose)
+            cout << "Erasing flash ... done\n\n" << flush;
+
+        if (mVerbose)
+            cout << "Writing flash ... \r" << flush;
+
+        Write(address, inputData, uint32_t(inputData.size()));
+
+        if (mVerbose)
+            cout << "Writing flash ... done\n\n" << flush;
+
+        if (mVerbose)
+            cout << "Verifying write ... \r" << flush;
+
+        if (verify)
+        {
+            vector<uint8_t> verifyData;
+            Read(address, verifyData, uint32_t(inputData.size()));
+
+            if (equal(inputData.begin(), inputData.end(), verifyData.begin()))
+            {
+                result = true;
+                if (mVerbose)
+                    cout << "Verifying write ... passed\n\n" << flush;
+            }
+            else
+            {
+                result = false;
+                if (mVerbose)
+                {
+                    pair<vector<uint8_t>::iterator, vector<uint8_t>::iterator> p;
+                    p = mismatch(inputData.begin(), inputData.end(), verifyData.begin());
+                    int64_t byteMismatchOffset = distance(inputData.begin(), p.first);
+                    cout << "Verifying write ... failed at byte " << byteMismatchOffset <<
+                            " expected: '" << hex << *p.first << "' but got: '" << hex << *p.second << "'\n\n" << flush;
+                }
+            }
+        }
+        else
+        {
+            result = true;
+        }
+    }
+
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::DumpToFile(const std::string& outFile, const uint32_t flashStartOffset, const uint32_t maxBytes)
+{
+    bool result = false;
+
+    if (maxBytes == 0)
+        return false;
+
+    // write the file
+    ofstream ofs(outFile, ofstream::out|ofstream::binary);
+    if (ofs)
+    {
+        vector<uint8_t> outputData;
+
+        // read data from flash
+        if (mVerbose)
+            cout << "Reading flash ...\r" << flush;
+
+        result = Read(flashStartOffset, outputData, maxBytes);
+
+        if (result)
+        {
+            if (mVerbose)
+                cout << "Reading flash ...done\n" << flush;
+
+            ofs.write((char*)&outputData[0], outputData.size());
+        }
+        else
+        {
+            if (mVerbose)
+                cout << "Reading flash ...failed\n" << flush;
+        }
+
+        ofs.close();
+    }
+
+    return result;
+}
+
+struct MacAddr
+{
+    uint8_t mac[6];
+};
+
+static bool makeMACsFromSerial(const std::string& serial, MacAddr *pMac1, MacAddr *pMac2)
+{
+    if (serial.find("ENG") != string::npos)
+    {
+        // ENG IoIp - if the serial starts with ENG
+
+        // 0000 to 0127 (qty 128) maps to 1B00 to 1BFF (256 addresses)
+        // First 4 bytes are: 00:0c:17:88 and next 2 bytes are computed
+        // as mac1= (0x1B00) + (serNum * 2) and
+        // mac2 = mac1 + 1
+        int serNum = 0;
+        if (sscanf(&serial[3], "%d", &serNum) != 1)
+            return false;
+
+        if (serNum > 127)
+        {
+            cout << "WARNING: Outside serial numbers ENG000 to ENG127\n";
+            return false;
+        }
+
+        int mac16LSBs = (0x1B00) + (serNum * 2);
+
+        pMac2->mac[0] = pMac1->mac[0] = 0x0;
+        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
+        pMac2->mac[2] = pMac1->mac[2] = 0x17;
+        pMac2->mac[3] = pMac1->mac[3] = 0x88;
+        pMac2->mac[4] = pMac1->mac[4] = mac16LSBs >> 8;
+        pMac2->mac[5] = pMac1->mac[5] = mac16LSBs & 0xff;
+        // The above byte will always be same for the second mac
+        // based on above allocation
+        pMac2->mac[5] = pMac1->mac[5] + 1;
+        return true;
+    }
+    else if (serial.find("6XT0") != string::npos)
+    {
+        // IoIp - if the serial starts with 6XT0
+
+        // 0250 to 8441 (qty 8192) maps to A000 to DFFF (16384 addresses)
+        // First 4 bytes are: 00:0c:17:48 and next 2 bytes are computed
+        // as mac1= (0xA000) + ((serNum - 250) * 2) and
+        // mac2 = mac1 + 1
+        int serNum = 0;
+        if (sscanf(&serial[4], "%d", &serNum) != 1)
+            return false;
+
+        if ((serNum < 250) || (serNum > 8441))
+        {
+            cout << "WARNING: Outside serial numbers 6XT000250 to 6XT008441\n";
+            return false;
+        }
+
+        int mac16LSBs = (0xA000) + ((serNum - 250) * 2);
+
+        pMac2->mac[0] = pMac1->mac[0] = 0x0;
+        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
+        pMac2->mac[2] = pMac1->mac[2] = 0x17;
+        pMac2->mac[3] = pMac1->mac[3] = 0x48;
+        pMac2->mac[4] = pMac1->mac[4] = mac16LSBs >> 8;
+        pMac2->mac[5] = pMac1->mac[5] = mac16LSBs & 0xff;
+        // The above byte will always be same for the second mac
+        // based on above allocation
+        pMac2->mac[5] = pMac1->mac[5] + 1;
+        return true;
+    }
+    else if (serial.find("6XT2") != string::npos)
+    {
+        // DNxIp - if the serial starts with 6XT2
+
+        // 0250 to 8441 (qty 8192) maps to E000 to 1FFF (16384 addresses)
+        // First 3 bytes are: 00:0c:17 and next 3 bytes are computed
+        // as mac1= (0x48E000) + ((serNum - 250) * 2) and
+        // mac2 = mac1 + 1
+        int serNum = 0;
+        if (sscanf(&serial[4], "%d", &serNum) != 1)
+            return false;
+
+        if ((serNum < 250) || (serNum > 8441))
+        {
+            cout << "WARNING: Outside serial numbers 6XT200250 to 6XT208441\n";
+            return false;
+        }
+
+        int mac24LSBs = (0x48E000) + ((serNum - 250) * 2);
+        pMac2->mac[0] = pMac1->mac[0] = 0x0;
+        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
+        pMac2->mac[2] = pMac1->mac[2] = 0x17;
+        pMac2->mac[3] = pMac1->mac[3] = (mac24LSBs & 0xFF0000) >> 16;
+        pMac2->mac[4] = pMac1->mac[4] = (mac24LSBs & 0x00FF00) >>  8;
+        pMac2->mac[5] = pMac1->mac[5] = (mac24LSBs & 0x0000FF) >>  0;
+        // The above byte will always be same for the second mac
+        // based on above allocation
+        pMac2->mac[5] = pMac1->mac[5] + 1;
+        return true;
+    }
+    else
+    {
+        cout << "Unrecognized or unspecified serial number '" << serial << "'\n";
+    }
+
+    return false;
+}
+
+bool CNTV2AxiSpiFlash::WriteSerialAndMac(const std::string& serial, const uint32_t macOffset, const uint32_t serialOffset)
+{
+    bool result = false;
+
+    if (serial.length() < 6)
+    {
+        if (mVerbose)
+            cout << "Could not set the Serial and MAC addresses, passed serial was under 6 characters" << endl;
+        return false;
+    }
+
+    MacAddr mac1, mac2;
+    result = makeMACsFromSerial(serial, &mac1, &mac2);
+    if (result)
+    {
+        // write MAC addresses
+        vector<uint8_t> macBytes;
+
+        macBytes.push_back(mac1.mac[3]);
+        macBytes.push_back(mac1.mac[2]);
+        macBytes.push_back(mac1.mac[1]);
+        macBytes.push_back(mac1.mac[0]);
+        macBytes.push_back(0);
+        macBytes.push_back(0);
+        macBytes.push_back(mac1.mac[5]);
+        macBytes.push_back(mac1.mac[4]);
+
+        macBytes.push_back(mac2.mac[3]);
+        macBytes.push_back(mac2.mac[2]);
+        macBytes.push_back(mac2.mac[1]);
+        macBytes.push_back(mac2.mac[0]);
+        macBytes.push_back(0);
+        macBytes.push_back(0);
+        macBytes.push_back(mac2.mac[5]);
+        macBytes.push_back(mac2.mac[4]);
+
+        Erase(macOffset, (uint32_t)macBytes.size());
+        Write(macOffset, macBytes, (uint32_t)macBytes.size());
+
+        // write serial number
+        vector<uint8_t> serialBytes;
+        for(int i=0;i<9;i++)
+        {
+            if (i < serial.size())
+                serialBytes.push_back(serial.at(i));
+            else
+                break;
+        }
+        serialBytes.push_back(0);
+
+        Erase(serialOffset, (uint32_t)serialBytes.size());
+        Write(serialOffset, serialBytes, (uint32_t)serialBytes.size());
+    }
+
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::NTV2DeviceOk()
+{
+    if (mDevice.IsOpen() == false)
+        return false;
+    if (mDevice.GetDeviceID() != DEVICE_ID_IOIP_2022)
+        return false;
+
+    return true;
+}
+
+void CNTV2AxiSpiFlash::SpiReset()
+{
+    if (!NTV2DeviceOk())
+        return;
+
+    mDevice.WriteRegister(mSpiSlaveReg, 0x0);
+    SpiResetFifos();
+
+    // make sure in 32bit mode
+    uint8_t bankAddressVal=0;
+    FlashReadBankAddress(bankAddressVal);
+    FlashWriteBankAddress(bankAddressVal | 0x80);
+}
+
+bool CNTV2AxiSpiFlash::SpiResetFifos()
+{
+    if (!NTV2DeviceOk())
+        return false;
+
+    uint32_t val=0;
+    mDevice.ReadRegister(mSpiControlReg, &val);
+
+    uint32_t spi_ctrl_val=0xe6;
+    return mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
+}
+
+bool CNTV2AxiSpiFlash::SpiWaitForWriteFifoEmpty()
+{
+    if (!NTV2DeviceOk())
+        return false;
+
+    ULWord status = 0;
+    ULWord count = 0;
+    mDevice.ReadRegister(mSpiStatusReg, &status);
+    while ((status & AXI_SPI_WRITE_FIFO_EMPTY) == 0)
+    {
+        if (++count > spi_timeout) return false;
+        mDevice.ReadRegister(mSpiStatusReg, &status);
+    }
+
+    return true;
+}
+
+void CNTV2AxiSpiFlash::SpiEnableWrite(bool enable)
+{
+    // see AXI Quad SPI v3.2 guide page 99
+
+    // 1 disable the master transaction by setting 0x100 high in spi control reg
+    mDevice.WriteRegister(mSpiControlReg, 0x186);
+
+    // 2 issue the write enable command
+    if (enable)
+        mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_WRITEENABLE_COMMAND);
+    else
+        mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_WRITEDISABLE_COMMAND);
+
+    // 3 issue chip select
+    mDevice.WriteRegister(mSpiSlaveReg, 0x00);
+
+    // 4 enable the master transaction by setting 0x100 low in spi control reg
+    uint32_t spi_ctrl_val = 0;
+    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    spi_ctrl_val &= ~0x100;
+    mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
+
+    // 5 deassert chip select
+    mDevice.WriteRegister(mSpiSlaveReg, 0x01);
+
+    // 6 disable the master transaction by setting 0x100 high in spi control reg
+    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    spi_ctrl_val |= 0x100;
+    mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
+}
+
+bool CNTV2AxiSpiFlash::FlashDeviceInfo(uint8_t& manufactureID, uint8_t& memInerfaceType,
+                                  uint8_t& memDensity, uint8_t& sectorArchitecture,
+                                  uint8_t& familyID)
+{
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(CYPRESS_FLASH_READ_JEDEC_ID_COMMAND);
+
+    vector<uint8_t> resultData;
+    bool result = SpiTransfer(commandSequence, {}, resultData, 6);
+    if (result && resultData.size() == 6)
+    {
+        manufactureID      = resultData.at(0);
+        memInerfaceType    = resultData.at(1);
+        memDensity         = resultData.at(2);
+        //uint8_t deviceIDMaxSize    = 0x3 + resultData.at(3);
+        sectorArchitecture = resultData.at(4);
+        familyID           = resultData.at(5);
+    }
+
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::FlashReadConfig(uint8_t& configValue)
+{
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(CYPRESS_FLASH_READ_CONFIG_COMMAND);
+
+    vector<uint8_t> resultData;
+    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    if (result && resultData.size() > 0)
+    {
+        configValue = resultData.at(0);
+    }
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::FlashReadStatus(uint8_t& statusValue)
+{
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(CYPRESS_FLASH_READ_STATUS_COMMAND);
+
+    vector<uint8_t> resultData;
+    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    if (result && resultData.size() > 0)
+    {
+        statusValue = resultData.at(0);
+    }
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::FlashReadBankAddress(uint8_t& bankAddressVal)
+{
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(CYPRESS_FLASH_READBANK_COMMAND);
+
+    vector<uint8_t> resultData;
+    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    if (result && resultData.size() > 0)
+    {
+        bankAddressVal = resultData.at(0);
+    }
+    return result;
+}
+
+bool CNTV2AxiSpiFlash::FlashWriteBankAddress(const uint8_t bankAddressVal)
+{
+    vector<uint8_t> commandSequence;
+    commandSequence.push_back(CYPRESS_FLASH_WRITEBANK_COMMAND);
+
+    vector<uint8_t> input;
+    input.push_back(bankAddressVal);
+    std::vector<uint8_t> dummyOutput;
+    return SpiTransfer(commandSequence, input, dummyOutput, 1);
+}
+
+void CNTV2AxiSpiFlash::FlashFixAddress(const uint32_t address, std::vector<uint8_t>& commandSequence)
+{
+    // turn the address into a bytes stream and change ordering to match what
+    // the flash chip wants to see (MSB)
+    commandSequence.push_back((address & (0xff000000)) >> 24);
+    commandSequence.push_back((address & (0x00ff0000)) >> 16);
+    commandSequence.push_back((address & (0x0000ff00)) >>  8);
+    commandSequence.push_back((address & (0x000000ff)) >>  0);
+}
+
+bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
+                                   const std::vector<uint8_t> inputData,
+                                   std::vector<uint8_t>& outputData, uint32_t maxByteCutoff)
+{
+    bool retVal = true;
+
+    if (commandSequence.empty())
+        return false;
+
+    if (!NTV2DeviceOk())
+        return false;
+
+    if (!SpiWaitForWriteFifoEmpty())
+        return false;
+
+    SpiResetFifos();
+
+    // issue chip select
+    mDevice.WriteRegister(mSpiSlaveReg, 0x01);
+    mDevice.WriteRegister(mSpiSlaveReg, 0x00);
+
+    // issue the command & arguments
+    uint32_t dummyVal = 0;
+    for(int i=0;i<commandSequence.size();++i)
+    {
+        mDevice.WriteRegister(mSpiWriteReg, (ULWord)commandSequence.at(i));
+        if (commandSequence.size() > 1)
+            mDevice.ReadRegister(mSpiReadReg, &dummyVal);
+    }
+
+    // enable the master transaction by setting 0x100 low in spi control reg
+    uint32_t spi_ctrl_val = 0;
+    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    spi_ctrl_val &= ~0x100;
+    mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
+
+    if (commandSequence.at(0) == CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND ||
+        commandSequence.at(0) == CYPRESS_FLASH_SECTOR_ERASE_COMMAND)
+    {
+        // an erase command, don't need to do anything else
+    }
+    else if (inputData.empty() == false)
+    {
+        // a write command
+
+        uint32_t maxWrite = maxByteCutoff;
+        if (inputData.size() >= 0 && maxWrite > inputData.size())
+            maxWrite = (uint32_t)inputData.size();
+
+        for(uint32_t i=0;i<maxWrite;++i)
+        {
+            mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
+        }
+    }
+    else
+    {
+        // a read command
+
+        uint32_t val    = 0;
+        //uint32_t status = 0;
+
+        for(uint32_t i=0;i<maxByteCutoff+1;++i)
+        {
+            mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
+            mDevice.ReadRegister(mSpiReadReg, &val);
+
+            // the first byte back is a dummy when reading flash
+            if (i > 0)
+                outputData.push_back(val);
+        }
+    }
+
+    // deassert chip select
+    mDevice.WriteRegister(mSpiSlaveReg, 0x01);
+
+    // disable the master transaction by setting 0x100 high in spi control reg
+    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    spi_ctrl_val |= 0x100;
+    mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
+
+    return retVal;
+}
