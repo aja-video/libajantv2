@@ -19,6 +19,8 @@ public:
     virtual bool Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes = 1) = 0;
     virtual bool Erase(const uint32_t address, uint32_t bytes) = 0;
     virtual uint32_t Size() = 0;
+
+    static bool DeviceSupported(NTV2DeviceID deviceId) {return false;}
 };
 
 class CNTV2AxiSpiFlash : public CNTV2SpiFlash
@@ -31,6 +33,8 @@ public:
     virtual bool Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes = 1);
     virtual bool Erase(const uint32_t address, uint32_t bytes);
     virtual uint32_t Size();
+
+    static bool DeviceSupported(NTV2DeviceID deviceId);
 
     // probably not leaving this, for testing
     bool ProgramFile(const std::string& sourceFile, const uint32_t fileStartOffset = 0, const uint32_t address = 0, const uint32_t maxBytes = 1, bool verify = true);

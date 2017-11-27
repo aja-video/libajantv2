@@ -169,6 +169,19 @@ CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
     }
 }
 
+bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
+{
+    if (deviceId == DEVICE_ID_IOIP_2022 ||
+        deviceId == DEVICE_ID_IOIP_2110)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, uint32_t maxBytes)
 {
     const uint32_t pageSize = 256;
@@ -366,6 +379,9 @@ bool CNTV2AxiSpiFlash::ProgramFile(const std::string& sourceFile, const uint32_t
     if (maxBytes == 0)
         return false;
 
+    if (NTV2DeviceOk() == false)
+        return false;
+
     bool mcsFile = false;
     if (sourceFile.rfind(".mcs") != string::npos)
         mcsFile = true;
@@ -500,6 +516,9 @@ bool CNTV2AxiSpiFlash::DumpToFile(const std::string& outFile, const uint32_t fla
     bool result = false;
 
     if (maxBytes == 0)
+        return false;
+
+    if (NTV2DeviceOk() == false)
         return false;
 
     // write the file
@@ -651,6 +670,9 @@ bool CNTV2AxiSpiFlash::WriteSerialAndMac(const std::string& serial, const uint32
         return false;
     }
 
+    if (NTV2DeviceOk() == false)
+        return false;
+
     MacAddr mac1, mac2;
     result = makeMACsFromSerial(serial, &mac1, &mac2);
     if (result)
@@ -701,7 +723,7 @@ bool CNTV2AxiSpiFlash::NTV2DeviceOk()
 {
     if (mDevice.IsOpen() == false)
         return false;
-    if (mDevice.GetDeviceID() != DEVICE_ID_IOIP_2022)
+    if (DeviceSupported(mDevice.GetDeviceID()) == false)
         return false;
 
     return true;
