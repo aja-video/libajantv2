@@ -151,11 +151,6 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 
     mDevice.Open(index);
 
-    if (NTV2DeviceOk())
-    {
-        mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, 0x1);
-    }
-
     SpiReset();
 
     uint8_t manufactureID;
@@ -189,10 +184,6 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 
 CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
 {
-    if (NTV2DeviceOk())
-    {
-        mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, 0x0);
-    }
 }
 
 void CNTV2AxiSpiFlash::SetVerbosity(bool verbose)
