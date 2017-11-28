@@ -139,7 +139,7 @@ uint32_t address_for_sector(uint32_t sectorSizeBytes, uint32_t sector)
 }
 
 CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
-    : mVerbose(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
+    : CNTV2SpiFlash(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
 {
     mSpiResetReg     = (mBaseByteAddress + 0x40) / 4;
     mSpiControlReg   = (mBaseByteAddress + 0x60) / 4;
@@ -185,7 +185,7 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
 {
 }
-
+/*
 void CNTV2AxiSpiFlash::SetVerbosity(bool verbose)
 {
     mVerbose = verbose;
@@ -195,7 +195,7 @@ bool CNTV2AxiSpiFlash::GetVerbosity()
 {
     return mVerbose;
 }
-
+*/
 bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
 {
     if (deviceId == DEVICE_ID_IOIP_2022 ||
@@ -230,7 +230,8 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
         if (mVerbose)
             cout << "Reading bytes " << p*pageSize << " of " << maxBytes << "\r" << flush;
 
-        SpiTransfer(commandSequence, {}, data, bytesToTransfer);
+        vector<uint8_t> dummyInput;
+        SpiTransfer(commandSequence, dummyInput, data, bytesToTransfer);
 
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
@@ -347,8 +348,9 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
         if (mVerbose)
             cout << "Erasing sector " << startSector << endl;
     }
+    vector<uint8_t> dummyInput;
     vector<uint8_t> dummyOutput;
-    SpiTransfer(commandSequence, {}, dummyOutput, bytes);
+    SpiTransfer(commandSequence, dummyInput, dummyOutput, bytes);
 
     // spin here until flash status bit 0 is clear
     uint8_t fs=0x00;
@@ -377,7 +379,8 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
             if (mVerbose)
                 cout << "Erasing sectors from " << startSector << " to " << endSector << ", at: " << start << "\r" << flush;
 
-            SpiTransfer(commandSequence2, {}, dummyOutput, bytes);
+            vector<uint8_t> dummyInput;
+            SpiTransfer(commandSequence2, dummyInput, dummyOutput, bytes);
 
             // spin here until flash status bit 0 is clear
             fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
@@ -407,354 +410,6 @@ bool CNTV2AxiSpiFlash::Verify(const uint32_t address, const std::vector<uint8_t>
 uint32_t CNTV2AxiSpiFlash::Size()
 {
     return mSize;
-}
-
-bool CNTV2AxiSpiFlash::ProgramFile(const std::string& sourceFile, const uint32_t fileStartOffset,
-                                   const uint32_t address, const uint32_t maxBytes, bool verify)
-{
-    bool result = false;
-
-    if (maxBytes == 0)
-        return false;
-
-    if (NTV2DeviceOk() == false)
-        return false;
-
-    bool mcsFile = false;
-    if (sourceFile.rfind(".mcs") != string::npos)
-        mcsFile = true;
-
-    vector<uint8_t> inputData;
-
-    // get the file data
-    if (mVerbose)
-        cout << "Reading file ... \r" << flush;
-
-    if (mcsFile)
-    {
-        // read the mcs file
-        CNTV2MCSfile mcsFile;
-        mcsFile.Open(sourceFile);
-
-        if (mcsFile.isReady())
-        {
-            uint16_t partitionOffset = 0;
-
-            inputData.reserve(maxBytes);
-            mcsFile.GetPartition(inputData, fileStartOffset, partitionOffset, false);
-
-            if (inputData.size() > maxBytes)
-            {
-                inputData.resize(maxBytes);
-                cout << "had to clamp file" << endl;
-            }
-
-            // temp debug
-            ostringstream filename;
-            filename << "dump_of_mcs_bytes_0x" << hex << fileStartOffset << dec << ".txt";
-
-            ofstream ofs(filename.str(), ofstream::out|ofstream::binary);
-            if (ofs)
-            {
-                ofs.write((char*)&inputData[0], inputData.size());
-                ofs.close();
-                //return false;
-            }
-            //temp debug
-        }
-    }
-    else
-    {
-        // read the file
-        ifstream ifs(sourceFile, ifstream::in|ifstream::binary);
-        if (ifs)
-        {
-            ifs.seekg(0, ifs.end);
-            int fileLen = int(ifs.tellg());
-            int bytesToRead = fileLen - fileStartOffset;
-            if (bytesToRead < 0)
-            {
-                ifs.close();
-                return false;
-            }
-
-            ifs.seekg(fileStartOffset, ifs.beg);
-
-            if (int(maxBytes) < bytesToRead)
-            {
-                bytesToRead = maxBytes;
-            }
-
-            inputData.resize(bytesToRead);
-
-            ifs.read((char*)&inputData[0], inputData.size());
-            ifs.close();
-        }
-    }
-
-    if (mVerbose)
-        cout << "Reading file ... done\n\n" << flush;
-
-    if (inputData.empty() == false)
-    {
-        if (mVerbose)
-            cout << "Erasing flash ... \r" << flush;
-
-        Erase(address, uint32_t(inputData.size()));
-
-        if (mVerbose)
-            cout << "Erasing flash ... done\n\n" << flush;
-
-        if (mVerbose)
-            cout << "Writing flash ... \r" << flush;
-
-        Write(address, inputData, uint32_t(inputData.size()));
-
-        if (mVerbose)
-            cout << "Writing flash ... done\n\n" << flush;
-
-        if (mVerbose)
-            cout << "Verifying write ... \r" << flush;
-
-        if (verify)
-        {
-            vector<uint8_t> verifyData;
-            Read(address, verifyData, uint32_t(inputData.size()));
-
-            if (equal(inputData.begin(), inputData.end(), verifyData.begin()))
-            {
-                result = true;
-                if (mVerbose)
-                    cout << "Verifying write ... passed\n\n" << flush;
-            }
-            else
-            {
-                result = false;
-                if (mVerbose)
-                {
-                    pair<vector<uint8_t>::iterator, vector<uint8_t>::iterator> p;
-                    p = mismatch(inputData.begin(), inputData.end(), verifyData.begin());
-                    int64_t byteMismatchOffset = distance(inputData.begin(), p.first);
-                    cout << "Verifying write ... failed at byte " << byteMismatchOffset <<
-                            " expected: '" << hex << *p.first << "' but got: '" << hex << *p.second << "'\n\n" << flush;
-                }
-            }
-        }
-        else
-        {
-            result = true;
-        }
-    }
-
-    return result;
-}
-
-bool CNTV2AxiSpiFlash::DumpToFile(const std::string& outFile, const uint32_t flashStartOffset, const uint32_t maxBytes)
-{
-    bool result = false;
-
-    if (maxBytes == 0)
-        return false;
-
-    if (NTV2DeviceOk() == false)
-        return false;
-
-    // write the file
-    ofstream ofs(outFile, ofstream::out|ofstream::binary);
-    if (ofs)
-    {
-        vector<uint8_t> outputData;
-
-        // read data from flash
-        if (mVerbose)
-            cout << "Reading flash ...\r" << flush;
-
-        result = Read(flashStartOffset, outputData, maxBytes);
-
-        if (result)
-        {
-            if (mVerbose)
-                cout << "Reading flash ...done\n" << flush;
-
-            ofs.write((char*)&outputData[0], outputData.size());
-        }
-        else
-        {
-            if (mVerbose)
-                cout << "Reading flash ...failed\n" << flush;
-        }
-
-        ofs.close();
-    }
-
-    return result;
-}
-
-struct MacAddr
-{
-    uint8_t mac[6];
-};
-
-static bool makeMACsFromSerial(const std::string& serial, MacAddr *pMac1, MacAddr *pMac2)
-{
-    if (serial.find("ENG") != string::npos)
-    {
-        // ENG IoIp - if the serial starts with ENG
-
-        // 0000 to 0127 (qty 128) maps to 1B00 to 1BFF (256 addresses)
-        // First 4 bytes are: 00:0c:17:88 and next 2 bytes are computed
-        // as mac1= (0x1B00) + (serNum * 2) and
-        // mac2 = mac1 + 1
-        int serNum = 0;
-        if (sscanf(&serial[3], "%d", &serNum) != 1)
-            return false;
-
-        if (serNum > 127)
-        {
-            cout << "WARNING: Outside serial numbers ENG000 to ENG127\n";
-            return false;
-        }
-
-        int mac16LSBs = (0x1B00) + (serNum * 2);
-
-        pMac2->mac[0] = pMac1->mac[0] = 0x0;
-        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
-        pMac2->mac[2] = pMac1->mac[2] = 0x17;
-        pMac2->mac[3] = pMac1->mac[3] = 0x88;
-        pMac2->mac[4] = pMac1->mac[4] = mac16LSBs >> 8;
-        pMac2->mac[5] = pMac1->mac[5] = mac16LSBs & 0xff;
-        // The above byte will always be same for the second mac
-        // based on above allocation
-        pMac2->mac[5] = pMac1->mac[5] + 1;
-        return true;
-    }
-    else if (serial.find("6XT0") != string::npos)
-    {
-        // IoIp - if the serial starts with 6XT0
-
-        // 0250 to 8441 (qty 8192) maps to A000 to DFFF (16384 addresses)
-        // First 4 bytes are: 00:0c:17:48 and next 2 bytes are computed
-        // as mac1= (0xA000) + ((serNum - 250) * 2) and
-        // mac2 = mac1 + 1
-        int serNum = 0;
-        if (sscanf(&serial[4], "%d", &serNum) != 1)
-            return false;
-
-        if ((serNum < 250) || (serNum > 8441))
-        {
-            cout << "WARNING: Outside serial numbers 6XT000250 to 6XT008441\n";
-            return false;
-        }
-
-        int mac16LSBs = (0xA000) + ((serNum - 250) * 2);
-
-        pMac2->mac[0] = pMac1->mac[0] = 0x0;
-        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
-        pMac2->mac[2] = pMac1->mac[2] = 0x17;
-        pMac2->mac[3] = pMac1->mac[3] = 0x48;
-        pMac2->mac[4] = pMac1->mac[4] = mac16LSBs >> 8;
-        pMac2->mac[5] = pMac1->mac[5] = mac16LSBs & 0xff;
-        // The above byte will always be same for the second mac
-        // based on above allocation
-        pMac2->mac[5] = pMac1->mac[5] + 1;
-        return true;
-    }
-    else if (serial.find("6XT2") != string::npos)
-    {
-        // DNxIp - if the serial starts with 6XT2
-
-        // 0250 to 8441 (qty 8192) maps to E000 to 1FFF (16384 addresses)
-        // First 3 bytes are: 00:0c:17 and next 3 bytes are computed
-        // as mac1= (0x48E000) + ((serNum - 250) * 2) and
-        // mac2 = mac1 + 1
-        int serNum = 0;
-        if (sscanf(&serial[4], "%d", &serNum) != 1)
-            return false;
-
-        if ((serNum < 250) || (serNum > 8441))
-        {
-            cout << "WARNING: Outside serial numbers 6XT200250 to 6XT208441\n";
-            return false;
-        }
-
-        int mac24LSBs = (0x48E000) + ((serNum - 250) * 2);
-        pMac2->mac[0] = pMac1->mac[0] = 0x0;
-        pMac2->mac[1] = pMac1->mac[1] = 0x0c;
-        pMac2->mac[2] = pMac1->mac[2] = 0x17;
-        pMac2->mac[3] = pMac1->mac[3] = (mac24LSBs & 0xFF0000) >> 16;
-        pMac2->mac[4] = pMac1->mac[4] = (mac24LSBs & 0x00FF00) >>  8;
-        pMac2->mac[5] = pMac1->mac[5] = (mac24LSBs & 0x0000FF) >>  0;
-        // The above byte will always be same for the second mac
-        // based on above allocation
-        pMac2->mac[5] = pMac1->mac[5] + 1;
-        return true;
-    }
-    else
-    {
-        cout << "Unrecognized or unspecified serial number '" << serial << "'\n";
-    }
-
-    return false;
-}
-
-bool CNTV2AxiSpiFlash::WriteSerialAndMac(const std::string& serial, const uint32_t macOffset, const uint32_t serialOffset)
-{
-    bool result = false;
-
-    if (serial.length() < 6)
-    {
-        if (mVerbose)
-            cout << "Could not set the Serial and MAC addresses, passed serial was under 6 characters" << endl;
-        return false;
-    }
-
-    if (NTV2DeviceOk() == false)
-        return false;
-
-    MacAddr mac1, mac2;
-    result = makeMACsFromSerial(serial, &mac1, &mac2);
-    if (result)
-    {
-        // write MAC addresses
-        vector<uint8_t> macBytes;
-
-        macBytes.push_back(mac1.mac[3]);
-        macBytes.push_back(mac1.mac[2]);
-        macBytes.push_back(mac1.mac[1]);
-        macBytes.push_back(mac1.mac[0]);
-        macBytes.push_back(0);
-        macBytes.push_back(0);
-        macBytes.push_back(mac1.mac[5]);
-        macBytes.push_back(mac1.mac[4]);
-
-        macBytes.push_back(mac2.mac[3]);
-        macBytes.push_back(mac2.mac[2]);
-        macBytes.push_back(mac2.mac[1]);
-        macBytes.push_back(mac2.mac[0]);
-        macBytes.push_back(0);
-        macBytes.push_back(0);
-        macBytes.push_back(mac2.mac[5]);
-        macBytes.push_back(mac2.mac[4]);
-
-        Erase(macOffset, (uint32_t)macBytes.size());
-        Write(macOffset, macBytes, (uint32_t)macBytes.size());
-
-        // write serial number
-        vector<uint8_t> serialBytes;
-        for(int i=0;i<9;i++)
-        {
-            if (i < serial.size())
-                serialBytes.push_back(serial.at(i));
-            else
-                break;
-        }
-        serialBytes.push_back(0);
-
-        Erase(serialOffset, (uint32_t)serialBytes.size());
-        Write(serialOffset, serialBytes, (uint32_t)serialBytes.size());
-    }
-
-    return result;
 }
 
 bool CNTV2AxiSpiFlash::NTV2DeviceOk()
@@ -848,8 +503,9 @@ bool CNTV2AxiSpiFlash::FlashDeviceInfo(uint8_t& manufactureID, uint8_t& memInerf
     vector<uint8_t> commandSequence;
     commandSequence.push_back(CYPRESS_FLASH_READ_JEDEC_ID_COMMAND);
 
+    vector<uint8_t> dummyInput;
     vector<uint8_t> resultData;
-    bool result = SpiTransfer(commandSequence, {}, resultData, 6);
+    bool result = SpiTransfer(commandSequence, dummyInput, resultData, 6);
     if (result && resultData.size() == 6)
     {
         manufactureID      = resultData.at(0);
@@ -868,8 +524,9 @@ bool CNTV2AxiSpiFlash::FlashReadConfig(uint8_t& configValue)
     vector<uint8_t> commandSequence;
     commandSequence.push_back(CYPRESS_FLASH_READ_CONFIG_COMMAND);
 
+    vector<uint8_t> dummyInput;
     vector<uint8_t> resultData;
-    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    bool result = SpiTransfer(commandSequence, dummyInput, resultData, 1);
     if (result && resultData.size() > 0)
     {
         configValue = resultData.at(0);
@@ -882,8 +539,9 @@ bool CNTV2AxiSpiFlash::FlashReadStatus(uint8_t& statusValue)
     vector<uint8_t> commandSequence;
     commandSequence.push_back(CYPRESS_FLASH_READ_STATUS_COMMAND);
 
+    vector<uint8_t> dummyInput;
     vector<uint8_t> resultData;
-    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    bool result = SpiTransfer(commandSequence, dummyInput, resultData, 1);
     if (result && resultData.size() > 0)
     {
         statusValue = resultData.at(0);
@@ -896,8 +554,9 @@ bool CNTV2AxiSpiFlash::FlashReadBankAddress(uint8_t& bankAddressVal)
     vector<uint8_t> commandSequence;
     commandSequence.push_back(CYPRESS_FLASH_READBANK_COMMAND);
 
+    vector<uint8_t> dummyInput;
     vector<uint8_t> resultData;
-    bool result = SpiTransfer(commandSequence, {}, resultData, 1);
+    bool result = SpiTransfer(commandSequence, dummyInput, resultData, 1);
     if (result && resultData.size() > 0)
     {
         bankAddressVal = resultData.at(0);
