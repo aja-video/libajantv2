@@ -33,8 +33,8 @@ bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<u
         if (verbose)
         {
             pair<vector<uint8_t>::const_iterator, vector<uint8_t>::const_iterator> p;
-            p = mismatch(dataWritten.cbegin(), dataWritten.cend(), dataRead.cbegin());
-            int64_t byteMismatchOffset = distance(dataWritten.cbegin(), p.first);
+            p = mismatch(dataWritten.begin(), dataWritten.end(), dataRead.begin());
+            int64_t byteMismatchOffset = distance(dataWritten.begin(), p.first);
             cout << "Verifying write ... failed at byte " << byteMismatchOffset <<
                     " expected: '" << hex << *p.first << "' but got: '" << hex << *p.second << "'\n\n" << flush;
         }
