@@ -17,6 +17,7 @@
 #include <iostream>
 #include "ntv2debug.h"
 #include "ntv2mcsfile.h"
+#include "ntv2spiinterface.h"
 
 #if defined(AJALinux) || defined(AJAMac)
 #include <netinet/in.h>	// htons and friends
@@ -254,6 +255,7 @@ public:
 		READBANKSELECT_COMMAND=0x16
 	} _FLASH_STUFF ;
 
+    CNTV2SpiFlash*   _spiFlash;
 };
 
 #endif	//	NTV2KONAFLASHPROGRAM_H
