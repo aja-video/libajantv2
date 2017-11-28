@@ -33,6 +33,13 @@
 #include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
+#if defined (AJALinux) || defined (AJAMac)
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
+
 
 //-------------------------------------------------------------------------------------------------------
 //	static accessors
@@ -1908,6 +1915,329 @@ NTV2FrameRate DeviceServices::HalfFrameRate(NTV2FrameRate rate)
 
 // MARK: -
 
+// IP common support routines
+
+//-------------------------------------------------------------------------------------------------------
+//	Support Routines
+//-------------------------------------------------------------------------------------------------------
+void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
+{
+    string  ip,sub,gate;
+    struct  in_addr addr;
+    
+    switch (port)
+    {
+        case SFP_BOTTOM:
+            addr.s_addr = mEth1.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth1.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
+        case SFP_TOP:
+        default:
+            addr.s_addr = mEth0.ipc_ip;
+            ip = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_subnet;
+            sub = inet_ntoa(addr);
+            addr.s_addr = mEth0.ipc_gateway;
+            gate = inet_ntoa(addr);
+            break;
+    }
+    
+    if (config->SetNetworkConfiguration(port,ip,sub,gate) == true)
+    {
+        printf("SetNetworkConfiguration port=%d OK\n",(int)port);
+        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+    }
+    else
+    {
+        printf("SetNetworkConfiguration port=%d ERROR %s\n",(int)port, config->getLastError().c_str());
+        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config->getLastErrorCode());
+    }
+}
+
+void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7)
+{
+    rx_2022_channel chan;
+    struct in_addr addr;
+    
+    // Always enable link A only enable link B if 2022_7 enabled
+    chan.linkAEnable	= true;
+    chan.linkBEnable	= is2022_7;
+    
+    switch ((int)channel)
+    {
+        case NTV2_CHANNEL2:
+            addr.s_addr                 = mRx2022Config2.rxc_primarySourceIp;
+            chan.primarySourceIP        = inet_ntoa(addr);
+            addr.s_addr                 = mRx2022Config2.rxc_primaryDestIp;
+            chan.primaryDestIP          = inet_ntoa(addr);;
+            chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch & 0x7fffffff;
+            chan.primarySourcePort      = mRx2022Config2.rxc_primarySourcePort;
+            chan.primaryDestPort        = mRx2022Config2.rxc_primaryDestPort;
+            chan.primaryVlan            = mRx2022Config2.rxc_primaryVlan;
+            
+            addr.s_addr                 = mRx2022Config2.rxc_secondarySourceIp;
+            chan.secondarySourceIP      = inet_ntoa(addr);
+            addr.s_addr                 = mRx2022Config2.rxc_secondaryDestIp;
+            chan.secondaryDestIP        = inet_ntoa(addr);;
+            chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch & 0x7fffffff;
+            chan.secondarySourcePort    = mRx2022Config2.rxc_secondarySourcePort;
+            chan.secondaryDestPort      = mRx2022Config2.rxc_secondaryDestPort;
+            chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
+            
+            chan.ssrc					= mRx2022Config2.rxc_ssrc;
+            chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
+            break;
+        default:
+        case NTV2_CHANNEL1:
+            addr.s_addr                 = mRx2022Config1.rxc_primarySourceIp;
+            chan.primarySourceIP        = inet_ntoa(addr);
+            addr.s_addr                 = mRx2022Config1.rxc_primaryDestIp;
+            chan.primaryDestIP          = inet_ntoa(addr);;
+            chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch  & 0x7fffffff;
+            chan.primarySourcePort      = mRx2022Config1.rxc_primarySourcePort;
+            chan.primaryDestPort        = mRx2022Config1.rxc_primaryDestPort;
+            chan.primaryVlan            = mRx2022Config1.rxc_primaryVlan;
+            
+            addr.s_addr                 = mRx2022Config1.rxc_secondarySourceIp;
+            chan.secondarySourceIP      = inet_ntoa(addr);
+            addr.s_addr                 = mRx2022Config1.rxc_secondaryDestIp;
+            chan.secondaryDestIP        = inet_ntoa(addr);;
+            chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch & 0x7fffffff;
+            chan.secondarySourcePort    = mRx2022Config1.rxc_secondarySourcePort;
+            chan.secondaryDestPort      = mRx2022Config1.rxc_secondaryDestPort;
+            chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
+            
+            chan.ssrc					= mRx2022Config1.rxc_ssrc;
+            chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
+            break;
+    }
+    
+    if (config->SetRxChannelConfiguration(channel,chan) == true)
+    {
+        printf("setRxConfig chn=%d OK\n",(int)channel);
+        SetIPError(channel, kErrRxConfig, NTV2IpErrNone);
+    }
+    else
+    {
+        printf("setRxConfig chn=%d ERROR %s\n",(int)channel, config->getLastError().c_str());
+        SetIPError(channel, kErrRxConfig, config->getLastErrorCode());
+    }
+}
+
+void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7)
+{
+    tx_2022_channel chan;
+    struct in_addr addr;
+    
+    // Always enable link A only enable link B if 2022_7 enabled
+    chan.linkAEnable	= true;
+    chan.linkBEnable	= is2022_7;
+    
+    switch((int)channel)
+    {
+        case NTV2_CHANNEL4:
+            addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
+            chan.primaryRemoteIP        = inet_ntoa(addr);
+            chan.primaryLocalPort       = mTx2022Config4.txc_primaryLocalPort;
+            chan.primaryRemotePort      = mTx2022Config4.txc_primaryRemotePort;
+            
+            addr.s_addr                 = mTx2022Config4.txc_secondaryRemoteIp;
+            chan.secondaryRemoteIP      = inet_ntoa(addr);
+            chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
+            chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
+            break;
+        default:
+            
+        case NTV2_CHANNEL3:
+            addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
+            chan.primaryRemoteIP        = inet_ntoa(addr);
+            chan.primaryLocalPort       = mTx2022Config3.txc_primaryLocalPort;
+            chan.primaryRemotePort      = mTx2022Config3.txc_primaryRemotePort;
+            
+            addr.s_addr                 = mTx2022Config3.txc_secondaryRemoteIp;
+            chan.secondaryRemoteIP      = inet_ntoa(addr);
+            chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
+            chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
+            break;
+    }
+    
+    if (config->SetTxChannelConfiguration(channel,chan) == true)
+    {
+        printf("setTxConfig chn=%d OK\n",(int)channel);
+        SetIPError(channel, kErrTxConfig, NTV2IpErrNone);
+    }
+    else
+    {
+        printf("setTxConfig chn=%d ERROR %s\n",(int)channel, config->getLastError().c_str());
+        SetIPError(channel, kErrTxConfig, config->getLastErrorCode());
+    }
+}
+
+void DeviceServices::SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
+{
+    uint32_t errCode;
+    uint32_t value = val & 0xff;
+    uint32_t reg;
+    
+    switch( configType )
+    {
+        default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
+        case kErrTxConfig:
+            reg = kVRegKIPTxCfgError;
+            break;
+        case kErrRxConfig:
+            reg = kVRegKIPRxCfgError;
+            break;
+        case kErrJ2kEncoderConfig:
+            reg = kVRegKIPEncCfgError;
+            break;
+        case kErrJ2kDecoderConfig:
+            reg = kVRegKIPDecCfgError;
+            break;
+    }
+    
+    mCard->ReadRegister(reg, &errCode);
+    
+    switch( channel )
+    {
+        default:
+        case NTV2_CHANNEL1:
+            errCode = (errCode & 0xffffff00) | value;
+            break;
+            
+        case NTV2_CHANNEL2:
+            errCode = (errCode & 0xffff00ff) | (value << 8);
+            break;
+            
+        case NTV2_CHANNEL3:
+            errCode = (errCode & 0xff00ffff) | (value << 16);
+            break;
+            
+        case NTV2_CHANNEL4:
+            errCode = (errCode & 0x00ffffff) | (value << 24);
+            break;
+    }
+    
+    mCard->WriteRegister(reg, errCode);
+}
+
+void DeviceServices::GetIPError(NTV2Channel channel, uint32_t configType, uint32_t & val)
+{
+    uint32_t errCode;
+    uint32_t reg;
+    
+    switch( configType )
+    {
+        default:
+        case kErrNetworkConfig:
+            reg = kVRegKIPNetCfgError;
+            break;
+        case kErrTxConfig:
+            reg = kVRegKIPTxCfgError;
+            break;
+        case kErrRxConfig:
+            reg = kVRegKIPRxCfgError;
+            break;
+        case kErrJ2kEncoderConfig:
+            reg = kVRegKIPEncCfgError;
+            break;
+        case kErrJ2kDecoderConfig:
+            reg = kVRegKIPDecCfgError;
+            break;
+    }
+    
+    mCard->ReadRegister(reg, &errCode);
+    
+    switch( channel )
+    {
+        default:
+        case NTV2_CHANNEL1:
+            errCode = errCode & 0xff;
+            break;
+            
+        case NTV2_CHANNEL2:
+            errCode = (errCode >> 8) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL3:
+            errCode = (errCode >> 16) & 0xff;
+            break;
+            
+        case NTV2_CHANNEL4:
+            errCode = (errCode >> 24) & 0xff;
+            break;
+    }
+    
+    val = errCode;
+}
+
+void DeviceServices::PrintRxConfig(rx_2022_channel chan)
+{
+    printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+    printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+    
+    printf("primarySourceIP			%s\n", chan.primarySourceIP.c_str());
+    printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
+    printf("primarySourcePort		%d\n", chan.primarySourcePort);
+    printf("primaryDestPort			%d\n", chan.primaryDestPort);
+    printf("primaryVlan				%d\n", chan.primaryVlan);
+    printf("primaryRxMatch			%d\n", chan.primaryRxMatch);
+    
+    printf("secondarySourceIP		%s\n", chan.secondarySourceIP.c_str());
+    printf("secondaryDestIP			%s\n", chan.secondaryDestIP.c_str());
+    printf("secondarySourcePort		%d\n", chan.secondarySourcePort);
+    printf("secondaryDestPort		%d\n", chan.secondaryDestPort);
+    printf("secondaryVlan			%d\n", chan.secondaryVlan);
+    printf("secondaryRxMatch		%d\n\n", chan.secondaryRxMatch);
+}
+
+void DeviceServices::PrintTxConfig(tx_2022_channel chan)
+{
+    printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
+    printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+    
+    printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
+    printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
+    printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
+    
+    printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
+    printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
+    printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
+}
+
+void DeviceServices::PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
+{
+    printf("videoFormat	   %6d%6d\n", modelConfig.videoFormat, encoderConfig.videoFormat);
+    printf("ullMode		   %6d%6d\n", modelConfig.ullMode, encoderConfig.ullMode);
+    printf("bitDepth	   %6d%6d\n", modelConfig.bitDepth, encoderConfig.bitDepth);
+    printf("chromaSubsamp  %6d%6d\n", modelConfig.chromaSubsamp, encoderConfig.chromaSubsamp);
+    printf("mbps		   %6d%6d\n", modelConfig.mbps, encoderConfig.mbps);
+    printf("audioChannels  %6d%6d\n", modelConfig.audioChannels, encoderConfig.audioChannels);
+    printf("streamType	   %6d%6d\n", modelConfig.streamType, encoderConfig.streamType);
+    printf("pmtPid		   %6d%6d\n", modelConfig.pmtPid, encoderConfig.pmtPid);
+    printf("videoPid	   %6d%6d\n", modelConfig.videoPid, encoderConfig.videoPid);
+    printf("pcrPid		   %6d%6d\n", modelConfig.pcrPid, encoderConfig.pcrPid);
+    printf("audio1Pid	   %6d%6d\n\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
+}
+
+void DeviceServices::PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
+{
+    printf("selectionMode  %6d%6d\n", modelConfig.selectionMode, encoderConfig.selectionMode);
+    printf("programNumber  %6d%6d\n", modelConfig.programNumber, encoderConfig.programNumber);
+    printf("programPID	   %6d%6d\n", modelConfig.programPID, encoderConfig.programPID);
+    printf("audioNumber    %6d%6d\n\n", modelConfig.audioNumber, encoderConfig.audioNumber);
+}
+
+
+// MARK: -
+
 // based on the user ColorSpace mode and the current video format,
 // set the ColorSpaceMatrixSelect
 bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
@@ -3251,4 +3581,3 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 		mCard->WriteRegister(kRegAud1Control, 1, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
 
 }
-
