@@ -352,23 +352,23 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
 	// Figure out what our input format is based on what is selected 
 	switch (mVirtualInputSelect)
 	{
-	case NTV2_Input1Select:
-	case NTV2_DualLinkInputSelect:
-	case NTV2_DualLink2xSdi4k:
-	case NTV2_DualLink4xSdi4k:
-		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput1FormatSelect;
-		break;
+        case NTV2_Input1Select:
+        case NTV2_DualLinkInputSelect:
+        case NTV2_DualLink2xSdi4k:
+        case NTV2_DualLink4xSdi4k:
+            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+            if (inputFormatSelect)
+                *inputFormatSelect = mSDIInput1FormatSelect;
+            break;
 
-	case NTV2_Input2Select:
-		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput2FormatSelect;
-		break;
+        case NTV2_Input2Select:
+            inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
+            if (inputFormatSelect)
+                *inputFormatSelect = mSDIInput2FormatSelect;
+            break;
 
-	default:
-		break;
+        default:
+            break;
 	}
 
 	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
