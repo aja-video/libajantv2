@@ -661,7 +661,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
         }
     }
 
-    if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID))
+    if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID) || ::NTV2DeviceHasSPIv5(_boardID))
 	{
 		WriteRegister(kRegXenaxFlashAddress, (ULWord)0);
 		WriteRegister(kRegXenaxFlashControlStatus, 0x17);
