@@ -1361,8 +1361,7 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
         ProgramSOC(verify);
 
         // now the main FPGA part
-        if (_flashID != MAIN_FLASHBLOCK && _flashID != FAILSAFE_FLASHBLOCK)
-            throw "Invalid block number";
+        _flashID = MAIN_FLASHBLOCK;
 
         vector<uint8_t> fpgaData;
         uint16_t fpgaPartitionOffset = 0;
