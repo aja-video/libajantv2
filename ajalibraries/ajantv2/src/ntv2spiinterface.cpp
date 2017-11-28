@@ -17,6 +17,32 @@
 
 using namespace std;
 
+bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<uint8_t> &dataRead, bool verbose = false)
+{
+    bool result = false;
+
+    if (equal(dataWritten.begin(), dataWritten.end(), dataRead.begin()))
+    {
+        result = true;
+        if (verbose)
+            cout << "Verifying write ... passed\n\n" << flush;
+    }
+    else
+    {
+        result = false;
+        if (verbose)
+        {
+            pair<vector<uint8_t>::const_iterator, vector<uint8_t>::const_iterator> p;
+            p = mismatch(dataWritten.cbegin(), dataWritten.cend(), dataRead.cbegin());
+            int64_t byteMismatchOffset = distance(dataWritten.cbegin(), p.first);
+            cout << "Verifying write ... failed at byte " << byteMismatchOffset <<
+                    " expected: '" << hex << *p.first << "' but got: '" << hex << *p.second << "'\n\n" << flush;
+        }
+    }
+
+    return result;
+}
+
 // Flash commands
 const int64_t spi_timeout = 10000;
 
@@ -167,6 +193,16 @@ CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
     {
         mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, 0x0);
     }
+}
+
+void CNTV2AxiSpiFlash::SetVerbosity(bool verbose)
+{
+    mVerbose = verbose;
+}
+
+bool CNTV2AxiSpiFlash::GetVerbosity()
+{
+    return mVerbose;
 }
 
 bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
@@ -364,6 +400,17 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
     }
 
     return true;
+}
+
+bool CNTV2AxiSpiFlash::Verify(const uint32_t address, const std::vector<uint8_t>& dataWritten)
+{
+    vector<uint8_t> verifyData;
+    bool readGood = Read(address, verifyData, uint32_t(dataWritten.size()));
+
+    if (readGood == false)
+        return false;
+
+    return verify_vectors(dataWritten, verifyData, mVerbose);
 }
 
 uint32_t CNTV2AxiSpiFlash::Size()
