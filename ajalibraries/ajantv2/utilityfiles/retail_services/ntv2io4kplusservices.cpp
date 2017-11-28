@@ -2248,7 +2248,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	}
 
 
-	// 425 mux
+	// 425 Mux
 	if (b4K && b2pi)
 	{
 		if (bFb1RGB)
