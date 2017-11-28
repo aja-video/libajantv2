@@ -19,6 +19,7 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
+const uint32_t axiSpiMACFlashOffset = 0x01F80000;
 
 using namespace std;
 
@@ -1034,51 +1035,92 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 	if(!IsKonaIPDevice())
 		return false;
 
-	uint32_t baseAddress = _macOffset;
+    if (mac1 == NULL || mac2 == NULL)
+        return false;
 
-	EraseBlock(MAC_FLASHBLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> macData;
+        macData.push_back(mac1->mac[3]);
+        macData.push_back(mac1->mac[2]);
+        macData.push_back(mac1->mac[1]);
+        macData.push_back(mac1->mac[0]);
+        macData.push_back(0);
+        macData.push_back(0);
+        macData.push_back(mac1->mac[5]);
+        macData.push_back(mac1->mac[4]);
 
-	SetFlashBlockIDBank(MAC_FLASHBLOCK);
+        macData.push_back(mac2->mac[3]);
+        macData.push_back(mac2->mac[2]);
+        macData.push_back(mac2->mac[1]);
+        macData.push_back(mac2->mac[0]);
+        macData.push_back(0);
+        macData.push_back(0);
+        macData.push_back(mac2->mac[5]);
+        macData.push_back(mac2->mac[4]);
+
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        _spiFlash->Erase(axiSpiMACFlashOffset, uint32_t(macData.size()));
+        if (_spiFlash->Write(axiSpiMACFlashOffset, macData, uint32_t(macData.size())))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        uint32_t baseAddress = _macOffset;
+
+        EraseBlock(MAC_FLASHBLOCK);
+
+        SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
 
-	uint32_t lo = 0;
-	lo |= (mac1->mac[0] << 24) & 0xff000000;
-	lo |= (mac1->mac[1] << 16) & 0x00ff0000;
-	lo |= (mac1->mac[2] << 8)  & 0x0000ff00;
-	lo |=  mac1->mac[3]        & 0x000000ff;
+        uint32_t lo = 0;
+        lo |= (mac1->mac[0] << 24) & 0xff000000;
+        lo |= (mac1->mac[1] << 16) & 0x00ff0000;
+        lo |= (mac1->mac[2] << 8)  & 0x0000ff00;
+        lo |=  mac1->mac[3]        & 0x000000ff;
 
-	uint32_t hi = 0;
-	hi |= (mac1->mac[4] << 24) & 0xff000000;
-	hi |= (mac1->mac[5] << 16) & 0x00ff0000;
+        uint32_t hi = 0;
+        hi |= (mac1->mac[4] << 24) & 0xff000000;
+        hi |= (mac1->mac[5] << 16) & 0x00ff0000;
 
-	uint32_t lo2 = 0;
-	lo2 |= (mac2->mac[0] << 24) & 0xff000000;
-	lo2 |= (mac2->mac[1] << 16) & 0x00ff0000;
-	lo2 |= (mac2->mac[2] << 8)  & 0x0000ff00;
-	lo2 |=  mac2->mac[3]	    & 0x000000ff;
+        uint32_t lo2 = 0;
+        lo2 |= (mac2->mac[0] << 24) & 0xff000000;
+        lo2 |= (mac2->mac[1] << 16) & 0x00ff0000;
+        lo2 |= (mac2->mac[2] << 8)  & 0x0000ff00;
+        lo2 |=  mac2->mac[3]	    & 0x000000ff;
 
-	uint32_t hi2 = 0;
-	hi2 |= (mac2->mac[4] << 24) & 0xff000000;
-	hi2 |= (mac2->mac[5] << 16) & 0x00ff0000;
+        uint32_t hi2 = 0;
+        hi2 |= (mac2->mac[4] << 24) & 0xff000000;
+        hi2 |= (mac2->mac[5] << 16) & 0x00ff0000;
 
 
-	ProgramFlashValue(baseAddress, lo);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, hi);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, lo2);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, hi2);
+        ProgramFlashValue(baseAddress, lo);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, hi);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, lo2);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, hi2);
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x9C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
 
-	SetBankSelect(BANK_0);
+        SetBankSelect(BANK_0);
 
-	return true;
+        return true;
+    }
 }
 
 bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
@@ -1093,11 +1135,10 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 
     if (_spiFlash)
     {
-        const uint32_t macOffset = 0x01F80000;
         vector<uint8_t> macData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        if (_spiFlash->Read(macOffset, macData, 16))
+        if (_spiFlash->Read(axiSpiMACFlashOffset, macData, 16))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             if (macData.size() < 16)
@@ -1333,7 +1374,7 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
             _bitFileBuffer = NULL;
         }
 
-        _bitFileSize = fpgaData.size();
+        _bitFileSize = uint32_t(fpgaData.size());
 
         // +_256 for fastFlash Programming
         _bitFileBuffer = new unsigned char[_bitFileSize+512];
