@@ -242,6 +242,7 @@
     <ClCompile Include="..\src\ntv2rp188.cpp" />
     <ClCompile Include="..\src\ntv2rp215.cpp" />
     <ClCompile Include="..\src\ntv2signalrouter.cpp" />
+    <ClCompile Include="..\src\ntv2spiinterface.cpp" />
     <ClCompile Include="..\src\ntv2status.cpp" />
     <ClCompile Include="..\src\ntv2subscriptions.cpp" />
     <ClCompile Include="..\src\ntv2task.cpp" />
@@ -280,6 +281,7 @@
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
     <ClInclude Include="..\includes\ntv2formatdescriptor.h" />
     <ClInclude Include="..\includes\ntv2registerexpert.h" />
+    <ClInclude Include="..\includes\ntv2spiinterface.h" />
     <ClInclude Include="..\includes\ntv2verticalfilter.h" />
     <ClInclude Include="..\src\ntv2devicefeatures.hpp" />
     <ClInclude Include="..\includes\ntv2devicescanner.h" />
