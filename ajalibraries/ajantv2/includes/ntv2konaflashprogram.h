@@ -78,7 +78,7 @@ public:
 	bool			EraseChip (UWord chip = 0);
 	bool			CreateSRecord ();
 	bool			CreateEDIDIntelRecord ();
-	void			SetQuietMode ()		{_bQuiet = true;}
+    void			SetQuietMode ();
 	bool			VerifyFlash (FlashBlockID flashBlockNumber);
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);

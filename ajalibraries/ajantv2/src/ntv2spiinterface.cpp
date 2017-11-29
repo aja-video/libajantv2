@@ -138,6 +138,20 @@ uint32_t address_for_sector(uint32_t sectorSizeBytes, uint32_t sector)
     return address;
 }
 
+inline ProgramState programstate_for_address(uint32_t address, int mode)
+{
+    ProgramState ps;
+    switch(mode)
+    {
+        case 0: ps = (address < 0x100000) ? kProgramStateEraseBank3   : kProgramStateEraseBank4;   break;
+        case 1: ps = (address < 0x100000) ? kProgramStateProgramBank3 : kProgramStateProgramBank4; break;
+        case 2: ps = (address < 0x100000) ? kProgramStateVerifyBank3  : kProgramStateVerifyBank4;  break;
+        default: ps = kProgramStateFinished; break;
+    }
+
+    return ps;
+}
+
 CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
     : CNTV2SpiFlash(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
 {
@@ -185,17 +199,7 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
 {
 }
-/*
-void CNTV2AxiSpiFlash::SetVerbosity(bool verbose)
-{
-    mVerbose = verbose;
-}
 
-bool CNTV2AxiSpiFlash::GetVerbosity()
-{
-    return mVerbose;
-}
-*/
 bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
 {
     if (deviceId == DEVICE_ID_IOIP_2022 ||
@@ -212,11 +216,17 @@ bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
 bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, uint32_t maxBytes)
 {
     const uint32_t pageSize = 256;
+    ProgramState ps = programstate_for_address(address, 2);
 
     uint32_t pageAddress = address;
     uint32_t numPages = (uint32_t)ceil((double)maxBytes/(double)pageSize);
 
     uint32_t bytesLeftToTransfer = maxBytes;
+    uint32_t bytesTransfered = 0;
+    mDevice.WriteRegister(kVRegFlashState, ps);
+    mDevice.WriteRegister(kVRegFlashSize, bytesLeftToTransfer);
+    mDevice.WriteRegister(kVRegFlashStatus, 0);
+
     for(uint32_t p=0;p<numPages;p++)
     {
         vector<uint8_t> commandSequence;
@@ -235,6 +245,10 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
 
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
+
+        bytesTransfered += pageSize;
+        mDevice.WriteRegister(kVRegFlashState, ps);
+        mDevice.WriteRegister(kVRegFlashStatus, bytesTransfered);
     }
 
     if (mVerbose)
@@ -246,6 +260,7 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
 bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes)
 {
     const uint32_t pageSize = 256;
+    ProgramState ps = programstate_for_address(address, 1);
 
     uint32_t maxWrite = maxBytes;
     if (data.size() >= 0 && maxWrite > data.size())
@@ -255,6 +270,11 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
 
     uint32_t pageAddress = address;
     uint32_t numPages = (uint32_t)ceil((double)maxWrite/(double)pageSize);
+
+    uint32_t bytesTransfered = 0;
+    mDevice.WriteRegister(kVRegFlashState, ps);
+    mDevice.WriteRegister(kVRegFlashSize, maxWrite);
+    mDevice.WriteRegister(kVRegFlashStatus, 0);
     for(uint32_t p=0;p<numPages;p++)
     {
         // enable write
@@ -284,6 +304,10 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
         do { FlashReadStatus(fs); } while(fs & 0x1);
 
         pageAddress += pageSize;
+
+        bytesTransfered += pageSize;
+        mDevice.WriteRegister(kVRegFlashState, ps);
+        mDevice.WriteRegister(kVRegFlashStatus, bytesTransfered);
 
         // disable write
         SpiEnableWrite(false);
@@ -325,6 +349,8 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
     return true;
 #endif
 
+    ProgramState ps = programstate_for_address(address, 0);
+
     // enable write
     SpiEnableWrite(true);
 
@@ -362,6 +388,11 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
     // Handle the case of erase spanning sectors
     if (endSector > startSector)
     {
+        uint32_t numSectors = endSector-startSector;
+        mDevice.WriteRegister(kVRegFlashState, ps);
+        mDevice.WriteRegister(kVRegFlashSize, numSectors);
+        mDevice.WriteRegister(kVRegFlashStatus, 0);
+
         uint32_t start = startSector;
         while (start < endSector)
         {            
@@ -384,6 +415,9 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
 
             // spin here until flash status bit 0 is clear
             fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+
+            mDevice.WriteRegister(kVRegFlashState, ps);
+            mDevice.WriteRegister(kVRegFlashStatus, start);
 
             // disable write
             SpiEnableWrite(false);

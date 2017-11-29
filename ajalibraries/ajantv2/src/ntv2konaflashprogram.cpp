@@ -92,6 +92,15 @@ CNTV2KonaFlashProgram::~CNTV2KonaFlashProgram()
         delete _spiFlash;
 }
 
+void CNTV2KonaFlashProgram::SetQuietMode()
+{
+    _bQuiet = true;
+    if (_spiFlash)
+    {
+        _spiFlash->SetVerbosity(false);
+    }
+}
+
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
 {
 	if (!Open (boardNumber, false, boardType))
@@ -447,6 +456,16 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 	if (IsOpen ())
 	{
 		uint32_t baseAddress = GetBaseAddressForProgramming(_flashID);
+
+        switch ( _flashID )
+        {
+            case MAIN_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock); break;
+            case FAILSAFE_FLASHBLOCK:   WriteRegister(kVRegFlashState, kProgramStateEraseFailSafeFlashBlock); break;
+            case SOC1_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseBank3); break;
+            case SOC2_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseBank4); break;
+            default: break;
+        }
+
 		EraseBlock(_flashID);
 
 		SetFlashBlockIDBank(_flashID);
@@ -454,6 +473,8 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 		uint32_t* bitFilePtr = (uint32_t*)_bitFileBuffer;
 		uint32_t twoFixtysixBlockSizeCount = (_bitFileSize+256)/256;
 		int32_t percentComplete = 0;
+        WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
+        WriteRegister(kVRegFlashSize, twoFixtysixBlockSizeCount);
 		for ( uint32_t count = 0; count < twoFixtysixBlockSizeCount; count++, baseAddress += 256, bitFilePtr += 64 )
 		{
 			if (NTV2DeviceHasSPIv5(_boardID) && baseAddress == _bankSize)
@@ -472,6 +493,8 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 			}
 			FastProgramFlash256(baseAddress, bitFilePtr);
 			percentComplete = (count*100)/twoFixtysixBlockSizeCount;
+
+            WriteRegister(kVRegFlashStatus, count);
 			if(!_bQuiet)
 			{
 				printf("Program status: %i%%\r", percentComplete);
@@ -583,6 +606,7 @@ void CNTV2KonaFlashProgram::EraseBlock(FlashBlockID blockID)
 			}
 			EraseSector(baseAddress + ((sectorCount - (_numSectorsMain* bankCount)) * _sectorSize));
 			percentComplete = (sectorCount*100)/numSectors;
+            WriteRegister(kVRegFlashStatus, sectorCount);
 			if(!_bQuiet)
 			{
 				printf("Erase status: %i%%\r", percentComplete);
@@ -1357,14 +1381,12 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
             return false;
         }
 
-        // handle the SOC part
-        ProgramSOC(verify);
-
         // now the main FPGA part
         _flashID = MAIN_FLASHBLOCK;
 
         vector<uint8_t> fpgaData;
         uint16_t fpgaPartitionOffset = 0;
+
         _mcsFile.GetPartition(fpgaData, 0x0000, fpgaPartitionOffset, false);
 
         if ( _bitFileBuffer != NULL )
@@ -1385,6 +1407,9 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
             throw "Can't Parse Header";
 
         Program(verify);
+
+        // handle the SOC part
+        ProgramSOC(verify);
 
         return true;
     }
@@ -1653,7 +1678,9 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
 
         // verify uboot
         if (verify)
+        {
             _spiFlash->Verify(ubootFlashOffset, ubootData);
+        }
 
         // erase image
         _spiFlash->Erase(imageFlashOffset, imageSize);
@@ -1663,7 +1690,9 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
 
         // verify image
         if (verify)
+        {
             _spiFlash->Verify(imageFlashOffset, imageData);
+        }
 
         return true;
     }
