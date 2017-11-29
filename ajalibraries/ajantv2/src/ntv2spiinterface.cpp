@@ -263,7 +263,7 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
     ProgramState ps = programstate_for_address(address, 1);
 
     uint32_t maxWrite = maxBytes;
-    if (data.size() >= 0 && maxWrite > data.size())
+    if (maxWrite > data.size())
         maxWrite = (uint32_t)data.size();
 
     std::vector<uint8_t> dummyOutput;
@@ -285,7 +285,7 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
         FlashFixAddress(pageAddress, commandSequence);
 
         vector<uint8_t> pageData;
-        for(int i=0;i<pageSize;i++)
+        for(unsigned i=0;i<pageSize;i++)
         {
             uint32_t offset = (p*pageSize)+i;
             if (offset >= data.size())
@@ -642,7 +642,7 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 
     // issue the command & arguments
     uint32_t dummyVal = 0;
-    for(int i=0;i<commandSequence.size();++i)
+    for(unsigned i=0;i<commandSequence.size();++i)
     {
         mDevice.WriteRegister(mSpiWriteReg, (ULWord)commandSequence.at(i));
         if (commandSequence.size() > 1)
@@ -665,7 +665,7 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
         // a write command
 
         uint32_t maxWrite = maxByteCutoff;
-        if (inputData.size() >= 0 && maxWrite > inputData.size())
+        if (maxWrite > inputData.size())
             maxWrite = (uint32_t)inputData.size();
 
         for(uint32_t i=0;i<maxWrite;++i)
