@@ -450,8 +450,8 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
         case DEVICE_ID_TTAP:            return "t_tap_top";			//	t_tap_top.ncd
         case DEVICE_ID_CORVIDHBR:       return "corvid_hb_r";		//	corvidhb-r
         case DEVICE_ID_IO4KPLUS:        return "io4kp";
-        case DEVICE_ID_IOIP_2022:       return "ioip2022";
-        case DEVICE_ID_IOIP_2110:       return "ioip2110";
+        case DEVICE_ID_IOIP_2022:       return "ioip_s2022";
+        case DEVICE_ID_IOIP_2110:       return "ioip_s2110";
         default:
 			break;
 	}
