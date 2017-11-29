@@ -3430,6 +3430,11 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		// set color space bits as specified
 		switch (mHDMIOutColorSpaceModeStatus)
 		{
+			case kHDMIOutCSCYCbCr8bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+				break;
+		
 			case kHDMIOutCSCYCbCr10bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
