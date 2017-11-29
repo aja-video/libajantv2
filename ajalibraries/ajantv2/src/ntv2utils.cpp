@@ -7515,8 +7515,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHI:							return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
-            case DEVICE_ID_IOIP_2022:					return "ioip_2022.mcs";
-            case DEVICE_ID_IOIP_2110:					return "ioip_2110.mcs";
+            case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
+            case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_4TX_2110:             return "kip_s2110.mcs";
             default:									return "";
 		}
