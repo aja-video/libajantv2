@@ -19,14 +19,20 @@
 
 IoIP2022Services::IoIP2022Services()
 {
+    config = NULL;
 }
 
 IoIP2022Services::~IoIP2022Services()
 {
+    if (config != NULL)
+    {
+        delete config;
+        config = NULL;
+    }
+
 	for(uint32_t i = 0; i < 8; i++)
 		mCard->EnableChannel((NTV2Channel)i);
 }
-
 
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
