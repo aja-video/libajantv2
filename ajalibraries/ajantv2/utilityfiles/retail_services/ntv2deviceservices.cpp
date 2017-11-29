@@ -2105,6 +2105,62 @@ bool DeviceServices::IsValidConfig(const tx2022Config & virtual_config, bool is2
     return true;
 }
 
+bool DeviceServices::NotEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config, bool is2022_7)
+{
+    uint32_t addr;
+    
+    if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
+    if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
+    if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
+    
+    addr = inet_addr(hw_channel.primaryDestIP.c_str());
+    if (virtual_config.rxc_primaryDestIp != addr) return true;
+    
+    addr = inet_addr(hw_channel.primarySourceIP.c_str());
+    if (virtual_config.rxc_primarySourceIp != addr) return true;
+    
+    if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
+        if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
+        if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
+        
+        addr = inet_addr(hw_channel.secondaryDestIP.c_str());
+        if (virtual_config.rxc_secondaryDestIp != addr) return true;
+        
+        addr = inet_addr(hw_channel.secondarySourceIP.c_str());
+        if (virtual_config.rxc_secondarySourceIp != addr) return true;
+    }
+    
+    return false;
+}
+
+bool DeviceServices::NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7)
+{
+    uint32_t addr;
+    
+    if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
+    if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
+    
+    addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
+    if (virtual_config.txc_primaryRemoteIp != addr) return true;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.txc_secondaryLocalPort != hw_channel.secondaryLocalPort)  return true;
+        if (virtual_config.txc_secondaryRemotePort != hw_channel.secondaryRemotePort) return true;
+        
+        addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
+        if (virtual_config.txc_secondaryRemoteIp != addr) return true;
+    }
+    
+    return false;
+}
+
 void DeviceServices::SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
 {
     uint32_t errCode;
