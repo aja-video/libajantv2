@@ -26,7 +26,7 @@ KonaIPJ2kServices::KonaIPJ2kServices()
 
  KonaIPJ2kServices::~KonaIPJ2kServices()
  {
-     if (config)
+     if (config != NULL)
      {
          delete config;
          config = NULL;

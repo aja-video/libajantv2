@@ -27,7 +27,7 @@ KonaIP22Services::KonaIP22Services()
 
  KonaIP22Services::~KonaIP22Services()
  {
-     if (config)
+     if (config != NULL)
      {
          delete config;
          config = NULL;
