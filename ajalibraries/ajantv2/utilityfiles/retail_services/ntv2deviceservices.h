@@ -72,6 +72,19 @@ public:
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
 	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
+    // common IP support routines
+    virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
+    virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
+    virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
+    virtual bool IsValidConfig(const rx2022Config & virtual_config, bool is2022_7);
+    virtual bool IsValidConfig(const tx2022Config & virtual_config, bool is2022_7);
+    virtual void SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
+    virtual void GetIPError(NTV2Channel channel, uint32_t configType, uint32_t & val);
+    virtual void PrintRxConfig(rx_2022_channel chan);
+    virtual void PrintTxConfig(tx_2022_channel chan);
+    virtual void PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
+    virtual void PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig);
+
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
 	virtual bool SetVideoADCMode(NTV2LSVideoADCMode value);

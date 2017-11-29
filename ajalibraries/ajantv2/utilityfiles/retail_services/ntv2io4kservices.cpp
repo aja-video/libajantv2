@@ -38,71 +38,74 @@ void Io4KServices::UpdateAutoState (void)
 //			which currently is videoformat of ch1-framebuffer
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat Io4KServices::GetSelectedInputVideoFormat(
-                                                              NTV2VideoFormat fbVideoFormat,
-                                                              NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2VideoFormat fbVideoFormat,
+											NTV2SDIInputFormatSelect* inputFormatSelect)
 {
     bool levelBInput;
     bool levelbtoaConvert;
-    NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-    if (inputFormatSelect)
-        *inputFormatSelect = NTV2_YUVSelect;
-    
-    // Figure out what our input format is based on what is selected
+	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
+	if (inputFormatSelect)
+		*inputFormatSelect = NTV2_YUVSelect;
+	
+	// Figure out what our input format is based on what is selected
     switch (mVirtualInputSelect)
     {
-        case NTV2_Input1Select:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            
-            // See if we need to translate this from a level B format to level A
-            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, &levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
-            
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1FormatSelect;
-            break;
-            
-        case NTV2_DualLinkInputSelect:
-        case NTV2_DualLink4xSdi4k:
-        case NTV2_DualLink2xSdi4k:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1FormatSelect;
-            break;
-        case NTV2_Input2Select:
-            inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-            
-            // See if we need to translate this from a level B format to level A
-            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, &levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
-            
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1FormatSelect;
-            break;
-        case NTV2_Input5Select:	// HDMI
-        {
-            // dynamically use input color space for
-            ULWord colorSpace;
-            mCard->ReadRegister(kRegHDMIInputStatus, &colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-            
-            inputFormat = mCard->GetHDMIInputVideoFormat();
-            if (inputFormatSelect)
-                *inputFormatSelect = (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_YUVSelect : NTV2_RGBSelect;
-        }
-            break;
-        default:
-            break;
-    }
-    inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-    
-    return inputFormat;
+		case NTV2_Input1Select:
+			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+
+			// See if we need to translate this from a level B format to level A
+			levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, &levelbtoaConvert);
+			if (levelBInput && levelbtoaConvert)
+			{
+				inputFormat = GetCorrespondingAFormat(inputFormat);
+			}
+
+			if (inputFormatSelect)
+				*inputFormatSelect = mSDIInput1FormatSelect;
+			break;
+
+		case NTV2_DualLinkInputSelect:
+		case NTV2_DualLink4xSdi4k:
+		case NTV2_DualLink2xSdi4k:
+			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+			if (inputFormatSelect)
+				*inputFormatSelect = mSDIInput1FormatSelect;
+			break;
+
+		case NTV2_Input2Select:
+			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
+
+			// See if we need to translate this from a level B format to level A
+			levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, &levelbtoaConvert);
+			if (levelBInput && levelbtoaConvert)
+			{
+				inputFormat = GetCorrespondingAFormat(inputFormat);
+			}
+
+			if (inputFormatSelect)
+				*inputFormatSelect = mSDIInput1FormatSelect;
+			break;
+
+		case NTV2_Input5Select:	// HDMI
+			{
+				// dynamically use input color space for 
+				ULWord colorSpace;
+				mCard->ReadRegister(kRegHDMIInputStatus, &colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+
+				inputFormat = mCard->GetHDMIInputVideoFormat();
+				if (inputFormatSelect)
+					*inputFormatSelect = (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_YUVSelect : NTV2_RGBSelect;
+			}
+			break;
+
+		default:
+			break;
+	}
+	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
+	
+	return inputFormat;
 }
 
 
@@ -618,7 +621,7 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
         {
             if (b4kHfr)
             {
-                // TODO: support 2pi
+                // TBD: support 2pi
                 mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptCSC1VidYUV);
                 mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptCSC2VidYUV);
                 mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptCSC3VidYUV);
@@ -627,7 +630,7 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
             }
             else
             {
-                // TODO: support 2pi
+                // TBD: support 2pi
                 mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptFrameBuffer1YUV);
                 mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptFrameBuffer2YUV);
                 mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptFrameBuffer3YUV);
@@ -1527,7 +1530,7 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 
 
-	// connect muxes
+	// 425 Mux
 	if (b2pi)
 	{
 		if (genFrameFormat == FORMAT_RGB)
@@ -2219,7 +2222,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		mCard->Connect (NTV2_XptDualLinkOut5Input, NTV2_XptBlack);
 	}
 	
-	// 425 mux
+	
+	// 425 Mux
 	if (b425)
 	{
 		if (genFrameFormat == FORMAT_RGB)

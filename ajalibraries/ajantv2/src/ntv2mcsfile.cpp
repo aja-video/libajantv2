@@ -353,6 +353,8 @@ void CNTV2MCSfile::IRecordOutput(const char *pIRecord)
 //   Return value < 0 indicates error
 uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 {
+    const uint32_t maxNumLines = 2000000;
+
 	std::string line;
 
 	if (!mMCSFileStream.is_open())
@@ -361,8 +363,8 @@ uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 	mMCSFileStream.seekg(0, std::ios::beg);
 	if (numberOfLines == 0)
 	{
-		mFileLines.resize(1370000);
-		numberOfLines = 1370000;
+        mFileLines.resize(maxNumLines);
+        numberOfLines = maxNumLines;
 	}
 	else
 	{
@@ -376,7 +378,7 @@ uint32_t CNTV2MCSfile::GetFileByteStream(uint32_t numberOfLines)
 		mFileLines[index] = line;
 		index++;
 	}
-	if (numberOfLines < 1370000)
+    if (numberOfLines < maxNumLines)
 		mFileLines[index] = ":00000001FF";
 	return mFileSize;
 
@@ -394,7 +396,22 @@ bool CNTV2MCSfile::FindExtendedLinearAddressRecord(uint16_t address /*= 0x0000*/
  	checksum = (~checksum) + 1;
 	std::vector<std::string>::iterator fileItr;
 	sprintf(&ELARString[13], "%02X", checksum);
-	mBaseELARLocation = std::find(mFileLines.begin(), mFileLines.end(), ELARString);
+
+    // Do a search for a match, don't search on the checksum
+    std::string needle(ELARString, 0, 13);
+    std::vector<std::string>::iterator it = mFileLines.begin();
+    mBaseELARLocation = mFileLines.end();
+    while(it != mFileLines.end())
+    {
+        std::string hay(*it, 0, 13);
+        if (needle == hay)
+        {
+            mBaseELARLocation = it;
+            break;
+        }
+        ++it;
+    }
+
 	if (mBaseELARLocation != mFileLines.end())
 		return true;
 	else

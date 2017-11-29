@@ -29,6 +29,68 @@ void Kona4QuadServices::UpdateAutoState (void)
 	}
 }
 
+//-------------------------------------------------------------------------------------------------------
+//	GetSelectedInputVideoFormat
+//	Note:	Determine input video format based on input select and fbVideoFormat
+//			which currently is videoformat of ch1-framebuffer
+//-------------------------------------------------------------------------------------------------------
+NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
+                                                              NTV2VideoFormat fbVideoFormat,
+                                                              NTV2SDIInputFormatSelect* inputFormatSelect)
+{
+    bool levelBInput;
+    bool levelbtoaConvert;
+    NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
+    if (inputFormatSelect)
+        *inputFormatSelect = NTV2_YUVSelect;
+    
+    // Figure out what our input format is based on what is selected
+    switch (mVirtualInputSelect)
+    {
+        case NTV2_Input1Select:
+            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+            
+            // See if we need to translate this from a level B format to level A
+            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, &levelbtoaConvert);
+            if (levelBInput && levelbtoaConvert)
+            {
+                inputFormat = GetCorrespondingAFormat(inputFormat);
+            }
+            
+            if (inputFormatSelect)
+                *inputFormatSelect = mSDIInput1FormatSelect;
+            break;
+            
+        case NTV2_DualLinkInputSelect:
+        case NTV2_DualLink4xSdi4k:
+        case NTV2_DualLink2xSdi4k:
+            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+            if (inputFormatSelect)
+                *inputFormatSelect = mSDIInput1FormatSelect;
+            break;
+        case NTV2_Input2Select:
+            inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
+            
+            // See if we need to translate this from a level B format to level A
+            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, &levelbtoaConvert);
+            if (levelBInput && levelbtoaConvert)
+            {
+                inputFormat = GetCorrespondingAFormat(inputFormat);
+            }
+            
+            if (inputFormatSelect)
+                *inputFormatSelect = mSDIInput1FormatSelect;
+            break;
+        default:
+            break;
+    }
+    inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
+    
+    return inputFormat;
+}
+
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback

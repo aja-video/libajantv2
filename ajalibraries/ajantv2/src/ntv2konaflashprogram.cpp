@@ -19,6 +19,7 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
+const uint32_t axiSpiMACFlashOffset = 0x01F80000;
 
 using namespace std;
 
@@ -45,7 +46,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
         _flashID            (MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-        _mcsStep(0)
+        _mcsStep(0),
+        _spiFlash(NULL)
 {
 }
 
@@ -72,7 +74,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const boo
         _flashID            (MAIN_FLASHBLOCK),
         _deviceID           (0),
         _bQuiet             (false),
-        _mcsStep            (0)
+        _mcsStep            (0),
+        _spiFlash(NULL)
 {
 	(void) displayErrorMessage;	//	unused
 	(void) ulBoardType;			//	unused
@@ -85,6 +88,17 @@ CNTV2KonaFlashProgram::~CNTV2KonaFlashProgram()
 		delete [] _bitFileBuffer;
 	if (_customFileBuffer)
 		delete [] _customFileBuffer;
+    if (_spiFlash)
+        delete _spiFlash;
+}
+
+void CNTV2KonaFlashProgram::SetQuietMode()
+{
+    _bQuiet = true;
+    if (_spiFlash)
+    {
+        _spiFlash->SetVerbosity(false);
+    }
 }
 
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
@@ -216,6 +230,17 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_macOffset = _bankSize - (2 * _sectorSize);
 		status = true;
 	}
+
+    if (_spiFlash)
+    {
+        delete _spiFlash;
+        _spiFlash = NULL;
+    }
+
+    if (CNTV2AxiSpiFlash::DeviceSupported(GetDeviceID()))
+    {
+        _spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
+    }
 
 	return status;
 }
@@ -431,6 +456,16 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 	if (IsOpen ())
 	{
 		uint32_t baseAddress = GetBaseAddressForProgramming(_flashID);
+
+        switch ( _flashID )
+        {
+            case MAIN_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock); break;
+            case FAILSAFE_FLASHBLOCK:   WriteRegister(kVRegFlashState, kProgramStateEraseFailSafeFlashBlock); break;
+            case SOC1_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseBank3); break;
+            case SOC2_FLASHBLOCK:       WriteRegister(kVRegFlashState, kProgramStateEraseBank4); break;
+            default: break;
+        }
+
 		EraseBlock(_flashID);
 
 		SetFlashBlockIDBank(_flashID);
@@ -438,6 +473,8 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 		uint32_t* bitFilePtr = (uint32_t*)_bitFileBuffer;
 		uint32_t twoFixtysixBlockSizeCount = (_bitFileSize+256)/256;
 		int32_t percentComplete = 0;
+        WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
+        WriteRegister(kVRegFlashSize, twoFixtysixBlockSizeCount);
 		for ( uint32_t count = 0; count < twoFixtysixBlockSizeCount; count++, baseAddress += 256, bitFilePtr += 64 )
 		{
 			if (NTV2DeviceHasSPIv5(_boardID) && baseAddress == _bankSize)
@@ -456,6 +493,8 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 			}
 			FastProgramFlash256(baseAddress, bitFilePtr);
 			percentComplete = (count*100)/twoFixtysixBlockSizeCount;
+
+            WriteRegister(kVRegFlashStatus, count);
 			if(!_bQuiet)
 			{
 				printf("Program status: %i%%\r", percentComplete);
@@ -567,6 +606,7 @@ void CNTV2KonaFlashProgram::EraseBlock(FlashBlockID blockID)
 			}
 			EraseSector(baseAddress + ((sectorCount - (_numSectorsMain* bankCount)) * _sectorSize));
 			percentComplete = (sectorCount*100)/numSectors;
+            WriteRegister(kVRegFlashStatus, sectorCount);
 			if(!_bQuiet)
 			{
 				printf("Erase status: %i%%\r", percentComplete);
@@ -1019,51 +1059,92 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 	if(!IsKonaIPDevice())
 		return false;
 
-	uint32_t baseAddress = _macOffset;
+    if (mac1 == NULL || mac2 == NULL)
+        return false;
 
-	EraseBlock(MAC_FLASHBLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> macData;
+        macData.push_back(mac1->mac[3]);
+        macData.push_back(mac1->mac[2]);
+        macData.push_back(mac1->mac[1]);
+        macData.push_back(mac1->mac[0]);
+        macData.push_back(0);
+        macData.push_back(0);
+        macData.push_back(mac1->mac[5]);
+        macData.push_back(mac1->mac[4]);
 
-	SetFlashBlockIDBank(MAC_FLASHBLOCK);
+        macData.push_back(mac2->mac[3]);
+        macData.push_back(mac2->mac[2]);
+        macData.push_back(mac2->mac[1]);
+        macData.push_back(mac2->mac[0]);
+        macData.push_back(0);
+        macData.push_back(0);
+        macData.push_back(mac2->mac[5]);
+        macData.push_back(mac2->mac[4]);
+
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        _spiFlash->Erase(axiSpiMACFlashOffset, uint32_t(macData.size()));
+        if (_spiFlash->Write(axiSpiMACFlashOffset, macData, uint32_t(macData.size())))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        uint32_t baseAddress = _macOffset;
+
+        EraseBlock(MAC_FLASHBLOCK);
+
+        SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
 
-	uint32_t lo = 0;
-	lo |= (mac1->mac[0] << 24) & 0xff000000;
-	lo |= (mac1->mac[1] << 16) & 0x00ff0000;
-	lo |= (mac1->mac[2] << 8)  & 0x0000ff00;
-	lo |=  mac1->mac[3]        & 0x000000ff;
+        uint32_t lo = 0;
+        lo |= (mac1->mac[0] << 24) & 0xff000000;
+        lo |= (mac1->mac[1] << 16) & 0x00ff0000;
+        lo |= (mac1->mac[2] << 8)  & 0x0000ff00;
+        lo |=  mac1->mac[3]        & 0x000000ff;
 
-	uint32_t hi = 0;
-	hi |= (mac1->mac[4] << 24) & 0xff000000;
-	hi |= (mac1->mac[5] << 16) & 0x00ff0000;
+        uint32_t hi = 0;
+        hi |= (mac1->mac[4] << 24) & 0xff000000;
+        hi |= (mac1->mac[5] << 16) & 0x00ff0000;
 
-	uint32_t lo2 = 0;
-	lo2 |= (mac2->mac[0] << 24) & 0xff000000;
-	lo2 |= (mac2->mac[1] << 16) & 0x00ff0000;
-	lo2 |= (mac2->mac[2] << 8)  & 0x0000ff00;
-	lo2 |=  mac2->mac[3]	    & 0x000000ff;
+        uint32_t lo2 = 0;
+        lo2 |= (mac2->mac[0] << 24) & 0xff000000;
+        lo2 |= (mac2->mac[1] << 16) & 0x00ff0000;
+        lo2 |= (mac2->mac[2] << 8)  & 0x0000ff00;
+        lo2 |=  mac2->mac[3]	    & 0x000000ff;
 
-	uint32_t hi2 = 0;
-	hi2 |= (mac2->mac[4] << 24) & 0xff000000;
-	hi2 |= (mac2->mac[5] << 16) & 0x00ff0000;
+        uint32_t hi2 = 0;
+        hi2 |= (mac2->mac[4] << 24) & 0xff000000;
+        hi2 |= (mac2->mac[5] << 16) & 0x00ff0000;
 
 
-	ProgramFlashValue(baseAddress, lo);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, hi);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, lo2);
-	baseAddress += 4;
-	ProgramFlashValue(baseAddress, hi2);
+        ProgramFlashValue(baseAddress, lo);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, hi);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, lo2);
+        baseAddress += 4;
+        ProgramFlashValue(baseAddress, hi2);
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x9C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
 
-	SetBankSelect(BANK_0);
+        SetBankSelect(BANK_0);
 
-	return true;
+        return true;
+    }
 }
 
 bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
@@ -1076,51 +1157,85 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 	if(!IsKonaIPDevice())
 		return false;
 
-	uint32_t baseAddress = GetBaseAddressForProgramming(MAC_FLASHBLOCK);
-	SetFlashBlockIDBank(MAC_FLASHBLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> macData;
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        if (_spiFlash->Read(axiSpiMACFlashOffset, macData, 16))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            if (macData.size() < 16)
+                return false;
 
-	WriteRegister(kRegXenaxFlashAddress, baseAddress);
-	WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-	WaitForFlashNOTBusy();
-	ReadRegister(kRegXenaxFlashDOUT, &lo);
-	baseAddress += 4;
+            mac1.mac[0] = macData.at(3);
+            mac1.mac[1] = macData.at(2);
+            mac1.mac[2] = macData.at(1);
+            mac1.mac[3] = macData.at(0);
+            mac1.mac[4] = macData.at(7);
+            mac1.mac[5] = macData.at(6);
 
-	WriteRegister(kRegXenaxFlashAddress, baseAddress);
-	WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-	WaitForFlashNOTBusy();
-	ReadRegister(kRegXenaxFlashDOUT, &hi);
-	baseAddress += 4;
+            mac2.mac[0] = macData.at(8+3);
+            mac2.mac[1] = macData.at(8+2);
+            mac2.mac[2] = macData.at(8+1);
+            mac2.mac[3] = macData.at(8+0);
+            mac2.mac[4] = macData.at(8+7);
+            mac2.mac[5] = macData.at(8+6);
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        uint32_t baseAddress = GetBaseAddressForProgramming(MAC_FLASHBLOCK);
+        SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
-	WriteRegister(kRegXenaxFlashAddress, baseAddress);
-	WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-	WaitForFlashNOTBusy();
-	ReadRegister(kRegXenaxFlashDOUT, &lo2);
-	baseAddress += 4;
+        WriteRegister(kRegXenaxFlashAddress, baseAddress);
+        WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+        WaitForFlashNOTBusy();
+        ReadRegister(kRegXenaxFlashDOUT, &lo);
+        baseAddress += 4;
 
-	WriteRegister(kRegXenaxFlashAddress, baseAddress);
-	WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-	WaitForFlashNOTBusy();
-	ReadRegister(kRegXenaxFlashDOUT, &hi2);
+        WriteRegister(kRegXenaxFlashAddress, baseAddress);
+        WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+        WaitForFlashNOTBusy();
+        ReadRegister(kRegXenaxFlashDOUT, &hi);
+        baseAddress += 4;
 
-	SetBankSelect(BANK_0);
+        WriteRegister(kRegXenaxFlashAddress, baseAddress);
+        WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+        WaitForFlashNOTBusy();
+        ReadRegister(kRegXenaxFlashDOUT, &lo2);
+        baseAddress += 4;
 
+        WriteRegister(kRegXenaxFlashAddress, baseAddress);
+        WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+        WaitForFlashNOTBusy();
+        ReadRegister(kRegXenaxFlashDOUT, &hi2);
 
-	if (lo == 0xffffffff && hi == 0xffffffff && lo2 == 0xffffffff && hi2 == 0xffffffff)
-		return false;
+        SetBankSelect(BANK_0);
 
-	mac1.mac[0] = (lo & 0xff000000) >> 24;
-	mac1.mac[1] = (lo & 0x00ff0000) >> 16;
-	mac1.mac[2] = (lo & 0x0000ff00) >> 8;
-	mac1.mac[3] =  lo & 0x000000ff;
-	mac1.mac[4] = (hi & 0xff000000) >> 24;
-	mac1.mac[5] = (hi & 0x00ff0000) >> 16;
+        if (lo == 0xffffffff && hi == 0xffffffff && lo2 == 0xffffffff && hi2 == 0xffffffff)
+            return false;
 
-	mac2.mac[0] = (lo2 & 0xff000000) >> 24;
-	mac2.mac[1] = (lo2 & 0x00ff0000) >> 16;
-	mac2.mac[2] = (lo2 & 0x0000ff00) >> 8;
-	mac2.mac[3] =  lo2 & 0x000000ff;
-	mac2.mac[4] = (hi2 & 0xff000000) >> 24;
-	mac2.mac[5] = (hi2 & 0x00ff0000) >> 16;
+        mac1.mac[0] = (lo & 0xff000000) >> 24;
+        mac1.mac[1] = (lo & 0x00ff0000) >> 16;
+        mac1.mac[2] = (lo & 0x0000ff00) >> 8;
+        mac1.mac[3] =  lo & 0x000000ff;
+        mac1.mac[4] = (hi & 0xff000000) >> 24;
+        mac1.mac[5] = (hi & 0x00ff0000) >> 16;
+
+        mac2.mac[0] = (lo2 & 0xff000000) >> 24;
+        mac2.mac[1] = (lo2 & 0x00ff0000) >> 16;
+        mac2.mac[2] = (lo2 & 0x0000ff00) >> 8;
+        mac2.mac[3] =  lo2 & 0x000000ff;
+        mac2.mac[4] = (hi2 & 0xff000000) >> 24;
+        mac2.mac[5] = (hi2 & 0x00ff0000) >> 16;
+    }
 
 	return true;
 }
@@ -1252,218 +1367,269 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
         return false;
     }
 
-	if (IsOpen())
-	{
-		bool hasErasedSOCs = false;
-		uint16_t linearOffsetToBankOffset = 0x0000;
-		uint16_t basePartitionAddress = linearOffsetToBankOffset;
-		bool bPartitionValid = true;
-		uint32_t partitionCount = 0;
-		while (bPartitionValid)
-		{
-            WriteRegister(kVRegFlashState,kProgramStateCalculating);
-            WriteRegister(kVRegFlashSize,MCS_STEPS);
-            WriteRegister(kVRegFlashStatus,NextMcsStep());
+    if (_spiFlash)
+    {
+        if (IsOpen() == false)
+        {
+            printf("Board Can't be opened\n");
+            return false;
+        }
 
-            uint16_t partitionOffset = 0;
-			FlashBlockID blockID = MAIN_FLASHBLOCK;
-			ParsePartitionFromFileLines(basePartitionAddress, partitionOffset);
-			if (basePartitionAddress < 0x0100)
-			{
-				blockID = MAIN_FLASHBLOCK;
-				linearOffsetToBankOffset = 0x0000;
-				//Program Main
-				printf("Erase Main Bitfile Bank\n");
-                WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock);
-				EraseBlock(MAIN_FLASHBLOCK);
-                WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
-			}
-			else if (basePartitionAddress >= 0x0100 && basePartitionAddress < 0x0200)
-			{
-				blockID = MCS_INFO_BLOCK;
-				linearOffsetToBankOffset = 0x0100;
-				//Program Comment
-                printf("Erase Package Info Block\n");
-                WriteRegister(kVRegFlashState, kProgramStateErasePackageInfo);
-				EraseBlock(MCS_INFO_BLOCK);
-                WriteRegister(kVRegFlashState, kProgramStateProgramPackageInfo);
-			}
-			else if (basePartitionAddress >= 0x0200 && basePartitionAddress < 0x0400)
-			{
-				if (!hasErasedSOCs)
-				{
-					printf("Erase SOC Bank 1\n");
-                    WriteRegister(kVRegFlashState, kProgramStateEraseBank3);
-					EraseBlock(SOC1_FLASHBLOCK);
-					printf("Erase SOC Bank 2\n");
-                    WriteRegister(kVRegFlashState, kProgramStateEraseBank4);
-					EraseBlock(SOC2_FLASHBLOCK);
-					hasErasedSOCs = true;
-				}
-				if (basePartitionAddress >= 0x0200 && basePartitionAddress < 0x0300)
-				{
-					blockID = SOC1_FLASHBLOCK;
-					linearOffsetToBankOffset = 0x0200;
-                    WriteRegister(kVRegFlashState, kProgramStateProgramBank3);
-				}
-				else
-				{
-					blockID = SOC2_FLASHBLOCK;
-					linearOffsetToBankOffset = 0x0300;
-                    WriteRegister(kVRegFlashState, kProgramStateProgramBank4);
-				}
-			}
-			else
-			{
-				break;
-			}
+        if (_mcsFile.isReady() == false)
+        {
+            printf("MCS file isn't ready\n");
+            return false;
+        }
 
-			uint16_t baseOffset = basePartitionAddress - linearOffsetToBankOffset;
-			uint32_t programOffset = (uint32_t)baseOffset << 16 | partitionOffset;
+        // now the main FPGA part
+        _flashID = MAIN_FLASHBLOCK;
 
-			if (_bankSize == 0)
-			{
-				bPartitionValid = false;
-				break;
-			}
+        vector<uint8_t> fpgaData;
+        uint16_t fpgaPartitionOffset = 0;
 
-			SetFlashBlockIDBank(blockID);
+        _mcsFile.GetPartition(fpgaData, 0x0000, fpgaPartitionOffset, false);
 
-			uint32_t baseAddress = GetBaseAddressForProgramming(blockID) + programOffset;
-			if (blockID == MCS_INFO_BLOCK)
-				baseAddress = _mcsInfoOffset;
-			uint32_t bufferIndex = 0;
-			uint32_t blockSize = 512;
-			uint32_t dwordsPerBLock = blockSize / 4;
-			uint32_t totalBlockCount = static_cast<uint32_t>((_partitionBuffer.size() + blockSize) / blockSize);
-			int32_t percentComplete = 0;
+        if ( _bitFileBuffer != NULL )
+        {
+            delete [] _bitFileBuffer;
+            _bitFileBuffer = NULL;
+        }
 
-            WriteRegister(kVRegFlashSize, totalBlockCount);
-			for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
-			{
-                WriteRegister(kVRegFlashStatus,blockCount);
-				if (baseAddress == 0x01000000 && blockCount > 0 && blockID == SOC1_FLASHBLOCK)
-				{
-					blockID = SOC2_FLASHBLOCK;
-					SetFlashBlockIDBank(blockID);
-					baseAddress = GetBaseAddressForProgramming(blockID);
-                    WriteRegister(kVRegFlashState, kProgramStateProgramBank4);
-				}
-				uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
-				WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-				WaitForFlashNOTBusy();
+        _bitFileSize = uint32_t(fpgaData.size());
 
-				for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
-				{
-					uint32_t partitionValue = 0xFFFFFFFF;
-					if (remainderBytes >= 4)
-					{
-						partitionValue = (uint32_t)_partitionBuffer[bufferIndex] << 24 |
-							(uint32_t)_partitionBuffer[bufferIndex + 1] << 16 |
-							(uint32_t)_partitionBuffer[bufferIndex + 2] << 8 |
-							(uint32_t)_partitionBuffer[bufferIndex + 3];
-						bufferIndex += 4;
-						remainderBytes -= 4;
-					}
-					else
-					{
-						switch (remainderBytes)
-						{
-						case 3:
-							partitionValue = 0xff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 2] << 8;
-							break;
-						case 2:
-							partitionValue = 0xffff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
-							break;
-						case 1:
-							partitionValue = 0xffffff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							break;
-						default:
-							break;
-						}
-						remainderBytes = 0;
-					}
-					partitionValue = NTV2EndianSwap32(partitionValue);
-					WriteRegister(kRegXenaxFlashDIN, partitionValue);
-				}
-				WriteRegister(kRegXenaxFlashAddress, baseAddress);
-				WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+        // +_256 for fastFlash Programming
+        _bitFileBuffer = new unsigned char[_bitFileSize+512];
+        memset(_bitFileBuffer, 0xFF, _bitFileSize+512);
+        memcpy(_bitFileBuffer, &fpgaData[0], _bitFileSize);
 
-				WaitForFlashNOTBusy();
+        // Parse header to make sure this is a xilinx bitfile.
+        if ( !ParseHeader((char *)_bitFileBuffer) )
+            throw "Can't Parse Header";
 
-				baseAddress += blockSize;
+        Program(verify);
 
-				percentComplete = (blockCount * 100) / totalBlockCount;
-				if (!_bQuiet)
-				{
-					printf("Partition %d program status: %i%%\r", partitionCount, percentComplete);
-					fflush(stdout);
-				}
-			}
-			if (!_bQuiet)
-				printf("Partition %d program status: 100%%                  \n", partitionCount);
+        // handle the SOC part
+        ProgramSOC(verify);
 
-            if (verify)
-			{
-                switch (blockID)
+        return true;
+    }
+    else
+    {
+
+        if (IsOpen())
+        {
+            bool hasErasedSOCs = false;
+            uint16_t linearOffsetToBankOffset = 0x0000;
+            uint16_t basePartitionAddress = linearOffsetToBankOffset;
+            bool bPartitionValid = true;
+            uint32_t partitionCount = 0;
+            while (bPartitionValid)
+            {
+                WriteRegister(kVRegFlashState,kProgramStateCalculating);
+                WriteRegister(kVRegFlashSize,MCS_STEPS);
+                WriteRegister(kVRegFlashStatus,NextMcsStep());
+
+                uint16_t partitionOffset = 0;
+                FlashBlockID blockID = MAIN_FLASHBLOCK;
+                ParsePartitionFromFileLines(basePartitionAddress, partitionOffset);
+                if (basePartitionAddress < 0x0100)
                 {
-                default:
-                case MAIN_FLASHBLOCK:
-                    WriteRegister(kVRegFlashState,kProgramStateVerifyFlash);
-                    break;
-                case SOC1_FLASHBLOCK:
-                    WriteRegister(kVRegFlashState,kProgramStateVerifyBank3);
-                    break;
-                case SOC2_FLASHBLOCK:
-                    WriteRegister(kVRegFlashState,kProgramStateVerifyBank4);
-                    break;
-                case MCS_INFO_BLOCK:
-                    WriteRegister(kVRegFlashState,kProgramStateVerifyPackageInfo);
+                    blockID = MAIN_FLASHBLOCK;
+                    linearOffsetToBankOffset = 0x0000;
+                    //Program Main
+                    printf("Erase Main Bitfile Bank\n");
+                    WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock);
+                    EraseBlock(MAIN_FLASHBLOCK);
+                    WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
+                }
+                else if (basePartitionAddress >= 0x0100 && basePartitionAddress < 0x0200)
+                {
+                    blockID = MCS_INFO_BLOCK;
+                    linearOffsetToBankOffset = 0x0100;
+                    //Program Comment
+                    printf("Erase Package Info Block\n");
+                    WriteRegister(kVRegFlashState, kProgramStateErasePackageInfo);
+                    EraseBlock(MCS_INFO_BLOCK);
+                    WriteRegister(kVRegFlashState, kProgramStateProgramPackageInfo);
+                }
+                else if (basePartitionAddress >= 0x0200 && basePartitionAddress < 0x0400)
+                {
+                    if (!hasErasedSOCs)
+                    {
+                        printf("Erase SOC Bank 1\n");
+                        WriteRegister(kVRegFlashState, kProgramStateEraseBank3);
+                        EraseBlock(SOC1_FLASHBLOCK);
+                        printf("Erase SOC Bank 2\n");
+                        WriteRegister(kVRegFlashState, kProgramStateEraseBank4);
+                        EraseBlock(SOC2_FLASHBLOCK);
+                        hasErasedSOCs = true;
+                    }
+                    if (basePartitionAddress >= 0x0200 && basePartitionAddress < 0x0300)
+                    {
+                        blockID = SOC1_FLASHBLOCK;
+                        linearOffsetToBankOffset = 0x0200;
+                        WriteRegister(kVRegFlashState, kProgramStateProgramBank3);
+                    }
+                    else
+                    {
+                        blockID = SOC2_FLASHBLOCK;
+                        linearOffsetToBankOffset = 0x0300;
+                        WriteRegister(kVRegFlashState, kProgramStateProgramBank4);
+                    }
+                }
+                else
+                {
                     break;
                 }
 
-                if (!VerifySOCPartition(blockID, programOffset))
-				{
-					SetBankSelect(BANK_0);
-                    printf("Verify Error\n");
-                    return false;
-				}
-			}
-			partitionCount++;
+                uint16_t baseOffset = basePartitionAddress - linearOffsetToBankOffset;
+                uint32_t programOffset = (uint32_t)baseOffset << 16 | partitionOffset;
 
-			IntelRecordInfo recordInfo;
-			_mcsFile.GetCurrentParsedRecord(recordInfo);
-			if (recordInfo.recordType != IRT_ELAR)
-				bPartitionValid = false;
-			else
-				basePartitionAddress = recordInfo.linearAddress;
+                if (_bankSize == 0)
+                {
+                    bPartitionValid = false;
+                    break;
+                }
 
-		}
+                SetFlashBlockIDBank(blockID);
 
-		//Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
+                uint32_t baseAddress = GetBaseAddressForProgramming(blockID) + programOffset;
+                if (blockID == MCS_INFO_BLOCK)
+                    baseAddress = _mcsInfoOffset;
+                uint32_t bufferIndex = 0;
+                uint32_t blockSize = 512;
+                uint32_t dwordsPerBLock = blockSize / 4;
+                uint32_t totalBlockCount = static_cast<uint32_t>((_partitionBuffer.size() + blockSize) / blockSize);
+                int32_t percentComplete = 0;
 
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
-		SetBankSelect(BANK_0);
-	}
-	else
-    {
-        printf("Board Can't be opened\n");
-        return false;
+                WriteRegister(kVRegFlashSize, totalBlockCount);
+                for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
+                {
+                    WriteRegister(kVRegFlashStatus,blockCount);
+                    if (baseAddress == 0x01000000 && blockCount > 0 && blockID == SOC1_FLASHBLOCK)
+                    {
+                        blockID = SOC2_FLASHBLOCK;
+                        SetFlashBlockIDBank(blockID);
+                        baseAddress = GetBaseAddressForProgramming(blockID);
+                        WriteRegister(kVRegFlashState, kProgramStateProgramBank4);
+                    }
+                    uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
+                    WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+                    WaitForFlashNOTBusy();
+
+                    for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
+                    {
+                        uint32_t partitionValue = 0xFFFFFFFF;
+                        if (remainderBytes >= 4)
+                        {
+                            partitionValue = (uint32_t)_partitionBuffer[bufferIndex] << 24 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 1] << 16 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 2] << 8 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 3];
+                            bufferIndex += 4;
+                            remainderBytes -= 4;
+                        }
+                        else
+                        {
+                            switch (remainderBytes)
+                            {
+                            case 3:
+                                partitionValue = 0xff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 2] << 8;
+                                break;
+                            case 2:
+                                partitionValue = 0xffff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
+                                break;
+                            case 1:
+                                partitionValue = 0xffffff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                break;
+                            default:
+                                break;
+                            }
+                            remainderBytes = 0;
+                        }
+                        partitionValue = NTV2EndianSwap32(partitionValue);
+                        WriteRegister(kRegXenaxFlashDIN, partitionValue);
+                    }
+                    WriteRegister(kRegXenaxFlashAddress, baseAddress);
+                    WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+
+                    WaitForFlashNOTBusy();
+
+                    baseAddress += blockSize;
+
+                    percentComplete = (blockCount * 100) / totalBlockCount;
+                    if (!_bQuiet)
+                    {
+                        printf("Partition %d program status: %i%%\r", partitionCount, percentComplete);
+                        fflush(stdout);
+                    }
+                }
+                if (!_bQuiet)
+                    printf("Partition %d program status: 100%%                  \n", partitionCount);
+
+                if (verify)
+                {
+                    switch (blockID)
+                    {
+                    default:
+                    case MAIN_FLASHBLOCK:
+                        WriteRegister(kVRegFlashState,kProgramStateVerifyFlash);
+                        break;
+                    case SOC1_FLASHBLOCK:
+                        WriteRegister(kVRegFlashState,kProgramStateVerifyBank3);
+                        break;
+                    case SOC2_FLASHBLOCK:
+                        WriteRegister(kVRegFlashState,kProgramStateVerifyBank4);
+                        break;
+                    case MCS_INFO_BLOCK:
+                        WriteRegister(kVRegFlashState,kProgramStateVerifyPackageInfo);
+                        break;
+                    }
+
+                    if (!VerifySOCPartition(blockID, programOffset))
+                    {
+                        SetBankSelect(BANK_0);
+                        printf("Verify Error\n");
+                        return false;
+                    }
+                }
+                partitionCount++;
+
+                IntelRecordInfo recordInfo;
+                _mcsFile.GetCurrentParsedRecord(recordInfo);
+                if (recordInfo.recordType != IRT_ELAR)
+                    bPartitionValid = false;
+                else
+                    basePartitionAddress = recordInfo.linearAddress;
+
+            }
+
+            //Protect Device
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x1C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x9C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+            SetBankSelect(BANK_0);
+        }
+        else
+        {
+            printf("Board Can't be opened\n");
+            return false;
+        }
+        return true;
     }
 
     return true;
@@ -1477,150 +1643,208 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
         return false;
     }
 
-	if (IsOpen())
-	{
-		printf("Erase SOC Bank 1\n");
- 		EraseBlock(SOC1_FLASHBLOCK);
-		printf("Erase SOC Bank 2\n");
- 		EraseBlock(SOC2_FLASHBLOCK);
+    if (_spiFlash)
+    {
+        if (IsOpen() == false)
+        {
+            printf("Board Can't be opened\n");
+            return false;
+        }
 
-		//1st partition is assumed to be at 32M mark
-		//the 32bit address is 0x02000000
-		//the ELAR address is 0x0200
-		uint16_t partition32M = 0x0200;
-		uint16_t basePartitionAddress = partition32M;
-		bool bPartitionValid = true;
-		uint32_t partitionCount = 0;
-		while (bPartitionValid)
-		{
-			uint16_t partitionOffset = 0;
-			ParsePartitionFromFileLines(basePartitionAddress, partitionOffset);
-			uint16_t baseOffset = basePartitionAddress - partition32M;
-			uint32_t programOffset = (uint32_t)baseOffset << 16 | partitionOffset;
+        if (_mcsFile.isReady() == false)
+        {
+            printf("MCS file isn't ready\n");
+            return false;
+        }
 
-			FlashBlockID blockID = SOC1_FLASHBLOCK;
-			if (programOffset >= 0x01000000)
-				blockID	 = SOC2_FLASHBLOCK;
+        vector<uint8_t> ubootData;
+        vector<uint8_t> imageData;
+        uint16_t ubootPartitionOffset = 0;
+        uint16_t imagePartitionOffset = 0;
+        _mcsFile.GetPartition(ubootData, 0x0400, ubootPartitionOffset, false);
+        _mcsFile.GetPartition(imageData, 0x0410, imagePartitionOffset, false);
 
-			if (_bankSize == 0)
+        uint32_t ubootFlashOffset = 0x000000;
+        uint32_t imageFlashOffset = 0x100000;
+
+        uint32_t ubootSize = uint32_t(ubootData.size());
+        uint32_t imageSize = uint32_t(imageData.size());
+
+        // erase uboot
+        _spiFlash->Erase(ubootFlashOffset, ubootSize);
+
+        // write uboot
+        _spiFlash->Write(ubootFlashOffset, ubootData, ubootSize);
+
+        // verify uboot
+        if (verify)
+        {
+            _spiFlash->Verify(ubootFlashOffset, ubootData);
+        }
+
+        // erase image
+        _spiFlash->Erase(imageFlashOffset, imageSize);
+
+        // write image
+        _spiFlash->Write(imageFlashOffset, imageData, imageSize);
+
+        // verify image
+        if (verify)
+        {
+            _spiFlash->Verify(imageFlashOffset, imageData);
+        }
+
+        return true;
+    }
+    else
+    {
+        if (IsOpen())
+        {
+            printf("Erase SOC Bank 1\n");
+            EraseBlock(SOC1_FLASHBLOCK);
+            printf("Erase SOC Bank 2\n");
+            EraseBlock(SOC2_FLASHBLOCK);
+
+            //1st partition is assumed to be at 32M mark
+            //the 32bit address is 0x02000000
+            //the ELAR address is 0x0200
+            uint16_t partition32M = 0x0200;
+            uint16_t basePartitionAddress = partition32M;
+            bool bPartitionValid = true;
+            uint32_t partitionCount = 0;
+            while (bPartitionValid)
             {
-                return true;
+                uint16_t partitionOffset = 0;
+                ParsePartitionFromFileLines(basePartitionAddress, partitionOffset);
+                uint16_t baseOffset = basePartitionAddress - partition32M;
+                uint32_t programOffset = (uint32_t)baseOffset << 16 | partitionOffset;
+
+                FlashBlockID blockID = SOC1_FLASHBLOCK;
+                if (programOffset >= 0x01000000)
+                    blockID	 = SOC2_FLASHBLOCK;
+
+                if (_bankSize == 0)
+                {
+                    return true;
+                }
+
+                SetFlashBlockIDBank(blockID);
+                uint32_t baseAddress = GetBaseAddressForProgramming(blockID) + programOffset;
+                uint32_t bufferIndex = 0;
+                uint32_t blockSize = 512;
+                uint32_t dwordsPerBLock = blockSize / 4;
+                uint32_t totalBlockCount = static_cast<uint32_t>((_partitionBuffer.size() + blockSize) / blockSize);
+                int32_t percentComplete = 0;
+                for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
+                {
+                    if (baseAddress == 0x01000000 && blockCount > 0)
+                    {
+                        SetFlashBlockIDBank(SOC2_FLASHBLOCK);
+                        baseAddress = GetBaseAddressForProgramming(blockID);
+                    }
+                    uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
+                    WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+                    WaitForFlashNOTBusy();
+
+                    for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
+                    {
+                        uint32_t partitionValue = 0xFFFFFFFF;
+                        if (remainderBytes >= 4)
+                        {
+                            partitionValue = (uint32_t)_partitionBuffer[bufferIndex] << 24 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 1] << 16 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 2] << 8 |
+                                (uint32_t)_partitionBuffer[bufferIndex + 3];
+                            bufferIndex += 4;
+                            remainderBytes -= 4;
+                        }
+                        else
+                        {
+                            switch (remainderBytes)
+                            {
+                            case 3:
+                                partitionValue = 0xff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 2] << 8;
+                                break;
+                            case 2:
+                                partitionValue = 0xffff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
+                                break;
+                            case 1:
+                                partitionValue = 0xffffff;
+                                partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
+                                break;
+                            default:
+                                break;
+                            }
+                            remainderBytes = 0;
+                        }
+                        partitionValue = NTV2EndianSwap32(partitionValue);
+                        WriteRegister(kRegXenaxFlashDIN, partitionValue);
+                    }
+                    WriteRegister(kRegXenaxFlashAddress, baseAddress);
+                    WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+
+                    WaitForFlashNOTBusy();
+
+                    baseAddress += blockSize;
+
+                    percentComplete = (blockCount * 100) / totalBlockCount;
+                    if (!_bQuiet)
+                    {
+                        printf("Partition %d program status: %i%%\r", partitionCount+2, percentComplete);
+                        fflush(stdout);
+                    }
+                }
+                if (!_bQuiet)
+                    printf("Partition %d program status: 100%%                  \n", partitionCount+2);
+
+                if (verify)
+                {
+                    if (!VerifySOCPartition(blockID, programOffset))
+                    {
+                        SetBankSelect(BANK_0);
+                        printf("Verify failed\n");
+                        return false;
+                    }
+                }
+
+                partitionCount++;
+                IntelRecordInfo recordInfo;
+                _mcsFile.GetCurrentParsedRecord(recordInfo);
+                if (recordInfo.recordType != IRT_ELAR)
+                    bPartitionValid = false;
+                else
+                    basePartitionAddress = recordInfo.linearAddress;
             }
 
-			SetFlashBlockIDBank(blockID);
-			uint32_t baseAddress = GetBaseAddressForProgramming(blockID) + programOffset;
-			uint32_t bufferIndex = 0;
-			uint32_t blockSize = 512;
-			uint32_t dwordsPerBLock = blockSize / 4;
-			uint32_t totalBlockCount = static_cast<uint32_t>((_partitionBuffer.size() + blockSize) / blockSize);
-			int32_t percentComplete = 0;
-			for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
-			{
-				if (baseAddress == 0x01000000 && blockCount > 0)
-				{
-					SetFlashBlockIDBank(SOC2_FLASHBLOCK);
-					baseAddress = GetBaseAddressForProgramming(blockID);
-				}
-				uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
-				WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-				WaitForFlashNOTBusy();
+            //Protect Device
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x1C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
 
-				for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
-				{
-					uint32_t partitionValue = 0xFFFFFFFF;
-					if (remainderBytes >= 4)
-					{
-						partitionValue = (uint32_t)_partitionBuffer[bufferIndex] << 24 |
-							(uint32_t)_partitionBuffer[bufferIndex + 1] << 16 |
-							(uint32_t)_partitionBuffer[bufferIndex + 2] << 8 |
-							(uint32_t)_partitionBuffer[bufferIndex + 3];
-						bufferIndex += 4;
-						remainderBytes -= 4;
-					}
-					else
-					{
-						switch (remainderBytes)
-						{
-						case 3:
-							partitionValue = 0xff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 2] << 8;
-							break;
-						case 2:
-							partitionValue = 0xffff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex + 1] << 16;
-							break;
-						case 1:
-							partitionValue = 0xffffff;
-							partitionValue |= (uint32_t)_partitionBuffer[bufferIndex] << 24;
-							break;
-						default:
-							break;
-						}
-						remainderBytes = 0;
-					}
-					partitionValue = NTV2EndianSwap32(partitionValue);
-					WriteRegister(kRegXenaxFlashDIN, partitionValue);
-				}
-				WriteRegister(kRegXenaxFlashAddress, baseAddress);
-				WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x9C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+            SetBankSelect(BANK_0);
+        }
+        else
+        {
+            printf("Board Can't be opened\n");
+            return false;
+        }
 
-				WaitForFlashNOTBusy();
-
-				baseAddress += blockSize;
-
-				percentComplete = (blockCount * 100) / totalBlockCount;
-				if (!_bQuiet)
-				{
-					printf("Partition %d program status: %i%%\r", partitionCount+2, percentComplete);
-					fflush(stdout);
-				}
-			}
-			if (!_bQuiet)
-				printf("Partition %d program status: 100%%                  \n", partitionCount+2);
-
-            if (verify)
-			{ 
-                if (!VerifySOCPartition(blockID, programOffset))
-				{
-					SetBankSelect(BANK_0);
-                    printf("Verify failed\n");
-                    return false;
-				}
-			}
-
-            partitionCount++;
-			IntelRecordInfo recordInfo;
-			_mcsFile.GetCurrentParsedRecord(recordInfo);
-			if (recordInfo.recordType != IRT_ELAR)
-				bPartitionValid = false;
-			else
-				basePartitionAddress = recordInfo.linearAddress;
-		}
-
-		//Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
-		
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
-		SetBankSelect(BANK_0);
- 	}
-	else
-    {
-        printf("Board Can't be opened\n");
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 static int64_t getFileSize( const char *fileName ) {
@@ -1641,152 +1865,203 @@ static int64_t getFileSize( const char *fileName ) {
 
 void CNTV2KonaFlashProgram::ProgramCustom ( const char *sCustomFileName, const uint32_t addr)
 {
-	static const int32_t MAX_CUSTOM_FILE_SIZE = (8<<20); // 1M
-	if (NULL == _customFileBuffer )
-		_customFileBuffer = new unsigned char[MAX_CUSTOM_FILE_SIZE];
-	size_t customSize = 0;
+    if (_spiFlash)
+    {
+        uint32_t maxFlashSize = _spiFlash->Size();
 
-	uint32_t bank   =  addr / _bankSize;
-	uint32_t offset =  addr % _bankSize;
-	if (offset + customSize > _bankSize) {
-		throw "Custom write spans banks - not supported";
-	}
-	if (offset % _sectorSize) {
-		throw "Write not on sector boundary - not supported";
-	}
+        vector<uint8_t> writeData;
+        size_t customSize = 0;
+        // open file and read data
+        {
+            int64_t sz = getFileSize(sCustomFileName);
+            if (sz < 0) {
+                throw "Error getting file size";
+            }
+            if (sz > maxFlashSize) {
+                throw "File size greater than max supported size (8M)";
+            }
 
-	{
-		int64_t sz = getFileSize(sCustomFileName);
-		if (sz < 0) {
-			throw "Error getting file size";
-		}
-	   	if (sz > MAX_CUSTOM_FILE_SIZE) {
-			throw "File size greater than max supported size (8M)";
-		}
+            FILE *fp = fopen(sCustomFileName, "rb");
+            if (fp == NULL) {
+                throw "Unable to open file";
+            }
 
-		FILE *fp = fopen(sCustomFileName, "rb");
-		if (fp == NULL) {
-			throw "Unable to open file";
-		}
+            writeData.resize(sz);
+            customSize = fread(&writeData[0], 1, sz, fp);
+            if (customSize == 0) {
+                fclose(fp);
+                throw "Couldn't read any data from custom file";
+            }
+            if (writeData.size() > customSize)
+                writeData.resize(customSize);
 
-		customSize = fread(_customFileBuffer, 1, MAX_CUSTOM_FILE_SIZE, fp);
-		if (customSize == 0) {
-			fclose(fp);
-			throw "Couldn't read any data from custom file";
-		}
-		fclose(fp);
-	}
-	if (IsOpen())
-	{
-		static const BankSelect BankIdxToBankSelect[] = {
-			BANK_0,
-			BANK_1,
-			BANK_2,
-			BANK_3
-		};
+            fclose(fp);
+        }
 
-		SetBankSelect(BankIdxToBankSelect[bank]);
+        // make sure device is open
+        if (IsOpen() == false)
+            throw "Board Can't be opened";
 
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x0);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
+        // erase flash
+        uint32_t writeSize = uint32_t(writeData.size());
+        bool eraseGood = _spiFlash->Erase(addr, writeSize);
+        if (eraseGood == false)
+            throw "Error erasing sectors";
 
-		int32_t customSectors = static_cast<int32_t>((customSize + _sectorSize - 1) / (_sectorSize));
-		for (int32_t i=0; i<customSectors; i++) {
-			printf("Erasing sectors - %3d of %3d\r", i, customSectors);
-			fflush(stdout);
-			EraseSector( offset + (i * _sectorSize));
-		}
+        // write flash
+        _spiFlash->Write(addr, writeData, writeSize);
+    }
+    else
+    {
 
-		{
-			WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-			WaitForFlashNOTBusy();
+        static const int32_t MAX_CUSTOM_FILE_SIZE = (8<<20); // 1M
+        if (NULL == _customFileBuffer )
+            _customFileBuffer = new unsigned char[MAX_CUSTOM_FILE_SIZE];
+        size_t customSize = 0;
 
-			uint32_t blockSize = 512;
-			uint32_t dwordsPerBLock = blockSize / 4;
-			uint32_t totalBlockCount = static_cast<uint32_t>((customSize + blockSize - 1) / blockSize);
-			int32_t percentComplete = 0;
-			uint32_t baseAddress = offset;
-			int32_t remainderBytes = static_cast<int32_t>(customSize);
-			int32_t bufferIndex = 0;
-			for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
-			{
-				WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-				WaitForFlashNOTBusy();
+        uint32_t bank   =  addr / _bankSize;
+        uint32_t offset =  addr % _bankSize;
+        if (offset + customSize > _bankSize) {
+            throw "Custom write spans banks - not supported";
+        }
+        if (offset % _sectorSize) {
+            throw "Write not on sector boundary - not supported";
+        }
 
-				for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
-				{
-					uint32_t partitionValue = 0xFFFFFFFF;
-					if (remainderBytes >= 4)
-					{
-						partitionValue = (uint32_t)_customFileBuffer[bufferIndex] << 24 |
-							(uint32_t)_customFileBuffer[bufferIndex + 1] << 16 |
-							(uint32_t)_customFileBuffer[bufferIndex + 2] << 8 |
-							(uint32_t)_customFileBuffer[bufferIndex + 3];
-						bufferIndex += 4;
-						remainderBytes -= 4;
-					}
-					else
-					{
-						switch (remainderBytes)
-						{
-						case 3:
-							partitionValue = 0xff;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 1] << 16;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 2] << 8;
-							break;
-						case 2:
-							partitionValue = 0xffff;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 1] << 16;
-							break;
-						case 1:
-							partitionValue = 0xffffff;
-							partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
-							break;
-						default:
-							break;
-						}
-						remainderBytes = 0;
-					}
-					partitionValue = NTV2EndianSwap32(partitionValue);
-					WriteRegister(kRegXenaxFlashDIN, partitionValue);
-				}
-				WriteRegister(kRegXenaxFlashAddress, baseAddress);
-				WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+        {
+            int64_t sz = getFileSize(sCustomFileName);
+            if (sz < 0) {
+                throw "Error getting file size";
+            }
+            if (sz > MAX_CUSTOM_FILE_SIZE) {
+                throw "File size greater than max supported size (8M)";
+            }
 
-				WaitForFlashNOTBusy();
+            FILE *fp = fopen(sCustomFileName, "rb");
+            if (fp == NULL) {
+                throw "Unable to open file";
+            }
 
-				baseAddress += blockSize;
+            customSize = fread(_customFileBuffer, 1, MAX_CUSTOM_FILE_SIZE, fp);
+            if (customSize == 0) {
+                fclose(fp);
+                throw "Couldn't read any data from custom file";
+            }
+            fclose(fp);
+        }
+        if (IsOpen())
+        {
+            static const BankSelect BankIdxToBankSelect[] = {
+                BANK_0,
+                BANK_1,
+                BANK_2,
+                BANK_3
+            };
 
-				percentComplete = (blockCount * 100) / totalBlockCount;
-				if (!_bQuiet)
-				{
-					printf("Program status: %i%% (%4d of %4d blocks)\r", percentComplete, blockCount, totalBlockCount);
-					fflush(stdout);
-				}
-			}
-		}
+            SetBankSelect(BankIdxToBankSelect[bank]);
 
-		//Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
-		
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-		WaitForFlashNOTBusy();
-		SetBankSelect(BANK_0);
- 	}
-	else
-		throw "Board Can't be opened";
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x0);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+
+            int32_t customSectors = static_cast<int32_t>((customSize + _sectorSize - 1) / (_sectorSize));
+            for (int32_t i=0; i<customSectors; i++) {
+                printf("Erasing sectors - %3d of %3d\r", i, customSectors);
+                fflush(stdout);
+                EraseSector( offset + (i * _sectorSize));
+            }
+
+            {
+                WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+                WaitForFlashNOTBusy();
+
+                uint32_t blockSize = 512;
+                uint32_t dwordsPerBLock = blockSize / 4;
+                uint32_t totalBlockCount = static_cast<uint32_t>((customSize + blockSize - 1) / blockSize);
+                int32_t percentComplete = 0;
+                uint32_t baseAddress = offset;
+                int32_t remainderBytes = static_cast<int32_t>(customSize);
+                int32_t bufferIndex = 0;
+                for (uint32_t blockCount = 0; blockCount < totalBlockCount; blockCount++)
+                {
+                    WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+                    WaitForFlashNOTBusy();
+
+                    for (uint32_t dwordCount = 0; dwordCount < dwordsPerBLock; dwordCount++)
+                    {
+                        uint32_t partitionValue = 0xFFFFFFFF;
+                        if (remainderBytes >= 4)
+                        {
+                            partitionValue = (uint32_t)_customFileBuffer[bufferIndex] << 24 |
+                                (uint32_t)_customFileBuffer[bufferIndex + 1] << 16 |
+                                (uint32_t)_customFileBuffer[bufferIndex + 2] << 8 |
+                                (uint32_t)_customFileBuffer[bufferIndex + 3];
+                            bufferIndex += 4;
+                            remainderBytes -= 4;
+                        }
+                        else
+                        {
+                            switch (remainderBytes)
+                            {
+                            case 3:
+                                partitionValue = 0xff;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 1] << 16;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 2] << 8;
+                                break;
+                            case 2:
+                                partitionValue = 0xffff;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex + 1] << 16;
+                                break;
+                            case 1:
+                                partitionValue = 0xffffff;
+                                partitionValue |= (uint32_t)_customFileBuffer[bufferIndex] << 24;
+                                break;
+                            default:
+                                break;
+                            }
+                            remainderBytes = 0;
+                        }
+                        partitionValue = NTV2EndianSwap32(partitionValue);
+                        WriteRegister(kRegXenaxFlashDIN, partitionValue);
+                    }
+                    WriteRegister(kRegXenaxFlashAddress, baseAddress);
+                    WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+
+                    WaitForFlashNOTBusy();
+
+                    baseAddress += blockSize;
+
+                    percentComplete = (blockCount * 100) / totalBlockCount;
+                    if (!_bQuiet)
+                    {
+                        printf("Program status: %i%% (%4d of %4d blocks)\r", percentComplete, blockCount, totalBlockCount);
+                        fflush(stdout);
+                    }
+                }
+            }
+
+            //Protect Device
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x1C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+
+            WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+            WaitForFlashNOTBusy();
+            WriteRegister(kRegXenaxFlashDIN, 0x9C);
+            WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+            WaitForFlashNOTBusy();
+            SetBankSelect(BANK_0);
+        }
+        else
+            throw "Board Can't be opened";
+
+    }
 }
 
 bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)
