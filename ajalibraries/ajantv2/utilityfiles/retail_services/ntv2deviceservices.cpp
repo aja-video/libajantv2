@@ -914,37 +914,50 @@ bool DeviceServices::IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat)
 
 bool DeviceServices::IsCompatibleWithReference(NTV2VideoFormat fbFormat)
 {
-	bool bResult = false;
-
 	// get reference frame rate
 	ULWord status;
 	mCard->ReadInputStatusRegister(&status);
-	NTV2FrameRate rateRef = (NTV2FrameRate)((status>>16)&0xF);
-	NTV2FrameRate rateFb  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	NTV2FrameRate refRate = (NTV2FrameRate)((status>>16)&0xF);
+	NTV2FrameRate fbRate  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	return IsCompatibleWithReference(fbRate, refRate);
+}
 
-	switch(rateFb)
+
+bool DeviceServices::IsCompatibleWithReference(NTV2VideoFormat fbFormat, NTV2VideoFormat inputFormat)
+{
+	NTV2FrameRate fbRate  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	NTV2FrameRate inputRate  = GetNTV2FrameRateFromVideoFormat(inputFormat);
+	return IsCompatibleWithReference(fbRate, inputRate);
+}
+
+
+bool DeviceServices::IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate)
+{
+	bool bResult = false;
+
+	switch(fbRate)
 	{
 		case NTV2_FRAMERATE_6000:
 		case NTV2_FRAMERATE_3000:
 		case NTV2_FRAMERATE_1500:
-			bResult = (rateRef == NTV2_FRAMERATE_6000 || rateRef == NTV2_FRAMERATE_3000);
+			bResult = (inputRate == NTV2_FRAMERATE_6000 || inputRate == NTV2_FRAMERATE_3000);
 			break;
 	
 		case NTV2_FRAMERATE_5994:
 		case NTV2_FRAMERATE_2997:
 		case NTV2_FRAMERATE_1498:
-			bResult = (rateRef == NTV2_FRAMERATE_5994 || rateRef == NTV2_FRAMERATE_2997);
+			bResult = (inputRate == NTV2_FRAMERATE_5994 || inputRate == NTV2_FRAMERATE_2997);
 			break;
 			
 		case NTV2_FRAMERATE_5000:
 		case NTV2_FRAMERATE_2500:
-			bResult = (rateRef == NTV2_FRAMERATE_5000 || rateRef == NTV2_FRAMERATE_2500);
+			bResult = (inputRate == NTV2_FRAMERATE_5000 || inputRate == NTV2_FRAMERATE_2500);
 			break;
 	
 		case NTV2_FRAMERATE_2398:
 		case NTV2_FRAMERATE_2400:
 		default:
-			bResult = (rateRef == rateFb);
+			bResult = (inputRate == fbRate);
 			break;
 	}
 	
@@ -3046,8 +3059,6 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
 	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
 	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
-	//if (lockV2 == true && refSelect == kFreeRun)
-	//	refSelect = kVideoIn;
 	
 	switch (refSelect)
 	{
@@ -3055,59 +3066,71 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	case kFreeRun:
 		mCard->SetReference(NTV2_REFERENCE_FREERUN);
 		break;
+	
 	case kReferenceIn:
 		if (IsCompatibleWithReference(mFb1VideoFormat))
 			mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
 		else
 			mCard->SetReference(NTV2_REFERENCE_FREERUN);
 		break;
+	
 	case kVideoIn:
 		{
-			//Some boards have HDMI some have analog LHi has both
-			switch (mVirtualInputSelect)
+			NTV2VideoFormat inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, NULL);
+			if (IsCompatibleWithReference(mFb1VideoFormat, inputFormat) == false)
 			{
-			default:
-			case NTV2_Input1Select:
-				mCard->SetReference(NTV2_REFERENCE_INPUT1);
-				break;
-			case NTV2_Input2Select:
-				switch(deviceID)
-				{
-				case DEVICE_ID_LHI:
-				case DEVICE_ID_IOEXPRESS:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHE_PLUS:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				default:
-					mCard->SetReference(NTV2_REFERENCE_INPUT2);
-					break;
-				}
-				break;
-			case NTV2_Input3Select:
-				switch(deviceID)
-				{
-				default:
-				case DEVICE_ID_IOXT:
-				case DEVICE_ID_IO4KUFC:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHI:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				}
-				break;
-			case NTV2_Input5Select://Only used by io4k quad id
-				if (lockV2)
-					mCard->SetReference(NTV2_REFERENCE_FREERUN);
-				else
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-				break;
+				mCard->SetReference(NTV2_REFERENCE_FREERUN);
 			}
-		}
+			else
+			{
+				//Some boards have HDMI some have analog LHi has both
+				switch (mVirtualInputSelect)
+				{
+				default:
+				case NTV2_Input1Select:
+					mCard->SetReference(NTV2_REFERENCE_INPUT1);
+					break;
+				case NTV2_Input2Select:
+					switch(deviceID)
+					{
+					case DEVICE_ID_LHI:
+					case DEVICE_ID_IOEXPRESS:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					case DEVICE_ID_LHE_PLUS:
+						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+						break;
+					default:
+						mCard->SetReference(NTV2_REFERENCE_INPUT2);
+						break;
+					}
+					break;
+				case NTV2_Input3Select:
+					switch(deviceID)
+					{
+					default:
+					case DEVICE_ID_IOXT:
+					case DEVICE_ID_IO4KUFC:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					case DEVICE_ID_LHI:
+						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+						break;
+					}
+					break;
+				case NTV2_Input5Select://Only used by io4k quad id
+					if (lockV2)
+						mCard->SetReference(NTV2_REFERENCE_FREERUN);
+					else
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+					break;
+				} // end switch
+			} // end else
+		
+		} // end switch-case
 		break;
-	}
+	
+	}// end switch (refSelect)
 
 	if (mAudioMixerOverrideState == false)
 		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);

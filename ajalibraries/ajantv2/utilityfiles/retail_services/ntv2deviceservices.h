@@ -107,6 +107,8 @@ public:
 	
 	bool IsPulldownConverterMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat);
+	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat, NTV2VideoFormat inputFormat);
+	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
 	bool IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
