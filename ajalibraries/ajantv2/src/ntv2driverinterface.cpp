@@ -725,7 +725,6 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		return false;
 }
 
-
 void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 {
 	mEventCounts [eInterruptType] = mEventCounts [eInterruptType] + 1;
@@ -749,11 +748,6 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 {
 	if (IsKonaIPDevice())
 	{
-        // PSM Hack for pre MB IOIP
-        ULWord hexID = 0x0;
-        ReadRegister (kRegBoardID, &hexID);
-        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
-
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
         if (val == SAREK_IF_VERSION)
@@ -763,7 +757,6 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	}
 	return true;
 }
-
 
 bool CNTV2DriverInterface::IsMBSystemReady()
 {
