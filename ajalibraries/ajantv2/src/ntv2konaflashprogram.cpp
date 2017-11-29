@@ -20,6 +20,7 @@ static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
 const uint32_t axiSpiMACFlashOffset = 0x01F80000;
+const uint32_t axiSpiMcsInfoFlashOffset = 0x01F40000;
 
 using namespace std;
 
@@ -423,28 +424,48 @@ bool CNTV2KonaFlashProgram::ReadHeader(FlashBlockID blockID)
 
 bool CNTV2KonaFlashProgram::ReadInfoString()
 {
-	if (_spiDeviceID != 0x010220)
-		return false;
-	uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
-	SetFlashBlockIDBank(MCS_INFO_BLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> mcsInfoData;
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        if (_spiFlash->Read(axiSpiMcsInfoFlashOffset, mcsInfoData, MAXMCSINFOSIZE))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            _mcsInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        if (_spiDeviceID != 0x010220)
+            return false;
+        uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
+        SetFlashBlockIDBank(MCS_INFO_BLOCK);
 
-	uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
-	uint32_t dwordSizeCount = MAXMCSINFOSIZE / 4;
-	for (uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4)
-	{
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-		WaitForFlashNOTBusy();
-		ReadRegister(kRegXenaxFlashDOUT, &mcsInfoPtr[count]);
-		if (mcsInfoPtr[count] == 0)
-			break;
-	}
-	_mcsInfo = (char*)mcsInfoPtr;
-	delete[] mcsInfoPtr;
-	//Make sure to reset bank to lower
-	SetBankSelect(BANK_0);
+        uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
+        uint32_t dwordSizeCount = MAXMCSINFOSIZE / 4;
+        for (uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4)
+        {
+            WriteRegister(kRegXenaxFlashAddress, baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+            WaitForFlashNOTBusy();
+            ReadRegister(kRegXenaxFlashDOUT, &mcsInfoPtr[count]);
+            if (mcsInfoPtr[count] == 0)
+                break;
+        }
+        _mcsInfo = (char*)mcsInfoPtr;
+        delete[] mcsInfoPtr;
+        //Make sure to reset bank to lower
+        SetBankSelect(BANK_0);
 
-	return true;
+        return true;
+    }
 }
 
 void CNTV2KonaFlashProgram::Program(bool verify)
@@ -1659,16 +1680,20 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
 
         vector<uint8_t> ubootData;
         vector<uint8_t> imageData;
+        vector<uint8_t> mcsInfoData;
         uint16_t ubootPartitionOffset = 0;
         uint16_t imagePartitionOffset = 0;
+        uint16_t mcsInfoPartitionOffset = 0;
         _mcsFile.GetPartition(ubootData, 0x0400, ubootPartitionOffset, false);
         _mcsFile.GetPartition(imageData, 0x0410, imagePartitionOffset, false);
+        _mcsFile.GetPartition(mcsInfoData, 0x05F4, mcsInfoPartitionOffset, false);
 
         uint32_t ubootFlashOffset = 0x000000;
         uint32_t imageFlashOffset = 0x100000;
 
         uint32_t ubootSize = uint32_t(ubootData.size());
         uint32_t imageSize = uint32_t(imageData.size());
+        uint32_t mcsInfoSize = uint32_t(mcsInfoData.size());
 
         // erase uboot
         _spiFlash->Erase(ubootFlashOffset, ubootSize);
@@ -1692,6 +1717,18 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
         if (verify)
         {
             _spiFlash->Verify(imageFlashOffset, imageData);
+        }
+
+        // erase mcs info
+        _spiFlash->Erase(axiSpiMcsInfoFlashOffset, mcsInfoSize);
+
+        // write mcs info
+        _spiFlash->Write(axiSpiMcsInfoFlashOffset, mcsInfoData, mcsInfoSize);
+
+        // verify mcs info
+        if (verify)
+        {
+            _spiFlash->Verify(axiSpiMcsInfoFlashOffset, mcsInfoData);
         }
 
         return true;
