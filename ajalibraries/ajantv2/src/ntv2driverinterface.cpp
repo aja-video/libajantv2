@@ -762,11 +762,6 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
 	{
-        // PSM Hack for pre MB IOIP
-        ULWord hexID = 0x0;
-        ReadRegister (kRegBoardID, &hexID);
-        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
-
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
         if (val != 0x01)
