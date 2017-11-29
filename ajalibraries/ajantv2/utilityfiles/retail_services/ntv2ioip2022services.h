@@ -27,6 +27,12 @@ public:
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat (
 									NTV2VideoFormat fbVideoFormat,
 									NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+    
+protected:
+    bool	notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config);
+    bool	notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config);
+
+    CNTV2Config2022     * config;
 };
 
 

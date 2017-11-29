@@ -2077,6 +2077,34 @@ void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, b
     }
 }
 
+bool DeviceServices::IsValidConfig(const rx2022Config & virtual_config, bool is2022_7)
+{
+    if (virtual_config.rxc_primaryRxMatch == 0) return false;
+    if (virtual_config.rxc_primaryDestIp == 0) return false;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.rxc_secondaryRxMatch == 0) return false;
+        if (virtual_config.rxc_secondaryDestIp == 0) return false;
+    }
+    return true;
+}
+
+bool DeviceServices::IsValidConfig(const tx2022Config & virtual_config, bool is2022_7)
+{
+    if (virtual_config.txc_primaryRemoteIp == 0) return false;
+    if (virtual_config.txc_primaryRemotePort == 0) return false;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.txc_secondaryRemoteIp == 0) return false;
+        if (virtual_config.txc_secondaryRemotePort == 0) return false;
+    }
+    return true;
+}
+
 void DeviceServices::SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
 {
     uint32_t errCode;

@@ -1195,7 +1195,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
 			(deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
 		{
-            if (isValidConfig(mRx2022Config1))
+            if (IsValidConfig(mRx2022Config1, false))
             {
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1, rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1, enableChCard);
@@ -1259,7 +1259,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
 			{
-                if (isValidConfig(mRx2022Config2))
+                if (IsValidConfig(mRx2022Config2, false))
                 {
                     rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
                     rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
@@ -1327,7 +1327,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
 			(deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
 		{
-            if (isValidConfig(mTx2022Config3))
+            if (IsValidConfig(mTx2022Config3, false))
             {
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL1, txHwConfig);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL1, enableChCard);
@@ -1401,7 +1401,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			
 			if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
 			{
-                if (isValidConfig(mTx2022Config4))
+                if (IsValidConfig(mTx2022Config4, false))
                 {
                     rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL2, txHwConfig);
                     rv2 = config->GetTxChannelEnable(NTV2_CHANNEL2, enableChCard);
@@ -1952,34 +1952,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
-}
-
-bool KonaIPJ2kServices::isValidConfig(const rx2022Config & virtual_config)
-{
-    if (virtual_config.rxc_primaryRxMatch == 0) return false;
-    if (virtual_config.rxc_primaryDestIp == 0) return false;
-    
-    // We only care about looking at secondary settings if we are doing 2022_7
-    if (m2022_7Mode)
-    {
-        if (virtual_config.rxc_secondaryRxMatch == 0) return false;
-        if (virtual_config.rxc_secondaryDestIp == 0) return false;
-    }
-    return true;
-}
-
-bool KonaIPJ2kServices::isValidConfig(const tx2022Config & virtual_config)
-{
-    if (virtual_config.txc_primaryRemoteIp == 0) return false;
-    if (virtual_config.txc_primaryRemotePort == 0) return false;
-    
-    // We only care about looking at secondary settings if we are doing 2022_7
-    if (m2022_7Mode)
-    {
-        if (virtual_config.txc_secondaryRemoteIp == 0) return false;
-        if (virtual_config.txc_secondaryRemotePort == 0) return false;
-    }
-    return true;
 }
 
 bool  KonaIPJ2kServices::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
