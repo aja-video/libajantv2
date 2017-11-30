@@ -1427,12 +1427,21 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
         if ( !ParseHeader((char *)_bitFileBuffer) )
             throw "Can't Parse Header";
 
-        Program(verify);
+        try
+        {
+            // handle the fpga part
+            Program(verify);
 
-        // handle the SOC part
-        ProgramSOC(verify);
+            // handle the SOC part
+            return ProgramSOC(verify);
+        }
+        catch (const char* Message)
+        {
+            printf("%s\n", Message);
+            return false;
+        }
 
-        return true;
+        return false;
     }
     else
     {
@@ -1685,8 +1694,25 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
         uint16_t imagePartitionOffset = 0;
         uint16_t mcsInfoPartitionOffset = 0;
         _mcsFile.GetPartition(ubootData, 0x0400, ubootPartitionOffset, false);
+        if (ubootData.empty())
+        {
+            printf("Could not find uboot data in MCS file\n");
+            return false;
+        }
+
         _mcsFile.GetPartition(imageData, 0x0410, imagePartitionOffset, false);
+        if (imageData.empty())
+        {
+            printf("Could not find kernel data in MCS file\n");
+            return false;
+        }
+
         _mcsFile.GetPartition(mcsInfoData, 0x05F4, mcsInfoPartitionOffset, false);
+        if (mcsInfoData.empty())
+        {
+            printf("Could not find mcs info in MCS file\n");
+            return false;
+        }
 
         uint32_t ubootFlashOffset = 0x000000;
         uint32_t imageFlashOffset = 0x100000;
