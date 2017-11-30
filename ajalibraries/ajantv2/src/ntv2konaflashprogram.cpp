@@ -19,8 +19,9 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
-const uint32_t axiSpiMACFlashOffset = 0x01F80000;
+const uint32_t axiSpiLicenseOffset      = 0x01F00000;
 const uint32_t axiSpiMcsInfoFlashOffset = 0x01F40000;
+const uint32_t axiSpiMACFlashOffset     = 0x01F80000;
 
 using namespace std;
 
@@ -1267,88 +1268,160 @@ CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
 	if(!IsKonaIPDevice())
 		return false;
 
-	EraseBlock(LICENSE_BLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> licenseData;
+        string::iterator it = licenseString.begin();
+        while(it != licenseString.end())
+        {
+            licenseData.push_back(*it);
+            ++it;
+        }
+        licenseData.push_back(0);
 
-	SetFlashBlockIDBank(LICENSE_BLOCK);
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        _spiFlash->Erase(axiSpiLicenseOffset, uint32_t(licenseData.size()));
+        if (_spiFlash->Write(axiSpiLicenseOffset, licenseData, uint32_t(licenseData.size())))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
 
-	ULWord sectorAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+        EraseBlock(LICENSE_BLOCK);
 
-    int len =  (int)licenseString.length();
-    int words = (len/4) + 2;
-    char * data8     = (char*)malloc(words*4);
-    ULWord  * data32 = (ULWord*)data8;
-    memset(data8,0x0,words*4);
-    strcat(data8,licenseString.c_str());
+        SetFlashBlockIDBank(LICENSE_BLOCK);
 
-	SetBankSelect(BANK_1);
+        ULWord sectorAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
 
-    for(int i = 0; i < words; i++)
-	{
-        ProgramFlashValue(sectorAddress, data32[i]);
-        sectorAddress += 4;
-	}
+        int len =  (int)licenseString.length();
+        int words = (len/4) + 2;
+        char * data8     = (char*)malloc(words*4);
+        ULWord  * data32 = (ULWord*)data8;
+        memset(data8,0x0,words*4);
+        strcat(data8,licenseString.c_str());
 
-    free(data8);
+        SetBankSelect(BANK_1);
 
-	// Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
-	SetBankSelect(BANK_0);
+        for(int i = 0; i < words; i++)
+        {
+            ProgramFlashValue(sectorAddress, data32[i]);
+            sectorAddress += 4;
+        }
 
-	return true;
+        free(data8);
+
+        // Protect Device
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x1C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x9C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
+        SetBankSelect(BANK_0);
+
+        return true;
+    }
+    return true;
 }
 
 bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
 {
-#define MAX_SIZE 100
+    const uint32_t maxSize = 100;
 
-    ULWord license[MAX_SIZE];
-    memset (license,0x0,sizeof(license));
+    if(!IsKonaIPDevice())
+        return false;
 
-	if(!IsKonaIPDevice())
-		return false;
-
-	uint32_t baseAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
-	SetFlashBlockIDBank(LICENSE_BLOCK);
-
-    bool terminated = false;
-    bool good = false;
-    for(int i = 0; i < MAX_SIZE; i++)
-	{
-		WriteRegister(kRegXenaxFlashAddress,baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
-		WaitForFlashNOTBusy();
-        ReadRegister(kRegXenaxFlashDOUT,&license[i]);
-        if (license[i] == 0xffffffff)
-        {
-            good = true; // uninitialized memory
-            break;
-        }
-        if (license[i] == 0)
-        {
-            good       = true;
-            terminated = true;
-            break;
-        }
-        baseAddress += 4;
-	}
-
-    std::string res;
-    if (terminated)
+    if (_spiFlash)
     {
-        res = (char*)license;
+        vector<uint8_t> licenseData;
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        if (_spiFlash->Read(axiSpiLicenseOffset, licenseData, maxSize))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            serialString = "";
+            if (licenseData.size() < 4)
+            {
+                return false;
+            }
+            else if ((uint32_t)&licenseData[0] == 0xffffffff)
+            {
+                return false;
+            }
+            else
+            {
+                serialString.assign(licenseData.begin(), licenseData.end());
+
+                // remove any trailing nulls
+                size_t found = serialString.find('\0');
+                if (found != string::npos)
+                {
+                    serialString.resize(found);
+                }
+            }
+
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        ULWord license[maxSize];
+        memset (license,0x0,sizeof(license));
+
+        uint32_t baseAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+        SetFlashBlockIDBank(LICENSE_BLOCK);
+
+        bool terminated = false;
+        bool good = false;
+        for(int i = 0; i < maxSize; i++)
+        {
+            WriteRegister(kRegXenaxFlashAddress,baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
+            WaitForFlashNOTBusy();
+            ReadRegister(kRegXenaxFlashDOUT,&license[i]);
+            if (license[i] == 0xffffffff)
+            {
+                good = true; // uninitialized memory
+                break;
+            }
+            if (license[i] == 0)
+            {
+                good       = true;
+                terminated = true;
+                break;
+            }
+            baseAddress += 4;
+        }
+
+        std::string res;
+        if (terminated)
+        {
+            res = (char*)license;
+        }
+
+        serialString = res;
+        return good;
     }
 
-    serialString = res;
-    return good;
+    return true;
 }
 
 bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
