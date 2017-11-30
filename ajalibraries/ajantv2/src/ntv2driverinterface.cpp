@@ -12,6 +12,7 @@
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
 #include "ntv2registers2022.h"
+#include "ntv2spiinterface.h"
 
 #include <string.h>
 #include <assert.h>
@@ -523,83 +524,113 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 	}
 }
 
- bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
- {
-     ULWord baseAddress = (16 * 1024 * 1024) - (3 * 256 * 1024);
-     ULWord* bitFilePtr =  new ULWord[256/4];
-     ULWord dwordSizeCount = 256/4;
+bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
+{
+    if(!IsDeviceReady(false) || !IsKonaIPDevice())
+    {
+        // cannot read flash
+        return false;
+    }
 
-     if(!IsDeviceReady(false) || !IsKonaIPDevice())
-     {
-         // cannot read flash
-         return false;
-     }
+    string packInfo;
+    ULWord deviceID = (ULWord)_boardID;
+    ReadRegister (kRegBoardID, &deviceID);
 
-     WriteRegister(kRegXenaxFlashAddress, (ULWord)1);   // bank 1
-     WriteRegister(kRegXenaxFlashControlStatus, 0x17);
-     bool busy = true;
-     ULWord timeoutCount = 1000;
-     do
-     {
-         ULWord regValue;
-         ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-         if (regValue & BIT(8))
-         {
-             busy = true;
-             timeoutCount--;
-         }
-         else
-             busy = false;
-     } while (busy == true && timeoutCount > 0);
-     if (timeoutCount == 0)
-         return false;
+    if (CNTV2AxiSpiFlash::DeviceSupported((NTV2DeviceID)deviceID))
+    {
+        CNTV2AxiSpiFlash spiFlash(_boardNumber, false);
+        const uint32_t axiSpiMcsInfoFlashOffset = 0x01F40000;
 
+        vector<uint8_t> mcsInfoData;
+        if (spiFlash.Read(axiSpiMcsInfoFlashOffset, mcsInfoData, 256))
+        {
+            packInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
 
-     for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
-     {
-         WriteRegister(kRegXenaxFlashAddress, baseAddress);
-         WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
-         busy = true;
-         timeoutCount = 1000;
-         do
-         {
-             ULWord regValue;
-             ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-             if ( regValue & BIT(8))
-             {
-                 busy = true;
-                 timeoutCount--;
-             }
-             else
-                 busy = false;
-         } while(busy == true && timeoutCount > 0);
-         if (timeoutCount == 0)
-             return false;
-         ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
-     }
+            // remove any trailing nulls
+            size_t found = packInfo.find('\0');
+            if (found != string::npos)
+            {
+                packInfo.resize(found);
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        ULWord baseAddress = (16 * 1024 * 1024) - (3 * 256 * 1024);
+        ULWord* bitFilePtr =  new ULWord[256/4];
+        ULWord dwordSizeCount = 256/4;
 
-     string packInfo = (char*)bitFilePtr;
-     istringstream iss(packInfo);
-     vector<string> results;
-     string token;
-     while (getline(iss,token, ' '))
-     {
-         results.push_back(token);
-     }
+        WriteRegister(kRegXenaxFlashAddress, (ULWord)1);   // bank 1
+        WriteRegister(kRegXenaxFlashControlStatus, 0x17);
+        bool busy = true;
+        ULWord timeoutCount = 1000;
+        do
+        {
+            ULWord regValue;
+            ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+            if (regValue & BIT(8))
+            {
+                busy = true;
+                timeoutCount--;
+            }
+            else
+                busy = false;
+        } while (busy == true && timeoutCount > 0);
+        if (timeoutCount == 0)
+            return false;
 
-     if (results.size() < 8)
-     {
-         return false;
-     }
+        for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
+        {
+            WriteRegister(kRegXenaxFlashAddress, baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
+            busy = true;
+            timeoutCount = 1000;
+            do
+            {
+                ULWord regValue;
+                ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+                if ( regValue & BIT(8))
+                {
+                    busy = true;
+                    timeoutCount--;
+                }
+                else
+                    busy = false;
+            } while(busy == true && timeoutCount > 0);
+            if (timeoutCount == 0)
+                return false;
+            ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
+        }
 
-     packageInfo.date = results[1];
-     token = results[2];
-     token.erase(remove(token.begin(), token.end(), '\n'), token.end());
-     packageInfo.time = token;
-     packageInfo.buildNumber   = results[4];
-     packageInfo.packageNumber = results[7];
-     return true;
- }
+        packInfo = (char*)bitFilePtr;
+    }
+
+    istringstream iss(packInfo);
+    vector<string> results;
+    string token;
+    while (getline(iss,token, ' '))
+    {
+        results.push_back(token);
+    }
+
+    if (results.size() < 8)
+    {
+        return false;
+    }
+
+    packageInfo.date = results[1];
+    token = results[2];
+    token.erase(remove(token.begin(), token.end(), '\n'), token.end());
+    packageInfo.time = token;
+    packageInfo.buildNumber   = results[4];
+    packageInfo.packageNumber = results[7];
+
+    return true;
+}
 
 // Common remote card DriverGetBuildInformation.  Subclasses have overloaded function
 // that does platform-specific function on local cards.
