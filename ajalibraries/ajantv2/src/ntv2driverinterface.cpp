@@ -545,6 +545,13 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
         if (spiFlash.Read(axiSpiMcsInfoFlashOffset, mcsInfoData, 256))
         {
             packInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
+
+            // remove any trailing nulls
+            size_t found = packInfo.find('\0');
+            if (found != string::npos)
+            {
+                packInfo.resize(found);
+            }
         }
         else
         {
@@ -620,16 +627,8 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
     token.erase(remove(token.begin(), token.end(), '\n'), token.end());
     packageInfo.time = token;
     packageInfo.buildNumber   = results[4];
-
-    // remove any trailing nulls
     packageInfo.packageNumber = results[7];
-    token = results[7];
-    size_t found = token.find('\0');
-    if (found != string::npos)
-    {
-        token.resize(found);
-        packageInfo.packageNumber = token;
-    }
+
     return true;
 }
 
