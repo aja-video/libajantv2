@@ -1357,7 +1357,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
             {
                 return false;
             }
-            else if ((uint32_t)&licenseData[0] == 0xffffffff)
+            else if (*((uint32_t*)&licenseData[0]) == 0xffffffff)
             {
                 return false;
             }
