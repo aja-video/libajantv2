@@ -122,13 +122,14 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			{
 				ostringstream	oss;
 				NTV2DeviceInfo	info;
+				bool bRetail = tmpDevice.DeviceIsDNxIV();
 
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
 				info.pciSlot			= tmpDevice.GetPCISlotNumber ();
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber ();
 
-				oss << ::NTV2DeviceIDToString (deviceID) << " - " << boardNum;
+				oss << ::NTV2DeviceIDToString (deviceID, bRetail) << " - " << boardNum;
 				if (info.pciSlot)
 					oss << ", Slot " << info.pciSlot;
 
