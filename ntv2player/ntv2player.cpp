@@ -236,7 +236,7 @@ AJAStatus NTV2Player::SetUpVideo ()
 
 	mDevice.SetFrameBufferFormat (mOutputChannel, mPixelFormat);
 	if(mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_2110 ||
-		mDeviceID == DEVICE_ID_KONAIP_4TX_2110)
+		mDeviceID == DEVICE_ID_KONAIP_2110)
 	{
 		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
 	}
