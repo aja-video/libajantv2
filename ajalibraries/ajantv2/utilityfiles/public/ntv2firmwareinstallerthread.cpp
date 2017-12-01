@@ -483,7 +483,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
                     designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
                     designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4TX_2110) ||
+					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110) ||
 					designName == "s2022_56_2p2ch_rxtx_mb" ||
                     designName == "s2022_12_2ch_tx_spoof" ||
                     designName == "s2022_12_2ch_tx" ||
@@ -499,14 +499,14 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_4TX_2110:
+	case DEVICE_ID_KONAIP_2110:
         return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2RX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4TX_2110) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110) ||
                 designName == "s2022_56_2p2ch_rxtx_mb" ||
                 designName == "s2022_12_2ch_tx_spoof" ||
                 designName == "s2022_12_2ch_tx" ||
@@ -553,7 +553,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
 		case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
         case DEVICE_ID_IOIP_2022:                   return "ioip_s2022";
         case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
-        case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx";
+        case DEVICE_ID_KONAIP_2110:                 return "konaip_s2110";
 		default: return "";
 	}
 }

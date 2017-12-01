@@ -4079,7 +4079,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
-        case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
+        case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
 #if !defined (_DEBUG)
 	    default:					break;
 #endif
@@ -7517,7 +7517,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
-            case DEVICE_ID_KONAIP_4TX_2110:             return "kip_s2110.mcs";
+            case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
             default:									return "";
 		}
 	#endif	//	else not MSWindows
@@ -7618,7 +7618,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_IO4KPLUS,
                                                         DEVICE_ID_IOIP_2022,
                                                         DEVICE_ID_IOIP_2110,
-                                                        DEVICE_ID_KONAIP_4TX_2110,
+                                                        DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)

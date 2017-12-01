@@ -204,7 +204,7 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_IO4KPLUS:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_KONAIP_2110:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
 	default:
@@ -269,7 +269,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_IO4KPLUS:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_KONAIP_2110:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -373,7 +373,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_IO4KPLUS:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_KONAIP_2110:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -436,7 +436,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_IO4KPLUS:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_4TX_2110:
+    case DEVICE_ID_KONAIP_2110:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -840,7 +840,7 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_kip_j2k2txMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_1RX_1TX_2110:
             return xpt_kip_2100_1rxtxMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_4TX_2110:
+        case DEVICE_ID_KONAIP_2110:
             return xpt_kip_2100_4txMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
             return xpt_kip_j2k1rxtxMatrix[inInputXpt][inOutputXpt];
