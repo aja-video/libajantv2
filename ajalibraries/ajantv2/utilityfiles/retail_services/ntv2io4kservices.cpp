@@ -1541,23 +1541,23 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && 
 													  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
 													   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool						bHdmiIn             = (mVirtualInputSelect == NTV2_Input5Select);
+	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && 
+	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
+	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	//bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	//bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
+	//bool						b4xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
 	bool						bStereoIn			= false;
 	int							bCh1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bCh2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bCh3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bCh4Disable			= 1;		// Assume Channel 2 IS disabled by default
 	
-	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
-	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 	NTV2FrameBufferFormat		fbFormatCh1;
+	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
@@ -1600,15 +1600,15 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// SDI In 4
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
-	
-    // frame buffer format
-    mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
+
+	// frame buffer format
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
     
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	NTV2_IS_3Gb_FORMAT(inputFormat);
 
 	// input 1 select
+	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
 		inHdYUV1 = NTV2_XptSDIIn1;
@@ -1691,6 +1691,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	b2pi		= b425In || (bHdmiIn && b4K);				
 	bInRGB		= (bHdmiIn == false && inputFormatSelect == NTV2_RGBSelect) ||
 				  (bHdmiIn == true && bHdmiInRGB == true);
+	
 
 	// 4K input routing
 	in4kRGB1 = in4kRGB2 = in4kRGB3 = in4kRGB4 = NTV2_XptBlack;
@@ -1720,7 +1721,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn1DS2;
 			in4kYUV3 = NTV2_XptSDIIn2;		in4kYUV4 = NTV2_XptSDIIn2DS2;
 		}
-		else							// SDI-4Wire-YUV
+		else								// SDI-4Wire-YUV
 		{
 			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn2;
 			in4kYUV3 = NTV2_XptSDIIn3;		in4kYUV4 = NTV2_XptSDIIn4;
@@ -1741,43 +1742,21 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fbFormatCh1);
 		}
 	}
-
-	// SMPTE 425
-	ULWord vpida           = 0;
-	ULWord vpidb           = 0;
-	bool b425_2wire        = false;
-	bool b425_4wireA       = false;
-	bool b425_4wireB       = false;
-		
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
-	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	CNTV2VPID parser;
-	parser.SetVPID(vpida);
-	VPIDStandard std = parser.GetStandard();
-	b425_2wire  = (std == VPIDStandard_2160_DualLink);
-	b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
-
-	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
-
-	// override inputFormatSelect for SMTE425
-	if (b425)
-	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
-		{
-			inputFormatSelect = NTV2_YUVSelect;
-		}
-		else
-		{
-			inputFormatSelect = NTV2_RGBSelect;
-		}
-	}
-
+	
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b425, NTV2_CHANNEL1);
+	mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
 	
-	
+	// Mixer/Keyer
+	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2FGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2FGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2BGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2BGKeyInput, NTV2_XptBlack);
+
+
 	// Dual Link In 1
 	if (bHdmiIn)
 	{
@@ -1786,18 +1765,18 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else
 	{
-		if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+		if (b4K && bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptSDIIn1);
-			mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptSDIIn1DS2);
+			mCard->Connect (NTV2_XptDualLinkIn1Input, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
+			mCard->Connect (NTV2_XptDualLinkIn1DSInput, bQuadSwap ? NTV2_XptSDIIn3DS2 : NTV2_XptSDIIn1DS2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
-			mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
-			
-			inputXptYUV1 = NTV2_XptCSC1VidYUV;
-			inputXptYUV2 = NTV2_XptBlack;
+			mCard->Connect (NTV2_XptDualLinkIn1Input, inHdYUV1);
+			mCard->Connect (NTV2_XptDualLinkIn1DSInput, inHdYUV2);
+
+			inHdYUV1 = NTV2_XptCSC1VidYUV;
+			inHdYUV2 = NTV2_XptBlack;
 		}
 		else
 		{
@@ -1805,7 +1784,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
 		}
 	}
-	
+
 	// Dual Link In 2
 	if (bHdmiIn)
 	{
@@ -1814,10 +1793,10 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else
 	{
-		if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+		if (b4K && bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkIn2Input, NTV2_XptSDIIn2);
-			mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptSDIIn2DS2);
+			mCard->Connect (NTV2_XptDualLinkIn2Input, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
+			mCard->Connect (NTV2_XptDualLinkIn2DSInput, bQuadSwap ? NTV2_XptSDIIn4DS2 : NTV2_XptSDIIn2DS2);
 		}
 		else
 		{
@@ -1825,8 +1804,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptBlack);
 		}
 	}
-	
-	
+
+
 	// Dual Link In 3
 	if (bHdmiIn)
 	{
@@ -1835,10 +1814,10 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else
 	{
-		if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+		if (b4K && bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkIn3Input, NTV2_XptSDIIn3);
-			mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptSDIIn3DS2);
+			mCard->Connect (NTV2_XptDualLinkIn3Input, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
+			mCard->Connect (NTV2_XptDualLinkIn3DSInput, bQuadSwap ? NTV2_XptSDIIn1DS2 : NTV2_XptSDIIn3DS2);
 		}
 		else
 		{
@@ -1846,8 +1825,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptBlack);
 		}
 	}
-	
-	
+
+
 	// Dual Link In 4
 	if (bHdmiIn)
 	{
@@ -1856,10 +1835,10 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	}
 	else
 	{
-		if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+		if (b4K && bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkIn4Input, NTV2_XptSDIIn4);
-			mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptSDIIn4DS2);
+			mCard->Connect (NTV2_XptDualLinkIn4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
+			mCard->Connect (NTV2_XptDualLinkIn4DSInput, bQuadSwap ? NTV2_XptSDIIn2DS2 : NTV2_XptSDIIn4DS2);
 		}
 		else
 		{
@@ -1867,8 +1846,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptBlack);
 		}
 	}
-	
-	
+
+
 	// CSC 1
 	if (b4K)
 	{
@@ -1903,8 +1882,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
-	
-	
+
+
 	// CSC 2
 	if (b4K)
 	{
@@ -1925,8 +1904,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptCSC2VidInput, inHdYUV2);
 	}
-	
-	
+
+
 	// CSC 3
 	if (b4K)
 	{
@@ -1987,8 +1966,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// LUT 1
 	// note b4K processing is same
 	if (!bInRGB)
@@ -2131,8 +2110,9 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptLUT5Input, NTV2_XptBlack);
 	}
-	
-	
+
+
+
 	// Dual Link Out 1
 	if (!bSdiOutRGB || !b4K)
 	{
@@ -2259,8 +2239,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptDualLinkOut5Input, bInRGB ? inHdRGB1 : NTV2_XptLUT1RGB);
 	}
-	
-	
+
+
 	// 425 Mux
 	if (b4K && b2pi)
 	{
@@ -2310,7 +2290,9 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux4BInput, NTV2_XptBlack);
 	}
-	
+
+
+	// Frame Buffer 1
 	if (b2pi)
 	{
 		if (bFb1RGB)
@@ -2643,8 +2625,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// Frame Buffer Disabling
 	if (bLevelBFormat || bStereoIn || m2XTransferMode)
 	{
@@ -2706,7 +2688,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	mCard->Connect (NTV2_Xpt4KDCQ3Input, XPt3);
 	mCard->Connect (NTV2_Xpt4KDCQ4Input, XPt4);
 
-	
+
+
 	// SDI Out 1
 	if (b4K)
 	{
@@ -2915,7 +2898,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 	}
 
-	
+
 	// SDI Out 5
 	if (bSdiOutRGB)			// RGB Out - alway use DL
 	{
@@ -2956,8 +2939,8 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// HDMI Out
 	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
 	if (b4K)
@@ -2973,7 +2956,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 					mCard->SetHDMIV2TxBypass(true);
 					break;
 				case NTV2_Quarter4k:
-					XPt1 = XPt1 = (b425) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB;
+					XPt1 = XPt1 = (b2pi) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB;
 					mCard->SetHDMIV2TxBypass(false);
 					break;
 				//The modes below are not supported yet. Requires 4k hdmi in -> hd hdmi out
@@ -2989,7 +2972,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			if (b4kHfr && (inputFormatSelect != NTV2_RGBSelect))
 			{
 				// YUV to HDMI Out
-				if (b425)
+				if (b2pi)
 				{
 					switch (mVirtualHDMIOutputSelect)
 					{
@@ -3051,7 +3034,7 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 					XPt3 = NTV2_XptLUT3Out;
 					XPt4 = NTV2_XptLUT4Out;
 					break;
-				case NTV2_Quarter4k:       XPt1 = (b425) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB; break;
+				case NTV2_Quarter4k:       XPt1 = (b2pi) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB; break;
 				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
