@@ -417,8 +417,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 #if 0
     printf("designName name %s\n", designName.c_str());
 
-    name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP);
-    printf("DEVICE_ID_KONAIP_4CH_1SFP name %s\n", name.c_str());
+    name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2022);
+    printf("DEVICE_ID_KONAIP_2022 name %s\n", name.c_str());
 
     name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP);
     printf("DEVICE_ID_KONAIP_4CH_2SFP name %s\n", name.c_str());
@@ -478,7 +478,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 	{
 		if (m_device.IsKonaIPDevice())
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
+					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
                     designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
                     designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
@@ -493,14 +493,14 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 		else
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC));
 	}
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
     case DEVICE_ID_KONAIP_4CH_2SFP:
     case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_KONAIP_2110:
-        return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_1SFP) ||
+        return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
@@ -544,7 +544,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie";               //	lhe_12_pcie.ncd
         case DEVICE_ID_LHI:							return "top_pike";                  //	top_pike.ncd
         case DEVICE_ID_TTAP:						return "t_tap_top";                 //	t_tap_top.ncd
-        case DEVICE_ID_KONAIP_4CH_1SFP:				return "s2022_56_4ch_rxtx";         //	konaip22
+        case DEVICE_ID_KONAIP_2022:                 return "konaip_s2022";              //	konaip22
         case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx";
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx_mb";

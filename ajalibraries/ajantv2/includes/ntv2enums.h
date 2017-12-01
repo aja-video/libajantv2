@@ -207,7 +207,6 @@ typedef enum
     DEVICE_ID_KONALHI					= 0x10266400,
     DEVICE_ID_KONALHIDVI				= 0x10266401,
     DEVICE_ID_TTAP						= 0x10416000,
-    DEVICE_ID_KONAIP_4CH_1SFP			= 0x10646700,
     DEVICE_ID_KONAIP_2022               = 0x10646700,
     DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,
     DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,
@@ -225,9 +224,9 @@ typedef enum
     DEVICE_ID_LHE_PLUS				= DEVICE_ID_KONALHEPLUS,	//	Will deprecate eventually
     DEVICE_ID_LHI					= DEVICE_ID_KONALHI,		//	Will deprecate eventually
     DEVICE_ID_LHI_DVI				= DEVICE_ID_KONALHIDVI,		//	Will deprecate eventually
-    DEVICE_ID_KONAIP22				= DEVICE_ID_KONAIP_4CH_1SFP,//	Will deprecate eventually
+    DEVICE_ID_KONAIP22				= DEVICE_ID_KONAIP_2022,    //	Will deprecate eventually
     DEVICE_ID_KONAIP4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
-    DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_4CH_1SFP,//	Will deprecate eventually
+    DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,    //	Will deprecate eventually
     DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
     DEVICE_ID_NOTFOUND				= -1
 
@@ -2919,7 +2918,7 @@ typedef enum
     NTV2_BITFILE_CORVID88           = 41,
     NTV2_BITFILE_CORVID44           = 42,
     NTV2_BITFILE_CORVIDHEVC         = 43,
-    NTV2_BITFILE_KONAIP_4CH_1SFP    = 44,
+    NTV2_BITFILE_KONAIP_2022        = 44,
     NTV2_BITFILE_KONAIP_4CH_2SFP    = 45,
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,

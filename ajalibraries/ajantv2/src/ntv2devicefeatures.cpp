@@ -195,7 +195,7 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_CORVID88:
 	case DEVICE_ID_CORVID44:
     case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -261,7 +261,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_CORVID44:
     case DEVICE_ID_CORVIDHEVC:
 	case DEVICE_ID_CORVIDHBR:
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -365,7 +365,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_CORVID88:
 	case DEVICE_ID_CORVID44:
     case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -427,7 +427,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVID88:
 	case DEVICE_ID_CORVID44:
     case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -832,7 +832,7 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_kona4Matrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONA4UFC:
             return xpt_kona4_ufcMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_4CH_1SFP:
+        case DEVICE_ID_KONAIP_2022:
             return xpt_kip_4rxtxMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_4CH_2SFP:
             return xpt_kip_2p2rxtcMatrix[inInputXpt][inOutputXpt];
