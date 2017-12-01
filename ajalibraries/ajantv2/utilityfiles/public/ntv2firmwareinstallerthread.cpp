@@ -435,8 +435,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110);
 	printf("DEVICE_ID_KONAIP_1RX_1TX_2110 name %s\n", name.c_str());
 
-    name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4TX_2110);
-    printf("DEVICE_ID_KONAIP_4TX_2110 name %s\n", name.c_str());
+    name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2110);
+    printf("DEVICE_ID_KONAIP_2110 name %s\n", name.c_str());
 
     name = GetPrimaryDesignName(DEVICE_ID_IOIP_2022);
     printf("DEVICE_ID_IOIP_2022 name %s\n", name.c_str());
