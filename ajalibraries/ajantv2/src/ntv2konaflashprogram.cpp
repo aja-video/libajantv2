@@ -426,7 +426,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
         vector<uint8_t> mcsInfoData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        uint32_t offset = _spiFlash->Offset(MCSINFO_SECTION_ID);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MCSINFO);
         if (_spiFlash->Read(offset, mcsInfoData, MAXMCSINFOSIZE))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
@@ -1104,7 +1104,7 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        uint32_t offset = _spiFlash->Offset(MAC_SECTION_ID);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MAC);
         _spiFlash->Erase(offset, uint32_t(macData.size()));
         if (_spiFlash->Write(offset, macData, uint32_t(macData.size())))
         {
@@ -1182,7 +1182,7 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
         vector<uint8_t> macData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        uint32_t offset = _spiFlash->Offset(MAC_SECTION_ID);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MAC);
         if (_spiFlash->Read(offset, macData, 16))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
@@ -1280,7 +1280,7 @@ CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
 
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        uint32_t offset = _spiFlash->Offset(LICENSE_SECTION_ID);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_LICENSE);
         _spiFlash->Erase(offset, uint32_t(licenseData.size()));
         if (_spiFlash->Write(offset, licenseData, uint32_t(licenseData.size())))
         {
@@ -1348,7 +1348,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
     {
         vector<uint8_t> licenseData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
-        uint32_t offset = _spiFlash->Offset(LICENSE_SECTION_ID);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_LICENSE);
         _spiFlash->SetVerbosity(false);
         if (_spiFlash->Read(offset, licenseData, maxSize))
         {
@@ -1788,9 +1788,9 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
             return false;
         }
 
-        uint32_t ubootFlashOffset = _spiFlash->Offset(UBOOT_SECTION_ID);
-        uint32_t imageFlashOffset = _spiFlash->Offset(KERNEL_SECTION_ID);
-        uint32_t mcsFlashOffset   = _spiFlash->Offset(MCSINFO_SECTION_ID);
+        uint32_t ubootFlashOffset = _spiFlash->Offset(SPI_FLASH_SECTION_UBOOT);
+        uint32_t imageFlashOffset = _spiFlash->Offset(SPI_FLASH_SECTION_KERNEL);
+        uint32_t mcsFlashOffset   = _spiFlash->Offset(SPI_FLASH_SECTION_MCSINFO);
 
         uint32_t ubootSize = uint32_t(ubootData.size());
         uint32_t imageSize = uint32_t(imageData.size());

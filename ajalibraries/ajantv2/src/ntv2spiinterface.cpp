@@ -458,19 +458,19 @@ bool CNTV2AxiSpiFlash::Verify(const uint32_t address, const std::vector<uint8_t>
     return verify_vectors(dataWritten, verifyData, mVerbose);
 }
 
-uint32_t CNTV2AxiSpiFlash::Size(SpiFlashSectionID sectionID)
+uint32_t CNTV2AxiSpiFlash::Size(SpiFlashSection sectionID)
 {
     uint32_t retVal = 0;
 
     switch(sectionID)
     {
-        case UBOOT_SECTION_ID:      retVal = 0x00080000; break;
-        case KERNEL_SECTION_ID:     retVal = 0x00C00000; break;
-        case LICENSE_SECTION_ID:    retVal = 0x00040000; break;
-        case MCSINFO_SECTION_ID:    retVal = 0x00040000; break;
-        case MAC_SECTION_ID:        retVal = 0x00040000; break;
-        case SERIAL_SECTION_ID:     retVal = 0x00040000; break;
-        case TOTAL_SECTION_ID:      retVal = mSize;      break;
+        case SPI_FLASH_SECTION_UBOOT:      retVal = 0x00080000; break;
+        case SPI_FLASH_SECTION_KERNEL:     retVal = 0x00C00000; break;
+        case SPI_FLASH_SECTION_LICENSE:    retVal = 0x00040000; break;
+        case SPI_FLASH_SECTION_MCSINFO:    retVal = 0x00040000; break;
+        case SPI_FLASH_SECTION_MAC:        retVal = 0x00040000; break;
+        case SPI_FLASH_SECTION_SERIAL:     retVal = 0x00040000; break;
+        case SPI_FLASH_SECTION_TOTAL:      retVal = mSize;      break;
 
         default:
             break;
@@ -479,19 +479,19 @@ uint32_t CNTV2AxiSpiFlash::Size(SpiFlashSectionID sectionID)
     return retVal;
 }
 
-uint32_t CNTV2AxiSpiFlash::Offset(SpiFlashSectionID sectionID)
+uint32_t CNTV2AxiSpiFlash::Offset(SpiFlashSection sectionID)
 {
     uint32_t retVal = 0xffffffff;
 
     switch(sectionID)
     {
-        case UBOOT_SECTION_ID:      retVal = 0x00000000; break;
-        case KERNEL_SECTION_ID:     retVal = 0x00100000; break;
-        case LICENSE_SECTION_ID:    retVal = 0x01F00000; break;
-        case MCSINFO_SECTION_ID:    retVal = 0x01F40000; break;
-        case MAC_SECTION_ID:        retVal = 0x01F80000; break;
-        case SERIAL_SECTION_ID:     retVal = 0x01FC0000; break;
-        case TOTAL_SECTION_ID:      retVal = 0;          break;
+        case SPI_FLASH_SECTION_UBOOT:      retVal = 0x00000000; break;
+        case SPI_FLASH_SECTION_KERNEL:     retVal = 0x00100000; break;
+        case SPI_FLASH_SECTION_LICENSE:    retVal = 0x01F00000; break;
+        case SPI_FLASH_SECTION_MCSINFO:    retVal = 0x01F40000; break;
+        case SPI_FLASH_SECTION_MAC:        retVal = 0x01F80000; break;
+        case SPI_FLASH_SECTION_SERIAL:     retVal = 0x01FC0000; break;
+        case SPI_FLASH_SECTION_TOTAL:      retVal = 0;          break;
 
         default:
             break;
