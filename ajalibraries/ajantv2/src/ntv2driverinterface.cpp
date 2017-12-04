@@ -539,10 +539,10 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
     if (CNTV2AxiSpiFlash::DeviceSupported((NTV2DeviceID)deviceID))
     {
         CNTV2AxiSpiFlash spiFlash(_boardNumber, false);
-        const uint32_t axiSpiMcsInfoFlashOffset = 0x01F40000;
 
+        uint32_t offset = spiFlash.Offset(SPI_FLASH_SECTION_MCSINFO);
         vector<uint8_t> mcsInfoData;
-        if (spiFlash.Read(axiSpiMcsInfoFlashOffset, mcsInfoData, 256))
+        if (spiFlash.Read(offset, mcsInfoData, 256))
         {
             packInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
 
