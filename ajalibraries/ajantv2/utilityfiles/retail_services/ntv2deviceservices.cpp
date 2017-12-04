@@ -60,10 +60,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
             pDeviceServices = new IoIP2110Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-        case DEVICE_ID_KONAIP_4TX_2110:
+        case DEVICE_ID_KONAIP_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
-        case DEVICE_ID_KONAIP_4CH_1SFP:
+        case DEVICE_ID_KONAIP_2022:
             pDeviceServices = new KonaIP22Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
