@@ -1392,7 +1392,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
 
         bool terminated = false;
         bool good = false;
-        for(int i = 0; i < maxSize; i++)
+        for(uint32_t i = 0; i < maxSize; i++)
         {
             WriteRegister(kRegXenaxFlashAddress,baseAddress);
             WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);

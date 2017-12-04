@@ -63,13 +63,13 @@ inline void print_flash_status_final(const string& label)
 const int64_t spi_timeout = 10000;
 
 // Cypress/Spansion
-const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND  = 0x01;
+//const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND  = 0x01;
 const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
 const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
 const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
 const uint32_t CYPRESS_FLASH_READFAST_COMMAND      = 0x0C; //4 byte address
 const uint32_t CYPRESS_FLASH_PAGE_PROGRAM_COMMAND  = 0x12; //4 byte address
-const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
+//const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
 const uint32_t CYPRESS_FLASH_READBANK_COMMAND      = 0x16;
 const uint32_t CYPRESS_FLASH_WRITEBANK_COMMAND     = 0x17;
 const uint32_t CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND= 0x21; //4 byte address
@@ -77,8 +77,8 @@ const uint32_t CYPRESS_FLASH_READ_CONFIG_COMMAND   = 0x35;
 const uint32_t CYPRESS_FLASH_READ_JEDEC_ID_COMMAND = 0x9F;
 const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
 
-const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
-const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
+//const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
+//const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
 const uint32_t AXI_SPI_WRITE_FIFO_EMPTY = 0x04;
 const uint32_t AXI_SPI_WRITE_FIFO_FULL  = 0x08;
 
