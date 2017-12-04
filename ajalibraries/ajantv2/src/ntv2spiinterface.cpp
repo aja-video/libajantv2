@@ -527,9 +527,46 @@ bool CNTV2AxiSpiFlash::Verify(const uint32_t address, const std::vector<uint8_t>
     return verify_vectors(dataWritten, verifyData, mVerbose);
 }
 
-uint32_t CNTV2AxiSpiFlash::Size()
+uint32_t CNTV2AxiSpiFlash::Size(SpiFlashSectionID sectionID)
 {
-    return mSize;
+    uint32_t retVal = 0;
+
+    switch(sectionID)
+    {
+        case UBOOT_SECTION_ID:      retVal = 0x00080000; break;
+        case KERNEL_SECTION_ID:     retVal = 0x00C00000; break;
+        case LICENSE_SECTION_ID:    retVal = 0x00040000; break;
+        case MCSINFO_SECTION_ID:    retVal = 0x00040000; break;
+        case MAC_SECTION_ID:        retVal = 0x00040000; break;
+        case SERIAL_SECTION_ID:     retVal = 0x00040000; break;
+        case TOTAL_SECTION_ID:      retVal = mSize;      break;
+
+        default:
+            break;
+    }
+
+    return retVal;
+}
+
+uint32_t CNTV2AxiSpiFlash::Offset(SpiFlashSectionID sectionID)
+{
+    uint32_t retVal = 0xffffffff;
+
+    switch(sectionID)
+    {
+        case UBOOT_SECTION_ID:      retVal = 0x00000000; break;
+        case KERNEL_SECTION_ID:     retVal = 0x00100000; break;
+        case LICENSE_SECTION_ID:    retVal = 0x01F00000; break;
+        case MCSINFO_SECTION_ID:    retVal = 0x01F40000; break;
+        case MAC_SECTION_ID:        retVal = 0x01F80000; break;
+        case SERIAL_SECTION_ID:     retVal = 0x01FC0000; break;
+        case TOTAL_SECTION_ID:      retVal = 0;          break;
+
+        default:
+            break;
+    }
+
+    return retVal;
 }
 
 bool CNTV2AxiSpiFlash::NTV2DeviceOk()

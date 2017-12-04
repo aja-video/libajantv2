@@ -19,10 +19,6 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
-const uint32_t axiSpiLicenseOffset      = 0x01F00000;
-const uint32_t axiSpiMcsInfoFlashOffset = 0x01F40000;
-const uint32_t axiSpiMACFlashOffset     = 0x01F80000;
-
 using namespace std;
 
 CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
@@ -430,7 +426,8 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
         vector<uint8_t> mcsInfoData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        if (_spiFlash->Read(axiSpiMcsInfoFlashOffset, mcsInfoData, MAXMCSINFOSIZE))
+        uint32_t offset = _spiFlash->Offset(MCSINFO_SECTION_ID);
+        if (_spiFlash->Read(offset, mcsInfoData, MAXMCSINFOSIZE))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             _mcsInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
@@ -1107,8 +1104,9 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        _spiFlash->Erase(axiSpiMACFlashOffset, uint32_t(macData.size()));
-        if (_spiFlash->Write(axiSpiMACFlashOffset, macData, uint32_t(macData.size())))
+        uint32_t offset = _spiFlash->Offset(MAC_SECTION_ID);
+        _spiFlash->Erase(offset, uint32_t(macData.size()));
+        if (_spiFlash->Write(offset, macData, uint32_t(macData.size())))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             return true;
@@ -1184,7 +1182,8 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
         vector<uint8_t> macData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        if (_spiFlash->Read(axiSpiMACFlashOffset, macData, 16))
+        uint32_t offset = _spiFlash->Offset(MAC_SECTION_ID);
+        if (_spiFlash->Read(offset, macData, 16))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             if (macData.size() < 16)
@@ -1281,8 +1280,9 @@ CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
 
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        _spiFlash->Erase(axiSpiLicenseOffset, uint32_t(licenseData.size()));
-        if (_spiFlash->Write(axiSpiLicenseOffset, licenseData, uint32_t(licenseData.size())))
+        uint32_t offset = _spiFlash->Offset(LICENSE_SECTION_ID);
+        _spiFlash->Erase(offset, uint32_t(licenseData.size()));
+        if (_spiFlash->Write(offset, licenseData, uint32_t(licenseData.size())))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             return true;
@@ -1348,8 +1348,9 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
     {
         vector<uint8_t> licenseData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
+        uint32_t offset = _spiFlash->Offset(LICENSE_SECTION_ID);
         _spiFlash->SetVerbosity(false);
-        if (_spiFlash->Read(axiSpiLicenseOffset, licenseData, maxSize))
+        if (_spiFlash->Read(offset, licenseData, maxSize))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             serialString = "";
@@ -1787,8 +1788,9 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
             return false;
         }
 
-        uint32_t ubootFlashOffset = 0x000000;
-        uint32_t imageFlashOffset = 0x100000;
+        uint32_t ubootFlashOffset = _spiFlash->Offset(UBOOT_SECTION_ID);
+        uint32_t imageFlashOffset = _spiFlash->Offset(KERNEL_SECTION_ID);
+        uint32_t mcsFlashOffset   = _spiFlash->Offset(MCSINFO_SECTION_ID);
 
         uint32_t ubootSize = uint32_t(ubootData.size());
         uint32_t imageSize = uint32_t(imageData.size());
@@ -1819,15 +1821,16 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
         }
 
         // erase mcs info
-        _spiFlash->Erase(axiSpiMcsInfoFlashOffset, mcsInfoSize);
+
+        _spiFlash->Erase(mcsFlashOffset, mcsInfoSize);
 
         // write mcs info
-        _spiFlash->Write(axiSpiMcsInfoFlashOffset, mcsInfoData, mcsInfoSize);
+        _spiFlash->Write(mcsFlashOffset, mcsInfoData, mcsInfoSize);
 
         // verify mcs info
         if (verify)
         {
-            _spiFlash->Verify(axiSpiMcsInfoFlashOffset, mcsInfoData);
+            _spiFlash->Verify(mcsFlashOffset, mcsInfoData);
         }
 
         return true;

@@ -9,6 +9,18 @@
 
 #include "ntv2card.h"
 
+typedef enum
+{
+    UBOOT_SECTION_ID,
+    KERNEL_SECTION_ID,
+    LICENSE_SECTION_ID,
+    MCSINFO_SECTION_ID,
+    MAC_SECTION_ID,
+    SERIAL_SECTION_ID,
+
+    TOTAL_SECTION_ID // should be at end, represents the whole flash chip
+}SpiFlashSectionID;
+
 class CNTV2SpiFlash
 {
 public:
@@ -19,7 +31,8 @@ public:
     virtual bool Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes = 1) = 0;
     virtual bool Erase(const uint32_t address, uint32_t bytes) = 0;
     virtual bool Verify(const uint32_t address, const std::vector<uint8_t>& dataWritten) = 0;
-    virtual uint32_t Size() = 0;
+    virtual uint32_t Size(SpiFlashSectionID sectionID = TOTAL_SECTION_ID) = 0;
+    virtual uint32_t Offset(SpiFlashSectionID sectionID = TOTAL_SECTION_ID) = 0;
     virtual void SetVerbosity(bool verbose) {mVerbose = verbose;}
     virtual bool GetVerbosity() {return mVerbose;}
 
@@ -40,7 +53,8 @@ public:
     virtual bool Write(const uint32_t address, const std::vector<uint8_t> data, uint32_t maxBytes = 1);
     virtual bool Erase(const uint32_t address, uint32_t bytes);
     virtual bool Verify(const uint32_t address, const std::vector<uint8_t>& dataWritten);
-    virtual uint32_t Size();
+    virtual uint32_t Size(SpiFlashSectionID sectionID = TOTAL_SECTION_ID);
+    virtual uint32_t Offset(SpiFlashSectionID sectionID = TOTAL_SECTION_ID);
     static bool DeviceSupported(NTV2DeviceID deviceId);
 
     // Axi specific
