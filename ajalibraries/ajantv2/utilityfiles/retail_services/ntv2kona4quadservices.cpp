@@ -1182,11 +1182,12 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
-		case NTV2_Quarter4k:	   mCard->Connect (NTV2_XptAnalogOutInput, NTV2_Xpt4KDownConverterOut); break;
-		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1YUV); break;
-		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC2VidYUV : NTV2_XptFrameBuffer2YUV); break;
-		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC3VidYUV : NTV2_XptFrameBuffer3YUV); break;
-		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC4VidYUV : NTV2_XptFrameBuffer4YUV); break;
+		case NTV2_Quarter4k:
+			if (b2pi)
+				mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1_425YUV); 
+			else
+				mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC5VidYUV : NTV2_Xpt4KDownConverterOut); 
+			break;
 		};
 	}
 	else
@@ -1508,9 +1509,10 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
 	
 	// swap quad mode
-	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
-	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
+	//ULWord					selectSwapQuad		= 0;
+	//mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
+	//bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
+	bool						bQuadSwap			= false;
 	
 	// SMPTE 425
 	bool						b2x425In			= false;
@@ -2992,23 +2994,20 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
 	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
 
+
+
+
 	// Analog Out
 	if (b4K)
 	{
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
-		case NTV2_Quadrant1Select: 
-			mCard->Connect (NTV2_XptAnalogOutInput, bInRGB ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); 
-			break;
-		case NTV2_Quadrant2Select: 
-			mCard->Connect (NTV2_XptAnalogOutInput, bInRGB ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); 
-			break;
-		case NTV2_Quadrant3Select: 
-			mCard->Connect (NTV2_XptAnalogOutInput, bInRGB ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); 
-			break;
-		case NTV2_Quadrant4Select: 
-			mCard->Connect (NTV2_XptAnalogOutInput, bInRGB ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); 
+		case NTV2_Quarter4k:
+			if (b2pi)
+				mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC1VidYUV : in4kYUV1); 
+			else
+				mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC5VidYUV : NTV2_Xpt4KDownConverterOut); 
 			break;
 		};
 	}
