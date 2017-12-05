@@ -18,6 +18,7 @@
 #include "xpt_io4k.h"
 #include "xpt_io4k_ufc.h"
 #include "xpt_io4kplus.h"
+#include "xpt_ioip_2022.h"
 #include "xpt_kona4_ufc.h"
 #include "xpt_kona4.h"
 #include "xpt_kip_4rxtx.h"
@@ -844,10 +845,10 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
             return xpt_kip_2100_4txMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
             return xpt_kip_j2k1rxtxMatrix[inInputXpt][inOutputXpt];
+        case DEVICE_ID_IOIP_2022:
+            return xpt_ioip_2022Matrix[inInputXpt][inOutputXpt];
         // PSM for now lets use the 4kplus matrix
         // TODO: need to generate these for IOIP cards
-        case DEVICE_ID_IOIP_2022:
-            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
         case DEVICE_ID_IOIP_2110:
             return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
 
