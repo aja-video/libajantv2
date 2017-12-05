@@ -488,8 +488,10 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
                     designName == "s2022_12_2ch_tx_spoof" ||
                     designName == "s2022_12_2ch_tx" ||
                     designName == "s2022_12_2ch_rx" ||
-					designName == "s2022_56_4ch_rxtx_fec" ||
-					designName == "s2022_56_1rx_1tx_2110");
+                    designName == "s2022_56_4ch_rxtx_fec" ||
+                    designName == "s2022_56_4ch_rxtx" ||
+                    designName == "s2110_4tx" ||
+                    designName == "s2022_56_1rx_1tx_2110");
 		else
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC));
 	}
@@ -557,4 +559,3 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
 		default: return "";
 	}
 }
-
