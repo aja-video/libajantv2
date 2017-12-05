@@ -2706,14 +2706,14 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else
 		{
-			if (bInRGB)
-			{
-				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
-				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
-			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
 			{
 				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
 			else
@@ -2741,14 +2741,14 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else // YUV
 		{
-			if (bInRGB)
-			{
-				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
-				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
-			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
 			{
 				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
 			else
@@ -2777,15 +2777,23 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else // YUV
 		{
-			if (bInRGB)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			{
+				if (bInRGB)
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptCSC2VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV1);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, in4kYUV2);
+				}
+			}
+			else if (bInRGB)
 			{
 				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
-			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
-			{
-				mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV1);
-				mCard->Connect (NTV2_XptSDIOut3InputDS2, in4kYUV2);
 			}
 			else
 			{
@@ -2846,15 +2854,23 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		}
 		else // YUV
 		{
-			if (bInRGB)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+			{
+				if (bInRGB)
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptCSC4VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV3);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, in4kYUV4);
+				}
+			}
+			else if (bInRGB)
 			{
 				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
-			}
-			else if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
-			{
-				mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV3);
-				mCard->Connect (NTV2_XptSDIOut4InputDS2, in4kYUV4);
 			}
 			else
 			{
