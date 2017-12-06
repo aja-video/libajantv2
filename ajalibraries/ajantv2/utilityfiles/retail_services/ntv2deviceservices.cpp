@@ -2966,7 +2966,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
 	}
 
-	if(!b4K)//if we are 4k all connections are inputs
+	//if(!b4K)//if we are 4k all connections are inputs
 	{
 		//Following the logic from each individual file
 		//this should cover almost all cases
