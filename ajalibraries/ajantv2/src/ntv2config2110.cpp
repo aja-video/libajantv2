@@ -1262,7 +1262,12 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     mDevice.WriteRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
     mDevice.WriteRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
     mDevice.WriteRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
-    mDevice.WriteRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
+    uint32_t val;
+    mDevice.ReadRegister(kRegPll_PTP_MstrIP      + SAREK_PLL, &val);
+    if (val == 0)
+        mDevice.WriteRegister(kRegPll_PTP_Match  + SAREK_PLL, 0x1);
+    else
+        mDevice.WriteRegister(kRegPll_PTP_Match  + SAREK_PLL, 0x9);
     mDevice.WriteRegister(kRegPll_Config         + SAREK_PLL, PLL_CONFIG_PTP | PLL_CONFIG_DCO_MODE);
 
     //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
