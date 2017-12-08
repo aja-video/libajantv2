@@ -365,6 +365,26 @@ class DeviceMap
 		uint32_t	GetDriverVersion (void) const			{ return mDriverVersion; }
 
 
+		bool	ConnectionIsStillOkay (const UWord inDeviceIndex)
+		{
+			if (inDeviceIndex >= kMaxNumDevices)
+			{
+				MDIWARNIF (kMacDeviceMapDebugLog_ParamError, "ConnectionIsStillOkay:  bad 'inDeviceIndex' parameter " << inDeviceIndex);
+				return 0;
+			}
+
+			const io_connect_t	connection	(mIOConnections [inDeviceIndex]);
+			if (connection)
+			{
+				uint64_t		scalarO_64 [2]	= {0, 0};
+				uint32_t		outputCount		= 2;
+				kern_return_t	kernResult		= OS_IOConnectCallScalarMethod (connection, kDriverGetStreamForApplication, 0, 0, scalarO_64, &outputCount);
+				if (kernResult == KERN_SUCCESS)
+					return true;
+			}
+			return false;
+		}
+
 	private:
 		bool WaitForBusToSettle (void)
 		{
@@ -393,26 +413,6 @@ class DeviceMap
 			return false;
 		}
 
-
-		bool	ConnectionIsStillOkay (const UWord inDeviceIndex)
-		{
-			if (inDeviceIndex >= kMaxNumDevices)
-			{
-				MDIWARNIF (kMacDeviceMapDebugLog_ParamError, "ConnectionIsStillOkay:  bad 'inDeviceIndex' parameter " << inDeviceIndex);
-				return 0;
-			}
-
-			const io_connect_t	connection	(mIOConnections [inDeviceIndex]);
-			if (connection)
-			{
-				uint64_t		scalarO_64 [2]	= {0, 0};
-				uint32_t		outputCount		= 2;
-				kern_return_t	kernResult		= OS_IOConnectCallScalarMethod (connection, kDriverGetStreamForApplication, 0, 0, scalarO_64, &outputCount);
-				if (kernResult == KERN_SUCCESS)
-					return true;
-			}
-			return false;
-		}
 
 		bool	CheckDriverVersion (io_connect_t inConnection)
 		{
@@ -542,7 +542,20 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 	(void) displayError;
 #endif
 	{
-		_boardOpened = gDeviceMap.GetConnection (inDeviceIndexNumber) != 0;						//	Local host open -- get a Mach connection
+		// Local host open -- get a Mach connection
+		_boardOpened = gDeviceMap.GetConnection (inDeviceIndexNumber) != 0;								
+		
+		// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
+		// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
+		if (_boardOpened)
+		{
+			if (gDeviceMap.ConnectionIsStillOkay(inDeviceIndexNumber) == false)
+			{
+				gDeviceMap.Reset();
+				_boardOpened = gDeviceMap.GetConnection (inDeviceIndexNumber) != 0;
+			}
+		}
+		
 		#if defined (_DEBUG)
 			gClientStats.fOpenCount++;
 		#endif	//	defined (_DEBUG)
@@ -550,7 +563,8 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 
 	if (IsOpen ())
 	{
-		_boardNumber = inDeviceIndexNumber;	//	Set _boardNumber now, because ReadRegister needs it to talk to the correct device
+		// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
+		_boardNumber = inDeviceIndexNumber;	
 		const NTV2DeviceIDSet	legalDeviceIDs	(::NTV2GetSupportedDevices ());
 		if (!ReadRegister (kRegBoardID, reinterpret_cast<ULWord*>(&_boardID)))
 		{
@@ -560,6 +574,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
 				_boardNumber = 0;
 				_boardOpened = false;
+				//gDeviceMap.Reset(true);
 				return false;
 			}
 			MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
@@ -641,7 +656,7 @@ ULWord CNTV2MacDriverInterface::GetPCISlotNumber (void) const
 
 	if (_boardOpened && GetIOConnect ())
 	{
-		//	TODO:	Figure out where in the IORegistry the io_connect_t is, then navigate up to the io_registry_entry
+		//	TBD: Figure out where in the IORegistry the io_connect_t is, then navigate up to the io_registry_entry
 		//			for our driver that contains the "AJAPCISlot" property. Then proceed as before...
 		ioRegistryEntry = static_cast <io_registry_entry_t> (GetIOConnect ());
 		return 0;		//	FINISH THIS
@@ -982,6 +997,9 @@ bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32_t pid )
 {
+	printf("AcquireStreamForApplication app=%x pid=%d\n", appType, pid);
+
+
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1012,6 +1030,9 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32_t pid )
 {
+	printf("ReleaseStreamForApplication app=%x pid=%d\n", appType, pid);
+
+
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1051,6 +1072,9 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32
 bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord appType, int32_t pid )
 {
 	kern_return_t kernResult = KERN_FAILURE;
+	
+	printf("AcquireStreamForApplicationWithReference app=%x pid=%d\n", appType, pid);
+
 
 	uint64_t	scalarI_64[2];
 	uint32_t	outputCount = 0;
@@ -1083,6 +1107,8 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference( ULWord appType, int32_t pid )
 {
+	printf("ReleaseStreamForApplicationWithReference app=%x pid=%d\n", appType, pid);
+
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1149,6 +1175,8 @@ bool CNTV2MacDriverInterface::KernelLog( void* dataPtr, UInt32 dataSize )
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t pid )
 {
+	printf("SetStreamingApplication app=%x pid=%d\n", appType, pid);
+
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
