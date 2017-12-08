@@ -22,6 +22,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		7D5732721FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */; };
+		7D5732731FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */; };
+		7D5732751FD9CB4E00862AD2 /* ntv2config2110.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D5732741FD9CB4E00862AD2 /* ntv2config2110.h */; };
+		7D5732761FD9CB4E00862AD2 /* ntv2config2110.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D5732741FD9CB4E00862AD2 /* ntv2config2110.h */; };
 		8A6F1B0C1CBEE58B008A0557 /* ntv2configts2022.h in Headers */ = {isa = PBXBuildFile; fileRef = 8A6F1B091CBEE58B008A0557 /* ntv2configts2022.h */; };
 		8A6F1B0D1CBEE58B008A0557 /* ntv2configts2022.h in Headers */ = {isa = PBXBuildFile; fileRef = 8A6F1B091CBEE58B008A0557 /* ntv2configts2022.h */; };
 		8A6F1B0E1CBEE70C008A0557 /* ntv2configts2022.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A6F1B081CBEE58B008A0557 /* ntv2configts2022.cpp */; };
@@ -242,6 +246,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ntv2config2110.cpp; sourceTree = "<group>"; };
+		7D5732741FD9CB4E00862AD2 /* ntv2config2110.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntv2config2110.h; sourceTree = "<group>"; };
 		8A6F1B081CBEE58B008A0557 /* ntv2configts2022.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2configts2022.cpp; path = ../src/ntv2configts2022.cpp; sourceTree = SOURCE_ROOT; };
 		8A6F1B091CBEE58B008A0557 /* ntv2configts2022.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2configts2022.h; path = ../includes/ntv2configts2022.h; sourceTree = SOURCE_ROOT; };
 		A49A335C1C7252FD0082D491 /* ntv2mailbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2mailbox.cpp; path = ../src/ntv2mailbox.cpp; sourceTree = SOURCE_ROOT; };
@@ -423,6 +429,7 @@
 				B41B5DCC16E5330C00A9E0DC /* ntv2colorcorrection.cpp */,
 				B4F90FAD1C485204004723C9 /* ntv2config2022.cpp */,
 				8A6F1B081CBEE58B008A0557 /* ntv2configts2022.cpp */,
+				7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */,
 				B40640FC1B825F5C0037C033 /* ntv2cscmatrix.cpp */,
 				B41B5DCE16E5330C00A9E0DC /* ntv2debug.cpp */,
 				B408066B1A3776A5002C35ED /* ntv2devicefeatures.cpp */,
@@ -486,6 +493,7 @@
 				B41B5DCD16E5330C00A9E0DC /* ntv2colorcorrection.h */,
 				B4F90FAE1C485204004723C9 /* ntv2config2022.h */,
 				8A6F1B091CBEE58B008A0557 /* ntv2configts2022.h */,
+				7D5732741FD9CB4E00862AD2 /* ntv2config2110.h */,
 				B40640FD1B825F5C0037C033 /* ntv2cscmatrix.h */,
 				B41B5DCF16E5330C00A9E0DC /* ntv2debug.h */,
 				B408066C1A3776A5002C35ED /* ntv2devicefeatures.h */,
@@ -585,6 +593,7 @@
 				B4CE1E5416E582B90092B564 /* ntv2rp215.h in Headers */,
 				B4CE1E5516E582B90092B564 /* ntv2status.h in Headers */,
 				B4CE1E5616E582B90092B564 /* ntv2task.h in Headers */,
+				7D5732761FD9CB4E00862AD2 /* ntv2config2110.h in Headers */,
 				B4A4507C1AA15583003AED85 /* ntv2devicefeatures.hpp in Headers */,
 				A49A33671C7252FD0082D491 /* ntv2mbcontroller.h in Headers */,
 				B4CE1E5716E582B90092B564 /* ntv2testpattern.h in Headers */,
@@ -643,6 +652,7 @@
 				B41B5E5516E5330C00A9E0DC /* ntv2rp188.h in Headers */,
 				B41B5E5716E5330C00A9E0DC /* ntv2rp215.h in Headers */,
 				B41B5E5916E5330C00A9E0DC /* ntv2status.h in Headers */,
+				7D5732751FD9CB4E00862AD2 /* ntv2config2110.h in Headers */,
 				B41B5E5C16E5330C00A9E0DC /* ntv2task.h in Headers */,
 				A49A33661C7252FD0082D491 /* ntv2mbcontroller.h in Headers */,
 				B41B5E5E16E5330C00A9E0DC /* ntv2testpattern.h in Headers */,
@@ -790,6 +800,7 @@
 				B4CE1E2A16E582A10092B564 /* ntv2vpid.cpp in Sources */,
 				B4CE1E2E16E582A10092B564 /* testpatterngen.cpp in Sources */,
 				B4CE1E3016E582A10092B564 /* ntv2verticalfilter.cpp in Sources */,
+				7D5732731FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */,
 				B4CE1E3316E582A10092B564 /* xena2vidproc.cpp in Sources */,
 				B4CE1E3416E582A10092B564 /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1E3516E582A10092B564 /* ntv2macdriverinterface.cpp in Sources */,
@@ -845,6 +856,7 @@
 				B41B5E6A16E5330C00A9E0DC /* ntv2vpid.cpp in Sources */,
 				B41B5E7316E5330C00A9E0DC /* testpatterngen.cpp in Sources */,
 				B41B5E7816E5330C00A9E0DC /* ntv2verticalfilter.cpp in Sources */,
+				7D5732721FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */,
 				B41B5E7E16E5330C00A9E0DC /* xena2vidproc.cpp in Sources */,
 				B41B5E8016E5330C00A9E0DC /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1CE616E53B560092B564 /* ntv2macdriverinterface.cpp in Sources */,

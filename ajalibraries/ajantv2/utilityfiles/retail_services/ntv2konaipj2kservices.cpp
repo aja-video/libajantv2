@@ -26,7 +26,7 @@ KonaIPJ2kServices::KonaIPJ2kServices()
 
  KonaIPJ2kServices::~KonaIPJ2kServices()
  {
-     if (config)
+     if (config != NULL)
      {
          delete config;
          config = NULL;
@@ -1231,7 +1231,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                     // if the channel is already enabled then check to see if a configuration has changed
                     else if (enableChServices)
                     {
-                        if (notEqual(rxHwConfig,mRx2022Config1))
+                        if (NotEqual(rxHwConfig, mRx2022Config1, false))
                         {
                             config->SetRxChannelEnable(NTV2_CHANNEL1, false);
                             SetRxConfig(config, NTV2_CHANNEL1, false);
@@ -1295,7 +1295,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                         // if the channel is already enabled then check to see if a configuration has changed
                         else if (enableChServices)
                         {
-                            if (notEqual(rxHwConfig,mRx2022Config2))
+                            if (NotEqual(rxHwConfig, mRx2022Config2, false))
                             {
                                 config->SetRxChannelEnable(NTV2_CHANNEL2, false);
                                 SetRxConfig(config, NTV2_CHANNEL2, false);
@@ -1354,7 +1354,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                     // if the channel is already enabled then check to see if a configuration has changed
                     else if (enableChServices)
                     {
-                        if (notEqual(txHwConfig,mTx2022Config3) || configErr)
+                        if (NotEqual(txHwConfig, mTx2022Config3, false) || configErr)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL1, false);
                             SetTxConfig(config, NTV2_CHANNEL1, false);
@@ -1428,7 +1428,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                         // if the channel is already enabled then check to see if a configuration has changed
                         else if (enableChServices)
                         {
-                            if (notEqual(txHwConfig,mTx2022Config4) || configErr)
+                            if (NotEqual(txHwConfig, mTx2022Config4, false) || configErr)
                             {
                                 config->SetTxChannelEnable(NTV2_CHANNEL2, false);
                                 SetTxConfig(config, NTV2_CHANNEL2, false);
@@ -1952,34 +1952,4 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
-}
-
-bool  KonaIPJ2kServices::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
-{
-	uint32_t addr;
-	
-	if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort) return true;
-	if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
-	if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
-	if ((virtual_config.rxc_primaryRxMatch & 0x7FFFFFFF) != (hw_channel.primaryRxMatch & 0x7FFFFFFF)) return true;
-	
-	addr = inet_addr(hw_channel.primaryDestIP.c_str());
-	if (virtual_config.rxc_primaryDestIp != addr) return true;
-	
-	addr = inet_addr(hw_channel.primarySourceIP.c_str());
-	if (virtual_config.rxc_primarySourceIp != addr) return true;
-	
-	return false;
-}
-
-bool  KonaIPJ2kServices::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
-{
-	uint32_t addr;
-	if (virtual_config.txc_primaryLocalPort			!= hw_channel.primaryLocalPort)  return true;
-	if (virtual_config.txc_primaryRemotePort		!= hw_channel.primaryRemotePort) return true;
-	
-	addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
-	if (virtual_config.txc_primaryRemoteIp     != addr) return true;
-	
-	return false;
 }

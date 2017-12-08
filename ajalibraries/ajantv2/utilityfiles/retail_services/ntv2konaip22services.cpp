@@ -27,7 +27,7 @@ KonaIP22Services::KonaIP22Services()
 
  KonaIP22Services::~KonaIP22Services()
  {
-     if (config)
+     if (config != NULL)
      {
          delete config;
          config = NULL;
@@ -2570,7 +2570,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 // if the channel is already enabled then check to see if a configuration has changed
                 else if (enableChServices)
                 {
-                    if (notEqual(rxHwConfig,mRx2022Config1) ||
+                    if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
                         enable2022_7Card != m2022_7Mode)
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL1, false);
@@ -2613,7 +2613,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 // if the channel is already enabled then check to see if a configuration has changed
                 else if (enableChServices)
                 {
-                    if (notEqual(rxHwConfig,mRx2022Config2) ||
+                    if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
                         enable2022_7Card != m2022_7Mode)
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL2, false);
@@ -2658,7 +2658,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 // if the channel is already enabled then check to see if a configuration has changed
                 else if (enableChServices)
                 {
-                    if (notEqual(txHwConfig,mTx2022Config3) ||
+                    if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
                         configErr ||
                         enable2022_7Card != m2022_7Mode)
                     {
@@ -2704,7 +2704,7 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
                 // if the channel is already enabled then check to see if a configuration has changed
                 else if (enableChServices)
                 {
-                    if (notEqual(txHwConfig2,mTx2022Config4) ||
+                    if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
                         configErr ||
                         enable2022_7Card != m2022_7Mode)
                     {
@@ -3391,60 +3391,4 @@ void KonaIP22Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
-}
-
-bool KonaIP22Services::notEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config)
-{
-    uint32_t addr;
-		
-    if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
-    if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
-	if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
-	
-    addr = inet_addr(hw_channel.primaryDestIP.c_str());
-    if (virtual_config.rxc_primaryDestIp != addr) return true;
-    
-    addr = inet_addr(hw_channel.primarySourceIP.c_str());
-    if (virtual_config.rxc_primarySourceIp != addr) return true;
-	
-	if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
-
-	// We only care about looking at secondary settings if we are doing 2022_7
-	if (m2022_7Mode)
-	{
-		if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
-		if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
-		if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
-		
-		addr = inet_addr(hw_channel.secondaryDestIP.c_str());
-		if (virtual_config.rxc_secondaryDestIp != addr) return true;
-		
-		addr = inet_addr(hw_channel.secondarySourceIP.c_str());
-		if (virtual_config.rxc_secondarySourceIp != addr) return true;
-	}
-
-    return false;
-}
-
-bool KonaIP22Services::notEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config)
-{
-    uint32_t addr;
-	
-    if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
-    if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
-	
-    addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
-    if (virtual_config.txc_primaryRemoteIp != addr) return true;
-	
-	// We only care about looking at secondary settings if we are doing 2022_7
-	if (m2022_7Mode)
-	{
-		if (virtual_config.txc_secondaryLocalPort != hw_channel.secondaryLocalPort)  return true;
-		if (virtual_config.txc_secondaryRemotePort != hw_channel.secondaryRemotePort) return true;
-	
-		addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
-		if (virtual_config.txc_secondaryRemoteIp != addr) return true;
-	}
-
-    return false;
 }

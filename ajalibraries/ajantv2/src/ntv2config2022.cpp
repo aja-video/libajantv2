@@ -772,7 +772,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
 
     rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
     if (!rv) return false;
-    if (enable & linkAEnable)
+    if (enable & linkBEnable)
     {
         uint8_t match;
         GetRxMatch(channel,SFP_BOTTOM,match);

@@ -12,6 +12,7 @@
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
 #include "ntv2registers2022.h"
+#include "ntv2spiinterface.h"
 
 #include <string.h>
 #include <assert.h>
@@ -492,7 +493,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 				case DEVICE_ID_TTAP:						bitFileInfo.bitFileType = NTV2_BITFILE_TTAP_MAIN;					break;
 
 				case DEVICE_ID_KONALHIDVI:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
-				case DEVICE_ID_KONAIP_4CH_1SFP:				bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_1SFP;				break;
+				case DEVICE_ID_KONAIP_2022:                 bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2022;                 break;
 				case DEVICE_ID_KONAIP_4CH_2SFP:				bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_4CH_2SFP;				break;
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K;		break;
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2TX_1SFP_J2K;			break;
@@ -502,7 +503,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
                 case DEVICE_ID_IOIP_2022:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2022;					break;
                 case DEVICE_ID_IOIP_2110:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2110;					break;
                 case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;			break;
-				case DEVICE_ID_KONAIP_4TX_2110:
+                case DEVICE_ID_KONAIP_2110:                 bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2110;                 break;
 				case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 			#if !defined (_DEBUG)
 				default:					break;
@@ -523,83 +524,113 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 	}
 }
 
- bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
- {
-     ULWord baseAddress = (16 * 1024 * 1024) - (3 * 256 * 1024);
-     ULWord* bitFilePtr =  new ULWord[256/4];
-     ULWord dwordSizeCount = 256/4;
+bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
+{
+    if(!IsDeviceReady(false) || !IsKonaIPDevice())
+    {
+        // cannot read flash
+        return false;
+    }
 
-     if(!IsDeviceReady(false) || !IsKonaIPDevice())
-     {
-         // cannot read flash
-         return false;
-     }
+    string packInfo;
+    ULWord deviceID = (ULWord)_boardID;
+    ReadRegister (kRegBoardID, &deviceID);
 
-     WriteRegister(kRegXenaxFlashAddress, (ULWord)1);   // bank 1
-     WriteRegister(kRegXenaxFlashControlStatus, 0x17);
-     bool busy = true;
-     ULWord timeoutCount = 1000;
-     do
-     {
-         ULWord regValue;
-         ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-         if (regValue & BIT(8))
-         {
-             busy = true;
-             timeoutCount--;
-         }
-         else
-             busy = false;
-     } while (busy == true && timeoutCount > 0);
-     if (timeoutCount == 0)
-         return false;
+    if (CNTV2AxiSpiFlash::DeviceSupported((NTV2DeviceID)deviceID))
+    {
+        CNTV2AxiSpiFlash spiFlash(_boardNumber, false);
 
+        uint32_t offset = spiFlash.Offset(SPI_FLASH_SECTION_MCSINFO);
+        vector<uint8_t> mcsInfoData;
+        if (spiFlash.Read(offset, mcsInfoData, 256))
+        {
+            packInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
 
-     for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
-     {
-         WriteRegister(kRegXenaxFlashAddress, baseAddress);
-         WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
-         busy = true;
-         timeoutCount = 1000;
-         do
-         {
-             ULWord regValue;
-             ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-             if ( regValue & BIT(8))
-             {
-                 busy = true;
-                 timeoutCount--;
-             }
-             else
-                 busy = false;
-         } while(busy == true && timeoutCount > 0);
-         if (timeoutCount == 0)
-             return false;
-         ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
-     }
+            // remove any trailing nulls
+            size_t found = packInfo.find('\0');
+            if (found != string::npos)
+            {
+                packInfo.resize(found);
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        ULWord baseAddress = (16 * 1024 * 1024) - (3 * 256 * 1024);
+        ULWord* bitFilePtr =  new ULWord[256/4];
+        ULWord dwordSizeCount = 256/4;
 
-     string packInfo = (char*)bitFilePtr;
-     istringstream iss(packInfo);
-     vector<string> results;
-     string token;
-     while (getline(iss,token, ' '))
-     {
-         results.push_back(token);
-     }
+        WriteRegister(kRegXenaxFlashAddress, (ULWord)1);   // bank 1
+        WriteRegister(kRegXenaxFlashControlStatus, 0x17);
+        bool busy = true;
+        ULWord timeoutCount = 1000;
+        do
+        {
+            ULWord regValue;
+            ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+            if (regValue & BIT(8))
+            {
+                busy = true;
+                timeoutCount--;
+            }
+            else
+                busy = false;
+        } while (busy == true && timeoutCount > 0);
+        if (timeoutCount == 0)
+            return false;
 
-     if (results.size() < 8)
-     {
-         return false;
-     }
+        for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
+        {
+            WriteRegister(kRegXenaxFlashAddress, baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
+            busy = true;
+            timeoutCount = 1000;
+            do
+            {
+                ULWord regValue;
+                ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+                if ( regValue & BIT(8))
+                {
+                    busy = true;
+                    timeoutCount--;
+                }
+                else
+                    busy = false;
+            } while(busy == true && timeoutCount > 0);
+            if (timeoutCount == 0)
+                return false;
+            ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
+        }
 
-     packageInfo.date = results[1];
-     token = results[2];
-     token.erase(remove(token.begin(), token.end(), '\n'), token.end());
-     packageInfo.time = token;
-     packageInfo.buildNumber   = results[4];
-     packageInfo.packageNumber = results[7];
-     return true;
- }
+        packInfo = (char*)bitFilePtr;
+    }
+
+    istringstream iss(packInfo);
+    vector<string> results;
+    string token;
+    while (getline(iss,token, ' '))
+    {
+        results.push_back(token);
+    }
+
+    if (results.size() < 8)
+    {
+        return false;
+    }
+
+    packageInfo.date = results[1];
+    token = results[2];
+    token.erase(remove(token.begin(), token.end(), '\n'), token.end());
+    packageInfo.time = token;
+    packageInfo.buildNumber   = results[4];
+    packageInfo.packageNumber = results[7];
+
+    return true;
+}
 
 // Common remote card DriverGetBuildInformation.  Subclasses have overloaded function
 // that does platform-specific function on local cards.
@@ -725,7 +756,6 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		return false;
 }
 
-
 void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 {
 	mEventCounts [eInterruptType] = mEventCounts [eInterruptType] + 1;
@@ -749,11 +779,6 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 {
 	if (IsKonaIPDevice())
 	{
-        // PSM Hack for pre MB IOIP
-        ULWord hexID = 0x0;
-        ReadRegister (kRegBoardID, &hexID);
-        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
-
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
         if (val == SAREK_IF_VERSION)
@@ -764,16 +789,10 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	return true;
 }
 
-
 bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
 	{
-        // PSM Hack for pre MB IOIP
-        ULWord hexID = 0x0;
-        ReadRegister (kRegBoardID, &hexID);
-        if ((hexID == DEVICE_ID_IOIP_2022) || (hexID == DEVICE_ID_IOIP_2110)) return true;
-
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
         if (val != 0x01)
@@ -804,12 +823,12 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 		else
 			return false;
 
-	case DEVICE_ID_KONAIP_4CH_1SFP:
+	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_4TX_2110:
+	case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
 		return true;

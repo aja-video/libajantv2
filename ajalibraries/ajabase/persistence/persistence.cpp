@@ -437,14 +437,16 @@ bool PersistenceGetValue(std::string keyRoot, std::string key, void *value, AJAP
 		rc = sqlite3_get_table(db,stmt.c_str(),&azResult,&nRows,&nCols,&zErrMsg);
 		areResultsGood(isGood,zErrMsg,rc,nRows,azResult);
 
-		if (isGood == false)
+		// SS 12/5/2017 - Removed for now. Experience indicates non-identical devices 
+		// sharing pref settings has been a source of many weird issues.
+		/* if (isGood == false)
 		{
 			// try matching only keyname
 			whereClause = std::string("name='") + key.c_str() + "'";
 			stmt = std::string("SELECT value FROM ") + tableName + " WHERE " + whereClause + ";";
 			rc = sqlite3_get_table(db,stmt.c_str(),&azResult,&nRows,&nCols,&zErrMsg);
 			areResultsGood(isGood,zErrMsg,rc,nRows,azResult);
-		}
+		} */
 	}
 
 	char *valueAsStr=NULL;
@@ -744,7 +746,7 @@ bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, 
 
 AJAPersistence::AJAPersistence()		
 {
-    SetParams("device 1");
+    SetParams("null_device");
 }
 
 AJAPersistence::AJAPersistence(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)

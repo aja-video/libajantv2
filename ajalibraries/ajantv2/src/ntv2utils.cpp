@@ -4148,7 +4148,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ?	"Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ?	"Corvid 44"					: "Corvid44";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ?	"Corvid HEVC"				: "CorvidHEVC";
-        case DEVICE_ID_KONAIP_4CH_1SFP:			return "KonaIP s2022";
+        case DEVICE_ID_KONAIP_2022:             return "KonaIP s2022";
         case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return "KonaIP J2K 1I 1O";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
@@ -4158,7 +4158,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
-        case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
+        case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
 #if !defined (_DEBUG)
 	    default:					break;
 #endif
@@ -7505,7 +7505,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "kona3g_quad_pcie.bit";
 			case DEVICE_ID_KONA4:						return "kona4_pcie.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona4_ufc_pcie.bit";
-            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
+            case DEVICE_ID_KONAIP_2022:                 return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
@@ -7516,7 +7516,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
-            case DEVICE_ID_KONAIP_4TX_2110:				return "kip_s2110.mcs";
+            case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
 			default:									return "";
 		}
 	#else
@@ -7585,7 +7585,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "k3g_quad.bit";
 			case DEVICE_ID_KONA4:						return "kona_4_quad.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona_4_ufc.bit";
-            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
+            case DEVICE_ID_KONAIP_2022:                 return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
@@ -7594,9 +7594,9 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHI:							return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
-            case DEVICE_ID_IOIP_2022:					return "ioip_2022.mcs";
-            case DEVICE_ID_IOIP_2110:					return "ioip_2110.mcs";
-            case DEVICE_ID_KONAIP_4TX_2110:             return "kip_s2110.mcs";
+            case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
+            case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
+            case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
             default:									return "";
 		}
 	#endif	//	else not MSWindows
@@ -7685,7 +7685,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONA3GQUAD,
 														DEVICE_ID_KONA4,
 														DEVICE_ID_KONA4UFC,
-														DEVICE_ID_KONAIP_4CH_1SFP,
+														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
@@ -7697,7 +7697,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_IO4KPLUS,
                                                         DEVICE_ID_IOIP_2022,
                                                         DEVICE_ID_IOIP_2110,
-                                                        DEVICE_ID_KONAIP_4TX_2110,
+                                                        DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)

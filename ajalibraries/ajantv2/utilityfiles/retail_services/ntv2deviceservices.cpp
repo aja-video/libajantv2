@@ -60,10 +60,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
             pDeviceServices = new IoIP2110Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-        case DEVICE_ID_KONAIP_4TX_2110:
+        case DEVICE_ID_KONAIP_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
-        case DEVICE_ID_KONAIP_4CH_1SFP:
+        case DEVICE_ID_KONAIP_2022:
             pDeviceServices = new KonaIP22Services();
             break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -914,37 +914,50 @@ bool DeviceServices::IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat)
 
 bool DeviceServices::IsCompatibleWithReference(NTV2VideoFormat fbFormat)
 {
-	bool bResult = false;
-
 	// get reference frame rate
 	ULWord status;
 	mCard->ReadInputStatusRegister(&status);
-	NTV2FrameRate rateRef = (NTV2FrameRate)((status>>16)&0xF);
-	NTV2FrameRate rateFb  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	NTV2FrameRate refRate = (NTV2FrameRate)((status>>16)&0xF);
+	NTV2FrameRate fbRate  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	return IsCompatibleWithReference(fbRate, refRate);
+}
 
-	switch(rateFb)
+
+bool DeviceServices::IsCompatibleWithReference(NTV2VideoFormat fbFormat, NTV2VideoFormat inputFormat)
+{
+	NTV2FrameRate fbRate  = GetNTV2FrameRateFromVideoFormat(fbFormat);
+	NTV2FrameRate inputRate  = GetNTV2FrameRateFromVideoFormat(inputFormat);
+	return IsCompatibleWithReference(fbRate, inputRate);
+}
+
+
+bool DeviceServices::IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate)
+{
+	bool bResult = false;
+
+	switch(fbRate)
 	{
 		case NTV2_FRAMERATE_6000:
 		case NTV2_FRAMERATE_3000:
 		case NTV2_FRAMERATE_1500:
-			bResult = (rateRef == NTV2_FRAMERATE_6000 || rateRef == NTV2_FRAMERATE_3000);
+			bResult = (inputRate == NTV2_FRAMERATE_6000 || inputRate == NTV2_FRAMERATE_3000);
 			break;
 	
 		case NTV2_FRAMERATE_5994:
 		case NTV2_FRAMERATE_2997:
 		case NTV2_FRAMERATE_1498:
-			bResult = (rateRef == NTV2_FRAMERATE_5994 || rateRef == NTV2_FRAMERATE_2997);
+			bResult = (inputRate == NTV2_FRAMERATE_5994 || inputRate == NTV2_FRAMERATE_2997);
 			break;
 			
 		case NTV2_FRAMERATE_5000:
 		case NTV2_FRAMERATE_2500:
-			bResult = (rateRef == NTV2_FRAMERATE_5000 || rateRef == NTV2_FRAMERATE_2500);
+			bResult = (inputRate == NTV2_FRAMERATE_5000 || inputRate == NTV2_FRAMERATE_2500);
 			break;
 	
 		case NTV2_FRAMERATE_2398:
 		case NTV2_FRAMERATE_2400:
 		default:
-			bResult = (rateRef == rateFb);
+			bResult = (inputRate == fbRate);
 			break;
 	}
 	
@@ -2105,6 +2118,62 @@ bool DeviceServices::IsValidConfig(const tx2022Config & virtual_config, bool is2
     return true;
 }
 
+bool DeviceServices::NotEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config, bool is2022_7)
+{
+    uint32_t addr;
+    
+    if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
+    if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
+    if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
+    
+    addr = inet_addr(hw_channel.primaryDestIP.c_str());
+    if (virtual_config.rxc_primaryDestIp != addr) return true;
+    
+    addr = inet_addr(hw_channel.primarySourceIP.c_str());
+    if (virtual_config.rxc_primarySourceIp != addr) return true;
+    
+    if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
+        if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
+        if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
+        
+        addr = inet_addr(hw_channel.secondaryDestIP.c_str());
+        if (virtual_config.rxc_secondaryDestIp != addr) return true;
+        
+        addr = inet_addr(hw_channel.secondarySourceIP.c_str());
+        if (virtual_config.rxc_secondarySourceIp != addr) return true;
+    }
+    
+    return false;
+}
+
+bool DeviceServices::NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7)
+{
+    uint32_t addr;
+    
+    if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
+    if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
+    
+    addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
+    if (virtual_config.txc_primaryRemoteIp != addr) return true;
+    
+    // We only care about looking at secondary settings if we are doing 2022_7
+    if (is2022_7)
+    {
+        if (virtual_config.txc_secondaryLocalPort != hw_channel.secondaryLocalPort)  return true;
+        if (virtual_config.txc_secondaryRemotePort != hw_channel.secondaryRemotePort) return true;
+        
+        addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
+        if (virtual_config.txc_secondaryRemoteIp != addr) return true;
+    }
+    
+    return false;
+}
+
 void DeviceServices::SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val)
 {
     uint32_t errCode;
@@ -2819,8 +2888,10 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		inputSelectID = NTV2_Wgt3GSDIIn2;
 
 	if ((deviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
-		(deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
-		(deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+        (deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
+        (deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
+        (deviceID != DEVICE_ID_KONAIP_2110) &&
+		(deviceID != DEVICE_ID_IOIP_2110))
 	{
 		uint32_t audioInputSelect;
 		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
@@ -2889,6 +2960,12 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 			}
 		}
 	}
+    // For 2110 need to set PTP as reference
+    else if ((deviceID == DEVICE_ID_KONAIP_2110) ||
+             (deviceID == DEVICE_ID_IOIP_2110))
+    {
+        mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
+    }
 	// For J2K devices we don't set the audio input select reg, audio input
 	// has to come from AES and the configuration code will set this properly
 	// we also force the reference on input to NTV2_REFERENCE_SFP1_PCR
@@ -2897,7 +2974,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
 	}
 
-	if(!b4K)//if we are 4k all connections are inputs
+	//if(!b4K)//if we are 4k all connections are inputs
 	{
 		//Following the logic from each individual file
 		//this should cover almost all cases
@@ -2990,68 +3067,99 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
 	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
 	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
-	//if (lockV2 == true && refSelect == kFreeRun)
-	//	refSelect = kVideoIn;
 	
-	switch (refSelect)
-	{
-	default:
-	case kFreeRun:
-		mCard->SetReference(NTV2_REFERENCE_FREERUN);
-		break;
-	case kReferenceIn:
-		if (IsCompatibleWithReference(mFb1VideoFormat))
-			mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
-		else
-			mCard->SetReference(NTV2_REFERENCE_FREERUN);
-		break;
-	case kVideoIn:
-		{
-			//Some boards have HDMI some have analog LHi has both
-			switch (mVirtualInputSelect)
-			{
-			default:
-			case NTV2_Input1Select:
-				mCard->SetReference(NTV2_REFERENCE_INPUT1);
-				break;
-			case NTV2_Input2Select:
-				switch(deviceID)
-				{
-				case DEVICE_ID_LHI:
-				case DEVICE_ID_IOEXPRESS:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHE_PLUS:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				default:
-					mCard->SetReference(NTV2_REFERENCE_INPUT2);
-					break;
-				}
-				break;
-			case NTV2_Input3Select:
-				switch(deviceID)
-				{
-				default:
-				case DEVICE_ID_IOXT:
-				case DEVICE_ID_IO4KUFC:
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-					break;
-				case DEVICE_ID_LHI:
-					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
-					break;
-				}
-				break;
-			case NTV2_Input5Select://Only used by io4k quad id
-				if (lockV2)
-					mCard->SetReference(NTV2_REFERENCE_FREERUN);
-				else
-					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
-				break;
-			}
-		}
-		break;
-	}
+    if ((deviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
+        (deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
+        (deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
+        (deviceID != DEVICE_ID_KONAIP_2110) &&
+        (deviceID != DEVICE_ID_IOIP_2110))
+    {
+
+        switch (refSelect)
+        {
+        default:
+        case kFreeRun:
+            mCard->SetReference(NTV2_REFERENCE_FREERUN);
+            break;
+        
+        case kReferenceIn:
+            if (IsCompatibleWithReference(mFb1VideoFormat))
+                mCard->SetReference(NTV2_REFERENCE_EXTERNAL);
+            else
+                mCard->SetReference(NTV2_REFERENCE_FREERUN);
+            break;
+        
+        case kVideoIn:
+            {
+                NTV2VideoFormat inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, NULL);
+                if (IsCompatibleWithReference(mFb1VideoFormat, inputFormat) == false)
+                {
+                    mCard->SetReference(NTV2_REFERENCE_FREERUN);
+                }
+                else
+                {
+                    //Some boards have HDMI some have analog LHi has both
+                    switch (mVirtualInputSelect)
+                    {
+                    default:
+                    case NTV2_Input1Select:
+                        mCard->SetReference(NTV2_REFERENCE_INPUT1);
+                        break;
+                    case NTV2_Input2Select:
+                        switch(deviceID)
+                        {
+                        case DEVICE_ID_LHI:
+                        case DEVICE_ID_IOEXPRESS:
+                            mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+                            break;
+                        case DEVICE_ID_LHE_PLUS:
+                            mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+                            break;
+                        default:
+                            mCard->SetReference(NTV2_REFERENCE_INPUT2);
+                            break;
+                        }
+                        break;
+                    case NTV2_Input3Select:
+                        switch(deviceID)
+                        {
+                        default:
+                        case DEVICE_ID_IOXT:
+                        case DEVICE_ID_IO4KUFC:
+                            mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+                            break;
+                        case DEVICE_ID_LHI:
+                            mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
+                            break;
+                        }
+                        break;
+                    case NTV2_Input5Select://Only used by io4k quad id
+                        if (lockV2)
+                            mCard->SetReference(NTV2_REFERENCE_FREERUN);
+                        else
+                            mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+                        break;
+                    } // end switch
+                } // end else
+            
+            } // end switch-case
+            break;
+        
+        }// end switch (refSelect)
+    }
+    // For 2110 need to set PTP as reference
+    else if ((deviceID == DEVICE_ID_KONAIP_2110) ||
+             (deviceID == DEVICE_ID_IOIP_2110))
+    {
+        mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
+    }
+    // For J2K devices we don't set the audio input select reg, audio input
+    // has to come from AES and the configuration code will set this properly
+    // we also force the reference on input to NTV2_REFERENCE_SFP1_PCR
+    else
+    {
+        mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
+    }        
 
 	if (mAudioMixerOverrideState == false)
 		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);

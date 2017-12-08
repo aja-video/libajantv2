@@ -78,6 +78,8 @@ public:
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual bool IsValidConfig(const rx2022Config & virtual_config, bool is2022_7);
     virtual bool IsValidConfig(const tx2022Config & virtual_config, bool is2022_7);
+    virtual bool NotEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config, bool is2022_7);
+    virtual bool NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7);
     virtual void SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
     virtual void GetIPError(NTV2Channel channel, uint32_t configType, uint32_t & val);
     virtual void PrintRxConfig(rx_2022_channel chan);
@@ -105,6 +107,8 @@ public:
 	
 	bool IsPulldownConverterMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat);
+	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat, NTV2VideoFormat inputFormat);
+	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
 	bool IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);

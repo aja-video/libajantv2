@@ -9048,15 +9048,15 @@ ULWord CNTV2Card::GetCRCErrorCountB(const NTV2Channel inChannel)
 	return value;
 }
 
-bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, const bool inEnable)
+bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, const bool inEnable)
 {
 	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
 		return false;
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_INPUT_SPIGOT_INVALID (inInputSpigot))
 		return false;
 
 	ULWord regNum, mask, shift;
-	switch (inOutputSpigot)
+	switch (inInputSpigot)
 	{
 		case NTV2_CHANNEL1:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn1LevelBtoLevelA;	shift = kRegShiftSDIIn1LevelBtoLevelA;	break;
 		case NTV2_CHANNEL2:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn2LevelBtoLevelA;	shift = kRegShiftSDIIn2LevelBtoLevelA;	break;
@@ -9071,15 +9071,15 @@ bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, co
 	return WriteRegister(regNum, inEnable, mask, shift);
 }
 
-bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bool & outEnable)
+bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool & outEnable)
 {
 	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
 		return false;
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_INPUT_SPIGOT_INVALID (inInputSpigot))
 		return false;
 
 	ULWord regNum, mask, shift;
-	switch (inOutputSpigot)
+	switch (inInputSpigot)
 	{
 		case NTV2_CHANNEL1:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn1LevelBtoLevelA;	shift = kRegShiftSDIIn1LevelBtoLevelA;	break;
 		case NTV2_CHANNEL2:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn2LevelBtoLevelA;	shift = kRegShiftSDIIn2LevelBtoLevelA;	break;
@@ -9089,7 +9089,7 @@ bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bo
 		case NTV2_CHANNEL6:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn6LevelBtoLevelA;	shift = kRegShiftSDIIn6LevelBtoLevelA;	break;
 		case NTV2_CHANNEL7:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn7LevelBtoLevelA;	shift = kRegShiftSDIIn7LevelBtoLevelA;	break;
 		case NTV2_CHANNEL8:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn8LevelBtoLevelA;	shift = kRegShiftSDIIn8LevelBtoLevelA;	break;
-		default:				return false;																											break;
+		default:				return false;
 	}
 	ULWord tempVal;
 	bool retVal = ReadRegister (regNum,		&tempVal,		mask,		shift);

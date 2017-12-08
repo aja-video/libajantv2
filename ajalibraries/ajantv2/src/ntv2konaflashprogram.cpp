@@ -19,8 +19,6 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
-const uint32_t axiSpiMACFlashOffset = 0x01F80000;
-
 using namespace std;
 
 CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
@@ -423,28 +421,49 @@ bool CNTV2KonaFlashProgram::ReadHeader(FlashBlockID blockID)
 
 bool CNTV2KonaFlashProgram::ReadInfoString()
 {
-	if (_spiDeviceID != 0x010220)
-		return false;
-	uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
-	SetFlashBlockIDBank(MCS_INFO_BLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> mcsInfoData;
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MCSINFO);
+        if (_spiFlash->Read(offset, mcsInfoData, MAXMCSINFOSIZE))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            _mcsInfo.assign(mcsInfoData.begin(), mcsInfoData.end());
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        if (_spiDeviceID != 0x010220)
+            return false;
+        uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
+        SetFlashBlockIDBank(MCS_INFO_BLOCK);
 
-	uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
-	uint32_t dwordSizeCount = MAXMCSINFOSIZE / 4;
-	for (uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4)
-	{
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
-		WaitForFlashNOTBusy();
-		ReadRegister(kRegXenaxFlashDOUT, &mcsInfoPtr[count]);
-		if (mcsInfoPtr[count] == 0)
-			break;
-	}
-	_mcsInfo = (char*)mcsInfoPtr;
-	delete[] mcsInfoPtr;
-	//Make sure to reset bank to lower
-	SetBankSelect(BANK_0);
+        uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
+        uint32_t dwordSizeCount = MAXMCSINFOSIZE / 4;
+        for (uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4)
+        {
+            WriteRegister(kRegXenaxFlashAddress, baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+            WaitForFlashNOTBusy();
+            ReadRegister(kRegXenaxFlashDOUT, &mcsInfoPtr[count]);
+            if (mcsInfoPtr[count] == 0)
+                break;
+        }
+        _mcsInfo = (char*)mcsInfoPtr;
+        delete[] mcsInfoPtr;
+        //Make sure to reset bank to lower
+        SetBankSelect(BANK_0);
 
-	return true;
+        return true;
+    }
 }
 
 void CNTV2KonaFlashProgram::Program(bool verify)
@@ -1085,8 +1104,9 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        _spiFlash->Erase(axiSpiMACFlashOffset, uint32_t(macData.size()));
-        if (_spiFlash->Write(axiSpiMACFlashOffset, macData, uint32_t(macData.size())))
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MAC);
+        _spiFlash->Erase(offset, uint32_t(macData.size()));
+        if (_spiFlash->Write(offset, macData, uint32_t(macData.size())))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             return true;
@@ -1162,7 +1182,8 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
         vector<uint8_t> macData;
         bool oldVerboseMode = _spiFlash->GetVerbosity();
         _spiFlash->SetVerbosity(false);
-        if (_spiFlash->Read(axiSpiMACFlashOffset, macData, 16))
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_MAC);
+        if (_spiFlash->Read(offset, macData, 16))
         {
             _spiFlash->SetVerbosity(oldVerboseMode);
             if (macData.size() < 16)
@@ -1246,88 +1267,162 @@ CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
 	if(!IsKonaIPDevice())
 		return false;
 
-	EraseBlock(LICENSE_BLOCK);
+    if (_spiFlash)
+    {
+        vector<uint8_t> licenseData;
+        string::iterator it = licenseString.begin();
+        while(it != licenseString.end())
+        {
+            licenseData.push_back(*it);
+            ++it;
+        }
+        licenseData.push_back(0);
 
-	SetFlashBlockIDBank(LICENSE_BLOCK);
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        _spiFlash->SetVerbosity(false);
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_LICENSE);
+        _spiFlash->Erase(offset, uint32_t(licenseData.size()));
+        if (_spiFlash->Write(offset, licenseData, uint32_t(licenseData.size())))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
 
-	ULWord sectorAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+        EraseBlock(LICENSE_BLOCK);
 
-    int len =  (int)licenseString.length();
-    int words = (len/4) + 2;
-    char * data8     = (char*)malloc(words*4);
-    ULWord  * data32 = (ULWord*)data8;
-    memset(data8,0x0,words*4);
-    strcat(data8,licenseString.c_str());
+        SetFlashBlockIDBank(LICENSE_BLOCK);
 
-	SetBankSelect(BANK_1);
+        ULWord sectorAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
 
-    for(int i = 0; i < words; i++)
-	{
-        ProgramFlashValue(sectorAddress, data32[i]);
-        sectorAddress += 4;
-	}
+        int len =  (int)licenseString.length();
+        int words = (len/4) + 2;
+        char * data8     = (char*)malloc(words*4);
+        ULWord  * data32 = (ULWord*)data8;
+        memset(data8,0x0,words*4);
+        strcat(data8,licenseString.c_str());
 
-    free(data8);
+        SetBankSelect(BANK_1);
 
-	// Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
-	SetBankSelect(BANK_0);
+        for(int i = 0; i < words; i++)
+        {
+            ProgramFlashValue(sectorAddress, data32[i]);
+            sectorAddress += 4;
+        }
 
-	return true;
+        free(data8);
+
+        // Protect Device
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x1C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+        WaitForFlashNOTBusy();
+        WriteRegister(kRegXenaxFlashDIN, 0x9C);
+        WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+        WaitForFlashNOTBusy();
+        SetBankSelect(BANK_0);
+
+        return true;
+    }
+    return true;
 }
 
 bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
 {
-#define MAX_SIZE 100
+    const uint32_t maxSize = 100;
 
-    ULWord license[MAX_SIZE];
-    memset (license,0x0,sizeof(license));
+    if(!IsKonaIPDevice())
+        return false;
 
-	if(!IsKonaIPDevice())
-		return false;
-
-	uint32_t baseAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
-	SetFlashBlockIDBank(LICENSE_BLOCK);
-
-    bool terminated = false;
-    bool good = false;
-    for(int i = 0; i < MAX_SIZE; i++)
-	{
-		WriteRegister(kRegXenaxFlashAddress,baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
-		WaitForFlashNOTBusy();
-        ReadRegister(kRegXenaxFlashDOUT,&license[i]);
-        if (license[i] == 0xffffffff)
-        {
-            good = true; // uninitialized memory
-            break;
-        }
-        if (license[i] == 0)
-        {
-            good       = true;
-            terminated = true;
-            break;
-        }
-        baseAddress += 4;
-	}
-
-    std::string res;
-    if (terminated)
+    if (_spiFlash)
     {
-        res = (char*)license;
+        vector<uint8_t> licenseData;
+        bool oldVerboseMode = _spiFlash->GetVerbosity();
+        uint32_t offset = _spiFlash->Offset(SPI_FLASH_SECTION_LICENSE);
+        _spiFlash->SetVerbosity(false);
+        if (_spiFlash->Read(offset, licenseData, maxSize))
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            serialString = "";
+            if (licenseData.size() < 4)
+            {
+                return false;
+            }
+            else if (*((uint32_t*)&licenseData[0]) == 0xffffffff)
+            {
+                return false;
+            }
+            else
+            {
+                serialString.assign(licenseData.begin(), licenseData.end());
+
+                // remove any trailing nulls
+                size_t found = serialString.find('\0');
+                if (found != string::npos)
+                {
+                    serialString.resize(found);
+                }
+            }
+
+            return true;
+        }
+        else
+        {
+            _spiFlash->SetVerbosity(oldVerboseMode);
+            return false;
+        }
+    }
+    else
+    {
+        ULWord license[maxSize];
+        memset (license,0x0,sizeof(license));
+
+        uint32_t baseAddress = GetBaseAddressForProgramming(LICENSE_BLOCK);
+        SetFlashBlockIDBank(LICENSE_BLOCK);
+
+        bool terminated = false;
+        bool good = false;
+        for(uint32_t i = 0; i < maxSize; i++)
+        {
+            WriteRegister(kRegXenaxFlashAddress,baseAddress);
+            WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
+            WaitForFlashNOTBusy();
+            ReadRegister(kRegXenaxFlashDOUT,&license[i]);
+            if (license[i] == 0xffffffff)
+            {
+                good = true; // uninitialized memory
+                break;
+            }
+            if (license[i] == 0)
+            {
+                good       = true;
+                terminated = true;
+                break;
+            }
+            baseAddress += 4;
+        }
+
+        std::string res;
+        if (terminated)
+        {
+            res = (char*)license;
+        }
+
+        serialString = res;
+        return good;
     }
 
-    serialString = res;
-    return good;
+    return true;
 }
 
 bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
@@ -1406,12 +1501,21 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
         if ( !ParseHeader((char *)_bitFileBuffer) )
             throw "Can't Parse Header";
 
-        Program(verify);
+        try
+        {
+            // handle the fpga part
+            Program(verify);
 
-        // handle the SOC part
-        ProgramSOC(verify);
+            // handle the SOC part
+            return ProgramSOC(verify);
+        }
+        catch (const char* Message)
+        {
+            printf("%s\n", Message);
+            return false;
+        }
 
-        return true;
+        return false;
     }
     else
     {
@@ -1659,16 +1763,38 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
 
         vector<uint8_t> ubootData;
         vector<uint8_t> imageData;
+        vector<uint8_t> mcsInfoData;
         uint16_t ubootPartitionOffset = 0;
         uint16_t imagePartitionOffset = 0;
+        uint16_t mcsInfoPartitionOffset = 0;
         _mcsFile.GetPartition(ubootData, 0x0400, ubootPartitionOffset, false);
-        _mcsFile.GetPartition(imageData, 0x0410, imagePartitionOffset, false);
+        if (ubootData.empty())
+        {
+            printf("Could not find uboot data in MCS file\n");
+            return false;
+        }
 
-        uint32_t ubootFlashOffset = 0x000000;
-        uint32_t imageFlashOffset = 0x100000;
+        _mcsFile.GetPartition(imageData, 0x0410, imagePartitionOffset, false);
+        if (imageData.empty())
+        {
+            printf("Could not find kernel data in MCS file\n");
+            return false;
+        }
+
+        _mcsFile.GetPartition(mcsInfoData, 0x05F4, mcsInfoPartitionOffset, false);
+        if (mcsInfoData.empty())
+        {
+            printf("Could not find mcs info in MCS file\n");
+            return false;
+        }
+
+        uint32_t ubootFlashOffset = _spiFlash->Offset(SPI_FLASH_SECTION_UBOOT);
+        uint32_t imageFlashOffset = _spiFlash->Offset(SPI_FLASH_SECTION_KERNEL);
+        uint32_t mcsFlashOffset   = _spiFlash->Offset(SPI_FLASH_SECTION_MCSINFO);
 
         uint32_t ubootSize = uint32_t(ubootData.size());
         uint32_t imageSize = uint32_t(imageData.size());
+        uint32_t mcsInfoSize = uint32_t(mcsInfoData.size());
 
         // erase uboot
         _spiFlash->Erase(ubootFlashOffset, ubootSize);
@@ -1692,6 +1818,19 @@ bool CNTV2KonaFlashProgram::ProgramSOC(bool verify )
         if (verify)
         {
             _spiFlash->Verify(imageFlashOffset, imageData);
+        }
+
+        // erase mcs info
+
+        _spiFlash->Erase(mcsFlashOffset, mcsInfoSize);
+
+        // write mcs info
+        _spiFlash->Write(mcsFlashOffset, mcsInfoData, mcsInfoSize);
+
+        // verify mcs info
+        if (verify)
+        {
+            _spiFlash->Verify(mcsFlashOffset, mcsInfoData);
         }
 
         return true;
