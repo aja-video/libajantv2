@@ -554,11 +554,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         device.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(mPTPMasterAddr.toStdString());
     }
-    else
-    {
-        device.SetReference(NTV2_REFERENCE_FREERUN);
-    }
-
 
     if (mKonaIPParams.mSFPs.size() < 1)
     {
