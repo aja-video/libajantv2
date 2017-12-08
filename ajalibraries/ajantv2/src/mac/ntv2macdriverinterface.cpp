@@ -574,7 +574,6 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
 				_boardNumber = 0;
 				_boardOpened = false;
-				//gDeviceMap.Reset(true);
 				return false;
 			}
 			MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
@@ -997,9 +996,6 @@ bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32_t pid )
 {
-	printf("AcquireStreamForApplication app=%x pid=%d\n", appType, pid);
-
-
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1030,9 +1026,6 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32_t pid )
 {
-	printf("ReleaseStreamForApplication app=%x pid=%d\n", appType, pid);
-
-
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1073,9 +1066,6 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 {
 	kern_return_t kernResult = KERN_FAILURE;
 	
-	printf("AcquireStreamForApplicationWithReference app=%x pid=%d\n", appType, pid);
-
-
 	uint64_t	scalarI_64[2];
 	uint32_t	outputCount = 0;
 
@@ -1107,8 +1097,6 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference( ULWord appType, int32_t pid )
 {
-	printf("ReleaseStreamForApplicationWithReference app=%x pid=%d\n", appType, pid);
-
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
@@ -1175,8 +1163,6 @@ bool CNTV2MacDriverInterface::KernelLog( void* dataPtr, UInt32 dataSize )
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t pid )
 {
-	printf("SetStreamingApplication app=%x pid=%d\n", appType, pid);
-
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[2];
