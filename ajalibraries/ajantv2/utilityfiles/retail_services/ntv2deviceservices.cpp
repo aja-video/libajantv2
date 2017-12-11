@@ -2880,7 +2880,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 
 	//mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
 
-	bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
 	
 	NTV2WidgetID inputSelectID = NTV2_Wgt3GSDIIn1;
