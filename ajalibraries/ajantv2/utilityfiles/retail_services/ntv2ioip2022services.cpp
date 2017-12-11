@@ -3202,7 +3202,7 @@ void IoIP2022Services::SetDeviceMiscRegisters (NTV2Mode mode)
             }
             else printf("rxConfig ch 1 read failed\n");
         }
-        else printf("rxConfig ch 1 invalid configuration\n");
+        else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
         
         if (IsValidConfig(mRx2022Config2, m2022_7Mode))
         {
@@ -3245,8 +3245,8 @@ void IoIP2022Services::SetDeviceMiscRegisters (NTV2Mode mode)
             }
             else printf("rxConfig ch 2 config read failed\n");
         }
-        else printf("rxConfig ch 2 invalid configuration\n");
-        
+        else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
+
         // KonaIP output configurations
         if (IsValidConfig(mTx2022Config3, m2022_7Mode))
         {
@@ -3291,8 +3291,8 @@ void IoIP2022Services::SetDeviceMiscRegisters (NTV2Mode mode)
             }
             else printf("txConfig ch 3 read failed\n");
         }
-        else printf("txConfig ch 3 invalid configuration\n");
-        
+        else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
+
         if (IsValidConfig(mTx2022Config4, m2022_7Mode))
         {
             
@@ -3337,7 +3337,7 @@ void IoIP2022Services::SetDeviceMiscRegisters (NTV2Mode mode)
             }
             else printf("txConfig ch 4 read failed\n");
         }
-        else printf("txConfig ch 3 invalid configuration\n");
+        else SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
     }
     
 	// VPID
