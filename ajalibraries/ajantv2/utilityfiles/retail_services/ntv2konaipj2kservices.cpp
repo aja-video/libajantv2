@@ -1254,7 +1254,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                 }
                 else printf("rxConfig ch 1 read failed\n");
             }
-            else printf("rxConfig ch 1 invalid configuration\n");
+            else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
 
 
 			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
@@ -1318,8 +1318,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                     }
                     else printf("rxConfig ch 2 read failed\n");
                 }
-                else printf("rxConfig ch 2 invalid configuration\n");
-			}
+                else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
+            }
 		}
 		
 		// KonaIP output configurations
@@ -1396,7 +1396,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                 }
                 else printf("j2kEncoder ch 1 read failed\n");
             }
-            else printf("txConfig ch 1 invalid configuration\n");
+            else SetIPError(NTV2_CHANNEL1,kErrTxConfig,NTV2IpErrInvalidConfig);
 
 			
 			if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
@@ -1469,8 +1469,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                     }
                     else printf("j2kEncoder ch 2 read failed\n");
                 }
-                else printf("txConfig ch 2 invalid configuration\n");
-			}
+                else SetIPError(NTV2_CHANNEL2,kErrTxConfig,NTV2IpErrInvalidConfig);
+            }
 		}
     }
 
