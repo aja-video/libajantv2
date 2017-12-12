@@ -809,28 +809,15 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 packetizer
-        NTV2AudioSystem audioSys;
-        switch (channel)
-        {
-        default:
-        case NTV2_CHANNEL1:
-            audioSys = NTV2_AUDIOSYSTEM_1;
-            break;
-        case NTV2_CHANNEL2:
-            audioSys = NTV2_AUDIOSYSTEM_2;
-            break;
-        case NTV2_CHANNEL3:
-            audioSys = NTV2_AUDIOSYSTEM_3;
-            break;
-        case NTV2_CHANNEL4:
-            audioSys = NTV2_AUDIOSYSTEM_4;
-            break;
-        }
 
+        NTV2AudioSystem audioSys = NTV2_AUDIOSYSTEM_1;
+        mDevice.GetSDIOutputAudioSystem (channel, audioSys);
         uint32_t audioChans = 16;
         mDevice.GetNumberAudioChannels (audioChans,audioSys);
-        if (audioChans < 8)   audioChans = 8;
-        if (audioChans > 16)  audioChans = 16;
+        if (audioChans != 16)
+        {
+            audioChans = 8;
+        }
         uint32_t samples = (audioChans == 8) ? 48 : 6;
         uint32_t plength = audioChans * samples * 3;
 
