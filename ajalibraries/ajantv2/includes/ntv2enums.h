@@ -4280,6 +4280,7 @@ typedef enum
     NTV2IpErrSDPNoAudio,
     NTV2IpErrSDPNoANC,
     NTV2IpErrSFPNotFound,
+    NTV2IpErrInvalidConfig,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

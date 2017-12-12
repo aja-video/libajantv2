@@ -7471,6 +7471,7 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
         case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
         case NTV2IpErrSFPNotFound:                  return "SFP data not found";
+        case NTV2IpErrInvalidConfig:                return "Invalid configuration";
         default:                                    return "Unknown IP error";
     }
 }
