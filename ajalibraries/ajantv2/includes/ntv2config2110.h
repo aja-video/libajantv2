@@ -160,6 +160,8 @@ public:
 
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
+    bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
+    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);

@@ -1276,6 +1276,37 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     return true;
 }
 
+bool CNTV2Config2110::GetSFPMSAData(eSFP port, SFPMSAData & data)
+{
+    return GetSFPInfo(port,data);
+}
+
+bool CNTV2Config2110::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
+    uint32_t val2;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
+
+    if (port == SFP_BOTTOM)
+    {
+        linkStatus.linkUp          = (val & LINK_B_UP) ? true : false;
+        linkStatus.SFP_present     = (val & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val & SFP_2_TX_FAULT) ? true : false;
+    }
+    else
+    {
+        linkStatus.linkUp          = (val & LINK_A_UP) ? true : false;
+        linkStatus.SFP_present     = (val & SFP_1_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val & SFP_1_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val & SFP_1_TX_FAULT) ? true : false;
+    }
+
+    return true;
+}
+
+
 string CNTV2Config2110::getLastError()
 {
     return NTV2IpErrorEnumToString(getLastErrorCode());
