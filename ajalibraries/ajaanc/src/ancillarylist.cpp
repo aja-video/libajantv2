@@ -494,15 +494,15 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 		UWordVANCPacketList	yPackets, cPackets;
 
 		inFormatDesc.GetSMPTELineNumber (line, smpteLineNum, isF2);
-// 		if (fbf == NTV2_FBF_10BIT_YCBCR)
-// 			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
-// 													inFormatDesc, uwords);
-// 		else
-// 			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
-// 																	uwords,  inFormatDesc.GetRasterWidth());
+		if (fbf == NTV2_FBF_10BIT_YCBCR)
+			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+													inFormatDesc, uwords);
+		else
+			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+																	uwords,  inFormatDesc.GetRasterWidth());
 
-		//CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
-		//CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
+		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets);
+		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets);
 
 		for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it)
 			if (isF2)
