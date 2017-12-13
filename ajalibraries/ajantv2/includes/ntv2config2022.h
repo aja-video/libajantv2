@@ -164,15 +164,6 @@ public:
     std::vector<uint32_t> availableAudioPIDs;
 };
 
-
-struct sLinkStatus
-{
-    bool SFP_present;
-    bool SFP_rx_los;    // loss of signal
-    bool SFP_tx_fault;
-    bool linkUp;
-};
-
 struct s2022RxChannelStatus
 {
     uint32_t primaryRxPackets;

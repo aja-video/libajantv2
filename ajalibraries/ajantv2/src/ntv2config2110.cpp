@@ -809,28 +809,15 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 packetizer
-        NTV2AudioSystem audioSys;
-        switch (channel)
-        {
-        default:
-        case NTV2_CHANNEL1:
-            audioSys = NTV2_AUDIOSYSTEM_1;
-            break;
-        case NTV2_CHANNEL2:
-            audioSys = NTV2_AUDIOSYSTEM_2;
-            break;
-        case NTV2_CHANNEL3:
-            audioSys = NTV2_AUDIOSYSTEM_3;
-            break;
-        case NTV2_CHANNEL4:
-            audioSys = NTV2_AUDIOSYSTEM_4;
-            break;
-        }
 
+        NTV2AudioSystem audioSys = NTV2_AUDIOSYSTEM_1;
+        mDevice.GetSDIOutputAudioSystem (channel, audioSys);
         uint32_t audioChans = 16;
         mDevice.GetNumberAudioChannels (audioChans,audioSys);
-        if (audioChans < 8)   audioChans = 8;
-        if (audioChans > 16)  audioChans = 16;
+        if (audioChans != 16)
+        {
+            audioChans = 8;
+        }
         uint32_t samples = (audioChans == 8) ? 48 : 6;
         uint32_t plength = audioChans * samples * 3;
 
@@ -1275,6 +1262,37 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
 
     return true;
 }
+
+bool CNTV2Config2110::GetSFPMSAData(eSFP port, SFPMSAData & data)
+{
+    return GetSFPInfo(port,data);
+}
+
+bool CNTV2Config2110::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
+    uint32_t val2;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
+
+    if (port == SFP_BOTTOM)
+    {
+        linkStatus.linkUp          = (val  & LINK_B_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_2_TX_FAULT) ? true : false;
+    }
+    else
+    {
+        linkStatus.linkUp          = (val  & LINK_A_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_1_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_1_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_1_TX_FAULT) ? true : false;
+    }
+
+    return true;
+}
+
 
 string CNTV2Config2110::getLastError()
 {
