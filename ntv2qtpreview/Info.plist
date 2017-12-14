@@ -8,6 +8,8 @@
 	<string>ntv2qtpreview</string>
 	<key>CFBundleName</key>
 	<string>ntv2qtpreview</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.0.0</string>
 	<key>CFBundlePackageType</key>
