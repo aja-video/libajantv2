@@ -2834,12 +2834,9 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 }
 
 
-
-#define XENA2_SEARCHTIMEOUT 5
-
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {
-#define BYTES_PER_UNIT	512		// each hardware click is 64 bytes
+	const uint32_t kBytesPerUnit = 512;		// each hardware click is 64 bytes
     
 	NTV2FrameRate rate =  NTV2_FRAMERATE_UNKNOWN;
 	mCard->GetFrameRate(&rate);
@@ -2850,7 +2847,7 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	mCard->GetNumberAudioChannels(channels);
 
 	double  bytes          = samplesPerFrame * 4 * frames * channels;
-	uint32_t offset        = uint32_t(bytes / BYTES_PER_UNIT);
+	uint32_t offset        = uint32_t(bytes / kBytesPerUnit);
 	
 	return offset;
 }
