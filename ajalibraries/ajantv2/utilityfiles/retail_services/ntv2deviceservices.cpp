@@ -652,13 +652,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// audio monitor
 	ULWord chSelect = NTV2_AudioMonitor1_2;
 	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, &chSelect);
-	if (deviceID == DEVICE_ID_KONA3G || deviceID == DEVICE_ID_KONA3GQUAD ||
-		deviceID == DEVICE_ID_KONA4  || deviceID == DEVICE_ID_KONA4UFC ||
-		deviceID == DEVICE_ID_IO4K   || deviceID == DEVICE_ID_IOXT)
+	if (deviceID == DEVICE_ID_KONA3G	|| deviceID == DEVICE_ID_KONA3GQUAD ||
+		deviceID == DEVICE_ID_IO4KUFC	|| deviceID == DEVICE_ID_KONA4UFC	||
+		deviceID == DEVICE_ID_IOXT )
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
 	}
-	else if (deviceID == DEVICE_ID_IO4KPLUS)
+	else if (deviceID == DEVICE_ID_IO4KPLUS || deviceID == DEVICE_ID_IO4K || deviceID == DEVICE_ID_KONA4)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
 		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
