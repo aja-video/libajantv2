@@ -4270,7 +4270,7 @@ public:
 	/**
 		@brief		Enables or disables decimate mode on the device's HDMI rasterizer, which halves the
 					output frame rate when enabled. This allows a 60 Hz video stream to be displayed on
-					a 30 Hz HDMI montitor.
+					a 30 Hz HDMI monitor.
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable		If true, enables decimation mode; otherwise disables decimation mode.
 	**/
