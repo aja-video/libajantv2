@@ -4230,32 +4230,32 @@ public:
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
 
 	/**
-		@brief						Allows user to force output parameters
-		@param[in]	bool			enabled
+		@brief						Enables or disables override of HDMI parameters.
+		@param[in]	inEnable		Specify true to enable HDMI user-override;  otherwise false to disable it.
 		@return						True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableHDMIOutUserOverride(bool enable);
+	AJA_VIRTUAL bool	EnableHDMIOutUserOverride (const bool inEnable);
 
 	/**
-		@brief						Reports force user output parameters enalbed
-		@param[out]	bool			enabled
+		@brief						Answers if override of HDMI parameters is enabled or not.
+		@param[out]	outIsEnabled	Receives true if enabled;  otherwise false.
 		@return						True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride(bool & isEnabled);
+	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride (bool & outIsEnabled);
 
 	/**
-		@brief						Allows user to center crop 4k/2k -> UHD/HD
-		@param[in]	bool			enabled
+		@brief						Controls the 4k/2k -> UHD/HD HDMI center cropping feature.
+		@param[in]	inEnable		Specify true to enable center cropping;  otherwise false to disable it.
 		@return						True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop(bool enable);
+	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop (const bool inEnable);
 
 	/**
-		@brief						Reports center crop 4k/2k -> UHD/HD enabled
-		@param[out]	bool			enabled
+		@brief						Answers if the HDMI 4k/2k -> UHD/HD center cropping is enabled or not.
+		@param[out]	outIsEnabled	Receives true if center cropping is enabled;  otherwise false.
 		@return						True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & isEnabled);
+	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & outIsEnabled);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
