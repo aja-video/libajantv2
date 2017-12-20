@@ -6606,7 +6606,7 @@ typedef enum
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains NTV2Channel of interest, but only for new API \c FRAME_STAMP message.
 					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (\c FRAME_STAMP message).
-					ULWord64			acAudioClockTimeStamp;			///< @brief	48kHz clock (in reg 28, extended to 64 bits) at time of play or record.
+					ULWord64			acAudioClockTimeStamp;			///< @brief	Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
 					ULWord				acAudioInStartAddress;			///< @brief	For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
 					ULWord				acAudioInStopAddress;			///< @brief	For record - end position (exclusive) in buffer of audio (includes base offset) -- AudioInAddress at the Frame AFTER this Frame was stamped
@@ -6634,7 +6634,7 @@ typedef enum
 																		///<		Granularity can vary depending on the HAL. acAudioClockCurrentTime is the recommended time-stamp to use instead of this.
 					ULWord				acCurrentFrame;					///< @brief	Last vertical blank frame for this autocirculate channel (when AutoCirculateGetFrameStamp was called)
 					LWord64				acCurrentFrameTime;				///< @brief	Vertical blank start of current frame
-					ULWord64			acAudioClockCurrentTime;		///< @brief	48kHz clock in reg 28 extended to 64 bits, consistent and accurate
+					ULWord64			acAudioClockCurrentTime;		///< @brief	Current time expressed as a count of 10MHz ticks, based on 48kHz clock (from register 28).
 					ULWord				acCurrentAudioExpectedAddress;	//	FIXFIXFIX	Document		What is this?!
 					ULWord				acCurrentAudioStartAddress;		///< @brief	As set by play
 					ULWord				acCurrentFieldCount;			///< @brief	As found by ISR at Call Field0 or Field1 _currently_ being OUTPUT (when AutoCirculateGetFrameStamp called)
