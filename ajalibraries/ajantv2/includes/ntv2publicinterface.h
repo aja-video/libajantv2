@@ -7115,8 +7115,8 @@ typedef enum
 				inline const AUTOCIRCULATE_TRANSFER_STATUS &	GetTransferStatus (void) const			{return acTransferStatus;}
 
 				/**
-					@brief	Returns a constant reference to my AUTOCIRCULATE_TRANSFER_STATUS.
-					@return	A constant reference to my AUTOCIRCULATE_TRANSFER_STATUS.
+					@brief	Returns a constant reference to my FRAME_STAMP.
+					@return	A constant reference to my FRAME_STAMP.
 				**/
 				inline const FRAME_STAMP &				GetFrameInfo (void) const						{return acTransferStatus.acFrameStamp;}
 
