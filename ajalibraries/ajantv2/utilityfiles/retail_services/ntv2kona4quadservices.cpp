@@ -3136,6 +3136,7 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 
 	// HDMI output - initialization sequence
+	#ifdef HDMI_INIT
 	if (mHDMIStartupCountDown > 0)
 	{
 		// start initialization
@@ -3154,6 +3155,7 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		mHDMIStartupCountDown--;
 	}
 	else
+	#endif
 	{
 		if (b4K == true)
 		{
