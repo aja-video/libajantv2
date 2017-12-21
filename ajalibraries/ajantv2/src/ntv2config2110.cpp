@@ -1021,7 +1021,7 @@ bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
     else
     {
         mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, 0);
-        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x01);
+        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x07);
         return false;
     }
 }
