@@ -135,8 +135,8 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	//bool						b4k6gOut			= false;
-	//bool						b4k12gOut			= false;
+	bool						b4k6gOut			= false;
+	bool						b4k12gOut			= false;
 	int							bCh1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bCh2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bCh3Disable			= 1;						// Assume Channel 3 IS disabled by default
@@ -161,10 +161,9 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
 	
-	//ULWord					selectSwapQuad		= 0;
-	//mCard->ReadRegister(kVRegSwizzle4kOutput, &selectSwapQuad);
-	//bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
-	bool						bQuadSwap			= false;
+	ULWord						selectSwapQuad		= 0;
+	mCard->ReadRegister(kVRegSwizzle4kOutput, &selectSwapQuad);
+	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
 	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 
 	// make sure formats/modes match for multibuffer modes
@@ -1563,10 +1562,9 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
 	
 	// swap quad mode
-	//ULWord					selectSwapQuad		= 0;
-	//mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
-	//bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
-	bool						bQuadSwap			= false;
+	ULWord						selectSwapQuad		= 0;
+	mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
+	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
 	
 	// SMPTE 425
 	bool						b2x425In			= false;
