@@ -261,7 +261,6 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
 
 bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
-#ifndef SAREK_EMBEDDED
     if (!mDevice.IsMBSystemReady())
     {
         mIpErrorCode = NTV2IpErrNotReady;
@@ -273,7 +272,6 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
         mIpErrorCode = NTV2IpErrSoftwareMismatch;
         return false;
     }
-#endif // SAREK_EMBEDDED
 
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
@@ -1144,13 +1142,11 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
 
 bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDifferential)
 {
-#ifndef SAREK_EMBEDDED
     if (!mDevice.IsMBSystemReady())
     {
         mIpErrorCode = NTV2IpErrNotReady;
         return false;
     }
-#endif // SAREK_EMBEDDED
 
     if (!_is2022_7)
     {
@@ -1349,9 +1345,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
 {
     if (_is2022_2)
     {
-#ifndef SAREK_EMBEDDED
     	mDevice.SetAudioSystemInputSource(NTV2_AUDIOSYSTEM_1,NTV2_AUDIO_AES,NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
-#endif // SAREK_EMBEDDED
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
         mIpErrorCode = tsConfig.getLastErrorCode();

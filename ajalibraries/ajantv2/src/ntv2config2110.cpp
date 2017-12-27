@@ -145,7 +145,6 @@ bool CNTV2Config2110::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
 
 bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
 {
-#ifndef SAREK_EMBEDDED
     if (!mDevice.IsMBSystemReady())
     {
         mIpErrorCode = NTV2IpErrNotReady;
@@ -157,7 +156,6 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
         mIpErrorCode = NTV2IpErrSoftwareMismatch;
         return false;
     }
-#endif // SAREK_EMBEDDED
 
     uint32_t addr = inet_addr(localIPAddress.c_str());
     addr = NTV2EndianSwap32(addr);
@@ -814,7 +812,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         uint32_t audioChans = 16;
         
-#ifndef SAREK_EMBEDDED
         NTV2AudioSystem audioSys = NTV2_AUDIOSYSTEM_1;
         mDevice.GetSDIOutputAudioSystem (channel, audioSys);
 
@@ -823,7 +820,6 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         {
             audioChans = 8;
         }
-#endif // SAREK_EMBEDDED
 
         uint32_t samples = (audioChans == 8) ? 48 : 6;
         uint32_t plength = audioChans * samples * 3;
