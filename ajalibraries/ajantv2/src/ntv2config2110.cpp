@@ -463,6 +463,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
+        bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
 
         // width
@@ -471,6 +472,10 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
 
         // height
         uint32_t height = fd.GetRasterHeight();
+        if (interlaced)
+        {
+            height /= 2;
+        }
         mDevice.WriteRegister(kReg4175_depkt_height + depacketizerBaseAddr,height);
 
         // video format = sampling
