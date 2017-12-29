@@ -23,11 +23,10 @@
 #define SAREK_GENLOCK_SPI           (0x101000/4)
 #define SAREK_MAILBOX               (0x107000/4)
 #define SAREK_PLL                   (0x108000/4)
-
 #define SAREK_REGS2                 (0x10e000/4)
-
 #define SAREK_10G_EMAC_0            (0x180000/4)
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
+#define SAREK_CSREGS                (0x080000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -168,6 +167,7 @@
 #define SAREK_PTP_PLL				BIT(5)
 #define SAREK_TX_TOP34              BIT(6)
 #define SAREK_2110                  BIT(7)
+#define SAREK_CS                    BIT(8)
 
 #define SAREK_TX0_MASK              (BIT(31) + BIT(30) + BIT(29) + BIT(28))
 #define SAREK_RX0_MASK              (BIT(27) + BIT(26) + BIT(25) + BIT(24))
