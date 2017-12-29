@@ -1,0 +1,604 @@
+/**
+    @file		ntv2supportlogger.cpp
+    @brief		Implementation of CNTV2SupportLogger class.
+    @copyright	(C) 2017 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+**/
+#include "ntv2supportlogger.h"
+
+#include "ntv2devicefeatures.h"
+#include "ntv2registerexpert.h"
+#include "ntv2rp188.h"
+
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+typedef map <NTV2Channel, AUTOCIRCULATE_STATUS>     ChannelToACStatus;
+typedef ChannelToACStatus::const_iterator			ChannelToACStatusConstIter;
+typedef pair <NTV2Channel, AUTOCIRCULATE_STATUS>	ChannelToACStatusPair;
+typedef map <uint16_t, NTV2TimeCodeList>			FrameToTCList;
+typedef FrameToTCList::const_iterator				FrameToTCListConstIter;
+typedef pair <uint16_t, NTV2TimeCodeList>			FrameToTCListPair;
+typedef map <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCList;
+typedef ChannelToPerFrameTCList::const_iterator		ChannelToPerFrameTCListConstIter;
+typedef pair <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCListPair;
+
+std::string makeHeader(std::ostringstream& oss, const std::string& name)
+{
+    oss << setfill('=') << setw(96) << " " << name << ":" << setfill(' ') << endl << endl;
+    return oss.str();
+}
+
+std::string timecodeToString(const NTV2_RP188 & inRP188)
+{
+    ostringstream oss;
+    if (inRP188.IsValid())
+    {
+        const CRP188 foo(inRP188);
+        oss << foo;
+    }
+    else
+    {
+        oss << "---";
+    }
+
+    return oss.str();
+}
+
+std::string appSignatureToString(const ULWord inAppSignature)
+{
+    ostringstream oss;
+    const string sigStr	(NTV2_4CC_AS_STRING (inAppSignature));
+    if (isprint (sigStr.at (0)) && isprint (sigStr.at (1)) && isprint (sigStr.at (2)) && isprint (sigStr.at (3)))
+        oss << "'" << sigStr << "'";
+    else if (inAppSignature)
+        oss << "0x" << hex << setw (8) << setfill ('0') << inAppSignature << dec << " (" << inAppSignature << ")";
+    else
+        oss << "'----' (0)";
+    return oss.str();
+}
+
+std::string pidToString(const uint32_t inPID)
+{
+    ostringstream	oss;
+    #if defined (MSWindows)
+        oss << inPID;
+        //TCHAR	filename	[MAX_PATH];
+        //HANDLE	processHandle	(OpenProcess (PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, inPID));
+        //if (processHandle)
+        //{
+        //	if (GetModuleFileNameEx (processHandle, NULL, filename, MAX_PATH))
+        //		oss << " (" << filename << ")";
+        //	CloseHandle (processHandle);
+        //}
+    #elif defined (AJALinux)
+        oss << inPID;
+    #elif defined (AJAMac)
+        oss << inPID;
+       // char		pathbuf [PROC_PIDPATHINFO_MAXSIZE];
+       // const int	rc		(::proc_pidpath (pid_t (inPID), pathbuf, sizeof (pathbuf)));
+       // if (rc == 0 && ::strlen (pathbuf))
+       //     oss << " (" << string (pathbuf) << ")";
+    #else
+        oss << inPID;
+    #endif
+    return oss.str();
+}
+
+//	NTV2_AUDIO_BUFFER_SIZE_8MB	8MB buffer:																							16-ch:	130,560 samples		8-ch:	261,120 samples		6-ch:	348,160 samples
+//	NTV2_AUDIO_BUFFER_SIZE_4MB	4MB buffer:	0x00400000(4,194,304 bytes) - 0x00004000(16,384 bytes) = 0x003FC000(4,177,920 bytes)	16-ch:	65,280 samples		8-ch:	130,560 samples		6-ch:	174,080 samples
+//	NTV2_AUDIO_BUFFER_SIZE_2MB	2MB buffer:																							16-ch:	32,640 samples		8-ch:	65,280 samples		6-ch:	87,040 samples
+//	NTV2_AUDIO_BUFFER_SIZE_1MB	1MB buffer:																							16-ch:	16,320 samples		8-ch:	32,640 samples		6-ch:	43,520 samples
+//	Returns the maximum number of samples for a given NTV2AudioBufferSize and maximum audio channel count...
+static uint32_t maxSampleCountForNTV2AudioBufferSize (const NTV2AudioBufferSize inBufferSize, const uint16_t inChannelCount)
+{												//	NTV2_AUDIO_BUFFER_SIZE_1MB	NTV2_AUDIO_BUFFER_SIZE_4MB	NTV2_AUDIO_BUFFER_SIZE_2MB	NTV2_AUDIO_BUFFER_SIZE_8MB	NTV2_AUDIO_BUFFER_INVALID
+    static uint32_t	gMaxSampleCount16 []	=	{	16320,						65280,						32640,						130560,						0	};
+    static uint32_t	gMaxSampleCount8 []		=	{	32640,						130560,						65280,						261120,						0	};
+    static uint32_t	gMaxSampleCount6 []		=	{	87040,						174080,						87040,						348160,						0	};
+    if (NTV2_IS_VALID_AUDIO_BUFFER_SIZE (inBufferSize))
+        switch (inChannelCount)
+        {
+            case 16:	return gMaxSampleCount16 [inBufferSize];
+            case 8:		return gMaxSampleCount8 [inBufferSize];
+            case 6:		return gMaxSampleCount6 [inBufferSize];
+            default:	break;
+        }
+    return 0;
+}
+
+NTV2VideoFormat getVideoFormat(CNTV2Card& device, const NTV2Channel inChannel)
+{
+    NTV2VideoFormat	result(NTV2_FORMAT_UNKNOWN);
+    device.GetVideoFormat(result, inChannel);
+    return result;
+}
+
+ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+{
+    ULWord result(0);
+    if (NTV2_IS_OUTPUT_MODE (mode))
+        device.ReadAudioLastOut (result, NTV2Channel(audioSystem));	//	read head
+    else
+        device.ReadAudioLastIn (result, NTV2Channel(audioSystem));	//	write head
+    return result;
+}
+
+ULWord getNumAudioChannels(CNTV2Card& device, NTV2AudioSystem audioSystem)
+{
+    ULWord numChannels = 1;
+    device.GetNumberAudioChannels(numChannels, audioSystem);
+    return numChannels;
+}
+
+ULWord bytesToSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, const ULWord inBytes)
+{
+    return inBytes / sizeof (uint32_t) / getNumAudioChannels(device, audioSystem);
+}
+
+ULWord getCurrentPositionSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+{
+    ULWord bytes = readCurrentAudioPosition(device, audioSystem, mode);
+    return bytesToSamples(device, audioSystem, bytes);
+}
+
+ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
+{
+    NTV2AudioBufferSize bufferSize;
+    device.GetAudioBufferSize(bufferSize, audioSystem);
+
+    return maxSampleCountForNTV2AudioBufferSize (bufferSize, getNumAudioChannels(device, audioSystem));
+}
+
+NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioSystem, AUTOCIRCULATE_STATUS & outStatus)
+{
+    for (UWord chan (0);  chan < ::NTV2DeviceGetNumVideoChannels (device.GetDeviceID());  chan++)
+        if (device.AutoCirculateGetStatus (NTV2Channel(chan), outStatus))
+            if (!outStatus.IsStopped())
+                if (outStatus.GetAudioSystem() == audioSystem)
+                {
+                    NTV2Mode mode = NTV2_MODE_DISPLAY;
+                    device.GetMode(NTV2Channel(chan), mode);
+                    if ((outStatus.IsInput() && NTV2_IS_INPUT_MODE (mode))
+                        ||  (outStatus.IsOutput() && NTV2_IS_OUTPUT_MODE (mode)))
+                            return NTV2Channel(chan);
+                }
+    return NTV2_CHANNEL_INVALID;
+}
+
+bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSource,
+                             const NTV2EmbeddedAudioInput inEmbeddedSource,
+                             NTV2AudioChannelPairs & outChannelPairsPresent)
+{
+    outChannelPairsPresent.clear();
+    switch (inAudioSource)
+    {
+        default:					return	false;
+
+        case NTV2_AUDIO_EMBEDDED:	return	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT (inEmbeddedSource)
+                                                //	Input detection is based on the audio de-embedder (as opposed to the SDI spigot)...
+                                                ?	device.GetDetectedAudioChannelPairs (NTV2AudioSystem(inEmbeddedSource), outChannelPairsPresent)
+                                                :	false;
+
+        case NTV2_AUDIO_AES:		return	device.GetDetectedAESChannelPairs (outChannelPairsPresent);
+
+        case NTV2_AUDIO_ANALOG:		if (NTV2_IS_VALID_VIDEO_FORMAT(device.GetAnalogInputVideoFormat())
+                                        || NTV2_IS_VALID_VIDEO_FORMAT(device.GetAnalogCompositeInputVideoFormat()))
+                                            {outChannelPairsPresent.insert(NTV2_AudioChannel1_2);	return true;}	//	Assume chls 1&2 if an analog signal present
+                                    break;
+
+        case NTV2_AUDIO_HDMI:		if (NTV2_IS_VALID_VIDEO_FORMAT(device.GetHDMIInputVideoFormat()))
+                                    {
+                                        NTV2HDMIAudioChannels	hdmiChls	(NTV2_INVALID_HDMI_AUDIO_CHANNELS);
+                                        if (!device.GetHDMIInputAudioChannels (hdmiChls))
+                                            return false;
+                                        for (NTV2AudioChannelPair chPair (NTV2_AudioChannel1_2);
+                                             chPair < ((hdmiChls == NTV2_HDMIAudio8Channels)  ?  NTV2_AudioChannel9_10  :  NTV2_AudioChannel3_4);
+                                             chPair = NTV2AudioChannelPair(chPair + 1))
+                                                    outChannelPairsPresent.insert (chPair);
+                                        return true;
+                                    }
+                                    break;
+    }
+    return false;
+}
+
+AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData)
+{
+    CNTV2SupportLogger* instance = (CNTV2SupportLogger*)&inData;
+    outStream << instance->ToString();
+    return outStream;
+}
+
+CNTV2SupportLogger::CNTV2SupportLogger(CNTV2Card& card, NTV2SupportLoggerSections sections)
+    : mSections(sections)
+{
+    mDevice.Open(card.GetIndexNumber(), false, DEVICETYPE_NTV2);
+}
+
+CNTV2SupportLogger::CNTV2SupportLogger(int cardIndex, NTV2SupportLoggerSections sections)
+    : mSections(sections)
+{
+    mDevice.Open(cardIndex, false, DEVICETYPE_NTV2);
+}
+
+CNTV2SupportLogger::~CNTV2SupportLogger()
+{
+}
+
+int CNTV2SupportLogger::Version()
+{
+    // Bump this whenever the formatting of the support log changes drastically
+    return 2;
+}
+
+void CNTV2SupportLogger::PrependCustomSection(const std::string& sectionName, const std::string& sectionData)
+{
+    ostringstream oss;
+    makeHeader(oss, sectionName);
+    oss << sectionData << "\n";
+    mHeaderStr.append(oss.str());
+}
+
+void CNTV2SupportLogger::AppendCustomSection(const std::string& sectionName, const std::string& sectionData)
+{
+    ostringstream oss;
+    makeHeader(oss, sectionName);
+    oss << sectionData << "\n";
+    mFooterStr.append(oss.str());
+}
+
+std::string CNTV2SupportLogger::ToString()
+{
+    ostringstream oss;
+
+    if(mDevice.IsOpen())
+    {
+        vector<char> dateBufferLocal(128, 0);
+        vector<char> dateBufferUTC(128, 0);
+
+        // get the wall time and format it
+        time_t now = time(NULL);
+
+        struct tm *localTimeinfo;
+        localTimeinfo = localtime((const time_t*)&now);
+        strcpy(&dateBufferLocal[0], "");
+        if (localTimeinfo)
+        {
+            ::strftime(&dateBufferLocal[0], dateBufferLocal.size(), "%B %d, %Y %I:%M:%S %p %Z (local)", localTimeinfo);
+        }
+
+        struct tm *utcTimeinfo;
+        utcTimeinfo = gmtime((const time_t*)&now);
+        strcpy(&dateBufferUTC[0], "");
+        if (utcTimeinfo)
+        {
+            ::strftime(&dateBufferUTC[0], dateBufferUTC.size(), "%Y-%m-%dT%H:%M:%SZ UTC", utcTimeinfo);
+        }
+
+        oss << "Begin NTV2 Support Log" << "\n" <<
+               "Version: "   << CNTV2SupportLogger::Version() << "\n"
+               "Generated: " << &dateBufferLocal[0] <<
+               "           " << &dateBufferUTC[0] << "\n\n" << flush;
+
+        if (mHeaderStr.empty() == false)
+        {
+            oss << mHeaderStr;
+        }
+
+        if (mSections & NTV2_SupportLoggerSectionAutoCirculate)
+        {
+            makeHeader(oss, "AutoCirculate");
+            FetchAutoCirculateLogInfo(oss);
+        }
+
+        if (mSections & NTV2_SupportLoggerSectionAudioLog)
+        {
+            makeHeader(oss, "Audio");
+            FetchAudioLogInfo(oss);
+        }
+
+        if (mSections & NTV2_SupportLoggerSectionRouting)
+        {
+            makeHeader(oss, "Routing");
+            FetchRoutingLogInfo(oss);
+        }
+
+        if (mSections & NTV2_SupportLoggerSectionRegisterLog)
+        {
+            makeHeader(oss, "Regs");
+            FetchRegisterLogInfo(oss);
+        }
+
+        if (mFooterStr.empty() == false)
+        {
+            oss << mFooterStr;
+        }
+
+        oss << endl << "End NTV2 Support Log";
+    }
+
+    return oss.str();
+}
+
+void CNTV2SupportLogger::ToString(std::string& outString)
+{
+    outString = ToString();
+}
+
+void CNTV2SupportLogger::FetchRegisterLogInfo(std::ostringstream& oss)
+{
+    NTV2RegisterReads	regs;
+    const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
+    const NTV2RegNumSet	deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
+    const NTV2RegNumSet	virtualRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Virtual));
+    static const string	sDashes		(96, '-');
+
+    oss	<< endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
+    regs = ::FromRegNumSet (deviceRegs);
+    if (!mDevice.ReadRegisters (regs))
+        oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+    for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
+    {
+        const NTV2RegInfo &	regInfo	(*it);
+        const uint32_t		regNum	(regInfo.registerNumber);
+        const uint32_t		offset	(regInfo.registerNumber * 4);
+        const uint32_t		value	(regInfo.registerValue);
+        oss	<< endl
+            << setw(20) << "Register Number: " << setw(10) << regNum << " : " << xHEX0N(regNum,8) << " : " << CNTV2RegisterExpert::GetDisplayName(regNum) << ":" << endl
+            << setw(20) << "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
+            //<< "Disposition: " << (CNTV2RegisterExpert::IsReadOnly(regNum) ? "READ-ONLY" : (CNTV2RegisterExpert::IsWriteOnly(regNum) ? "WRITE-ONLY" : "READ/WRITE")) << endl
+            //<< "Start Address: " << "0x00000000" << endl
+            << setw(20) << "Register Offset: " << setw(10) << offset << " : " << xHEX0N(offset,8) << endl
+            << setw(20) << "Register Value: " << setw(10) << value << " : " << xHEX0N(value,8) << " : " << bBIN032(value) << endl
+            << CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
+    }
+
+    regs = ::FromRegNumSet (virtualRegs);
+    oss	<< endl << virtualRegs.size() << " Virtual Registers " << sDashes << endl << endl;
+    if (!mDevice.ReadRegisters (regs))
+        oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+    for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
+    {
+        const NTV2RegInfo &	regInfo	(*it);
+        const uint32_t		regNum	(regInfo.registerNumber);
+        const uint32_t		offset	(regInfo.registerNumber * 4);
+        const uint32_t		value	(regInfo.registerValue);
+        oss	<< endl
+            << setw(20) << "VReg Number: " << setw(10) << regNum << " : " << xHEX0N(regNum,8) << " : " << CNTV2RegisterExpert::GetDisplayName(regNum) << ":" << endl
+            //<< setw(20) << "VReg Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
+            //<< "Disposition: " << (CNTV2RegisterExpert::IsReadOnly(regNum) ? "READ-ONLY" : (CNTV2RegisterExpert::IsWriteOnly(regNum) ? "WRITE-ONLY" : "READ/WRITE")) << endl
+            //<< "Start Address: " << "0x00000000" << endl
+            << setw(20) << "VReg Offset: " << setw(10) << offset << " : " << xHEX0N(offset,8) << endl
+            << setw(20) << "VReg Value: " << setw(10) << value << " : " << xHEX0N(value,8) << " : " << bBIN032(value)
+            << CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
+    }
+}
+
+void CNTV2SupportLogger::FetchAutoCirculateLogInfo(std::ostringstream& oss)
+{
+    ULWord					appSignature	(0);
+    int32_t					appPID			(0);
+    ChannelToACStatus		perChannelStatus;	//	Per-channel AUTOCIRCULATE_STATUS
+    ChannelToPerFrameTCList	perChannelTCs;		//	Per-channel collection of per-frame TCs
+    NTV2EveryFrameTaskMode	taskMode	(NTV2_DISABLE_TASKS);
+    static const string		dashes		(25, '-');
+
+    //	This code block takes a snapshot of the current AutoCirculate state of the device...
+    {
+        //QMutexLocker	tmpLock (&mutex);
+        mDevice.GetEveryFrameServices (taskMode);
+        mDevice.GetStreamingApplication (&appSignature, &appPID);
+
+        //	Grab A/C status for each channel...
+        for (NTV2Channel chan (NTV2_CHANNEL1);  chan < NTV2_MAX_NUM_CHANNELS;  chan = NTV2Channel(chan+1))
+        {
+            FrameToTCList			perFrameTCs;
+            AUTOCIRCULATE_STATUS	acStatus;
+            if (NTV2_IS_INPUT_CROSSPOINT (acStatus.acCrosspoint))	mDevice.WaitForInputVerticalInterrupt (chan);
+            else													mDevice.WaitForOutputVerticalInterrupt (chan);
+            mDevice.AutoCirculateGetStatus (chan, acStatus);
+            perChannelStatus.insert (ChannelToACStatusPair (chan, acStatus));
+            if (!acStatus.IsStopped())
+            {
+                for (uint16_t frameNum (acStatus.GetStartFrame());  frameNum <= acStatus.GetEndFrame();  frameNum++)
+                {
+                    FRAME_STAMP			frameStamp;
+                    NTV2TimeCodeList	timecodes;
+                    mDevice.AutoCirculateGetFrameStamp (chan, frameNum, frameStamp);
+                    frameStamp.GetInputTimeCodes (timecodes);
+                    perFrameTCs.insert (FrameToTCListPair (frameNum, timecodes));
+                }	//	for each A/C frame
+                perChannelTCs.insert (ChannelToPerFrameTCListPair (chan, perFrameTCs));
+            }	//	if not stopped
+        }	//	for each channel
+    }	//	lock scope
+
+    oss	<< "Task mode:  " << ::NTV2TaskModeToString (taskMode) << ", PID=" << pidToString (appPID) << ", signature=" << appSignatureToString (appSignature) << endl
+        << endl
+        << "AutoCirculate:    State  Start   End   Act FramesProc FramesDrop BufLvl                             A u t o C i r c u l a t e   O p t i o n s           VideoFormat" << endl
+        << "-------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+    for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
+    {
+        const NTV2Channel				chan	(iter->first);
+        const AUTOCIRCULATE_STATUS	&	status	(iter->second);
+        if (status.IsStopped())
+            continue;
+        oss << ::NTV2ChannelToString (chan, true) << ": " << (NTV2_IS_INPUT_CROSSPOINT (status.acCrosspoint) ? " Input" : "Output")
+            << setw (12) << ::NTV2AutoCirculateStateToString (status.acState)
+            << "  " << setw (5) << status.acStartFrame
+            << setw (6) << status.acEndFrame
+            << setw (6) << status.acActiveFrame
+            << setw (11) << status.acFramesProcessed
+            << setw (11) << status.acFramesDropped
+            << setw (7) << status.acBufferLevel
+            << setw (10) << ::NTV2AudioSystemToString (status.acAudioSystem, true)
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_RP188		? "+RP188"		: "-RP188")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE	? "+FBFchg"		: "-FBFchg")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE	? "+FBOchg"		: "-FBOchg")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "+ColCor"		: "-ColCor")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "+VidProc"	: "-VidProc")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "+AncData"	: "-AncData")
+            << setw (22) << ::NTV2VideoFormatToString (getVideoFormat(mDevice, chan))
+            << endl;
+    }	//	for each channel
+
+    for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
+    {
+        const NTV2Channel				chan	(iter->first);
+        const AUTOCIRCULATE_STATUS	&	status	(iter->second);
+        if (status.IsStopped())
+            continue;	//	Stopped -- skip this channel
+
+        ChannelToPerFrameTCListConstIter	it	(perChannelTCs.find (chan));
+        if (it == perChannelTCs.end())
+            continue;	//	Channel not in perChannelTCs
+
+        const FrameToTCList	perFrameTCs	(it->second);
+        oss << endl << dashes << " " << (NTV2_IS_INPUT_CROSSPOINT (status.acCrosspoint) ? "Input " : "Output ") << (chan+1) << " Per-Frame Timecodes:" << endl;
+        for (FrameToTCListConstIter i (perFrameTCs.begin());  i != perFrameTCs.end();  ++i)
+        {
+            const uint16_t				frameNum	(i->first);
+            const NTV2TimeCodeList &	timecodes	(i->second);
+            oss << "Frame " << frameNum << ":" << endl;
+            for (uint16_t tcNdx (0);  tcNdx < timecodes.size();  tcNdx++)
+            {
+                const NTV2TimecodeIndex	tcIndex	(static_cast <NTV2TimecodeIndex> (tcNdx));
+                oss << "\t" << setw(10) << ::NTV2TCIndexToString (tcIndex, true) << setw(0) << ":\t"
+                    << setw(12) << timecodeToString(timecodes[tcNdx]) << setw(0) << "\t" << timecodes[tcNdx] << endl;
+            }	//	for each timecode
+        }	//	for each frame
+    }	//	for each channel
+}
+
+void CNTV2SupportLogger::FetchAudioLogInfo(std::ostringstream& oss)
+{
+
+    const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
+    oss     << "             Device:\t" << mDevice.GetDisplayName ()											<< endl;
+
+    // loop over all the audio systems
+    for (int i=0; i<NTV2DeviceGetNumAudioSystems(mDevice.GetDeviceID()); i++)
+    {
+        //temp stubs
+        // need to determin channel and audio system still
+        //
+        NTV2AudioSystem audioSystem = NTV2AudioSystem(i);//NTV2_AUDIOSYSTEM_1;
+
+        AUTOCIRCULATE_STATUS acStatus;
+        NTV2Channel channel = findActiveACChannel(mDevice, audioSystem, acStatus);
+        if (channel != NTV2_CHANNEL_INVALID)
+        {
+            NTV2AudioSource audioSource = NTV2_AUDIO_EMBEDDED;
+            NTV2EmbeddedAudioInput embeddedSource = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1;
+            mDevice.GetAudioSystemInputSource(audioSystem, audioSource, embeddedSource);
+            NTV2Mode mode = NTV2_MODE_DISPLAY;
+            mDevice.GetMode(channel, mode);
+            NTV2AudioRate audioRate = NTV2_AUDIO_48K;
+            mDevice.GetAudioRate(audioRate, audioSystem);
+            NTV2AudioBufferSize audioBufferSize;
+            mDevice.GetAudioBufferSize(audioBufferSize, audioSystem);
+            NTV2AudioLoopBack loopbackMode = NTV2_AUDIO_LOOPBACK_OFF;
+            mDevice.GetAudioLoopBack(loopbackMode, audioSystem);
+
+            NTV2AudioChannelPairs channelPairsPresent;
+            if (NTV2_IS_INPUT_MODE(mode))
+            {
+                detectInputChannelPairs(mDevice, audioSource, embeddedSource, channelPairsPresent);
+            }
+            else if (NTV2_IS_OUTPUT_MODE(mode))
+            {
+                bool isEmbedderEnabled = false;
+                mDevice.GetAudioOutputEmbedderState(NTV2Channel(audioSystem), isEmbedderEnabled);
+                UWord inChannelCount = isEmbedderEnabled ? maxNumChannels : 0;
+
+                //	Generates a NTV2AudioChannelPairs set for the given number of audio channels...
+                for (UWord audioChannel (0);  audioChannel < inChannelCount;  audioChannel++)
+                {
+                    if (audioChannel & 1)
+                        continue;
+                    channelPairsPresent.insert(NTV2AudioChannelPair(audioChannel/2));
+                }
+            }
+
+            if (::NTV2DeviceCanDoPCMDetection(mDevice.GetDeviceID()))
+                mDevice.GetInputAudioChannelPairsWithPCM(channel, channelPairsPresent);
+
+            NTV2AudioChannelPairs nonPCMChannelPairs;
+            mDevice.GetInputAudioChannelPairsWithoutPCM(channel, nonPCMChannelPairs);
+            bool isNonPCM = true;
+            //end temp
+
+            const ULWord	currentPosSampleNdx	(getCurrentPositionSamples(mDevice, audioSystem, mode));
+            const ULWord	maxSamples			(getMaxNumSamples(mDevice, audioSystem));
+
+            oss																										<< endl
+            //        << "             Device:\t" << mDevice.GetDisplayName ()											<< endl
+                    << "       Audio system:\t" << ::NTV2AudioSystemToString (audioSystem, true)						<< endl
+                    << "        Sample Rate:\t" << ::NTV2AudioRateToString (audioRate, true)							<< endl
+                    << "        Buffer Size:\t" << ::NTV2AudioBufferSizeToString (audioBufferSize, true)				<< endl
+                    << "     Audio Channels:\t" << getNumAudioChannels(mDevice, audioSystem);
+                    if (getNumAudioChannels(mDevice, audioSystem) == maxNumChannels)
+                        oss << " (max)"										<< endl;
+                    else
+                        oss << " (" << maxNumChannels << " (max))"			<< endl;
+            oss	<< "      Total Samples:\t[" << DEC0N(maxSamples,6) << "]"											<< endl
+                    << "          Direction:\t" << ::NTV2ModeToString (mode, true)									<< endl
+    //                << "       Engine State:\t" << (isAudioEngineRunning() ? (isAudioEnginePaused() ? "Paused" : "Running") : "Stopped") << endl
+                    << "      AutoCirculate:\t" << ::NTV2ChannelToString (channel, true)								<< endl
+                    << "      Loopback Mode:\t" << ::NTV2AudioLoopBackToString (loopbackMode, true)					<< endl;
+            if (NTV2_IS_INPUT_MODE(mode))
+            {
+                oss	<< "Write Head Position:\t["	<< DEC0N(currentPosSampleNdx,6) << "]"				<< endl
+                        << "       Audio source:\t"		<< ::NTV2AudioSourceToString(audioSource, true);
+                if (NTV2_AUDIO_SOURCE_IS_EMBEDDED(audioSource))
+                    oss	<< " (" << ::NTV2EmbeddedAudioInputToString(embeddedSource, true) << ")";
+                oss																						<< endl
+                        << "   Channels Present:\t"		<< channelPairsPresent								<< endl
+                        << "   Non-PCM Channels:\t"		<< nonPCMChannelPairs								<< endl;
+            }
+            else if (NTV2_IS_OUTPUT_MODE(mode))
+            {
+                oss	<< " Read Head Position:\t[" << DEC0N(currentPosSampleNdx,6) << "]"					<< endl;
+                if (::NTV2DeviceCanDoPCMControl(mDevice.GetDeviceID()))
+                    oss	<< "   Non-PCM Channels:\t" << nonPCMChannelPairs								<< endl;
+                else
+                    oss	<< "   Non-PCM Channels:\t" << (isNonPCM ? "All Channel Pairs" : "Normal")		<< endl;
+            }
+        }
+    }
+}
+
+void CNTV2SupportLogger::FetchRoutingLogInfo(std::ostringstream& oss)
+{
+    //	Dump routing info...
+    CNTV2SignalRouter	router;
+    string				codeStr;
+    mDevice.GetRouting (router);
+    oss << "(NTV2InputCrosspointID <== NTV2OutputCrosspointID)" << endl;
+    router.Print (oss, false);
+
+    //	Dump routing as NTV2 source code...
+    router.PrintCode (codeStr);
+    oss	<< endl
+        << endl
+        << codeStr	<< endl;
+
+    //	Dump routing registers...
+    NTV2RegNumSet		deviceRoutingRegs;
+    const NTV2RegNumSet	routingRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
+    const NTV2RegNumSet	deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (mDevice.GetDeviceID()));
+    //	Get the intersection of the deviceRegs|routingRegs sets...
+    set_intersection (routingRegs.begin(), routingRegs.end(),  deviceRegs.begin(), deviceRegs.end(),  std::inserter (deviceRoutingRegs, deviceRoutingRegs.begin()));
+    NTV2RegisterReads	regsToRead	(::FromRegNumSet (deviceRoutingRegs));
+    mDevice.ReadRegisters (regsToRead);	//	Read the routing regs
+    oss << endl
+        << deviceRoutingRegs.size() << " Routing Registers:" << endl;
+    for (NTV2RegisterReadsConstIter it (regsToRead.begin());  it != regsToRead.end();  ++it)
+        oss	<< endl
+            << "Register: " << it->registerNumber << ":" << HEX0N(it->registerNumber,8) << ":" << CNTV2RegisterExpert::GetDisplayName (it->registerNumber) << ":" << endl
+            << "Value: " << it->registerValue << " (" << HEX0N(it->registerValue,8) << ")"
+            << CNTV2RegisterExpert::GetDisplayValue (it->registerNumber, it->registerValue, mDevice.GetDeviceID())	<< endl;
+}
