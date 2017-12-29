@@ -375,6 +375,14 @@
 #define kRegPll_90KHzRTP_TS                     0x27
 #define kRegPll_48KHzRTP_TS                     0x28
 #define kRegPll_Intr_Reg                        0x29
+#define kRegPll_ptp_dst_mac_addr_hi             0x2a
+#define kRegPll_ptp_dst_mac_addr_lo             0x2b
+#define kRegPll_ptp_dst_ipv4_addr               0x2c
+#define kRegPll_ptp_sync_cnt                    0x2d
+#define kRegPll_ptp_follow_up_cnt               0x2e
+#define kRegPll_ptp_delay_req_cnt               0x2f
+#define kRegPll_ptp_delay_resp_cnt              0x30
+#define kRegPll_ptp_announce_cnt                0x31
 
 /////////////////////////////////////////////////////////////////////
 //
