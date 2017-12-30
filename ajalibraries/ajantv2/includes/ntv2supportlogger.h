@@ -15,9 +15,9 @@ typedef enum
 {
     NTV2_SupportLoggerSectionInfo           = 0x00000001 << 0,
     NTV2_SupportLoggerSectionAutoCirculate  = 0x00000001 << 1,
-    NTV2_SupportLoggerSectionAudioLog       = 0x00000001 << 2,
+    NTV2_SupportLoggerSectionAudio          = 0x00000001 << 2,
     NTV2_SupportLoggerSectionRouting        = 0x00000001 << 3,
-    NTV2_SupportLoggerSectionRegisterLog    = 0x00000001 << 4,
+    NTV2_SupportLoggerSectionRegisters      = 0x00000001 << 4,
     NTV2_SupportLoggerSectionsAll           = 0xFFFFFFFF
 } NTV2SupportLoggerSections;
 

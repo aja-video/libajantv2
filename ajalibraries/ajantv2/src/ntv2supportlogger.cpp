@@ -386,9 +386,9 @@ std::string CNTV2SupportLogger::ToString()
 
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog);
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAutoCirculate, "AutoCirculate", FetchAutoCirculateLog);
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudioLog, "Audio", FetchAudioLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudio, "Audio", FetchAudioLog);
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRouting, "Routing", FetchRoutingLog);
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisterLog, "Regs", FetchRegisterLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisters, "Regs", FetchRegisterLog);
 
         if (mFooterStr.empty() == false)
         {
