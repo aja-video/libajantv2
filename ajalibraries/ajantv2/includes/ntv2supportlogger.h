@@ -8,13 +8,16 @@
 #define NTV2SUPPORTLOGGER_H
 
 #include "ntv2card.h"
+#include <map>
+#include <string>
 
 typedef enum
 {
-    NTV2_SupportLoggerSectionAutoCirculate  = 0x00000001 << 0,
-    NTV2_SupportLoggerSectionAudioLog       = 0x00000001 << 1,
-    NTV2_SupportLoggerSectionRouting        = 0x00000001 << 2,
-    NTV2_SupportLoggerSectionRegisterLog    = 0x00000001 << 3,
+    NTV2_SupportLoggerSectionInfo           = 0x00000001 << 0,
+    NTV2_SupportLoggerSectionAutoCirculate  = 0x00000001 << 1,
+    NTV2_SupportLoggerSectionAudioLog       = 0x00000001 << 2,
+    NTV2_SupportLoggerSectionRouting        = 0x00000001 << 3,
+    NTV2_SupportLoggerSectionRegisterLog    = 0x00000001 << 4,
     NTV2_SupportLoggerSectionsAll           = 0xFFFFFFFF
 } NTV2SupportLoggerSections;
 
@@ -32,9 +35,13 @@ public:
 
     static int Version();
 
-    void PrependCustomSection(const std::string& sectionName, const std::string& sectionData);
+    void PrependToSection(uint32_t section, const std::string& sectionData);
 
-    void AppendCustomSection(const std::string& sectionName, const std::string& sectionData);
+    void AppendToSection(uint32_t section, const std::string& sectionData);
+
+    void AddHeader(const std::string& sectionName, const std::string& sectionData);
+
+    void AddFooter(const std::string& sectionName, const std::string& sectionData);
 
     std::string ToString();
 
@@ -42,15 +49,19 @@ public:
 
 
 private:
-    void FetchRegisterLogInfo(std::ostringstream& oss);
-    void FetchAutoCirculateLogInfo(std::ostringstream& oss);
-    void FetchAudioLogInfo(std::ostringstream& oss);
-    void FetchRoutingLogInfo(std::ostringstream& oss);
+    void FetchInfoLog(std::ostringstream& oss);
+    void FetchRegisterLog(std::ostringstream& oss);
+    void FetchAutoCirculateLog(std::ostringstream& oss);
+    void FetchAudioLog(std::ostringstream& oss);
+    void FetchRoutingLog(std::ostringstream& oss);
 
     CNTV2Card mDevice;
     NTV2SupportLoggerSections mSections;
     std::string mHeaderStr;
     std::string mFooterStr;
+
+    std::map<uint32_t, std::string> mPrependMap;
+    std::map<uint32_t, std::string> mAppendMap;
 };
 
 AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData);

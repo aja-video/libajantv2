@@ -6,12 +6,12 @@
 #include "ntv2supportlogger.h"
 
 #include "ntv2devicefeatures.h"
+#include "ntv2konaflashprogram.h"
 #include "ntv2registerexpert.h"
+#include "ntv2registersmb.h"
 #include "ntv2rp188.h"
 
-#include <map>
 #include <sstream>
-#include <string>
 #include <vector>
 
 using namespace std;
@@ -205,6 +205,56 @@ bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSou
     return false;
 }
 
+bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
+{
+    BITFILE_INFO_STRUCT bitFileInfo;
+    memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));
+    bitFileInfo.whichFPGA = whichFPGA;
+    bool bBitFileInfoAvailable = false;     // BitFileInfo is implemented only on 5.2 and later drivers.
+    if ( true)	//	boardID != BOARD_ID_XENAX &&  boardID != BOARD_ID_XENAX2 )
+        bBitFileInfoAvailable = device.DriverGetBitFileInformation(bitFileInfo);
+    if( bBitFileInfoAvailable )
+    {
+        bitFileDateString = bitFileInfo.designNameStr;
+        int start = (int)bitFileDateString.find(".ncd");
+        if(start > 0)
+        {
+            bitFileDateString = bitFileDateString.substr(0, bitFileDateString.find(".ncd"));
+            bitFileDateString += ".bit ";
+            bitFileDateString += bitFileInfo.dateStr;
+            bitFileDateString += " ";
+            bitFileDateString += bitFileInfo.timeStr;
+        }
+        else if (bitFileDateString.find(";") != string::npos)
+        {
+            bitFileDateString = bitFileDateString.substr(0, bitFileDateString.find(";"));
+            bitFileDateString += ".bit ";
+            bitFileDateString += bitFileInfo.dateStr;
+            bitFileDateString += " ";
+            bitFileDateString += bitFileInfo.timeStr;
+        }
+        else if (bitFileDateString.find(".bit") != string::npos &&
+                 bitFileDateString != ".bit")
+        {
+            bitFileDateString = bitFileInfo.designNameStr;
+            bitFileDateString += " ";
+            bitFileDateString += bitFileInfo.dateStr;
+            bitFileDateString += " ";
+            bitFileDateString += bitFileInfo.timeStr;
+        }
+        else
+        {
+            bitFileDateString = "bad bitfile date string";
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
 AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData)
 {
     CNTV2SupportLogger* instance = (CNTV2SupportLogger*)&inData;
@@ -234,7 +284,35 @@ int CNTV2SupportLogger::Version()
     return 2;
 }
 
-void CNTV2SupportLogger::PrependCustomSection(const std::string& sectionName, const std::string& sectionData)
+void CNTV2SupportLogger::PrependToSection(uint32_t section, const std::string& sectionData)
+{
+    if (mPrependMap.find(section) != mPrependMap.end())
+    {
+        mPrependMap.at(section).insert(0, "\n");
+        mPrependMap.at(section).insert(0, sectionData);
+    }
+    else
+    {
+        mPrependMap[section] = sectionData;
+        mPrependMap.at(section).append("\n");
+    }
+}
+
+void CNTV2SupportLogger::AppendToSection(uint32_t section, const std::string& sectionData)
+{
+    if (mAppendMap.find(section) != mAppendMap.end())
+    {
+        mAppendMap.at(section).append("\n");
+        mAppendMap.at(section).append(sectionData);
+    }
+    else
+    {
+        mAppendMap[section] = "\n";
+        mAppendMap.at(section).append(sectionData);
+    }
+}
+
+void CNTV2SupportLogger::AddHeader(const std::string& sectionName, const std::string& sectionData)
 {
     ostringstream oss;
     makeHeader(oss, sectionName);
@@ -242,13 +320,31 @@ void CNTV2SupportLogger::PrependCustomSection(const std::string& sectionName, co
     mHeaderStr.append(oss.str());
 }
 
-void CNTV2SupportLogger::AppendCustomSection(const std::string& sectionName, const std::string& sectionData)
+void CNTV2SupportLogger::AddFooter(const std::string& sectionName, const std::string& sectionData)
 {
     ostringstream oss;
     makeHeader(oss, sectionName);
     oss << sectionData << "\n";
     mFooterStr.append(oss.str());
 }
+
+// Use this macro to handle generating text for each section
+// - the header
+// - the prepend if any
+// - the method that fills the section
+// - the append if any
+#define LoggerSectionToFunctionMacro(_SectionEnum_, _SectionString_, _SectionMethod_) \
+    if (mSections & _SectionEnum_) \
+    { \
+        makeHeader(oss, _SectionString_); \
+        if (mPrependMap.find(_SectionEnum_) != mPrependMap.end()) \
+            oss << mPrependMap.at(_SectionEnum_); \
+        \
+        _SectionMethod_(oss); \
+        \
+        if (mAppendMap.find(_SectionEnum_) != mAppendMap.end()) \
+            oss << mAppendMap.at(_SectionEnum_); \
+    }
 
 std::string CNTV2SupportLogger::ToString()
 {
@@ -288,29 +384,11 @@ std::string CNTV2SupportLogger::ToString()
             oss << mHeaderStr;
         }
 
-        if (mSections & NTV2_SupportLoggerSectionAutoCirculate)
-        {
-            makeHeader(oss, "AutoCirculate");
-            FetchAutoCirculateLogInfo(oss);
-        }
-
-        if (mSections & NTV2_SupportLoggerSectionAudioLog)
-        {
-            makeHeader(oss, "Audio");
-            FetchAudioLogInfo(oss);
-        }
-
-        if (mSections & NTV2_SupportLoggerSectionRouting)
-        {
-            makeHeader(oss, "Routing");
-            FetchRoutingLogInfo(oss);
-        }
-
-        if (mSections & NTV2_SupportLoggerSectionRegisterLog)
-        {
-            makeHeader(oss, "Regs");
-            FetchRegisterLogInfo(oss);
-        }
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAutoCirculate, "AutoCirculate", FetchAutoCirculateLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudioLog, "Audio", FetchAudioLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRouting, "Routing", FetchRoutingLog);
+        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisterLog, "Regs", FetchRegisterLog);
 
         if (mFooterStr.empty() == false)
         {
@@ -328,7 +406,84 @@ void CNTV2SupportLogger::ToString(std::string& outString)
     outString = ToString();
 }
 
-void CNTV2SupportLogger::FetchRegisterLogInfo(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
+{
+    string str;
+    string bitFileDateString;
+    oss << "NTV2 SDK Version:  " << ::NTV2GetVersionString(true) << "\n"
+        << "Watcher/supportlog built on " << __DATE__ << " at " << __TIME__ << "\n"
+        << "Device: " << mDevice.GetDeviceVersionString() << "\n"
+        << "PCI FPGA Version: " << mDevice.GetPCIFPGAVersionString() << "\n"
+        << "Driver Version: " << mDevice.GetDriverVersionString() << "\n"
+        << "Device ID: " << hex << mDevice.GetDeviceID() << dec << "\n"
+        << "Serial Number: " << (mDevice.GetSerialNumberString(str) ? str : "Not programmed") << "\n"
+        << "Video Bitfile: " << (getBitfileDate(mDevice, bitFileDateString, eFPGAVideoProc) ? bitFileDateString : "Not available") << "\n";
+
+    if (mDevice.IsKonaIPDevice())
+    {
+        ULWord cfg(0);
+        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), &cfg);
+
+        PACKAGE_INFO_STRUCT pis;
+        mDevice.GetPackageInformation(pis);
+        oss << "Package: " << pis.packageNumber << "  Build: " << pis.buildNumber << "  " << pis.date << " "  << pis.time << endl;
+
+        CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
+        MacAddr mac1;
+        MacAddr mac2;
+        if (ntv2Card.ReadMACAddresses(mac1, mac2))
+        {
+            char buf[132];
+            sprintf(buf,"MAC1=%02x:%02x:%02x:%02x:%02x:%02x MAC2=%02x:%02x:%02x:%02x:%02x:%02x\n",
+                mac1.mac[0], mac1.mac[1], mac1.mac[2], mac1.mac[3], mac1.mac[4], mac1.mac[5],
+                mac2.mac[0], mac2.mac[1], mac2.mac[2], mac2.mac[3], mac2.mac[4], mac2.mac[5]);
+            oss << buf;
+        }
+
+        if (cfg & SAREK_2022_2)
+        {
+            ULWord dnaLo;
+            ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, &dnaLo);
+            ULWord dnaHi;
+            ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, &dnaHi);
+            oss << "Device DNA: " << HEX0N(dnaHi,8) << "-" << HEX0N(dnaLo,8) << endl;
+        }
+
+        string licenseInfo;
+        ntv2Card.ReadLicenseInfo(licenseInfo);
+        oss << "License: " << licenseInfo << endl;
+
+        if (cfg & SAREK_2022_2)
+        {
+            ULWord licenseStatus;
+            ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, &licenseStatus);
+            oss  << ((licenseStatus & SAREK_LICENSE_PRESENT) ? "" : "License not found ")
+                 << ((licenseStatus & SAREK_LICENSE_VALID) ? "License is valid" : "License NOT valid")
+                 << " (Enable Mask: 0x" << hex << (licenseStatus & 0xff) << ")"
+                 << endl;
+        }
+    }
+
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+    oss << "Watcher Nub Protocol version: " << maxKnownProtocolVersion << endl;
+
+    ULWord negotiatedProtocolVersion = mDevice.GetNubProtocolVersion ();
+    oss << "Negotiated Nub Protocol version: ";
+    if (!negotiatedProtocolVersion)
+        oss << " Not available" << endl;
+    else
+        oss << negotiatedProtocolVersion << endl;
+
+    if (negotiatedProtocolVersion >= ntv2NubProtocolVersion3)
+    {
+        BUILD_INFO_STRUCT buildInfo;
+        if (mDevice.DriverGetBuildInformation (buildInfo))
+            oss << buildInfo.buildStr;
+    }
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+}
+
+void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
 {
     NTV2RegisterReads	regs;
     const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
@@ -377,7 +532,7 @@ void CNTV2SupportLogger::FetchRegisterLogInfo(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchAutoCirculateLogInfo(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss)
 {
     ULWord					appSignature	(0);
     int32_t					appPID			(0);
@@ -473,7 +628,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLogInfo(std::ostringstream& oss)
     }	//	for each channel
 }
 
-void CNTV2SupportLogger::FetchAudioLogInfo(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
 {
 
     const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
@@ -571,7 +726,7 @@ void CNTV2SupportLogger::FetchAudioLogInfo(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchRoutingLogInfo(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
 {
     //	Dump routing info...
     CNTV2SignalRouter	router;
