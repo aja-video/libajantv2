@@ -1367,7 +1367,7 @@ bool  CNTV2Config2110::decompose2110TxAudioStream2(uint32_t istream, NTV2Channel
     int channel = istream / 4;
     int stream  = istream - (channel * 4);
     ch          = (NTV2Channel) channel;
-    str         = (NTV2Stream)  stream;
+    str         = (NTV2Stream) (stream + NTV2_AUDIO1_STREAM);
     return true;
 }
 
