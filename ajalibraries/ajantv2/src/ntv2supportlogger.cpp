@@ -11,6 +11,7 @@
 #include "ntv2registersmb.h"
 #include "ntv2rp188.h"
 
+#include <algorithm>
 #include <sstream>
 #include <vector>
 
