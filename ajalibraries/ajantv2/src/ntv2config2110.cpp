@@ -1338,6 +1338,7 @@ uint32_t CNTV2Config2110::get2110TxStream2(NTV2Channel ch,NTV2Stream str)
         break;
     case NTV2_AUDIO2_STREAM:
         iStream = ((uint32_t)ch * 4) + 1;
+        break;
     case NTV2_AUDIO3_STREAM:
         iStream = ((uint32_t)ch * 4) + 2;
         break;
