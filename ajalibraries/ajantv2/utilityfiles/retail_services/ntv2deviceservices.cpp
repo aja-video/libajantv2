@@ -2447,36 +2447,6 @@ bool DeviceServices::UpdateK2LUTSelect()
 		case NTV2_GammaRec709:		
 			wantedLUT = NTV2_LUTLinear;	
 			break;
-			
-		/*
-		// force to Rec 601
-		case NTV2_GammaRec601:		
-			wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;	
-			break;
-	
-		// force to Rec 709
-		case NTV2_GammaRec709:		
-			wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;	
-			break;
-	
-		// Auto-switch between SD (Rec 601) and HD (Rec 709)
-		case NTV2_GammaAuto:		
-			if (NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
-			else
-				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
-			break;
-				
-		// custom LUT in use - do not change
-		case NTV2_GammaNone:		
-			wantedLUT = NTV2_LUTCustom;
-			break;
-								
-		default:
-		case NTV2_GammaMac:			
-			wantedLUT = NTV2_LUTLinear;
-			break;
-		*/
 	}
 	
 	// special case for RGB-to-RGB LUT conversion
