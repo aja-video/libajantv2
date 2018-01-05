@@ -2424,6 +2424,31 @@ bool DeviceServices::UpdateK2LUTSelect()
 	NTV2LutType wantedLUT = NTV2_LUTUnknown;
 	switch (mGammaMode)
 	{
+		// custom LUT in use - do not change
+		case NTV2_GammaNone:		
+			wantedLUT = NTV2_LUTCustom;
+			break;
+		
+		// old QuickTime 1.8 gamma - used for legacy QT apps (VTRX, FCP7) old time mac monitors
+		case NTV2_GammaMac:	
+			if (NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
+				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
+			else
+				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
+			break;
+		
+		case NTV2_GammaAuto:	
+			wantedLUT = NTV2_LUTLinear;
+			break;
+		
+		// when in doubt use linear
+		default:
+		case NTV2_GammaRec601:	
+		case NTV2_GammaRec709:		
+			wantedLUT = NTV2_LUTLinear;	
+			break;
+			
+		/*
 		// force to Rec 601
 		case NTV2_GammaRec601:		
 			wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;	
@@ -2451,6 +2476,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 		case NTV2_GammaMac:			
 			wantedLUT = NTV2_LUTLinear;
 			break;
+		*/
 	}
 	
 	// special case for RGB-to-RGB LUT conversion
