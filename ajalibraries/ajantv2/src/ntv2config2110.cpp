@@ -20,7 +20,10 @@
 #endif
 
 uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
-uint32_t CNTV2Config2110::a_packetizers[4] = {SAREK_3190_TX_PACKETIZER_1,SAREK_3190_TX_PACKETIZER_2,SAREK_3190_TX_PACKETIZER_3,SAREK_3190_TX_PACKETIZER_4};
+uint32_t CNTV2Config2110::a_packetizers[16] ={SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
+                                              SAREK_3190_TX_PACKETIZER_4, SAREK_3190_TX_PACKETIZER_5, SAREK_3190_TX_PACKETIZER_6, SAREK_3190_TX_PACKETIZER_7,
+                                              SAREK_3190_TX_PACKETIZER_8, SAREK_3190_TX_PACKETIZER_9, SAREK_3190_TX_PACKETIZER_10,SAREK_3190_TX_PACKETIZER_11,
+                                              SAREK_3190_TX_PACKETIZER_12,SAREK_3190_TX_PACKETIZER_13,SAREK_3190_TX_PACKETIZER_14,SAREK_3190_TX_PACKETIZER_15};
 uint32_t CNTV2Config2110::m_packetizers[4] = {SAREK_ANC_TX_PACKETIZER_1, SAREK_ANC_TX_PACKETIZER_2, SAREK_ANC_TX_PACKETIZER_3, SAREK_ANC_TX_PACKETIZER_4};
 
 using namespace std;
@@ -183,16 +186,10 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP port, string localIPAddress,
 #endif
 
     uint32_t core;
-
-    if (port == SFP_TOP)
-    {
-        core = SAREK_2110_FRAMER_1_TOP;
-    }
-    else
-    {
-        core = SAREK_2110_FRAMER_2_BOT;
-    }
-
+    core = SAREK_2110_VIDEO_FRAMER;
+    mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
+    mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
+    core = SAREK_2110_AUDIO_FRAMER;
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
 
@@ -1174,28 +1171,20 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(NTV2Channel channel, NTV2Stream stream)
 {
-    (void) stream;
-    uint32_t iChannel = (uint32_t) channel;
-
-    if (iChannel > _numTxChans)
+    if (stream == NTV2_VIDEO_STREAM)
     {
-        return SAREK_2110_FRAMER_1_TOP;  // default
-    }
-
-    if (iChannel >= _numTx0Chans)
-    {
-        return SAREK_2110_FRAMER_2_BOT;
+        return SAREK_2110_VIDEO_FRAMER;
     }
     else
     {
-        return SAREK_2110_FRAMER_1_TOP;
+        return SAREK_2110_AUDIO_FRAMER;
     }
 }
 
 void CNTV2Config2110::SelectTxFramerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddrFramer)
 {
     // select channel
-    uint32_t iStream = get2110TxStream(channel,stream);
+    uint32_t iStream = get2110TxStream2(channel,stream);
     SetChannel(kRegFramer_channel_access + baseAddrFramer, iStream);
 }
 
@@ -1206,26 +1195,24 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream str
     if (iChannel > _numTxChans)
         return false;
 
-    uint32_t iStream = get2110TxStream(channel,stream);
+    uint32_t iStream = get2110TxStream2(channel,stream);
 
-    if (stream == NTV2_VIDEO_STREAM)
+    switch (stream)
     {
+    case NTV2_VIDEO_STREAM:
         baseAddrPacketizer  = v_packetizers[iChannel];
         mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, iStream);
-    }
-    else if (stream == NTV2_AUDIO1_STREAM)
-    {
+        break;
+    case NTV2_AUDIO1_STREAM:
+    case NTV2_AUDIO2_STREAM:
+    case NTV2_AUDIO3_STREAM:
+    case NTV2_AUDIO4_STREAM:
         baseAddrPacketizer  = a_packetizers[iChannel];
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
-    }
-    else if (stream == NTV2_METADATA_STREAM)
-    {
-        baseAddrPacketizer  = m_packetizers[iChannel];
-        //mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
-    }
-    else
+        break;
+    default:
         return false;
-
+    }
     return true;
 }
 
@@ -1337,20 +1324,47 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x02);
 }
 
-uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,NTV2Stream str )
+uint32_t CNTV2Config2110::get2110TxStream2(NTV2Channel ch,NTV2Stream str)
 {
     // this stream number is a core 'channel' number
-    uint32_t iStream =  ( (int(ch) * 3) + (int)str );
+    uint32_t iStream = 0;
+    switch (str)
+    {
+    case NTV2_VIDEO_STREAM:
+        iStream = (uint32_t)ch;
+        break;
+    case NTV2_AUDIO1_STREAM:
+        iStream = (uint32_t)ch * 4;
+        break;
+    case NTV2_AUDIO2_STREAM:
+        iStream = ((uint32_t)ch * 4) + 1;
+    case NTV2_AUDIO3_STREAM:
+        iStream = ((uint32_t)ch * 4) + 2;
+        break;
+    case NTV2_AUDIO4_STREAM:
+        iStream = ((uint32_t)ch * 4) + 3;
+        break;
+    }
     return iStream;
 }
 
-bool  CNTV2Config2110::decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
+bool  CNTV2Config2110::decompose2110TxVideoStream2(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
 {
-    if (istream > 11)
+    if (istream > 3)
         return false;
 
-    int channel = istream / 3;
-    int stream  = istream - (channel * 3);
+    ch  = (NTV2Channel)istream;
+    str = NTV2_VIDEO_STREAM;
+    return true;
+}
+
+bool  CNTV2Config2110::decompose2110TxAudioStream2(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
+{
+    if (istream > 15)
+        return false;
+
+    int channel = istream / 4;
+    int stream  = istream - (channel * 4);
     ch          = (NTV2Channel) channel;
     str         = (NTV2Stream)  stream;
     return true;

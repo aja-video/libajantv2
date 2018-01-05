@@ -471,10 +471,9 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
         uint32_t source_addr;
     };
 
-    //static IGMPCB igmpcb[SAREK_MAX_PORTS][SAREK_MAX_CHANS][NTV2_MAX_NUM_STREAMS];
-    if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_STREAM(stream))
+    if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_CHANNEL(channel) && NTV2_IS_VALID_RX_STREAM(stream))
     {
-        uint32_t index = (int)stream + NTV2_MAX_NUM_STREAMS * ((int)channel + SAREK_MAX_CHANS * (int)port );
+        uint32_t index = (int)stream + NTV2_ALLOCATED_RX_STREAMS * ((int)channel + SAREK_MAX_CHANS * (int)port );
         uint32_t reg   = (index * sizeof(IGMPCB))/4;
         return reg;
     }
