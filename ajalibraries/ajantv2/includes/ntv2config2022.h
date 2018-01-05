@@ -136,7 +136,7 @@ public:
         eProgSel_LowestProgNum,
         eProgSel_SpecificProgNum,
         eProgSel_SpecificProgPID,
-        eProgSel_Default = eProgSel_AutoFirstProg,
+        eProgSel_Default = eProgSel_AutoFirstProg
     } eProgSelMode_t;
 
     j2kDecoderConfig() {init();}

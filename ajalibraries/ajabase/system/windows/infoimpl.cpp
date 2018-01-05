@@ -371,8 +371,9 @@ AJASystemInfoImpl::Rescan()
                                              "LastUsedUsername"));
     }
 
-    path.append("\\AppData\\Local\\Aja\\");
+    mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = path;
 
+    path.append("\\AppData\\Local\\Aja\\");
     mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
 
     TCHAR szPath[MAX_PATH];

@@ -37,7 +37,7 @@ typedef enum
 	SOC2_FLASHBLOCK,
 	MAC_FLASHBLOCK,
 	MCS_INFO_BLOCK,
-	LICENSE_BLOCK,
+	LICENSE_BLOCK
 }FlashBlockID;
 
 typedef enum
