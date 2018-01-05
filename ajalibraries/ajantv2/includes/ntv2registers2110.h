@@ -35,6 +35,7 @@
 #define SAREK_ANC_TX_PACKETIZER_2       (0x305000/4)
 #define SAREK_ANC_TX_PACKETIZER_3       (0x306000/4)
 #define SAREK_ANC_TX_PACKETIZER_4       (0x307000/4)
+
 #define SAREK_4175_RX_DEPACKETIZER_1    (0x208000/4)
 #define SAREK_4175_RX_DEPACKETIZER_2    (0x209000/4)
 #define SAREK_4175_RX_DEPACKETIZER_3    (0x20a000/4)
@@ -47,7 +48,7 @@
 #define SAREK_2110_VIDEO_FRAMER             (0x210000/4)
 #define SAREK_2110_AUDIO_FRAMER             (0x212000/4)
 #define SAREK_2110_DECAPSULATOR_1_TOP       (0x211000/4)
-#define SAREK_2110_DECAPSULATOR_2_BOT       (0x213000/4)
+#define SAREK_2110_AUDIO_STREAMSELECT       (0x230000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
