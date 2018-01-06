@@ -6,6 +6,9 @@
 
 #include "system.h"
 
+#include <cstdlib>
+#include <sstream>
+
 #if defined(AJA_WINDOWS)
 
 namespace aja
@@ -106,6 +109,44 @@ namespace aja
 
         return outValue;
     }
+
+    int reveal_file_in_file_manager(const std::string& filePath)
+    {
+        std::ostringstream oss;
+        oss << "explorer /select," << "\"" << filePath << "\"";
+        return ::system(oss.str().c_str());
+    }
+
 } //end aja namespace
 
 #endif //end AJA_WINDOWS
+
+#if defined(AJA_MAC)
+namespace aja
+{
+    int reveal_file_in_file_manager(const std::string& filePath)
+    {
+        std::ostringstream oss;
+        oss << "/usr/bin/osascript " << "-e " << "tell application \"Finder\""
+                                     << "-e " << "activate"
+                                     << "-e " << "reveal \"" + filePath + "\" as POSIX file"
+                                     << "-e " << "end tell";
+        return ::system(oss.str().c_str());
+    }
+} //end aja namespace
+#endif //end AJA_MAC
+
+#if defined(AJA_LINUX)
+#include <libgen.h> // for dirname()
+namespace aja
+{
+    int reveal_file_in_file_manager(const std::string& filePath)
+    {
+        // need to pass the directory of the file to open in file manager, otherwise
+        // will open in the default application for file type
+        std::ostringstream oss;
+        oss << "xdg-open " << "\"" << dirname(filePath.c_str()) << "\"";
+        return ::system(oss.str().c_str());
+    }
+} //end aja namespace
+#endif //end AJA_LINUX
