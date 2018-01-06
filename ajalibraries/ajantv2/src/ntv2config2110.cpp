@@ -816,23 +816,12 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
         // audio setup 3190 packetizer
 
-        uint32_t audioChans = 16;
-        
-        NTV2AudioSystem audioSys = NTV2_AUDIOSYSTEM_1;
-        mDevice.GetSDIOutputAudioSystem (channel, audioSys);
-
-        mDevice.GetNumberAudioChannels (audioChans,audioSys);
-        if (audioChans != 16)
-        {
-            audioChans = 8;
-        }
-
-        uint32_t samples = (audioChans == 8) ? 48 : 6;
-        uint32_t plength = audioChans * samples * 3;
+        uint32_t audioChans = txConfig.numAudioChannels;
+        uint32_t samples    = 6;
+        uint32_t plength    = audioChans * samples * 3;
 
         // audio select
-        uint32_t numChans = (txConfig.numAudioChannels) ? txConfig.numAudioChannels -1 : 0;
-        uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + numChans;
+        uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + audioChans;
         uint32_t offset  =  get2110TxStream(channel,stream) * 4;
         mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset,aselect);
 
@@ -1218,7 +1207,7 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream str
     case NTV2_AUDIO2_STREAM:
     case NTV2_AUDIO3_STREAM:
     case NTV2_AUDIO4_STREAM:
-        baseAddrPacketizer  = a_packetizers[iChannel];
+        baseAddrPacketizer  = a_packetizers[iStream];
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, iStream);
         break;
     default:
