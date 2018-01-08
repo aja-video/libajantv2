@@ -27,6 +27,9 @@ public:
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat (
 									NTV2VideoFormat fbVideoFormat,
 									NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+    
+protected:
+    CNTV2Config2022     * config;
 };
 
 

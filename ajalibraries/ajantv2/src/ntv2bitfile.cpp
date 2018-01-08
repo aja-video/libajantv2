@@ -427,6 +427,17 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 			case BOARD_ID_LHI_DVI:
 			case BOARD_ID_LHI_T:
 		#endif	//	!defined (NTV2_DEPRECATE)
+        case DEVICE_ID_NOTFOUND:        break;
+        case DEVICE_ID_CORVID1:         return "corvid1pcie";		//	top.ncd
+        case DEVICE_ID_CORVID3G:        return "corvid1_3Gpcie";	//	corvid1_3Gpcie
+        case DEVICE_ID_CORVID22:        return "top_c22";			//	top_c22.ncd
+        case DEVICE_ID_CORVID24:        return "corvid24_quad";		//	corvid24_quad.ncd
+        case DEVICE_ID_CORVID44:        return "corvid_44";			//	corvid_44
+        case DEVICE_ID_CORVID88:        return "corvid_88";			//	CORVID88
+        case DEVICE_ID_CORVIDHEVC:      return "corvid_hevc";       //	CORVIDHEVC
+        case DEVICE_ID_KONA3G:          return "K3G_top";			//	K3G_top.ncd
+        //case DEVICE_ID_KONA3G:        return "K3G_p2p";			//	K3G_p2p.ncd
+        case DEVICE_ID_KONA3GQUAD:      return "K3G_quad";			//	K3G_quad.ncd
 		case DEVICE_ID_NOTFOUND:	break;
 		case DEVICE_ID_CORVID1:		return "corvid1pcie";		//	top.ncd
 		case DEVICE_ID_CORVID3G:	return "corvid1_3Gpcie";	//	corvid1_3Gpcie
@@ -450,8 +461,8 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
         case DEVICE_ID_IO4KPLUS:        return "io4kp";
-        case DEVICE_ID_IOIP_2022:       return "ioip2022";
-        case DEVICE_ID_IOIP_2110:       return "ioip2110";
+        case DEVICE_ID_IOIP_2022:       return "ioip_s2022";
+        case DEVICE_ID_IOIP_2110:       return "ioip_s2110";
 		case DEVICE_ID_KONAALPHA:		return "kona_alpha";
 		default:
 			break;

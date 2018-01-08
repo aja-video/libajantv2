@@ -704,7 +704,7 @@ void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 							 bool twoKby1080,
 							 bool wideVANC)
 {
-	NTV2FormatDescriptor fd = GetFormatDescriptor(standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
 	UWord lineBuffer[2048*2];
 	Make10BitLine(lineBuffer,color.y,color.cb,color.cr,fd.numPixels);
 	for ( UWord i= 0; i<fd.numLines; i++)
@@ -795,7 +795,7 @@ void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 							 bool twoKby1080,
 							 bool wideVANC)
 {
-	NTV2FormatDescriptor fd = GetFormatDescriptor(standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
 
 	for ( UWord i= 0; i<fd.numLines; i++)
 	{
@@ -4069,7 +4069,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ?	"Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ?	"Corvid 44"					: "Corvid44";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ?	"Corvid HEVC"				: "CorvidHEVC";
-        case DEVICE_ID_KONAIP_4CH_1SFP:			return "KonaIP s2022";
+        case DEVICE_ID_KONAIP_2022:             return "KonaIP s2022";
         case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return "KonaIP J2K 1I 1O";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
@@ -4079,6 +4079,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
+        case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
 		case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
 		case DEVICE_ID_KONAALPHA:				return "KONA ALPHA";
 #if !defined (_DEBUG)
@@ -7393,6 +7394,7 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrSDPNoAudio:                   return "SDP does not contain audio";
         case NTV2IpErrSDPNoANC:                     return "SDP does not contain metadata";
         case NTV2IpErrSFPNotFound:                  return "SFP data not found";
+        case NTV2IpErrInvalidConfig:                return "Invalid configuration";
         default:                                    return "Unknown IP error";
     }
 }
@@ -7427,7 +7429,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "kona3g_quad_pcie.bit";
 			case DEVICE_ID_KONA4:						return "kona4_pcie.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona4_ufc_pcie.bit";
-            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
+            case DEVICE_ID_KONAIP_2022:                 return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
@@ -7438,7 +7440,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
-            case DEVICE_ID_KONAIP_4TX_2110:				return "kip_s2110.mcs";
+            case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
 			case DEVICE_ID_KONAALPHA:					return "kona_alpha.bit";
 			default:									return "";
 		}
@@ -7508,7 +7510,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_KONA3GQUAD:					return "k3g_quad.bit";
 			case DEVICE_ID_KONA4:						return "kona_4_quad.bit";
 			case DEVICE_ID_KONA4UFC:					return "kona_4_ufc.bit";
-            case DEVICE_ID_KONAIP_4CH_1SFP:				return "kip_s2022.mcs";
+            case DEVICE_ID_KONAIP_2022:                 return "kip_s2022.mcs";
 			case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
@@ -7517,9 +7519,9 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 			case DEVICE_ID_LHI:							return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
-            case DEVICE_ID_IOIP_2022:					return "ioip_2022.mcs";
-            case DEVICE_ID_IOIP_2110:					return "ioip_2110.mcs";
-            case DEVICE_ID_KONAIP_4TX_2110:             return "kip_s2110.mcs";
+            case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
+            case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
+            case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
             default:									return "";
 		}
 	#endif	//	else not MSWindows
@@ -7608,7 +7610,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONA3GQUAD,
 														DEVICE_ID_KONA4,
 														DEVICE_ID_KONA4UFC,
-														DEVICE_ID_KONAIP_4CH_1SFP,
+														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
@@ -7620,6 +7622,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_IO4KPLUS,
                                                         DEVICE_ID_IOIP_2022,
                                                         DEVICE_ID_IOIP_2110,
+                                                        DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONAIP_4TX_2110,
 														DEVICE_ID_KONAALPHA,
 														DEVICE_ID_NOTFOUND	};

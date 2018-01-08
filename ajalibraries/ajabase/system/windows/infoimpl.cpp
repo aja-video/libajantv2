@@ -10,6 +10,7 @@
 
 // need to link with Shlwapi.lib & Netapi32.lib
 #pragma warning(disable:4996)
+#include <intrin.h>
 #include <io.h>
 #include <LM.h>
 #include <ShlObj.h>

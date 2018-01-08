@@ -5382,7 +5382,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL1:
 		if (ReadRegister (kRegInputStatus, &status))
 		{
-			///Now it is really ugly
+			//	Now it is really ugly
 			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 			{
 				NTV2VideoFormat format =  GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
@@ -5422,7 +5422,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL2:
 		if (ReadRegister (kRegInputStatus, &status))
 		{
-			///Now it is really ugly
+			//	Now it is really ugly
 			if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 			{
 				//This is a hack, LHI does not have a second input
@@ -5458,7 +5458,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL3:
 		if (ReadRegister (kRegInputStatus2, &status))
 		{
-			///Now it is really ugly
+			//	Now it is really ugly
 			if ((::NTV2DeviceCanDo3GOut(_boardID, 2) || ::NTV2DeviceCanDo12GOut(_boardID, 2)) && ReadRegister(kRegSDIInput3GStatus2, &threeGStatus))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
@@ -5482,7 +5482,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL4:
 		if (ReadRegister (kRegInputStatus2, &status))
 		{
-			///Now it is really ugly
+			//	Now it is really ugly
 			if (::NTV2DeviceCanDo3GOut (_boardID, 3) && ReadRegister (kRegSDIInput3GStatus2, &threeGStatus))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
@@ -9048,15 +9048,15 @@ ULWord CNTV2Card::GetCRCErrorCountB(const NTV2Channel inChannel)
 	return value;
 }
 
-bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, const bool inEnable)
+bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, const bool inEnable)
 {
 	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
 		return false;
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_INPUT_SPIGOT_INVALID (inInputSpigot))
 		return false;
 
 	ULWord regNum, mask, shift;
-	switch (inOutputSpigot)
+	switch (inInputSpigot)
 	{
 		case NTV2_CHANNEL1:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn1LevelBtoLevelA;	shift = kRegShiftSDIIn1LevelBtoLevelA;	break;
 		case NTV2_CHANNEL2:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn2LevelBtoLevelA;	shift = kRegShiftSDIIn2LevelBtoLevelA;	break;
@@ -9071,15 +9071,15 @@ bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, co
 	return WriteRegister(regNum, inEnable, mask, shift);
 }
 
-bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bool & outEnable)
+bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool & outEnable)
 {
 	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
 		return false;
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_INPUT_SPIGOT_INVALID (inInputSpigot))
 		return false;
 
 	ULWord regNum, mask, shift;
-	switch (inOutputSpigot)
+	switch (inInputSpigot)
 	{
 		case NTV2_CHANNEL1:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn1LevelBtoLevelA;	shift = kRegShiftSDIIn1LevelBtoLevelA;	break;
 		case NTV2_CHANNEL2:		regNum = kRegSDIInput3GStatus;			mask = kRegMaskSDIIn2LevelBtoLevelA;	shift = kRegShiftSDIIn2LevelBtoLevelA;	break;
@@ -9089,7 +9089,7 @@ bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inOutputSpigot, bo
 		case NTV2_CHANNEL6:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn6LevelBtoLevelA;	shift = kRegShiftSDIIn6LevelBtoLevelA;	break;
 		case NTV2_CHANNEL7:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn7LevelBtoLevelA;	shift = kRegShiftSDIIn7LevelBtoLevelA;	break;
 		case NTV2_CHANNEL8:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn8LevelBtoLevelA;	shift = kRegShiftSDIIn8LevelBtoLevelA;	break;
-		default:				return false;																											break;
+		default:				return false;
 	}
 	ULWord tempVal;
 	bool retVal = ReadRegister (regNum,		&tempVal,		mask,		shift);

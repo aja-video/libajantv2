@@ -463,6 +463,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
+        bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
 
         // width
@@ -471,6 +472,10 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
 
         // height
         uint32_t height = fd.GetRasterHeight();
+        if (interlaced)
+        {
+            height /= 2;
+        }
         mDevice.WriteRegister(kReg4175_depkt_height + depacketizerBaseAddr,height);
 
         // video format = sampling
@@ -809,28 +814,18 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 packetizer
-        NTV2AudioSystem audioSys;
-        switch (channel)
-        {
-        default:
-        case NTV2_CHANNEL1:
-            audioSys = NTV2_AUDIOSYSTEM_1;
-            break;
-        case NTV2_CHANNEL2:
-            audioSys = NTV2_AUDIOSYSTEM_2;
-            break;
-        case NTV2_CHANNEL3:
-            audioSys = NTV2_AUDIOSYSTEM_3;
-            break;
-        case NTV2_CHANNEL4:
-            audioSys = NTV2_AUDIOSYSTEM_4;
-            break;
-        }
 
         uint32_t audioChans = 16;
+        
+        NTV2AudioSystem audioSys = NTV2_AUDIOSYSTEM_1;
+        mDevice.GetSDIOutputAudioSystem (channel, audioSys);
+
         mDevice.GetNumberAudioChannels (audioChans,audioSys);
-        if (audioChans < 8)   audioChans = 8;
-        if (audioChans > 16)  audioChans = 16;
+        if (audioChans != 16)
+        {
+            audioChans = 8;
+        }
+
         uint32_t samples = (audioChans == 8) ? 48 : 6;
         uint32_t plength = audioChans * samples * 3;
 
@@ -1034,7 +1029,7 @@ bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
     else
     {
         mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, 0);
-        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x01);
+        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x07);
         return false;
     }
 }
@@ -1262,7 +1257,12 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
     mDevice.WriteRegister(kRegPll_PTP_EventUdp   + SAREK_PLL, 0x0000013f);
     mDevice.WriteRegister(kRegPll_PTP_MstrMcast  + SAREK_PLL, 0xe0000181);
     mDevice.WriteRegister(kRegPll_PTP_LclIP      + SAREK_PLL, addr);
-    mDevice.WriteRegister(kRegPll_PTP_Match      + SAREK_PLL, 0x9);
+    uint32_t val;
+    mDevice.ReadRegister(kRegPll_PTP_MstrIP      + SAREK_PLL, &val);
+    if (val == 0)
+        mDevice.WriteRegister(kRegPll_PTP_Match  + SAREK_PLL, 0x1);
+    else
+        mDevice.WriteRegister(kRegPll_PTP_Match  + SAREK_PLL, 0x9);
     mDevice.WriteRegister(kRegPll_Config         + SAREK_PLL, PLL_CONFIG_PTP | PLL_CONFIG_DCO_MODE);
 
     //WriteChannelRegister(kRegPll_PTP_LclClkIdLo + SAREK_PLL, (0xfe << 24) | ((macHi & 0x000000ff) << 16) | (macLo >> 16));
@@ -1270,6 +1270,37 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
 
     return true;
 }
+
+bool CNTV2Config2110::GetSFPMSAData(eSFP port, SFPMSAData & data)
+{
+    return GetSFPInfo(port,data);
+}
+
+bool CNTV2Config2110::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
+    uint32_t val2;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
+
+    if (port == SFP_BOTTOM)
+    {
+        linkStatus.linkUp          = (val  & LINK_B_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_2_TX_FAULT) ? true : false;
+    }
+    else
+    {
+        linkStatus.linkUp          = (val  & LINK_A_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_1_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_1_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_1_TX_FAULT) ? true : false;
+    }
+
+    return true;
+}
+
 
 string CNTV2Config2110::getLastError()
 {

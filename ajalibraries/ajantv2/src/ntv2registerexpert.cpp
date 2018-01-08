@@ -145,7 +145,14 @@ public:
 		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
+		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
+		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
 		
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
@@ -610,7 +617,6 @@ private:
 		DefineRegName	(kVRegDisplayReferenceSelect,			"kVRegDisplayReferenceSelect");
 		DefineRegName	(kVRegVANCMode,							"kVRegVANCMode");
 		DefineRegName	(kVRegDualStreamTransportType,			"kVRegDualStreamTransportType");
-		DefineRegName	(kVRegSDIOut1TransportType,				"kVRegSDIOut1TransportType");
 		DefineRegName	(kVRegDSKMode,							"kVRegDSKMode");
 		DefineRegName	(kVRegIsoConvertEnable,					"kVRegIsoConvertEnable");
 		DefineRegName	(kVRegDSKAudioMode,						"kVRegDSKAudioMode");
@@ -850,7 +856,45 @@ private:
 		DefineRegName	(kVRegMailBoxRelease,					"kVRegMailBoxRelease");
 		DefineRegName	(kVRegMailBoxAbort,						"kVRegMailBoxAbort");
 		DefineRegName	(kVRegMailBoxTimeoutNS,					"kVRegMailBoxTimeoutNS");
+		DefineRegName	(kVRegRxc_2DecodeSelectionMode1,		"kVRegRxc_2DecodeSelectionMode1");
+		DefineRegName	(kVRegRxc_2DecodeProgramNumber1,		"kVRegRxc_2DecodeProgramNumber1");
+		DefineRegName	(kVRegRxc_2DecodeProgramPID1,			"kVRegRxc_2DecodeProgramPID1");
+		DefineRegName	(kVRegRxc_2DecodeAudioNumber1,			"kVRegRxc_2DecodeAudioNumber1");
+		DefineRegName	(kVRegRxc_2DecodeSelectionMode2,		"kVRegRxc_2DecodeSelectionMode2");
+		DefineRegName	(kVRegRxc_2DecodeProgramNumber2,		"kVRegRxc_2DecodeProgramNumber2");
+		DefineRegName	(kVRegRxc_2DecodeProgramPID2,			"kVRegRxc_2DecodeProgramPID2");
+		DefineRegName	(kVRegRxc_2DecodeAudioNumber2,			"kVRegRxc_2DecodeAudioNumber2");
+		DefineRegName	(kVRegTxc_2EncodeVideoFormat1,			"kVRegTxc_2EncodeVideoFormat1");
+		DefineRegName	(kVRegTxc_2EncodeUllMode1,				"kVRegTxc_2EncodeUllMode1");
+		DefineRegName	(kVRegTxc_2EncodeBitDepth1,				"kVRegTxc_2EncodeBitDepth1");
+		DefineRegName	(kVRegTxc_2EncodeChromaSubSamp1,		"kVRegTxc_2EncodeChromaSubSamp1");
+		DefineRegName	(kVRegTxc_2EncodeMbps1,					"kVRegTxc_2EncodeMbps1");
+		DefineRegName	(kVRegTxc_2EncodeAudioChannels1,		"kVRegTxc_2EncodeAudioChannels1");
+		DefineRegName	(kVRegTxc_2EncodeStreamType1,			"kVRegTxc_2EncodeStreamType1");
+		DefineRegName	(kVRegTxc_2EncodeProgramPid1,			"kVRegTxc_2EncodeProgramPid1");
+		DefineRegName	(kVRegTxc_2EncodeVideoPid1,				"kVRegTxc_2EncodeVideoPid1");
+		DefineRegName	(kVRegTxc_2EncodePcrPid1,				"kVRegTxc_2EncodePcrPid1");
+		DefineRegName	(kVRegTxc_2EncodeAudio1Pid1,			"kVRegTxc_2EncodeAudio1Pid1");
+		DefineRegName	(kVRegTxc_2EncodeVideoFormat2,			"kVRegTxc_2EncodeVideoFormat2");
+		DefineRegName	(kVRegTxc_2EncodeUllMode2,				"kVRegTxc_2EncodeUllMode2");
+		DefineRegName	(kVRegTxc_2EncodeBitDepth2,				"kVRegTxc_2EncodeBitDepth2");
+		DefineRegName	(kVRegTxc_2EncodeChromaSubSamp2,		"kVRegTxc_2EncodeChromaSubSamp2");
+		DefineRegName	(kVRegTxc_2EncodeMbps2,					"kVRegTxc_2EncodeMbps2");
+		DefineRegName	(kVRegTxc_2EncodeAudioChannels2,		"kVRegTxc_2EncodeAudioChannels2");
+		DefineRegName	(kVRegTxc_2EncodeStreamType2,			"kVRegTxc_2EncodeStreamType2");
+		DefineRegName	(kVRegTxc_2EncodeProgramPid2,			"kVRegTxc_2EncodeProgramPid2");
+		DefineRegName	(kVRegTxc_2EncodeVideoPid2,				"kVRegTxc_2EncodeVideoPid2");
+		DefineRegName	(kVRegTxc_2EncodePcrPid2,				"kVRegTxc_2EncodePcrPid2");
+		DefineRegName	(kVRegTxc_2EncodeAudio1Pid2,			"kVRegTxc_2EncodeAudio1Pid2");
 		DefineRegName	(kVReg2022_7Enable,						"kVReg2022_7Enable");
+		DefineRegName	(kVReg2022_7NetworkPathDiff,			"kVReg2022_7NetworkPathDiff");
+		DefineRegName	(kVRegKIPRxCfgError,					"kVRegKIPRxCfgError");
+		DefineRegName	(kVRegKIPTxCfgError,					"kVRegKIPTxCfgError");
+		DefineRegName	(kVRegKIPEncCfgError,					"kVRegKIPEncCfgError");
+		DefineRegName	(kVRegKIPDecCfgError,					"kVRegKIPDecCfgError");
+		DefineRegName	(kVRegKIPNetCfgError,					"kVRegKIPNetCfgError");
+		DefineRegName	(kVRegUseHDMI420Mode,					"kVRegUseHDMI420Mode");
+		DefineRegName	(kVRegUnused501,						"kVRegUnused501");
         DefineRegName   (kVReg2022_7NetworkPathDiff,            "kVReg2022_7NetworkPathDiff");
 		DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 		DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
@@ -873,6 +917,7 @@ private:
 		DefineRegName	(kVRegAudioCapMixerSourceAux2Gain,		"kVRegAudioCapMixerSourceAux2Gain");
 		DefineRegName	(kVRegSwizzle4kInput,					"kVRegSwizzle4kInput");
 		DefineRegName	(kVRegSwizzle4kOutput,					"kVRegSwizzle4kOutput");
+		DefineRegName	(kVRegAnalogAudioIOConfiguration,		"kVRegAnalogAudioIOConfiguration");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 		
@@ -1102,6 +1147,7 @@ private:
 			(void) inDeviceID;
 			return string();
 		}
+		virtual	~Decoder()	{}
 	} mDefaultRegDecoder;
 	
 	struct DecodeGlobalControlReg : public Decoder
@@ -1127,12 +1173,13 @@ private:
 				oss	<< (((inRegValue & kRegMaskLED) >> (16 + led))  ?  "*"  :  ".");
 			oss	<< endl
 				<< "Register Clocking: "		<< ::NTV2RegisterWriteModeToString (registerWriteMode, true).c_str() << endl
-				<< "Ch 1 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh1 ? "Enabled" : "Disabled") << endl
-				<< "Ch 2 RP-188 output: "		<< (inRegValue & kRegMaskRP188ModeCh2 ? "Enabled" : "Disabled") << endl
+				<< "Ch 1 RP-188 output: "		<< EnabDisab(inRegValue & kRegMaskRP188ModeCh1) << endl
+				<< "Ch 2 RP-188 output: "		<< EnabDisab(inRegValue & kRegMaskRP188ModeCh2) << endl
 				<< "Color Correction: "			<< "Channel: " << ((inRegValue & BIT(31)) ? "2" : "1")
 				<< " Bank " << ((inRegValue & BIT (30)) ? "1" : "0");
 			return oss.str();
 		}
+		virtual	~DecodeGlobalControlReg()	{}
 	}	mDecodeGlobalControlReg;
 	
 	struct DecodeGlobalControl2Reg : public Decoder
@@ -1168,6 +1215,7 @@ private:
 				<< "Has audio mixer: "				<< YesNo(inRegValue & kRegMaskAudioMixerPresent)	<< endl;
 			return oss.str();
 		}
+		virtual	~DecodeGlobalControl2Reg()	{}
 	}	mDecodeGlobalControl2;
 	
 	struct DecodeChannelControlReg : public Decoder
@@ -1207,7 +1255,7 @@ private:
 				case 16:	oss << "16-bit ARGB";					break;
 			}
 			oss								<< (inRegValue & kRegMaskFrameFormatHiBit	? " (extended)"			: " (normal)")					<< endl
-				<< "Channel: "				<< (inRegValue & kRegMaskChannelDisable		? "Disabled"			: "Enabled")					<< endl
+				<< "Channel: "				<< DisabEnab(inRegValue & kRegMaskChannelDisable)													<< endl
 				<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
 				<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
 				<< "DRT Display: "			<< (inRegValue & kRegMaskQuarterSizeMode	? "On"					: "Off")						<< endl
@@ -1218,6 +1266,7 @@ private:
 				<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
 			return oss.str();
 		}
+		virtual	~DecodeChannelControlReg()	{}
 	}	mDecodeChannelControl;
 	
 	struct DecodeFBControlReg : public Decoder
@@ -1233,6 +1282,7 @@ private:
 				<< "Format: "	<< xHEX0N(format,4) << " (" << DEC(format) << ")";
 			return oss.str();
 		}
+		virtual	~DecodeFBControlReg()	{}
 	}	mDecodeFBControlReg;
 	
 	struct DecodeSysmonVccIntDieTemp : public Decoder
@@ -1251,6 +1301,7 @@ private:
 				<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
 			return oss.str();
 		}
+		virtual	~DecodeSysmonVccIntDieTemp()	{}
 	}	mDecodeSysmonVccIntDieTemp;
 	
 	struct DecodeSDITransmitCtrl : public Decoder
@@ -1280,6 +1331,7 @@ private:
 				oss	<< "(Bi-directional SDI not supported)";
 			return oss.str();
 		}
+		virtual	~DecodeSDITransmitCtrl()	{}
 	}	mDecodeSDITransmitCtrl;
 
 	struct DecodeBitfileDateTime : public Decoder
@@ -1311,6 +1363,7 @@ private:
 			else NTV2_ASSERT(false);	//	impossible
 			return oss.str();
 		}
+		virtual	~DecodeBitfileDateTime()	{}
 	}	mDecodeBitfileDateTime;
 
 	struct DecodeVidControlReg : public Decoder		//	Bit31=Is16x9 | Bit30=IsMono
@@ -1326,8 +1379,66 @@ private:
 				<< "Depth: " << (isMono ? "Monochrome" : "Color");
 			return oss.str();
 		}
+		virtual	~DecodeVidControlReg()	{}
 	}	mDecodeVidControlReg;
-	
+
+	struct DecodeStatusReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Device Version: "				<< xHEX0N(inRegValue & kRegMaskHardwareVersion, 1)	<< endl
+				<< "FPGA Version: "					<< xHEX0N(inRegValue & kRegMaskFPGAVersion, 2)		<< endl;
+			if (::NTV2DeviceGetNumSerialPorts(inDeviceID))
+				oss	<< "Uart 1 Rx Interrupt: "		<< ActInact(inRegValue & BIT(15))					<< endl
+					<< "Uart 1 Tx Interrupt: "		<< ActInact(inRegValue & BIT(24))					<< endl;
+			if (::NTV2DeviceGetNumSerialPorts(inDeviceID) > 1)
+				oss	<< "Uart 2 Tx Interrupt: "		<< ActInact(inRegValue & BIT(26))					<< endl;
+			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
+				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
+				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
+				<< "Input 2 Field ID: "				<< (inRegValue & BIT(19) ? "1" : "0")				<< endl
+				<< "Output Vertical Blank: "		<< ActInact(inRegValue & BIT(22))					<< endl
+				<< "Output Field ID: "				<< (inRegValue & BIT(23) ? "1" : "0")				<< endl
+				<< "Wrap Rate Interrupt: "			<< ActInact(inRegValue & BIT(25))					<< endl
+				<< "Input 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(30))					<< endl
+				<< "Input 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(29))					<< endl
+				<< "Output Vertical Interrupt: "	<< ActInact(inRegValue & BIT(31));
+			return oss.str();
+		}
+		virtual	~DecodeStatusReg()	{}
+	}	mDecodeStatusReg;
+
+	struct DecodeStatus2Reg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			static const uint8_t	bitNumsInputVBlank[]	=	{20, 18, 16, 14, 12, 10};	//	Input 3/4/5/6/7/8 Vertical Blank
+			static const uint8_t	bitNumsInputFieldID[]	=	{21, 19, 17, 15, 13, 11};	//	Input 3/4/5/6/7/8 Field ID
+			static const uint8_t	bitNumsInputVertInt[]	=	{30, 29, 28, 27, 26, 25};	//	Input 3/4/5/6/7/8 Vertical Interrupt
+			static const uint8_t	bitNumsOutputVBlank[]	=	{ 8,  6,  4,  2};			//	Output 5/6/7/8 Vertical Blank
+			static const uint8_t	bitNumsOutputFieldID[]	=	{ 9,  7,  5,  3};			//	Output 5/6/7/8 Field ID
+			static const uint8_t	bitNumsOutputVertInt[]	=	{31, 24, 23, 22};			//	Output 5/6/7/8 Vertical Interrupt
+			ostringstream	oss;
+			for (unsigned ndx(0);  ndx < 6;  ndx++)
+				oss	<< "Input " << (ndx+3) << " Vertical Blank: "		<< ActInact(inRegValue & BIT(bitNumsInputVBlank[ndx]))			<< endl
+					<< "Input " << (ndx+3) << " Field ID: "				<< (inRegValue & BIT(bitNumsInputFieldID[ndx]) ? "1" : "0")		<< endl
+					<< "Input " << (ndx+3) << " Vertical Interrupt: "	<< ActInact(inRegValue & BIT(bitNumsInputVertInt[ndx]))			<< endl;
+			for (unsigned ndx(0);  ndx < 4;  ndx++)
+				oss	<< "Output " << (ndx+5) << " Vertical Blank: "		<< ActInact(inRegValue & BIT(bitNumsOutputVBlank[ndx]))			<< endl
+					<< "Output " << (ndx+5) << " Field ID: "			<< (inRegValue & BIT(bitNumsOutputFieldID[ndx]) ? "1" : "0")	<< endl
+					<< "Output " << (ndx+5) << " Vertical Interrupt: "	<< ActInact(inRegValue & BIT(bitNumsOutputVertInt[ndx]))		<< endl;
+			oss	<< "HDMI In Hot-Plug Detect Interrupt: "	<< ActInact(inRegValue & BIT(0))	<< endl
+				<< "HDMI In Chip Interrupt: "				<< ActInact(inRegValue & BIT(1));
+			return oss.str();
+		}
+		virtual	~DecodeStatus2Reg()	{}
+	}	mDecodeStatus2Reg;
+
 	struct DecodeInputStatusReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1404,8 +1515,57 @@ private:
 				<< "AES Channel 7-8: " << ((BIT(27) & inRegValue) ? "Invalid" : "Valid");
 			return oss.str();
 		}
+		virtual	~DecodeInputStatusReg()	{}
 	}	mDecodeInputStatusReg;
-	
+
+	struct DecodeSDIInputStatusReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			uint16_t		numSpigots	(0);
+			uint16_t		startSpigot	(0);
+			ostringstream	oss;
+			switch (inRegNum)
+			{
+				case kRegSDIInput3GStatus:		numSpigots = 2;		startSpigot = 1;	break;
+				case kRegSDIInput3GStatus2:		numSpigots = 2;		startSpigot = 3;	break;
+				case kRegSDI5678Input3GStatus:	numSpigots = 4;		startSpigot = 5;	break;
+			}
+			if ((startSpigot-1) >= ::NTV2DeviceGetNumVideoInputs(inDeviceID))
+				return oss.str();	//	Skip if no such SDI inputs
+				
+			for (uint16_t spigotNdx(0);  spigotNdx < numSpigots;  )
+			{
+				const uint16_t	spigotNum	(spigotNdx + startSpigot);
+				const uint8_t	statusBits	((inRegValue >> (spigotNdx*8)) & 0xFF);
+				const uint8_t	speedBits	(statusBits & 0xC1);
+				ostringstream	ossSpeed, ossSpigot;
+				ossSpigot << "SDI In " << spigotNum << " ";
+				const string	spigotLabel	(ossSpigot.str());
+				if (speedBits & 0x01)	ossSpeed << " 3G";
+				if (::NTV2DeviceCanDo12GSDI(inDeviceID))
+				{
+					if (speedBits & 0x40)	ossSpeed << " 6G";
+					if (speedBits & 0x80)	ossSpeed << " 12G";
+				}
+				if (speedBits == 0)		ossSpeed << " 1.5G";
+				oss	<< spigotLabel << "Link Speed:"				<< ossSpeed.str()				<< endl
+					<< spigotLabel << "SMPTE Level B: "			<< YesNo(statusBits & 0x02)		<< endl
+					<< spigotLabel << "Link A VPID Valid: "		<< YesNo(statusBits & 0x10)		<< endl
+					<< spigotLabel << "Link B VPID Valid: "		<< YesNo(statusBits & 0x20)		<< endl;
+				if (::NTV2DeviceCanDo3GLevelConversion(inDeviceID))
+					oss	<< spigotLabel << "3Gb-to-3Ga Conversion: "	<< EnabDisab(statusBits & 0x04);
+				else
+					oss	<< spigotLabel << "3Gb-to-3Ga Conversion: n/a";
+				if (++spigotNdx < numSpigots)
+					oss << endl;
+			}	//	for each spigot
+			return oss.str();
+		}
+		virtual	~DecodeSDIInputStatusReg()	{}
+	}	mDecodeSDIInputStatusReg;
+
 	struct DecodeAudDetectReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1431,6 +1591,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeAudDetectReg()	{}
 	}	mDecodeAudDetectReg;
 	
 	struct DecodeAudControlReg : public Decoder
@@ -1450,16 +1611,16 @@ private:
 			}
 			
 			ostringstream		oss;
-			oss		<< "Audio Capture: "		<< (BIT(0) & inRegValue ? "Enabled" : "Disabled")	<< endl
-					<< "Audio Loopback: "		<< (BIT(3) & inRegValue ? "Enabled" : "Disabled")	<< endl
-					<< "Audio Input: "			<< (BIT(8) & inRegValue ? "Disabled" : "Enabled")	<< endl
-					<< "Audio Output: "			<< (BIT(9) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+			oss		<< "Audio Capture: "		<< EnabDisab(BIT(0) & inRegValue)	<< endl
+					<< "Audio Loopback: "		<< EnabDisab(BIT(3) & inRegValue)	<< endl
+					<< "Audio Input: "			<< DisabEnab(BIT(8) & inRegValue)	<< endl
+					<< "Audio Output: "			<< DisabEnab(BIT(9) & inRegValue)	<< endl;
 			if (sdiOutput)
-				oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << (BIT(13) & inRegValue ? "Disabled" : "Enabled")	<< endl
-					<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << (BIT(15) & inRegValue ? "Disabled" : "Enabled")	<< endl;
+				oss	<< "Audio Embedder SDIOut" << sdiOutput		<< ": " << DisabEnab(BIT(13) & inRegValue)	<< endl
+					<< "Audio Embedder SDIOut" << (sdiOutput+1)	<< ": " << DisabEnab(BIT(15) & inRegValue)	<< endl;
 			
-			oss		<< "A/V Sync Mode: "		<< (BIT(15) & inRegValue ? "Enabled" : "Disabled")	<< endl
-					<< "AES Rate Converter: "	<< (BIT(19) & inRegValue ? "Disabled" : "Enabled")	<< endl
+			oss		<< "A/V Sync Mode: "		<< EnabDisab(BIT(15) & inRegValue)	<< endl
+					<< "AES Rate Converter: "	<< DisabEnab(BIT(19) & inRegValue)	<< endl
 					<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
 					<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
 					<< (BIT(18) & inRegValue ? "96kHz Support" : "48kHz Support")					<< endl
@@ -1472,6 +1633,7 @@ private:
 					<< "Audio Buffer Size: "	<< (BIT(31) & inRegValue ? "4 MB" : "1 MB");
 			return oss.str();
 		}
+		virtual	~DecodeAudControlReg()	{}
 	}	mDecodeAudControlReg;
 	
 	struct DecodeAudSourceSelectReg : public Decoder
@@ -1493,6 +1655,7 @@ private:
 				<< "3G audio source: "			<< (inRegValue & BIT(21) ? "Data stream 2" : "Data stream 1");
 			return oss.str();
 		}
+		virtual	~DecodeAudSourceSelectReg()	{}
 	}	mDecodeAudSourceSelectReg;
 
 	struct DecodeAudOutputSrcMap : public Decoder
@@ -1542,6 +1705,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeAudOutputSrcMap()	{}
 	}	mDecodeAudOutputSrcMap;
 
 	struct DecodePCMControlReg : public Decoder
@@ -1569,6 +1733,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodePCMControlReg()	{}
 	}	mDecodePCMControlReg;
 
 	struct DecodeAudioMixerInputSelectReg : public Decoder
@@ -1585,6 +1750,7 @@ private:
 				<< "AuxIn2: "	<< "2 chls from Audio System " << (input2_2Channel+1);
 			return oss.str();
 		}
+		virtual	~DecodeAudioMixerInputSelectReg()	{}
 	}	mAudMxrInputSelDecoder;
 
 	struct DecodeAudioMixerGainRegs : public Decoder
@@ -1600,6 +1766,7 @@ private:
 			ostringstream	oss;
 			return oss.str();
 		}
+		virtual	~DecodeAudioMixerGainRegs()	{}
 	}	mAudMxrGainDecoder;
 
 	struct DecodeAudioMixerChannelSelectReg : public Decoder
@@ -1612,6 +1779,7 @@ private:
 			ostringstream	oss;
 			return oss.str();
 		}
+		virtual	~DecodeAudioMixerChannelSelectReg()	{}
 	}	mAudMxrChanSelDecoder;
 
 	struct DecodeAudioMixerMutesReg : public Decoder
@@ -1624,6 +1792,7 @@ private:
 			ostringstream	oss;
 			return oss.str();
 		}
+		virtual	~DecodeAudioMixerMutesReg()	{}
 	}	mAudMxrMutesDecoder;
 
 	struct DecodeAudioMixerLevelsReg : public Decoder
@@ -1636,6 +1805,7 @@ private:
 			ostringstream	oss;
 			return oss.str();
 		}
+		virtual	~DecodeAudioMixerLevelsReg()	{}
 	}	mAudMxrLevelDecoder;
 
 	struct DecodeAncExtControlReg : public Decoder
@@ -1657,6 +1827,7 @@ private:
 				<< "Metadata from: "		<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
 			return oss.str();
 		}
+		virtual	~DecodeAncExtControlReg()	{}
 	}	mDecodeAncExtControlReg;
 	
 	struct DecodeAncExtFieldLinesReg : public Decoder
@@ -1688,6 +1859,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeAncExtFieldLinesReg()	{}
 	}	mDecodeAncExtFieldLines;
 	
 	struct DecodeAncExtStatusReg : public Decoder
@@ -1710,6 +1882,7 @@ private:
 			<< "Overrun: "	<< YesNo(overrun);
 			return oss.str();
 		}
+		virtual	~DecodeAncExtStatusReg()	{}
 	}	mDecodeAncExtStatus;
 	
 	struct DecodeAncExtIgnoreDIDReg : public Decoder
@@ -1725,6 +1898,7 @@ private:
 				<< ", " << HEX0N((inRegValue >> 24) & 0xFF, 2);
 			return oss.str();
 		}
+		virtual	~DecodeAncExtIgnoreDIDReg()	{}
 	}	mDecodeAncExtIgnoreDIDs;
 	
 	struct DecodeAncExtAnalogFilterReg : public Decoder
@@ -1747,6 +1921,7 @@ private:
 			oss << " line as analog, else digital";
 			return oss.str();
 		}
+		virtual	~DecodeAncExtAnalogFilterReg()	{}
 	}	mDecodeAncExtAnalogFilter;
 	
 	struct DecodeAncInsValuePairReg : public Decoder
@@ -1783,6 +1958,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeAncInsValuePairReg()	{}
 	}	mDecodeAncInsValuePairReg;
 	
 	struct DecodeAncInsControlReg : public Decoder
@@ -1805,6 +1981,7 @@ private:
 				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}
+		virtual	~DecodeAncInsControlReg()	{}
 	}	mDecodeAncInsControlReg;
 	
 	struct DecodeAncInsChromaBlankReg : public Decoder
@@ -1826,6 +2003,7 @@ private:
 			oss	<< " should be blanked or passed thru";
 			return oss.str();
 		}
+		virtual	~DecodeAncInsChromaBlankReg()	{}
 	}	mDecodeAncInsChromaBlankReg;
 	
 	struct DecodeXptGroupReg : public Decoder		//	Every byte is a crosspoint number 0-255
@@ -1847,6 +2025,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeXptGroupReg()	{}
 	}	mDecodeXptGroupReg;
 	
 	struct DecodeHDMIOutputControl : public Decoder
@@ -1878,6 +2057,7 @@ private:
 			<< "Audio Loopback: "	<< OnOff(inRegValue & BIT(31));
 			return oss.str();
 		}
+		virtual	~DecodeHDMIOutputControl()	{}
 	}	mDecodeHDMIOutputControl;
 	
 	struct DecodeHDMIInputStatus : public Decoder
@@ -1904,6 +2084,7 @@ private:
 				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
+		virtual	~DecodeHDMIInputStatus()	{}
 	}	mDecodeHDMIInputStatus;
 	
 	struct DecodeHDMIOutHDRPrimary : public Decoder
@@ -1973,6 +2154,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeHDMIOutHDRPrimary()	{}
 	}	mDecodeHDMIOutHDRPrimary;
 	
 	struct DecodeHDMIOutHDRControl : public Decoder
@@ -1994,6 +2176,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeHDMIOutHDRControl()	{}
 	}	mDecodeHDMIOutHDRControl;
 	
 	struct DecodeSDIOutputControl : public Decoder
@@ -2032,6 +2215,7 @@ private:
 			}
 			return oss.str();
 		}
+		virtual	~DecodeSDIOutputControl()	{}
 	}	mDecodeSDIOutputControl;
 	
 	struct DecodeDMAControl : public Decoder
@@ -2055,8 +2239,9 @@ private:
 				<< "Lanes: "									<< lanes << ((lanes >= 0  &&  lanes < 9) ? "" : " <invalid>");
 			return oss.str();
 		}
+		virtual	~DecodeDMAControl()	{}
 	}	mDMAControlRegDecoder;
-	
+
 	struct DecodeDMAIntControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2072,8 +2257,9 @@ private:
 			oss	<< "Bus Error: "							<< YesNo(inRegValue & BIT(31));
 			return oss.str();
 		}
+		virtual	~DecodeDMAIntControl()	{}
 	}	mDMAIntControlRegDecoder;
-	
+
 	struct DecodeRP188InOutDBB : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2087,8 +2273,9 @@ private:
 				<< "DBB: "		<< HEX0N((inRegValue & 0x0000FF00) >> 8, 2) << " " << HEX0N(inRegValue & 0x000000FF, 2);
 			return oss.str();
 		}
+		virtual	~DecodeRP188InOutDBB()	{}
 	}	mRP188InOutDBBRegDecoder;
-	
+
 	struct DecodeVidProcControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2099,14 +2286,15 @@ private:
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
 			oss	<< "Limiting: "		<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
 				<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
-				<< "FG Matte: "		<< (inRegValue & kRegMaskVidProcFGMatteEnable ? "Enabled" : "Disabled")											<< endl
-				<< "BG Matte: "		<< (inRegValue & kRegMaskVidProcBGMatteEnable ? "Enabled" : "Disabled")											<< endl
+				<< "FG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
+				<< "BG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
 				<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
 				<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
 				<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
 				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}
+		virtual	~DecodeVidProcControl()	{}
 	}	mVidProcControlRegDecoder;
 	
 	struct DecodeSplitControl : public Decoder
@@ -2126,6 +2314,7 @@ private:
 				<< "Split Type: "	<< ((inRegValue & BIT(30)) ? "Vertical" : "Horizontal");
 			return oss.str();
 		}
+		virtual	~DecodeSplitControl()	{}
 	}	mSplitControlRegDecoder;
 	
 	struct DecodeFlatMatteValue : public Decoder
@@ -2141,6 +2330,7 @@ private:
 				<< "Flat Matte Cr: "	<< HEX0N((inRegValue >> 20) & mask, 3);
 			return oss.str();
 		}
+		virtual	~DecodeFlatMatteValue()	{}
 	}	mFlatMatteValueRegDecoder;
 	
 	struct DecodeSDIErrorStatus : public Decoder
@@ -2158,6 +2348,7 @@ private:
 					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
 			return oss.str();
 		}
+		virtual	~DecodeSDIErrorStatus()	{}
 	}	mSDIErrorStatusRegDecoder;
 	
 	struct DecodeSDIErrorCount : public Decoder
@@ -2172,6 +2363,7 @@ private:
 					<< "Link B: "		<< DEC((inRegValue & 0xFFFF0000) >> 16);
 			return oss.str();
 		}
+		virtual	~DecodeSDIErrorCount()	{}
 	}	mSDIErrorCountRegDecoder;
 	
 	static const int	NOREADWRITE	=	0;

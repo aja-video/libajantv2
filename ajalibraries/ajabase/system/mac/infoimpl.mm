@@ -184,7 +184,7 @@ AJASystemInfoImpl::Rescan()
         mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/Library/Preferences/");
     }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/Users/Shared/Library/Preferences/";
+    mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/Users/Shared/AJA/";
 
     mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/Applications/";
     mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/Applications/AJA Utilities/";

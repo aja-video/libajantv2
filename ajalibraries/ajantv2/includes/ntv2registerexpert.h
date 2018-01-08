@@ -25,6 +25,8 @@
 #define	OnOff(__x__)			((__x__) ? "On"			: "Off")
 #define	SetNotset(__x__)		((__x__) ? "Set"		: "Not Set")
 #define	EnabDisab(__x__)		((__x__) ? "Enabled"	: "Disabled")
+#define	DisabEnab(__x__)		((__x__) ? "Disabled"	: "Enabled")
+#define	ActInact(__x__)			((__x__) ? "Active"		: "Inactive")
 
 
 //	Register classifier keys
