@@ -821,7 +821,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         uint32_t plength    = audioChans * samples * 3;
 
         // audio select
-        uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + audioChans;
+        uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + (audioChans-1);
         uint32_t offset  =  get2110TxStream(channel,stream) * 4;
         mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset,aselect);
 
@@ -829,7 +829,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, samples);
 
         // audio channels - zero-based (i.e. 0 = 1 channel)
-        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, audioChans-1);
+        mDevice.WriteRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, audioChans);
 
         // payload length
         mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer, plength);
