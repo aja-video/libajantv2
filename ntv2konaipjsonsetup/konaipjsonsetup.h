@@ -64,6 +64,8 @@ typedef struct
     QString mPayloadLen;
     QString mLastPayloadLen;
     QString mPktsPerLine;
+    QString mNumAudioChannels;
+    QString mFirstAudioChannel;
 }TransmitStruct;
 
 typedef  struct {
