@@ -816,7 +816,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     {
         // audio setup 3190 packetizer
 
-        uint32_t audioChans = txConfig.numAudioChannels;
+        uint32_t audioChans = txConfig.numAudioChannels - 1;    // zero-based (i.e. 0=1 channel)
         uint32_t samples    = 6;
         uint32_t plength    = audioChans * samples * 3;
 
