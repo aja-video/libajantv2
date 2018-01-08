@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>ntv2qtrawcapture</string>
+	<string>ntv2player</string>
 	<key>CFBundleName</key>
-	<string>ntv2qtrawcapture</string>
+	<string>ntv2player</string>
 	<key>CFBundleVersion</key>
 	<string>0.0.0</string>
 	<key>CFBundleShortVersionString</key>
@@ -15,9 +15,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aja.ntv2qtrawcapture</string>
+	<string>com.aja.ntv2player</string>
 	<key>CFBundleSignature</key>
-	<string>AjRC</string>
+	<string>AjPL</string>
 	<key>CFBundleIconFile</key>
 	<string>app.icns</string>
 	<key>NSHumanReadableCopyright</key>

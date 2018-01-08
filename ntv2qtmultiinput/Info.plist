@@ -8,6 +8,8 @@
 	<string>ntv2qtmultiinput</string>
 	<key>CFBundleName</key>
 	<string>ntv2qtmultiinput</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.0.0</string>
 	<key>CFBundlePackageType</key>
@@ -19,8 +21,8 @@
 	<key>CFBundleIconFile</key>
 	<string>app.icns</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © AJA Video Systems, Inc. 2013</string>
+	<string>Copyright (C) AJA Video Systems, Inc. 2011-AJA_BUILD_YEAR</string>
 	<key>CFBundleGetInfoString</key>
-	<string>0.0.0 Copyright © AJA Video Systems, Inc. 2013</string>
+	<string>0.0.0 Copyright (C) AJA Video Systems, Inc. 2011-AJA_BUILD_YEAR</string>
 </dict>
 </plist>
