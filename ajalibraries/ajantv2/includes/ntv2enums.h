@@ -1128,12 +1128,16 @@ typedef enum
 {
   NTV2_VIDEO_STREAM      = 0,
   NTV2_AUDIO1_STREAM     = 1,
-  NTV2_METADATA_STREAM   = 2,
-  NTV2_UNUSED_STREAM     = 3,
-  NTV2_MAX_NUM_STREAMS   = 4
+  NTV2_AUDIO2_STREAM     = 2,
+  NTV2_AUDIO3_STREAM     = 3,
+  NTV2_AUDIO4_STREAM     = 4,
+  NTV2_METADATA_STREAM   = 5,
+  NTV2_MAX_NUM_STREAMS   = 6
 } NTV2Stream;
 
-#define NTV2_IS_VALID_STREAM(__x__)					((__x__) >= NTV2_VIDEO_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
+#define NTV2_ALLOCATED_RX_STREAMS   4
+#define NTV2_IS_VALID_RX_STREAM(__x__)					((__x__) >= NTV2_VIDEO_STREAM && (__x__) < NTV2_ALLOCATED_RX_STREAMS)
+#define NTV2_IS_VALID_TX_STREAM(__x__)					((__x__) >= NTV2_VIDEO_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
 
 typedef enum
 {

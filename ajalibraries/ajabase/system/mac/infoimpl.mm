@@ -180,6 +180,7 @@ AJASystemInfoImpl::Rescan()
     const char* homePath = getenv("HOME");
     if (homePath != NULL)
     {
+        mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
         mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
         mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/Library/Preferences/");
     }
