@@ -652,17 +652,18 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// audio monitor
 	ULWord chSelect = NTV2_AudioMonitor1_2;
 	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, &chSelect);
-	if (deviceID == DEVICE_ID_KONA3G || deviceID == DEVICE_ID_KONA3GQUAD ||
-		deviceID == DEVICE_ID_KONA4  || deviceID == DEVICE_ID_KONA4UFC ||
-		deviceID == DEVICE_ID_IO4K   || deviceID == DEVICE_ID_IOXT)
-	{
-		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
-	}
-	else if (deviceID == DEVICE_ID_IO4KPLUS)
+	if (deviceID == DEVICE_ID_IO4KPLUS || deviceID == DEVICE_ID_IO4K || 
+		deviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
 		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
 		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
+	}
+	else if (	deviceID == DEVICE_ID_KONA3G	|| deviceID == DEVICE_ID_KONA3GQUAD ||
+				deviceID == DEVICE_ID_IO4KUFC	|| deviceID == DEVICE_ID_KONA4UFC	||
+				deviceID == DEVICE_ID_IOXT )
+	{
+		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
 	}
 	else
 	{
@@ -2423,32 +2424,28 @@ bool DeviceServices::UpdateK2LUTSelect()
 	NTV2LutType wantedLUT = NTV2_LUTUnknown;
 	switch (mGammaMode)
 	{
-		// force to Rec 601
-		case NTV2_GammaRec601:		
-			wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;	
+		// custom LUT in use - do not change
+		case NTV2_GammaNone:		
+			wantedLUT = NTV2_LUTCustom;
 			break;
-	
-		// force to Rec 709
-		case NTV2_GammaRec709:		
-			wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;	
-			break;
-	
-		// Auto-switch between SD (Rec 601) and HD (Rec 709)
-		case NTV2_GammaAuto:		
+		
+		// old QuickTime 1.8 gamma - used for legacy QT apps (VTRX, FCP7) old time mac monitors
+		case NTV2_GammaMac:	
 			if (NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
 				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
 			else
 				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
 			break;
-				
-		// custom LUT in use - do not change
-		case NTV2_GammaNone:		
-			wantedLUT = NTV2_LUTCustom;
-			break;
-								
-		default:
-		case NTV2_GammaMac:			
+		
+		case NTV2_GammaAuto:	
 			wantedLUT = NTV2_LUTLinear;
+			break;
+		
+		// when in doubt use linear
+		default:
+		case NTV2_GammaRec601:	
+		case NTV2_GammaRec709:		
+			wantedLUT = NTV2_LUTLinear;	
 			break;
 	}
 	
@@ -2834,12 +2831,9 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 }
 
 
-
-#define XENA2_SEARCHTIMEOUT 5
-
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {
-#define BYTES_PER_UNIT	512		// each hardware click is 64 bytes
+	const uint32_t kBytesPerUnit = 512;		// each hardware click is 64 bytes
     
 	NTV2FrameRate rate =  NTV2_FRAMERATE_UNKNOWN;
 	mCard->GetFrameRate(&rate);
@@ -2850,7 +2844,7 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	mCard->GetNumberAudioChannels(channels);
 
 	double  bytes          = samplesPerFrame * 4 * frames * channels;
-	uint32_t offset        = uint32_t(bytes / BYTES_PER_UNIT);
+	uint32_t offset        = uint32_t(bytes / kBytesPerUnit);
 	
 	return offset;
 }

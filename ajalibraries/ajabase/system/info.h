@@ -37,6 +37,7 @@ enum AJASystemInfoTag
     AJA_SystemInfoTag_Mem_Total,
     AJA_SystemInfoTag_Mem_Used,
     AJA_SystemInfoTag_Mem_Free,
+    AJA_SystemInfoTag_Path_UserHome,
     AJA_SystemInfoTag_Path_PersistenceStoreUser,
     AJA_SystemInfoTag_Path_PersistenceStoreSystem,
     AJA_SystemInfoTag_Path_Applications,

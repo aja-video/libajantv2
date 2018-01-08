@@ -10,6 +10,7 @@
 
 // need to link with Shlwapi.lib & Netapi32.lib
 #pragma warning(disable:4996)
+#include <intrin.h>
 #include <io.h>
 #include <LM.h>
 #include <ShlObj.h>
@@ -370,8 +371,9 @@ AJASystemInfoImpl::Rescan()
                                              "LastUsedUsername"));
     }
 
-    path.append("\\AppData\\Local\\Aja\\");
+    mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = path;
 
+    path.append("\\AppData\\Local\\Aja\\");
     mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
 
     TCHAR szPath[MAX_PATH];

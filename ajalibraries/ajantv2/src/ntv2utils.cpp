@@ -783,7 +783,7 @@ void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 							 bool twoKby1080,
 							 bool wideVANC)
 {
-	NTV2FormatDescriptor fd = GetFormatDescriptor(standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
 	UWord lineBuffer[2048*2];
 	Make10BitLine(lineBuffer,color.y,color.cb,color.cr,fd.numPixels);
 	for ( UWord i= 0; i<fd.numLines; i++)
@@ -874,7 +874,7 @@ void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 							 bool twoKby1080,
 							 bool wideVANC)
 {
-	NTV2FormatDescriptor fd = GetFormatDescriptor(standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
 
 	for ( UWord i= 0; i<fd.numLines; i++)
 	{

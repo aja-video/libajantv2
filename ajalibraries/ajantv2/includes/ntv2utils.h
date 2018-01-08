@@ -820,10 +820,6 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Smpt
 **/
 inline NTV2SmpteLineNumber GetSmpteLineNumber (const NTV2Standard inStandard)	{return NTV2SmpteLineNumber (inStandard);}
 
-#if !defined (NTV2_DEPRECATE)
-	extern AJAExport const NTV2FormatDescriptor formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS];
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 typedef std::set <NTV2DeviceID>			NTV2DeviceIDSet;			///< @brief	A set of NTV2DeviceIDs.
 typedef NTV2DeviceIDSet::iterator		NTV2DeviceIDSetIter;		///< @brief	A convenient non-const iterator for NTV2DeviceIDSet.

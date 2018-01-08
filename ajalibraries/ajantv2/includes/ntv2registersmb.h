@@ -23,11 +23,10 @@
 #define SAREK_GENLOCK_SPI           (0x101000/4)
 #define SAREK_MAILBOX               (0x107000/4)
 #define SAREK_PLL                   (0x108000/4)
-
 #define SAREK_REGS2                 (0x10e000/4)
-
 #define SAREK_10G_EMAC_0            (0x180000/4)
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
+#define SAREK_CSREGS                (0x080000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -168,6 +167,7 @@
 #define SAREK_PTP_PLL				BIT(5)
 #define SAREK_TX_TOP34              BIT(6)
 #define SAREK_2110                  BIT(7)
+#define SAREK_CS                    BIT(8)
 
 #define SAREK_TX0_MASK              (BIT(31) + BIT(30) + BIT(29) + BIT(28))
 #define SAREK_RX0_MASK              (BIT(27) + BIT(26) + BIT(25) + BIT(24))
@@ -375,6 +375,14 @@
 #define kRegPll_90KHzRTP_TS                     0x27
 #define kRegPll_48KHzRTP_TS                     0x28
 #define kRegPll_Intr_Reg                        0x29
+#define kRegPll_ptp_dst_mac_addr_hi             0x2a
+#define kRegPll_ptp_dst_mac_addr_lo             0x2b
+#define kRegPll_ptp_dst_ipv4_addr               0x2c
+#define kRegPll_ptp_sync_cnt                    0x2d
+#define kRegPll_ptp_follow_up_cnt               0x2e
+#define kRegPll_ptp_delay_req_cnt               0x2f
+#define kRegPll_ptp_delay_resp_cnt              0x30
+#define kRegPll_ptp_announce_cnt                0x31
 
 /////////////////////////////////////////////////////////////////////
 //

@@ -66,6 +66,7 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2spiinterface.cpp \
 		ntv2status.cpp \
 		ntv2subscriptions.cpp \
+		ntv2supportlogger.cpp \
 		ntv2testpattern.cpp \
 		ntv2tonegenerator.cpp \
 		ntv2transcode.cpp \

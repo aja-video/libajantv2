@@ -136,7 +136,7 @@ public:
         eProgSel_LowestProgNum,
         eProgSel_SpecificProgNum,
         eProgSel_SpecificProgPID,
-        eProgSel_Default = eProgSel_AutoFirstProg,
+        eProgSel_Default = eProgSel_AutoFirstProg
     } eProgSelMode_t;
 
     j2kDecoderConfig() {init();}
@@ -162,15 +162,6 @@ public:
     std::vector<uint32_t> availableProgramNumbers;
     std::vector<uint32_t> availableProgramPIDs;
     std::vector<uint32_t> availableAudioPIDs;
-};
-
-
-struct sLinkStatus
-{
-    bool SFP_present;
-    bool SFP_rx_los;    // loss of signal
-    bool SFP_tx_fault;
-    bool linkUp;
 };
 
 struct s2022RxChannelStatus

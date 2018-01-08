@@ -2936,8 +2936,29 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// YUV Out 4K 2pi 
 	else if (b4K && b2pi)
 	{
-		mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
-		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+		if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x425In)
+		{
+			if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+				mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+			}
+		}
+		else if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
+			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+		}
 	}
 	// Stereo or LevelB
 	else if (bLevelBFormat || bStereoIn)											
@@ -3230,6 +3251,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// HDMI output - initialization sequence
+	#ifdef HDMI_INIT
 	if (mHDMIStartupCountDown > 0)
 	{
 		// start initialization
@@ -3248,6 +3270,8 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mHDMIStartupCountDown--;
 	}
 	else
+	#endif
+	
 	{
 		// set standard / mode
 		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);

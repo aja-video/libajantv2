@@ -511,8 +511,7 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
 
 	if ( FormatIs60_50fps(_tcFormat) )
 	{
-			// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
-			// we use the field ID bit to be the LS bit of the three bit number.
+		// for frame rates > 39 fps, the field ID correlates frame pairs
 		bool bFieldID = (FormatIsPAL(_tcFormat) ? ((TC32_63 & BIT_27) != 0) : ((TC0_31 & BIT_27) != 0) );	// Note: FID is in different words for PAL & NTSC!
 		int numFrames = (((((TC0_31>>8)&0x3) * 10) + (TC0_31&0xF)) * 2) + (int)bFieldID;					// double the regular frame count and add fieldID
 		unitFrames = bcd[numFrames % 10];
@@ -756,7 +755,7 @@ void CRP188::SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs
 	SetColorFrame(false);
 	SetVaricamRate( DefaultFrameRateForTimecodeFormat(_tcFormat) );
 
-	if ( !FormatIs60_50fps(_tcFormat) )		// if we're using 50 or 60 fps format, the fieldID bit is part of the frame 10's digit and is set in ConvertTcStrToReg()
+	if ( !FormatIs60_50fps(_tcFormat) )		// if we're using 50 or 60 fps format, the field id signifies frame pairs
 		SetFieldID(0);
 
 	SetBFGBits(false, false, false);

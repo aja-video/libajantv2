@@ -1345,7 +1345,7 @@ bool CNTV2Config2022::SetJ2KDecoderConfiguration(const  j2kDecoderConfig & j2kCo
 {
     if (_is2022_2)
     {
-        mDevice.SetAudioSystemInputSource(NTV2_AUDIOSYSTEM_1,NTV2_AUDIO_AES,NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
+    	mDevice.SetAudioSystemInputSource(NTV2_AUDIOSYSTEM_1,NTV2_AUDIO_AES,NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
         CNTV2ConfigTs2022 tsConfig(mDevice);
         bool rv = tsConfig.SetupJ2KDecoder(j2kConfig);
         mIpErrorCode = tsConfig.getLastErrorCode();
@@ -1621,17 +1621,17 @@ bool CNTV2Config2022::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
 
     if (port == SFP_BOTTOM)
     {
-        linkStatus.linkUp          = (val & LINK_B_UP) ? true : false;
-        linkStatus.SFP_present     = (val & SFP_2_NOT_PRESENT) ? false : true;
-        linkStatus.SFP_rx_los      = (val & SFP_2_RX_LOS) ? true : false;
-        linkStatus.SFP_tx_fault    = (val & SFP_2_TX_FAULT) ? true : false;
+        linkStatus.linkUp          = (val  & LINK_B_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_2_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_2_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_2_TX_FAULT) ? true : false;
     }
     else
     {
-        linkStatus.linkUp          = (val & LINK_A_UP) ? true : false;
-        linkStatus.SFP_present     = (val & SFP_2_NOT_PRESENT) ? false : true;
-        linkStatus.SFP_rx_los      = (val & SFP_2_RX_LOS) ? true : false;
-        linkStatus.SFP_tx_fault    = (val & SFP_2_TX_FAULT) ? true : false;
+        linkStatus.linkUp          = (val  & LINK_A_UP) ? true : false;
+        linkStatus.SFP_present     = (val2 & SFP_1_NOT_PRESENT) ? false : true;
+        linkStatus.SFP_rx_los      = (val2 & SFP_1_RX_LOS) ? true : false;
+        linkStatus.SFP_tx_fault    = (val2 & SFP_1_TX_FAULT) ? true : false;
     }
 
     return true;

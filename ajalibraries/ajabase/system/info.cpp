@@ -58,6 +58,7 @@ AJASystemInfo::Rescan()
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
 
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)] = "User Home Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";

@@ -66,6 +66,8 @@ public:
     uint32_t     pktsPerLine;    // read-only
     uint32_t     payloadLen;     // read0only
     uint32_t     lastPayLoadLen; // read-only
+    uint8_t      numAudioChannels;
+    uint8_t      firstAudioChannel;
 };
 
 /**
@@ -160,9 +162,12 @@ public:
 
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
+    bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
+    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
-    static bool      decompose2110TxStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
+    static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
+    static bool      decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static uint32_t  GetDecapsulatorAddress(NTV2Channel channel, NTV2Stream stream);
 
     // If method returns false call this to get details
@@ -170,7 +175,7 @@ public:
     NTV2IpError getLastErrorCode();
 
     static uint32_t v_packetizers[4];
-    static uint32_t a_packetizers[4];
+    static uint32_t a_packetizers[16];
     static uint32_t m_packetizers[4];
 
 protected:
@@ -192,7 +197,7 @@ protected:
 
     bool        GenSDP(NTV2Channel channel);
     bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
-    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
+    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);
 
 private:
     eSFP        GetRxPort(NTV2Channel chan);

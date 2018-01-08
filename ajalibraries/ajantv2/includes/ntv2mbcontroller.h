@@ -56,6 +56,13 @@ typedef struct
     uint8_t data[64];
 } SFPMSAData;
 
+struct sLinkStatus
+{
+    bool SFP_present;
+    bool SFP_rx_los;    // loss of signal
+    bool SFP_tx_fault;
+    bool linkUp;
+};
 
 // IGMP Control Block
 #define IGMPCB_REG_STATE       0
