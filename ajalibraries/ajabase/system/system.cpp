@@ -127,10 +127,10 @@ namespace aja
     int reveal_file_in_file_manager(const std::string& filePath)
     {
         std::ostringstream oss;
-        oss << "/usr/bin/osascript " << "-e " << "tell application \"Finder\""
-                                     << "-e " << "activate"
-                                     << "-e " << "reveal \"" + filePath + "\" as POSIX file"
-                                     << "-e " << "end tell";
+        oss << "/usr/bin/osascript" << " -e \"" << "tell application \\\"Finder\\\"" << "\""
+                                    << " -e \"" << "activate" << "\""
+                                    << " -e \"" << "reveal \\\"" + filePath + "\\\" as POSIX file" << "\""
+                                    << " -e \"" << "end tell" << "\"";
         return ::system(oss.str().c_str());
     }
 } //end aja namespace
