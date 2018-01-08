@@ -145,7 +145,7 @@ namespace aja
         // need to pass the directory of the file to open in file manager, otherwise
         // will open in the default application for file type
         std::ostringstream oss;
-        oss << "xdg-open " << "\"" << dirname(filePath.c_str()) << "\"";
+        oss << "xdg-open " << "\"" << dirname((char*)filePath.c_str()) << "\"";
         return ::system(oss.str().c_str());
     }
 } //end aja namespace
