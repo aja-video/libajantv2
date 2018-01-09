@@ -108,6 +108,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
         case DEVICE_ID_IOIP_2022:					return "DEVICE_ID_IOIP_2022";					break;
         case DEVICE_ID_IOIP_2110:					return "DEVICE_ID_IOIP_2110";					break;
 		case DEVICE_ID_KONAALPHA:					return "DEVICE_ID_KONAALPHA";					break;
+        case DEVICE_ID_KONAHDMI:					return "DEVICE_ID_KONAHDMI";					break;
         case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";					break;
 	}
 	return "";
@@ -196,6 +197,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
         case DEVICE_ID_IOIP_2022:					return "DNxIP_2022";				break;
         case DEVICE_ID_IOIP_2110:					return "DNxIP_2110";				break;
 		case DEVICE_ID_KONAALPHA:					return "KonaAlpha";					break;
+        case DEVICE_ID_KONAHDMI:					return "KonaHDMI";					break;
         case DEVICE_ID_NOTFOUND:					return "Unknown";					break;
 	}
 
