@@ -207,6 +207,7 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_KONAIP_2110:
 	case DEVICE_ID_KONAALPHA:
+    case DEVICE_ID_KONAHDMI:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;
 	default:
@@ -240,7 +241,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_IOXT:
 	case DEVICE_ID_TTAP:
 	case DEVICE_ID_KONAALPHA:
-		switch (inFrameGeometry)
+        switch (inFrameGeometry)
 		{
 		case NTV2_FG_2048x1080:
 		case NTV2_FG_2048x1556:
@@ -273,6 +274,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
+    case DEVICE_ID_KONAHDMI:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -378,6 +380,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
+    case DEVICE_ID_KONAHDMI:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -442,6 +445,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
+    case DEVICE_ID_KONAHDMI:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:

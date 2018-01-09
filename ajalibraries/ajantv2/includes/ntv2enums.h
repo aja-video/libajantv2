@@ -219,6 +219,7 @@ typedef enum
     DEVICE_ID_IOIP_2110                 = 0x10710851,
 
 	DEVICE_ID_KONAALPHA					= 0x10756600,
+    DEVICE_ID_KONAHDMI                  = 0x10767400,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -990,6 +991,9 @@ typedef enum
         NTV2_INPUTSOURCE_ANALOG1,		///< @brief	Identifies Analog Video Input 1.
         NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	//	Might deprecate this someday
         NTV2_INPUTSOURCE_HDMI1,			///< @brief	Identifies HDMI Input 1.
+        NTV2_INPUTSOURCE_HDMI2,
+        NTV2_INPUTSOURCE_HDMI3,
+        NTV2_INPUTSOURCE_HDMI4,
         NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	//	Might deprecate this someday
         NTV2_INPUTSOURCE_SDI1,			///< @brief	Identifies SDI Input 1.
         NTV2_INPUTSOURCE_SDI2,			///< @brief	Identifies SDI Input 2.
@@ -1034,7 +1038,10 @@ typedef enum
 } NTV2InputSource;
 
 
-#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				((_inpSrc_) == NTV2_INPUTSOURCE_HDMI)
+#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				(   (_inpSrc_) == NTV2_INPUTSOURCE_HDMI ||      \
+                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI2 ||     \
+                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI3 ||     \
+                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI4    )
 #define	NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG)
 #define	NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				(!NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_) && !NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
 #define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
@@ -1141,22 +1148,26 @@ typedef enum
 
 typedef enum
 {
-    NTV2_REFERENCE_EXTERNAL,
-    NTV2_REFERENCE_INPUT1,
-    NTV2_REFERENCE_INPUT2,
-    NTV2_REFERENCE_FREERUN,
-    NTV2_REFERENCE_ANALOG_INPUT,
-    NTV2_REFERENCE_HDMI_INPUT,
-    NTV2_REFERENCE_INPUT3,
-    NTV2_REFERENCE_INPUT4,
-    NTV2_REFERENCE_INPUT5,
-    NTV2_REFERENCE_INPUT6,
-    NTV2_REFERENCE_INPUT7,
-    NTV2_REFERENCE_INPUT8,
-    NTV2_REFERENCE_SFP1_PTP,
-    NTV2_REFERENCE_SFP1_PCR,
-    NTV2_REFERENCE_SFP2_PTP,
-    NTV2_REFERENCE_SFP2_PCR,
+    NTV2_REFERENCE_EXTERNAL         = 0,
+    NTV2_REFERENCE_INPUT1           = 1,
+    NTV2_REFERENCE_INPUT2           = 2,
+    NTV2_REFERENCE_FREERUN          = 3,
+    NTV2_REFERENCE_ANALOG_INPUT     = 4,
+    NTV2_REFERENCE_HDMI_INPUT1      = 5,
+    NTV2_REFERENCE_HDMI_INPUT       = NTV2_REFERENCE_HDMI_INPUT1,
+    NTV2_REFERENCE_INPUT3           = 6,
+    NTV2_REFERENCE_INPUT4           = 7,
+    NTV2_REFERENCE_INPUT5           = 8,
+    NTV2_REFERENCE_INPUT6           = 9,
+    NTV2_REFERENCE_INPUT7           = 10,
+    NTV2_REFERENCE_INPUT8           = 11,
+    NTV2_REFERENCE_SFP1_PTP         = 12,
+    NTV2_REFERENCE_SFP1_PCR         = 13,
+    NTV2_REFERENCE_SFP2_PTP         = 14,
+    NTV2_REFERENCE_SFP2_PCR         = 15,
+    NTV2_REFERENCE_HDMI_INPUT2      = 16,
+    NTV2_REFERENCE_HDMI_INPUT3      = 17,
+    NTV2_REFERENCE_HDMI_INPUT4      = 18,
     NTV2_NUM_REFERENCE_INPUTS,			//	Always last!
     NTV2_REFERENCE_INVALID = NTV2_NUM_REFERENCE_INPUTS
 } NTV2ReferenceSource;
@@ -2621,7 +2632,10 @@ typedef enum
 	NTV2_Wgt12GSDIOut3,
 	NTV2_Wgt12GSDIOut4,
 	NTV2_WgtHDMIIn1v4,
-	NTV2_WgtHDMIOut1v4,
+    NTV2_WgtHDMIIn2v4,
+    NTV2_WgtHDMIIn3v4,
+    NTV2_WgtHDMIIn4v4,
+    NTV2_WgtHDMIOut1v4,
 	NTV2_WgtModuleTypeCount,// always last
 	NTV2_WgtUndefined = NTV2_WgtModuleTypeCount,
 	NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -2933,7 +2947,8 @@ typedef enum
     NTV2_BITFILE_IOIP_2022          = 51,
     NTV2_BITFILE_IOIP_2110          = 52,
     NTV2_BITFILE_KONAIP_2110        = 53,
-	NTV2_BITFILE_KONAALPHA,
+    NTV2_BITFILE_KONAALPHA          = 54,
+    NTV2_BITFILE_KONAHDMI           = 55,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
