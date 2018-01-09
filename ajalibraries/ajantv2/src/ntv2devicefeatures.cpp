@@ -205,8 +205,7 @@ ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_IO4KPLUS:
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_2110:
-	case DEVICE_ID_KONAIP_4TX_2110:
+	case DEVICE_ID_KONAIP_2110:
 	case DEVICE_ID_KONAALPHA:
         frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
 		break;

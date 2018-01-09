@@ -4079,8 +4079,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4K PLUS";
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
-        case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
-		case DEVICE_ID_KONAIP_4TX_2110:			return "KonaIP s2110";
+		case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
 		case DEVICE_ID_KONAALPHA:				return "KONA ALPHA";
 #if !defined (_DEBUG)
 	    default:					break;
@@ -7622,8 +7621,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_IO4KPLUS,
                                                         DEVICE_ID_IOIP_2022,
                                                         DEVICE_ID_IOIP_2110,
-                                                        DEVICE_ID_KONAIP_2110,
-														DEVICE_ID_KONAIP_4TX_2110,
+														DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONAALPHA,
 														DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
