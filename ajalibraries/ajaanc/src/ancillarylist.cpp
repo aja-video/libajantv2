@@ -198,20 +198,28 @@ AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncDat
 	if (pData)
 		m_ancList.push_back(pData);
 
+	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) stored after appending packet " << pData->AsString(16));
 	return AJA_STATUS_SUCCESS;
 }
 
 
 AJAStatus AJAAncillaryList::Clear (void)
 {
+	uint32_t		numDeleted	(0);
+	const uint32_t	oldSize		(m_ancList.size());
 	for (AJAAncDataListConstIter it (m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData(*it);
 		if (pAncData)
+		{
 			delete (pAncData);
+			numDeleted++;
+		}
 	}
 
 	m_ancList.clear();
+	if (oldSize || numDeleted)
+		LOGMYDEBUG(numDeleted << " packet(s) deleted -- list emptied");
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -220,9 +228,10 @@ AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
 {
 	if (!pAncData)
 		return AJA_STATUS_NULL;
-	else
-		m_ancList.remove(pAncData);	//	note:	there's no feedback as to whether one or more elements existed or not
-									//	note:	pAncData is NOT deleted!
+
+	m_ancList.remove(pAncData);	//	note:	there's no feedback as to whether one or more elements existed or not
+								//	note:	pAncData is NOT deleted!
+	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) remain after removing packet " << pAncData->AsString(16));
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -357,9 +366,8 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 		newAncData.Clear();
 		status = newAncData.InitWithReceivedData (pInputData, remainingSize, defaultLoc, packetSize);
 
-		//	NOTE:	Right now we're just bailing if there is a detected error in the raw data stream.
-		//			Theoretically one could try to get back "in sync" and recover any following data, but
-		//			we'll save that for another day...
+		//	NOTE:	Right now we bail if there's a detected error in the GUMP stream.
+		//	TODO:	Try to recover and process subsequent packets...
 		if (AJA_FAILURE(status))
 			break;
 		else
@@ -532,19 +540,34 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 	outPackets.Clear();
 
 	if (inFrameBuffer.IsNULL())
-		return AJA_STATUS_BAD_PARAM;
+	{
+		LOGMYERROR("AJA_STATUS_NULL: NULL frame buffer pointer");
+		return AJA_STATUS_NULL;
+	}
 	if (!inFormatDesc.IsValid())
+	{
+		LOGMYERROR("AJA_STATUS_BAD_PARAM: bad NTV2FormatDescriptor");
 		return AJA_STATUS_BAD_PARAM;
+	}
 	if (!inFormatDesc.IsVANC())
+	{
+		LOGMYERROR("AJA_STATUS_BAD_PARAM: format descriptor has no VANC lines");
 		return AJA_STATUS_BAD_PARAM;
+	}
 
 	const ULWord			vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
 	const NTV2PixelFormat	fbf			(inFormatDesc.GetPixelFormat());
 	const bool				isSD		(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()));
 	if (inFrameBuffer.GetByteCount() < vancBytes)
+	{
+		LOGMYERROR("AJA_STATUS_FAIL: " << inFrameBuffer.GetByteCount() << "-byte frame buffer smaller than " << vancBytes << "-byte VANC region");
 		return AJA_STATUS_FAIL;
+	}
 	if (fbf != NTV2_FBF_10BIT_YCBCR  &&  fbf != NTV2_FBF_8BIT_YCBCR)
+	{
+		LOGMYERROR("AJA_STATUS_UNSUPPORTED: frame buffer format " << ::NTV2FrameBufferFormatToString(fbf) << " not '2vuy' nor 'v210'");
 		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
+	}
 
 	for (ULWord line (0);  line < inFormatDesc.GetFirstActiveLine();  line++)
 	{
@@ -593,7 +616,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
 		}
 	}	//	for each VANC line
-	//cerr << "AJAAncillaryList::SetFromVANCData: returning " << DEC(outPackets.CountAncillaryData()) << " pkts:" << endl << outPackets << endl;
+	LOGMYDEBUG("returning " << DEC(outPackets.CountAncillaryData()) << " packets:" << endl << outPackets);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -717,15 +740,30 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const
 {
 	if (inFrameBuffer.IsNULL())
-		{LOGMYERROR("NULL frame buffer");  return AJA_STATUS_NULL;}
+	{
+		LOGMYERROR("AJA_STATUS_NULL: null frame buffer");
+		return AJA_STATUS_NULL;
+	}
 	if (!inFormatDesc.IsValid())
-		{LOGMYERROR("Invalid format descriptor");  return AJA_STATUS_BAD_PARAM;}
+	{
+		LOGMYERROR("AJA_STATUS_BAD_PARAM: Invalid format descriptor");
+		return AJA_STATUS_BAD_PARAM;
+	}
 	if (!inFormatDesc.IsVANC())
-		{LOGMYERROR("Not a VANC geometry");  return AJA_STATUS_BAD_PARAM;}
+	{
+		LOGMYERROR("AJA_STATUS_BAD_PARAM: Not a VANC geometry");
+		return AJA_STATUS_BAD_PARAM;
+	}
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR  &&  inFormatDesc.GetPixelFormat() != NTV2_FBF_8BIT_YCBCR)
-		{LOGMYERROR("Invalid pixel format: " << inFormatDesc);  return AJA_STATUS_UNSUPPORTED;}
+	{
+		LOGMYERROR("AJA_STATUS_UNSUPPORTED: unsupported pixel format: " << inFormatDesc);
+		return AJA_STATUS_UNSUPPORTED;
+	}
 	if (!CountAncillaryData())
-		{LOGMYWARN("List is empty");  return AJA_STATUS_SUCCESS;}
+	{
+		LOGMYWARN("List is empty");
+		return AJA_STATUS_SUCCESS;
+	}
 
 	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
 	const bool	isSD	(inFormatDesc.IsSDFormat());
@@ -858,8 +896,12 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 AJAStatus AJAAncillaryList::WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const
 {
 	if (inRTPBuffer.IsNULL())
+	{
+		LOGMYERROR("AJA_STATUS_NULL: null RTP buffer");
 		return AJA_STATUS_NULL;
+	}
 
+	LOGMYERROR("AJA_STATUS_UNSUPPORTED: WriteRTPPacket unimplemented");
 	return AJA_STATUS_UNSUPPORTED;
 }
 

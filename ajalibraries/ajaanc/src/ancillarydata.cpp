@@ -438,7 +438,7 @@ AJAStatus AJAAncillaryData::ParsePayloadData (void)
 
 
 //**********
-// Initializes the AJAAncillaryData object from "raw" ancillary data received from hardware (ingest)
+// Initializes the AJAAncillaryData object from "GUMP" data received from extractor (ingest)
 AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 													const uint32_t					inMaxBytes,
 													const AJAAncillaryDataLocation & inLocationInfo,
@@ -478,6 +478,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	if (pInData == NULL)
 	{
 		outPacketByteCount = 0;
+		LOGMYERROR("AJA_STATUS_NULL: NULL pointer");
 		return AJA_STATUS_NULL;
 	}
 
@@ -485,6 +486,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	if (inMaxBytes < AJAAncillaryDataWrapperSize)
 	{
 		outPacketByteCount = inMaxBytes;
+		LOGMYERROR("AJA_STATUS_RANGE: Buffer size " << inMaxBytes << " smaller than " << AJAAncillaryDataWrapperSize << " bytes");
 		return AJA_STATUS_RANGE;
 	}
 
@@ -493,6 +495,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	{
 		//	Let the caller try to resynchronize...
 		outPacketByteCount = 0;
+		LOGMYERROR("AJA_STATUS_BAD_PARAM: First GUMP byte " << xHEX0N(uint16_t(pInData[0]),2) << " is not 0xFF");
 		return AJA_STATUS_BAD_PARAM;
 	}
 
@@ -504,6 +507,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	if (totalSize > inMaxBytes)
 	{
 		outPacketByteCount = inMaxBytes;
+		LOGMYERROR("AJA_STATUS_RANGE: Reported packet size " << totalSize << " [bytes] extends past end of buffer " << inMaxBytes << " by " << (totalSize-inMaxBytes) << " byte(s)");
 		return AJA_STATUS_RANGE;
 	}
 
@@ -539,7 +543,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	}
 
 	outPacketByteCount = totalSize;
-
+	LOGMYDEBUG("Successfully set from packet data buffer: " << AsString(16) << (GetDC() > 16 ? "..." : ""));
 	return status;
 }
 
@@ -608,12 +612,25 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
 	// make sure the caller has allocated enough space to hold what we're going to generate
-	uint32_t myPacketSize;
+	uint32_t	myPacketSize	(0);
 	GetRawPacketSize(myPacketSize);
 
-	if (myPacketSize > inMaxBytes  ||  myPacketSize == 0)
+	if (myPacketSize == 0)
 	{
-		outPacketSize = 0;		// it won't fit: generate no data and return zero size
+		outPacketSize = 0;			//	Nothing to do
+		LOGMYERROR("AJA_STATUS_FAIL: nothing to do -- raw packet size is zero" << AsString(16) << (GetDC() > 16 ? "..." : ""));
+		return AJA_STATUS_FAIL;
+	}
+	if (myPacketSize > inMaxBytes)
+	{
+		outPacketSize = 0;			//	Won't fit: generate no data and return zero size
+		LOGMYERROR("AJA_STATUS_FAIL: " << inMaxBytes << "-byte client buffer too small to hold " << myPacketSize << " byte(s)" << AsString(16) << (GetDC() > 16 ? "..." : ""));
+		return AJA_STATUS_FAIL;
+	}
+	if (!IsDigital() && !IsRaw())	//	Coding not set: don't generate anything
+	{
+		outPacketSize = 0;
+		LOGMYERROR("AJA_STATUS_FAIL: invalid packet coding (neither Raw nor Digital)" << AsString(16) << (GetDC() > 16 ? "..." : ""));
 		return AJA_STATUS_FAIL;
 	}
 
@@ -685,12 +702,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		// all done!
 		outPacketSize = myPacketSize;
 	}
-	else	// huh? coding param not set - don't generate anything
-	{
-		outPacketSize = 0;
-		status = AJA_STATUS_FAIL;
-	}
-
+	LOGMYDEBUG(outPacketSize << " byte(s) generated" << AsString(16) << (GetDC() > 16 ? "..." : ""));
 	return status;
 }
 
@@ -748,9 +760,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 		outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(Calculate8BitChecksum()));	//	CS
 
 	if (AJA_SUCCESS(status))
-		LOGMYDEBUG("Appended " << (outRawComponents.size()-origSize) << " elements: " << AsString(16));
+		LOGMYDEBUG("Appended " << (outRawComponents.size()-origSize) << " elements: " << AsString(16) << (GetDC() > 16 ? "..." : ""));
 	else
-		LOGMYERROR("Failed: " << ::AJAStatusToString(status) << ": origSize=" << origSize << ", " << AsString(16));
+		LOGMYERROR("Failed: " << ::AJAStatusToString(status) << ": origSize=" << origSize << ", " << AsString(16) << (GetDC() > 16 ? "..." : ""));
 	return status;
 }
 
