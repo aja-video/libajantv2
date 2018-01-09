@@ -351,53 +351,55 @@ std::string CNTV2SupportLogger::ToString()
 {
     ostringstream oss;
 
-    if(mDevice.IsOpen())
+    vector<char> dateBufferLocal(128, 0);
+    vector<char> dateBufferUTC(128, 0);
+
+    // get the wall time and format it
+    time_t now = time(NULL);
+
+    struct tm *localTimeinfo;
+    localTimeinfo = localtime((const time_t*)&now);
+    strcpy(&dateBufferLocal[0], "");
+    if (localTimeinfo)
     {
-        vector<char> dateBufferLocal(128, 0);
-        vector<char> dateBufferUTC(128, 0);
+        ::strftime(&dateBufferLocal[0], dateBufferLocal.size(), "%B %d, %Y %I:%M:%S %p %Z (local)", localTimeinfo);
+    }
 
-        // get the wall time and format it
-        time_t now = time(NULL);
+    struct tm *utcTimeinfo;
+    utcTimeinfo = gmtime((const time_t*)&now);
+    strcpy(&dateBufferUTC[0], "");
+    if (utcTimeinfo)
+    {
+        ::strftime(&dateBufferUTC[0], dateBufferUTC.size(), "%Y-%m-%dT%H:%M:%SZ UTC", utcTimeinfo);
+    }
 
-        struct tm *localTimeinfo;
-        localTimeinfo = localtime((const time_t*)&now);
-        strcpy(&dateBufferLocal[0], "");
-        if (localTimeinfo)
-        {
-            ::strftime(&dateBufferLocal[0], dateBufferLocal.size(), "%B %d, %Y %I:%M:%S %p %Z (local)", localTimeinfo);
-        }
+    oss << "Begin NTV2 Support Log" << "\n" <<
+           "Version: "   << CNTV2SupportLogger::Version() << "\n"
+           "Generated: " << &dateBufferLocal[0] <<
+           "           " << &dateBufferUTC[0] << "\n\n" << flush;
 
-        struct tm *utcTimeinfo;
-        utcTimeinfo = gmtime((const time_t*)&now);
-        strcpy(&dateBufferUTC[0], "");
-        if (utcTimeinfo)
-        {
-            ::strftime(&dateBufferUTC[0], dateBufferUTC.size(), "%Y-%m-%dT%H:%M:%SZ UTC", utcTimeinfo);
-        }
+    if (mHeaderStr.empty() == false)
+    {
+        oss << mHeaderStr;
+    }
 
-        oss << "Begin NTV2 Support Log" << "\n" <<
-               "Version: "   << CNTV2SupportLogger::Version() << "\n"
-               "Generated: " << &dateBufferLocal[0] <<
-               "           " << &dateBufferUTC[0] << "\n\n" << flush;
+    // Go ahead and show info even if the device is not open
+    LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog);
 
-        if (mHeaderStr.empty() == false)
-        {
-            oss << mHeaderStr;
-        }
-
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog);
+    if (mDevice.IsOpen())
+    {
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAutoCirculate, "AutoCirculate", FetchAutoCirculateLog);
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudio, "Audio", FetchAudioLog);
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRouting, "Routing", FetchRoutingLog);
         LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisters, "Regs", FetchRegisterLog);
-
-        if (mFooterStr.empty() == false)
-        {
-            oss << mFooterStr;
-        }
-
-        oss << endl << "End NTV2 Support Log";
     }
+
+    if (mFooterStr.empty() == false)
+    {
+        oss << mFooterStr;
+    }
+
+    oss << endl << "End NTV2 Support Log";
 
     return oss.str();
 }
