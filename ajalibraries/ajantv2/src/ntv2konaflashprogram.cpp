@@ -384,13 +384,21 @@ bool CNTV2KonaFlashProgram::ParseHeader(char* headerAddress)
 		{
 			p += 4;							// now pointing at the beginning of the identifier
 		}
-
-		// make sure the sync word is what we expect
-		if ( strncmp(p, (const char*)signature, 8) != 0 )
-			break;
+		bool bFound = (strncmp(p, (const char*)signature, 8) == 0);
+		int i = 0;
+		while (bFound == false && i < 1000)
+		{
+			bFound = strncmp(p, (const char*)signature, 8) == 0;
+			// make sure the sync word is what we expect
+			if(!bFound)
+			{
+				p++;
+				i++;
+			}
+		}
 
 		// if we made it this far it must be an OK Header - and it is parsed
-		headerOK = true;
+		headerOK = bFound;
 
 	} while(0);
 
