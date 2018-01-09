@@ -116,6 +116,8 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b1wireQ4k			= (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
+
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
@@ -670,7 +672,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT3Out);
+			mCard->Connect (NTV2_XptDualLinkOut3Input, b1wireQ4k ? NTV2_Xpt4KDownConverterOutRGB : NTV2_XptLUT3Out);
 		}
 	}
 	else
@@ -700,7 +702,12 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// SDI Out 1
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+		if (b1wireQ4k)
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+		}
+        else if (bSdiOutRGB || bCh1HDR_RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, bQuadSwap ? NTV2_XptDuallinkOut3 : NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, bQuadSwap ? NTV2_XptDuallinkOut3DS2 : NTV2_XptDuallinkOut1DS2);
@@ -759,7 +766,12 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// SDI Out 2
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+		if (b1wireQ4k)
+		{
+			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+		}
+        else if (bSdiOutRGB || bCh1HDR_RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, bQuadSwap ?  NTV2_XptDuallinkOut4 : NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, bQuadSwap ?  NTV2_XptDuallinkOut4DS2 : NTV2_XptDuallinkOut2DS2);
@@ -817,7 +829,20 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+		if (b1wireQ4k)
+		{
+			if (bSdiOutRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt4KDownConverterOut);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			}
+		}
+        else if (bSdiOutRGB || bCh1HDR_RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, bQuadSwap ?  NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, bQuadSwap ?  NTV2_XptDuallinkOut1DS2 : NTV2_XptDuallinkOut3DS2);
@@ -928,7 +953,12 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+		if (b1wireQ4k)
+		{
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+		}
+        else if (bSdiOutRGB || bCh1HDR_RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_XptDuallinkOut2 : NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, bQuadSwap ? NTV2_XptDuallinkOut2DS2 : NTV2_XptDuallinkOut4DS2);
