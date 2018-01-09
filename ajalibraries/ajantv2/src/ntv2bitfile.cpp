@@ -261,18 +261,6 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 			p += 4;						// now pointing at the beginning of the identifier
 			pos += 4;
 		}
-		//Search for the start signature
-		bool bFound = (strncmp(p, (const char*)signature, 8) == 0);
-		int i = 0;
-		while (bFound == false && i < 1000)
-		{
-			bFound = strncmp(p, (const char*)signature, 8) == 0;
-			if(!bFound)
-			{
-				p++;
-				i++;
-			}
-		}
 
 		outPreambleSize = (int32_t) _fileHeader.size () - pos;
 
