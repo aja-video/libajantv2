@@ -875,7 +875,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord()
 			WaitForFlashNOTBusy();
 			uint32_t flashValue;
 			ReadRegister(kRegXenaxFlashDOUT,&flashValue);
-			flashValue = NTV2EndianSwap32(flashValue);
+			//flashValue = NTV2EndianSwap32(flashValue);
 
 			UWord dd = (flashValue & 0xff);
 			sprintf(&sRecord[index], "%02x", dd);
