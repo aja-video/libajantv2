@@ -20,7 +20,7 @@ using namespace std;
 // TODO: Handle compressed bit-files
 #define MAX_BITFILEHEADERSIZE 184
 #define BITFILE_SYNCWORD_SIZE 6
-
+static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static const unsigned char SyncWord[ BITFILE_SYNCWORD_SIZE ] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99};
 static const unsigned char Head13[] = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
@@ -453,7 +453,8 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
         case DEVICE_ID_IOIP_2022:       return "ioip_s2022";
         case DEVICE_ID_IOIP_2110:       return "ioip_s2110";
 		case DEVICE_ID_KONAALPHA:		return "kona_alpha";
-		default:
+        case DEVICE_ID_KONAHDMI:		return "kona_hdmi";
+        default:
 			break;
 	}
 	return "";
