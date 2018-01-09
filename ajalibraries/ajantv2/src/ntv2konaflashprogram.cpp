@@ -368,28 +368,12 @@ bool CNTV2KonaFlashProgram::ParseHeader(char* headerAddress)
 
 		_numBytes = htonl(*((uint32_t *)p));		// the next 4 bytes are the length of the raw program data
 
-		if ( _partName[0] == '5' || _partName[0] == '6' || _partName[0] == '7' || _partName[0] == 'x')
-		{
-			// still waiting for xilinx to explain this fully
-			if(_partName[0] == '5' || (_partName[0] == '6' && _partName[1] == 'v'))
-				p += 48;							// now pointing at the beginning of the identifier
-			else if(_partName[0] == '7' && _partName[1] == 'k')
-				p += 48;
-			else if(_partName[0] == 'x')
-				p += 80;
-			else
-				p += 16;
-		}
-		else
-		{
-			p += 4;							// now pointing at the beginning of the identifier
-		}
+		//Search for the start signature
 		bool bFound = (strncmp(p, (const char*)signature, 8) == 0);
 		int i = 0;
 		while (bFound == false && i < 1000)
 		{
 			bFound = strncmp(p, (const char*)signature, 8) == 0;
-			// make sure the sync word is what we expect
 			if(!bFound)
 			{
 				p++;
