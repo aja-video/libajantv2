@@ -557,10 +557,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
 		case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
         case DEVICE_ID_IOIP_2022:                   return "ioip_s2022";
         case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
-        case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
-        case DEVICE_ID_IOIP_2022:                   return "IO_IP_2022";
-        case DEVICE_ID_IOIP_2110:                   return "IO_IP_2110";
-		case DEVICE_ID_KONAIP_4TX_2110:				return "s2110_4tx";
+		case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
 		case DEVICE_ID_KONAALPHA:					return "kona_alpha.bit";
 		default: return "";
 	}
