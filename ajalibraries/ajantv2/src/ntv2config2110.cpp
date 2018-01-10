@@ -43,6 +43,7 @@ void tx_2110Config::init()
     ssrc           = 1000;
     numAudioChannels  = 0;
     firstAudioChannel = 0;
+    audioPacketInterval = PACKET_INTERVAL_125uS;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
@@ -58,7 +59,8 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
         (videoFormat     == other.videoFormat)    &&
         (videoSamples    == other.videoSamples)   &&
         (numAudioChannels == other.numAudioChannels) &&
-        (firstAudioChannel == other.firstAudioChannel))
+        (firstAudioChannel == other.firstAudioChannel) &&
+        (audioPacketInterval == other.audioPacketInterval))
     {
         return true;
     }
@@ -817,7 +819,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
         // audio setup 3190 packetizer
 
         uint32_t audioChans = txConfig.numAudioChannels;
-        uint32_t samples    = 6;
+        uint32_t samples    = (txConfig.audioPacketInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
         uint32_t plength    = audioChans * samples * 3;
 
         // audio select
@@ -873,6 +875,8 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
     // dest port
     ReadChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,&txConfig.remotePort);
+
+    // select packetizer
     uint32_t baseAddrPacketizer;
     SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
 
@@ -926,6 +930,11 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, NTV2S
 
         txConfig.firstAudioChannel = (aselect >> 16) & 0xff;
         txConfig.numAudioChannels  = (aselect & 0xff) + 1;
+
+        // packet interval
+        uint32_t samples;
+        mDevice.ReadRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, &samples);
+        txConfig.audioPacketInterval = (samples == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
     }
 
     return true;
