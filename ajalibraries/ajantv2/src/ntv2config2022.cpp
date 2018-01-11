@@ -455,6 +455,8 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         // hold off access while we update channel regs
         ChannelSemaphoreClear(kReg2022_6_rx_control, baseAddr);
 
+        SetRxMatch(channel,SFP_BOTTOM,0);       // disable while configuring
+
         // source ip address
         uint32_t sourceIp = inet_addr(rxConfig.secondarySourceIP.c_str());
         sourceIp = NTV2EndianSwap32(sourceIp);
@@ -510,6 +512,8 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 
     // hold off access while we update channel regs
     ChannelSemaphoreClear(kReg2022_6_rx_control, baseAddr);
+
+    SetRxMatch(channel,SFP_TOP,0);      // disable while configuring
 
     // source ip address
     uint32_t sourceIp = inet_addr(rxConfig.primarySourceIP.c_str());

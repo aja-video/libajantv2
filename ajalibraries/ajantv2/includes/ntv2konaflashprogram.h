@@ -23,7 +23,7 @@
 #include <netinet/in.h>	// htons and friends
 #endif
 
-#define MAXBITFILE_HEADERSIZE 256
+#define MAXBITFILE_HEADERSIZE 512
 #define MAXMCSINFOSIZE 256
 #define MAXMCSLICENSESIZE 256
 #define MCS_STEPS      6

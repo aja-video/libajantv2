@@ -5314,28 +5314,28 @@ typedef enum
 typedef enum
 {
 	regAncExt_FIRST,
-	regAncExtControl	=	regAncExt_FIRST,
-	regAncExtField1StartAddress,
-	regAncExtField1EndAddress,
-	regAncExtField2StartAddress,
-	regAncExtField2EndAddress,
-	regAncExtFieldCutoffLine,
-	regAncExtTotalStatus,
-	regAncExtField1Status,
-	regAncExtField2Status,
-	regAncExtFieldVBLStartLine,
-	regAncExtTotalFrameLines,
-	regAncExtFID,
-	regAncExtIgnorePacketReg_1_2_3_4,
-	regAncExtIgnorePacketReg_5_6_7_8,
-	regAncExtIgnorePacketReg_9_10_11_12,
-	regAncExtIgnorePacketReg_13_14_15_16,
-	regAncExtIgnorePacketReg_17_18_19_20,
-	regAncExtAnalogStartLine,
-	regAncExtField1AnalogYFilter,
-	regAncExtField2AnalogYFilter,
-	regAncExtField1AnalogCFilter,
-	regAncExtField2AnalogCFilter,
+	regAncExtControl	=	regAncExt_FIRST,	//	Reg 0 - Control register
+	regAncExtField1StartAddress,				//	Reg 1 - f1_start_address[31:0]
+	regAncExtField1EndAddress,					//	Reg 2 - f1_end_address[31:0]
+	regAncExtField2StartAddress,				//	Reg 3 - f2_start_addr[31:0]
+	regAncExtField2EndAddress,					//	Reg 4 - f2_end_address[31:0]
+	regAncExtFieldCutoffLine,					//	Reg 5 - f2_cutoff_line[10:0], f1_cutoff_line[10:0]
+	regAncExtTotalStatus,						//	Reg 6 - mem_sz_overrun, total_bytes[15:0]
+	regAncExtField1Status,						//	Reg 7 - mem_sz_overrun_f1, total_bytes_f1[15:0]
+	regAncExtField2Status,						//	Reg 8 - mem_sz_overrun_f2, total_bytes_f2[15:0]
+	regAncExtFieldVBLStartLine,					//	Reg 9 - f2_vbl_start[10:0], f1_vbl_start[10:0]
+	regAncExtTotalFrameLines,					//	Reg 10 - total_lines[10:0]
+	regAncExtFID,								//	Reg 11 - fid_low[10:0], fid_hi[10:0]
+	regAncExtIgnorePacketReg_1_2_3_4,			//	Reg 12 - Packet Ignore bytes
+	regAncExtIgnorePacketReg_5_6_7_8,			//	Reg 13 - Packet Ignore bytes
+	regAncExtIgnorePacketReg_9_10_11_12,		//	Reg 14 - Packet Ignore bytes
+	regAncExtIgnorePacketReg_13_14_15_16,		//	Reg 15 - Packet Ignore bytes
+	regAncExtIgnorePacketReg_17_18_19_20,		//	Reg 16 - Packet Ignore bytes
+	regAncExtAnalogStartLine,					//	Reg 17 - analog_start_line[10:0]
+	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[10:0]
+	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[10:0]
+	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[10:0]
+	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[10:0]
 	regAncExt_LAST
 } ANCExtRegisters;
 

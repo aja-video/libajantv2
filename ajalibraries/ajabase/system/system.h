@@ -44,5 +44,10 @@
 
 #endif
 
+// Common to all
+namespace aja
+{
+    AJA_EXPORT int reveal_file_in_file_manager(const std::string& filePath);
+}
 
 #endif

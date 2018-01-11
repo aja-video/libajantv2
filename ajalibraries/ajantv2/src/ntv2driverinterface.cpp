@@ -502,9 +502,11 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 				case DEVICE_ID_IO4KPLUS:					bitFileInfo.bitFileType = NTV2_BITFILE_IO4KPLUS_MAIN;				break;
                 case DEVICE_ID_IOIP_2022:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2022;					break;
                 case DEVICE_ID_IOIP_2110:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2110;					break;
-                case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;			break;
+				case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;			break;
+				case DEVICE_ID_KONA1:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAALPHA;					break;
                 case DEVICE_ID_KONAIP_2110:                 bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_2110;                 break;
-				case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
+                case DEVICE_ID_KONAHDMI:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAHDMI;					break;
+                case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 			#if !defined (_DEBUG)
 				default:					break;
 			#endif
@@ -793,17 +795,17 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 {
 	if (IsKonaIPDevice())
 	{
-        uint32_t val;
-        ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
-        if (val != 0x01)
-        {
-            //MB not ready
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+		uint32_t val;
+		ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
+		if (val != 0x01)
+		{
+			//MB not ready
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 	return false;
 }

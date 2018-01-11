@@ -20,7 +20,7 @@ using namespace std;
 // TODO: Handle compressed bit-files
 #define MAX_BITFILEHEADERSIZE 184
 #define BITFILE_SYNCWORD_SIZE 6
-
+static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static const unsigned char SyncWord[ BITFILE_SYNCWORD_SIZE ] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99};
 static const unsigned char Head13[] = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
@@ -427,31 +427,33 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 			case BOARD_ID_LHI_DVI:
 			case BOARD_ID_LHI_T:
 		#endif	//	!defined (NTV2_DEPRECATE)
-        case DEVICE_ID_NOTFOUND:        break;
-        case DEVICE_ID_CORVID1:         return "corvid1pcie";		//	top.ncd
-        case DEVICE_ID_CORVID3G:        return "corvid1_3Gpcie";	//	corvid1_3Gpcie
-        case DEVICE_ID_CORVID22:        return "top_c22";			//	top_c22.ncd
-        case DEVICE_ID_CORVID24:        return "corvid24_quad";		//	corvid24_quad.ncd
-        case DEVICE_ID_CORVID44:        return "corvid_44";			//	corvid_44
-        case DEVICE_ID_CORVID88:        return "corvid_88";			//	CORVID88
-        case DEVICE_ID_CORVIDHEVC:      return "corvid_hevc";       //	CORVIDHEVC
-        case DEVICE_ID_KONA3G:          return "K3G_top";			//	K3G_top.ncd
-        //case DEVICE_ID_KONA3G:        return "K3G_p2p";			//	K3G_p2p.ncd
-        case DEVICE_ID_KONA3GQUAD:      return "K3G_quad";			//	K3G_quad.ncd
+		case DEVICE_ID_NOTFOUND:	break;
+		case DEVICE_ID_CORVID1:		return "corvid1pcie";		//	top.ncd
+		case DEVICE_ID_CORVID3G:	return "corvid1_3Gpcie";	//	corvid1_3Gpcie
+		case DEVICE_ID_CORVID22:	return "top_c22";			//	top_c22.ncd
+		case DEVICE_ID_CORVID24:	return "corvid24_quad";		//	corvid24_quad.ncd
+		case DEVICE_ID_CORVID44:	return "corvid_44";			//	corvid_44
+		case DEVICE_ID_CORVID88:	return "corvid_88";			//	CORVID88
+		case DEVICE_ID_CORVIDHEVC:  return "corvid_hevc";       //	CORVIDHEVC
+		case DEVICE_ID_KONA3G:		return "K3G_top";			//	K3G_top.ncd
+		//case DEVICE_ID_KONA3G:	return "K3G_p2p";			//	K3G_p2p.ncd
+		case DEVICE_ID_KONA3GQUAD:	return "K3G_quad";			//	K3G_quad.ncd
         //case DEVICE_ID_KONA3GQUAD:    return "K3G_quad_p2p";		//	K3G_quad_p2p.ncd
-        case DEVICE_ID_KONA4:           return "kona_4_quad";		//	kona_4_quad
-        case DEVICE_ID_KONA4UFC:        return "kona_4_ufc";		//	kona_4_ufc
-        case DEVICE_ID_IO4K:            return "IO_XT_4K";			//	IO_XT_4K
-        case DEVICE_ID_IO4KUFC:         return "IO_XT_4K_UFC";		//	IO_XT_4K_UFC
-        case DEVICE_ID_IOEXPRESS:       return "chekov_00_pcie";	//	chekov_00_pcie.ncd
-        case DEVICE_ID_IOXT:            return "top_IO_TX";			//	top_IO_TX.ncd
-        case DEVICE_ID_LHE_PLUS:        return "lhe_12_pcie";		//	lhe_12_pcie.ncd
-        case DEVICE_ID_LHI:             return "top_pike";			//	top_pike.ncd
-        case DEVICE_ID_TTAP:            return "t_tap_top";			//	t_tap_top.ncd
-        case DEVICE_ID_CORVIDHBR:       return "corvid_hb_r";		//	corvidhb-r
+		case DEVICE_ID_KONA4:		return "kona_4_quad";		//	kona_4_quad
+		case DEVICE_ID_KONA4UFC:	return "kona_4_ufc";		//	kona_4_ufc
+		case DEVICE_ID_IO4K:		return "IO_XT_4K";			//	IO_XT_4K
+		case DEVICE_ID_IO4KUFC:		return "IO_XT_4K_UFC";		//	IO_XT_4K_UFC
+		case DEVICE_ID_IOEXPRESS:	return "chekov_00_pcie";	//	chekov_00_pcie.ncd
+		case DEVICE_ID_IOXT:		return "top_IO_TX";			//	top_IO_TX.ncd
+		case DEVICE_ID_LHE_PLUS:	return "lhe_12_pcie";		//	lhe_12_pcie.ncd
+		case DEVICE_ID_LHI:			return "top_pike";			//	top_pike.ncd
+		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
+		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
         case DEVICE_ID_IO4KPLUS:        return "io4kp";
         case DEVICE_ID_IOIP_2022:       return "ioip_s2022";
         case DEVICE_ID_IOIP_2110:       return "ioip_s2110";
+		case DEVICE_ID_KONA1:		return "kona_alpha";
+        case DEVICE_ID_KONAHDMI:		return "kona_hdmi";
         default:
 			break;
 	}
@@ -467,28 +469,28 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
 	switch (inDeviceID)
 	{
-        case DEVICE_ID_CORVID44:        return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44) == _designName
+		case DEVICE_ID_CORVID44:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44) == _designName
 											|| _designName == "corvid_446";	//	Corvid 446
-        case DEVICE_ID_KONA3GQUAD:      return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA3G) == _designName
+		case DEVICE_ID_KONA3GQUAD:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA3G) == _designName
 											|| _designName == "K3G_quad_p2p";	//	K3G_quad_p2p.ncd
-        case DEVICE_ID_KONA3G:          return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA3GQUAD) == _designName
+		case DEVICE_ID_KONA3G:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA3GQUAD) == _designName
 											|| _designName == "K3G_p2p";		//	K3G_p2p.ncd
 
-        case DEVICE_ID_KONA4:           return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA4UFC) == _designName;
-        case DEVICE_ID_KONA4UFC:        return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA4) == _designName;
+		case DEVICE_ID_KONA4:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA4UFC) == _designName;
+		case DEVICE_ID_KONA4UFC:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA4) == _designName;
 
-        case DEVICE_ID_IO4K:            return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_IO4KUFC) == _designName;
-        case DEVICE_ID_IO4KUFC:         return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_IO4K) == _designName;
+		case DEVICE_ID_IO4K:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_IO4KUFC) == _designName;
+		case DEVICE_ID_IO4KUFC:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_IO4K) == _designName;
 
-        case DEVICE_ID_CORVID88:        return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVID88) == _designName
+		case DEVICE_ID_CORVID88:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVID88) == _designName
 											|| _designName == "CORVID88"
 											|| _designName == "corvid88_top";
-        case DEVICE_ID_CORVIDHBR:       return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVIDHBR) == _designName
+		case DEVICE_ID_CORVIDHBR:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVIDHBR) == _designName
 											|| _designName == "ZARTAN";
 		case DEVICE_ID_IO4KPLUS:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == _designName;
         case DEVICE_ID_IOIP_2022:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == _designName;
         case DEVICE_ID_IOIP_2110:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
-        default:                        break;
+		default:					break;
 	}
 	return false;
 }

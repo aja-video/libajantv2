@@ -546,18 +546,20 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_IOEXPRESS:					return "chekov_00_pcie";            //	chekov_00_pcie.ncd
         case DEVICE_ID_IOXT:						return "top_IO_TX";                 //	top_IO_TX.ncd
         case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie";               //	lhe_12_pcie.ncd
-        case DEVICE_ID_LHI:							return "top_pike";                  //	top_pike.ncd
+        case DEVICE_ID_LHI:						return "top_pike";                  //	top_pike.ncd
         case DEVICE_ID_TTAP:						return "t_tap_top";                 //	t_tap_top.ncd
-        case DEVICE_ID_KONAIP_2022:                 return "s2022_56_4ch_rxtx";         //	konaip22
-        case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx";
-        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx";
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx_mb";
-        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:			return "s2022_12_2ch_rx_mb";
-        case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx";
-		case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
-        case DEVICE_ID_IOIP_2022:                   return "ioip_s2022";
-        case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
-        case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
-		default: return "";
+        case DEVICE_ID_KONAIP_2022:                                     return "s2022_56_4ch_rxtx";         //	konaip22
+        case DEVICE_ID_KONAIP_4CH_2SFP:                                 return "s2022_56_2p2ch_rxtx";
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:                         return "s2022_12_1rx_1tx";
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:                             return "s2022_12_2ch_tx_mb";
+        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:                             return "s2022_12_2ch_rx_mb";
+        case DEVICE_ID_KONAIP_1RX_1TX_2110:                             return "s2110_1rx_1tx";
+        case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
+        case DEVICE_ID_IOIP_2022:                                       return "ioip_s2022";
+        case DEVICE_ID_IOIP_2110:                                       return "ioip_s2110";
+        case DEVICE_ID_KONAIP_2110:                                     return "s2110_4tx";
+        case DEVICE_ID_KONA1:					return "kona_alpha";
+        case DEVICE_ID_KONAHDMI:					return "kona_hdmi";
+        default: return "";
 	}
 }

@@ -39,6 +39,12 @@
 #define PLL_CONFIG_PTP                  BIT(1)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
 
+enum NTV2PacketInterval
+{
+    PACKET_INTERVAL_125uS,
+    PACKET_INTERVAL_1mS
+};
+
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
@@ -64,10 +70,11 @@ public:
     NTV2VideoFormat videoFormat;
     VPIDSampling videoSamples;
     uint32_t     pktsPerLine;    // read-only
-    uint32_t     payloadLen;     // read0only
+    uint32_t     payloadLen;     // read-only
     uint32_t     lastPayLoadLen; // read-only
     uint8_t      numAudioChannels;
     uint8_t      firstAudioChannel;
+    NTV2PacketInterval audioPacketInterval;
 };
 
 /**
