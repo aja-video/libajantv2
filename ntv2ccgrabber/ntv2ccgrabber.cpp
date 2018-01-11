@@ -286,7 +286,11 @@ AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 				<< "' cannot grab captions from '" << ::NTV2InputSourceToString (mInputSource) << "'" << endl;
 		return AJA_STATUS_FAIL;
 	}
-	NTV2_ASSERT (NTV2_INPUT_SOURCE_IS_SDI (mInputSource));	//	CCGrabber is SDI only
+	if (NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+	{
+		cerr	<< "## ERROR:  Input '" << ::NTV2InputSourceToString (mInputSource) << "' not SDI" << endl;
+		return AJA_STATUS_FAIL;
+	}
 
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))												//	If device has bidirectional SDI (Io4K, Corvid24, etc.)...
 		if (mDevice.GetSDITransmitEnable (::NTV2InputSourceToChannel (mInputSource), isTransmit))	//	...and GetSDITransmitEnable succeeds...
