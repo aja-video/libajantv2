@@ -6671,6 +6671,9 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		case NTV2_Wgt12GSDIOut3:			return inCompactDisplay ? "12GSDIOut3"		: "NTV2_Wgt12GSDIOut3";
 		case NTV2_Wgt12GSDIOut4:			return inCompactDisplay ? "12GSDIOut4"		: "NTV2_Wgt12GSDIOut4";
 		case NTV2_WgtHDMIIn1v4:				return inCompactDisplay ? "HDMIv4In1"		: "NTV2_WgtHDMIIn1v4";
+		case NTV2_WgtHDMIIn2v4:				return inCompactDisplay ? "HDMIv4In2"		: "NTV2_WgtHDMIIn2v4";
+		case NTV2_WgtHDMIIn3v4:				return inCompactDisplay ? "HDMIv4In3"		: "NTV2_WgtHDMIIn3v4";
+		case NTV2_WgtHDMIIn4v4:				return inCompactDisplay ? "HDMIv4In4"		: "NTV2_WgtHDMIIn4v4";
 		case NTV2_WgtHDMIOut1v4:			return inCompactDisplay ? "HDMIv4Out1"		: "NTV2_WgtHDMIOut1v4";
 		case NTV2_WgtModuleTypeCount:		return inCompactDisplay ? "???"				: "???";
 	}
@@ -7265,17 +7268,20 @@ string NTV2ReferenceSourceToString (const NTV2ReferenceSource inValue, const boo
 		case NTV2_REFERENCE_INPUT2:			return inForRetailDisplay ? "Input 2"		: "NTV2_REFERENCE_INPUT2";
 		case NTV2_REFERENCE_FREERUN:		return inForRetailDisplay ? "Free Run"		: "NTV2_REFERENCE_FREERUN";
 		case NTV2_REFERENCE_ANALOG_INPUT:	return inForRetailDisplay ? "Analog In"		: "NTV2_REFERENCE_ANALOG_INPUT";
-		case NTV2_REFERENCE_HDMI_INPUT:		return inForRetailDisplay ? "HDMI In"		: "NTV2_REFERENCE_HDMI_INPUT";
+		case NTV2_REFERENCE_HDMI_INPUT:		return inForRetailDisplay ? "HDMI In 1"		: "NTV2_REFERENCE_HDMI_INPUT";
 		case NTV2_REFERENCE_INPUT3:			return inForRetailDisplay ? "Input 3"		: "NTV2_REFERENCE_INPUT3";
 		case NTV2_REFERENCE_INPUT4:			return inForRetailDisplay ? "Input 4"		: "NTV2_REFERENCE_INPUT4";
 		case NTV2_REFERENCE_INPUT5:			return inForRetailDisplay ? "Input 5"		: "NTV2_REFERENCE_INPUT5";
 		case NTV2_REFERENCE_INPUT6:			return inForRetailDisplay ? "Input 6"		: "NTV2_REFERENCE_INPUT6";
 		case NTV2_REFERENCE_INPUT7:			return inForRetailDisplay ? "Input 7"		: "NTV2_REFERENCE_INPUT7";
 		case NTV2_REFERENCE_INPUT8:			return inForRetailDisplay ? "Input 8"		: "NTV2_REFERENCE_INPUT8";
-		case NTV2_REFERENCE_SFP1_PCR:		return inForRetailDisplay ? "SFP 1 PCR"		: "NTV2_REFERENCE_SFP1 PCR";
-		case NTV2_REFERENCE_SFP1_PTP:		return inForRetailDisplay ? "SFP 1 PTP"		: "NTV2_REFERENCE_SFP1 PTP";
-		case NTV2_REFERENCE_SFP2_PCR:		return inForRetailDisplay ? "SFP 2 PCR"		: "NTV2_REFERENCE_SFP2 PCR";
-		case NTV2_REFERENCE_SFP2_PTP:		return inForRetailDisplay ? "SFP 2 PTP"		: "NTV2_REFERENCE_SFP2 PTP";
+		case NTV2_REFERENCE_SFP1_PCR:		return inForRetailDisplay ? "SFP 1 PCR"		: "NTV2_REFERENCE_SFP1_PCR";
+		case NTV2_REFERENCE_SFP1_PTP:		return inForRetailDisplay ? "SFP 1 PTP"		: "NTV2_REFERENCE_SFP1_PTP";
+		case NTV2_REFERENCE_SFP2_PCR:		return inForRetailDisplay ? "SFP 2 PCR"		: "NTV2_REFERENCE_SFP2_PCR";
+		case NTV2_REFERENCE_SFP2_PTP:		return inForRetailDisplay ? "SFP 2 PTP"		: "NTV2_REFERENCE_SFP2_PTP";
+		case NTV2_REFERENCE_HDMI_INPUT2:	return inForRetailDisplay ? "HDMI In 2"		: "NTV2_REFERENCE_HDMI_INPUT2";
+		case NTV2_REFERENCE_HDMI_INPUT3:	return inForRetailDisplay ? "HDMI In 3"		: "NTV2_REFERENCE_HDMI_INPUT3";
+		case NTV2_REFERENCE_HDMI_INPUT4:	return inForRetailDisplay ? "HDMI In 4"		: "NTV2_REFERENCE_HDMI_INPUT4";
 		case NTV2_NUM_REFERENCE_INPUTS:		break;
 	}
 	return string ();
