@@ -424,32 +424,36 @@ private:
 	void SetupAncInsExt(void)
 	{
 		static const string	AncExtRegNames []	=	{	"Control",				"F1 Start Address",		"F1 End Address",
-			"F2 Start Address",		"F2 End Address",		"Field Cutoff Lines",
-			"Memory Total",			"F1 Memory Usage",		"F2 Memory Usage",
-			"V Blank Lines",		"Lines Per Frame",		"Field ID Lines",
-			"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
-			"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
-			"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-			"Analog F2 C Filter"	};
+														"F2 Start Address",		"F2 End Address",		"Field Cutoff Lines",
+														"Memory Total",			"F1 Memory Usage",		"F2 Memory Usage",
+														"V Blank Lines",		"Lines Per Frame",		"Field ID Lines",
+														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
+														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
+														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
+														"Analog F2 C Filter"	};
 		static const string	AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
-			"F2 Start Address",		"Pixel Delays",			"First Active Lines",
-			"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
-			"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
-			"F1 C Blanking Mask",	"F2 C Blanking Mask"	};
+														"F2 Start Address",		"Pixel Delays",			"First Active Lines",
+														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
+														"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
+														"F1 C Blanking Mask",	"F2 C Blanking Mask"	};
 		static const uint32_t	AncExtPerChlRegBase []	=	{	0x1000,	0x1040,	0x1080,	0x10C0,	0x1100,	0x1140,	0x1180,	0x11C0	};
 		static const uint32_t	AncInsPerChlRegBase []	=	{	0x1200,	0x1240,	0x1280,	0x12C0,	0x1300,	0x1340,	0x1380,	0x13C0	};
 		
 		for (ULWord offsetNdx (0);  offsetNdx < 8;  offsetNdx++)
 		{
-			for (ULWord reg (regAncExtControl);  reg < regAncExt_LAST;  reg++)
+			for (ULWord reg(regAncExtControl);  reg < regAncExt_LAST;  reg++)
 			{
 				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " " << AncExtRegNames[reg];
-				DefineRegName (AncExtPerChlRegBase [offsetNdx] + reg,	oss.str());
+				DefineRegName (AncExtPerChlRegBase[offsetNdx] + reg,	oss.str());
 			}
-			for (ULWord reg (regAncInsFieldBytes);  reg < regAncIns_LAST;  reg++)
+			{
+				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " Active Line Length";
+				DefineRegName (AncExtPerChlRegBase[offsetNdx] + 27,	oss.str());
+			}
+			for (ULWord reg(regAncInsFieldBytes);  reg < regAncIns_LAST;  reg++)
 			{
 				ostringstream	oss;	oss << "Insert " << (offsetNdx+1) << " " << AncInsRegNames[reg];
-				DefineRegName (AncInsPerChlRegBase [offsetNdx] + reg,	oss.str());
+				DefineRegName (AncInsPerChlRegBase[offsetNdx] + reg,	oss.str());
 			}
 		}
 		for (ULWord ndx (0);  ndx < 8;  ndx++)
@@ -476,6 +480,7 @@ private:
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogYFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1AnalogCFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogCFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtControl + 27,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldBytes,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsControl,						"",	mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
