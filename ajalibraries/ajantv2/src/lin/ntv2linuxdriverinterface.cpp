@@ -913,6 +913,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = pFrameBuffer;
 	if (bRead)
@@ -1752,6 +1753,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer(NTV2DMAEngine DMAEngin
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
     dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
     dmaControlBuf.frameOffsetSrc = 0;
@@ -1796,6 +1798,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer(NTV2DMAEngine DMAEngin
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
     dmaControlBuf.frameOffsetSrc = offsetSrc;
@@ -1840,6 +1843,7 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
     dmaControlBuf.frameOffsetSrc = 0;
@@ -1893,6 +1897,7 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
     dmaControlBuf.frameOffsetSrc = offsetSrc;
@@ -1937,6 +1942,7 @@ CNTV2LinuxDriverInterface::DmaWriteWithOffsets(
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = pFrameBuffer;
     dmaControlBuf.frameOffsetSrc = offsetSrc;
@@ -1994,6 +2000,7 @@ CNTV2LinuxDriverInterface::DmaReadWithOffsets(
     NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 
     dmaControlBuf.engine = DMAEngine;
+	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
     dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = pFrameBuffer;
     dmaControlBuf.frameOffsetSrc = offsetSrc;
