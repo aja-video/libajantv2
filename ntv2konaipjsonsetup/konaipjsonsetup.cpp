@@ -239,6 +239,18 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << transmitStruct.mPktsPerLine.toStdString() << endl;
 
+        transmitStruct.mNumAudioChannels = transmitChannelObject["numAudioChannels"].toString();
+        if (!transmitStruct.mNumAudioChannels.isEmpty())
+            cout << "Number of Audio Channels " << transmitStruct.mNumAudioChannels.toStdString() << endl;
+
+        transmitStruct.mFirstAudioChannel = transmitChannelObject["firstAudioChannel"].toString();
+        if (!transmitStruct.mFirstAudioChannel.isEmpty())
+            cout << "First Audio Channel " << transmitStruct.mFirstAudioChannel.toStdString() << endl;
+
+        transmitStruct.mAudioPktInterval = transmitChannelObject["audioPktInterval"].toString();
+        if (!transmitStruct.mAudioPktInterval.isEmpty())
+            cout << "Audio Packet Interval " << transmitStruct.mAudioPktInterval.toStdString() << endl;
+
         transmitStruct.mLinkAEnable = transmitChannelObject["LinkAEnable"].toString();
         if (!transmitStruct.mLinkAEnable.isEmpty())
             cout << "Link A Enable " << transmitStruct.mLinkAEnable.toStdString() << endl;
@@ -605,7 +617,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         ReceiveStruct receive = receiveIter.next();
 
         bool ok;
-        NTV2Channel channel          = getChannel(receive.mChannelDesignator);
+        NTV2Channel channel = getChannel(receive.mChannelDesignator);
         NTV2Stream stream;
         if (receive.mStream == "audio1")
         {
@@ -688,6 +700,13 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
+        if (!transmit.mNumAudioChannels.isEmpty())
+            txChannelConfig.numAudioChannels  = transmit.mNumAudioChannels.toUInt();
+        if (!transmit.mFirstAudioChannel.isEmpty())
+            txChannelConfig.firstAudioChannel = transmit.mFirstAudioChannel.toUInt();
+        if (!transmit.mAudioPktInterval.isEmpty())
+            txChannelConfig.audioPacketInterval = (transmit.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
+
         if (!transmit.mPayloadLen.isEmpty())
             txChannelConfig.payloadLen = transmit.mPayloadLen.toUInt();
         if (!transmit.mLastPayloadLen.isEmpty())
@@ -696,10 +715,31 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             txChannelConfig.pktsPerLine = transmit.mPktsPerLine.toUInt();
 
         NTV2Stream stream;
-        if (transmit.mStream == "audio1")
-            stream = NTV2_AUDIO1_STREAM;
-        else
+        if (transmit.mStream == "video")
+        {
             stream = NTV2_VIDEO_STREAM;
+        }
+        else if (transmit.mStream == "audio1")
+        {
+            stream = NTV2_AUDIO1_STREAM;
+        }
+        else if (transmit.mStream == "audio2")
+        {
+            stream = NTV2_AUDIO2_STREAM;
+        }
+        else if (transmit.mStream == "audio3")
+        {
+            stream = NTV2_AUDIO3_STREAM;
+        }
+        else if (transmit.mStream == "audio4")
+        {
+            stream = NTV2_AUDIO4_STREAM;
+        }
+        else
+        {
+            cout << "Error: Tx stream <" << transmit.mStream.toStdString() << "> is invalid" << endl;
+            continue;
+        }
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
         config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
