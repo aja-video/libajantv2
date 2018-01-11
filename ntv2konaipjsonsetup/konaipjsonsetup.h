@@ -66,6 +66,7 @@ typedef struct
     QString mPktsPerLine;
     QString mNumAudioChannels;
     QString mFirstAudioChannel;
+    QString mAudioPktInterval;
 }TransmitStruct;
 
 typedef  struct {

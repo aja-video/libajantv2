@@ -30,6 +30,7 @@
             "ssrc":"1000",
             "numAudioChannels":"4",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"1000",
             "Enable":"true"
         },
         {
@@ -42,6 +43,7 @@
             "ssrc":"1000",
             "numAudioChannels":"4",
             "firstAudioChannel":"4",
+            "audioPktInterval" :"1000",
             "Enable":"true"
         },
         {
@@ -54,6 +56,7 @@
             "ssrc":"1000",
             "numAudioChannels":"8",
             "firstAudioChannel":"8",
+            "audioPktInterval" :"125",
             "Enable":"true"
         },
         {
@@ -66,6 +69,7 @@
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"125",
             "Enable":"true"
         },
         {
@@ -89,6 +93,7 @@
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"125",
             "Enable":"true"
         },
         {
@@ -112,6 +117,7 @@
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"125",
             "Enable":"true"
         },
         {
@@ -135,6 +141,7 @@
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"125",
             "Enable":"true"
         }
     ]

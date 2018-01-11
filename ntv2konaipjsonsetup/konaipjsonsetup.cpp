@@ -247,6 +247,10 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mFirstAudioChannel.isEmpty())
             cout << "First Audio Channel " << transmitStruct.mFirstAudioChannel.toStdString() << endl;
 
+        transmitStruct.mAudioPktInterval = transmitChannelObject["audioPktInterval"].toString();
+        if (!transmitStruct.mAudioPktInterval.isEmpty())
+            cout << "Audio Packet Interval " << transmitStruct.mAudioPktInterval.toStdString() << endl;
+
         transmitStruct.mLinkAEnable = transmitChannelObject["LinkAEnable"].toString();
         if (!transmitStruct.mLinkAEnable.isEmpty())
             cout << "Link A Enable " << transmitStruct.mLinkAEnable.toStdString() << endl;
@@ -700,6 +704,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             txChannelConfig.numAudioChannels  = transmit.mNumAudioChannels.toUInt();
         if (!transmit.mFirstAudioChannel.isEmpty())
             txChannelConfig.firstAudioChannel = transmit.mFirstAudioChannel.toUInt();
+        if (!transmit.mAudioPktInterval.isEmpty())
+            txChannelConfig.audioPacketInterval = (transmit.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
 
         if (!transmit.mPayloadLen.isEmpty())
             txChannelConfig.payloadLen = transmit.mPayloadLen.toUInt();

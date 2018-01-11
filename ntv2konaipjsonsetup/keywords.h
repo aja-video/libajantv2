@@ -57,6 +57,9 @@ videoFormat                               x     format string (e.g. NTV2_FORMAT_
 payloadLen                                x     decimal number (expert use only) \n  \
 lastPayloadLen                            x     decimal number (expert use only) \n  \
 pktsPerLine                               x     decimal number (expert use only) \n  \
+numAudioChannels                          *     decimal number 1-16 \n \
+firstAudioChannel                         *     decimal number 0-15 \n \
+audioPktInterval                          *     decimal number 125 or 1000 (microseconds) \n \
 Enable                    x      x        x     true | false \n  \
 ";
 
