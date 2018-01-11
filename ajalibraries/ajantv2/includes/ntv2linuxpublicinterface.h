@@ -187,22 +187,24 @@ typedef struct {
 // Structure used to request a DMA transfer
 typedef struct
 {
-  NTV2DMAEngine	   engine;
-  ULWord           frameNumber;      // 0-NUM_FRAMEBUFFERS-1
-  PULWord          frameBuffer;      // if small integer, then interpreted as DMA driver buffer # in
-									 //    driver(i.e. GetDMABufferAddress)
-  ULWord           frameOffsetSrc;   // For Audio DMA, we want to write from a specific location within the 'frame'
-  ULWord           frameOffsetDest;  // For Audio DMA, we want to write to a specific location within the 'frame'
-  ULWord           numBytes;         // number of bytes to transfer
-  ULWord           downSample;       // applies only to KHD, used for 1/4 size preview
-  ULWord           linePitch;        // applies only if downSample true, gets every linePitch lines
-  ULWord           poll;             // if poll = true it doesn't block, needs to be checked manually
+	NTV2DMAEngine	 engine;
+	NTV2Channel      dmaChannel;
+	ULWord           frameNumber;      // 0-NUM_FRAMEBUFFERS-1
+	PULWord          frameBuffer;      // if small integer, then interpreted as DMA driver buffer # in
+	//    driver(i.e. GetDMABufferAddress)
+	ULWord           frameOffsetSrc;   // For Audio DMA, we want to write from a specific location within the 'frame'
+	ULWord           frameOffsetDest;  // For Audio DMA, we want to write to a specific location within the 'frame'
+	ULWord           numBytes;         // number of bytes to transfer
+	ULWord           downSample;       // applies only to KHD, used for 1/4 size preview
+	ULWord           linePitch;        // applies only if downSample true, gets every linePitch lines
+	ULWord           poll;             // if poll = true it doesn't block, needs to be checked manually
 } NTV2_DMA_CONTROL_STRUCT, *P_NTV2_DMA_CONTROL_STRUCT;
 
 // Structure used to request a DMA transfer
 typedef struct
 {
 	NTV2DMAEngine    engine;
+	NTV2Channel      dmaChannel;
 	ULWord           frameNumber;      // 0-NUM_FRAMEBUFFERS-1
 	PULWord          frameBuffer;      // if small integer, then interpreted as DMA driver buffer # in
 	//    driver(i.e. GetDMABufferAddress)
