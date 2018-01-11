@@ -438,13 +438,6 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 }	//	AddReceivedAncillaryData
 
 
-AJAStatus AJAAncillaryList::AppendReceivedRTPAncillaryData (const std::vector<uint32_t> & inRTPPacketData)
-{
-	(void) inRTPPacketData;		//	TODO:	FINISH THIS
-	return AJA_STATUS_UNSUPPORTED;
-}
-
-
 static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
 											const vector<uint16_t> &		inPacketWords,
 											const AJAAncillaryDataLocation	inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A,
@@ -618,6 +611,35 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 	}	//	for each VANC line
 	LOGMYDEBUG("returning " << DEC(outPackets.CountAncillaryData()) << " packets:" << endl << outPackets);
 	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus AJAAncillaryList::SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffer,
+											const NTV2_POINTER & inF2AncBuffer,
+											AJAAncillaryList & outPackets)
+{
+	AJAStatus	result	(AJA_STATUS_SUCCESS);
+	outPackets.Clear();
+	if (!inF1AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
+		result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF1AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
+	if (!inF2AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
+		result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF2AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
+	return result;
+}
+
+
+AJAStatus AJAAncillaryList::SetFromIPAncData (const NTV2_POINTER & inRTPAncBuffer,
+											AJAAncillaryList & outPackets)
+{
+	outPackets.Clear();
+	if (inRTPAncBuffer.IsNULL())
+	{
+		LOGMYWARN("AJA_STATUS_NULL: empty/null RTP anc buffer");
+		return AJA_STATUS_NULL;
+	}
+	LOGMYERROR("AJA_STATUS_UNSUPPORTED: unimplemented");
+	return AJA_STATUS_UNSUPPORTED;
+//	return outPackets.AppendReceivedRTPAncillaryData (reinterpret_cast <const uint32_t *> (inRTPAncBuffer.GetHostPointer()), inRTPAncBuffer.GetByteCount());
 }
 
 
@@ -893,15 +915,15 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 }	//	WriteVANCData
 
 
-AJAStatus AJAAncillaryList::WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const
+AJAStatus AJAAncillaryList::WriteRTPAncData (NTV2_POINTER & inRTPBuffer) const
 {
 	if (inRTPBuffer.IsNULL())
 	{
-		LOGMYERROR("AJA_STATUS_NULL: null RTP buffer");
+		LOGMYERROR("AJA_STATUS_NULL: null/empty destination buffer");
 		return AJA_STATUS_NULL;
 	}
 
-	LOGMYERROR("AJA_STATUS_UNSUPPORTED: WriteRTPPacket unimplemented");
+	LOGMYERROR("AJA_STATUS_UNSUPPORTED: unimplemented");
 	return AJA_STATUS_UNSUPPORTED;
 }
 

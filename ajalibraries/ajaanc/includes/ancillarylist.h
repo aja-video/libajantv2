@@ -33,17 +33,18 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 				<b>Transmit:</b> Put My Packets Into Other Buffer Destinations
 				-	Call AJAAncillaryList::AddAncillaryData for each packet to be added to me.
 				-	For AJA hardware, it's best to call AJAAncillaryList::SortListByLocation before sending it to another buffer.
-				-	There is no method yet for encoding packets into a "tall" or "taller" VANC frame geometry.
-				-	For newer devices with Anc inserters, call AJAAncillaryList::GetAncillaryDataTransmitData to fill the Anc buffer
-					used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call (see \ref ancgumpformat).
+				-	For encoding into a "tall" or "taller" VANC frame buffer, call AJAAncillaryList::WriteVANCData.
+				-	To fill the Anc buffer used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers function,
+					-	call AJAAncillaryList::GetAncillaryDataTransmitData for SDI (see \ref ancgumpformat).
+					-	call AJAAncillaryList::WriteRTPAncData for IP/RTP.
 
 				<b>Receive:</b> Create Packet List(s) From Other Buffer Sources
 				-	For a "tall" or "taller" VANC frame geometry, call the AJAAncillaryList::SetFromVANCData class method,
 					passing it an NTV2_POINTER that references the frame buffer, and an NTV2FormatDescriptor that describes the raster.
 					It will return two packet lists.
-				-	For newer devices with Anc extractors, call AJAAncillaryList::AddReceivedAncillaryData (SDI devices) or
-					AJAAncillaryList::AppendReceivedRTPAncillaryData (IP devices), passing it the buffer used in the
-					AUTOCIRCULATE_TRANSFER::SetAncBuffers call. (Buffers on SDI devices will use \ref ancgumpformat).
+				-	For newer devices with Anc extractors, using the buffer(s) used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call...
+					-	call AJAAncillaryList::SetFromSDIAncData for SDI (use \ref ancgumpformat);
+					-	call AJAAncillaryList::SetFromIPAncData for IP/RTP.
 
 	@note		I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
@@ -63,6 +64,26 @@ public:	//	CLASS METHODS
 	**/
 	static AJAStatus						SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 															const NTV2FormatDescriptor & inFormatDesc,
+															AJAAncillaryList & outPackets);
+
+	/**
+		@brief		Returns all packets found in the given F1 and F2 ancillary data buffers.
+		@param[in]	inF1AncBuffer		Specifies the F1 ancillary data ("GUMP") buffer.
+		@param[in]	inF2AncBuffer		Specifies the F2 ancillary data ("GUMP") buffer.
+		@param[out]	outPackets			Receives the packet list.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffer,
+															const NTV2_POINTER & inF2AncBuffer,
+															AJAAncillaryList & outPackets);
+
+	/**
+		@brief		Returns all packets found in the given RTP ancillary data buffer.
+		@param[in]	inRTPAncBuffer		Specifies the RTP ancillary data buffer.
+		@param[out]	outPackets			Receives the packet list.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						SetFromIPAncData (const NTV2_POINTER & inRTPAncBuffer,
 															AJAAncillaryList & outPackets);
 
 public:	//	INSTANCE METHODS
@@ -256,7 +277,7 @@ public:	//	INSTANCE METHODS
 		@note		It's a good idea to always call AJAAncillaryList::SortListByLocation before calling this function.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						WriteRTPPacket (NTV2_POINTER & inRTPBuffer) const;
+	virtual AJAStatus						WriteRTPAncData (NTV2_POINTER & inRTPBuffer) const;
 	///@}
 
 
@@ -273,15 +294,6 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount);
-
-
-	/**
-		@brief		Parses the RTP packet extracted by an AJA NTV2 IP device's Extractor Widget into zero or more AJAAncillaryData
-					objects, and appends them onto me.
-		@param[in]	inRTPPacketData		Contains the RTP packet data as captured from an AJA IP device.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						AppendReceivedRTPAncillaryData (const std::vector<uint32_t> & inRTPPacketData);
 
 
 	/**
