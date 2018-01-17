@@ -50,7 +50,7 @@ inline void print_flash_status(const string& label, uint32_t curValue, uint32_t 
     if (percentage != lastPercentage)
     {
         lastPercentage = percentage;
-        cout << label << " status: " << lastPercentage << "%   \r" << flush;
+        cout << label << " status: " << dec << lastPercentage << "%   \r" << flush;
     }
 }
 
@@ -727,7 +727,11 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 
         for(uint32_t i=0;i<maxWrite;++i)
         {
-            mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
+            bool res = mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
+            if (res == false)
+            {
+                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (write command) on byte: " << i << " out of: " << maxWrite << "\n" << endl;
+            }
         }
     }
     else
@@ -737,8 +741,16 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 
         for(uint32_t i=0;i<maxByteCutoff+1;++i)
         {
-            mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
-            mDevice.ReadRegister(mSpiReadReg, &val);
+            bool resWrite = mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
+            if (resWrite == false)
+            {
+                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << "\n" << endl;
+            }
+            bool resRead = mDevice.ReadRegister(mSpiReadReg, &val);
+            if (resRead == false)
+            {
+                cout << "\nReadRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << "\n" << endl;
+            }
 
             // the first byte back is a dummy when reading flash
             if (i > 0)
