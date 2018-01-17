@@ -4080,7 +4080,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
 		case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
-		case DEVICE_ID_KONA1:				return "KONA ALPHA";
+		case DEVICE_ID_KONA1:					return "Kona1";
         case DEVICE_ID_KONAHDMI:				return "KONA HDMI";
 #if !defined (_DEBUG)
 	    default:					break;
