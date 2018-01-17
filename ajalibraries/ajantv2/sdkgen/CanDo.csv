@@ -55,7 +55,7 @@ NTV2DeviceCanDoThunderbolt,Returns true if the device having the given ID connec
 NTV2DeviceCanDoVideoProcessing,,-,-,X,X,X,X,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanMeasureTemperature,Returns true if the device having the given ID can measure its temperature.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanReportFrameSize,,-,-,-,-,-,-,-,-,-,-,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,-,-,-,X,X,-,-,X,-,-
+NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,-,-,-,X,X,-,-,X,X,-
 NTV2DeviceHasColorSpaceConverterOnChannel2,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceHasNWL,Returns true if the device having the given ID has NorthWest Logic DMA hardware.,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-,-,X,-,-
 NTV2DeviceHasPCIeGen2,Returns true if the device having the given ID supports 2nd-generation PCIe.,-,-,-,-,-,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-,-,X,X,-
