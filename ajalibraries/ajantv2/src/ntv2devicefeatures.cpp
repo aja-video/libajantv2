@@ -356,7 +356,6 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_LHI:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID3G:
-	case DEVICE_ID_KONA1:
 		return 32;
 	case DEVICE_ID_IOXT:
 		return 24;
@@ -380,6 +379,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
+	case DEVICE_ID_KONA1:
     case DEVICE_ID_KONAHDMI:
         return 111;
 	case DEVICE_ID_KONA3G:
