@@ -218,7 +218,7 @@ typedef enum
     DEVICE_ID_IOIP_2022                 = 0x10710850,
     DEVICE_ID_IOIP_2110                 = 0x10710851,
 
-	DEVICE_ID_KONA1					= 0x10756600,
+	DEVICE_ID_KONA1						= 0x10756600,
     DEVICE_ID_KONAHDMI                  = 0x10767400,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
