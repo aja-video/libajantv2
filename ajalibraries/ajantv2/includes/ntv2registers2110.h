@@ -45,10 +45,13 @@
 #define SAREK_3190_RX_DEPACKETIZER_3    (0x20e000/4)
 #define SAREK_3190_RX_DEPACKETIZER_4    (0x20f000/4)
 
-#define SAREK_2110_VIDEO_FRAMER             (0x210000/4)
-#define SAREK_2110_AUDIO_FRAMER             (0x212000/4)
-#define SAREK_2110_DECAPSULATOR_1_TOP       (0x211000/4)
-#define SAREK_2110_AUDIO_STREAMSELECT       (0x230000/4)
+#define SAREK_2110_VIDEO_FRAMER_0       (0x210000/4)
+#define SAREK_2110_AUDIO_FRAMER_0       (0x212000/4)
+#define SAREK_2110_VIDEO_FRAMER_1       (0x213000/4)
+#define SAREK_2110_AUDIO_FRAMER_1       (0x214000/4)
+#define SAREK_2110_TX_ARBITRATOR        (0x215000/4)
+#define SAREK_2110_DECAPSULATOR_1_TOP   (0x211000/4)
+#define SAREK_2110_AUDIO_STREAMSELECT   (0x230000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
