@@ -899,7 +899,21 @@ typedef enum
 	kRegHDMIOutputAudioConfig = 0x1d4B
 }NTV2HDMIOutAudioRegisters;
 
-
+typedef enum _NTV2HDMIRegisters
+{
+    kRegHDMIOutputConfig1       = 0x8000,
+    kRegHDMIInputStatus1        = 0x8001,
+    kRegHDMIControl1            = 0x8002,
+    kRegHDMIOutputConfig2       = 0xa000,
+    kRegHDMIInputStatus2        = 0xa001,
+    kRegHDMIControl2            = 0xa002,
+    kRegHDMIOutputConfig3       = 0xb012,
+    kRegHDMIInputStatus3        = 0xb013,
+    kRegHDMIControl3            = 0xb014,
+    kRegHDMIOutputConfig4       = 0xc012,
+    kRegHDMIInputStatus4        = 0xc013,
+    kRegHDMIControl4            = 0xc014,
+} NTV2HDMIRegisters;
 
 #if !defined (NTV2_DEPRECATE)
 	#define	KRegDMA1HostAddr			kRegDMA1HostAddr			///< @deprecated		Use kRegDMA1HostAddr instead.
