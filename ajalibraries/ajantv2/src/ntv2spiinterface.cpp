@@ -763,7 +763,8 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
             bool res = mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
             if (res == false)
             {
-                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (write command) on byte: " << i << " out of: " << maxWrite << "\n" << endl;
+                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (write command) on byte: " << i << " out of: " << maxWrite << endl;
+                retVal = false;
             }
         }
     }
@@ -777,12 +778,14 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
             bool resWrite = mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
             if (resWrite == false)
             {
-                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << "\n" << endl;
+                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << endl;
+                retVal = false;
             }
             bool resRead = mDevice.ReadRegister(mSpiReadReg, &val);
             if (resRead == false)
             {
-                cout << "\nReadRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << "\n" << endl;
+                cout << "\nReadRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << endl;
+                retVal = false;
             }
 
             // the first byte back is a dummy when reading flash
