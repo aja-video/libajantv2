@@ -49,8 +49,8 @@ bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<u
                 p = mismatch(p.first, dataWritten.end(), p.second);
             }
 
-            cout << "Verifying write ... failed at byte: " << byteMismatchOffset <<
-                    ", byte written to device should be: " << ossWrite.str() << " , byte read from device was: " << ossRead.str() << ".\n" <<
+            cout << "Verifying write of: " << dataWritten.size() << " bytes, failed at byte index: " << byteMismatchOffset <<
+                    ", byte written to device should be: " << ossWrite.str() << ", byte read back from device is: " << ossRead.str() << ".\n" <<
                     "There are " << errorCount << " other mismatches after this." << endl;
         }
     }
@@ -274,10 +274,6 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
         vector<uint8_t> dummyInput;
         SpiTransfer(commandSequence, dummyInput, data, bytesToTransfer);
 
-        // spin here until flash status bit 0 is clear
-        //uint8_t fs=0x00;
-        //do { FlashReadStatus(fs); } while(fs & 0x1);
-
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
 
@@ -339,7 +335,13 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
 
         // spin here until flash status bit 0 is clear
         uint8_t fs=0x00;
-        do { FlashReadStatus(fs); } while(fs & 0x1);
+        do {
+            FlashReadStatus(fs);
+            /*if (fs & 0x40)
+            {
+                cout << "ERROR writing page: " << p << "\n";
+            }*/
+        } while(fs & 0x1);
 
         pageAddress += pageSize;
         bytesTransfered += pageData.size();
@@ -447,7 +449,14 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
             SpiTransfer(commandSequence2, dummyInput, dummyOutput, bytes);
 
             // spin here until flash status bit 0 is clear
-            fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+            fs=0x00;
+            do {
+                FlashReadStatus(fs);
+                /*if (fs & 0x20)
+                {
+                    cout << "ERROR erasing sector: " << start << "\n";
+                }*/
+            } while(fs & 0x1);
 
             uint32_t curProgress = start-startSector;
             if (mVerbose)
