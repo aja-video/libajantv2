@@ -1,0 +1,61 @@
+//	@file		getnum_canon.gen
+//	@brief		This is the canonical list of "GetNum" functions (those device-features functions that return a numeric value).
+//	@detail		To add a new function:
+//				1)	Add a new line
+//				2)	In the new line, add the following (left-to-right order)...
+//					a)	Function name
+//					b)	Whitespace (required)
+//					c)	Return type (required)
+//					d)	Whitespace (required if return value description included)
+//					e)	Optional return value description. (Used in Doxy-tagged "@return" comments.)
+//
+//	@note		Order is irrelevant -- the script sorts everything itself.
+
+
+// FUNCTION									RETURN
+// NAME										TYPE	RETURN VALUE DESCRIPTION
+// ---------------------------------------- ------  --------------------------------------------------------------------------------------
+NTV2DeviceGetActiveMemorySize				ULWord	Returns the size, in bytes, of the device's active RAM available for video and audio.
+NTV2DeviceGetDACVersion						UWord	Returns the version number of the DAC on the device having the given ID.
+NTV2DeviceGetDownConverterDelay				UWord	Returns the down-converter delay on the device having the given ID.
+NTV2DeviceGetHDMIVersion					ULWord	Returns the version number of the HDMI input(s) and/or output(s) on the device having the given ID.
+NTV2DeviceGetLUTVersion						ULWord	Returns the version number of the LUT(s) on the device having the given ID.
+NTV2DeviceGetMaxAudioChannels				UWord	Returns the maximum number of audio channels that a single audio system can support on the device having the given ID.
+NTV2DeviceGetMaxRegisterNumber				ULWord	Returns the highest register number for the device having the given ID.
+NTV2DeviceGetMaxTransferCount				ULWord	Returns the maximum number of 32-bit words that the DMA engine can move at a time on the device having the given ID.
+NTV2DeviceGetNumDMAEngines					ULWord	Returns the number of DMA engines on the device having the given ID.
+NTV2DeviceGetNumVideoChannels				ULWord	Returns the number of video channels supported on the device having the given ID.
+NTV2DeviceGetPingLED						ULWord	Returns the highest bit number of the LED bits in the Global Control Register on the device having the given ID.
+NTV2DeviceGetUFCVersion						ULWord	Returns the version number of the UFC on the device having the given ID.
+NTV2DeviceGetNum4kQuarterSizeConverters		UWord	Returns the number of quarter-size 4K/UHD down-converters on the device having the given ID.
+NTV2DeviceGetNumAESAudioInputChannels		UWord	Returns the number of AES/EBU audio input channels on the device having the given ID.
+NTV2DeviceGetNumAESAudioOutputChannels		UWord	Returns the number of AES/EBU audio output channels on the device having the given ID.
+NTV2DeviceGetNumAnalogAudioInputChannels	UWord	Returns the number of analog audio input channels on the device having the given ID.
+NTV2DeviceGetNumAnalogAudioOutputChannels	UWord	Returns the number of analog audio output channels on the device having the given ID.
+NTV2DeviceGetNumAnalogVideoInputs			UWord	Returns the number of analog video inputs on the device having the given ID.
+NTV2DeviceGetNumAnalogVideoOutputs			UWord	Returns the number of analog video outputs on the device having the given ID.
+NTV2DeviceGetNumAudioSystems				UWord	Returns the number of independent audio systems on the device having the given ID.
+NTV2DeviceGetNumCrossConverters				UWord	Returns the number of cross-converters on the device having the given ID.
+NTV2DeviceGetNumCSCs						UWord	Returns the number of colorspace converter widgets on the device having the given ID.
+NTV2DeviceGetNumDownConverters				UWord	Returns the number of down-converters on the device having the given ID.
+NTV2DeviceGetNumEmbeddedAudioInputChannels	UWord	Returns the number of SDI-embedded input audio channels supported by the device having the given ID.
+NTV2DeviceGetNumEmbeddedAudioOutputChannels	UWord	Returns the number of SDI-embedded output audio channels supported by the device having the given ID.
+NTV2DeviceGetNumFrameStores					UWord	Returns the number of frame stores on the device having the given ID.
+NTV2DeviceGetNumFrameSyncs					UWord	Returns the number of frame sync widgets on the device having the given ID.
+NTV2DeviceGetNumHDMIAudioInputChannels		UWord	Returns the number of HDMI audio input channels on the device having the given ID.
+NTV2DeviceGetNumHDMIAudioOutputChannels		UWord	Returns the number of HDMI audio output channels on the device having the given ID.
+NTV2DeviceGetNumHDMIVideoInputs				UWord	Returns the number of HDMI video inputs on the device having the given ID.
+NTV2DeviceGetNumHDMIVideoOutputs			UWord	Returns the number of HDMI video outputs on the device having the given ID.
+NTV2DeviceGetNumInputConverters				UWord	Returns the number of input converter widgets on the device having the given ID.
+NTV2DeviceGetNumLUTs						UWord	Returns the number of LUT widgets on the device having the given ID.
+NTV2DeviceGetNumMixers						UWord	Returns the number of mixer/keyer widgets on the device having the given ID.
+NTV2DeviceGetNumOutputConverters			UWord	Returns the number of output converter widgets on the device having the given ID.
+NTV2DeviceGetNumReferenceVideoInputs		UWord	Returns the number of reference video inputs on the device having the given ID.
+NTV2DeviceGetNumSerialPorts					UWord	Returns the number of RS-422 serial ports on the device having the given ID.
+NTV2DeviceGetNumUpConverters				UWord	Returns the number of up-converters on the device having the given ID.
+NTV2DeviceGetNumVideoInputs					UWord	Returns the number of SDI video inputs on the device having the given ID.
+NTV2DeviceGetNumVideoOutputs				UWord	Returns the number of SDI video outputs on the device having the given ID.
+NTV2DeviceGetNum2022ChannelsSFP1			UWord	Returns the number of 2022 channels configured on SFP 1 on the device having the given ID.
+NTV2DeviceGetNum2022ChannelsSFP2			UWord	Returns the number of 2022 channels configured on SFP 2 on the device having the given ID.
+NTV2DeviceGetNumLTCInputs					UWord	Returns the number of analog LTC inputs on the device having the given ID.
+NTV2DeviceGetNumLTCOutputs					UWord	Returns the number of analog LTC outputs on the device having the given ID.

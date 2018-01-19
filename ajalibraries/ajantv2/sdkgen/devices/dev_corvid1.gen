@@ -1,0 +1,83 @@
+//	@file		dev_corvid1.gen
+//	@brief		Corvid1 (DEVICE_ID_CORVID1) device features.
+//	@copyright	Copyright (C) 2017-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
+
+
+// NTV2VideoFormats
+NTV2_FORMAT_1080i_5000
+NTV2_FORMAT_1080i_5994
+NTV2_FORMAT_1080i_6000
+NTV2_FORMAT_720p_5994
+NTV2_FORMAT_720p_6000
+NTV2_FORMAT_1080psf_2398
+NTV2_FORMAT_1080psf_2400
+NTV2_FORMAT_1080p_2997
+NTV2_FORMAT_1080p_3000
+NTV2_FORMAT_1080p_2500
+NTV2_FORMAT_1080p_2398
+NTV2_FORMAT_1080p_2400
+NTV2_FORMAT_1080psf_2K_2398
+NTV2_FORMAT_1080psf_2K_2400
+NTV2_FORMAT_720p_5000
+NTV2_FORMAT_1080psf_2500_2
+NTV2_FORMAT_1080psf_2997_2
+NTV2_FORMAT_1080psf_3000_2
+NTV2_FORMAT_525_5994
+NTV2_FORMAT_625_5000
+
+// NTV2FrameBufferFormats
+NTV2_FBF_10BIT_YCBCR
+NTV2_FBF_8BIT_YCBCR
+NTV2_FBF_8BIT_YCBCR_YUY2
+
+// NTV2WidgetIDs
+NTV2_WgtFrameBuffer1
+NTV2_WgtFrameBuffer2
+NTV2_WgtSDIIn1
+NTV2_WgtSDIOut1
+NTV2_WgtGenLock
+
+// NTV2InputSources
+NTV2_INPUTSOURCE_SDI1
+
+// GetNums		(see 'getnum_canon.gen' for legal values)
+NTV2DeviceGetLUTVersion						1
+NTV2DeviceGetMaxAudioChannels				16
+NTV2DeviceGetMaxRegisterNumber				kRegCS2Coefficients9_10
+NTV2DeviceGetMaxTransferCount				BIT(21)-1
+NTV2DeviceGetNumDMAEngines					2
+NTV2DeviceGetNumVideoChannels				2
+NTV2DeviceGetPingLED						BIT(19)
+NTV2DeviceGetUFCVersion						1
+NTV2DeviceGetNumAudioSystems				1
+NTV2DeviceGetNumEmbeddedAudioInputChannels	16
+NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
+NTV2DeviceGetNumFrameStores					2
+NTV2DeviceGetNumReferenceVideoInputs		1
+NTV2DeviceGetNumSerialPorts					1
+NTV2DeviceGetNumVideoInputs					1
+NTV2DeviceGetNumVideoOutputs				1
+NTV2DeviceGetNumLTCInputs					1
+
+// CanDo's		(see 'cando_canon.gen' for legal values)
+NTV2DeviceCanChangeEmbeddedAudioClock
+NTV2DeviceCanChangeFrameBufferSize
+NTV2DeviceCanDoAudio8Channels
+NTV2DeviceCanDoCapture
+NTV2DeviceCanDoHDVideo
+NTV2DeviceCanDoLTC
+NTV2DeviceCanDoLTCInOnRefPort
+NTV2DeviceCanDoPlayback
+NTV2DeviceCanDoRP188
+NTV2DeviceCanDoSDVideo
+NTV2DeviceCanMeasureTemperature
+NTV2DeviceHasSPIFlash
+NTV2DeviceIs64Bit
+NTV2DeviceIsDirectAddressable
+NTV2DeviceIsSupported
+NTV2DeviceNeedsRoutingSetup
+
+// NTV2ConversionModes
+
+
+// NTV2DSKModes

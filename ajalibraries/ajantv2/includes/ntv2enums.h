@@ -586,126 +586,126 @@ typedef enum
 /**
     @brief	Identifies a particular video format.
 **/
-typedef enum
+typedef enum _NTV2VideoFormat
 {
-    NTV2_FORMAT_UNKNOWN,											// 0
-    NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT,								// 1
-    NTV2_FORMAT_1080i_5000 = NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT,		// 1
-    NTV2_FORMAT_1080psf_2500 = NTV2_FORMAT_1080i_5000,				// 1
-    NTV2_FORMAT_1080i_5994,											// 2
-    NTV2_FORMAT_1080psf_2997 = NTV2_FORMAT_1080i_5994,				// 2
-    NTV2_FORMAT_1080i_6000,											// 3
-    NTV2_FORMAT_1080psf_3000 = NTV2_FORMAT_1080i_6000,				// 3
-    NTV2_FORMAT_720p_5994,			// 4
-    NTV2_FORMAT_720p_6000,			// 5
-    NTV2_FORMAT_1080psf_2398,		// 6
-    NTV2_FORMAT_1080psf_2400,		// 7
-    NTV2_FORMAT_1080p_2997,			// 8
-    NTV2_FORMAT_1080p_3000,			// 9
-    NTV2_FORMAT_1080p_2500,			// 10
-    NTV2_FORMAT_1080p_2398,			// 11
-    NTV2_FORMAT_1080p_2400,			// 12
-    NTV2_FORMAT_1080p_2K_2398,		// 13
-    NTV2_FORMAT_DEPRECATED_525_5994 = NTV2_FORMAT_1080p_2K_2398, // 13 - Backward compatibility for Linux .ntv2 files, do not use
-    NTV2_FORMAT_1080p_2K_2400,		// 14
-    NTV2_FORMAT_DEPRECATED_625_5000 = NTV2_FORMAT_1080p_2K_2400, // 14 - Backward compatibility for Linux .ntv2 files, do not use
-    NTV2_FORMAT_1080psf_2K_2398,	// 15
-    NTV2_FORMAT_1080psf_2K_2400,	// 16
-    NTV2_FORMAT_720p_5000,			// 17
-    NTV2_FORMAT_1080p_5000,			// 18
-    NTV2_FORMAT_1080p_5000_B = NTV2_FORMAT_1080p_5000, // 18
-    NTV2_FORMAT_1080p_5994,			// 19
-    NTV2_FORMAT_1080p_5994_B = NTV2_FORMAT_1080p_5994, // 19
-    NTV2_FORMAT_1080p_6000,			// 20
-    NTV2_FORMAT_1080p_6000_B = NTV2_FORMAT_1080p_6000, // 20
-    NTV2_FORMAT_720p_2398,			// 21
-    NTV2_FORMAT_720p_2500,			// 22
-    NTV2_FORMAT_1080p_5000_A,		// 23
-    NTV2_FORMAT_1080p_5994_A,		// 24
-    NTV2_FORMAT_1080p_6000_A,		// 25
-    NTV2_FORMAT_1080p_2K_2500,		// 26
-    NTV2_FORMAT_1080psf_2K_2500,	// 27
-    NTV2_FORMAT_1080psf_2500_2,		// 28 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_2500
-    NTV2_FORMAT_1080psf_2997_2,		// 29 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_2997
-    NTV2_FORMAT_1080psf_3000_2,		// 30 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_3000
+    NTV2_FORMAT_UNKNOWN,																// 0
+    NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT,													// 1
+    NTV2_FORMAT_1080i_5000			= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT,				// 1
+    NTV2_FORMAT_1080psf_2500		= NTV2_FORMAT_1080i_5000,							// 1
+    NTV2_FORMAT_1080i_5994,																// 2
+    NTV2_FORMAT_1080psf_2997		= NTV2_FORMAT_1080i_5994,							// 2
+    NTV2_FORMAT_1080i_6000,																// 3
+    NTV2_FORMAT_1080psf_3000		= NTV2_FORMAT_1080i_6000,							// 3
+    NTV2_FORMAT_720p_5994,																// 4
+    NTV2_FORMAT_720p_6000,																// 5
+    NTV2_FORMAT_1080psf_2398,															// 6
+    NTV2_FORMAT_1080psf_2400,															// 7
+    NTV2_FORMAT_1080p_2997,																// 8
+    NTV2_FORMAT_1080p_3000,																// 9
+    NTV2_FORMAT_1080p_2500,																// 10
+    NTV2_FORMAT_1080p_2398,																// 11
+    NTV2_FORMAT_1080p_2400,																// 12
+    NTV2_FORMAT_1080p_2K_2398,															// 13
+    NTV2_FORMAT_DEPRECATED_525_5994	= NTV2_FORMAT_1080p_2K_2398,						// 13 - Backward compatibility for Linux .ntv2 files, do not use
+    NTV2_FORMAT_1080p_2K_2400,															// 14
+    NTV2_FORMAT_DEPRECATED_625_5000	= NTV2_FORMAT_1080p_2K_2400,						// 14 - Backward compatibility for Linux .ntv2 files, do not use
+    NTV2_FORMAT_1080psf_2K_2398,														// 15
+    NTV2_FORMAT_1080psf_2K_2400,														// 16
+    NTV2_FORMAT_720p_5000,																// 17
+    NTV2_FORMAT_1080p_5000,																// 18
+    NTV2_FORMAT_1080p_5000_B		= NTV2_FORMAT_1080p_5000,							// 18
+    NTV2_FORMAT_1080p_5994,																// 19
+    NTV2_FORMAT_1080p_5994_B		= NTV2_FORMAT_1080p_5994,							// 19
+    NTV2_FORMAT_1080p_6000,																// 20
+    NTV2_FORMAT_1080p_6000_B		= NTV2_FORMAT_1080p_6000,							// 20
+    NTV2_FORMAT_720p_2398,																// 21
+    NTV2_FORMAT_720p_2500,																// 22
+    NTV2_FORMAT_1080p_5000_A,															// 23
+    NTV2_FORMAT_1080p_5994_A,															// 24
+    NTV2_FORMAT_1080p_6000_A,															// 25
+    NTV2_FORMAT_1080p_2K_2500,															// 26
+    NTV2_FORMAT_1080psf_2K_2500,														// 27
+    NTV2_FORMAT_1080psf_2500_2,															// 28 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_2500
+    NTV2_FORMAT_1080psf_2997_2,															// 29 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_2997
+    NTV2_FORMAT_1080psf_3000_2,															// 30 - psf only (non-interlaced), deprecates NTV2_FORMAT_1080psf_3000
     // Add new HD formats here
-    NTV2_FORMAT_END_HIGH_DEF_FORMATS,// 31
+    NTV2_FORMAT_END_HIGH_DEF_FORMATS,													// 31
 
-    NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT = 32,
-    NTV2_FORMAT_525_5994 = NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT, // 32
-    NTV2_FORMAT_625_5000,			// 33
-    NTV2_FORMAT_525_2398,			// 34
-    NTV2_FORMAT_525_2400,			// 35
-    NTV2_FORMAT_525psf_2997,		// 36
-    NTV2_FORMAT_625psf_2500,		// 37
+    NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT	= 32,										// 32
+    NTV2_FORMAT_525_5994					= NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT,	// 32
+    NTV2_FORMAT_625_5000,																// 33
+    NTV2_FORMAT_525_2398,																// 34
+    NTV2_FORMAT_525_2400,																// 35
+    NTV2_FORMAT_525psf_2997,															// 36
+    NTV2_FORMAT_625psf_2500,															// 37
     // Add new SD formats here
-    NTV2_FORMAT_END_STANDARD_DEF_FORMATS, // 38
+    NTV2_FORMAT_END_STANDARD_DEF_FORMATS,												// 38
 
     // 2K Starts Here.
-    NTV2_FORMAT_FIRST_2K_DEF_FORMAT	=  64,
-    NTV2_FORMAT_2K_1498=NTV2_FORMAT_FIRST_2K_DEF_FORMAT,	// 64
-    NTV2_FORMAT_2K_1500,				// 65
-    NTV2_FORMAT_2K_2398,				// 66
-    NTV2_FORMAT_2K_2400,				// 67
-    NTV2_FORMAT_2K_2500,				// 68
+    NTV2_FORMAT_FIRST_2K_DEF_FORMAT		=  64,											// 64
+    NTV2_FORMAT_2K_1498					= NTV2_FORMAT_FIRST_2K_DEF_FORMAT,				// 64
+    NTV2_FORMAT_2K_1500,																// 65
+    NTV2_FORMAT_2K_2398,																// 66
+    NTV2_FORMAT_2K_2400,																// 67
+    NTV2_FORMAT_2K_2500,																// 68
     // Add new 2K formats here
-    NTV2_FORMAT_END_2K_DEF_FORMATS,	// 69
+    NTV2_FORMAT_END_2K_DEF_FORMATS,														// 69
 
     // 4K Starts Here.
-    NTV2_FORMAT_FIRST_4K_DEF_FORMAT  =  80,
-    NTV2_FORMAT_4x1920x1080psf_2398=NTV2_FORMAT_FIRST_4K_DEF_FORMAT, // 80
-    NTV2_FORMAT_4x1920x1080psf_2400,	// 81
-    NTV2_FORMAT_4x1920x1080psf_2500,	// 82
-    NTV2_FORMAT_4x1920x1080p_2398,		// 83
-    NTV2_FORMAT_4x1920x1080p_2400,		// 84
-    NTV2_FORMAT_4x1920x1080p_2500,		// 85
-    NTV2_FORMAT_4x2048x1080psf_2398,	// 86
-    NTV2_FORMAT_4x2048x1080psf_2400,	// 87
-    NTV2_FORMAT_4x2048x1080psf_2500,	// 88
-    NTV2_FORMAT_4x2048x1080p_2398,		// 89
-    NTV2_FORMAT_4x2048x1080p_2400,		// 90
-    NTV2_FORMAT_4x2048x1080p_2500,		// 91
-    NTV2_FORMAT_4x1920x1080p_2997,		// 92
-    NTV2_FORMAT_4x1920x1080p_3000,		// 93
-    NTV2_FORMAT_4x1920x1080psf_2997,	// 94 NOT SUPPORTED
-    NTV2_FORMAT_4x1920x1080psf_3000,	// 95 NOT SUPPORTED
-    NTV2_FORMAT_4x2048x1080p_2997,		// 96
-    NTV2_FORMAT_4x2048x1080p_3000,		// 97
-    NTV2_FORMAT_4x2048x1080psf_2997,	// 98 NOT SUPPORTED
-    NTV2_FORMAT_4x2048x1080psf_3000,	// 99 NOT SUPPORTED
-    NTV2_FORMAT_4x1920x1080p_5000,		// 100
-    NTV2_FORMAT_4x1920x1080p_5994,		// 101
-    NTV2_FORMAT_4x1920x1080p_6000,		// 102
-    NTV2_FORMAT_4x2048x1080p_5000,		// 103
-    NTV2_FORMAT_4x2048x1080p_5994,		// 104
-    NTV2_FORMAT_4x2048x1080p_6000,		// 105
-    NTV2_FORMAT_4x2048x1080p_4795,		// 106
-    NTV2_FORMAT_4x2048x1080p_4800,		// 107
-    NTV2_FORMAT_4x2048x1080p_11988,		// 108
-    NTV2_FORMAT_4x2048x1080p_12000,		// 109
+    NTV2_FORMAT_FIRST_4K_DEF_FORMAT		=  80,											// 80
+    NTV2_FORMAT_4x1920x1080psf_2398		= NTV2_FORMAT_FIRST_4K_DEF_FORMAT,				// 80
+    NTV2_FORMAT_4x1920x1080psf_2400,													// 81
+    NTV2_FORMAT_4x1920x1080psf_2500,													// 82
+    NTV2_FORMAT_4x1920x1080p_2398,														// 83
+    NTV2_FORMAT_4x1920x1080p_2400,														// 84
+    NTV2_FORMAT_4x1920x1080p_2500,														// 85
+    NTV2_FORMAT_4x2048x1080psf_2398,													// 86
+    NTV2_FORMAT_4x2048x1080psf_2400,													// 87
+    NTV2_FORMAT_4x2048x1080psf_2500,													// 88
+    NTV2_FORMAT_4x2048x1080p_2398,														// 89
+    NTV2_FORMAT_4x2048x1080p_2400,														// 90
+    NTV2_FORMAT_4x2048x1080p_2500,														// 91
+    NTV2_FORMAT_4x1920x1080p_2997,														// 92
+    NTV2_FORMAT_4x1920x1080p_3000,														// 93
+    NTV2_FORMAT_4x1920x1080psf_2997,													// 94 NOT SUPPORTED
+    NTV2_FORMAT_4x1920x1080psf_3000,													// 95 NOT SUPPORTED
+    NTV2_FORMAT_4x2048x1080p_2997,														// 96
+    NTV2_FORMAT_4x2048x1080p_3000,														// 97
+    NTV2_FORMAT_4x2048x1080psf_2997,													// 98 NOT SUPPORTED
+    NTV2_FORMAT_4x2048x1080psf_3000,													// 99 NOT SUPPORTED
+    NTV2_FORMAT_4x1920x1080p_5000,														// 100
+    NTV2_FORMAT_4x1920x1080p_5994,														// 101
+    NTV2_FORMAT_4x1920x1080p_6000,														// 102
+    NTV2_FORMAT_4x2048x1080p_5000,														// 103
+    NTV2_FORMAT_4x2048x1080p_5994,														// 104
+    NTV2_FORMAT_4x2048x1080p_6000,														// 105
+    NTV2_FORMAT_4x2048x1080p_4795,														// 106
+    NTV2_FORMAT_4x2048x1080p_4800,														// 107
+    NTV2_FORMAT_4x2048x1080p_11988,														// 108
+    NTV2_FORMAT_4x2048x1080p_12000,														// 109
     // Add new 4K formats here
-    NTV2_FORMAT_END_4K_DEF_FORMATS,		// 110
+    NTV2_FORMAT_END_4K_DEF_FORMATS,														// 110
 
-    NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2 = 110,
-    NTV2_FORMAT_1080p_2K_6000=NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2,	// 110
-    NTV2_FORMAT_1080p_2K_6000_A = NTV2_FORMAT_1080p_2K_6000,	// 110
-    NTV2_FORMAT_1080p_2K_5994,			// 111
-    NTV2_FORMAT_1080p_2K_5994_A = NTV2_FORMAT_1080p_2K_5994,	// 111
-    NTV2_FORMAT_1080p_2K_2997,			// 112
-    NTV2_FORMAT_1080p_2K_3000,			// 113
-    NTV2_FORMAT_1080p_2K_5000,			// 114
-    NTV2_FORMAT_1080p_2K_5000_A = NTV2_FORMAT_1080p_2K_5000,	// 114
-    NTV2_FORMAT_1080p_2K_4795,			// 115
-    NTV2_FORMAT_1080p_2K_4795_A = NTV2_FORMAT_1080p_2K_4795,	// 115
-    NTV2_FORMAT_1080p_2K_4800,			// 116
-    NTV2_FORMAT_1080p_2K_4800_A = NTV2_FORMAT_1080p_2K_4800,	// 116
-    NTV2_FORMAT_1080p_2K_4795_B,		// 117
-    NTV2_FORMAT_1080p_2K_4800_B,		// 118
-    NTV2_FORMAT_1080p_2K_5000_B,		// 119
-    NTV2_FORMAT_1080p_2K_5994_B,		// 120
-    NTV2_FORMAT_1080p_2K_6000_B,		// 121
-    NTV2_FORMAT_END_HIGH_DEF_FORMATS2,	// 122
-    NTV2_MAX_NUM_VIDEO_FORMATS = NTV2_FORMAT_END_HIGH_DEF_FORMATS2
+    NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2	= 110,											// 110
+    NTV2_FORMAT_1080p_2K_6000			= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2,			// 110
+    NTV2_FORMAT_1080p_2K_6000_A			= NTV2_FORMAT_1080p_2K_6000,					// 110
+    NTV2_FORMAT_1080p_2K_5994,															// 111
+    NTV2_FORMAT_1080p_2K_5994_A			= NTV2_FORMAT_1080p_2K_5994,					// 111
+    NTV2_FORMAT_1080p_2K_2997,															// 112
+    NTV2_FORMAT_1080p_2K_3000,															// 113
+    NTV2_FORMAT_1080p_2K_5000,															// 114
+    NTV2_FORMAT_1080p_2K_5000_A			= NTV2_FORMAT_1080p_2K_5000,					// 114
+    NTV2_FORMAT_1080p_2K_4795,															// 115
+    NTV2_FORMAT_1080p_2K_4795_A			= NTV2_FORMAT_1080p_2K_4795,					// 115
+    NTV2_FORMAT_1080p_2K_4800,															// 116
+    NTV2_FORMAT_1080p_2K_4800_A			= NTV2_FORMAT_1080p_2K_4800,					// 116
+    NTV2_FORMAT_1080p_2K_4795_B,														// 117
+    NTV2_FORMAT_1080p_2K_4800_B,														// 118
+    NTV2_FORMAT_1080p_2K_5000_B,														// 119
+    NTV2_FORMAT_1080p_2K_5994_B,														// 120
+    NTV2_FORMAT_1080p_2K_6000_B,														// 121
+    NTV2_FORMAT_END_HIGH_DEF_FORMATS2,													// 122
+    NTV2_MAX_NUM_VIDEO_FORMATS = NTV2_FORMAT_END_HIGH_DEF_FORMATS2						// 122
 } NTV2VideoFormat;
 
 
@@ -987,74 +987,33 @@ typedef enum
 **/
 typedef enum
 {
-    #if defined (NTV2_DEPRECATE)
-        NTV2_INPUTSOURCE_ANALOG1,		///< @brief	Identifies Analog Video Input 1.
-        NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	//	Might deprecate this someday
-        NTV2_INPUTSOURCE_HDMI1,			///< @brief	Identifies HDMI Input 1.
-        NTV2_INPUTSOURCE_HDMI2,
-        NTV2_INPUTSOURCE_HDMI3,
-        NTV2_INPUTSOURCE_HDMI4,
-        NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	//	Might deprecate this someday
-        NTV2_INPUTSOURCE_SDI1,			///< @brief	Identifies SDI Input 1.
-        NTV2_INPUTSOURCE_SDI2,			///< @brief	Identifies SDI Input 2.
-        NTV2_INPUTSOURCE_SDI3,			///< @brief	Identifies SDI Input 3.
-        NTV2_INPUTSOURCE_SDI4,			///< @brief	Identifies SDI Input 4.
-        NTV2_INPUTSOURCE_SDI5,			///< @brief	Identifies SDI Input 5.
-        NTV2_INPUTSOURCE_SDI6,			///< @brief	Identifies SDI Input 6.
-        NTV2_INPUTSOURCE_SDI7,			///< @brief	Identifies SDI Input 7.
-        NTV2_INPUTSOURCE_SDI8,			///< @brief	Identifies SDI Input 8.
-    #else
-        NTV2_INPUTSOURCE_SDI,
-        NTV2_INPUTSOURCE_SDI1		= NTV2_INPUTSOURCE_SDI,
-        NTV2_INPUTSOURCE_ANALOG,
-        NTV2_INPUTSOURCE_SDI2,
-        NTV2_INPUTSOURCE_HDMI,
-        NTV2_INPUTSOURCE_DUALLINK,
-        NTV2_INPUTSOURCE_DUALLINK1	= NTV2_INPUTSOURCE_DUALLINK,
-        NTV2_INPUTSOURCE_DUALLINK2,
-        NTV2_INPUTSOURCE_SDI3,
-        NTV2_INPUTSOURCE_SDI4,
-        NTV2_INPUTSOURCE_DUALLINK3,
-        NTV2_INPUTSOURCE_DUALLINK4,
-        NTV2_INPUTSOURCE_SDI1_DS2,
-        NTV2_INPUTSOURCE_SDI2_DS2,
-        NTV2_INPUTSOURCE_SDI3_DS2,
-        NTV2_INPUTSOURCE_SDI4_DS2,
-        NTV2_INPUTSOURCE_SDI5,
-        NTV2_INPUTSOURCE_SDI6,
-        NTV2_INPUTSOURCE_SDI7,
-        NTV2_INPUTSOURCE_SDI8,
-        NTV2_INPUTSOURCE_SDI5_DS2,
-        NTV2_INPUTSOURCE_SDI6_DS2,
-        NTV2_INPUTSOURCE_SDI7_DS2,
-        NTV2_INPUTSOURCE_SDI8_DS2,
-        NTV2_INPUTSOURCE_DUALLINK5,
-        NTV2_INPUTSOURCE_DUALLINK6,
-        NTV2_INPUTSOURCE_DUALLINK7,
-        NTV2_INPUTSOURCE_DUALLINK8,
-    #endif	//	!defined (NTV2_DEPRECATE)
+	NTV2_INPUTSOURCE_ANALOG1,		///< @brief	Identifies Analog Video Input 1.
+	NTV2_INPUTSOURCE_HDMI1,			///< @brief	Identifies HDMI Input 1.
+	NTV2_INPUTSOURCE_HDMI2,			///< @brief	Identifies HDMI Input 2.
+	NTV2_INPUTSOURCE_HDMI3,			///< @brief	Identifies HDMI Input 3.
+	NTV2_INPUTSOURCE_HDMI4,			///< @brief	Identifies HDMI Input 4.
+	NTV2_INPUTSOURCE_SDI1,			///< @brief	Identifies SDI Input 1.
+	NTV2_INPUTSOURCE_SDI2,			///< @brief	Identifies SDI Input 2.
+	NTV2_INPUTSOURCE_SDI3,			///< @brief	Identifies SDI Input 3.
+	NTV2_INPUTSOURCE_SDI4,			///< @brief	Identifies SDI Input 4.
+	NTV2_INPUTSOURCE_SDI5,			///< @brief	Identifies SDI Input 5.
+	NTV2_INPUTSOURCE_SDI6,			///< @brief	Identifies SDI Input 6.
+	NTV2_INPUTSOURCE_SDI7,			///< @brief	Identifies SDI Input 7.
+	NTV2_INPUTSOURCE_SDI8,			///< @brief	Identifies SDI Input 8.
     NTV2_INPUTSOURCE_INVALID,
+	NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
+	NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
     NTV2_NUM_INPUTSOURCES = NTV2_INPUTSOURCE_INVALID	//	Always last!
 } NTV2InputSource;
 
 
-#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				(   (_inpSrc_) == NTV2_INPUTSOURCE_HDMI ||      \
+#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				(   (_inpSrc_) == NTV2_INPUTSOURCE_HDMI1 ||     \
                                                             (_inpSrc_) == NTV2_INPUTSOURCE_HDMI2 ||     \
                                                             (_inpSrc_) == NTV2_INPUTSOURCE_HDMI3 ||     \
                                                             (_inpSrc_) == NTV2_INPUTSOURCE_HDMI4    )
 #define	NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG)
 #define	NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				(!NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_) && !NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
 #define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
-#if !defined (NTV2_DEPRECATE)
-    #define	NTV2_INPUT_SOURCE_IS_DUALLINK_SDI(_inpSrc_)	(	(_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK1 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK2 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK3 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK4 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK5 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK6 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK7 ||		\
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_DUALLINK8	)
-#endif	//	!defined (NTV2_DEPRECATE)
 
 typedef enum
 {
@@ -1152,9 +1111,8 @@ typedef enum
     NTV2_REFERENCE_INPUT1           = 1,
     NTV2_REFERENCE_INPUT2           = 2,
     NTV2_REFERENCE_FREERUN          = 3,
-    NTV2_REFERENCE_ANALOG_INPUT     = 4,
+    NTV2_REFERENCE_ANALOG_INPUT1    = 4,
     NTV2_REFERENCE_HDMI_INPUT1      = 5,
-    NTV2_REFERENCE_HDMI_INPUT       = NTV2_REFERENCE_HDMI_INPUT1,
     NTV2_REFERENCE_INPUT3           = 6,
     NTV2_REFERENCE_INPUT4           = 7,
     NTV2_REFERENCE_INPUT5           = 8,
@@ -1169,6 +1127,8 @@ typedef enum
     NTV2_REFERENCE_HDMI_INPUT3      = 17,
     NTV2_REFERENCE_HDMI_INPUT4      = 18,
     NTV2_NUM_REFERENCE_INPUTS,			//	Always last!
+    NTV2_REFERENCE_HDMI_INPUT       = NTV2_REFERENCE_HDMI_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_HDMI_INPUT1 instead.
+    NTV2_REFERENCE_ANALOG_INPUT		= NTV2_REFERENCE_ANALOG_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_ANALOG_INPUT1 instead.
     NTV2_REFERENCE_INVALID = NTV2_NUM_REFERENCE_INPUTS
 } NTV2ReferenceSource;
 
@@ -2636,7 +2596,7 @@ typedef enum
     NTV2_WgtHDMIIn3v4,
     NTV2_WgtHDMIIn4v4,
     NTV2_WgtHDMIOut1v4,
-	NTV2_WgtModuleTypeCount,// always last
+	NTV2_WgtModuleTypeCount,	// always last
 	NTV2_WgtUndefined = NTV2_WgtModuleTypeCount,
 	NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
 } NTV2WidgetID;

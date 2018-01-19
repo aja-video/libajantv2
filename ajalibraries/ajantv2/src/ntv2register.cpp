@@ -5365,8 +5365,8 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 		case NTV2_INPUTSOURCE_SDI6:		return GetSDIInputVideoFormat (NTV2_CHANNEL6, inIsProgressivePicture);	break;
 		case NTV2_INPUTSOURCE_SDI7:		return GetSDIInputVideoFormat (NTV2_CHANNEL7, inIsProgressivePicture);	break;
 		case NTV2_INPUTSOURCE_SDI8:		return GetSDIInputVideoFormat (NTV2_CHANNEL8, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_HDMI:		return GetHDMIInputVideoFormat ();										break;
-		case NTV2_INPUTSOURCE_ANALOG:	return GetAnalogInputVideoFormat ();									break;
+		case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat ();										break;
+		case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
 		default:						return NTV2_FORMAT_UNKNOWN;												break;
 	}
 }

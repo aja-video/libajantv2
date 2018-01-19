@@ -1,0 +1,125 @@
+//	@file		dev_ioexpress.gen
+//	@brief		IoExpress (DEVICE_ID_IOEXPRESS) device features.
+//	@copyright	Copyright (C) 2017-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
+
+
+// NTV2VideoFormats
+NTV2_FORMAT_1080i_5000
+NTV2_FORMAT_1080i_5994
+NTV2_FORMAT_1080i_6000
+NTV2_FORMAT_720p_5994
+NTV2_FORMAT_720p_6000
+NTV2_FORMAT_1080psf_2398
+NTV2_FORMAT_1080psf_2400
+NTV2_FORMAT_1080p_2997
+NTV2_FORMAT_1080p_3000
+NTV2_FORMAT_1080p_2500
+NTV2_FORMAT_1080p_2398
+NTV2_FORMAT_1080p_2400
+NTV2_FORMAT_720p_5000
+NTV2_FORMAT_1080psf_2500_2
+NTV2_FORMAT_1080psf_2997_2
+NTV2_FORMAT_1080psf_3000_2
+NTV2_FORMAT_525_5994
+NTV2_FORMAT_625_5000
+
+
+// NTV2FrameBufferFormats
+NTV2_FBF_10BIT_YCBCR
+NTV2_FBF_8BIT_YCBCR
+NTV2_FBF_8BIT_YCBCR_YUY2
+NTV2_FBF_8BIT_DVCPRO
+NTV2_FBF_8BIT_HDV
+
+
+// NTV2WidgetIDs
+NTV2_WgtFrameBuffer1
+NTV2_WgtFrameSync1
+NTV2_WgtFrameSync2
+NTV2_WgtSDIIn1
+NTV2_WgtSDIOut1
+NTV2_WgtAnalogOut1
+NTV2_WgtHDMIIn1
+NTV2_WgtHDMIOut1
+NTV2_WgtUpDownConverter1
+NTV2_WgtCompression1
+NTV2_WgtGenLock
+
+
+// NTV2InputSources
+NTV2_INPUTSOURCE_HDMI1
+NTV2_INPUTSOURCE_SDI1
+
+
+// GetNums		(see 'getnum_canon.gen' for legal values)
+NTV2DeviceGetDACVersion						2
+NTV2DeviceGetHDMIVersion					1
+NTV2DeviceGetLUTVersion						1
+NTV2DeviceGetMaxAudioChannels				8
+NTV2DeviceGetMaxRegisterNumber				kRegSDIOut1VPIDB
+NTV2DeviceGetMaxTransferCount				BIT(21)-1
+NTV2DeviceGetNumDMAEngines					2
+NTV2DeviceGetNumVideoChannels				1
+NTV2DeviceGetPingLED						BIT(16)
+NTV2DeviceGetUFCVersion						1
+NTV2DeviceGetNumAESAudioInputChannels		2
+NTV2DeviceGetNumAESAudioOutputChannels		2
+NTV2DeviceGetNumAnalogAudioOutputChannels	2
+NTV2DeviceGetNumAnalogVideoOutputs			1
+NTV2DeviceGetNumAudioSystems				1
+NTV2DeviceGetNumDownConverters				1
+NTV2DeviceGetNumEmbeddedAudioInputChannels	8
+NTV2DeviceGetNumEmbeddedAudioOutputChannels	8
+NTV2DeviceGetNumFrameStores					1
+NTV2DeviceGetNumHDMIAudioInputChannels		8
+NTV2DeviceGetNumHDMIAudioOutputChannels		8
+NTV2DeviceGetNumHDMIVideoInputs				1
+NTV2DeviceGetNumHDMIVideoOutputs			1
+NTV2DeviceGetNumInputConverters				1
+NTV2DeviceGetNumOutputConverters			1
+NTV2DeviceGetNumReferenceVideoInputs		1
+NTV2DeviceGetNumSerialPorts					1
+NTV2DeviceGetNumVideoInputs					1
+NTV2DeviceGetNumVideoOutputs				1
+NTV2DeviceGetNumLTCInputs					1
+NTV2DeviceGetNumLTCOutputs					1
+
+
+// CanDo's		(see 'cando_canon.gen' for legal values)
+NTV2DeviceCanChangeEmbeddedAudioClock
+NTV2DeviceCanChangeFrameBufferSize
+NTV2DeviceCanDoAESAudioIn
+NTV2DeviceCanDoAnalogAudio
+NTV2DeviceCanDoAnalogVideoOut
+NTV2DeviceCanDoAudio8Channels
+NTV2DeviceCanDoAudio96K
+NTV2DeviceCanDoCapture
+NTV2DeviceCanDoDVCProHD
+NTV2DeviceCanDoFrameStore1Display
+NTV2DeviceCanDoHDV
+NTV2DeviceCanDoHDVideo
+NTV2DeviceCanDoLTC
+NTV2DeviceCanDoLTCInOnRefPort
+NTV2DeviceCanDoPlayback
+NTV2DeviceCanDoQuarterExpand
+NTV2DeviceCanDoRP188
+NTV2DeviceCanDoSDVideo
+NTV2DeviceCanMeasureTemperature
+NTV2DeviceHasRetailSupport
+NTV2DeviceHasSPIFlash
+NTV2DeviceIs64Bit
+NTV2DeviceIsDirectAddressable
+NTV2DeviceIsExternalToHost
+NTV2DeviceIsSupported
+NTV2DeviceNeedsRoutingSetup
+
+
+// NTV2ConversionModes
+NTV2_1080i_5994to525_5994
+NTV2_1080i_2500to625_2500
+NTV2_720p_5994to525_5994
+NTV2_720p_5000to625_2500
+NTV2_1080i2398to525_2997
+
+
+// NTV2DSKModes

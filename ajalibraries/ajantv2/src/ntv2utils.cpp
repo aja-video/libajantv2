@@ -4328,40 +4328,20 @@ NTV2AudioSystem NTV2ChannelToAudioSystem (const NTV2Channel inChannel)
 
 NTV2EmbeddedAudioInput NTV2InputSourceToEmbeddedAudioInput (const NTV2InputSource inInputSource)
 {
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2EmbeddedAudioInput	gInputSourceToEmbeddedAudioInputs []	= {	NTV2_MAX_NUM_EmbeddedAudioInputs,	NTV2_MAX_NUM_EmbeddedAudioInputs,	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
-																						NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
-																						NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5,	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6,	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
-																						NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,	NTV2_MAX_NUM_EmbeddedAudioInputs};
-	#else	//	else !defined (NTV2_DEPRECATE)
-		static const NTV2EmbeddedAudioInput	gInputSourceToEmbeddedAudioInputs []	= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
-																						/* NTV2_INPUTSOURCE_ANALOG */		NTV2_MAX_NUM_EmbeddedAudioInputs,
-																						/* NTV2_INPUTSOURCE_SDI2 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,
-																						/* NTV2_INPUTSOURCE_HDMI */			NTV2_MAX_NUM_EmbeddedAudioInputs,
-																						/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
-																						/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,
-																						/* NTV2_INPUTSOURCE_SDI3 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,
-																						/* NTV2_INPUTSOURCE_SDI4 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
-																						/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,
-																						/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
-																						/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
-																						/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,
-																						/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,
-																						/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
-																						/* NTV2_INPUTSOURCE_SDI5 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5,
-																						/* NTV2_INPUTSOURCE_SDI6 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6,
-																						/* NTV2_INPUTSOURCE_SDI7 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
-																						/* NTV2_INPUTSOURCE_SDI8 */			NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,
-																						/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5,
-																						/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6,
-																						/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
-																						/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,
-																						/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5,
-																						/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6,
-																						/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
-																						/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,	NTV2_MAX_NUM_EmbeddedAudioInputs};
-	#endif	//	else !defined (NTV2_DEPRECATE)
-
+	static const NTV2EmbeddedAudioInput	gInputSourceToEmbeddedAudioInputs []	= {	/* NTV2_INPUTSOURCE_ANALOG1 */	NTV2_MAX_NUM_EmbeddedAudioInputs,
+																					/* NTV2_INPUTSOURCE_HDMI1 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
+																					/* NTV2_INPUTSOURCE_HDMI2 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,
+																					/* NTV2_INPUTSOURCE_HDMI3 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,
+																					/* NTV2_INPUTSOURCE_HDMI4 */	NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
+																					/* NTV2_INPUTSOURCE_SDI1 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1,
+																					/* NTV2_INPUTSOURCE_SDI2 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2,
+																					/* NTV2_INPUTSOURCE_SDI3 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3,
+																					/* NTV2_INPUTSOURCE_SDI4 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4,
+																					/* NTV2_INPUTSOURCE_SDI5 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5,
+																					/* NTV2_INPUTSOURCE_SDI6 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6,
+																					/* NTV2_INPUTSOURCE_SDI7 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
+																					/* NTV2_INPUTSOURCE_SDI8 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,
+																					/* NTV2_INPUTSOURCE_INVALID */	NTV2_MAX_NUM_EmbeddedAudioInputs};
 	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < (int)(sizeof (gInputSourceToEmbeddedAudioInputs) / sizeof (NTV2EmbeddedAudioInput)))
 		return gInputSourceToEmbeddedAudioInputs [inInputSource];
 	else
@@ -4451,7 +4431,7 @@ NTV2Channel NTV2TimecodeIndexToChannel (const NTV2TCIndex inTCIndex)
 NTV2InputSource NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex)
 {
 	static const NTV2InputSource	gTCIndexToInputSource []	= {	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,		NTV2_INPUTSOURCE_SDI3,		NTV2_INPUTSOURCE_SDI4,
-																	NTV2_INPUTSOURCE_SDI1,		NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_ANALOG,	NTV2_INPUTSOURCE_ANALOG,
+																	NTV2_INPUTSOURCE_SDI1,		NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_ANALOG1,	NTV2_INPUTSOURCE_ANALOG1,
 																	NTV2_INPUTSOURCE_SDI5,		NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,		NTV2_INPUTSOURCE_SDI8,
 																	NTV2_INPUTSOURCE_SDI3,		NTV2_INPUTSOURCE_SDI4,	NTV2_INPUTSOURCE_SDI5,		NTV2_INPUTSOURCE_SDI6,
 																	NTV2_INPUTSOURCE_SDI7,		NTV2_INPUTSOURCE_SDI8,	NTV2_INPUTSOURCE_INVALID};
@@ -4461,9 +4441,11 @@ NTV2InputSource NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex)
 
 NTV2Crosspoint NTV2InputSourceToChannelSpec (const NTV2InputSource inInputSource)
 {
-#if defined (NTV2_DEPRECATE)
-	static const NTV2Crosspoint	gInputSourceToChannelSpec []	= { /* NTV2_INPUTSOURCE_ANALOG */		NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2CROSSPOINT_INPUT1,
+	static const NTV2Crosspoint	gInputSourceToChannelSpec []	= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2CROSSPOINT_INPUT1,
+																	/* NTV2_INPUTSOURCE_HDMI1 */		NTV2CROSSPOINT_INPUT1,
+																	/* NTV2_INPUTSOURCE_HDMI2 */		NTV2CROSSPOINT_INPUT2,
+																	/* NTV2_INPUTSOURCE_HDMI3 */		NTV2CROSSPOINT_INPUT3,
+																	/* NTV2_INPUTSOURCE_HDMI4 */		NTV2CROSSPOINT_INPUT4,
 																	/* NTV2_INPUTSOURCE_SDI1 */			NTV2CROSSPOINT_INPUT1,
 																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2CROSSPOINT_INPUT2,
 																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2CROSSPOINT_INPUT3,
@@ -4473,37 +4455,6 @@ NTV2Crosspoint NTV2InputSourceToChannelSpec (const NTV2InputSource inInputSource
 																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2CROSSPOINT_INPUT7,
 																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2CROSSPOINT_INPUT8,
 																	/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_CROSSPOINTS};
-	
-#else	//	else !defined (NTV2_DEPRECATE)
-	static const NTV2Crosspoint	gInputSourceToChannelSpec []	= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_ANALOG */		NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2CROSSPOINT_INPUT2,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2CROSSPOINT_INPUT2,
-																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2CROSSPOINT_INPUT3,
-																	/* NTV2_INPUTSOURCE_SDI4 */			NTV2CROSSPOINT_INPUT4,
-																	/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2CROSSPOINT_INPUT3,
-																	/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2CROSSPOINT_INPUT4,
-																	/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2CROSSPOINT_INPUT1,
-																	/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2CROSSPOINT_INPUT2,
-																	/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2CROSSPOINT_INPUT3,
-																	/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2CROSSPOINT_INPUT4,
-																	/* NTV2_INPUTSOURCE_SDI5 */			NTV2CROSSPOINT_INPUT5,
-																	/* NTV2_INPUTSOURCE_SDI6 */			NTV2CROSSPOINT_INPUT6,
-																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2CROSSPOINT_INPUT7,
-																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2CROSSPOINT_INPUT8,
-																	/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2CROSSPOINT_INPUT5,
-																	/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2CROSSPOINT_INPUT6,
-																	/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2CROSSPOINT_INPUT7,
-																	/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2CROSSPOINT_INPUT8,
-																	/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2CROSSPOINT_INPUT5,
-																	/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2CROSSPOINT_INPUT6,
-																	/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2CROSSPOINT_INPUT7,
-																	/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2CROSSPOINT_INPUT8,
-																	/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_CROSSPOINTS};
-#endif	//	else !defined (NTV2_DEPRECATE)
-	
 	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  size_t (inInputSource) < sizeof (gInputSourceToChannelSpec) / sizeof (NTV2Channel))
 		return gInputSourceToChannelSpec [inInputSource];
 	else
@@ -4514,9 +4465,11 @@ NTV2Crosspoint NTV2InputSourceToChannelSpec (const NTV2InputSource inInputSource
 
 NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inInputSource)
 {
-#if defined (NTV2_DEPRECATE)
-	static const NTV2ReferenceSource	gInputSourceToReferenceSource []	= { /* NTV2_INPUTSOURCE_ANALOG */		NTV2_REFERENCE_ANALOG_INPUT,
-																				/* NTV2_INPUTSOURCE_HDMI */			NTV2_REFERENCE_HDMI_INPUT,
+	static const NTV2ReferenceSource	gInputSourceToReferenceSource []	= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_REFERENCE_ANALOG_INPUT,
+																				/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_REFERENCE_HDMI_INPUT1,
+																				/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_REFERENCE_HDMI_INPUT2,
+																				/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_REFERENCE_HDMI_INPUT3,
+																				/* NTV2_INPUTSOURCE_HDMI4 */		NTV2_REFERENCE_HDMI_INPUT4,
 																				/* NTV2_INPUTSOURCE_SDI1 */			NTV2_REFERENCE_INPUT1,
 																				/* NTV2_INPUTSOURCE_SDI2 */			NTV2_REFERENCE_INPUT2,
 																				/* NTV2_INPUTSOURCE_SDI3 */			NTV2_REFERENCE_INPUT3,
@@ -4526,37 +4479,6 @@ NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inIn
 																				/* NTV2_INPUTSOURCE_SDI7 */			NTV2_REFERENCE_INPUT7,
 																				/* NTV2_INPUTSOURCE_SDI8 */			NTV2_REFERENCE_INPUT8,
 																				/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_REFERENCE_INPUTS};
-
-#else	//	else !defined (NTV2_DEPRECATE)
-	static const NTV2ReferenceSource	gInputSourceToReferenceSource []	= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_REFERENCE_INPUT1,
-																				/* NTV2_INPUTSOURCE_ANALOG */		NTV2_REFERENCE_ANALOG_INPUT,
-																				/* NTV2_INPUTSOURCE_SDI2 */			NTV2_REFERENCE_INPUT2,
-																				/* NTV2_INPUTSOURCE_HDMI */			NTV2_REFERENCE_HDMI_INPUT,
-																				/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_REFERENCE_INPUT1,
-																				/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_REFERENCE_INPUT2,
-																				/* NTV2_INPUTSOURCE_SDI3 */			NTV2_REFERENCE_INPUT3,
-																				/* NTV2_INPUTSOURCE_SDI4 */			NTV2_REFERENCE_INPUT4,
-																				/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_REFERENCE_INPUT3,
-																				/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_REFERENCE_INPUT4,
-																				/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_REFERENCE_INPUT1,
-																				/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_REFERENCE_INPUT2,
-																				/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_REFERENCE_INPUT3,
-																				/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_REFERENCE_INPUT4,
-																				/* NTV2_INPUTSOURCE_SDI5 */			NTV2_REFERENCE_INPUT5,
-																				/* NTV2_INPUTSOURCE_SDI6 */			NTV2_REFERENCE_INPUT6,
-																				/* NTV2_INPUTSOURCE_SDI7 */			NTV2_REFERENCE_INPUT7,
-																				/* NTV2_INPUTSOURCE_SDI8 */			NTV2_REFERENCE_INPUT8,
-																				/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_REFERENCE_INPUT5,
-																				/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_REFERENCE_INPUT6,
-																				/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_REFERENCE_INPUT7,
-																				/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_REFERENCE_INPUT8,
-																				/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_REFERENCE_INPUT5,
-																				/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_REFERENCE_INPUT6,
-																				/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_REFERENCE_INPUT7,
-																				/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_REFERENCE_INPUT8,
-																				/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_REFERENCE_INPUTS};
-#endif	//	else !defined (NTV2_DEPRECATE)
-
 	if (NTV2_IS_VALID_INPUT_SOURCE (inInputSource)  &&  size_t (inInputSource) < sizeof (gInputSourceToReferenceSource) / sizeof (NTV2ReferenceSource))
 		return gInputSourceToReferenceSource [inInputSource];
 	else
@@ -4567,49 +4489,20 @@ NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inIn
 
 NTV2Channel NTV2InputSourceToChannel (const NTV2InputSource inInputSource)
 {
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2Channel	gInputSourceToChannel []	= { /* NTV2_INPUTSOURCE_ANALOG */		NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_CHANNEL2,
-																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_CHANNEL3,
-																	/* NTV2_INPUTSOURCE_SDI4 */			NTV2_CHANNEL4,
-																	/* NTV2_INPUTSOURCE_SDI5 */			NTV2_CHANNEL5,
-																	/* NTV2_INPUTSOURCE_SDI6 */			NTV2_CHANNEL6,
-																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_CHANNEL7,
-																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_CHANNEL8,
-																	/* NTV2_NUM_INPUTSOURCES */			NTV2_CHANNEL_INVALID};
-	
-	#else	//	else !defined (NTV2_DEPRECATE)
-		static const NTV2Channel	gInputSourceToChannel []	= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_ANALOG */		NTV2_CHANNEL_INVALID,
-																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_CHANNEL2,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_CHANNEL_INVALID,
-																	/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_CHANNEL2,
-																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_CHANNEL3,
-																	/* NTV2_INPUTSOURCE_SDI4 */			NTV2_CHANNEL4,
-																	/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_CHANNEL3,
-																	/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_CHANNEL4,
-																	/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_CHANNEL1,
-																	/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_CHANNEL2,
-																	/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_CHANNEL3,
-																	/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_CHANNEL4,
-																	/* NTV2_INPUTSOURCE_SDI5 */			NTV2_CHANNEL5,
-																	/* NTV2_INPUTSOURCE_SDI6 */			NTV2_CHANNEL6,
-																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_CHANNEL7,
-																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_CHANNEL8,
-																	/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_CHANNEL5,
-																	/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_CHANNEL6,
-																	/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_CHANNEL7,
-																	/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_CHANNEL8,
-																	/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_CHANNEL5,
-																	/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_CHANNEL6,
-																	/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_CHANNEL7,
-																	/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_CHANNEL8,
-																	/* NTV2_NUM_INPUTSOURCES */			NTV2_CHANNEL_INVALID};
-	#endif	//	else !defined (NTV2_DEPRECATE)
-
+	static const NTV2Channel	gInputSourceToChannel []	= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_CHANNEL1,
+																/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_CHANNEL1,
+																/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_CHANNEL2,
+																/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_CHANNEL3,
+																/* NTV2_INPUTSOURCE_HDMI4 */		NTV2_CHANNEL4,
+																/* NTV2_INPUTSOURCE_SDI1 */			NTV2_CHANNEL1,
+																/* NTV2_INPUTSOURCE_SDI2 */			NTV2_CHANNEL2,
+																/* NTV2_INPUTSOURCE_SDI3 */			NTV2_CHANNEL3,
+																/* NTV2_INPUTSOURCE_SDI4 */			NTV2_CHANNEL4,
+																/* NTV2_INPUTSOURCE_SDI5 */			NTV2_CHANNEL5,
+																/* NTV2_INPUTSOURCE_SDI6 */			NTV2_CHANNEL6,
+																/* NTV2_INPUTSOURCE_SDI7 */			NTV2_CHANNEL7,
+																/* NTV2_INPUTSOURCE_SDI8 */			NTV2_CHANNEL8,
+																/* NTV2_NUM_INPUTSOURCES */			NTV2_CHANNEL_INVALID};
 	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  size_t (inInputSource) < sizeof (gInputSourceToChannel) / sizeof (NTV2Channel))
 		return gInputSourceToChannel [inInputSource];
 	else
@@ -4620,48 +4513,20 @@ NTV2Channel NTV2InputSourceToChannel (const NTV2InputSource inInputSource)
 
 NTV2AudioSystem NTV2InputSourceToAudioSystem (const NTV2InputSource inInputSource)
 {
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2AudioSystem	gInputSourceToAudioSystem []	= {	/* NTV2_INPUTSOURCE_ANALOG */		NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_HDMI */			NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_SDI1 */			NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_SDI2 */			NTV2_AUDIOSYSTEM_2,
-																			/* NTV2_INPUTSOURCE_SDI3 */			NTV2_AUDIOSYSTEM_3,
-																			/* NTV2_INPUTSOURCE_SDI4 */			NTV2_AUDIOSYSTEM_4,
-																			/* NTV2_INPUTSOURCE_SDI5 */			NTV2_AUDIOSYSTEM_5,
-																			/* NTV2_INPUTSOURCE_SDI6 */			NTV2_AUDIOSYSTEM_6,
-																			/* NTV2_INPUTSOURCE_SDI7 */			NTV2_AUDIOSYSTEM_7,
-																			/* NTV2_INPUTSOURCE_SDI8 */			NTV2_AUDIOSYSTEM_8,
-																			/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_AUDIOSYSTEMS};
-	#else	//	else !defined (NTV2_DEPRECATE)
-		static const NTV2AudioSystem	gInputSourceToAudioSystem []	= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_ANALOG */		NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_SDI2 */			NTV2_AUDIOSYSTEM_2,
-																			/* NTV2_INPUTSOURCE_HDMI */			NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_AUDIOSYSTEM_2,
-																			/* NTV2_INPUTSOURCE_SDI3 */			NTV2_AUDIOSYSTEM_3,
-																			/* NTV2_INPUTSOURCE_SDI4 */			NTV2_AUDIOSYSTEM_4,
-																			/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_AUDIOSYSTEM_3,
-																			/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_AUDIOSYSTEM_4,
-																			/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_AUDIOSYSTEM_1,
-																			/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_AUDIOSYSTEM_2,
-																			/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_AUDIOSYSTEM_3,
-																			/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_AUDIOSYSTEM_4,
-																			/* NTV2_INPUTSOURCE_SDI5 */			NTV2_AUDIOSYSTEM_5,
-																			/* NTV2_INPUTSOURCE_SDI6 */			NTV2_AUDIOSYSTEM_6,
-																			/* NTV2_INPUTSOURCE_SDI7 */			NTV2_AUDIOSYSTEM_7,
-																			/* NTV2_INPUTSOURCE_SDI8 */			NTV2_AUDIOSYSTEM_8,
-																			/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_AUDIOSYSTEM_5,
-																			/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_AUDIOSYSTEM_6,
-																			/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_AUDIOSYSTEM_7,
-																			/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_AUDIOSYSTEM_8,
-																			/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_AUDIOSYSTEM_5,
-																			/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_AUDIOSYSTEM_6,
-																			/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_AUDIOSYSTEM_7,
-																			/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_AUDIOSYSTEM_8,
-																			/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_AUDIOSYSTEMS};
-	#endif	//	else !defined (NTV2_DEPRECATE)
-
+	static const NTV2AudioSystem	gInputSourceToAudioSystem []	= {	/* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_AUDIOSYSTEM_1,
+																		/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_AUDIOSYSTEM_1,
+																		/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_AUDIOSYSTEM_2,
+																		/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_AUDIOSYSTEM_3,
+																		/* NTV2_INPUTSOURCE_HDMI4 */		NTV2_AUDIOSYSTEM_4,
+																		/* NTV2_INPUTSOURCE_SDI1 */			NTV2_AUDIOSYSTEM_1,
+																		/* NTV2_INPUTSOURCE_SDI2 */			NTV2_AUDIOSYSTEM_2,
+																		/* NTV2_INPUTSOURCE_SDI3 */			NTV2_AUDIOSYSTEM_3,
+																		/* NTV2_INPUTSOURCE_SDI4 */			NTV2_AUDIOSYSTEM_4,
+																		/* NTV2_INPUTSOURCE_SDI5 */			NTV2_AUDIOSYSTEM_5,
+																		/* NTV2_INPUTSOURCE_SDI6 */			NTV2_AUDIOSYSTEM_6,
+																		/* NTV2_INPUTSOURCE_SDI7 */			NTV2_AUDIOSYSTEM_7,
+																		/* NTV2_INPUTSOURCE_SDI8 */			NTV2_AUDIOSYSTEM_8,
+																		/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_AUDIOSYSTEMS};
 	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < (int)(sizeof (gInputSourceToAudioSystem) / sizeof (NTV2AudioSystem)))
 		return gInputSourceToAudioSystem [inInputSource];
 	else
@@ -4672,9 +4537,11 @@ NTV2AudioSystem NTV2InputSourceToAudioSystem (const NTV2InputSource inInputSourc
 
 NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSource inInputSource, const bool inEmbeddedLTC)
 {
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2TimecodeIndex	gInputSourceToTCIndex []= { /* NTV2_INPUTSOURCE_ANALOG */		NTV2_TCINDEX_LTC1,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_TCINDEX_INVALID,
+		static const NTV2TimecodeIndex	gInputSourceToTCIndex []= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_TCINDEX_LTC1,
+																	/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI4 */		NTV2_TCINDEX_INVALID,
 																	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_TCINDEX_SDI1,
 																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_TCINDEX_SDI2,
 																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_TCINDEX_SDI3,
@@ -4684,8 +4551,11 @@ NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSource inInputS
 																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_TCINDEX_SDI7,
 																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_TCINDEX_SDI8,
 																	/* NTV2_NUM_INPUTSOURCES */			NTV2_TCINDEX_INVALID};
-		static const NTV2TimecodeIndex	gInputSourceToLTCIndex []= { /* NTV2_INPUTSOURCE_ANALOG */		NTV2_TCINDEX_LTC1,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_TCINDEX_INVALID,
+		static const NTV2TimecodeIndex	gInputSourceToLTCIndex []= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_TCINDEX_LTC1,
+																	/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_TCINDEX_INVALID,
+																	/* NTV2_INPUTSOURCE_HDMI4 */		NTV2_TCINDEX_INVALID,
 																	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_TCINDEX_SDI1_LTC,
 																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_TCINDEX_SDI2_LTC,
 																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_TCINDEX_SDI3_LTC,
@@ -4695,63 +4565,6 @@ NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSource inInputS
 																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_TCINDEX_SDI7_LTC,
 																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_TCINDEX_SDI8_LTC,
 																	/* NTV2_NUM_INPUTSOURCES */			NTV2_TCINDEX_INVALID};
-	#else	//	else !defined (NTV2_DEPRECATE)
-		static const NTV2TimecodeIndex	gInputSourceToTCIndex []= {	/* NTV2_INPUTSOURCE_SDI1 */			NTV2_TCINDEX_SDI1,
-																	/* NTV2_INPUTSOURCE_ANALOG */		NTV2_TCINDEX_LTC1,
-																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_TCINDEX_SDI2,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_TCINDEX_INVALID,
-																	/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_TCINDEX_SDI1,
-																	/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_TCINDEX_SDI2,
-																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_TCINDEX_SDI3,
-																	/* NTV2_INPUTSOURCE_SDI4 */			NTV2_TCINDEX_SDI4,
-																	/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_TCINDEX_SDI3,
-																	/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_TCINDEX_SDI4,
-																	/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_TCINDEX_SDI1,
-																	/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_TCINDEX_SDI2,
-																	/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_TCINDEX_SDI3,
-																	/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_TCINDEX_SDI4,
-																	/* NTV2_INPUTSOURCE_SDI5 */			NTV2_TCINDEX_SDI5,
-																	/* NTV2_INPUTSOURCE_SDI6 */			NTV2_TCINDEX_SDI6,
-																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_TCINDEX_SDI7,
-																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_TCINDEX_SDI8,
-																	/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_TCINDEX_SDI5,
-																	/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_TCINDEX_SDI6,
-																	/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_TCINDEX_SDI7,
-																	/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_TCINDEX_SDI8,
-																	/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_TCINDEX_SDI5,
-																	/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_TCINDEX_SDI6,
-																	/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_TCINDEX_SDI7,
-																	/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_TCINDEX_SDI8,
-																	/* NTV2_NUM_INPUTSOURCES */			NTV2_TCINDEX_INVALID };
-		static const NTV2TimecodeIndex	gInputSourceToLTCIndex []= {/* NTV2_INPUTSOURCE_SDI1 */			NTV2_TCINDEX_SDI1_LTC,
-																	/* NTV2_INPUTSOURCE_ANALOG */		NTV2_TCINDEX_LTC1,
-																	/* NTV2_INPUTSOURCE_SDI2 */			NTV2_TCINDEX_SDI2_LTC,
-																	/* NTV2_INPUTSOURCE_HDMI */			NTV2_TCINDEX_INVALID,
-																	/* NTV2_INPUTSOURCE_DUALLINK1 */	NTV2_TCINDEX_SDI1_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK2 */	NTV2_TCINDEX_SDI2_LTC,
-																	/* NTV2_INPUTSOURCE_SDI3 */			NTV2_TCINDEX_SDI3_LTC,
-																	/* NTV2_INPUTSOURCE_SDI4 */			NTV2_TCINDEX_SDI4_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK3 */	NTV2_TCINDEX_SDI3_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK4 */	NTV2_TCINDEX_SDI4_LTC,
-																	/* NTV2_INPUTSOURCE_SDI1_DS2 */		NTV2_TCINDEX_SDI1_LTC,
-																	/* NTV2_INPUTSOURCE_SDI2_DS2 */		NTV2_TCINDEX_SDI2_LTC,
-																	/* NTV2_INPUTSOURCE_SDI3_DS2 */		NTV2_TCINDEX_SDI3_LTC,
-																	/* NTV2_INPUTSOURCE_SDI4_DS2 */		NTV2_TCINDEX_SDI4_LTC,
-																	/* NTV2_INPUTSOURCE_SDI5 */			NTV2_TCINDEX_SDI5_LTC,
-																	/* NTV2_INPUTSOURCE_SDI6 */			NTV2_TCINDEX_SDI6_LTC,
-																	/* NTV2_INPUTSOURCE_SDI7 */			NTV2_TCINDEX_SDI7_LTC,
-																	/* NTV2_INPUTSOURCE_SDI8 */			NTV2_TCINDEX_SDI8_LTC,
-																	/* NTV2_INPUTSOURCE_SDI5_DS2 */		NTV2_TCINDEX_SDI5_LTC,
-																	/* NTV2_INPUTSOURCE_SDI6_DS2 */		NTV2_TCINDEX_SDI6_LTC,
-																	/* NTV2_INPUTSOURCE_SDI7_DS2 */		NTV2_TCINDEX_SDI7_LTC,
-																	/* NTV2_INPUTSOURCE_SDI8_DS2 */		NTV2_TCINDEX_SDI8_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK5 */	NTV2_TCINDEX_SDI5_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK6 */	NTV2_TCINDEX_SDI6_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK7 */	NTV2_TCINDEX_SDI7_LTC,
-																	/* NTV2_INPUTSOURCE_DUALLINK8 */	NTV2_TCINDEX_SDI8_LTC,
-																	/* NTV2_NUM_INPUTSOURCES */			NTV2_TCINDEX_INVALID };
-	#endif	//	else !defined (NTV2_DEPRECATE)
-
 	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  size_t (inInputSource) < sizeof (gInputSourceToTCIndex) / sizeof (NTV2TimecodeIndex))
 		return inEmbeddedLTC ? gInputSourceToLTCIndex [inInputSource] : gInputSourceToTCIndex [inInputSource];
 	else
@@ -4897,40 +4710,9 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0)
 
 ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 {
-	static const ULWord	sInputSourcesIndexes []	= {
-												#if defined (NTV2_DEPRECATE)
-													0xFFFFFFFF,	//	NTV2_INPUTSOURCE_ANALOG,
-													0xFFFFFFFF,	//	NTV2_INPUTSOURCE_HDMI,
-													0,	1,	2,	3,	4,	5,	6,	7	//	NTV2_INPUTSOURCE_SDI1 ... NTV2_INPUTSOURCE_SDI8
-												#else
-													0,			//	NTV2_INPUTSOURCE_SDI,
-													0xFFFFFFFF,	//	NTV2_INPUTSOURCE_ANALOG,
-													1,			//	NTV2_INPUTSOURCE_SDI2,
-													0xFFFFFFFF,	//	NTV2_INPUTSOURCE_HDMI,
-													0,			//	NTV2_INPUTSOURCE_DUALLINK,
-													1,			//	NTV2_INPUTSOURCE_DUALLINK2,
-													2,			//	NTV2_INPUTSOURCE_SDI3,
-													3,			//	NTV2_INPUTSOURCE_SDI4,
-													2,			//	NTV2_INPUTSOURCE_DUALLINK3,
-													3,			//	NTV2_INPUTSOURCE_DUALLINK4,
-													0,			//	NTV2_INPUTSOURCE_SDI1_DS2,
-													1,			//	NTV2_INPUTSOURCE_SDI2_DS2,
-													2,			//	NTV2_INPUTSOURCE_SDI3_DS2,
-													3,			//	NTV2_INPUTSOURCE_SDI4_DS2,
-													4,			//	NTV2_INPUTSOURCE_SDI5,
-													5,			//	NTV2_INPUTSOURCE_SDI6,
-													6,			//	NTV2_INPUTSOURCE_SDI7,
-													7,			//	NTV2_INPUTSOURCE_SDI8,
-													4,			//	NTV2_INPUTSOURCE_SDI5_DS2,
-													5,			//	NTV2_INPUTSOURCE_SDI6_DS2,
-													6,			//	NTV2_INPUTSOURCE_SDI7_DS2,
-													7,			//	NTV2_INPUTSOURCE_SDI8_DS2,
-													4,			//	NTV2_INPUTSOURCE_DUALLINK5,
-													5,			//	NTV2_INPUTSOURCE_DUALLINK6,
-													6,			//	NTV2_INPUTSOURCE_DUALLINK7,
-													7			//	NTV2_INPUTSOURCE_DUALLINK8,
-												#endif	//	!defined (NTV2_DEPRECATE)
-												};
+	static const ULWord	sInputSourcesIndexes []	= {	0,							//	NTV2_INPUTSOURCE_ANALOG1,
+													0, 1, 2, 3,					//	NTV2_INPUTSOURCE_HDMI1 ... NTV2_INPUTSOURCE_HDMI4,
+													0, 1, 2, 3, 4, 5, 6, 7 };	//	NTV2_INPUTSOURCE_SDI1 ... NTV2_INPUTSOURCE_SDI8
 	if (static_cast <size_t> (inValue) < sizeof (sInputSourcesIndexes) / sizeof (ULWord))
 		return sInputSourcesIndexes [inValue];
 	else
@@ -5616,8 +5398,6 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 	{
 		(void) convert;
 		(void) lut;
-		if ( dualLink )
-			inputSource = NTV2_INPUTSOURCE_DUALLINK;
 		bool status = false;
 		if (fbf == NTV2_FBF_8BIT_YCBCR_420PL3)
 			return status;
@@ -5640,15 +5420,11 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				case NTV2_INPUTSOURCE_SDI2:
 					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
 					break;
-				case NTV2_INPUTSOURCE_ANALOG:
+				case NTV2_INPUTSOURCE_ANALOG1:
 					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
-				case NTV2_INPUTSOURCE_HDMI:
+				case NTV2_INPUTSOURCE_HDMI1:
 					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn);
-					break;
-				case NTV2_INPUTSOURCE_DUALLINK:
-					outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
 					break;
 				default:
 					return false;
@@ -5685,10 +5461,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					case NTV2_INPUTSOURCE_SDI2:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn2);
 						break;
-					case NTV2_INPUTSOURCE_ANALOG:
+					case NTV2_INPUTSOURCE_ANALOG1:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
-					case NTV2_INPUTSOURCE_HDMI:
+					case NTV2_INPUTSOURCE_HDMI1:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
 						break;
 					default:
@@ -5709,10 +5485,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				case NTV2_INPUTSOURCE_SDI2:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
 					break;
-				case NTV2_INPUTSOURCE_ANALOG:
+				case NTV2_INPUTSOURCE_ANALOG1:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
-				case NTV2_INPUTSOURCE_HDMI:
+				case NTV2_INPUTSOURCE_HDMI1:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
 					break;
 				default:
@@ -5744,10 +5520,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					case NTV2_INPUTSOURCE_SDI2:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn2);
 						break;
-					case NTV2_INPUTSOURCE_ANALOG:
+					case NTV2_INPUTSOURCE_ANALOG1:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
-					case NTV2_INPUTSOURCE_HDMI:
+					case NTV2_INPUTSOURCE_HDMI1:
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
 						break;
 					default:
@@ -5766,15 +5542,11 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				case NTV2_INPUTSOURCE_SDI2:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
 					break;
-				case NTV2_INPUTSOURCE_ANALOG:
+				case NTV2_INPUTSOURCE_ANALOG1:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
-				case NTV2_INPUTSOURCE_HDMI:
+				case NTV2_INPUTSOURCE_HDMI1:
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
-					break;
-				case NTV2_INPUTSOURCE_DUALLINK:
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn2);
 					break;
 				default:
 					return false;
@@ -5792,10 +5564,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 			case NTV2_INPUTSOURCE_SDI2:
 				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn2);
 				break;
-			case NTV2_INPUTSOURCE_ANALOG:
+			case NTV2_INPUTSOURCE_ANALOG1:
 				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptAnalogIn);
 				break;
-			case NTV2_INPUTSOURCE_HDMI:
+			case NTV2_INPUTSOURCE_HDMI1:
 				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn);
 				break;
 			default:
@@ -5823,10 +5595,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				case NTV2_INPUTSOURCE_SDI2:
 					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn2);
 					break;
-				case NTV2_INPUTSOURCE_ANALOG:
+				case NTV2_INPUTSOURCE_ANALOG1:
 					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
-				case NTV2_INPUTSOURCE_HDMI:
+				case NTV2_INPUTSOURCE_HDMI1:
 					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn);
 					break;
 				default:
@@ -5843,10 +5615,10 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				case NTV2_INPUTSOURCE_SDI2:
 					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn2);
 					break;
-				case NTV2_INPUTSOURCE_ANALOG:
+				case NTV2_INPUTSOURCE_ANALOG1:
 					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
-				case NTV2_INPUTSOURCE_HDMI:
+				case NTV2_INPUTSOURCE_HDMI1:
 					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn);
 					break;
 				default:
@@ -7194,8 +6966,11 @@ string NTV2InputSourceToString (const NTV2InputSource inValue,	const bool inForR
 {
 	switch (inValue)
 	{
-		case NTV2_INPUTSOURCE_ANALOG:			return inForRetailDisplay ? "Analog"	: "NTV2_INPUTSOURCE_ANALOG";
-		case NTV2_INPUTSOURCE_HDMI:				return inForRetailDisplay ? "HDMI"		: "NTV2_INPUTSOURCE_HDMI";
+		case NTV2_INPUTSOURCE_ANALOG1:			return inForRetailDisplay ? "Analog1"	: "NTV2_INPUTSOURCE_ANALOG1";
+		case NTV2_INPUTSOURCE_HDMI1:			return inForRetailDisplay ? "HDMI1"		: "NTV2_INPUTSOURCE_HDMI1";
+		case NTV2_INPUTSOURCE_HDMI2:			return inForRetailDisplay ? "HDMI2"		: "NTV2_INPUTSOURCE_HDMI2";
+		case NTV2_INPUTSOURCE_HDMI3:			return inForRetailDisplay ? "HDMI3"		: "NTV2_INPUTSOURCE_HDMI3";
+		case NTV2_INPUTSOURCE_HDMI4:			return inForRetailDisplay ? "HDMI4"		: "NTV2_INPUTSOURCE_HDMI4";
 		case NTV2_INPUTSOURCE_SDI1:				return inForRetailDisplay ? "SDI1"		: "NTV2_INPUTSOURCE_SDI1";
 		case NTV2_INPUTSOURCE_SDI2:				return inForRetailDisplay ? "SDI2"		: "NTV2_INPUTSOURCE_SDI2";
 		case NTV2_INPUTSOURCE_SDI3:				return inForRetailDisplay ? "SDI3"		: "NTV2_INPUTSOURCE_SDI3";
@@ -7204,24 +6979,6 @@ string NTV2InputSourceToString (const NTV2InputSource inValue,	const bool inForR
 		case NTV2_INPUTSOURCE_SDI6:				return inForRetailDisplay ? "SDI6"		: "NTV2_INPUTSOURCE_SDI6";
 		case NTV2_INPUTSOURCE_SDI7:				return inForRetailDisplay ? "SDI7"		: "NTV2_INPUTSOURCE_SDI7";
 		case NTV2_INPUTSOURCE_SDI8:				return inForRetailDisplay ? "SDI8"		: "NTV2_INPUTSOURCE_SDI8";
-		#if !defined (NTV2_DEPRECATE)
-			case NTV2_INPUTSOURCE_DUALLINK1:	return inForRetailDisplay ? "SDI1 DL"	: "NTV2_INPUTSOURCE_DUALLINK1";
-			case NTV2_INPUTSOURCE_DUALLINK2:	return inForRetailDisplay ? "SDI2 DL"	: "NTV2_INPUTSOURCE_DUALLINK2";
-			case NTV2_INPUTSOURCE_DUALLINK3:	return inForRetailDisplay ? "SDI3 DL"	: "NTV2_INPUTSOURCE_DUALLINK3";
-			case NTV2_INPUTSOURCE_DUALLINK4:	return inForRetailDisplay ? "SDI4 DL"	: "NTV2_INPUTSOURCE_DUALLINK4";
-			case NTV2_INPUTSOURCE_SDI1_DS2:		return inForRetailDisplay ? "SDI1 DS2"	: "NTV2_INPUTSOURCE_SDI1_DS2";
-			case NTV2_INPUTSOURCE_SDI2_DS2:		return inForRetailDisplay ? "SDI2 DS2"	: "NTV2_INPUTSOURCE_SDI2_DS2";
-			case NTV2_INPUTSOURCE_SDI3_DS2:		return inForRetailDisplay ? "SDI3 DS2"	: "NTV2_INPUTSOURCE_SDI3_DS2";
-			case NTV2_INPUTSOURCE_SDI4_DS2:		return inForRetailDisplay ? "SDI4 DS2"	: "NTV2_INPUTSOURCE_SDI4_DS2";
-			case NTV2_INPUTSOURCE_SDI5_DS2:		return inForRetailDisplay ? "SDI5 DS2"	: "NTV2_INPUTSOURCE_SDI5_DS2";
-			case NTV2_INPUTSOURCE_SDI6_DS2:		return inForRetailDisplay ? "SDI6 DS2"	: "NTV2_INPUTSOURCE_SDI6_DS2";
-			case NTV2_INPUTSOURCE_SDI7_DS2:		return inForRetailDisplay ? "SDI7 DS2"	: "NTV2_INPUTSOURCE_SDI7_DS2";
-			case NTV2_INPUTSOURCE_SDI8_DS2:		return inForRetailDisplay ? "SDI8 DS2"	: "NTV2_INPUTSOURCE_SDI8_DS2";
-			case NTV2_INPUTSOURCE_DUALLINK5:	return inForRetailDisplay ? "SDI5 DL"	: "NTV2_INPUTSOURCE_DUALLINK5";
-			case NTV2_INPUTSOURCE_DUALLINK6:	return inForRetailDisplay ? "SDI6 DL"	: "NTV2_INPUTSOURCE_DUALLINK6";
-			case NTV2_INPUTSOURCE_DUALLINK7:	return inForRetailDisplay ? "SDI7 DL"	: "NTV2_INPUTSOURCE_DUALLINK7";
-			case NTV2_INPUTSOURCE_DUALLINK8:	return inForRetailDisplay ? "SDI8 DL"	: "NTV2_INPUTSOURCE_DUALLINK8";
-		#endif	//	!defined (NTV2_DEPRECATE)
 		case NTV2_NUM_INPUTSOURCES:				break;
 	}
 	return string ();
