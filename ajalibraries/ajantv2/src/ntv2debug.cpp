@@ -107,7 +107,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		case DEVICE_ID_IO4KPLUS:					return "DEVICE_ID_IO4KPLUS";					break;
         case DEVICE_ID_IOIP_2022:					return "DEVICE_ID_IOIP_2022";					break;
         case DEVICE_ID_IOIP_2110:					return "DEVICE_ID_IOIP_2110";					break;
-		case DEVICE_ID_KONA1:					return "DEVICE_ID_KONAALPHA";					break;
+		case DEVICE_ID_KONA1:						return "DEVICE_ID_KONA1";						break;
         case DEVICE_ID_KONAHDMI:					return "DEVICE_ID_KONAHDMI";					break;
         case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";					break;
 	}
