@@ -58,9 +58,9 @@ static const SourceMapping		gSourceMappings []	=	{{"sdi1",	NTV2_INPUTSOURCE_SDI1
 														{"sdi6",	NTV2_INPUTSOURCE_SDI6},
 														{"sdi7",	NTV2_INPUTSOURCE_SDI7},
 														{"sdi8",	NTV2_INPUTSOURCE_SDI8},
-														{"hdmi",	NTV2_INPUTSOURCE_HDMI},
-														{"analog",	NTV2_INPUTSOURCE_ANALOG},
-														{"anlg",	NTV2_INPUTSOURCE_ANALOG},
+														{"hdmi",	NTV2_INPUTSOURCE_HDMI1},
+														{"analog",	NTV2_INPUTSOURCE_ANALOG1},
+														{"anlg",	NTV2_INPUTSOURCE_ANALOG1},
 														{"",		NTV2_NUM_INPUTSOURCES}};
 
 
