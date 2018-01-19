@@ -33,8 +33,25 @@ bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<u
             pair<vector<uint8_t>::const_iterator, vector<uint8_t>::const_iterator> p;
             p = mismatch(dataWritten.begin(), dataWritten.end(), dataRead.begin());
             int64_t byteMismatchOffset = distance(dataWritten.begin(), p.first);
-            cout << "Verifying write ... failed at byte " << byteMismatchOffset <<
-                    " expected: '" << hex << *p.first << "' but got: '" << hex << *p.second << "'\n\n" << flush;
+            ostringstream ossWrite;
+            ossWrite << "0x" << std::setw(2) << std::setfill('0') << hex << (int)*p.first;
+            ostringstream ossRead;
+            ossRead << "0x" << std::setw(2) << std::setfill('0') << hex << (int)*p.second;
+
+            ++p.first; ++p.second;
+            p = mismatch(p.first, dataWritten.end(), p.second);
+
+            int errorCount = 0;
+            while(p.first != dataWritten.end() && p.second != dataRead.end())
+            {
+                errorCount++;
+                ++p.first; ++p.second;
+                p = mismatch(p.first, dataWritten.end(), p.second);
+            }
+
+            cout << "Verifying write ... failed at byte: " << byteMismatchOffset <<
+                    ", byte written to device should be: " << ossWrite.str() << " , byte read from device was: " << ossRead.str() << ".\n" <<
+                    "There are " << errorCount << " other mismatches after this." << endl;
         }
     }
 
@@ -257,10 +274,14 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
         vector<uint8_t> dummyInput;
         SpiTransfer(commandSequence, dummyInput, data, bytesToTransfer);
 
+        // spin here until flash status bit 0 is clear
+        //uint8_t fs=0x00;
+        //do { FlashReadStatus(fs); } while(fs & 0x1);
+
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
 
-        bytesTransfered += pageSize;
+        bytesTransfered += bytesToTransfer;
 
         if (mVerbose && maxBytes > 0)
             print_flash_status("Verify", bytesTransfered, maxBytes, lastPercent);
@@ -321,7 +342,7 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
         do { FlashReadStatus(fs); } while(fs & 0x1);
 
         pageAddress += pageSize;
-        bytesTransfered += pageSize;
+        bytesTransfered += pageData.size();
 
         if (mVerbose && maxWrite > 0)
             print_flash_status("Program", bytesTransfered, maxWrite, lastPercent);
@@ -703,6 +724,9 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 
     // issue chip select
     mDevice.WriteRegister(mSpiSlaveReg, 0x00);
+
+    //uint32_t regValue;
+    //mDevice.ReadRegister(kRegBoardID, &regValue);
 
     // issue the command & arguments
     uint32_t dummyVal = 0;
