@@ -1131,36 +1131,39 @@ def main ():
                 f.write("**/\n")
                 f.write("%s %s (const NTV2DeviceID inDeviceID)\n" % (type, func))
                 f.write("{\n")
-                f.write("\tswitch (inDeviceID)\n")
-                f.write("\t{\n")
                 device_to_value_map = {}
                 if func in GetNums:
                     device_to_value_map = GetNums[func]
-                all_devices = device_ids
-                for device_name in all_devices:
-                    all_devices[device_name] = False
-                for device_name in devices_old_order:
-                    if device_name in device_to_value_map:
-                        if device_name:
-                            all_devices[device_name] = True
-                            value = device_to_value_map[device_name]
-                            if len(device_name) < 14:
-                                tabs = "\t\t\t"
-                            elif len(device_name) < 18:
-                                tabs = "\t\t"
-                            else:
-                                tabs = "\t"
-                            f.write("\t\tcase %s:%sreturn %s;\n" % (device_name, tabs, value))
-                f.write("\t#if defined(_DEBUG)\t\t// These devices all return zero:\n")
-                for device_name in all_devices:
-                    if not all_devices[device_name]:
-                        f.write("\t\tcase %s:\n" % (device_name))
-                f.write("\t#else\n")
-                f.write("\t\tdefault:\n")
-                f.write("\t#endif\t//\tdefined(_DEBUG)\n")
-                f.write("\t\t\tbreak;\n")
-                f.write("\t}\t//\tswitch on inDeviceID\n")
-                f.write("\n")
+                if len(device_to_value_map) is 0:
+                    f.write("\t(void) inDeviceID;\t\t// No devices support this function\n")
+                else:
+                    f.write("\tswitch (inDeviceID)\n")
+                    f.write("\t{\n")
+                    all_devices = device_ids
+                    for device_name in all_devices:
+                        all_devices[device_name] = False
+                    for device_name in devices_old_order:
+                        if device_name in device_to_value_map:
+                            if device_name:
+                                all_devices[device_name] = True
+                                value = device_to_value_map[device_name]
+                                if len(device_name) < 14:
+                                    tabs = "\t\t\t"
+                                elif len(device_name) < 18:
+                                    tabs = "\t\t"
+                                else:
+                                    tabs = "\t"
+                                f.write("\t\tcase %s:%sreturn %s;\n" % (device_name, tabs, value))
+                    f.write("\t#if defined(_DEBUG)\t\t// These devices all return zero:\n")
+                    for device_name in all_devices:
+                        if not all_devices[device_name]:
+                            f.write("\t\tcase %s:\n" % (device_name))
+                    f.write("\t#else\n")
+                    f.write("\t\tdefault:\n")
+                    f.write("\t#endif\t//\tdefined(_DEBUG)\n")
+                    f.write("\t\t\tbreak;\n")
+                    f.write("\t}\t//\tswitch on inDeviceID\n")
+                    f.write("\n")
                 f.write("\treturn 0;\n")
                 f.write("\n")
                 f.write("}\t//  %s (auto-generated)\n" % (func))
