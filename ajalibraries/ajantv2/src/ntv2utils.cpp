@@ -7565,7 +7565,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 		static	NTV2DeviceID	sDeviceIDs [] =	{	DEVICE_ID_KONA3GQUAD,	DEVICE_ID_KONA3G,	DEVICE_ID_KONA4,		DEVICE_ID_KONA4UFC,	DEVICE_ID_LHI,
 													DEVICE_ID_LHE_PLUS,		DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22,	DEVICE_ID_CORVID24,
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
-													DEVICE_ID_KONA1,	DEVICE_ID_NOTFOUND };
+													DEVICE_ID_KONA1,		DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);  ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
 	}
