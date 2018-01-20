@@ -54,7 +54,7 @@
             "primaryRemotePort":"6010",
             "payload":"100",
             "ssrc":"1000",
-            "numAudioChannels":"5",
+            "numAudioChannels":"4",
             "firstAudioChannel":"8",
             "audioPktInterval" :"1000",
             "Enable":"true"
