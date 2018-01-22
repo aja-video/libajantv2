@@ -4133,14 +4133,14 @@ typedef enum
 /**
 	@brief	Everything needed to call CNTV2Card::ReadRegister or CNTV2Card::WriteRegister functions.
 **/
-typedef /*AJAExport*/ struct NTV2RegInfo
+typedef struct NTV2RegInfo
 {
 	ULWord	registerNumber;		///< @brief	My register number to use in a ReadRegister or WriteRegister call.
 	ULWord	registerValue;		///< @brief	My register value to use in a ReadRegister or WriteRegister call.
 	ULWord	registerMask;		///< @brief	My register mask value to use in a ReadRegister or WriteRegister call.
 	ULWord	registerShift;		///< @brief	My register shift value to use in a ReadRegister or WriteRegister call.
 
-	#if !defined (NTV2_BUILDING_DRIVER)
+	#if !defined(NTV2_BUILDING_DRIVER)
 		/**
 			@brief	Constructs me from the given parameters.
 			@param[in]	inRegNum	Specifies the register number to use. If not specified, defaults to zero.
@@ -4148,7 +4148,7 @@ typedef /*AJAExport*/ struct NTV2RegInfo
 			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
 			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inRegValue = 0, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
+		AJAExport NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inRegValue = 0, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
 			:	registerNumber	(inRegNum),
 				registerValue	(inRegValue),
 				registerMask	(inRegMask),
@@ -4163,31 +4163,31 @@ typedef /*AJAExport*/ struct NTV2RegInfo
 			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
 			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		inline void	Set (const ULWord inRegNum, const ULWord inRegValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
+		AJAExport inline void	Set (const ULWord inRegNum, const ULWord inRegValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
 													{registerNumber	= inRegNum; registerValue = inRegValue; registerMask = inRegMask; registerShift = inRegShift;}
 		/**
 			@brief	Invalidates me, setting my register number, value, mask and shift values to 0xFFFFFFFF.
 		**/
-		inline void	MakeInvalid (void)				{registerNumber	= registerValue	= registerMask	= registerShift	= 0xFFFFFFFF;}
+		AJAExport inline void	MakeInvalid (void)				{registerNumber	= registerValue	= registerMask	= registerShift	= 0xFFFFFFFF;}
 
 		/**
 			@return	True if I'm considered "valid", or false if my register number, value, mask and shift values are all 0xFFFFFFFF.
 		**/
-		inline bool	IsValid (void) const			{return registerNumber != 0xFFFFFFFF || registerValue != 0xFFFFFFFF || registerMask != 0xFFFFFFFF || registerShift != 0xFFFFFFFF;}
+		AJAExport inline bool	IsValid (void) const			{return registerNumber != 0xFFFFFFFF || registerValue != 0xFFFFFFFF || registerMask != 0xFFFFFFFF || registerShift != 0xFFFFFFFF;}
 
 		/**
 			@return		True if I'm identical to the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS	Specifies the right-hand-side NTV2RegInfo that will be compared to me.
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		inline bool	operator == (const NTV2RegInfo & inRHS) const	{return registerNumber == inRHS.registerNumber && registerValue == inRHS.registerValue
+		AJAExport inline bool	operator == (const NTV2RegInfo & inRHS) const	{return registerNumber == inRHS.registerNumber && registerValue == inRHS.registerValue
 																			&& registerMask == inRHS.registerMask && registerShift == inRHS.registerShift;}
 		/**
 			@return		True if I'm less than the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS	Specifies the right-hand-side NTV2RegInfo that will be compared to me.
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		bool		operator < (const NTV2RegInfo & inRHS) const;
+		AJAExport bool			operator < (const NTV2RegInfo & inRHS) const;
 	#endif	//	not NTV2_BUILDING_DRIVER
 } NTV2RegInfo;
 
