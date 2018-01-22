@@ -276,7 +276,7 @@ bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const
 {
 	if (inOutputSpigot >= ::NTV2DeviceGetNumVideoOutputs (_boardID))
 	{
-		if ((_boardID == DEVICE_ID_IO4KUFC || _boardID == DEVICE_ID_IO4KUFC) && inOutputSpigot == 4)
+		if (NTV2DeviceCanDoWidget(_boardID, NTV2_WgtSDIMonOut1) && inOutputSpigot == 4)
 			return false;	//	Io4K Monitor Output exception
 		return true;		//	Invalid
 	}

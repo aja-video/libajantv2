@@ -356,7 +356,6 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_LHI:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID3G:
-	case DEVICE_ID_KONA1:
 		return 32;
 	case DEVICE_ID_IOXT:
 		return 24;
@@ -380,6 +379,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_IOIP_2022:
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
+	case DEVICE_ID_KONA1:
     case DEVICE_ID_KONAHDMI:
         return 111;
 	case DEVICE_ID_KONA3G:
@@ -950,9 +950,12 @@ bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inC
 
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
-	if (inDeviceID == DEVICE_ID_IO4KPLUS  ||  inDeviceID == DEVICE_ID_IO4K)
-        return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
-	return NTV2_AUDIOSYSTEM_INVALID;
+    return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
+}
+
+NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
+{
+	return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID));
 }
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)

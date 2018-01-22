@@ -218,7 +218,7 @@ typedef enum
     DEVICE_ID_IOIP_2022                 = 0x10710850,
     DEVICE_ID_IOIP_2110                 = 0x10710851,
 
-	DEVICE_ID_KONA1					= 0x10756600,
+	DEVICE_ID_KONA1						= 0x10756600,
     DEVICE_ID_KONAHDMI                  = 0x10767400,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
@@ -2947,7 +2947,7 @@ typedef enum
     NTV2_BITFILE_IOIP_2022          = 51,
     NTV2_BITFILE_IOIP_2110          = 52,
     NTV2_BITFILE_KONAIP_2110        = 53,
-    NTV2_BITFILE_KONAALPHA          = 54,
+    NTV2_BITFILE_KONA1				= 54,
     NTV2_BITFILE_KONAHDMI           = 55,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;

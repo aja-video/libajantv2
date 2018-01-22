@@ -15,7 +15,7 @@ NTV2DeviceCanDoAudio2Channels,Returns true if the audio system(s) on the device 
 NTV2DeviceCanDoAudio6Channels,Returns true if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 6 audio channels.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoAudio8Channels,Returns true if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 8 audio channels.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoAudio96K,Returns true if audio system(s) on the device having the given ID can be set to a 96kHz sample rate.,-,-,-,X,X,-,X,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,-,-,-,X,X,X,X,-,-,-
-NTV2DeviceCanDoAudioDelay,Returns true if audio system(s) on the device having the given ID have an adjustable delay.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,-,-
+NTV2DeviceCanDoAudioDelay,Returns true if audio system(s) on the device having the given ID have an adjustable delay.,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanDoBreakoutBox,Returns true if the device having the given ID can be connected to an AJA breakout box.,-,-,-,X,X,X,-,-,X,X,-,-,-,-,-,-,X,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoCapture,Returns true if the device having the given ID can capture (ingest) video.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoColorCorrection,Returns true if the device having the given ID has at least one programmable LUT.,-,-,-,X,X,X,-,-,X,X,X,X,-,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X
@@ -49,13 +49,13 @@ NTV2DeviceCanDoRP188,Returns true if the device having the given ID can insert a
 NTV2DeviceCanDoSDVideo,Returns true if the device having the given ID can handle SD (Standard Definition) video.,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 NTV2DeviceCanDoSDIErrorChecks,Returns true if the device having the given ID can perform SDI error checking.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceCanDoStackedAudio,"Returns true if the device having the given ID uses a ""stacked"" arrangement of its audio buffers.",-,-,-,-,-,-,-,-,-,X,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceCanDoStereoIn,Returns true if the device having the given ID supports 3D video input over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X,-,-,-
-NTV2DeviceCanDoStereoOut,Returns true if the device having the given ID supports 3D video output over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X,X,-,-
+NTV2DeviceCanDoStereoIn,Returns true if the device having the given ID supports 3D video input over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X,-,X,-
+NTV2DeviceCanDoStereoOut,Returns true if the device having the given ID supports 3D video output over dual-stream SDI.,-,-,-,-,-,-,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,-,-,-,X,X,X,X,X,X,-
 NTV2DeviceCanDoThunderbolt,Returns true if the device having the given ID connects to the host using a Thunderbolt cable.,-,-,-,-,-,-,-,-,-,-,-,X,X,X,X,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,-,-
 NTV2DeviceCanDoVideoProcessing,,-,-,X,X,X,X,-,X,X,X,X,X,-,X,X,X,X,X,X,-,-,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanMeasureTemperature,Returns true if the device having the given ID can measure its temperature.,-,X,X,X,X,X,X,X,X,X,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-
 NTV2DeviceCanReportFrameSize,,-,-,-,-,-,-,-,-,-,-,X,X,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
-NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,-,-,-,X,X,-,-,X,-,-
+NTV2DeviceHasBiDirectionalSDI,Returns true if the SDI connectors on the device having the given ID are bi-directional.,-,-,-,-,-,-,-,-,-,X,X,-,-,X,-,X,X,-,X,-,-,X,X,-,-,-,X,X,-,-,X,X,-
 NTV2DeviceHasColorSpaceConverterOnChannel2,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
 NTV2DeviceHasNWL,Returns true if the device having the given ID has NorthWest Logic DMA hardware.,-,-,-,-,-,-,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-,-,X,-,-
 NTV2DeviceHasPCIeGen2,Returns true if the device having the given ID supports 2nd-generation PCIe.,-,-,-,-,-,X,-,-,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,-,-,-,X,X,-
@@ -82,5 +82,5 @@ NTV2DeviceCanDo2110,Returns true if the device supports SMPTE 2110,-,-,-,-,-,-,-
 NTV2DeviceHasXilinxDMA,Returns true if the device has Xilinx DMA engine,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,X,X
 NTV2DeviceCanDo12GSDI,Returns true if the device supports 12G SDI,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,-,-,-
 NTV2DeviceHasSPIv5,Returns true if the device having the given ID uses version 5 SPI hardware.,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,-,X
-NTV2DeviceCanDoAudioMixer,Returns true if the device supports an audio mixer (firmware dependent).,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,-,-,-,-,-,-,X,X,X,-,-,-
-NTV2DeviceHasGenlockv2,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,X,-
+NTV2DeviceCanDoAudioMixer,Returns true if the device supports an audio mixer (firmware dependent).,-,-,-,-,-,-,-,-,-,-,-,-,-,X,-,-,X,-,-,-,-,-,-,-,-,-,-,X,X,X,-,X,-
+NTV2DeviceHasGenlockv2,,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,X,X,X,-,-,-
