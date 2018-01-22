@@ -15,10 +15,14 @@
             "primaryLocalPort":"5000",
             "primaryRemoteIPAddress":"239.1.164.20",
             "primaryRemotePort":"6000",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -26,12 +30,16 @@
             "primaryLocalPort":"5010",
             "primaryRemoteIPAddress":"239.11.164.30",
             "primaryRemotePort":"6010",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"4",
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -39,12 +47,15 @@
             "primaryLocalPort":"5010",
             "primaryRemoteIPAddress":"239.12.164.30",
             "primaryRemotePort":"6010",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"4",
             "firstAudioChannel":"4",
-            "audioPktInterval" :"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -52,12 +63,16 @@
             "primaryLocalPort":"5010",
             "primaryRemoteIPAddress":"239.13.164.30",
             "primaryRemotePort":"6010",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"8",
             "firstAudioChannel":"8",
             "audioPktInterval" :"125",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -65,12 +80,16 @@
             "primaryLocalPort":"5010",
             "primaryRemoteIPAddress":"239.14.164.30",
             "primaryRemotePort":"6010",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel2",
@@ -78,10 +97,14 @@
             "primaryLocalPort":"5001",
             "primaryRemoteIPAddress":"239.2.164.20",
             "primaryRemotePort":"6001",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel2",
@@ -89,12 +112,16 @@
             "primaryLocalPort":"5011",
             "primaryRemoteIPAddress":"239.21.164.30",
             "primaryRemotePort":"6011",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel3",
@@ -102,10 +129,14 @@
             "primaryLocalPort":"5002",
             "primaryRemoteIPAddress":"239.3.164.20",
             "primaryRemotePort":"6002",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel3",
@@ -113,12 +144,16 @@
             "primaryLocalPort":"5012",
             "primaryRemoteIPAddress":"239.31.164.30",
             "primaryRemotePort":"6012",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel4",
@@ -126,10 +161,14 @@
             "primaryLocalPort":"5003",
             "primaryRemoteIPAddress":"239.4.164.30",
             "primaryRemotePort":"6003",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel4",
@@ -137,12 +176,15 @@
             "primaryLocalPort":"5013",
             "primaryRemoteIPAddress":"239.41.164.30",
             "primaryRemotePort":"6013",
+            "secondaryRemoteIPAddress":"0.0.0.0",
+            "secondaryRemotePort":"6000",
+            "secondaryLocalPort":"5000",
             "payload":"100",
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
-            "audioPktInterval" :"125",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         }
     ]
 }

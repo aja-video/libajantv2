@@ -18,7 +18,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -31,7 +32,8 @@
             "numAudioChannels":"4",
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -44,7 +46,8 @@
             "numAudioChannels":"4",
             "firstAudioChannel":"4",
             "audioPktInterval" :"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -57,7 +60,8 @@
             "numAudioChannels":"4",
             "firstAudioChannel":"8",
             "audioPktInterval" :"1000",
-            "Enable":"true"
+            "LinkAEnable":"true",
+            "LinkBEnable":"false"
         }
     ]
 }
