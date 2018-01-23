@@ -43,10 +43,10 @@ bool NTV2DeviceCanChangeEmbeddedAudioClock (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
 		case DEVICE_ID_KONAIP_2110:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 			return true;
 	#if defined(_DEBUG)
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVIDHBR:
 	#else
@@ -714,7 +714,48 @@ bool NTV2DeviceCanDoAnalogVideoOut (const NTV2DeviceID inDeviceID)
 **/
 bool NTV2DeviceCanDoAudio2Channels (const NTV2DeviceID inDeviceID)
 {
-	(void) inDeviceID;
+	switch (inDeviceID)
+	{
+		case DEVICE_ID_KONA1:
+			return true;
+	#if defined(_DEBUG)
+		case DEVICE_ID_IO4KUFC:
+		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_KONALHI:
+		case DEVICE_ID_IOXT:
+		case DEVICE_ID_TTAP:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONAHDMI:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONA4:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_NOTFOUND:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_CORVID3G:
+		case DEVICE_ID_CORVIDHBR:
+		case DEVICE_ID_KONA3GQUAD:
+		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_CORVID1:
+		case DEVICE_ID_KONA3G:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_CORVID24:
+		case DEVICE_ID_KONALHEPLUS:
+		case DEVICE_ID_CORVID22:
+		case DEVICE_ID_IO4KPLUS:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_KONALHIDVI:
+	#else
+		default:
+	#endif
+			break;
+	}	//	switch on inDeviceID
 
 	return false;
 
@@ -727,7 +768,48 @@ bool NTV2DeviceCanDoAudio2Channels (const NTV2DeviceID inDeviceID)
 **/
 bool NTV2DeviceCanDoAudio6Channels (const NTV2DeviceID inDeviceID)
 {
-	(void) inDeviceID;
+	switch (inDeviceID)
+	{
+		case DEVICE_ID_KONA1:
+			return true;
+	#if defined(_DEBUG)
+		case DEVICE_ID_IO4KUFC:
+		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_KONALHI:
+		case DEVICE_ID_IOXT:
+		case DEVICE_ID_TTAP:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONAHDMI:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONA4:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_NOTFOUND:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_CORVID3G:
+		case DEVICE_ID_CORVIDHBR:
+		case DEVICE_ID_KONA3GQUAD:
+		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_CORVID1:
+		case DEVICE_ID_KONA3G:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_CORVID24:
+		case DEVICE_ID_KONALHEPLUS:
+		case DEVICE_ID_CORVID22:
+		case DEVICE_ID_IO4KPLUS:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_KONALHIDVI:
+	#else
+		default:
+	#endif
+			break;
+	}	//	switch on inDeviceID
 
 	return false;
 
@@ -867,13 +949,13 @@ bool NTV2DeviceCanDoAudioDelay (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
 		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_KONALHI:
 		case DEVICE_ID_IOXT:
 		case DEVICE_ID_TTAP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVID3G:
@@ -909,6 +991,7 @@ bool NTV2DeviceCanDoAudioMixer (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IO4KUFC:
@@ -918,7 +1001,6 @@ bool NTV2DeviceCanDoAudioMixer (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOXT:
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -2533,6 +2615,7 @@ bool NTV2DeviceCanDoSDIErrorChecks (const NTV2DeviceID inDeviceID)
 	{
 		case DEVICE_ID_CORVID88:
 		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IO4KUFC:
@@ -2544,7 +2627,6 @@ bool NTV2DeviceCanDoSDIErrorChecks (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -2879,12 +2961,12 @@ bool NTV2DeviceCanDoVideoProcessing (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
 		case DEVICE_ID_KONAIP_2110:
-		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_TTAP:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVIDHBR:
@@ -3074,6 +3156,7 @@ bool NTV2DeviceCanThermostat (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IOEXPRESS:
@@ -3082,7 +3165,6 @@ bool NTV2DeviceCanThermostat (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOXT:
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -3282,7 +3364,48 @@ bool NTV2DeviceHasBiDirectionalSDI (const NTV2DeviceID inDeviceID)
 **/
 bool NTV2DeviceHasColorSpaceConverterOnChannel2 (const NTV2DeviceID inDeviceID)
 {
-	(void) inDeviceID;
+	switch (inDeviceID)
+	{
+		case DEVICE_ID_KONA1:
+			return true;
+	#if defined(_DEBUG)
+		case DEVICE_ID_IO4KUFC:
+		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_KONALHI:
+		case DEVICE_ID_IOXT:
+		case DEVICE_ID_TTAP:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONAHDMI:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONA4:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_NOTFOUND:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_CORVID3G:
+		case DEVICE_ID_CORVIDHBR:
+		case DEVICE_ID_KONA3GQUAD:
+		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_CORVID1:
+		case DEVICE_ID_KONA3G:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_CORVID24:
+		case DEVICE_ID_KONALHEPLUS:
+		case DEVICE_ID_CORVID22:
+		case DEVICE_ID_IO4KPLUS:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_KONALHIDVI:
+	#else
+		default:
+	#endif
+			break;
+	}	//	switch on inDeviceID
 
 	return false;
 
@@ -3299,7 +3422,6 @@ bool NTV2DeviceHasGenlockv2 (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
-		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IO4KUFC:
@@ -3310,6 +3432,7 @@ bool NTV2DeviceHasGenlockv2 (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -3545,12 +3668,12 @@ bool NTV2DeviceHasNWL (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_KONALHI:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVID3G:
@@ -4066,7 +4189,6 @@ bool NTV2DeviceHasXilinxDMA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 			return true;
 	#if defined(_DEBUG)
@@ -4078,6 +4200,7 @@ bool NTV2DeviceHasXilinxDMA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONA4:
@@ -4405,13 +4528,13 @@ bool NTV2DeviceSoftwareCanChangeFrameBufferSize (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
 		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_KONALHI:
 		case DEVICE_ID_TTAP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVID3G:
 		case DEVICE_ID_KONA3GQUAD:
@@ -4786,7 +4909,7 @@ ULWord NTV2DeviceGetMaxRegisterNumber (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:	return kRegReserved511;
 		case DEVICE_ID_IOIP_2110:	return kRegReserved511;
 		case DEVICE_ID_KONAIP_2110:	return kRegReserved511;
-		case DEVICE_ID_KONA1:		return kRegXptSelectGroup10;
+		case DEVICE_ID_KONA1:		return kRegReserved511;
 		case DEVICE_ID_KONAHDMI:	return kRegReserved511;
 	#if defined(_DEBUG)		// These devices all return zero:
 		case DEVICE_ID_NOTFOUND:
@@ -6170,12 +6293,12 @@ UWord NTV2DeviceGetNumLUTs (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2022:	return 5;
 		case DEVICE_ID_IOIP_2110:	return 5;
 		case DEVICE_ID_KONAIP_2110:	return 5;
+		case DEVICE_ID_KONA1:		return 2;
 		case DEVICE_ID_KONAHDMI:	return 4;
 	#if defined(_DEBUG)		// These devices all return zero:
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_TTAP:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVID3G:
 		case DEVICE_ID_CORVID1:
@@ -6697,11 +6820,11 @@ ULWord NTV2DeviceGetUFCVersion (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:	return 1;
 		case DEVICE_ID_IOIP_2022:	return 1;
 		case DEVICE_ID_IOIP_2110:	return 1;
-		case DEVICE_ID_KONA1:		return 1;
 		case DEVICE_ID_KONAHDMI:	return 1;
 	#if defined(_DEBUG)		// These devices all return zero:
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -8845,6 +8968,51 @@ bool NTV2DeviceCanDoFrameBufferFormat (const NTV2DeviceID inDeviceID, const NTV2
 			}	//  switch on inDeviceID for NTV2_FBF_10BIT_YCBCR_422PL3_LE
 			break;	//  NTV2_FBF_10BIT_YCBCR_422PL3_LE
 
+		case NTV2_FBF_10BIT_YCBCR_DPX:
+			switch (inDeviceID)
+			{
+				case DEVICE_ID_KONA1:
+					return true;
+			#if defined(_DEBUG)		// These devices don't support NTV2_FBF_10BIT_YCBCR_DPX:
+				case DEVICE_ID_IO4KUFC:
+				case DEVICE_ID_IOEXPRESS:
+				case DEVICE_ID_IOIP_2022:
+				case DEVICE_ID_CORVIDHEVC:
+				case DEVICE_ID_KONALHI:
+				case DEVICE_ID_IOXT:
+				case DEVICE_ID_TTAP:
+				case DEVICE_ID_IO4K:
+				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONAHDMI:
+				case DEVICE_ID_KONAIP_2022:
+				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+				case DEVICE_ID_KONA4:
+				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+				case DEVICE_ID_NOTFOUND:
+				case DEVICE_ID_KONAIP_1RX_1TX_2110:
+				case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+				case DEVICE_ID_CORVID88:
+				case DEVICE_ID_CORVID3G:
+				case DEVICE_ID_CORVIDHBR:
+				case DEVICE_ID_KONA3GQUAD:
+				case DEVICE_ID_KONA4UFC:
+				case DEVICE_ID_CORVID1:
+				case DEVICE_ID_KONA3G:
+				case DEVICE_ID_IOIP_2110:
+				case DEVICE_ID_KONAIP_2110:
+				case DEVICE_ID_CORVID24:
+				case DEVICE_ID_KONALHEPLUS:
+				case DEVICE_ID_CORVID22:
+				case DEVICE_ID_IO4KPLUS:
+				case DEVICE_ID_CORVID44:
+				case DEVICE_ID_KONALHIDVI:
+			#else
+				default:
+			#endif
+					break;
+			}	//  switch on inDeviceID for NTV2_FBF_10BIT_YCBCR_DPX
+			break;	//  NTV2_FBF_10BIT_YCBCR_DPX
+
 		case NTV2_FBF_24BIT_BGR:
 			switch (inDeviceID)
 			{
@@ -8944,6 +9112,7 @@ bool NTV2DeviceCanDoFrameBufferFormat (const NTV2DeviceID inDeviceID, const NTV2
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -8968,7 +9137,6 @@ bool NTV2DeviceCanDoFrameBufferFormat (const NTV2DeviceID inDeviceID, const NTV2
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_CORVID1:
@@ -9478,7 +9646,6 @@ bool NTV2DeviceCanDoFrameBufferFormat (const NTV2DeviceID inDeviceID, const NTV2
 	#if defined(_DEBUG)		// These are unreferenced:
 		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_YCBCR_DPX:
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_INVALID:
@@ -10165,6 +10332,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10189,7 +10357,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080i_5994:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10210,6 +10377,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10234,7 +10402,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080i_6000:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10255,6 +10422,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10279,7 +10447,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2398:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10345,6 +10512,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10369,7 +10537,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2500:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10390,6 +10557,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10414,7 +10582,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2997:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10434,6 +10601,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10458,7 +10626,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2K_2398:
 				case DEVICE_ID_IOEXPRESS:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 			#else
@@ -10479,6 +10646,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10503,7 +10671,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2K_2400:
 				case DEVICE_ID_IOEXPRESS:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 			#else
@@ -10524,6 +10691,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10548,7 +10716,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_2K_2500:
 				case DEVICE_ID_IOEXPRESS:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 			#else
@@ -10565,6 +10732,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10588,7 +10756,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA4UFC:
@@ -10610,6 +10777,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10633,7 +10801,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA4UFC:
@@ -10655,6 +10822,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10675,7 +10843,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA3GQUAD:
@@ -10700,6 +10867,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10720,7 +10888,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA3GQUAD:
@@ -10745,6 +10912,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10766,7 +10934,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA3GQUAD:
@@ -10790,6 +10957,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10811,7 +10979,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA3GQUAD:
@@ -10835,6 +11002,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10856,7 +11024,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID3G:
 				case DEVICE_ID_KONA3GQUAD:
@@ -10885,6 +11052,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10909,7 +11077,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_3000:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -10927,6 +11094,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
@@ -10947,7 +11115,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 				case DEVICE_ID_NOTFOUND:
@@ -10973,6 +11140,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -10997,7 +11165,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_5000_A:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 				case DEVICE_ID_KONALHEPLUS:
@@ -11017,6 +11184,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
@@ -11037,7 +11205,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 				case DEVICE_ID_NOTFOUND:
@@ -11063,6 +11230,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -11087,7 +11255,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_5994_A:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 				case DEVICE_ID_KONALHEPLUS:
@@ -11153,6 +11320,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -11177,7 +11345,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080p_6000_A:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 				case DEVICE_ID_KONALHEPLUS:
@@ -11199,6 +11366,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11217,7 +11385,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2398:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11244,6 +11411,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11262,7 +11430,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2400:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11289,6 +11456,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11307,7 +11475,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2500_2:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11334,6 +11501,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11352,7 +11520,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2997_2:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11378,6 +11545,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11397,7 +11565,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2K_2398:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11423,6 +11590,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11442,7 +11610,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2K_2400:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11468,6 +11635,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11486,7 +11654,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_2K_2500:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -11514,6 +11681,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
@@ -11532,7 +11700,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_1080psf_3000_2:
 				case DEVICE_ID_IOIP_2022:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -12182,7 +12349,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			switch (inDeviceID)
 			{
 				case DEVICE_ID_CORVIDHEVC:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_CORVID88:
 				case DEVICE_ID_KONA3GQUAD:
 				case DEVICE_ID_CORVID24:
@@ -12197,6 +12363,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -12860,6 +13027,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IO4KUFC:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
 				case DEVICE_ID_CORVID3G:
@@ -12874,7 +13042,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONA4:
@@ -12906,6 +13073,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOIP_2022:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
@@ -12924,7 +13092,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_NOTFOUND:
@@ -12955,6 +13122,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -12979,7 +13147,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_525_5994:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -12993,6 +13160,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			{
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_IO4K:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_CORVID88:
 				case DEVICE_ID_KONA3G:
@@ -13007,7 +13175,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -13045,6 +13212,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -13069,7 +13237,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_625_5000:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
@@ -13083,6 +13250,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			{
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_IO4K:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONA4:
 				case DEVICE_ID_CORVID88:
 				case DEVICE_ID_KONA3G:
@@ -13097,7 +13265,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -13130,6 +13297,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IO4KUFC:
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_1RX_1TX_2110:
 				case DEVICE_ID_CORVID3G:
@@ -13146,7 +13314,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_CORVIDHEVC:
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 				case DEVICE_ID_KONA4:
@@ -13178,6 +13345,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_IOXT:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -13202,7 +13370,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_720p_2500:
 				case DEVICE_ID_IOEXPRESS:
 				case DEVICE_ID_TTAP:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 				case DEVICE_ID_CORVID1:
 				case DEVICE_ID_KONALHEPLUS:
@@ -13225,6 +13392,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_IO4K:
 				case DEVICE_ID_KONAIP_4CH_2SFP:
+				case DEVICE_ID_KONA1:
 				case DEVICE_ID_KONAHDMI:
 				case DEVICE_ID_KONAIP_2022:
 				case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -13249,7 +13417,6 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 				case DEVICE_ID_KONALHIDVI:
 					return true;
 			#if defined(_DEBUG)		// These devices don't support NTV2_FORMAT_720p_5000:
-				case DEVICE_ID_KONA1:
 				case DEVICE_ID_NOTFOUND:
 			#else
 				default:
