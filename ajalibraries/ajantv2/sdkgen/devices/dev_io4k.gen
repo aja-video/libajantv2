@@ -220,6 +220,9 @@ NTV2DeviceCanThermostat
 NTV2DeviceCanDoVITC2
 NTV2DeviceCanDoHDMIHDROut
 NTV2DeviceCanDoAudioMixer
+NTV2DeviceHasLEDAudioMeters
+NTV2DeviceHasHeadphoneJack
+NTV2DeviceHasAudioMonitorRCAJacks
 
 
 // NTV2ConversionModes

@@ -220,6 +220,9 @@ NTV2DeviceCanDo12GSDI
 NTV2DeviceHasSPIv5
 NTV2DeviceCanDoAudioMixer
 NTV2DeviceHasGenlockv2
+NTV2DeviceHasLEDAudioMeters
+NTV2DeviceHasHeadphoneJack
+NTV2DeviceHasBiDirectionalAnalogAudio
 
 
 // NTV2ConversionModes

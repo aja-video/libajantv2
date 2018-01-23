@@ -32,26 +32,6 @@
 #include "ntv2devicefeatures.hh"
 
 /*
-	@return	True if the device having the given ID has LED audio meters;  otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceHasLEDAudioMeters(const NTV2DeviceID inDeviceID);
-/*
-	@return	True if the device having the given ID has a headphone jack;  otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceHasHeadphoneJack(const NTV2DeviceID inDeviceID);
-/*
-	@return	True if the device having the given ID has a pair of unbalanced RCA audio monitor output jacks;  otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceHasAudioMonitorRCAJacks(const NTV2DeviceID inDeviceID);
-/*
-	@return	True if the device having the given ID has a bi-directional analog audio connector;  otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceHasBiDirectionalAnalogAudio(const NTV2DeviceID inDeviceID);
-/*
 	@return	True if the device having the given ID can do audio output;  otherwise false.
 	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
 */
