@@ -2055,14 +2055,17 @@ void CNTV2Config2110::SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP lin
 {
     uint32_t reg;
     if (stream == NTV2_VIDEO_STREAM)
+    {
         reg = SAREK_2110_TX_ARBITRATOR;
+    }
     else
+    {
         reg = SAREK_2110_TX_ARBITRATOR + 1;  // audio
-
+    }
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
 
-    uint32_t bit = (1  << channel) << (16 * (int)link);
+    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(link) * 16);
     if (enable)
         val |= bit;
     else
@@ -2082,6 +2085,6 @@ void CNTV2Config2110::GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP lin
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
 
-    uint32_t bit = (1  << channel) << (16 * (int)link);
+    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(link) * 16);
     enable = (val & bit);
 }
