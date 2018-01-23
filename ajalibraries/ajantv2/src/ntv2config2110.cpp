@@ -1180,6 +1180,7 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(NTV2Channel channel, NTV2Stream stream)
 {
+	(void) channel;
     if (stream == NTV2_VIDEO_STREAM)
     {
         return SAREK_2110_VIDEO_FRAMER;
@@ -1339,21 +1340,13 @@ uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,NTV2Stream str)
     uint32_t iStream = 0;
     switch (str)
     {
-    case NTV2_VIDEO_STREAM:
-        iStream = (uint32_t)ch;
-        break;
-    case NTV2_AUDIO1_STREAM:
-        iStream = (uint32_t)ch * 4;
-        break;
-    case NTV2_AUDIO2_STREAM:
-        iStream = ((uint32_t)ch * 4) + 1;
-        break;
-    case NTV2_AUDIO3_STREAM:
-        iStream = ((uint32_t)ch * 4) + 2;
-        break;
-    case NTV2_AUDIO4_STREAM:
-        iStream = ((uint32_t)ch * 4) + 3;
-        break;
+		case NTV2_VIDEO_STREAM:			iStream = (uint32_t)ch;				break;
+		case NTV2_AUDIO1_STREAM:		iStream = (uint32_t)ch * 4;			break;
+		case NTV2_AUDIO2_STREAM:		iStream = ((uint32_t)ch * 4) + 1;	break;
+		case NTV2_AUDIO3_STREAM:		iStream = ((uint32_t)ch * 4) + 2;	break;
+		case NTV2_AUDIO4_STREAM:		iStream = ((uint32_t)ch * 4) + 3;	break;
+		case NTV2_METADATA_STREAM:		break;
+		case NTV2_MAX_NUM_STREAMS:		break;
     }
     return iStream;
 }

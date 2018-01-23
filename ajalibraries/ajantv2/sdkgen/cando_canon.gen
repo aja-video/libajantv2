@@ -1,0 +1,99 @@
+//	@file		cando_canon.gen
+//	@brief		This is the canonical list of "CanDo" functions (those device-features functions that return true/false).
+//	@detail		To add a new function:
+//				1)	Add a new line
+//				2)	In the new line, add the following (left-to-right order)...
+//					a)	Function name
+//					b)	Whitespace (required if return value description included)
+//					c)	Optional return value description. (Used in Doxy-tagged "@return" comments.)
+//
+//	@note		Order is irrelevant -- the script sorts everything itself.
+
+
+// FUNCTION NAME							RETURN VALUE DESCRIPTION
+// ---------------------------------------- --------------------------------------------------------------------------------------
+NTV2DeviceCanChangeFrameBufferSize			True if the device having the given ID does not have fixed frame buffer sizes.
+NTV2DeviceCanDisableUFC						True if the device having the given ID has at least one UFC, and it can be disabled.
+NTV2DeviceCanDo2KVideo						True if the device having the given ID is capable of handling 2Kx1556 video.
+NTV2DeviceCanDo3GLevelConversion			True if the device having the given ID can perform 3G level B to 3G level A conversion.
+NTV2DeviceCanDoRGBLevelAConversion			True if the device having the given ID can do RGB over 3G Level A.
+NTV2DeviceCanDo425Mux						True if the device having the given ID supports SMPTE 425 mux control.
+NTV2DeviceCanDo4KVideo						True if the device having the given ID can handle 4K/UHD video.
+NTV2DeviceCanDoAESAudioIn					True if the device having the given ID has at least one AES/EBU audio input.
+NTV2DeviceCanDoAnalogAudio					True if the device having the given ID has at least one analog audio input or output.
+NTV2DeviceCanDoAnalogVideoIn				True if the device having the given ID has at least one analog video input.
+NTV2DeviceCanDoAnalogVideoOut				True if the device having the given ID has at least one analog video output.
+NTV2DeviceCanDoAudio2Channels				True if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 2 audio channels.
+NTV2DeviceCanDoAudio6Channels				True if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 6 audio channels.
+NTV2DeviceCanDoAudio8Channels				True if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 8 audio channels.
+NTV2DeviceCanDoAudio96K						True if audio system(s) on the device having the given ID can be set to a 96kHz sample rate.
+NTV2DeviceCanDoAudioDelay					True if audio system(s) on the device having the given ID have an adjustable delay.
+NTV2DeviceCanDoBreakoutBox					True if the device having the given ID can be connected to an AJA breakout box.
+NTV2DeviceCanDoCapture						True if the device having the given ID can capture (ingest) video.
+NTV2DeviceCanDoColorCorrection				True if the device having the given ID has at least one programmable LUT.
+NTV2DeviceCanDoCustomAnc					True if the device having the given ID supports ANC insertion/extraction.
+NTV2DeviceCanDoDSKOpacity					True if the device having the given ID has a mixer/keyer whose opacity is adjustable.
+NTV2DeviceCanDoDualLink						True if the device having the given ID can input/output 10-bit RGB over 2-wire SDI.
+NTV2DeviceCanDoDVCProHD						True if the device having the given ID can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
+NTV2DeviceCanDoEnhancedCSC					True if the device having the given ID has enhanced color space converter capability.
+NTV2DeviceCanDoHDMIOutStereo				True if the device having the given ID can handle 3D-stereo video output over HDMI.
+NTV2DeviceCanDoHDV							True if the device having the given ID can squeeze/stretch between 1920x1080 and 1440x1080.
+NTV2DeviceCanDoHDVideo						True if the device having the given ID can handle HD (High Definition) video.
+NTV2DeviceCanDoLTC							True if the device having the given ID can take in LTC (Linear TimeCode) from one of its inputs.
+NTV2DeviceCanDoLTCInOnRefPort				True if the device having the given ID can read LTC (Linear TimeCode) from its reference input.
+NTV2DeviceCanDoMSI							True if the DMA hardware on the device having the given ID supports MSI (Message Signaled Interrupts).
+NTV2DeviceCanDoMultiFormat					True if the device having the given ID can simultaneously handle different video formats on more than one SDI input or output.
+NTV2DeviceCanDoPCMControl					True if the audio system(s) on the device having the given ID can set the per-audio-channel-pair non-PCM (Pulse Code Modulation) bits in outgoing embedded audio.
+NTV2DeviceCanDoPCMDetection					True if the device having the given ID has per-audio-channel-pair PCM detection capabilities.
+NTV2DeviceCanDoPIO							True if the device having the given ID supports Programmed I/O.
+NTV2DeviceCanDoPlayback						True if the device having the given ID can output (play) video.
+NTV2DeviceCanDoProgrammableCSC				True if the device having the given ID has at least one programmable color space converter widget.
+NTV2DeviceCanDoProgrammableRS422			True if the device having the given ID has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
+NTV2DeviceCanDoProRes						True if the device having the given ID can can accommodate Apple ProRes-compressed video in its frame buffers.
+NTV2DeviceCanDoQuarterExpand				True if the device having the given ID can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
+NTV2DeviceCanDoRateConvert					True if the device having the given ID can do frame rate conversion.
+NTV2DeviceCanDoRGBPlusAlphaOut				True if the device with the given ID has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. Has nothing to do with RGB wire formats.
+NTV2DeviceCanDoRP188						True if the device having the given ID can insert and/or extract RP-188/VITC.
+NTV2DeviceCanDoSDVideo						True if the device having the given ID can handle SD (Standard Definition) video.
+NTV2DeviceCanDoSDIErrorChecks				True if the device having the given ID can perform SDI error checking.
+NTV2DeviceCanDoStackedAudio					True if the device having the given ID uses a 'stacked' arrangement of its audio buffers.
+NTV2DeviceCanDoStereoIn						True if the device having the given ID supports 3D video input over dual-stream SDI.
+NTV2DeviceCanDoStereoOut					True if the device having the given ID supports 3D video output over dual-stream SDI.
+NTV2DeviceCanDoThunderbolt					True if the device having the given ID connects to the host using a Thunderbolt cable.
+NTV2DeviceCanDoVideoProcessing
+NTV2DeviceCanMeasureTemperature				True if the device having the given ID can measure its temperature.
+NTV2DeviceCanReportFrameSize
+NTV2DeviceHasBiDirectionalSDI				True if the SDI connectors on the device having the given ID are bi-directional.
+NTV2DeviceHasNWL							True if the device having the given ID has NorthWest Logic DMA hardware.
+NTV2DeviceHasPCIeGen2						True if the device having the given ID supports 2nd-generation PCIe.
+NTV2DeviceHasRetailSupport					True if the device can be configured and controlled by the retail services and AJA Control Panel.
+NTV2DeviceHasSDIRelays						True if the device having the given ID has bypass relays on its SDI connectors.
+NTV2DeviceHasSPIFlash
+NTV2DeviceHasSPIFlashSerial
+NTV2DeviceHasSPIv2							True if the device having the given ID uses version 2 SPI hardware.
+NTV2DeviceHasSPIv3							True if the device having the given ID uses version 3 SPI hardware.
+NTV2DeviceHasSPIv4							True if the device having the given ID uses version 4 SPI hardware.
+NTV2DeviceIs64Bit	
+NTV2DeviceIsDirectAddressable
+NTV2DeviceIsExternalToHost					True if the device having the given ID connects to the host with a cable.
+NTV2DeviceIsSupported						True if the device having the given ID is supported by this SDK.
+NTV2DeviceNeedsRoutingSetup					True if the routing for the device having the given ID can be queried and/or changed.
+NTV2DeviceCanThermostat						True if the fan on the device having the given ID can be thermostatically controlled.
+NTV2DeviceHasHEVCM31						True if the device having the given ID has an HEVC M31 encoder.
+NTV2DeviceHasHEVCM30						True if the device having the given ID has an HEVC M30 encoder/decoder.
+NTV2DeviceCanDoVITC2						True if the device having the given ID can insert and/or extract RP-188/VITC2.
+NTV2DeviceCanDoHDMIHDROut					True if the device having the given ID supports HDMI HDR output.
+NTV2DeviceCanDoJ2K							True if the device supports the JPEG 2000 codec
+NTV2DeviceCanDo2110							True if the device supports SMPTE 2110
+NTV2DeviceHasXilinxDMA						True if the device has Xilinx DMA engine
+NTV2DeviceCanDo12GSDI						True if the device supports 12G SDI
+NTV2DeviceHasSPIv5							True if the device having the given ID uses version 5 SPI hardware.
+NTV2DeviceCanDoAudioMixer					True if the device supports an audio mixer (firmware dependent).
+NTV2DeviceHasGenlockv2	
+NTV2DeviceHasColorSpaceConverterOnChannel2
+NTV2DeviceSoftwareCanChangeFrameBufferSize	
+NTV2DeviceCanDoFrameStore1Display	
+NTV2DeviceCanDoFreezeOutput			
+NTV2DeviceCanDoQREZ
+NTV2DeviceCanDoIsoConvert
+NTV2DeviceCanChangeEmbeddedAudioClock		

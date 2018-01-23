@@ -23,7 +23,7 @@
 			including the total number of lines, number of pixels per line, line pitch, and which line contains the start
 			of active video.
 **/
-typedef struct NTV2FormatDescriptor
+AJAExport typedef struct NTV2FormatDescriptor
 {
 	/**
 		@brief	My default constructor initializes me in an "invalid" state.
@@ -299,7 +299,7 @@ typedef struct NTV2FormatDescriptor
 	@param[in]	inFormatDesc	Specifies the NTV2FormatDescriptor instance to print to the output stream.
 	@return	A non-constant reference to the specified output stream.
 **/
-inline std::ostream & operator << (std::ostream & inOutStream, const NTV2FormatDescriptor & inFormatDesc)	{return inFormatDesc.Print (inOutStream);}
+AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2FormatDescriptor & inFormatDesc)	{return inFormatDesc.Print (inOutStream);}
 
 
 //#if !defined (NTV2_DEPRECATE_12_6)

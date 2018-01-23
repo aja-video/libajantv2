@@ -17,6 +17,7 @@
 //#define NTV2_DEPRECATE_13_0			//	First deprecated in SDK 13.0
 //#define NTV2_DEPRECATE_13_1			//	First deprecated in SDK 13.1
 //#define NTV2_DEPRECATE_14_0			//	First deprecated in SDK 14.0
+//#define NTV2_DEPRECATE_14_1			//	First deprecated in SDK 14.1
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -108,6 +109,9 @@
 		#define	NTV2_DEPRECATED_12_5
 		#define	NTV2_DEPRECATED_12_6
 		#define	NTV2_DEPRECATED_13_0
+		#define	NTV2_DEPRECATED_13_1
+		#define	NTV2_DEPRECATED_14_0
+		#define	NTV2_DEPRECATED_14_1
 	#else
 		#if defined (NTV2_DEPRECATE)
 			#define	NTV2_DEPRECATED
@@ -137,6 +141,24 @@
 			#define	NTV2_DEPRECATED_13_0
 		#else
 			#define	NTV2_DEPRECATED_13_0	__declspec(deprecated)
+		#endif
+
+		#if defined (NTV2_DEPRECATE_13_1)
+			#define	NTV2_DEPRECATED_13_1
+		#else
+			#define	NTV2_DEPRECATED_13_1	__declspec(deprecated)
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_0)
+			#define	NTV2_DEPRECATED_14_0
+		#else
+			#define	NTV2_DEPRECATED_14_0	__declspec(deprecated)
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_1)
+			#define	NTV2_DEPRECATED_14_1
+		#else
+			#define	NTV2_DEPRECATED_14_1	__declspec(deprecated)
 		#endif
 	#endif
 
@@ -250,6 +272,48 @@
 				#define	NTV2_DEPRECATED_13_0	__declspec(deprecated)
 			#endif
 		#endif
+
+		#if defined (NTV2_DEPRECATE_13_1)
+			#define	NTV2_DEPRECATED_13_1
+		#else
+			#if !defined (__clang__)
+				#define	NTV2_DEPRECATED_13_1	//	__declspec unavailable until Xcode 5
+			#elif __clang_major__ == 7  &&  __clang_minor__ == 3
+				#define	NTV2_DEPRECATED_13_1	//	__declspec broken in Xcode 7.3
+			#elif __clang_major__ == 8
+				#define	NTV2_DEPRECATED_13_1	//	__declspec broken in Xcode 8
+			#else
+				#define	NTV2_DEPRECATED_13_1	__declspec(deprecated)
+			#endif
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_0)
+			#define	NTV2_DEPRECATED_14_0
+		#else
+			#if !defined (__clang__)
+				#define	NTV2_DEPRECATED_14_0	//	__declspec unavailable until Xcode 5
+			#elif __clang_major__ == 7  &&  __clang_minor__ == 3
+				#define	NTV2_DEPRECATED_14_0	//	__declspec broken in Xcode 7.3
+			#elif __clang_major__ == 8
+				#define	NTV2_DEPRECATED_14_0	//	__declspec broken in Xcode 8
+			#else
+				#define	NTV2_DEPRECATED_14_0	__declspec(deprecated)
+			#endif
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_1)
+			#define	NTV2_DEPRECATED_14_1
+		#else
+			#if !defined (__clang__)
+				#define	NTV2_DEPRECATED_14_1	//	__declspec unavailable until Xcode 5
+			#elif __clang_major__ == 7  &&  __clang_minor__ == 3
+				#define	NTV2_DEPRECATED_14_1	//	__declspec broken in Xcode 7.3
+			#elif __clang_major__ == 8
+				#define	NTV2_DEPRECATED_14_1	//	__declspec broken in Xcode 8
+			#else
+				#define	NTV2_DEPRECATED_14_1	__declspec(deprecated)
+			#endif
+		#endif
 	#endif
 
 #elif defined (AJALinux)				///////////////LINUX//////////////////////////////
@@ -291,6 +355,11 @@
 		#define NTV2_BUILDING_DRIVER
 		#define	NTV2_DEPRECATED
 		#define	NTV2_DEPRECATED_12_5
+		#define	NTV2_DEPRECATED_12_6
+		#define	NTV2_DEPRECATED_13_0
+		#define	NTV2_DEPRECATED_13_1
+		#define	NTV2_DEPRECATED_14_0
+		#define	NTV2_DEPRECATED_14_1
 	#else
 		#if defined (NTV2_DEPRECATE)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
@@ -325,6 +394,27 @@
 			#define	NTV2_DEPRECATED_13_0		//	Disable deprecate warnings (for now)
 		#else
 			#define	NTV2_DEPRECATED_13_0
+		#endif
+
+		#if defined (NTV2_DEPRECATE_13_1)
+			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
+			#define	NTV2_DEPRECATED_13_1		//	Disable deprecate warnings (for now)
+		#else
+			#define	NTV2_DEPRECATED_13_1
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_0)
+			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
+			#define	NTV2_DEPRECATED_14_0		//	Disable deprecate warnings (for now)
+		#else
+			#define	NTV2_DEPRECATED_14_0
+		#endif
+
+		#if defined (NTV2_DEPRECATE_14_1)
+			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
+			#define	NTV2_DEPRECATED_14_1		//	Disable deprecate warnings (for now)
+		#else
+			#define	NTV2_DEPRECATED_14_1
 		#endif
 	#endif
 
