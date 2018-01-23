@@ -1001,9 +1001,11 @@ typedef enum
 	NTV2_INPUTSOURCE_SDI7,			///< @brief	Identifies SDI Input 7.
 	NTV2_INPUTSOURCE_SDI8,			///< @brief	Identifies SDI Input 8.
     NTV2_INPUTSOURCE_INVALID,
-	NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
-	NTV2_INPUTSOURCE_HDMI	= NTV2_INPUTSOURCE_HDMI1,	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
     NTV2_NUM_INPUTSOURCES = NTV2_INPUTSOURCE_INVALID	//	Always last!
+#if !defined (NTV2_DEPRECATE_14_1)
+	,NTV2_INPUTSOURCE_ANALOG	= NTV2_INPUTSOURCE_ANALOG1,	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
+	NTV2_INPUTSOURCE_HDMI		= NTV2_INPUTSOURCE_HDMI1	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
+#endif
 #if !defined (NTV2_DEPRECATE)
 	,NTV2_INPUTSOURCE_DUALLINK	= NTV2_INPUTSOURCE_SDI1,	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
 	NTV2_INPUTSOURCE_DUALLINK1	= NTV2_INPUTSOURCE_SDI1,	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
@@ -1026,13 +1028,10 @@ typedef enum
 } NTV2InputSource;
 
 
-#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				(   (_inpSrc_) == NTV2_INPUTSOURCE_HDMI1 ||     \
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI2 ||     \
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI3 ||     \
-                                                            (_inpSrc_) == NTV2_INPUTSOURCE_HDMI4    )
+#define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_HDMI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_HDMI4)
 #define	NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG)
-#define	NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				(!NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_) && !NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
-#define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
+#define	NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_SDI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_SDI8)
+#define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
 
 typedef enum
 {
