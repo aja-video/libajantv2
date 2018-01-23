@@ -210,8 +210,8 @@ AJAStatus NTV2Burn::SetupVideo (void)
 		case NTV2_INPUTSOURCE_SDI7:		mOutputChannel = NTV2_CHANNEL8;																	break;
 		case NTV2_INPUTSOURCE_SDI8:		mOutputChannel = NTV2_CHANNEL7;																	break;
 
-		case NTV2_INPUTSOURCE_ANALOG:
-		case NTV2_INPUTSOURCE_HDMI:		mOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
+		case NTV2_INPUTSOURCE_ANALOG1:
+		case NTV2_INPUTSOURCE_HDMI1:	mOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
 										mAudioSystem = NTV2_AUDIOSYSTEM_2;
 										break;
 

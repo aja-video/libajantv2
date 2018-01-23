@@ -191,8 +191,8 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 
 	switch (mInputSource)
 	{
-		case NTV2_INPUTSOURCE_ANALOG:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
-		case NTV2_INPUTSOURCE_HDMI:		mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
+		case NTV2_INPUTSOURCE_ANALOG1:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
+		case NTV2_INPUTSOURCE_HDMI1:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
 		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
 		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;						break;
 		case NTV2_INPUTSOURCE_SDI3:		mOutputChannel = NTV2_CHANNEL4;																break;

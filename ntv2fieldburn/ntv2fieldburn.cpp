@@ -181,8 +181,8 @@ AJAStatus NTV2FieldBurn::SetupVideo (void)
 	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mInputSource)
 	{
-		case NTV2_INPUTSOURCE_ANALOG:	mOutputChannel = NTV2_CHANNEL3;																	break;
-		case NTV2_INPUTSOURCE_HDMI:		mOutputChannel = NTV2_CHANNEL3;																	break;
+		case NTV2_INPUTSOURCE_ANALOG1:	mOutputChannel = NTV2_CHANNEL3;																	break;
+		case NTV2_INPUTSOURCE_HDMI1:	mOutputChannel = NTV2_CHANNEL3;																	break;
 		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = (numFrameStores == 2 || numFrameStores > 4) ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
 		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = (numFrameStores > 4) ? NTV2_CHANNEL3 : NTV2_CHANNEL4;							break;
 		case NTV2_INPUTSOURCE_SDI3:		mOutputChannel = NTV2_CHANNEL4;																	break;

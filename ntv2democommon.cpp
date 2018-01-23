@@ -258,10 +258,10 @@ class DemoCommonInitializer
 				gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (inputSource, true), inputSource));
 				gString2InputSourceMap.insert (String2InputSourcePair (ULWordToString (ndx + 1), inputSource));
 			}	//	for each SDI source
-			gInputSources.insert (NTV2_INPUTSOURCE_HDMI);
-			gInputSourcesHDMI.insert (NTV2_INPUTSOURCE_HDMI);
-			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI, false), NTV2_INPUTSOURCE_HDMI));
-			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI, true)), NTV2_INPUTSOURCE_HDMI));
+			gInputSources.insert (NTV2_INPUTSOURCE_HDMI1);
+			gInputSourcesHDMI.insert (NTV2_INPUTSOURCE_HDMI1);
+			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, false), NTV2_INPUTSOURCE_HDMI1));
+			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, true)), NTV2_INPUTSOURCE_HDMI1));
 			gInputSources.insert (NTV2_INPUTSOURCE_ANALOG);
 			gInputSourcesAnalog.insert (NTV2_INPUTSOURCE_ANALOG);
 			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, false), NTV2_INPUTSOURCE_ANALOG));

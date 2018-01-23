@@ -551,7 +551,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 					break;
 			}
 		}
-		else if (mInputSource == NTV2_INPUTSOURCE_ANALOG)
+		else if (mInputSource == NTV2_INPUTSOURCE_ANALOG1)
 		{
             mNumChannels = 0;
             mTsi = false;
@@ -565,7 +565,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mChannel = NTV2_CHANNEL1;
             mNumChannels = 1;
 		}
-		else if (mInputSource == NTV2_INPUTSOURCE_HDMI)
+		else if (mInputSource == NTV2_INPUTSOURCE_HDMI1)
 		{
             mNumChannels = 0;
             mTsi = false;
