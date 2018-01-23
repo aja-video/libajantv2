@@ -170,6 +170,8 @@ NTV2DeviceIsExternalToHost
 NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
+NTV2DeviceHasLEDAudioMeters
+NTV2DeviceHasHeadphoneJack
 
 
 // NTV2ConversionModes

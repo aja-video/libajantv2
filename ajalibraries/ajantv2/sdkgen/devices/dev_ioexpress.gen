@@ -112,6 +112,8 @@ NTV2DeviceIsDirectAddressable
 NTV2DeviceIsExternalToHost
 NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
+NTV2DeviceHasHeadphoneJack
+NTV2DeviceHasAudioMonitorRCAJacks
 
 
 // NTV2ConversionModes

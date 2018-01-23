@@ -97,3 +97,7 @@ NTV2DeviceCanDoFreezeOutput
 NTV2DeviceCanDoQREZ
 NTV2DeviceCanDoIsoConvert
 NTV2DeviceCanChangeEmbeddedAudioClock		
+NTV2DeviceHasLEDAudioMeters					True if the device having the given ID has LED audio meters.
+NTV2DeviceHasHeadphoneJack					True if the device having the given ID has a headphone jack.
+NTV2DeviceHasAudioMonitorRCAJacks			True if the device having the given ID has a pair of unbalanced RCA audio monitor output jacks.
+NTV2DeviceHasBiDirectionalAnalogAudio		True if the device having the given ID has a bi-directional analog audio connector.
