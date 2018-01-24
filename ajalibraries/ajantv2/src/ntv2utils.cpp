@@ -4708,6 +4708,16 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0)
 }
 
 
+NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)
+{
+	static const NTV2InputSource	sInputSources []	= {	NTV2_INPUTSOURCE_HDMI1,	NTV2_INPUTSOURCE_HDMI2,	NTV2_INPUTSOURCE_HDMI3,	NTV2_INPUTSOURCE_HDMI4};
+	if (inIndex0 < sizeof (sInputSources) / sizeof (NTV2InputSource))
+		return sInputSources [inIndex0];
+	else
+		return NTV2_NUM_INPUTSOURCES;
+}
+
+
 ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 {
 	static const ULWord	sInputSourcesIndexes []	= {	0,							//	NTV2_INPUTSOURCE_ANALOG1,
