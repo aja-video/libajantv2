@@ -77,7 +77,7 @@ inline void print_flash_status_final(const string& label)
 }
 
 // Flash commands
-const int64_t spi_timeout = 10000;
+const int64_t spi_timeout = 50000;
 
 // Cypress/Spansion
 //const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND  = 0x01;
@@ -86,7 +86,7 @@ const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
 const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
 const uint32_t CYPRESS_FLASH_READFAST_COMMAND      = 0x0C; //4 byte address
 const uint32_t CYPRESS_FLASH_PAGE_PROGRAM_COMMAND  = 0x12; //4 byte address
-//const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
+const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
 const uint32_t CYPRESS_FLASH_READBANK_COMMAND      = 0x16;
 const uint32_t CYPRESS_FLASH_WRITEBANK_COMMAND     = 0x17;
 const uint32_t CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND= 0x21; //4 byte address
@@ -94,8 +94,8 @@ const uint32_t CYPRESS_FLASH_READ_CONFIG_COMMAND   = 0x35;
 const uint32_t CYPRESS_FLASH_READ_JEDEC_ID_COMMAND = 0x9F;
 const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
 
-//const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
-//const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
+const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
+const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
 const uint32_t AXI_SPI_WRITE_FIFO_EMPTY = 0x04;
 const uint32_t AXI_SPI_WRITE_FIFO_FULL  = 0x08;
 
@@ -183,6 +183,13 @@ inline ProgramState programstate_for_address(uint32_t address, int mode)
     }
 
     return ps;
+}
+
+inline uint32_t make_spi_ready(CNTV2Card& device)
+{
+    uint32_t deviceId=0;
+    device.ReadRegister(kRegBoardID, &deviceId);
+    return deviceId;
 }
 
 CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
@@ -273,6 +280,7 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
 
         vector<uint8_t> dummyInput;
         SpiTransfer(commandSequence, dummyInput, data, bytesToTransfer);
+        uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
 
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
@@ -314,9 +322,6 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
     uint32_t lastPercent = 0;
     for(uint32_t p=0;p<numPages;p++)
     {
-        // enable write
-        SpiEnableWrite(true);
-
         vector<uint8_t> commandSequence;
         commandSequence.push_back(CYPRESS_FLASH_PAGE_PROGRAM_COMMAND);
         FlashFixAddress(pageAddress, commandSequence);
@@ -331,17 +336,14 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
             pageData.push_back(data.at(offset));
         }
 
-        SpiTransfer(commandSequence, pageData, dummyOutput, (uint32_t)pageData.size());
+        // enable write
+        SpiEnableWrite(true);
 
-        // spin here until flash status bit 0 is clear
-        uint8_t fs=0x00;
-        do {
-            FlashReadStatus(fs);
-            /*if (fs & 0x40)
-            {
-                cout << "ERROR writing page: " << p << "\n";
-            }*/
-        } while(fs & 0x1);
+        SpiTransfer(commandSequence, pageData, dummyOutput, (uint32_t)pageData.size());
+        uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+
+        // disable write
+        SpiEnableWrite(false);
 
         pageAddress += pageSize;
         bytesTransfered += pageData.size();
@@ -351,9 +353,6 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
 
         mDevice.WriteRegister(kVRegFlashState, ps);
         mDevice.WriteRegister(kVRegFlashStatus, bytesTransfered);
-
-        // disable write
-        SpiEnableWrite(false);
     }
 
     if (mVerbose)
@@ -394,9 +393,6 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
 
     ProgramState ps = programstate_for_address(address, 0);
 
-    // enable write
-    SpiEnableWrite(true);
-
     uint32_t startSector = sector_for_address(mSectorSize, address);
     uint32_t endSector = sector_for_address(mSectorSize, address + bytes);
 
@@ -412,13 +408,13 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
     if (mVerbose && endSector > startSector)
         print_flash_status("Erase", startSector, endSector-startSector, lastPercent);
 
+    // enable write
+    SpiEnableWrite(true);
+
     vector<uint8_t> dummyInput;
     vector<uint8_t> dummyOutput;
     SpiTransfer(commandSequence, dummyInput, dummyOutput, bytes);
-
-    // spin here until flash status bit 0 is clear
-    uint8_t fs=0x00;
-    do { FlashReadStatus(fs); } while(fs & 0x1);
+    uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
 
     // disable write
     SpiEnableWrite(false);
@@ -433,10 +429,7 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
 
         uint32_t start = startSector;
         while (start < endSector)
-        {            
-            // enable write
-            SpiEnableWrite(true);
-
+        {
             ++start;
             cmd = erase_cmd_for_sector(mSectorSize, start);
             sectorAddress = address_for_sector(mSectorSize, start);
@@ -445,18 +438,15 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
             commandSequence2.push_back(cmd);
             FlashFixAddress(sectorAddress, commandSequence2);
 
+            // enable write
+            SpiEnableWrite(true);
+
             vector<uint8_t> dummyInput;
             SpiTransfer(commandSequence2, dummyInput, dummyOutput, bytes);
+            uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
 
-            // spin here until flash status bit 0 is clear
-            fs=0x00;
-            do {
-                FlashReadStatus(fs);
-                /*if (fs & 0x20)
-                {
-                    cout << "ERROR erasing sector: " << start << "\n";
-                }*/
-            } while(fs & 0x1);
+            // disable write
+            SpiEnableWrite(false);
 
             uint32_t curProgress = start-startSector;
             if (mVerbose)
@@ -464,9 +454,6 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
 
             mDevice.WriteRegister(kVRegFlashState, ps);
             mDevice.WriteRegister(kVRegFlashStatus, curProgress);
-
-            // disable write
-            SpiEnableWrite(false);
         }
 
         if (mVerbose)
@@ -600,34 +587,81 @@ bool CNTV2AxiSpiFlash::SpiWaitForWriteFifoNotFull()
     return true;
 }
 
+bool CNTV2AxiSpiFlash::SpiWaitForReadFifoEmpty()
+{
+    if (!NTV2DeviceOk())
+        return false;
+
+    ULWord status = 0;
+    ULWord count = 0;
+    mDevice.ReadRegister(mSpiStatusReg, &status);
+    while ((status & AXI_SPI_READ_FIFO_EMPTY) == 0)
+    {
+        if (++count > spi_timeout) return false;
+        mDevice.ReadRegister(mSpiStatusReg, &status);
+    }
+
+    return true;
+}
+
+bool CNTV2AxiSpiFlash::SpiWaitForReadFifoNotFull()
+{
+    if (!NTV2DeviceOk())
+        return false;
+
+    ULWord status = 0;
+    ULWord count = 0;
+    mDevice.ReadRegister(mSpiStatusReg, &status);
+    while ((status & AXI_SPI_READ_FIFO_FULL) == 0)
+    {
+        if (++count > spi_timeout) return false;
+        mDevice.ReadRegister(mSpiStatusReg, &status);
+    }
+
+    return true;
+}
+
 void CNTV2AxiSpiFlash::SpiEnableWrite(bool enable)
 {
     // see AXI Quad SPI v3.2 guide page 99
 
     // 1 disable the master transaction by setting 0x100 high in spi control reg
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiControlReg, 0x186);
 
     // 2 issue the write enable command
     if (enable)
+    {
+        make_spi_ready(mDevice);
         mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_WRITEENABLE_COMMAND);
+    }
     else
+    {
+        make_spi_ready(mDevice);
         mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_WRITEDISABLE_COMMAND);
+    }
 
     // 3 issue chip select
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiSlaveReg, 0x00);
 
     // 4 enable the master transaction by setting 0x100 low in spi control reg
     uint32_t spi_ctrl_val = 0;
+    make_spi_ready(mDevice);
     mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
     spi_ctrl_val &= ~0x100;
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
 
     // 5 deassert chip select
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiSlaveReg, 0x01);
 
     // 6 disable the master transaction by setting 0x100 high in spi control reg
+    make_spi_ready(mDevice);
     mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
     spi_ctrl_val |= 0x100;
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
 }
 
@@ -682,6 +716,24 @@ bool CNTV2AxiSpiFlash::FlashReadStatus(uint8_t& statusValue)
         statusValue = resultData.at(0);
     }
     return result;
+
+/*
+    mDevice.WriteRegister(mSpiSlaveReg, 0x01);
+    uint32_t fs=0x00;
+    do {
+        mDevice.WriteRegister(mSpiSlaveReg, 0x00);
+            mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_READ_STATUS_COMMAND);
+            for(int i=0;i<8;i++)
+            {
+                //mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy to start the read
+                mDevice.ReadRegister(mSpiReadReg, &fs);
+            }
+        mDevice.WriteRegister(mSpiSlaveReg, 0x01);
+    } while(fs & 0x1);
+
+    statusValue = fs;
+    return true;
+    */
 }
 
 bool CNTV2AxiSpiFlash::FlashReadBankAddress(uint8_t& bankAddressVal)
@@ -729,21 +781,24 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
     if (commandSequence.empty())
         return false;
 
+    make_spi_ready(mDevice);
     SpiResetFifos();
 
     // issue chip select
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiSlaveReg, 0x00);
-
-    //uint32_t regValue;
-    //mDevice.ReadRegister(kRegBoardID, &regValue);
 
     // issue the command & arguments
     uint32_t dummyVal = 0;
     for(unsigned i=0;i<commandSequence.size();++i)
     {
+        make_spi_ready(mDevice);
         mDevice.WriteRegister(mSpiWriteReg, (ULWord)commandSequence.at(i));
         if (commandSequence.size() > 1)
+        {
+            make_spi_ready(mDevice);
             mDevice.ReadRegister(mSpiReadReg, &dummyVal);
+        }
     }
 
     if (commandSequence.at(0) == CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND ||
@@ -760,33 +815,21 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 
         for(uint32_t i=0;i<maxWrite;++i)
         {
-            bool res = mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
-            if (res == false)
-            {
-                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (write command) on byte: " << i << " out of: " << maxWrite << endl;
-                retVal = false;
-            }
+            make_spi_ready(mDevice);
+            mDevice.WriteRegister(mSpiWriteReg, inputData.at(i));
         }
     }
     else
     {
         // a read command
         uint32_t val = 0;
-
         for(uint32_t i=0;i<maxByteCutoff+1;++i)
         {
-            bool resWrite = mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
-            if (resWrite == false)
-            {
-                cout << "\nWriteRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << endl;
-                retVal = false;
-            }
-            bool resRead = mDevice.ReadRegister(mSpiReadReg, &val);
-            if (resRead == false)
-            {
-                cout << "\nReadRegister failed in CNTV2AxiSpiFlash::SpiTransfer (read command) on byte: " << i << " out of: " << maxByteCutoff+1 << endl;
-                retVal = false;
-            }
+            make_spi_ready(mDevice);
+            mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
+
+            make_spi_ready(mDevice);
+            mDevice.ReadRegister(mSpiReadReg, &val);
 
             // the first byte back is a dummy when reading flash
             if (i > 0)
@@ -795,6 +838,7 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
     }
 
     // deassert chip select
+    make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiSlaveReg, 0x01);
 
     return retVal;
