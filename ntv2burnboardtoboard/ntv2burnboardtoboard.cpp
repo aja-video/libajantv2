@@ -1,7 +1,7 @@
 /**
 	@file		ntv2burnboardtoboard.cpp
 	@brief		Implementation of NTV2Burn demonstration class.
-	@copyright	Copyright (C) 2012-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
 **/
 #define _WINSOCKAPI_
 #include "ntv2burnboardtoboard.h"
