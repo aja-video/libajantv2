@@ -1,6 +1,6 @@
 /**
     @brief		CNTV2SignalRouter implementation.
-    @copyright	(C) 2014-2017 AJA Video Systems, Inc.	Proprietary and confidential.
+    @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential.
 **/
 #include "ntv2signalrouter.h"
 #include "ntv2debug.h"
@@ -1229,7 +1229,7 @@ NTV2OutputCrosspointID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const 
 bool CNTV2SignalRouter::GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets)
 {
     outWidgets.clear();
-    for (NTV2WidgetID widgetID(NTV2_WIDGET_FIRST);  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
+	for (NTV2WidgetID widgetID((NTV2WidgetID)NTV2_WIDGET_FIRST);  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
         if (::NTV2DeviceCanDoWidget (inDeviceID, widgetID))
             outWidgets.insert(widgetID);
     return !outWidgets.empty();

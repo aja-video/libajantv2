@@ -1,7 +1,7 @@
 /**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ajatypes.h"
 #include "ntv2utils.h"
@@ -1735,7 +1735,7 @@ NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTra
 
 NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced)
 {
-	for (NTV2VideoFormat fmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
+	for (NTV2VideoFormat fmt((NTV2VideoFormat)NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
 		if (inFrameRate == ::GetNTV2FrameRateFromVideoFormat(fmt))
 			if (inHeightLines == ::GetDisplayHeight(fmt))
 				if (inWidthPixels == ::GetDisplayWidth(fmt))
@@ -3122,7 +3122,7 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
 
 	const NTV2FrameGeometry	fg	(::GetNormalizedFrameGeometry(inFrameGeometry));
 	//	Look for a video format that matches the given frame rate, geometry and standard...
-	for (NTV2VideoFormat vFmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
+	for (NTV2VideoFormat vFmt((NTV2VideoFormat)NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
 	{
 		if (!NTV2_IS_VALID_VIDEO_FORMAT(vFmt))
 			continue;

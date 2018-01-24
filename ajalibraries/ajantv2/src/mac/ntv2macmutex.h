@@ -3,7 +3,7 @@
 	@brief		Declares and implements the Mac-only PMutex and PThreadLocker classes, a simple
 				posix-based mutex locker. Designed to be created on the stack. Allows thread to
 				do multiple locks on the same mutex while avoiding race conditions.
-	@copyright	(C) 2003-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2003-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 	@details	Usage example:
 	@code{.cpp}
 		static PMutex  sMutex;

@@ -1,7 +1,7 @@
 /**
 	@brief		Declared the now-obsolete CXena2Routing class.
 	@deprecated	Include "ntv2signalrouter.h" instead.
-	@copyright	(C) 2006-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2006-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef XENA2ROUTING_H

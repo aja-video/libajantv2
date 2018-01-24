@@ -1,7 +1,7 @@
 /**
 	@file		ntv2bitfile.cpp
 	@brief		Implementation of CNTV2Bitfile class.
-	@copyright	(C) 2010-2017 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+	@copyright	(C) 2010-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 #include "ntv2bitfile.h"
 #include <iostream>

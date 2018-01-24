@@ -111,17 +111,19 @@ def get_canonical_video_formats (args, ntv2enums):
                 continue
             pieces = line.split()
             key = pieces[0]
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             if key.startswith("NTV2_FORMAT_"):
                 #print(pieces)
                 if "=" in key:
                     print("## ERROR:  Line %d in 'ntv2enums.h':  Missing whitespace around '='" % (line_num))
                     return {'err': 503,	'videoformats': {}}
-                if pieces[1].startswith("=") and pieces[1]<>"=":
+                if len(pieces)>1 and pieces[1].startswith("=") and pieces[1]<>"=":
                     print("## ERROR:  Line %d in 'ntv2enums.h':  Missing whitespace around '='" % (line_num))
                     return {'err': 503,	'videoformats': {}}
                 if "," in key:
                     key = key.replace(",","")
-                if pieces[1] is "=":
+                if len(pieces)>1 and pieces[1] is "=":
                     if not pieces[2].startswith("NTV2_FORMAT_FIRST_"):
                         #print("## DEBUG:  skipped '%s' -- dupe of '%s'" % (key, pieces[2]))
                         key = ""
@@ -181,6 +183,8 @@ def get_canonical_pixel_formats (args, ntv2enums):
                 continue
             pieces = line.split(None,2)
             key = pieces[0]
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             if key[0:9] == "NTV2_FBF_":
                 if "=" in key:
                     pieces = key.split("=")
@@ -225,6 +229,8 @@ def get_canonical_input_sources (args, ntv2enums):
                 continue
             pieces = line.split(None,2)
             key = pieces[0]
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             if key[0:17] == "NTV2_INPUTSOURCE_":
                 if "=" in key:
                     pieces = key.split("=")
@@ -265,6 +271,8 @@ def get_canonical_widget_ids (args, ntv2enums):
                 continue
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             if key[0:8] == "NTV2_Wgt":
                 if "=" in key:
                     pieces = key.split("=")
@@ -305,6 +313,8 @@ def get_canonical_dsk_modes (args, ntv2enums):
                 continue
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             if key[0:12] == "NTV2_DSKMode":
                 if "=" in key:
                     pieces = key.split("=")
@@ -345,6 +355,8 @@ def get_canonical_conversion_modes (args, ntv2enums):
                 continue
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
+            if key.startswith(","):
+				key = key.replace(",","").lstrip().rstrip()
             first8 = key[0:8]
             if "to" in key and (first8 == "NTV2_108" or first8 == "NTV2_720" or first8 == "NTV2_525" or first8 == "NTV2_625" or first8 == "NTV2_720"):
                 if "=" in key:

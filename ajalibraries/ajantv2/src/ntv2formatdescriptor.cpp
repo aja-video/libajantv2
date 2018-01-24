@@ -1,7 +1,7 @@
 /**
 	@file		ntv2formatdescriptor.cpp
 	@brief		Implementation of the NTV2FormatDescriptor class.
-	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2formatdescriptor.h"
 #include "ntv2utils.h"
