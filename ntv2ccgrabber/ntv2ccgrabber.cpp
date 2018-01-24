@@ -1,7 +1,7 @@
 /**
 	@file		ntv2ccgrabber.cpp
 	@brief		Implementation of NTV2CCGrabber class
-	@copyright	Copyright (C) 2013-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2ccgrabber.h"
