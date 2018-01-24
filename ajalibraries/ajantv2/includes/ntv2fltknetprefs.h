@@ -1,7 +1,7 @@
 /**
 	@file		ntv2fltknetprefs.h
 	@brief		Declares the CNTV2FLTKNetPrefs class.
-	@copyright	(C) 2008-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2FLTKNETPREFS_H

@@ -1,7 +1,7 @@
 /**
 	@file		xenaserialcontrol.h
 	@deprecated	Include 'ntv2serialcontrol.h' instead.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef _XENASERIALCONTROL_H

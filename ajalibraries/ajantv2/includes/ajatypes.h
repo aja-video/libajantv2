@@ -1,6 +1,6 @@
 /**
 	@file		ajatypes.h
-	@copyright	Copyright (C) 2004-2017 AJA Video Systems, Inc.  Proprietary and Confidential information.
+	@copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
 	@brief		Declares the most fundamental data types used by NTV2. Since Windows NT was the first principal
 				development platform, many typedefs are Windows-centric.
 **/

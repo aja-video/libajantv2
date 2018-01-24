@@ -1,6 +1,6 @@
 /**
 	@file		pnp/mac/masterport.cpp
-	@copyright	Copyright (C) 2013-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the MasterPort class.
 **/
 

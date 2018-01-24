@@ -1,6 +1,6 @@
 /**
 	@file		file_io.h
-	@copyright	Copyright (C) 2011-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2011-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAFileIO class.
 **/
 

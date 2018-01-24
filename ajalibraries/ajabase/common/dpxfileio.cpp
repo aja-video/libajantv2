@@ -1,6 +1,6 @@
 /**
 	@file		dpxfileio.cpp
-	@copyright	Copyright (C) 2009-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implementation of the AJADPXFileIO class, for low level file I/O.
 **/
 

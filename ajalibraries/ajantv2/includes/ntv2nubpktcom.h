@@ -1,7 +1,7 @@
 /**
 	@file		ntv2nubpktcom.h
 	@brief		Declares functions that handle NTV2 "nub" packets.
-	@copyright	(C) 2006-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2006-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef __NTV2NUBPKTCOM_H

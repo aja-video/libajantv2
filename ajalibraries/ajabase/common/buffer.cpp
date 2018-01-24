@@ -1,6 +1,6 @@
 /**
 	@file		buffer.cpp
-	@copyright	Copyright (C) 2010-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2010-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implementation of AJABuffer class.
 **/
 

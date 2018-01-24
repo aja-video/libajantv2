@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registerexpert.cpp
 	@brief		Implements the CNTV2RegisterExpert class.
-	@copyright	(C) 2016-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
  **/
 #include "ntv2registerexpert.h"
 #include "ntv2devicefeatures.h"

@@ -1,6 +1,6 @@
 /**
     @file		ntv2enums.h
-    @copyright	Copyright (C) 2013-2017 AJA Video Systems, Inc.  All rights reserved.
+    @copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
     @brief		Enumerations for controlling NTV2 devices.
 **/
 
@@ -36,7 +36,7 @@
 /**
     @mainpage	The NTV2 SDK
 
-    @copyright	Copyright (C) 2004-2017 AJA Video Systems, Inc.  All rights reserved.
+    @copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
 
     @details	The NTV2 Software Development Kit (SDK) is a suite of classes and data types which allow end-users to access and control
                 nearly any NTV2-compatible AJA device using the C++ programming language.
