@@ -3710,7 +3710,7 @@ public:
 		@brief		Returns the video format of the signal that is present on the device's HDMI input.
 		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
 	**/
-	AJA_VIRTUAL NTV2VideoFormat GetHDMIInputVideoFormat (void);
+    AJA_VIRTUAL NTV2VideoFormat GetHDMIInputVideoFormat (NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's analog video input.
@@ -4137,11 +4137,15 @@ public:
 	AJA_VIRTUAL bool		GetHDMIOut3DMode (NTV2HDMIOut3DMode & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOut3DMode (NTV2HDMIOut3DMode * pOutValue)							{return pOutValue ? GetHDMIOut3DMode (*pOutValue) : false;}
 
-	AJA_VIRTUAL bool		GetHDMIInputStatusRegister (ULWord & outValue);
-	AJA_VIRTUAL inline bool	GetHDMIInputStatusRegister (ULWord * pOutValue)								{return pOutValue ? GetHDMIInputStatusRegister (*pOutValue) : false;}
+    AJA_VIRTUAL bool		GetHDMIInputStatusRegister (ULWord & outValue,
+                                                        NTV2Channel inChannel = NTV2_CHANNEL1);
+    AJA_VIRTUAL inline bool	GetHDMIInputStatusRegister (ULWord * pOutValue,
+                                                        NTV2Channel inChannel = NTV2_CHANNEL1)			{return pOutValue ? GetHDMIInputStatusRegister (*pOutValue, inChannel) : false;}
 
-	AJA_VIRTUAL bool		GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue);
-	AJA_VIRTUAL inline bool	GetHDMIInputColor (NTV2LHIHDMIColorSpace * pOutValue)						{return pOutValue ? GetHDMIInputColor (*pOutValue) : false;}
+    AJA_VIRTUAL bool		GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue,
+                                               NTV2Channel inChannel = NTV2_CHANNEL1);
+    AJA_VIRTUAL inline bool	GetHDMIInputColor (NTV2LHIHDMIColorSpace * pOutValue,
+                                               NTV2Channel inChannel = NTV2_CHANNEL1)					{return pOutValue ? GetHDMIInputColor (*pOutValue, inChannel) : false;}
 
 	AJA_VIRTUAL bool		SetHDMIV2TxBypass (bool inBypass);
 
