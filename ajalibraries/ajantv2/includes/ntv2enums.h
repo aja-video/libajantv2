@@ -332,10 +332,11 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+#define NTV2_FBF_FIRST	0
+
 /**
     @brief	Identifies a particular video frame buffer format. See \ref devicefbformats for details.
 **/
-#define NTV2_FBF_FIRST	0
 typedef enum
 {
 	 NTV2_FBF_10BIT_YCBCR			= NTV2_FBF_FIRST
@@ -583,15 +584,15 @@ typedef enum
 //			(If the format is really new, videotypes.h in ajabase/common may need updating)
 //		Update the #defines following this enum
 
-/**
-    @brief	Identifies a particular video format.
-**/
-
 #define NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT		1
 #define NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT	32
 #define NTV2_FORMAT_FIRST_2K_DEF_FORMAT			64
 #define NTV2_FORMAT_FIRST_4K_DEF_FORMAT			80
 #define NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2		110
+
+/**
+    @brief	Identifies a particular video format.
+**/
 typedef enum _NTV2VideoFormat
 {
 	 NTV2_FORMAT_UNKNOWN
