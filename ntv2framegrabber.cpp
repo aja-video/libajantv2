@@ -565,15 +565,15 @@ bool NTV2FrameGrabber::SetupInput (void)
 			mChannel = NTV2_CHANNEL1;
             mNumChannels = 1;
 		}
-		else if (mInputSource == NTV2_INPUTSOURCE_HDMI1)
+		else if (NTV2_INPUT_SOURCE_IS_HDMI (mInputSource))
 		{
             mNumChannels = 0;
             mTsi = false;
 
             NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
-			mNTV2Card.GetHDMIInputColor (hdmiColor);
+            mNTV2Card.GetHDMIInputColor (hdmiColor, mChannel);
             if (!mbFixedReference)
-                mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT);
+                mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT1);
 
             // configure hdmi with 2.0 support
             if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
