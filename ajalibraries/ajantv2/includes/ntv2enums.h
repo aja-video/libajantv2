@@ -675,13 +675,13 @@ typedef enum _NTV2VideoFormat
 	,NTV2_FORMAT_4x2048x1080p_12000
 	,NTV2_FORMAT_END_4K_DEF_FORMATS
 
-	,NTV2_FORMAT_1080p_2K_6000			= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2
-	,NTV2_FORMAT_1080p_2K_5994
+	,NTV2_FORMAT_1080p_2K_6000_A			= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2
+	,NTV2_FORMAT_1080p_2K_5994_A
 	,NTV2_FORMAT_1080p_2K_2997
 	,NTV2_FORMAT_1080p_2K_3000
-	,NTV2_FORMAT_1080p_2K_5000
-	,NTV2_FORMAT_1080p_2K_4795
-	,NTV2_FORMAT_1080p_2K_4800
+	,NTV2_FORMAT_1080p_2K_5000_A
+	,NTV2_FORMAT_1080p_2K_4795_A
+	,NTV2_FORMAT_1080p_2K_4800_A
 	,NTV2_FORMAT_1080p_2K_4795_B
 	,NTV2_FORMAT_1080p_2K_4800_B
 	,NTV2_FORMAT_1080p_2K_5000_B
@@ -703,11 +703,11 @@ typedef enum _NTV2VideoFormat
 	const NTV2VideoFormat NTV2_FORMAT_1080p_5994			= NTV2_FORMAT_1080p_5994_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5994 instead.
 	const NTV2VideoFormat NTV2_FORMAT_1080p_6000			= NTV2_FORMAT_1080p_6000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_6000 instead.
 
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000_A		= NTV2_FORMAT_1080p_2K_6000;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994_A		= NTV2_FORMAT_1080p_2K_5994;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000_A		= NTV2_FORMAT_1080p_2K_5000;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795_A		= NTV2_FORMAT_1080p_2K_4795;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800_A		= NTV2_FORMAT_1080p_2K_4800;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000		= NTV2_FORMAT_1080p_2K_6000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994		= NTV2_FORMAT_1080p_2K_5994_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000		= NTV2_FORMAT_1080p_2K_5000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795		= NTV2_FORMAT_1080p_2K_4795_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800		= NTV2_FORMAT_1080p_2K_4800_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800 instead.
 #endif	//	NTV2_DEPRECATE_14_1
 
 #define NTV2_IS_VALID_VIDEO_FORMAT(__f__)							\
@@ -752,11 +752,11 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080psf_2K_2500	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_2997	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_3000	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_4795	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_4800	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_5000	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_5994	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_6000	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_4795_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_4800_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5000_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5994_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_6000_A	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_6000_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5994_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5000_B	||					\
@@ -842,11 +842,11 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_5994_B	||						\
         (__f__) == NTV2_FORMAT_1080p_6000_A	||						\
         (__f__) == NTV2_FORMAT_1080p_6000_B	||						\
-        (__f__) == NTV2_FORMAT_1080p_2K_4795	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_4800	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_5000	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_5994	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_6000	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_4795_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_4800_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5000_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5994_A	||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_6000_A	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_6000_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5994_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5000_B	||					\
