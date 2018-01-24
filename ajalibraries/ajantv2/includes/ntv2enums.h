@@ -335,49 +335,6 @@ typedef enum
 /**
     @brief	Identifies a particular video frame buffer format. See \ref devicefbformats for details.
 **/
-<<<<<<< HEAD
-typedef enum
-{
-    NTV2_FBF_FIRST					= 0,
-    NTV2_FBF_10BIT_YCBCR			= 0,	///< @brief	This is the 'v210' format -- 12 x 10-bit unsigned components packed into 4 32-bit little-endian words (6 pixels per 16 bytes).
-    NTV2_FBF_8BIT_YCBCR				= 1,	///< @brief	This is the 'UYVY' format on Windows and '2vuy' on MacOS/QuickTime.
-    NTV2_FBF_ARGB					= 2,
-    NTV2_FBF_RGBA					= 3,
-    NTV2_FBF_10BIT_RGB				= 4,
-    NTV2_FBF_8BIT_YCBCR_YUY2		= 5,
-    NTV2_FBF_ABGR					= 6,
-    NTV2_FBF_LAST_SD_FBF = NTV2_FBF_ABGR,
-    NTV2_FBF_10BIT_DPX				= 7,
-    NTV2_FBF_10BIT_YCBCR_DPX		= 8,
-    NTV2_FBF_8BIT_DVCPRO			= 9,
-    NTV2_FBF_8BIT_YCBCR_420PL3		= 10,	///< @brief	"I420" format, 8-bit Y plane followed by 8-bit 2x2 subsampled U and V planes, 12 bpp.
-    NTV2_FBF_8BIT_HDV				= 11,
-    NTV2_FBF_24BIT_RGB				= 12,
-    NTV2_FBF_24BIT_BGR				= 13,
-    NTV2_FBF_10BIT_YCBCRA			= 14,
-    NTV2_FBF_10BIT_DPX_LE			= 15,
-    NTV2_FBF_48BIT_RGB				= 16,
-    NTV2_FBF_PRORES					= 17,
-    NTV2_FBF_PRORES_DVCPRO			= 18,
-    NTV2_FBF_PRORES_HDV				= 19,
-    NTV2_FBF_10BIT_RGB_PACKED		= 20,
-    NTV2_FBF_10BIT_ARGB				= 21,
-    NTV2_FBF_16BIT_ARGB				= 22,
-    NTV2_FBF_8BIT_YCBCR_422PL3		= 23,	///< @brief	"Weitek" or "Y42B" format, identical to I420, but horizontal-only chroma subsampling, 16 bpp.
-    NTV2_FBF_10BIT_RAW_RGB			= 24,
-    NTV2_FBF_10BIT_RAW_YCBCR		= 25,
-    NTV2_FBF_10BIT_YCBCR_420PL3_LE	= 26,	///< @brief	"I420_10LE" 10-bit 4:2:0 format, same plane order & layout as I420, but uses 16-bit LE samples, 24 bpp.
-    NTV2_FBF_10BIT_YCBCR_422PL3_LE	= 27,	///< @brief	"I422_10LE" 10-bit 4:2:2 format, same as I420_10LE, but horizontal-only chroma subsampling, 32 bpp.
-    NTV2_FBF_10BIT_YCBCR_420PL2		= 28,
-    NTV2_FBF_10BIT_YCBCR_422PL2		= 29,
-    NTV2_FBF_8BIT_YCBCR_420PL2		= 30,
-    NTV2_FBF_8BIT_YCBCR_422PL2		= 31,
-    NTV2_FBF_LAST					= 31,
-    ///note, if you add more you need to add another  bit in the channel control register.
-    ///and an entry in ntv2utils.cpp in frameBufferFormats[].
-    NTV2_FBF_NUMFRAMEBUFFERFORMATS,
-    NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
-=======
 #define NTV2_FBF_FIRST	0
 typedef enum
 {
@@ -420,7 +377,6 @@ typedef enum
 } NTV2FrameBufferFormat;
 
 
->>>>>>> ntv2_14_1
 #if !defined(NTV2_DEPRECATE_14_0)
 const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ				= NTV2_FBF_8BIT_YCBCR_420PL3;
 const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN	= NTV2_FBF_10BIT_DPX_LE;
