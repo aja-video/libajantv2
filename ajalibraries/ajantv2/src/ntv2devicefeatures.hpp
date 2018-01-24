@@ -11139,7 +11139,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			}	//  switch on inDeviceID for NTV2_FORMAT_1080p_3000
 			break;	//  NTV2_FORMAT_1080p_3000
 
-		case NTV2_FORMAT_1080p_5000:
+		case NTV2_FORMAT_1080p_5000_B:
 			switch (inDeviceID)
 			{
 				case DEVICE_ID_KONALHI:
@@ -11229,7 +11229,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			}	//  switch on inDeviceID for NTV2_FORMAT_1080p_5000_A
 			break;	//  NTV2_FORMAT_1080p_5000_A
 
-		case NTV2_FORMAT_1080p_5994:
+		case NTV2_FORMAT_1080p_5994_B:
 			switch (inDeviceID)
 			{
 				case DEVICE_ID_KONALHI:
@@ -11319,7 +11319,7 @@ bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const NTV2VideoF
 			}	//  switch on inDeviceID for NTV2_FORMAT_1080p_5994_A
 			break;	//  NTV2_FORMAT_1080p_5994_A
 
-		case NTV2_FORMAT_1080p_6000:
+		case NTV2_FORMAT_1080p_6000_B:
 			switch (inDeviceID)
 			{
 				case DEVICE_ID_KONALHI:

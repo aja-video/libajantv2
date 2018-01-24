@@ -233,7 +233,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 			case NTV2_FBF_10BIT_RGB:
 			case NTV2_FBF_ABGR:
 			case NTV2_FBF_10BIT_DPX:
-			case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+			case NTV2_FBF_10BIT_DPX_LE:
 				multiplier = 8;
 				break;
 			default:

@@ -421,7 +421,7 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
                                             ||	(__fbf__) == NTV2_FBF_10BIT_DPX					\
                                             ||	(__fbf__) == NTV2_FBF_24BIT_RGB					\
                                             ||	(__fbf__) == NTV2_FBF_24BIT_BGR					\
-                                            ||	(__fbf__) == NTV2_FBF_10BIT_DPX_LITTLEENDIAN	\
+                                            ||	(__fbf__) == NTV2_FBF_10BIT_DPX_LE				\
                                             ||	(__fbf__) == NTV2_FBF_48BIT_RGB					\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_RGB_PACKED			\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_ARGB				\
@@ -613,9 +613,9 @@ typedef enum _NTV2VideoFormat
 	,NTV2_FORMAT_1080psf_2K_2398
 	,NTV2_FORMAT_1080psf_2K_2400
 	,NTV2_FORMAT_720p_5000
-	,NTV2_FORMAT_1080p_5000
-	,NTV2_FORMAT_1080p_5994
-	,NTV2_FORMAT_1080p_6000
+	,NTV2_FORMAT_1080p_5000_B
+	,NTV2_FORMAT_1080p_5994_B
+	,NTV2_FORMAT_1080p_6000_B
 	,NTV2_FORMAT_720p_2398
 	,NTV2_FORMAT_720p_2500
 	,NTV2_FORMAT_1080p_5000_A
@@ -699,9 +699,9 @@ typedef enum _NTV2VideoFormat
 	const NTV2VideoFormat NTV2_FORMAT_1080psf_3000			= NTV2_FORMAT_1080i_6000;		///< @deprecated	Use NTV2_FORMAT_1080i_6000 instead.
 	const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_525_5994	= NTV2_FORMAT_1080p_2K_2398;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2398 instead.
 	const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_625_5000	= NTV2_FORMAT_1080p_2K_2400;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2400 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_5000_B			= NTV2_FORMAT_1080p_5000;		///< @deprecated	Use NTV2_FORMAT_1080p_5000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_5994_B			= NTV2_FORMAT_1080p_5994;		///< @deprecated	Use NTV2_FORMAT_1080p_5994 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_6000_B			= NTV2_FORMAT_1080p_6000;		///< @deprecated	Use NTV2_FORMAT_1080p_6000 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_5000			= NTV2_FORMAT_1080p_5000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5000 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_5994			= NTV2_FORMAT_1080p_5994_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5994 instead.
+	const NTV2VideoFormat NTV2_FORMAT_1080p_6000			= NTV2_FORMAT_1080p_6000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_6000 instead.
 
 	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000_A		= NTV2_FORMAT_1080p_2K_6000;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000 instead.
 	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994_A		= NTV2_FORMAT_1080p_2K_5994;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994 instead.
