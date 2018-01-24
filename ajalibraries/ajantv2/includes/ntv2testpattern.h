@@ -1,7 +1,7 @@
 /**
 	@file		ntv2testpattern.h
 	@brief		Declares the CNTV2TestPattern class.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2TESTPATTERN_H

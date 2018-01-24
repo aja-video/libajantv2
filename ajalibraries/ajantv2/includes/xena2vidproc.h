@@ -1,7 +1,7 @@
 /**
 	@file		xena2vidproc.h
 	@deprecated	Use the CNTV2Card class instead.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef XENA2VIDPROC_H

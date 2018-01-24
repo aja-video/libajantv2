@@ -1,6 +1,6 @@
 /**
 	@file		linux/threadimpl.h
-	@copyright	Copyright (C) 2009-2017 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAThreadImpl class.
 **/
 

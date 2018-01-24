@@ -1,7 +1,7 @@
 /**
 	@file		ntv2testpattern.cpp
 	@brief		Implementation of CNTV2TestPattern class.
-	@copyright	(C) 2004-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2testpattern.h"

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2fltknetprefs.cpp
 	@brief		Implements the CNTV2FLTKNetPrefs class.
-	@copyright	(C) 2008-2017 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 	@note		This module will disappear when the FLTK-based Cables and Watcher apps are retired.
 **/
 
