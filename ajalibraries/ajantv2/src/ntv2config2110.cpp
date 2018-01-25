@@ -82,11 +82,14 @@ void rx_2110Config::init()
     destPort       = 0;
     SSRC           = 1000;
     VLAN           = 1;
+    payloadType    = 0;
     videoFormat    = NTV2_FORMAT_UNKNOWN;
     videoSamples   = VPIDSampling_YUV_422;
     payloadLen     = 0;
     lastPayloadLen = 0;
     pktsPerLine    = 0;
+    audioChannels  = 2;
+    audioSamplesPerPkt = 48;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -474,7 +477,6 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
     {
         // setup 4175 depacketizer
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
-
 
         NTV2VideoFormat fmt = rxConfig.videoFormat;
         bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
