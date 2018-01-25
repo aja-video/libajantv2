@@ -601,7 +601,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		
 		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
 		
-		audioSystem = NTV2_AUDIOSYSTEM_6;
+		audioSystem = NTV2DeviceGetAudioMixerSystem(deviceID);
 	}
 
 	// Setup the SDI Outputs audio source
