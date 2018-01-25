@@ -1,5 +1,5 @@
 /**
-	@file		ancillarydata_framestatusinfo5251.h
+	@file		ancillarydata_hdr_hdr10.h
 	@brief		Declares the AJAAncillaryData_HDR_HDR10 class.
 	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/

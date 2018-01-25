@@ -1,5 +1,5 @@
 /**
-	@file		ancillarydata_framestatusinfo5251.cpp
+	@file		ancillarydata_hdr_sdr.cpp
 	@brief		Implements the AJAAncillaryData_HDR_SDR class.
 	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
