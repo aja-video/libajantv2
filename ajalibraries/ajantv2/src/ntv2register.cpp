@@ -8034,7 +8034,11 @@ bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue, NTV2Channel inC
     {
         return ReadRegister  (kRegHDMIInputStatus,		&outValue);
     }
-    return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		&outValue);
+	if (inChannel < (NTV2Channel)numInputs)
+	{
+		return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		&outValue);
+	}
+	return false;
 }
 
 bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, NTV2Channel inChannel)
@@ -8045,7 +8049,11 @@ bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, NTV2Cha
     {
         return ReadRegister  (kRegHDMIInputStatus,		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
     }
-    return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+	if (inChannel <= (NTV2Channel)numInputs)
+	{
+		return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+	}
+	return false;
 }
 
 // kRegHDMIInputControl
