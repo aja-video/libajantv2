@@ -127,7 +127,7 @@ NTV2DeviceGetNumLUTs						5
 NTV2DeviceGetNumMixers						2
 NTV2DeviceGetNumReferenceVideoInputs		1
 NTV2DeviceGetNumVideoInputs					1
-NTV2DeviceGetNumVideoOutputs				5
+NTV2DeviceGetNumVideoOutputs				4
 NTV2DeviceGetNum2022ChannelsSFP1			4
 
 
