@@ -41,11 +41,11 @@ Enable                    x      x        x     true | false \n  \
 transmit \n  \
 designator                x      x        x     channel1 | channel2 | channel3 | channel4 \n  \
 stream                                    x     video | audio 1 \n  \
-LinkAEnable               x      x              true | false \n  \
+LinkAEnable               x      x        x     true | false \n  \
 primaryLocalPort          x      x        x     decimal number \n  \
 primaryRemoteIPAddress    x      x        x     IP string \n  \
 primaryRemotePort         x      x        x     decimal number \n  \
-LinkBEnable               x      x              true | false \n  \
+LinkBEnable               x      x        x     true | false \n  \
 secondaryLocalPort        x                     decimal number \n  \
 secondaryRemoteIPAddress  x                     IP string \n  \
 secondaryRemotePort       x                     IP string \n  \
@@ -60,7 +60,7 @@ pktsPerLine                               x     decimal number (expert use only)
 numAudioChannels                          *     decimal number 1-16 \n \
 firstAudioChannel                         *     decimal number 0-15 \n \
 audioPktInterval                          *     decimal number 125 or 1000 (microseconds) \n \
-Enable                    x      x        x     true | false \n  \
+Enable                    x      x              true | false \n  \
 ";
 
 #endif // KEYWORDS_H

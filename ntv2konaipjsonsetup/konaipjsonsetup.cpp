@@ -690,9 +690,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         tx_2110Config txChannelConfig;
 
         NTV2Channel channel          = getChannel(transmit.mChannelDesignator);
-        txChannelConfig.localPort    = transmit.mPrimaryLocalPort.toUInt();
-        txChannelConfig.remoteIP     = transmit.mPrimaryRemoteIPAddress.toStdString();
-        txChannelConfig.remotePort   = transmit.mPrimaryRemotePort.toUInt();
+        txChannelConfig.localPort[0] = transmit.mPrimaryLocalPort.toUInt();
+        txChannelConfig.remoteIP[0]  = transmit.mPrimaryRemoteIPAddress.toStdString();
+        txChannelConfig.remotePort[0]= transmit.mPrimaryRemotePort.toUInt();
+        txChannelConfig.localPort[1] = transmit.mSecondaryLocalPort.toUInt();
+        txChannelConfig.remoteIP[1]  = transmit.mSecondaryRemoteIPAddress.toStdString();
+        txChannelConfig.remotePort[1]= transmit.mSecondaryRemotePort.toUInt();
         txChannelConfig.payloadType  = transmit.mPayload.toUInt();
         txChannelConfig.ssrc         = transmit.mSSRC.toUInt();
         txChannelConfig.tos          = transmit.mTOS.toUInt();
@@ -742,7 +745,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mEnable));
+        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mLinkAEnable), getEnable(transmit.mLinkBEnable));
     }
     return true;
 }
