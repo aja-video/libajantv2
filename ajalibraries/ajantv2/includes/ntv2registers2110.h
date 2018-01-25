@@ -83,16 +83,13 @@
 /////////////////////////////////////////////////////////////////////
 
 #define kReg4175_depkt_control                  (0x0000/4)
-#define kReg4175_depkt_width                    (0x0010/4)
-#define kReg4175_depkt_height                   (0x0018/4)
-#define kReg4175_depkt_vid_fmt                  (0x0020/4)
-#define kReg4175_depkt_pkts_per_line            (0x0028/4)
-#define kReg4175_depkt_payload_len              (0x0030/4)
-#define kReg4175_depkt_payload_len_last         (0x0038/4)
-#define kReg4175_depkt_bpc_reg                  (0x0040/4)
-#define kReg4175_depkt_rx_pkt_cnt               (0x0048/4)
-#define kReg4175_depkt_rx_pkt_cnt_valid         (0x0050/4)
-#define kReg4175_depkt_stat_reset               (0x0054/4)
+#define kReg4175_depkt_rx_field_cnt             (0x002C/4)
+#define kReg4175_depkt_rx_pkt_cnt               (0x0030/4)
+#define kReg4175_depkt_rx_byte_cnt              (0x0034/4)
+#define kReg4175_depkt_bytes_per_line           (0x0038/4)
+#define kReg4175_depkt_rows_per_field           (0x003C/4)
+#define kReg4175_depkt_version                  (0x0040/4)
+#define kReg4175_depkt_sequence_err             (0x007C/4)
 
 /////////////////////////////////////////////////////////////////////
 //

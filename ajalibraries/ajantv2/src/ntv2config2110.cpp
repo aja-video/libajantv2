@@ -475,13 +475,14 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         // setup 4175 depacketizer
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
 
+
         NTV2VideoFormat fmt = rxConfig.videoFormat;
         bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
 
         // width
         uint32_t width = fd.GetRasterWidth();
-        mDevice.WriteRegister(kReg4175_depkt_width + depacketizerBaseAddr,width);
+        //mDevice.WriteRegister(kReg4175_depkt_width + depacketizerBaseAddr,width);
 
         // height
         uint32_t height = fd.GetRasterHeight();
@@ -489,7 +490,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         {
             height /= 2;
         }
-        mDevice.WriteRegister(kReg4175_depkt_height + depacketizerBaseAddr,height);
+        //mDevice.WriteRegister(kReg4175_depkt_height + depacketizerBaseAddr,height);
 
         // video format = sampling
         int vf;
@@ -516,16 +517,14 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
             componentsPerUnit  = 4;
             break;
         }
-        mDevice.WriteRegister(kReg4175_depkt_vid_fmt + depacketizerBaseAddr,vf);
+        //mDevice.WriteRegister(kReg4175_depkt_vid_fmt + depacketizerBaseAddr,vf);
 
         const int bitsPerComponent = 10;
         const int pixelsPerClock = 1;
         int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
         int activeLineLength   = activeLine_root/8;
         int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-//      int pixelGroupSize     = pixelGroup_root/8;
         int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-//      int bytesPerCycle      = bytesPerCycle_root/8;
         int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
@@ -542,13 +541,13 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
             ipktsPerLine        = rxConfig.pktsPerLine;
 
         // pkts per line
-        mDevice.WriteRegister(kReg4175_depkt_pkts_per_line + depacketizerBaseAddr,ipktsPerLine);
+        //mDevice.WriteRegister(kReg4175_depkt_pkts_per_line + depacketizerBaseAddr,ipktsPerLine);
 
         // payload length
-        mDevice.WriteRegister(kReg4175_depkt_payload_len + depacketizerBaseAddr,payloadLength);
+        //mDevice.WriteRegister(kReg4175_depkt_payload_len + depacketizerBaseAddr,payloadLength);
 
         // payload length last
-        mDevice.WriteRegister(kReg4175_depkt_payload_len_last + depacketizerBaseAddr,payloadLengthLast);
+        //mDevice.WriteRegister(kReg4175_depkt_payload_len_last + depacketizerBaseAddr,payloadLengthLast);
 
         // enable video depacketizer
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
@@ -615,6 +614,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
         // depacketizer
         uint32_t depackBaseAddr = GetDepacketizerAddress(channel, stream);
 
+        /*
         // sampling
         mDevice.ReadRegister(kReg4175_depkt_vid_fmt + depackBaseAddr,&val);
         val = val & 0x3;
@@ -632,7 +632,10 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
             vs = VPIDSampling_YUV_422;
             break;
         }
-        rxConfig.videoSamples = vs;
+        */
+        // For now assume it is always YUV-422, this will change and it will either be detected by the depkt or may be
+        // driven by the SDP or config code.
+        rxConfig.videoSamples = VPIDSampling_YUV_422;
 
         // format
 #if 0
