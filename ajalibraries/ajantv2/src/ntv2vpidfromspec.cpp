@@ -323,7 +323,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		 ! NTV2_IS_720P_VIDEO_FORMAT	(outputFormat) &&
 		 ! NTV2_IS_2K_1080_VIDEO_FORMAT	(outputFormat))
 	{
-		if (is3G && !isLevelB && !isDualLink)
+		if (is3G && !isLevelB)
 			byte3 |= (1UL << 7);			//	0x80
 		else
 			byte3 |= (1UL << 5);			//	0x20
