@@ -76,28 +76,21 @@ inline void print_flash_status_final(const string& label)
     cout << label << " status: 100%   " << endl;
 }
 
-// Flash commands
-const int64_t spi_timeout = 50000;
+// Cypress/Spansion commands
 
-// Cypress/Spansion
 //const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND  = 0x01;
 const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
 const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
 const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
 const uint32_t CYPRESS_FLASH_READFAST_COMMAND      = 0x0C; //4 byte address
 const uint32_t CYPRESS_FLASH_PAGE_PROGRAM_COMMAND  = 0x12; //4 byte address
-const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
+//const uint32_t CYPRESS_FLASH_READ_COMMAND          = 0x13; //4 byte address
 const uint32_t CYPRESS_FLASH_READBANK_COMMAND      = 0x16;
 const uint32_t CYPRESS_FLASH_WRITEBANK_COMMAND     = 0x17;
 const uint32_t CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND= 0x21; //4 byte address
 const uint32_t CYPRESS_FLASH_READ_CONFIG_COMMAND   = 0x35;
 const uint32_t CYPRESS_FLASH_READ_JEDEC_ID_COMMAND = 0x9F;
 const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
-
-const uint32_t AXI_SPI_READ_FIFO_EMPTY  = 0x01;
-const uint32_t AXI_SPI_READ_FIFO_FULL   = 0x02;
-const uint32_t AXI_SPI_WRITE_FIFO_EMPTY = 0x04;
-const uint32_t AXI_SPI_WRITE_FIFO_FULL  = 0x08;
 
 inline bool has_4k_start_sectors(const uint32_t reportedSectorSize)
 {
@@ -546,79 +539,8 @@ bool CNTV2AxiSpiFlash::SpiResetFifos()
     if (!NTV2DeviceOk())
         return false;
 
-    //uint32_t val=0;
-    //mDevice.ReadRegister(mSpiControlReg, &val);
-
     uint32_t spi_ctrl_val=0xe6;
     return mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
-}
-
-bool CNTV2AxiSpiFlash::SpiWaitForWriteFifoEmpty()
-{
-    if (!NTV2DeviceOk())
-        return false;
-
-    ULWord status = 0;
-    ULWord count = 0;
-    mDevice.ReadRegister(mSpiStatusReg, &status);
-    while ((status & AXI_SPI_WRITE_FIFO_EMPTY) == 0)
-    {
-        if (++count > spi_timeout) return false;
-        mDevice.ReadRegister(mSpiStatusReg, &status);
-    }
-
-    return true;
-}
-
-bool CNTV2AxiSpiFlash::SpiWaitForWriteFifoNotFull()
-{
-    if (!NTV2DeviceOk())
-        return false;
-
-    ULWord status = 0;
-    ULWord count = 0;
-    mDevice.ReadRegister(mSpiStatusReg, &status);
-    while ((status & AXI_SPI_WRITE_FIFO_FULL) == 0)
-    {
-        if (++count > spi_timeout) return false;
-        mDevice.ReadRegister(mSpiStatusReg, &status);
-    }
-
-    return true;
-}
-
-bool CNTV2AxiSpiFlash::SpiWaitForReadFifoEmpty()
-{
-    if (!NTV2DeviceOk())
-        return false;
-
-    ULWord status = 0;
-    ULWord count = 0;
-    mDevice.ReadRegister(mSpiStatusReg, &status);
-    while ((status & AXI_SPI_READ_FIFO_EMPTY) == 0)
-    {
-        if (++count > spi_timeout) return false;
-        mDevice.ReadRegister(mSpiStatusReg, &status);
-    }
-
-    return true;
-}
-
-bool CNTV2AxiSpiFlash::SpiWaitForReadFifoNotFull()
-{
-    if (!NTV2DeviceOk())
-        return false;
-
-    ULWord status = 0;
-    ULWord count = 0;
-    mDevice.ReadRegister(mSpiStatusReg, &status);
-    while ((status & AXI_SPI_READ_FIFO_FULL) == 0)
-    {
-        if (++count > spi_timeout) return false;
-        mDevice.ReadRegister(mSpiStatusReg, &status);
-    }
-
-    return true;
 }
 
 void CNTV2AxiSpiFlash::SpiEnableWrite(bool enable)
@@ -680,7 +602,6 @@ bool CNTV2AxiSpiFlash::FlashDeviceInfo(uint8_t& manufactureID, uint8_t& memInerf
         manufactureID      = resultData.at(0);
         memInerfaceType    = resultData.at(1);
         memDensity         = resultData.at(2);
-        //uint8_t deviceIDMaxSize    = 0x3 + resultData.at(3);
         sectorArchitecture = resultData.at(4);
         familyID           = resultData.at(5);
     }
@@ -716,24 +637,6 @@ bool CNTV2AxiSpiFlash::FlashReadStatus(uint8_t& statusValue)
         statusValue = resultData.at(0);
     }
     return result;
-
-/*
-    mDevice.WriteRegister(mSpiSlaveReg, 0x01);
-    uint32_t fs=0x00;
-    do {
-        mDevice.WriteRegister(mSpiSlaveReg, 0x00);
-            mDevice.WriteRegister(mSpiWriteReg, CYPRESS_FLASH_READ_STATUS_COMMAND);
-            for(int i=0;i<8;i++)
-            {
-                //mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy to start the read
-                mDevice.ReadRegister(mSpiReadReg, &fs);
-            }
-        mDevice.WriteRegister(mSpiSlaveReg, 0x01);
-    } while(fs & 0x1);
-
-    statusValue = fs;
-    return true;
-    */
 }
 
 bool CNTV2AxiSpiFlash::FlashReadBankAddress(uint8_t& bankAddressVal)
