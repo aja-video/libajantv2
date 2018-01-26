@@ -63,8 +63,6 @@ private:
 
     void SpiReset();
     bool SpiResetFifos();
-    bool SpiWaitForWriteFifoEmpty();
-    bool SpiWaitForWriteFifoNotFull();
     void SpiEnableWrite(bool enable);
     bool SpiTransfer(std::vector<uint8_t> commandSequence,
                      const std::vector<uint8_t> inputData,

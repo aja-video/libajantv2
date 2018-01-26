@@ -82,11 +82,14 @@ void rx_2110Config::init()
     destPort       = 0;
     SSRC           = 1000;
     VLAN           = 1;
+    payloadType    = 0;
     videoFormat    = NTV2_FORMAT_UNKNOWN;
     videoSamples   = VPIDSampling_YUV_422;
     payloadLen     = 0;
     lastPayloadLen = 0;
     pktsPerLine    = 0;
+    audioChannels  = 2;
+    audioSamplesPerPkt = 48;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -523,9 +526,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
         int activeLineLength   = activeLine_root/8;
         int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-//      int pixelGroupSize     = pixelGroup_root/8;
         int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-//      int bytesPerCycle      = bytesPerCycle_root/8;
         int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
@@ -1640,12 +1641,6 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     tx_2110Config config;
     GetTxChannelConfiguration(channel, stream, config);
 
-    uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(channel, stream, baseAddrPacketizer);
-
-    uint32_t audioChans;
-    mDevice.ReadRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, &audioChans);
-
     // media name
     sdp << "m=audio ";
     sdp << To_String(config.remotePort[0]);     // FIXME
@@ -1661,26 +1656,37 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     sdp << "a=rtpmap:";
     sdp << To_String(config.payloadType);
     sdp << " L24/48000/";
-    sdp << To_String(audioChans) << endl;
+    sdp << To_String(config.numAudioChannels) << endl;
 
     //fmtp
     sdp << "a=fmtp:";
     sdp << To_String(config.payloadType);
     sdp << " channel-order=SMPTE2110.(";
-    switch (audioChans)
+    switch (config.numAudioChannels)
     {
     case 2:
         sdp << "ST)";
         break;
-    default:
+    case 4:
+        sdp << "SGRP)";
+        break;
     case 8:
+    default:
         sdp << "SGRP,SGRP)";
+        break;
+    case 12:
+        sdp << "SGRP,SGRP,SGRP)";
         break;
     case 16:
         sdp << "SGRP,SGRP,SGRP,SGRP)";
         break;
     }
     sdp << endl;
+
+    if (config. audioPacketInterval == PACKET_INTERVAL_125uS)
+        sdp << "a=ptime:0.125" << endl;
+    else
+        sdp << "a=ptime:1.000" << endl;
 
     sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;
