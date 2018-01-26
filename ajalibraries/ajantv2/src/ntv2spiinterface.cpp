@@ -185,6 +185,8 @@ inline uint32_t make_spi_ready(CNTV2Card& device)
     return deviceId;
 }
 
+#define wait_for_flash_status_ready() { uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1); }
+
 CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
     : CNTV2SpiFlash(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
 {
@@ -273,7 +275,7 @@ bool CNTV2AxiSpiFlash::Read(const uint32_t address, std::vector<uint8_t> &data, 
 
         vector<uint8_t> dummyInput;
         SpiTransfer(commandSequence, dummyInput, data, bytesToTransfer);
-        uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+        wait_for_flash_status_ready();
 
         bytesLeftToTransfer -= bytesToTransfer;
         pageAddress += pageSize;
@@ -333,7 +335,7 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
         SpiEnableWrite(true);
 
         SpiTransfer(commandSequence, pageData, dummyOutput, (uint32_t)pageData.size());
-        uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+        wait_for_flash_status_ready();
 
         // disable write
         SpiEnableWrite(false);
@@ -407,7 +409,7 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
     vector<uint8_t> dummyInput;
     vector<uint8_t> dummyOutput;
     SpiTransfer(commandSequence, dummyInput, dummyOutput, bytes);
-    uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+    wait_for_flash_status_ready();
 
     // disable write
     SpiEnableWrite(false);
@@ -436,7 +438,7 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
 
             vector<uint8_t> dummyInput;
             SpiTransfer(commandSequence2, dummyInput, dummyOutput, bytes);
-            uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1);
+            wait_for_flash_status_ready();
 
             // disable write
             SpiEnableWrite(false);
