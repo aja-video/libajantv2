@@ -446,8 +446,8 @@ NTV2OutputCrosspointID GetFrameBufferOutputXptFromChannel (const NTV2Channel inC
 
 NTV2OutputCrosspointID GetInputSourceOutputXpt (const NTV2InputSource inInputSource, const bool inIsSDI_DS2, const bool inIsHDMI_RGB, const UWord inHDMI_Quadrant)
 {
-    static const NTV2OutputCrosspointID	gHDMIInputOutputs []	=	{	NTV2_XptHDMIIn,		NTV2_XptHDMIInQ2,		NTV2_XptHDMIInQ3,		NTV2_XptHDMIInQ4};
-    static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs []	=	{	NTV2_XptHDMIInRGB,	NTV2_XptHDMIInQ2RGB,	NTV2_XptHDMIInQ3RGB,	NTV2_XptHDMIInQ4RGB};
+    static const NTV2OutputCrosspointID	gHDMIInputOutputs []	=	{	NTV2_XptHDMIIn1,		NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4};
+    static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs []	=	{	NTV2_XptHDMIIn1RGB,	NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB};
 
     if (NTV2_INPUT_SOURCE_IS_SDI (inInputSource))
         return ::GetSDIInputOutputXptFromChannel (::NTV2InputSourceToChannel (inInputSource), inIsSDI_DS2);
@@ -1664,14 +1664,38 @@ bool CNTV2SignalRouter::Initialize (void)
     gOutputXpt2String [NTV2_XptSDIIn7DS2]				= "SDIIn7DS2";	//	, "SDIIn7DS2";
     gOutputXpt2String [NTV2_XptSDIIn8]					= "SDIIn8";
     gOutputXpt2String [NTV2_XptSDIIn8DS2]				= "SDIIn8DS2";	//	, "SDIIn8DS2";
-    gOutputXpt2String [NTV2_XptHDMIIn]					= "HDMIIn";
-    gOutputXpt2String [NTV2_XptHDMIInQ2]				= "HDMIInQ2";
-    gOutputXpt2String [NTV2_XptHDMIInQ2RGB]				= "HDMIInQ2RGB";
-    gOutputXpt2String [NTV2_XptHDMIInQ3]				= "HDMIInQ3";
-    gOutputXpt2String [NTV2_XptHDMIInQ3RGB]				= "HDMIInQ3RGB";
-    gOutputXpt2String [NTV2_XptHDMIInQ4]				= "HDMIInQ4";
-    gOutputXpt2String [NTV2_XptHDMIInQ4RGB]				= "HDMIInQ4RGB";
-    gOutputXpt2String [NTV2_XptHDMIInRGB]				= "HDMIInRGB";
+    gOutputXpt2String [NTV2_XptHDMIIn1]					= "HDMIIn1";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q2]				= "HDMIIn1Q2";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q2RGB]			= "HDMIIn1Q2RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q3]				= "HDMIIn1Q3";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q3RGB]			= "HDMIIn1Q3RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q4]				= "HDMIIn1Q4";
+    gOutputXpt2String [NTV2_XptHDMIIn1Q4RGB]			= "HDMIIn1Q4RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn1RGB]				= "HDMIIn1RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn2]					= "HDMIIn2";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q2]				= "HDMIIn2Q2";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q2RGB]			= "HDMIIn2Q2RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q3]				= "HDMIIn2Q3";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q3RGB]			= "HDMIIn2Q3RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q4]				= "HDMIIn2Q4";
+    gOutputXpt2String [NTV2_XptHDMIIn2Q4RGB]			= "HDMIIn2Q4RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn2RGB]				= "HDMIIn2RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn3]					= "HDMIIn3";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q2]				= "HDMIIn3Q2";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q2RGB]			= "HDMIIn3Q2RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q3]				= "HDMIIn3Q3";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q3RGB]			= "HDMIIn3Q3RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q4]				= "HDMIIn3Q4";
+    gOutputXpt2String [NTV2_XptHDMIIn3Q4RGB]			= "HDMIIn3Q4RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn3RGB]				= "HDMIIn3RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn4]					= "HDMIIn4";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q2]				= "HDMIIn4Q2";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q2RGB]			= "HDMIIn4Q2RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q3]				= "HDMIIn4Q3";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q3RGB]			= "HDMIIn4Q3RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q4]				= "HDMIIn4Q4";
+    gOutputXpt2String [NTV2_XptHDMIIn4Q4RGB]			= "HDMIIn4Q4RGB";
+    gOutputXpt2String [NTV2_XptHDMIIn4RGB]				= "HDMIIn4RGB";
 
     //	gString2InputXpt
     for (OutputXpt2StringConstIter iter (gOutputXpt2String.begin ());  iter != gOutputXpt2String.end ();  ++iter)
@@ -1930,14 +1954,38 @@ bool CNTV2SignalRouter::Initialize (void)
     gOutputXpt2WidgetID [NTV2_XptSDIIn7DS2]				= NTV2_Wgt3GSDIIn7;
     gOutputXpt2WidgetID [NTV2_XptSDIIn8]				= NTV2_Wgt3GSDIIn8;
     gOutputXpt2WidgetID [NTV2_XptSDIIn8DS2]				= NTV2_Wgt3GSDIIn8;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ2]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ3]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ4]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInQ4RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIInRGB]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1]				= NTV2_WgtHDMIIn1;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q2]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q2RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q3]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q3RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q4]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q4RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn1RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2]				= NTV2_WgtHDMIIn1;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q2]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q2RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q3]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q3RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q4]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q4RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn2RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3]				= NTV2_WgtHDMIIn1;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q2]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q2RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q3]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q3RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q4]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q4RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn3RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4]				= NTV2_WgtHDMIIn1;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q2]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q2RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q3]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q3RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q4]				= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q4RGB]			= NTV2_WgtHDMIIn1v3;
+    gOutputXpt2WidgetID [NTV2_XptHDMIIn4RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_Xpt425Mux1ARGB]			= NTV2_Wgt425Mux1;
     gOutputXpt2WidgetID [NTV2_Xpt425Mux1AYUV]			= NTV2_Wgt425Mux1;
     gOutputXpt2WidgetID [NTV2_Xpt425Mux1BRGB]			= NTV2_Wgt425Mux1;
