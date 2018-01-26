@@ -573,7 +573,7 @@ bool NTV2FrameGrabber::SetupInput (void)
             NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
             mNTV2Card.GetHDMIInputColor (hdmiColor, mChannel);
             if (!mbFixedReference)
-                mNTV2Card.SetReference (NTV2_REFERENCE_HDMI_INPUT1);
+				mNTV2Card.SetReference (::NTV2InputSourceToReferenceSource(mInputSource));
 
             // configure hdmi with 2.0 support
             if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
@@ -659,7 +659,6 @@ bool NTV2FrameGrabber::SetupInput (void)
                     mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
                 }
             }
-            mChannel = NTV2_CHANNEL1;
 		}
 		else
 			qDebug () << "## DEBUG:  NTV2FrameGrabber::SetupInput:  Bad mInputSource switch value " << ::NTV2InputSourceToChannelSpec (mInputSource);
