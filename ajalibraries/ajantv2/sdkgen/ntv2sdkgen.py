@@ -112,13 +112,13 @@ def get_canonical_video_formats (args, ntv2enums):
             pieces = line.split()
             key = pieces[0]
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             if key.startswith("NTV2_FORMAT_"):
                 #print(pieces)
                 if "=" in key:
                     print("## ERROR:  Line %d in 'ntv2enums.h':  Missing whitespace around '='" % (line_num))
                     return {'err': 503,	'videoformats': {}}
-                if len(pieces)>1 and pieces[1].startswith("=") and pieces[1]<>"=":
+                if len(pieces)>1 and pieces[1].startswith("=") and pieces[1] != "=":
                     print("## ERROR:  Line %d in 'ntv2enums.h':  Missing whitespace around '='" % (line_num))
                     return {'err': 503,	'videoformats': {}}
                 if "," in key:
@@ -184,7 +184,7 @@ def get_canonical_pixel_formats (args, ntv2enums):
             pieces = line.split(None,2)
             key = pieces[0]
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             if key[0:9] == "NTV2_FBF_":
                 if "=" in key:
                     pieces = key.split("=")
@@ -230,7 +230,7 @@ def get_canonical_input_sources (args, ntv2enums):
             pieces = line.split(None,2)
             key = pieces[0]
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             if key[0:17] == "NTV2_INPUTSOURCE_":
                 if "=" in key:
                     pieces = key.split("=")
@@ -272,7 +272,7 @@ def get_canonical_widget_ids (args, ntv2enums):
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             if key[0:8] == "NTV2_Wgt":
                 if "=" in key:
                     pieces = key.split("=")
@@ -314,7 +314,7 @@ def get_canonical_dsk_modes (args, ntv2enums):
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             if key[0:12] == "NTV2_DSKMode":
                 if "=" in key:
                     pieces = key.split("=")
@@ -356,7 +356,7 @@ def get_canonical_conversion_modes (args, ntv2enums):
             pieces = line.split(None,2)
             key = pieces[0].lstrip().rstrip()
             if key.startswith(","):
-				key = key.replace(",","").lstrip().rstrip()
+                key = key.replace(",","").lstrip().rstrip()
             first8 = key[0:8]
             if "to" in key and (first8 == "NTV2_108" or first8 == "NTV2_720" or first8 == "NTV2_525" or first8 == "NTV2_625" or first8 == "NTV2_720"):
                 if "=" in key:
@@ -468,7 +468,7 @@ def parse_device_file (args, dev_path, dev_file):
                 if len(pieces) > 1:
                     value = pieces[1]
                 the_dict[key] = value
-    if err<>0:
+    if err!=0:
         print("## ERROR:  parse_device_file failed for device file '%s', returning %d" % (dev_file, err))
     elif args.verbose:
         print("## NOTE:  %s has %d symbols defined from device file '%s'" % (device_id, len(the_dict), dev_file))
@@ -489,10 +489,10 @@ def parse_device_files (args, dev_path):
             err        = result['err']
             device_id  = result['device_id']
             device_map = result['map']
-            if err <> 0:
+            if err != 0:
                 break
             device_maps[device_id] = device_map
-    if err<>0:
+    if err != 0:
         print("## ERROR:  'parse_device_files' failed after parsing %d file(s), returning %d" % (file_num, err))
     elif args.verbose:
         print("## NOTE:  %d device files successfully parsed" % (file_num))
@@ -513,16 +513,16 @@ def write_csv (args, csvDir, csvName, devices, headings, funcs, descs, func_to_d
         f.write("%s,%s\n" % (",".join(headings), ",".join(devices)))
         for func in sorted(funcs, key=str.lower):
             desc = ""
-            if descs <> None:
+            if descs != None:
                 if func in descs:
                     desc = descs[func]
             if "," in desc:
                 desc = "\"" + desc + "\""
 
             tuple = [func]
-            if descs <> None:
+            if descs != None:
                 tuple = [func, desc]
-            if types <> None:
+            if types != None:
                 if func in types:
                     tuple = [func, types[func], desc]
 
@@ -532,12 +532,12 @@ def write_csv (args, csvDir, csvName, devices, headings, funcs, descs, func_to_d
                 supported_devs = func_to_devs_map[func]
             for dev in sorted(devices, key=str.lower):
                 if dev in supported_devs:
-                    if types <> None:
+                    if types != None:
                         f.write(",%s" % (supported_devs[dev]))
                     else:
                         f.write(",X")
                 else:
-                    if types <> None:
+                    if types != None:
                         f.write(",0")
                     else:
                         f.write(",-")
@@ -682,51 +682,51 @@ def main ():
     result = get_canonical_device_ids (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err        = result['err']
     device_ids = result['device_ids']
-    if err <> 0:
+    if err != 0:
         return err
     device_ids["DEVICE_ID_NOTFOUND"] = False
 
     result = get_canonical_video_formats (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err           = result['err']
     video_formats = result['videoformats']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_pixel_formats (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err        = result['err']
     pixel_formats = result['pixelformats']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_input_sources (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err        = result['err']
     input_sources = result['inputsources']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_widget_ids (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err        = result['err']
     widget_ids = result['widgetids']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_dsk_modes (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err        = result['err']
     dsk_modes = result['dskmodes']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_conversion_modes (args, os.path.join(ajantv2Dir, "includes", "ntv2enums.h"))
     err              = result['err']
     conversion_modes = result['convmodes']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_functions (args, os.path.join(sdkgenDir, "cando_canon.gen"))
     err              = result['err']
     can_do_functions = result['functions']
     can_do_descs     = result['return_descs']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = get_canonical_functions (args, os.path.join(sdkgenDir, "getnum_canon.gen"), 3)
@@ -734,18 +734,18 @@ def main ():
     get_num_functions = result['functions']
     get_num_types     = result['return_types']
     get_num_descs     = result['return_descs']
-    if err <> 0:
+    if err != 0:
         return err
 
     result = parse_device_files(args, devicesDir)
     err         = result['err']
     device_maps = result['devices']
-    if err <> 0:
+    if err != 0:
         print("## NOTE:  'sdkgen' failed, error %d" % (err))
 
     # Check that each canonical device is represented in device_maps (other than DEVICE_ID_NOTFOUND)...
     for device_id in device_ids:
-        if device_id <> "DEVICE_ID_NOTFOUND":
+        if device_id != "DEVICE_ID_NOTFOUND":
             if not device_id in device_maps:
                 print("## ERROR:  Canonical device %s not represented in device files" % device_id)
                 return 611
@@ -946,12 +946,12 @@ def main ():
             if args.failwarnings:
                 return 602
     if False:
-        print "\nVIDEO FORMATS:\n", VideoFormats
-        print "\nFRAME BUFFER FORMATS:\n", FrameBufferFormats
-        print "\nWIDGETS:\n", WidgetIDs
-        print "\nINPUT SOURCES:\n", InputSources
-        print "\nDSK MODES:\n", DSKModes
-        print "\nCONVERSION MODES:\n", ConversionModes
+        print("\nVIDEO FORMATS:\n", VideoFormats)
+        print("\nFRAME BUFFER FORMATS:\n", FrameBufferFormats)
+        print("\nWIDGETS:\n", WidgetIDs)
+        print("\nINPUT SOURCES:\n", InputSources)
+        print("\nDSK MODES:\n", DSKModes)
+        print("\nCONVERSION MODES:\n", ConversionModes)
 
         # To match existing CSVs, use the existing device ID order:
     devices_old_order = [	"DEVICE_ID_NOTFOUND",					"DEVICE_ID_CORVID1",				"DEVICE_ID_CORVID3G",				"DEVICE_ID_KONALHI",
@@ -973,35 +973,35 @@ def main ():
 
         # Write CanDo.csv
         result = write_csv(args, csvDir, "CanDo.csv", devices_old_order, ["FunctionName","Brief"], can_do_functions, can_do_descs, CanDos)
-        if result <> 0:
+        if result != 0:
             return result
         # Write GetNum.csv
         result = write_csv(args, csvDir, "GetNum.csv", devices_old_order, ["FunctionName","Returns","Brief"], get_num_functions, get_num_descs, GetNums, get_num_types)
-        if result <> 0:
+        if result != 0:
             return result
         # Write ConversionModes.csv
         result = write_csv(args, csvDir, "ConversionModes.csv", devices_old_order, ["NTV2ConversionMode"], conversion_modes, None, ConversionModes)
-        if result <> 0:
+        if result != 0:
             return result
         # Write DSKModes.csv
         result = write_csv(args, csvDir, "DSKModes.csv", devices_old_order, ["NTV2DSKMode"], dsk_modes, None, DSKModes)
-        if result <> 0:
+        if result != 0:
             return result
         # Write FBFormats.csv
         result = write_csv(args, csvDir, "FBFormats.csv", devices_old_order, ["NTV2FrameBufferFormat"], pixel_formats, None, FrameBufferFormats)
-        if result <> 0:
+        if result != 0:
             return result
         # Write InputSources.csv
         result = write_csv(args, csvDir, "InputSources.csv", devices_old_order, ["NTV2InputSource"], input_sources, None, InputSources)
-        if result <> 0:
+        if result != 0:
             return result
         # Write VideoFormats.csv
         result = write_csv(args, csvDir, "VideoFormats.csv", devices_old_order, ["NTV2VideoFormat"], video_formats, None, VideoFormats)
-        if result <> 0:
+        if result != 0:
             return result
         # Write Widgets.csv
         result = write_csv(args, csvDir, "Widgets.csv", devices_old_order, ["NTV2WidgetID"], widget_ids, None, WidgetIDs)
-        if result <> 0:
+        if result != 0:
             return result
 
     # Optional:  Write .hh file:
@@ -1077,7 +1077,7 @@ def main ():
             f.write("\n\n#endif\t//\tNTV2DEVICEFEATURES_HH\n")
         if args.verbose:
             print("## NOTE:  '%s' written successfully" % (ohhFile))
-        if result <> 0:
+        if result != 0:
             return result
 
     if ohppFile:
@@ -1188,7 +1188,7 @@ def main ():
             write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoWidget",            "NTV2WidgetID",          "inWidgetID",       widget_ids,       WidgetIDs,          "NTV2_WIDGET_INVALID")
         if args.verbose:
             print("## NOTE:  '%s' written successfully" % (ohppFile))
-        if result <> 0:
+        if result != 0:
             return result
 
     if args.verbose:
