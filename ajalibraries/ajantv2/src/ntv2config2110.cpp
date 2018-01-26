@@ -1641,12 +1641,6 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     tx_2110Config config;
     GetTxChannelConfiguration(channel, stream, config);
 
-    uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(channel, stream, baseAddrPacketizer);
-
-    uint32_t audioChans;
-    mDevice.ReadRegister(kReg3190_pkt_num_audio_channels + baseAddrPacketizer, &audioChans);
-
     // media name
     sdp << "m=audio ";
     sdp << To_String(config.remotePort[0]);     // FIXME
@@ -1662,26 +1656,37 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     sdp << "a=rtpmap:";
     sdp << To_String(config.payloadType);
     sdp << " L24/48000/";
-    sdp << To_String(audioChans) << endl;
+    sdp << To_String(config.numAudioChannels) << endl;
 
     //fmtp
     sdp << "a=fmtp:";
     sdp << To_String(config.payloadType);
     sdp << " channel-order=SMPTE2110.(";
-    switch (audioChans)
+    switch (config.numAudioChannels)
     {
     case 2:
         sdp << "ST)";
         break;
-    default:
+    case 4:
+        sdp << "SGRP)";
+        break;
     case 8:
+    default:
         sdp << "SGRP,SGRP)";
+        break;
+    case 12:
+        sdp << "SGRP,SGRP,SGRP)";
         break;
     case 16:
         sdp << "SGRP,SGRP,SGRP,SGRP)";
         break;
     }
     sdp << endl;
+
+    if (config. audioPacketInterval == PACKET_INTERVAL_125uS)
+        sdp << "a=ptime:0.125" << endl;
+    else
+        sdp << "a=ptime:1.000" << endl;
 
     sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;

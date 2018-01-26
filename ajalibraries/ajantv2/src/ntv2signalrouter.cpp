@@ -446,15 +446,22 @@ NTV2OutputCrosspointID GetFrameBufferOutputXptFromChannel (const NTV2Channel inC
 
 NTV2OutputCrosspointID GetInputSourceOutputXpt (const NTV2InputSource inInputSource, const bool inIsSDI_DS2, const bool inIsHDMI_RGB, const UWord inHDMI_Quadrant)
 {
-    static const NTV2OutputCrosspointID	gHDMIInputOutputs []	=	{	NTV2_XptHDMIIn1,		NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4};
-    static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs []	=	{	NTV2_XptHDMIIn1RGB,	NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB};
+	static const NTV2OutputCrosspointID	gHDMIInputOutputs [4][4] =		{	{	NTV2_XptHDMIIn1,	NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4		},
+																			{   NTV2_XptHDMIIn2,	NTV2_XptHDMIIn2Q2,		NTV2_XptHDMIIn2Q3,		NTV2_XptHDMIIn2Q4		},
+																			{   NTV2_XptHDMIIn3,	NTV2_XptHDMIIn3Q2,		NTV2_XptHDMIIn3Q3,		NTV2_XptHDMIIn3Q4		},
+																			{   NTV2_XptHDMIIn4,	NTV2_XptHDMIIn4Q2,		NTV2_XptHDMIIn4Q3,		NTV2_XptHDMIIn4Q4		}   };
+	static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs [4][4]	=	{	{	NTV2_XptHDMIIn1RGB, NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB	},
+																			{	NTV2_XptHDMIIn2RGB,	NTV2_XptHDMIIn2Q2RGB,	NTV2_XptHDMIIn2Q3RGB,	NTV2_XptHDMIIn2Q4RGB	},
+																			{	NTV2_XptHDMIIn3RGB,	NTV2_XptHDMIIn3Q2RGB,	NTV2_XptHDMIIn3Q3RGB,	NTV2_XptHDMIIn3Q4RGB	},
+																			{	NTV2_XptHDMIIn4RGB,	NTV2_XptHDMIIn4Q2RGB,	NTV2_XptHDMIIn4Q3RGB,	NTV2_XptHDMIIn4Q4RGB	}	};
 
     if (NTV2_INPUT_SOURCE_IS_SDI (inInputSource))
         return ::GetSDIInputOutputXptFromChannel (::NTV2InputSourceToChannel (inInputSource), inIsSDI_DS2);
     else if (NTV2_INPUT_SOURCE_IS_HDMI (inInputSource))
     {
+		NTV2Channel channel = ::NTV2InputSourceToChannel (inInputSource);
         if (inHDMI_Quadrant < 4)
-            return inIsHDMI_RGB  ?  gHDMIInputRGBOutputs [inHDMI_Quadrant]  :  gHDMIInputOutputs [inHDMI_Quadrant];
+			return inIsHDMI_RGB  ?  gHDMIInputRGBOutputs [channel][inHDMI_Quadrant]  :  gHDMIInputOutputs [channel][inHDMI_Quadrant];
         else
             return NTV2_OUTPUT_CROSSPOINT_INVALID;
     }
