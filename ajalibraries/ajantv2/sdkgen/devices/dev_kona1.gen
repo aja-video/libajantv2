@@ -132,7 +132,6 @@ NTV2DeviceCanDoSDIErrorChecks
 NTV2DeviceCanDoStackedAudio
 NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
-NTV2DeviceHasNWL
 NTV2DeviceHasPCIeGen2
 NTV2DeviceHasRetailSupport
 NTV2DeviceHasSPIFlash
@@ -144,6 +143,7 @@ NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceCanThermostat
 NTV2DeviceCanDoVITC2
+NTV2DeviceHasXilinxDMA
 NTV2DeviceCanDoAudioMixer
 NTV2DeviceHasColorSpaceConverterOnChannel2
 NTV2DeviceSoftwareCanChangeFrameBufferSize
