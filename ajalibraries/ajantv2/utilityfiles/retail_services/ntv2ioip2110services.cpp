@@ -3236,6 +3236,7 @@ void IoIP2110Services::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// HDMI output - initialization sequence
+	#ifdef HDMI_INIT
 	if (mHDMIStartupCountDown > 0)
 	{
 		// start initialization
@@ -3254,6 +3255,8 @@ void IoIP2110Services::SetDeviceMiscRegisters (NTV2Mode mode)
 		mHDMIStartupCountDown--;
 	}
 	else
+	#endif
+	
 	{
 		// set standard / mode
 		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
