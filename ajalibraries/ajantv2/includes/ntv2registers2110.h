@@ -98,9 +98,7 @@
 #define kReg4175_depkt_rx_byte_cnt              (0x0060/4)
 #define kReg4175_depkt_bytes_per_line           (0x0064/4)
 #define kReg4175_depkt_rows_per_field           (0x0068/4)
-#define kReg4175_depkt_major_version            (0x006C/4)
-#define kReg4175_depkt_minor_version            (0x0070/4)
-#define kReg4175_depkt_widget_id                (0x0074/4)
+#define kReg4175_depkt_version_id               (0x006C/4)
 #define kReg4175_depkt_sequence_err             (0x007C/4)
 
 /////////////////////////////////////////////////////////////////////
