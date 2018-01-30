@@ -448,12 +448,12 @@ NTV2OutputCrosspointID GetInputSourceOutputXpt (const NTV2InputSource inInputSou
 {
 	static const NTV2OutputCrosspointID	gHDMIInputOutputs [4][4] =		{	{	NTV2_XptHDMIIn1,	NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4		},
 																			{   NTV2_XptHDMIIn2,	NTV2_XptHDMIIn2Q2,		NTV2_XptHDMIIn2Q3,		NTV2_XptHDMIIn2Q4		},
-																			{   NTV2_XptHDMIIn3,	NTV2_XptHDMIIn3Q2,		NTV2_XptHDMIIn3Q3,		NTV2_XptHDMIIn3Q4		},
-																			{   NTV2_XptHDMIIn4,	NTV2_XptHDMIIn4Q2,		NTV2_XptHDMIIn4Q3,		NTV2_XptHDMIIn4Q4		}   };
+																			{   NTV2_XptHDMIIn3,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
+																			{   NTV2_XptHDMIIn4,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}   };
 	static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs [4][4]	=	{	{	NTV2_XptHDMIIn1RGB, NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB	},
 																			{	NTV2_XptHDMIIn2RGB,	NTV2_XptHDMIIn2Q2RGB,	NTV2_XptHDMIIn2Q3RGB,	NTV2_XptHDMIIn2Q4RGB	},
-																			{	NTV2_XptHDMIIn3RGB,	NTV2_XptHDMIIn3Q2RGB,	NTV2_XptHDMIIn3Q3RGB,	NTV2_XptHDMIIn3Q4RGB	},
-																			{	NTV2_XptHDMIIn4RGB,	NTV2_XptHDMIIn4Q2RGB,	NTV2_XptHDMIIn4Q3RGB,	NTV2_XptHDMIIn4Q4RGB	}	};
+																			{	NTV2_XptHDMIIn3RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
+																			{	NTV2_XptHDMIIn4RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}	};
 
     if (NTV2_INPUT_SOURCE_IS_SDI (inInputSource))
         return ::GetSDIInputOutputXptFromChannel (::NTV2InputSourceToChannel (inInputSource), inIsSDI_DS2);
@@ -1688,20 +1688,8 @@ bool CNTV2SignalRouter::Initialize (void)
     gOutputXpt2String [NTV2_XptHDMIIn2Q4RGB]			= "HDMIIn2Q4RGB";
     gOutputXpt2String [NTV2_XptHDMIIn2RGB]				= "HDMIIn2RGB";
     gOutputXpt2String [NTV2_XptHDMIIn3]					= "HDMIIn3";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q2]				= "HDMIIn3Q2";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q2RGB]			= "HDMIIn3Q2RGB";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q3]				= "HDMIIn3Q3";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q3RGB]			= "HDMIIn3Q3RGB";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q4]				= "HDMIIn3Q4";
-    gOutputXpt2String [NTV2_XptHDMIIn3Q4RGB]			= "HDMIIn3Q4RGB";
     gOutputXpt2String [NTV2_XptHDMIIn3RGB]				= "HDMIIn3RGB";
     gOutputXpt2String [NTV2_XptHDMIIn4]					= "HDMIIn4";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q2]				= "HDMIIn4Q2";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q2RGB]			= "HDMIIn4Q2RGB";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q3]				= "HDMIIn4Q3";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q3RGB]			= "HDMIIn4Q3RGB";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q4]				= "HDMIIn4Q4";
-    gOutputXpt2String [NTV2_XptHDMIIn4Q4RGB]			= "HDMIIn4Q4RGB";
     gOutputXpt2String [NTV2_XptHDMIIn4RGB]				= "HDMIIn4RGB";
 
     //	gString2InputXpt
@@ -1978,20 +1966,8 @@ bool CNTV2SignalRouter::Initialize (void)
     gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q4RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_XptHDMIIn2RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_XptHDMIIn3]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q2]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q3]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q4]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3Q4RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_XptHDMIIn3RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_XptHDMIIn4]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q2]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q3]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q4]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4Q4RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_XptHDMIIn4RGB]			= NTV2_WgtHDMIIn1v3;
     gOutputXpt2WidgetID [NTV2_Xpt425Mux1ARGB]			= NTV2_Wgt425Mux1;
     gOutputXpt2WidgetID [NTV2_Xpt425Mux1AYUV]			= NTV2_Wgt425Mux1;
