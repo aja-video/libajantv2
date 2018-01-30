@@ -106,7 +106,7 @@ public:
     uint32_t    payloadLen;
     uint32_t    lastPayloadLen;
     uint32_t    pktsPerLine;
-    uint32_t    audioChannels;
+    uint32_t    numAudioChannels;
     uint32_t    audioSamplesPerPkt;
 };
 
