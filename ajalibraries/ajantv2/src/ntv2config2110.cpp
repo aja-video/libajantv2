@@ -88,7 +88,7 @@ void rx_2110Config::init()
     payloadLen     = 0;
     lastPayloadLen = 0;
     pktsPerLine    = 0;
-    audioChannels  = 2;
+	numAudioChannels  = 2;
     audioSamplesPerPkt = 48;
 }
 
@@ -562,7 +562,7 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
 
         uint32_t num_samples  = rxConfig.audioSamplesPerPkt;
-        uint32_t num_channels = rxConfig.audioChannels;
+		uint32_t num_channels = rxConfig.numAudioChannels;
         uint32_t val = (num_samples << 8) + num_channels;
         mDevice.WriteRegister(kReg3190_depkt_config + depacketizerBaseAddr,val);
 
@@ -1947,7 +1947,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
                 tokens = split(tokens[1].c_str(), '/');
                 if ((tokens.size() >= 3) && !tokens[2].empty())
                 {
-                    rxConfig.audioChannels = atoi(tokens[2].c_str());
+					rxConfig.numAudioChannels = atoi(tokens[2].c_str());
                 }
             }
         }
