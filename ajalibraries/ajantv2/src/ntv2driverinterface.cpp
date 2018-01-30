@@ -683,6 +683,12 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	ULWord* bitFilePtr =  new ULWord[256/4];
 	ULWord dwordSizeCount = 256/4;
 
+	if(!IsDeviceReady(false))
+	{
+		// cannot read flash
+		return false;
+	}
+
 	if (NTV2DeviceHasSPIv4(_boardID))
     {
         uint32_t val;
