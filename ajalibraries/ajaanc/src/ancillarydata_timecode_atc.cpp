@@ -188,54 +188,51 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 
 AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
 	m_DID = AJAAncillaryData_SMPTE12M_DID;
 	m_SID = AJAAncillaryData_SMPTE12M_SID;
 
-	status = AllocDataMemory(AJAAncillaryData_SMPTE12M_PayloadSize);
+	AJAStatus status = AllocDataMemory(AJAAncillaryData_SMPTE12M_PayloadSize);
+	if (AJA_FAILURE(status))
+		return status;
 
-	if (AJA_SUCCESS(status))
+	// time digits in the even payload words
+	m_payload[ 0] = (m_timeDigits[kTcFrameUnits]  & 0x0F) << 4;
+	m_payload[ 2] = (m_timeDigits[kTcFrameTens]   & 0x0F) << 4;
+	m_payload[ 4] = (m_timeDigits[kTcSecondUnits] & 0x0F) << 4;
+	m_payload[ 6] = (m_timeDigits[kTcSecondTens]  & 0x0F) << 4;
+	m_payload[ 8] = (m_timeDigits[kTcMinuteUnits] & 0x0F) << 4;
+	m_payload[10] = (m_timeDigits[kTcMinuteTens]  & 0x0F) << 4;
+	m_payload[12] = (m_timeDigits[kTcHourUnits]   & 0x0F) << 4;
+	m_payload[14] = (m_timeDigits[kTcHourTens]    & 0x0F) << 4;
+
+	// binary group data in the odd payload words
+	m_payload[ 1] = (m_binaryGroup[kBg1] & 0x0F) << 4;	
+	m_payload[ 3] = (m_binaryGroup[kBg2] & 0x0F) << 4;
+	m_payload[ 5] = (m_binaryGroup[kBg3] & 0x0F) << 4;
+	m_payload[ 7] = (m_binaryGroup[kBg4] & 0x0F) << 4;
+	m_payload[ 9] = (m_binaryGroup[kBg5] & 0x0F) << 4;
+	m_payload[11] = (m_binaryGroup[kBg6] & 0x0F) << 4;
+	m_payload[13] = (m_binaryGroup[kBg7] & 0x0F) << 4;
+	m_payload[15] = (m_binaryGroup[kBg8] & 0x0F) << 4;
+
+	// add the distributed bits
+	uint8_t i;
+	uint8_t dbb = m_dbb1;		// DBB1 goes into UDW1 - 8, ls bit first
+	for (i = 0; i < 8; i++)
 	{
-		// time digits in the even payload words
-		m_payload[ 0] = (m_timeDigits[kTcFrameUnits]  & 0x0F) << 4;
-		m_payload[ 2] = (m_timeDigits[kTcFrameTens]   & 0x0F) << 4;
-		m_payload[ 4] = (m_timeDigits[kTcSecondUnits] & 0x0F) << 4;
-		m_payload[ 6] = (m_timeDigits[kTcSecondTens]  & 0x0F) << 4;
-		m_payload[ 8] = (m_timeDigits[kTcMinuteUnits] & 0x0F) << 4;
-		m_payload[10] = (m_timeDigits[kTcMinuteTens]  & 0x0F) << 4;
-		m_payload[12] = (m_timeDigits[kTcHourUnits]   & 0x0F) << 4;
-		m_payload[14] = (m_timeDigits[kTcHourTens]    & 0x0F) << 4;
+		m_payload[i] |= (dbb & 0x01) << 3;
+		dbb = dbb >> 1;
+	}
 
-		// binary group data in the odd payload words
-		m_payload[ 1] = (m_binaryGroup[kBg1] & 0x0F) << 4;	
-		m_payload[ 3] = (m_binaryGroup[kBg2] & 0x0F) << 4;
-		m_payload[ 5] = (m_binaryGroup[kBg3] & 0x0F) << 4;
-		m_payload[ 7] = (m_binaryGroup[kBg4] & 0x0F) << 4;
-		m_payload[ 9] = (m_binaryGroup[kBg5] & 0x0F) << 4;
-		m_payload[11] = (m_binaryGroup[kBg6] & 0x0F) << 4;
-		m_payload[13] = (m_binaryGroup[kBg7] & 0x0F) << 4;
-		m_payload[15] = (m_binaryGroup[kBg8] & 0x0F) << 4;
-
-		// add the distributed bits
-		uint8_t i;
-		uint8_t dbb = m_dbb1;		// DBB1 goes into UDW1 - 8, ls bit first
-		for (i = 0; i < 8; i++)
-		{
-			m_payload[i] |= (dbb & 0x01) << 3;
-			dbb = dbb >> 1;
-		}
-
-		dbb = m_dbb2;				// DBB2 goes into UDW9 - 16, ls bit first
-		for (i = 8; i < 16; i++)
-		{
-			m_payload[i] |= (dbb & 0x01) << 3;
-			dbb = dbb >> 1;
-		}
+	dbb = m_dbb2;				// DBB2 goes into UDW9 - 16, ls bit first
+	for (i = 8; i < 16; i++)
+	{
+		m_payload[i] |= (dbb & 0x01) << 3;
+		dbb = dbb >> 1;
 	}
 
 	m_checksum = Calculate8BitChecksum();
-	return status;
+	return AJA_STATUS_SUCCESS;
 }
 
 

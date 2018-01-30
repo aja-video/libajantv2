@@ -107,7 +107,7 @@ protected:
 
 	// Encode methods ported/stolen from ntv2vitc.cpp
 	bool		DecodeLine (const uint8_t * pInLine);
-	bool		EncodeLine (uint8_t * pOutLine);
+	AJAStatus	EncodeLine (uint8_t * pOutLine) const;
 
 #ifdef USE_SMPTE_266M
 #else

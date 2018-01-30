@@ -91,22 +91,22 @@ AJAStatus AJAAncillaryData_Timecode_VITC::ParsePayloadData (void)
 
 AJAStatus AJAAncillaryData_Timecode_VITC::GeneratePayloadData (void)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
 	m_DID = AJAAncillaryData_VITC_DID;
 	m_SID = AJAAncillaryData_VITC_SID;
 
-	status = AllocDataMemory(AJAAncillaryData_VITC_PayloadSize);
-	if (AJA_SUCCESS(status))
-	{
-		EncodeLine(&m_payload[0]);
+	AJAStatus status = AllocDataMemory(AJAAncillaryData_VITC_PayloadSize);
+	if (AJA_FAILURE(status))
+		return status;
 
-		// round-trip: TEST ONLY!
-		//bool bResult = DecodeLine (m_pPayload);
-	}
+	status = EncodeLine(&m_payload[0]);
+	if (AJA_FAILURE(status))
+		return status;
+
+	// round-trip: TEST ONLY!
+	//bool bResult = DecodeLine (m_pPayload);
 
 	m_checksum = Calculate8BitChecksum ();
-	return status;
+	return AJA_STATUS_SUCCESS;
 }
 
 
@@ -462,9 +462,8 @@ static void DoVITCBitPair (uint8_t *pLine, uint32_t& pixelIndex, bool bPrevBit, 
 
 // Encodes the supplied timecode data to VITC and inserts it in the designated video line.
 // If this is RP-201 "Film" or "Production" data, we jigger the CRC per RP-201 specs.
-bool AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine)
+AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 {
-	bool bResult = true;
 	uint32_t i;
 	uint32_t pixelIndex = 0;		// running pixel count
 	uint32_t group;
@@ -547,7 +546,7 @@ bool AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine)
 		for (i = 0; i < (uint32_t)remainingPixels; i++)
 			DoVITCPixel (pLine, pixelIndex++, VITC_YUV8_LO);
 
-	return bResult;
+	return AJA_STATUS_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
