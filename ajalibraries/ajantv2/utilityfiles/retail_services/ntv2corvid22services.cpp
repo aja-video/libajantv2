@@ -520,11 +520,8 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
 	else 
-	{	// Not doing dual link then wire up input to frame buffer if we do a 2x transfer
-		if (m2XTransferMode)
-			mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
-		else
-			mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	{	
+		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	}
 	
 	

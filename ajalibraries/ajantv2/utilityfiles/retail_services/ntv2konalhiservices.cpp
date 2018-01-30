@@ -928,11 +928,8 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
 	}
 	else 
-	{	// Not doing dual link then wire up input to frame buffer if we do a 2x transfer
-		if (m2XTransferMode)
-			mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
-		else
-			mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	{
+		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	}
 
 	// 3G Link A - follows SDI 1 for now

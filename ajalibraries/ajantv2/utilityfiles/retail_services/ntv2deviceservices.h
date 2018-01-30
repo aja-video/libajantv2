@@ -181,7 +181,6 @@ public:
 	uint32_t				mDSKForegroundFade;
 	ReferenceSelect			mCaptureReferenceSelect;
 	ReferenceSelect			mDisplayReferenceSelect;
-	bool					m2XTransferMode;
 	NTV2GammaType			mGammaMode;
 	NTV2RGB10Range			mRGB10Range;
 	NTV2ColorSpaceType		mColorSpaceMode;

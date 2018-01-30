@@ -186,7 +186,6 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegDSKForegroundFade, (ULWord *) &mDSKForegroundFade);
 	mCard->ReadRegister(kVRegCaptureReferenceSelect, (ULWord *) &mCaptureReferenceSelect);
 	mCard->ReadRegister(kVRegDisplayReferenceSelect, (ULWord *) &mDisplayReferenceSelect);
-	mCard->ReadRegister(kVReg2XTransferMode, (ULWord *) &m2XTransferMode);
 	mCard->ReadRegister(kVRegGammaMode, (ULWord *) &mGammaMode);
 	mCard->ReadRegister(kVRegRGB10Range, (ULWord *) &mRGB10Range);
 	mCard->ReadRegister(kVRegColorSpaceMode, (ULWord *) &mColorSpaceMode);
