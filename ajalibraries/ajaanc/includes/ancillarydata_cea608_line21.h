@@ -107,9 +107,9 @@ protected:
 		@param[in]	inChar1				Specifies the 8-bit "1st" character on the line.
 		@param[in]	inChar2				Specifies the 8-bit "2nd" character on the line.
 		@param[in]	inDataStartOffset	Specifies the pixel count from beginning of line (buffer) to the first data pixel.
-		@return		Pointer to the beginning of the buffer.
+		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual uint8_t *	EncodeLine (const uint8_t inChar1, const uint8_t inChar2, const uint32_t inDataStartOffset);
+	virtual AJAStatus	EncodeLine (const uint8_t inChar1, const uint8_t inChar2, const uint32_t inDataStartOffset);
 
 	/**
 		@brief		Encodes a single 8-bit character from just after the transition to the first bit until just before the transition from the last bit.
@@ -141,7 +141,7 @@ protected:
 		@param[out]	outGotClock	Receives 'true' if a valid CEA-608 ("Line 21") clock waveform was found.
 		@return		AJA_STATUS_SUCCESS if successful, or AJA_STATUS_FAIL if payload not allocated or wrong size.
 	**/
-	virtual AJAStatus	DecodeLine (uint8_t & outChar1, uint8_t & outChar2, bool & outGotClock);
+	virtual AJAStatus	DecodeLine (uint8_t & outChar1, uint8_t & outChar2, bool & outGotClock) const;
 
 
 	/**

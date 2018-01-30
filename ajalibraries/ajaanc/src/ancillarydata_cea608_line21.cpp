@@ -105,7 +105,7 @@ const uint32_t CC_DEFAULT_ENCODE_OFFSET = 7;	// number of pixels between start o
 
 AJAStatus AJAAncillaryData_Cea608_Line21::GeneratePayloadData (void)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
+	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	m_DID = AJAAncillaryData_Cea608_Line21_DID;
 	m_SID = AJAAncillaryData_Cea608_Line21_SID;
@@ -114,11 +114,11 @@ AJAStatus AJAAncillaryData_Cea608_Line21::GeneratePayloadData (void)
 	// (run-in clock, etc.). After that we're going to assume: (a) the payload size never changes; and (b) the
 	// unchanging bits don't change.
 	if (!m_bEncodeBufferInitialized || GetDC() != AJAAncillaryData_Cea608_Line21_PayloadSize || m_dataStartOffset == 0)
-		status = AllocEncodeBuffer ();
+		status = AllocEncodeBuffer();
 
 	// encode the payload data
 	if (AJA_SUCCESS(status))
-		EncodeLine (m_char1, m_char2, m_dataStartOffset);
+		status = EncodeLine (m_char1, m_char2, m_dataStartOffset);
 
 	// note: we're not going to bother with a checksum since it's tedious and the hardware ignores it anyway...
 	return status;
@@ -265,7 +265,7 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 
 // encodes the supplied two bytes into the existing encode buffer and returns a pointer to same
 // note: caller should NOT modify the returned buffer in any way.
-uint8_t * AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t char2, uint32_t dataStartOffset)
+AJAStatus AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t char2, uint32_t dataStartOffset)
 {
 	// pointer to first data bit, minus room for transition
 	uint8_t *ptr = &m_payload[0] + (dataStartOffset - TRANSITION_PRE);
@@ -286,7 +286,7 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t cha
 	ptr = EncodeTransition (ptr, (char2 & 0x80), 0);
 	
 	// return ptr to the beginning of the encode buffer
-	return &m_payload[0];
+	return AJA_STATUS_SUCCESS;
 }
 
 
@@ -296,7 +296,7 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t cha
 uint8_t * AJAAncillaryData_Cea608_Line21::EncodeCharacter (uint8_t * ptr, uint8_t byte)
 {
 	uint8_t mask = 1;
-	
+
 	// do all 8 bits
 	for (uint8_t j = 0; j < 8; j++)
 	{
@@ -355,7 +355,7 @@ uint8_t * AJAAncillaryData_Cea608_Line21::EncodeTransition (uint8_t * ptr, const
 // try to make a reasonable attempt to discover whether captioning data is present or not,
 // and if it decides that the line does NOT contain encoded captioning info, will return 'false'
 // and set the characters to 0.
-AJAStatus AJAAncillaryData_Cea608_Line21::DecodeLine (uint8_t & outChar1, uint8_t & outChar2, bool & outGotClock)
+AJAStatus AJAAncillaryData_Cea608_Line21::DecodeLine (uint8_t & outChar1, uint8_t & outChar2, bool & outGotClock) const
 {
 	outChar1 = outChar2 = 0xFF;
 	outGotClock = false;
