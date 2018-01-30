@@ -130,6 +130,7 @@ NTV2DeviceCanDoRP188
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoSDIErrorChecks
 NTV2DeviceCanDoStackedAudio
+NTV2DeviceCanDoVideoProcessing
 NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
 NTV2DeviceHasPCIeGen2
