@@ -154,12 +154,12 @@ uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 uint16_t AJAAncillaryData::Calculate9BitChecksum (void) const
 {
 	//	SMPTE 291-1:2011:	6.7 Checksum Word
-	uint16_t	sum	(uint16_t(m_DID) & 0x1FF);		//	DID
-	sum += uint16_t(m_SID) & 0x1FF;					//	+ SDID
-	sum += uint16_t(GetDC()) & 0x1FF;				//	+ DC
-	if (!m_payload.empty())							//	+ payload:
+	uint16_t	sum	(CNTV2SMPTEAncData::AddEvenParity(m_DID));	//	DID
+	sum += CNTV2SMPTEAncData::AddEvenParity(m_SID);				//	+ SDID
+	sum += CNTV2SMPTEAncData::AddEvenParity(GetDC());			//	+ DC
+	if (!m_payload.empty())										//	+ payload:
 		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
-			sum += uint16_t(m_payload[ndx]) & 0x1FF;
+			sum += CNTV2SMPTEAncData::AddEvenParity(m_payload[ndx]);
 
 	const bool	b8	((sum & 0x100) != 0);
 	const bool	b9	(!b8);
@@ -743,7 +743,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 	{
 		try
 		{
-			const uint8_t	dataCount	((GetDC() > 255) ? 255 : GetDC());	//	Truncate payload to max 255 bytes
+			const uint8_t	dataCount	((GetDC() > 255) ? 255 : uint8_t(GetDC()));	//	Truncate payload to max 255 bytes
 			outRawComponents.push_back(0x000);														//	000
 			outRawComponents.push_back(0x3FF);														//	3FF
 			outRawComponents.push_back(0x3FF);														//	3FF
@@ -767,7 +767,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 		outRawComponents.push_back(Calculate9BitChecksum());	//	CS
 
 	if (AJA_SUCCESS(status))
-		LOGMYDEBUG((origSize ? "Appended " : "Generated ")  << (outRawComponents.size() - origSize)  << " UWords from "  << AsString(32) << endl << UWordSequence(outRawComponents) << endl);
+		LOGMYDEBUG((origSize ? "Appended " : "Generated ")  << (outRawComponents.size() - origSize)  << " UWords from " << AsString(32) << endl << UWordSequence(outRawComponents));
 	else
 		LOGMYERROR("Failed: " << ::AJAStatusToString(status) << ": origSize=" << origSize << ", " << AsString(32));
 	return status;

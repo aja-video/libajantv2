@@ -624,7 +624,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 			UWordSequence				yHOffsets, cHOffsets;
 			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, smpteLineNum);
 			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, smpteLineNum);
-cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
+			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
@@ -639,7 +639,7 @@ cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDe
 				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
 		}
 	}	//	for each VANC line
-	LOGMYDEBUG("returning " << DEC(outPackets.CountAncillaryData()) << " packets:" << endl << outPackets);
+	LOGMYDEBUG("returning " << outPackets);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -882,14 +882,17 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 					{	//	HD overwrites only the Y or C channel data:
 						vector<uint16_t>	YUV16Line;
 						unsigned			dstNdx	(loc.IsLumaChannel() ? 1 : 0);
+
 						//	Read original Y+C components from FB...
 						muxedOK = UnpackLine_10BitYUVtoU16s (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
-cerr << "WriteVANCData|orig: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
+						//cerr << "WriteVANCData|orig: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
+
 						//	Patch the Y or C channel...
 						if (muxedOK)
 							for (unsigned srcNdx(0);  srcNdx < u16PktComponents.size();  srcNdx++)
 								YUV16Line[dstNdx + 2*srcNdx] = u16PktComponents[srcNdx] & 0x03FF;
-cerr << "WriteVANCData|modi: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
+						//cerr << "WriteVANCData|modi: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
+
 						//	Repack the patched YUV16 line back into the FB...
 						if (muxedOK)
 							muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
