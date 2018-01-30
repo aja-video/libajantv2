@@ -396,6 +396,7 @@ AJAExport NTV2VideoFormat		GetTransportCompatibleFormat (const NTV2VideoFormat i
 AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2);
 
 AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0);				//	0-based index
+AJAExport NTV2InputSource		GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 

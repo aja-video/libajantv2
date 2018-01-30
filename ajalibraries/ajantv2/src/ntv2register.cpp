@@ -805,6 +805,10 @@ static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,	
 static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
 														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
 
+static const ULWord gHDMIChannelToOutputConfigRegNum [] =   { kRegHDMIOutputConfig1, kRegHDMIOutputConfig2, kRegHDMIOutputConfig3, kRegHDMIOutputConfig4, 0 };
+static const ULWord gHDMIChannelToInputStatusRegNum [] =    { kRegHDMIInputStatus1, kRegHDMIInputStatus2, kRegHDMIInputStatus3, kRegHDMIInputStatus4, 0 };
+static const ULWord gHDMIChannelToControlRegNum [] =        { kRegHDMIControl1, kRegHDMIControl2, kRegHDMIControl3, kRegHDMIControl4, 0 };
+
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
 // Output: NONE
@@ -2007,7 +2011,19 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		refControl2 = 1;
 		ptpControl = 1;
 		break;
-	default:
+    case NTV2_REFERENCE_HDMI_INPUT2:
+        refControl1 = 4;
+        refControl2 = 0;
+        break;
+    case NTV2_REFERENCE_HDMI_INPUT3:
+        refControl1 = 6;
+        refControl2 = 0;
+        break;
+    case NTV2_REFERENCE_HDMI_INPUT4:
+        refControl1 = 7;
+        refControl2 = 0;
+        break;
+    default:
 		break;
 	}
 
@@ -2071,7 +2087,29 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				break;
 			}
 	}
-	return result;
+
+    if (_boardID == DEVICE_ID_KONAHDMI)
+    {
+        switch(refControl1)
+        {
+        case 5:
+            outValue = NTV2_REFERENCE_HDMI_INPUT1;
+            break;
+        case 4:
+            outValue = NTV2_REFERENCE_HDMI_INPUT2;
+            break;
+        case 6:
+            outValue = NTV2_REFERENCE_HDMI_INPUT3;
+            break;
+        case 7:
+            outValue = NTV2_REFERENCE_HDMI_INPUT4;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return result;
 }
 
 #if !defined (NTV2_DEPRECATE)
@@ -5365,8 +5403,11 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 		case NTV2_INPUTSOURCE_SDI6:		return GetSDIInputVideoFormat (NTV2_CHANNEL6, inIsProgressivePicture);	break;
 		case NTV2_INPUTSOURCE_SDI7:		return GetSDIInputVideoFormat (NTV2_CHANNEL7, inIsProgressivePicture);	break;
 		case NTV2_INPUTSOURCE_SDI8:		return GetSDIInputVideoFormat (NTV2_CHANNEL8, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat ();										break;
-		case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
+        case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat (NTV2_CHANNEL1);							break;
+        case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);							break;
+        case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);							break;
+        case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);							break;
+        case NTV2_INPUTSOURCE_ANALOG:	return GetAnalogInputVideoFormat ();									break;
 		default:						return NTV2_FORMAT_UNKNOWN;												break;
 	}
 }
@@ -5565,11 +5606,11 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 }
 
 
-NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat()
+NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 {
 	NTV2VideoFormat format = NTV2_FORMAT_UNKNOWN;
 	ULWord status;
-	if ( GetHDMIInputStatusRegister(&status) )
+    if ( GetHDMIInputStatusRegister(&status, inChannel) )
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 		{
@@ -7985,8 +8026,35 @@ bool CNTV2Card::ReadProcAmpOffsetYAdjustment		(ULWord* value)		{return ReadRegis
 // HDMI
 
 // kRegHDMIInputStatus
-bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue)						{return ReadRegister  (kRegHDMIInputStatus,		&outValue);}
-bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue)		{return ReadRegister  (kRegHDMIInputStatus,		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);}
+bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue, NTV2Channel inChannel)
+{
+    ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
+    if (numInputs < 1) return false;
+    if (numInputs == 1)
+    {
+        return ReadRegister  (kRegHDMIInputStatus,		&outValue);
+    }
+	if (inChannel < (NTV2Channel)numInputs)
+	{
+		return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		&outValue);
+	}
+	return false;
+}
+
+bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, NTV2Channel inChannel)
+{
+    ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
+    if (numInputs < 1) return false;
+    if (numInputs == 1)
+    {
+        return ReadRegister  (kRegHDMIInputStatus,		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+    }
+	if (inChannel <= (NTV2Channel)numInputs)
+	{
+		return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel],		(ULWord*)&outValue,	kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+	}
+	return false;
+}
 
 // kRegHDMIInputControl
 bool CNTV2Card::SetHDMIInputRange					(NTV2HDMIRange value)					{return WriteRegister (kRegHDMIInputControl,	(ULWord)value,		kRegMaskHDMIInputRange,		kRegShiftHDMIInputRange);}

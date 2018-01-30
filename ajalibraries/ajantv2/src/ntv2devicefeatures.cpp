@@ -233,7 +233,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 			case NTV2_FBF_10BIT_RGB:
 			case NTV2_FBF_ABGR:
 			case NTV2_FBF_10BIT_DPX:
-			case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+			case NTV2_FBF_10BIT_DPX_LE:
 				multiplier = 8;
 				break;
 			default:
@@ -630,13 +630,13 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
 				*pOutValue = NTV2_FORMAT_4x2048x1080p_4795;
 			else
-				*pOutValue = NTV2_FORMAT_1080p_2K_4795;
+				*pOutValue = NTV2_FORMAT_1080p_2K_4795_A;
 			break;
 		case NTV2_FRAMERATE_4800:
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
 				*pOutValue = NTV2_FORMAT_4x2048x1080p_4800;
 			else
-				*pOutValue = NTV2_FORMAT_1080p_2K_4800;
+				*pOutValue = NTV2_FORMAT_1080p_2K_4800_A;
 			break;
 		case NTV2_FRAMERATE_5000:
 			if ( inFrameGeometry == NTV2_FG_4x1920x1080 )
@@ -644,7 +644,7 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
 				*pOutValue = NTV2_FORMAT_4x2048x1080p_5000;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
-				*pOutValue = NTV2_FORMAT_1080p_2K_5000;
+				*pOutValue = NTV2_FORMAT_1080p_2K_5000_A;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_5000_A;
 			break;
@@ -654,7 +654,7 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
 				*pOutValue = NTV2_FORMAT_4x2048x1080p_5994;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
-				*pOutValue = NTV2_FORMAT_1080p_2K_5994;
+				*pOutValue = NTV2_FORMAT_1080p_2K_5994_A;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_5994_A;
 			break;
@@ -664,7 +664,7 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
 				*pOutValue = NTV2_FORMAT_4x2048x1080p_6000;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
-				*pOutValue = NTV2_FORMAT_1080p_2K_6000;
+				*pOutValue = NTV2_FORMAT_1080p_2K_6000_A;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_6000_A;
 			break;

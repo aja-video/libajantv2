@@ -4787,6 +4787,16 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0)
 }
 
 
+NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)
+{
+	static const NTV2InputSource	sInputSources []	= {	NTV2_INPUTSOURCE_HDMI1,	NTV2_INPUTSOURCE_HDMI2,	NTV2_INPUTSOURCE_HDMI3,	NTV2_INPUTSOURCE_HDMI4};
+	if (inIndex0 < sizeof (sInputSources) / sizeof (NTV2InputSource))
+		return sInputSources [inIndex0];
+	else
+		return NTV2_NUM_INPUTSOURCES;
+}
+
+
 ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 {
 	static const ULWord	sInputSourcesIndexes []	= {	0,							//	NTV2_INPUTSOURCE_ANALOG1,
@@ -6264,14 +6274,38 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		case NTV2_XptDuallinkOut4DS2:			return inForRetailDisplay ? "DL Out 4 DS2"				: "NTV2_XptDuallinkOut4DS2";
 		case NTV2_XptAlphaOut:					return inForRetailDisplay ? "Alpha Out"					: "NTV2_XptAlphaOut";
 		case NTV2_XptAnalogIn:					return inForRetailDisplay ? "Analog In"					: "NTV2_XptAnalogIn";
-		case NTV2_XptHDMIIn:					return inForRetailDisplay ? "HDMI In"					: "NTV2_XptHDMIIn";
-		case NTV2_XptHDMIInQ2:					return inForRetailDisplay ? "HDMI In Q2"				: "NTV2_XptHDMIInQ2";
-		case NTV2_XptHDMIInQ3:					return inForRetailDisplay ? "HDMI In Q3"				: "NTV2_XptHDMIInQ3";
-		case NTV2_XptHDMIInQ4:					return inForRetailDisplay ? "HDMI In Q4"				: "NTV2_XptHDMIInQ4";
-		case NTV2_XptHDMIInRGB:					return inForRetailDisplay ? "HDMI In RGB"				: "NTV2_XptHDMIInRGB";
-		case NTV2_XptHDMIInQ2RGB:				return inForRetailDisplay ? "HDMI In Q2 RGB"			: "NTV2_XptHDMIInQ2RGB";
-		case NTV2_XptHDMIInQ3RGB:				return inForRetailDisplay ? "HDMI In Q3 RGB"			: "NTV2_XptHDMIInQ3RGB";
-		case NTV2_XptHDMIInQ4RGB:				return inForRetailDisplay ? "HDMI In Q4 RGB"			: "NTV2_XptHDMIInQ4RGB";
+		case NTV2_XptHDMIIn1:					return inForRetailDisplay ? "HDMI In 1"					: "NTV2_XptHDMIIn1";
+		case NTV2_XptHDMIIn1Q2:					return inForRetailDisplay ? "HDMI In 1 Q2"				: "NTV2_XptHDMIIn1Q2";
+		case NTV2_XptHDMIIn1Q3:					return inForRetailDisplay ? "HDMI In 1 Q3"				: "NTV2_XptHDMIIn1Q3";
+		case NTV2_XptHDMIIn1Q4:					return inForRetailDisplay ? "HDMI In 1 Q4"				: "NTV2_XptHDMIIn1Q4";
+		case NTV2_XptHDMIIn1RGB:				return inForRetailDisplay ? "HDMI In 1 RGB"				: "NTV2_XptHDMIIn1RGB";
+		case NTV2_XptHDMIIn1Q2RGB:				return inForRetailDisplay ? "HDMI In 1 Q2 RGB"			: "NTV2_XptHDMIIn1Q2RGB";
+		case NTV2_XptHDMIIn1Q3RGB:				return inForRetailDisplay ? "HDMI In 1 Q3 RGB"			: "NTV2_XptHDMIIn1Q3RGB";
+		case NTV2_XptHDMIIn1Q4RGB:				return inForRetailDisplay ? "HDMI In 1 Q4 RGB"			: "NTV2_XptHDMIIn1Q4RGB";
+		case NTV2_XptHDMIIn2:					return inForRetailDisplay ? "HDMI In 2"					: "NTV2_XptHDMIIn2";
+		case NTV2_XptHDMIIn2Q2:					return inForRetailDisplay ? "HDMI In 2 Q2"				: "NTV2_XptHDMIIn2Q2";
+		case NTV2_XptHDMIIn2Q3:					return inForRetailDisplay ? "HDMI In 2 Q3"				: "NTV2_XptHDMIIn2Q3";
+		case NTV2_XptHDMIIn2Q4:					return inForRetailDisplay ? "HDMI In 2 Q4"				: "NTV2_XptHDMIIn2Q4";
+		case NTV2_XptHDMIIn2RGB:				return inForRetailDisplay ? "HDMI In 2 RGB"				: "NTV2_XptHDMIIn2RGB";
+		case NTV2_XptHDMIIn2Q2RGB:				return inForRetailDisplay ? "HDMI In 2 Q2 RGB"			: "NTV2_XptHDMIIn2Q2RGB";
+		case NTV2_XptHDMIIn2Q3RGB:				return inForRetailDisplay ? "HDMI In 2 Q3 RGB"			: "NTV2_XptHDMIIn2Q3RGB";
+		case NTV2_XptHDMIIn2Q4RGB:				return inForRetailDisplay ? "HDMI In 2 Q4 RGB"			: "NTV2_XptHDMIIn2Q4RGB";
+		case NTV2_XptHDMIIn3:					return inForRetailDisplay ? "HDMI In 3"					: "NTV2_XptHDMIIn3";
+		case NTV2_XptHDMIIn3Q2:					return inForRetailDisplay ? "HDMI In 3 Q2"				: "NTV2_XptHDMIIn3Q2";
+		case NTV2_XptHDMIIn3Q3:					return inForRetailDisplay ? "HDMI In 3 Q3"				: "NTV2_XptHDMIIn3Q3";
+		case NTV2_XptHDMIIn3Q4:					return inForRetailDisplay ? "HDMI In 3 Q4"				: "NTV2_XptHDMIIn3Q4";
+		case NTV2_XptHDMIIn3RGB:				return inForRetailDisplay ? "HDMI In 3 RGB"				: "NTV2_XptHDMIIn3RGB";
+		case NTV2_XptHDMIIn3Q2RGB:				return inForRetailDisplay ? "HDMI In 3 Q2 RGB"			: "NTV2_XptHDMIIn3Q2RGB";
+		case NTV2_XptHDMIIn3Q3RGB:				return inForRetailDisplay ? "HDMI In 3 Q3 RGB"			: "NTV2_XptHDMIIn3Q3RGB";
+		case NTV2_XptHDMIIn3Q4RGB:				return inForRetailDisplay ? "HDMI In 3 Q4 RGB"			: "NTV2_XptHDMIIn3Q4RGB";
+		case NTV2_XptHDMIIn4:					return inForRetailDisplay ? "HDMI In 4"					: "NTV2_XptHDMIIn4";
+		case NTV2_XptHDMIIn4Q2:					return inForRetailDisplay ? "HDMI In 4 Q2"				: "NTV2_XptHDMIIn4Q2";
+		case NTV2_XptHDMIIn4Q3:					return inForRetailDisplay ? "HDMI In 4 Q3"				: "NTV2_XptHDMIIn4Q3";
+		case NTV2_XptHDMIIn4Q4:					return inForRetailDisplay ? "HDMI In 4 Q4"				: "NTV2_XptHDMIIn4Q4";
+		case NTV2_XptHDMIIn4RGB:				return inForRetailDisplay ? "HDMI In 4 RGB"				: "NTV2_XptHDMIIn4RGB";
+		case NTV2_XptHDMIIn4Q2RGB:				return inForRetailDisplay ? "HDMI In 4 Q2 RGB"			: "NTV2_XptHDMIIn4Q2RGB";
+		case NTV2_XptHDMIIn4Q3RGB:				return inForRetailDisplay ? "HDMI In 4 Q3 RGB"			: "NTV2_XptHDMIIn4Q3RGB";
+		case NTV2_XptHDMIIn4Q4RGB:				return inForRetailDisplay ? "HDMI In 4 Q4 RGB"			: "NTV2_XptHDMIIn4Q4RGB";
 		case NTV2_XptDuallinkIn1:				return inForRetailDisplay ? "DL In 1"					: "NTV2_XptDuallinkIn1";
 		case NTV2_XptDuallinkIn2:				return inForRetailDisplay ? "DL In 2"					: "NTV2_XptDuallinkIn2";
 		case NTV2_XptDuallinkIn3:				return inForRetailDisplay ? "DL In 3"					: "NTV2_XptDuallinkIn3";
@@ -7283,7 +7317,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
-			case DEVICE_ID_KONA1:					return "kona_alpha.bit";
+			case DEVICE_ID_KONA1:						return "kona1_pcie.bit";
             case DEVICE_ID_KONAHDMI:					return "kona_hdmi.bit";
             default:									return "";
 		}

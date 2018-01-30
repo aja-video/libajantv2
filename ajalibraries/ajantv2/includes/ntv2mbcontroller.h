@@ -23,7 +23,9 @@ enum eMBCmd
 enum eSFP
 {
     SFP_TOP,
+    SFP_LINK_A = SFP_TOP,
     SFP_BOTTOM,
+    SFP_LINK_B = SFP_BOTTOM,
     SFP_MAX_NUM_SFPS,
     SFP_INVALID		= SFP_MAX_NUM_SFPS
 };

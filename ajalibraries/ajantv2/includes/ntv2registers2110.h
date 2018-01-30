@@ -45,10 +45,13 @@
 #define SAREK_3190_RX_DEPACKETIZER_3    (0x20e000/4)
 #define SAREK_3190_RX_DEPACKETIZER_4    (0x20f000/4)
 
-#define SAREK_2110_VIDEO_FRAMER             (0x210000/4)
-#define SAREK_2110_AUDIO_FRAMER             (0x212000/4)
-#define SAREK_2110_DECAPSULATOR_1_TOP       (0x211000/4)
-#define SAREK_2110_AUDIO_STREAMSELECT       (0x230000/4)
+#define SAREK_2110_VIDEO_FRAMER_0       (0x210000/4)
+#define SAREK_2110_AUDIO_FRAMER_0       (0x212000/4)
+#define SAREK_2110_VIDEO_FRAMER_1       (0x213000/4)
+#define SAREK_2110_AUDIO_FRAMER_1       (0x214000/4)
+#define SAREK_2110_TX_ARBITRATOR        (0x215000/4)
+#define SAREK_2110_DECAPSULATOR_1_TOP   (0x211000/4)
+#define SAREK_2110_AUDIO_STREAMSELECT   (0x230000/4)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -90,6 +93,13 @@
 #define kReg4175_depkt_rx_pkt_cnt               (0x0048/4)
 #define kReg4175_depkt_rx_pkt_cnt_valid         (0x0050/4)
 #define kReg4175_depkt_stat_reset               (0x0054/4)
+#define kReg4175_depkt_rx_field_cnt             (0x0058/4)
+#define kReg4175_depkt_rx_pkt_cnt               (0x005C/4)
+#define kReg4175_depkt_rx_byte_cnt              (0x0060/4)
+#define kReg4175_depkt_bytes_per_line           (0x0064/4)
+#define kReg4175_depkt_rows_per_field           (0x0068/4)
+#define kReg4175_depkt_version_id               (0x006C/4)
+#define kReg4175_depkt_sequence_err             (0x007C/4)
 
 /////////////////////////////////////////////////////////////////////
 //

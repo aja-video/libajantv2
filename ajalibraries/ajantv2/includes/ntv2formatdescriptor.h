@@ -23,8 +23,9 @@
 			including the total number of lines, number of pixels per line, line pitch, and which line contains the start
 			of active video.
 **/
-AJAExport typedef struct NTV2FormatDescriptor
+class AJAExport NTV2FormatDescriptor
 {
+public:
 	/**
 		@brief	My default constructor initializes me in an "invalid" state.
 	**/
@@ -290,7 +291,7 @@ AJAExport typedef struct NTV2FormatDescriptor
 		UWord					mNumPlanes;			///< @brief	Number of planes
 		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
 
-} NTV2FormatDescriptor;
+};
 
 
 /**

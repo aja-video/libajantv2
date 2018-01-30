@@ -99,6 +99,6 @@ GENERATING THE SDK
 		This method generates the SDK .hh and .hpp files directly.
 		1)  Invoke the new script:
 		        $  cd ajalibraries/ajantv2
-		        $  ./sdkgen/ntv2sdkgen.py   --ohh includes   -ohpp src
+		        $  ./sdkgen/ntv2sdkgen.py   --ohh includes   --ohpp src
 		    If the script succeeds, the .hh and .hpp files will have replaced the existing ones.
 		    The SDK is now ready to be built and/or distributed.

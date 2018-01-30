@@ -60,9 +60,9 @@ public:
     bool operator == ( const tx_2110Config &other );
 
 public:
-    std::string	remoteIP;        ///< @brief	Specifies remote (destination) IP address.
-    uint32_t	localPort;		 ///< @brief	Specifies the local (source) port number.
-    uint32_t	remotePort;		 ///< @brief	Specifies the remote (destination) port number.
+    std::string	remoteIP[2];       ///< @brief	Specifies remote (destination) IP address.
+    uint32_t	localPort[2];		///< @brief	Specifies the local (source) port number.
+    uint32_t	remotePort[2];		///< @brief	Specifies the remote (destination) port number.
     uint16_t    payloadType;
     uint8_t     tos;            // type of service
     uint8_t     ttl;            // time to live
@@ -140,8 +140,8 @@ public:
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig);
-    bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enable);
-    bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enableLinkA, bool enableLinkB = false);
+    bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & linkAEnabled, bool & linkBEnabled);
 
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
@@ -186,10 +186,16 @@ public:
     static uint32_t m_packetizers[4];
 
 protected:
-    uint32_t    GetFramerAddress(NTV2Channel channel, NTV2Stream stream);
+    uint32_t    GetFramerAddress(eSFP link, NTV2Channel channel, NTV2Stream stream);
     void        SelectTxFramerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
+
+    void        EnableFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, bool enable);
+    bool        SetFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, const tx_2110Config  & txConfig);
+    void        GetFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, tx_2110Config  & txConfig);
+    void        SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool enable);
+    void        GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool & enable);
 
     void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
