@@ -149,8 +149,8 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 													  (bFb2RGB && bDSKGraphicMode);
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
-	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;					// Input source selected single stream
-	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;					// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
+	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
     bool						bCh1HDR_RGB			= fbFormatCh1 == NTV2_FBF_48BIT_RGB;
     bool						bCh2HDR_RGB			= fbFormatCh2 == NTV2_FBF_48BIT_RGB;
@@ -411,7 +411,6 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	
 	
 	// LUT 1
-	// note b4K is same processing as regular formats
 	if (bFb1RGB || bDSKOn)
 	{
 		if (!b2pi)
