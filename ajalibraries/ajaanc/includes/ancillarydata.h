@@ -488,6 +488,13 @@ public:
 	virtual uint8_t							Calculate8BitChecksum (void) const;
 
 	/**
+		@brief		Generates the official SMPTE 291 9-bit checksum from the DID + SID + DC + payload data.
+		@note		This class is only applicable to 8-bit ancillary data applications.
+		@return		The calculated 9-bit checksum.
+	**/
+	virtual uint16_t						Calculate9BitChecksum (void) const;
+
+	/**
 		@brief	Compares the received 8-bit checksum with a newly calculated 8-bit checksum. Returns 'true' if they match.
 		@note	This is NOT the same as the official SMPTE-291 checksum, which is 9 bits wide and should be calculated by the hardware.
 		@return	True if the calculated checksum matches received checksum; otherwise false.
@@ -816,7 +823,12 @@ public:
 	virtual std::ostream &					DumpPayload (std::ostream & inOutStream) const;
 
 	virtual inline std::string				IDAsString (void) const	{return DIDSIDToString (GetDID(), GetSID());}	///< @return	A string representing my DID/SID.
-	virtual std::string						AsString (uint16_t inDumpMaxBytes = 0) const;	///< @return	Converts me to a compact, human-readable string.
+
+	/**
+		@return		Converts me into a compact, human-readable string.
+		@param[in]	inDumpMaxBytes		Number of payload bytes to dump into the returned string. Defaults to zero (none).
+	**/
+	virtual std::string						AsString (const uint16_t inDumpMaxBytes = 0) const;
 	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const		{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}
 
 	/**

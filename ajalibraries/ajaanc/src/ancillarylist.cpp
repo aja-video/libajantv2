@@ -198,7 +198,7 @@ AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncDat
 	if (pData)
 		m_ancList.push_back(pData);
 
-	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) stored after appending packet " << pData->AsString(16));
+	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) stored after appending packet " << pData->AsString(32));
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -231,7 +231,7 @@ AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
 
 	m_ancList.remove(pAncData);	//	note:	there's no feedback as to whether one or more elements existed or not
 								//	note:	pAncData is NOT deleted!
-	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) remain after removing packet " << pAncData->AsString(16));
+	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) remain after removing packet " << pAncData->AsString(32));
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -306,6 +306,36 @@ AJAStatus AJAAncillaryList::SortListByLocation (void)
 }
 
 
+AJAStatus AJAAncillaryList::Compare (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation, const bool inIgnoreChecksum) const
+{
+	if (inCompareList.CountAncillaryData() != CountAncillaryData())
+		return AJA_STATUS_FAIL;
+	for (uint32_t ndx (0);  ndx < CountAncillaryData();  ndx++)
+	{
+		AJAAncillaryData *	pPktA	(inCompareList.GetAncillaryDataAtIndex(ndx));
+		AJAAncillaryData *	pPktB	(inCompareList.GetAncillaryDataAtIndex(ndx));
+		if (pPktA->GetDID() != pPktB->GetDID())
+			return AJA_STATUS_FAIL;
+		if (pPktA->GetSID() != pPktB->GetSID())
+			return AJA_STATUS_FAIL;
+		if (pPktA->GetDC() != pPktB->GetDC())
+			return AJA_STATUS_FAIL;
+		if (pPktA->GetDataCoding() != pPktB->GetDataCoding())
+			return AJA_STATUS_FAIL;
+		if (!inIgnoreChecksum)
+			if (pPktA->GetChecksum() != pPktB->GetChecksum())
+				return AJA_STATUS_FAIL;
+		if (!inIgnoreLocation)
+			if (!(pPktA->GetDataLocation() == pPktB->GetDataLocation()))
+				return AJA_STATUS_FAIL;
+		if (!pPktA->IsEmpty())
+			if (::memcmp(pPktA->GetPayloadData(), pPktB->GetPayloadData(), pPktA->GetPayloadByteCount()))
+				return AJA_STATUS_FAIL;
+	}	//	for each packet
+	return AJA_STATUS_SUCCESS;
+}
+
+
 static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillaryData * pNewData)
 {
 	if (pPrevData == NULL || pNewData == NULL)
@@ -365,72 +395,72 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 		//	Reset the AncData object, then load itself from the next GUMP packet...
 		newAncData.Clear();
 		status = newAncData.InitWithReceivedData (pInputData, remainingSize, defaultLoc, packetSize);
-
-		//	NOTE:	Right now we bail if there's a detected error in the GUMP stream.
-		//	TODO:	Try to recover and process subsequent packets...
 		if (AJA_FAILURE(status))
-			break;
-		else
 		{
-			//	Determine what type of anc data we have, and create an object of the appropriate class...
-			if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Digital)
+			//	TODO:	Someday, let's try to recover and process subsequent packets.
+			break;		//	NOTE:	For now, bail on errors in the GUMP stream
+		}
+		else if (packetSize == 0)
+			break;		//	Nothing to do
+
+		//	Determine what type of anc data we have, and create an object of the appropriate class...
+		if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Digital)
+		{
+			//	Digital anc packets are fairly easy to categorize: you just have to look at their DID/SID.
+			//	Also, they are (by definition) independent packets which become independent AJAAncillaryData objects.
+			newAncType = factory.GuessAncillaryDataType(&newAncData);
+			bInsertNew = true;		//	Add it to the list
+		}	// digital anc data
+		else if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Analog)
+		{
+			//	"Analog" packets are trickier... First, digitized analog lines are broken into multiple
+			//	packets by the hardware, which need to be recombined into a single AJAAncillaryData object.
+			//	Second, it is harder to classify the data type, since there is no single easy-to-read
+			//	ID. Instead, we rely on the user to tell us what lines are expected to contain what kind
+			//	of data (e.g. "expect line 21 to carry 608 captioning...").
+
+			//	First, see if the LAST AJAAncillaryData object came from analog space and the same
+			//	location as this new one. If so, we're going to assume that the new data is simply a
+			//	continuation of the previous packet, and append the payload data accordingly.
+			bool bAppendAnalog = false;
+
+			if (!m_ancList.empty ())
 			{
-				//	Digital anc packets are fairly easy to categorize: you just have to look at their DID/SID.
-				//	Also, they are (by definition) independent packets which become independent AJAAncillaryData objects.
-				newAncType = factory.GuessAncillaryDataType(&newAncData);
-				bInsertNew = true;		//	Add it to the list
-			}	// digital anc data
-			else if (newAncData.GetDataCoding() == AJAAncillaryDataCoding_Analog)
+				AJAAncillaryData *	pPrevData		(m_ancList.back ());
+				bool				bAnlgContinue	(TestForAnalogContinuation (pPrevData, &newAncData));
+
+				if (bAnlgContinue)
+				{
+					//	The new data is just a continuation of the previous packet: simply append the
+					//	new payload data to the previous payload...
+					pPrevData->AppendPayload (&newAncData);
+					bAppendAnalog = true;
+				}
+			}
+
+			if (!bAppendAnalog)
 			{
-				//	"Analog" packets are trickier... First, digitized analog lines are broken into multiple
-				//	packets by the hardware, which need to be recombined into a single AJAAncillaryData object.
-				//	Second, it is harder to classify the data type, since there is no single easy-to-read
-				//	ID. Instead, we rely on the user to tell us what lines are expected to contain what kind
-				//	of data (e.g. "expect line 21 to carry 608 captioning...").
-
-				//	First, see if the LAST AJAAncillaryData object came from analog space and the same
-				//	location as this new one. If so, we're going to assume that the new data is simply a
-				//	continuation of the previous packet, and append the payload data accordingly.
-				bool bAppendAnalog = false;
-
-				if (!m_ancList.empty ())
-				{
-					AJAAncillaryData *	pPrevData		(m_ancList.back ());
-					bool				bAnlgContinue	(TestForAnalogContinuation (pPrevData, &newAncData));
-
-					if (bAnlgContinue)
-					{
-						//	The new data is just a continuation of the previous packet: simply append the
-						//	new payload data to the previous payload...
-						pPrevData->AppendPayload (&newAncData);
-						bAppendAnalog = true;
-					}
-				}
-
-				if (!bAppendAnalog)
-				{
-					//	If this is NOT a "continuation" packet, then this is a new analog packet. see if the
-					//	user has specified an expected Anc data type that matches the location of the new data...
-					newAncType = GetAnalogAncillaryDataType (&newAncData);
-					bInsertNew = true;
-				}
-			}	// analog anc data
+				//	If this is NOT a "continuation" packet, then this is a new analog packet. see if the
+				//	user has specified an expected Anc data type that matches the location of the new data...
+				newAncType = GetAnalogAncillaryDataType (&newAncData);
+				bInsertNew = true;
+			}
+		}	// analog anc data
 //			else 
 //				Anc Coding Unknown????	(ignore it)
 
-			if (bInsertNew)
-			{
-				//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
-				AJAAncillaryData *	pData	(factory.Create (newAncType, &newAncData));
-				if (pData)
-					m_ancList.push_back(pData);		//	Add it to my list
-			}
-
-			remainingSize -= packetSize;		//	Decrease the remaining data size by the amount we just "consumed"
-			pInputData += packetSize;			//	Advance the input data pointer by the same amount
-			if (remainingSize <= 0)				//	All of the input data consumed?
-				bMoreData = false;
+		if (bInsertNew)
+		{
+			//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
+			AJAAncillaryData *	pData	(factory.Create (newAncType, &newAncData));
+			if (pData)
+				m_ancList.push_back(pData);		//	Add it to my list
 		}
+
+		remainingSize -= packetSize;		//	Decrease the remaining data size by the amount we just "consumed"
+		pInputData += packetSize;			//	Advance the input data pointer by the same amount
+		if (remainingSize <= 0)				//	All of the input data consumed?
+			bMoreData = false;
 	}	// while (bMoreData)
 
 	return status;
@@ -562,19 +592,19 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
 	}
 
-	for (ULWord line (0);  line < inFormatDesc.GetFirstActiveLine();  line++)
+	for (ULWord lineOffset (0);  lineOffset < inFormatDesc.GetFirstActiveLine();  lineOffset++)
 	{
 		UWordSequence	uwords;
 		bool			isF2			(false);
 		ULWord			smpteLineNum	(0);
 		unsigned		ndx				(0);
 
-		inFormatDesc.GetSMPTELineNumber (line, smpteLineNum, isF2);
+		inFormatDesc.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
-			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
 													inFormatDesc, uwords);
 		else
-			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), line),
+			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
 																	uwords,  inFormatDesc.GetRasterWidth());
 		if (isSD)
 		{
@@ -594,7 +624,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 			UWordSequence				yHOffsets, cHOffsets;
 			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, smpteLineNum);
 			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, smpteLineNum);
-
+cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
@@ -805,14 +835,23 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 			const AJAAncillaryData &			ancData (**iter);
 			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
 			vector<uint16_t>					u16PktComponents;
-			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)
-				continue;	//	Ignore "Raw" or "Analog" or "Unknown" packets
-			if (loc.GetDataSpace() != AJAAncillaryDataSpace_VANC)
-				continue;	//	Ignore "HANC" or "Unknown" packets
-			if (loc.GetLineNumber() != smpteLine)
-				continue;	//	Wrong line number
-			if (!IS_VALID_AJAAncillaryDataChannel(loc.GetDataChannel()))
-				continue;	//	Bad data channel
+			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)	//	Ignore "Raw" or "Analog" or "Unknown" packets
+				continue;
+			if (loc.GetDataSpace() != AJAAncillaryDataSpace_VANC)			//	Ignore "HANC" or "Unknown" packets
+			{
+				//LOGMYWARN("Skipping non-VANC packet " << ancData);
+				continue;
+			}
+			if (loc.GetLineNumber() != smpteLine)							//	Wrong line number
+			{
+				//LOGMYWARN("Skipping packet not destined for line " << DEC(smpteLine) << " " << loc);
+				continue;
+			}
+			if (!IS_VALID_AJAAncillaryDataChannel(loc.GetDataChannel()))	//	Bad data channel
+			{
+				LOGMYWARN("Skipped packet with invalid data channel " << loc);
+				continue;
+			}
 
 			//	For v210 buffers, generate 10-bit packet data and put into u16 vector...
 			muxedOK = AJA_SUCCESS(ancData.GenerateTransmitData(u16PktComponents));
@@ -845,10 +884,12 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 						unsigned			dstNdx	(loc.IsLumaChannel() ? 1 : 0);
 						//	Read original Y+C components from FB...
 						muxedOK = UnpackLine_10BitYUVtoU16s (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
+cerr << "WriteVANCData|orig: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
 						//	Patch the Y or C channel...
 						if (muxedOK)
 							for (unsigned srcNdx(0);  srcNdx < u16PktComponents.size();  srcNdx++)
-								YUV16Line[dstNdx + 2*srcNdx] = u16PktComponents[srcNdx] & 0x00FF;
+								YUV16Line[dstNdx + 2*srcNdx] = u16PktComponents[srcNdx] & 0x03FF;
+cerr << "WriteVANCData|modi: +" << DEC0N(fbLineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, fbLineOffset);  cerr << ":" << endl << YUV16Line << endl;
 						//	Repack the patched YUV16 line back into the FB...
 						if (muxedOK)
 							muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
@@ -905,9 +946,9 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 	}	//	for each Analog packet
 
 	if (failures.CountAncillaryData())
-		LOGMYWARN("AJAAncillaryList::WriteVANCData: FAILURES: " << failures);
+		LOGMYWARN("FAILURES: " << failures);
 	if (successes.CountAncillaryData())
-		LOGMYDEBUG("AJAAncillaryList::WriteVANCData: SUCCESSES: " << successes);
+		LOGMYDEBUG("SUCCESSES: " << successes);
 
 	//	At least one success is considered SUCCESS.
 	//	Zero successes and one or more failures is considered FAIL...
@@ -936,8 +977,8 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	{
 		AJAAncillaryData *	ancData	(*it);
 
-		inOutStream << "## Packet " << ++num << ":  ";
-		ancData->Print (inOutStream, inDumpPayload);
+		inOutStream << "## Pkt" << DEC0N(++num,3) << ":  " << ancData->AsString(inDumpPayload ? 64 : 0);
+//		ancData->Print (inOutStream, inDumpPayload);
 		++it;
 		if (it != m_ancList.end())
 			inOutStream << endl;

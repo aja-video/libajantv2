@@ -60,19 +60,14 @@ public:
 
 	/**
 		@brief		Sets my SMPTE 334 (CEA608) field/line numbers.
-		@param[in]	inFieldNum	Specifies the field number. Use 0 for F1, 1 for F2.
+		@param[in]	inIsF2		Specifies the field number ('true' for F2, 'false' for F1).
 		@param[in]	inLineNum	Specifies the line number (see SMPTE 334-1 for details).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetLine (const uint8_t inFieldNum, const uint8_t inLineNum);
+	virtual AJAStatus						SetLine (const bool inIsF2, const uint8_t inLineNum);
 
-	/**
-		@brief		Answers with my current SMPTE 334 (CEA608) field/line numbers.
-		@param[out]	outFieldNum		Receives the field number (0 for F1, 1 for F2).
-		@param[out]	outLineNum		Receives the line number (see SMPTE 334-1 for details).
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GetLine (uint8_t & outFieldNum, uint8_t & outLineNum) const;
+	virtual inline uint16_t					GetLineNumber (void) const	{return m_lineNum;}		///< @return	My current SMPTE 334 (CEA608) line number.
+	virtual inline bool						IsField2 (void) const		{return m_isF2;}		///< @return	True if my current Field ID is Field 2;  otherwise false.
 
 	/**
 		@brief		Parses out (interprets) the "local" ancillary data from my payload data.
@@ -99,14 +94,17 @@ public:
 		@param[in]	pInAncData	A valid pointer to a base AJAAncillaryData object that contains the Anc data to inspect.
 		@return		AJAAncillaryDataType if I recognize this Anc data (or AJAAncillaryDataType_Unknown if unrecognized).
 	**/
-	static AJAAncillaryDataType		RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
+	static AJAAncillaryDataType				RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
+
+
+	virtual AJAStatus						GetLine (uint8_t & outFieldNum, uint8_t & outLineNum) const;	///< @deprecated	Use AJAAncillaryData_Cea608_Vanc::GetLineNumber or AJAAncillaryData_Cea608_Vanc::IsField2 instead.
 
 protected:
 	void		Init (void);	// NOT virtual - called by constructors
 
 	// Note: if you make a change to the local member data, be sure to ALSO make the appropriate
 	//		 changes in the Init() and operator= methods!
-	uint8_t		m_fieldNum;		// 0 = field 1, 1 = field 2
+	bool		m_isF2;			// F2 if true;  otherwise F1
 	uint8_t		m_lineNum;		// 525i: 0 = line 9 (field 1) or line 272 (field 2)
 								// 625i: 0 = line 5 (field 1) or line 318 (field 2)
 

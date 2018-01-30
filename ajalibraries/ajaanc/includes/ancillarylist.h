@@ -202,7 +202,7 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@name	Sorting
+		@name	Operations
 	**/
 	///@{
 
@@ -224,6 +224,15 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SortListByLocation (void);
+
+	/**
+		@brief		Compares me with another list.
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
+		@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
+		@note		The sort order of each list, to be considered identical, must be the same.
+	**/
+	virtual AJAStatus						Compare (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation = true,  const bool inIgnoreChecksum = true) const;
 	///@}
 
 
@@ -387,7 +396,13 @@ public:	//	INSTANCE METHODS
 	**/
 	///@{
 
-	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = false) const;
+	/**
+		@brief		Dumps a human-readable description of every packet in my list to the given output stream.
+		@param[in]	inDetailed		If true, include some of the packet data;  otherwise omit packet data.
+									Defaults to true.
+		@return		The specified output stream.
+	**/
+	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
 	///@}
 
 

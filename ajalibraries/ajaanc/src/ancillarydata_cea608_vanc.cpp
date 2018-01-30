@@ -54,7 +54,7 @@ void AJAAncillaryData_Cea608_Vanc::Init (void)
 	m_DID	  = AJAAncillaryData_Cea608_Vanc_DID;
 	m_SID	  = AJAAncillaryData_Cea608_Vanc_SID;
 
-	m_fieldNum = 0;		// default to field 1
+	m_isF2 = false;		// default to field 1
 	m_lineNum  = 12;	// line 21 (0 = line 9 in 525i)
 }
 
@@ -66,7 +66,7 @@ AJAAncillaryData_Cea608_Vanc & AJAAncillaryData_Cea608_Vanc::operator= (const AJ
 		AJAAncillaryData_Cea608::operator= (rhs);		// copy the base class stuff
 
 		// copy the local stuff
-		m_fieldNum = rhs.m_fieldNum;
+		m_isF2 = rhs.m_isF2;
 		m_lineNum  = rhs.m_lineNum;
 	}
 	return *this;
@@ -80,9 +80,9 @@ void AJAAncillaryData_Cea608_Vanc::Clear (void)
 }
 
 
-AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const uint8_t fieldNum, const uint8_t lineNum)
+AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const bool inIsF2, const uint8_t lineNum)
 {
-	m_fieldNum = fieldNum & 0x01;	// 0 = field 1, 1 = field 2
+	m_isF2 = inIsF2;
 	m_lineNum  = lineNum  & 0x1F;	// valid range is 0 (= line 9) to 31 (= line 40)
 	return AJA_STATUS_SUCCESS;
 }
@@ -90,7 +90,7 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const uint8_t fieldNum, const u
 
 AJAStatus AJAAncillaryData_Cea608_Vanc::GetLine (uint8_t & fieldNum, uint8_t & lineNum) const
 {
-	fieldNum = m_fieldNum;
+	fieldNum = m_isF2 ? 0x01 : 0x00;
 	lineNum  = m_lineNum;
 	return AJA_STATUS_SUCCESS;
 }
@@ -105,13 +105,11 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::ParsePayloadData (void)
 		return AJA_STATUS_FAIL;
 	}
 
-	// we have some kind of payload data - try to parse it
-	m_fieldNum = (m_payload[0] >> 7) & 0x01;	// the field number (flag) is bit 7 of the 1st payload word
-	m_lineNum  = (m_payload[0] & 0x1F);		// the line number is bits [4:0] of the 1st payload word
-
+	//	Try to parse the payload data...
+	m_isF2 = ((m_payload[0] >> 7) & 0x01) ? true : false;	//	Field number (flag) is bit 7 of the 1st payload word
+	m_lineNum  = (m_payload[0] & 0x1F);						//	Line number is bits [4:0] of the 1st payload word
 	m_char1	   = m_payload[1];		// the 1st character
 	m_char2    = m_payload[2];		// the 2nd character
-
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
 }
@@ -125,7 +123,19 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::GeneratePayloadData (void)
 	AJAStatus status = AllocDataMemory (AJAAncillaryData_Cea608_Vanc_PayloadSize);
 	if (AJA_SUCCESS (status))
 	{
-		m_payload[0] = ((m_fieldNum & 0x01) << 7) | (m_lineNum & 0x1F);	// fieldNum goes in bit 7, line num goes in bits [4:0]
+		/*
+			From S334-1 and S334-2 standards documents:
+				The LINE value at the start of the UDW represents the field number and line where the data are intended to be carried.
+				Bit b7 of the LINE value is the field number (0 for field 2; 1 for field 1).
+				Bits b6 and b5 are 0.
+				Bits b4-b0 form a 5-bit unsigned integer which represents the offset (in lines) of the data insertion line,
+				relative to the base line for the original image format:
+					line 9 of 525-line F1
+					line 272 of 525-line F2
+					line 5 of 625-line F1
+					line 318 of 625-line F2
+		*/
+		m_payload[0] = ((m_isF2 ? 0x01 : 0x00) << 7) | (m_lineNum & 0x1F);	//	F2 flag goes in b7, line num in bits [4:0]
 		m_payload[1] = m_char1;
 		m_payload[2] = m_char2;
 	}
@@ -139,7 +149,7 @@ ostream & AJAAncillaryData_Cea608_Vanc::Print (ostream & debugStream, const bool
 	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
 	AJAAncillaryData_Cea608::Print (debugStream, bShowDetail);
 	debugStream << endl
-				<< "Field: " << (m_fieldNum ? "F2" : "F1") << endl
+				<< "Field: " << (m_isF2 ? "F2" : "F1") << endl
 				<< "Line: " << dec << uint16_t(m_lineNum);
 	return debugStream;
 }
