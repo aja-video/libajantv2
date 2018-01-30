@@ -108,12 +108,6 @@ AJAStatus AJAAncillaryData_FrameStatusInfo5251::ParsePayloadData (void)
 }
 
 
-AJAStatus AJAAncillaryData_FrameStatusInfo5251::GeneratePayloadData (void)
-{
-	return AJA_STATUS_FAIL;	//	Unimplemented
-}
-
-
 AJAAncillaryDataType AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)

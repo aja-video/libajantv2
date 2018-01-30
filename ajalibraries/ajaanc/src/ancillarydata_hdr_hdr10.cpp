@@ -97,12 +97,6 @@ AJAStatus AJAAncillaryData_HDR_HDR10::ParsePayloadData (void)
 }
 
 
-AJAStatus AJAAncillaryData_HDR_HDR10::GeneratePayloadData (void)
-{
-	return AJA_STATUS_FAIL;
-}
-
-
 AJAAncillaryDataType AJAAncillaryData_HDR_HDR10::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
