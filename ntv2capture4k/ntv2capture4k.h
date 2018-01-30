@@ -44,7 +44,8 @@ class NTV2Capture4K
 						const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
 						const bool					inDoLvlABConversion	= false,
 						const bool					inMultiFormat		= false,
-						const bool					inWithAnc			= false);
+						const bool					inWithAnc			= false,
+						const bool					inDoTsiRouting		= false);
 
 		virtual						~NTV2Capture4K ();
 
@@ -168,7 +169,7 @@ class NTV2Capture4K
 		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
 		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
 		uint32_t					mAncBufferSize;
-
+		bool						mDoTsiRouting;
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
 

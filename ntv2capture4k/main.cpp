@@ -35,6 +35,7 @@ int main (int argc, const char ** argv)
 	uint32_t		channelNumber	(1);					//	Number of the channel to use
 	int				noAudio			(0);					//	Disable audio tone?
 	int				doMultiFormat	(0);					//	Enable multi-format
+	int				doTsiRouting	(0);
 	poptContext		optionsContext; 						//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
@@ -45,6 +46,7 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"			},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"						},
 		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		NULL							},
+		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				NULL							},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -74,7 +76,7 @@ int main (int argc, const char ** argv)
 	else
 		channelNumber = 5;
 	//	Instantiate the NTV2Capture object, using the specified AJA device...
-	NTV2Capture4K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0", (noAudio ? false : true), ::GetNTV2ChannelForIndex (channelNumber - 1), pixelFormat, false, doMultiFormat ? true : false);
+	NTV2Capture4K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0", (noAudio ? false : true), ::GetNTV2ChannelForIndex (channelNumber - 1), pixelFormat, false, doMultiFormat ? true : false, doTsiRouting ? true : false);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
