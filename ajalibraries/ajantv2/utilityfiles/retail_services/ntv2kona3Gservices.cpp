@@ -827,7 +827,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	
 
 	// Frame Buffer 1
-	if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -869,7 +869,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	
 	
 	// Frame Buffer 2
-	if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -880,7 +880,7 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (bLevelBFormat || bStereoIn)
 	{
 		bCh1Disable = bCh2Disable = false;
 	}

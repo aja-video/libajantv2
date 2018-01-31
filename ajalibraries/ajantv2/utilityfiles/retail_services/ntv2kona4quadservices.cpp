@@ -1697,7 +1697,7 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	}
 	
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (b4K || bLevelBFormat || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
@@ -2355,7 +2355,7 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	else if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inHdYUV1);
 	}
@@ -2485,7 +2485,7 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	else if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inHdYUV2);
 	}
@@ -2578,7 +2578,7 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 			}
 			else if (!b425In)
 			{
-				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);				// CSC converted
+				mCard->Connect (NTV2_XptFrameBuffer4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);				// CSC converted
 			}
 		}
 	}
@@ -2589,7 +2589,7 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 
 
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (bLevelBFormat || bStereoIn)
 	{
 		bCh1Disable = bCh2Disable = false;
 	}

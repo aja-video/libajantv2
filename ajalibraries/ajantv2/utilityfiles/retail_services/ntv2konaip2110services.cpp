@@ -1424,7 +1424,7 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
 	
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (b4K || bLevelBFormat || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
@@ -1936,7 +1936,7 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	else if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -2015,7 +2015,7 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	else if (bLevelBFormat || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -2112,7 +2112,7 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
 	
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn || m2XTransferMode)
+	if (bLevelBFormat || bStereoIn)
 	{
 		bCh1Disable = bCh2Disable = false;
 	}

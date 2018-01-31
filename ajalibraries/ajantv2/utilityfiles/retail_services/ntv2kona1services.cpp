@@ -23,38 +23,42 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
-	NTV2FrameBufferFormat fbFormatCh1;
+	NTV2FrameBufferFormat		fbFormatCh1, fbFormatCh2;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fbFormatCh1);
-		
-	NTV2FrameBufferFormat fbFormatCh2;
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
-		
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
-		
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
-		bDSKOn = false;
-		
-	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(fbFormatCh1);
+	bool						bFb2RGB				= IsFrameBufferFormatRGB(fbFormatCh2);
+	
+	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	int							bCh1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
+	int							bCh2Disable			= 1;						// Assume Channel 2 IS disabled by default
+	bool						bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+													  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
+													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+													  (bFb2RGB && bDSKGraphicMode);
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
+	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
+		
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
-		bCh2RGB = bCh1RGB;
+		bFb2RGB = bFb1RGB;
 	}
+	
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -69,13 +73,9 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	}
 	else 
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
-		}
-		else if (genFrameFormat == FORMAT_COMPRESSED)
-		{
-			frameSync1YUV = NTV2_XptCompressionModule;
 		}
 		else
 		{
@@ -83,13 +83,12 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 		}
 	}
 	
-	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync2YUV = NTV2_XptCSC2VidYUV;
 		}
@@ -102,7 +101,7 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	{
 		frameSync2YUV = NTV2_XptMixer1KeyYUV;
 	}
-	else if (genFrameFormat == FORMAT_RGB)
+	else if (bFb1RGB)
 	{
 		frameSync2RGB = NTV2_XptLUT1RGB;
 	}
@@ -112,18 +111,23 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	}
 	
 	
-	// Compression Module
-	mCard->Connect (NTV2_XptCompressionModInput, NTV2_XptFrameBuffer1YUV);
+	// Dual Link In 1
+	if (bInRGB)
+	{
+		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptSDIIn1);
+		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptSDIIn1DS2);
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
+	}
 	
 	
 	// CSC 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
-	}
-	else if (genFrameFormat == FORMAT_COMPRESSED)
-	{
-		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptCompressionModule);
 	}
 	else
 	{
@@ -132,7 +136,7 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	
 	
 	// CSC 2
-	if ( bCh2RGB )
+	if ( bFb2RGB )
 	{
 		mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 	}
@@ -143,10 +147,21 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	
 	
 	// LUT 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+	
+		// if RGB-to-RGB apply LUT converter
+		if (bSdiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank ( NTV2_CHANNEL1,					
+												 mRGB10Range == NTV2_RGB10RangeFull ?
+												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	
+		}
 	}
 	else
 	{
@@ -156,10 +171,21 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	
 	
 	// LUT 2
-	if ( bCh2RGB )
+	if ( bFb2RGB )
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+	
+		// if RGB-to-RGB apply LUT converter
+		if (bSdiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,					
+												 mRGB10Range == NTV2_RGB10RangeFull ?
+												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	
+		}
 	}
 	else
 	{
@@ -169,18 +195,24 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	
 
 	// Frame Buffer 1
-	if  (genFrameFormat == FORMAT_COMPRESSED)
-	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
-	}
-	else
-	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
-	}
+	mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
+	
+	
+	// Frame Buffer 2
+	mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	
+	
+	// Dual Link Out 1
+	mCard->Connect (NTV2_XptDualLinkOut1Input, frameSync2RGB);
 	
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (bSdiOutRGB)
+	{
+		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
+	}
+	else if (bLevelBFormat || bStereoOut)										// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -190,14 +222,14 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)			// Video+Key
 	{		
 		if (bDSKOn)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
@@ -220,8 +252,6 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// The background video/key depends on the DSK mode
 	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
-	int bCh1Disable = 0;						// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -230,18 +260,11 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 		{	
 			case NTV2_DSKModeFBOverMatte:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
-				}
-				else if (genFrameFormat == FORMAT_COMPRESSED)
-				{
-					// The foreground video/key needs to come from the Compression Module output (0x07 - key input is "don't care")
-					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCompressionModule);
-					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCompressionModule);
-					bNoKey = true;
 				}
 				else
 				{
@@ -259,18 +282,11 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 			
 			case NTV2_DSKModeFBOverVideoIn:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
-				}
-				else if (genFrameFormat == FORMAT_COMPRESSED)
-				{
-					// The foreground video/key needs to come from the Compression Module output (0x07 - key input is "don't care")
-					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCompressionModule);
-					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCompressionModule);
-					bNoKey = true;
 				}
 				else
 				{
@@ -293,7 +309,7 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 
 			case NTV2_DSKModeGraphicOverMatte:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -310,14 +326,13 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 				// Background (note: FB1 is used for sync - it will be replaced by matte video
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
-				bCh1Disable = 1;			// disable Ch 1
 				bCh2Disable = 0;			// enable Ch 2
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 				break;
 			
 			case NTV2_DSKModeGraphicOverVideoIn:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -347,7 +362,7 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 			
 			case NTV2_DSKModeGraphicOverFB:			
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -362,26 +377,17 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 				}
 				
 				// Background is Frame Buffer 1 (with or without compression)
-				if (genFrameFormat == FORMAT_COMPRESSED)
+				if (bFb1RGB)
 				{
-					// Select compression module (0x07)
-					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCompressionModule);
-					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptCompressionModule);
+					// Select CSC1 (0x05/0x0E)
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
 				else
 				{
-					if (bCh1RGB)
-					{
-						// Select CSC1 (0x05/0x0E)
-						mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
-						mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptCSC1KeyYUV);
-					}
-					else
-					{
-						// Select frame buffer YUV (0x08)
-						mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
-						mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
-					}
+					// Select frame buffer YUV (0x08)
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 				}
 				bCh2Disable = 0;			// enable Ch 2
 				break;
@@ -413,7 +419,6 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// set Channel disable mode (0 = enable, 1 = disable)
 	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
-
 }
 	
 	
@@ -424,7 +429,11 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
-
+	
+	NTV2FrameBufferFormat		fbFormatCh1;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
+	
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(fbFormatCh1);
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -433,10 +442,12 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	int							bCh1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
 	int							bCh2Disable			= 1;					// Assume Channel 2 IS disabled by default
 													  
-	NTV2CrosspointID	inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
-	NTV2CrosspointID	inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;	// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
+	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect; // Input format select (YUV, RGB, Stereo 3D)
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 	
 	
 	// Figure out what our input format is based on what is selected 
@@ -475,10 +486,26 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptCompressionModInput, NTV2_XptConversionModule);
 	}
+	
+	// Dual Link In 1
+	if (bInRGB)
+	{
+		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
+		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
+	}
 
 	
 	// CSC 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (bInRGB)
+	{
+		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
+	}
+	else
 	{
 		if (inputFormat == mFb1VideoFormat)
 		{
@@ -486,37 +513,41 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptConversionModule);
+			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptBlack);
 		}
 	}
-	else
-	{
-		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
-	}
+	
+	
+	// CSC 2
+	mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptBlack);
 	
 
 	// LUT 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (!bInRGB)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);		// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->Connect(NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
+
+		// if RGB-to-RGB apply LUT converter
+		if (bFb1RGB)
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1,					
+												 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
+												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	
+		}
 	}
 	
 	
 	// LUT 2 
-	// provides SMPTE <-> Full conversion
-	if (inputFormatSelect == NTV2_RGBSelect)
-	{
-		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
-										mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
-										kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
-	}
+	mCard->Connect(NTV2_XptLUT2Input, NTV2_XptBlack);
 	
 
 	// Frame Buffer 1
@@ -524,9 +555,9 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
-	else if (genFrameFormat == FORMAT_RGB)
+	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (bInRGB)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -542,20 +573,15 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// CSC converted
 		}
 	}
-	else if (genFrameFormat == FORMAT_COMPRESSED)
-	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
-	}
 	else 
 	{
-		if ( (inputFormat == mFb1VideoFormat) &&	// formats are same
-			 !(ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect) && ISO_CONVERT_FMT(inputFormat)) )	 // not SD to SD
+		if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptConversionModule);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 		}
 	}
 	
@@ -583,24 +609,37 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 
 
 	// SDI Out 1 
-	if (bLevelBFormat ||																// Dual Stream - p60b
-		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
+	if (IsVideoFormatB(mFb1VideoFormat) ||							// Dual Stream - p60b
+		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||	// Stereo 3D
+		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)	// Video + Key
 	{
 		if (b3GbTransportOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, frameSync2YUV);
+			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, inputXptYUV2);
 		}
-		else 
+		else
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
+			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+	else if (bSdiOutRGB)
 	{
-		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
+		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);		// 1 3Gb wire
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
+	}
+	else // NTV2_PrimaryOutputSelect											// Primary
+	{
+		if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
+		}
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 	}
 }
 
