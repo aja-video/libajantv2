@@ -47,6 +47,8 @@ public:
 
     void ToString(std::string& outString);
 
+	bool LoadFromLog (const std::string & inLogFilePath, const uint32_t inOptions = 0);
+
 
 private:
     void FetchInfoLog(std::ostringstream& oss);

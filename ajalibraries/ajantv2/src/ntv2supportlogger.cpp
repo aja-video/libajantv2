@@ -505,13 +505,11 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
         const uint32_t		offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
-            << setw(20) << "Register Number: " << setw(10) << regNum << " : " << xHEX0N(regNum,8) << " : " << CNTV2RegisterExpert::GetDisplayName(regNum) << ":" << endl
-            << setw(20) << "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
-            //<< "Disposition: " << (CNTV2RegisterExpert::IsReadOnly(regNum) ? "READ-ONLY" : (CNTV2RegisterExpert::IsWriteOnly(regNum) ? "WRITE-ONLY" : "READ/WRITE")) << endl
-            //<< "Start Address: " << "0x00000000" << endl
-            << setw(20) << "Register Offset: " << setw(10) << offset << " : " << xHEX0N(offset,8) << endl
-            << setw(20) << "Register Value: " << setw(10) << value << " : " << xHEX0N(value,8) << " : " << bBIN032(value) << endl
-            << CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
+			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
+			<< "Register Number: " << regNum << endl
+			<< "Register Value: " << value << " : " << xHEX0N(value,8) << endl
+			<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
+			<< CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID) << endl;
     }
 
     regs = ::FromRegNumSet (virtualRegs);
@@ -525,12 +523,9 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
         const uint32_t		offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
-            << setw(20) << "VReg Number: " << setw(10) << regNum << " : " << xHEX0N(regNum,8) << " : " << CNTV2RegisterExpert::GetDisplayName(regNum) << ":" << endl
-            //<< setw(20) << "VReg Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
-            //<< "Disposition: " << (CNTV2RegisterExpert::IsReadOnly(regNum) ? "READ-ONLY" : (CNTV2RegisterExpert::IsWriteOnly(regNum) ? "WRITE-ONLY" : "READ/WRITE")) << endl
-            //<< "Start Address: " << "0x00000000" << endl
-            << setw(20) << "VReg Offset: " << setw(10) << offset << " : " << xHEX0N(offset,8) << endl
-            << setw(20) << "VReg Value: " << setw(10) << value << " : " << xHEX0N(value,8) << " : " << bBIN032(value)
+			<< "VReg Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
+			<< "VReg Number: " << setw(10) << regNum << endl
+			<< "VReg Value: " << value << " : " << xHEX0N(value,8) << endl
             << CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
     }
 }
@@ -643,7 +638,7 @@ void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
         //temp stubs
         // need to determin channel and audio system still
         //
-        NTV2AudioSystem audioSystem = NTV2AudioSystem(i);//NTV2_AUDIOSYSTEM_1;
+		NTV2AudioSystem audioSystem = NTV2AudioSystem(i);
 
         AUTOCIRCULATE_STATUS acStatus;
         NTV2Channel channel = findActiveACChannel(mDevice, audioSystem, acStatus);
@@ -739,10 +734,10 @@ void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
     router.Print (oss, false);
 
     //	Dump routing as NTV2 source code...
-    router.PrintCode (codeStr);
-    oss	<< endl
-        << endl
-        << codeStr	<< endl;
+//    router.PrintCode (codeStr);
+//    oss	<< endl
+//        << endl
+//        << codeStr	<< endl;
 
     //	Dump routing registers...
     NTV2RegNumSet		deviceRoutingRegs;
@@ -754,9 +749,33 @@ void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
     mDevice.ReadRegisters (regsToRead);	//	Read the routing regs
     oss << endl
         << deviceRoutingRegs.size() << " Routing Registers:" << endl;
-    for (NTV2RegisterReadsConstIter it (regsToRead.begin());  it != regsToRead.end();  ++it)
-        oss	<< endl
-            << "Register: " << it->registerNumber << ":" << HEX0N(it->registerNumber,8) << ":" << CNTV2RegisterExpert::GetDisplayName (it->registerNumber) << ":" << endl
-            << "Value: " << it->registerValue << " (" << HEX0N(it->registerValue,8) << ")"
-            << CNTV2RegisterExpert::GetDisplayValue (it->registerNumber, it->registerValue, mDevice.GetDeviceID())	<< endl;
+//    for (NTV2RegisterReadsConstIter it (regsToRead.begin());  it != regsToRead.end();  ++it)
+//        oss	<< endl
+//			<< "XptReg Name: " << CNTV2RegisterExpert::GetDisplayName (it->registerNumber) << endl
+//			<< "XptReg Number: " << it->registerNumber << endl
+//			<< "XptReg Value: " << it->registerValue << " : " << HEX0N(it->registerValue,8) << endl
+//            << CNTV2RegisterExpert::GetDisplayValue (it->registerNumber, it->registerValue, mDevice.GetDeviceID())	<< endl;
+}
+
+bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const uint32_t inOptions)
+{
+	(void)inOptions;
+	ifstream fileInput;
+	fileInput.open(inLogFilePath);
+	uint32_t regNumberLine = 0;
+	string lineContents;
+	while(getline(fileInput, lineContents))
+	{
+		string searchString = "Register Name: ";
+		searchString.append("6");
+		regNumberLine++;
+		if (lineContents.find(searchString, 0) != string::npos)
+		{
+			cout << "found: " << searchString << "line: " << regNumberLine << endl;
+		}
+
+	}
+
+	return true;
+
 }
