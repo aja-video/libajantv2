@@ -262,7 +262,7 @@ void NTV2PlaybackDPX::getDPXFileInfo(QString fileNameStr)
         }
         else
         {
-            mDPXInfo.pixelFormat = NTV2_FBF_10BIT_DPX_LITTLEENDIAN;
+            mDPXInfo.pixelFormat = NTV2_FBF_10BIT_DPX_LE;
         }
     }
     if ( mDPXInfo.numPitsPerCompent == 16 )
@@ -654,7 +654,7 @@ void NTV2PlaybackDPX::previewFrame(uint8_t* videoBuffer)
     }
         break;
 
-    case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
     {
         if (mUseSSE)
         {

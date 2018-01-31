@@ -334,7 +334,7 @@ AJAStatus NTV2EncodeHEVC::Init (void)
     //  Otherwise use the pixel format and SDI input format
     else if (mPixelFormat >= NTV2_FBF_NUMFRAMEBUFFERFORMATS)
     {
-         mPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL;
+         mPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL2;
          if (mVif)
          {
              mPixelFormat = NTV2_FBF_8BIT_YCBCR;

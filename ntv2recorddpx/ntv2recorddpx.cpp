@@ -240,7 +240,7 @@ void NTV2RecordDPX::setupDPXHeader(uint32_t frameWidth, uint32_t frameHeight, ui
 #if 0
 	memset((void*)&mDPXHeader.GetHdr(), 0xff, mDPXHeader.GetHdrSize());		// SMPTE 268 requirement
 
-    if ( mPixelFormat == NTV2_FBF_10BIT_DPX_LITTLEENDIAN || mPixelFormat == NTV2_FBF_10BIT_YCBCR_DPX)
+    if ( mPixelFormat == NTV2_FBF_10BIT_DPX_LE || mPixelFormat == NTV2_FBF_10BIT_YCBCR_DPX)
 		mDPXHeader.init(DPX_C_MAGIC);
 	else
 		mDPXHeader.init(DPX_C_MAGIC_BE);
@@ -251,7 +251,7 @@ void NTV2RecordDPX::setupDPXHeader(uint32_t frameWidth, uint32_t frameHeight, ui
     mDPXHeader.set_fi_creator("AJA Video");
 	mDPXHeader.set_fi_copyright("2012");
 	mDPXHeader.set_fi_image_offset(mDPXHeader.GetHdrSize());
-    if ( mPixelFormat == NTV2_FBF_10BIT_DPX_LITTLEENDIAN || mPixelFormat == NTV2_FBF_10BIT_DPX)
+    if ( mPixelFormat == NTV2_FBF_10BIT_DPX_LE || mPixelFormat == NTV2_FBF_10BIT_DPX)
 		mDPXHeader.set_fi_file_size(mDPXHeader.GetHdrSize()+frameWidth*frameHeight*4);
 	else
 		mDPXHeader.set_fi_file_size(mDPXHeader.GetHdrSize()+frameWidth*frameHeight*8/3);

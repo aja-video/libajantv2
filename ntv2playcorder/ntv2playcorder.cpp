@@ -163,7 +163,7 @@ const string &	NTV2Playcorder::GetInputFormatString ()
 			ClearPreviewBuffers ();
 
 			// Create a new instance that will configure itself for the new video format
-			mRecord	= new NTV2Capture (mBoardIndex, true, NTV2_CHANNEL1, NTV2_FBF_10BIT_DPX_LITTLEENDIAN);
+            mRecord	= new NTV2Capture (mBoardIndex, true, NTV2_CHANNEL1, NTV2_FBF_10BIT_DPX_LE);
 			StartRecording ();
 		}
 		// Things like number of pixels and lines need to change in the header
@@ -195,7 +195,7 @@ AJAStatus NTV2Playcorder::StartPlaying (uint32_t & numberOfFrames)
 		mPlayback	= new NTV2Player (mBoardIndex,
 									  true,
 									  NTV2_CHANNEL2,
-									  NTV2_FBF_10BIT_DPX_LITTLEENDIAN,
+                                      NTV2_FBF_10BIT_DPX_LE,
 									  NTV2_OUTPUTDESTINATION_SDI2,
 									  mPlayFormat);
 	}
@@ -302,7 +302,7 @@ AJAStatus NTV2Playcorder::StartRecording ()
 {
 	if (!mRecord)
 	{
-		mRecord	= new NTV2Capture (mBoardIndex, true, NTV2_CHANNEL1, NTV2_FBF_10BIT_DPX_LITTLEENDIAN);
+        mRecord	= new NTV2Capture (mBoardIndex, true, NTV2_CHANNEL1, NTV2_FBF_10BIT_DPX_LE);
 	}
 
 	if (!mRecord)
@@ -549,7 +549,7 @@ void NTV2Playcorder::InitializeDpxHdr()
 {
 	// Get info about input format in use
 	NTV2FormatDescriptor fd = GetFormatDescriptor (GetNTV2StandardFromVideoFormat (mInputFormat),
-												   NTV2_FBF_10BIT_DPX_LITTLEENDIAN,
+                                                   NTV2_FBF_10BIT_DPX_LE,
 												   false,						// No vanc enabled
 												   Is2KFormat (mInputFormat),
 												   false);						// No wide vanc

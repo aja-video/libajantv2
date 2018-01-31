@@ -305,7 +305,7 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     //  Otherwise use the pixel format and SDI input format
     else if (mCodecPixelFormat >= NTV2_FBF_NUMFRAMEBUFFERFORMATS)
     {
-         mCodecPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL;
+         mCodecPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL2;
     }
 
     //  When video format is unknown determine from SDI input

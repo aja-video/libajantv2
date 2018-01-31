@@ -459,7 +459,7 @@ void NTV2QtPlaycorder::UpdateVideoFormatEnumerator()
 			mVideoPlaybackFormatCombo->addItem(formatString,QVariant(formatNumber));
 	}
 #endif
-	mSequenceFileTypeCombo->addItem("RGB DPX LE",QVariant((int)NTV2_FBF_10BIT_DPX_LITTLEENDIAN));
+    mSequenceFileTypeCombo->addItem("RGB DPX LE",QVariant((int)NTV2_FBF_10BIT_DPX_LE));
 	mSequenceFileTypeCombo->addItem("RGB DPX BE",QVariant((int)NTV2_FBF_10BIT_DPX));
 	mSequenceFileTypeCombo->addItem("YCbCr DPX BE",QVariant((int)NTV2_FBF_10BIT_YCBCR_DPX));
 	connect(mSequenceFileTypeCombo,SIGNAL(currentIndexChanged(int)),SLOT(NewFileFormatChoice(int)));
