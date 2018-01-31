@@ -2334,7 +2334,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	// Avoid divide by 0 error/floating point exception for unsupported formats.
 	if ( 
 			(standard == NTV2_STANDARD_525 || standard == NTV2_STANDARD_625)
-		&&	(_fbFormat == NTV2_FBF_8BIT_DVCPRO || _fbFormat == NTV2_FBF_8BIT_QREZ || _fbFormat == NTV2_FBF_8BIT_HDV)
+        &&	(_fbFormat == NTV2_FBF_8BIT_DVCPRO || _fbFormat == NTV2_FBF_8BIT_HDV)
 	   )
 	{
 		DisplayNTV2Error("DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625.");
@@ -2530,7 +2530,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 				case NTV2_FBF_10BIT_YCBCRA:
 					ConvertLineto10BitYCbCrA(unPackedBuffer,packedBuffer,numPixels);
 					break;
-				case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+                case NTV2_FBF_10BIT_DPX_LE:
 					ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
 					PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels,false);
 					break;
@@ -2695,7 +2695,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	case NTV2_FBF_10BIT_DPX:
 	case NTV2_FBF_24BIT_RGB:
 	case NTV2_FBF_24BIT_BGR:
-	case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
 	case NTV2_FBF_48BIT_RGB:
 		memset(currentAddress,0,linePitch*numLines*4);
 		break;
@@ -3777,7 +3777,7 @@ void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord
 			}
 			break;
 
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 			ConvertLineto10BitRGB(unPackedBuffer, (RGBAlpha10BitPixel*)packedBuffer, numPixels, bIsSD);
 			PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer, numPixels, false);
 			break;
@@ -3815,7 +3815,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePit
 		case NTV2_FBF_10BIT_RGB:
 		case NTV2_FBF_10BIT_RGB_PACKED:
 		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 			numPixels = HD_NUMCOMPONENTPIXELS_2K;
 			linePitch = HD_NUMCOMPONENTPIXELS_2K;
 			break;
@@ -3881,7 +3881,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePit
 	case NTV2_FBF_10BIT_RGB:
 	case NTV2_FBF_10BIT_RGB_PACKED:
 	case NTV2_FBF_10BIT_DPX:
-	case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
 		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
 		linePitch = HD_NUMCOMPONENTPIXELS_QUADHD;
 		numLines = HD_NUMLINES_4K;
@@ -3917,10 +3917,10 @@ void CNTV2TESTPATTERNCLASS::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePit
 	case NTV2_FBF_8BIT_YCBCR_422PL3:
 	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_420PL:
-	case NTV2_FBF_10BIT_YCBCR_422PL:
-	case NTV2_FBF_8BIT_YCBCR_420PL:
-	case NTV2_FBF_8BIT_YCBCR_422PL:
+    case NTV2_FBF_10BIT_YCBCR_420PL2:
+    case NTV2_FBF_10BIT_YCBCR_422PL2:
+    case NTV2_FBF_8BIT_YCBCR_420PL2:
+    case NTV2_FBF_8BIT_YCBCR_422PL2:
 		numPixels = 0;
 		linePitch = 0;
 		numLines = 0;
@@ -3951,7 +3951,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePit
 	case NTV2_FBF_10BIT_RGB:
 	case NTV2_FBF_10BIT_RGB_PACKED:
 	case NTV2_FBF_10BIT_DPX:
-	case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
 		numPixels = HD_NUMCOMPONENTPIXELS_4K;
 		linePitch = HD_NUMCOMPONENTPIXELS_4K;
 		numLines = HD_NUMLINES_4K;
@@ -3987,10 +3987,10 @@ void CNTV2TESTPATTERNCLASS::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePit
 	case NTV2_FBF_8BIT_YCBCR_422PL3:
 	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_420PL:
-	case NTV2_FBF_10BIT_YCBCR_422PL:
-	case NTV2_FBF_8BIT_YCBCR_420PL:
-	case NTV2_FBF_8BIT_YCBCR_422PL:
+    case NTV2_FBF_10BIT_YCBCR_420PL2:
+    case NTV2_FBF_10BIT_YCBCR_422PL2:
+    case NTV2_FBF_8BIT_YCBCR_420PL2:
+    case NTV2_FBF_8BIT_YCBCR_422PL2:
 		numPixels = 0;
 		linePitch = 0;
 		numLines = 0;

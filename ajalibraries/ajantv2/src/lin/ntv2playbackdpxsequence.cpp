@@ -4,7 +4,7 @@
 
   This software is provided by AJA Video, Inc. "AS IS" with no express or implied warranties.
 
-  This software plays back dpx files.....in either NTV2_FBF_10BIT_DPX or NTV2_FBF_10BIT_DPX_LITTLEENDIAN
+  This software plays back dpx files.....in either NTV2_FBF_10BIT_DPX or NTV2_FBF_10BIT_DPX_LE
   modes only. Only supported by dual link capable boards.
 
   Note that it is important to call CNTV2PlaybackDPXSequence::Quit() before deleting the object.
@@ -347,7 +347,7 @@ void CNTV2PlaybackDPXSequence::SetupPlaybackVideo()
 	}
 	else
 	{
-		_frameBufferFormat = NTV2_FBF_10BIT_DPX_LITTLEENDIAN;
+        _frameBufferFormat = NTV2_FBF_10BIT_DPX_LE;
 	}
 	// Default Video Format
 	NTV2VideoFormat videoFormat;
