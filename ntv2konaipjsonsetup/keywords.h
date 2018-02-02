@@ -54,9 +54,6 @@ ttl                       x      x        x     decimal number \n  \
 tos                       x      x        x     decimal number \n  \
 payload                                   x     decimal number (payload type) \n  \
 videoFormat                               x     format string (e.g. NTV2_FORMAT_1080i_5994) \n  \
-payloadLen                                x     decimal number (expert use only) \n  \
-lastPayloadLen                            x     decimal number (expert use only) \n  \
-pktsPerLine                               x     decimal number (expert use only) \n  \
 numAudioChannels                          *     decimal number 1-16 \n \
 firstAudioChannel                         *     decimal number 0-15 \n \
 audioPktInterval                          *     decimal number 125 or 1000 (microseconds) \n \
