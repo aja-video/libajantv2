@@ -102,10 +102,6 @@ public:
     uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t    payloadType;
     NTV2VideoFormat videoFormat;
-    VPIDSampling    videoSamples;
-    uint32_t    payloadLen;
-    uint32_t    lastPayloadLen;
-    uint32_t    pktsPerLine;
     uint32_t    numAudioChannels;
     uint32_t    audioSamplesPerPkt;
 };
@@ -204,6 +200,7 @@ protected:
     void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
+
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);

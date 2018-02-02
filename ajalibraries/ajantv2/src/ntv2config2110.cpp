@@ -84,10 +84,6 @@ void rx_2110Config::init()
     VLAN           = 1;
     payloadType    = 0;
     videoFormat    = NTV2_FORMAT_UNKNOWN;
-    videoSamples   = VPIDSampling_YUV_422;
-    payloadLen     = 0;
-    lastPayloadLen = 0;
-    pktsPerLine    = 0;
 	numAudioChannels  = 2;
     audioSamplesPerPkt = 48;
 }
@@ -106,8 +102,7 @@ bool rx_2110Config::operator == ( const rx_2110Config &other )
             (destPort          == other.destPort)       &&
             (SSRC              == other.SSRC)           &&
             (VLAN              == other.VLAN)           &&
-            (videoFormat       == other.videoFormat)    &&
-            (videoSamples      == other.videoSamples))
+            (videoFormat       == other.videoFormat))
     {
         return true;
     }
@@ -364,7 +359,7 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
 
     SetupDecapsulatorStream(channel,stream, rxConfig);
 
-    ResetDepacketizer(channel,stream);
+    //ResetDepacketizer(channel,stream);
 
     SetupDepacketizer(channel,stream,rxConfig);
 
@@ -470,95 +465,12 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kRegPll_DecVidStd + SAREK_PLL, val);
     }
 
-    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
 
-
-    if (stream == NTV2_VIDEO_STREAM)
-    {
-        // setup 4175 depacketizer
-        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
-
-        NTV2VideoFormat fmt = rxConfig.videoFormat;
-        bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
-        NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
-
-        // width
-        uint32_t width = fd.GetRasterWidth();
-        mDevice.WriteRegister(kReg4175_depkt_width_o + depacketizerBaseAddr,width);
-
-        // height
-        uint32_t height = fd.GetRasterHeight();
-        if (interlaced)
-        {
-            height /= 2;
-        }
-        mDevice.WriteRegister(kReg4175_depkt_height_o + depacketizerBaseAddr,height);
-
-        // video format = sampling
-        int vf;
-        int componentsPerPixel;
-        int componentsPerUnit;
-
-        VPIDSampling vs = rxConfig.videoSamples;
-        switch(vs)
-        {
-        case VPIDSampling_GBR_444:
-            vf = 0;
-            componentsPerPixel = 3;
-            componentsPerUnit  = 3;
-            break;
-        case VPIDSampling_YUV_444:
-            vf = 1;
-            componentsPerPixel = 3;
-            componentsPerUnit  = 3;
-            break;
-        default:
-        case VPIDSampling_YUV_422:
-            vf = 2;
-            componentsPerPixel = 2;
-            componentsPerUnit  = 4;
-            break;
-        }
-        mDevice.WriteRegister(kReg4175_depkt_vid_fmt_o + depacketizerBaseAddr,vf);
-
-        const int bitsPerComponent = 10;
-        const int pixelsPerClock = 1;
-        int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
-        int activeLineLength   = activeLine_root/8;
-        int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-        int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-        int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
-        int payloadLength_root =  min(activeLineLength,1376)/lcm;
-        int payloadLength      = payloadLength_root * lcm;
-        float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
-        int ipktsPerLine       = (int)ceil(pktsPerLine);
-
-        int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
-
-        if (rxConfig.payloadLen != 0)
-            payloadLength       = rxConfig.payloadLen;
-        if (rxConfig.lastPayloadLen != 0)
-            payloadLengthLast   = rxConfig.lastPayloadLen;
-        if (rxConfig.pktsPerLine != 0)
-            ipktsPerLine        = rxConfig.pktsPerLine;
-
-        // pkts per line
-        mDevice.WriteRegister(kReg4175_depkt_pkts_per_line_o + depacketizerBaseAddr,ipktsPerLine);
-
-        // payload length
-        mDevice.WriteRegister(kReg4175_depkt_payload_len_o + depacketizerBaseAddr,payloadLength);
-
-        // payload length last
-        mDevice.WriteRegister(kReg4175_depkt_payload_len_last_o + depacketizerBaseAddr,payloadLengthLast);
-
-        // enable video depacketizer
-        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x80);
-        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x81);
-        // end setup 4175 depacketizer
-    }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 depacketizer
+        uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
 
         uint32_t num_samples  = rxConfig.audioSamplesPerPkt;
@@ -613,6 +525,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
 
     if (stream == NTV2_VIDEO_STREAM)
     {
+#if 0
         // depacketizer
         uint32_t depackBaseAddr = GetDepacketizerAddress(channel, stream);
 
@@ -644,6 +557,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
        bool               is2K = (val & BIT(13));
 
        NTV2FormatDescriptor fd;
+#endif
 #endif
     }
 
@@ -1175,17 +1089,28 @@ eSFP  CNTV2Config2110::GetTxPort(NTV2Channel chan)
 
 uint32_t CNTV2Config2110::GetDecapsulatorAddress(NTV2Channel channel,NTV2Stream stream)
 {
-    if (channel != NTV2_CHANNEL1)
-        channel  = NTV2_CHANNEL1;
-
-    switch (stream)
+    switch (channel)
     {
-    case NTV2_VIDEO_STREAM:
-    default:
-            return SAREK_2110_DECAPSULATOR_1_TOP;   // default
-
-    case NTV2_AUDIO1_STREAM:
-            return SAREK_2110_DECAPSULATOR_1_TOP + 16;
+    case NTV2_CHANNEL1:
+        if (stream == NTV2_VIDEO_STREAM)
+            return SAREK_2110_DECAPSULATOR_0;
+        else
+            return SAREK_2110_DECAPSULATOR_0 + 16;
+    case NTV2_CHANNEL2:
+        if (stream == NTV2_VIDEO_STREAM)
+            return SAREK_2110_DECAPSULATOR_0 + 32;
+        else
+            return SAREK_2110_DECAPSULATOR_0 + 48;
+    case NTV2_CHANNEL3:
+        if (stream == NTV2_VIDEO_STREAM)
+            return SAREK_2110_DECAPSULATOR_1;
+        else
+            return SAREK_2110_DECAPSULATOR_1 + 16;
+    case NTV2_CHANNEL4:
+        if (stream == NTV2_VIDEO_STREAM)
+            return SAREK_2110_DECAPSULATOR_1 + 32;
+        else
+            return SAREK_2110_DECAPSULATOR_1 + 48;
     }
 }
 
@@ -1195,9 +1120,6 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
     static uint32_t a_depacketizers[4] = {SAREK_3190_RX_DEPACKETIZER_1,SAREK_3190_RX_DEPACKETIZER_2,SAREK_3190_RX_DEPACKETIZER_3,SAREK_3190_RX_DEPACKETIZER_4};
 
     uint32_t iChannel = (uint32_t) channel;
-
-    if (iChannel > _numTxChans)
-        return SAREK_4175_RX_DEPACKETIZER_1;
 
     if (stream == NTV2_VIDEO_STREAM)
     {
@@ -1868,10 +1790,6 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         {
             tokens = split(value.c_str(), ' ');
             string sampling = getVideoDescriptionValue("sampling=");
-            if (sampling ==  "YCbCr-4:2:2")
-            {
-                rxConfig.videoSamples = VPIDSampling_YUV_422;
-            }
             string width    = getVideoDescriptionValue("width=");
             string height   = getVideoDescriptionValue("height=");
             string rate     = getVideoDescriptionValue("exactframerate=");

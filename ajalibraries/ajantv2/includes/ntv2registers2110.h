@@ -50,7 +50,8 @@
 #define SAREK_2110_VIDEO_FRAMER_1       (0x213000/4)
 #define SAREK_2110_AUDIO_FRAMER_1       (0x214000/4)
 #define SAREK_2110_TX_ARBITRATOR        (0x215000/4)
-#define SAREK_2110_DECAPSULATOR_1_TOP   (0x211000/4)
+#define SAREK_2110_DECAPSULATOR_0       (0x211000/4)
+#define SAREK_2110_DECAPSULATOR_1       (0x216000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT   (0x230000/4)
 
 /////////////////////////////////////////////////////////////////////
@@ -83,16 +84,6 @@
 /////////////////////////////////////////////////////////////////////
 
 #define kReg4175_depkt_control                  (0x0000/4)
-#define kReg4175_depkt_width_o                  (0x0010/4)
-#define kReg4175_depkt_height_o                 (0x0018/4)
-#define kReg4175_depkt_vid_fmt_o                (0x0020/4)
-#define kReg4175_depkt_pkts_per_line_o          (0x0028/4)
-#define kReg4175_depkt_payload_len_o            (0x0030/4)
-#define kReg4175_depkt_payload_len_last_o       (0x0038/4)
-#define kReg4175_depkt_bpc_reg_o                (0x0040/4)
-#define kReg4175_depkt_rx_pkt_cnt_o             (0x0048/4)
-#define kReg4175_depkt_rx_pkt_cnt_valid_o       (0x0050/4)
-#define kReg4175_depkt_stat_reset_o             (0x0054/4)
 #define kReg4175_depkt_rx_field_cnt             (0x0058/4)
 #define kReg4175_depkt_rx_pkt_cnt               (0x005C/4)
 #define kReg4175_depkt_rx_byte_cnt              (0x0060/4)
