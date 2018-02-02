@@ -32,7 +32,7 @@ playoutDelay              x      x        x     decimal number (milliseconds) \n
 vlan                      x      x        x     decimal number \n  \
 ssrc                      x      x        x     decimal number \n  \
 payload                                   x     decimal number (payload type) \n  \
-videoFormat                               x     format string (e.g. NTV2_FORMAT_1080i_5994) \n  \
+videoFormat                               x     format string (525i | 625i | 720p | 1080i | 1080i50 | 1080p | 1080p50) \
 payloadLen                                x     decimal number (expert use only) \n  \
 lastPayloadLen                            x     decimal number (expert use only) \n  \
 pktsPerLine                               x     decimal number (expert use only) \n  \
@@ -61,3 +61,5 @@ Enable                    x      x              true | false \n  \
 ";
 
 #endif // KEYWORDS_H
+
+
