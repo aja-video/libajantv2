@@ -152,6 +152,14 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mLastPayloadLen.isEmpty())
             cout << "Last Payload Len " << receiveStruct.mLastPayloadLen.toStdString() << endl;
 
+        receiveStruct.mNumAudioChannels = receiveChannelObject["numAudioChannels"].toString();
+        if (!receiveStruct.mNumAudioChannels.isEmpty())
+            cout << "Number of Audio Channels " << receiveStruct.mNumAudioChannels.toStdString() << endl;
+
+        receiveStruct.mAudioPktInterval = receiveChannelObject["audioPktInterval"].toString();
+        if (!receiveStruct.mAudioPktInterval.isEmpty())
+            cout << "Audio Packet Interval " << receiveStruct.mAudioPktInterval.toStdString() << endl;
+
         receiveStruct.mPktsPerLine = receiveChannelObject["pktsPerLine"].toString();
         if (!receiveStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
@@ -658,6 +666,10 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig.lastPayloadLen = receive.mLastPayloadLen.toUInt();
         if (!receive.mPktsPerLine.isEmpty())
             rxChannelConfig.pktsPerLine = receive.mPktsPerLine.toUInt();
+        if (!receive.mNumAudioChannels.isEmpty())
+            rxChannelConfig.numAudioChannels  = receive.mNumAudioChannels.toUInt();
+        if (!receive.mAudioPktInterval.isEmpty())
+            rxChannelConfig.audioPacketInterval = (receive.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
 
         bool rv = config2110.EnableRxStream (channel, stream, rxChannelConfig);
         if (!rv)
