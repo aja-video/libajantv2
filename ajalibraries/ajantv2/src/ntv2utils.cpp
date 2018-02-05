@@ -55,7 +55,7 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 	
 	case NTV2_FBF_10BIT_RGB:
 	case NTV2_FBF_10BIT_DPX:
-	case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
 	case NTV2_FBF_10BIT_RGB_PACKED:
 	case NTV2_FBF_ARGB:	
 	case NTV2_FBF_RGBA:
@@ -264,7 +264,7 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels);
 			break;
 
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 			ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
 			PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels, false);
 			break;
@@ -1021,7 +1021,7 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 		case NTV2_FBF_24BIT_RGB:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_10BIT_YCBCRA:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_48BIT_RGB:
 		case NTV2_FBF_PRORES:
 		case NTV2_FBF_PRORES_DVCPRO:
@@ -1034,10 +1034,10 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 		case NTV2_FBF_10BIT_RAW_YCBCR:
 		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-		case NTV2_FBF_10BIT_YCBCR_420PL:
-		case NTV2_FBF_10BIT_YCBCR_422PL:
-		case NTV2_FBF_8BIT_YCBCR_420PL:
-		case NTV2_FBF_8BIT_YCBCR_422PL:
+        case NTV2_FBF_10BIT_YCBCR_420PL2:
+        case NTV2_FBF_10BIT_YCBCR_422PL2:
+        case NTV2_FBF_8BIT_YCBCR_420PL2:
+        case NTV2_FBF_8BIT_YCBCR_422PL2:
 		case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
 			return false;
 	}
@@ -1475,7 +1475,7 @@ bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of
 		case NTV2_FBF_RGBA:
 		case NTV2_FBF_ABGR:
 		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_10BIT_RGB:				return CopyRaster4BytesPerPixel (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
 																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
@@ -1507,10 +1507,10 @@ bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of
 		case NTV2_FBF_8BIT_YCBCR_422PL3:
 		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-		case NTV2_FBF_10BIT_YCBCR_420PL:
-		case NTV2_FBF_10BIT_YCBCR_422PL:
-		case NTV2_FBF_8BIT_YCBCR_420PL:
-		case NTV2_FBF_8BIT_YCBCR_422PL:
+        case NTV2_FBF_10BIT_YCBCR_420PL2:
+        case NTV2_FBF_10BIT_YCBCR_422PL2:
+        case NTV2_FBF_8BIT_YCBCR_420PL2:
+        case NTV2_FBF_8BIT_YCBCR_422PL2:
 		case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
 			return false;	//	Unsupported
 	}
@@ -1807,6 +1807,9 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080psf_2500_2:
 		case NTV2_FORMAT_1080psf_2997_2:
 		case NTV2_FORMAT_1080psf_3000_2:
+		case NTV2_FORMAT_1080psf_2K_2398:
+		case NTV2_FORMAT_1080psf_2K_2400:
+		case NTV2_FORMAT_1080psf_2K_2500:
 			standard = NTV2_STANDARD_1080;
 			break;
 		case NTV2_FORMAT_1080p_2500:
@@ -1837,9 +1840,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080p_2K_5000_B:
 		case NTV2_FORMAT_1080p_2K_5994_B:
 		case NTV2_FORMAT_1080p_2K_6000_B:
-		case NTV2_FORMAT_1080psf_2K_2398:
-		case NTV2_FORMAT_1080psf_2K_2400:
-		case NTV2_FORMAT_1080psf_2K_2500:
 			standard = NTV2_STANDARD_2Kx1080p;
 			break;
 		case NTV2_FORMAT_720p_2398:
@@ -2080,10 +2080,10 @@ ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameB
 	//	Planar formats are special -- and VANC doesn't apply...
 	switch (inFBFormat)
 	{
-		case NTV2_FBF_10BIT_YCBCR_420PL:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2 * 10 / 8;
-		case NTV2_FBF_10BIT_YCBCR_422PL:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2 * 10 / 8;
-		case NTV2_FBF_8BIT_YCBCR_420PL:		return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;
-		case NTV2_FBF_8BIT_YCBCR_422PL:		return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2;
+        case NTV2_FBF_10BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2 * 10 / 8;
+        case NTV2_FBF_10BIT_YCBCR_422PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2 * 10 / 8;
+        case NTV2_FBF_8BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;
+        case NTV2_FBF_8BIT_YCBCR_422PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2;
 		default:							break;
 	}
 
@@ -3549,7 +3549,7 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 		"24BIT_RGB",						//	NTV2_FBF_24BIT_RGB				//	12
 		"24BIT_BGR",						//	NTV2_FBF_24BIT_BGR				//	13
 		"",									//	NTV2_FBF_10BIT_YCBCRA			//	14
-		"DPX_LITTLEENDIAN",					//	NTV2_FBF_10BIT_DPX_LITTLEENDIAN	//	15
+        "DPX_LITTLEENDIAN",					//	NTV2_FBF_10BIT_DPX_LE           //	15
 		"48BIT_RGB",						//	NTV2_FBF_48BIT_RGB				//	16
 		"",									//	NTV2_FBF_PRORES					//	17
 		"",									//	NTV2_FBF_PRORES_DVCPRO			//	18
@@ -3583,7 +3583,7 @@ AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS
 	"24 Bit RGB",						//	NTV2_FBF_24BIT_RGB				//	12
 	"24 Bit BGR",						//	NTV2_FBF_24BIT_BGR				//	13
 	"10 Bit YCbCrA",					//	NTV2_FBF_10BIT_YCBCRA			//	14
-	"10 Bit RGB - DPX Little Endian",	//	NTV2_FBF_10BIT_DPX_LITTLEENDIAN	//	15
+    "10 Bit RGB - DPX LE",              //	NTV2_FBF_10BIT_DPX_LE           //	15
 	"48 Bit RGB",						//	NTV2_FBF_48BIT_RGB				//	16
 	"10 Bit YCbCr - Compressed",		//	NTV2_FBF_PRORES					//	17
 	"10 Bit YCbCr DVCPro - Compressed",	//	NTV2_FBF_PRORES_DVCPRO			//	18
@@ -4902,7 +4902,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 		case NTV2_FBF_10BIT_RGB:
 		case NTV2_FBF_10BIT_RGB_PACKED:
 		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_24BIT_RGB:
 		case NTV2_FBF_48BIT_RGB:
@@ -5205,7 +5205,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 			case NTV2_FBF_10BIT_RGB:
 			case NTV2_FBF_10BIT_RGB_PACKED:
 			case NTV2_FBF_10BIT_DPX:
-			case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+            case NTV2_FBF_10BIT_DPX_LE:
 			case NTV2_FBF_24BIT_BGR:
 			case NTV2_FBF_24BIT_RGB:
 				if ( channel == NTV2_CHANNEL1)
@@ -5341,7 +5341,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 		case NTV2_FBF_10BIT_RGB:
 		case NTV2_FBF_10BIT_RGB_PACKED:
 		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_24BIT_RGB:
 			if ( channel == NTV2_CHANNEL1)
@@ -5511,7 +5511,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 		case NTV2_FBF_10BIT_RGB:
 		case NTV2_FBF_10BIT_RGB_PACKED:
 		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_24BIT_RGB:
 			if ( channel == NTV2_CHANNEL1)
@@ -6729,7 +6729,7 @@ string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const
 		case NTV2_FBF_24BIT_RGB:				return "NTV2_FBF_24BIT_RGB";
 		case NTV2_FBF_24BIT_BGR:				return "NTV2_FBF_24BIT_BGR";
 		case NTV2_FBF_10BIT_YCBCRA:				return "NTV2_FBF_10BIT_YCBCRA";
-		case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:	return "NTV2_FBF_10BIT_DPX_LITTLEENDIAN";
+        case NTV2_FBF_10BIT_DPX_LE:             return "NTV2_FBF_10BIT_DPX_LE";
 		case NTV2_FBF_48BIT_RGB:				return "NTV2_FBF_48BIT_RGB";
 		case NTV2_FBF_PRORES:					return "NTV2_FBF_PRORES";
 		case NTV2_FBF_PRORES_DVCPRO:			return "NTV2_FBF_PRORES_DVCPRO";

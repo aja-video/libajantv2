@@ -845,7 +845,7 @@ GeneralFrameFormat DeviceServices::GetGeneralFrameFormat(NTV2FrameBufferFormat f
 		case NTV2_FBF_10BIT_DPX:
 		case NTV2_FBF_24BIT_RGB:
 		case NTV2_FBF_24BIT_BGR:
-        case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+        case NTV2_FBF_10BIT_DPX_LE:
         case NTV2_FBF_48BIT_RGB:
 			genFmt = FORMAT_RGB;
 			break;

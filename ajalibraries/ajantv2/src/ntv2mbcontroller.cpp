@@ -30,8 +30,8 @@ bool IPVNetConfig::operator != ( const IPVNetConfig &other )
 bool IPVNetConfig::operator == ( const IPVNetConfig &other )
 {
     if ((ipc_gateway  == other.ipc_gateway)   &&
-            (ipc_ip       == other.ipc_ip)        &&
-            (ipc_subnet   == other.ipc_subnet))
+        (ipc_ip       == other.ipc_ip)        &&
+        (ipc_subnet   == other.ipc_subnet))
     {
         return true;
     }

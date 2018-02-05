@@ -435,7 +435,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
     {
         if (_spiDeviceID != 0x010220)
             return false;
-        uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
+		uint32_t baseAddress = _mcsInfoOffset;
         SetFlashBlockIDBank(MCS_INFO_BLOCK);
 
         uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
