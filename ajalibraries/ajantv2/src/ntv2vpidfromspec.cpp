@@ -80,6 +80,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	isProgressivePicture	= NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (outputFormat);
 	isProgressiveTransport	= isProgressivePicture;							//	Must be a progressive format to start
 
+	if (NTV2_IS_720P_VIDEO_FORMAT(outputFormat) && !is3G)
+		isProgressiveTransport = false;
+
 	if (NTV2_IS_PSF_VIDEO_FORMAT (outputFormat))
 		isProgressiveTransport = false;										//	PSF is never a progressive transport
 
