@@ -76,7 +76,7 @@ public:
 	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
 	void			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
-	bool			CreateSRecord ();
+	bool			CreateSRecord (bool bChangeEndian);
 	bool			CreateEDIDIntelRecord ();
     void			SetQuietMode ();
 	bool			VerifyFlash (FlashBlockID flashBlockNumber);
