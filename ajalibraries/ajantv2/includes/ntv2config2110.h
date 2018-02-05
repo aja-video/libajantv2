@@ -60,21 +60,21 @@ public:
     bool operator == ( const tx_2110Config &other );
 
 public:
-    std::string	remoteIP[2];       ///< @brief	Specifies remote (destination) IP address.
-    uint32_t	localPort[2];		///< @brief	Specifies the local (source) port number.
-    uint32_t	remotePort[2];		///< @brief	Specifies the remote (destination) port number.
-    uint16_t    payloadType;
-    uint8_t     tos;            // type of service
-    uint8_t     ttl;            // time to live
-    uint32_t    ssrc;
-    NTV2VideoFormat videoFormat;
-    VPIDSampling videoSamples;
-    uint32_t     pktsPerLine;    // read-only
-    uint32_t     payloadLen;     // read-only
-    uint32_t     lastPayLoadLen; // read-only
-    uint8_t      numAudioChannels;
-    uint8_t      firstAudioChannel;
-    NTV2PacketInterval audioPacketInterval;
+    std::string         remoteIP[2];        ///< @brief	Specifies remote (destination) IP address.
+    uint32_t            localPort[2];		///< @brief	Specifies the local (source) port number.
+    uint32_t            remotePort[2];		///< @brief	Specifies the remote (destination) port number.
+    uint16_t            payloadType;
+    uint8_t             tos;                // type of service
+    uint8_t             ttl;                // time to live
+    uint32_t            ssrc;
+    NTV2VideoFormat     videoFormat;
+    VPIDSampling        videoSamples;
+    uint32_t            pktsPerLine;        // read-only
+    uint32_t            payloadLen;         // read-only
+    uint32_t            lastPayLoadLen;     // read-only
+    uint8_t             numAudioChannels;
+    uint8_t             firstAudioChannel;
+    NTV2PacketInterval  audioPacketInterval;
 };
 
 /**
@@ -92,22 +92,22 @@ public:
     bool operator == ( const rx_2110Config &other );
 
 public:
-    uint32_t	rxMatch;         ///< @brief	Bitmap of rxMatch criteria used
-    std::string	sourceIP;		///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2110_SOURCE_IP set). If it's in the multiclass range, then
-                                 ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-    std::string	destIP;			///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
-    uint32_t	sourcePort;		///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
-    uint32_t	destPort;		///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
-    uint32_t	SSRC;            ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
-    uint16_t	VLAN;            ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
-    uint16_t    payloadType;
-    NTV2VideoFormat videoFormat;
-    VPIDSampling    videoSamples;
-    uint32_t    payloadLen;
-    uint32_t    lastPayloadLen;
-    uint32_t    pktsPerLine;
-    uint32_t    numAudioChannels;
-    uint32_t    audioSamplesPerPkt;
+    uint32_t            rxMatch;            ///< @brief	Bitmap of rxMatch criteria used
+    std::string         sourceIP;           ///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2110_SOURCE_IP set). If it's in the multiclass range, then
+                                            ///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
+    std::string         destIP;             ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
+    uint32_t            sourcePort;         ///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
+    uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
+    uint32_t            SSRC;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
+    uint16_t            VLAN;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
+    uint16_t            payloadType;
+    NTV2VideoFormat     videoFormat;
+    VPIDSampling        videoSamples;
+    uint32_t            payloadLen;
+    uint32_t            lastPayloadLen;
+    uint32_t            pktsPerLine;
+    uint32_t            numAudioChannels;
+    NTV2PacketInterval  audioPacketInterval;
 };
 
 
