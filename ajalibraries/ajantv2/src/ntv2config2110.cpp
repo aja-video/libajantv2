@@ -592,8 +592,6 @@ int CNTV2Config2110::LeastCommonMultiple(int a,int b)
 
 bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig)
 {
-
-
     bool        rv = true;
 
     if (GetLinkActive(SFP_TOP) == false)
@@ -736,7 +734,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, NTV2S
     }
 
     // Generate and push the SDP
-    GenSDP(channel);
+    GenSDP(channel,stream);
 
     return rv;
 }
@@ -915,7 +913,7 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, NTV2Stream s
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
 
-    GenSDP(channel);
+    GenSDP(channel,stream);
 
     return true;
 }
@@ -1402,13 +1400,15 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
-string CNTV2Config2110::GetTxSDP(NTV2Channel chan)
+string CNTV2Config2110::GetTxSDP(NTV2Channel chan, NTV2Stream stream)
 {
-    if (txsdp[(int)chan].str().empty())
+    int ch = (int)chan;
+    int st = (int)stream;
+    if (txsdp[ch][st].str().empty())
     {
-        GenSDP(chan);
+        GenSDP(chan,stream);
     }
-    return txsdp[(int)chan].str();
+    return txsdp[ch][st].str();
 }
 
 string CNTV2Config2110::To_String(int val)
@@ -1418,10 +1418,23 @@ string CNTV2Config2110::To_String(int val)
     return oss.str();
 }
 
-bool CNTV2Config2110::GenSDP(NTV2Channel channel)
+bool CNTV2Config2110::GenSDP(NTV2Channel channel, NTV2Stream stream)
 {
-    string filename = "txch" + To_String((int)channel+1) + ".sdp";
-    stringstream & sdp = txsdp[(int)channel];
+    int ch = (int)channel;
+    int st = (int)stream;
+
+    string filename = "txch" + To_String(ch+1);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        filename += "v.sdp";
+    }
+    else
+    {
+        filename += "a";
+        filename += To_String(st);
+        filename += ".sdp";
+    }
+    stringstream & sdp = txsdp[ch][st];
 
     sdp.str("");
     sdp.clear();
@@ -1455,11 +1468,14 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel)
     bool rv = FetchGrandMasterInfo(gmInfo);
     gmInfo.erase(remove(gmInfo.begin(), gmInfo.end(), '\n'), gmInfo.end());
 
-    GenSDPVideoStream(sdp,channel,gmInfo);
-    GenSDPAudioStream(sdp,channel,NTV2_AUDIO1_STREAM,gmInfo);
-    GenSDPAudioStream(sdp,channel,NTV2_AUDIO2_STREAM,gmInfo);
-    GenSDPAudioStream(sdp,channel,NTV2_AUDIO3_STREAM,gmInfo);
-    GenSDPAudioStream(sdp,channel,NTV2_AUDIO4_STREAM,gmInfo);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        GenSDPVideoStream(sdp,channel,gmInfo);
+    }
+    else
+    {
+        GenSDPAudioStream(sdp,channel,stream,gmInfo);
+    }
 
     rv = PushSDP(filename,sdp);
 
