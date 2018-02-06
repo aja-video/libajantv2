@@ -173,5 +173,18 @@
 #define kRegDecap_unused2               14
 #define kRegDecap_descriptiom           15
 
+/////////////////////////////////////////////////////////////////////
+//
+// Arbitrator
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegArb_video               0
+#define kRegArb_audio               1
+#define kRegRxVideoDecode1          8
+#define kRegRxVideoDecode2          9
+#define kRegRxVideoDecode3          0xa
+#define kRegRxVideoDecode4          0xb
+
 
 #endif // REGISTERS_2110_H

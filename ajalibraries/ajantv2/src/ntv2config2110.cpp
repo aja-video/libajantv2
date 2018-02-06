@@ -462,7 +462,21 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         if (is2K) val += BIT(13);
 
         // setup PLL
-        mDevice.WriteRegister(kRegPll_DecVidStd + SAREK_PLL, val);
+        switch(channel)
+        {
+        case NTV2_CHANNEL1:
+            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            break;
+        case NTV2_CHANNEL2:
+            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            break;
+        case NTV2_CHANNEL3:
+            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            break;
+        case NTV2_CHANNEL4:
+            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            break;
+        }
     }
 
 
@@ -526,38 +540,30 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
     if (stream == NTV2_VIDEO_STREAM)
     {
 #if 0
-        // depacketizer
-        uint32_t depackBaseAddr = GetDepacketizerAddress(channel, stream);
-
-        // sampling
-        mDevice.ReadRegister(kReg4175_depkt_vid_fmt_o + depackBaseAddr,&val);
-        val = val & 0x3;
-        VPIDSampling vs;
-        switch(val)
+        // format
+        uint32_t val;
+        switch(channel)
         {
-        case 0:
-            vs = VPIDSampling_GBR_444;
+        case NTV2_CHANNEL1:
+            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
-        case 1:
-            vs = VPIDSampling_YUV_444;
+        case NTV2_CHANNEL2:
+            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
-        case 2:
-        default:
-            vs = VPIDSampling_YUV_422;
+        case NTV2_CHANNEL3:
+            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
+            break;
+        case NTV2_CHANNEL4:
+            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
         }
-        rxConfig.videoSamples = vs;
 
-        // format
-#if 0
-        mDevice.ReadRegister(SAREK_PLL + kRegPll_DecVidStd, &val);
-       NTV2FrameRate       fr  = NTV2FrameRate((val & 0xf00) >> 8);
-       NTV2FrameGeometry   fg  = NTV2FrameGeometry((val & 0xf0) >> 4);
-       NTV2Standard        std = NTV2Standard(val & 0x0f);
-       bool               is2K = (val & BIT(13));
+           NTV2FrameRate       fr  = NTV2FrameRate((val & 0xf00) >> 8);
+           NTV2FrameGeometry   fg  = NTV2FrameGeometry((val & 0xf0) >> 4);
+           NTV2Standard        std = NTV2Standard(val & 0x0f);
+           bool               is2K = (val & BIT(13));
 
-       NTV2FormatDescriptor fd;
-#endif
+           NTV2FormatDescriptor fd;
 #endif
     }
 
@@ -1988,11 +1994,11 @@ void CNTV2Config2110::SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP lin
     uint32_t reg;
     if (stream == NTV2_VIDEO_STREAM)
     {
-        reg = SAREK_2110_TX_ARBITRATOR;
+        reg = kRegArb_video + SAREK_2110_TX_ARBITRATOR;
     }
     else
     {
-        reg = SAREK_2110_TX_ARBITRATOR + 1;  // audio
+        reg = kRegArb_audio +  SAREK_2110_TX_ARBITRATOR;
     }
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
@@ -2010,9 +2016,9 @@ void CNTV2Config2110::GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP lin
 {
     uint32_t reg;
     if (stream == NTV2_VIDEO_STREAM)
-        reg = SAREK_2110_TX_ARBITRATOR;
+        reg = kRegArb_video + SAREK_2110_TX_ARBITRATOR;
     else
-        reg = SAREK_2110_TX_ARBITRATOR + 1;  // audio
+        reg = kRegArb_audio + SAREK_2110_TX_ARBITRATOR;
 
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
