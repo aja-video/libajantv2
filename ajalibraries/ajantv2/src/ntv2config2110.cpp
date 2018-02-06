@@ -1543,9 +1543,9 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << To_String(height);
     sdp << "; exactframerate=";
     sdp << rateString;
-    sdp << "; depth=10; TCS=SDR; colorimtery=";
+    sdp << "; depth=10; TCS=SDR; colorimetry=";
     sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vfmt)) ? "BT601" : "BT709");
-    sdp << "; PM=2110GPM; SSN=\"ST2110-20:2017\"; ";
+    sdp << "; PM=2110GPM; SSN=ST2110-20:2017; ";
     if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
     {
         sdp << "interlace";
