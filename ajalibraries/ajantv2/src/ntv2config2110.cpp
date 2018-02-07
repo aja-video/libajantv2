@@ -1596,7 +1596,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     // connection information
     sdp << "c=IN IP4 ";
-    sdp << config.remoteIP;
+    sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
@@ -1657,7 +1657,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
 
     // connection information
     sdp << "c=IN IPV4 ";
-    sdp << config.remoteIP;
+    sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
