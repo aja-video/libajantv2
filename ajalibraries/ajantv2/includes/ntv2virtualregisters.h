@@ -471,8 +471,9 @@ typedef enum
 	kVRegHdmiHdrOutChanged					= VIRTUALREG_START+524,
 
 	kVRegDisableAutoVPID					= VIRTUALREG_START+525,
+	kVRegEnableBT2020						= VIRTUALREG_START+526,
 
-	kVRegLastAJA							= VIRTUALREG_START+526,		///< @brief	The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+527,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
