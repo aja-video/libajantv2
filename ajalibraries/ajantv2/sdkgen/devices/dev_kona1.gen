@@ -76,7 +76,7 @@ NTV2_INPUTSOURCE_SDI1
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize	0x40000000
-NTV2DeviceGetLUTVersion	1
+NTV2DeviceGetLUTVersion	2
 NTV2DeviceGetMaxAudioChannels	16
 NTV2DeviceGetMaxRegisterNumber	kRegReserved511
 NTV2DeviceGetMaxTransferCount	BIT(21)-1
