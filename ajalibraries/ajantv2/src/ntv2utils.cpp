@@ -3119,7 +3119,7 @@ ULWord GetNTV2FrameGeometryWidth(NTV2FrameGeometry geometry)
 //	Displayable width of format, not counting HANC/VANC
 ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 {
-	int width = 0;
+	ULWord width = 0;
 
 	switch (videoFormat)
 	{
@@ -3218,15 +3218,15 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_4x2048x1080p_12000:
 			width = 4096;
 			break;
-		/**	To reveal missing values, comment out the "default:" below, then uncomment out these cases:
+#if defined(_DEBUG)
 		case NTV2_FORMAT_UNKNOWN:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
-		case NTV2_FORMAT_END_4K_DEF_FORMATS:
-		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:**/
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+#else
 		default:
-			width = 0;
+#endif
 			break;
 	}
 
@@ -3238,7 +3238,7 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 //	Displayable height of format, not counting HANC/VANC
 ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 {
-	int height = 0;
+	ULWord height = 0;
 
 	switch (videoFormat)
 	{
@@ -3337,13 +3337,15 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_4x2048x1080p_12000:
 			height = 2160;
 			break;
+#if defined(_DEBUG)
 		case NTV2_FORMAT_UNKNOWN:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
-		//case NTV2_FORMAT_END_4K_DEF_FORMATS:	//	duplicate of NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2 and NTV2_FORMAT_1080p_2K_6000
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
-			height = 0;
+#else
+		default:
+#endif
 			break;
 	}
 
