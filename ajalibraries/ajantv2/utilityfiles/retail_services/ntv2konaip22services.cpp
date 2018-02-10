@@ -88,8 +88,8 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
-    bool						bCh1HDR_RGB			= (fbFormatCh1 == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool						bCh2HDR_RGB			= (fbFormatCh2 == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool						bFb1HdrRGB			= (fbFormatCh1 == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool						bFb2HdrRGB			= (fbFormatCh2 == NTV2_FBF_48BIT_RGB) ? true : false;
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || bLevelBFormat || bStereoOut)
@@ -198,7 +198,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (genFrameFormat == FORMAT_RGB)
 	{
-        frameSync2RGB = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+        frameSync2RGB = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
 	}
 	else
 	{
@@ -211,7 +211,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC1VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -227,7 +227,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (genFrameFormat == FORMAT_RGB || bDSKOn)
 	{
-        mCard->Connect (NTV2_XptCSC1VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+        mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 	}
 	else
 	{
@@ -240,7 +240,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC2VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -256,7 +256,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (bCh2RGB)
 	{
-        mCard->Connect (NTV2_XptCSC2VidInput, bCh2HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+        mCard->Connect (NTV2_XptCSC2VidInput, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 	}
 	else
 	{
@@ -269,7 +269,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC3VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -294,7 +294,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC4VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -505,7 +505,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				mCard->Enable4KDCRGBMode(false);
 			}
 		}
-        else if (bCh1HDR_RGB)
+        else if (bFb1HdrRGB)
         {
             if (b4kHfr)
             {
@@ -568,7 +568,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut1Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -577,7 +577,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else 
 	{
-        mCard->Connect (NTV2_XptDualLinkOut1Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : frameSync2RGB);
+        mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : frameSync2RGB);
 	}
 	
 	
@@ -586,7 +586,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut2Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -595,7 +595,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else 
 	{
-        mCard->Connect (NTV2_XptDualLinkOut2Input, bCh2HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptBlack);
+        mCard->Connect (NTV2_XptDualLinkOut2Input, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptBlack);
 	}
 	
 	
@@ -604,7 +604,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut3Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -622,7 +622,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut4Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -638,7 +638,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 1
 	if (b4K)
 	{	
-        if (bSdiRgbOut || bCh1HDR_RGB)
+        if (bSdiRgbOut || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
@@ -697,7 +697,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 2
 	if (b4K)
 	{
-        if (bSdiRgbOut || bCh1HDR_RGB)
+        if (bSdiRgbOut || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
@@ -755,7 +755,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiRgbOut || bCh1HDR_RGB)
+        if (bSdiRgbOut || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
@@ -854,7 +854,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else // NTV2_PrimaryOutputSelect												// Primary
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut1);
             mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -870,7 +870,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiRgbOut || bCh1HDR_RGB)
+        if (bSdiRgbOut || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
@@ -974,7 +974,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else // NTV2_PrimaryOutputSelect												// Primary
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut1);
             mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -1073,24 +1073,24 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			case NTV2_PrimaryOutputSelect:
 				if (b4kHfr)
 				{
-                    XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
-                    XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptCSC2VidYUV;
-                    XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptCSC3VidYUV;
-                    XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptCSC4VidYUV;
+                    XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
+                    XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptCSC2VidYUV;
+                    XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptCSC3VidYUV;
+                    XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptCSC4VidYUV;
 				}
 				else
 				{
-					XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-					XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-					XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-					XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
+					XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+					XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
+					XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
+					XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
 				}
 				break;
 			case NTV2_4kHalfFrameRate:
-                XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-                XPt2 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-                XPt3 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-                XPt4 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
+                XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+                XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
+                XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
+                XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
 				break;
 			case NTV2_Quarter4k:
 				if (b2pi)
@@ -1110,10 +1110,10 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					XPt1 = NTV2_Xpt4KDownConverterOutRGB;
 				}
 				break;
-            case NTV2_Quadrant1Select: XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB; break;
-            case NTV2_Quadrant2Select: XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB; break;
-            case NTV2_Quadrant3Select: XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out; break;
-            case NTV2_Quadrant4Select: XPt1 = bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out; break;
+            case NTV2_Quadrant1Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB; break;
+            case NTV2_Quadrant2Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB; break;
+            case NTV2_Quadrant3Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out; break;
+            case NTV2_Quadrant4Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out; break;
 			}
 		}
 	}
@@ -1129,7 +1129,7 @@ void KonaIP22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else
 	{
-        XPt1 = bCh1HDR_RGB ? frameSync2RGB : NTV2_XptLUT1RGB;
+        XPt1 = bFb1HdrRGB ? frameSync2RGB : NTV2_XptLUT1RGB;
 	}
 
 	mCard->Connect (NTV2_XptHDMIOutInput, XPt1);

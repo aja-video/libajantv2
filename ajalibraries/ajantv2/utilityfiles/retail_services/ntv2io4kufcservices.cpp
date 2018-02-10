@@ -88,8 +88,8 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 	
-    bool bCh1HDR_RGB        = (fbFormatCh1 == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool bCh2HDR_RGB		= (fbFormatCh2 == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool bFb1HdrRGB        = (fbFormatCh1 == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool bFb2HdrRGB		= (fbFormatCh2 == NTV2_FBF_48BIT_RGB) ? true : false;
 
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (bLevelBFormat || bStereoOut)
@@ -153,7 +153,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	}
 	else if (genFrameFormat == FORMAT_RGB)
 	{
-        frameSync2RGB = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+        frameSync2RGB = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
 	}
 	else
 	{
@@ -190,7 +190,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	// CSC 1
 	if (genFrameFormat == FORMAT_RGB || bDSKOn)
 	{
-        mCard->Connect (NTV2_XptCSC1VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+        mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 	}
 	else if (genFrameFormat == FORMAT_COMPRESSED)
 	{
@@ -205,7 +205,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	// CSC 2
 	if ( bCh2RGB )
 	{
-        mCard->Connect (NTV2_XptCSC2VidInput, bCh2HDR_RGB ? NTV2_XptFrameBuffer2RGB :NTV2_XptLUT2RGB);
+        mCard->Connect (NTV2_XptCSC2VidInput, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB :NTV2_XptLUT2RGB);
 	}
 	else
 	{
@@ -287,7 +287,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 				 && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				 && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             if (bDSKOn)
             {
@@ -356,7 +356,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             if (bDSKOn)
             {
@@ -451,7 +451,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 		else
 		{
             NTV2CrosspointID xpt = frameSync1YUV;
-            if (bCh1HDR_RGB && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
+            if (bFb1HdrRGB && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
                 xpt = NTV2_XptFrameBuffer1RGB;
 
             mCard->Connect (NTV2_XptHDMIOutInput, xpt);

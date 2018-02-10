@@ -156,8 +156,8 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;					// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;					// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
-    bool						bCh1HDR_RGB			= fbFormatCh1 == NTV2_FBF_48BIT_RGB;
-    bool						bCh2HDR_RGB			= fbFormatCh2 == NTV2_FBF_48BIT_RGB;
+    bool						bFb1HdrRGB			= fbFormatCh1 == NTV2_FBF_48BIT_RGB;
+    bool						bFb2HdrRGB			= fbFormatCh2 == NTV2_FBF_48BIT_RGB;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
@@ -286,7 +286,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (genFrameFormat == FORMAT_RGB)
 	{
-        frameSync2RGB = bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+        frameSync2RGB = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
 	}
 	else
 	{
@@ -299,7 +299,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC1VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -315,7 +315,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (genFrameFormat == FORMAT_RGB || bDSKOn)
 	{
-        mCard->Connect (NTV2_XptCSC1VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+        mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 	}
 	else
 	{
@@ -328,7 +328,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC2VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -344,7 +344,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else if (bFb2RGB)
 	{
-        mCard->Connect (NTV2_XptCSC2VidInput, bCh2HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+        mCard->Connect (NTV2_XptCSC2VidInput, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 	}
 	else
 	{
@@ -357,7 +357,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC3VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -382,7 +382,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptCSC4VidInput, bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -672,7 +672,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut1Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -681,7 +681,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else
 	{
-        mCard->Connect (NTV2_XptDualLinkOut1Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer1RGB : frameSync2RGB);
+        mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : frameSync2RGB);
 	}
 	
 	
@@ -690,7 +690,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut2Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -699,7 +699,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else
 	{
-        mCard->Connect (NTV2_XptDualLinkOut2Input, bCh2HDR_RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptBlack);
+        mCard->Connect (NTV2_XptDualLinkOut2Input, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptBlack);
 	}
 	
 	
@@ -708,7 +708,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut3Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -726,7 +726,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (genFrameFormat == FORMAT_RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut4Input, bCh1HDR_RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -757,7 +757,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 1
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+        if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, bQuadSwap ? NTV2_XptDuallinkOut3 : NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, bQuadSwap ? NTV2_XptDuallinkOut3DS2 : NTV2_XptDuallinkOut1DS2);
@@ -816,7 +816,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 2
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+        if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, bQuadSwap ?  NTV2_XptDuallinkOut4 : NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, bQuadSwap ?  NTV2_XptDuallinkOut4DS2 : NTV2_XptDuallinkOut2DS2);
@@ -874,7 +874,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+        if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, bQuadSwap ?  NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, bQuadSwap ?  NTV2_XptDuallinkOut1DS2 : NTV2_XptDuallinkOut3DS2);
@@ -969,7 +969,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else // NTV2_PrimaryOutputSelect												// Primary
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut1);
             mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -985,7 +985,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-        if (bSdiOutRGB || bCh1HDR_RGB)
+        if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_XptDuallinkOut2 : NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, bQuadSwap ? NTV2_XptDuallinkOut2DS2 : NTV2_XptDuallinkOut4DS2);
@@ -1089,7 +1089,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else // NTV2_PrimaryOutputSelect												// Primary
 	{
-        if (bCh1HDR_RGB)
+        if (bFb1HdrRGB)
         {
             mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut1);
             mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -1242,7 +1242,7 @@ void IoIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		if (bHdmiOutRGB)
 		{
-			XPt1 = bCh1HDR_RGB ? frameSync2RGB : NTV2_XptLUT1RGB;
+			XPt1 = bFb1HdrRGB ? frameSync2RGB : NTV2_XptLUT1RGB;
 		}
 		else
 		{
