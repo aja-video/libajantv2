@@ -3025,12 +3025,12 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	(void) format;
 	NTV2DeviceID deviceID = mCard->GetDeviceID();
 
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
+	NTV2FrameBufferFormat fb1Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 
-	NTV2FrameBufferFormat fbFormatCh2;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
+	NTV2FrameBufferFormat fb2Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
+	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
 
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
@@ -3241,17 +3241,17 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer (2,3,4) disabling, format, direction
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
+	NTV2FrameBufferFormat fb1Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
 	mCard->WriteRegister(kRegCh2Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
 		
 		mCard->WriteRegister(kRegCh3Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 		mCard->WriteRegister(kRegCh4Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
@@ -3482,7 +3482,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	
 	
 	// Frame Buffer 1
-	int bCh1Disable=false, bCh2Disable=false, bCh3Disable=false, bCh4Disable=false;
+	int bFb1Disable=false, bFb2Disable=false, bFb3Disable=false, bFb4Disable=false;
 	switch (format)
 	{
 		default:
@@ -3513,7 +3513,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	{
 		default:
 		case FORMAT_RAW:
-			bCh3Disable = true;
+			bFb3Disable = true;
 			mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
 			break;
 		case FORMAT_RAW_HFR:
@@ -3529,7 +3529,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	{
 		default:
 		case FORMAT_RAW:
-			bCh4Disable = true;
+			bFb4Disable = true;
 			mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 			break;
 		case FORMAT_RAW_HFR:
@@ -3541,23 +3541,23 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	}
 	
 	// Frame Buffer (1 2 3 4) format, direction
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
+	NTV2FrameBufferFormat fb1Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
 	}
 
 	// Frame Buffer (1 2 3 4) disable
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, bCh3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh3Control, bFb3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh4Control, bFb4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	
 	
 	// 4K Down Converter

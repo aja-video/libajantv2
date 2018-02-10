@@ -54,13 +54,13 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 	
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fbFormatCh1);
+	NTV2FrameBufferFormat fb1Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
+	bool bCh1RGB = IsFrameBufferFormatRGB(fb1Format);
 		
-	NTV2FrameBufferFormat fbFormatCh2;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
+	NTV2FrameBufferFormat fb2Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
+	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
@@ -308,8 +308,8 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 	// The background video/key depends on the DSK mode
 	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
-	int bCh1Disable = 0;						// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;						// Assume Channel 2 IS disabled
+	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
+	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -408,8 +408,8 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 				// Background (note: FB1 is used for sync - it will be replaced by matte video
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 				break;
 			
@@ -443,8 +443,8 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptAnalogIn);
 				}
 				
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
@@ -491,7 +491,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 						mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 					}
 				}
-				bCh2Disable = 0;			// enable Ch 2
+				bFb2Disable = 0;			// enable Ch 2
 				break;
 				
 			default:
@@ -516,11 +516,11 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 	// never disable channels if in dual link 372 mode
 	if (bLevelBFormat || bStereoOut)
 	{
-		bCh1Disable = bCh2Disable = 0; 
+		bFb1Disable = bFb2Disable = 0; 
 	}
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 }
 	
 	
