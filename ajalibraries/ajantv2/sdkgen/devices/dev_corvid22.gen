@@ -94,6 +94,7 @@ NTV2DeviceGetNumVideoInputs					2
 NTV2DeviceGetNumVideoOutputs				2
 NTV2DeviceGetNumLTCInputs					2
 NTV2DeviceGetNumLTCOutputs					2
+NTV2DeviceGetActiveMemorySize				0x20000000
 
 
 // CanDo's		(see 'cando_canon.gen' for legal values)

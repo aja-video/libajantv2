@@ -141,6 +141,8 @@ public:
 		DefineRegister (kRegSDIOut6Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut7Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7,	kRegClass_NULL);
 		DefineRegister (kRegSDIOut8Control,		"",	mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8,	kRegClass_NULL);
+		DefineRegister (kRegCh1ControlExtended,	"",	mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister (kRegCh2ControlExtended,	"",	mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
 
 		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -1222,7 +1224,7 @@ private:
 		}
 		virtual	~DecodeGlobalControl2Reg()	{}
 	}	mDecodeGlobalControl2;
-	
+
 	struct DecodeChannelControlReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1230,36 +1232,10 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "Mode: "		<< (inRegValue & kRegMaskMode ? "Capture" : "Display") << endl
-				<< "Format: ";
-			if (inRegValue & kRegMaskFrameFormatHiBit)
-			{
-				if ((inRegValue & kRegMaskFrameFormat) == 0)
-					oss << "16-bit RGB (dual-link only)";
-				else
-					oss << "?? " << uint16_t (inRegValue & kRegMaskFrameFormat) << "(0x" << hex << uint16_t (inRegValue & kRegMaskFrameFormat) << dec << ")";
-			}
-			else switch ((inRegValue & kRegMaskFrameFormat) >> 1)
-			{
-				case 0:		oss << "10-bit YCbCr";					break;
-				case 1:		oss << "8-bit YCbCr(UYVY)";				break;
-				case 2:		oss << "8-bit ARGB";					break;
-				case 3:		oss << "8-bit RGBA";					break;
-				case 4:		oss << "10-bit RGB";					break;
-				case 5:		oss << "8-bit YCbCr(YUY2)";				break;
-				case 6:		oss << "8-bit ABGR";					break;
-				case 7:		oss << "DPX 10-bit ABGR";				break;
-				case 8:		oss << "DPX YCbCr";						break;
-				case 9:		oss << "DVCPro [8-bit YCbCr (UYVY)]";	break;
-				case 10:	oss << "10(0xA) -- reserved";			break;
-				case 11:	oss << "HDV 8-bit YCbCr";				break;
-				case 12:	oss << "8-bit packed RGB";				break;
-				case 13:	oss << "8-bit packed BGR";				break;
-				case 14:	oss << "DPX 10-bit RGB, little endian";	break;
-				case 15:	oss << "10-bit ARGB";					break;
-				case 16:	oss << "16-bit ARGB";					break;
-			}
-			oss								<< (inRegValue & kRegMaskFrameFormatHiBit	? " (extended)"			: " (normal)")					<< endl
+			const ULWord	fbfUpper	((inRegValue & kRegMaskFrameFormatHiBit) >> 2);
+			const ULWord	fbfLower	((inRegValue & kRegMaskFrameFormat) >> 1);
+			oss	<< "Mode: "					<< (inRegValue & kRegMaskMode ? "Capture" : "Display")												<< endl
+				<< "Format: "				<< ::NTV2FrameBufferFormatToString(NTV2PixelFormat(fbfUpper | fbfLower),false)						<< endl
 				<< "Channel: "				<< DisabEnab(inRegValue & kRegMaskChannelDisable)													<< endl
 				<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
 				<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
@@ -1289,6 +1265,21 @@ private:
 		}
 		virtual	~DecodeFBControlReg()	{}
 	}	mDecodeFBControlReg;
+
+	struct DecodeChannelControlExtReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Input Video 2:1 Decimate: "		<< EnabDisab(inRegValue & BIT(0))		<< endl
+				<< "HDMI Rx Direct: "				<< EnabDisab(inRegValue & BIT(1))		<< endl
+				<< "3:2 Pulldown Mode: "			<< EnabDisab(inRegValue & BIT(2));
+			return oss.str();
+		}
+		virtual	~DecodeChannelControlExtReg()	{}
+	}	mDecodeChannelControlExt;
 	
 	struct DecodeSysmonVccIntDieTemp : public Decoder
 	{
