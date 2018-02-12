@@ -183,6 +183,7 @@
             "ssrc":"1000",
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
+            "audioPktInterval" :"125",
             "LinkAEnable":"true",
             "LinkBEnable":"false"
         }

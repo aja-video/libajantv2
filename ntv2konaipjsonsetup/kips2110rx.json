@@ -34,6 +34,8 @@
             "ssrc":"1234",
             "payload":"101",
             "primaryFilter":"0x5e",
+            "numAudioChannels":"2",
+            "audioPktInterval" :"1000",
             "Enable":"false"
     }]
 }

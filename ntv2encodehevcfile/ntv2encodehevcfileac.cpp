@@ -349,7 +349,7 @@ AJAStatus NTV2EncodeHEVCFileAc::Init (void)
     //  Otherwise use the pixel format and SDI input format
     else if (mPixelFormat >= NTV2_FBF_NUMFRAMEBUFFERFORMATS)
     {
-         mPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL;
+         mPixelFormat = NTV2_FBF_8BIT_YCBCR_420PL2;
     }
 
     //  Quad mode must be channel 1

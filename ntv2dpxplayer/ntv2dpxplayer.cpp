@@ -405,7 +405,7 @@ void NTV2DPXPlayer::UpdateVideoFormatEnumerator()
 			m_videoPlaybackFormatCombo->addItem(formatString,QVariant(formatNumber));
 	}
 #endif
-	m_sequenceFileTypeCombo->addItem("RGB DPX LE",QVariant((int)NTV2_FBF_10BIT_DPX_LITTLEENDIAN));
+    m_sequenceFileTypeCombo->addItem("RGB DPX LE",QVariant((int)NTV2_FBF_10BIT_DPX_LE));
 	m_sequenceFileTypeCombo->addItem("RGB DPX BE",QVariant((int)NTV2_FBF_10BIT_DPX));
 	m_sequenceFileTypeCombo->addItem("YCbCr DPX BE",QVariant((int)NTV2_FBF_10BIT_YCBCR_DPX));
 	connect(m_sequenceFileTypeCombo,SIGNAL(currentIndexChanged(int)),SLOT(NewFileFormatChoice(int)));

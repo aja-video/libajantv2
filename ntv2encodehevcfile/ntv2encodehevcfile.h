@@ -50,7 +50,7 @@ class NTV2EncodeHEVCFile
 			@param[in]	inM31Preset			Specifies the m31 preset to use.
 											Defaults to 8-bit 1280x720 5994p.
             @param[in]	inPixelFormat		Specifies the pixel format to use.
-                                            Defaults to NTV2_FBF_10BIT_YCBCR_420PL.
+                                            Defaults to NTV2_FBF_10BIT_YCBCR_420PL2.
             @param[in]	inQuadMode  		Specifies UHD mode.
                                             Defaults to HD mode.
             @param[in]	inAudioChannels		Specifies number of audio channels to write to AIFF file.
