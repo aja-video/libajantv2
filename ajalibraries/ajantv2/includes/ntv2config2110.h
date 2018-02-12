@@ -193,12 +193,15 @@ protected:
     void        SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool enable);
     void        GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool & enable);
 
-    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        DisableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
+    void        EnableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+
     void        SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
 
-    void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
-    void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);
+    void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
 
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
