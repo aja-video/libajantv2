@@ -310,20 +310,8 @@ bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Strea
         EnableIGMPGroup(port,channel,stream,false);
     }
 
-    // disable depacketizer
-    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
-    if (stream == NTV2_VIDEO_STREAM)
-    {
-        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
-    }
-    else if (stream == NTV2_AUDIO1_STREAM)
-    {
-        mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
-    }
-
-    // disable decapsulator
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(channel,stream);
-    mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x00);
+    DisableDepacketizerStream(channel,stream);
+    DisableDecapsulatorStream(channel,stream);
     return true;
 }
 
@@ -355,19 +343,18 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
         UnsetIGMPGroup(port, channel, stream);
     }
 
+    DisableDepacketizerStream(channel,stream);
     DisableDecapsulatorStream(channel,stream);
 
     SetupDecapsulatorStream(channel,stream, rxConfig);
-
     //ResetDepacketizer(channel,stream);
-
-    SetupDepacketizer(channel,stream,rxConfig);
+    SetupDepacketizerStream(channel,stream,rxConfig);
 
     EnableDecapsulatorStream(channel,stream);
+    EnableDepacketizerStream(channel,stream);
 
     return true;
 }
-
 
 void  CNTV2Config2110::SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
 {
@@ -402,6 +389,32 @@ void  CNTV2Config2110::SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream s
     mDevice.WriteRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 }
 
+void  CNTV2Config2110::DisableDepacketizerStream(NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+        mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
+    }
+}
+
+void  CNTV2Config2110::EnableDepacketizerStream(NTV2Channel channel, NTV2Stream stream)
+{
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x01);
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+        mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x01);
+    }
+}
+
 void  CNTV2Config2110::DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream)
 {
     // disable decasulator
@@ -416,7 +429,7 @@ void  CNTV2Config2110::EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream 
     mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x01);
 }
 
-void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream)
+void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream)
 {
     (void) channel;
     if (stream == NTV2_AUDIO1_STREAM)
@@ -444,7 +457,7 @@ void  CNTV2Config2110::ResetDepacketizer(const NTV2Channel channel, NTV2Stream s
     #endif
 }
 
-void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
+void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
 {
     if (stream == NTV2_VIDEO_STREAM)
     {
@@ -476,9 +489,10 @@ void  CNTV2Config2110::SetupDepacketizer(const NTV2Channel channel, NTV2Stream s
         case NTV2_CHANNEL4:
             mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
             break;
+        default:
+            break;
         }
     }
-
 
     if (stream == NTV2_AUDIO1_STREAM)
     {
