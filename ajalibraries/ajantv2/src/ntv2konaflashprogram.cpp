@@ -435,7 +435,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
     {
         if (_spiDeviceID != 0x010220)
             return false;
-        uint32_t baseAddress = _mcsInfoOffset;//GetBaseAddressForProgramming(MCS_INFO_BLOCK);
+		uint32_t baseAddress = _mcsInfoOffset;
         SetFlashBlockIDBank(MCS_INFO_BLOCK);
 
         uint32_t* mcsInfoPtr = new uint32_t[MAXMCSINFOSIZE / 4];
@@ -803,7 +803,7 @@ void CNTV2KonaFlashProgram::SRecordOutput (const char *pSRecord)
 	printf ("%s\n", pSRecord);
 }
 
-bool CNTV2KonaFlashProgram::CreateSRecord()
+bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 {
 	uint32_t baseAddress = 0;
 	char sRecord[100];
@@ -875,7 +875,8 @@ bool CNTV2KonaFlashProgram::CreateSRecord()
 			WaitForFlashNOTBusy();
 			uint32_t flashValue;
 			ReadRegister(kRegXenaxFlashDOUT,&flashValue);
-			//flashValue = NTV2EndianSwap32(flashValue);
+			if(bChangeEndian)
+				flashValue = NTV2EndianSwap32(flashValue);
 
 			UWord dd = (flashValue & 0xff);
 			sprintf(&sRecord[index], "%02x", dd);

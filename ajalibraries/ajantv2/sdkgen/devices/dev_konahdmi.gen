@@ -113,10 +113,9 @@ NTV2DeviceGetNumAudioSystems			4
 NTV2DeviceGetNumCSCs					4
 NTV2DeviceGetNumFrameStores				4
 NTV2DeviceGetNumHDMIAudioInputChannels	8
-NTV2DeviceGetNumHDMIAudioOutputChannels	8
 NTV2DeviceGetNumHDMIVideoInputs			4
 NTV2DeviceGetNumLUTs					4
-
+NTV2DeviceGetNumVideoChannels			4
 
 // CanDo's		(see 'cando_canon.gen' for legal values)
 NTV2DeviceCanChangeEmbeddedAudioClock

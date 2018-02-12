@@ -470,11 +470,11 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	
 	
 	// Frame Sync 1
-	NTV2CrosspointID frameSync1YUV = inputXptYUV1;
+	//NTV2CrosspointID frameSync1YUV = inputXptYUV1;
 	
 	
 	// Frame Sync 2
-	NTV2CrosspointID frameSync2YUV = inputXptYUV1;
+	//NTV2CrosspointID frameSync2YUV = inputXptYUV1;
 
 
 	// Compression Module

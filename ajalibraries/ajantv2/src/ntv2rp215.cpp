@@ -397,7 +397,7 @@ bool CNTV2RP215Decoder::Locate()
 			}
 		}
 		break;
-	case NTV2_FBF_10BIT_DPX_LITTLEENDIAN:
+    case NTV2_FBF_10BIT_DPX_LE:
 		break;
 	case NTV2_FBF_10BIT_YCBCR:
 		{

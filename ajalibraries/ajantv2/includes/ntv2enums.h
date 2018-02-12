@@ -379,7 +379,7 @@ typedef enum
 
 #if !defined(NTV2_DEPRECATE_14_0)
 const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ				= NTV2_FBF_8BIT_YCBCR_420PL3;		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL3 instead.
-const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN	= NTV2_FBF_10BIT_DPX_LE;			///< @deprecated	Use NTV2_FBF_10BIT_DPX_LE instead.
+const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN = NTV2_FBF_10BIT_DPX_LE;			///< @deprecated	Use NTV2_FBF_10BIT_DPX_LE instead.
 const NTV2FrameBufferFormat NTV2_FBF_UNUSED_23				= NTV2_FBF_8BIT_YCBCR_422PL3;		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL3 instead.
 const NTV2FrameBufferFormat NTV2_FBF_UNUSED_26				= NTV2_FBF_10BIT_YCBCR_420PL3_LE;	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL3_LE instead.
 const NTV2FrameBufferFormat NTV2_FBF_UNUSED_27				= NTV2_FBF_10BIT_YCBCR_422PL3_LE;	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL3_LE instead.
@@ -694,20 +694,20 @@ typedef enum _NTV2VideoFormat
 
 
 #if !defined(NTV2_DEPRECATE_14_1)
-	const NTV2VideoFormat NTV2_FORMAT_1080psf_2500			= NTV2_FORMAT_1080i_5000;		///< @deprecated	Use NTV2_FORMAT_1080psf_2500 instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080psf_2500			= NTV2_FORMAT_1080i_5000;		///< @deprecated	Use NTV2_FORMAT_1080i_5000 instead.
 	const NTV2VideoFormat NTV2_FORMAT_1080psf_2997			= NTV2_FORMAT_1080i_5994;		///< @deprecated	Use NTV2_FORMAT_1080i_5994 instead.
 	const NTV2VideoFormat NTV2_FORMAT_1080psf_3000			= NTV2_FORMAT_1080i_6000;		///< @deprecated	Use NTV2_FORMAT_1080i_6000 instead.
 	const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_525_5994	= NTV2_FORMAT_1080p_2K_2398;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2398 instead.
 	const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_625_5000	= NTV2_FORMAT_1080p_2K_2400;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2400 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_5000			= NTV2_FORMAT_1080p_5000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_5994			= NTV2_FORMAT_1080p_5994_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5994 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_6000			= NTV2_FORMAT_1080p_6000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_6000 instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_5000			= NTV2_FORMAT_1080p_5000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5000_B instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_5994			= NTV2_FORMAT_1080p_5994_B;		///< @deprecated	Use NTV2_FORMAT_1080p_5994_B instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_6000			= NTV2_FORMAT_1080p_6000_B;		///< @deprecated	Use NTV2_FORMAT_1080p_6000_B instead.
 
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000		= NTV2_FORMAT_1080p_2K_6000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994		= NTV2_FORMAT_1080p_2K_5994_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000		= NTV2_FORMAT_1080p_2K_5000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795		= NTV2_FORMAT_1080p_2K_4795_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795 instead.
-	const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800		= NTV2_FORMAT_1080p_2K_4800_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800 instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000		= NTV2_FORMAT_1080p_2K_6000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000_A instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994		= NTV2_FORMAT_1080p_2K_5994_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994_A instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000		= NTV2_FORMAT_1080p_2K_5000_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000_A instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795		= NTV2_FORMAT_1080p_2K_4795_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795_A instead.
+    const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800		= NTV2_FORMAT_1080p_2K_4800_A;	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800_A instead.
 #endif	//	NTV2_DEPRECATE_14_1
 
 #define NTV2_IS_VALID_VIDEO_FORMAT(__f__)							\

@@ -4327,14 +4327,60 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 {
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
-	return WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
+
+	NTV2Standard newStandard = inValue;
+	bool is2kx1080 = false;
+	switch(inValue)
+	{
+	case NTV2_STANDARD_2Kx1080p:
+		newStandard = NTV2_STANDARD_1080p;
+		is2kx1080 = true;
+		break;
+	case NTV2_STANDARD_2Kx1080i:
+		newStandard = NTV2_STANDARD_1080;
+		is2kx1080 = true;
+		break;
+	case NTV2_STANDARD_3840x2160p:
+	case NTV2_STANDARD_3840HFR:
+		newStandard = NTV2_STANDARD_1080p;
+		break;
+	case NTV2_STANDARD_4096x2160p:
+	case NTV2_STANDARD_4096HFR:
+		newStandard = NTV2_STANDARD_1080p;
+		is2kx1080 = true;
+		break;
+	default:
+		break;
+	}
+
+	WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
+	return SetSDIOut2Kx1080Enable((NTV2Channel)inOutputSpigot, is2kx1080);
 }
 
 bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard & outValue)
 {
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
-	return ReadRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], reinterpret_cast <ULWord *> (&outValue), kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
+	bool is2kx1080 = false;
+	NTV2Standard newStandard = NTV2_STANDARD_INVALID;
+	ReadRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], reinterpret_cast <ULWord *> (&newStandard), kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
+	bool returnValue = GetSDIOut2Kx1080Enable((NTV2Channel)inOutputSpigot, &is2kx1080);
+	outValue = newStandard;
+	switch(newStandard)
+	{
+	case NTV2_STANDARD_1080:
+		if(is2kx1080)
+			outValue = NTV2_STANDARD_2Kx1080i;
+		break;
+	case NTV2_STANDARD_1080p:
+		if(is2kx1080)
+			outValue = NTV2_STANDARD_2Kx1080p;
+		break;
+	default:
+		break;
+
+	}
+	return returnValue;
 }
 
 #if !defined (NTV2_DEPRECATE)

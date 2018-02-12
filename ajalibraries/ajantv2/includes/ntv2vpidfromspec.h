@@ -31,6 +31,7 @@ typedef struct
 	VPIDAudio				audioCarriage;			///< @brief	Specifies how audio is carried in additional channels.
 	bool					isOutput6G;				///< @brief	If true, the transport on the wire is 6G.
 	bool					isOutput12G;			///< @brief	If true, the transport on the wire is 12G.
+	bool					enableBT2020;			///< @brief	If true, the VPID will insert BT.2020 data.
 } VPIDSpec;
 
 /**

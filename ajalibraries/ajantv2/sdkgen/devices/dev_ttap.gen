@@ -65,6 +65,7 @@ NTV2DeviceGetNumFrameStores						1
 NTV2DeviceGetNumHDMIAudioOutputChannels			8
 NTV2DeviceGetNumHDMIVideoOutputs				1
 NTV2DeviceGetNumVideoOutputs					1
+NTV2DeviceGetActiveMemorySize					0x08000000
 
 
 // CanDo's		(see 'cando_canon.gen' for legal values)
