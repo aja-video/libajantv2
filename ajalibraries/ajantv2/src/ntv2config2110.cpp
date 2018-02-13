@@ -478,13 +478,13 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2St
         switch(channel)
         {
         case NTV2_CHANNEL1:
-            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            mDevice.WriteRegister(kRegRxVideoDecode1 + SAREK_2110_TX_ARBITRATOR, val);
             break;
         case NTV2_CHANNEL2:
-            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            mDevice.WriteRegister(kRegRxVideoDecode2 + SAREK_2110_TX_ARBITRATOR, val);
             break;
         case NTV2_CHANNEL3:
-            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
+            mDevice.WriteRegister(kRegRxVideoDecode3 + SAREK_2110_TX_ARBITRATOR, val);
             break;
         case NTV2_CHANNEL4:
             mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
