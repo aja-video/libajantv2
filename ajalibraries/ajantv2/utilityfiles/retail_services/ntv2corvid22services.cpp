@@ -50,7 +50,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID frameSync1YUV;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -65,7 +65,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else 
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -80,7 +80,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync2YUV = NTV2_XptCSC2VidYUV;
 		}
@@ -100,7 +100,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// CSC 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1RGB);
 	}
@@ -135,7 +135,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 1
 	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -157,7 +157,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
@@ -195,7 +195,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? frameSync1YUV : frameSync2YUV);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
@@ -427,6 +427,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
+	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
 	bool						bStereoIn			= false;
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -446,9 +447,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (bLevelBFormat || bStereoIn)
 	{
-		NTV2FrameBufferFormat fbFormat;
-		mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormat);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormat);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 	}
 	
@@ -499,7 +498,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// Frame Buffer 1
-	if (genFrameFormat == FORMAT_RGB)
+	if (bFb1RGB)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB);
 	}

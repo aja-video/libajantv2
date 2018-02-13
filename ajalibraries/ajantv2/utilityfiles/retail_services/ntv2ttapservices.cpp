@@ -22,6 +22,7 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(format);
+	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
 	
 	// get video format
 	//NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
@@ -32,7 +33,7 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 	// Frame Sync
 	NTV2CrosspointID frameSyncYUV;
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		frameSyncYUV = NTV2_XptCompressionModule;
 	}
@@ -91,11 +92,9 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
@@ -189,7 +188,7 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);

@@ -53,6 +53,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(format);
+	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
 	
 	// Turn off LTC loopback during playback
 	mCard->WriteRegister (kRegFS1ReferenceSelect, 0, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
@@ -63,7 +64,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	
 	
 	// Set (Up/Down Converter) module input (reg 136, bits 23-16)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression module (0x07)
 		mCard->Connect (NTV2_XptConversionModInput, NTV2_XptCompressionModule);
@@ -76,7 +77,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 
 	// Set (Frame Sync 1) input (reg 137, bits 15-8)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression module (0x07)
 		mCard->Connect (NTV2_XptFrameSync1Input, NTV2_XptCompressionModule);
@@ -89,7 +90,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 
 	// Set (Frame Buffer 1) input (reg 137, bits 7-0)
-	if  (format == FORMAT_COMPRESSED)
+	if  (bFb1Compressed)
 	{
 		// Select compression module out (0x07)
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
@@ -192,6 +193,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID			inputSelectPrimary = NTV2_XptSDIIn1;
 	NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
+	bool 						bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
 	
 	// if user select LTC port as input - loop it back during capture
 	uint32_t enabled = false;
@@ -254,7 +256,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 
 
 	// Set frame buffer 1 input (reg 137, bits 7-0)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression out (0x07)
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
@@ -330,11 +332,9 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
@@ -442,7 +442,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	
 		// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);

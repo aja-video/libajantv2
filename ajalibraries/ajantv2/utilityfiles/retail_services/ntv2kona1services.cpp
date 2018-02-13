@@ -450,9 +450,7 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (bLevelBFormat || bStereoIn)
 	{
-		NTV2FrameBufferFormat fbFormat;
-		mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormat);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormat);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 	}
 	
@@ -644,12 +642,9 @@ void Kona1Services::SetDeviceMiscRegisters (NTV2Mode mode)
 {	
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters(mode);
-	NTV2FrameBufferFormat   primaryPixelFormat;
-
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 	
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);

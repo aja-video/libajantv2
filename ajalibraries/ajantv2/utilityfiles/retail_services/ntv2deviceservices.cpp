@@ -902,6 +902,23 @@ bool DeviceServices::IsPulldownConverterMode(NTV2VideoFormat fmt1, NTV2VideoForm
 }
 
 
+bool DeviceServices::IsFrameBufferCompressed(NTV2FrameBufferFormat fbFormat)
+{
+	switch (fbFormat)
+	{
+		
+		case NTV2_FBF_PRORES_DVCPRO:
+		case NTV2_FBF_PRORES_HDV:
+		case NTV2_FBF_8BIT_DVCPRO:
+		//case NTV2_FBF_8BIT_QREZ:
+		case NTV2_FBF_8BIT_HDV:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
 bool DeviceServices::IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat)
 {
 	switch (fbFormat)
@@ -1020,10 +1037,6 @@ bool DeviceServices::IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fm
 
 NTV2RGB10Range DeviceServices::GetCSCRange()
 {
-	NTV2DeviceID deviceID = mDeviceID;
-	NTV2FrameBufferFormat frameBufferFormat;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &frameBufferFormat);
-	
 	// Get display/capture mode and call routines to setup XPoint
 	NTV2Mode mode = GetCh1Mode();
 
@@ -1031,12 +1044,12 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 	NTV2RGB10Range cscRange = mRGB10Range;		// default use RGB range
 	
 	// for case where duallink(RGB) IO is supported
-	if ( ::NTV2DeviceCanDoDualLink(deviceID) )
+	if ( ::NTV2DeviceCanDoDualLink(mDeviceID) )
 	{
 		if (mode == NTV2_MODE_DISPLAY)
 		{
 			// follow framebuffer RGB range
-			if (NTV2_IS_FBF_RGB(frameBufferFormat))
+			if (NTV2_IS_FBF_RGB(mFb1Format))
 				cscRange = mRGB10Range; 
 			
 			// follow output RGB range
@@ -2411,9 +2424,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
 	
-	NTV2FrameBufferFormat frameBufferFormat;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &frameBufferFormat);
-	GeneralFrameFormat genFrameFormat = GetGeneralFrameFormat(frameBufferFormat);
+	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
 	NTV2Mode mode = GetCh1Mode();
 
 	// if the board doesn't have LUTs, bail
@@ -2457,12 +2468,12 @@ bool DeviceServices::UpdateK2LUTSelect()
 		// convert to NTV2RGB10Range to NTV2RGBRangeMode to do the comparison
 		NTV2RGBRangeMode fbRange = (mRGB10Range == NTV2_RGB10RangeFull) ? NTV2_RGBRangeFull : NTV2_RGBRangeSMPTE;
 	
-		if (mode == NTV2_MODE_DISPLAY && genFrameFormat == FORMAT_RGB && mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+		if (mode == NTV2_MODE_DISPLAY && bFb1RGB == true && mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
 		{
 			wantedLUT = (fbRange == mSDIOutput1RGBRange) ? NTV2_LUTLinear : NTV2_LUTRGBRangeFull_SMPTE;
 		}
 		
-		else if (mode == NTV2_MODE_CAPTURE && genFrameFormat == FORMAT_RGB && mSDIInput1FormatSelect == NTV2_RGBSelect)
+		else if (mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1FormatSelect == NTV2_RGBSelect)
 		{
 			wantedLUT = NTV2_LUTRGBRangeFull_SMPTE;
 		}

@@ -1533,7 +1533,7 @@ void Io4KPlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 	
-	bool						bFb1RGB				= genFrameFormat == FORMAT_RGB;
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbTransportOut	= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
@@ -3112,11 +3112,9 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 	
 	//GeneralFrameFormat	genFormat			= GetGeneralFrameFormat(primaryPixelFormat);
 	//const bool			kNot48Bit			= false;
@@ -3152,7 +3150,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 							(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							b2xQuadOut || b2xQuadIn;
 	
-	GeneralFrameFormat genFormat = GetGeneralFrameFormat(primaryPixelFormat);
+	GeneralFrameFormat genFormat = GetGeneralFrameFormat(mFb1Format);
 	bool b4xIo = b4K == true || genFormat == FORMAT_RAW_UHFR;
 	bool b2pi  = false;
 
@@ -3529,7 +3527,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->Enable4KPSFOutMode(bPsf);
 
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
