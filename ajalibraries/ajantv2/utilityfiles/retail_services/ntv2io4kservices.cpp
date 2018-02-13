@@ -121,12 +121,8 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// Io4K
 	//
 	
-	NTV2FrameBufferFormat		fb1Format, fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(fb1Format);
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(fb2Format);
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
+	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -152,8 +148,8 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
-    bool						bFb1HdrRGB			= fb1Format == NTV2_FBF_48BIT_RGB;
-    bool						bFb2HdrRGB			= fb2Format == NTV2_FBF_48BIT_RGB;
+    bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+    bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
@@ -170,16 +166,16 @@ void Io4KServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	if (b4K || bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
-		bFb2RGB = IsFrameBufferFormatRGB(fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+		bFb2RGB = IsFrameBufferFormatRGB(mFb1Format);
 		
 		if (b4K)
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 			
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
 	
@@ -1554,7 +1550,6 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
 	
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
-	NTV2FrameBufferFormat		fb1Format;
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
@@ -1597,9 +1592,6 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// SDI In 4
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
-
-	// frame buffer format
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
     
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -1729,14 +1721,14 @@ void Io4KServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	if (b4K || bLevelBFormat || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		if (b4K)
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 			
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
 	

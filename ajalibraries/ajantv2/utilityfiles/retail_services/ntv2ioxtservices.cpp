@@ -62,13 +62,8 @@ void IoXTServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 	
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fb1Format);
-		
-	NTV2FrameBufferFormat fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
+	bool bCh1RGB = IsFrameBufferFormatRGB(mFb1Format);
+	bool bCh2RGB = IsFrameBufferFormatRGB(mFb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
@@ -86,7 +81,7 @@ void IoXTServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		bCh2RGB = bCh1RGB;
 	}
 

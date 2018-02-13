@@ -68,13 +68,8 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 	
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fb1Format);
-		
-	NTV2FrameBufferFormat fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
+	bool bCh1RGB = IsFrameBufferFormatRGB(mFb1Format);
+	bool bCh2RGB = IsFrameBufferFormatRGB(mFb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
@@ -88,14 +83,14 @@ void Io4KUfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 	
-    bool bFb1HdrRGB        = (fb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool bFb2HdrRGB		= (fb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool bFb1HdrRGB        = (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool bFb2HdrRGB		= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		bCh2RGB = bCh1RGB;
 	}
 

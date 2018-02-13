@@ -218,12 +218,12 @@ void DeviceServices::ReadDriverState (void)
 	// basic Ch1 HW registers 
 	mDeviceID = mCard->GetDeviceID();
 	mCard->GetVideoFormat(mFb1VideoFormat);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Fomat);
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
 	
 	// basic Ch2 HW registers
 	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
-		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Fomat);
+		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
 	
     if (mCard->DeviceCanDoAudioMixer())
 	{
@@ -757,16 +757,16 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 			vpidSpec.pixelFormat = NTV2_FBF_48BIT_RGB;
 		
 		// Converted RGB -> YUV on wire
-		else if (vpidSpec.isRGBOnWire == false && IsFrameBufferFormatRGB(mFb1Fomat) == true)
-			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Fomat) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
+		else if (vpidSpec.isRGBOnWire == false && IsFrameBufferFormatRGB(mFb1Format) == true)
+			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Format) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
 		// Converted YUV -> RGB on wire
-		else if (vpidSpec.isRGBOnWire == true && IsFrameBufferFormatRGB(mFb1Fomat) == false)
+		else if (vpidSpec.isRGBOnWire == true && IsFrameBufferFormatRGB(mFb1Format) == false)
 			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
 	
 		// otherwise
 		else
-			vpidSpec.pixelFormat = mFb1Fomat;
+			vpidSpec.pixelFormat = mFb1Format;
 	}
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
@@ -3020,14 +3020,8 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 {
 	(void) format;
-
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-
-	NTV2FrameBufferFormat fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
-
+	
+	bool bCh2RGB = IsFrameBufferFormatRGB(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;
@@ -3236,17 +3230,15 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer (2,3,4) disabling, format, direction
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	mCard->WriteRegister(kRegCh2Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		
 		mCard->WriteRegister(kRegCh3Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 		mCard->WriteRegister(kRegCh4Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
@@ -3535,16 +3527,14 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	}
 	
 	// Frame Buffer (1 2 3 4) format, direction
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 	}
 
 	// Frame Buffer (1 2 3 4) disable

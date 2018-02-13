@@ -42,10 +42,6 @@ void Corvid44Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// Kona4 Quad
 	//
 	
-	NTV2FrameBufferFormat		fb1Format, fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -58,7 +54,7 @@ void Corvid44Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bCh2RGB				= IsFrameBufferFormatRGB(fb2Format);
+	bool						bCh2RGB				= IsFrameBufferFormatRGB(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
@@ -71,16 +67,16 @@ void Corvid44Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	if (b4K || bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
-		bCh2RGB = IsFrameBufferFormatRGB(fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+		bCh2RGB = IsFrameBufferFormatRGB(mFb1Format);
 		
 		if (b4K)
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 			
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
 	
@@ -1149,10 +1145,6 @@ void Corvid44Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
-	NTV2FrameBufferFormat		fb1Format;
-	
-	// frame buffer format
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
 	
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -1184,14 +1176,14 @@ void Corvid44Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	if (b4K || bLevelBFormat || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		if (b4K)
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 			
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
-			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fb1Format);
+			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
 

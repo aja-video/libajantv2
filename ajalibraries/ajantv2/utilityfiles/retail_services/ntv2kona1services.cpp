@@ -23,12 +23,8 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 
-	NTV2FrameBufferFormat		fb1Format, fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(fb1Format);
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(fb2Format);
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
+	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
 	
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
@@ -49,7 +45,7 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		bFb2RGB = bFb1RGB;
 	}
 	
@@ -430,10 +426,7 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
 	
-	NTV2FrameBufferFormat		fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(fb1Format);
+	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
