@@ -113,11 +113,9 @@ string CNTV2HEVCFirmwareInstallerThread::GetStatusString (void) const
 		case kProgramStateProgramFlash:				return "Programming...";
 		case kProgramStateVerifyFlash:				return "Verifying...";
 		case kProgramStateFinished:					return "Done";
-	}
-
-	return "";
+		default:									return "";
+	}		
 }
-
 
 uint32_t CNTV2HEVCFirmwareInstallerThread::GetProgressValue (void) const
 {
