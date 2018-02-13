@@ -310,8 +310,8 @@ bool CNTV2Config2110::DisableRxStream(const NTV2Channel channel, const NTV2Strea
         EnableIGMPGroup(port,channel,stream,false);
     }
 
-    DisableDepacketizerStream(channel,stream);
     DisableDecapsulatorStream(channel,stream);
+    DisableDepacketizerStream(channel,stream);
     return true;
 }
 
@@ -322,8 +322,6 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
         mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
-
-    printf("EnableRxStream channel/stream %d/%d\n", channel, stream);
 
     // make IGMP subsciption if needed
     eSFP port = GetRxPort(channel);
@@ -345,15 +343,15 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
         UnsetIGMPGroup(port, channel, stream);
     }
 
-    DisableDepacketizerStream(channel,stream);
     DisableDecapsulatorStream(channel,stream);
+    DisableDepacketizerStream(channel,stream);
 
-    SetupDecapsulatorStream(channel,stream, rxConfig);
     //ResetDepacketizer(channel,stream);
     SetupDepacketizerStream(channel,stream,rxConfig);
+    SetupDecapsulatorStream(channel,stream, rxConfig);
 
-    EnableDecapsulatorStream(channel,stream);
     EnableDepacketizerStream(channel,stream);
+    EnableDecapsulatorStream(channel,stream);
 
     return true;
 }
