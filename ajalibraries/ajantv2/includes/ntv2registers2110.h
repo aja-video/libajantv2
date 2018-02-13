@@ -183,8 +183,8 @@
 #define kRegArb_audio               1
 #define kRegRxVideoDecode1          8
 #define kRegRxVideoDecode2          9
-#define kRegRxVideoDecode3          0xa
-#define kRegRxVideoDecode4          0xb
+#define kRegRxVideoDecode3          10
+#define kRegRxVideoDecode4          11
 
 
 #endif // REGISTERS_2110_H
