@@ -323,6 +323,8 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
         return false;
     }
 
+    printf("EnableRxStream channel/stream %d/%d\n", channel, stream);
+
     // make IGMP subsciption if needed
     eSFP port = GetRxPort(channel);
 
@@ -1134,7 +1136,7 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(NTV2Channel channel,NTV2Stream 
 
 uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream)
 {
-    static uint32_t v_depacketizers[4] = {SAREK_4175_RX_DEPACKETIZER_1,SAREK_4175_RX_DEPACKETIZER_2,SAREK_4175_RX_DEPACKETIZER_2,SAREK_4175_RX_DEPACKETIZER_4};
+    static uint32_t v_depacketizers[4] = {SAREK_4175_RX_DEPACKETIZER_1,SAREK_4175_RX_DEPACKETIZER_2,SAREK_4175_RX_DEPACKETIZER_3,SAREK_4175_RX_DEPACKETIZER_4};
     static uint32_t a_depacketizers[4] = {SAREK_3190_RX_DEPACKETIZER_1,SAREK_3190_RX_DEPACKETIZER_2,SAREK_3190_RX_DEPACKETIZER_3,SAREK_3190_RX_DEPACKETIZER_4};
 
     uint32_t iChannel = (uint32_t) channel;
