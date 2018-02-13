@@ -50,9 +50,7 @@ void KonaIPJ2kServices::UpdateAutoState (void)
 void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-
-	if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
+	if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
 	{
 		// no output for KIPJ2k2rx, should not be here
 		mCard->SetDefaultVideoOutMode(kDefaultModeVideoIn);
@@ -631,9 +629,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-
-	if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
+	if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
 	{
 		// no input for KIPJ2k2tx, should not be here
 		mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
@@ -1159,7 +1155,6 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
     if (mCard->IsDeviceReady(true) == true)
     {
 		// We need the device ID for KonaIP J2k because there are three flavors of this device
-		NTV2DeviceID deviceID = mCard->GetDeviceID();
 		rx_2022_channel		rxHwConfig;
 		tx_2022_channel		txHwConfig;
 		j2kEncoderConfig	encoderConfig;
@@ -1192,8 +1187,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		
 		// KonaIP input configurations
 		// Only config RX for devices that have RX channels
-		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-			(deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+		if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+			(mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
 		{
             if (IsValidConfig(mRx2022Config1, false))
             {
@@ -1257,7 +1252,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
             else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
 
 
-			if (deviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
+			if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
 			{
                 if (IsValidConfig(mRx2022Config2, false))
                 {
@@ -1324,8 +1319,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		
 		// KonaIP output configurations
 		// Only config TX for devices that have TX channels
-		if ((deviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-			(deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
+		if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+			(mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
 		{
             if (IsValidConfig(mTx2022Config3, false))
             {
@@ -1399,7 +1394,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
             else SetIPError(NTV2_CHANNEL1,kErrTxConfig,NTV2IpErrInvalidConfig);
 
 			
-			if (deviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
+			if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
 			{
                 if (IsValidConfig(mTx2022Config4, false))
                 {

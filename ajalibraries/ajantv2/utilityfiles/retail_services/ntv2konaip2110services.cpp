@@ -1364,9 +1364,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
 {
     // We need the device ID for KonaIP 2110 because there are two flavors of this device
-    NTV2DeviceID deviceID = mCard->GetDeviceID();
-    
-    if (deviceID == DEVICE_ID_KONAIP_2110)
+    if (mDeviceID == DEVICE_ID_KONAIP_2110)
     {
         // no input yet for KONAIP_2110
         mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
