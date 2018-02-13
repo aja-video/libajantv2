@@ -61,11 +61,11 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	
 	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 
-	bool bCh1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bCh2RGB = IsFrameBufferFormatRGB(mFb2Format);
+	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
+	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 						
 	// don't let the DSK be ON if we're in Mac Desktop mode
 	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
@@ -130,7 +130,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	}
 	
 	// Set (CSC2) color space converter input (reg 140, bits 16-23)
-	if ( bDSKOn && bDSKGraphicMode && bCh2RGB )
+	if ( bDSKOn && bDSKGraphicMode && bFb2RGB )
 	{
 		// CSC2?LUT2 is needed for RGB->YUV conversion - Select LUT RGB out (0x8D)
 		mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
@@ -169,7 +169,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	
 	
 	// Set (LUT2) input (reg 140, bits 8-15)
-	if ( bDSKOn && bDSKGraphicMode && bCh2RGB )
+	if ( bDSKOn && bDSKGraphicMode && bFb2RGB )
 	{
 		// Select frame buffer 1 RGB (0x8F)
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
@@ -318,7 +318,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)
 	{
 		// if the frame buffer format is one of the 8-bit RGBA types, select the "alpha" extractor output
-		if (bCh1RGB)
+		if (bFb1RGB)
 		{
 			// Select "alpha" out (0x0c)
 			//mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptAlphaOut);
@@ -416,7 +416,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 		{
 			case NTV2_DSKModeFBOverMatte:
 						// Foreground
-						if (bCh1RGB)
+						if (bFb1RGB)
 						{
 							// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 							mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -446,7 +446,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 			
 			case NTV2_DSKModeFBOverVideoIn:
 						// Foreground
-						if (bCh1RGB)
+						if (bFb1RGB)
 						{
 							// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 							mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -503,7 +503,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 			case NTV2_DSKModeGraphicOverMatte:
 						// Foreground
-						if (bCh2RGB)
+						if (bFb2RGB)
 						{
 							// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 							//mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -531,7 +531,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 			
 			case NTV2_DSKModeGraphicOverVideoIn:
 						// Foreground
-						if (bCh2RGB)
+						if (bFb2RGB)
 						{
 							// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 							//mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -587,7 +587,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 			
 			case NTV2_DSKModeGraphicOverFB:			
 						// Foreground
-						if (bCh2RGB)
+						if (bFb2RGB)
 						{
 							// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 							//mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -613,7 +613,7 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 						}
 						else
 						{
-							if (bCh1RGB)
+							if (bFb1RGB)
 							{
 								// Select CSC1 (0x05/0x0E)
 								mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);

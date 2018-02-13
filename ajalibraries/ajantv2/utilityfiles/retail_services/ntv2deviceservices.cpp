@@ -3021,9 +3021,9 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 {
 	(void) format;
 	
-	bool bCh2RGB = IsFrameBufferFormatRGB(mFb2Format);
+	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
+	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;
 
 	// don't let the DSK be ON if we're in Mac Desktop mode
