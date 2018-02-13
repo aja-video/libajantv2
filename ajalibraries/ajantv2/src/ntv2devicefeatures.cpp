@@ -96,6 +96,47 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 }	//	NTV2DeviceCanDoLTCEmbeddedN
 
 
+UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF)
+{
+	UWord	factor	(1);	//	default
+	switch (inFG)
+	{
+		case NTV2_FG_4x1920x1080:
+		case NTV2_FG_1920x1080:
+			if (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB)
+				factor = 2;
+			break;
+
+		case NTV2_FG_4x2048x1080:
+		case NTV2_FG_2048x1080:
+		case NTV2_FG_2048x1556:
+		case NTV2_FG_2048x1588:
+		case NTV2_FG_1920x1112:
+		case NTV2_FG_1920x1114:
+		case NTV2_FG_2048x1112:
+		case NTV2_FG_2048x1114:
+			factor = (inFBF == NTV2_FBF_16BIT_ARGB)  ?  4  :  2;
+			break;
+
+		case NTV2_FG_1280x720:
+		case NTV2_FG_720x486:
+		case NTV2_FG_720x576:
+		case NTV2_FG_720x508:
+		case NTV2_FG_720x598:
+		case NTV2_FG_1280x740:
+		case NTV2_FG_720x514:
+		case NTV2_FG_720x612:
+		case NTV2_FG_INVALID:
+			break;
+	}
+	if (inFG == NTV2_FG_4x1920x1080 || inFG == NTV2_FG_4x2048x1080)
+		factor *= 4;
+	if (inFBF == NTV2_FBF_48BIT_RGB )
+		factor *= 2;
+	return factor;
+}
+
+
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID)
