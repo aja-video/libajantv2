@@ -54,16 +54,16 @@ NTV2VideoFormat KonaLHiServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
+void KonaLHiServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(format);
+	DeviceServices::SetDeviceXPointPlayback();
 	
 	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 
-	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
@@ -662,17 +662,17 @@ void KonaLHiServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
+void KonaLHiServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(format);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID	inputSelectPrimary = NTV2_XptBlack; 
 	NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
 	bool				bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
-	bool 				bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool 				bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool 				bFb1RGB = IsFormatRGB(mFb1Format);
+	bool 				bFb1Compressed = IsFormatCompressed(mFb1Format);
 														
 	// Figure out what our input format is based on what is selected 
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1018,10 +1018,10 @@ void KonaLHiServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void KonaLHiServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -1329,7 +1329,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	// Set conversion control (reg 131)
 	// Set converter output standard (bits 14-12)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
 		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
@@ -1352,7 +1352,7 @@ void KonaLHiServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// Set converter output standard (bits 2-0)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
 		mCard->SetConverterInStandard(primaryStandard);				// so converter input = primary format
 
 	else														// capture mode: converter may be on input or output

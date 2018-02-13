@@ -18,14 +18,14 @@ Corvid3GServices::Corvid3GServices()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Corvid3GServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 
-	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
@@ -416,14 +416,14 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Corvid3GServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
-	bool 						bFb1Compressed 		= IsFrameBufferCompressed(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
@@ -603,10 +603,10 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void Corvid3GServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -667,7 +667,7 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Finish VPID for SDI 1 Out / SDI 2 Out 
 	{
 		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
+		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
 								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
 								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
 		

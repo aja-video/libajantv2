@@ -49,14 +49,14 @@ NTV2VideoFormat KonaLHePlusServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void KonaLHePlusServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
@@ -523,13 +523,13 @@ void KonaLHePlusServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFo
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaLHePlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void KonaLHePlusServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
-	bool 				bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool 				bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool 				bFb1RGB = IsFormatRGB(mFb1Format);
+	bool 				bFb1Compressed = IsFormatCompressed(mFb1Format);
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID	inputXptYUV1;
 	
@@ -715,10 +715,10 @@ void KonaLHePlusServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFor
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void KonaLHePlusServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -799,7 +799,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//
 	// Set conversion control (reg 131)
 	// Set converter output standard (bits 14-12)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
 		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
@@ -822,7 +822,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// Set converter output standard (bits 2-0)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
 	{	
 		mCard->SetConverterInStandard(primaryStandard);				// so converter input = primary format
 	}
@@ -1020,7 +1020,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	/* Not supported yet
 	{
 		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(mode == NTV2_MODE_CAPTURE);
+		ULWord overwrite =	!(mFb1Mode == NTV2_MODE_CAPTURE);
 		
 		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kRegMaskVPIDInsertionOverwrite);
 		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kRegMaskVPIDInsertionOverwrite);

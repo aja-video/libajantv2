@@ -95,17 +95,17 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Kona4QuadServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
 	//
 	// Kona4 Quad
 	//
 	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
+	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -153,7 +153,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFrameBufferFormatRGB(mFb1Format);
+		bFb2RGB = IsFormatRGB(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1497,12 +1497,12 @@ void Kona4QuadServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
+void Kona4QuadServices::SetDeviceXPointCapture()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
+	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbTransportOut	= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
@@ -3057,10 +3057,10 @@ void Kona4QuadServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
+void Kona4QuadServices::SetDeviceMiscRegisters()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -3088,8 +3088,8 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 		(bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 
-	bool b2wire4kOut = (mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool b2wire4kIn =  (mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
+	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
 
 
 	// all 3Gb transport out
@@ -3104,7 +3104,7 @@ void Kona4QuadServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool b2pi  = false;
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
-	if (mode == NTV2_MODE_CAPTURE)
+	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
 		ULWord vpida = 0;
 		ULWord vpidb = 0;

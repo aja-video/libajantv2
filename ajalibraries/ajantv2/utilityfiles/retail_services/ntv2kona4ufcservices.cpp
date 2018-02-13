@@ -19,14 +19,14 @@ Kona4UfcServices::Kona4UfcServices()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Kona4UfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Kona4UfcServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
@@ -649,14 +649,14 @@ void Kona4UfcServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Kona4UfcServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Kona4UfcServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
-	bool 						bFb1Compressed 		= IsFrameBufferCompressed(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
@@ -1083,10 +1083,10 @@ void Kona4UfcServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Kona4UfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void Kona4UfcServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -1416,7 +1416,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Finish VPID for SDI 1 Out / SDI 2 Out 
 	{
 		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
+		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
 								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
 								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
 		
@@ -1442,7 +1442,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	//
 	// Up/Down Converter
 	//
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
 		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat, mVirtualSecondaryFormatSelect) );
@@ -1495,7 +1495,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->WriteRegister(kRegSDIOut2Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
 	
 	// Set converter output standard (bits 2-0)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
 	{
 		mCard->SetConverterInStandard(primaryStandard);				// so converter input = primary format
 		mCard->SetConverterInRate(primaryFrameRate);

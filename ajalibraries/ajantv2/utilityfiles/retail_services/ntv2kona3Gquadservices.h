@@ -20,9 +20,9 @@ public:
 	Kona3GQuadServices();
 	~Kona3GQuadServices() {}
 	
-	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
-	virtual void SetDeviceXPointCapture (GeneralFrameFormat format);
-	virtual void SetDeviceMiscRegisters (NTV2Mode mode);
+	virtual void SetDeviceXPointPlayback ();
+	virtual void SetDeviceXPointCapture ();
+	virtual void SetDeviceMiscRegisters ();
 };
 
 

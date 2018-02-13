@@ -33,16 +33,16 @@ void KonaIP2110Services::UpdateAutoState (void)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void KonaIP2110Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
 	//
 	// Kona4 Quad
 	//
 	
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -55,7 +55,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 	bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
@@ -72,7 +72,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFrameBufferFormatRGB(mFb1Format);
+		bFb2RGB = IsFormatRGB(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1358,7 +1358,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFor
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
+void KonaIP2110Services::SetDeviceXPointCapture()
 {
     // We need the device ID for KonaIP 2110 because there are two flavors of this device
     if (mDeviceID == DEVICE_ID_KONAIP_2110)
@@ -1369,11 +1369,11 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
     }
 
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 	
 	NTV2VideoFormat				inputFormat      = NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange = (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K              = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr           = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -2399,10 +2399,10 @@ void KonaIP2110Services::SetDeviceXPointCapture(GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaIP2110Services::SetDeviceMiscRegisters(NTV2Mode mode)
+void KonaIP2110Services::SetDeviceMiscRegisters()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 	
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -2439,8 +2439,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters(NTV2Mode mode)
 		(bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 	
-	bool b2wire4kOut = (mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool b2wire4kIn =  (mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
+	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
 	
 	
 	// all 3Gb transport out
@@ -2455,7 +2455,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool b2pi  = false;
 	
 	// enable/disable transmission (in/out polarity) for each SDI channel
-	if (mode == NTV2_MODE_CAPTURE)
+	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
 		ULWord vpida = 0;
 		ULWord vpidb = 0;
@@ -2979,7 +2979,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters(NTV2Mode mode)
 	// Finish VPID for SDI Out 1-4 Out
 	{
 		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
+		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
 							  ((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
 							   (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
 		

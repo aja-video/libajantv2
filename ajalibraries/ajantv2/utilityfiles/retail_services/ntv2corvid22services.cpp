@@ -18,13 +18,13 @@ Corvid22Services::Corvid22Services()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Corvid22Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bFb1RGB = IsFrameBufferFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFrameBufferFormatRGB(mFb2Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
@@ -421,13 +421,13 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Corvid22Services::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						bStereoIn			= false;
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -577,10 +577,10 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceMiscRegisters (NTV2Mode mode)
+void Corvid22Services::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	mCard->GetStandard(&primaryStandard);

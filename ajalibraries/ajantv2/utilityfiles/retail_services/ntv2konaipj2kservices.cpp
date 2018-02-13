@@ -47,7 +47,7 @@ void KonaIPJ2kServices::UpdateAutoState (void)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
 	if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
@@ -65,9 +65,9 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	mCard->WriteRegister(kVRegTxcEnable4, true);
 	
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -75,7 +75,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
@@ -88,7 +88,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFrameBufferFormatRGB(mFb1Format);
+		bFb2RGB = IsFormatRGB(mFb1Format);
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
@@ -623,7 +623,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointCapture()
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
 	if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
@@ -641,11 +641,11 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	mCard->WriteRegister(kVRegTxcEnable4, false);
 
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat				inputFormat      	= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFrameBufferFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b3GbTransportOut 	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bLevelBFormat    	= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoIn   		= false;
@@ -1130,10 +1130,10 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
+void KonaIPJ2kServices::SetDeviceMiscRegisters()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -1488,7 +1488,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	bool b3GbTransportOut = (b1x3Gb == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
-	if (mode == NTV2_MODE_CAPTURE)
+	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
 		ULWord vpida = 0;
 		ULWord vpidb = 0;
@@ -1876,7 +1876,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	// Finish VPID for SDI Out 1-4 Out
 	{
 		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
+		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
 								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
 								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
 		

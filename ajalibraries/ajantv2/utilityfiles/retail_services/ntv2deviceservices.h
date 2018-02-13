@@ -35,8 +35,6 @@ typedef enum
 	
 } GeneralFrameFormat;
 
-#define IS_CION_RAW(genFmt)	(genFmt >= FORMAT_RAW && genFmt <= FORMAT_RAW_UHFR)
-
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
 
 
@@ -60,15 +58,15 @@ public:
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
 	virtual void SetDeviceEveryFrameRegs();
-	virtual void SetDeviceXPointPlayback(GeneralFrameFormat format);
-	virtual void SetDeviceXPointCapture(GeneralFrameFormat format);
-	virtual void SetDeviceMiscRegisters(NTV2Mode mode);
+	virtual void SetDeviceXPointPlayback();
+	virtual void SetDeviceXPointCapture();
+	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
-	virtual void SetDeviceXPointPlaybackRaw(GeneralFrameFormat format);
-	virtual void SetDeviceXPointCaptureRaw(GeneralFrameFormat format);
+	virtual void SetDeviceXPointPlaybackRaw();
+	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
 	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
@@ -109,8 +107,9 @@ public:
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat);
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat, NTV2VideoFormat inputFormat);
 	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
-	bool IsFrameBufferCompressed(NTV2FrameBufferFormat fbFormat);
-	bool IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatRaw(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatCompressed(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	NTV2RGB10Range GetCSCRange();

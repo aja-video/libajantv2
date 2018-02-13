@@ -49,11 +49,11 @@ NTV2VideoFormat IoExpressServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
+void IoExpressServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	DeviceServices::SetDeviceXPointPlayback();
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// Turn off LTC loopback during playback
 	mCard->WriteRegister (kRegFS1ReferenceSelect, 0, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
@@ -185,15 +185,15 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
+void IoExpressServices::SetDeviceXPointCapture()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(format);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID			inputSelectPrimary = NTV2_XptSDIIn1;
 	NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
-	bool 						bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	bool 						bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// if user select LTC port as input - loop it back during capture
 	uint32_t enabled = false;
@@ -325,10 +325,10 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void IoExpressServices::SetDeviceMiscRegisters ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
@@ -555,7 +555,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	// Set conversion control (reg 131)
 	// Set converter output standard (bits 14-12)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
 		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
@@ -578,7 +578,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// Set converter output standard (bits 2-0)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
 		mCard->SetConverterInStandard(primaryStandard);				// so converter input = primary format
 
 	else														// capture mode: converter may be on input or output

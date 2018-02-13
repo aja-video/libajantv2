@@ -18,13 +18,13 @@ Kona1Services::Kona1Services()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Kona1Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFrameBufferFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
+	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
@@ -421,12 +421,12 @@ void Kona1Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Kona1Services::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 	
-	bool						bFb1RGB				= IsFrameBufferFormatRGB(mFb1Format);
+	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
@@ -638,10 +638,10 @@ void Kona1Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Kona1Services::SetDeviceMiscRegisters (NTV2Mode mode)
+void Kona1Services::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 	
 	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )

@@ -18,11 +18,11 @@ TTapServices::TTapServices()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
+void TTapServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(format);
-	bool bFb1Compressed = IsFrameBufferCompressed(mFb1Format);
+	DeviceServices::SetDeviceXPointPlayback();
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// get video format
 	//NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
@@ -74,9 +74,8 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceXPointCapture (GeneralFrameFormat format)
+void TTapServices::SetDeviceXPointCapture ()
 {
-	(void) format;
 	// no input for T-Tap, should not be here
 	mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
 }
@@ -85,10 +84,10 @@ void TTapServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void TTapServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
