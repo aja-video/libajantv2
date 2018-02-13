@@ -172,12 +172,12 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// default video proc mode
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
-	int bCh1Disable = 0;							// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;							// Assume Channel 2 IS disabled
+	int bFb1Disable = 0;							// Assume Channel 1 is NOT disabled
+	int bFb2Disable = 1;							// Assume Channel 2 IS disabled
 		
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 }
 	
 	

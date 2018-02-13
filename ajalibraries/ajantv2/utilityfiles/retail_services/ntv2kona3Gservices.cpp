@@ -24,13 +24,13 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
 	
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fbFormatCh1);
+	NTV2FrameBufferFormat fb1Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
+	bool bCh1RGB = IsFrameBufferFormatRGB(fb1Format);
 		
-	NTV2FrameBufferFormat fbFormatCh2;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
+	NTV2FrameBufferFormat fb2Format;
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
+	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
@@ -48,7 +48,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
 		bCh2RGB = bCh1RGB;
 	}
 
@@ -371,8 +371,8 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// The background video/key depends on the DSK mode
 	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
-	int bCh1Disable = 0;						// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;						// Assume Channel 2 IS disabled
+	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
+	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -477,8 +477,8 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 				// Background (note: FB1 is used for sync - it will be replaced by matte video
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 				break;
 			
@@ -518,8 +518,8 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
 				
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
@@ -566,7 +566,7 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 						mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 					}
 				}
-				bCh2Disable = 0;			// enable Ch 2
+				bFb2Disable = 0;			// enable Ch 2
 				break;
 			
 			default:
@@ -591,11 +591,11 @@ void Kona3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 	// Make sure both channels are enable for stereo, dual-link B
 	if (bLevelBFormat || bStereoOut)
 	{
-		bCh1Disable = bCh2Disable = 0; 
+		bFb1Disable = bFb2Disable = 0; 
 	}
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 	
 	
 	// UFC enable
@@ -618,8 +618,8 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	bool						bEanbleConverter	= false;
-	int							bCh1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
-	int							bCh2Disable			= 1;		// Assume Channel 2 IS disabled by default
+	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
+	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 													  
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
@@ -882,12 +882,12 @@ void Kona3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 	// Make sure both channels are enable for stereo, dual-link B
 	if (bLevelBFormat || bStereoIn)
 	{
-		bCh1Disable = bCh2Disable = false;
+		bFb1Disable = bFb2Disable = false;
 	}
 		
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 
 
 	// SDI Out 1 

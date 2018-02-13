@@ -200,8 +200,10 @@ public:
     uint32_t				mNetworkPathDiff;
 
 	// real register state - common
+	NTV2DeviceID			mDeviceID;
 	NTV2VideoFormat			mFb1VideoFormat;
-	NTV2FrameBufferFormat	mFb1FrameBufferFomat;
+	NTV2FrameBufferFormat	mFb1Fomat;
+	NTV2FrameBufferFormat	mFb2Fomat;
 	NTV2Mode				mFb1Mode;
 
 	// calculated valule, selected by user

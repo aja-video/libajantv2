@@ -65,8 +65,8 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	mCard->Connect (NTV2_XptHDMIOutInput, frameSyncYUV);
 	
 	// set Channel disable mode (0 = enable, 1 = disable)
-	int bCh1Disable = 0;
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	int bFb1Disable = 0;
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 }
 	
 	
