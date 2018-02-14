@@ -689,26 +689,26 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	}
 
-	// SMPTE 425
-	ULWord vpida           = 0;
-	ULWord vpidb           = 0;
-	bool b425_2wire        = false;
-	bool b425_4wireA       = false;
-	bool b425_4wireB       = false;
+	// SMPTE 425 (2pi)
+	ULWord vpida		= 0;
+	ULWord vpidb		= 0;
+	bool b2x2piIn		= false;
+	bool b4x2piInA		= false;
+	bool b4x2piInB		= false;
 		
 	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);
 	VPIDStandard std = parser.GetStandard();
-	b425_2wire  = (std == VPIDStandard_2160_DualLink);
-	b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 
-	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
+	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// override inputFormatSelect for SMTE425
-	if (b425)
+	if (b2piIn)
 	{
 		VPIDSampling sample = parser.GetSampling();
 		if (sample == VPIDSampling_YUV_422)
@@ -722,7 +722,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	}
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->Set425FrameEnable(b425, NTV2_CHANNEL1);
+	mCard->Set425FrameEnable(b2piIn, NTV2_CHANNEL1);
 	
 
 	// SDI In 1
@@ -873,7 +873,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	
 	
 	// 425 mux
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -901,7 +901,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 				mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptCSC3VidYUV);
 				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptCSC4VidYUV);
 			}
-			else  if (b425_2wire)
+			else  if (b2x2piIn)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn1DS2);
@@ -937,7 +937,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	}
 
 	// Frame Buffer 1
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -980,7 +980,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 	
 	// Frame Buffer 2
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -1472,7 +1472,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
-	bool b1x3Gb =
+	bool b1x3GbOut =
 		((bRGBOut == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
@@ -1480,8 +1480,8 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 
 	// all 3Gb transport out
-	// b3GbTransportOut = (b1x3Gb + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbTransportOut = (b1x3Gb == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
+	// b3GbTransportOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
+	bool b3GbTransportOut = (b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)

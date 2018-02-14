@@ -36,7 +36,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						b2wire4k			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
@@ -474,7 +474,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
 		}
-		else if (!b2wire4k)
+		else if (!b2xQuadOut)
 		{
 			// is 4k quad 4-wire
 			if (bFb1RGB)
@@ -508,7 +508,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
 		}
-		else if (!b2wire4k)
+		else if (!b2xQuadOut)
 		{
 			// is 4k quad 4-wire
 			if (bFb1RGB)
@@ -542,7 +542,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
 		}
-		else if (!b2wire4k)
+		else if (!b2xQuadOut)
 		{
 			// is 4k quad 4-wire
 			if (bFb1RGB)
@@ -614,7 +614,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
 		}
-		else if (!b2wire4k)
+		else if (!b2xQuadOut)
 		{
 			// is 4k quad 4-wire
 			if (bFb1RGB)
@@ -977,7 +977,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr           	= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b2wire4k         	= (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
+	bool						b2xQuadOut         	= (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -1126,7 +1126,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// CSC 2
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
 		}
@@ -1148,7 +1148,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// CSC 3
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn2);
 		}
@@ -1170,7 +1170,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// CSC 4
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2DS2);
 		}
@@ -1375,7 +1375,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 			}
@@ -1444,7 +1444,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn1DS2);
 			}
@@ -1491,7 +1491,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
 			}
@@ -1534,7 +1534,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
 			}
@@ -1580,7 +1580,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 
 
 	// SDI Out 3 - acts like SDI 1
-	if (b2wire4k)
+	if (b2xQuadOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptSDIIn1DS2);
@@ -1622,7 +1622,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	
 	
 	// SDI Out 4 - acts like SDI 2
-	if (b2wire4k)
+	if (b2xQuadOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn2);
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn2DS2);

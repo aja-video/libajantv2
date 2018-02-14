@@ -39,6 +39,35 @@ typedef enum
 
 
 //-------------------------------------------------------------------------------------------------------
+//	class HLState
+//-------------------------------------------------------------------------------------------------------
+ class HLState
+ {
+public:
+	explicit HLState() { init(); }
+	HLState(const HLState& s)  { copy(s); }
+	virtual ~HLState() {}
+	
+	void init();
+	void copy(const HLState& s);
+	virtual HLState& operator=(const HLState& s);
+	virtual bool operator==(const HLState& s);
+
+public:
+	// misc regs
+	bool					bHdmiIn;
+	bool					bLevelA;
+	bool					b4K;
+	bool					b4kHfr;
+	bool					bHfr;
+	bool					bSdiOutRGB;
+	bool					b4k6gOut;
+	bool					b4k12gOut;
+	NTV2FrameRate			primaryFrameRate;
+};
+
+
+//-------------------------------------------------------------------------------------------------------
 //	class DeviceServices
 //-------------------------------------------------------------------------------------------------------
 class DeviceServices
