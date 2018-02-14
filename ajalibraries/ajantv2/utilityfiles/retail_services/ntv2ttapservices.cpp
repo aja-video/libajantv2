@@ -18,10 +18,11 @@ TTapServices::TTapServices()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
+void TTapServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(format);
+	DeviceServices::SetDeviceXPointPlayback();
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// get video format
 	//NTV2VideoFormat frameBufferVideoFormat = GetFrameBufferVideoFormat();
@@ -32,7 +33,7 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 	// Frame Sync
 	NTV2CrosspointID frameSyncYUV;
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		frameSyncYUV = NTV2_XptCompressionModule;
 	}
@@ -65,17 +66,16 @@ void TTapServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	mCard->Connect (NTV2_XptHDMIOutInput, frameSyncYUV);
 	
 	// set Channel disable mode (0 = enable, 1 = disable)
-	int bCh1Disable = 0;
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	int bFb1Disable = 0;
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 }
 	
 	
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceXPointCapture (GeneralFrameFormat format)
+void TTapServices::SetDeviceXPointCapture ()
 {
-	(void) format;
 	// no input for T-Tap, should not be here
 	mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
 }
@@ -84,18 +84,16 @@ void TTapServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void TTapServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
@@ -189,7 +187,7 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
@@ -197,25 +195,4 @@ void TTapServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	// Set SDI out control video standard (reg 129, bits 2-0)
 	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	
-	// VPID insertion
-	{
-		const bool				kRGBOut				= false;
-		const bool				kNot48Bit			= false;
-		const bool				kNot3Gb				= false;
-		ULWord					vpidOut1a(0);
-	
-		// enable overwrite
-		mCard->WriteRegister(kRegSDIOut1Control,	1, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		
-		// generate vpid register value
-        // get video format
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, kRGBOut, kNot48Bit, kNot3Gb, false, VPIDChannel_1);
-		
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-	}
 }

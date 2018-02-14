@@ -47,6 +47,14 @@ AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
 
+/**
+	@return	The minimum number of 8MB chunks that will accommodate a raster having the given frame geometry and pixel format.
+	@param[in]	inFG	A valid frame geometry.
+	@param[in]	inFBF	A valid frame buffer format.
+**/
+AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF);
+
+
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
 // 
 // TODO: Audit all platforms and switch all the original calls to the _Ex

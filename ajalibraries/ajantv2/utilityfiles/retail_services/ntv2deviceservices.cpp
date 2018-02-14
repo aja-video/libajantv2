@@ -215,10 +215,15 @@ void DeviceServices::ReadDriverState (void)
 	//mCard->ReadRegister(kVRegSDIInput2FormatSelect, (ULWord *) &mSDIInput2FormatSelect);
 	mSDIInput2FormatSelect = mSDIInput1FormatSelect;	// for now
 	
-	// read primary HW registers (primary same as Channel1)
+	// basic Ch1 HW registers 
+	mDeviceID = mCard->GetDeviceID();
 	mCard->GetVideoFormat(mFb1VideoFormat);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1FrameBufferFomat);
+	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
+	
+	// basic Ch2 HW registers
+	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
+		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
 	
     if (mCard->DeviceCanDoAudioMixer())
 	{
@@ -238,7 +243,7 @@ void DeviceServices::ReadDriverState (void)
 		//mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
 	}
 
-    if ((NTV2DeviceGetNum2022ChannelsSFP1(mCard->GetDeviceID()) > 0) && (mCard->IsDeviceReady(true) == true))
+    if ((NTV2DeviceGetNum2022ChannelsSFP1(mDeviceID) > 0) && (mCard->IsDeviceReady(true) == true))
 	{
         mCard->ReadRegister(kVReg2022_7Enable,              (ULWord*)&m2022_7Mode);
         mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     (ULWord*)&mNetworkPathDiff);
@@ -431,6 +436,7 @@ void DeviceServices::SetDeviceEveryFrameRegs ()
 	SetDeviceEveryFrameRegs (virtualDebug1, everyFrameTaskFilter);
 }
 
+
 // Do everyframe task using input filter variables  
 void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t everyFrameTaskFilter)
 {	
@@ -469,29 +475,17 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	UpdateAutoState();
 		
 	// Get the general format
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-
-	if (::NTV2DeviceCanDoMultiFormat(deviceID))
+	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
 	{
 		mCard->SetMultiFormatMode(false);
 	}
 
-	NTV2FrameBufferFormat fbFormat;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormat);
-	
-	GeneralFrameFormat format = GetGeneralFrameFormat(fbFormat);
-	if (::NTV2DeviceCanDoFrameBufferFormat(deviceID, fbFormat) == false)
-		format = FORMAT_YUV;
-	
-	// Get display/capture mode and call routines to setup XPoint
-	NTV2Mode mode = GetCh1Mode();
-
-	if (mode == NTV2_MODE_DISPLAY)
+	if (mFb1Mode == NTV2_MODE_DISPLAY)
 	{
-		if (IS_CION_RAW(format))
-			SetDeviceXPointPlaybackRaw(format);
+		if (IsFormatRaw(mFb1Format))
+			SetDeviceXPointPlaybackRaw();
 		else
-			SetDeviceXPointPlayback(format);
+			SetDeviceXPointPlayback();
 	}
 	else
 	{
@@ -506,21 +500,21 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			}
 		}
 	
-		if (IS_CION_RAW(format))
-			SetDeviceXPointCaptureRaw(format);
+		if (IsFormatRaw(mFb1Format))
+			SetDeviceXPointCaptureRaw();
 		else
-			SetDeviceXPointCapture(format);
+			SetDeviceXPointCapture();
 	}
 	
 	//Setup the analog LTC stuff
 	RP188SourceSelect TimecodeSource;
 	mCard->ReadRegister(kVRegRP188SourceSelect, (ULWord*)&TimecodeSource);
-	if (NTV2DeviceGetNumLTCInputs(mCard->GetDeviceID()) && TimecodeSource == kRP188SourceLTCPort)
+	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && TimecodeSource == kRP188SourceLTCPort)
 	{
 		mCard->SetLTCInputEnable(true);
 		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x1, BIT(10), 10);
 		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
-		if(NTV2DeviceCanDoLTCInOnRefPort(mCard->GetDeviceID()))
+		if(NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
 			mCard->SetLTCOnReference(true);
 	}
 	else
@@ -528,7 +522,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->SetLTCInputEnable(false);
 		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x0, BIT(10), 10);
 		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
-		if (NTV2DeviceCanDoLTCInOnRefPort(mCard->GetDeviceID()))
+		if (NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
 			mCard->SetLTCOnReference(false);
 	}
 	
@@ -565,7 +559,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
 		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
 	
-		if (mode == NTV2_MODE_DISPLAY)
+		if (mFb1Mode == NTV2_MODE_DISPLAY)
 		{
 			mCard->SetAudioMixerMainInputAudioSystem(bHostAudioApp ? hostAudioSystem : NTV2_AUDIOSYSTEM_1);
 		
@@ -600,11 +594,11 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		
 		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
 		
-		audioSystem = NTV2DeviceGetAudioMixerSystem(deviceID);
+		audioSystem = NTV2DeviceGetAudioMixerSystem(mDeviceID);
 	}
 
 	// Setup the SDI Outputs audio source
-	switch(NTV2DeviceGetNumVideoOutputs(deviceID))
+	switch(NTV2DeviceGetNumVideoOutputs(mDeviceID))
 	{
 	case 8:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
@@ -625,12 +619,12 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
 		break;
 	}
-	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
+	if(NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
 	{
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem );
 	}
 
-	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	switch(NTV2DeviceGetNumVideoChannels(mDeviceID))
 	{
 	case 8:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL8, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
@@ -655,16 +649,16 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// audio monitor
 	ULWord chSelect = NTV2_AudioMonitor1_2;
 	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, &chSelect);
-	if (deviceID == DEVICE_ID_IO4KPLUS || deviceID == DEVICE_ID_IO4K || 
-		deviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
+	if (mDeviceID == DEVICE_ID_IO4KPLUS || mDeviceID == DEVICE_ID_IO4K || 
+		mDeviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
 		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
 		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
 	}
-	else if (	deviceID == DEVICE_ID_KONA3G	|| deviceID == DEVICE_ID_KONA3GQUAD ||
-				deviceID == DEVICE_ID_IO4KUFC	|| deviceID == DEVICE_ID_KONA4UFC	||
-				deviceID == DEVICE_ID_IOXT )
+	else if (	mDeviceID == DEVICE_ID_KONA3G	|| mDeviceID == DEVICE_ID_KONA3GQUAD ||
+				mDeviceID == DEVICE_ID_IO4KUFC	|| mDeviceID == DEVICE_ID_KONA4UFC	||
+				mDeviceID == DEVICE_ID_IOXT )
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
 	}
@@ -691,25 +685,24 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		// reinitialize HDMI hardware on reset cycle
 		mHDMIStartupCountDown = kHDMIStartupPhase0;
 
-		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT1))
+		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT1))
 			mCard->WriteRegister(kVRegLUTType, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT2))
+		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT2))
 			mCard->WriteRegister(kVRegLUT2Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT3))
+		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT3))
 			mCard->WriteRegister(kVRegLUT3Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT4))
+		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT4))
 			mCard->WriteRegister(kVRegLUT4Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT5))
+		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5))
 			mCard->WriteRegister(kVRegLUT5Type, NTV2_LUTUnknown);
 	}
 	// Set misc registers
-	SetDeviceMiscRegisters(mode);
+	SetDeviceMiscRegisters();
 }
 
 
-void DeviceServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void DeviceServices::SetDeviceMiscRegisters ()
 {
-	(void) mode;
 }
 
 
@@ -754,16 +747,16 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 			vpidSpec.pixelFormat = NTV2_FBF_48BIT_RGB;
 		
 		// Converted RGB -> YUV on wire
-		else if (vpidSpec.isRGBOnWire == false && IsFrameBufferFormatRGB(mFb1FrameBufferFomat) == true)
-			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1FrameBufferFomat) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
+		else if (vpidSpec.isRGBOnWire == false && IsFormatRGB(mFb1Format) == true)
+			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Format) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
 		// Converted YUV -> RGB on wire
-		else if (vpidSpec.isRGBOnWire == true && IsFrameBufferFormatRGB(mFb1FrameBufferFomat) == false)
+		else if (vpidSpec.isRGBOnWire == true && IsFormatRGB(mFb1Format) == false)
 			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
 	
 		// otherwise
 		else
-			vpidSpec.pixelFormat = mFb1FrameBufferFomat;
+			vpidSpec.pixelFormat = mFb1Format;
 	}
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
@@ -898,8 +891,38 @@ bool DeviceServices::IsPulldownConverterMode(NTV2VideoFormat fmt1, NTV2VideoForm
 	}
 }
 
+bool DeviceServices::IsFormatRaw(NTV2FrameBufferFormat fbFormat)
+{
+	GeneralFrameFormat gFormat = GetGeneralFrameFormat(fbFormat);
+	switch (gFormat)
+	{
+		case FORMAT_RAW:
+		case FORMAT_RAW_HFR:
+		case FORMAT_RAW_UHFR:
+			return true;
+		default:
+			return false;
+	}
+}
 
-bool DeviceServices::IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat)
+bool DeviceServices::IsFormatCompressed(NTV2FrameBufferFormat fbFormat)
+{
+	switch (fbFormat)
+	{
+		
+		case NTV2_FBF_PRORES_DVCPRO:
+		case NTV2_FBF_PRORES_HDV:
+		case NTV2_FBF_8BIT_DVCPRO:
+		//case NTV2_FBF_8BIT_QREZ:
+		case NTV2_FBF_8BIT_HDV:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
+bool DeviceServices::IsFormatRGB(NTV2FrameBufferFormat fbFormat)
 {
 	switch (fbFormat)
 	{
@@ -1017,23 +1040,16 @@ bool DeviceServices::IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fm
 
 NTV2RGB10Range DeviceServices::GetCSCRange()
 {
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-	NTV2FrameBufferFormat frameBufferFormat;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &frameBufferFormat);
-	
-	// Get display/capture mode and call routines to setup XPoint
-	NTV2Mode mode = GetCh1Mode();
-
 	// get csc rgb range
 	NTV2RGB10Range cscRange = mRGB10Range;		// default use RGB range
 	
 	// for case where duallink(RGB) IO is supported
-	if ( ::NTV2DeviceCanDoDualLink(deviceID) )
+	if ( ::NTV2DeviceCanDoDualLink(mDeviceID) )
 	{
-		if (mode == NTV2_MODE_DISPLAY)
+		if (mFb1Mode == NTV2_MODE_DISPLAY)
 		{
 			// follow framebuffer RGB range
-			if (NTV2_IS_FBF_RGB(frameBufferFormat))
+			if (NTV2_IS_FBF_RGB(mFb1Format))
 				cscRange = mRGB10Range; 
 			
 			// follow output RGB range
@@ -1041,7 +1057,7 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 				cscRange = (mSDIOutput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE; 
 		}
 		
-		else	// mode == NTV2_MODE_CAPTURE
+		else	// mFb1Mode == NTV2_MODE_CAPTURE
 		{
 			// follow input RGB range
 			if (mSDIInput1FormatSelect == NTV2_RGBSelect)
@@ -1781,8 +1797,7 @@ bool DeviceServices::CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat 
 	NTV2ConversionMode cMode = GetConversionMode(inFormat, outFormat);
 	if (cMode != NTV2_CONVERSIONMODE_UNKNOWN)
 	{
-		NTV2DeviceID	deviceID = mCard->GetDeviceID();
-		bResult = ::NTV2DeviceCanDoConversionMode(deviceID, cMode);
+		bResult = ::NTV2DeviceCanDoConversionMode(mDeviceID, cMode);
 	}
 	
 	return bResult;
@@ -1860,8 +1875,7 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormat(int32_t index, NTV2VideoForm
 	
 	// HACK NOTICE 2
 	sdiInFormat = GetTransportCompatibleFormat(sdiInFormat, videoFormat);
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-	if (sdiInFormat != videoFormat && ::NTV2DeviceGetNumInputConverters(deviceID) > 0)
+	if (sdiInFormat != videoFormat && ::NTV2DeviceGetNumInputConverters(mDeviceID) > 0)
 		sdiInFormat = GetConversionCompatibleFormat(sdiInFormat, mVirtualSecondaryFormatSelect);
 	
 	// HACK NOTICE 3
@@ -2344,10 +2358,9 @@ void DeviceServices::PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoder
 bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 {
 	bool bResult = true;
-	NTV2DeviceID	deviceID = mCard->GetDeviceID();
 	
 	// if the board doesn't have LUTs, bail
-	if ( !::NTV2DeviceCanDoProgrammableCSC(deviceID) )
+	if ( !::NTV2DeviceCanDoProgrammableCSC(mDeviceID) )
 		return bResult;
 
 	// figure out what ColorSpace we want to be using
@@ -2375,7 +2388,7 @@ bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 	}
 	
 	// set matrix
-	int numberCSCs = ::NTV2DeviceGetNumCSCs(deviceID);
+	int numberCSCs = ::NTV2DeviceGetNumCSCs(mDeviceID);
 	
 	bResult = mCard->SetColorSpaceMatrixSelect(matrix, NTV2_CHANNEL1);
 	if (numberCSCs >= 2)
@@ -2410,15 +2423,11 @@ bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
-	NTV2DeviceID	deviceID = mCard->GetDeviceID();
 	
-	NTV2FrameBufferFormat frameBufferFormat;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &frameBufferFormat);
-	GeneralFrameFormat genFrameFormat = GetGeneralFrameFormat(frameBufferFormat);
-	NTV2Mode mode = GetCh1Mode();
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
 
 	// if the board doesn't have LUTs, bail
-	if ( !::NTV2DeviceCanDoColorCorrection(deviceID) )
+	if ( !::NTV2DeviceCanDoColorCorrection(mDeviceID) )
 		return bResult;
 	
 	NTV2RGB10Range cscRange = GetCSCRange();
@@ -2453,27 +2462,27 @@ bool DeviceServices::UpdateK2LUTSelect()
 	}
 	
 	// special case for RGB-to-RGB LUT conversion
-	if (::NTV2DeviceCanDoDualLink(deviceID) && wantedLUT != NTV2_LUTCustom)
+	if (::NTV2DeviceCanDoDualLink(mDeviceID) && wantedLUT != NTV2_LUTCustom)
 	{
 		// convert to NTV2RGB10Range to NTV2RGBRangeMode to do the comparison
 		NTV2RGBRangeMode fbRange = (mRGB10Range == NTV2_RGB10RangeFull) ? NTV2_RGBRangeFull : NTV2_RGBRangeSMPTE;
 	
-		if (mode == NTV2_MODE_DISPLAY && genFrameFormat == FORMAT_RGB && mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+		if (mFb1Mode == NTV2_MODE_DISPLAY && bFb1RGB == true && mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
 		{
 			wantedLUT = (fbRange == mSDIOutput1RGBRange) ? NTV2_LUTLinear : NTV2_LUTRGBRangeFull_SMPTE;
 		}
 		
-		else if (mode == NTV2_MODE_CAPTURE && genFrameFormat == FORMAT_RGB && mSDIInput1FormatSelect == NTV2_RGBSelect)
+		else if (mFb1Mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1FormatSelect == NTV2_RGBSelect)
 		{
 			wantedLUT = NTV2_LUTRGBRangeFull_SMPTE;
 		}
 	}
 
 	// Note some devices can to LUT5 but not LUT4 (e.g. Io4K UFC)
-	bool bLut2 = ::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT2);
-	bool bLut3 = ::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT3);
-	bool bLut4 = ::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT4);
-	bool bLut5 = ::NTV2DeviceCanDoWidget(deviceID, NTV2_WgtLUT5);
+	bool bLut2 = ::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT2);
+	bool bLut3 = ::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT3);
+	bool bLut4 = ::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT4);
+	bool bLut5 = ::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5);
 	
 	ULWord lut2Type = mLUTType, lut3Type = mLUTType, lut4Type = mLUTType, lut5Type = mLUTType;
 	if (bLut2)
@@ -2486,7 +2495,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 		mCard->ReadRegister(kVRegLUT5Type, &lut5Type);
 	
 	// test for special use of LUT2 for E-to-E rgb range conversion
-	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == false) && (mode == NTV2_MODE_CAPTURE);
+	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == false) && (mFb1Mode == NTV2_MODE_CAPTURE);
 	
 	// what LUT function is CURRENTLY loaded into hardware?
 	if ((wantedLUT != NTV2_LUTCustom) &&
@@ -2858,8 +2867,7 @@ NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
 	NTV2AudioSystem hostAudioSystem = NTV2_AUDIOSYSTEM_1;
 	if (mCard->DeviceCanDoAudioMixer())
 	{
-		NTV2DeviceID deviceID = mCard->GetDeviceID();
-		uint32_t audioSystem = NTV2DeviceGetNumAudioSystems(deviceID);
+		uint32_t audioSystem = NTV2DeviceGetNumAudioSystems(mDeviceID);
 		hostAudioSystem = (NTV2AudioSystem)audioSystem;
 	}
 	return hostAudioSystem;
@@ -2870,32 +2878,29 @@ NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
 // MARK: Base Service -
 //
 
-void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
+void DeviceServices::SetDeviceXPointCapture()
 {
-	(void) format;
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-
 	//mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_1);
 
 	//bool b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(deviceID);
+	bool hasBiDirectionalSDI = NTV2DeviceHasBiDirectionalSDI(mDeviceID);
 	
 	NTV2WidgetID inputSelectID = NTV2_Wgt3GSDIIn1;
 	if(mVirtualInputSelect == NTV2_Input2Select)
 		inputSelectID = NTV2_Wgt3GSDIIn2;
 
-	if ((deviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2110) &&
-		(deviceID != DEVICE_ID_IOIP_2110))
+	if ((mDeviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2110) &&
+		(mDeviceID != DEVICE_ID_IOIP_2110))
 	{
 		uint32_t audioInputSelect;
 		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-		ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(deviceID) ? kVideoIn : mCaptureReferenceSelect;
+		ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(mDeviceID) ? kVideoIn : mCaptureReferenceSelect;
 		switch (tempSelect)
 		{
 		default:
@@ -2913,7 +2918,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 				mCard->SetReference(NTV2_REFERENCE_INPUT1);
 				break;
 			case NTV2_Input2Select:
-				switch(deviceID)
+				switch(mDeviceID)
 				{
 				case DEVICE_ID_LHI:
 				case DEVICE_ID_IOEXPRESS:
@@ -2929,7 +2934,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 				break;
 			case NTV2_Input3Select:
 				{
-					switch(deviceID)
+					switch(mDeviceID)
 					{
 					case DEVICE_ID_LHI:
 						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
@@ -2944,7 +2949,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 				break;
 			case NTV2_Input5Select:
 				{
-					switch(deviceID)
+					switch(mDeviceID)
 					{
 					default:
 					case DEVICE_ID_IO4KPLUS:
@@ -2958,8 +2963,8 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		}
 	}
     // For 2110 need to set PTP as reference
-    else if ((deviceID == DEVICE_ID_KONAIP_2110) ||
-             (deviceID == DEVICE_ID_IOIP_2110))
+    else if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
+             (mDeviceID == DEVICE_ID_IOIP_2110))
     {
         mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
     }
@@ -2979,7 +2984,7 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 		//Fall through so every output is setup
 		//1 and 2 get set if they are not bi-directional
 		//otherwise 1 and 2 are direction input
-		switch(NTV2DeviceGetNumVideoInputs(deviceID))
+		switch(NTV2DeviceGetNumVideoInputs(mDeviceID))
 		{
 		case 8:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut8);
@@ -3003,13 +3008,13 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 			break;
 		}
 	}
-	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
+	if(NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
 		EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut5);
 
 	// set custom anc input select
-	if (NTV2DeviceCanDoCustomAnc(deviceID) == true)
+	if (NTV2DeviceCanDoCustomAnc(mDeviceID) == true)
 	{
-		uint32_t numSdiInputs = NTV2DeviceGetNumVideoInputs(deviceID);
+		uint32_t numSdiInputs = NTV2DeviceGetNumVideoInputs(mDeviceID);
 		uint32_t selectedAncInput = mVirtualInputSelect;
 
 		if (selectedAncInput >= numSdiInputs)
@@ -3020,24 +3025,15 @@ void DeviceServices::SetDeviceXPointCapture( GeneralFrameFormat format )
 
 }
 
-void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
+void DeviceServices::SetDeviceXPointPlayback()
 {
-	(void) format;
-	NTV2DeviceID deviceID = mCard->GetDeviceID();
-
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
-
-	NTV2FrameBufferFormat fbFormatCh2;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
-
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
+	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;
 
 	// don't let the DSK be ON if we're in Mac Desktop mode
-	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(deviceID, NTV2_WgtMixer1))
+	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
 	
 	if (mCard->DeviceCanDoAudioMixer())
@@ -3062,14 +3058,14 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	}
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-	bool lockV2 = NTV2DeviceHasGenlockv2(deviceID);
+	bool lockV2 = NTV2DeviceHasGenlockv2(mDeviceID);
 	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
 	
-    if ((deviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
-        (deviceID != DEVICE_ID_KONAIP_2110) &&
-        (deviceID != DEVICE_ID_IOIP_2110))
+    if ((mDeviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
+        (mDeviceID != DEVICE_ID_KONAIP_2110) &&
+        (mDeviceID != DEVICE_ID_IOIP_2110))
     {
 
         switch (refSelect)
@@ -3103,7 +3099,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
                         mCard->SetReference(NTV2_REFERENCE_INPUT1);
                         break;
                     case NTV2_Input2Select:
-                        switch(deviceID)
+                        switch(mDeviceID)
                         {
                         case DEVICE_ID_LHI:
                         case DEVICE_ID_IOEXPRESS:
@@ -3118,7 +3114,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
                         }
                         break;
                     case NTV2_Input3Select:
-                        switch(deviceID)
+                        switch(mDeviceID)
                         {
                         default:
                         case DEVICE_ID_IOXT:
@@ -3145,8 +3141,8 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
         }// end switch (refSelect)
     }
     // For 2110 need to set PTP as reference
-    else if ((deviceID == DEVICE_ID_KONAIP_2110) ||
-             (deviceID == DEVICE_ID_IOIP_2110))
+    else if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
+             (mDeviceID == DEVICE_ID_IOIP_2110))
     {
         mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
     }
@@ -3161,7 +3157,7 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	if (mAudioMixerOverrideState == false)
 		mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
 
-	switch(NTV2DeviceGetNumVideoInputs(deviceID))
+	switch(NTV2DeviceGetNumVideoInputs(mDeviceID))
 	{
 	case 8:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut8);
@@ -3176,30 +3172,28 @@ void DeviceServices::SetDeviceXPointPlayback( GeneralFrameFormat format )
 	case 3:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut3);
 	case 2:
-		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
+		if(!NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 		{
 			DisableRP188EtoE(NTV2_Wgt3GSDIOut2);
 		}
 	default:
 	case 1:
-		if(!NTV2DeviceHasBiDirectionalSDI(deviceID))
+		if(!NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 		{
 			DisableRP188EtoE(NTV2_Wgt3GSDIOut1);
 		}
 		break;
 	}
-	if(NTV2DeviceCanDoWidget(deviceID, NTV2_WgtSDIMonOut1))
+	if(NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
 	{
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut5);
 	}
 }
 
 
-void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
+void DeviceServices::SetDeviceXPointPlaybackRaw()
 {
-	(void) format;
-	NTV2DeviceID deviceId = mCard->GetDeviceID();
-	
+
 
 	// CSC 1
 	mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptBlack);
@@ -3210,7 +3204,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	// CSC 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtCSC5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtCSC5))
 	{
 		mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptBlack);
 	}
@@ -3225,7 +3219,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	// LUT 4
 	mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 	// LUT 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtLUT5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5))
 	{
 		mCard->Connect (NTV2_XptLUT5Input, NTV2_XptBlack);
 	}
@@ -3241,17 +3235,17 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer (2,3,4) disabling, format, direction
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	mCard->WriteRegister(kRegCh2Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	
+	GeneralFrameFormat format = GetGeneralFrameFormat(mFb1Format);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		
 		mCard->WriteRegister(kRegCh3Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 		mCard->WriteRegister(kRegCh4Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
@@ -3263,7 +3257,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	}
 
 	// 4K Down Converter
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_Wgt4KDownConverter))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt4KDownConverter))
 	{
 		mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptBlack);
@@ -3281,7 +3275,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	// Duallink Out 4
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtDualLinkV2Out5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtDualLinkV2Out5))
 	{
 		mCard->Connect (NTV2_XptDualLinkOut5Input, NTV2_XptBlack);
 	}
@@ -3303,7 +3297,7 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 	mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 
 	// SDI Out 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_Wgt3GSDIOut5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt3GSDIOut5))
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
@@ -3361,11 +3355,11 @@ void DeviceServices::SetDeviceXPointPlaybackRaw( GeneralFrameFormat format )
 }
 
 
-void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
+void DeviceServices::SetDeviceXPointCaptureRaw()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(format);
-	NTV2DeviceID deviceId = mCard->GetDeviceID();
+	DeviceServices::SetDeviceXPointCapture();
+	GeneralFrameFormat format = GetGeneralFrameFormat(mFb1Format);
 	
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GPresent(b3GbInEnabled, NTV2_CHANNEL1);
@@ -3445,7 +3439,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	// CSC 4
 	mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	// CSC 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtCSC5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtCSC5))
 	{
 		mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptBlack);
 	}
@@ -3460,7 +3454,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	// LUT 4
 	mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 	// LUT 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtLUT5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5))
 	{
 		mCard->Connect (NTV2_XptLUT5Input, NTV2_XptBlack);
 	}
@@ -3475,14 +3469,14 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	// Duallink Out 4
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	// Duallink Out 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtDualLinkV2Out5))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtDualLinkV2Out5))
 	{
 		mCard->Connect (NTV2_XptDualLinkOut5Input, NTV2_XptBlack);
 	}
 	
 	
 	// Frame Buffer 1
-	int bCh1Disable=false, bCh2Disable=false, bCh3Disable=false, bCh4Disable=false;
+	int bFb1Disable=false, bFb2Disable=false, bFb3Disable=false, bFb4Disable=false;
 	switch (format)
 	{
 		default:
@@ -3513,7 +3507,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	{
 		default:
 		case FORMAT_RAW:
-			bCh3Disable = true;
+			bFb3Disable = true;
 			mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
 			break;
 		case FORMAT_RAW_HFR:
@@ -3529,7 +3523,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	{
 		default:
 		case FORMAT_RAW:
-			bCh4Disable = true;
+			bFb4Disable = true;
 			mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 			break;
 		case FORMAT_RAW_HFR:
@@ -3541,27 +3535,25 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 	}
 	
 	// Frame Buffer (1 2 3 4) format, direction
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
 	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	if (format == FORMAT_RAW_HFR || format == FORMAT_RAW_UHFR)
 	{
 		mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, fbFormatCh1);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 	}
 
 	// Frame Buffer (1 2 3 4) disable
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, bCh3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, bCh4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh3Control, bFb3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh4Control, bFb4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	
 	
 	// 4K Down Converter
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_Wgt4KDownConverter))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt4KDownConverter))
 	{
 		mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptBlack);
@@ -3632,7 +3624,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw( GeneralFrameFormat format )
 			break;
 	}
 	// SDI Out 5
-	if (::NTV2DeviceCanDoWidget(deviceId, NTV2_WgtSDIMonOut1))
+	if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
 	{
 		switch (format)
 		{

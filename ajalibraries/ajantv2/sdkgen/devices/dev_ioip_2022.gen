@@ -136,7 +136,6 @@ NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDo3GLevelConversion
 NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDo425Mux
-NTV2DeviceCanDo4KVideo
 NTV2DeviceCanDoAnalogAudio
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudio96K

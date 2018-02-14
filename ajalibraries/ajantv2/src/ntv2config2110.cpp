@@ -85,7 +85,7 @@ void rx_2110Config::init()
     payloadType    = 0;
     videoFormat    = NTV2_FORMAT_UNKNOWN;
 	numAudioChannels  = 2;
-    audioSamplesPerPkt = 48;
+    audioPacketInterval = PACKET_INTERVAL_1mS;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -102,7 +102,10 @@ bool rx_2110Config::operator == ( const rx_2110Config &other )
             (destPort          == other.destPort)       &&
             (SSRC              == other.SSRC)           &&
             (VLAN              == other.VLAN)           &&
-            (videoFormat       == other.videoFormat))
+            (videoFormat       == other.videoFormat)    &&
+            (videoSamples      == other.videoSamples)   &&
+            (numAudioChannels == other.numAudioChannels) &&
+            (audioPacketInterval == other.audioPacketInterval))
     {
         return true;
     }
@@ -500,8 +503,7 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2St
         uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
 
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
-
-        uint32_t num_samples  = rxConfig.audioSamplesPerPkt;
+        uint32_t num_samples = (rxConfig.audioPacketInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
 		uint32_t num_channels = rxConfig.numAudioChannels;
         uint32_t val = (num_samples << 8) + num_channels;
         mDevice.WriteRegister(kReg3190_depkt_config + depacketizerBaseAddr,val);
@@ -551,12 +553,15 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
     // matching
     mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
 
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+
     if (stream == NTV2_VIDEO_STREAM)
     {
-#if 0
-        // format
-        uint32_t val;
-        switch(channel)
+        // sampling
+        mDevice.ReadRegister(kReg4175_depkt_vid_fmt_o + depacketizerBaseAddr,&val);
+        val = val & 0x3;
+        VPIDSampling vs;
+        switch(val)
         {
         case NTV2_CHANNEL1:
             mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
@@ -578,7 +583,14 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
            bool               is2K = (val & BIT(13));
 
            NTV2FormatDescriptor fd;
-#endif
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+
+        uint32_t samples;
+        mDevice.ReadRegister(kReg3190_depkt_config + depacketizerBaseAddr, &samples);
+        rxConfig.audioPacketInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
+        rxConfig.numAudioChannels = samples & 0xff;
     }
 
     return true;
@@ -1546,7 +1558,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     // connection information
     sdp << "c=IN IP4 ";
-    sdp << config.remoteIP;
+    sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
@@ -1607,7 +1619,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
 
     // connection information
     sdp << "c=IN IPV4 ";
-    sdp << config.remoteIP;
+    sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap

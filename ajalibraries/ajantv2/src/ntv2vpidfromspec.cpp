@@ -44,6 +44,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	isStereo				= false;
 	bool	is6G					= false;
 	bool	is12G					= false;
+	bool	enableBT2020			= false;
 	VPIDChannel vpidChannel			= VPIDChannel_1;
 
 	uint8_t	byte1 = 0;
@@ -66,6 +67,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	is6G					= pInVPIDSpec->isOutput6G;
 	is12G					= pInVPIDSpec->isOutput12G;
 	vpidChannel				= pInVPIDSpec->vpidChannel;
+	enableBT2020			= pInVPIDSpec->enableBT2020;
+
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
 	{
@@ -79,6 +82,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	frameRate				= GetNTV2FrameRateFromVideoFormat			(outputFormat);
 	isProgressivePicture	= NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (outputFormat);
 	isProgressiveTransport	= isProgressivePicture;							//	Must be a progressive format to start
+
+	if (NTV2_IS_720P_VIDEO_FORMAT(outputFormat) && !is3G)
+		isProgressiveTransport = false;
 
 	if (NTV2_IS_PSF_VIDEO_FORMAT (outputFormat))
 		isProgressiveTransport = false;										//	PSF is never a progressive transport
@@ -336,6 +342,20 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 			byte3 |= (1UL << 7);			//	0x80
 		else
 			byte3 |= (1UL << 5);			//	0x20
+	}
+
+	//Colorimetry
+	if ((NTV2_IS_4K_VIDEO_FORMAT(outputFormat) ||
+		NTV2_IS_HD_VIDEO_FORMAT(outputFormat)) &&
+		enableBT2020)
+	{
+		if ((!NTV2_IS_FBF_RGB(pixelFormat) &&
+			NTV2_IS_HIGH_NTV2FrameRate(frameRate)) ||
+			(NTV2_IS_FBF_RGB(pixelFormat) &&
+			!NTV2_IS_HIGH_NTV2FrameRate(frameRate)))
+		{
+			byte3 |= (VPIDDynamicRange_400 << 4);
+		}
 	}
 
 	//	Sampling structure

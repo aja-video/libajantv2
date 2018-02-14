@@ -21,9 +21,10 @@
 	Audio System is Running, eight or sixteen channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this
 	memory, regardless of whether all 8 or 16 channels are used.
 
-	On newer AJA devices, the last byte of the first Audio System's memory buffer coincides with the last byte of the last frame buffer
-	(and subsequent buffers stack downward from there). On older devices, the first byte of the first Audio System's buffer coincides
-	with the first byte of the last frame buffer (and subsequent buffers stack upward from there).
+	On newer AJA devices, the last byte of the first Audio System's input buffer coincides with the last addressable byte of device SDRAM
+	(and subsequent Audio System buffers stack backward from there, 8MB per Audio System). On older devices, the first byte of the last
+	Audio System's output buffer coincides with the first byte of the last frame buffer in device memory (and previous Audio System buffers,
+	if any, start at previous video frame buffers).
 
 	@image	html	hwref-fig2-audiobuffers.png
 
