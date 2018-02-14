@@ -34,11 +34,11 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -48,7 +48,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -78,7 +78,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -133,7 +133,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 	
 
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		if (bFb1RGB)
 		{
@@ -171,7 +171,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 	
 
 	// SDI Out 2
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		if (b3GbTransportOut)
 		{
@@ -408,7 +408,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 	}
 
 	// never disable channels if in dual link 372 mode
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 		bFb1Disable = bFb2Disable = false; 
 		
 	// set Channel disable mode (0 = enable, 1 = disable)
@@ -429,7 +429,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						bStereoIn			= false;
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable = 0;				// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable = 1;				// Assume Channel 2 IS disabled by default
@@ -445,7 +445,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -478,7 +478,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV;
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Select input 2 (0x02)
 		frameSync2YUV = inputXptYUV2;
@@ -509,7 +509,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	
 
 	// Frame Buffer 2
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -520,7 +520,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false; 
 	}

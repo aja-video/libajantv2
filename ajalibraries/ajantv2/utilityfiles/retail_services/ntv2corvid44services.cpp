@@ -1136,7 +1136,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b2xQuadOut            = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
+	bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
 	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -2024,7 +2024,7 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
-	bool b1x3GbOut =			(b4K == false) &&
+	bool b1x3GbOut =		(b4K == false) &&
 							((bRGBOut == true) ||
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||

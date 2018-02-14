@@ -1576,13 +1576,13 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
 	
-	// SMPTE 425
-	bool						b2x425In			= false;
-	bool						b4x425InA			= false;
-	bool						b4x425InB			= false;
-	bool						b6G					= false;
-	bool						b12G				= false;
-	bool						b425In				= false;
+	// SMPTE 425 (2pi)
+	bool						bVpid2x2piIn		= false;
+	bool						bVpid4x2piInA		= false;
+	bool						bVpid4x2piInB		= false;
+	bool						bVpid6GIn			= false;
+	bool						bVpid12GIn			= false;
+	bool						b2piIn				= false;
 	bool						b2pi				= false;
 	bool						bInRGB				= false;
 	bool						bHdmiInRGB			= false;
@@ -1662,17 +1662,17 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 		CNTV2VPID parser;
 		parser.SetVPID(vpida);
 		VPIDStandard std = parser.GetStandard();
-		b2x425In  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
-		b4x425InA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
-		b4x425InB = std == VPIDStandard_2160_QuadDualLink_3Gb;
-		mCard->GetSDIInput6GPresent(b6G, NTV2_CHANNEL1);
-		mCard->GetSDIInput12GPresent(b12G, NTV2_CHANNEL1);
-		b2x425In	= b6G;
-		b4x425InA	= b12G;
-		b425In		= b2x425In || b4x425InA || b4x425InB;
+		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
+		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
+		bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
+		mCard->GetSDIInput6GPresent(bVpid6GIn, NTV2_CHANNEL1);
+		mCard->GetSDIInput12GPresent(bVpid12GIn, NTV2_CHANNEL1);
+		bVpid2x2piIn	= bVpid6GIn;
+		bVpid4x2piInA	= bVpid12GIn;
+		b2piIn			= bVpid2x2piIn || bVpid4x2piInA || bVpid4x2piInB;
 
 		// override inputFormatSelect for SMTE425
-		if (b425In)
+		if (b2piIn)
 		{
 			VPIDSampling sample = parser.GetSampling();
 			if (sample == VPIDSampling_YUV_422)
@@ -1688,7 +1688,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	
 	// other bools
 	bStereoIn	= inputFormatSelect == NTV2_Stereo3DSelect;
-	b2pi		= b425In || (bHdmiIn && b4K);				
+	b2pi		= b2piIn || (bHdmiIn && b4K);				
 	bInRGB		= (bHdmiIn == false && inputFormatSelect == NTV2_RGBSelect) ||
 				  (bHdmiIn == true && bHdmiInRGB == true);
 	
@@ -1716,7 +1716,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 			in4kRGB1 = NTV2_XptDuallinkIn1;	in4kRGB2 = NTV2_XptDuallinkIn2;
 			in4kRGB3 = NTV2_XptDuallinkIn3;	in4kRGB4 = NTV2_XptDuallinkIn4;
 		}
-		else if (b2x425In || b2xQuadIn)	// SDI-2Wire-YUV
+		else if (bVpid2x2piIn || b2xQuadIn)	// SDI-2Wire-YUV
 		{
 			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn1DS2;
 			in4kYUV3 = NTV2_XptSDIIn2;		in4kYUV4 = NTV2_XptSDIIn2DS2;
@@ -2574,11 +2574,11 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
 			}
-			else if (bInRGB && !b425In)
+			else if (bInRGB && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidYUV);
 			}
-			else if (!b425In)
+			else if (!b2piIn)
 			{
 				if (bHdmiIn)
 				{
@@ -2624,11 +2624,11 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
 			}
-			else if (bInRGB && !b425In)
+			else if (bInRGB && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidYUV);
 			}
-			else if (!b425In)
+			else if (!b2piIn)
 			{
 				if (bHdmiIn)
 				{
@@ -2654,7 +2654,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	}
 	else if (b4K)
 	{
-		if (b425In || bHdmiIn)
+		if (b2piIn || bHdmiIn)
 		{
 			bFb1Disable = bFb2Disable = 0;
 		}
