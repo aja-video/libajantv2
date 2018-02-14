@@ -84,6 +84,10 @@ void rx_2110Config::init()
     VLAN           = 1;
     payloadType    = 0;
     videoFormat    = NTV2_FORMAT_UNKNOWN;
+    videoSamples   = VPIDSampling_YUV_422;
+    payloadLen     = 0;
+    lastPayloadLen = 0;
+    pktsPerLine    = 0;
 	numAudioChannels  = 2;
     audioPacketInterval = PACKET_INTERVAL_1mS;
 }

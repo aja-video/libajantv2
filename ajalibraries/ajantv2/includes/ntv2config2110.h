@@ -207,7 +207,6 @@ protected:
     void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
-
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
