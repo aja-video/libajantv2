@@ -68,7 +68,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	DeviceServices::SetDeviceXPointPlayback();
 	
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
@@ -84,7 +84,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
 	// make sure formats/modes match for multibuffer modes
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -134,7 +134,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -164,7 +164,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -220,13 +220,13 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 		// if RGB-to-RGB apply LUT converter
 		if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
 		{
-			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
 											mRGB10Range == NTV2_RGB10RangeFull ? 
 											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);	
 		}
 		else
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}	
 	}
 	else
@@ -240,7 +240,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	if (bFb2RGB)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
@@ -285,7 +285,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -321,7 +321,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 
 	
 	// SDI Out 2
-	if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		if (b3GbTransportOut)
 		{
@@ -373,7 +373,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	{
 		XPt1 = frameSync1YUV;
 	}
-	else if (bLevelBFormat || bStereoOut)
+	else if (b2FbLevelBHfr || bStereoOut)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -597,7 +597,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	}
 
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -647,7 +647,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b3GbTransportOut 	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bLevelBFormat    	= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr    	= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoIn   		= false;
 	int							bFb1Disable 		= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable 		= 1;		// Assume Channel 2 IS disabled by default
@@ -683,7 +683,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
 
 	// make sure formats/modes match for multibuffer modes
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -728,11 +728,11 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled) || (levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled) || (levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b3GbInEnabled) || (levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b3GbInEnabled) || (levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
@@ -790,7 +790,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else
 	{
@@ -799,13 +799,13 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 		// if RGB-to-RGB apply LUT converter
 		if (bFb1RGB)
 		{
-			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,
 											mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 		}
 		else 
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}	
 	}
 	
@@ -815,14 +815,14 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	{
 		// provides SMPTE <-> Full conversion
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,	
 											 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
 											 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	
 	// LUT 3, 4
@@ -950,7 +950,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 			mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -993,7 +993,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 			mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -1007,7 +1007,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -1107,7 +1107,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	NTV2CrosspointID XPt2 = NTV2_XptBlack;
 	NTV2CrosspointID XPt3 = NTV2_XptBlack;
 	NTV2CrosspointID XPt4 = NTV2_XptBlack;
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;

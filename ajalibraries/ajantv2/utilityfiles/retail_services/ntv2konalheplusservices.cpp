@@ -66,11 +66,11 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 	
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -105,7 +105,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -182,12 +182,12 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	if (bFb1RGB || bDSKOn )
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 
 
@@ -214,7 +214,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	
 
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 	}
@@ -247,7 +247,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 2
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}
@@ -510,7 +510,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	}
 	
 	// never disable channels if in dual link 372 mode
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -617,7 +617,7 @@ void KonaLHePlusServices::SetDeviceXPointCapture ()
 		(mVirtualInputSelect == NTV2_Input2Select))
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 
 

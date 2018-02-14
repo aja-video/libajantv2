@@ -108,7 +108,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -149,7 +149,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoOut)
+	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -205,7 +205,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -235,7 +235,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -903,7 +903,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)											// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)											// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -1020,7 +1020,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)													// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)													// Stereo or LevelB
 	{
 		if (b3GbTransportOut)
 		{
@@ -1165,7 +1165,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	{
 		XPt1 = frameSync1YUV;
 	}
-	else if (bLevelBFormat || bStereoOut)
+	else if (b2FbLevelBHfr || bStereoOut)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -1413,7 +1413,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	}
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0;
 	}
@@ -1515,7 +1515,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && 
 	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
 	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1689,7 +1689,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	}
 	
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoIn)
+	if (b4K || b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -2347,7 +2347,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inHdYUV1);
 	}
@@ -2477,7 +2477,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inHdYUV2);
 	}
@@ -2581,7 +2581,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 
 
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -2886,7 +2886,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
 	// Stereo or LevelB
-	else if (bLevelBFormat || bStereoIn)											
+	else if (b2FbLevelBHfr || bStereoIn)											
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, inHdYUV1);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, inHdYUV2);
@@ -2999,7 +2999,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;

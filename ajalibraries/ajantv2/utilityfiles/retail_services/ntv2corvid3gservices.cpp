@@ -35,11 +35,11 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -48,7 +48,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -83,7 +83,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -142,12 +142,12 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	
 	
@@ -155,12 +155,12 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	if ( bFb2RGB )
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	
 
@@ -176,7 +176,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -402,7 +402,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	}	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -424,7 +424,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
@@ -441,7 +441,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -494,12 +494,12 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);		// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 	
 	
@@ -508,14 +508,14 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	if (inputFormatSelect == NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,	
 										mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 										kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 	}
 	
 
 	// Frame Buffer 1
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -556,7 +556,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -567,7 +567,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, level B
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -578,7 +578,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 
 
 	// SDI Out 1 
-	if (bLevelBFormat ||																// Dual Stream - p60b
+	if (b2FbLevelBHfr ||																// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{

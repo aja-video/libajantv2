@@ -45,7 +45,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -68,7 +68,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
     bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoOut)
+	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -127,7 +127,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -157,7 +157,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -306,13 +306,13 @@ void Corvid88Services::SetDeviceXPointPlayback ()
         // if RGB-to-RGB apply LUT converter
         if (bSdiRgbOut)
         {
-            mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+            mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
                                             mRGB10Range == NTV2_RGB10RangeFull ?
                                             kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
         }
         else
         {
-            mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+            mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
         }
 	}
 	else
@@ -340,13 +340,13 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 			// if RGB-to-RGB apply LUT converter
 			if (bSdiRgbOut)
 			{
-				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL2,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL2,
 												mRGB10Range == NTV2_RGB10RangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);	
 			}
 			else
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -358,7 +358,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	else if (bFb2RGB)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
@@ -384,13 +384,13 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 			// if RGB-to-RGB apply LUT converter
 			if (bSdiRgbOut)
 			{
-				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL3,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL3,
 												mRGB10Range == NTV2_RGB10RangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);	
 			}
 			else
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -422,13 +422,13 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 			// if RGB-to-RGB apply LUT converter
 			if (bSdiRgbOut)
 			{
-				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL4,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL4,
 												mRGB10Range == NTV2_RGB10RangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);	
 			}
 			else
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -717,7 +717,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -829,7 +829,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)													// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)													// Stereo or LevelB
 	{
 		if (b3GbTransportOut)
 		{
@@ -1082,7 +1082,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	}	
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -1154,7 +1154,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b2wire4k			= (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						bStereoIn			= false;
@@ -1195,7 +1195,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
 
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoIn)
+	if (b4K || b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -1248,11 +1248,11 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
@@ -1428,7 +1428,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else
 	{
@@ -1437,13 +1437,13 @@ void Corvid88Services::SetDeviceXPointCapture ()
 		// if RGB-to-RGB apply LUT converter
 		if (bFb1RGB)
 		{
-			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,
 											mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 		}
 		else 
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}	
 	}
 	
@@ -1458,13 +1458,13 @@ void Corvid88Services::SetDeviceXPointCapture ()
 			// if RGB-to-RGB apply LUT converter
 			if (bFb1RGB)
 			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,
 												mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else 
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -1477,14 +1477,14 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	{
 		// provides SMPTE <-> Full conversion
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,	
 											 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
 											 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	
 	
@@ -1498,13 +1498,13 @@ void Corvid88Services::SetDeviceXPointCapture ()
 			// if RGB-to-RGB apply LUT converter
 			if (bFb1RGB)
 			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL3,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL3,
 												mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else 
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -1529,13 +1529,13 @@ void Corvid88Services::SetDeviceXPointCapture ()
 			// if RGB-to-RGB apply LUT converter
 			if (bFb1RGB)
 			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL4,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL4,
 												mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else 
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);
 			}	
 		}
 		else
@@ -1707,7 +1707,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -1786,7 +1786,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -1883,7 +1883,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}

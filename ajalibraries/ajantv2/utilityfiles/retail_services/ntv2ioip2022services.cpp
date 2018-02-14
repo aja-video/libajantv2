@@ -115,7 +115,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -157,7 +157,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 
 	if(b4k12gOut || b4k6gOut) b2pi = true;
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoOut)
+	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -222,7 +222,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -252,7 +252,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -922,7 +922,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)											// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)											// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -1034,7 +1034,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoOut)													// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)													// Stereo or LevelB
 	{
 		if (b3GbTransportOut)
 		{
@@ -1098,7 +1098,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
 	// Stereo or LevelB
-	else if (bLevelBFormat || bStereoOut)											
+	else if (b2FbLevelBHfr || bStereoOut)											
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, frameSync2YUV);
@@ -1215,7 +1215,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	{
 		XPt1 = frameSync1YUV;
 	}
-	else if (bLevelBFormat || bStereoOut)
+	else if (b2FbLevelBHfr || bStereoOut)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -1443,7 +1443,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	}
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0;
 	}
@@ -1541,7 +1541,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	//bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1702,7 +1702,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	}
 	
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || bLevelBFormat || bStereoIn)
+	if (b4K || b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -1722,12 +1722,12 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
 
 
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
 
 
 	// SDI In 3
@@ -2381,7 +2381,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inHdYUV1);
 	}
@@ -2511,7 +2511,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inHdYUV2);
 	}
@@ -2622,7 +2622,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 
 
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -2911,7 +2911,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
 	// Stereo or LevelB
-	else if (bLevelBFormat || bStereoIn)											
+	else if (b2FbLevelBHfr || bStereoIn)											
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, inHdYUV1);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, inHdYUV2);
@@ -3024,7 +3024,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;

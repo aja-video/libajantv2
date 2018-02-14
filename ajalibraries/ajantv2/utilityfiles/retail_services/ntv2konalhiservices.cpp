@@ -151,21 +151,21 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 		{
 			// Select frame buffer 2 RGB (0x8F)
 			mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer2RGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 		}
 		else
 		*/
 		{
 			// Select frame buffer 1 RGB (0x88)
 			mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}
 	}
 	else
 	{
 		// Select color space converter (0x85)
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	
 	
@@ -174,7 +174,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 	{
 		// Select frame buffer 1 RGB (0x8F)
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
@@ -775,13 +775,13 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 	{
 		// Select color space converter (0x85)
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
 	{
 		// Select dual link in (0x83)
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 
 

@@ -80,7 +80,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 	
@@ -88,7 +88,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
     bool bFb2HdrRGB		= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -97,7 +97,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -132,7 +132,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
 		{
@@ -273,7 +273,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -334,7 +334,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 2
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		if (b3GbTransportOut)
 		{
@@ -403,7 +403,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out Mon
-	if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, frameSync2YUV);
@@ -692,7 +692,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	}
 
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -718,7 +718,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull; 
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	bool						bEanbleConverter	= false;
@@ -735,7 +735,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -769,7 +769,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoIn || bLevelBFormat)
+	if (bStereoIn || b2FbLevelBHfr)
 	{
 		frameSync1YUV = inputXptYUV1;
 	}
@@ -786,7 +786,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV;
-	if (bStereoIn || bLevelBFormat)
+	if (bStereoIn || b2FbLevelBHfr)
 	{
 		frameSync2YUV = inputXptYUV2;
 	}
@@ -948,7 +948,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 
 	// Frame Buffer 1
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -997,7 +997,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -1008,7 +1008,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -1019,7 +1019,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 
 
 	// SDI Out 1 
-	if (bLevelBFormat ||															// Dual Stream - p60b
+	if (b2FbLevelBHfr ||															// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -1067,7 +1067,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	
 	// SDI Out 2
-	if (bLevelBFormat ||															// Dual Stream - p60b
+	if (b2FbLevelBHfr ||															// Dual Stream - p60b
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -1143,7 +1143,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 
 	
 	// SDI Out 5 - Auto
-	if (bLevelBFormat )																// Stereo or LevelB
+	if (b2FbLevelBHfr )																// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, frameSync2YUV);
