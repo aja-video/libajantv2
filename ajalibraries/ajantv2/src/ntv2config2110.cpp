@@ -353,7 +353,7 @@ bool CNTV2Config2110::EnableRxStream(const NTV2Channel channel, const NTV2Stream
     DisableDecapsulatorStream(channel,stream);
     DisableDepacketizerStream(channel,stream);
 
-    //ResetDepacketizer(channel,stream);
+    ResetDepacketizerStream(channel,stream);
     SetupDepacketizerStream(channel,stream,rxConfig);
     SetupDecapsulatorStream(channel,stream, rxConfig);
 
@@ -438,30 +438,46 @@ void  CNTV2Config2110::EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream 
 
 void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream)
 {
-    (void) channel;
-    if (stream == NTV2_AUDIO1_STREAM)
+    if (stream == NTV2_VIDEO_STREAM)
     {
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x2);
-    }
-    else
-    {
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x1);
-    }
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (500);
-    #else
-        usleep (500 * 1000);
-    #endif
+        uint32_t    val;
+        uint32_t    bit;
 
-    mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, 0x0);
+        switch(channel)
+        {
+        default:
+        case NTV2_CHANNEL1:
+            bit = BIT(0);
+            break;
+        case NTV2_CHANNEL2:
+            bit = BIT(1);
+            break;
+        case NTV2_CHANNEL3:
+            bit = BIT(2);
+            break;
+        case NTV2_CHANNEL4:
+            bit = BIT(3);
+            break;
+        }
 
-    // Wait
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (500);
-    #else
-        usleep (500 * 1000);
-    #endif
+        // read/modify/write reset bit for a given channel
+        mDevice.ReadRegister(kRegSarekRxReset + SAREK_REGS, &val);
+
+        // Set reset bit
+        val |= bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+
+        // Wait just a bit
+        #if defined(AJAWindows) || defined(MSWindows)
+            ::Sleep (50);
+        #else
+            usleep (50 * 1000);
+        #endif
+
+        // Unset reset bit
+        val &= ~bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+    }
 }
 
 void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig)
