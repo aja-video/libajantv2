@@ -1600,7 +1600,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << "; PM=2110GPM; SSN=ST2110-20:2017; TP=2110TPN; ";
     if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
     {
-        sdp << "interlace";
+        sdp << "interlace=1; ";
     }
     else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
     {
@@ -1609,7 +1609,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << endl;
 
     // PTP
-    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+    sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;
     sdp << "a=mid:VID" << endl;
 
@@ -1638,7 +1638,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     sdp << To_String(config.payloadType) << endl;
 
     // connection information
-    sdp << "c=IN IPV4 ";
+    sdp << "c=IN IP4 ";
     sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
