@@ -325,7 +325,7 @@ typedef enum
     AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
 
 // Other
-    AJA_STATUS_REBOOT           = 100   /**< Device requires reboot */
+    AJA_STATUS_REBOOT           = 255   /**< Device requires reboot */
 
 } AJAStatus;
 ///@}
