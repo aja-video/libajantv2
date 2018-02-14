@@ -1188,16 +1188,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 												  IsVideoFormatB(mFb1VideoFormat) ||
 												  bRGBOut;
 											  
-	const bool				kNot48Bit = false;
-	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a(0);
-	ULWord					vpidOut1b(0);
-	ULWord					vpidOut2a(0);
-	ULWord					vpidOut2b(0);
-	ULWord					vpidOutMonA(0);
-	ULWord					vpidOutMonB(0);
-	bool					vpid16x9 = true;
-
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);
 	
@@ -1365,22 +1355,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mVirtualSecondaryFormatSelect));
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 		}
-		
-		// Set VPID
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		SetVPIDData(vpidOut1a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-		if (bDualStreamOut && b3GbTransportOut)
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	}
 	else
 	{
@@ -1399,12 +1373,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 		}
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-		if (bDualStreamOut && b3GbTransportOut)
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	}
 
 
@@ -1428,24 +1396,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mVirtualSecondaryFormatSelect));
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 		}
-		
-		// Set VPID values
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		
-		// note that if secondary, it cannot be a dual-stream output type
-		SetVPIDData(vpidOut2a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-		if (bDualStreamOut && b3GbTransportOut)
-			SetVPIDData(vpidOut2b, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	}
 	else
 	{
@@ -1464,13 +1414,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mFb1VideoFormat));
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 		}
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		vpidChannel = (bDualStreamOut && !b3GbTransportOut) ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, vpidChannel, true);
-		if (bDualStreamOut && b3GbTransportOut)
-			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	}
 	
 	
@@ -1493,49 +1436,8 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, IsVideoFormatA(mFb1VideoFormat));
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, false);
 		}
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		vpidChannel = (bDualStreamOut && !b3GbTransportOut) ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOutMonA, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, vpidChannel);
-		if (bDualStreamOut && b3GbTransportOut)
-			SetVPIDData(vpidOutMonB, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
 	}
 	
-	
-	
-	// Finish VPID for SDI 1 Out / SDI 2 Out 
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
-		
-		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut5Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut5Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-		
-		// write VPID for SDI 2
-		mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
-		
-		// write VPID for Mon
-		mCard->WriteRegister(kRegSDIOut5VPIDA, vpidOutMonA);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut5VPIDB, vpidOutMonB);
-	}
-
 
 	//
 	// Up/Down Converter

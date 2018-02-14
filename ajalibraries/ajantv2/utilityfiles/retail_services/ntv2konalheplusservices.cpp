@@ -735,13 +735,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 											  IsVideoFormatB(mFb1VideoFormat);
 
-	const bool				bRGBOut	= false;
-	const bool				kNot48Bit = false;
-	VPIDChannel				vpidChannel;
-	ULWord					vpidOut1a(0);
-	ULWord					vpidOut2a(0);
-	bool					vpid16x9 = true;
-	
+	const bool				bRGBOut	= false;	
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)
 	if (bDualStreamOut)
@@ -843,30 +837,12 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 		// Select secondary standard
 		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, secondaryGeometry == NTV2_FG_2048x1080 );
 		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, secondaryStandard);
-		
-		// Set VPID
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		SetVPIDData(vpidOut1a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
 	}
 	else
 	{
 		// Select primary standard
 		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
 		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
 	}
 
 
@@ -878,31 +854,12 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 		// Select secondary standard
 		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, secondaryGeometry == NTV2_FG_2048x1080 );
 		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, secondaryStandard);
-		
-		// Set VPID
-		if ( NTV2_IS_SD_VIDEO_FORMAT(mVirtualSecondaryFormatSelect) )
-		{
-			if ( ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat) )
-			{
-				NTV2DownConvertMode dcMode;
-				mCard->GetDownConvertMode(&dcMode);
-				vpid16x9 = (dcMode == NTV2_DownConvertAnamorphic);
-			}
-			else
-				vpid16x9 = false;
-		}
-		SetVPIDData(vpidOut2a, mVirtualSecondaryFormatSelect, bRGBOut, kNot48Bit, bDualStreamOut, false, VPIDChannel_1);
 	}
 	else
 	{
 		// Select primary standard
 		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, primaryGeometry == NTV2_FG_2048x1080 );
 		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-		
-		// Set VPID
-		vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-		vpidChannel = bDualStreamOut ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut, false, vpidChannel, true);
 	}
 	
 	

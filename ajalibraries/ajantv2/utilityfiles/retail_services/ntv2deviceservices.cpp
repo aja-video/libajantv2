@@ -1040,9 +1040,6 @@ bool DeviceServices::IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fm
 
 NTV2RGB10Range DeviceServices::GetCSCRange()
 {
-	// Get display/capture mode and call routines to setup XPoint
-	NTV2Mode mode = GetCh1Mode();
-
 	// get csc rgb range
 	NTV2RGB10Range cscRange = mRGB10Range;		// default use RGB range
 	

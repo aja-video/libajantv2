@@ -1639,7 +1639,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	const bool				kNot48Bit = false;
 	
 	// VPID
 	bool	b4K				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1653,16 +1652,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 												  bRGBOut ||
 												  b2wire4kOut || b2wire4kIn;
 	bool	b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bRGBOut) || b2wire4kOut || b2wire4kIn;
-	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
-	VPIDChannel				vpidChannela;
-	ULWord					vpidOut1a(0);
-	ULWord					vpidOut1b(0);
-	ULWord					vpidOut2a(0);
-	ULWord					vpidOut2b(0);
-	ULWord					vpidOut3a(0);
-	ULWord					vpidOut3b(0);
-	ULWord					vpidOut4a(0);
-	ULWord					vpidOut4b(0);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
@@ -1692,9 +1681,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
-	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
 	//
 	// SDI Out 1
 	//
@@ -1717,17 +1703,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
-	
-	// Set VPID 1
-	if (b4K)
-	{
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
-	
 
 	//
 	// SDI Out 2
@@ -1747,20 +1722,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mFb1VideoFormat));
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
-	
-	// Set VPID 2
-	if (b4K)
-	{
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
-		}
-		else
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-		}
 	}
 	
 	
@@ -1784,29 +1745,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
 	}
 
-	
-	// Set VPID 3
-	if (b4K)
-	{
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_5);
-			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_6);
-		}
-		else
-		{
-			SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_3);
-		}
-	}
-	else
-	{
-		SetVPIDData(vpidOut3a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut3b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
-
 	//
 	// SDI Out 4
 	//
@@ -1827,79 +1765,6 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
 	}
 	
-	// Set VPID 4
-	if (b4K)
-	{
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_7);
-			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_8);
-		}
-		else
-		{
-			SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_4);
-		}
-	}
-	else 
-	{
-		vpidChannela = (bDualStreamOut && !b3GbTransportOut) ? VPIDChannel_2 : VPIDChannel_1;
-		SetVPIDData(vpidOut4a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, vpidChannela, true);
-		if (bDualStreamOut && b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut4b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
-	
-	
-	// Finish VPID for SDI Out 1-4 Out
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mFb1Mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
-		
-		// enable overwrite
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-			mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		}
-		mCard->WriteRegister(kRegSDIOut3Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut4Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-			mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		}
-		mCard->WriteRegister(kRegSDIOut3Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut4Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-
-		// write VPID value
-		if (b4K)
-		{
-			// write VPID for SDI 1
-			mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-			if (bDualStreamOut && b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-			
-			// write VPID for SDI 2
-			mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-			if (bDualStreamOut && b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
-		}
-
-		// write VPID for SDI 3
-		mCard->WriteRegister(kRegSDIOut3VPIDA, vpidOut3a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut3VPIDB, vpidOut3b);
-		
-		// write VPID for SDI 4
-		mCard->WriteRegister(kRegSDIOut4VPIDA, vpidOut4a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut4VPIDB, vpidOut4b);
-	}
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	if (b4K)
