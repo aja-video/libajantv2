@@ -24,8 +24,6 @@ NTV2_FORMAT_720p_5000
 NTV2_FORMAT_1080p_5000_B
 NTV2_FORMAT_1080p_5994_B
 NTV2_FORMAT_1080p_6000_B
-NTV2_FORMAT_720p_2398
-NTV2_FORMAT_720p_2500
 NTV2_FORMAT_1080p_5000_A
 NTV2_FORMAT_1080p_5994_A
 NTV2_FORMAT_1080p_6000_A
@@ -78,7 +76,7 @@ NTV2_INPUTSOURCE_SDI1
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize	0x40000000
-NTV2DeviceGetLUTVersion	1
+NTV2DeviceGetLUTVersion	2
 NTV2DeviceGetMaxAudioChannels	16
 NTV2DeviceGetMaxRegisterNumber	kRegReserved511
 NTV2DeviceGetMaxTransferCount	BIT(21)-1

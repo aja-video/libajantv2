@@ -50,7 +50,8 @@
 #define SAREK_2110_VIDEO_FRAMER_1       (0x213000/4)
 #define SAREK_2110_AUDIO_FRAMER_1       (0x214000/4)
 #define SAREK_2110_TX_ARBITRATOR        (0x215000/4)
-#define SAREK_2110_DECAPSULATOR_1_TOP   (0x211000/4)
+#define SAREK_2110_DECAPSULATOR_0       (0x211000/4)
+#define SAREK_2110_DECAPSULATOR_1       (0x216000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT   (0x230000/4)
 
 /////////////////////////////////////////////////////////////////////
@@ -181,6 +182,19 @@
 #define kRegDecap_reordered_pkt_cnt     13
 #define kRegDecap_unused2               14
 #define kRegDecap_descriptiom           15
+
+/////////////////////////////////////////////////////////////////////
+//
+// Arbitrator
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegArb_video               0
+#define kRegArb_audio               1
+#define kRegRxVideoDecode1          8
+#define kRegRxVideoDecode2          9
+#define kRegRxVideoDecode3          10
+#define kRegRxVideoDecode4          11
 
 
 #endif // REGISTERS_2110_H

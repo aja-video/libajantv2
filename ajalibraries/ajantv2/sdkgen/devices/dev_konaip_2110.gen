@@ -79,6 +79,9 @@ NTV2_WgtCSC2
 NTV2_WgtLUT1
 NTV2_WgtLUT2
 NTV2_Wgt3GSDIIn1
+NTV2_Wgt3GSDIIn2
+NTV2_Wgt3GSDIIn3
+NTV2_Wgt3GSDIIn4
 NTV2_Wgt3GSDIOut1
 NTV2_Wgt3GSDIOut2
 NTV2_Wgt3GSDIOut3
@@ -126,7 +129,7 @@ NTV2DeviceGetNumHDMIVideoOutputs			1
 NTV2DeviceGetNumLUTs						5
 NTV2DeviceGetNumMixers						2
 NTV2DeviceGetNumReferenceVideoInputs		1
-NTV2DeviceGetNumVideoInputs					1
+NTV2DeviceGetNumVideoInputs					4
 NTV2DeviceGetNumVideoOutputs				4
 NTV2DeviceGetNum2022ChannelsSFP1			4
 

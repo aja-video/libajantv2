@@ -18,21 +18,16 @@ Corvid22Services::Corvid22Services()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Corvid22Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 	
-	NTV2FrameBufferFormat fbFormatCh1;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormatCh1);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fbFormatCh1);
-		
-	NTV2FrameBufferFormat fbFormatCh2;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fbFormatCh2);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fbFormatCh2);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
+	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 		
 	// don't let the DSK be ON if we're in Mac Desktop mode
 	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
@@ -46,8 +41,8 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	if (bLevelBFormat || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormatCh1);
-		bCh2RGB = bCh1RGB;
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+		bFb2RGB = bFb1RGB;
 	}
 	
 
@@ -55,7 +50,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID frameSync1YUV;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -70,7 +65,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else 
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -85,7 +80,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	if (bStereoOut || bLevelBFormat)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync2YUV = NTV2_XptCSC2VidYUV;
 		}
@@ -105,7 +100,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// CSC 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1RGB);
 	}
@@ -116,7 +111,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// CSC 2
-	if (bCh2RGB)
+	if (bFb2RGB)
 	{
 		mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB);
 	}
@@ -140,7 +135,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// SDI Out 1
 	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
@@ -162,7 +157,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
@@ -200,7 +195,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? frameSync1YUV : frameSync2YUV);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
@@ -224,8 +219,8 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// The background video/key depends on the DSK mode
 	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
-	int bCh1Disable = 0;							// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;							// Assume Channel 2 IS disabled
+	int bFb1Disable = 0;							// Assume Channel 1 is NOT disabled
+	int bFb2Disable = 1;							// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -234,7 +229,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		{
 			case NTV2_DSKModeFBOverMatte:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -256,7 +251,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			
 			case NTV2_DSKModeFBOverVideoIn:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -293,7 +288,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 
 			case NTV2_DSKModeGraphicOverMatte:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -310,14 +305,14 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				// Background (note: FB1 is used for sync - it will be replaced by matte video
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable);
 				break;
 			
 			case NTV2_DSKModeGraphicOverVideoIn:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -345,8 +340,8 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn2);
 				}
 				
-				bCh1Disable = 1;			// disable Ch 1
-				bCh2Disable = 0;			// enable Ch 2
+				bFb1Disable = 1;			// disable Ch 1
+				bFb2Disable = 0;			// enable Ch 2
 				
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
@@ -357,7 +352,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			
 			case NTV2_DSKModeGraphicOverFB:			
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -372,7 +367,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				}
 				
 				// Background is Frame Buffer 1
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// Select CSC1 (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
@@ -384,7 +379,7 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 				}
-				bCh2Disable = 0;			// enable Ch 2
+				bFb2Disable = 0;			// enable Ch 2
 				break;
 				
 			default:
@@ -414,11 +409,11 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 
 	// never disable channels if in dual link 372 mode
 	if (bLevelBFormat || bStereoOut)
-		bCh1Disable = bCh2Disable = false; 
+		bFb1Disable = bFb2Disable = false; 
 		
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable);		
 
 }
 	
@@ -426,17 +421,18 @@ void Corvid22Services::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Corvid22Services::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						bStereoIn			= false;
 	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	int							bCh1Disable = 0;				// Assume Channel 1 is NOT disabled by default
-	int							bCh2Disable = 1;				// Assume Channel 2 IS disabled by default
+	int							bFb1Disable = 0;				// Assume Channel 1 is NOT disabled by default
+	int							bFb2Disable = 1;				// Assume Channel 2 IS disabled by default
 	
 	NTV2CrosspointID			inputXptYUV1 = NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2 = NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
@@ -451,9 +447,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (bLevelBFormat || bStereoIn)
 	{
-		NTV2FrameBufferFormat fbFormat;
-		mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormat);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormat);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 	}
 	
@@ -504,7 +498,7 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// Frame Buffer 1
-	if (genFrameFormat == FORMAT_RGB)
+	if (bFb1RGB)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB);
 	}
@@ -528,11 +522,11 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	// Make sure both channels are enable for stereo, dual-link B
 	if (bLevelBFormat || bStereoIn)
 	{
-		bCh1Disable = bCh2Disable = false; 
+		bFb1Disable = bFb2Disable = false; 
 	}
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable);		
 
 
 	// SDI Out 1
@@ -583,10 +577,10 @@ void Corvid22Services::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Corvid22Services::SetDeviceMiscRegisters (NTV2Mode mode)
+void Corvid22Services::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	mCard->GetStandard(&primaryStandard);

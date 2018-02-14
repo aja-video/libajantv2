@@ -103,7 +103,10 @@
 	well locked to an input, with the only difference being when the signals would actually come out of the BNC connectors.
 
 	If the device's output(s) must have a given timing (e.g., to feed a switcher), then applications can pass \c NTV2_REFERENCE_EXTERNAL to
-	CNTV2Card::SetReference, which will lock the device to an analog or tri-level sync signal connected to the device's external sync input.
+	CNTV2Card::SetReference, which will lock the device to an analog or tri-level sync signal connected to the device's external reference input.
+	You can determine the video format of the signal being applied to the reference input by calling CNTV2Card::GetReferenceVideoFormat.
+	Note that even when configured to sync its outputs to \c NTV2_REFERENCE_EXTERNAL, the device output will internally revert to Free-Run if
+	the reference signal disappears or is incompatible with the output video format.
 
 
 	@section	deviceinpoutcharact		Input/Output Characteristics

@@ -49,10 +49,11 @@ NTV2VideoFormat IoExpressServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
+void IoExpressServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(format);
+	DeviceServices::SetDeviceXPointPlayback();
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// Turn off LTC loopback during playback
 	mCard->WriteRegister (kRegFS1ReferenceSelect, 0, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
@@ -63,7 +64,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	
 	
 	// Set (Up/Down Converter) module input (reg 136, bits 23-16)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression module (0x07)
 		mCard->Connect (NTV2_XptConversionModInput, NTV2_XptCompressionModule);
@@ -76,7 +77,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 
 	// Set (Frame Sync 1) input (reg 137, bits 15-8)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression module (0x07)
 		mCard->Connect (NTV2_XptFrameSync1Input, NTV2_XptCompressionModule);
@@ -89,7 +90,7 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 
 
 	// Set (Frame Buffer 1) input (reg 137, bits 7-0)
-	if  (format == FORMAT_COMPRESSED)
+	if  (bFb1Compressed)
 	{
 		// Select compression module out (0x07)
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
@@ -172,26 +173,27 @@ void IoExpressServices::SetDeviceXPointPlayback (GeneralFrameFormat format)
 	// default video proc mode
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
-	int bCh1Disable = 0;							// Assume Channel 1 is NOT disabled
-	int bCh2Disable = 1;							// Assume Channel 2 IS disabled
+	int bFb1Disable = 0;							// Assume Channel 1 is NOT disabled
+	int bFb2Disable = 1;							// Assume Channel 2 IS disabled
 		
 	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bCh1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bCh2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
+	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 }
 	
 	
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
+void IoExpressServices::SetDeviceXPointCapture()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(format);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID			inputSelectPrimary = NTV2_XptSDIIn1;
 	NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
+	bool 						bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// if user select LTC port as input - loop it back during capture
 	uint32_t enabled = false;
@@ -254,7 +256,7 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 
 
 	// Set frame buffer 1 input (reg 137, bits 7-0)
-	if (format == FORMAT_COMPRESSED)
+	if (bFb1Compressed)
 	{
 		// Select compression out (0x07)
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
@@ -323,18 +325,16 @@ void IoExpressServices::SetDeviceXPointCapture (GeneralFrameFormat format)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void IoExpressServices::SetDeviceMiscRegisters ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
 	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
@@ -442,7 +442,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 	
 		// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
@@ -555,7 +555,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 
 	// Set conversion control (reg 131)
 	// Set converter output standard (bits 14-12)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode: converter is always on output,
 	{
 		// set pulldown bit
 		mCard->SetConverterPulldown( (ULWord)IsPulldownConverterMode(mFb1VideoFormat,mVirtualSecondaryFormatSelect) );
@@ -578,7 +578,7 @@ void IoExpressServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	}
 
 	// Set converter output standard (bits 2-0)
-	if (mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
+	if (mFb1Mode == NTV2_MODE_DISPLAY)								// playback mode - converter always on output
 		mCard->SetConverterInStandard(primaryStandard);				// so converter input = primary format
 
 	else														// capture mode: converter may be on input or output
