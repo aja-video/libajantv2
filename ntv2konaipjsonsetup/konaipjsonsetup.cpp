@@ -144,6 +144,26 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mVideoFormat.isEmpty())
             cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << endl;
 
+        receiveStruct.mPayloadLen = receiveChannelObject["payloadLen"].toString();
+        if (!receiveStruct.mPayloadLen.isEmpty())
+            cout << "Payload Len " << receiveStruct.mPayloadLen.toStdString() << endl;
+
+        receiveStruct.mLastPayloadLen = receiveChannelObject["lastPayloadLen"].toString();
+        if (!receiveStruct.mLastPayloadLen.isEmpty())
+            cout << "Last Payload Len " << receiveStruct.mLastPayloadLen.toStdString() << endl;
+
+        receiveStruct.mNumAudioChannels = receiveChannelObject["numAudioChannels"].toString();
+        if (!receiveStruct.mNumAudioChannels.isEmpty())
+            cout << "Number of Audio Channels " << receiveStruct.mNumAudioChannels.toStdString() << endl;
+
+        receiveStruct.mAudioPktInterval = receiveChannelObject["audioPktInterval"].toString();
+        if (!receiveStruct.mAudioPktInterval.isEmpty())
+            cout << "Audio Packet Interval " << receiveStruct.mAudioPktInterval.toStdString() << endl;
+
+        receiveStruct.mPktsPerLine = receiveChannelObject["pktsPerLine"].toString();
+        if (!receiveStruct.mPktsPerLine.isEmpty())
+            cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
+
         receiveStruct.mLinkAEnable = receiveChannelObject["LinkAEnable"].toString();
         if (!receiveStruct.mLinkAEnable.isEmpty())
             cout << "Link A Enable " << receiveStruct.mLinkAEnable.toStdString() << endl;
@@ -638,6 +658,18 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
         rxChannelConfig.payloadType  = receive.mPayload.toUInt();
         rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
+        rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
+
+        if (!receive.mPayloadLen.isEmpty())
+            rxChannelConfig.payloadLen = receive.mPayloadLen.toUInt();
+        if (!receive.mLastPayloadLen.isEmpty())
+            rxChannelConfig.lastPayloadLen = receive.mLastPayloadLen.toUInt();
+        if (!receive.mPktsPerLine.isEmpty())
+            rxChannelConfig.pktsPerLine = receive.mPktsPerLine.toUInt();
+        if (!receive.mNumAudioChannels.isEmpty())
+            rxChannelConfig.numAudioChannels  = receive.mNumAudioChannels.toUInt();
+        if (!receive.mAudioPktInterval.isEmpty())
+            rxChannelConfig.audioPacketInterval = (receive.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
 
         bool rv = config2110.EnableRxStream (channel, stream, rxChannelConfig);
         if (!rv)
