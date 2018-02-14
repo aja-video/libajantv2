@@ -1462,21 +1462,21 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
     }
 
 	// VPID
-	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
+	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 
-	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
 	bool b1x3GbOut =
-		((bRGBOut == true) ||
+		((bSdiOutRGB == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-		(bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 
 	// all 3Gb transport out
@@ -1808,7 +1808,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbTransportOut);
 
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -1818,7 +1818,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 
@@ -1830,7 +1830,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbTransportOut);
 
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -1840,7 +1840,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
 	

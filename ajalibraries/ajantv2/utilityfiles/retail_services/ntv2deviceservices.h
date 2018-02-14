@@ -56,7 +56,7 @@ public:
 public:
 	// misc regs
 	bool					bHdmiIn;
-	bool					bLevelA;
+	bool					bFbLevelA;
 	bool					b4K;
 	bool					b4kHfr;
 	bool					bHfr;

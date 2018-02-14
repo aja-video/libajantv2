@@ -3105,7 +3105,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	
 	// VPID
 	bool					bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
-	bool					bLevelA             = IsVideoFormatA(mFb1VideoFormat);
+	bool					bFbLevelA             = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
@@ -3118,7 +3118,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 							((bSdiOutRGB == true) ||
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-							 (bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+							 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
 	bool b2wire4kOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
@@ -3497,7 +3497,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -3507,7 +3507,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 	
@@ -3519,7 +3519,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -3529,7 +3529,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
 	
@@ -3541,7 +3541,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bLevelA && b3GbTransportOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bFbLevelA && b3GbTransportOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut || (b2pi && !b4kHfr))
@@ -3551,7 +3551,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
 	}
 	
@@ -3563,7 +3563,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bLevelA && b3GbTransportOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bFbLevelA && b3GbTransportOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut || (b2pi && !b4kHfr))
@@ -3573,7 +3573,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
 	}
 	
@@ -3637,7 +3637,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
 		}
 	}
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
 	
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE

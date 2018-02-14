@@ -33,7 +33,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
@@ -467,7 +467,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	// SDI Out 1
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
@@ -502,7 +502,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	// SDI Out 2
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
@@ -537,7 +537,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
@@ -609,7 +609,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
@@ -1645,13 +1645,13 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 	bool	b4kHfr          = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool 	b2wire4kOut 	= (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool 	b2wire4kIn 		= (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
-	bool	bRGBOut			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool	bSdiOutRGB		= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	bool	bDualStreamOut	= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bRGBOut ||
+												  bSdiOutRGB ||
 												  b2wire4kOut || b2wire4kIn;
-	bool	b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bRGBOut) || b2wire4kOut || b2wire4kIn;
+	bool	b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bSdiOutRGB) || b2wire4kOut || b2wire4kIn;
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)

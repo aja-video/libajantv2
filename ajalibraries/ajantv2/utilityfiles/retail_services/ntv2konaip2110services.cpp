@@ -47,7 +47,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -606,7 +606,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	// SDI Out 1
 	if (b4K)
 	{
-		if (bRGBOut4K || bFb1HdrRGB)
+		if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
@@ -665,7 +665,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	// SDI Out 2
 	if (b4K)
 	{
-		if (bRGBOut4K || bFb1HdrRGB)
+		if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
@@ -723,7 +723,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K || bFb1HdrRGB)
+		if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
@@ -834,7 +834,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K || bFb1HdrRGB)
+		if (bSdiOutRGB || bFb1HdrRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
@@ -2411,22 +2411,22 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	// VPID
-	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
+	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	
-	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
 	bool b1x3GbOut = (b4K == false) &&
-	((bRGBOut == true) ||
+	((bSdiOutRGB == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-		(bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 	
 	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -2436,7 +2436,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// all 3Gb transport out
 	// b3GbTransportOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
 	bool b3GbTransportOut = (b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
-	(b4K == true && bRGBOut == true) ||
+	(b4K == true && bSdiOutRGB == true) ||
 	(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 	b2wire4kOut || b2wire4kIn;
 	
@@ -2484,7 +2484,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	else
 	{
 		b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		if (b2pi && !bRGBOut && !b4kHfr)
+		if (b2pi && !bSdiOutRGB && !b4kHfr)
 			b4xIo = false;										// low frame rate two pixel interleave YUV
 		
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
@@ -2796,7 +2796,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -2806,7 +2806,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 		
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
@@ -2819,7 +2819,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut)
@@ -2829,7 +2829,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
 	
@@ -2841,7 +2841,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut || (b2pi && !b4kHfr))
@@ -2851,7 +2851,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
 	}
 
@@ -2863,7 +2863,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbTransportOut);
 	
 	// 3Ga / 3Gb / Neither
 	if (b3GbTransportOut || (b2pi && !b4kHfr))
@@ -2873,7 +2873,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
 	}
 	
