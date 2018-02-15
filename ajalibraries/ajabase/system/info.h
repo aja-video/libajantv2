@@ -46,6 +46,7 @@ enum AJASystemInfoTag
     AJA_SystemInfoTag_Path_PersistenceStoreSystem,
     AJA_SystemInfoTag_Path_Applications,
     AJA_SystemInfoTag_Path_Utilities,
+    AJA_SystemInfoTag_Path_Firmware,
 
     AJA_SystemInfoTag_LAST
 };

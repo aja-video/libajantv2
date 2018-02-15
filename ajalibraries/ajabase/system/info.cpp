@@ -139,6 +139,7 @@ AJAStatus AJASystemInfo::Rescan (AJASystemInfoSections sections)
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)] = "AJA Utilities Path";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Firmware)] = "AJA Firmware Path";
 
         ret = mpImpl->Rescan(sections);
     }

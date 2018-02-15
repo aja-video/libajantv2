@@ -376,6 +376,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 
         mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/opt/aja/bin/";
         mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/opt/aja/bin/";
+        mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = "/opt/aja/firmware/";
 
         ret = AJA_STATUS_SUCCESS;
     }
