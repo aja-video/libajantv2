@@ -733,12 +733,6 @@ void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
     oss << "(NTV2InputCrosspointID <== NTV2OutputCrosspointID)" << endl;
     router.Print (oss, false);
 
-    //	Dump routing as NTV2 source code...
-//    router.PrintCode (codeStr);
-//    oss	<< endl
-//        << endl
-//        << codeStr	<< endl;
-
     //	Dump routing registers...
     NTV2RegNumSet		deviceRoutingRegs;
     const NTV2RegNumSet	routingRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
@@ -749,31 +743,189 @@ void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
     mDevice.ReadRegisters (regsToRead);	//	Read the routing regs
     oss << endl
         << deviceRoutingRegs.size() << " Routing Registers:" << endl;
-//    for (NTV2RegisterReadsConstIter it (regsToRead.begin());  it != regsToRead.end();  ++it)
-//        oss	<< endl
-//			<< "XptReg Name: " << CNTV2RegisterExpert::GetDisplayName (it->registerNumber) << endl
-//			<< "XptReg Number: " << it->registerNumber << endl
-//			<< "XptReg Value: " << it->registerValue << " : " << HEX0N(it->registerValue,8) << endl
-//            << CNTV2RegisterExpert::GetDisplayValue (it->registerNumber, it->registerValue, mDevice.GetDeviceID())	<< endl;
 }
 
-bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const uint32_t inOptions)
+struct registerToLoadString
 {
-	(void)inOptions;
+	NTV2RegisterNumber registerNum;
+	std::string registerStr;
+};
+const registerToLoadString registerToLoadStrings[] =
+{
+	Enum2Str(kRegGlobalControl)
+	Enum2Str(kRegCh1Control)
+	Enum2Str(kRegCh2Control)
+	Enum2Str(kRegVidProcXptControl)
+	Enum2Str(kRegMixer1Coefficient)
+	Enum2Str(kRegSplitControl)
+	Enum2Str(kRegFlatMatteValue)
+	Enum2Str(kRegOutputTimingControl)
+	Enum2Str(kRegAud1Delay)
+	Enum2Str(kRegAud1Control)
+	Enum2Str(kRegAud1SourceSelect)
+	Enum2Str(kRegAud2Delay)
+	Enum2Str(kRegGlobalControl3)
+	Enum2Str(kRegXptSelectGroup1)
+	Enum2Str(kRegXptSelectGroup2)
+	Enum2Str(kRegXptSelectGroup3)
+	Enum2Str(kRegXptSelectGroup4)
+	Enum2Str(kRegXptSelectGroup5)
+	Enum2Str(kRegXptSelectGroup6)
+	Enum2Str(kRegXptSelectGroup7)
+	Enum2Str(kRegXptSelectGroup8)
+	Enum2Str(kRegCh1ControlExtended)
+	Enum2Str(kRegCh2ControlExtended)
+	Enum2Str(kRegXptSelectGroup11)
+	Enum2Str(kRegXptSelectGroup12)
+	Enum2Str(kRegAud2Control)
+	Enum2Str(kRegAud2SourceSelect)
+	Enum2Str(kRegXptSelectGroup9)
+	Enum2Str(kRegXptSelectGroup10)
+	Enum2Str(kRegSDITransmitControl)
+	Enum2Str(kRegCh3Control)
+	Enum2Str(kRegCh4Control)
+	Enum2Str(kRegXptSelectGroup13)
+	Enum2Str(kRegXptSelectGroup14)
+	Enum2Str(kRegGlobalControl2)
+	Enum2Str(kRegAud3Control)
+	Enum2Str(kRegAud4Control)
+	Enum2Str(kRegAud3SourceSelect)
+	Enum2Str(kRegAud4SourceSelect)
+	Enum2Str(kRegXptSelectGroup17)
+	Enum2Str(kRegXptSelectGroup15)
+	Enum2Str(kRegXptSelectGroup16)
+	Enum2Str(kRegAud3Delay)
+	Enum2Str(kRegAud4Delay)
+	Enum2Str(kRegXptSelectGroup18)
+	Enum2Str(kRegXptSelectGroup19)
+	Enum2Str(kRegXptSelectGroup20)
+	Enum2Str(kRegGlobalControlCh2)
+	Enum2Str(kRegGlobalControlCh3)
+	Enum2Str(kRegGlobalControlCh4)
+	Enum2Str(kRegGlobalControlCh5)
+	Enum2Str(kRegGlobalControlCh6)
+	Enum2Str(kRegGlobalControlCh7)
+	Enum2Str(kRegGlobalControlCh8)
+	Enum2Str(kRegCh5Control)
+	Enum2Str(kRegCh6Control)
+	Enum2Str(kRegCh7Control)
+	Enum2Str(kRegCh8Control)
+	Enum2Str(kRegXptSelectGroup21)
+	Enum2Str(kRegXptSelectGroup22)
+	Enum2Str(kRegXptSelectGroup30)
+	Enum2Str(kRegXptSelectGroup23)
+	Enum2Str(kRegXptSelectGroup24)
+	Enum2Str(kRegXptSelectGroup25)
+	Enum2Str(kRegXptSelectGroup26)
+	Enum2Str(kRegXptSelectGroup27)
+	Enum2Str(kRegXptSelectGroup28)
+	Enum2Str(kRegXptSelectGroup29)
+	Enum2Str(kRegXptSelectGroup31)
+	Enum2Str(kRegAud5Control)
+	Enum2Str(kRegAud5SourceSelect)
+	Enum2Str(kRegAud6Control)
+	Enum2Str(kRegAud6SourceSelect)
+	Enum2Str(kRegAud7Control)
+	Enum2Str(kRegAud7SourceSelect)
+	Enum2Str(kRegAud8Control)
+	Enum2Str(kRegAud8SourceSelect)
+	Enum2Str(kRegOutputTimingControlch2)
+	Enum2Str(kRegOutputTimingControlch3)
+	Enum2Str(kRegOutputTimingControlch4)
+	Enum2Str(kRegOutputTimingControlch5)
+	Enum2Str(kRegOutputTimingControlch6)
+	Enum2Str(kRegOutputTimingControlch7)
+	Enum2Str(kRegOutputTimingControlch8)
+	Enum2Str(kRegVidProc3Control)
+	Enum2Str(kRegMixer3Coefficient)
+	Enum2Str(kRegFlatMatte3Value)
+	Enum2Str(kRegVidProc4Control)
+	Enum2Str(kRegMixer4Coefficient)
+	Enum2Str(kRegFlatMatte4Value)
+	Enum2Str(kRegAud5Delay)
+	Enum2Str(kRegAud6Delay)
+	Enum2Str(kRegAud7Delay)
+	Enum2Str(kRegAud8Delay)
+	Enum2Str(kRegXptSelectGroup32)
+	Enum2Str(kRegXptSelectGroup33)
+	Enum2Str(kRegXptSelectGroup34)
+	Enum2Str(kRegXptSelectGroup35)
+};
+
+bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad)
+{
 	ifstream fileInput;
 	fileInput.open(inLogFilePath);
-	uint32_t regNumberLine = 0;
 	string lineContents;
+	int i = 0, numLines = 0;;
+	int size = sizeof(registerToLoadStrings)/sizeof(registerToLoadString);
+	string searchString;
+	bool isCompatible = false;
+
 	while(getline(fileInput, lineContents))
+		numLines++;
+	if(size > numLines)
+		return false;
+	fileInput.clear();
+	fileInput.seekg(0, ios::beg);
+	while(getline(fileInput, lineContents) && i < size && !bForceLoad)
 	{
-		string searchString = "Register Name: ";
-		searchString.append("6");
-		regNumberLine++;
+		searchString = "Device: ";
+		searchString.append(NTV2DeviceIDToString(mDevice.GetDeviceID()));
 		if (lineContents.find(searchString, 0) != string::npos)
 		{
-			cout << "found: " << searchString << "line: " << regNumberLine << endl;
+			cout << NTV2DeviceIDToString(mDevice.GetDeviceID()) << " is compatible with the log." << endl;
+			isCompatible = true;
+			break;
 		}
+		else
+		{
+			continue;
+		}
+	}
 
+	if(!isCompatible)
+		return false;
+
+	while(i < size)
+	{
+		getline(fileInput, lineContents);
+		if(fileInput.eof())
+		{
+			//Did not find the register reset stream to begin
+			fileInput.clear();
+			fileInput.seekg(0, ios::beg);
+			i++;
+			continue;
+		}
+		searchString = "Register Name: ";
+		searchString.append(registerToLoadStrings[i].registerStr);
+		if (lineContents.find(searchString, 0) != string::npos)
+		{
+			getline(fileInput, lineContents);
+			getline(fileInput, lineContents);
+			searchString = "Register Value: ";
+			auto start = lineContents.find(searchString);
+			if(start != string::npos)
+			{
+				auto end = lineContents.find(" : ");
+				stringstream registerValueString(lineContents.substr(start + searchString.length(), end));
+				uint32_t registerValue = 0;
+				registerValueString >> registerValue;
+				cout << "Writing register: " << registerToLoadStrings[i].registerStr << " " << registerValue << endl;
+				mDevice.WriteRegister(registerToLoadStrings[i].registerNum, registerValue);
+			}
+			else
+			{
+				cout << "The format of the log file is not compatible with this option." << endl;
+				return false;
+			}
+		}
+		else
+		{
+			continue;
+		}
+		i++;
 	}
 
 	return true;

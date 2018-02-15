@@ -21,7 +21,7 @@
 	#include <stdint.h>
 #endif
 
-
+#define Enum2Str(e)  {e, #e},
 //////////////////////////////////////////////////////
 //	BEGIN SECTION MOVED FROM 'videoutilities.h'
 //////////////////////////////////////////////////////
@@ -43,7 +43,7 @@
 #define FRAME_1080_8BIT_LINEPITCH (1920*2)
 #define FRAME_QUADHD_10BIT_SIZE (FRAME_1080_10BIT_LINEPITCH*2160)
 #define FRAME_QUADHD_8BIT_SIZE (FRAME_1080_8BIT_LINEPITCH*2160)
-#define FRAME_BASE(frameNumber,frameSize) (frameNumber*frameSize) 
+#define FRAME_BASE(frameNumber,frameSize) (frameNumber*frameSize)
 
 /**
 	@param[in]	inPixelFormat		Specifies the pixel format.
