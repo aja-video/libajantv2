@@ -44,10 +44,10 @@ NTV2VideoFormat CorvidServices::GetSelectedInputVideoFormat(
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void CorvidServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void CorvidServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 
 	int bFb1Disable = 0;							// Assume Channel 1 is NOT disabled
 	int bFb2Disable = 1;							// Assume Channel 2 IS disabled
@@ -68,10 +68,10 @@ void CorvidServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void CorvidServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void CorvidServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	// Select input 1 (0x01)
 	mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
@@ -85,10 +85,10 @@ void CorvidServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void CorvidServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void CorvidServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	mCard->GetStandard(&primaryStandard);

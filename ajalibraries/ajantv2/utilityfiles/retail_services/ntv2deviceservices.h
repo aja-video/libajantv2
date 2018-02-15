@@ -35,9 +35,36 @@ typedef enum
 	
 } GeneralFrameFormat;
 
-#define IS_CION_RAW(genFmt)	(genFmt >= FORMAT_RAW && genFmt <= FORMAT_RAW_UHFR)
-
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
+
+
+//-------------------------------------------------------------------------------------------------------
+//	class HLState
+//-------------------------------------------------------------------------------------------------------
+ class HLState
+ {
+public:
+	explicit HLState() { init(); }
+	HLState(const HLState& s)  { copy(s); }
+	virtual ~HLState() {}
+	
+	void init();
+	void copy(const HLState& s);
+	virtual HLState& operator=(const HLState& s);
+	virtual bool operator==(const HLState& s);
+
+public:
+	// misc regs
+	bool					bHdmiIn;
+	bool					bFbLevelA;
+	bool					b4K;
+	bool					b4kHfr;
+	bool					bHfr;
+	bool					bSdiOutRGB;
+	bool					b4k6gOut;
+	bool					b4k12gOut;
+	NTV2FrameRate			primaryFrameRate;
+};
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -60,15 +87,15 @@ public:
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
 	virtual void SetDeviceEveryFrameRegs();
-	virtual void SetDeviceXPointPlayback(GeneralFrameFormat format);
-	virtual void SetDeviceXPointCapture(GeneralFrameFormat format);
-	virtual void SetDeviceMiscRegisters(NTV2Mode mode);
+	virtual void SetDeviceXPointPlayback();
+	virtual void SetDeviceXPointCapture();
+	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
-	virtual void SetDeviceXPointPlaybackRaw(GeneralFrameFormat format);
-	virtual void SetDeviceXPointCaptureRaw(GeneralFrameFormat format);
+	virtual void SetDeviceXPointPlaybackRaw();
+	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
 	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
@@ -109,7 +136,9 @@ public:
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat);
 	bool IsCompatibleWithReference(NTV2VideoFormat videoFormat, NTV2VideoFormat inputFormat);
 	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
-	bool IsFrameBufferFormatRGB(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatRaw(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatCompressed(NTV2FrameBufferFormat fbFormat);
+	bool IsFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	NTV2RGB10Range GetCSCRange();
@@ -202,8 +231,8 @@ public:
 	// real register state - common
 	NTV2DeviceID			mDeviceID;
 	NTV2VideoFormat			mFb1VideoFormat;
-	NTV2FrameBufferFormat	mFb1Fomat;
-	NTV2FrameBufferFormat	mFb2Fomat;
+	NTV2FrameBufferFormat	mFb1Format;
+	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
 
 	// calculated valule, selected by user

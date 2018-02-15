@@ -98,7 +98,7 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 
 UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF)
 {
-	UWord	factor	(1);	//	default
+        UWord	factor = 1;	//	default
 	switch (inFG)
 	{
 		case NTV2_FG_4x1920x1080:

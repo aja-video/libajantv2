@@ -18,43 +18,39 @@ Corvid3GServices::Corvid3GServices()
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void Corvid3GServices::SetDeviceXPointPlayback ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
+	DeviceServices::SetDeviceXPointPlayback();
 
-	NTV2FrameBufferFormat fb1Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	bool bCh1RGB = IsFrameBufferFormatRGB(fb1Format);
-		
-	NTV2FrameBufferFormat fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-	bool bCh2RGB = IsFrameBufferFormatRGB(fb2Format);
+	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode));
+	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 		
 	// don't let the DSK be ON if we're in Mac Desktop mode
 	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool b3GbOut			= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);	
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
-		bCh2RGB = bCh1RGB;
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+		bFb2RGB = bFb1RGB;
 	}
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -69,11 +65,11 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}
 	else 
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
-		else if (genFrameFormat == FORMAT_COMPRESSED)
+		else if (bFb1Compressed)
 		{
 			frameSync1YUV = NTV2_XptCompressionModule;
 		}
@@ -87,9 +83,9 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync2YUV = NTV2_XptCSC2VidYUV;
 		}
@@ -102,7 +98,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	{
 		frameSync2YUV = NTV2_XptMixer1KeyYUV;
 	}
-	else if (genFrameFormat == FORMAT_RGB)
+	else if (bFb1RGB)
 	{
 		frameSync2RGB = NTV2_XptLUT1RGB;
 	}
@@ -117,11 +113,11 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// CSC 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
-	else if (genFrameFormat == FORMAT_COMPRESSED)
+	else if (bFb1Compressed)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptCompressionModule);
 	}
@@ -132,7 +128,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// CSC 2
-	if ( bCh2RGB )
+	if ( bFb2RGB )
 	{
 		mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 	}
@@ -143,33 +139,33 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// LUT 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	
 	
 	// LUT 2
-	if ( bCh2RGB )
+	if ( bFb2RGB )
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	
 
 	// Frame Buffer 1
-	if  (genFrameFormat == FORMAT_COMPRESSED)
+	if  (bFb1Compressed)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
 	}
@@ -180,10 +176,10 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
-		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
 	{
@@ -195,12 +191,12 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		if (bDSKOn)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
 		}
 		else
 		{
@@ -230,13 +226,13 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 		{	
 			case NTV2_DSKModeFBOverMatte:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
-				else if (genFrameFormat == FORMAT_COMPRESSED)
+				else if (bFb1Compressed)
 				{
 					// The foreground video/key needs to come from the Compression Module output (0x07 - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCompressionModule);
@@ -259,13 +255,13 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			
 			case NTV2_DSKModeFBOverVideoIn:
 				// Foreground
-				if (bCh1RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
-				else if (genFrameFormat == FORMAT_COMPRESSED)
+				else if (bFb1Compressed)
 				{
 					// The foreground video/key needs to come from the Compression Module output (0x07 - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCompressionModule);
@@ -293,7 +289,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 
 			case NTV2_DSKModeGraphicOverMatte:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -317,7 +313,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			
 			case NTV2_DSKModeGraphicOverVideoIn:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -347,7 +343,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 			
 			case NTV2_DSKModeGraphicOverFB:			
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -362,7 +358,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				}
 				
 				// Background is Frame Buffer 1 (with or without compression)
-				if (genFrameFormat == FORMAT_COMPRESSED)
+				if (bFb1Compressed)
 				{
 					// Select compression module (0x07)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCompressionModule);
@@ -370,7 +366,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 				}
 				else
 				{
-					if (bCh1RGB)
+					if (bFb1RGB)
 					{
 						// Select CSC1 (0x05/0x0E)
 						mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
@@ -406,7 +402,7 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 	}	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -420,15 +416,16 @@ void Corvid3GServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForma
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat)
+void Corvid3GServices::SetDeviceXPointCapture ()
 {
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;					// Assume Channel 2 IS disabled by default
@@ -444,11 +441,9 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
-		NTV2FrameBufferFormat fbFormat;
-		mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fbFormat);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fbFormat);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 	}
 	
@@ -499,12 +494,12 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);		// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 	}
 	
 	
@@ -513,18 +508,18 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	if (inputFormatSelect == NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,	
 										mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 										kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 	}
 	
 
 	// Frame Buffer 1
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
-	else if (genFrameFormat == FORMAT_RGB)
+	else if (bFb1RGB)
 	{
 		if (inputFormatSelect == NTV2_RGBSelect)
 		{
@@ -542,7 +537,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// CSC converted
 		}
 	}
-	else if (genFrameFormat == FORMAT_COMPRESSED)
+	else if (bFb1Compressed)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCompressionModule);
 	}
@@ -561,7 +556,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	
 	
 	// Frame Buffer 2
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -572,7 +567,7 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 	
 	
 	// Make sure both channels are enable for stereo, level B
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -583,11 +578,11 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 
 
 	// SDI Out 1 
-	if (bLevelBFormat ||																// Dual Stream - p60b
+	if (b2FbLevelBHfr ||																// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, frameSync2YUV);
@@ -608,41 +603,30 @@ void Corvid3GServices::SetDeviceXPointCapture (GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
+void Corvid3GServices::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat (NTV2_CHANNEL1, &primaryPixelFormat);
 	
 	// VPID
-	bool					b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bRGBOut;
-											  
-	const bool				kNot48Bit = false;
-	ULWord					vpidOut1a(0);
-	ULWord					vpidOut1b(0);
-	bool					vpid16x9 = true;
-	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
+												  bSdiOutRGB;
 	
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat) )
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-	
-	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	//
@@ -653,10 +637,10 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
 	
 	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbTransportOut)
+	if (bDualStreamOut && b3GbOut)
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbTransportOut);
+		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbOut);
 	}
 	else
 	{
@@ -664,33 +648,7 @@ void Corvid3GServices::SetDeviceMiscRegisters (NTV2Mode mode)
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 	
-	// Set VPID
-	vpid16x9 = ! NTV2_IS_SD_VIDEO_FORMAT(mFb1VideoFormat);
-	SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_1);
-	if (bDualStreamOut && b3GbTransportOut)
-		SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, kNot48Bit, bDualStreamOut && b3GbTransportOut, false, VPIDChannel_2);
-	
-	
-	// Finish VPID for SDI 1 Out / SDI 2 Out 
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
 		
-		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-		if (bDualStreamOut && b3GbTransportOut)
-			mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-	}
-	
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
 	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)

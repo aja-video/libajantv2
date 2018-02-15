@@ -47,7 +47,7 @@ void KonaIPJ2kServices::UpdateAutoState (void)
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
 	if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
@@ -65,33 +65,30 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	mCard->WriteRegister(kVRegTxcEnable4, true);
 	
 	// call superclass first
-	DeviceServices::SetDeviceXPointPlayback(genFrameFormat);
-
-	NTV2FrameBufferFormat		fb1Format, fb2Format;
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL2, &fb2Format);
-
-	bool						bLevelBFormat		= IsVideoFormatB(mFb1VideoFormat);
+	DeviceServices::SetDeviceXPointPlayback();
+	
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bCh2RGB				= IsFrameBufferFormatRGB(fb2Format);
+	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bCh2RGB && bDSKGraphicMode);
+	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
 	NTV2VideoFormat				inputFormat;									// Input video format
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
 	// make sure formats/modes match for multibuffer modes
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
-		bCh2RGB = IsFrameBufferFormatRGB(fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+		bFb2RGB = IsFormatRGB(mFb1Format);
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
@@ -137,9 +134,9 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -154,7 +151,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	}
 	else 
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync1YUV = NTV2_XptCSC1VidYUV;
 		}
@@ -167,9 +164,9 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
-	if (bStereoOut || bLevelBFormat)
+	if (bStereoOut || b2FbLevelBHfr)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			frameSync2YUV = NTV2_XptCSC2VidYUV;
 		}
@@ -189,7 +186,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	
 	
 	// CSC 1
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
         mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
@@ -200,7 +197,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	
 	
 	// CSC 2
-	if (bCh2RGB)
+	if (bFb2RGB)
 	{
         mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 	}
@@ -216,20 +213,20 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	
 	// LUT 1
 	// note b4K is same processing as regular formats
-	if (genFrameFormat == FORMAT_RGB || bDSKOn)
+	if (bFb1RGB || bDSKOn)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
 	
 		// if RGB-to-RGB apply LUT converter
 		if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
 		{
-			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
 											mRGB10Range == NTV2_RGB10RangeFull ? 
 											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);	
 		}
 		else
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}	
 	}
 	else
@@ -240,10 +237,10 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	
 	
 	// LUT 2
-	if (bCh2RGB)
+	if (bFb2RGB)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptFrameBuffer2RGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
 	}
 	else
 	{
@@ -288,27 +285,27 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	
 	// SDI Out 1
-	if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
-		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)				// RGB Out
 	{		
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
-		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
 		}
 		else
 		{
@@ -324,9 +321,9 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 
 	
 	// SDI Out 2
-	if (bLevelBFormat || bStereoOut)												// Stereo or LevelB
+	if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, frameSync2YUV);
@@ -339,20 +336,20 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)				// RGB Out
 	{
-		mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
-		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
+		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
-			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? frameSync1YUV : frameSync2YUV);
-			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? frameSync1YUV : frameSync2YUV);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 		}
-		else if (genFrameFormat == FORMAT_RGB)
+		else if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut2Input, b3GbTransportOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
-			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
 		}
 		else
 		{
@@ -376,7 +373,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	{
 		XPt1 = frameSync1YUV;
 	}
-	else if (bLevelBFormat || bStereoOut)
+	else if (b2FbLevelBHfr || bStereoOut)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -416,7 +413,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 		{
 			case NTV2_DSKModeFBOverMatte:
 				// Foreground
-				if (genFrameFormat == FORMAT_RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -438,7 +435,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 			
 			case NTV2_DSKModeFBOverVideoIn:
 				// Foreground
-				if (genFrameFormat == FORMAT_RGB)
+				if (bFb1RGB)
 				{
 					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
@@ -481,7 +478,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 
 			case NTV2_DSKModeGraphicOverMatte:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -504,7 +501,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 			
 			case NTV2_DSKModeGraphicOverVideoIn:
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -550,7 +547,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 			
 			case NTV2_DSKModeGraphicOverFB:			
 				// Foreground
-				if (bCh2RGB)
+				if (bFb2RGB)
 				{
 					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
@@ -565,7 +562,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 				}
 				
 				// Background is Frame Buffer 1
-				if (genFrameFormat == FORMAT_RGB)
+				if (bFb1RGB)
 				{
 					// Select CSC1 (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
@@ -600,7 +597,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 	}
 
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoOut)
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		bFb1Disable = bFb2Disable = 0; 
 	}
@@ -626,7 +623,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback (GeneralFrameFormat genFrameForm
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointCapture
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat)
+void KonaIPJ2kServices::SetDeviceXPointCapture()
 {
 	// We need the device ID for KonaIP J2k because there are three flavors of this device
 	if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
@@ -644,23 +641,20 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	mCard->WriteRegister(kVRegTxcEnable4, false);
 
 	// call superclass first
-	DeviceServices::SetDeviceXPointCapture(genFrameFormat);
+	DeviceServices::SetDeviceXPointCapture();
 
-	NTV2VideoFormat				inputFormat      = NTV2_FORMAT_UNKNOWN;
-	NTV2RGBRangeMode			frambBufferRange = (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool						b3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bLevelBFormat    = IsVideoFormatB(mFb1VideoFormat);
-	bool						bStereoIn   = false;
-	int							bFb1Disable = 0;		// Assume Channel 1 is NOT disabled by default
-	int							bFb2Disable = 1;		// Assume Channel 2 IS disabled by default
+	NTV2VideoFormat				inputFormat      	= NTV2_FORMAT_UNKNOWN;
+	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b2FbLevelBHfr    	= IsVideoFormatB(mFb1VideoFormat);
+	bool						bStereoIn   		= false;
+	int							bFb1Disable 		= 0;		// Assume Channel 1 is NOT disabled by default
+	int							bFb2Disable 		= 1;		// Assume Channel 2 IS disabled by default
 
-	NTV2CrosspointID			inputXptYUV1 = NTV2_XptBlack;				// Input source selected single stream
-	NTV2CrosspointID			inputXptYUV2 = NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect = NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
-	NTV2FrameBufferFormat		fb1Format;
-
-	// frame buffer format
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &fb1Format);
+	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;				// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2SDIInputFormatSelect	inputFormatSelect 	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -689,32 +683,32 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
 
 	// make sure formats/modes match for multibuffer modes
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, fb1Format);
+		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	}
 
-	// SMPTE 425
-	ULWord vpida           = 0;
-	ULWord vpidb           = 0;
-	bool b425_2wire        = false;
-	bool b425_4wireA       = false;
-	bool b425_4wireB       = false;
+	// SMPTE 425 (2pi)
+	ULWord vpida		= 0;
+	ULWord vpidb		= 0;
+	bool b2x2piIn		= false;
+	bool b4x2piInA		= false;
+	bool b4x2piInB		= false;
 		
 	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);
 	VPIDStandard std = parser.GetStandard();
-	b425_2wire  = (std == VPIDStandard_2160_DualLink);
-	b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 
-	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
+	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// override inputFormatSelect for SMTE425
-	if (b425)
+	if (b2piIn)
 	{
 		VPIDSampling sample = parser.GetSampling();
 		if (sample == VPIDSampling_YUV_422)
@@ -728,17 +722,17 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	}
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->Set425FrameEnable(b425, NTV2_CHANNEL1);
+	mCard->Set425FrameEnable(b2piIn, NTV2_CHANNEL1);
 	
 
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled) || (levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled) || (levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b3GbInEnabled) || (levelBInput && !bLevelBFormat));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b3GbInEnabled) || (levelBInput && !b2FbLevelBHfr));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
@@ -796,22 +790,22 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
 		
 		// if RGB-to-RGB apply LUT converter
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
-			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,					// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,
 											mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 		}
 		else 
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}	
 	}
 	
@@ -821,14 +815,14 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	{
 		// provides SMPTE <-> Full conversion
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,						// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,	
 											 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
 											 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);	// NOTE: this conflicts with using AutoCirculate Color Correction!
+		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	
 	// LUT 3, 4
@@ -879,9 +873,9 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	
 	
 	// 425 mux
-	if (b425)
+	if (b2piIn)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			if (inputFormatSelect == NTV2_RGBSelect)
 			{
@@ -907,7 +901,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 				mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptCSC3VidYUV);
 				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptCSC4VidYUV);
 			}
-			else  if (b425_2wire)
+			else  if (b2x2piIn)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn1DS2);
@@ -943,9 +937,9 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	}
 
 	// Frame Buffer 1
-	if (b425)
+	if (b2piIn)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB);
 			mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
@@ -956,11 +950,11 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 			mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
-	else if (genFrameFormat == FORMAT_RGB)
+	else if (bFb1RGB)
 	{
 		if (inputFormatSelect == NTV2_RGBSelect)
 		{
@@ -986,9 +980,9 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 
 	
 	// Frame Buffer 2
-	if (b425)
+	if (b2piIn)
 	{
-		if (genFrameFormat == FORMAT_RGB)
+		if (bFb1RGB)
 		{
 			mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
 			mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
@@ -999,7 +993,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 			mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
 		}
 	}
-	else if (bLevelBFormat || bStereoIn)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -1013,7 +1007,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	
 	// Frame Buffer Disabling
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -1043,7 +1037,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, inputXptYUV2);
@@ -1056,7 +1050,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
 	{		
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);							// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
@@ -1078,7 +1072,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, inputXptYUV1);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, inputXptYUV2);
@@ -1091,7 +1085,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);							// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
@@ -1113,7 +1107,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 	NTV2CrosspointID XPt2 = NTV2_XptBlack;
 	NTV2CrosspointID XPt3 = NTV2_XptBlack;
 	NTV2CrosspointID XPt4 = NTV2_XptBlack;
-	if (bLevelBFormat || bStereoIn)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -1136,21 +1130,19 @@ void KonaIPJ2kServices::SetDeviceXPointCapture(GeneralFrameFormat genFrameFormat
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
+void KonaIPJ2kServices::SetDeviceMiscRegisters()
 {
 	// call superclass first
-	DeviceServices::SetDeviceMiscRegisters(mode);
+	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	NTV2FrameBufferFormat   primaryPixelFormat;
 	bool					rv, rv2, enableChCard;
 	uint32_t				enableChServices;
     uint32_t                configErr;
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
-	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, &primaryPixelFormat);
 
     if (mCard->IsDeviceReady(true) == true)
     {
@@ -1372,7 +1364,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                     
                     // current bit depth
                     mTx2022J2kConfig1.bitDepth = 10;
-                    if (Is8BitFrameBufferFormat(primaryPixelFormat))
+                    if (Is8BitFrameBufferFormat(mFb1Format))
                     {
                         mTx2022J2kConfig1.bitDepth = 8;
                     }
@@ -1446,7 +1438,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
                         
                         // current bit depth
                         mTx2022J2kConfig2.bitDepth = 10;
-                        if (Is8BitFrameBufferFormat(primaryPixelFormat))
+                        if (Is8BitFrameBufferFormat(mFb1Format))
                         {
                             mTx2022J2kConfig2.bitDepth = 8;
                         }
@@ -1470,33 +1462,29 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
     }
 
 	// VPID
-	bool					bLevelA = IsVideoFormatA(mFb1VideoFormat);
+	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 
-	bool					bRGBOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	ULWord					vpidOut1a(0);
-	ULWord					vpidOut1b(0);
-	ULWord					vpidOut2a(0);
-	ULWord					vpidOut2b(0);
+	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
-	bool b1x3Gb =
-		((bRGBOut == true) ||
+	bool b1x3GbOut =
+		((bSdiOutRGB == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-		(bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 
 	// all 3Gb transport out
-	// b3GbTransportOut = (b1x3Gb + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbTransportOut = (b1x3Gb == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
+	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
+	bool b3GbOut = (b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
-	if (mode == NTV2_MODE_CAPTURE)
+	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
 		ULWord vpida = 0;
 		ULWord vpidb = 0;
@@ -1510,7 +1498,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:
-				b3GbTransportOut = true;
+				b3GbOut = true;
 				break;
 			case VPIDStandard_2160_QuadLink_3Ga:
 			case VPIDStandard_2160_QuadDualLink_3Gb:
@@ -1775,7 +1763,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(primaryPixelFormat))
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format))
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
@@ -1815,33 +1803,23 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 
 	// is 2K frame buffer geometry, includes 4K mode
 	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbTransportOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
+	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
+	if (b3GbOut)
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-
-	// Set VPID 1
-	if (b4K)
-	{
-		SetVPIDData(vpidOut1a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_1);
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut1b, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_2);
-		}
 	}
 
 
@@ -1852,72 +1830,20 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters(NTV2Mode mode)
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
+	if (b3GbOut)
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
-
-	// Set VPID 2
-	if (b4K)
-	{
-		if (b3GbTransportOut)
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_3);
-			SetVPIDData(vpidOut2b, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_4);
-		}
-		else
-		{
-			SetVPIDData(vpidOut2a, mFb1VideoFormat, bRGBOut, false, b3GbTransportOut, false, VPIDChannel_2);
-		}
-	}
 	
-	
-	// Finish VPID for SDI Out 1-4 Out
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(	(mode == NTV2_MODE_CAPTURE) &&
-								((mVirtualInputSelect == NTV2_DualLinkInputSelect && bRGBOut == true) ||
-								 (mVirtualInputSelect != NTV2_DualLinkInputSelect && bRGBOut != true)   ));
-		
-		// enable overwrite
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-			mCard->WriteRegister(kRegSDIOut2Control, overwrite, kK2RegMaskVPIDInsertionOverwrite, kK2RegShiftVPIDInsertionOverwrite);
-		}
-		
-		// enable VPID write
-		if (b4K)
-		{
-			mCard->WriteRegister(kRegSDIOut1Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-			mCard->WriteRegister(kRegSDIOut2Control, 1, kK2RegMaskVPIDInsertionEnable, kK2RegShiftVPIDInsertionEnable);
-		}
-
-		// write VPID value
-		if (b4K)
-		{
-			// write VPID for SDI 1
-			//debugOut("out vpid = %08x  %08x  %08x  %08x  %08x  %08x  %08x %08x\n", true, vpidOut1a, vpidOut1b, vpidOut2a, vpidOut2b, vpidOut3a, vpidOut3b, vpidOut4a, vpidOut4b);
-			mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut1VPIDB, vpidOut1b);
-			
-			// write VPID for SDI 2
-			mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-			if (b3GbTransportOut)
-				mCard->WriteRegister(kRegSDIOut2VPIDB, vpidOut2b);
-		}
-
-	}
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	mCard->WriteRegister(kRegSDIOut1Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);

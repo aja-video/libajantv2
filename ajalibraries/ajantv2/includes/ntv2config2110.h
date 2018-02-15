@@ -146,7 +146,7 @@ public:
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
 
-    std::string GetTxSDP(NTV2Channel chan);
+    std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
 
@@ -197,18 +197,21 @@ protected:
     void        SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool enable);
     void        GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool & enable);
 
-    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        DisableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
+    void        EnableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
     void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+
     void        SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
 
-    void        SetupDepacketizer(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
-    void        ResetDepacketizer(const NTV2Channel channel, NTV2Stream stream);
+    void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     bool		ConfigurePTP(eSFP port, std::string localIPAddress);
 
-    bool        GenSDP(NTV2Channel channel);
+    bool        GenSDP(NTV2Channel channel, NTV2Stream stream);
     bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
     bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);
 
@@ -226,7 +229,7 @@ private:
     int         getDescriptionValue(int startLine, std::string type, std::string & value);
     std::string getVideoDescriptionValue(std::string type);
 
-    std::stringstream txsdp[4]; // one SDP per channel
+    std::stringstream txsdp[4][5];  // indexed by channel and stream
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;

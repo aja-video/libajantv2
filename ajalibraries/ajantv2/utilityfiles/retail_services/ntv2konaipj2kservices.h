@@ -22,9 +22,9 @@ public:
 	~KonaIPJ2kServices();
 	
 	virtual void UpdateAutoState (void);
-	virtual void SetDeviceXPointPlayback (GeneralFrameFormat format);
-	virtual void SetDeviceXPointCapture (GeneralFrameFormat format);
-	virtual void SetDeviceMiscRegisters (NTV2Mode mode);
+	virtual void SetDeviceXPointPlayback ();
+	virtual void SetDeviceXPointCapture ();
+	virtual void SetDeviceMiscRegisters ();
 
 protected:
 	CNTV2Config2022     * config;
