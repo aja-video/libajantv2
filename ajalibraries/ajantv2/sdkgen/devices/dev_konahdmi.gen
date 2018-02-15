@@ -90,6 +90,7 @@ NTV2_WgtHDMIIn1v4
 NTV2_WgtHDMIIn2v4
 NTV2_WgtHDMIIn3v4
 NTV2_WgtHDMIIn4v4
+NTV2_WgtGenLock
 
 
 // NTV2InputSources
