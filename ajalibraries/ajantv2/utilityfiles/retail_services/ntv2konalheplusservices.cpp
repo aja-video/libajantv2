@@ -734,8 +734,6 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 	bool					bDualStreamOut	= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 											  IsVideoFormatB(mFb1VideoFormat);
-
-	const bool				bRGBOut	= false;	
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)
 	if (bDualStreamOut)

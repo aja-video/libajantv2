@@ -46,10 +46,10 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bRGBOut4K			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
-	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
-	bool						b2wire4k			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
@@ -537,14 +537,14 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	// SDI Out 1
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
 		}
 		else if (!b2pi)
 		{
-			if (!b2wire4k)
+			if (!b2xQuadOut)
 			{
 				// is 4k quad 4-wire
 				if (bFb1RGB)
@@ -596,14 +596,14 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	// SDI Out 2
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
 		}
 		else if (!b2pi)
 		{
-			if (!b2wire4k)
+			if (!b2xQuadOut)
 			{
 				// is 4k quad 4-wire
 				if (bFb1RGB)
@@ -654,14 +654,14 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
 		}
 		else if (!b2pi)
 		{
-			if (!b2wire4k)
+			if (!b2xQuadOut)
 			{
 				// is 4k quad 4-wire
 				if (bFb1RGB)
@@ -722,24 +722,24 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	else if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
-		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)			// RGB Out
 	{		
 		mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut1);
-		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 		}
 		else if (bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
 		}
 		else
 		{
@@ -757,14 +757,14 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
-		if (bRGBOut4K)
+		if (bSdiOutRGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
 		}
 		else if (!b2pi)
 		{
-			if (!b2wire4k)
+			if (!b2xQuadOut)
 			{
 				// is 4k quad 4-wire
 				if (bFb1RGB)
@@ -825,7 +825,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	}
 	else if (b2FbLevelBHfr || bStereoOut)													// Stereo or LevelB
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, frameSync1YUV);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, frameSync2YUV);
@@ -838,20 +838,20 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)			// RGB Out
 	{
-		mCard->Connect (NTV2_XptSDIOut4Input, b3GbTransportOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
-		mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbTransportOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
+		mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, b3GbTransportOut ? frameSync1YUV : frameSync2YUV);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbTransportOut ? frameSync2YUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? frameSync1YUV : frameSync2YUV);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 		}
 		else if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, b3GbTransportOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbTransportOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
+			mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? NTV2_XptCSC1VidYUV : NTV2_XptCSC1KeyYUV);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? NTV2_XptCSC1KeyYUV : NTV2_XptBlack);
 		}
 		else
 		{
@@ -1132,11 +1132,11 @@ void Corvid44Services::SetDeviceXPointCapture ()
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
-	bool						b3GbTransportOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b2wire4k            = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
+	bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
 	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -1188,26 +1188,26 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 	}
 
-	// SMPTE 425
-	ULWord vpida           = 0;
-	ULWord vpidb           = 0;
-	bool b425_2wire        = false;
-	bool b425_4wireA       = false;
-	bool b425_4wireB       = false;
+	// SMPTE 425 (2pi)
+	ULWord vpida		= 0;
+	ULWord vpidb		= 0;
+	bool b2x2piIn		= false;
+	bool b4x2piInA		= false;
+	bool b4x2piInB		= false;
 		
 	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
 	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);
 	VPIDStandard std = parser.GetStandard();
-	b425_2wire  = (std == VPIDStandard_2160_DualLink);
-	b425_4wireA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b425_4wireB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 
-	bool b425 = (b425_2wire || b425_4wireA || b425_4wireB);
+	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// override inputFormatSelect for SMTE425
-	if (b425)
+	if (b2piIn)
 	{
 		VPIDSampling sample = parser.GetSampling();
 		if (sample == VPIDSampling_YUV_422)
@@ -1221,7 +1221,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	}
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b425, NTV2_CHANNEL1);
+	mCard->SetTsiFrameEnable(b2piIn, NTV2_CHANNEL1);
 	
 	// SDI In 1
 	bool b3GbInEnabled;
@@ -1326,7 +1326,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	// CSC 2
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
 		}
@@ -1334,7 +1334,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 		}
-		else if (b425_2wire)
+		else if (b2x2piIn)
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
 		}
@@ -1352,7 +1352,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	// CSC 3
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn2);
 		}
@@ -1360,7 +1360,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptLUT3Out);
 		}
-		else if (b425_2wire)
+		else if (b2x2piIn)
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn2);
 		}
@@ -1378,7 +1378,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	// CSC 4
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2DS2);
 		}
@@ -1386,7 +1386,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptLUT4Out);
 		}
-		else if (b425_2wire)
+		else if (b2x2piIn)
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2DS2);
 		}
@@ -1571,7 +1571,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	
 
 	// 425 mux
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -1599,7 +1599,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 				mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptCSC3VidYUV);
 				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptCSC4VidYUV);
 			}
-			else  if (b425_2wire)
+			else  if (b2x2piIn)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn1DS2);
@@ -1635,7 +1635,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	}
 
 	// Frame Buffer 1
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -1670,7 +1670,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 			}
@@ -1713,7 +1713,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (b425)
+	if (b2piIn)
 	{
 		if (bFb1RGB)
 		{
@@ -1748,7 +1748,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn1DS2);
 			}
@@ -1795,15 +1795,15 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect && !b425)
+			else if (inputFormatSelect == NTV2_RGBSelect && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidYUV);
 			}
-			else if (!b425)
+			else if (!b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn3);				// CSC converted
 			}
@@ -1838,15 +1838,15 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b2wire4k)
+			if (b2xQuadOut)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect && !b425)
+			else if (inputFormatSelect == NTV2_RGBSelect && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidYUV);
 			}
-			else if (!b425)
+			else if (!b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);				// CSC converted
 			}
@@ -1865,7 +1865,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	}
 	else if (b4K)
 	{
-		if (b425)
+		if (b2piIn)
 		{
 			bFb1Disable = bFb2Disable = 0;
 		}
@@ -1896,12 +1896,12 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	// SDI Out 3 - acts like SDI 1
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptSDIIn1DS2);
 		}
-		else if (b425_2wire && !bFb1RGB)
+		else if (b2x2piIn && !bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux3AYUV);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_Xpt425Mux3BYUV);
@@ -1916,7 +1916,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, inputXptYUV2);
@@ -1929,7 +1929,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
 	{		
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);							// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
@@ -1949,12 +1949,12 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	// SDI Out 4 - acts like SDI 2
 	if (b4K)
 	{
-		if (b2wire4k)
+		if (b2xQuadOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn2);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn2DS2);
 		}
-		else if (b425_2wire && !bFb1RGB)
+		else if (b2x2piIn && !bFb1RGB)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux4AYUV);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_Xpt425Mux4BYUV);
@@ -1969,7 +1969,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, inputXptYUV1);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, inputXptYUV2);
@@ -1982,7 +1982,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
 	{
-		if (b3GbTransportOut)
+		if (b3GbOut)
 		{
 			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);							// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
@@ -2016,28 +2016,28 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	// VPID
-	bool					bLevelA				= IsVideoFormatA(mFb1VideoFormat);
+	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	bool					bRGBOut				= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
-	bool b1x3Gb =			(b4K == false) &&
-							((bRGBOut == true) ||
+	bool b1x3GbOut =		(b4K == false) &&
+							((bSdiOutRGB == true) ||
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-							 (bLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+							 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
 	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	
 	// all 3Gb transport out
-	// b3GbTransportOut = (b1x3Gb + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbTransportOut =	(b1x3Gb == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
-							(b4K == true && bRGBOut == true) ||
+	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
+	bool b3GbOut =	(b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
+							(b4K == true && bSdiOutRGB == true) ||
 							(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							b2wire4kOut || b2wire4kIn;
 	
@@ -2060,7 +2060,7 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:
-				b3GbTransportOut = true;
+				b3GbOut = true;
 				b4xIo = false;
 				b2pi  = true;
 				break;
@@ -2085,7 +2085,7 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	else
 	{		
 		b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		if (b2pi && !bRGBOut && !b4kHfr)
+		if (b2pi && !bSdiOutRGB && !b4kHfr)
 			b4xIo = false;										// low frame rate two pixel interleave YUV
 		
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
@@ -2107,22 +2107,22 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	
 	// is 2K frame buffer geometry, includes 4K mode
 	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbTransportOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
+	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 	
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
+	if (b3GbOut)
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 
@@ -2133,17 +2133,17 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut)
+	if (b3GbOut)
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
 	}
 	
@@ -2155,17 +2155,17 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bFbLevelA && b3GbOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut || (b2pi && !b4kHfr))
+	if (b3GbOut || (b2pi && !b4kHfr))
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
 	}
 	
@@ -2177,17 +2177,17 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	// Select primary standard
 	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
 	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bLevelA && b3GbTransportOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbTransportOut || (b2pi && !b4kHfr))
+	if (b3GbOut || (b2pi && !b4kHfr))
 	{
 		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bLevelA);
+		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
 		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
 	}
 	
