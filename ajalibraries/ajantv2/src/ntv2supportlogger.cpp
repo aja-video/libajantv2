@@ -855,7 +855,7 @@ const registerToLoadString registerToLoadStrings[] =
 bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad)
 {
 	ifstream fileInput;
-	fileInput.open(inLogFilePath);
+	fileInput.open(inLogFilePath.c_str());
 	string lineContents;
 	int i = 0, numLines = 0;;
 	int size = sizeof(registerToLoadStrings)/sizeof(registerToLoadString);
