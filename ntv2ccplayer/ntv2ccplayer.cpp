@@ -846,15 +846,15 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 		return AJA_STATUS_FAIL;
 	}
 
-	//	Stuff the gray pattern into my video buffer...
-	::memcpy (formatDesc.GetTopVisibleRowAddress (mpVideoBuffer), &testPatternBuffer[0], testPatternBuffer.size ());
-
 	//	Set the VANC area, if any, to legal black...
 	if (formatDesc.IsVANC () && !::SetRasterLinesBlack (mPixelFormat, mpVideoBuffer, formatDesc.GetBytesPerRow (), formatDesc.firstActiveLine))
 	{
 		cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
 		return AJA_STATUS_FAIL;
 	}
+
+	//	Stuff the gray pattern into my video buffer...
+	::memcpy (formatDesc.GetTopVisibleRowAddress (mpVideoBuffer), &testPatternBuffer[0], testPatternBuffer.size ());
 
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString (mVideoFormat)));
