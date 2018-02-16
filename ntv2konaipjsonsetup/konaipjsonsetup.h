@@ -6,6 +6,9 @@
 #include <QJsonObject>
 #include <QList>
 
+#include "ntv2config2022.h"
+#include "ntv2config2110.h"
+
 typedef struct
 {
     QString mSFPDesignator;
@@ -90,6 +93,7 @@ protected:
     bool setupBoard2110(std::string deviceSpec);
     bool setupBoard2022(std::string deviceSpec);
     bool readJson(const QJsonObject &json);
+    void dumpRx2110Config(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig);
 
     KonaIPParamSetupStruct mKonaIPParams;
 
