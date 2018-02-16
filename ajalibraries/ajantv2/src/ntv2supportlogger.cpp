@@ -502,7 +502,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     {
         const NTV2RegInfo &	regInfo	(*it);
         const uint32_t		regNum	(regInfo.registerNumber);
-        const uint32_t		offset	(regInfo.registerNumber * 4);
+        //const uint32_t	offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
 			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
@@ -520,7 +520,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     {
         const NTV2RegInfo &	regInfo	(*it);
         const uint32_t		regNum	(regInfo.registerNumber);
-        const uint32_t		offset	(regInfo.registerNumber * 4);
+        //const uint32_t	offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
 			<< "VReg Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
