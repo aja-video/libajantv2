@@ -36,7 +36,7 @@
 #define FRAME_1080_8BIT_LINEPITCH (1920*2)
 #define FRAME_QUADHD_10BIT_SIZE (FRAME_1080_10BIT_LINEPITCH*2160)
 #define FRAME_QUADHD_8BIT_SIZE (FRAME_1080_8BIT_LINEPITCH*2160)
-#define FRAME_BASE(frameNumber,frameSize) (frameNumber*frameSize) 
+#define FRAME_BASE(__frameNum__,__frameSize__)	((__frameNum__)*(__frameSize__))
 
 #define ClipRGB_8BIT(X) ((X) > MAX_RGB_8BIT ? (MAX_RGB_8BIT) : ((X) < MIN_RGB_8BIT ? (MIN_RGB_8BIT) : (X)))
 #define ClipRGB_10BIT(X) ((X) > MAX_RGB_10BIT ? (MAX_RGB_10BIT) : ((X) < MIN_RGB_10BIT ? (MIN_RGB_10BIT) : (X)))
