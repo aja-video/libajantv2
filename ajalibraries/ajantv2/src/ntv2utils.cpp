@@ -743,13 +743,13 @@ void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels)
 
 }
 
-void Make10BitBlackLine(UWord* lineData,UWord numPixels)
+void Make10BitBlackLine (UWord * pOutLineData, const UWord inNumPixels)
 {
 	// Assume 1080 format
-	for ( int count = 0; count < numPixels*2; count+=2 )
+	for (UWord count(0);  count < inNumPixels*2;  count+=2)
 	{
-		lineData[count] = (UWord)CCIR601_10BIT_CHROMAOFFSET;
-		lineData[count+1] = (UWord)CCIR601_10BIT_BLACK;
+		pOutLineData[count]   = UWord(CCIR601_10BIT_CHROMAOFFSET);
+		pOutLineData[count+1] = UWord(CCIR601_10BIT_BLACK);
 	}
 }
 
