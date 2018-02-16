@@ -662,6 +662,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
         rxChannelConfig.payloadType  = receive.mPayload.toUInt();
         rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
+        if (rxChannelConfig.videoFormat == NTV2_FORMAT_UNKNOWN)
+            rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString(), true);
+
         rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
         if (!receive.mPayloadLen.isEmpty())
@@ -718,6 +721,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.tos          = transmit.mTOS.toUInt();
         txChannelConfig.ttl          = transmit.mTTL.toUInt();
         txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
+        if (txChannelConfig.videoFormat == NTV2_FORMAT_UNKNOWN)
+            txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString(), true);
+
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
         if (!transmit.mNumAudioChannels.isEmpty())
