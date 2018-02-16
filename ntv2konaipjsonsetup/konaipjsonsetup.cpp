@@ -10,8 +10,6 @@
 
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
-#include "ntv2config2022.h"
-#include "ntv2config2110.h"
 
 
 using std::endl;
@@ -631,10 +629,16 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         {
             stream = NTV2_AUDIO1_STREAM;
         }
-        else
+        else if (receive.mStream == "video")
         {
             stream = NTV2_VIDEO_STREAM;
         }
+        else
+        {
+            cerr << "Invalid RX Stream: " << receive.mStream.toStdString() << endl;
+            return false;
+        }
+
 
         bool enable = getEnable(receive.mEnable);
         if (!enable)
@@ -671,6 +675,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         if (!receive.mAudioPktInterval.isEmpty())
             rxChannelConfig.audioPacketInterval = (receive.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
 
+        //dumpRx2110Config (channel, stream, rxChannelConfig);
         bool rv = config2110.EnableRxStream (channel, stream, rxChannelConfig);
         if (!rv)
         {
@@ -781,3 +786,24 @@ bool getEnable(QString enableBoolString)
     return (enableBoolString == "true");
 }
 
+
+void CKonaIpJsonSetup::dumpRx2110Config(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
+{
+    qDebug() << "Rx2110Config for channel " << channel << "and stream " << stream;
+
+    qDebug() << "  rxMatch             " << rxConfig.rxMatch;
+    qDebug() << "  sourceIP            " << QString::fromStdString(rxConfig.sourceIP);
+    qDebug() << "  destIP              " << QString::fromStdString(rxConfig.destIP);
+    qDebug() << "  sourcePort          "<< rxConfig.sourcePort;
+    qDebug() << "  destPort            "<< rxConfig.destPort;
+    qDebug() << "  SSRC                "<< rxConfig.SSRC;
+    qDebug() << "  VLAN                "<< rxConfig.VLAN;
+    qDebug() << "  payloadType         "<< rxConfig.payloadType;
+    qDebug() << "  videoFormat         "<< rxConfig.videoFormat;
+    qDebug() << "  videoSamples        "<< rxConfig.videoSamples;
+    qDebug() << "  payloadLen          "<< rxConfig.payloadLen;
+    qDebug() << "  lastPayloadLen      "<< rxConfig.lastPayloadLen;
+    qDebug() << "  pktsPerLine         "<< rxConfig.pktsPerLine;
+    qDebug() << "  numAudioChannels    "<< rxConfig.numAudioChannels;
+    qDebug() << "  audioPacketInterval "<< rxConfig.audioPacketInterval << endl;
+}
