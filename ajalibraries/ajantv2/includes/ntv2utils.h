@@ -25,25 +25,26 @@
 //////////////////////////////////////////////////////
 //	BEGIN SECTION MOVED FROM 'videoutilities.h'
 //////////////////////////////////////////////////////
-#define DEFAULT_PATT_GAIN  0.9		// some patterns pay attention to this...
-#define HD_NUMCOMPONENTPIXELS_2K  2048
-#define HD_NUMCOMPONENTPIXELS_1080_2K  2048
-#define HD_NUMCOMPONENTPIXELS_1080  1920
-#define CCIR601_10BIT_BLACK  64
-#define CCIR601_10BIT_WHITE  940
-#define CCIR601_10BIT_CHROMAOFFSET  512
+#define DEFAULT_PATT_GAIN				0.9		//	some patterns pay attention to this...
+#define HD_NUMCOMPONENTPIXELS_2K		2048
+#define HD_NUMCOMPONENTPIXELS_1080_2K	2048
+#define HD_NUMCOMPONENTPIXELS_1080		1920
 
-#define CCIR601_8BIT_BLACK  16
-#define CCIR601_8BIT_WHITE  235
-#define CCIR601_8BIT_CHROMAOFFSET  128
+#define CCIR601_10BIT_BLACK				64
+#define CCIR601_10BIT_WHITE				940
+#define CCIR601_10BIT_CHROMAOFFSET		512
+
+#define CCIR601_8BIT_BLACK				16
+#define CCIR601_8BIT_WHITE				235
+#define CCIR601_8BIT_CHROMAOFFSET		128
 
 // line pitch is in bytes.
-#define FRAME_0_BASE (0x0)
-#define FRAME_1080_10BIT_LINEPITCH (1280*4)
-#define FRAME_1080_8BIT_LINEPITCH (1920*2)
-#define FRAME_QUADHD_10BIT_SIZE (FRAME_1080_10BIT_LINEPITCH*2160)
-#define FRAME_QUADHD_8BIT_SIZE (FRAME_1080_8BIT_LINEPITCH*2160)
-#define FRAME_BASE(frameNumber,frameSize) (frameNumber*frameSize)
+#define FRAME_0_BASE							(0x0)
+#define FRAME_1080_10BIT_LINEPITCH				(1280*4)
+#define FRAME_1080_8BIT_LINEPITCH				(1920*2)
+#define FRAME_QUADHD_10BIT_SIZE					(FRAME_1080_10BIT_LINEPITCH*2160)
+#define FRAME_QUADHD_8BIT_SIZE					(FRAME_1080_8BIT_LINEPITCH*2160)
+#define FRAME_BASE(__frameNum__,__frameSize__)	((__frameNum__)*(__frameSize__))
 
 /**
 	@param[in]	inPixelFormat		Specifies the pixel format.
@@ -114,7 +115,16 @@ AJAExport void UnPack10BitDPXtoRGBAlpha10BitPixel(RGBAlpha10BitPixel* rgba10BitB
 AJAExport void UnPack10BitDPXtoForRP215withEndianSwap(UWord* rawrp215Buffer,ULWord* DPXLinebuffer ,ULWord numPixels);
 AJAExport void UnPack10BitDPXtoForRP215(UWord* rawrp215Buffer,ULWord* DPXLinebuffer ,ULWord numPixels);
 AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels);
-AJAExport void Make10BitBlackLine(UWord* lineData,UWord numPixels=1920);
+
+/**
+	@brief		Writes a line of unpacked 10-bit Y/C legal SMPTE black values into the given UWord buffer.
+	@param[in]	pLineData		A valid, non-NULL pointer to the destination UWord buffer.
+	@param[in]	inNumPixels		Specifies the width of the line, in pixels. Defaults to 1920.
+	@warning	This function performs no error checking. Memory corruption will occur if the destination buffer
+				is smaller than 4 x inNumPixels bytes (i.e. smaller than 2 x inNumPixels UWords).
+**/
+AJAExport void Make10BitBlackLine (UWord * pLineData, const UWord inNumPixels = 1920);
+
 AJAExport void Make10BitWhiteLine(UWord* lineData,UWord numPixels=1920);
 AJAExport void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 										NTV2Standard standard,
