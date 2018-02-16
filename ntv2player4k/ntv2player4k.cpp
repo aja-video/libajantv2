@@ -228,7 +228,17 @@ AJAStatus NTV2Player4K::SetUpVideo ()
 		mDevice.EnableChannel (NTV2_CHANNEL8);
 		mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL5);
 	}
-	mDevice.SetReference (NTV2_REFERENCE_FREERUN);
+
+	if(mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_2110 ||
+		mDeviceID == DEVICE_ID_KONAIP_2110 ||
+		mDeviceID == DEVICE_ID_KONAIP_2110)
+	{
+		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
+	}
+	else
+	{
+		mDevice.SetReference (NTV2_REFERENCE_FREERUN);
+	}
 
 	return AJA_STATUS_SUCCESS;
 
