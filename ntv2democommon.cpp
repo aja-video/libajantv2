@@ -303,7 +303,7 @@ static const DemoCommonInitializer	gInitializer;
 
 const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
-	return inKinds == BOTH_VIDEO_FORMATS  ?  gAllFormats  :  (inKinds == UHD_VIDEO_FORMATS ? g4KFormats : gNon4KFormats);
+	return inKinds == VIDEO_FORMATS_ALL  ?  gAllFormats  :  (inKinds == VIDEO_FORMATS_4KUHD ? g4KFormats : gNon4KFormats);
 }
 
 
@@ -396,15 +396,17 @@ string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKind
 }
 
 
-NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const bool in4K)
+NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const NTV2VideoFormatKinds inKinds)
 {
-	String2VideoFormatMapConstIter	iter	(gString2VideoFormatMap.find (inStr));
-	if (iter == gString2VideoFormatMap.end ())
+	String2VideoFormatMapConstIter	iter	(gString2VideoFormatMap.find(inStr));
+	if (iter == gString2VideoFormatMap.end())
 		return NTV2_FORMAT_UNKNOWN;
 	const NTV2VideoFormat	format	(iter->second);
-	if (in4K && NTV2_IS_4K_VIDEO_FORMAT (format))
+	if (inKinds == VIDEO_FORMATS_ALL)
 		return format;
-	if (!in4K && !NTV2_IS_4K_VIDEO_FORMAT (format))
+	if (inKinds == VIDEO_FORMATS_4KUHD && NTV2_IS_4K_VIDEO_FORMAT(format))
+		return format;
+	if (inKinds == VIDEO_FORMATS_NON_4KUHD && !NTV2_IS_4K_VIDEO_FORMAT(format))
 		return format;
 	return NTV2_FORMAT_UNKNOWN;
 }

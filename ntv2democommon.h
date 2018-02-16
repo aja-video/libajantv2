@@ -106,9 +106,15 @@ class Bouncer
 
 typedef enum _NTV2VideoFormatKinds
 {
-	NON_UHD_VIDEO_FORMATS	= -1,
-	BOTH_VIDEO_FORMATS		= 0,
-	UHD_VIDEO_FORMATS		= 1
+	VIDEO_FORMATS_ALL		= 0xFF,
+	VIDEO_FORMATS_NON_4KUHD	= 1,
+	VIDEO_FORMATS_4KUHD		= 2,
+	VIDEO_FORMATS_NONE		= 0,
+	//	Deprecated old ones:
+	BOTH_VIDEO_FORMATS		= VIDEO_FORMATS_ALL,
+	NON_UHD_VIDEO_FORMATS	= VIDEO_FORMATS_NON_4KUHD,
+	UHD_VIDEO_FORMATS		= VIDEO_FORMATS_4KUHD
+
 } NTV2VideoFormatKinds;
 
 
@@ -150,11 +156,15 @@ typedef enum _NTV2TCIndexKinds
 class CNTV2DemoCommon
 {
 	public:
+	/**
+		@name	Video Format Functions
+	**/
+	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
 			@return		The supported NTV2VideoFormatSet.
 		**/
-		static const NTV2VideoFormatSet &	GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = NON_UHD_VIDEO_FORMATS);
+		static const NTV2VideoFormatSet &	GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
 		/**
 			@param[in]	inKinds				Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
@@ -162,17 +172,30 @@ class CNTV2DemoCommon
 											warns if the video format is incompatible with that device.
 			@return		A string that can be printed to show the supported video formats.
 		**/
-		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = NON_UHD_VIDEO_FORMATS,
+		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
 			@brief	Returns the NTV2VideoFormat that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an NTV2VideoFormat.
-			@param[in]	in4K	If true, expects "inStr" to specify a valid 4K/UHD video format;  otherwise expects a non-4K/UHD format.
+			@param[in]	inStr		Specifies the string to be converted to an NTV2VideoFormat.
+			@param[in]	inKinds		Specifies which video format type is expected in "inStr", whether non-4K/UHD (the default),
+									exclusively 4K/UHD, or both/all.
 			@return		The given string converted to an NTV2VideoFormat, or NTV2_FORMAT_UNKNOWN if there's no match.
 		**/
-		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const bool in4K = false);
+		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
+		/**
+			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
+			@param[out]	On entry, specifies the wire format;  on exit, receives the 4K video format.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);
+	///@}
+
+	/**
+		@name	Pixel Format Functions
+	**/
+	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
 			@return		The supported NTV2PixelFormatSet.
@@ -196,6 +219,17 @@ class CNTV2DemoCommon
 		static NTV2FrameBufferFormat		GetPixelFormatFromString (const std::string & inStr);
 
 		/**
+			@return		The equivalent AJA_PixelFormat for the given NTV2FrameBufferFormat.
+			@param[in]	inFormat	Specifies the NTV2FrameBufferFormat to be converted into an equivalent AJA_PixelFormat.
+		**/
+		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat);
+	///@}
+
+	/**
+		@name	Input Source Functions
+	**/
+	///@{
+		/**
 			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
 			@return		The supported NTV2InputSourceSet.
 		**/
@@ -216,7 +250,12 @@ class CNTV2DemoCommon
 			@return		The given string converted to an NTV2InputSource, or NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
 		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr);
+	///@}
 
+	/**
+		@name	Timecode Functions
+	**/
+	///@{
 		/**
 			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
 			@return		The supported NTV2TCIndexes set.
@@ -238,7 +277,12 @@ class CNTV2DemoCommon
 			@return		The given string converted to an NTV2TCIndex, or NTV2_TCINDEX_INVALID if there's no match.
 		**/
 		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr);
+	///@}
 
+	/**
+		@name	Audio System Functions
+	**/
+	///@{
 		/**
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											returns the audio systems that are compatible with that device.
@@ -252,7 +296,12 @@ class CNTV2DemoCommon
 			@return		The given string converted to an NTV2AudioSystem, or NTV2_AUDIOSYSTEM_INVALID if there's no match.
 		**/
 		static NTV2AudioSystem				GetAudioSystemFromString (const std::string & inStr);
+	///@}
 
+	/**
+		@name	Miscellaneous Functions
+	**/
+	///@{
 		/**
 			@brief	Returns the given string after converting it to lower case.
 			@param[in]	inStr	Specifies the string to be converted to lower case.
@@ -286,28 +335,16 @@ class CNTV2DemoCommon
 		static TimecodeFormat				NTV2FrameRate2TimecodeFormat(const NTV2FrameRate inFrameRate);
 
 		/**
-			@return		The equivalent AJA_PixelFormat for the given NTV2FrameBufferFormat.
-			@param[in]	inFormat	Specifies the NTV2FrameBufferFormat to be converted into an equivalent AJA_PixelFormat.
-		**/
-		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat);
-
-		/**
 			@return		The equivalent AJA_FrameRate for the given NTV2FrameRate.
 			@param[in]	inFrameRate	Specifies the NTV2FrameRate to be converted into an equivalent AJA_FrameRate.
 		**/
 		static AJA_FrameRate				GetAJAFrameRate (const NTV2FrameRate inFrameRate);
 
 		/**
-			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
-			@param[out]	On entry, specifies the wire format;  on exit, receives the 4K video format.
-			@return		True if successful;  otherwise false.
-		**/
-		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);
-
-		/**
 			@return		A pointer to a 'C' string containing the name of the AJA NTV2 demonstration application global mutex.
 		**/
 		static const char *					GetGlobalMutexName (void);
+	///@}
 
 };	//	CNTV2DemoCommon
 

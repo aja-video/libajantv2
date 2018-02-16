@@ -62,11 +62,11 @@ int main (int argc, const char ** argv)
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr));
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetVideoFormatStrings (NON_UHD_VIDEO_FORMATS, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;  return 0;}
 	else if (!videoFormatStr.empty () && videoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings (NON_UHD_VIDEO_FORMATS, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;
 		return 2;
 	}
 
