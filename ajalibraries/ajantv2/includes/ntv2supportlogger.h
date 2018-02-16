@@ -10,6 +10,7 @@
 #include "ntv2card.h"
 #include <map>
 #include <string>
+#include "ntv2utils.h"
 
 typedef enum
 {
@@ -46,6 +47,8 @@ public:
     std::string ToString();
 
     void ToString(std::string& outString);
+
+	bool LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad);
 
 
 private:
