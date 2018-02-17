@@ -1030,7 +1030,7 @@ const NTV2InputSource NTV2_INPUTSOURCE_SDI8_DS2	= NTV2_INPUTSOURCE_SDI8;	///< @d
 #endif
 
 #define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_HDMI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_HDMI4)
-#define	NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG)
+#define	NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG1)
 #define	NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_SDI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_SDI8)
 #define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
 
