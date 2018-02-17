@@ -244,30 +244,24 @@ class DemoCommonInitializer
 				gString2AudioSystemMap.insert (String2AudioSystemPair (ULWordToString (ndx + 1), NTV2AudioSystem (ndx)));
 
 			//	Input Sources...
-			static const NTV2InputSource	gSDISources[]	=	{	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
-																	NTV2_INPUTSOURCE_SDI5,	NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,	NTV2_INPUTSOURCE_SDI8,
-																	NTV2_INPUTSOURCE_INVALID	};
-			for (unsigned ndx (0);  gSDISources[ndx] != NTV2_INPUTSOURCE_INVALID;  ndx++)
+			for (NTV2InputSource inputSource(NTV2_INPUTSOURCE_ANALOG1);  inputSource < NTV2_NUM_INPUTSOURCES;  inputSource = NTV2InputSource(inputSource+1))
 			{
-				const NTV2InputSource	inputSource	(gSDISources [ndx]);
-				gInputSources.insert (inputSource);
-				gInputSourcesSDI.insert (inputSource);
-				string	str (::NTV2InputSourceToString (inputSource, true));
-				while (str.find (" ") != string::npos)
-					str.erase (str.find (" "), 1);		//	Remove all spaces
-				gString2InputSourceMap.insert (String2InputSourcePair (str, inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (inputSource, false), inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (inputSource, true), inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (ULWordToString (ndx + 1), inputSource));
-			}	//	for each SDI source
-			gInputSources.insert (NTV2_INPUTSOURCE_HDMI1);
-			gInputSourcesHDMI.insert (NTV2_INPUTSOURCE_HDMI1);
-			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, false), NTV2_INPUTSOURCE_HDMI1));
-			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, true)), NTV2_INPUTSOURCE_HDMI1));
-			gInputSources.insert (NTV2_INPUTSOURCE_ANALOG);
-			gInputSourcesAnalog.insert (NTV2_INPUTSOURCE_ANALOG);
-			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, false), NTV2_INPUTSOURCE_ANALOG));
-			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, true)), NTV2_INPUTSOURCE_ANALOG));
+				gInputSources.insert(inputSource);
+				if (NTV2_INPUT_SOURCE_IS_SDI(inputSource))
+				{
+					gInputSourcesSDI.insert(inputSource);
+					gString2InputSourceMap.insert(String2InputSourcePair(ULWordToString(inputSource - NTV2_INPUTSOURCE_SDI1 + 1), inputSource));
+				}
+				else if (NTV2_INPUT_SOURCE_IS_HDMI(inputSource))
+					gInputSourcesHDMI.insert(inputSource);
+				else if (NTV2_INPUT_SOURCE_IS_ANALOG(inputSource))
+					gInputSourcesAnalog.insert(inputSource);
+				else
+					continue;
+				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, false), inputSource));
+				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, true), inputSource));
+				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (inputSource, true)), inputSource));
+			}	//	for each input source
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
