@@ -905,10 +905,10 @@ bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const b
 			getline(fileInput, lineContents);
 			getline(fileInput, lineContents);
 			searchString = "Register Value: ";
-			auto start = lineContents.find(searchString);
+			std::size_t start = lineContents.find(searchString);
 			if(start != string::npos)
 			{
-				auto end = lineContents.find(" : ");
+				std::size_t end = lineContents.find(" : ");
 				stringstream registerValueString(lineContents.substr(start + searchString.length(), end));
 				uint32_t registerValue = 0;
 				registerValueString >> registerValue;
