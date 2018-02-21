@@ -1163,9 +1163,9 @@ public:
 		@param[in]	inMode		Specifies the new data shift mode. Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
 		@return		True if successful;  otherwise false.
 		@note		NTV2 devices only implement this feature for HD video formats (see \c NTV2_IS_HD_VIDEO_FORMAT macro).
-		@note		NTV2 devices only implement this feature for \c NTV2_FBF_8BIT_YCBCR pixel formats.
+		@note		This only affects \c NTV2_FBF_8BIT_YCBCR pixel formats and only VANC lines (not visible raster lines).
 		@note		If enabled, be sure the device Frame Store's VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
-		@sa			\ref vancframegeometries
+					\ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);

@@ -135,7 +135,7 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inRegReads		Specifies the routing registers/values (perhaps obtained from CNTV2Card::ReadRegisters).
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputs, const NTV2RegisterReads & inRegReads);
+		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputXpts, const NTV2RegisterReads & inRegReads);
 
 		/**
 			@brief	Answers with the current number of connections (signal routes).
