@@ -1224,7 +1224,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 		{
 			if (bFb1RGB)
 			{
-				XPt1 = NTV2_XptCSC5VidYUV;
+				XPt1 = NTV2_XptCSC1VidYUV;
 			}
 			
 			// FB-YUV 

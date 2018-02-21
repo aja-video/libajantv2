@@ -502,7 +502,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     {
         const NTV2RegInfo &	regInfo	(*it);
         const uint32_t		regNum	(regInfo.registerNumber);
-        const uint32_t		offset	(regInfo.registerNumber * 4);
+        //const uint32_t	offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
 			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
@@ -520,7 +520,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     {
         const NTV2RegInfo &	regInfo	(*it);
         const uint32_t		regNum	(regInfo.registerNumber);
-        const uint32_t		offset	(regInfo.registerNumber * 4);
+        //const uint32_t	offset	(regInfo.registerNumber * 4);
         const uint32_t		value	(regInfo.registerValue);
         oss	<< endl
 			<< "VReg Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
@@ -855,7 +855,7 @@ const registerToLoadString registerToLoadStrings[] =
 bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad)
 {
 	ifstream fileInput;
-	fileInput.open(inLogFilePath);
+	fileInput.open(inLogFilePath.c_str());
 	string lineContents;
 	int i = 0, numLines = 0;;
 	int size = sizeof(registerToLoadStrings)/sizeof(registerToLoadString);
@@ -905,10 +905,10 @@ bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const b
 			getline(fileInput, lineContents);
 			getline(fileInput, lineContents);
 			searchString = "Register Value: ";
-			auto start = lineContents.find(searchString);
+			std::size_t start = lineContents.find(searchString);
 			if(start != string::npos)
 			{
-				auto end = lineContents.find(" : ");
+				std::size_t end = lineContents.find(" : ");
 				stringstream registerValueString(lineContents.substr(start + searchString.length(), end));
 				uint32_t registerValue = 0;
 				registerValueString >> registerValue;

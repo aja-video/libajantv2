@@ -901,18 +901,18 @@ typedef enum
 
 typedef enum _NTV2HDMIRegisters
 {
-	kRegHDMIOutputConfig1       = 0x2000,
-	kRegHDMIInputStatus1        = 0x2001,
-	kRegHDMIControl1            = 0x2002,
-	kRegHDMIOutputConfig2       = 0x2800,
-	kRegHDMIInputStatus2        = 0x2801,
-	kRegHDMIControl2            = 0x2802,
-	kRegHDMIOutputConfig3       = 0x2000,  // 0x2c12,
-	kRegHDMIInputStatus3        = 0x2001,  // 0x2c13,
-	kRegHDMIControl3            = 0x2002,  // 0x2c14,
-	kRegHDMIOutputConfig4       = 0x2800,  // 0x3012,
-	kRegHDMIInputStatus4        = 0x2801,  // 0x3013,
-	kRegHDMIControl4            = 0x2802   // 0x3014
+	kRegHDMIOutputConfig1       = 0x1d14,
+	kRegHDMIInputStatus1        = 0x1d15,
+	kRegHDMIControl1            = 0x1d16,
+	kRegHDMIOutputConfig2       = 0x2514,
+	kRegHDMIInputStatus2        = 0x2515,
+	kRegHDMIControl2            = 0x2516,
+	kRegHDMIOutputConfig3       = 0x2c12,
+	kRegHDMIInputStatus3        = 0x2c13,
+	kRegHDMIControl3            = 0x2c14,
+	kRegHDMIOutputConfig4       = 0x3012,
+	kRegHDMIInputStatus4        = 0x3013,
+	kRegHDMIControl4            = 0x3014
 } NTV2HDMIRegisters;
 
 #if !defined (NTV2_DEPRECATE)
