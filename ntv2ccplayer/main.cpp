@@ -174,17 +174,13 @@ int main (int argc, const char ** argv)
 	NTV2FrameBufferFormat	pixelFormat		(NTV2_FBF_10BIT_YCBCR);		//	Default to 10bitYUV
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetVideoFormatStrings (BOTH_VIDEO_FORMATS, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
 	if (!videoFormatStr.empty ())
-	{
-		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, false);
-		if (!NTV2_IS_VALID_VIDEO_FORMAT (videoFormat))
-			videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, true);
-	}
+		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_ALL);
 	else if (!videoFormatStr.empty ()  &&  !NTV2_IS_VALID_VIDEO_FORMAT (videoFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings (BOTH_VIDEO_FORMATS, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
 	if (bSuppressLine21 && !NTV2_IS_SD_VIDEO_FORMAT (videoFormat))

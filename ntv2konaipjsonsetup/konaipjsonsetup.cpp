@@ -562,6 +562,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
     CNTV2Config2110	config2110 (device);
+	const NTV2VideoFormatKinds allowedVideoFormatTypes(::NTV2DeviceCanDo4KVideo(device.GetDeviceID()) ? VIDEO_FORMATS_ALL : VIDEO_FORMATS_NON_4KUHD);
+
 
 #ifdef CABLE_ME_SIMPLE
     //config2110.SetIGMPVersion(eIGMPVersion_2);
@@ -661,7 +663,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
         rxChannelConfig.payloadType  = receive.mPayload.toUInt();
-        rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString());
+        rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString(), allowedVideoFormatTypes);
         rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
         if (!receive.mPayloadLen.isEmpty())
@@ -717,7 +719,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.ssrc         = transmit.mSSRC.toUInt();
         txChannelConfig.tos          = transmit.mTOS.toUInt();
         txChannelConfig.ttl          = transmit.mTTL.toUInt();
-        txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString());
+        txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmit.mVideoFormat.toStdString(), allowedVideoFormatTypes);
         txChannelConfig.videoSamples = VPIDSampling_YUV_422;
 
         if (!transmit.mNumAudioChannels.isEmpty())

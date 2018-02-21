@@ -244,30 +244,24 @@ class DemoCommonInitializer
 				gString2AudioSystemMap.insert (String2AudioSystemPair (ULWordToString (ndx + 1), NTV2AudioSystem (ndx)));
 
 			//	Input Sources...
-			static const NTV2InputSource	gSDISources[]	=	{	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
-																	NTV2_INPUTSOURCE_SDI5,	NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,	NTV2_INPUTSOURCE_SDI8,
-																	NTV2_INPUTSOURCE_INVALID	};
-			for (unsigned ndx (0);  gSDISources[ndx] != NTV2_INPUTSOURCE_INVALID;  ndx++)
+			for (NTV2InputSource inputSource(NTV2_INPUTSOURCE_ANALOG1);  inputSource < NTV2_NUM_INPUTSOURCES;  inputSource = NTV2InputSource(inputSource+1))
 			{
-				const NTV2InputSource	inputSource	(gSDISources [ndx]);
-				gInputSources.insert (inputSource);
-				gInputSourcesSDI.insert (inputSource);
-				string	str (::NTV2InputSourceToString (inputSource, true));
-				while (str.find (" ") != string::npos)
-					str.erase (str.find (" "), 1);		//	Remove all spaces
-				gString2InputSourceMap.insert (String2InputSourcePair (str, inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (inputSource, false), inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (inputSource, true), inputSource));
-				gString2InputSourceMap.insert (String2InputSourcePair (ULWordToString (ndx + 1), inputSource));
-			}	//	for each SDI source
-			gInputSources.insert (NTV2_INPUTSOURCE_HDMI1);
-			gInputSourcesHDMI.insert (NTV2_INPUTSOURCE_HDMI1);
-			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, false), NTV2_INPUTSOURCE_HDMI1));
-			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_HDMI1, true)), NTV2_INPUTSOURCE_HDMI1));
-			gInputSources.insert (NTV2_INPUTSOURCE_ANALOG);
-			gInputSourcesAnalog.insert (NTV2_INPUTSOURCE_ANALOG);
-			gString2InputSourceMap.insert (String2InputSourcePair (::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, false), NTV2_INPUTSOURCE_ANALOG));
-			gString2InputSourceMap.insert (String2InputSourcePair (CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (NTV2_INPUTSOURCE_ANALOG, true)), NTV2_INPUTSOURCE_ANALOG));
+				gInputSources.insert(inputSource);
+				if (NTV2_INPUT_SOURCE_IS_SDI(inputSource))
+				{
+					gInputSourcesSDI.insert(inputSource);
+					gString2InputSourceMap.insert(String2InputSourcePair(ULWordToString(inputSource - NTV2_INPUTSOURCE_SDI1 + 1), inputSource));
+				}
+				else if (NTV2_INPUT_SOURCE_IS_HDMI(inputSource))
+					gInputSourcesHDMI.insert(inputSource);
+				else if (NTV2_INPUT_SOURCE_IS_ANALOG(inputSource))
+					gInputSourcesAnalog.insert(inputSource);
+				else
+					continue;
+				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, false), inputSource));
+				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, true), inputSource));
+				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (inputSource, true)), inputSource));
+			}	//	for each input source
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
@@ -303,7 +297,7 @@ static const DemoCommonInitializer	gInitializer;
 
 const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
-	return inKinds == BOTH_VIDEO_FORMATS  ?  gAllFormats  :  (inKinds == UHD_VIDEO_FORMATS ? g4KFormats : gNon4KFormats);
+	return inKinds == VIDEO_FORMATS_ALL  ?  gAllFormats  :  (inKinds == VIDEO_FORMATS_4KUHD ? g4KFormats : gNon4KFormats);
 }
 
 
@@ -396,15 +390,17 @@ string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKind
 }
 
 
-NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const bool in4K)
+NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const NTV2VideoFormatKinds inKinds)
 {
-	String2VideoFormatMapConstIter	iter	(gString2VideoFormatMap.find (inStr));
-	if (iter == gString2VideoFormatMap.end ())
+	String2VideoFormatMapConstIter	iter	(gString2VideoFormatMap.find(inStr));
+	if (iter == gString2VideoFormatMap.end())
 		return NTV2_FORMAT_UNKNOWN;
 	const NTV2VideoFormat	format	(iter->second);
-	if (in4K && NTV2_IS_4K_VIDEO_FORMAT (format))
+	if (inKinds == VIDEO_FORMATS_ALL)
 		return format;
-	if (!in4K && !NTV2_IS_4K_VIDEO_FORMAT (format))
+	if (inKinds == VIDEO_FORMATS_4KUHD && NTV2_IS_4K_VIDEO_FORMAT(format))
+		return format;
+	if (inKinds == VIDEO_FORMATS_NON_4KUHD && !NTV2_IS_4K_VIDEO_FORMAT(format))
 		return format;
 	return NTV2_FORMAT_UNKNOWN;
 }
