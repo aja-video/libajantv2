@@ -580,7 +580,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const NTV2Channel channel, NTV2S
         // sampling
         mDevice.ReadRegister(kReg4175_depkt_vid_fmt_o + depacketizerBaseAddr,&val);
         val = val & 0x3;
-        VPIDSampling vs;
+        //VPIDSampling vs;
         switch(val)
         {
         case NTV2_CHANNEL1:
@@ -1141,27 +1141,34 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(NTV2Channel channel,NTV2Stream 
 {
     switch (channel)
     {
-    case NTV2_CHANNEL1:
-        if (stream == NTV2_VIDEO_STREAM)
-            return SAREK_2110_DECAPSULATOR_0;
-        else
-            return SAREK_2110_DECAPSULATOR_0 + 16;
-    case NTV2_CHANNEL2:
-        if (stream == NTV2_VIDEO_STREAM)
-            return SAREK_2110_DECAPSULATOR_0 + 32;
-        else
-            return SAREK_2110_DECAPSULATOR_0 + 48;
-    case NTV2_CHANNEL3:
-        if (stream == NTV2_VIDEO_STREAM)
-            return SAREK_2110_DECAPSULATOR_1;
-        else
-            return SAREK_2110_DECAPSULATOR_1 + 16;
-    case NTV2_CHANNEL4:
-        if (stream == NTV2_VIDEO_STREAM)
-            return SAREK_2110_DECAPSULATOR_1 + 32;
-        else
-            return SAREK_2110_DECAPSULATOR_1 + 48;
+		case NTV2_CHANNEL1:
+			if (stream == NTV2_VIDEO_STREAM)
+				return SAREK_2110_DECAPSULATOR_0;
+			else
+				return SAREK_2110_DECAPSULATOR_0 + 16;
+		case NTV2_CHANNEL2:
+			if (stream == NTV2_VIDEO_STREAM)
+				return SAREK_2110_DECAPSULATOR_0 + 32;
+			else
+				return SAREK_2110_DECAPSULATOR_0 + 48;
+		case NTV2_CHANNEL3:
+			if (stream == NTV2_VIDEO_STREAM)
+				return SAREK_2110_DECAPSULATOR_1;
+			else
+				return SAREK_2110_DECAPSULATOR_1 + 16;
+		case NTV2_CHANNEL4:
+			if (stream == NTV2_VIDEO_STREAM)
+				return SAREK_2110_DECAPSULATOR_1 + 32;
+			else
+				return SAREK_2110_DECAPSULATOR_1 + 48;
+		case NTV2_CHANNEL5:
+		case NTV2_CHANNEL6:
+		case NTV2_CHANNEL7:
+		case NTV2_CHANNEL8:
+		case NTV2_CHANNEL_INVALID:
+			break;
     }
+    return 0;
 }
 
 uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream)
@@ -1185,6 +1192,7 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
 
 uint32_t CNTV2Config2110::GetFramerAddress(eSFP link, NTV2Channel channel, NTV2Stream stream)
 {
+	(void) channel;
     if (link == SFP_LINK_B)
     {
         if (stream == NTV2_VIDEO_STREAM)
