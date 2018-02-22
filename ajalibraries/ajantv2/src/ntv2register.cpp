@@ -805,9 +805,8 @@ static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,	
 static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
 														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
 
-static const ULWord gHDMIChannelToOutputConfigRegNum [] =   { kRegHDMIOutputConfig1, kRegHDMIOutputConfig2, kRegHDMIOutputConfig3, kRegHDMIOutputConfig4, 0 };
 static const ULWord gHDMIChannelToInputStatusRegNum [] =    { kRegHDMIInputStatus1, kRegHDMIInputStatus2, kRegHDMIInputStatus3, kRegHDMIInputStatus4, 0 };
-static const ULWord gHDMIChannelToControlRegNum [] =        { kRegHDMIControl1, kRegHDMIControl2, kRegHDMIControl3, kRegHDMIControl4, 0 };
+
 
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
