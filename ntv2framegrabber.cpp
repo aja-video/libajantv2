@@ -17,6 +17,7 @@
 
 #define NTV2_AUDIOSIZE_MAX	(401*1024)
 #define	NTV2_ANCSIZE_MAX	(512)
+#define NTV2_NUM_IMAGES		(10)
 
 static QMutex			gMutex;
 static const uint32_t	kAppSignature			(AJA_FOURCC ('D','E','M','O'));
@@ -31,7 +32,7 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
         mbFixedReference        (false),
 		mBoardNumber			(0),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
-		mChannel				(NTV2_CHANNEL1),
+		mChannel				(NTV2_MAX_NUM_CHANNELS),
         mNumChannels            (0),
         mTsi                    (false),
 		mCurrentVideoFormat		(NTV2_FORMAT_UNKNOWN),
@@ -40,6 +41,7 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
 		mFormatIsProgressive	(true),
 		mInputSource			(NTV2_NUM_INPUTSOURCES),
 		mFrameBufferFormat		(NTV2_FBF_ARGB),
+		mDoMultiChannel			(false),
 		mbWithAudio				(false),
 		mAudioOutput			(NULL),
 		mAudioDevice			(NULL),
@@ -273,15 +275,19 @@ void NTV2FrameGrabber::changeCaptionChannel (int inNewCaptionChannelId)
 void NTV2FrameGrabber::run (void)
 {
 	//	Set up 2 images to ping-pong between capture and display...
-	QImage		imageEven	(QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y, QImage::Format_RGB32);
-	QImage		imageOdd	(QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y, QImage::Format_RGB32);
-	QImage *	images [2]	= {&imageEven, &imageOdd};
+	QImage *	images [NTV2_NUM_IMAGES];
 	ULWord		framesCaptured	(0);
+
+	// initialize images
+	for (int i = 0; i < NTV2_NUM_IMAGES; i++)
+	{
+		images[i] = new QImage(QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y, QImage::Format_RGB32);
+	}
 
 	// Make sure all Bidirectionals are set to Inputs.
 	if (mNTV2Card.Open (mBoardNumber, false))
 	{
-		if (!mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
+		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
 		{
 			//	We have not acquired the board continue until something changes...
 			qDebug ("Could not acquire board number %d", GetDeviceIndex ());
@@ -322,8 +328,11 @@ void NTV2FrameGrabber::run (void)
 		if (!NTV2_IS_VALID_INPUT_SOURCE (mInputSource))
 		{
 			//	No input chosen, so display banner...
-			StopAutoCirculate ();
-			QImage *	currentImage = images [framesCaptured & 0x1];
+			if (NTV2_IS_VALID_CHANNEL(mChannel))
+			{
+				StopAutoCirculate ();
+			}
+			QImage *	currentImage = images [framesCaptured % NTV2_NUM_IMAGES];
 			currentImage->load (":/resources/splash.png");
 			emit newStatusString ("");
 			emit newFrame (*currentImage, true);
@@ -337,8 +346,11 @@ void NTV2FrameGrabber::run (void)
 				StopAutoCirculate ();
 				if (mNTV2Card.IsOpen ())
 				{
-					mNTV2Card.ReleaseStreamForApplicationWithReference (kAppSignature, AJAProcess::GetPid ());
-					mNTV2Card.SetEveryFrameServices (mSavedTaskMode);
+					if (!mDoMultiChannel)
+					{
+						mNTV2Card.ReleaseStreamForApplicationWithReference (kAppSignature, AJAProcess::GetPid ());
+						mNTV2Card.SetEveryFrameServices (mSavedTaskMode);
+					}
 					mNTV2Card.Close ();
 					mDeviceID = DEVICE_ID_NOTFOUND;
 				}
@@ -346,7 +358,7 @@ void NTV2FrameGrabber::run (void)
 
 			if (mNTV2Card.Open (mBoardNumber, false))
 			{
-				if (!mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
+				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
 				{
 					//We have not acquired the board continue until something changes
 					qDebug() << "Could not acquire board number " << GetDeviceIndex();
@@ -388,8 +400,12 @@ void NTV2FrameGrabber::run (void)
 					mNTV2Card.SetRP188Source (mChannel, 0);
 					mNTV2Card.AutoCirculateStart (mChannel);
 
-					imageEven = imageEven.scaled (mFrameDimensions.Width (), mFrameDimensions.Height ());	//	make image correct size
-					imageOdd = imageOdd.scaled (mFrameDimensions.Width (), mFrameDimensions.Height ());		//	make image correct size
+					for (int i = 0; i < NTV2_NUM_IMAGES; i++)
+					{
+						delete images[i];
+						images[i] = new QImage (mFrameDimensions.Width (), mFrameDimensions.Height (), QImage::Format_RGB32);
+					}
+
 					framesCaptured = 0;
 					mRestart = false;
 				}	//	if board set up ok
@@ -408,7 +424,7 @@ void NTV2FrameGrabber::run (void)
 
 		if (CheckForValidInput () == false && NTV2_IS_VALID_INPUT_SOURCE (mInputSource))
 		{
-			QImage *	currentImage	(images [framesCaptured & 0x1]);
+			QImage *	currentImage	(images [framesCaptured % NTV2_NUM_IMAGES]);
 			currentImage->fill (qRgba (40, 40, 40, 255));
 
 			QString		status			(QString ("%1: No Detected Input").arg (::NTV2InputSourceToString (mInputSource, true).c_str()));
@@ -423,7 +439,7 @@ void NTV2FrameGrabber::run (void)
 		mNTV2Card.AutoCirculateGetStatus (mChannel, acStatus);
 		if (acStatus.acState == NTV2_AUTOCIRCULATE_RUNNING && acStatus.acBufferLevel > 1)
 		{
-			QImage *			currentImage	(images [framesCaptured & 0x1]);
+			QImage *			currentImage	(images [framesCaptured % NTV2_NUM_IMAGES]);
 			NTV2TimeCodeList	tcValues;
 
 			mTransferStruct.SetVideoBuffer ((PULWord) currentImage->bits (), currentImage->byteCount ());
@@ -471,10 +487,18 @@ void NTV2FrameGrabber::run (void)
 	if (mNTV2Card.IsOpen ())
 	{
 		gMutex.lock ();
-			StopAutoCirculate ();
+		StopAutoCirculate ();
+		if (!mDoMultiChannel)
+		{
 			mNTV2Card.ReleaseStreamForApplicationWithReference (AJA_FOURCC ('D','E','M','O'), (uint32_t) AJAProcess::GetPid ());	//	Release the device
 			mNTV2Card.SetEveryFrameServices (mSavedTaskMode);	//	Restore prior task mode
+		}
 		gMutex.unlock ();
+	}
+
+	for (int i = 0; i < NTV2_NUM_IMAGES; i++)
+	{
+		delete images[i];
 	}
 
 	qDebug() << "## NOTE:  NTV2FrameGrabber thread exiting for device " << GetDeviceIndex () << " input source " << mInputSource;
@@ -537,7 +561,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 		{
             mNumChannels = 0;
             mTsi = false;
-            mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
+			mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
             for (unsigned offset (0);  offset < 4;  offset++)
 			{
@@ -555,7 +579,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 		{
             mNumChannels = 0;
             mTsi = false;
-            mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
+			mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2_CHANNEL1), NTV2_XptAnalogIn);
 			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel (NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
@@ -579,7 +603,7 @@ bool NTV2FrameGrabber::SetupInput (void)
             if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
             {
                 //	Set two sample interleave
-                mNTV2Card.SetTsiFrameEnable(true, NTV2_CHANNEL1);
+				mNTV2Card.SetTsiFrameEnable(true, NTV2_CHANNEL1);
 
                 for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL3;  channel = NTV2Channel(channel+1))
                 {
@@ -623,7 +647,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 			else if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
             {
                 mNumChannels = 0;
-                mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
+				mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
                 for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL5;  channel = NTV2Channel(channel+1))
                 {
                     mNumChannels++;

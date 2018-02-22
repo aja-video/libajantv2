@@ -13,6 +13,8 @@ AJAPreviewWidget::AJAPreviewWidget (QWidget *parent)
 		for (unsigned ndx (0);  ndx < 15;  ndx++)
 			_captionStrings [ndx] = QString (32, QChar (32));
 	#endif	//	defined (INCLUDE_AJACC)
+	_clear = false;
+	_render = false;
 }
 
 void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
@@ -63,45 +65,40 @@ void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
 			painter.drawText (offX, offY + ndx * (metrics.height() + metrics.leading()), _captionStrings [ndx]);
 	#endif	//	defined (INCLUDE_AJACC)
 
+	_render = false;
 }	//	paintEvent
 
 
-void AJAPreviewWidget::updateFrame (const QImage &image,bool clear)
+void AJAPreviewWidget::updateFrame (const QImage &image, bool clear)
 {
-    qDebug() << "Update Frame";
+	qDebug() << "Update Frame";
 	_unscaledImageSize.setHeight(image.height());
 	_unscaledImageSize.setWidth(image.width());
+	_image = image;
+	_clear = clear;
 
-    if ( image.width() > this->width())
-        _pixmap = QPixmap::fromImage(image.scaledToWidth(this->width(),Qt::SmoothTransformation),0);
-    else if ( image.height() > this->height())
-        _pixmap = QPixmap::fromImage(image.scaledToHeight(this->height(),Qt::SmoothTransformation),0);
-    else
-        _pixmap = QPixmap::fromImage(image,0);
-
-	setAttribute(Qt::WA_OpaquePaintEvent, clear ? false : true);
-	repaint();
+	if (!_render)
+	{
+		_render = true;
+		QMetaObject::invokeMethod(this, "renderFrame", Qt::QueuedConnection);
+	}
 }
 
-
-void AJAPreviewWidget::updateFrameWithStatus (const QImage &image,const QString& statusString,bool clear)
+void AJAPreviewWidget::updateFrameWithStatus (const QImage &image, const QString& statusString, bool clear)
 {
     qDebug() << "Update Frame With Status";
 
 	_statusString = statusString;
 	_unscaledImageSize.setHeight(image.height());
 	_unscaledImageSize.setWidth(image.width());
+	_image = image;
+	_clear = clear;
 
-	QPixmap tempPixmap = QPixmap::fromImage(image,0);
-	if ( image.width() > this->width())
-        _pixmap = tempPixmap.scaledToWidth(this->width(),Qt::SmoothTransformation);
-	else if ( image.height() > this->height())
-        _pixmap = tempPixmap.scaledToHeight(this->height(),Qt::SmoothTransformation);
-	else
-		_pixmap = tempPixmap;
-
-	setAttribute(Qt::WA_OpaquePaintEvent, clear ? false : true);
-	repaint();
+	if (!_render)
+	{
+		_render = true;
+		QMetaObject::invokeMethod(this, "renderFrame", Qt::QueuedConnection);
+	}
 }
 
 void AJAPreviewWidget::updateFrameWithROI (const QImage & image, ROIRectList roiList, bool clear)
@@ -109,7 +106,14 @@ void AJAPreviewWidget::updateFrameWithROI (const QImage & image, ROIRectList roi
 	_roiList = roiList;
 	_unscaledImageSize.setHeight (image.height());
 	_unscaledImageSize.setWidth (image.width());
-	updateFrame (image, clear);
+	_image = image;
+	_clear = clear;
+
+	if (!_render)
+	{
+		_render = true;
+		QMetaObject::invokeMethod(this, "renderFrame", Qt::QueuedConnection);
+	}
 }
 
 void AJAPreviewWidget::updateROI (ROIRectList roiList)
@@ -131,6 +135,21 @@ void AJAPreviewWidget::updateStatusString(const QString statusString)
 				_captionStrings [row-1].replace (col-1, 1, QChar (*pCell++));
 	}
 #endif	//	defined (INCLUDE_AJACC)
+
+void AJAPreviewWidget::renderFrame ()
+{
+	qDebug() << "Render Frame";
+
+	if (_image.width() > this->width())
+		_pixmap = QPixmap::fromImage(_image.scaledToWidth(this->width(), Qt::SmoothTransformation), 0);
+	else if (_image.height() > this->height())
+		_pixmap = QPixmap::fromImage(_image.scaledToHeight(this->height() ,Qt::SmoothTransformation), 0);
+	else
+		_pixmap = QPixmap::fromImage(_image, 0);
+
+	setAttribute(Qt::WA_OpaquePaintEvent, _clear ? false : true);
+	repaint();
+}
 
 void AJAPreviewWidget::wheelEvent ( QWheelEvent * event )
 {
