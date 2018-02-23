@@ -4574,47 +4574,25 @@ NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSource inInputS
 }
 
 
-NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel)
+NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2InputSourceKinds inSourceType)
 {
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
-		return NTV2_INPUTSOURCE_INVALID;
-
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2InputSource	gChannelToInputSource []	=	{	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
-																			NTV2_INPUTSOURCE_SDI5,	NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,	NTV2_INPUTSOURCE_SDI8,
-																			NTV2_NUM_INPUTSOURCES	};
-		return gChannelToInputSource [inChannel];
-	#else	//	else !defined (NTV2_DEPRECATE)
-		switch (inChannel)
+	static const NTV2InputSource	gChannelToSDIInputSource []	=	{	NTV2_INPUTSOURCE_SDI1,		NTV2_INPUTSOURCE_SDI2,		NTV2_INPUTSOURCE_SDI3,		NTV2_INPUTSOURCE_SDI4,
+																		NTV2_INPUTSOURCE_SDI5,		NTV2_INPUTSOURCE_SDI6,		NTV2_INPUTSOURCE_SDI7,		NTV2_INPUTSOURCE_SDI8,
+																		NTV2_INPUTSOURCE_INVALID	};
+	static const NTV2InputSource	gChannelToHDMIInputSource[] =	{	NTV2_INPUTSOURCE_HDMI1,		NTV2_INPUTSOURCE_HDMI2,		NTV2_INPUTSOURCE_HDMI3,		NTV2_INPUTSOURCE_HDMI4,
+																		NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,
+																		NTV2_INPUTSOURCE_INVALID	};
+	static const NTV2InputSource	gChannelToAnlgInputSource[] =	{	NTV2_INPUTSOURCE_ANALOG1,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,
+																		NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,	NTV2_INPUTSOURCE_INVALID,
+																		NTV2_INPUTSOURCE_INVALID	};
+	if (NTV2_IS_VALID_CHANNEL(inChannel))
+		switch (inSourceType)
 		{
-			default:
-			case NTV2_CHANNEL1:		return NTV2_INPUTSOURCE_SDI1;
-			case NTV2_CHANNEL2:		return NTV2_INPUTSOURCE_SDI2;
-			case NTV2_CHANNEL3:		return NTV2_INPUTSOURCE_SDI3;
-			case NTV2_CHANNEL4:		return NTV2_INPUTSOURCE_SDI4;
-			case NTV2_CHANNEL5:		return NTV2_INPUTSOURCE_SDI5;
-			case NTV2_CHANNEL6:		return NTV2_INPUTSOURCE_SDI6;
-			case NTV2_CHANNEL7:		return NTV2_INPUTSOURCE_SDI7;
-			case NTV2_CHANNEL8:		return NTV2_INPUTSOURCE_SDI8;
+			case NTV2_INPUTSOURCES_SDI:		return gChannelToSDIInputSource[inChannel];
+			case NTV2_INPUTSOURCES_HDMI:	return gChannelToHDMIInputSource[inChannel];
+			case NTV2_INPUTSOURCES_ANALOG:	return gChannelToAnlgInputSource[inChannel];
+			default:						break;
 		}
-	#endif	//	else !defined (NTV2_DEPRECATE)
-}
-
-
-NTV2InputSource NTV2ChannelToHDMIInputSource (const NTV2Channel inChannel)
-{
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
-		return NTV2_INPUTSOURCE_INVALID;
-
-	switch (inChannel)
-	{
-		default:
-		case NTV2_CHANNEL1:		return NTV2_INPUTSOURCE_HDMI1;
-		case NTV2_CHANNEL2:		return NTV2_INPUTSOURCE_HDMI2;
-		case NTV2_CHANNEL3:		return NTV2_INPUTSOURCE_HDMI3;
-		case NTV2_CHANNEL4:		return NTV2_INPUTSOURCE_HDMI4;
-	}
-
 	return NTV2_INPUTSOURCE_INVALID;
 }
 
