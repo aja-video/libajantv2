@@ -722,7 +722,7 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Fram
 	@brief		Used to describe Start of Active Video (SAV) location and field dominance for a given NTV2Standard.
 				(See GetSmpteLineNumber function.)
 **/
-typedef struct NTV2SmpteLineNumber
+typedef struct AJAExport NTV2SmpteLineNumber
 {
 	ULWord			smpteFirstActiveLine;	///< @brief	SMPTE line number of first (top-most) active line of video
 	ULWord			smpteSecondActiveLine;	///< @brief	SMPTE line number of second active line of video
