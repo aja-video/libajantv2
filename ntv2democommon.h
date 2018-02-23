@@ -130,16 +130,6 @@ typedef enum _NTV2PixelFormatKinds
 } NTV2PixelFormatKinds;
 
 
-typedef enum _NTV2InputSourceKinds
-{
-	INPUT_SOURCES_ALL		= 0xFF,
-	INPUT_SOURCES_SDI		= 1,
-	INPUT_SOURCES_HDMI		= 2,
-	INPUT_SOURCES_ANALOG	= 4,
-	INPUT_SOURCES_NONE		= 0
-} NTV2InputSourceKinds;
-
-
 typedef enum _NTV2TCIndexKinds
 {
 	TC_INDEXES_ALL		= 0xFF,
@@ -233,7 +223,7 @@ class CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
 			@return		The supported NTV2InputSourceSet.
 		**/
-		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2InputSourceKinds inKinds = INPUT_SOURCES_ALL);
+		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL);
 
 		/**
 			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
@@ -241,7 +231,7 @@ class CNTV2DemoCommon
 											warns if the input source is incompatible with that device.
 			@return		A string that can be printed to show the available input sources (or those that are supported by a given device).
 		**/
-		static std::string					GetInputSourceStrings (const NTV2InputSourceKinds inKinds = INPUT_SOURCES_ALL,
+		static std::string					GetInputSourceStrings (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**

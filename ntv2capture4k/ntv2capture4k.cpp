@@ -159,7 +159,7 @@ AJAStatus NTV2Capture4K::Init (void)
 	if (::NTV2DeviceGetNumHDMIVideoInputs (mDeviceID) > 1)
 	{
 		mInputChannel = NTV2_CHANNEL1;
-		mInputSource = ::NTV2ChannelToHDMIInputSource (mInputChannel);
+		mInputSource = ::NTV2ChannelToInputSource (mInputChannel, NTV2_INPUTSOURCES_HDMI);
 		mDoTsiRouting = true;
 	}
 

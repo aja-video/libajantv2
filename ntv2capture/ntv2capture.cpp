@@ -134,7 +134,7 @@ AJAStatus NTV2Capture::Init (void)
 		mDevice.SetMultiFormatMode (mDoMultiFormat);
 
 	if (::NTV2DeviceGetNumHDMIVideoInputs (mDeviceID) > 1)
-		mInputSource = ::NTV2ChannelToHDMIInputSource (mInputChannel);
+		mInputSource = ::NTV2ChannelToInputSource (mInputChannel, NTV2_INPUTSOURCES_HDMI);
 
 	//	Set up the video and audio...
 	status = SetupVideo ();
