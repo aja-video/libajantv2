@@ -526,6 +526,13 @@ AJAExport NTV2AudioSystem NTV2ChannelToAudioSystem (const NTV2Channel inChannel)
 AJAExport NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel);
 
 /**
+	@brief		Converts the given NTV2Channel value into its ordinary equivalent HDMI NTV2InputSource.
+	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
+	@return		The equivalent NTV2InputSource value.
+**/
+AJAExport NTV2InputSource NTV2ChannelToHDMIInputSource (const NTV2Channel inChannel);
+
+/**
 	@brief		Converts a given NTV2OutputDestination to its equivalent NTV2Channel value.
 	@param[in]	inOutputDest	Specifies the NTV2OutputDestination to be converted.
 	@return		The equivalent NTV2Channel value.

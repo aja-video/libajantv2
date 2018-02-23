@@ -4601,6 +4601,24 @@ NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel)
 }
 
 
+NTV2InputSource NTV2ChannelToHDMIInputSource (const NTV2Channel inChannel)
+{
+	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+		return NTV2_INPUTSOURCE_INVALID;
+
+	switch (inChannel)
+	{
+		default:
+		case NTV2_CHANNEL1:		return NTV2_INPUTSOURCE_HDMI1;
+		case NTV2_CHANNEL2:		return NTV2_INPUTSOURCE_HDMI2;
+		case NTV2_CHANNEL3:		return NTV2_INPUTSOURCE_HDMI3;
+		case NTV2_CHANNEL4:		return NTV2_INPUTSOURCE_HDMI4;
+	}
+
+	return NTV2_INPUTSOURCE_INVALID;
+}
+
+
 NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestination inOutputDest)
 {
 	if (!NTV2_IS_VALID_OUTPUT_DEST (inOutputDest))
