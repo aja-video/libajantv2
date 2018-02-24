@@ -133,6 +133,9 @@ AJAStatus NTV2Capture::Init (void)
 	if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
 		mDevice.SetMultiFormatMode (mDoMultiFormat);
 
+	if (::NTV2DeviceGetNumHDMIVideoInputs (mDeviceID) > 1)
+		mInputSource = ::NTV2ChannelToInputSource (mInputChannel, NTV2_INPUTSOURCES_HDMI);
+
 	//	Set up the video and audio...
 	status = SetupVideo ();
 	if (AJA_FAILURE (status))
@@ -270,22 +273,36 @@ void NTV2Capture::RouteInputSignal (void)
 	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mInputSource))
 		mInputSource = NTV2_INPUTSOURCE_SDI1;
 
-	const bool						isRGB					(::IsRGBFormat (mPixelFormat));
-	const NTV2OutputCrosspointID	sdiInputWidgetOutputXpt	(::GetSDIInputOutputXptFromChannel (mInputChannel));
+	NTV2LHIHDMIColorSpace	inputColor	(NTV2_LHIHDMIColorSpaceYCbCr);
+	if (NTV2_INPUT_SOURCE_IS_HDMI (mInputSource))
+	{
+		mDevice.GetHDMIInputColor (inputColor, mInputChannel);
+	}
+
+	const bool						isInputRGB				(inputColor == NTV2_LHIHDMIColorSpaceRGB);
+	const bool						isFrameRGB				(::IsRGBFormat (mPixelFormat));
+	const NTV2OutputCrosspointID	inputWidgetOutputXpt	(::GetInputSourceOutputXpt (mInputSource, false, isInputRGB, 0));
 	const NTV2InputCrosspointID		frameBufferInputXpt		(::GetFrameBufferInputXptFromChannel (mInputChannel));
 	const NTV2InputCrosspointID		cscWidgetVideoInputXpt	(::GetCSCInputXptFromChannel (mInputChannel));
 	const NTV2OutputCrosspointID	cscWidgetRGBOutputXpt	(::GetCSCOutputXptFromChannel (mInputChannel, /*inIsKey*/ false, /*inIsRGB*/ true));
+	const NTV2OutputCrosspointID	cscWidgetYUVOutputXpt	(::GetCSCOutputXptFromChannel (mInputChannel, /*inIsKey*/ false, /*inIsRGB*/ false));
+
 
 	if (!mDoMultiFormat)
 		mDevice.ClearRouting ();
 
-	if (isRGB)
+	if (isInputRGB && !isFrameRGB)
 	{
-		mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt);		//	Frame store input to CSC widget's RGB output
-		mDevice.Connect (cscWidgetVideoInputXpt,	sdiInputWidgetOutputXpt);	//	CSC widget's YUV input to SDI-In widget's output
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetYUVOutputXpt);	//	Frame store input to CSC widget's YUV output
+		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt);	//	CSC widget's RGB input to input widget's output
+	}
+	else if (!isInputRGB && isFrameRGB)
+	{
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt);	//	Frame store input to CSC widget's RGB output
+		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt);	//	CSC widget's YUV input to input widget's output
 	}
 	else
-		mDevice.Connect (frameBufferInputXpt,		sdiInputWidgetOutputXpt);	//	Frame store input to SDI-In widget's output
+		mDevice.Connect (frameBufferInputXpt,		inputWidgetOutputXpt);	//	Frame store input to input widget's output
 
 }	//	RouteInputSignal
 

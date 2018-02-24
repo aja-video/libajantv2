@@ -46,7 +46,7 @@ int main (int argc, const char ** argv)
 	{
 		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
-		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,		0,	"which video format to use",	"e.g. '525i2997' or ? to list"},
+		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,		0,	"which video format to use",	"e.g. 'uhd24' or ? to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		NULL},

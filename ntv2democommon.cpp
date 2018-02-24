@@ -415,16 +415,16 @@ NTV2FrameBufferFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & 
 
 const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2InputSourceKinds inKinds)
 {
-	if (inKinds == INPUT_SOURCES_ALL)
+	if (inKinds == NTV2_INPUTSOURCES_ALL)
 		return gInputSources;
 
 	NTV2InputSourceSet	result;
 
-	if (inKinds & INPUT_SOURCES_SDI)
+	if (inKinds & NTV2_INPUTSOURCES_SDI)
 		result += gInputSourcesSDI;
-	if (inKinds & INPUT_SOURCES_HDMI)
+	if (inKinds & NTV2_INPUTSOURCES_HDMI)
 		result += gInputSourcesHDMI;
-	if (inKinds & INPUT_SOURCES_ANALOG)
+	if (inKinds & NTV2_INPUTSOURCES_ANALOG)
 		result += gInputSourcesAnalog;
 
 	return result;

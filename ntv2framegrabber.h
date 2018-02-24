@@ -102,7 +102,7 @@ class NTV2FrameGrabber : public QThread
 			@param[in]	inClear		True if a redraw should take place -- i.e., if the frame is the first of a valid video stream,
 									or if there is currently no valid video.
 		**/
-		void			newFrame (const QImage & inImage, const bool inClear);
+		void			newFrame (const QImage &inImage, const bool inClear);
 
 		/**
 			@brief	This is signaled (called) when my status string changes.
@@ -173,6 +173,7 @@ class NTV2FrameGrabber : public QThread
 		NTV2FrameBufferFormat		mFrameBufferFormat;		///< @brief	My frame buffer format
 		AUTOCIRCULATE_TRANSFER		mTransferStruct;		///< @brief	AutoCirculate transfer object
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
+		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
 
 		bool						mbWithAudio;			///< @brief	Capture audio?
 		QAudioOutput *				mAudioOutput;			///< @brief	Used to play captured audio on host audio system

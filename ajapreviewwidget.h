@@ -43,14 +43,17 @@ class AJAPreviewWidget : public QFrame
 		void droppedFile (QString fileName);
 
 	public slots:
-		void updateFrame (const QImage &image,bool clear);
-		void updateFrameWithStatus (const QImage &image,const QString &statusString,bool clear);
-		void updateFrameWithROI (const QImage &image,ROIRectList roiList, bool clear);
+		void updateFrame (const QImage &image, bool clear);
+		void updateFrameWithStatus (const QImage &image, const QString &statusString, bool clear);
+		void updateFrameWithROI (const QImage &image, ROIRectList roiList, bool clear);
 		void updateROI (ROIRectList roiList);
 		void updateStatusString (const QString statusString);
 	#if defined (INCLUDE_AJACC)
 		void updateCaptionScreen (const ushort * inScreen);
 	#endif	//	defined (INCLUDE_AJACC)
+
+	private slots:
+		void renderFrame ();
 
 	protected:
 		void paintEvent (QPaintEvent * event);
@@ -60,6 +63,9 @@ class AJAPreviewWidget : public QFrame
 		void dropEvent (QDropEvent *event);
 
 	private:
+		QImage				_image;
+		bool				_clear;
+		bool				_render;
 		QPixmap				_pixmap;
 		QString				_statusString;
 		int					_step;

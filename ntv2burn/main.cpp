@@ -174,7 +174,7 @@ int main (int argc, const char ** argv)
 
 	//	Select video source...
 	if (vidSourceStr == "?" || vidSourceStr == "list")
-		{cout << CNTV2DemoCommon::GetInputSourceStrings (INPUT_SOURCES_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetInputSourceStrings (NTV2_INPUTSOURCES_ALL, deviceSpec) << endl;  return 0;}
 	if (pVidSource)
 	{
 		if (gSourceMap.find (vidSourceStr) == gSourceMap.end ())

@@ -154,7 +154,7 @@ class NTV2Capture4K
 		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;		///< @brief	The device specifier string
 		const bool					mWithAudio;				///< @brief	Capture and playout audio?
-		const NTV2Channel			mInputChannel;			///< @brief	My input channel
+		NTV2Channel					mInputChannel;			///< @brief	My input channel
 		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
 		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
