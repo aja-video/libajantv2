@@ -548,11 +548,12 @@ AJAExport NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSourc
 AJAExport NTV2AudioSystem NTV2ChannelToAudioSystem (const NTV2Channel inChannel);
 
 /**
-	@brief		Converts the given NTV2Channel value into its ordinary equivalent NTV2InputSource.
 	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
-	@return		The equivalent NTV2InputSource value.
+	@param[in]	inKinds			Specifies the type of input source of interest (SDI, HDMI, etc.).
+								Defaults to SDI.
+	@return		The NTV2InputSource value that corresponds to the given NTV2Channel value.
 **/
-AJAExport NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel);
+AJAExport NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_SDI);
 
 /**
 	@brief		Converts a given NTV2OutputDestination to its equivalent NTV2Channel value.
@@ -751,7 +752,7 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Fram
 	@brief		Used to describe Start of Active Video (SAV) location and field dominance for a given NTV2Standard.
 				(See GetSmpteLineNumber function.)
 **/
-typedef struct NTV2SmpteLineNumber
+typedef struct AJAExport NTV2SmpteLineNumber
 {
 	ULWord			smpteFirstActiveLine;	///< @brief	SMPTE line number of first (top-most) active line of video
 	ULWord			smpteSecondActiveLine;	///< @brief	SMPTE line number of second active line of video
