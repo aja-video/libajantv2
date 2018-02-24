@@ -1798,7 +1798,7 @@ bool CNTV2Card::GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChann
 	bool	s425Enabled	(false);
 	bool	status1 = Get4kSquaresEnable (quadEnabled, inChannel);
 	if (::NTV2DeviceCanDo425Mux (_boardID))
-		status2 = Get425FrameEnable (s425Enabled, inChannel);
+		status2 = GetTsiFrameEnable (s425Enabled, inChannel);
 
 	outValue = (status1 & status2) ? (quadEnabled | (s425Enabled ? 1 : 0)) : 0;
 	return status1;
