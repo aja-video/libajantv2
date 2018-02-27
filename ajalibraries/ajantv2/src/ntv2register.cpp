@@ -9497,7 +9497,7 @@ bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const
 	{
 		// NOTE: DO NOT REMOVE THIS
 		// It's needed for the nub client to work
-		// TODO: Make an 'atomic bank-select op.
+        // TODO: Make an 'atomic bank-select op.---
 		// For now, we just do 2 ops and hope nobody else clobbers the
 		// bank select register
 		if (!WriteRegister(inBankSelect.registerNumber,	inBankSelect.registerValue,	inBankSelect.registerMask,	inBankSelect.registerShift))
@@ -9542,7 +9542,7 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 	}
 }
 
-bool CNTV2Card::VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9555,13 +9555,13 @@ bool CNTV2Card::VirtualDataWrite (const ULWord inTag, const void* inVirtualData,
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
     {
         NTV2VirtualData	virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
-        //cerr << "## DEBUG:  CNTV2Card::VirtualDataWrite:  " << virtualDataMsg << endl;
+        //cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:  " << virtualDataMsg << endl;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
     }
     return result;
 }
 
-bool CNTV2Card::VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9574,7 +9574,7 @@ bool CNTV2Card::VirtualDataRead (const ULWord inTag, const void* inOutVirtualDat
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
     {
         NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
-        //cerr << "## DEBUG:  CNTV2Card::VirtualDataRead:  " << virtualDataMsg << endl;
+        //cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
     }
     return result;
