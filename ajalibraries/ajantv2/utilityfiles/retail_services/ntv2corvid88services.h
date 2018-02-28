@@ -1,7 +1,7 @@
 //
 //  ntv2corvid88services.h
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _Corvid88Services_

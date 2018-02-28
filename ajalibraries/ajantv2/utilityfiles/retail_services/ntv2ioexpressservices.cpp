@@ -1,7 +1,7 @@
 //
 //  ntv2ioexpressservices.cpp
 //
-//  Copyright (c) 2011 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2ioexpressservices.h"

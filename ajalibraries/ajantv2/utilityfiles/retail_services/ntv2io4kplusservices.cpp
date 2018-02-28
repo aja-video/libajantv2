@@ -1,7 +1,7 @@
 //
 //  ntv2io4kplusservices.cpp
 //
-//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2io4kplusservices.h"

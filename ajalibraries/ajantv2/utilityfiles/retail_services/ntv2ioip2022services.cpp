@@ -1,7 +1,7 @@
 //
 //  ntv2ioip2022services.cpp
 //
-//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2ioip2022services.h"
