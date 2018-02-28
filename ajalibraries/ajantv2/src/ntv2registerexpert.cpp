@@ -1259,11 +1259,13 @@ private:
 				<< "Channel: "				<< DisabEnab(inRegValue & kRegMaskChannelDisable)													<< endl
 				<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
 				<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
-				<< "DRT Display: "			<< (inRegValue & kRegMaskQuarterSizeMode	? "On"					: "Off")						<< endl
+				<< "DRT Display: "			<< OnOff(inRegValue & kRegMaskQuarterSizeMode)														<< endl
 				<< "Frame Buffer Mode: "	<< (inRegValue & kRegMaskFrameBufferMode	? "Field"				: "Frame")						<< endl
 				<< "Dither: "				<< (inRegValue & kRegMaskDitherOn8BitInput	? "Dither 8-bit inputs"	: "No dithering")				<< endl
-				<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl
-				<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
+				<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl;
+			if (inRegNum == kRegCh1Control)
+				oss	<< "Frame Size Override: "	<< EnabDisab(inRegValue & kRegMaskFrameSizeSetBySW)												<< endl;
+			oss	<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
 				<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
 			return oss.str();
 		}
