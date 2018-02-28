@@ -27,6 +27,8 @@
 #define	EnabDisab(__x__)		((__x__) ? "Enabled"	: "Disabled")
 #define	DisabEnab(__x__)		((__x__) ? "Disabled"	: "Enabled")
 #define	ActInact(__x__)			((__x__) ? "Active"		: "Inactive")
+#define	SuppNotsupp(__x__)		((__x__) ? "Supported"	: "Unsupported")
+#define	PresNotPres(__x__)		((__x__) ? "Present"	: "Not Present")
 
 
 //	Register classifier keys
