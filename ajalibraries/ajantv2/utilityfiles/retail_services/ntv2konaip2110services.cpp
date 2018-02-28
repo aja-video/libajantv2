@@ -1360,14 +1360,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 //-------------------------------------------------------------------------------------------------------
 void KonaIP2110Services::SetDeviceXPointCapture()
 {
-    // We need the device ID for KonaIP 2110 because there are two flavors of this device
-    if (mDeviceID == DEVICE_ID_KONAIP_2110)
-    {
-        // no input yet for KONAIP_2110
-        mCard->SetDefaultVideoOutMode(kDefaultModeTestPattern);
-        return;
-    }
-
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
 	
