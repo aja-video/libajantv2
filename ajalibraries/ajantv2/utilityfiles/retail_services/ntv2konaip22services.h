@@ -9,7 +9,6 @@
 
 
 #include "ntv2deviceservices.h"
-#include "ntv2config2022.h"
 
 //-------------------------------------------------------------------------------------------------------
 //	class KonaIP22Services
