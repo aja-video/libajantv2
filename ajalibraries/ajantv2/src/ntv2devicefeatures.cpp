@@ -144,6 +144,7 @@ ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID)
 ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 #endif
 {
+	(void) boardID;
 	return XENA2_FRAMEBUFFER_SIZE;
 }
 
