@@ -1,7 +1,7 @@
 //
 //  ntv2corvid3gservices.cpp
 //
-//  Copyright (c) 2013 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2corvid3gservices.h"

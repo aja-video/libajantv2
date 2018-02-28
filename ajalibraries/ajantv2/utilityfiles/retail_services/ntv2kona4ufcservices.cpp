@@ -1,7 +1,7 @@
 //
 //  ntv2kona4ufcservices.cpp
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2kona4ufcservices.h"

@@ -1,7 +1,7 @@
 //
 //  ntv2io4kufcservices.h
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _Io4KUFCServices_

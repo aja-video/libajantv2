@@ -1,7 +1,7 @@
 //
 //  ntv2konaip2110services.h
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _KonaIP2110Services_

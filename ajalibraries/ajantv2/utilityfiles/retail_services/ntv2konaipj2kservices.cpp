@@ -1,7 +1,7 @@
 //
 //  ntv2konaipj2kservices.cpp
 //
-//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2konaipj2kservices.h"

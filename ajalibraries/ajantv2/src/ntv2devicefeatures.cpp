@@ -131,8 +131,6 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 	}
 	if (inFG == NTV2_FG_4x1920x1080 || inFG == NTV2_FG_4x2048x1080)
 		factor *= 4;
-	if (inFBF == NTV2_FBF_48BIT_RGB )
-		factor *= 2;
 	return factor;
 }
 
@@ -144,53 +142,8 @@ ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID)
 ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
 #endif
 {
-	ULWord frameBufferSize = 0;
-	switch (boardID)
-	{
-	#if !defined (NTV2_DEPRECATE)
-	case BOARD_ID_XENA2:
-	//case BOARD_ID_LHI_DVI:
-	case BOARD_ID_LHI_T:
-	#endif	//	!defined (NTV2_DEPRECATE)
-	case DEVICE_ID_KONALHIDVI:
-	case DEVICE_ID_LHI:
-	case DEVICE_ID_IOEXPRESS:
-	case DEVICE_ID_CORVID1:
-	case DEVICE_ID_CORVID22:
-	case DEVICE_ID_CORVID3G:
-	case DEVICE_ID_KONA3G:
-	case DEVICE_ID_KONA3GQUAD:
-	case DEVICE_ID_LHE_PLUS:
-	case DEVICE_ID_IOXT:
-	case DEVICE_ID_CORVID24:
-	case DEVICE_ID_TTAP:
-	case DEVICE_ID_IO4K:
-	case DEVICE_ID_IO4KUFC:
-	case DEVICE_ID_KONA4:
-	case DEVICE_ID_KONA4UFC:
-	case DEVICE_ID_CORVID88:
-	case DEVICE_ID_CORVID44:
-    case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_CORVIDHBR:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IOIP_2022:
-    case DEVICE_ID_IOIP_2110:
-	case DEVICE_ID_KONAIP_2110:
-	case DEVICE_ID_KONA1:
-    case DEVICE_ID_KONAHDMI:
-        frameBufferSize = XENA2_FRAMEBUFFER_SIZE;
-		break;
-	default:
-		frameBufferSize = 0;
-		break;
-	}
-	
-	return frameBufferSize;
+	(void) boardID;
+	return XENA2_FRAMEBUFFER_SIZE;
 }
 
 

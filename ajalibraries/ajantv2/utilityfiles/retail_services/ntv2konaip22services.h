@@ -1,7 +1,7 @@
 //
 //  ntv2konaip22services.h
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _KonaIP22Services_
@@ -9,7 +9,6 @@
 
 
 #include "ntv2deviceservices.h"
-#include "ntv2config2022.h"
 
 //-------------------------------------------------------------------------------------------------------
 //	class KonaIP22Services
