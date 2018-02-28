@@ -1,7 +1,7 @@
 //
 //  ntv2ioip2022services.h
 //
-//  Copyright (c) 2013 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _IoIP2022Services_

@@ -1,17 +1,20 @@
 //
 //  ntv2ioip2022services.cpp
 //
-//  Copyright (c) 2017 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2ioip2022services.h"
 
 #if defined (AJALinux) || defined (AJAMac)
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+    #include <stdlib.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
 #endif
+
+using namespace std;
+
 
 //-------------------------------------------------------------------------------------------------------
 //	class IoIP2022Services
@@ -29,9 +32,6 @@ IoIP2022Services::~IoIP2022Services()
         delete config;
         config = NULL;
     }
-
-	for(uint32_t i = 0; i < 8; i++)
-		mCard->EnableChannel((NTV2Channel)i);
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -106,9 +106,9 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
-	
+
 	//
-	// Io4K
+	// IoIP
 	//
 	
 	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
@@ -136,8 +136,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
 	NTV2VideoFormat				inputFormat;									// Input video format
-	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;					// Input source selected single stream
-	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;					// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
+	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
     bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
@@ -175,8 +175,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	
 	// select square division or 2 pixel interleave in frame buffer
 	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
-	
-	// Figure out what our input format is based on what is selected
+
+	// Figure out what our input format is based on what is selected 
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
@@ -218,8 +218,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
 	if (bStereoOut || b2FbLevelBHfr)
@@ -602,21 +602,17 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
 	mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
 	
-	
 	// Frame Buffer 2
 	mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
-	
 	
 	// Frame Buffer 3
 	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
 	mCard->Connect(NTV2_XptFrameBuffer3BInput, NTV2_XptBlack);
 	
-	
 	// Frame Buffer 4
 	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
 	mCard->Connect(NTV2_XptFrameBuffer4BInput, NTV2_XptBlack);
-	
 	
 	// 4K Down Converter
 	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;

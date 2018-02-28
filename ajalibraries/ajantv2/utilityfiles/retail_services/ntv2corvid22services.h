@@ -1,12 +1,11 @@
 //
 //  ntv2corvid22services.h
 //
-//  Copyright (c) 2011 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _Corvid22Services_
 #define _Corvid22Services_
-
 
 #include "ntv2deviceservices.h"
 

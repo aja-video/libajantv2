@@ -1,7 +1,7 @@
 //
 //  ntv2ioexpressservices.h
 //
-//  Copyright (c) 2011 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _IoExpressServices_

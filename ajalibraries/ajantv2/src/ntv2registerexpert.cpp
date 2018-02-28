@@ -94,13 +94,14 @@ public:
 			DefineRegName (regNum,	::NTV2RegisterNameString (regNum));
 		
 		DefineRegister (kRegGlobalControl,		"",	mDecodeGlobalControlReg,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh2,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh3,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel3,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh4,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel4,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh5,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel5,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh6,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel6,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh7,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel7,	kRegClass_NULL);
-		DefineRegister (kRegGlobalControlCh8,	"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel8,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControl2,		"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh2,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh3,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel3,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh4,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel4,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh5,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel5,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh6,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel6,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh7,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel7,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControlCh8,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel8,	kRegClass_NULL);
 		DefineRegister (kRegCh1Control,			"",	mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 		DefineRegister (kRegCh2Control,			"",	mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
 		DefineRegister (kRegCh3Control,			"",	mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel3,	kRegClass_NULL);
@@ -1156,7 +1157,7 @@ private:
 		}
 		virtual	~Decoder()	{}
 	} mDefaultRegDecoder;
-	
+
 	struct DecodeGlobalControlReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1188,43 +1189,62 @@ private:
 		}
 		virtual	~DecodeGlobalControlReg()	{}
 	}	mDecodeGlobalControlReg;
-	
-	struct DecodeGlobalControl2Reg : public Decoder
+
+	//	reg 267 aka kRegGlobalControl2
+	struct DecodeGlobalControl2 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			static const ULWord	playCaptModes[]	= {	kRegMaskAud1PlayCapMode,kRegMaskAud2PlayCapMode,kRegMaskAud3PlayCapMode,kRegMaskAud4PlayCapMode,
+													kRegMaskAud5PlayCapMode,kRegMaskAud6PlayCapMode,kRegMaskAud7PlayCapMode,kRegMaskAud8PlayCapMode};
+			static const ULWord	rp188Modes[]	= {	0, 0, kRegMaskRP188ModeCh3,kRegMaskRP188ModeCh4,kRegMaskRP188ModeCh5,kRegMaskRP188ModeCh6,kRegMaskRP188ModeCh7,kRegMaskRP188ModeCh8};
+			static const ULWord	k425Masks[]		= {	kRegMask425FB12, kRegMask425FB34, kRegMask425FB56, kRegMask425FB78};
+			static const ULWord	BLinkModes[]	= {	kRegMaskSmpte372Enable4, kRegMaskSmpte372Enable6, kRegMaskSmpte372Enable8};
+			ostringstream	oss;
+		    oss	<< "Reference source bit 4: "	<< SetNotset(inRegValue & kRegMaskRefSource2)			<< endl
+				<< "Quad Mode Channel 1-4: "	<< SetNotset(inRegValue & kRegMaskQuadMode)				<< endl
+				<< "Quad Mode Channel 5-8: "	<< SetNotset(inRegValue & kRegMaskQuadMode2)			<< endl
+				<< "Independent Channel Mode: " << SetNotset(inRegValue & kRegMaskIndependentMode)		<< endl
+				<< "2MB Frame Support: "		<< SuppNotsupp(inRegValue & kRegMask2MFrameSupport)		<< endl
+				<< "Audio Mixer: "				<< PresNotPres(inRegValue & kRegMaskAudioMixerPresent)	<< endl
+				<< "Is DNXIV Product: "			<< YesNo(inRegValue & kRegMaskIsDNXIV)					<< endl;
+			for (unsigned ch(0);  ch < 8;  ch++)
+				oss << "Audio " << DEC(ch+1) << " Play/Capture Mode: " << OnOff(inRegValue & playCaptModes[ch])	<< endl;
+			for (unsigned ch(2);  ch < 8;  ch++)
+				oss << "Ch " << DEC(ch+1) << " RP188 Output: " << EnabDisab(inRegValue & rp188Modes[ch])	<< endl;
+			for (unsigned ch(0);  ch < 3;  ch++)
+				oss << "Ch " << DEC(2*(ch+2)) << " 1080p50/p60 Link-B Mode: " << EnabDisab(inRegValue & BLinkModes[ch])	<< endl;
+			for (unsigned ch(0);  ch < 4;  ch++)
+				oss << "Ch " << DEC(ch+1) << "/" << DEC(ch+2) << " 2SI Mode: " << EnabDisab(inRegValue & k425Masks[ch])	<< endl;
+			oss	<< "2SI Min Align Delay 1-4: "	<< EnabDisab(inRegValue & BIT(24))			<< endl
+				<< "2SI Min Align Delay 5-8: "	<< EnabDisab(inRegValue & BIT(25));
+			return oss.str();
+		}
+		virtual	~DecodeGlobalControl2()	{}
+	}	mDecodeGlobalControl2;
+
+	// Regs 377,378,379,380,381,382,383 aka kRegGlobalControlCh2,kRegGlobalControlCh3,kRegGlobalControlCh4,kRegGlobalControlCh5,kRegGlobalControlCh6,kRegGlobalControlCh7,kRegGlobalControlCh8
+	struct DecodeGlobalControlChanReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss << "Reference source bit 4: "		<< SetNotset(inRegValue & kRegMaskRefSource2)		<< endl
-				<< "Channel 1-4 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode)			<< endl
-				<< "Channel 5-8 Quad: "				<< SetNotset(inRegValue & kRegMaskQuadMode2)		<< endl
-				<< "Independent Channel Mode: "		<< SetNotset(inRegValue & kRegMaskIndependentMode)	<< endl
-				<< "Audio 1 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud1PlayCapMode)		<< endl
-				<< "Audio 2 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud2PlayCapMode)		<< endl
-				<< "Audio 3 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud3PlayCapMode)		<< endl
-				<< "Audio 4 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud4PlayCapMode)		<< endl
-				<< "Audio 5 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud5PlayCapMode)		<< endl
-				<< "Audio 6 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud6PlayCapMode)		<< endl
-				<< "Audio 7 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud7PlayCapMode)		<< endl
-				<< "Audio 8 play/capture mode: "	<< OnOff(inRegValue & kRegMaskAud8PlayCapMode)		<< endl
-				<< "Ch 3 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh3)		<< endl
-				<< "Ch 4 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh4)		<< endl
-				<< "Ch 5 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh5)		<< endl
-				<< "Ch 6 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh6)		<< endl
-				<< "Ch 7 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh7)		<< endl
-				<< "Ch 8 RP-188 output: "			<< EnabDisab(inRegValue & kRegMaskRP188ModeCh8)		<< endl
-				<< "Ch 1/2 425: "					<< EnabDisab(inRegValue & kRegMask425FB12)			<< endl
-				<< "Ch 3/4 425: "					<< EnabDisab(inRegValue & kRegMask425FB34)			<< endl
-				<< "Ch 5/6 425: "					<< EnabDisab(inRegValue & kRegMask425FB56)			<< endl
-				<< "Ch 7/8 425: "					<< EnabDisab(inRegValue & kRegMask425FB78)			<< endl
-				<< "DnxIv: "						<< YesNo(inRegValue & kRegMaskIsDNXIV)				<< endl
-				<< "Has audio mixer: "				<< YesNo(inRegValue & kRegMaskAudioMixerPresent)	<< endl;
+			const NTV2FrameGeometry	frameGeometry	= NTV2FrameGeometry((inRegValue & kRegMaskGeometry) >> 3);
+			const NTV2Standard		videoStandard	= NTV2Standard((inRegValue & kRegMaskStandard) >> 7);
+			const NTV2FrameRate		frameRate		= NTV2FrameRate(((inRegValue & kRegMaskFrameRate) >> kRegShiftFrameRate) | ((inRegValue & kRegMaskFrameRateHiBit) >> (kRegShiftFrameRateHiBit - 3)));
+			oss << "Frame Rate: "		<< ::NTV2FrameRateToString (frameRate)			<< endl
+				<< "Frame Geometry: "	<< ::NTV2FrameGeometryToString (frameGeometry)	<< endl
+				<< "Standard: "			<< ::NTV2StandardToString (videoStandard);
 			return oss.str();
 		}
-		virtual	~DecodeGlobalControl2Reg()	{}
-	}	mDecodeGlobalControl2;
+		virtual	~DecodeGlobalControlChanReg()	{}
+	}	mDecodeGlobalControlChanRegs;
 
+	//	Regs 1/5/257/260/384/388/392/396  aka  kRegCh1Control,kRegCh2Control,kRegCh3Control,kRegCh4Control,kRegCh5Control,kRegCh6Control,kRegCh7Control,kRegCh8Control
 	struct DecodeChannelControlReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1239,11 +1259,13 @@ private:
 				<< "Channel: "				<< DisabEnab(inRegValue & kRegMaskChannelDisable)													<< endl
 				<< "Viper Squeeze: "		<< (inRegValue & BIT(9)						? "Squeeze"				: "Normal")						<< endl
 				<< "Flip Vertical: "		<< (inRegValue & kRegMaskFrameOrientation	? "Upside Down"			: "Normal")						<< endl
-				<< "DRT Display: "			<< (inRegValue & kRegMaskQuarterSizeMode	? "On"					: "Off")						<< endl
+				<< "DRT Display: "			<< OnOff(inRegValue & kRegMaskQuarterSizeMode)														<< endl
 				<< "Frame Buffer Mode: "	<< (inRegValue & kRegMaskFrameBufferMode	? "Field"				: "Frame")						<< endl
 				<< "Dither: "				<< (inRegValue & kRegMaskDitherOn8BitInput	? "Dither 8-bit inputs"	: "No dithering")				<< endl
-				<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl
-				<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
+				<< "Frame Size: "			<< (1 << (((inRegValue & kK2RegMaskFrameSize) >> 20) + 1)) << " MB"									<< endl;
+			if (inRegNum == kRegCh1Control)
+				oss	<< "Frame Size Override: "	<< EnabDisab(inRegValue & kRegMaskFrameSizeSetBySW)												<< endl;
+			oss	<< "RGB Range: "			<< (inRegValue & BIT(24)					? "Black = 0x40"		: "Black = 0")					<< endl
 				<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
 			return oss.str();
 		}

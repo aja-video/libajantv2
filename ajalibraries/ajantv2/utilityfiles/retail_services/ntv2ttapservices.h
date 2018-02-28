@@ -1,7 +1,7 @@
 //
 //  ntv2ttapservices.h
 //
-//  Copyright (c) 2012 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _TTapServices_

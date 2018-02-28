@@ -1,7 +1,7 @@
 //
 //  ntv2io4kservices.h
 //
-//  Copyright (c) 2013 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #ifndef _Io4KServices_

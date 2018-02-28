@@ -3280,7 +3280,7 @@ public:
         @return			True if all requested registers were successfully written; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    VirtualDataWrite (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize);
+    AJA_VIRTUAL bool    WriteVirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize);
 
     /**
         @brief			Reads the block of virtual data for a specific tag
@@ -3290,7 +3290,7 @@ public:
         @return			True if all requested registers were successfully written; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    VirtualDataRead (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize);
+    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize);
 
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),

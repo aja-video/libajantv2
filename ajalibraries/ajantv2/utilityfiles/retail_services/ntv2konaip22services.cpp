@@ -1,13 +1,13 @@
 //
 //  ntv2konaip22services.cpp
 //
-//  Copyright (c) 2014 AJA Video, Inc. All rights reserved.
+//  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
 #include "ntv2konaip22services.h"
 
 #if defined (AJALinux) || defined (AJAMac)
-	#include <stdlib.h>
+    #include <stdlib.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
