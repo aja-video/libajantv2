@@ -13,6 +13,8 @@
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 
+using namespace std;
+
 #define NTV2_AUDIOSIZE_MAX		(401 * 1024)
 
 static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');

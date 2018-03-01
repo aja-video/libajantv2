@@ -15,6 +15,8 @@
 #include <iomanip>
 #include "ajabase/system/systemtime.h"
 
+using namespace std;
+
 
 //	Globals
 static bool			gGlobalQuit		(false);	//	Set this "true" to exit gracefully

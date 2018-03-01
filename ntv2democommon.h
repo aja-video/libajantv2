@@ -199,7 +199,7 @@ class CNTV2DemoCommon
 			@return		A string that can be printed to show the available pixel formats (or those that are supported by a given device).
 		**/
 		static std::string					GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
-																	const string inDeviceSpecifier = std::string ());
+																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
 			@brief	Returns the NTV2FrameBufferFormat that matches the given string.

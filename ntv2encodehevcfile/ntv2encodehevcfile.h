@@ -64,7 +64,7 @@ class NTV2EncodeHEVCFile
         **/
 		NTV2EncodeHEVCFile (const std::string			inDeviceSpecifier	= "0",
 							const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-                            const string                fileName            = NULL,
+                            const std::string           fileName            = "",
                             const uint32_t              frameWidth          = 0,
                             const uint32_t              frameHeight         = 0,
 							const M31VideoPreset		inM31Preset			= M31PRESET);

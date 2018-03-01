@@ -14,6 +14,8 @@
 #include "ntv2democommon.h"
 #include <iostream>
 
+using namespace std;
+
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
 const uint32_t	kAppSignature	(AJA_FOURCC ('F','l','d','B'));

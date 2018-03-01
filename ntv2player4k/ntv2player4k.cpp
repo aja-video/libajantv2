@@ -16,6 +16,8 @@
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 
+using namespace std;
+
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
 /**
