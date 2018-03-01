@@ -23,7 +23,6 @@
 # include <string.h>		/* memset, memcpy */
 #endif
 
-using namespace std;
 
 typedef enum
 {
@@ -60,7 +59,7 @@ public:
 						CRP188 ();
 						CRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
-						CRP188 (string & sRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
+						CRP188 (const std::string & sRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormat30fps);
 	virtual 			~CRP188();
@@ -72,7 +71,7 @@ public:
 									NTV2FrameRate frameRate, const bool bDropFrame = false, const bool bSMPTE372 = false);
     void				SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
     void				SetRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-    void				SetRP188 (string &sRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+    void				SetRP188 (const std::string &sRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
     void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormatUnknown);
 	void				SetRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormatUnknown);
 
@@ -87,7 +86,7 @@ public:
 	void				SetOutputFilter (UByte src);
 
     // Getters
-    bool				GetRP188Str  (string & sRP188) const;
+    bool				GetRP188Str  (std::string & sRP188) const;
 	const char *		GetRP188CString () const;
     bool				GetRP188Secs (ULWord & ulSecs) const;
     bool				GetRP188Frms (ULWord & ulFrms) const;
@@ -101,7 +100,7 @@ public:
 	void				ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord & hours, ULWord & minutes, ULWord & seconds, ULWord & frames);
 	ULWord				AddFrames (ULWord frameCount);
 	ULWord				SubtractFrames (ULWord frameCount);
-	bool				GetRP188UserBitsStr (string & sRP188UB);
+	bool				GetRP188UserBitsStr (std::string & sRP188UB);
 	const char *		GetRP188UserBitsCString ();
 	UByte				GetSource () const ;
 	UByte				GetOutputFilter () const ;
@@ -142,7 +141,7 @@ public:
 	void				writeV210Pixel (char **pBytePtr, int x, int c, int y);
 	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
 	void				CopyDigit (char *pDigit, int digitWidth, int digitHeight, char *pFrameBuff, int fbRowBytes);
-	string				GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
+	std::string			GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
 	
 private:
     void				ConvertTcStrToVal (void);   // converts _sHMSF to _ulVal
@@ -165,8 +164,8 @@ private:
 	bool				_bColorFrameFlag;   // Color Frame bit: '0' or '1'
 	ULWord				_varicamRate;		// Varicam rate expressed as bits [0..3] 1 units, bits [4..7] tens unit.
 
-    string				_sHMSF;				// hour:minute:second:frame in string format
-	string				_sUserBits;			// Binary Groups 8-1 in string format
+    std::string			_sHMSF;				// hour:minute:second:frame in string format
+	std::string			_sUserBits;			// Binary Groups 8-1 in string format
     ULWord				_ulVal[4];			// [0]=frame, [1]=seconds, etc.
 	ULWord				_ulUserBits[8];		// [0] = Binary Group 1, [1] = Binary Group 2, etc. (note: SMPTE labels them 1 - 8)
     RP188_STRUCT		_rp188;				// AJA native format

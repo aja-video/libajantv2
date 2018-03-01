@@ -7,6 +7,8 @@
 #include "ntv2rp188.h"
 #include "stdio.h" // for sprintf
 
+using namespace std;
+
 
 //--------------------------------------------------------------------------------------------------------------------
 // CRP188 definition
@@ -430,7 +432,7 @@ CRP188::CRP188 (const NTV2_RP188 & inRP188, const TimecodeFormat tcFormat)
 	SetRP188 (inRP188, tcFormat);
 }
 
-CRP188::CRP188 (string & sRP188, const TimecodeFormat tcFormat)
+CRP188::CRP188 (const string & sRP188, const TimecodeFormat tcFormat)
 {
 	Init();
     SetRP188(sRP188, tcFormat);
@@ -593,7 +595,7 @@ void CRP188::SetRP188 (const NTV2_RP188 & inRP188, const TimecodeFormat inFormat
 }
 
 
-void CRP188::SetRP188 (string &sRP188, const TimecodeFormat tcFormat)
+void CRP188::SetRP188 (const string &sRP188, const TimecodeFormat tcFormat)
 {
 	if (tcFormat != kTCFormatUnknown)
 		_tcFormat = tcFormat;
