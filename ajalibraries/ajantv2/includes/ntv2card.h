@@ -3727,6 +3727,7 @@ public:
 	/**
 		@brief		Returns the video format of the signal that is present on the device's reference input.
 		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+		@note		The returned video format, if valid, will be an SD format for black burst and HD for tri-level.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetReferenceVideoFormat (void);
 
