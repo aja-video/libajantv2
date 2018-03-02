@@ -8551,7 +8551,7 @@ bool CNTV2Card::GetLTCInputEnable (bool & outIsEnabled)
 bool CNTV2Card::GetLTCOnReference (bool & outLTCIsOnReference)
 {
 	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegFS1ReferenceSelect, &tempVal, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect));
+	bool	retVal	(ReadRegister (kRegFS1ReferenceSelect, &tempVal, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect));
 	if (retVal)
 		outLTCIsOnReference = (tempVal == 1) ? false : true;
 	return retVal;
