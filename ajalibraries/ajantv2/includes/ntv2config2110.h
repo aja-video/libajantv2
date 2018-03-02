@@ -46,6 +46,128 @@ enum NTV2PacketInterval
 };
 
 /**
+    @brief	Structs and enums that define the virtual config data used by services and the Control panel to set and maintain 2110 configuration
+**/
+
+typedef enum
+{
+    kNetworkVDataTag2110      = 'n210',           // 4CC of network config virtual data
+    kTransmitVDataTag2110     = 't210',           // 4CC of transmit config virtual data
+    kReceiveVDataTag2110      = 'r210',           // 4CC of receive config virtual data
+    kMetadataVDataTag2110     = 'm210',           // 4CC of metadata config virtual data
+} VDataTag2110 ;
+
+
+typedef struct
+{
+    char                    remoteIP[32][2];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint16_t                payloadType;
+    uint8_t                 tos;
+    uint8_t                 ttl;
+    uint32_t                ssrc;
+    uint32_t                pktsPerLine;
+    uint32_t                payloadLen;
+    uint32_t                lastPayLoadLen;
+
+} TxNetworkChVData2110;
+
+typedef struct
+{
+    TxNetworkChVData2110    txAudioNetwork;
+    uint8_t                 numAudioChannels;
+    uint8_t                 firstAudioChannel;
+    NTV2PacketInterval      audioPacketInterval;
+} TxAudioChVData2110;
+
+typedef struct
+{
+    TxNetworkChVData2110    txVideo;
+    uint32_t                numAudioStreams;
+    TxAudioChVData2110      txAudio1;
+    TxAudioChVData2110      txAudio2;
+    TxAudioChVData2110      txAudio3;
+    TxAudioChVData2110      txAudio4;
+} TxChVData2110;
+
+typedef struct
+{
+    uint32_t                rxMatch;
+    char                    sourceIP[32];
+    char                    destIP[32];
+    uint32_t                sourcePort;
+    uint32_t                destPort;
+    uint32_t                ssrc;
+    uint16_t                vlan;
+    uint16_t                payloadType;
+    uint32_t                payloadLen;
+    uint32_t                lastPayloadLen;
+    uint32_t                pktsPerLine;
+} RxNetworkChVData2110;
+
+typedef struct
+{
+    RxNetworkChVData2110    rxAudioNetwork;
+    uint8_t                 numAudioChannels;
+    NTV2PacketInterval      audioPacketInterval;
+} RxAudioChVData2110;
+
+typedef struct
+{
+    RxNetworkChVData2110    rxVideo;
+    uint32_t                numAudioStreams;
+    RxAudioChVData2110      txAudio1;
+    RxAudioChVData2110      txAudio2;
+    RxAudioChVData2110      txAudio3;
+    RxAudioChVData2110      txAudio4;
+} RxChVData2110;
+
+
+typedef struct
+{
+    char                    ipAddress[32];
+    char                    subnetMask[32];
+    char                    gateWay[32];
+} SFPVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    char                    ptpMasterIP[32];
+    uint32_t                numSFPs;
+    SFPVData2110            linkA;
+    SFPVData2110            linkB;
+} NetworkVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numTxChannels;
+    TxChVData2110           txCh1;
+    TxChVData2110           txCh2;
+    TxChVData2110           txCh3;
+    TxChVData2110           txCh4;
+} TransmitVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numRxChannels;
+    RxChVData2110           rxCh1;
+    RxChVData2110           rxCh2;
+    RxChVData2110           rxCh3;
+    RxChVData2110           rxCh4;
+} ReceiveVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+} MetadataVData2110;
+
+
+
+/**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
