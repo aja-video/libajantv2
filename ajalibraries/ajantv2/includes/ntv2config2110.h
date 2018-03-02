@@ -83,12 +83,10 @@ typedef struct
 
 typedef struct
 {
-    TxNetworkChVData2110    txVideo;
+    uint32_t                numVideoStreams;
+    TxNetworkChVData2110    txVideo[1];
     uint32_t                numAudioStreams;
-    TxAudioChVData2110      txAudio1;
-    TxAudioChVData2110      txAudio2;
-    TxAudioChVData2110      txAudio3;
-    TxAudioChVData2110      txAudio4;
+    TxAudioChVData2110      txAudio[4];
 } TxChVData2110;
 
 typedef struct
@@ -115,12 +113,10 @@ typedef struct
 
 typedef struct
 {
-    RxNetworkChVData2110    rxVideo;
+    uint32_t                numVideoStreams;
+    RxNetworkChVData2110    rxVideo[1];
     uint32_t                numAudioStreams;
-    RxAudioChVData2110      txAudio1;
-    RxAudioChVData2110      txAudio2;
-    RxAudioChVData2110      txAudio3;
-    RxAudioChVData2110      txAudio4;
+    RxAudioChVData2110      txAudio[4];
 } RxChVData2110;
 
 
@@ -144,20 +140,14 @@ typedef struct
 {
     uint32_t                id;
     uint32_t                numTxChannels;
-    TxChVData2110           txCh1;
-    TxChVData2110           txCh2;
-    TxChVData2110           txCh3;
-    TxChVData2110           txCh4;
+    TxChVData2110           txCh[4];
 } TransmitVData2110;
 
 typedef struct
 {
     uint32_t                id;
     uint32_t                numRxChannels;
-    RxChVData2110           rxCh1;
-    RxChVData2110           rxCh2;
-    RxChVData2110           rxCh3;
-    RxChVData2110           rxCh4;
+    RxChVData2110           rxCh[4];
 } ReceiveVData2110;
 
 typedef struct
