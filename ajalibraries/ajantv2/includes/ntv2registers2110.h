@@ -166,22 +166,22 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kRegDecap_chan_enable            0
-#define kRegDecap_match_reserved         1
-#define kRegDecap_match_src_ip           2
-#define kRegDecap_match_dst_ip           3
-#define kRegDecap_match_udp_src_port     4
-#define kRegDecap_match_udp_dst_port     5
-#define kRegDecap_match_payload          6
-#define kRegDecap_match_ssrc             7
-#define kRegDecap_match_sel              8
-#define kRegDecap_unused                 9
-#define kRegDecap_rx_payload            10
-#define kRegDecap_rx_ssrc               11
-#define kRegDecap_rx_pkt_cnt            12
-#define kRegDecap_reordered_pkt_cnt     13
-#define kRegDecap_unused2               14
-#define kRegDecap_descriptiom           15
+#define kRegDecap_chan_enable           0x00
+#define kRegDecap_match_reserved        0x01
+#define kRegDecap_match_src_ip          0x02
+#define kRegDecap_match_dst_ip          0x03
+#define kRegDecap_match_udp_src_port    0x04
+#define kRegDecap_match_udp_dst_port    0x05
+#define kRegDecap_match_payload         0x06
+#define kRegDecap_match_ssrc            0x07
+#define kRegDecap_match_sel             0x08
+#define kRegDecap_unused                0x09
+#define kRegDecap_rx_payload            0x0a
+#define kRegDecap_rx_ssrc               0x0b
+#define kRegDecap_rx_pkt_cnt            0x0c
+#define kRegDecap_reordered_pkt_cnt     0x0d
+#define kRegDecap_unused2               0x0e
+#define kRegDecap_descriptiom           0x0f
 
 /////////////////////////////////////////////////////////////////////
 //
