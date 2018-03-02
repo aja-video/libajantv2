@@ -2902,8 +2902,8 @@ void DeviceServices::SetDeviceXPointCapture()
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
-		ReferenceSelect tempSelect = NTV2DeviceHasGenlockv2(mDeviceID) ? kVideoIn : mCaptureReferenceSelect;
-		switch (tempSelect)
+		ReferenceSelect refSelect = NTV2DeviceHasGenlockv2(mDeviceID) ? kVideoIn : mCaptureReferenceSelect;
+		switch (refSelect)
 		{
 		default:
 		case kFreeRun:
@@ -3061,7 +3061,7 @@ void DeviceServices::SetDeviceXPointPlayback()
 
 	// The reference (genlock) source: if it's a video input, make sure it matches our current selection
 	bool lockV2 = NTV2DeviceHasGenlockv2(mDeviceID);
-	ReferenceSelect refSelect = bDSKNeedsInputRef ? mDisplayReferenceSelect : mDisplayReferenceSelect;
+	ReferenceSelect refSelect = bDSKNeedsInputRef ? mCaptureReferenceSelect : mDisplayReferenceSelect;
 	
     if ((mDeviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
         (mDeviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
