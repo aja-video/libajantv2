@@ -132,8 +132,7 @@ typedef struct
     uint32_t                id;
     char                    ptpMasterIP[32];
     uint32_t                numSFPs;
-    SFPVData2110            linkA;
-    SFPVData2110            linkB;
+    SFPVData2110            link[2];
 } NetworkVData2110;
 
 typedef struct
