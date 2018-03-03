@@ -51,10 +51,10 @@ enum NTV2PacketInterval
 
 typedef enum
 {
-    kNetworkVDataTag2110      = 'n210',           // 4CC of network config virtual data
-    kTransmitVDataTag2110     = 't210',           // 4CC of transmit config virtual data
-    kReceiveVDataTag2110      = 'r210',           // 4CC of receive config virtual data
-    kMetadataVDataTag2110     = 'm210',           // 4CC of metadata config virtual data
+    kNetworkVData2110      	= 'n210',           // 4CC of network config virtual data
+    kTransmitVData2110     	= 't210',           // 4CC of transmit config virtual data
+    kReceiveVData2110     	= 'r210',           // 4CC of receive config virtual data
+    kMetadataVData2110     	= 'm210',           // 4CC of metadata config virtual data
 } VDataTag2110 ;
 
 
@@ -64,12 +64,12 @@ typedef struct
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint16_t                payloadType;
-    uint8_t                 tos;
-    uint8_t                 ttl;
     uint32_t                ssrc;
-    uint32_t                pktsPerLine;
-    uint32_t                payloadLen;
-    uint32_t                lastPayLoadLen;
+    uint8_t                 tos;				// hard coded
+    uint8_t                 ttl;				// hard coded
+    uint32_t                pktsPerLine;		// hard coded
+    uint32_t                payloadLen;			// hard coded
+    uint32_t                lastPayLoadLen;		// hard coded
 
 } TxNetworkChVData2110;
 
@@ -91,17 +91,17 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                rxMatch;
     char                    sourceIP[32];
     char                    destIP[32];
     uint32_t                sourcePort;
     uint32_t                destPort;
+    uint32_t                rxMatch;
     uint32_t                ssrc;
     uint16_t                vlan;
     uint16_t                payloadType;
-    uint32_t                payloadLen;
-    uint32_t                lastPayloadLen;
-    uint32_t                pktsPerLine;
+    uint32_t                payloadLen;			// hard coded
+    uint32_t                lastPayloadLen;		// hard coded
+    uint32_t                pktsPerLine;		// hard coded
 } RxNetworkChVData2110;
 
 typedef struct
@@ -116,7 +116,7 @@ typedef struct
     uint32_t                numVideoStreams;
     RxNetworkChVData2110    rxVideo[1];
     uint32_t                numAudioStreams;
-    RxAudioChVData2110      txAudio[4];
+    RxAudioChVData2110      rxAudio[4];
 } RxChVData2110;
 
 
@@ -140,7 +140,7 @@ typedef struct
     uint32_t                id;
     uint32_t                numTxChannels;
     TxChVData2110           txCh[4];
-} TransmitVData2110;
+} TransmitVData2110; 
 
 typedef struct
 {
