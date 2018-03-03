@@ -65,11 +65,6 @@ typedef struct
     uint32_t                remotePort[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
-    uint8_t                 tos;				// hard coded
-    uint8_t                 ttl;				// hard coded
-    uint32_t                pktsPerLine;		// hard coded
-    uint32_t                payloadLen;			// hard coded
-    uint32_t                lastPayLoadLen;		// hard coded
 
 } TxNetworkChVData2110;
 
@@ -99,9 +94,6 @@ typedef struct
     uint32_t                ssrc;
     uint16_t                vlan;
     uint16_t                payloadType;
-    uint32_t                payloadLen;			// hard coded
-    uint32_t                lastPayloadLen;		// hard coded
-    uint32_t                pktsPerLine;		// hard coded
 } RxNetworkChVData2110;
 
 typedef struct
