@@ -3288,11 +3288,11 @@ public:
         @param[in]		inTag               Tag for the virtual data.
         @param[out]		inOutVirtualData    Virtual data buffer to be written
         @param[in]		inVirtualDataSize   Virtual data size to read
-        @param[out]		outVirtualDataSize   Virtual data size of vData
+        @param[out]		outVirtualDataSize   Virtual data size of tagged data regardless of how much read
         @return			True if all requested registers were successfully written; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
+    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
 
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),

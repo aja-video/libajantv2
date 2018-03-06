@@ -9553,7 +9553,7 @@ bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData,
     return result;
 }
 
-bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
+bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9565,7 +9565,7 @@ bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualDat
     else
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
     {
-        NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
+        NTV2VirtualData	virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
         //cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
         *outVirtualDataSize = 0;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
