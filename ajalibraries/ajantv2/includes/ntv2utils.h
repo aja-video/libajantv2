@@ -296,8 +296,9 @@ AJAExport double GetFrameTime(NTV2FrameRate frameRate);
 	@param[in]	inHeightLines	Specifies the raster height, in lines of visible video.
 	@param[in]	inWidthPixels	Specifies the raster width, in pixels.
 	@param[in]	inIsInterlaced	Specify true for interlaced/psf video, or false for progressive.
+	@param[in]	inIsLevelB    	Specify true for level B, or false for everything else.
 **/
-AJAExport NTV2VideoFormat	GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced);
+AJAExport NTV2VideoFormat	GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced, const bool inIsLevelB);
 
 /**
 	@brief		Answers with the given frame rate, in frames per second, as two components:
