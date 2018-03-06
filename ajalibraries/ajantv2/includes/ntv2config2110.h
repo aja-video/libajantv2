@@ -240,6 +240,7 @@ public:
     bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
     bool        GetRxStreamConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
     bool        GetRxStreamEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
+	bool        GetRxByteCount( const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig);
