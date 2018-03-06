@@ -430,7 +430,7 @@ NTV2OutputCrosspointID GetFrameBufferOutputXptFromChannel (const NTV2Channel inC
                                                                                 NTV2_XptFrameBuffer5YUV,		NTV2_XptFrameBuffer6YUV,		NTV2_XptFrameBuffer7YUV,		NTV2_XptFrameBuffer8YUV};
     static const NTV2OutputCrosspointID	gFrameBufferRGBOutputs []		=	{	NTV2_XptFrameBuffer1RGB,		NTV2_XptFrameBuffer2RGB,		NTV2_XptFrameBuffer3RGB,		NTV2_XptFrameBuffer4RGB,
                                                                                 NTV2_XptFrameBuffer5RGB,		NTV2_XptFrameBuffer6RGB,		NTV2_XptFrameBuffer7RGB,		NTV2_XptFrameBuffer8RGB};
-    static const NTV2OutputCrosspointID	gFrameBufferYUV425Outputs []	=	{	NTV2_XptFrameBuffer1_425YUV,	NTV2_XptFrameBuffer1_425YUV,	NTV2_XptFrameBuffer1_425YUV,	NTV2_XptFrameBuffer4_425YUV,
+    static const NTV2OutputCrosspointID	gFrameBufferYUV425Outputs []	=	{	NTV2_XptFrameBuffer1_425YUV,	NTV2_XptFrameBuffer2_425YUV,	NTV2_XptFrameBuffer3_425YUV,	NTV2_XptFrameBuffer4_425YUV,
                                                                                 NTV2_XptFrameBuffer5_425YUV,	NTV2_XptFrameBuffer6_425YUV,	NTV2_XptFrameBuffer7_425YUV,	NTV2_XptFrameBuffer8_425YUV};
     static const NTV2OutputCrosspointID	gFrameBufferRGB425Outputs []	=	{	NTV2_XptFrameBuffer1_425RGB,	NTV2_XptFrameBuffer2_425RGB,	NTV2_XptFrameBuffer3_425RGB,	NTV2_XptFrameBuffer4_425RGB,
                                                                                 NTV2_XptFrameBuffer5_425RGB,	NTV2_XptFrameBuffer6_425RGB,	NTV2_XptFrameBuffer7_425RGB,	NTV2_XptFrameBuffer8_425RGB};
