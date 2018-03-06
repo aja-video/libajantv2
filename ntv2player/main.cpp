@@ -38,6 +38,9 @@ int main (int argc, const char ** argv)
 	int				noAudio				(0);					//	Disable audio tone?
 	int				doMultiChannel		(0);					//	Enable multi-format?
 	int				hdrType				(0);
+    int				rData               (0);
+    int				wData               (0);
+
 	poptContext		optionsContext; 							//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
@@ -49,7 +52,9 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",		"'?' or 'list' to list"},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",			"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",				"number of the channel"},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",			NULL},
+        {"readVdata",   'r',	POPT_ARG_NONE,		&rData,         0,	"read data",                        NULL},
+        {"writeVdata",  'w',	POPT_ARG_NONE,		&wData,         0,	"read data",                        NULL},
+        {"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",			NULL},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",				NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -108,7 +113,7 @@ int main (int argc, const char ** argv)
 		break;
 	}
 
-	NTV2Player	player (deviceSpec, (noAudio ? false : true), channel, pixelFormat, outputDest, videoFormat, false, false, doMultiChannel ? true : false, sendType);
+    NTV2Player	player (deviceSpec, (noAudio ? false : true), channel, pixelFormat, outputDest, videoFormat, false, false, doMultiChannel ? true : false, (rData ? true : false), (wData ? true : false), sendType);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
