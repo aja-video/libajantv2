@@ -60,10 +60,8 @@ class NTV2Player
 											const NTV2VideoFormat		inVideoFormat		= NTV2_FORMAT_1080i_5994,
 											const bool					inWithVanc			= false,
 											const bool					inLevelConversion	= false,
-                                            const bool					inDoMultiFormat		= false,
-                                            const bool					inTestRData         = false,
-                                            const bool					inTestWData         = false,
-                                            const AJAAncillaryDataType	inSendHDRType		= AJAAncillaryDataType_Unknown);
+											const bool					inDoMultiFormat		= false,
+											const AJAAncillaryDataType	inSendHDRType		= AJAAncillaryDataType_Unknown);
 
 		virtual					~NTV2Player (void);
 
@@ -232,10 +230,8 @@ class NTV2Player
 		bool						mEnableVanc;				///< @brief	Enable VANC?
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion
-        bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
-        bool						mTestRData;
-        bool						mTestWData;
-        AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
+		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
+		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
 		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
 		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
 

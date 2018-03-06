@@ -51,8 +51,6 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 						const bool					inEnableVanc,
 						const bool					inLevelConversion,
 						const bool					inDoMultiChannel,
-                        const bool					inTestRData,
-                        const bool					inTestWData,
 						const AJAAncillaryDataType	inSendHDRType)
 
 	:	mConsumerThread				(NULL),
@@ -75,8 +73,6 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mGlobalQuit					(false),
 		mDoLevelConversion			(inLevelConversion),
 		mDoMultiChannel				(inDoMultiChannel),
-        mTestRData                  (inTestRData),
-        mTestWData                  (inTestWData),
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
 		mTestPatternVideoBuffers	(NULL),
@@ -159,35 +155,6 @@ AJAStatus NTV2Player::Init (void)
 
     if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-
-    if (mTestRData || mTestWData)
-    {
-        struct myStruct
-        {
-            uint32_t        a;
-            uint32_t        b;
-            uint32_t        c;
-            uint32_t        d;
-            uint32_t        e;
-        };
-
-        myStruct dataWrite, dataRead;
-        dataWrite.a = 1;
-        dataWrite.b = 2;
-        dataWrite.c = 3;
-        dataWrite.d = 4;
-        dataWrite.e = 5;
-
-        uint32_t    dataSizeWrite, dataSizeRead;
-
-        mDevice.WriteVirtualData('aabb', &dataWrite, sizeof(dataWrite), &dataSizeWrite);
-
-        mDevice.ReadVirtualData('aabb', &dataRead, sizeof(dataRead), &dataSizeRead);
-
-        cerr << "NTV2Player::Init mTestRData " << mTestRData << endl;
-        cerr << "NTV2Player::Init mTestWData " << mTestWData << endl;
-        return AJA_STATUS_INITIALIZE;
-    }
 
 	if (!mDoMultiChannel)
 	{
