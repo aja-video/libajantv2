@@ -628,6 +628,22 @@ bool CNTV2Config2110::GetRxStreamEnable(const NTV2Channel channel, NTV2Stream st
     return true;
 }
 
+bool CNTV2Config2110::GetRxByteCount( const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes) {
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        mDevice.ReadRegister(kReg4175_depkt_rx_byte_cnt+ depacketizerBaseAddr, &bytes);
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+		// TODO: 
+		// mDevice.ReadRegister(kReg3190_rx_byte_cnt + depacketizerBaseAddr, &bytes);
+		bytes = 0;
+    }
+
+    return true;
+}
+
 int CNTV2Config2110::LeastCommonMultiple(int a,int b)
 {
     int m = a;
@@ -1866,6 +1882,10 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         {
             tokens = split(value.c_str(), ' ');
             string sampling = getVideoDescriptionValue("sampling=");
+            if (sampling ==  "YCbCr-4:2:2")
+            {
+                rxConfig.videoSamples = VPIDSampling_YUV_422;
+            }
             string width    = getVideoDescriptionValue("width=");
             string height   = getVideoDescriptionValue("height=");
             string rate     = getVideoDescriptionValue("exactframerate=");
@@ -1873,15 +1893,32 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             vector<string>::iterator it;
             for (it = tokens.begin(); it != tokens.end(); it++)
             {
-                if (*it == "interlace")
-                {
-                    interlace = true;
-                }
+				// For interlace, we can get one of the following tokens:
+				// interlace
+				// interlace;
+				// interlace=1
+				// Note: interlace=0 means 
+				if (it->substr( 0, 9 ) != "interlace") 
+					continue;
+
+				if (*it == "interlace") {
+					interlace=true;
+					break;
+				}
+
+				if (it->substr(0,10) == "interlace;") {
+					interlace=true;
+					break;
+				}
+				if (it->substr(0,11) == "interlace=1") {
+					interlace=true;
+					break;
+				}
             }
             int w = atoi(width.c_str());
             int h = atoi(height.c_str());
             NTV2FrameRate r = stringToRate(rate);
-            NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace);
+            NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace,false /* no level B */);
             rxConfig.videoFormat = vf;
         }
         rxConfig.rxMatch = rxMatch;

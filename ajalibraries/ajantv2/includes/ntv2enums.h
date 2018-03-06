@@ -926,6 +926,16 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994 ||					\
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	)
 
+#define NTV2_VIDEO_FORMAT_IS_B(__f__)								\
+    (	(__f__) == NTV2_FORMAT_1080p_5000_B ||						\
+        (__f__) == NTV2_FORMAT_1080p_5994_B ||						\
+        (__f__) == NTV2_FORMAT_1080p_6000_B ||						\
+        (__f__) == NTV2_FORMAT_1080p_2K_4795_B ||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_4800_B ||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5000_B ||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_5994_B ||					\
+        (__f__) == NTV2_FORMAT_1080p_2K_6000_B )
+
 #define NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(__f__)					\
     (	(__f__) == NTV2_FORMAT_525_5994 ||                          \
         (__f__) == NTV2_FORMAT_625_5000 ||                          \
