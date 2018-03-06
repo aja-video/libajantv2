@@ -9531,7 +9531,7 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 	}
 }
 
-bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9545,12 +9545,15 @@ bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData,
     {
         NTV2VirtualData	virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
         //cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:  " << virtualDataMsg << endl;
+        *outVirtualDataSize = 0;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        if (result)
+            *outVirtualDataSize = virtualDataMsg.mByteCount;
     }
     return result;
 }
 
-bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9564,7 +9567,10 @@ bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualDat
     {
         NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
         //cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
+        *outVirtualDataSize = 0;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        if (result)
+            *outVirtualDataSize = virtualDataMsg.mByteCount;
     }
     return result;
 }
