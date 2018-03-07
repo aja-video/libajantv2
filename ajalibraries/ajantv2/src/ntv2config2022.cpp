@@ -342,17 +342,6 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
     return rv;
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration (string localIPAddress0, string netmask0, string gateway0,
-                                                string localIPAddress1, string netmask1, string gateway1)
-{
-
-    bool rv = SetNetworkConfiguration(SFP_TOP, localIPAddress0, netmask0, gateway0);
-    if (!rv) return false;
-
-    rv = SetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, netmask1, gateway1);
-    return rv;
-}
-
 bool  CNTV2Config2022::DisableNetworkInterface(eSFP port)
 {
     return DisableNetworkConfiguration(port);
@@ -404,16 +393,6 @@ bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress
         addr.s_addr = val;
         gateway = inet_ntoa(addr);
     }
-    return true;
-}
-
-bool CNTV2Config2022::GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
-                                               std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1)
-{
-
-    GetNetworkConfiguration(SFP_TOP, localIPAddress0, subnetMask0, gateway0);
-    GetNetworkConfiguration(SFP_BOTTOM, localIPAddress1, subnetMask1, gateway1);
-
     return true;
 }
 

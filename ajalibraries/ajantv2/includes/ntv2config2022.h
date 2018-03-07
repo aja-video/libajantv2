@@ -183,14 +183,10 @@ public:
 
     bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
     bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        SetNetworkConfiguration(std::string localIPAddress0, std::string subnetMask0, std::string gateway0,
-                                        std::string localIPAddress1, std::string subnetMask1, std::string gateway1);
     bool        DisableNetworkInterface(eSFP port);
 
     bool        GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig);
     bool        GetNetworkConfiguration(eSFP port, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
-    bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
-                                        std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
 
     bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2022_channel & rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig);

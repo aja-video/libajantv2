@@ -225,16 +225,12 @@ public:
     CNTV2Config2110 (CNTV2Card & device);
     ~CNTV2Config2110();
 
-    bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
-    bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        SetNetworkConfiguration(std::string localIPAddress0, std::string subnetMask0, std::string gateway0,
-                                        std::string localIPAddress1, std::string subnetMask1, std::string gateway1);
-    bool        DisableNetworkInterface(eSFP port);
+    bool        SetNetworkConfiguration(eSFP link, const IPVNetConfig & netConfig);
+    bool        SetNetworkConfiguration(eSFP link, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
+    bool        DisableNetworkInterface(eSFP link);
 
-    bool        GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig);
-    bool        GetNetworkConfiguration(eSFP port, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
-    bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
-                                        std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
+    bool        GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfig);
+    bool        GetNetworkConfiguration(eSFP link, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
 
     bool        EnableRxStream(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
     bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
@@ -279,7 +275,7 @@ public:
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static bool      decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
-    static uint32_t  GetDecapsulatorAddress(NTV2Channel channel, NTV2Stream stream);
+    static uint32_t  GetDecapsulatorAddress(eSFP link, NTV2Channel channel, NTV2Stream stream);
 
     // If method returns false call this to get details
     std::string getLastError();
@@ -303,10 +299,10 @@ protected:
 
     void        DisableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
     void        EnableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
-    void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
-    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        DisableDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream);
+    void        EnableDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream);
 
-    void        SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
+    void        SetupDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
 
     void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
