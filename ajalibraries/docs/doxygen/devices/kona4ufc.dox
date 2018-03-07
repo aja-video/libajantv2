@@ -37,7 +37,7 @@ four SDI connectors. In UFC mode operation, SDI connectors 1 and 2 are inputs; c
 -	2 subsystems
 -	16 channels (max.) per subsystem
 -	16 channels (max.) of AES audio
--	First subsystem's buffer memory starts 8MB from end of last frame
+-	First subsystem's buffer memory starts 8MB from end of memory
 -	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
 
 @par	Video Formats
