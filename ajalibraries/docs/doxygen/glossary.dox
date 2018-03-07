@@ -38,6 +38,7 @@
 		<tr><td><b>RP-188</b>			<td>A SMPTE standard for encoding and conveying timecode over SDI.
 		<tr><td><b>SDI</b>				<td>\e Serial \e Digital \e Interface, a family of video interfaces standardized by SMPTE for transferring video and audio data between two machines.
 		<tr><td><b>SDRAM</b>			<td>\e Synchronous \e Dynamic \e Random \e Access \e Memory, a type of random access memory that is refreshed dynamically every clock cycle on the PCI bus.
+		<tr><td><b>SFP</b>				<td>\e Small \e Form-factor \e Pluggable \e transceiver, a hot-pluggable optical connector used to connect to high-speed IP communications networks.
 		<tr><td><b>SMPTE</b>			<td>\e Society \e of \e Motion \e Picture \e and \e Television \e Engineers, the body that governs most of the standards used in digital video/audio signal transmission.
 		<tr><td><b>Thunderbolt</b>		<td>A hardware interface developed by Intel that's used to connect external peripheral devices to a computer, which combines PCI Express and DisplayPort signals into a single serial cable, including DC power, using a Mini DisplayPort connector.
 		<tr><td><b>Timecode</b>			<td>A sequence of numeric codes generated at regular intervals by a timing system.

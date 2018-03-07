@@ -37,7 +37,7 @@ It can be "flashed" with different firmware to become a 4-channel device (see \r
 
 -	2 subsystems
 -	16 channels (max.) per subsystem
--	First subsystem's buffer memory starts 8MB before end of last frame
+-	First subsystem's buffer memory starts 8MB from end of memory
 
 @par	Video Formats
 

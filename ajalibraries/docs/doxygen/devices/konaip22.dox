@@ -37,7 +37,7 @@ It's a flexible platform that can support, via future firmware upgrades, J2K (JP
 
 -	4 subsystems
 -	16 channels (max.) per subsystem
--	First subsystem's buffer memory starts 8MB from end of last frame
+-	First subsystem's buffer memory starts 8MB from end of memory
 
 @par	Video Formats
 
