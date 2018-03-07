@@ -41,7 +41,7 @@ which supports 4K ingest or playout through a Thunderbolt III port.
 
 -	5 subsystems, 1 reserved for Mic input
 -	16 channels (max.) per subsystem
--	First subsystem's buffer memory starts 8MB before end of last frame
+-	First subsystem's buffer memory starts 8MB from end of memory
 -	24-bit D/A 48kHz balanced analog audio I/O (requires breakout cable):
 	-	8-channels input-only
 	-	8-channels output-only
