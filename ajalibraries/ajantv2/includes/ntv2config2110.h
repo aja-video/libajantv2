@@ -65,12 +65,15 @@ typedef struct
     uint32_t                remotePort[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
-
 } TxNetworkChVData2110;
 
 typedef struct
 {
-    TxNetworkChVData2110    txAudioNetwork;
+    char                    remoteIP[32][2];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint16_t                payloadType;
+    uint32_t                ssrc;
     uint8_t                 numAudioChannels;
     uint8_t                 firstAudioChannel;
     NTV2PacketInterval      audioPacketInterval;
@@ -98,7 +101,14 @@ typedef struct
 
 typedef struct
 {
-    RxNetworkChVData2110    rxAudioNetwork;
+    char                    sourceIP[32];
+    char                    destIP[32];
+    uint32_t                sourcePort;
+    uint32_t                destPort;
+    uint32_t                rxMatch;
+    uint32_t                ssrc;
+    uint16_t                vlan;
+    uint16_t                payloadType;
     uint8_t                 numAudioChannels;
     NTV2PacketInterval      audioPacketInterval;
 } RxAudioChVData2110;
@@ -108,7 +118,7 @@ typedef struct
     uint32_t                numVideoStreams;
     RxNetworkChVData2110    rxVideo[1];
     uint32_t                numAudioStreams;
-    RxAudioChVData2110      rxAudio[4];
+    RxAudioChVData2110      rxAudio[4];	
 } RxChVData2110;
 
 
