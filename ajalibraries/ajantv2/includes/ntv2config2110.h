@@ -39,6 +39,8 @@
 #define PLL_CONFIG_PTP                  BIT(1)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
 
+#define IP_STRSIZE						32
+
 enum NTV2PacketInterval
 {
     PACKET_INTERVAL_125uS,
@@ -60,7 +62,7 @@ typedef enum
 
 typedef struct
 {
-    char                    remoteIP[32][2];
+    char                    remoteIP[IP_STRSIZE][2];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint16_t                payloadType;
@@ -69,7 +71,7 @@ typedef struct
 
 typedef struct
 {
-    char                    remoteIP[32][2];
+    char                    remoteIP[IP_STRSIZE][2];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint16_t                payloadType;
@@ -89,8 +91,8 @@ typedef struct
 
 typedef struct
 {
-    char                    sourceIP[32];
-    char                    destIP[32];
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
     uint32_t                sourcePort;
     uint32_t                destPort;
     uint32_t                rxMatch;
@@ -101,8 +103,8 @@ typedef struct
 
 typedef struct
 {
-    char                    sourceIP[32];
-    char                    destIP[32];
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
     uint32_t                sourcePort;
     uint32_t                destPort;
     uint32_t                rxMatch;
@@ -124,15 +126,15 @@ typedef struct
 
 typedef struct
 {
-    char                    ipAddress[32];
-    char                    subnetMask[32];
-    char                    gateWay[32];
+    char                    ipAddress[IP_STRSIZE];
+    char                    subnetMask[IP_STRSIZE];
+    char                    gateWay[IP_STRSIZE];
 } SFPVData2110;
 
 typedef struct
 {
     uint32_t                id;
-    char                    ptpMasterIP[32];
+    char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
     SFPVData2110            link[2];
 } NetworkVData2110;
