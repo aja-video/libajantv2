@@ -39,6 +39,8 @@
 #define PLL_CONFIG_PTP                  BIT(1)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
 
+#define IP_STRSIZE						32
+
 enum NTV2PacketInterval
 {
     PACKET_INTERVAL_125uS,
@@ -60,17 +62,20 @@ typedef enum
 
 typedef struct
 {
-    char                    remoteIP[32][2];
+    char                    remoteIP[IP_STRSIZE][2];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
-
 } TxNetworkChVData2110;
 
 typedef struct
 {
-    TxNetworkChVData2110    txAudioNetwork;
+    char                    remoteIP[IP_STRSIZE][2];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint16_t                payloadType;
+    uint32_t                ssrc;
     uint8_t                 numAudioChannels;
     uint8_t                 firstAudioChannel;
     NTV2PacketInterval      audioPacketInterval;
@@ -86,8 +91,8 @@ typedef struct
 
 typedef struct
 {
-    char                    sourceIP[32];
-    char                    destIP[32];
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
     uint32_t                sourcePort;
     uint32_t                destPort;
     uint32_t                rxMatch;
@@ -98,7 +103,14 @@ typedef struct
 
 typedef struct
 {
-    RxNetworkChVData2110    rxAudioNetwork;
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
+    uint32_t                sourcePort;
+    uint32_t                destPort;
+    uint32_t                rxMatch;
+    uint32_t                ssrc;
+    uint16_t                vlan;
+    uint16_t                payloadType;
     uint8_t                 numAudioChannels;
     NTV2PacketInterval      audioPacketInterval;
 } RxAudioChVData2110;
@@ -108,21 +120,21 @@ typedef struct
     uint32_t                numVideoStreams;
     RxNetworkChVData2110    rxVideo[1];
     uint32_t                numAudioStreams;
-    RxAudioChVData2110      rxAudio[4];
+    RxAudioChVData2110      rxAudio[4];	
 } RxChVData2110;
 
 
 typedef struct
 {
-    char                    ipAddress[32];
-    char                    subnetMask[32];
-    char                    gateWay[32];
+    char                    ipAddress[IP_STRSIZE];
+    char                    subnetMask[IP_STRSIZE];
+    char                    gateWay[IP_STRSIZE];
 } SFPVData2110;
 
 typedef struct
 {
     uint32_t                id;
-    char                    ptpMasterIP[32];
+    char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
     SFPVData2110            link[2];
 } NetworkVData2110;
