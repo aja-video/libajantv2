@@ -5,8 +5,8 @@
 		<tr><td><b>Active Frame</b>		<td>The frame buffer in an AJA device's frame buffer memory that is currently being recorded from the incoming video signal during capture, or that's being sent to the output jack during playout.
 		<tr><td><b>Anc</b>				<td>A contraction for \e Ancillary \e Data, which is non-video metadata that's embedded in the video signal.
 		<tr><td><b>Bypass</b>			<td>Routing a device's input directly to its output.
-		<tr><td><b>CEA-608</b>			<td>The old standard for encoding captions as a waveform on line 21 of a standard-definition television signal.
-		<tr><td><b>CEA-708</b>			<td>The new standard for encoding captions inside data packets in the ancillary data areas of HD digital television signals.
+		<tr><td><b>CEA-608</b>			<td>The old U.S. standard for encoding captions as a waveform on line 21 of a standard-definition television signal.
+		<tr><td><b>CEA-708</b>			<td>The new U.S. standard for encoding captions inside data packets in the ancillary data areas of HD digital television signals.
 		<tr><td><b>DMA</b>				<td>\e Direct \e Memory \e Access, an efficient method for transferring data between a peripheral device and host memory without directly involving the host CPU(s).
 		<tr><td><b>DRAM</b>				<td>\e Dynamic \e Random \e Access \e Memory, a type of random access memory that must be periodically refreshed, or else it will "forget" what it was storing.
 		<tr><td><b>Driver</b>			<td>Low-level software that operates at the operating system "kernel" level to control a peripheral device.

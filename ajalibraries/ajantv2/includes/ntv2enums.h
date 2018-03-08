@@ -80,7 +80,7 @@
 
     @subpage	gettingstarted
 
-    @subpage	commondeviceinfo
+    @subpage	deviceoperation
 
     @subpage	demoapps
 

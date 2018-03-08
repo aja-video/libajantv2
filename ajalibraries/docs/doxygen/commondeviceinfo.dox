@@ -1,15 +1,122 @@
 /**
-	@page	commondeviceinfo		Common Device Information
+	@page	deviceoperation		Basic NTV2 Device Operation
 
-	All AJA hardware devices that work with the NTV2 SDK support at least the following:
-	-	Play host-generated video and audio through at least one video output port.
+	@par	Introduction
+
+	Reduced to their simplest form, NTV2 devices are essentially...
+	-	a big chunk of SDRAM memory for buffering video frames and audio samples that's tied to...
+	-	an FPGA that determines what gets written or read to/from that memory (and where), plus...
+	-	one or more SDI or HDMI signal inputs and/or outputs, and...
+	-	a high-speed PCIe interface to a host computer for rapidly reading or writing 32-bit registers and transferring bulk data via DMA to/from the host.
+
+	@image	html	hwref-fig0-blockdiagram.png
+
+	All AJA NTV2 hardware devices minimally support the following:
+	-	Capture or play to/from the host computer video and audio through at least one video connector.
 	-	SD video formats: 525i 59.94fps, and 625i 50fps
 	-	HD video formats: 720p 50/59.94/60, 1080i 50/59.94/60, 1080psf 23.98/24 and 1080p 23.98/24/29.97/30
 	-	8-bit YCbCr or 10-bit YCbCr frame buffer formats.
 
 	Beyond these common characteristics, AJA devices fan out into a diverse array of capabilities to suit many different applications.
+	To determine the features of an AJA device, use the "Device Features" API. See \ref ntv2devicefeatures for examples of how to call these functions.
 
-	@section	hardwarecharacteristics	Hardware Characteristics
+	Most devices can capture and play video, but some may only capture, while others may only playout.
+	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.
+	-	To determine if a device can play video, call ::NTV2DeviceCanDoPlayback.
+
+	@subsection	devicesignalinputsoutputs		Signal Inputs & Outputs
+
+	@par	SDI Connectors
+
+	Most AJA devices have at least one SDI connector.
+	-	To determine the number of SDI input jacks the device has, call ::NTV2DeviceGetNumVideoInputs.
+	-	To determine the number of SDI output jacks the device has, call ::NTV2DeviceGetNumVideoOutputs.
+
+	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they're software-configurable.
+	This means your application can, by calling a function in the NTV2 SDK, instruct the device to reconfigure one of its SDI jacks from an
+	input to an output (or vice-versa).
+	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
+	-	If a device has bi-directional SDI connectors, the ::NTV2DeviceGetNumVideoInputs and ::NTV2DeviceGetNumVideoOutputs will reflect
+		the maximum possible number of inputs and outputs.
+		-	For example, the Io4K with its Quad-mode firmware, has four bi-directional SDI jacks, plus an additional monitor (output-only) jack,
+			so ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
+
+	@par	Analog Video Connectors
+
+	Some older AJA devices have analog video connectors (remember the old RCA component-level jacks?).
+	Board products require connecting a breakout cable or breakout box to the board to access these signals.
+	-	To determine the number of analog video inputs the device has, call ::NTV2DeviceGetNumAnalogVideoInputs.
+	-	To determine the number of analog video outputs the device has, call ::NTV2DeviceGetNumAnalogVideoOutputs.
+	-	To determine if the device can support a breakout box, call ::NTV2DeviceCanDoBreakoutBox.
+
+	@par	HDMI Connectors
+
+	Many AJA devices have HDMI connectors, some for capture, most for playout.
+	-	To determine the number of HDMI inputs the device has, call ::NTV2DeviceGetNumHDMIVideoInputs.
+	-	To determine the number of HDMI outputs the device has, call ::NTV2DeviceGetNumHDMIVideoOutputs.
+
+	@par	Audio Connectors
+
+	Some AJA devices have separate connectors for audio input and/or output, even analog audio on some older devices.
+	-	To determine if the device is capable of analog audio input or output, call ::NTV2DeviceCanDoAnalogAudio.
+	-	To determine how many AES inputs and/or outputs a device has, call ::NTV2DeviceGetNumAESAudioInputChannels
+		and/or ::NTV2DeviceGetNumAESAudioOutputChannels, respectively.
+	-	To determine how many analog audio inputs and/or outputs a device has, call ::NTV2DeviceGetNumAnalogAudioInputChannels
+		and/or ::NTV2DeviceGetNumAnalogAudioOutputChannels, respectively.
+
+	@par	Reference and LTC Connectors
+
+	Most AJA devices have a single BNC connector that can be used for reference input or for analog LTC input.
+	On other devices, there are separate reference and LTC input connectors. Some devices have output connectors
+	for LTC or Reference.
+	-	To determine the number of reference video inputs, call ::NTV2DeviceGetNumReferenceVideoInputs.
+	-	To determine if the device can be configured to receive LTC on its reference port, call ::NTV2DeviceCanDoLTCInOnRefPort.
+	-	To determine the number of LTC inputs, call ::NTV2DeviceGetNumLTCInputs.
+	-	To determine the number of LTC outputs, call ::NTV2DeviceGetNumLTCOutputs.
+
+	@par	Serial Ports (RS-422)
+
+	Most AJA devices have a single RS-422 connector that can be used for tape deck control and other purposes.
+
+	@par	Common Electrical Characteristics
+
+	Unless otherwise noted, physical and electrical characteristics of inputs and outputs -- SDI, HDMI, analog video, analog audio, reference,
+	LTC, etc. -- are generally identical across all AJA devices.
+
+	<b>SDI Input(s)</b>
+	-	AC-coupled input terminated with 75 ohms to ground
+
+	<b>SDI Output(s)</b>
+	-	AC-coupled output terminated with 75 ohms to ground
+	-	<b>Output Level:</b>  800 mV peak-to-peak +/- 10%, terminated into 75 ohms
+
+	<b>Video Reference Input(s)</b>
+	-	Analog video reference, NTSC, PAL, or tri-level sync
+	-	Active loop-through, input terminated by 75 ohms to ground
+	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
+
+	<b>HDMI Input, Output</b>
+	-	Connector: Type-A (unless otherwise noted)
+
+	<b>AES Input(s)</b>
+	-	DC-coupled input terminated with 75 ohms to ground
+	-	<b>Minimum input level:</b>  100 mV peak-to-peak
+
+	<b>AES Output(s)</b>
+	-	AC-coupled output terminated with 75 ohms to ground
+	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75 ohms
+
+	<b>Analog Video Output(s)</b>
+	-	12-bit precision DAC output
+	-	<b>Luma Bandwidth:</b> 12.5 MHz (SD) or 30 MHz (HD)
+	-	<b>Chroma Bandwidth:</b> 5.8 MHz (SD) or 13.75 MHz (HD)
+
+	<b>Audio Output</b>
+	-	<b>Connector:</b>  DB-25
+	-	<b>Maximum Level, unclipped:</b>  +12dBu, +15dBu, +18dBu, +24dBu (selectable)
+
+
+	@subsection	hardwarecharacteristics	Hardware Characteristics
 
 	@par		PCI Interface
 
@@ -76,7 +183,7 @@
 			slower rate.
 
 
-	@section	deviceclockingandsync		Device Clocking and Synchronization
+	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
 	Traditionally, AJA's NTV2 devices required all channels to have the same video standard, frame rate, and frame geometry.
 	AJA's newer devices --- e.g., \ref corvid44, \ref kona4quad, \ref io4kquad, \ref corvid88, etc. --- still retain this default behavior,
@@ -107,43 +214,5 @@
 	You can determine the video format of the signal being applied to the reference input by calling CNTV2Card::GetReferenceVideoFormat.
 	Note that even when configured to sync its outputs to \c NTV2_REFERENCE_EXTERNAL, the device output will internally revert to Free-Run if
 	the reference signal disappears or is incompatible with the output video format.
-
-
-	@section	deviceinpoutcharact		Input/Output Characteristics
-
-	Unless otherwise noted, physical and electrical characteristics of inputs and outputs -- SDI, HDMI, analog video, analog audio, reference,
-	LTC, etc. -- are generally identical across all AJA devices.
-
-	<b>SDI Input(s)</b>
-	-	AC-coupled input terminated with 75 ohms to ground
-
-	<b>SDI Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output Level:</b>  800 mV peak-to-peak +/- 10%, terminated into 75 ohms
-
-	<b>Video Reference Input(s)</b>
-	-	Analog video reference, NTSC, PAL, or tri-level sync
-	-	Active loop-through, input terminated by 75 ohms to ground
-	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
-
-	<b>HDMI Input, Output</b>
-	-	Connector: Type-A (unless otherwise noted)
-
-	<b>AES Input(s)</b>
-	-	DC-coupled input terminated with 75 ohms to ground
-	-	<b>Minimum input level:</b>  100 mV peak-to-peak
-
-	<b>AES Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75 ohms
-
-	<b>Analog Video Output(s)</b>
-	-	12-bit precision DAC output
-	-	<b>Luma Bandwidth:</b> 12.5 MHz (SD) or 30 MHz (HD)
-	-	<b>Chroma Bandwidth:</b> 5.8 MHz (SD) or 13.75 MHz (HD)
-
-	<b>Audio Output</b>
-	-	<b>Connector:</b>  DB-25
-	-	<b>Maximum Level, unclipped:</b>  +12dBu, +15dBu, +18dBu, +24dBu (selectable)
 
 **/
