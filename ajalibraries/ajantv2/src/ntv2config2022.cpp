@@ -1367,18 +1367,6 @@ bool CNTV2Config2022::GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus)
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-eSFP  CNTV2Config2022::GetRxPort(NTV2Channel chan)
-{
-    if ((uint32_t)chan >= _numRx0Chans)
-    {
-        return SFP_BOTTOM;
-    }
-    else
-    {
-        return SFP_TOP;
-    }
-}
-
 eSFP  CNTV2Config2022::GetTxPort(NTV2Channel chan)
 {
     if (!_is_txTop34)

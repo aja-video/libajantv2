@@ -246,7 +246,6 @@ private:
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
-    eSFP        GetRxPort(NTV2Channel chan);
     eSFP        GetTxPort(NTV2Channel chan);
 
     uint32_t    _numRx0Chans;
