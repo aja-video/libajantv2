@@ -130,13 +130,57 @@ bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType
 
 bool CNTV2KonaFlashProgram::SetDeviceProperties()
 {
-	bool status;
-	_spiDeviceID = ReadDeviceID();
-	if (::NTV2DeviceHasSPIv2(_boardID))
+	bool knownChip = false;
+	bool status = false;
+	_deviceID = ReadDeviceID();
+
+	switch(_deviceID)
 	{
+	case 0x00202018:
+	case 0x00012018:
+	case 0x00C22018:
+		_flashSize = 16 * 1024 * 1024;
+		_bankSize = 16 * 1024 * 1024;
+		_sectorSize = 256 * 1024;
+		knownChip = true;
+		break;
+	case 0x00010220:
+		_flashSize = 64 * 1024 * 1024;
+		_bankSize = 16 * 1024 * 1024;
+		_sectorSize = 256 * 1024;
+		knownChip = true;
+		break;
+	case 0x00C84018:
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
+		knownChip = true;
+		break;
+	case 0x00010219:
+		_flashSize = 32 * 1024 * 1024;
+		_bankSize = 16 * 1024 * 1024;
+		_sectorSize = 64 * 1024;
+		knownChip = true;
+		break;
+//	case spiv5:
+//		_flashSize = 64 * 1024 * 1024;
+//		_bankSize = 16 * 1024 * 1024;
+//		_sectorSize = 256 * 1024;
+//		knownChip = true;
+//		break;
+	default:
+		_flashSize = 0;
+		_bankSize = 0;
+		_sectorSize = 0;
+		knownChip = false;
+		break;
+	}
+
+	if(!knownChip)
+		return false;
+
+	if (::NTV2DeviceHasSPIv2(GetDeviceID()))
+	{
 		_numSectorsMain = _flashSize / _sectorSize / 2;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
 		_mainOffset = 0;
@@ -144,14 +188,11 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_macOffset = _bankSize - (2 * _sectorSize);
 		status = true;
 	}
-	else if (::NTV2DeviceHasSPIv3(_boardID))
+	else if (::NTV2DeviceHasSPIv3(GetDeviceID()))
 	{
-		if (_spiDeviceID == 0x010220)
+		if (_deviceID == 0x010220)
 		{
-			//This is actually SPI v4 but needed this for NAB 2016
-			_flashSize = 64 * 1024 * 1024;
-			_bankSize = 16 * 1024 * 1024;
-			_sectorSize = 256 * 1024;
+			//This is actually SPI v4 but needed this for spoofing Kona4
 			_numSectorsMain = _flashSize / _sectorSize / 4;
 			_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 3;
 			_numSectorsSOC1 = _flashSize / _sectorSize / 4;
@@ -169,9 +210,6 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		{
 			//SPIV3 This gets a little weird both main and failsafe have an offset of 0
 			//and the real offset is controlled by a bank selector switch in firmware
-			_flashSize = 32 * 1024 * 1024;
-			_bankSize = 16 * 1024 * 1024;
-			_sectorSize = 64 * 1024;
 			_numSectorsMain = _flashSize / _sectorSize / 2;
 			_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
 			_mainOffset = 0;
@@ -182,12 +220,9 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			status = true;
 		}
 	}
-	else if (::NTV2DeviceHasSPIv4(_boardID))
+	else if (::NTV2DeviceHasSPIv4(GetDeviceID()))
 	{
 		//SPIV4 is a bigger SPIv3 2x
-		_flashSize = 64 * 1024 * 1024;
-		_bankSize = 16 * 1024 * 1024;
-		_sectorSize = 256 * 1024;
 		_numSectorsMain = _flashSize / _sectorSize / 4;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 4;
 		_numSectorsSOC1 = _flashSize / _sectorSize / 4;
@@ -201,12 +236,8 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_licenseOffset = _bankSize - (4* _sectorSize);
 		status = true;
 	}
-	else if(NTV2DeviceHasSPIv5(_boardID))
+	else if(NTV2DeviceHasSPIv5(GetDeviceID()))
 	{
-		//This is actually SPI v4 but needed this for NAB 2016
-		_flashSize = 64 * 1024 * 1024;
-		_bankSize = 16 * 1024 * 1024;
-		_sectorSize = 256 * 1024;
 		_numSectorsMain = _flashSize / _sectorSize / 2;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
 		_mainOffset = 0;
@@ -218,9 +249,6 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		//This includes legacy boards such as LHi, Corvid 1...
 		//SPI is devided up into 4 logical blocks of 4M each
 		//Without history explained main is at offset 0 and failsafe is at offset 12
-		_flashSize = 16 * 1024 * 1024;
-		_bankSize = 16 * 1024 * 1024;
-		_sectorSize = 64 * 1024;
 		_numSectorsMain = _flashSize / _sectorSize / 4;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
 		_mainOffset = 0;
@@ -235,7 +263,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
         _spiFlash = NULL;
     }
 
-    if (CNTV2AxiSpiFlash::DeviceSupported(GetDeviceID()))
+	if (CNTV2AxiSpiFlash::DeviceSupported(GetDeviceID()))
     {
         _spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
     }
