@@ -270,8 +270,8 @@ public:
                     are disabled, if the channel is the last user of the group, then the subscription to the multicast group will be ended.
                     When IGMP is disabled, the above actions are not performed,
     **/
-    bool        SetIGMPDisable(eSFP port, bool disable);
-    bool        GetIGMPDisable(eSFP port, bool & disabled);
+    bool        SetIGMPDisable(eSFP link, bool disable);
+    bool        GetIGMPDisable(eSFP link, bool & disabled);
 
     bool        SetIGMPVersion(eIGMPVersion_t version);
     bool        GetIGMPVersion(eIGMPVersion_t & version);
@@ -321,7 +321,7 @@ protected:
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
-    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+    bool		ConfigurePTP(eSFP link, std::string localIPAddress);
 
     bool        GenSDP(NTV2Channel channel, NTV2Stream stream);
     bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);

@@ -637,7 +637,7 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, const
 {
     bool        rv = true;
 
-    if (GetLinkActive(SFP_TOP) == false)
+    if (GetLinkActive(SFP_LINK_A) == false)
     {
         mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
@@ -1044,10 +1044,10 @@ bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
     return true;
 }
 
-bool CNTV2Config2110::SetIGMPDisable(eSFP port, bool disable)
+bool CNTV2Config2110::SetIGMPDisable(eSFP link, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
-    if (port == SFP_TOP )
+    if (link == SFP_LINK_A )
     {
         mDevice.WriteRegister(SAREK_REGS + kSarekRegIGMPDisable,val);
     }
@@ -1058,10 +1058,10 @@ bool CNTV2Config2110::SetIGMPDisable(eSFP port, bool disable)
     return true;
 }
 
-bool CNTV2Config2110::GetIGMPDisable(eSFP port, bool & disabled)
+bool CNTV2Config2110::GetIGMPDisable(eSFP link, bool & disabled)
 {
     uint32_t val;
-    if (port == SFP_TOP )
+    if (link == SFP_LINK_A )
     {
         mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable,&val);
     }
@@ -1224,14 +1224,14 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream str
     return true;
 }
 
-bool  CNTV2Config2110::ConfigurePTP (eSFP port, string localIPAddress)
+bool  CNTV2Config2110::ConfigurePTP (eSFP link, string localIPAddress)
 {
     uint32_t macLo;
     uint32_t macHi;
 
     // get primaray mac address
     uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
-    if (port != SFP_TOP)
+    if (link != SFP_LINK_A)
     {
         macAddressRegister += 2;
     }
@@ -1400,7 +1400,7 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         bool rv;
         // is destination on the same subnet?
         IPVNetConfig nc;
-        GetNetworkConfiguration(port,nc);
+        GetNetworkConfiguration(port, nc);
         if ( (destIp & nc.ipc_subnet) != (nc.ipc_ip & nc.ipc_subnet))
         {
             struct in_addr addr;
@@ -1425,7 +1425,7 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         while (i < 6)
         {
             getline (ss, token, ':');
-            macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(),NULL,16);
+            macaddr.mac[i++] = (uint8_t)strtoul(token.c_str(), NULL, 16);
         }
     }
 
@@ -1446,7 +1446,7 @@ string CNTV2Config2110::GetTxSDP(NTV2Channel chan, NTV2Stream stream)
     int st = (int)stream;
     if (txsdp[ch][st].str().empty())
     {
-        GenSDP(chan,stream);
+        GenSDP(chan, stream);
     }
     return txsdp[ch][st].str();
 }

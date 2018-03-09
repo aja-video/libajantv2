@@ -20,6 +20,7 @@ enum eMBCmd
     MB_CMD_FETCH_SFP_INFO         = 11
 };
 
+#if 1
 enum eSFP
 {
     SFP_TOP,
@@ -29,8 +30,18 @@ enum eSFP
     SFP_MAX_NUM_SFPS,
     SFP_INVALID		= SFP_MAX_NUM_SFPS
 };
+#else
+enum eSFP
+{
+    SFP_LINK_A,
+    SFP_LINK_B,
+    SFP_MAX_NUM_SFPS,
+    SFP_INVALID		= SFP_MAX_NUM_SFPS
+};
 
-#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_TOP)  &&  ((__sfp__) < SFP_INVALID))
+#endif
+
+#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_LINK_A)  &&  ((__sfp__) < SFP_INVALID))
 
 enum eArpState
 {
@@ -123,8 +134,8 @@ protected:
     bool SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
     bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
 
-    bool SetLinkActive(eSFP Link);
-    bool SetLinkInactive(eSFP Link);
+    bool SetLinkActive(eSFP link);
+    bool SetLinkInactive(eSFP link);
     bool GetLinkActive(eSFP link);
 
     bool SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt);
