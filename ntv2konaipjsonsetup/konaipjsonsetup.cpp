@@ -42,19 +42,19 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         sfpStruct.mSFPDesignator = sfpObject["designator"].toString();
         cout << "SFPDesignator " << sfpStruct.mSFPDesignator.toStdString() << endl;
 
-        sfpStruct.mIPAddress = sfpObject["IPAddress"].toString();
+        sfpStruct.mIPAddress = sfpObject["ipAddress"].toString();
         cout << "IPAddress " << sfpStruct.mIPAddress.toStdString() << endl;
 
-        sfpStruct.mSubnetMask = sfpObject["SubnetMask"].toString();
+        sfpStruct.mSubnetMask = sfpObject["subnetMask"].toString();
         cout << "SubnetMask " << sfpStruct.mSubnetMask.toStdString() << endl;
 
-        sfpStruct.mRouter = sfpObject["Router"].toString();
+        sfpStruct.mRouter = sfpObject["gateway"].toString();
         cout << "Router " << sfpStruct.mRouter.toStdString() << endl;
 
-        QString enable2022_7 = sfpObject["Enable2022_7"].toString();
+        QString enable2022_7 = sfpObject["enable2022_7"].toString();
         if (!enable2022_7.isEmpty())
         {
-            cout << "ERROR: Enable2022_7 is now moved to global settings" << endl;
+            cout << "ERROR: enable2022_7 is now moved to global settings" << endl;
             return false;
         }
 
@@ -118,7 +118,7 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         QString networkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
         if (!networkPathDifferential.isEmpty())
         {
-            cout << "ERROR: NetworkPathDifferential is now part of global settings" << endl;
+            cout << "ERROR: networkPathDifferential is now part of global settings" << endl;
             return false;
         }
 
@@ -162,15 +162,15 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
 
-        receiveStruct.mLinkAEnable = receiveChannelObject["LinkAEnable"].toString();
+        receiveStruct.mLinkAEnable = receiveChannelObject["linkAEnable"].toString();
         if (!receiveStruct.mLinkAEnable.isEmpty())
             cout << "Link A Enable " << receiveStruct.mLinkAEnable.toStdString() << endl;
 
-        receiveStruct.mLinkBEnable = receiveChannelObject["LinkBEnable"].toString();
+        receiveStruct.mLinkBEnable = receiveChannelObject["linkBEnable"].toString();
         if (!receiveStruct.mLinkBEnable.isEmpty())
             cout << "Link B Enable " << receiveStruct.mLinkBEnable.toStdString() << endl;
 
-        receiveStruct.mEnable = receiveChannelObject["Enable"].toString();
+        receiveStruct.mEnable = receiveChannelObject["enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
 
         mKonaIPParams.mReceiveChannels.append(receiveStruct);
@@ -257,15 +257,15 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mAudioPktInterval.isEmpty())
             cout << "Audio Packet Interval " << transmitStruct.mAudioPktInterval.toStdString() << endl;
 
-        transmitStruct.mLinkAEnable = transmitChannelObject["LinkAEnable"].toString();
+        transmitStruct.mLinkAEnable = transmitChannelObject["linkAEnable"].toString();
         if (!transmitStruct.mLinkAEnable.isEmpty())
             cout << "Link A Enable " << transmitStruct.mLinkAEnable.toStdString() << endl;
 
-        transmitStruct.mLinkBEnable = transmitChannelObject["LinkBEnable"].toString();
+        transmitStruct.mLinkBEnable = transmitChannelObject["linkBEnable"].toString();
         if (!transmitStruct.mLinkBEnable.isEmpty())
             cout << "Link B Enable " << transmitStruct.mLinkBEnable.toStdString() << endl;
 
-        transmitStruct.mEnable = transmitChannelObject["Enable"].toString();
+        transmitStruct.mEnable = transmitChannelObject["enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
 
         mKonaIPParams.mTransmitChannels.append(transmitStruct);
@@ -316,10 +316,20 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
             mPTPMasterAddr = qjv.toString();
             cout << "PTP Master Address " << mPTPMasterAddr.toStdString() << endl;
         }
+        qjv = json.value("4KMode");
+        if (qjv != QJsonValue::Undefined)
+        {
+            m4KMode = getEnable(qjv.toString());
+        }
+        else
+        {
+            m4KMode = false;
+        }
+
     }
     else
     {
-        qjv = json.value("Enable2022_7");
+        qjv = json.value("enable2022_7");
         if (qjv != QJsonValue::Undefined)
         {
             mEnable2022_7 = getEnable(qjv.toString());
@@ -397,9 +407,9 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     while (sfpIter.hasNext())
     {
         SFPStruct sfp = sfpIter.next();
-        if ( sfp.mSFPDesignator == "top")
+        if ( sfp.mSFPDesignator == "linkA")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_TOP,
+            bool rv = config2022.SetNetworkConfiguration (SFP_LINK_A,
                                                           sfp.mIPAddress.toStdString(),
                                                           sfp.mSubnetMask.toStdString(),
                                                           sfp.mRouter.toStdString());
@@ -409,9 +419,9 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
                 return false;
             }
         }
-        else if ( sfp.mSFPDesignator == "bottom")
+        else if ( sfp.mSFPDesignator == "linkB")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_BOTTOM,
+            bool rv = config2022.SetNetworkConfiguration (SFP_LINK_B,
                                                           sfp.mIPAddress.toStdString(),
                                                           sfp.mSubnetMask.toStdString(),
                                                           sfp.mRouter.toStdString());
@@ -586,13 +596,13 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     {
         SFPStruct sfp = sfpIter.next();
 
-        if ( sfp.mSFPDesignator == "top")
+        if ( sfp.mSFPDesignator == "linkA")
         {
-            config2110.SetNetworkConfiguration (SFP_TOP, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            config2110.SetNetworkConfiguration (SFP_LINK_A, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
         }
-        else if ( sfp.mSFPDesignator == "bottom")
+        else if ( sfp.mSFPDesignator == "linkB")
         {
-            config2110.SetNetworkConfiguration (SFP_BOTTOM, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            config2110.SetNetworkConfiguration (SFP_LINK_B, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
 
         }
     }
@@ -641,11 +651,22 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             return false;
         }
 
+        // If linkB is on use it otherwise assume we are always dealing with linkA
+        // (RX does not support both at the moment)
+        bool linkBOn = false;
+        if (!receive.mLinkBEnable.isEmpty())
+            linkBOn = getEnable(receive.mLinkBEnable);
+
+        eSFP link;
+        if (linkBOn)
+            link = SFP_LINK_B;
+        else
+            link = SFP_LINK_A;
 
         bool enable = getEnable(receive.mEnable);
         if (!enable)
         {
-            bool rv = config2110.DisableRxStream (channel, stream);
+            bool rv = config2110.DisableRxStream (link, channel, stream);
             if (!rv)
             {
                 cerr << "DisableRxStream: FAILED: " << config2110.getLastError() << endl;
@@ -678,7 +699,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig.audioPacketInterval = (receive.mAudioPktInterval.toUInt() == 1000) ? PACKET_INTERVAL_1mS :  PACKET_INTERVAL_125uS;
 
         //dumpRx2110Config (channel, stream, rxChannelConfig);
-        bool rv = config2110.EnableRxStream (channel, stream, rxChannelConfig);
+        bool rv = config2110.EnableRxStream (link, channel, stream, rxChannelConfig);
         if (!rv)
         {
             cerr << "EnableRxStream: FAILED: " << config2110.getLastError() << endl;

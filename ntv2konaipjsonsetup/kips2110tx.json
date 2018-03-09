@@ -3,11 +3,12 @@
     "PTPMaster":"172.16.0.201",
     "sfps":[
         {
-            "designator":"top",
-            "IPAddress":"172.16.164.16",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-        }],
+            "designator":"linkA",
+            "ipAddress":"172.16.164.16",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
+    ],
     "transmit":[
         {
             "designator":"channel1",
@@ -21,8 +22,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -38,8 +39,8 @@
             "numAudioChannels":"4",
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -54,8 +55,8 @@
             "ssrc":"1000",
             "numAudioChannels":"4",
             "firstAudioChannel":"4",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -71,8 +72,8 @@
             "numAudioChannels":"8",
             "firstAudioChannel":"8",
             "audioPktInterval" :"125",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel1",
@@ -88,8 +89,8 @@
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel2",
@@ -103,8 +104,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel2",
@@ -120,8 +121,8 @@
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel3",
@@ -135,8 +136,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel3",
@@ -152,8 +153,8 @@
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel4",
@@ -167,8 +168,8 @@
             "videoFormat":"1080i50",
             "payload":"96",
             "ssrc":"1000",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         },
         {
             "designator":"channel4",
@@ -184,8 +185,8 @@
             "numAudioChannels":"16",
             "firstAudioChannel":"0",
             "audioPktInterval" :"125",
-            "LinkAEnable":"true",
-            "LinkBEnable":"false"
+            "linkAEnable":"true",
+            "linkBEnable":"false"
         }
     ]
 }

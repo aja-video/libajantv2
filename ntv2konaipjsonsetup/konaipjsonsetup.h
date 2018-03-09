@@ -100,6 +100,7 @@ protected:
 private:
     bool        mEnable2022_7;
     bool        mIs2110;
+    bool        m4KMode;
     uint32_t    mNetworkPathDifferential;
     QString     mPTPMasterAddr;
 };

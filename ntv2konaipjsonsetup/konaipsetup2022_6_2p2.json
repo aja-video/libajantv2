@@ -1,54 +1,58 @@
 {
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-    },
-    {
-            "designator":"bottom",
-            "IPAddress":"172.16.19.11",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-    }
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255",
+        },
+        {
+            "designator":"linkB",
+            "ipAddress":"172.16.19.11",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255",
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
             "primaryDestIPAddress":"239.0.4.16",
             "primaryDestPort":"20016",
             "primaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"false",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
             "primaryDestIPAddress":"239.0.4.17",
             "primaryDestPort":"20017",
             "primaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-	{
+            "linkAEnable":"true",
+            "linkBEnable":"false",
+            "enable":"false"
+        },
+        {
             "designator":"channel3",
             "secondaryDestIPAddress":"239.0.4.16",
             "secondaryDestPort":"20016",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-			"LinkAEnable":"false",
-			"LinkBEnable":"true",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"false",
+            "linkBEnable":"true",
+            "enable":"true"
+        },
+        {
             "designator":"channel4",
             "secondaryDestIPAddress":"239.0.4.17",
             "secondaryDestPort":"20017",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-			"LinkAEnable":"false",
-			"LinkBEnable":"true",
-            "Enable":"false"
-    }
+            "linkAEnable":"false",
+            "linkBEnable":"true",
+            "enable":"false"
+        }
     ]
 }

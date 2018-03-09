@@ -1,15 +1,17 @@
 {
     "protocol" : "2110",
     "PTPMaster":"172.16.0.200",
+    "4KMode":"false",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }],
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
+    ],
     "receive":[
-    {
+        {
             "designator":"channel1",
             "stream":"video",
             "srcIPAddress":"172.16.107.18",
@@ -21,9 +23,11 @@
             "payload":"100",
             "primaryFilter":"0x5e",
             "videoFormat":"720p",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"false"
+            "enable":"true"
+        },
+        {
             "designator":"channel1",
             "stream":"audio1",
             "srcIPAddress":"172.16.107.18",
@@ -36,6 +40,9 @@
             "primaryFilter":"0x5e",
             "numAudioChannels":"2",
             "audioPktInterval" :"1000",
-            "Enable":"false"
-    }]
+            "linkAEnable":"true",
+            "linkBEnable":"false"
+            "enable":"false"
+        }
+    ]
 }

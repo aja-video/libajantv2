@@ -1,21 +1,21 @@
 {
-	"Enable2022_7":"true",
+    "enable2022_7":"true",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.12",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.19.12",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
         },
-    {
-            "designator":"bottom",
-            "IPAddress":"172.16.19.13",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
+        {
+            "designator":"linkB",
+            "ipAddress":"172.16.19.13",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
         }
     ],
     "transmit":[
-    {
+        {
             "designator":"channel1",
             "primaryRemoteIPAddress":"239.0.4.11",
             "primaryRemotePort":"6011",
@@ -26,9 +26,11 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
             "primaryRemoteIPAddress":"239.0.4.12",
             "primaryRemotePort":"6012",
@@ -39,9 +41,11 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"false"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel3",
             "primaryRemoteIPAddress":"239.0.4.13",
             "primaryRemotePort":"6013",
@@ -52,9 +56,11 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"false"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel4",
             "primaryRemoteIPAddress":"239.0.4.14",
             "primaryRemotePort":"6014",
@@ -65,7 +71,9 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"false"
-    }
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        }
     ]
 }

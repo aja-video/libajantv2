@@ -3,15 +3,15 @@
     "Enable2022_7":"false",
     "networkPathDifferential":"50",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.0.14",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.0.14",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
             "primaryDestIPAddress":"239.0.4.50",
             "primaryDestPort":"6010",
@@ -19,9 +19,11 @@
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"false",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
             "primaryDestIPAddress":"239.0.4.51",
             "primaryDestPort":"6011",
@@ -29,7 +31,9 @@
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "Enable":"false"
-    }
+            "linkAEnable":"true",
+            "linkBEnable":"false",
+            "enable":"false"
+        }
     ]
 }

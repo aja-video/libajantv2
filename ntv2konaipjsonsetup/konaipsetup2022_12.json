@@ -1,14 +1,14 @@
 {
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.45.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.45.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "transmit":[
-    {
+        {
             "designator":"channel1",
             "primaryRemoteIPAddress":"239.0.45.15",
             "primaryRemotePort":"6010",
@@ -16,9 +16,9 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"true"
-    },
-    {
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
             "primaryRemoteIPAddress":"239.0.45.25",
             "primaryRemotePort":"6011",
@@ -26,7 +26,7 @@
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"false"
-    }
+            "enable":"false"
+        }
     ]
 }

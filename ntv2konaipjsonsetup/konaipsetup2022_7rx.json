@@ -1,22 +1,22 @@
 {
-    "Enable2022_7":"true",
+    "enable2022_7":"true",
     "networkPathDifferential":"50",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    },
-    {
+        {
+            "designator":"linkA",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        },
+        {
             "designator":"bottom",
-            "IPAddress":"172.16.19.11",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+            "ipAddress":"172.16.19.11",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
             "primaryDestIPAddress":"239.0.4.11",
             "primaryDestPort":"6011",
@@ -25,9 +25,11 @@
             "secondaryDestPort":"6021",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"true"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
             "primaryDestIPAddress":"239.0.4.12",
             "primaryDestPort":"6012",
@@ -36,9 +38,11 @@
             "secondaryDestPort":"6022",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel3",
             "primaryDestIPAddress":"239.0.4.13",
             "primaryDestPort":"6013",
@@ -47,9 +51,11 @@
             "secondaryDestPort":"6023",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-    {
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel4",
             "primaryDestIPAddress":"239.0.4.14",
             "primaryDestPort":"6014",
@@ -58,7 +64,9 @@
             "secondaryDestPort":"6024",
             "secondaryFilter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    }
+            "linkAEnable":"true",
+            "linkBEnable":"true",
+            "enable":"false"
+        }
     ]
 }
