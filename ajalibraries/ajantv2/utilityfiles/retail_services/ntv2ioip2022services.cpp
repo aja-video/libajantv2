@@ -3087,7 +3087,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
         // KonaIP network configuration
         string hwIp,hwNet,hwGate;       // current hardware config
         
-        rv = config->GetNetworkConfiguration(SFP_TOP,hwIp,hwNet,hwGate);
+        rv = config->GetNetworkConfiguration(SFP_LINK_A,hwIp,hwNet,hwGate);
         if (rv)
         {
             uint32_t ip, net, gate;
@@ -3097,13 +3097,13 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             
             if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
             {
-                SetNetConfig(config, SFP_TOP);
+                SetNetConfig(config, SFP_LINK_A);
             }
         }
         else
             printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
         
-        rv = config->GetNetworkConfiguration(SFP_BOTTOM,hwIp,hwNet,hwGate);
+        rv = config->GetNetworkConfiguration(SFP_LINK_B,hwIp,hwNet,hwGate);
         if (rv)
         {
             uint32_t ip, net, gate;
@@ -3113,7 +3113,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             
             if ((ip != mEth1.ipc_ip) || (net != mEth1.ipc_subnet) || (gate != mEth1.ipc_gateway))
             {
-                SetNetConfig(config, SFP_BOTTOM);
+                SetNetConfig(config, SFP_LINK_B);
             }
         }
         else

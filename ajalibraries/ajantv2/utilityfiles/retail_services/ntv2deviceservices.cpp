@@ -1960,7 +1960,7 @@ void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
     
     switch (port)
     {
-        case SFP_BOTTOM:
+        case SFP_LINK_B:
             addr.s_addr = mEth1.ipc_ip;
             ip = inet_ntoa(addr);
             addr.s_addr = mEth1.ipc_subnet;
@@ -1968,7 +1968,7 @@ void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
             addr.s_addr = mEth1.ipc_gateway;
             gate = inet_ntoa(addr);
             break;
-        case SFP_TOP:
+        case SFP_LINK_A:
         default:
             addr.s_addr = mEth0.ipc_ip;
             ip = inet_ntoa(addr);
