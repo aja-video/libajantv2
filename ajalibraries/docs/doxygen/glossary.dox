@@ -1,37 +1,40 @@
 /**
-	@page	glossary	Glossary
+	@page	glossary	Glossary of Terms
 
 	<table>
-		<tr><td><b>Active Frame</b>		<td>The frame buffer in an AJA device's frame buffer memory that is currently being recorded from the incoming video signal during capture, or that's being sent to the output jack during playout.
-		<tr><td><b>Anc</b>				<td>A contraction for \e Ancillary \e Data, which is non-video metadata that's embedded in the video signal.
-		<tr><td><b>Bypass</b>			<td>Routing a device's input directly to its output.
+		<tr><td><b>Active Frame</b>		<td>An AutoCirculate term, the frame buffer in an AJA device’s SDRAM that is currently being recorded from the incoming video signal during capture, or that’s being sent to the output jack during playout.
+		<tr><td><b>Anc</b>				<td>A contraction for \e Ancillary \e Data, which is non-video metadata that’s embedded in the video signal.
+		<tr><td><b>Bypass</b>			<td>Shunting the signal received by a device’s input connector directly to its output connector.
 		<tr><td><b>CEA-608</b>			<td>The old U.S. standard for encoding captions as a waveform on line 21 of a standard-definition television signal.
 		<tr><td><b>CEA-708</b>			<td>The new U.S. standard for encoding captions inside data packets in the ancillary data areas of HD digital television signals.
 		<tr><td><b>DMA</b>				<td>\e Direct \e Memory \e Access, an efficient method for transferring data between a peripheral device and host memory without directly involving the host CPU(s).
-		<tr><td><b>DRAM</b>				<td>\e Dynamic \e Random \e Access \e Memory, a type of random access memory that must be periodically refreshed, or else it will "forget" what it was storing.
-		<tr><td><b>Driver</b>			<td>Low-level software that operates at the operating system "kernel" level to control a peripheral device.
+		<tr><td><b>DRAM</b>				<td>\e Dynamic \e Random \e Access \e Memory, a type of random access memory that must be periodically refreshed, or else it will “forget” what it was storing.
+		<tr><td><b>Driver</b>			<td>Low-level software that operates at the operating system “kernel” level to control a peripheral device.
+		<tr><td><b>E-E</b>				<td>“End-to-End” … a routing from an input jack to an output jack without going through an intermediate Frame Store to buffer frames.
 		<tr><td><b>Field</b>			<td>The odd or even horizontal lines that comprise a single frame of interlaced video.
+		<tr><td><b>FPS</b>				<td>Acronym for “Frames Per Second”, used to measure frame rate.
 		<tr><td><b>Frame</b>			<td>A complete video image.
-		<tr><td><b>Frame Buffer</b>		<td>A contiguous chunk of RAM used to store one or more fields/frames of video. It can also store audio and ancillary data. Frame buffers exist both on the host computer and on AJA devices.
-		<tr><td><b>Frame Store</b>		<td>Random access memory on the AJA device that can store a fixed number of frames of video data (possibly with ancillary data).
+		<tr><td><b>Frame Buffer</b>		<td>A contiguous chunk of RAM used to store a frame of video pixel data, either on the host computer or in an AJA device.
+		<tr><td><b>Frame Store</b>		<td>A device widget having mode, pixel format and video format properties (e.g., Capture, 10-bit YCbCr, and 1080i50), that, when enabled, can write or read video frame data to or from device SDRAM. Often used interchangeably with the word “Channel”.
 		<tr><td><b>HANC</b>				<td>\e Horizontal \e Ancillary \e Data, is ancillary data that is embedded into the video lines that are between the start and end of active video.
 		<tr><td><b>HDMI</b>				<td>\e High-Definition \e Multimedia \e Interface, a compact hardware interface used for transferring video and audio data between compatible devices.
 		<tr><td><b>HEVC</b>				<td>\e High \e Efficiency \e Video \e Coding, H.265/HEVC is a video compression standard, a successor to H.264/MPEG-4 AVC (\e Advanced \e Video \e Coding).
-		<tr><td><b>HFR</b>				<td>\e High \e Frame \e Rate -- .
+		<tr><td><b>HFR</b>				<td>\e High \e Frame \e Rate … usually 60 fps minimum.
 		<tr><td><b>Host</b>				<td>The computer that is connected to the AJA device.
 		<tr><td><b>IDE</b>				<td>\e Integrated \e Development \e Environment, a software application that provides comprehensive facilities to programmers for performing interactive software development and debugging.
-		<tr><td><b>ISR</b>				<td>\e Interrupt \e Service \e Routine, usually a driver function that gets called by the host operating system "kernel" to handle an interrupt that may be relevant to the device being managed by the driver.
+		<tr><td><b>Incoming Frame</b>	<td>The frame data currently being written into a frame buffer in an AJA device’s SDRAM from its video input connector.
+		<tr><td><b>ISR</b>				<td>\e Interrupt \e Service \e Routine, usually a driver function that gets called by the host operating system “kernel” to handle an interrupt that may be relevant to the device being managed by the driver.
 		<tr><td><b>ISR</b>				<td>Also \e Interrupt \e Status \e Register, which exists on a peripheral device that indicates the state of the device at the conclusion of an interrupt-driven data transfer with another device or host.
 		<tr><td><b>Kick Sequence</b>	<td>A set of values written to a watchdog timer to prevent it from timing out.
 		<tr><td><b>LTC</b>				<td>\e Linear \e Time \e Code, a SMPTE standard for encoding timecode in an audio signal.
-		<tr><td><b>Loopback</b>			<td>An audio subsystem feature on NTV2 devices that, when enabled, the output embedder's FIFO obtains audio samples directly from the audio subsystem's input de-embedder FIFO, instead of from the audio subsystem's output buffer.
+		<tr><td><b>Loopback</b>			<td>An audio subsystem feature on NTV2 devices that, when enabled, the output embedder’s FIFO obtains audio samples directly from the audio subsystem’s input de-embedder FIFO, instead of from the audio subsystem’s output buffer.
 		<tr><td><b>MB86M31</b>			<td>HEVC/H.265 Real-time encoder hardware, developed by Socionext, a new company established by the consolidation of the System LSI businesses of Fujitsu Ltd and Panasonic Corp.  This real-time 4K encoder is used in AJA HEVC-capable hardware and is supported in this SDK.
-		<tr><td><b>OpenGL</b>			<td>\e Open \e Graphics \e Library, a cross-language, multi-platform API for rendering 2-D and 3-D vector graphics. It's commonly used to achieve hardware-accelerated rendering using a host computer's GPU.
-		<tr><td><b>Outgoing Frame</b>	<td>The frame data currently being sent from an AJA device's output connector.
+		<tr><td><b>OpenGL</b>			<td>\e Open \e Graphics \e Library, a cross-language, multi-platform API for rendering 2-D and 3-D vector graphics. It’s commonly used to achieve hardware-accelerated rendering using a host computer’s GPU.
+		<tr><td><b>Outgoing Frame</b>	<td>The frame data currently being read out of a frame buffer in an AJA device’s SDRAM and sent to its video output connector.
 		<tr><td><b>PCI</b>				<td>\e Peripheral \e Component \e Interconnect, a standardized expansion bus for attaching hardware devices to a host computer.
 		<tr><td><b>PCIe</b>				<td>\e Peripheral \e Component \e Interconnect \e Express, a high-speed serial expansion bus used to attach hardware devices to a host computer, and be able to transfer data between the host and the device, or between PCIe devices that share the bus.
 		<tr><td><b>PCM</b>				<td>\e Pulse \e Code \e Modulation, a method of digitally encoding sampled analog signals, most typically audio signals. The amplitude of the signal is sampled at regular time intervals, with each sample quantized to the nearest discrete value.
-		<tr><td><b>PIO</b>				<td>\e Programmed \e Input / \e Output, a relatively slow and archaic method of transferring data between a peripheral device and the host computer it's attached to.
+		<tr><td><b>PIO</b>				<td>\e Programmed \e Input / \e Output, a relatively slow and archaic method of transferring data between a peripheral device and the host computer it’s attached to.
 		<tr><td><b>PSF</b>				<td>Acronym for \e Progressive \e Segmented \e Frame, a scheme for dividing a single progressive (full) frame into two fields of even and odd lines, just as in interlaced video, but with no time elapsed (or content motion) between the two fields.
 		<tr><td><b>RAM</b>				<td>Acronym for \e Random \e Access \e Memory.
 		<tr><td><b>Relay</b>			<td>An electrical switch whose position is controlled by another independent electrical signal. The switch has a default position when no power or signal is applied to its control input.
@@ -40,9 +43,9 @@
 		<tr><td><b>SDRAM</b>			<td>\e Synchronous \e Dynamic \e Random \e Access \e Memory, a type of random access memory that is refreshed dynamically every clock cycle on the PCI bus.
 		<tr><td><b>SFP</b>				<td>\e Small \e Form-factor \e Pluggable \e transceiver, a hot-pluggable optical connector used to connect to high-speed IP communications networks.
 		<tr><td><b>SMPTE</b>			<td>\e Society \e of \e Motion \e Picture \e and \e Television \e Engineers, the body that governs most of the standards used in digital video/audio signal transmission.
-		<tr><td><b>Thunderbolt</b>		<td>A hardware interface developed by Intel that's used to connect external peripheral devices to a computer, which combines PCI Express and DisplayPort signals into a single serial cable, including DC power, using a Mini DisplayPort connector.
+		<tr><td><b>Thunderbolt</b>		<td>A hardware interface developed by Intel that’s used to connect external peripheral devices to a computer, which combines PCI Express and DisplayPort signals into a single serial cable, including DC power, using a Mini DisplayPort connector.
 		<tr><td><b>Timecode</b>			<td>A sequence of numeric codes generated at regular intervals by a timing system.
-		<tr><td><b>Transfer Frame</b>	<td>Identifies the frame being transferred from host memory to the AJA device's frame buffer memory (when playing out), or from the AJA device's frame buffer memory to host memory (when capturing).
+		<tr><td><b>Transfer Frame</b>	<td>Identifies the frame being transferred from host memory to the AJA device’s frame buffer memory (when playing out), or from the AJA device’s frame buffer memory to host memory (when capturing).
 		<tr><td><b>VANC</b>				<td>\e Vertical \e Ancillary \e Data, is ancillary data that, for each field (interlaced) or frame (progressive), is embedded into the video lines that precede the first line of active video.
 		<tr><td><b>VBI</b>				<td>\e Vertical \e Blanking \e Interval, which is the length of time between the end of the last line of a video field/frame and the start of the first line of the next frame/field.
 		<tr><td><b>VBI</b>				<td>Also \e Vertical \e Blanking \e Interrupt, which signals the AJA device driver when the next field or frame should be handled by AutoCirculate.

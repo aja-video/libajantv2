@@ -13,8 +13,8 @@
 /**
  *	The list of debug message severity codes.
  *	@ingroup AJAGroupDebug
- *	@{
  */
+///@{
 typedef enum _AJADebugSeverity
 {
 	AJA_DebugSeverity_Emergency		= 0,	/**< System is unusable */
@@ -28,13 +28,14 @@ typedef enum _AJADebugSeverity
 	AJA_DebugSeverity_Size			= 8		/**< Size of severity enum, must be last */
 
 } AJADebugSeverity;
+///@}
 
 
 /**
  *	The list of debug message groups.
  *	@ingroup AJAGroupDebug
- *	@{
  */
+///@{
 typedef enum _AJADebugUnit
 {
     AJA_DebugUnit_Unknown					= 0,
@@ -145,6 +146,7 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_Size						= 85,
 
 } AJADebugUnit;
+///@}
 
 
 /**

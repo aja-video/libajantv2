@@ -1,83 +1,87 @@
 /**
-@page	io4kplus	Io4K Plus
+	@page			ntv2devices
 
-This page describes the Io4K Plus capture/playout device with standard Quad-Mode firmware,
-which supports 4K ingest or playout through a Thunderbolt III port.
+	@section		ntv2hwio
 
-@image	html	io4kplusfront.png
-@image	html	io4kplusrear.png
+	@subsection		io4kplus	Io4K Plus
 
-@par	PCI Interface
+	This page describes the Io4K Plus capture/playout device with standard Quad-Mode firmware,
+	which supports 4K ingest or playout through a Thunderbolt III port.
 
--	PCI device ID: <b>0xEB11</b>
--	Four-lane gen 3 PCI Express
--	2 DMA engines
--	MSI supported
--	2 x Thunderbolt III connectors
+	@image	html	io4kplusfront.png
+	@image	html	io4kplusrear.png
 
-@par	Inputs & Outputs
+	@par	PCI Interface
 
--	4 x SDI connectors
-	-#	Bi-directional in 3G mode (under software control), 4K/UHD input-only in 6G/12G mode
-	-#	Bi-directional 3G-SDI (under software control)
-	-#	Bi-directional in 3G mode (under software control), 4K/UHD output-only in 6G/12G mode
-	-#	Bi-directional 3G-SDI (under software control)
--	1 x 3G-SDI monitor output
--	1 x HDMI 2.0 input
--	1 x HDMI 2.0 output (supports HDR InfoFrame metadata and UHD/4Kp60 4:4:4)
--	1 x Reference/LTC input (Ref supports 1V analog color black, 2/4V composite sync, or 1V HD tri-level sync)
--	1 x LTC output
--	1 x RS-422 serial port
--	1 x Microphone input
--	1 x DB-25 connector for audio (8 channels in, or 8 channels out, or 4-in/4-out)
+	-	PCI device ID: <b>0xEB11</b>
+	-	Four-lane gen 3 PCI Express
+	-	2 DMA engines
+	-	MSI supported
+	-	2 x Thunderbolt III connectors
 
-@par	Frame Buffer
+	@par	Inputs & Outputs
 
--	2GB SDRAM
--	256 x 8MB frames
--	128 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	4 x SDI connectors
+		-#	Bi-directional in 3G mode (under software control), 4K/UHD input-only in 6G/12G mode
+		-#	Bi-directional 3G-SDI (under software control)
+		-#	Bi-directional in 3G mode (under software control), 4K/UHD output-only in 6G/12G mode
+		-#	Bi-directional 3G-SDI (under software control)
+	-	1 x 3G-SDI monitor output
+	-	1 x HDMI 2.0 input
+	-	1 x HDMI 2.0 output (supports HDR InfoFrame metadata and UHD/4Kp60 4:4:4)
+	-	1 x Reference/LTC input (Ref supports 1V analog color black, 2/4V composite sync, or 1V HD tri-level sync)
+	-	1 x LTC output
+	-	1 x RS-422 serial port
+	-	1 x Microphone input
+	-	1 x DB-25 connector for audio (8 channels in, or 8 channels out, or 4-in/4-out)
 
-@par	Audio
+	@par	Frame Buffer
 
--	5 subsystems, 1 reserved for Mic input
--	16 channels (max.) per subsystem
--	First subsystem's buffer memory starts 8MB from end of memory
--	24-bit D/A 48kHz balanced analog audio I/O (requires breakout cable):
-	-	8-channels input-only
-	-	8-channels output-only
-	-	4-channels input and 4-channels output
--	Audio I/O to/from HDMI supports 2 or 8 audio channels
+	-	2GB SDRAM
+	-	256 x 8MB frames
+	-	128 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
-@par	Video Formats
+	@par	Audio
 
--	Supports all SD, HD, 2K and 4K video formats, including 4Kp60.
--	Multiple, independent video formats supported (provided all in same clock family).
--	DVCPro HD and HDV not supported with Quad firmware.
--	RGB on SDI inputs/outputs supported.
--	3GbA and 3GbB (dual-link) supported.
--	SMPTE 425 2si mux supported
+	-	5 subsystems, 1 reserved for Mic input
+	-	16 channels (max.) per subsystem
+	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	24-bit D/A 48kHz balanced analog audio I/O (requires breakout cable):
+		-	8-channels input-only
+		-	8-channels output-only
+		-	4-channels input and 4-channels output
+	-	Audio I/O to/from HDMI supports 2 or 8 audio channels
 
-@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+	@par	Video Formats
 
-@par	Ancillary Data
+	-	Supports all SD, HD, 2K and 4K video formats, including 4Kp60.
+	-	Multiple, independent video formats supported (provided all in same clock family).
+	-	DVCPro HD and HDV not supported with Quad firmware.
+	-	RGB on SDI inputs/outputs supported.
+	-	3GbA and 3GbB (dual-link) supported.
+	-	SMPTE 425 2si mux supported
 
--	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
--	VANC geometries
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-@par	Physical
+	@par	Ancillary Data
 
--	Size (W x D x H):  8.74" x 8.11" x 1.65" (222mm × 206mm × 42mm)
--	Weight:	3.4 lb (1.5 kg)
--	Power: 30W (typ), 33W (max), 70W max with USB-C power delivery to downstream devices
+	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
+	-	VANC geometries
 
-@par	Environment
+	@par	Physical
 
--	Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
--	Operating Relative Humidity: 10-90% non-condensing
--	Operating Altitude: under 3,000 meters (under 10,000 feet)
--	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+	-	Size (W x D x H):  8.74" x 8.11" x 1.65" (222mm × 206mm × 42mm)
+	-	Weight:	3.4 lb (1.5 kg)
+	-	Power: 30W (typ), 33W (max), 70W max with USB-C power delivery to downstream devices
+
+	@par	Environment
+
+	-	Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
 
-@par	Firmware
-TBD: <https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/25>
+	@par	Firmware
+	TBD: <https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/25>
 **/

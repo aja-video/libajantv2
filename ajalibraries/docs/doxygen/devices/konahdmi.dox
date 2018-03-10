@@ -1,59 +1,73 @@
 /**
-@page	konahdmi		KONA HDMI
+	@page			ntv2devices
 
-This page describes the KONA HDMI capture board.
+	@section		ntv2hwkona
 
-@image	html	konahdmi.png
+	@subsection		konahdmi		KONA HDMI
 
-The KONA HDMI has four HDMI input-only connectors.
+	This page describes the KONA HDMI capture board.
 
-@par	PCI Interface
+	@image	html	konahdmi.png
 
--	PCI device ID: <b>0xEB24</b>
--	Gen 2 x 8 PCIe
--	2 DMA engines
--	Legacy and MSI interrupt delivery supported
+	The KONA HDMI has four input-only HDMI connectors.
 
-@par	Inputs & Outputs
+	@par	PCI Interface
 
--	4 x HDMI 2.0 inputs
+	-	PCI device ID: <b>0xEB24</b>
+	-	Gen 2 x 8 PCIe
+	-	2 DMA engines
+	-	MSI interrupt delivery supported
 
-@par	Frame Buffer
+	@par	Inputs & Outputs
 
--	2 GB SDRAM
--	256 x 8MB frames
--	128 x 16MB frames for 2K (1080x2048) and RGB-16+
--	64 x 32MB frames for 4K RGB
+	-	4 x HDMI 2.0 inputs
 
-@par	Audio
+	@par	Frame Buffer
 
--	4 subsystems
--	16 channels (max.) per subsystem
--	First subsystem's buffer memory starts 8MB from end of memory
+	-	2 GB SDRAM
+	-	256 x 8MB frames
+	-	128 x 16MB frames for 2K (1080x2048) and RGB-16+
+	-	64 x 32MB frames for 4K RGB
 
-@par	Video Formats
+	@par	Audio
 
--	Supports all standard video formats, plus 2K, 4K and UHD formats.
+	-	4 subsystems
+	-	Maximum number of audio channels, per-subsystem:
+		-	Quad-stream mode:
+			-	32 channels (max.)
+		-	Single-stream mode:
+			-	8 channels (max.)
+	-	First subsystem's buffer memory starts 8MB from end of memory
 
-@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+	@par	Video Formats
 
-@par	Ancillary Data
+	-	Supports all standard video formats, plus 2K, 4K and UHD formats.
+	-	Single-stream mode:
+		-	4K/UHD with HFR support up to 60p 4:2:2 10-bit
+		-	30/36 bits per pixel, RGB or YUV, 6 Gbps per color component
+	-	Quad-stream mode:
+		-	SD/HD/2K with HFR support up to 60p 4:2:2 10-bit
+		-	30/36 bits per pixel, RGB or YUV, 2.25 Gbps per color component
 
--	HDMI HDR
+	@note	Hardware color-space converters (CSCs) can convert input YUV to RGB when using RGB buffer formats.
 
-@par	Firmware
-TBD
+	@par	Ancillary Data
 
-@par	Physical
+	-	HDMI HDR
 
--	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
--	Weight: 0.7 lb (0.4 kg)
+	@par	Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/201/25>
 
-@par	Environment
+	@par	Physical
 
--	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
--	Operating Relative Humidity: 10-90% non-condensing
--	Operating Altitude: under 3,000 meters (under 10,000 feet)
--	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Weight: 0.7 lb (0.4 kg)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
 **/

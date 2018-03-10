@@ -1,13 +1,14 @@
 /**
-	@page	deviceoperation		Basic NTV2 Device Operation
+	@page	ntv2devops		NTV2 Device Hardware Operation
 
-	@par	Introduction
+	@section	ntv2devops-intro	Introduction
 
-	Reduced to their simplest form, NTV2 devices are essentially...
-	-	a big chunk of SDRAM memory for buffering video frames and audio samples that's tied to...
+	In simplest terms, NTV2 devices are essentially…
+	-	a big chunk of SDRAM memory for buffering video frames and audio samples, which is tied to...
 	-	an FPGA that determines what gets written or read to/from that memory (and where), plus...
-	-	one or more SDI or HDMI signal inputs and/or outputs, and...
-	-	a high-speed PCIe interface to a host computer for rapidly reading or writing 32-bit registers and transferring bulk data via DMA to/from the host.
+	-	one or more video and/or audio signal inputs and/or outputs, and...
+	-	a high-speed PCIe interface to a host computer, for rapidly reading or writing 32-bit registers,
+		and transferring bulk data via DMA to/from the host.
 
 	@image	html	hwref-fig0-blockdiagram.png
 
@@ -24,7 +25,8 @@
 	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.
 	-	To determine if a device can play video, call ::NTV2DeviceCanDoPlayback.
 
-	@subsection	devicesignalinputsoutputs		Signal Inputs & Outputs
+	<hr size="50px" />
+	@section	devicesignalinputsoutputs		Signal Inputs & Outputs
 
 	@par	SDI Connectors
 
@@ -38,8 +40,8 @@
 	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
 	-	If a device has bi-directional SDI connectors, the ::NTV2DeviceGetNumVideoInputs and ::NTV2DeviceGetNumVideoOutputs will reflect
 		the maximum possible number of inputs and outputs.
-		-	For example, the Io4K with its Quad-mode firmware, has four bi-directional SDI jacks, plus an additional monitor (output-only) jack,
-			so ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
+		-	For example, the \ref io4kquad has four bi-directional SDI jacks plus an additional monitor (output-only) jack,
+			so for that device, ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
 
 	@par	Analog Video Connectors
 
@@ -76,9 +78,10 @@
 
 	@par	Serial Ports (RS-422)
 
-	Most AJA devices have a single RS-422 connector that can be used for tape deck control and other purposes.
+	Most AJA devices have a single RS-422 connector that can be used to control tape deck transports and for other purposes.
+	-	To determine the number of serial ports on a device, call ::NTV2DeviceGetNumSerialPorts.
 
-	@par	Common Electrical Characteristics
+	@subsection	commonelectricalchars		Common Electrical Characteristics
 
 	Unless otherwise noted, physical and electrical characteristics of inputs and outputs -- SDI, HDMI, analog video, analog audio, reference,
 	LTC, etc. -- are generally identical across all AJA devices.
@@ -125,94 +128,337 @@
 
 	@par		PCI Vendor ID
 
-	All AJA NTV2 devices share the same PCI vendor ID.
+	All AJA NTV2 devices have the same PCI vendor ID.
 	-	PCI vendor ID:  <b>0xF1D0</b>
 
 	@par		Data Transfer
 
 	Direct Memory Access (DMA) is the only supported method of moving data between host memory and the hardware. All NTV2 devices have at least one DMA engine.
 	(Programmed Input/Output, a.k.a. PIO is not supported in AJA devices.)
+	-	To determine the number of DMA engines for a device, call ::NTV2DeviceGetNumDMAEngines.
 
 	@par		Device Frame Buffer
 
-	All NTV2 devices have a fixed amount of Synchronous Dynamic Random Access Memory (SDRAM). The Xilinx is the SDRAM controller, which controls the output
-	of video from RAM, the input of video into RAM, the PCI interface to/from RAM, and RAM refresh.
+	All NTV2 devices have a fixed amount of Synchronous Dynamic Random Access Memory (SDRAM).
+	The FPGA is the SDRAM controller, which controls the output of video (and audio and anc)
+	from RAM, the input of video (and audio and anc) into RAM, the PCI interface to/from RAM,
+	and RAM refresh.
 
 	@par		Frame Buffer Layout
 
-	The device's SDRAM is partitioned into a number of equal-sized video frames. Devices that can handle larger frame sizes
-	(e.g., 2K, 4K, and VANC modes) and/or RGB frame data will partition their RAM storage into half as many frames when those modes
-	and/or formats are in use.
-
-	Video data in the device frame buffer is always stored full-frame. Interlaced video is always stored in the frame buffer with the first line of
-	Field 1 (F1L1) at the top of the buffer, followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc., alternating to the end
-	of the frame. (A very <i>very</i> long time ago, AJA made devices that stored all of Field 1's lines in the top half of the buffer, and all of
-	Field 2's lines in the bottom half of the buffer. These devices and buffer formats are no longer supported.)
+	The device’s SDRAM is partitioned into a number of equal-sized video frames. These video
+	frames are indexed using a zero-based index number. The first byte of the first frame
+	(frame zero) starts at the lowest SDRAM address, and subsequent frames are located at
+	higher addresses from there. Devices that can handle larger frame sizes (e.g., 2K, 4K,
+	and VANC modes) and/or RGB frame data will partition their RAM storage into half as many
+	frames when those modes and/or formats are in use. 4K and UHD frames require four times
+	the storage as non-quad frames.
 
 	@image	html	hwref-fig1-sdramfblayout.png
 
-	Note that this scheme has two major disadvantages:
-	-	It wastes a lot of device memory, especially with pixel formats and video formats that push the frame size to just over 8MB.
-		(For example, enabling VANC on a 1080p ARGB image requires 8.14 MB per frame, which wastes nearly half of each frame's 16MB of storage.)
-	-	Changing a Frame Store's pixel format from YCBCr to RGB while another channel is ingesting or playing video using AutoCirculate results
-		in at least one bad frame of video in the ingest/playout stream as the device's memory layout is changed. It could even cause the "start"
-		and "end" frames being AutoCirculated to refer to frames that no longer exist on the device.
+	@warning	On multi-channel devices, changing a Frame Store’s frame buffer format and/or
+				video format that results in a 8MB/16MB frame size change (or vice-versa)
+				while another channel is ingesting or playing video using AutoCirculate will
+				result in at least one bad frame of video in the stream as the device’s memory
+				layout is changed. It can even cause the “start” and “end” frames being
+				AutoCirculated to refer to frames that no longer exist on the device.
 
-	@par		Channel Architecture
+	Video data in the device frame buffer is always stored full-frame. Interlaced video is
+	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
+	buffer, followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc.,
+	alternating to the end of the frame. <small> (A very <i>very</i> long time ago, AJA made devices
+	that stored all of Field 1’s lines in the top half of the buffer, and all of Field 2’s
+	lines in the bottom half of the buffer. These devices and buffer formats are no longer
+	supported.) </small>
 
-	Multi-channel devices can simultaneously and independently ingest or playout video, and have independent control of which SDRAM frame(s)
-	will be read or writen as video. Thus, the device has an upper limit on the number of concurrent video accesses to SDRAM at any given time,
-	but note that <b>the host computer always has access to frame memory</b>. As a consequence, data transfers from the host to an SDRAM frame on the
-	device that was being read for the currently-playing video frame or field would probably look torn or distorted. (Likewise for the opposite -- i.e.,
-	transfers to the host from an SDRAM frame being written from the currently incoming video frame/field would have some lines containing pixel data for
-	the new, incoming frame, while the remaining lines would contain old pixel data.) Thus it's important to synchronize or gate transfers to/from the
-	host:
-	-	using the vertical blanking interrupt (e.g., CNTV2Card::WaitForOutputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.);
-	-	using the device's current line counter (e.g., monitoring the \c kRegLineCount register using CNTV2Card::ReadRegister).
 
-	@par		Frame Buffer Access
+	<hr size="50px" />
+	@section	videooperation		Video System Operation
 
-	Each channel also has independent PCI access from the host computer.
+	This section will attempt to explain how the Video System operates.
 
-	@note	DMA transfer speeds may be affected by the amount of video data being accessed by the device to transmit video.
-			If a channel is in display mode, it is always outputting video, and SDRAM bandwidth on the device is being consumed by this process...
-			and the amount consumed is determined by the amount of data being read from frame memory, which depends on Frame Buffer Format.
-			<b>In some cases, DMA speeds can be increased by disabling unused channels</b> (see CNTV2Card::DisableChannel). It is especially
-			useful when using RGB Frame Buffer Formats, which use significant SDRAM bandwidth to read frame data for playout. In addition to
-			the fact that more data is moved in RGBA mode (than, say, for 8-bit YCbCr), the transfer of that data may also proceed at a slightly
-			slower rate.
+	@subsection	vidop-fs		Frame Store
+
+	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that is associated with
+	several hardware Registers that monitor and control it. Some of the important properties
+	these Registers get and set are:
+	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget will not access SDRAM.
+		Call CNTV2Card::IsChannelEnabled to determine if a Frame Store is enabled or not.
+		Calling CNTV2Card::EnableChannel or CNTV2Card::DisableChannel will change it.
+	-	<b>Mode</b> — This correlates to the NTV2Mode enumeration in the SDK.
+		In \c NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
+		in \c NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
+		to determine the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
+	-	<b>Frame Buffer Format</b> — This coincides with the NTV2FrameBufferFormat enumeration
+		in the SDK. Call CNTV2Card::GetFrameBufferFormat to determine the current format;
+		calling CNTV2Card::SetFrameBufferFormat will change it. See \ref devicefbformats for details.
+	-	<b>Video Format</b> — This correlates to the NTV2VideoFormat enumeration in the SDK,
+		and implies a Frame Geometry, Video Standard and Frame Rate. Call CNTV2Card::GetVideoFormat
+		to determine the current format; calling CNTV2Card::SetVideoFormat will set it.
+	-	<b>Input Frame</b> — This is a zero-based index number that identifies the specific Frame
+		Buffer in SDRAM that will be continually written with video frame data <b>if</b>…
+		-	the Frame Store is Enabled;
+		-	its Mode is Capture;
+		-	and a signal is routed to the Frame Store’s input.
+	-	Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
+		Calling CNTV2Card::SetInputFrame can change it.
+	-	<b>Output Frame</b> — This is a zero-based index number that identifies the specific Frame
+		Buffer in SDRAM that will continuously be read from <b>if</b> the Frame Store is Enabled,
+		and its Mode is set to Display. (This video can be monitored <b>if</b> the Frame Store’s
+		output signal is routed to a video output widget, and a monitor is connected to that output
+		connector.) Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b>
+		buffer number. Calling CNTV2Card::SetOutputFrame can change it.
+
+	Some AJA devices have only one Frame Store, so that device is limited to Capturing or Playing
+	one single stream of video at a time.
+
+	@note	In NTV2 parlance, the terms <b>Channel</b> and <b>Frame Store</b> are often used interchangeably.
+
+	Multi-channel devices can simultaneously and independently ingest or playout video, and have
+	independent control of which SDRAM frame(s) will be read or writen with video.
+
+	In the SDK, Frame Stores are identified by an NTV2Channel enumeration and sometimes by a zero-based
+	unsigned integer value, where zero corresponds to \c NTV2_CHANNEL1 .
+	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
+	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
+
+	@subsection	vidop-fbaccess		Frame Buffer Access
+
+	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
+	Call CNTV2Card::DMAReadFrame to transfer a single frame from device SDRAM to a local host buffer.
+	Call CNTV2Card::DMAWriteFrame to transfer a single frame from a local host buffer to device SDRAM.
+
+	It’s important to remember that <b>the host computer always has access to frame memory</b>.
+	Thus it’s important to synchronize or gate transfers to/from the host:
+	-	using the vertical blanking interrupt (e.g., CNTV2Card::WaitForOutputVerticalInterrupt,
+		CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.);
+	-	using the device’s current line counter (e.g., monitoring the \c kRegLineCount register
+		using CNTV2Card::ReadRegister).
+
+	@warning	Calling CNTV2Card::DMAWriteFrame at a significant fraction of frame time <i>after</i>
+				the VBI to write the same frame on the device that’s being read for the currently-playing
+				video frame will likely look torn or distorted.
+				Likewise for the opposite — i.e., calling CNTV2Card::DMAReadFrame at a significant
+				fraction of frame time after or before the VBI to read the same frame being written
+				by the Frame Store from the currently incoming video frame would result in some lines
+				having pixel data from the new, incoming frame, while the remaining lines would contain
+				old pixel data.
+
+	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
+			the device to transmit video. If a channel is in display mode, it is always outputting
+			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
+			determined by the amount of data being read from frame memory, which depends on Frame
+			Buffer Format and Frame Geometry. <b>In some cases, DMA speeds can be increased by
+			disabling unused channels</b> (see CNTV2Card::DisableChannel). It is especially useful
+			when using larger video & frame buffer formats, which use significant SDRAM bandwidth
+			to read frame data for playout. In addition to the fact that more data is moved in, say,
+			48-bit RGB (than YUV8), the transfer of that data may also proceed at a slightly slower
+			rate.
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
-	Traditionally, AJA's NTV2 devices required all channels to have the same video standard, frame rate, and frame geometry.
-	AJA's newer devices --- e.g., \ref corvid44, \ref kona4quad, \ref io4kquad, \ref corvid88, etc. --- still retain this default behavior,
-	but can be switched into "multi-format" mode that allows different channels to use different formats (see ::NTV2DeviceCanDoMultiFormat and
-	CNTV2Card::SetMultiFormatMode).
+	Traditionally, AJA’s NTV2 devices required all channels to have the same video standard,
+	frame rate, and frame geometry. AJA’s newer devices — e.g., \ref corvid44, \ref kona4quad,
+	\ref io4kquad, \ref corvid88, etc. — retain this default behavior, but can be switched into
+	“multi-format” mode that allows different channels to use different formats
+	(see ::NTV2DeviceCanDoMultiFormat and CNTV2Card::SetMultiFormatMode).
 
-	The SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different clock sources:
-	-	the device's on-board crystal oscillator (a.k.a. "free run");
-	-	an SDI input (note that devices without video inputs can't use this);
-	-	an external timing reference signal (note that devices without an external reference input can't use this).
+	All SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different
+	clock sources:
+	-	the device’s on-board crystal oscillator (a.k.a. “free run”);
+	-	an SDI input (unavailable on playout-only devices);
+	-	an external timing reference signal (devices with external reference inputs only).
 
-	The SDK's CNTV2Card::SetReference function is used to specify which clock source should be used to generate timing for the device's outputs.
-	When CNTV2Card::SetReference is called with \c NTV2_REFERENCE_INPUT1, the device's outputs will be locked to the same timebase as that of input
-	channel 1. Note that the actual output will be delayed a couple of lines due to propagation delays through the device's circuitry, but the
-	important point is that the phase relationship between the input and the output will be fixed and will not drift.
-	This form of output clocking is best suited to end-to-end (E-E) routing, where an input is routed to an output, directly, or indirectly (e.g.,
-	through a Mixer/Keyer) without any mediation through a pair of Frame Stores.
+	The SDK’s CNTV2Card::SetReference function is used to specify which clock source should
+	be used to generate timing for the device’s outputs. When CNTV2Card::SetReference is called
+	with \c NTV2_REFERENCE_INPUT1, the device’s outputs will be locked to the same timebase as
+	that of input channel 1. Note that the actual output will be delayed a couple of lines due
+	to propagation delays through the device’s circuitry, but the important point is that the
+	phase relationship between the input and the output will be fixed and will not drift. This
+	form of output clocking is best suited to end-to-end (E-E) routing, where an input is routed
+	to an output, directly, or indirectly (e.g., through a Mixer/Keyer) without any mediation
+	through a pair of Frame Stores.
 
-	However, if two inputs are feeding the device, it's probably impossible to lock to both sources.
-	Unless the sources are synced to a common timebase (often called "house reference"), then the two signals will drift over time with respect
-	to each other.  One channel may just be starting a new frame, while the other is already half way through its frame.
-	Since a client application can't lock to both signals at the same time, \c NTV2_REFERENCE_FREERUN should be used, to clock the outputs from
-	the device's own internal clock source. Note that even setting "free run" isn't technically necessary --- the application would run just as
-	well locked to an input, with the only difference being when the signals would actually come out of the BNC connectors.
+	However, if two inputs are feeding the device, it's probably impossible to lock to both
+	sources. Unless the sources are synced to a common timebase (often called “house reference”),
+	then the two signals will drift over time with respect to each other. One channel may just
+	be starting a new frame, while the other is already half way through its frame. Since a
+	client application can’t lock to both signals at the same time, \c NTV2_REFERENCE_FREERUN
+	should be used, to clock the outputs from the device’s own internal clock source. Note that
+	even setting “free run” isn't technically necessary — the application would run just as
+	well locked to an input, with the only difference being when the signals would actually
+	come out of the BNC connectors.
 
-	If the device's output(s) must have a given timing (e.g., to feed a switcher), then applications can pass \c NTV2_REFERENCE_EXTERNAL to
-	CNTV2Card::SetReference, which will lock the device to an analog or tri-level sync signal connected to the device's external reference input.
-	You can determine the video format of the signal being applied to the reference input by calling CNTV2Card::GetReferenceVideoFormat.
-	Note that even when configured to sync its outputs to \c NTV2_REFERENCE_EXTERNAL, the device output will internally revert to Free-Run if
-	the reference signal disappears or is incompatible with the output video format.
+	If the device’s output(s) must have a given timing (e.g., to feed a switcher), then
+	applications can pass \c NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will
+	lock the device to an analog or tri-level sync signal connected to the device’s external
+	reference input. You can determine the video format of the signal being applied to the
+	reference input by calling CNTV2Card::GetReferenceVideoFormat. Note that even when
+	configured to sync its outputs to \c NTV2_REFERENCE_EXTERNAL, the device output will
+	internally revert to Free-Run if the reference signal disappears or is incompatible with
+	the output video format.
+
+
+
+	<hr size="50px" />
+	@section	audiooperation		Audio System Operation
+
+	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
+	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
+
+	Each Audio System can accommodate at least 8 channels of audio.
+	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s Audio System(s) can handle.
+	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device Audio System is currently configured for.
+	Modern AJA devices will accommodate up to 16 channels. Older AJA devices defaulted to 6 channels at power-up — these should be
+	configured to use 8 channels.
+	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device Audio System is configured to use.
+
+	@note	It is recommended that the Audio System be configured to use the maximum number of audio channels the device is capable of.
+
+	The audio sample rate on all AJA devices is fixed at 48 kHz.
+
+	Each Audio System uses an 8 MB contiguous block of memory located in the upper part of SDRAM:
+
+	@image	html	hwref-fig2-audiobuffers.png
+
+	An NTV2 device will use one of these two memory configurations for its Audio Systems’ buffers:
+	-	“Stacked” — The first Audio System’s 8 MB chunk starts at the very top of SDRAM,
+		such that the last byte of Audio System 1's input buffer coincides with the last addressable
+		byte of SDRAM. Subsequent Audio Systems’ buffers stack downward from there, 8 MB each.
+	-	“Non-stacked” — These devices use the last one or two video frames for audio storage.
+		The first byte of the last Audio System’s output buffer coincides with the first byte
+		of the last frame buffer in device memory. Previous Audio System buffers, if any, start
+		at the next-lower 8MB frame buffer.
+	-	Call ::NTV2DeviceCanDoStackedAudio to determine if the device uses the “stacked” arrangement or not.
+
+	The first (lower address) and last (higher address) 4 MB of the Audio System’s 8 MB chunk is used
+	for <b>Audio Output</b> and <b>Audio Input</b>, respectively. Each Output or Input aspect of the
+	Audio System operate independently, each being in one of two states: <b>Running</b> or <b>Stopped</b>
+	(a.k.a. the “Reset” state). When the Input or Output of the Audio System is Running, eight or sixteen
+	channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this memory,
+	regardless of whether all 8 or 16 channels are used.
+
+	See \ref audioformats for a details on the format of the audio data in the buffer.
+
+	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
+				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
+				buffers used by your application never coincide with any of the audio buffers.
+
+
+	<hr size="50px" />
+	@subsection	audiocapture		Audio Capture
+
+	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
+	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
+	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
+
+	When the Audio System is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
+	in the Audio Input Buffer in device memory at the address specified by the Audio System's Audio Input Last Address register (i.e.,
+	the <b>Record Head</b> or "write head"). Call CNTV2Card::ReadAudioLastIn to get the current Record Head position. Audio data continues to
+	be written into the input buffer until filled, whereupon the Record Head wraps back to the start of the buffer, where writing continues.
+	The least-significant byte of each 32-bit sample word in the Audio Input Buffer is always set to zero. (Note that for SD, because
+	extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
+
+	@image	html	hwref-fig3-audiorecordplay.png
+
+	Audio data can be transferred from the Audio Input Buffer in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
+	While the offset to the Input portion of the device Audio Buffer is typically fixed at 4 MB, to be absolutely safe should this ever change,
+	call CNTV2Card::GetAudioReadOffset to obtain the actual offset being used by the driver and SDK.
+
+	Note that if AutoCirculate is used for capture, AutoCirculate completely and automatically manages the Audio System.
+	See \ref aboutautocirculate for more information.
+
+	If the Embedded Audio Group packet (containing two audio channel pairs) is not present in the data stream, its samples in the buffer
+	will be set to zero (silence). The firmware notes which audio group packets are present and which are missing, and coalesces this
+	information into a hardware register. Client software can query this information by calling CNTV2Card::GetDetectedAudioChannelPairs.
+
+	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) via certain bits in the AES
+	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the Audio System's de-embedder makes this
+	information available in a hardware register, and client software can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM
+	or CNTV2Card::InputAudioChannelPairHasPCM.
+
+	Generally, each Audio System's <b>Input Source</b> is selectable, to receive samples from any of the device's video (and possibly audio)
+	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
+	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+
+
+	<hr size="50px" />
+	@subsection	audioplayout		Audio Playout
+
+	If the device supports SDI playout, each Audio System has an output embedder that generates audio packets (per SMPTE 299M for HD
+	and SMPTE 272M for SD) and inserts them into the HANC area of the outgoing SDI data stream.
+	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
+	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
+	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
+	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
+	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
+	in a similar fashion.
+	There is currently no provision for enabling or disabling specific audio groups.
+
+	The output embedder always inserts audio packets unless it's been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
+
+	When the Audio System is stopped, the output embedder will either embed silence (zeroes) into the data stream, or, if <b>Loopback Mode</b>
+	is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder (see CNTV2Card::SetAudioLoopBack).
+
+	When the Audio System is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
+	in the device audio buffer (the least-significant byte is ignored). Note, however, for SD, only the most-significant 20 bits are
+	used (since the embedder does not create extended audio packets).
+
+	During playout, the output embedder pulls audio samples from the Audio Output Buffer in device memory at the address specified by the
+	Audio System's Audio Output Last Address register (i.e., the <b>Play Head</b> or "read head"). Call CNTV2Card::ReadAudioLastOut to get the
+	current Play Head position. Audio data continues to be read from the output buffer until the end is reached, whereupon the Play Head wraps
+	back to the start of the buffer, where reading continues.
+
+	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the Output Buffer memory immediately behind
+	the Play Head as it runs. If the host application fails to transfer new samples into the Audio Output Buffer, the buffer will eventually
+	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
+	to configure this feature.
+
+	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
+	written into the Audio Output Buffer (via DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
+	If the output hardware "Play Head" pointer catches up to the Audio Output Last Address, the buffer will wrap, and audio/video
+	synchronization will be lost.
+
+	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the Audio System.
+	See \ref aboutautocirculate for more information.
+
+	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
+
+	Downstream equipment can be told that the outgoing audio is not carrying PCM data, by setting the non-PCM indicator in the AES header.
+	Older AJA devices can only do this on an audio-system-wide basis -- i.e., all outgoing audio groups are marked PCM or non-PCM.
+	Use the simpler form of the CNTV2Card::SetAudioPCMControl function for these devices.
+
+	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
+	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
+	single NTV2AudioChannelPair or an NTV2AudioChannelPairs set.
+
+
+	<hr size="50px" />
+	@subsection	audiomixer		Audio Mixer
+
+	Some newer NTV2 devices have firmware that implements a three-multichannel-input <b>Audio Mixer</b>.
+	To determine if a device can support this feature, call ::NTV2DeviceCanDoAudioMixer.
+	To determine if the device actually has this feature in its running firmware, call CNTV2Card::DeviceCanDoAudioMixer.
+
+	The mixer supports three multichannel input sources:
+	-	<b>Main</b> (primary) input (all audio channels);
+	-	<b>Auxiliary 1</b> input (2 audio channels only);
+	-	<b>Auxiliary 2</b> input (2 audio channels only).
+
+	Each of the three mixer inputs can be sourced from the output of any audio engine on the device by making these calls:
+	-	CNTV2Card::SetAudioMixerMainInputAudioSystem (all audio channels)
+	-	CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (two audio channels only)
+	-	CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (two audio channels only)
+
+	Any of the mixer inputs can be disabled (muted) or enabled (unmuted) by making these calls:
+	-	CNTV2Card::SetAudioMixerMainInputEnable
+	-	CNTV2Card::SetAudioMixerAux1InputEnable
+	-	CNTV2Card::SetAudioMixerAux2InputEnable
+
+	Each mixer input has a separate gain control that's controlled from these functions:
+	-	CNTV2Card::SetAudioMixerMainInputGain
+	-	CNTV2Card::SetAudioMixerAux1InputGain
+	-	CNTV2Card::SetAudioMixerAux2InputGain
 
 **/

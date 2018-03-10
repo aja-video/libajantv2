@@ -1,14 +1,28 @@
 /**
-	@page	ntv2devicefeatures		Discovering Device Features
+	@page	ajantv2		“libajantv2” Class Library
+
+	This library contains the principal classes and data types that interface with the NTV2 device driver,
+	plus a number of utility classes that deal with NTV2-specific data formats,
+	including…
+
+    @par		The Principal Classes
+
+	- CNTV2DeviceScanner — enumerates attached devices
+	- CNTV2Card — queries and/or controls a device
+	- CNTV2SignalRouter — a collection of signal routes that can be applied to a device
+
+
+
+	@section	ntv2devicefeatures		Device Features API
 
 	The "NTV2Device..." functions describe AJA NTV2 device capabilities. All of the functions accept an \c NTV2DeviceID parameter,
 	which identifies the AJA device model of interest.
 
 	@note	A device need not be installed in or attached to the host to use these functions.
 
-	@par	'CanDo' Functions
+	@par	‘CanDo’ Functions
 
-	These functions have names starting with "NTV2DeviceCanDo..." and return a \c bool value that answers Yes or No for a particular device capability.
+	These functions have names starting with “NTV2DeviceCanDo…” and return a \c bool value that answers Yes or No for a particular device capability.
 	Most of them accept a single \c NTV2DeviceID parameter, like \c NTV2DeviceCanDoAnalogAudio, which answers true if the device is capable of working
 	with analog audio.  A smaller set of functions accept two parameters:  the \c NTV2DeviceID parameter, and a second enumeration parameter, for determining
 	if a device is capable of working with a particular video format (e.g., \c NTV2DeviceCanDoVideoFormat) or frame buffer format (\c NTV2DeviceCanDoFrameBufferFormat), etc.
@@ -25,9 +39,9 @@
 		}
 	@endcode
 
-	@par	'Has' Functions
+	@par	‘Has’ Functions
 
-	These functions are similar to the "Can Do" functions. They also return a \c bool value that answers Yes or No for a particular device capability.
+	These functions are similar to the “Can Do” functions. They also return a \c bool value that answers Yes or No for a particular device capability.
 	For example, you may want to know if a device has bi-directional SDI connectors:
 
 	@code{.cpp}
@@ -38,7 +52,7 @@
 			theDevice.SetSDITransmitEnable (outputChannel, true);
 	@endcode
 
-	@par	'GetNum' Functions
+	@par	‘GetNum’ Functions
 
 	These functions return a count of a particular device feature. For example, to find out which devices have at least one HDMI output:
 
@@ -51,5 +65,4 @@
 				deviceIDsWithHDMIOut.push_back (*it);
 		}
 	@endcode
-
 **/

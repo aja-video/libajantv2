@@ -1,5 +1,9 @@
 /**
-	@page	corvid24		Corvid 24
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvid24		Corvid 24
 
 	This page describes the <b>Corvid 24</b> OEM capture/playout board, which features bypass relays on each SDI
 	connector that can operate under software control or hardware control (using the built-in "watchdog" timer).
@@ -122,5 +126,5 @@
 
 	@par		Additional Topics
 
-	@subpage	aja102953
+	@subsubpage	aja102953
 **/

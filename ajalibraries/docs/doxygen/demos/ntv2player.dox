@@ -1,5 +1,7 @@
 /**
-@page	ntv2player		NTV2Player Demo
+@page	demoapps
+
+@section	ntv2player		NTV2Player Demo
 
 This command-line program plays out a repeating sequence of test patterns and audio tones with realtime timecode burned
 into the video.

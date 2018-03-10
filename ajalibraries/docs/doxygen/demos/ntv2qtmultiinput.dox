@@ -1,18 +1,20 @@
 /**
-@page	ntv2qtmultiinput		NTV2QtMultiInput Demo
+@page	demoapps
 
-This Qt-based GUI demonstration application simultaneously captures and displays four video streams from an AJA 4 or 8 input
-device (e.g., KONA 4, KONA 3G, Io4K, Corvid 44, Corvid 88, Corvid 24, etc.) in a "4-up" display, with or without audio playout
-on the host.
+@section	ntv2qtmultiinput		NTV2QtMultiInput Demo
+
+This <a href="https://doc.qt.io/" target="_qt">Qt</a>-based GUI demonstration application simultaneously captures and displays
+four video streams from an AJA 4 or 8 input device (e.g., KONA 4, KONA 3G, Io4K, Corvid 44, Corvid 88, Corvid 24, etc.) in a
+“4-up” display, with or without audio playout on the host.
 
 @image	html	ntv2qtmultiinput.png
 
-Screenshot of the Qt-based <b>ntv2qtmultiinput</b> application running on MacOS.
+Screenshot of the <a href="https://doc.qt.io/" target="_qt">Qt</a>-based <b>ntv2qtmultiinput</b> application running on MacOS.
 
 It demonstrates...
--	how to use the AJAPreviewWidget, a reusable Qt-based GUI element that displays realtime video that's been grabbed from
-	an NTV2FrameGrabber object;
+-	how to use the AJAPreviewWidget, a reusable <a href="https://doc.qt.io/" target="_qt">Qt</a>-based GUI element that displays
+	realtime video that's been grabbed from an NTV2FrameGrabber object;
 -	how to use the NTV2FrameGrabber class, a QThread that captures a video stream from any NTV2-compatible AJA device,
-	and uses Qt signals to emit captured ARGB video frames;
--	how to play two channels of audio on the host using Qt's QAudioOutput class.
+	and uses <a href="https://doc.qt.io/" target="_qt">Qt</a> signals to emit captured ARGB video frames;
+-	how to play two channels of audio on the host using <a href="https://doc.qt.io/" target="_qt">Qt</a>’s QAudioOutput class.
 **/

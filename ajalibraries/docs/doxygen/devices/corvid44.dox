@@ -1,5 +1,9 @@
 /**
-	@page	corvid44		Corvid 44
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvid44		Corvid 44
 
 	This page describes the <b>Corvid 44</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
 	configured as inputs or outputs.

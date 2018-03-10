@@ -224,6 +224,28 @@ def main ():
     html_folder_path = "NTV2SDK_docs_%s" % (underscore_version)
     client_browser_url = "https://sdksupport.aja.com/docs/" + html_folder_path + "/"
 
+    if args.local == True and platform.node() == "mrbillmp.aja.com":
+        # Local dev builds use the local dev tree's ajalibraries ... not those extracted from the SDK zips...
+        print("Local dev build ... replace ajalibraries/ajabase with dev tree's ajabase folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajabase"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajabase'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajaanc with dev tree's ajaanc folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajaanc"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajaanc'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajacc with dev tree's ajacc folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajacc"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajacc'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajantv2 with dev tree's ajantv2 folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajantv2"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajantv2'], False, "3")
+        shutil.rmtree(os.path.join("ajalibraries","ajantv2","gpuclasses"))
+
+    """
+    Patch in version number, remove NTV2_NUB_CLIENT_SUPPORT...
+    """
     stuff_to_patch =	[	{	'name':		'Versionize Doxy Config File',
     							'files':	'patched_config.doxy',
     							'replace':	{'0.0.0':	display_version}				},

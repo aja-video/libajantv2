@@ -6505,6 +6505,7 @@ typedef enum
 					@brief	Constructs an NTV2BankSelGetSetRegs struct for atomically reading or writing the given bank-selected register.
 					@param[in]	inBankSelect	The bank select register info.
 					@param[in]	inRegInfo		The register info of the register to be read or written.
+					@param[in]	inDoWrite		Specify 'true' to write the register value;  otherwise use 'false'. Defaults to 'false'.
 				**/
 				explicit	NTV2BankSelGetSetRegs (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inRegInfo, const bool inDoWrite = false);
 

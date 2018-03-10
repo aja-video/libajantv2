@@ -1,5 +1,7 @@
 /**
-@page	ntv2enumerateboards		NTV2EnumerateBoards Demo
+@page	demoapps
+
+@section	ntv2enumerateboards		NTV2EnumerateBoards Demo
 
 This simple command-line program dumps information about every AJA device found on the local host.
 

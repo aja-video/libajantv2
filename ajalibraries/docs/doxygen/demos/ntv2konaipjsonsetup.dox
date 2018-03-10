@@ -1,5 +1,7 @@
 /**
-@page   ntv2konaipjsonsetup     NTV2 KonaIP JSON Setup Demo
+@page	demoapps
+
+@section   ntv2konaipjsonsetup     NTV2 JSON Setup Demo
 
 This Qt-based command-line program shows how to configure the network parameters for any of the KONA IP's physical SFP cages from a JSON data file.
 
