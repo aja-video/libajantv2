@@ -20,7 +20,7 @@ enum eMBCmd
     MB_CMD_FETCH_SFP_INFO         = 11
 };
 
-#if 1
+#if 0
 enum eSFP
 {
     SFP_TOP,

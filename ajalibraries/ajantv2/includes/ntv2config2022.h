@@ -181,12 +181,12 @@ public:
     CNTV2Config2022 (CNTV2Card & device);
     ~CNTV2Config2022();
 
-    bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
-    bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        DisableNetworkInterface(eSFP port);
+    bool        SetNetworkConfiguration(eSFP link, const IPVNetConfig & netConfig);
+    bool        SetNetworkConfiguration(eSFP link, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
+    bool        DisableNetworkInterface(eSFP link);
 
-    bool        GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig);
-    bool        GetNetworkConfiguration(eSFP port, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfig);
+    bool        GetNetworkConfiguration(eSFP link, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
 
     bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2022_channel & rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig);
@@ -212,14 +212,14 @@ public:
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
-        @param[in]	port                Specifies SFP connector used.
+        @param[in]	link                Specifies SFP connector used.
         @param[in]	disable             If true, IGMP messages will not be sent to join multicast groups
         @note       When Rx channels are enabled for multicast IP addresses, by default the multicast group is joined. When Rx Channels
                     are disabled, if the channel is the last user of the group, then the subscription to the multicast group will be ended.
                     When IGMP is disabled, the above actions are not performed,
     **/
-    bool        SetIGMPDisable(eSFP port, bool disable);
-    bool        GetIGMPDisable(eSFP port, bool & disabled);
+    bool        SetIGMPDisable(eSFP link, bool disable);
+    bool        GetIGMPDisable(eSFP link, bool & disabled);
 
     bool        SetIGMPVersion(eIGMPVersion_t version);
     bool        GetIGMPVersion(eIGMPVersion_t & version);
@@ -227,10 +227,10 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
+    bool        GetMACAddress(eSFP link, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
-    bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
-    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
+    bool        GetSFPMSAData(eSFP link, SFPMSAData & data);
+    bool        GetLinkStatus(eSFP link, sLinkStatus & linkStatus);
     bool        Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & status);
 
     // If method returns false call this to get details
@@ -246,7 +246,7 @@ private:
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
-    eSFP        GetTxPort(NTV2Channel chan);
+    eSFP        GetTxLink(NTV2Channel chan);
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;

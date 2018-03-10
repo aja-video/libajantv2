@@ -1266,19 +1266,19 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP link, string localIPAddress)
     return true;
 }
 
-bool CNTV2Config2110::GetSFPMSAData(eSFP port, SFPMSAData & data)
+bool CNTV2Config2110::GetSFPMSAData(eSFP link, SFPMSAData & data)
 {
-    return GetSFPInfo(port,data);
+    return GetSFPInfo(link, data);
 }
 
-bool CNTV2Config2110::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+bool CNTV2Config2110::GetLinkStatus(eSFP link, sLinkStatus & linkStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
     uint32_t val2;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
 
-    if (port == SFP_BOTTOM)
+    if (link == SFP_LINK_B)
     {
         linkStatus.linkUp          = (val  & LINK_B_UP) ? true : false;
         linkStatus.SFP_present     = (val2 & SFP_2_NOT_PRESENT) ? false : true;

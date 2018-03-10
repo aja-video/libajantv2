@@ -244,7 +244,7 @@ CNTV2Config2022::~CNTV2Config2022()
     }
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig)
+bool CNTV2Config2022::SetNetworkConfiguration(eSFP link, const IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     struct in_addr addr;
@@ -255,11 +255,11 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP port, const IPVNetConfig & ne
     addr.s_addr = (uint32_t)netConfig.ipc_gateway;
     gateway = inet_ntoa(addr);
 
-    bool rv = SetNetworkConfiguration(port, ip, subnet, gateway);
+    bool rv = SetNetworkConfiguration(link, ip, subnet, gateway);
     return rv;
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2022::SetNetworkConfiguration (eSFP link, string localIPAddress, string netmask, string gateway)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -300,7 +300,7 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
     uint32_t core6;
     uint32_t core2;
 
-    if (port == SFP_TOP)
+    if (link == SFP_LINK_A)
     {
         core6 = (_is_txTop34) ? SAREK_2022_6_TX_CORE_1 : SAREK_2022_6_TX_CORE_0;
         core2 = SAREK_2022_2_TX_CORE_0;
@@ -338,19 +338,19 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP port, string localIPAddress,
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
     }
 
-    bool rv = SetMBNetworkConfiguration (port, localIPAddress, netmask, gateway);
+    bool rv = SetMBNetworkConfiguration (link, localIPAddress, netmask, gateway);
     return rv;
 }
 
-bool  CNTV2Config2022::DisableNetworkInterface(eSFP port)
+bool  CNTV2Config2022::DisableNetworkInterface(eSFP link)
 {
-    return DisableNetworkConfiguration(port);
+    return DisableNetworkConfiguration(link);
 }
 
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
-    GetNetworkConfiguration(port, ip, subnet, gateway);
+    GetNetworkConfiguration(link, ip, subnet, gateway);
 
     netConfig.ipc_ip      = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
     netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
@@ -359,11 +359,11 @@ bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfi
     return true;
 }
 
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP port, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP link, string & localIPAddress, string & subnetMask, string & gateway)
 {
     struct in_addr addr;
 
-    if (port == SFP_TOP)
+    if (link == SFP_LINK_A)
     {
         uint32_t val;
         mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
@@ -413,13 +413,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         linkB = true;
     }
 
-    if (linkA && (GetLinkActive(SFP_TOP) == false))
+    if (linkA && (GetLinkActive(SFP_LINK_A) == false))
     {
         mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
-    if (linkB && (GetLinkActive(SFP_BOTTOM) == false))
+    if (linkB && (GetLinkActive(SFP_LINK_B) == false))
     {
         mIpErrorCode = NTV2IpErrLinkBNotConfigured;
         return false;
@@ -428,13 +428,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     if (_is2022_7)
     {
         // select secondary channel
-        rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
+        rv = SelectRxChannel(channel, SFP_LINK_B, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
         ChannelSemaphoreClear(kReg2022_6_rx_control, baseAddr);
 
-        SetRxMatch(channel,SFP_BOTTOM,0);       // disable while configuring
+        SetRxMatch(channel, SFP_LINK_B, 0);       // disable while configuring
 
         // source ip address
         uint32_t sourceIp = inet_addr(rxConfig.secondarySourceIP.c_str());
@@ -456,7 +456,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         WriteChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, rxConfig.secondaryVlan);
 
         // matching
-        SetRxMatch(channel,SFP_BOTTOM,rxConfig.secondaryRxMatch);
+        SetRxMatch(channel, SFP_LINK_B, rxConfig.secondaryRxMatch);
 
         // enable  register updates
         ChannelSemaphoreSet(kReg2022_6_rx_control, baseAddr);
@@ -469,13 +469,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
             bool enabled = false;
             GetRxChannelEnable(channel,enabled);
             if (rxConfig.secondaryRxMatch & RX_MATCH_2022_SOURCE_IP)
-                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+                SetIGMPGroup(SFP_LINK_B, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
             else
-                SetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
+                SetIGMPGroup(SFP_LINK_B, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
         }
         else
         {
-            UnsetIGMPGroup(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM);
+            UnsetIGMPGroup(SFP_LINK_B, channel, NTV2_VIDEO_STREAM);
         }
 
          SetRxLinkState(channel, linkA, linkB);
@@ -486,13 +486,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     }
 
     // select primary channel
-    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
     ChannelSemaphoreClear(kReg2022_6_rx_control, baseAddr);
 
-    SetRxMatch(channel,SFP_TOP,0);      // disable while configuring
+    SetRxMatch(channel, SFP_LINK_A, 0);      // disable while configuring
 
     // source ip address
     uint32_t sourceIp = inet_addr(rxConfig.primarySourceIP.c_str());
@@ -517,7 +517,7 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
     WriteChannelRegister(kReg2022_6_rx_match_vlan + baseAddr, rxConfig.primaryVlan);
 
     // matching
-    SetRxMatch(channel,SFP_TOP,rxConfig.primaryRxMatch);
+    SetRxMatch(channel, SFP_LINK_A, rxConfig.primaryRxMatch);
 
     // playout delay in 27MHz clocks or 90kHz clocks
     uint32_t delay;
@@ -569,13 +569,13 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
         bool enabled = false;
         GetRxChannelEnable(channel,enabled);
         if (rxConfig.primaryRxMatch & RX_MATCH_2022_SOURCE_IP)
-            SetIGMPGroup(SFP_TOP, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
+            SetIGMPGroup(SFP_LINK_A, channel, NTV2_VIDEO_STREAM, destIp, sourceIp, enabled);
         else
-            SetIGMPGroup(SFP_TOP, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
+            SetIGMPGroup(SFP_LINK_A, channel, NTV2_VIDEO_STREAM, destIp, 0, enabled);
     }
     else
     {
-        UnsetIGMPGroup(SFP_TOP, channel, NTV2_VIDEO_STREAM);
+        UnsetIGMPGroup(SFP_LINK_A, channel, NTV2_VIDEO_STREAM);
     }
 
     return rv;
@@ -593,7 +593,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
+        rv = SelectRxChannel(channel, SFP_LINK_B, baseAddr);
         if (!rv) return false;
 
         // source ip address
@@ -620,7 +620,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
         rxConfig.secondaryVlan = val & 0xffff;
 
         // matching
-        GetRxMatch(channel, SFP_BOTTOM, rxConfig.secondaryRxMatch);
+        GetRxMatch(channel, SFP_LINK_B, rxConfig.secondaryRxMatch);
     }
     else
     {
@@ -629,7 +629,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     }
 
     // select primary channel
-    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     // source ip address
@@ -659,13 +659,11 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     rxConfig.primaryVlan = val & 0xffff;
 
     // matching
-    GetRxMatch(channel, SFP_TOP, rxConfig.primaryRxMatch);
+    GetRxMatch(channel, SFP_LINK_A, rxConfig.primaryRxMatch);
 
     // playout delay in ms
     ReadChannelRegister(kReg2022_6_rx_playout_delay + baseAddr,  &val);
     rxConfig.playoutDelay = (_is2022_2) ? (val >>9)/90 : val/27000;
-
-
 
     return true;
 }
@@ -683,7 +681,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable && linkAEnable)
     {
-        if (GetLinkActive(SFP_TOP) == false)
+        if (GetLinkActive(SFP_LINK_A) == false)
         {
             mIpErrorCode = NTV2IpErrLinkANotConfigured;
             return false;
@@ -692,7 +690,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable && linkBEnable)
     {
-        if (GetLinkActive(SFP_BOTTOM) == false)
+        if (GetLinkActive(SFP_LINK_B) == false)
         {
             mIpErrorCode = NTV2IpErrLinkBNotConfigured;
             return false;
@@ -714,37 +712,37 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     if (linkBEnable)
     {
         // IGMP subscription for secondary channel
-        GetIGMPDisable(SFP_BOTTOM, disableIGMP);
+        GetIGMPDisable(SFP_LINK_B, disableIGMP);
         if (!disableIGMP)
         {
-            EnableIGMPGroup(SFP_BOTTOM,channel,NTV2_VIDEO_STREAM,enable);
+            EnableIGMPGroup(SFP_LINK_B, channel, NTV2_VIDEO_STREAM, enable);
         }
     }
     else
     {
-        EnableIGMPGroup(SFP_BOTTOM,channel,NTV2_VIDEO_STREAM,false);
+        EnableIGMPGroup(SFP_LINK_B, channel, NTV2_VIDEO_STREAM, false);
     }
 
     if (linkAEnable)
     {
         // IGMP subscription for primary channel
-        GetIGMPDisable(SFP_TOP, disableIGMP);
+        GetIGMPDisable(SFP_LINK_A, disableIGMP);
         if (!disableIGMP)
         {
-            EnableIGMPGroup(SFP_TOP,channel,NTV2_VIDEO_STREAM,enable);
+            EnableIGMPGroup(SFP_LINK_A, channel, NTV2_VIDEO_STREAM, enable);
         }
     }
     else
     {
-        EnableIGMPGroup(SFP_TOP,channel,NTV2_VIDEO_STREAM,false);
+        EnableIGMPGroup(SFP_LINK_A, channel, NTV2_VIDEO_STREAM, false);
     }
 
-    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
     if (enable & linkAEnable)
     {
         uint8_t match;
-        GetRxMatch(channel,SFP_TOP,match);
+        GetRxMatch(channel, SFP_LINK_A, match);
         WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, (uint32_t)match);
     }
     else
@@ -753,12 +751,12 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
         WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, 0);
     }
 
-    rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_B, baseAddr);
     if (!rv) return false;
     if (enable & linkBEnable)
     {
         uint8_t match;
-        GetRxMatch(channel,SFP_BOTTOM,match);
+        GetRxMatch(channel, SFP_LINK_B, match);
         WriteChannelRegister(kReg2022_6_rx_match_sel + baseAddr, (uint32_t)match);
     }
     else
@@ -768,7 +766,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // always on
-    rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_A, baseAddr);
     WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x01);
 
     return rv;
@@ -781,7 +779,7 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     enabled = false;
 
     // select primary channel
-    bool rv = SelectRxChannel(channel, SFP_TOP, baseAddr);
+    bool rv = SelectRxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     uint32_t val;
@@ -794,7 +792,7 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     }
 
     // select secondary channel
-    rv = SelectRxChannel(channel, SFP_BOTTOM, baseAddr);
+    rv = SelectRxChannel(channel, SFP_LINK_B, baseAddr);
     if (!rv) return false;
 
     rv = ReadChannelRegister(kReg2022_6_rx_match_sel + baseAddr,&val);
@@ -819,23 +817,22 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     bool        rv;
 
-    if (txConfig.linkAEnable && (GetLinkActive(SFP_TOP) == false))
+    if (txConfig.linkAEnable && (GetLinkActive(SFP_LINK_A) == false))
     {
         mIpErrorCode = NTV2IpErrLinkANotConfigured;
         return false;
     }
 
-    if (txConfig.linkBEnable && (GetLinkActive(SFP_BOTTOM) == false))
+    if (txConfig.linkBEnable && (GetLinkActive(SFP_LINK_B) == false))
     {
         mIpErrorCode = NTV2IpErrLinkBNotConfigured;
         return false;
     }
 
-
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
+        rv = SelectTxChannel(channel, SFP_LINK_B, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
@@ -869,7 +866,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // Get or generate a Mac address if we have 2022-7 enabled.
         if (txConfig.linkBEnable)
         {
-            rv = GetMACAddress(SFP_BOTTOM, channel, NTV2_VIDEO_STREAM, txConfig.secondaryRemoteIP,hi,lo);
+            rv = GetMACAddress(SFP_LINK_B, channel, NTV2_VIDEO_STREAM, txConfig.secondaryRemoteIP,hi,lo);
             if (!rv) return false;
             WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
             WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
@@ -886,7 +883,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
     }
 
     // select primary channel
-    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectTxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     // hold off access while we update channel regs
@@ -918,7 +915,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     if (txConfig.linkAEnable)
     {
-        rv = GetMACAddress(SFP_TOP, channel, NTV2_VIDEO_STREAM, txConfig.primaryRemoteIP,hi,lo);
+        rv = GetMACAddress(SFP_LINK_A, channel, NTV2_VIDEO_STREAM, txConfig.primaryRemoteIP,hi,lo);
         if (!rv) return false;
         WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
         WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
@@ -938,7 +935,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
     if (_is2022_7)
     {
         // select secondary channel
-        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
+        rv = SelectTxChannel(channel, SFP_LINK_B, baseAddr);
         if (!rv) return false;
 
         //get link enables
@@ -967,7 +964,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
         txConfig.linkBEnable = false;
     }
     // Select primary channel
-    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectTxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     // dest ip address
@@ -998,7 +995,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable && linkAEnable)
     {
-        if (GetLinkActive(SFP_TOP) == false)
+        if (GetLinkActive(SFP_LINK_A) == false)
         {
             mIpErrorCode = NTV2IpErrLinkANotConfigured;
             return false;
@@ -1007,7 +1004,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable && linkBEnable)
     {
-        if (GetLinkActive(SFP_BOTTOM) == false)
+        if (GetLinkActive(SFP_LINK_B) == false)
         {
             mIpErrorCode = NTV2IpErrLinkBNotConfigured;
             return false;
@@ -1027,12 +1024,12 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     }
 
     // select primary channel
-    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectTxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     if (!enable)
     {
-        rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
+        rv = SelectTxChannel(channel, SFP_LINK_A, baseAddr);
         if (!rv) return false;
 
         WriteChannelRegister(kReg2022_6_tx_chan_enable    + baseAddr,0x0);   // disables channel
@@ -1045,7 +1042,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable && linkAEnable)
     {
-        if (GetTxPort(channel) == SFP_TOP)
+        if (GetTxLink(channel) == SFP_LINK_A)
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
         }
@@ -1068,7 +1065,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     if (_is2022_7)
     {
         // Select secondary channel
-        rv = SelectTxChannel(channel, SFP_BOTTOM, baseAddr);
+        rv = SelectTxChannel(channel, SFP_LINK_B, baseAddr);
         if (!rv) return false;
 
         // hold off access while we update channel regs
@@ -1096,7 +1093,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
     if (enable)
     {
-        SelectTxChannel(channel, SFP_TOP, baseAddr);
+        SelectTxChannel(channel, SFP_LINK_A, baseAddr);
         WriteChannelRegister(kReg2022_6_tx_chan_enable + baseAddr,0x01);  // enables channel
     }
 
@@ -1111,7 +1108,7 @@ bool CNTV2Config2022::GetTxChannelEnable(const NTV2Channel channel, bool & enabl
 
     enabled = false;
 
-    rv = SelectTxChannel(channel, SFP_TOP, baseAddr);
+    rv = SelectTxChannel(channel, SFP_LINK_A, baseAddr);
     if (!rv) return false;
 
     ReadChannelRegister(kReg2022_6_tx_chan_enable + baseAddr, &val);
@@ -1148,7 +1145,7 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
     if (_numRxChans)
     {
         uint32_t baseAddr;
-        SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        SelectRxChannel(NTV2_CHANNEL1, SFP_LINK_A, baseAddr);
         if (enableChange)
         {
             // reset
@@ -1175,7 +1172,7 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
 
         // reset the tx core
         uint32_t baseAddr;
-        SelectTxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        SelectTxChannel(NTV2_CHANNEL1, SFP_LINK_A, baseAddr);
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x01);
         WriteChannelRegister(kReg2022_6_tx_reset + baseAddr, 0x00);
 
@@ -1236,17 +1233,17 @@ bool  CNTV2Config2022::Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDi
         // network path differential in ms
         uint32_t val;
         uint32_t baseAddr;
-        SelectRxChannel(NTV2_CHANNEL1, SFP_TOP, baseAddr);
+        SelectRxChannel(NTV2_CHANNEL1, SFP_LINK_A, baseAddr);
         ReadChannelRegister(kReg2022_6_rx_network_path_differential + baseAddr, &val);
         rx_networkPathDifferential = val/27000;
     }
     return true;
 }
 
-bool CNTV2Config2022::SetIGMPDisable(eSFP port, bool disable)
+bool CNTV2Config2022::SetIGMPDisable(eSFP link, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
-    if (port == SFP_TOP )
+    if (link == SFP_LINK_A)
     {
         mDevice.WriteRegister(SAREK_REGS + kSarekRegIGMPDisable,val);
     }
@@ -1257,10 +1254,10 @@ bool CNTV2Config2022::SetIGMPDisable(eSFP port, bool disable)
     return true;
 }
 
-bool CNTV2Config2022::GetIGMPDisable(eSFP port, bool & disabled)
+bool CNTV2Config2022::GetIGMPDisable(eSFP link, bool & disabled)
 {
     uint32_t val;
-    if (port == SFP_TOP )
+    if (link == SFP_LINK_A)
     {
         mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable,&val);
     }
@@ -1367,28 +1364,28 @@ bool CNTV2Config2022::GetJ2KDecoderStatus(j2kDecoderStatus & j2kStatus)
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-eSFP  CNTV2Config2022::GetTxPort(NTV2Channel chan)
+eSFP  CNTV2Config2022::GetTxLink(NTV2Channel chan)
 {
     if (!_is_txTop34)
     {
         if ((uint32_t)chan >= _numTx0Chans)
         {
-            return SFP_BOTTOM;
+            return SFP_LINK_B;
         }
         else
         {
-            return SFP_TOP;
+            return SFP_LINK_A;
         }
     }
     else
     {
         if ((uint32_t)chan >= _numTx0Chans)
         {
-            return SFP_TOP;
+            return SFP_LINK_A;
         }
         else
         {
-            return SFP_BOTTOM;
+            return SFP_LINK_B;
         }
     }
 }
@@ -1429,7 +1426,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (link == SFP_BOTTOM)
+    if (link == SFP_LINK_B)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1473,7 +1470,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (link == SFP_BOTTOM)
+    if (link == SFP_LINK_B)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1509,7 +1506,7 @@ void CNTV2Config2022::ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseAd
 }
 
 
-bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
+bool CNTV2Config2022::GetMACAddress(eSFP link, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
 {
     uint32_t destIp = inet_addr(remoteIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
@@ -1538,17 +1535,17 @@ bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         bool rv;
         // is destination on the same subnet?
         IPVNetConfig nc;
-        GetNetworkConfiguration(port,nc);
+        GetNetworkConfiguration(link, nc);
         if ( (destIp & nc.ipc_subnet) != (nc.ipc_ip & nc.ipc_subnet))
         {
             struct in_addr addr;
             addr.s_addr  = NTV2EndianSwap32(nc.ipc_gateway);
             string gateIp = inet_ntoa(addr);
-            rv = GetRemoteMAC(gateIp, port, channel, stream, macAddr);
+            rv = GetRemoteMAC(gateIp, link, channel, stream, macAddr);
         }
         else
         {
-            rv = GetRemoteMAC(remoteIP, port, channel, stream, macAddr);
+            rv = GetRemoteMAC(remoteIP, link, channel, stream, macAddr);
         }
         if (!rv)
         {
@@ -1578,19 +1575,19 @@ bool CNTV2Config2022::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
-bool CNTV2Config2022::GetSFPMSAData(eSFP port, SFPMSAData & data)
+bool CNTV2Config2022::GetSFPMSAData(eSFP link, SFPMSAData & data)
 {
-    return GetSFPInfo(port,data);
+    return GetSFPInfo(link, data);
 }
 
-bool CNTV2Config2022::GetLinkStatus(eSFP port, sLinkStatus & linkStatus)
+bool CNTV2Config2022::GetLinkStatus(eSFP link, sLinkStatus & linkStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
     uint32_t val2;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
 
-    if (port == SFP_BOTTOM)
+    if (link == SFP_LINK_B)
     {
         linkStatus.linkUp          = (val  & LINK_B_UP) ? true : false;
         linkStatus.SFP_present     = (val2 & SFP_2_NOT_PRESENT) ? false : true;
@@ -1612,11 +1609,11 @@ bool CNTV2Config2022:: Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChanne
 {
     uint32_t addr;
 
-    SelectRxChannel(channel,SFP_BOTTOM,addr);
+    SelectRxChannel(channel, SFP_LINK_B, addr);
     ReadChannelRegister(addr + kReg2022_6_rx_sec_recv_pkt_cnt, &chanStatus.secondaryRxPackets);
     ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.secondaryValidRxPackets);
 
-    SelectRxChannel(channel,SFP_TOP,addr);
+    SelectRxChannel(channel, SFP_LINK_A, addr);
     ReadChannelRegister(addr + kReg2022_6_rx_pri_recv_pkt_cnt, &chanStatus.primaryRxPackets);
     ReadChannelRegister(addr + kReg2022_6_rx_link_valid_media_pkt_cnt, &chanStatus.primaryValidRxPackets);
 
