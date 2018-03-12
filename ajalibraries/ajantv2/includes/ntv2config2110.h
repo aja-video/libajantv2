@@ -258,6 +258,9 @@ public:
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
 
+    bool        Set2110_4K_Mode(bool enable);
+    bool        Get2110_4K_Mode(bool & enable);
+
     std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);

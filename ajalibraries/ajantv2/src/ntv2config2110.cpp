@@ -1044,6 +1044,48 @@ bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
     return true;
 }
 
+bool CNTV2Config2110::Set2110_4K_Mode(bool enable)
+{
+    if (!mDevice.IsMBSystemReady())
+    {
+        mIpErrorCode = NTV2IpErrNotReady;
+        return false;
+    }
+
+    bool old_enable = false;
+    Get2110_4K_Mode(old_enable);
+    bool enableChange = (old_enable != enable);
+
+    if (enableChange)
+    {
+        uint32_t reg;
+        reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
+
+        uint32_t val;
+        mDevice.ReadRegister(reg,&val);
+        if (enable)
+            val |= BIT(0);
+        else
+            val &= ~BIT(0);
+
+        mDevice.WriteRegister(reg,val);
+    }
+
+    return true;
+}
+
+bool  CNTV2Config2110::Get2110_4K_Mode(bool & enable)
+{
+    uint32_t reg;
+    reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
+
+    uint32_t val;
+    mDevice.ReadRegister(reg,&val);
+
+    enable = val & 0x01;
+    return true;
+}
+
 bool CNTV2Config2110::SetIGMPDisable(eSFP link, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
