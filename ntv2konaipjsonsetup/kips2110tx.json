@@ -1,6 +1,7 @@
 {
     "protocol" : "2110",
     "PTPMaster":"172.16.0.201",
+    "4KMode":"false",
     "sfps":[
         {
             "designator":"linkA",
