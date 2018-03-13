@@ -196,6 +196,9 @@
 #define kRegRxVideoDecode2              0x09
 #define kRegRxVideoDecode3              0x0a
 #define kRegRxVideoDecode4              0x0b
-
+#define kRegTxVideoDecode1              0x0c
+#define kRegTxVideoDecode2              0x0d
+#define kRegTxVideoDecode3              0x0e
+#define kRegTxVideoDecode4              0x0f
 
 #endif // REGISTERS_2110_H

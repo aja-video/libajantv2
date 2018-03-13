@@ -324,6 +324,7 @@ protected:
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
+    void        SetVideoFormatForRxTx(const NTV2Channel channel, const NTV2VideoFormat format, const bool rx);
     bool		ConfigurePTP(eSFP link, std::string localIPAddress);
 
     bool        GenSDP(NTV2Channel channel, NTV2Stream stream);

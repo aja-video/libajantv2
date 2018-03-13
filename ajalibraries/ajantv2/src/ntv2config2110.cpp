@@ -459,40 +459,10 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2St
 {
     if (stream == NTV2_VIDEO_STREAM)
     {
-        NTV2VideoFormat fmt = rxConfig.videoFormat;
-        NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
-
-        NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(fmt);
-        NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
-        NTV2Standard        std = fd.GetVideoStandard();
-        bool               is2K = fd.Is2KFormat();
-
-        uint32_t val = ( (((uint32_t) fr) << 8) |
-                         (((uint32_t) fg) << 4) |
-                          ((uint32_t) std ) );
-        if (is2K) val += BIT(13);
-
-        // setup PLL
-        switch(channel)
-        {
-        case NTV2_CHANNEL1:
-            mDevice.WriteRegister(kRegRxVideoDecode1 + SAREK_2110_TX_ARBITRATOR, val);
-            break;
-        case NTV2_CHANNEL2:
-            mDevice.WriteRegister(kRegRxVideoDecode2 + SAREK_2110_TX_ARBITRATOR, val);
-            break;
-        case NTV2_CHANNEL3:
-            mDevice.WriteRegister(kRegRxVideoDecode3 + SAREK_2110_TX_ARBITRATOR, val);
-            break;
-        case NTV2_CHANNEL4:
-            mDevice.WriteRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, val);
-            break;
-        default:
-            break;
-        }
+        SetVideoFormatForRxTx(channel, (NTV2VideoFormat) rxConfig.videoFormat, true);
     }
 
-    if (stream == NTV2_AUDIO1_STREAM)
+    else if (stream == NTV2_AUDIO1_STREAM)
     {
         // setup 3190 depacketizer
         uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
@@ -506,6 +476,33 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2St
         // audio channels
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr,0x01);
     }
+}
+
+void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Channel channel, const NTV2VideoFormat format, const bool rx)
+{
+    NTV2FormatDescriptor fd(format, NTV2_FBF_10BIT_YCBCR);
+
+    NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(format);
+    NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+    NTV2Standard        std = fd.GetVideoStandard();
+    bool               is2K = fd.Is2KFormat();
+
+    uint32_t val = ( (((uint32_t) fr) << 8) |
+                     (((uint32_t) fg) << 4) |
+                      ((uint32_t) std ) );
+    if (is2K)
+        val += BIT(13);
+
+    if (NTV2_IS_PSF_VIDEO_FORMAT (format))
+        val += BIT(15);
+
+    uint32_t reg;
+    if (rx)
+        reg = channel - NTV2_CHANNEL1 + kRegRxVideoDecode1;
+    else
+        reg = channel - NTV2_CHANNEL1 + kRegTxVideoDecode1;
+
+    mDevice.WriteRegister(reg + SAREK_2110_TX_ARBITRATOR, val);
 }
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
@@ -552,6 +549,8 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
 
     if (stream == NTV2_VIDEO_STREAM)
     {
+        // PSM fix this, this code is all nonsense, I believe it is suppose to return the NTV2Video format
+#if 0
         // sampling
         mDevice.ReadRegister(kReg4175_depkt_vid_fmt_o + depacketizerBaseAddr,&val);
         val = val & 0x3;
@@ -559,13 +558,13 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
         switch(val)
         {
         case NTV2_CHANNEL1:
-            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
+            mDevice.ReadRegister(kRegRxVideoDecode1 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
         case NTV2_CHANNEL2:
-            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
+            mDevice.ReadRegister(kRegRxVideoDecode2 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
         case NTV2_CHANNEL3:
-            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
+            mDevice.ReadRegister(kRegRxVideoDecode3 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
         case NTV2_CHANNEL4:
             mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
@@ -578,6 +577,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
            bool               is2K = (val & BIT(13));
 
            NTV2FormatDescriptor fd;
+#endif
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {
@@ -651,10 +651,13 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, const
     SetTxPacketizerChannel(channel,stream,baseAddrPacketizer);
 
     if (stream == NTV2_VIDEO_STREAM)
-    {
-        // setup 4175 packetizer
-
+    {        
         NTV2VideoFormat fmt = txConfig.videoFormat;
+
+        // Write the video format into the arbitrator
+        SetVideoFormatForRxTx(channel, fmt, false);
+
+        // setup 4175 packetizer
         bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
         NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
 
