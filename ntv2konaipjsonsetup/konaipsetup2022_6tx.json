@@ -10,9 +10,9 @@
     "transmit":[
         {
             "designator":"channel3",
-            "primaryRemoteIPAddress":"239.0.4.50",
-            "primaryRemotePort":"6010",
-            "primaryLocalPort":"5010",
+            "linkARemoteIPAddress":"239.0.4.50",
+            "linkARemotePort":"6010",
+            "linkALocalPort":"5010",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
@@ -22,9 +22,9 @@
         },
         {
             "designator":"channel4",
-            "primaryRemoteIPAddress":"239.0.4.51",
-            "primaryRemotePort":"6011",
-            "primaryLocalPort":"5011",
+            "linkARemoteIPAddress":"239.0.4.51",
+            "linkARemotePort":"6011",
+            "linkALocalPort":"5011",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",

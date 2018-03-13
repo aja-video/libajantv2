@@ -13,9 +13,9 @@
     "receive":[
         {
             "designator":"channel1",
-            "primaryDestIPAddress":"239.0.4.50",
-            "primaryDestPort":"6010",
-            "primaryFilter":"0x14",
+            "linkADestIPAddress":"239.0.4.50",
+            "linkADestPort":"6010",
+            "linkAFilter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
@@ -25,9 +25,9 @@
         },
         {
             "designator":"channel2",
-            "primaryDestIPAddress":"239.0.4.51",
-            "primaryDestPort":"6011",
-            "primaryFilter":"0x14",
+            "linkADestIPAddress":"239.0.4.51",
+            "linkADestPort":"6011",
+            "linkAFilter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
