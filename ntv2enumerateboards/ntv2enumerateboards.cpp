@@ -9,9 +9,8 @@
 #include "ajatypes.h"
 
 // SDK includes
-#include "ntv2devicescanner.h"
-#include "ntv2utils.h"
 #include "ntv2enumerateboards.h"
+#include "ntv2utils.h"
 
 
 
