@@ -678,16 +678,33 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
                 cout << "DisableRxStream: ok" << endl;
         }
 
-        rxChannelConfig.rxMatch      = receive.mlinkAFilter.toUInt(&ok, 16);
-        rxChannelConfig.sourceIP     = receive.mlinkASrcIPAddress.toStdString();
-        rxChannelConfig.destIP       = receive.mlinkADestIPAddress.toStdString();
-        rxChannelConfig.sourcePort   = receive.mlinkASrcPort.toUInt();
-        rxChannelConfig.destPort     = receive.mlinkADestPort.toUInt();
+        // Right now RX config only has one set for whichever link is active, for now there can
+        // only be one active link
+        if (link == SFP_LINK_A)
+        {
+            rxChannelConfig.rxMatch      = receive.mlinkAFilter.toUInt(&ok, 16);
+            rxChannelConfig.sourceIP     = receive.mlinkASrcIPAddress.toStdString();
+            rxChannelConfig.destIP       = receive.mlinkADestIPAddress.toStdString();
+            rxChannelConfig.sourcePort   = receive.mlinkASrcPort.toUInt();
+            rxChannelConfig.destPort     = receive.mlinkADestPort.toUInt();
+        }
+        else
+        {
+            rxChannelConfig.rxMatch      = receive.mlinkBFilter.toUInt(&ok, 16);
+            rxChannelConfig.sourceIP     = receive.mlinkBSrcIPAddress.toStdString();
+            rxChannelConfig.destIP       = receive.mlinkBDestIPAddress.toStdString();
+            rxChannelConfig.sourcePort   = receive.mlinkBSrcPort.toUInt();
+            rxChannelConfig.destPort     = receive.mlinkBDestPort.toUInt();
+        }
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
         rxChannelConfig.payloadType  = receive.mPayload.toUInt();
-        rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString(), allowedVideoFormatTypes);
-        rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
+
+        if (!receive.mVideoFormat.isEmpty())
+        {
+            rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receive.mVideoFormat.toStdString(), allowedVideoFormatTypes);
+            rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
+        }
 
         if (!receive.mPayloadLen.isEmpty())
             rxChannelConfig.payloadLen = receive.mPayloadLen.toUInt();
