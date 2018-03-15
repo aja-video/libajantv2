@@ -252,8 +252,8 @@ public:
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig);
-    bool        SetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableLinkA, bool enableLinkB = false);
-    bool        GetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool & linkAEnabled, bool & linkBEnabled);
+    bool        SetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
+    bool        GetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
 
     bool        SetPTPMaster(std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
@@ -285,7 +285,7 @@ public:
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
-    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
+    bool        GetLinkStatus(eSFP port, sSFPStatus & sfpStatus);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
