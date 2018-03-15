@@ -39,8 +39,8 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         QJsonObject sfpObject = sfpArray[sfpIndex].toObject();
         SFPStruct sfpStruct;
 
-        sfpStruct.mSFPDesignator = sfpObject["designator"].toString();
-        cout << "SFPDesignator " << sfpStruct.mSFPDesignator.toStdString() << endl;
+        sfpStruct.mSfpDesignator = sfpObject["designator"].toString();
+        cout << "SFPDesignator " << sfpStruct.mSfpDesignator.toStdString() << endl;
 
         sfpStruct.mIPAddress = sfpObject["ipAddress"].toString();
         cout << "IPAddress " << sfpStruct.mIPAddress.toStdString() << endl;
@@ -78,42 +78,42 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mStream.isEmpty())
             cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
 
-        receiveStruct.mlinkASrcPort = receiveChannelObject["linkASrcPort"].toString();
-        if (!receiveStruct.mlinkASrcPort.isEmpty())
-            cout << "LinkASrcPort " << receiveStruct.mlinkASrcPort.toStdString() << endl;
+        receiveStruct.mSfp1SrcPort = receiveChannelObject["sfp1SrcPort"].toString();
+        if (!receiveStruct.mSfp1SrcPort.isEmpty())
+            cout << "SFP1SrcPort " << receiveStruct.mSfp1SrcPort.toStdString() << endl;
 
-        receiveStruct.mlinkASrcIPAddress = receiveChannelObject["linkASrcIPAddress"].toString();
-        if (!receiveStruct.mlinkASrcIPAddress.isEmpty())
-            cout << "LinkASrcIPAddress " << receiveStruct.mlinkASrcIPAddress.toStdString() << endl;
+        receiveStruct.mSfp1SrcIPAddress = receiveChannelObject["sfp1SrcIPAddress"].toString();
+        if (!receiveStruct.mSfp1SrcIPAddress.isEmpty())
+            cout << "SFP1SrcIPAddress " << receiveStruct.mSfp1SrcIPAddress.toStdString() << endl;
 
-        receiveStruct.mlinkADestIPAddress = receiveChannelObject["linkADestIPAddress"].toString();
-            cout << "LinkADestIPAddress " << receiveStruct.mlinkADestIPAddress.toStdString() << endl;
+        receiveStruct.mSfp1DestIPAddress = receiveChannelObject["sfp1DestIPAddress"].toString();
+            cout << "SFP1DestIPAddress " << receiveStruct.mSfp1DestIPAddress.toStdString() << endl;
 
-        receiveStruct.mlinkADestPort = receiveChannelObject["linkADestPort"].toString();
-            cout << "LinkADestPort " << receiveStruct.mlinkADestPort.toStdString() << endl;
+        receiveStruct.mSfp1DestPort = receiveChannelObject["sfp1DestPort"].toString();
+            cout << "SFP1DestPort " << receiveStruct.mSfp1DestPort.toStdString() << endl;
 
-        receiveStruct.mlinkAFilter = receiveChannelObject["linkAFilter"].toString();
-            cout << "LinkAFilter " << receiveStruct.mlinkAFilter.toStdString() << endl;
+        receiveStruct.mSfp1Filter = receiveChannelObject["sfp1Filter"].toString();
+            cout << "SFP1Filter " << receiveStruct.mSfp1Filter.toStdString() << endl;
 
-        receiveStruct.mlinkBSrcPort = receiveChannelObject["linkBSrcPort"].toString();
-        if (!receiveStruct.mlinkBSrcPort.isEmpty())
-            cout << "LinkBSrcPort " << receiveStruct.mlinkBSrcPort.toStdString() << endl;
+        receiveStruct.mSfp2SrcPort = receiveChannelObject["sfp2SrcPort"].toString();
+        if (!receiveStruct.mSfp2SrcPort.isEmpty())
+            cout << "SFP2SrcPort " << receiveStruct.mSfp2SrcPort.toStdString() << endl;
 
-        receiveStruct.mlinkBSrcIPAddress = receiveChannelObject["linkBSrcIPAddress"].toString();
-        if (!receiveStruct.mlinkBSrcIPAddress.isEmpty())
-            cout << "LinkBSrcIAddress " << receiveStruct.mlinkBSrcIPAddress.toStdString() << endl;
+        receiveStruct.mSfp2SrcIPAddress = receiveChannelObject["sfp2SrcIPAddress"].toString();
+        if (!receiveStruct.mSfp2SrcIPAddress.isEmpty())
+            cout << "SFP2SrcIAddress " << receiveStruct.mSfp2SrcIPAddress.toStdString() << endl;
 
-        receiveStruct.mlinkBDestIPAddress = receiveChannelObject["linkBDestIPAddress"].toString();
-        if (!receiveStruct.mlinkBDestIPAddress.isEmpty())
-            cout << "LinkBDestIPAddress " << receiveStruct.mlinkBDestIPAddress.toStdString() << endl;
+        receiveStruct.mSfp2DestIPAddress = receiveChannelObject["sfp2DestIPAddress"].toString();
+        if (!receiveStruct.mSfp2DestIPAddress.isEmpty())
+            cout << "SFP2DestIPAddress " << receiveStruct.mSfp2DestIPAddress.toStdString() << endl;
 
-        receiveStruct.mlinkBDestPort = receiveChannelObject["linkBDestPort"].toString();
-        if (!receiveStruct.mlinkBDestPort.isEmpty())
-            cout << "LinkBDestPort " << receiveStruct.mlinkBDestPort.toStdString() << endl;
+        receiveStruct.mSfp2DestPort = receiveChannelObject["sfp2DestPort"].toString();
+        if (!receiveStruct.mSfp2DestPort.isEmpty())
+            cout << "SFP2DestPort " << receiveStruct.mSfp2DestPort.toStdString() << endl;
 
-        receiveStruct.mlinkBFilter = receiveChannelObject["linkBFilter"].toString();
-        if (!receiveStruct.mlinkBFilter.isEmpty())
-            cout << "LinkBFilter " << receiveStruct.mlinkBFilter.toStdString() << endl;
+        receiveStruct.mSfp2Filter = receiveChannelObject["sfp2Filter"].toString();
+        if (!receiveStruct.mSfp2Filter.isEmpty())
+            cout << "SFP2Filter " << receiveStruct.mSfp2Filter.toStdString() << endl;
 
         QString networkPathDifferential = receiveChannelObject["networkPathDifferential"].toString();
         if (!networkPathDifferential.isEmpty())
@@ -162,13 +162,13 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!receiveStruct.mPktsPerLine.isEmpty())
             cout << "Packets per line " << receiveStruct.mPktsPerLine.toStdString() << endl;
 
-        receiveStruct.mLinkAEnable = receiveChannelObject["linkAEnable"].toString();
-        if (!receiveStruct.mLinkAEnable.isEmpty())
-            cout << "Link A Enable " << receiveStruct.mLinkAEnable.toStdString() << endl;
+        receiveStruct.mSfp1Enable = receiveChannelObject["sfp1Enable"].toString();
+        if (!receiveStruct.mSfp1Enable.isEmpty())
+            cout << "Link A Enable " << receiveStruct.mSfp1Enable.toStdString() << endl;
 
-        receiveStruct.mLinkBEnable = receiveChannelObject["linkBEnable"].toString();
-        if (!receiveStruct.mLinkBEnable.isEmpty())
-            cout << "Link B Enable " << receiveStruct.mLinkBEnable.toStdString() << endl;
+        receiveStruct.mSfp2Enable = receiveChannelObject["sfp2Enable"].toString();
+        if (!receiveStruct.mSfp2Enable.isEmpty())
+            cout << "Link B Enable " << receiveStruct.mSfp2Enable.toStdString() << endl;
 
         receiveStruct.mEnable = receiveChannelObject["enable"].toString();
         cout << "Enable " << receiveStruct.mEnable.toStdString() << endl << endl;
@@ -192,26 +192,26 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mStream.isEmpty())
             cout << "Stream " << transmitStruct.mStream.toStdString() << endl;
 
-        transmitStruct.mlinkALocalPort = transmitChannelObject["linkALocalPort"].toString();
-            cout << "LinkALocalPort " << transmitStruct.mlinkALocalPort.toStdString() << endl;
+        transmitStruct.mSfp1LocalPort = transmitChannelObject["sfp1LocalPort"].toString();
+            cout << "SFP1LocalPort " << transmitStruct.mSfp1LocalPort.toStdString() << endl;
 
-        transmitStruct.mlinkARemoteIPAddress = transmitChannelObject["linkARemoteIPAddress"].toString();
-            cout << "LinkARemoteIPAddress " << transmitStruct.mlinkARemoteIPAddress.toStdString() << endl;
+        transmitStruct.mSfp1RemoteIPAddress = transmitChannelObject["sfp1RemoteIPAddress"].toString();
+            cout << "SFP1RemoteIPAddress " << transmitStruct.mSfp1RemoteIPAddress.toStdString() << endl;
 
-        transmitStruct.mlinkARemotePort = transmitChannelObject["linkARemotePort"].toString();
-            cout << "LinkARemotePort " << transmitStruct.mlinkARemotePort.toStdString() << endl;
+        transmitStruct.mSfp1RemotePort = transmitChannelObject["sfp1RemotePort"].toString();
+            cout << "SFP1RemotePort " << transmitStruct.mSfp1RemotePort.toStdString() << endl;
 
-        transmitStruct.mlinkBLocalPort = transmitChannelObject["linkBLocalPort"].toString();
-        if (!transmitStruct.mlinkBLocalPort.isEmpty())
-            cout << "LinkBLocalPort " << transmitStruct.mlinkBLocalPort.toStdString() << endl;
+        transmitStruct.mSfp2LocalPort = transmitChannelObject["sfp2LocalPort"].toString();
+        if (!transmitStruct.mSfp2LocalPort.isEmpty())
+            cout << "SFP2LocalPort " << transmitStruct.mSfp2LocalPort.toStdString() << endl;
 
-        transmitStruct.mlinkBRemoteIPAddress = transmitChannelObject["linkBRemoteIPAddress"].toString();
-        if (!transmitStruct.mlinkBRemoteIPAddress.isEmpty())
-            cout << "LinkBRemoteIPAddress " << transmitStruct.mlinkBRemoteIPAddress.toStdString() << endl;
+        transmitStruct.mSfp2RemoteIPAddress = transmitChannelObject["sfp2RemoteIPAddress"].toString();
+        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
+            cout << "SFP2RemoteIPAddress " << transmitStruct.mSfp2RemoteIPAddress.toStdString() << endl;
 
-        transmitStruct.mlinkBRemotePort = transmitChannelObject["linkBRemotePort"].toString();
-        if (!transmitStruct.mlinkBRemoteIPAddress.isEmpty())
-            cout << "LinkBRemotePort " << transmitStruct.mlinkBRemotePort.toStdString() << endl;
+        transmitStruct.mSfp2RemotePort = transmitChannelObject["sfp2RemotePort"].toString();
+        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
+            cout << "SFP2RemotePort " << transmitStruct.mSfp2RemotePort.toStdString() << endl;
 
         transmitStruct.mSSRC = transmitChannelObject["ssrc"].toString();
         if (!transmitStruct.mSSRC.isEmpty())
@@ -257,13 +257,13 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         if (!transmitStruct.mAudioPktInterval.isEmpty())
             cout << "Audio Packet Interval " << transmitStruct.mAudioPktInterval.toStdString() << endl;
 
-        transmitStruct.mLinkAEnable = transmitChannelObject["linkAEnable"].toString();
-        if (!transmitStruct.mLinkAEnable.isEmpty())
-            cout << "Link A Enable " << transmitStruct.mLinkAEnable.toStdString() << endl;
+        transmitStruct.mSfp1Enable = transmitChannelObject["sfp1Enable"].toString();
+        if (!transmitStruct.mSfp1Enable.isEmpty())
+            cout << "Link A Enable " << transmitStruct.mSfp1Enable.toStdString() << endl;
 
-        transmitStruct.mLinkBEnable = transmitChannelObject["linkBEnable"].toString();
-        if (!transmitStruct.mLinkBEnable.isEmpty())
-            cout << "Link B Enable " << transmitStruct.mLinkBEnable.toStdString() << endl;
+        transmitStruct.mSfp2Enable = transmitChannelObject["sfp2Enable"].toString();
+        if (!transmitStruct.mSfp2Enable.isEmpty())
+            cout << "Link B Enable " << transmitStruct.mSfp2Enable.toStdString() << endl;
 
         transmitStruct.mEnable = transmitChannelObject["enable"].toString();
         cout << "Enable " << transmitStruct.mEnable.toStdString() << endl << endl;
@@ -407,9 +407,9 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     while (sfpIter.hasNext())
     {
         SFPStruct sfp = sfpIter.next();
-        if ( sfp.mSFPDesignator == "linkA")
+        if ( sfp.mSfpDesignator == "sfp1")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_LINK_A,
+            bool rv = config2022.SetNetworkConfiguration (SFP_1,
                                                           sfp.mIPAddress.toStdString(),
                                                           sfp.mSubnetMask.toStdString(),
                                                           sfp.mGateway.toStdString());
@@ -419,9 +419,9 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
                 return false;
             }
         }
-        else if ( sfp.mSFPDesignator == "linkB")
+        else if ( sfp.mSfpDesignator == "sfp2")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_LINK_B,
+            bool rv = config2022.SetNetworkConfiguration (SFP_2,
                                                           sfp.mIPAddress.toStdString(),
                                                           sfp.mSubnetMask.toStdString(),
                                                           sfp.mGateway.toStdString());
@@ -460,26 +460,26 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 
         if (mEnable2022_7)
         {
-            rxChannelConfig.linkAEnable = true;
-            rxChannelConfig.linkBEnable = true;
+            rxChannelConfig.sfp1Enable = true;
+            rxChannelConfig.sfp2Enable = true;
         }
         else
         {
-            if (!receive.mLinkAEnable.isEmpty())
-                rxChannelConfig.linkAEnable = (getEnable(receive.mLinkAEnable));
-            if (!receive.mLinkBEnable.isEmpty())
-                rxChannelConfig.linkBEnable = (getEnable(receive.mLinkBEnable));
+            if (!receive.mSfp1Enable.isEmpty())
+                rxChannelConfig.sfp1Enable = (getEnable(receive.mSfp1Enable));
+            if (!receive.mSfp2Enable.isEmpty())
+                rxChannelConfig.sfp2Enable = (getEnable(receive.mSfp2Enable));
         }
-        rxChannelConfig.primarySourceIP     = receive.mlinkASrcIPAddress.toStdString();
-        rxChannelConfig.primarySourcePort   = receive.mlinkASrcPort.toUInt();
-        rxChannelConfig.primaryDestIP       = receive.mlinkADestIPAddress.toStdString();
-        rxChannelConfig.primaryDestPort     = receive.mlinkADestPort.toUInt();
-        rxChannelConfig.primaryRxMatch      = receive.mlinkAFilter.toUInt(&ok, 16);
-        rxChannelConfig.secondarySourceIP   = receive.mlinkBSrcIPAddress.toStdString();
-        rxChannelConfig.secondarySourcePort = receive.mlinkBSrcPort.toUInt();
-        rxChannelConfig.secondaryDestIP     = receive.mlinkBDestIPAddress.toStdString();
-        rxChannelConfig.secondaryDestPort   = receive.mlinkBDestPort.toUInt();
-        rxChannelConfig.secondaryRxMatch    = receive.mlinkBFilter.toUInt(&ok, 16);
+        rxChannelConfig.sfp1SourceIP        = receive.mSfp1SrcIPAddress.toStdString();
+        rxChannelConfig.sfp1SourcePort      = receive.mSfp1SrcPort.toUInt();
+        rxChannelConfig.sfp1DestIP          = receive.mSfp1DestIPAddress.toStdString();
+        rxChannelConfig.sfp1DestPort        = receive.mSfp1DestPort.toUInt();
+        rxChannelConfig.sfp1RxMatch         = receive.mSfp1Filter.toUInt(&ok, 16);
+        rxChannelConfig.sfp2SourceIP        = receive.mSfp2SrcIPAddress.toStdString();
+        rxChannelConfig.sfp2SourcePort      = receive.mSfp2SrcPort.toUInt();
+        rxChannelConfig.sfp2DestIP          = receive.mSfp2DestIPAddress.toStdString();
+        rxChannelConfig.sfp2DestPort        = receive.mSfp2DestPort.toUInt();
+        rxChannelConfig.sfp2RxMatch         = receive.mSfp2Filter.toUInt(&ok, 16);
         rxChannelConfig.playoutDelay        = receive.mPlayoutDelay.toUInt();
         rxChannelConfig.ssrc                = receive.mSSRC.toUInt();
 
@@ -509,22 +509,22 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         NTV2Channel channel                 = getChannel(transmit.mChannelDesignator);
         if (mEnable2022_7)
         {
-            txChannelConfig.linkAEnable = true;
-            txChannelConfig.linkBEnable = true;
+            txChannelConfig.sfp1Enable = true;
+            txChannelConfig.sfp2Enable = true;
         }
         else
         {
-            if (!transmit.mLinkAEnable.isEmpty())
-                txChannelConfig.linkAEnable = (getEnable(transmit.mLinkAEnable));
-            if (!transmit.mLinkBEnable.isEmpty())
-                txChannelConfig.linkBEnable = (getEnable(transmit.mLinkBEnable));
+            if (!transmit.mSfp1Enable.isEmpty())
+                txChannelConfig.sfp1Enable = (getEnable(transmit.mSfp1Enable));
+            if (!transmit.mSfp2Enable.isEmpty())
+                txChannelConfig.sfp2Enable = (getEnable(transmit.mSfp2Enable));
         }
-        txChannelConfig.primaryLocalPort    = transmit.mlinkALocalPort.toUInt();
-        txChannelConfig.primaryRemoteIP     = transmit.mlinkARemoteIPAddress.toStdString();
-        txChannelConfig.primaryRemotePort   = transmit.mlinkARemotePort.toUInt();
-        txChannelConfig.secondaryLocalPort  = transmit.mlinkBLocalPort.toUInt();
-        txChannelConfig.secondaryRemoteIP   = transmit.mlinkBRemoteIPAddress.toStdString();
-        txChannelConfig.secondaryRemotePort = transmit.mlinkBRemotePort.toUInt();
+        txChannelConfig.sfp1LocalPort       = transmit.mSfp1LocalPort.toUInt();
+        txChannelConfig.sfp1RemoteIP        = transmit.mSfp1RemoteIPAddress.toStdString();
+        txChannelConfig.sfp1RemotePort      = transmit.mSfp1RemotePort.toUInt();
+        txChannelConfig.sfp2LocalPort       = transmit.mSfp2LocalPort.toUInt();
+        txChannelConfig.sfp2RemoteIP        = transmit.mSfp2RemoteIPAddress.toStdString();
+        txChannelConfig.sfp2RemotePort      = transmit.mSfp2RemotePort.toUInt();
         txChannelConfig.ssrc                = transmit.mSSRC.toUInt();
         txChannelConfig.tos                 = transmit.mTOS.toUInt();
         txChannelConfig.ttl                 = transmit.mTTL.toUInt();
@@ -598,13 +598,13 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     {
         SFPStruct sfp = sfpIter.next();
 
-        if ( sfp.mSFPDesignator == "linkA")
+        if ( sfp.mSfpDesignator == "sfp1")
         {
-            config2110.SetNetworkConfiguration (SFP_LINK_A, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            config2110.SetNetworkConfiguration (SFP_1, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
         }
-        else if ( sfp.mSFPDesignator == "linkB")
+        else if ( sfp.mSfpDesignator == "sfp2")
         {
-            config2110.SetNetworkConfiguration (SFP_LINK_B, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            config2110.SetNetworkConfiguration (SFP_2, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
 
         }
     }
@@ -653,17 +653,17 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             return false;
         }
 
-        // If linkB is on use it otherwise assume we are always dealing with linkA
+        // If sfp2 is on use it otherwise assume we are always dealing with sfp1
         // (RX does not support both at the moment)
-        bool linkBOn = false;
-        if (!receive.mLinkBEnable.isEmpty())
-            linkBOn = getEnable(receive.mLinkBEnable);
+        bool sfp2On = false;
+        if (!receive.mSfp2Enable.isEmpty())
+            sfp2On = getEnable(receive.mSfp2Enable);
 
         eSFP link;
-        if (linkBOn)
-            link = SFP_LINK_B;
+        if (sfp2On)
+            link = SFP_2;
         else
-            link = SFP_LINK_A;
+            link = SFP_1;
 
         bool enable = getEnable(receive.mEnable);
         if (!enable)
@@ -680,21 +680,21 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         // Right now RX config only has one set for whichever link is active, for now there can
         // only be one active link
-        if (link == SFP_LINK_A)
+        if (link == SFP_1)
         {
-            rxChannelConfig.rxMatch      = receive.mlinkAFilter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receive.mlinkASrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receive.mlinkADestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receive.mlinkASrcPort.toUInt();
-            rxChannelConfig.destPort     = receive.mlinkADestPort.toUInt();
+            rxChannelConfig.rxMatch      = receive.mSfp1Filter.toUInt(&ok, 16);
+            rxChannelConfig.sourceIP     = receive.mSfp1SrcIPAddress.toStdString();
+            rxChannelConfig.destIP       = receive.mSfp1DestIPAddress.toStdString();
+            rxChannelConfig.sourcePort   = receive.mSfp1SrcPort.toUInt();
+            rxChannelConfig.destPort     = receive.mSfp1DestPort.toUInt();
         }
         else
         {
-            rxChannelConfig.rxMatch      = receive.mlinkBFilter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receive.mlinkBSrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receive.mlinkBDestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receive.mlinkBSrcPort.toUInt();
-            rxChannelConfig.destPort     = receive.mlinkBDestPort.toUInt();
+            rxChannelConfig.rxMatch      = receive.mSfp2Filter.toUInt(&ok, 16);
+            rxChannelConfig.sourceIP     = receive.mSfp2SrcIPAddress.toStdString();
+            rxChannelConfig.destIP       = receive.mSfp2DestIPAddress.toStdString();
+            rxChannelConfig.sourcePort   = receive.mSfp2SrcPort.toUInt();
+            rxChannelConfig.destPort     = receive.mSfp2DestPort.toUInt();
         }
         rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
         rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
@@ -749,12 +749,12 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         tx_2110Config txChannelConfig;
 
         NTV2Channel channel          = getChannel(transmit.mChannelDesignator);
-        txChannelConfig.localPort[0] = transmit.mlinkALocalPort.toUInt();
-        txChannelConfig.remoteIP[0]  = transmit.mlinkARemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[0]= transmit.mlinkARemotePort.toUInt();
-        txChannelConfig.localPort[1] = transmit.mlinkBLocalPort.toUInt();
-        txChannelConfig.remoteIP[1]  = transmit.mlinkBRemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[1]= transmit.mlinkBRemotePort.toUInt();
+        txChannelConfig.localPort[0] = transmit.mSfp1LocalPort.toUInt();
+        txChannelConfig.remoteIP[0]  = transmit.mSfp1RemoteIPAddress.toStdString();
+        txChannelConfig.remotePort[0]= transmit.mSfp1RemotePort.toUInt();
+        txChannelConfig.localPort[1] = transmit.mSfp2LocalPort.toUInt();
+        txChannelConfig.remoteIP[1]  = transmit.mSfp2RemoteIPAddress.toStdString();
+        txChannelConfig.remotePort[1]= transmit.mSfp2RemotePort.toUInt();
         txChannelConfig.payloadType  = transmit.mPayload.toUInt();
         txChannelConfig.ssrc         = transmit.mSSRC.toUInt();
         txChannelConfig.tos          = transmit.mTOS.toUInt();
@@ -804,7 +804,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
 
         config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mLinkAEnable), getEnable(transmit.mLinkBEnable));
+        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mSfp1Enable), getEnable(transmit.mSfp2Enable));
     }
     return true;
 }
