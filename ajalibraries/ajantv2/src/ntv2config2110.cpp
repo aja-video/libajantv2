@@ -1569,7 +1569,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel, NTV2Stream stream)
 
 bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel, string gmInfo)
 {
-    // TODO - fix this to work with link B
+    // TODO - fix this to work with sfp2
     bool enabledA;
     bool enabledB;
     GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabledA,enabledB);
@@ -1652,7 +1652,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
 bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel, NTV2Stream stream, string gmInfo)
 {
-    // TODO - fix this to work with link B
+    // TODO - fix this to work with sfp2
     bool enabledA;
     bool enabledB;
     GetTxChannelEnable(channel,stream,enabledA,enabledB);
