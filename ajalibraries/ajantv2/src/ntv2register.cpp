@@ -3451,9 +3451,20 @@ bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, ULWord inFrame, RP188
 	(void)	inFrame;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum [inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum [inChannel],	outRP188Data.Low)
-			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum [inChannel],	outRP188Data.High);
+	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.Low)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.High);
+}
+
+
+bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, NTV2_RP188 & outRP188Data)
+{
+	outRP188Data = NTV2_RP188();
+	if (IS_CHANNEL_INVALID (inChannel))
+		return false;
+	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.fLo)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.fHi);
 }
 
 
@@ -3462,9 +3473,21 @@ bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const ULWord inFrame,
 	(void) inFrame;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return		WriteRegister (gChannelToRP188DBBRegisterNum [inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	WriteRegister (gChannelToRP188Bits031RegisterNum [inChannel],	inRP188Data.Low)
-			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum [inChannel],	inRP188Data.High);
+	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.Low)
+			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.High);
+}
+
+
+bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const NTV2_RP188 & inRP188Data)
+{
+	if (IS_CHANNEL_INVALID (inChannel))
+		return false;
+	if (!inRP188Data.IsValid())
+		return false;
+	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.fLo)
+			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.fHi);
 }
 
 
