@@ -2713,7 +2713,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	//bool					b1wireQ4k = (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
 	
 	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
@@ -3090,8 +3090,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	//
 
 	// is 2K frame buffer geometry, includes 4K mode
-	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
+	//bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
+	//NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 
 	// Select primary standard
 	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
@@ -3099,17 +3099,16 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		//mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
-	}
-	else
-	{
-		//mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
-
-		//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
+	//if (b3GbOut)
+	//{
+	//	mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
+	//	mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
+	//}
+	//else
+	//{
+	//	mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
+	//	mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
+	//}
 
 
 	//
