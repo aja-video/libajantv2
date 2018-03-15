@@ -411,6 +411,51 @@ void  CNTV2Config2110::EnableDecapsulatorStream(eSFP link, NTV2Channel channel, 
     mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x01);
 }
 
+void  CNTV2Config2110::ResetPacketizerStream(const NTV2Channel channel, NTV2Stream stream)
+{
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+
+        uint32_t    val;
+        uint32_t    bit;
+
+        switch(channel)
+        {
+            default:
+            case NTV2_CHANNEL1:
+                bit = BIT(16);
+                break;
+            case NTV2_CHANNEL2:
+                bit = BIT(17);
+                break;
+            case NTV2_CHANNEL3:
+                bit = BIT(18);
+                break;
+            case NTV2_CHANNEL4:
+                bit = BIT(19);
+                break;
+        }
+
+        // read/modify/write reset bit for a given channel
+        mDevice.ReadRegister(kRegSarekRxReset + SAREK_REGS, &val);
+
+        // Set reset bit
+        val |= bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+
+        // Wait just a bit
+        #if defined(AJAWindows) || defined(MSWindows)
+            ::Sleep (50);
+        #else
+            usleep (50 * 1000);
+        #endif
+
+        // Unset reset bit
+        val &= ~bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+    }
+}
+
 void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream)
 {
     if (stream == NTV2_VIDEO_STREAM)
@@ -939,6 +984,8 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, const NTV2St
         mIpErrorCode = NTV2IpErrSFP2NotConfigured;
         return false;
     }
+
+    ResetPacketizerStream(channel, stream);
 
     EnableFramerStream(SFP_1, channel, stream, enableSfp1);
     EnableFramerStream(SFP_2, channel, stream, enableSfp2);

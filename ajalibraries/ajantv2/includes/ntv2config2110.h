@@ -319,6 +319,8 @@ protected:
 
     void        SetupDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
 
+    void        ResetPacketizerStream(const NTV2Channel channel, NTV2Stream stream);
+
     void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
