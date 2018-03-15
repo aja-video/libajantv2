@@ -146,7 +146,7 @@ public:
 		@return	The height of the raster, in lines.
 		@param[in]	inVisibleOnly	Specify true to return just the visible height;  otherwise false (the default) to return the full height.
 	**/
-	inline ULWord	GetRasterHeight (const bool inVisibleOnly = false) const		{return inVisibleOnly ? numLines - firstActiveLine : numLines;}
+	inline ULWord	GetRasterHeight (const bool inVisibleOnly = false) const		{return inVisibleOnly ? GetVisibleRasterHeight() : numLines;}
 
 	/**
 		@return		The full height of the raster, in lines (including VANC, if any).

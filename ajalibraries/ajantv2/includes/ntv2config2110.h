@@ -39,11 +39,126 @@
 #define PLL_CONFIG_PTP                  BIT(1)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
 
+#define IP_STRSIZE						32
+
 enum NTV2PacketInterval
 {
     PACKET_INTERVAL_125uS,
     PACKET_INTERVAL_1mS
 };
+
+/**
+    @brief	Structs and enums that define the virtual config data used by services and the Control panel to set and maintain 2110 configuration
+**/
+
+typedef enum
+{
+    kNetworkVData2110      	= 'n210',           // 4CC of network config virtual data
+    kTransmitVData2110     	= 't210',           // 4CC of transmit config virtual data
+    kReceiveVData2110     	= 'r210',           // 4CC of receive config virtual data
+    kMetadataVData2110     	= 'm210',           // 4CC of metadata config virtual data
+} VDataTag2110 ;
+
+
+typedef struct
+{
+    char                    remoteIP[IP_STRSIZE][2];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint16_t                payloadType;
+    uint32_t                ssrc;
+} TxNetworkChVData2110;
+
+typedef struct
+{
+    char                    remoteIP[IP_STRSIZE][2];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint16_t                payloadType;
+    uint32_t                ssrc;
+    uint8_t                 numAudioChannels;
+    uint8_t                 firstAudioChannel;
+    NTV2PacketInterval      audioPacketInterval;
+} TxAudioChVData2110;
+
+typedef struct
+{
+    uint32_t                numVideoStreams;
+    TxNetworkChVData2110    txVideo[1];
+    uint32_t                numAudioStreams;
+    TxAudioChVData2110      txAudio[4];
+} TxChVData2110;
+
+typedef struct
+{
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
+    uint32_t                sourcePort;
+    uint32_t                destPort;
+    uint32_t                rxMatch;
+    uint32_t                ssrc;
+    uint16_t                vlan;
+    uint16_t                payloadType;
+} RxNetworkChVData2110;
+
+typedef struct
+{
+    char                    sourceIP[IP_STRSIZE];
+    char                    destIP[IP_STRSIZE];
+    uint32_t                sourcePort;
+    uint32_t                destPort;
+    uint32_t                rxMatch;
+    uint32_t                ssrc;
+    uint16_t                vlan;
+    uint16_t                payloadType;
+    uint8_t                 numAudioChannels;
+    NTV2PacketInterval      audioPacketInterval;
+} RxAudioChVData2110;
+
+typedef struct
+{
+    uint32_t                numVideoStreams;
+    RxNetworkChVData2110    rxVideo[1];
+    uint32_t                numAudioStreams;
+    RxAudioChVData2110      rxAudio[4];	
+} RxChVData2110;
+
+
+typedef struct
+{
+    char                    ipAddress[IP_STRSIZE];
+    char                    subnetMask[IP_STRSIZE];
+    char                    gateWay[IP_STRSIZE];
+} SFPVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    char                    ptpMasterIP[IP_STRSIZE];
+    uint32_t                numSFPs;
+    SFPVData2110            link[2];
+} NetworkVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numTxChannels;
+    TxChVData2110           txCh[4];
+} TransmitVData2110; 
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numRxChannels;
+    RxChVData2110           rxCh[4];
+} ReceiveVData2110;
+
+typedef struct
+{
+    uint32_t                id;
+} MetadataVData2110;
+
+
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
@@ -137,6 +252,7 @@ public:
     bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
     bool        GetRxStreamConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
     bool        GetRxStreamEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
+	bool        GetRxByteCount( const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
 
     bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
     bool        GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig);

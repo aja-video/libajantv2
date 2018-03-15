@@ -3451,9 +3451,20 @@ bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, ULWord inFrame, RP188
 	(void)	inFrame;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum [inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum [inChannel],	outRP188Data.Low)
-			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum [inChannel],	outRP188Data.High);
+	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.Low)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.High);
+}
+
+
+bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, NTV2_RP188 & outRP188Data)
+{
+	outRP188Data = NTV2_RP188();
+	if (IS_CHANNEL_INVALID (inChannel))
+		return false;
+	return		CNTV2DriverInterface::ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.fLo)
+			&&	CNTV2DriverInterface::ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.fHi);
 }
 
 
@@ -3462,9 +3473,21 @@ bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const ULWord inFrame,
 	(void) inFrame;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return		WriteRegister (gChannelToRP188DBBRegisterNum [inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	WriteRegister (gChannelToRP188Bits031RegisterNum [inChannel],	inRP188Data.Low)
-			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum [inChannel],	inRP188Data.High);
+	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.Low)
+			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.High);
+}
+
+
+bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const NTV2_RP188 & inRP188Data)
+{
+	if (IS_CHANNEL_INVALID (inChannel))
+		return false;
+	if (!inRP188Data.IsValid())
+		return false;
+	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.fLo)
+			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.fHi);
 }
 
 
@@ -8551,7 +8574,7 @@ bool CNTV2Card::GetLTCInputEnable (bool & outIsEnabled)
 bool CNTV2Card::GetLTCOnReference (bool & outLTCIsOnReference)
 {
 	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegFS1ReferenceSelect, &tempVal, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect));
+	bool	retVal	(ReadRegister (kRegFS1ReferenceSelect, &tempVal, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect));
 	if (retVal)
 		outLTCIsOnReference = (tempVal == 1) ? false : true;
 	return retVal;
@@ -9531,7 +9554,7 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 	}
 }
 
-bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9545,12 +9568,15 @@ bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData,
     {
         NTV2VirtualData	virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
         //cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:  " << virtualDataMsg << endl;
+        *outVirtualDataSize = 0;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        if (result)
+            *outVirtualDataSize = virtualDataMsg.mByteCount;
     }
     return result;
 }
 
-bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualData, const size_t inVirtualDataSize)
+bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize)
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -9562,9 +9588,12 @@ bool CNTV2Card::ReadVirtualData (const ULWord inTag, const void* inOutVirtualDat
     else
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
     {
-        NTV2VirtualData	virtualDataMsg	(inTag, inOutVirtualData, inVirtualDataSize, false);
+        NTV2VirtualData	virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
         //cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
+        *outVirtualDataSize = 0;
         result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+        if (result)
+            *outVirtualDataSize = virtualDataMsg.mByteCount;
     }
     return result;
 }

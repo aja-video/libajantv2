@@ -32,7 +32,7 @@
 
 	-	8 subsystems
 	-	16 channels (max.) per subsystem
-	-	First subsystem's buffer memory starts 8MB before end of last frame
+	-	First subsystem's buffer memory starts 8MB from end of memory
 	-	24-bit PCM, 48kHz sample rate, synchronous SDI embedded
 
 	@par	Video Formats

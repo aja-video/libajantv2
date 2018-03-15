@@ -1165,7 +1165,6 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
@@ -1234,8 +1233,6 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
 					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
-				
-				bDSKNeedsInputRef = true;		// genlock to input video
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -1303,8 +1300,6 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
 					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
-				
-				bDSKNeedsInputRef = true;		// genlock to input video
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			
@@ -3099,21 +3094,21 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
 	if (b3GbOut)
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
+		//mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
+		//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
 	}
 	else
 	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
+		//mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
 
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
+		//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
 	}
 
 
@@ -3122,21 +3117,21 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	//
 
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
+//	if (b3GbOut)
+//	{
+//		//mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
+//		//mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
+//	}
 
 
 	//
@@ -3144,42 +3139,42 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	//
 
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bFbLevelA && b3GbOut);
 
 	// 3Ga / 3Gb / Neither
-	if (b3GbOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
-	}
+//	if (b3GbOut || (b2pi && !b4kHfr))
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
+//	}
 
 	//
 	// SDI Out 4
 	//
 	
 	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
+	//mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
+	//mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbOut);
 	
 	// 3Ga / 3Gb / Neither
-	if (b3GbOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
-	}
+//	if (b3GbOut || (b2pi && !b4kHfr))
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
+//	}
+//	else
+//	{
+//		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
+//		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
+//	}
 	
 	
 	

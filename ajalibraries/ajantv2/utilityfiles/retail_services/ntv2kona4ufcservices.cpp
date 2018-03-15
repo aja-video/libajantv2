@@ -411,7 +411,6 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	bool bDSKNeedsInputRef = false;				// Assume we're genlocking to display reference source
 	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
 	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
@@ -496,8 +495,6 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
 					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
-				
-				bDSKNeedsInputRef = true;		// genlock to input video
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -566,8 +563,6 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
 				if (mDSKAudioMode == NTV2_DSKAudioBackground)
 					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
-				
-				bDSKNeedsInputRef = true;		// genlock to input video
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			

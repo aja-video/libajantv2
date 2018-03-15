@@ -27,6 +27,7 @@
 #define SAREK_10G_EMAC_0            (0x180000/4)
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
 #define SAREK_CSREGS                (0x080000/4)
+#define SAREK_ENET_FILTER           (0x109000/4)
 
 /////////////////////////////////////////////////////////////////////
 //

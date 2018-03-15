@@ -56,7 +56,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
             (int)MB_CMD_SET_NET,(int)port,ipaddr.c_str(),netmask.c_str(),gateway.c_str());
 
-    rv = sendMsg(1000);
+    rv = sendMsg(5000);
     if (!rv)
     {
         ReleaseMailbox();
@@ -106,7 +106,7 @@ bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
     sprintf((char*)txBuf,"cmd=%d,port=%d",
             (int)MB_CMD_DISABLE_NET_IF,(int)port);
 
-    rv = sendMsg(1000);
+    rv = sendMsg(5000);
     if (!rv)
     {
         ReleaseMailbox();
@@ -151,7 +151,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
         return true;
 
     sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -191,7 +191,7 @@ bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
         return true;
 
     sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_FETCH_GM_INFO);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -278,7 +278,7 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
             (int)port,
             (int)channel,
             (int)stream);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         return ARP_ERROR;
@@ -335,7 +335,7 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
             remote_IPAddress.c_str(),
             int(port));
 
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         return ARP_ERROR;
@@ -732,7 +732,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
     }
 
     sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -778,7 +778,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
      }
 
      sprintf((char*)txBuf,"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
-     bool rv = sendMsg(1000);
+     bool rv = sendMsg(5000);
      if (!rv)
      {
          mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -832,7 +832,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
          return true;
 
      sprintf((char*)txBuf,"cmd=%d,port=%d",(int)MB_CMD_FETCH_SFP_INFO,(int)port);
-     bool rv = sendMsg(1000);
+     bool rv = sendMsg(5000);
      if (!rv)
      {
          mIpErrorCode = NTV2IpErrNoResponseFromMB;
