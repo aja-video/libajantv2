@@ -16,6 +16,8 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace std;
+
 
 //	Globals
 static bool	gGlobalQuit		(false);	///< @brief	Set this "true" to exit gracefully

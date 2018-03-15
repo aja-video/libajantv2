@@ -14,6 +14,8 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace std;
+
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(2048)

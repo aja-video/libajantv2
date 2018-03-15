@@ -7,7 +7,7 @@
 #ifndef NTV2_ENUMERATE_BOARDS_CLASS
 #define NTV2_ENUMERATE_BOARDS_CLASS
 
-
+#include "ntv2devicescanner.h"
 #include <string>
 
 

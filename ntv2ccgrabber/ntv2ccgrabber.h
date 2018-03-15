@@ -184,7 +184,7 @@ class NTV2CCGrabber
 			@param[in]	inCharacter		Specifies the character to be emitted to the standard output stream.
 			@note	This function only serves to eliminate long whitespace runs.
 		**/
-		virtual void			EmitCharacter (const string & inCharacter);
+		virtual void			EmitCharacter (const std::string & inCharacter);
 
 
 		/**
@@ -263,7 +263,7 @@ class NTV2CCGrabber
 		bool						mDoMultiFormat;		///< @brief	Multi-format enabled?
 		bool						mForceVanc;			///< @brief	Force use of Vanc?
 		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
-		string						mLastChar;			///< @brief	Last character I emitted to cout
+		std::string					mLastChar;			///< @brief	Last character I emitted to cout
 		uint32_t					mCaptureBufferSize;	///< @brief	My capture video buffer size, in bytes
 		ULWord						mErrorTally;		///< @brief	Number of caption detect/decode errors
 		ULWord						mCaptionDataTally;	///< @brief	Number of caption detections

@@ -16,6 +16,8 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace std;
+
 const int kNoSelection      (1000000000);
 
 

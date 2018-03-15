@@ -12,6 +12,8 @@
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 
+using namespace std;
+
 static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
 
 

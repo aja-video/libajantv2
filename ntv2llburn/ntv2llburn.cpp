@@ -10,6 +10,8 @@
 #include "ajabase/system/memory.h"
 #include <iostream>
 
+using namespace std;
+
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 

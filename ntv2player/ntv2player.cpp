@@ -18,6 +18,8 @@
 #include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include "ajaanc/includes/ancillarylist.h"
 
+using namespace std;
+
 #define NTV2_ANCSIZE_MAX	(0x2000)
 /**
 	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
