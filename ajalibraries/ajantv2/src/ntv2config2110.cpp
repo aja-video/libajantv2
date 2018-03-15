@@ -570,7 +570,6 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
             mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
             break;
         }
-
            NTV2FrameRate       fr  = NTV2FrameRate((val & 0xf00) >> 8);
            NTV2FrameGeometry   fg  = NTV2FrameGeometry((val & 0xf0) >> 4);
            NTV2Standard        std = NTV2Standard(val & 0x0f);
