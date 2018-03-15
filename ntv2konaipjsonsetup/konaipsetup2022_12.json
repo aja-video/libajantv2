@@ -1,7 +1,7 @@
 {
     "sfps":[
         {
-            "designator":"linkA",
+            "designator":"sfp1",
             "ipAddress":"172.16.45.10",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255"
@@ -10,9 +10,9 @@
     "transmit":[
         {
             "designator":"channel1",
-            "linkARemoteIPAddress":"239.0.45.15",
-            "linkARemotePort":"6010",
-            "linkALocalPort":"5010",
+            "sfp1RemoteIPAddress":"239.0.45.15",
+            "sfp1RemotePort":"6010",
+            "sfp1LocalPort":"5010",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
@@ -20,9 +20,9 @@
         },
         {
             "designator":"channel2",
-            "linkARemoteIPAddress":"239.0.45.25",
-            "linkARemotePort":"6011",
-            "linkALocalPort":"5011",
+            "sfp1RemoteIPAddress":"239.0.45.25",
+            "sfp1RemotePort":"6011",
+            "sfp1LocalPort":"5011",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",

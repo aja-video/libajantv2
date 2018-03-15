@@ -4,7 +4,7 @@
     "4KMode":"false",
     "sfps":[
         {
-            "designator":"linkA",
+            "designator":"sfp1",
             "ipAddress":"172.16.19.10",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255"
@@ -14,44 +14,44 @@
         {
             "designator":"channel1",
             "stream":"video",
-            "linkASrcIPAddress":"172.16.107.18",
-            "linkADestIPAddress":"239.0.107.32",
-            "linkASrcPort":"5013",
-            "linkADestPort":"6000",
-            "linkAFilter":"0x5e",
-            "linkBSrcIPAddress":"172.16.107.18",
-            "linkBDestIPAddress":"239.0.107.32",
-            "linkBSrcPort":"5013",
-            "linkBDestPort":"6000",
-            "linkBFilter":"0x5e",
+            "sfp1SrcIPAddress":"172.16.107.18",
+            "sfp1DestIPAddress":"239.0.107.32",
+            "sfp1SrcPort":"5013",
+            "sfp1DestPort":"6000",
+            "sfp1Filter":"0x5e",
+            "sfp2SrcIPAddress":"172.16.107.18",
+            "sfp2DestIPAddress":"239.0.107.32",
+            "sfp2SrcPort":"5013",
+            "sfp2DestPort":"6000",
+            "sfp2Filter":"0x5e",
             "vlan":"1",
             "ssrc":"1234",
             "payload":"100",
             "videoFormat":"720p",
-            "linkAEnable":"true",
-            "linkBEnable":"false"
+            "sfp1Enable":"true",
+            "sfp2Enable":"false"
             "enable":"true"
         },
         {
             "designator":"channel1",
             "stream":"audio1",
-            "linkASrcIPAddress":"172.16.107.18",
-            "linkADestIPAddress":"239.0.107.33",
-            "linkASrcPort":"5000",
-            "linkADestPort":"6000",
-            "linkAFilter":"0x5e",
-            "linkBSrcIPAddress":"172.16.107.18",
-            "linkBDestIPAddress":"239.0.107.33",
-            "linkBSrcPort":"5000",
-            "linkBDestPort":"6000",
-            "linkBFilter":"0x5e",
+            "sfp1SrcIPAddress":"172.16.107.18",
+            "sfp1DestIPAddress":"239.0.107.33",
+            "sfp1SrcPort":"5000",
+            "sfp1DestPort":"6000",
+            "sfp1Filter":"0x5e",
+            "sfp2SrcIPAddress":"172.16.107.18",
+            "sfp2DestIPAddress":"239.0.107.33",
+            "sfp2SrcPort":"5000",
+            "sfp2DestPort":"6000",
+            "sfp2Filter":"0x5e",
             "vlan":"1",
             "ssrc":"1234",
             "payload":"101",
             "numAudioChannels":"2",
             "audioPktInterval" :"1000",
-            "linkAEnable":"true",
-            "linkBEnable":"false"
+            "sfp1Enable":"true",
+            "sfp2Enable":"false"
             "enable":"false"
         }
     ]

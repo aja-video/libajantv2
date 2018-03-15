@@ -4,7 +4,7 @@
     "networkPathDifferential":"50",
     "sfps":[
         {
-            "designator":"linkA",
+            "designator":"sfp1",
             "ipAddress":"172.16.0.14",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255"
@@ -13,26 +13,26 @@
     "receive":[
         {
             "designator":"channel1",
-            "linkADestIPAddress":"239.0.4.50",
-            "linkADestPort":"6010",
-            "linkAFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.50",
+            "sfp1DestPort":"6010",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "linkAEnable":"true",
-            "linkBEnable":"false",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
             "enable":"true"
         },
         {
             "designator":"channel2",
-            "linkADestIPAddress":"239.0.4.51",
-            "linkADestPort":"6011",
-            "linkAFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.51",
+            "sfp1DestPort":"6011",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "linkAEnable":"true",
-            "linkBEnable":"false",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
             "enable":"false"
         }
     ]

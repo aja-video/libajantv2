@@ -1,13 +1,13 @@
 {
     "sfps":[
         {
-            "designator":"linkA",
+            "designator":"sfp1",
             "ipAddress":"172.16.19.10",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255",
         },
         {
-            "designator":"linkB",
+            "designator":"sfp2",
             "ipAddress":"172.16.19.11",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255",
@@ -16,42 +16,42 @@
     "receive":[
         {
             "designator":"channel1",
-            "linkADestIPAddress":"239.0.4.16",
-            "linkADestPort":"20016",
-            "linkAFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.16",
+            "sfp1DestPort":"20016",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
-            "linkAEnable":"true",
-            "linkBEnable":"false",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
             "enable":"true"
         },
         {
             "designator":"channel2",
-            "linkADestIPAddress":"239.0.4.17",
-            "linkADestPort":"20017",
-            "linkAFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.17",
+            "sfp1DestPort":"20017",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
-            "linkAEnable":"true",
-            "linkBEnable":"false",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
             "enable":"false"
         },
         {
             "designator":"channel3",
-            "linkBDestIPAddress":"239.0.4.16",
-            "linkBDestPort":"20016",
-            "linkBFilter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.16",
+            "sfp2DestPort":"20016",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "linkAEnable":"false",
-            "linkBEnable":"true",
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
             "enable":"true"
         },
         {
             "designator":"channel4",
-            "linkBDestIPAddress":"239.0.4.17",
-            "linkBDestPort":"20017",
-            "linkBFilter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.17",
+            "sfp2DestPort":"20017",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "linkAEnable":"false",
-            "linkBEnable":"true",
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
             "enable":"false"
         }
     ]
