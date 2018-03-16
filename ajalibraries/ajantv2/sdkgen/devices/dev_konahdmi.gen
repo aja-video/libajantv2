@@ -76,12 +76,20 @@ NTV2_WgtFrameBuffer3
 NTV2_WgtFrameBuffer4
 NTV2_WgtCSC1
 NTV2_WgtCSC2
+NTV2_WgtCSC3
+NTV2_WgtCSC4
+NTV2_WgtCSC5
+NTV2_WgtCSC6
+NTV2_WgtCSC7
+NTV2_WgtCSC8
 NTV2_WgtLUT1
 NTV2_WgtLUT2
 NTV2_WgtLUT3
 NTV2_WgtLUT4
-NTV2_WgtCSC3
-NTV2_WgtCSC4
+NTV2_WgtLUT5
+NTV2_WgtLUT6
+NTV2_WgtLUT7
+NTV2_WgtLUT8
 NTV2_Wgt425Mux1
 NTV2_Wgt425Mux2
 NTV2_Wgt425Mux3
@@ -111,11 +119,11 @@ NTV2DeviceGetNumDMAEngines				2
 NTV2DeviceGetPingLED					BIT(16)
 NTV2DeviceGetUFCVersion					1
 NTV2DeviceGetNumAudioSystems			4
-NTV2DeviceGetNumCSCs					4
+NTV2DeviceGetNumCSCs					8
 NTV2DeviceGetNumFrameStores				4
 NTV2DeviceGetNumHDMIAudioInputChannels	8
 NTV2DeviceGetNumHDMIVideoInputs			4
-NTV2DeviceGetNumLUTs					4
+NTV2DeviceGetNumLUTs					8
 NTV2DeviceGetNumVideoChannels			4
 
 // CanDo's		(see 'cando_canon.gen' for legal values)
