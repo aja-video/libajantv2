@@ -418,7 +418,7 @@ AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillary
 				<b>Receive -- Packet Detection</b>
 				-	Use AJAAncillaryDataFactory::GuessAncillaryDataType to detect the Anc packet type.
 
-	@note		I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
+	@warning	I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
 **/
 class AJAExport AJAAncillaryData

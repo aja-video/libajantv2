@@ -46,7 +46,7 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 					-	call AJAAncillaryList::SetFromSDIAncData for SDI (use \ref ancgumpformat);
 					-	call AJAAncillaryList::SetFromIPAncData for IP/RTP.
 
-	@note		I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
+	@warning	I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
 **/
 class AJAExport AJAAncillaryList
@@ -277,6 +277,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inFormatDesc		Describes the frame buffer's raster and pixel format.
 		@note		It's a good idea to call AJAAncillaryList::SortListByLocation before calling this function.
 		@return		AJA_STATUS_SUCCESS if successful.
+		@bug		Currently ignores each packet's horizontal offset (assumes AJAAncDataHorizOffset_Anywhere).
 	**/
 	virtual AJAStatus						WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const;
 
