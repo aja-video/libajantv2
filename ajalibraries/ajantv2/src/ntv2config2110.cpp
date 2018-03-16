@@ -19,12 +19,12 @@
 #include <math.h>
 #endif
 
-uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1,SAREK_4175_TX_PACKETIZER_2,SAREK_4175_TX_PACKETIZER_3,SAREK_4175_TX_PACKETIZER_4};
+uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4};
 uint32_t CNTV2Config2110::a_packetizers[16] ={SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
                                               SAREK_3190_TX_PACKETIZER_4, SAREK_3190_TX_PACKETIZER_5, SAREK_3190_TX_PACKETIZER_6, SAREK_3190_TX_PACKETIZER_7,
                                               SAREK_3190_TX_PACKETIZER_8, SAREK_3190_TX_PACKETIZER_9, SAREK_3190_TX_PACKETIZER_10,SAREK_3190_TX_PACKETIZER_11,
                                               SAREK_3190_TX_PACKETIZER_12,SAREK_3190_TX_PACKETIZER_13,SAREK_3190_TX_PACKETIZER_14,SAREK_3190_TX_PACKETIZER_15};
-uint32_t CNTV2Config2110::m_packetizers[4] = {SAREK_ANC_TX_PACKETIZER_1, SAREK_ANC_TX_PACKETIZER_2, SAREK_ANC_TX_PACKETIZER_3, SAREK_ANC_TX_PACKETIZER_4};
+uint32_t CNTV2Config2110::m_packetizers[4] = {SAREK_ANC_TX_PACKETIZER_1,  SAREK_ANC_TX_PACKETIZER_2,  SAREK_ANC_TX_PACKETIZER_3,  SAREK_ANC_TX_PACKETIZER_4};
 
 using namespace std;
 
@@ -36,16 +36,16 @@ void tx_2110Config::init()
         remotePort[i]  = 0;
         remoteIP[i].erase();
     }
-    videoFormat    = NTV2_FORMAT_UNKNOWN;
-    videoSamples   = VPIDSampling_YUV_422;
-    payloadLen     = 0;
-    lastPayLoadLen = 0;
-    pktsPerLine    = 0;
-    ttl            = 0x80;
-    tos            = 0x64;
-    ssrc           = 1000;
-    numAudioChannels  = 0;
-    firstAudioChannel = 0;
+    videoFormat         = NTV2_FORMAT_UNKNOWN;
+    videoSamples        = VPIDSampling_YUV_422;
+    payloadLen          = 0;
+    lastPayLoadLen      = 0;
+    pktsPerLine         = 0;
+    ttl                 = 0x80;
+    tos                 = 0x64;
+    ssrc                = 1000;
+    numAudioChannels    = 0;
+    firstAudioChannel   = 0;
     audioPacketInterval = PACKET_INTERVAL_125uS;
 }
 
@@ -56,14 +56,14 @@ bool tx_2110Config::operator != ( const tx_2110Config &other )
 
 bool tx_2110Config::operator == ( const tx_2110Config &other )
 {
-    if ((localPort       == other.localPort)      &&
-        (remotePort      == other.remotePort)     &&
-        (remoteIP        == other.remoteIP)       &&
-        (videoFormat     == other.videoFormat)    &&
-        (videoSamples    == other.videoSamples)   &&
-        (numAudioChannels == other.numAudioChannels) &&
-        (firstAudioChannel == other.firstAudioChannel) &&
-        (audioPacketInterval == other.audioPacketInterval))
+    if ((localPort              == other.localPort)             &&
+        (remotePort             == other.remotePort)            &&
+        (remoteIP               == other.remoteIP)              &&
+        (videoFormat            == other.videoFormat)           &&
+        (videoSamples           == other.videoSamples)          &&
+        (numAudioChannels       == other.numAudioChannels)      &&
+        (firstAudioChannel      == other.firstAudioChannel)     &&
+        (audioPacketInterval    == other.audioPacketInterval))
     {
         return true;
     }
@@ -75,20 +75,20 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
 
 void rx_2110Config::init()
 {
-    rxMatch        = 0;
+    rxMatch             = 0;
     sourceIP.erase();
     destIP.erase();
-    sourcePort     = 0;
-    destPort       = 0;
-    SSRC           = 1000;
-    VLAN           = 1;
-    payloadType    = 0;
-    videoFormat    = NTV2_FORMAT_UNKNOWN;
-    videoSamples   = VPIDSampling_YUV_422;
-    payloadLen     = 0;
-    lastPayloadLen = 0;
-    pktsPerLine    = 0;
-	numAudioChannels  = 2;
+    sourcePort          = 0;
+    destPort            = 0;
+    SSRC                = 1000;
+    VLAN                = 1;
+    payloadType         = 0;
+    videoFormat         = NTV2_FORMAT_UNKNOWN;
+    videoSamples        = VPIDSampling_YUV_422;
+    payloadLen          = 0;
+    lastPayloadLen      = 0;
+    pktsPerLine         = 0;
+    numAudioChannels    = 2;
     audioPacketInterval = PACKET_INTERVAL_1mS;
 }
 
@@ -99,16 +99,16 @@ bool rx_2110Config::operator != ( const rx_2110Config &other )
 
 bool rx_2110Config::operator == ( const rx_2110Config &other )
 {
-    if (    (rxMatch           == other.rxMatch)        &&
-            (sourceIP          == other.sourceIP)       &&
-            (destIP            == other.destIP)         &&
-            (sourcePort        == other.sourcePort)     &&
-            (destPort          == other.destPort)       &&
-            (SSRC              == other.SSRC)           &&
-            (VLAN              == other.VLAN)           &&
-            (videoFormat       == other.videoFormat)    &&
-            (videoSamples      == other.videoSamples)   &&
-            (numAudioChannels == other.numAudioChannels) &&
+    if (    (rxMatch           == other.rxMatch)            &&
+            (sourceIP          == other.sourceIP)           &&
+            (destIP            == other.destIP)             &&
+            (sourcePort        == other.sourcePort)         &&
+            (destPort          == other.destPort)           &&
+            (SSRC              == other.SSRC)               &&
+            (VLAN              == other.VLAN)               &&
+            (videoFormat       == other.videoFormat)        &&
+            (videoSamples      == other.videoSamples)       &&
+            (numAudioChannels == other.numAudioChannels)    &&
             (audioPacketInterval == other.audioPacketInterval))
     {
         return true;
@@ -541,13 +541,43 @@ void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Channel channel, const NTV
     if (NTV2_IS_PSF_VIDEO_FORMAT (format))
         val += BIT(15);
 
-    uint32_t reg;
+    uint32_t reg, reg2;
     if (rx)
+    {
         reg = channel - NTV2_CHANNEL1 + kRegRxVideoDecode1;
+        reg2 = channel - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
+    }
     else
+    {
         reg = channel - NTV2_CHANNEL1 + kRegTxVideoDecode1;
+        reg2 = channel - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+    }
 
+    // Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
     mDevice.WriteRegister(reg + SAREK_2110_TX_ARBITRATOR, val);
+    mDevice.WriteRegister(reg2 + SAREK_REGS2, format);
+
+}
+
+void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Channel channel, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx)
+{
+    uint32_t reg, reg2, value;
+    if (rx)
+    {
+        reg = channel - NTV2_CHANNEL1 + kRegRxVideoDecode1;
+        reg2 = channel - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
+    }
+    else
+    {
+        reg = channel - NTV2_CHANNEL1 + kRegTxVideoDecode1;
+        reg2 = channel - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+    }
+
+    // Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
+    mDevice.ReadRegister(reg + SAREK_2110_TX_ARBITRATOR, &value);
+    hwFormat = value;
+    mDevice.ReadRegister(reg2 + SAREK_REGS2, &value);
+    format = (NTV2VideoFormat)value;
 }
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
@@ -594,34 +624,11 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
 
     if (stream == NTV2_VIDEO_STREAM)
     {
-        // PSM fix this, this code is all nonsense, I believe it is suppose to return the NTV2Video format
-#if 0
-        // sampling
-        mDevice.ReadRegister(kReg4175_depkt_vid_fmt_o + depacketizerBaseAddr,&val);
-        val = val & 0x3;
-        //VPIDSampling vs;
-        switch(val)
-        {
-        case NTV2_CHANNEL1:
-            mDevice.ReadRegister(kRegRxVideoDecode1 + SAREK_2110_TX_ARBITRATOR, &val);
-            break;
-        case NTV2_CHANNEL2:
-            mDevice.ReadRegister(kRegRxVideoDecode2 + SAREK_2110_TX_ARBITRATOR, &val);
-            break;
-        case NTV2_CHANNEL3:
-            mDevice.ReadRegister(kRegRxVideoDecode3 + SAREK_2110_TX_ARBITRATOR, &val);
-            break;
-        case NTV2_CHANNEL4:
-            mDevice.ReadRegister(kRegRxVideoDecode4 + SAREK_2110_TX_ARBITRATOR, &val);
-            break;
-        }
-           NTV2FrameRate       fr  = NTV2FrameRate((val & 0xf00) >> 8);
-           NTV2FrameGeometry   fg  = NTV2FrameGeometry((val & 0xf0) >> 4);
-           NTV2Standard        std = NTV2Standard(val & 0x0f);
-           bool               is2K = (val & BIT(13));
+        NTV2VideoFormat     format;
+        uint32_t            hwFormat;
 
-           NTV2FormatDescriptor fd;
-#endif
+        GetVideoFormatForRxTx(channel, format, hwFormat, true);
+        rxConfig.videoFormat = format;
     }
     else if (stream == NTV2_AUDIO1_STREAM)
     {

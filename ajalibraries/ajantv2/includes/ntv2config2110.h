@@ -136,7 +136,7 @@ typedef struct
     uint32_t                id;
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
-    SFPVData2110            link[2];
+    SFPVData2110            sfp[2];
 } NetworkVData2110;
 
 typedef struct
@@ -327,6 +327,8 @@ protected:
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
     void        SetVideoFormatForRxTx(const NTV2Channel channel, const NTV2VideoFormat format, const bool rx);
+    void        GetVideoFormatForRxTx(const NTV2Channel channel, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
+
     bool		ConfigurePTP(eSFP link, std::string localIPAddress);
 
     bool        GenSDP(NTV2Channel channel, NTV2Stream stream);

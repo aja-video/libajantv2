@@ -201,4 +201,20 @@
 #define kRegTxVideoDecode3              0x0e
 #define kRegTxVideoDecode4              0x0f
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// 2110 Block scratch pad registers
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegRxNtv2VideoDecode1      (S2110_BLOCK_BASE+0)
+#define kRegRxNtv2VideoDecode2      (S2110_BLOCK_BASE+1)
+#define kRegRxNtv2VideoDecode3      (S2110_BLOCK_BASE+2)
+#define kRegRxNtv2VideoDecode4      (S2110_BLOCK_BASE+3)
+#define kRegTxNtv2VideoDecode1      (S2110_BLOCK_BASE+4)
+#define kRegTxNtv2VideoDecode2      (S2110_BLOCK_BASE+5)
+#define kRegTxNtv2VideoDecode3      (S2110_BLOCK_BASE+6)
+#define kRegTxNtv2VideoDecode4      (S2110_BLOCK_BASE+7)
+
 #endif // REGISTERS_2110_H
