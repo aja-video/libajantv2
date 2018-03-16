@@ -14,8 +14,26 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+#if defined(AJA_WINDOWS)
+#include <Windows.h>
+#endif
+
 namespace aja
 {
+
+inline size_t local_min(const size_t& a, const size_t& b)
+{
+#if defined(AJA_WINDOWS)
+    // By including the Windows.h header that brings in the min() macro which prevents us from using std::min()
+    // so implement our own
+    size_t size = b;
+    if (a < b)
+        size = a;
+    return size;
+#else
+    return std::min(a, b);
+#endif
+}
 
 std::string& replace(std::string& str, const std::string& from, const std::string& to)
 {
@@ -157,6 +175,21 @@ std::string to_string(long double val)
 
 bool string_to_wstring(const std::string& str, std::wstring& wstr)
 {
+#if defined(AJA_WINDOWS)
+    const char *tmpPtr = str.c_str();
+    uint32_t codePage = CP_UTF8;
+    uint32_t flags = 0;
+    size_t len = 1 + MultiByteToWideChar(codePage, flags, tmpPtr, (int)str.length(), NULL, 0);
+    std::vector<wchar_t> tmp(len);
+    int retVal = MultiByteToWideChar(codePage, flags, tmpPtr, (int)str.length(), &tmp[0], (int)len);
+    if (retVal == 0)
+        return false;
+    else
+    {
+        wstr.assign(&tmp[0]);
+        return true;
+    }
+#else
     std::mbstate_t state = std::mbstate_t();
     mbrlen(NULL, 0, &state);
     const char *tmpPtr = str.c_str();
@@ -169,10 +202,35 @@ bool string_to_wstring(const std::string& str, std::wstring& wstr)
         wstr.assign(&tmp[0]);
 
     return true;
+#endif
 }
+
+#if 0
+bool string_to_wstring_cpp11(const std::string& str, std::wstring& wstr)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    wstr = converterX.from_bytes(str);
+    return true;
+}
+#endif
 
 bool wstring_to_string(const std::wstring& wstr, std::string& str)
 {
+#if defined(AJA_WINDOWS)
+    const wchar_t *tmpPtr = wstr.c_str();
+    uint32_t codePage = CP_UTF8;
+    uint32_t flags = 0;
+    size_t len = 1 + WideCharToMultiByte(codePage, flags, tmpPtr, (int)wstr.length(), NULL, 0, NULL, NULL);
+    std::vector<char> tmp(len);
+    int retVal = WideCharToMultiByte(codePage, flags, tmpPtr, (int)wstr.length(), &tmp[0], (int)len, NULL, NULL);
+    if (retVal == 0)
+        return false;
+    else
+    {
+        str.assign(&tmp[0]);
+        return true;
+    }
+#else
     std::mbstate_t state = std::mbstate_t();
     mbrlen(NULL, 0, &state);
     const wchar_t *tmpPtr = wstr.c_str();
@@ -185,14 +243,24 @@ bool wstring_to_string(const std::wstring& wstr, std::string& str)
         str.assign(&tmp[0]);
 
     return true;
+#endif
 }
+
+#if 0
+bool wstring_to_string_cpp11(const std::wstring& wstr, std::string& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    str = converterX.to_bytes(wstr);
+    return true;
+}
+#endif
 
 bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
 {
     if(c_str == NULL || c_str_size < 1)
         return false;
 
-    size_t maxSize = std::min(str.size(), c_str_size-1);
+    size_t maxSize = local_min(str.size(), c_str_size-1);
     for(size_t i=0;i<maxSize;++i)
     {
         c_str[i] = str[i];
