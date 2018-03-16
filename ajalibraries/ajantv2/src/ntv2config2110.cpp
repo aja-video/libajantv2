@@ -144,7 +144,7 @@ CNTV2Config2110::~CNTV2Config2110()
 {
 }
 
-bool CNTV2Config2110::SetNetworkConfiguration(eSFP link, const IPVNetConfig & netConfig)
+bool CNTV2Config2110::SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     struct in_addr addr;
@@ -155,11 +155,11 @@ bool CNTV2Config2110::SetNetworkConfiguration(eSFP link, const IPVNetConfig & ne
     addr.s_addr = (uint32_t)netConfig.ipc_gateway;
     gateway = inet_ntoa(addr);
 
-    bool rv = SetNetworkConfiguration(link, ip, subnet, gateway);
+    bool rv = SetNetworkConfiguration(sfp, ip, subnet, gateway);
     return rv;
 }
 
-bool CNTV2Config2110::SetNetworkConfiguration (eSFP link, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2110::SetNetworkConfiguration (eSFP sfp, string localIPAddress, string netmask, string gateway)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -213,26 +213,26 @@ bool CNTV2Config2110::SetNetworkConfiguration (eSFP link, string localIPAddress,
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo2);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi2);
 
-    bool rv = SetMBNetworkConfiguration (link, localIPAddress, netmask, gateway);
+    bool rv = SetMBNetworkConfiguration (sfp, localIPAddress, netmask, gateway);
     if (!rv) return false;
 
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
-        ConfigurePTP(link,localIPAddress);
+        ConfigurePTP(sfp,localIPAddress);
     }
 
     return true;
 }
 
-bool  CNTV2Config2110::DisableNetworkInterface(eSFP link)
+bool  CNTV2Config2110::DisableNetworkInterface(eSFP sfp)
 {
-    return DisableNetworkConfiguration(link);
+    return DisableNetworkConfiguration(sfp);
 }
 
-bool CNTV2Config2110::GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfig)
+bool CNTV2Config2110::GetNetworkConfiguration(eSFP sfp, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
-    GetNetworkConfiguration(link, ip, subnet, gateway);
+    GetNetworkConfiguration(sfp, ip, subnet, gateway);
 
     netConfig.ipc_ip      = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
     netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
@@ -241,11 +241,11 @@ bool CNTV2Config2110::GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfi
     return true;
 }
 
-bool CNTV2Config2110::GetNetworkConfiguration(eSFP link, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2110::GetNetworkConfiguration(eSFP sfp, string & localIPAddress, string & subnetMask, string & gateway)
 {
     struct in_addr addr;
 
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
         uint32_t val;
         mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
@@ -278,9 +278,9 @@ bool CNTV2Config2110::GetNetworkConfiguration(eSFP link, string & localIPAddress
     return true;
 }
 
-bool CNTV2Config2110::DisableRxStream(const eSFP link, const NTV2Channel channel, const NTV2Stream stream)
+bool CNTV2Config2110::DisableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream)
 {
-    if (GetSFPActive(link) == false)
+    if (GetSFPActive(sfp) == false)
     {
         mIpErrorCode = NTV2IpErrSFP1NotConfigured;
         return false;
@@ -288,20 +288,20 @@ bool CNTV2Config2110::DisableRxStream(const eSFP link, const NTV2Channel channel
 
     // disable IGMP subscription
     bool disableIGMP;
-    GetIGMPDisable(link, disableIGMP);
+    GetIGMPDisable(sfp, disableIGMP);
     if (!disableIGMP)
     {
-        EnableIGMPGroup(link, channel, stream, false);
+        EnableIGMPGroup(sfp, channel, stream, false);
     }
 
-    DisableDecapsulatorStream(link, channel, stream);
+    DisableDecapsulatorStream(sfp, channel, stream);
     DisableDepacketizerStream(channel, stream);
     return true;
 }
 
-bool CNTV2Config2110::EnableRxStream(const eSFP link, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
+bool CNTV2Config2110::EnableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
-    if (GetSFPActive(link) == false)
+    if (GetSFPActive(sfp) == false)
     {
         mIpErrorCode = NTV2IpErrSFP1NotConfigured;
         return false;
@@ -318,29 +318,29 @@ bool CNTV2Config2110::EnableRxStream(const eSFP link, const NTV2Channel channel,
     if (ip0 >= 224 && ip0 <= 239)
     {
         // is multicast
-        SetIGMPGroup(link, channel, stream, destIp, srcIp, true);
+        SetIGMPGroup(sfp, channel, stream, destIp, srcIp, true);
     }
     else
     {
-        UnsetIGMPGroup(link, channel, stream);
+        UnsetIGMPGroup(sfp, channel, stream);
     }
 
-    DisableDecapsulatorStream(link, channel, stream);
+    DisableDecapsulatorStream(sfp, channel, stream);
     DisableDepacketizerStream(channel,stream);
 
     ResetDepacketizerStream(channel,stream);
     SetupDepacketizerStream(channel,stream,rxConfig);
-    SetupDecapsulatorStream(link, channel, stream, rxConfig);
+    SetupDecapsulatorStream(sfp, channel, stream, rxConfig);
 
     EnableDepacketizerStream(channel, stream);
-    EnableDecapsulatorStream(link, channel, stream);
+    EnableDecapsulatorStream(sfp, channel, stream);
 
     return true;
 }
 
-void  CNTV2Config2110::SetupDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
+void  CNTV2Config2110::SetupDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
 {
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(link,channel,stream);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp,channel,stream);
 
     // source ip address
     uint32_t sourceIp = inet_addr(rxConfig.sourceIP.c_str());
@@ -397,17 +397,17 @@ void  CNTV2Config2110::EnableDepacketizerStream(NTV2Channel channel, NTV2Stream 
     }
 }
 
-void  CNTV2Config2110::DisableDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream)
+void  CNTV2Config2110::DisableDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream)
 {
     // disable decasulator
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(link,channel,stream);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp,channel,stream);
     mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x00);
 }
 
-void  CNTV2Config2110::EnableDecapsulatorStream(eSFP link, NTV2Channel channel, NTV2Stream stream)
+void  CNTV2Config2110::EnableDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream)
 {
     // enable decasulator
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(link,channel,stream);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp,channel,stream);
     mDevice.WriteRegister(kRegDecap_chan_enable + decapBaseAddr, 0x01);
 }
 
@@ -580,12 +580,12 @@ void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Channel channel, NTV2Video
     format = (NTV2VideoFormat)value;
 }
 
-bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
+bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig)
 {
     uint32_t    val;
 
     // get address,strean
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(link, channel, stream);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, channel, stream);
 
     // source ip address
     mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, &val);
@@ -641,10 +641,10 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP link, const NTV2Chann
     return true;
 }
 
-bool CNTV2Config2110::GetRxStreamEnable(const eSFP link, const NTV2Channel channel, NTV2Stream stream, bool & enabled)
+bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, bool & enabled)
 {
     // get address
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(link, channel, stream);
+    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, channel, stream);
 
     uint32_t val;
     mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr,&val);
@@ -836,10 +836,10 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, const
     return rv;
 }
 
-bool CNTV2Config2110::SetFramerStream(const eSFP link, const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig)
+bool CNTV2Config2110::SetFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig)
 {
     // get frame address
-    uint32_t baseAddrFramer = GetFramerAddress(link, channel,stream);
+    uint32_t baseAddrFramer = GetFramerAddress(sfp, channel,stream);
 
     // select channel
     SelectTxFramerChannel(channel, stream, baseAddrFramer);
@@ -851,7 +851,7 @@ bool CNTV2Config2110::SetFramerStream(const eSFP link, const NTV2Channel channel
     uint32_t val = (txConfig.tos << 8) | txConfig.ttl;
     WriteChannelRegister(kRegFramer_ip_hdr_media + baseAddrFramer, val);
 
-    int index = (int)link;
+    int index = (int)sfp;
     // dest ip address
     uint32_t destIp = inet_addr(txConfig.remoteIP[index].c_str());
     destIp = NTV2EndianSwap32(destIp);
@@ -866,7 +866,7 @@ bool CNTV2Config2110::SetFramerStream(const eSFP link, const NTV2Channel channel
     // MAC address
     uint32_t    hi;
     uint32_t    lo;
-    bool rv = GetMACAddress(link,channel,stream,txConfig.remoteIP[index],hi,lo);
+    bool rv = GetMACAddress(sfp,channel,stream,txConfig.remoteIP[index],hi,lo);
     if (!rv) return false;
     WriteChannelRegister(kRegFramer_dest_mac_lo  + baseAddrFramer,lo);
     WriteChannelRegister(kRegFramer_dest_mac_hi  + baseAddrFramer,hi);
@@ -949,12 +949,12 @@ bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, const
     return true;
 }
 
-void CNTV2Config2110::GetFramerStream(NTV2Channel channel, NTV2Stream stream, eSFP link, tx_2110Config  & txConfig)
+void CNTV2Config2110::GetFramerStream(NTV2Channel channel, NTV2Stream stream, eSFP sfp, tx_2110Config  & txConfig)
 {
-    int index = (int)link;
+    int index = (int)sfp;
 
     // get frame address
-    uint32_t baseAddrFramer = GetFramerAddress(link,channel,stream);
+    uint32_t baseAddrFramer = GetFramerAddress(sfp,channel,stream);
 
     // Select channel
     SelectTxFramerChannel(channel, stream, baseAddrFramer);
@@ -1021,11 +1021,11 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, const NTV2St
     return true;
 }
 
-void CNTV2Config2110::EnableFramerStream(const eSFP link, const NTV2Channel channel, const NTV2Stream stream, bool enable)
+void CNTV2Config2110::EnableFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable)
 {
     // ** Framer
     // get frame address
-    uint32_t baseAddrFramer = GetFramerAddress(link, channel, stream);
+    uint32_t baseAddrFramer = GetFramerAddress(sfp, channel, stream);
 
     // select channel
     SelectTxFramerChannel(channel, stream, baseAddrFramer);
@@ -1036,7 +1036,7 @@ void CNTV2Config2110::EnableFramerStream(const eSFP link, const NTV2Channel chan
     if (enable)
     {
         uint32_t localIp;
-        if (link == SFP_1)
+        if (sfp == SFP_1)
         {
             mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, &localIp);
         }
@@ -1142,10 +1142,10 @@ bool  CNTV2Config2110::Get2110_4K_Mode(bool & enable)
     return true;
 }
 
-bool CNTV2Config2110::SetIGMPDisable(eSFP link, bool disable)
+bool CNTV2Config2110::SetIGMPDisable(eSFP sfp, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
-    if (link == SFP_1 )
+    if (sfp == SFP_1 )
     {
         mDevice.WriteRegister(SAREK_REGS + kSarekRegIGMPDisable,val);
     }
@@ -1156,10 +1156,10 @@ bool CNTV2Config2110::SetIGMPDisable(eSFP link, bool disable)
     return true;
 }
 
-bool CNTV2Config2110::GetIGMPDisable(eSFP link, bool & disabled)
+bool CNTV2Config2110::GetIGMPDisable(eSFP sfp, bool & disabled)
 {
     uint32_t val;
-    if (link == SFP_1 )
+    if (sfp == SFP_1 )
     {
         mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable,&val);
     }
@@ -1205,7 +1205,7 @@ bool CNTV2Config2110::GetIGMPVersion(eIGMPVersion_t & version)
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP link, NTV2Channel channel, NTV2Stream stream)
+uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream)
 {
     uint32_t offset = 0;
 
@@ -1243,7 +1243,7 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP link, NTV2Channel channel,
 			break;
     }
 
-    if (link == SFP_1)
+    if (sfp == SFP_1)
         return SAREK_2110_DECAPSULATOR_0 + offset;
     else
         return SAREK_2110_DECAPSULATOR_1 + offset;
@@ -1268,10 +1268,10 @@ uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Channel channel, NTV2Stream
     return SAREK_4175_RX_DEPACKETIZER_1;
 }
 
-uint32_t CNTV2Config2110::GetFramerAddress(eSFP link, NTV2Channel channel, NTV2Stream stream)
+uint32_t CNTV2Config2110::GetFramerAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream)
 {
 	(void) channel;
-    if (link == SFP_2)
+    if (sfp == SFP_2)
     {
         if (stream == NTV2_VIDEO_STREAM)
             return SAREK_2110_VIDEO_FRAMER_1;
@@ -1322,14 +1322,14 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream str
     return true;
 }
 
-bool  CNTV2Config2110::ConfigurePTP (eSFP link, string localIPAddress)
+bool  CNTV2Config2110::ConfigurePTP (eSFP sfp, string localIPAddress)
 {
     uint32_t macLo;
     uint32_t macHi;
 
     // get primaray mac address
     uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
-    if (link != SFP_1)
+    if (sfp != SFP_1)
     {
         macAddressRegister += 2;
     }
@@ -1364,19 +1364,19 @@ bool  CNTV2Config2110::ConfigurePTP (eSFP link, string localIPAddress)
     return true;
 }
 
-bool CNTV2Config2110::GetSFPMSAData(eSFP link, SFPMSAData & data)
+bool CNTV2Config2110::GetSFPMSAData(eSFP sfp, SFPMSAData & data)
 {
-    return GetSFPInfo(link, data);
+    return GetSFPInfo(sfp, data);
 }
 
-bool CNTV2Config2110::GetLinkStatus(eSFP link, sSFPStatus & sfpStatus)
+bool CNTV2Config2110::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
     uint32_t val2;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
 
-    if (link == SFP_2)
+    if (sfp == SFP_2)
     {
         sfpStatus.linkUp            = (val  & LINK_B_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_2_NOT_PRESENT) ? false : true;
@@ -2142,7 +2142,7 @@ NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
     return rate;
 }
 
-void CNTV2Config2110::SetArbiter(const eSFP link, const NTV2Channel channel, const NTV2Stream stream, bool enable)
+void CNTV2Config2110::SetArbiter(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable)
 {
     uint32_t reg;
     if (stream == NTV2_VIDEO_STREAM)
@@ -2156,7 +2156,7 @@ void CNTV2Config2110::SetArbiter(const eSFP link, const NTV2Channel channel, con
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
 
-    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(link) * 16);
+    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(sfp) * 16);
     if (enable)
         val |= bit;
     else
@@ -2165,7 +2165,7 @@ void CNTV2Config2110::SetArbiter(const eSFP link, const NTV2Channel channel, con
     mDevice.WriteRegister(reg,val);
 }
 
-void CNTV2Config2110::GetArbiter(const eSFP link, NTV2Channel channel, NTV2Stream stream, bool & enable)
+void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Channel channel, NTV2Stream stream, bool & enable)
 {
     uint32_t reg;
     if (stream == NTV2_VIDEO_STREAM)
@@ -2176,6 +2176,6 @@ void CNTV2Config2110::GetArbiter(const eSFP link, NTV2Channel channel, NTV2Strea
     uint32_t val;
     mDevice.ReadRegister(reg,&val);
 
-    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(link) * 16);
+    uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(sfp) * 16);
     enable = (val & bit);
 }

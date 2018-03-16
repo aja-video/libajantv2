@@ -244,7 +244,7 @@ CNTV2Config2022::~CNTV2Config2022()
     }
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration(eSFP link, const IPVNetConfig & netConfig)
+bool CNTV2Config2022::SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     struct in_addr addr;
@@ -255,11 +255,11 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP link, const IPVNetConfig & ne
     addr.s_addr = (uint32_t)netConfig.ipc_gateway;
     gateway = inet_ntoa(addr);
 
-    bool rv = SetNetworkConfiguration(link, ip, subnet, gateway);
+    bool rv = SetNetworkConfiguration(sfp, ip, subnet, gateway);
     return rv;
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration (eSFP link, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2022::SetNetworkConfiguration (eSFP sfp, string localIPAddress, string netmask, string gateway)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -300,7 +300,7 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP link, string localIPAddress,
     uint32_t core6;
     uint32_t core2;
 
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
         core6 = (_is_txTop34) ? SAREK_2022_6_TX_CORE_1 : SAREK_2022_6_TX_CORE_0;
         core2 = SAREK_2022_2_TX_CORE_0;
@@ -338,19 +338,19 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP link, string localIPAddress,
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
     }
 
-    bool rv = SetMBNetworkConfiguration (link, localIPAddress, netmask, gateway);
+    bool rv = SetMBNetworkConfiguration (sfp, localIPAddress, netmask, gateway);
     return rv;
 }
 
-bool  CNTV2Config2022::DisableNetworkInterface(eSFP link)
+bool  CNTV2Config2022::DisableNetworkInterface(eSFP sfp)
 {
-    return DisableNetworkConfiguration(link);
+    return DisableNetworkConfiguration(sfp);
 }
 
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfig)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP sfp, IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
-    GetNetworkConfiguration(link, ip, subnet, gateway);
+    GetNetworkConfiguration(sfp, ip, subnet, gateway);
 
     netConfig.ipc_ip      = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
     netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
@@ -359,11 +359,11 @@ bool CNTV2Config2022::GetNetworkConfiguration(eSFP link, IPVNetConfig & netConfi
     return true;
 }
 
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP link, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(eSFP sfp, string & localIPAddress, string & subnetMask, string & gateway)
 {
     struct in_addr addr;
 
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
         uint32_t val;
         mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
@@ -587,7 +587,7 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
     uint32_t    val;
     bool        rv;
 
-    //get link enables
+    //get sfp enables
     GetRxLinkState(channel,rxConfig.sfp1Enable, rxConfig.sfp2Enable);
 
     if (_is2022_7)
@@ -674,7 +674,7 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
     bool        rv;
     bool        disableIGMP;
 
-    //get link enables
+    //get sfp enables
     bool sfp1Enable;
     bool sfp2Enable;
     GetRxLinkState(channel,sfp1Enable, sfp2Enable);
@@ -938,7 +938,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
         rv = SelectTxChannel(channel, SFP_2, baseAddr);
         if (!rv) return false;
 
-        //get link enables
+        //get sfp enables
         GetTxLinkState(channel,txConfig.sfp1Enable, txConfig.sfp2Enable);
 
         ReadChannelRegister(kReg2022_6_tx_ip_header + baseAddr,&val);
@@ -988,7 +988,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     bool        rv;
     uint32_t    localIp;
 
-    //get link enables
+    //get sfp enables
     bool sfp1Enable;
     bool sfp2Enable;
     GetTxLinkState(channel,sfp1Enable, sfp2Enable);
@@ -1240,10 +1240,10 @@ bool  CNTV2Config2022::Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDi
     return true;
 }
 
-bool CNTV2Config2022::SetIGMPDisable(eSFP link, bool disable)
+bool CNTV2Config2022::SetIGMPDisable(eSFP sfp, bool disable)
 {
     uint32_t val = (disable) ? 1 : 0;
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
         mDevice.WriteRegister(SAREK_REGS + kSarekRegIGMPDisable,val);
     }
@@ -1254,10 +1254,10 @@ bool CNTV2Config2022::SetIGMPDisable(eSFP link, bool disable)
     return true;
 }
 
-bool CNTV2Config2022::GetIGMPDisable(eSFP link, bool & disabled)
+bool CNTV2Config2022::GetIGMPDisable(eSFP sfp, bool & disabled)
 {
     uint32_t val;
-    if (link == SFP_1)
+    if (sfp == SFP_1)
     {
         mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable,&val);
     }
@@ -1391,7 +1391,7 @@ eSFP  CNTV2Config2022::GetTxLink(NTV2Channel chan)
 }
 
 
-bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr)
+bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1426,7 +1426,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (link == SFP_2)
+    if (sfp == SFP_2)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1435,7 +1435,7 @@ bool CNTV2Config2022::SelectRxChannel(NTV2Channel channel, eSFP link, uint32_t &
     return true;
 }
 
-bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t & baseAddr)
+bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr)
 {
     uint32_t iChannel = (uint32_t) channel;
     uint32_t channelIndex = iChannel;
@@ -1470,7 +1470,7 @@ bool CNTV2Config2022::SelectTxChannel(NTV2Channel channel, eSFP link, uint32_t &
         }
     }
 
-    if (link == SFP_2)
+    if (sfp == SFP_2)
         channelIndex |= 0x80000000;
 
     // select channel
@@ -1506,7 +1506,7 @@ void CNTV2Config2022::ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseAd
 }
 
 
-bool CNTV2Config2022::GetMACAddress(eSFP link, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
+bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
 {
     uint32_t destIp = inet_addr(remoteIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
@@ -1535,17 +1535,17 @@ bool CNTV2Config2022::GetMACAddress(eSFP link, NTV2Channel channel, NTV2Stream s
         bool rv;
         // is destination on the same subnet?
         IPVNetConfig nc;
-        GetNetworkConfiguration(link, nc);
+        GetNetworkConfiguration(sfp, nc);
         if ( (destIp & nc.ipc_subnet) != (nc.ipc_ip & nc.ipc_subnet))
         {
             struct in_addr addr;
             addr.s_addr  = NTV2EndianSwap32(nc.ipc_gateway);
             string gateIp = inet_ntoa(addr);
-            rv = GetRemoteMAC(gateIp, link, channel, stream, macAddr);
+            rv = GetRemoteMAC(gateIp, sfp, channel, stream, macAddr);
         }
         else
         {
-            rv = GetRemoteMAC(remoteIP, link, channel, stream, macAddr);
+            rv = GetRemoteMAC(remoteIP, sfp, channel, stream, macAddr);
         }
         if (!rv)
         {
@@ -1575,19 +1575,19 @@ bool CNTV2Config2022::GetMACAddress(eSFP link, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
-bool CNTV2Config2022::GetSFPMSAData(eSFP link, SFPMSAData & data)
+bool CNTV2Config2022::GetSFPMSAData(eSFP sfp, SFPMSAData & data)
 {
-    return GetSFPInfo(link, data);
+    return GetSFPInfo(sfp, data);
 }
 
-bool CNTV2Config2022::GetLinkStatus(eSFP link, sSFPStatus & sfpStatus)
+bool CNTV2Config2022::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
     uint32_t val2;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
 
-    if (link == SFP_2)
+    if (sfp == SFP_2)
     {
         sfpStatus.linkUp            = (val  & LINK_B_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_2_NOT_PRESENT) ? false : true;
