@@ -20,6 +20,7 @@ enum eMBCmd
     MB_CMD_FETCH_SFP_INFO         = 11
 };
 
+#if 0
 enum eSFP
 {
     SFP_TOP,
@@ -29,8 +30,18 @@ enum eSFP
     SFP_MAX_NUM_SFPS,
     SFP_INVALID		= SFP_MAX_NUM_SFPS
 };
+#else
+enum eSFP
+{
+    SFP_1,
+    SFP_2,
+    SFP_MAX_NUM_SFPS,
+    SFP_INVALID		= SFP_MAX_NUM_SFPS
+};
 
-#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_TOP)  &&  ((__sfp__) < SFP_INVALID))
+#endif
+
+#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_1)  &&  ((__sfp__) < SFP_INVALID))
 
 enum eArpState
 {
@@ -58,7 +69,7 @@ typedef struct
     uint8_t data[64];
 } SFPMSAData;
 
-struct sLinkStatus
+struct sSFPStatus
 {
     bool SFP_present;
     bool SFP_rx_los;    // loss of signal
@@ -112,10 +123,10 @@ protected:
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
     void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
 
-    bool SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
-    bool SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+    bool SetTxLinkState(NTV2Channel channel, bool sfp1Enable,   bool sfp2Enable);
+    bool GetTxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable);
+    bool SetRxLinkState(NTV2Channel channel, bool sfp1Enable,   bool sfp2Enable);
+    bool GetRxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable);
 
     bool SetDualLinkMode(bool enable);
     bool GetDualLinkMode(bool & enable);
@@ -123,9 +134,9 @@ protected:
     bool SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
     bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
 
-    bool SetLinkActive(eSFP Link);
-    bool SetLinkInactive(eSFP Link);
-    bool GetLinkActive(eSFP link);
+    bool SetSFPActive(eSFP sfp);
+    bool SetSFPInactive(eSFP sfp);
+    bool GetSFPActive(eSFP sfp);
 
     bool SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt);
     bool GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt);

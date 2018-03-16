@@ -85,7 +85,7 @@
 #define TS_BLOCK_BASE               0
 #define IGMP_BLOCK_BASE             100
 #define ENCODER_BLOCK_BASE          200
-#define UNUSED_BLOCK_BASE           300
+#define S2110_BLOCK_BASE            300
 
 #define kRegSarekMBSeqNum           0
 #define kRegSarekActProgramNum      1
