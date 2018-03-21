@@ -67,7 +67,7 @@ typedef struct
     uint32_t                remotePort[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
-} TxNetworkChVData2110;
+} TxVideoChVData2110;
 
 typedef struct
 {
@@ -84,30 +84,32 @@ typedef struct
 typedef struct
 {
     uint32_t                numVideoStreams;
-    TxNetworkChVData2110    txVideo[1];
+    TxVideoChVData2110      txVideo[1];
     uint32_t                numAudioStreams;
     TxAudioChVData2110      txAudio[4];
 } TxChVData2110;
 
 typedef struct
 {
-    char                    sourceIP[IP_STRSIZE];
-    char                    destIP[IP_STRSIZE];
-    uint32_t                sourcePort;
-    uint32_t                destPort;
-    uint32_t                rxMatch;
+    char                    sourceIP[IP_STRSIZE][2];
+    char                    destIP[IP_STRSIZE][2];
+    uint32_t                sourcePort[2];
+    uint32_t                destPort[2];
+    uint32_t                rxMatch[2];
+    uint32_t                enable[2];
     uint32_t                ssrc;
     uint16_t                vlan;
     uint16_t                payloadType;
-} RxNetworkChVData2110;
+} RxVideoChVData2110;
 
 typedef struct
 {
-    char                    sourceIP[IP_STRSIZE];
-    char                    destIP[IP_STRSIZE];
-    uint32_t                sourcePort;
-    uint32_t                destPort;
-    uint32_t                rxMatch;
+    char                    sourceIP[IP_STRSIZE][2];
+    char                    destIP[IP_STRSIZE][2];
+    uint32_t                sourcePort[2];
+    uint32_t                destPort[2];
+    uint32_t                rxMatch[2];
+    uint32_t                enable[2];
     uint32_t                ssrc;
     uint16_t                vlan;
     uint16_t                payloadType;
@@ -118,7 +120,7 @@ typedef struct
 typedef struct
 {
     uint32_t                numVideoStreams;
-    RxNetworkChVData2110    rxVideo[1];
+    RxVideoChVData2110      rxVideo[1];
     uint32_t                numAudioStreams;
     RxAudioChVData2110      rxAudio[4];	
 } RxChVData2110;
