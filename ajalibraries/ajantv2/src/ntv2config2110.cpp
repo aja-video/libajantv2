@@ -694,6 +694,8 @@ bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, const
         return false;
     }
 
+    ResetPacketizerStream(channel, stream);
+
     SetFramerStream(SFP_1, channel, stream, txConfig);
     SetFramerStream(SFP_2, channel, stream, txConfig);
 
@@ -991,8 +993,6 @@ bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, const NTV2St
         mIpErrorCode = NTV2IpErrSFP2NotConfigured;
         return false;
     }
-
-    ResetPacketizerStream(channel, stream);
 
     EnableFramerStream(SFP_1, channel, stream, enableSfp1);
     EnableFramerStream(SFP_2, channel, stream, enableSfp2);
