@@ -65,6 +65,7 @@ typedef struct
     char                    remoteIP[IP_STRSIZE][2];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
+    uint32_t                enable[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
 } TxVideoChVData2110;
@@ -74,6 +75,7 @@ typedef struct
     char                    remoteIP[IP_STRSIZE][2];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
+    uint32_t                enable[2];
     uint16_t                payloadType;
     uint32_t                ssrc;
     uint8_t                 numAudioChannels;
