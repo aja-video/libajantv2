@@ -22,7 +22,9 @@
 #elif defined(__clang__)
     // Note that the __clang__ test needs to go before the __GNUC__ test since it also defines __GNUC__
     #if __cplusplus >= 201103L
-        #define AJA_BASE_USECPP_11  1
+		#if !defined(AJA_MAC)
+			#define AJA_BASE_USECPP_11  1
+		#endif
     #endif
 #elif defined(__GNUC__)
     // GCC < 5 says it supports C++11 but does not support "Standard code conversion facets"
