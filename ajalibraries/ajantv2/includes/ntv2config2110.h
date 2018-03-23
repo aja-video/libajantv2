@@ -62,7 +62,7 @@ typedef enum
 
 typedef struct
 {
-    char                    remoteIP[IP_STRSIZE][2];
+    char                    remoteIP[2][IP_STRSIZE];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint32_t                enable[2];
@@ -72,7 +72,7 @@ typedef struct
 
 typedef struct
 {
-    char                    remoteIP[IP_STRSIZE][2];
+    char                    remoteIP[2][IP_STRSIZE];
     uint32_t                localPort[2];
     uint32_t                remotePort[2];
     uint32_t                enable[2];
@@ -93,8 +93,8 @@ typedef struct
 
 typedef struct
 {
-    char                    sourceIP[IP_STRSIZE][2];
-    char                    destIP[IP_STRSIZE][2];
+    char                    sourceIP[2][IP_STRSIZE];
+    char                    destIP[2][IP_STRSIZE];
     uint32_t                sourcePort[2];
     uint32_t                destPort[2];
     uint32_t                rxMatch[2];
@@ -106,8 +106,8 @@ typedef struct
 
 typedef struct
 {
-    char                    sourceIP[IP_STRSIZE][2];
-    char                    destIP[IP_STRSIZE][2];
+    char                    sourceIP[2][IP_STRSIZE];
+    char                    destIP[2][IP_STRSIZE];
     uint32_t                sourcePort[2];
     uint32_t                destPort[2];
     uint32_t                rxMatch[2];
