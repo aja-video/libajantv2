@@ -21,19 +21,19 @@
 using namespace std;
 void tx_2022_channel::init()
 {
-    sfp1Enable         = true;
-    sfp2Enable         = false;
+    sfp1Enable          = true;
+    sfp2Enable          = false;
 
     sfp1RemoteIP.erase();
-    sfp1LocalPort    = 0;
-    sfp1RemotePort   = 0;
+    sfp1LocalPort       = 0;
+    sfp1RemotePort      = 0;
 
     sfp2RemoteIP.erase();
-    sfp2LocalPort  = 0;
-    sfp2RemotePort = 0;
+    sfp2LocalPort       = 0;
+    sfp2RemotePort      = 0;
 
     tos                 = 0x64;
-    ttl                 = 0x80;
+    ttl                 = 0x40;
     ssrc                = 0;
 }
 
@@ -195,12 +195,11 @@ bool j2kDecoderConfig::operator == ( const j2kDecoderConfig &other )
 void j2kDecoderStatus::init()
 {
     numAvailablePrograms = 0;
-    numAvailableAudios       = 0;
+    numAvailableAudios = 0;
     availableProgramNumbers.clear();
     availableProgramPIDs.clear();
     availableAudioPIDs.clear();
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////
 //
