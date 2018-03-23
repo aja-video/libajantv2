@@ -51,6 +51,9 @@ bool CKonaIpJsonSetup::readJson(const QJsonObject &json)
         sfpStruct.mGateway = sfpObject["gateway"].toString();
         cout << "Gateway " << sfpStruct.mGateway.toStdString() << endl;
 
+        sfpStruct.mEnable = sfpObject["enable"].toString();
+        cout << "Enable " << sfpStruct.mEnable.toStdString() << endl;
+
         QString enable2022_7 = sfpObject["enable2022_7"].toString();
         if (!enable2022_7.isEmpty())
         {
@@ -407,30 +410,57 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     while (sfpIter.hasNext())
     {
         SFPStruct sfp = sfpIter.next();
+
         if ( sfp.mSfpDesignator == "sfp1")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_1,
-                                                          sfp.mIPAddress.toStdString(),
-                                                          sfp.mSubnetMask.toStdString(),
-                                                          sfp.mGateway.toStdString());
-            if (!rv)
+            bool enable;
+            if (sfp.mEnable.isEmpty())
+                enable = true;
+            else
+                enable = getEnable(sfp.mEnable);
+
+            if (enable)
             {
-                cerr << "Error: " << config2022.getLastError() << endl;
-                return false;
+                bool rv = config2022.SetNetworkConfiguration (SFP_1,
+                                                              sfp.mIPAddress.toStdString(),
+                                                              sfp.mSubnetMask.toStdString(),
+                                                              sfp.mGateway.toStdString());
+                if (!rv)
+                {
+                    cerr << "Error: " << config2022.getLastError() << endl;
+                    return false;
+                }
+            }
+            else
+            {
+                config2022.DisableNetworkInterface(SFP_1);
             }
         }
         else if ( sfp.mSfpDesignator == "sfp2")
         {
-            bool rv = config2022.SetNetworkConfiguration (SFP_2,
-                                                          sfp.mIPAddress.toStdString(),
-                                                          sfp.mSubnetMask.toStdString(),
-                                                          sfp.mGateway.toStdString());
-            if (!rv)
+            bool enable;
+            if (sfp.mEnable.isEmpty())
+                enable = true;
+            else
+                enable = getEnable(sfp.mEnable);
+
+            if (enable)
             {
-                cerr << "Error: " << config2022.getLastError() << endl;
-                return false;
-        	}
-    	}
+                bool rv = config2022.SetNetworkConfiguration (SFP_2,
+                                                              sfp.mIPAddress.toStdString(),
+                                                              sfp.mSubnetMask.toStdString(),
+                                                              sfp.mGateway.toStdString());
+                if (!rv)
+                {
+                    cerr << "Error: " << config2022.getLastError() << endl;
+                    return false;
+                }
+            }
+            else
+            {
+                config2022.DisableNetworkInterface(SFP_2);
+            }
+        }
     }
 
     uint32_t val;
@@ -600,12 +630,53 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         if ( sfp.mSfpDesignator == "sfp1")
         {
-            config2110.SetNetworkConfiguration (SFP_1, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool enable;
+            if (sfp.mEnable.isEmpty())
+                enable = true;
+            else
+                enable = getEnable(sfp.mEnable);
+
+            if (enable)
+            {
+                bool rv = config2110.SetNetworkConfiguration (SFP_1,
+                                                              sfp.mIPAddress.toStdString(),
+                                                              sfp.mSubnetMask.toStdString(),
+                                                              sfp.mGateway.toStdString());
+                if (!rv)
+                {
+                    cerr << "Error: " << config2110.getLastError() << endl;
+                    return false;
+                }
+            }
+            else
+            {
+                config2110.DisableNetworkInterface(SFP_1);
+            }
         }
         else if ( sfp.mSfpDesignator == "sfp2")
         {
-            config2110.SetNetworkConfiguration (SFP_2, sfp.mIPAddress.toStdString(), sfp.mSubnetMask.toStdString());
+            bool enable;
+            if (sfp.mEnable.isEmpty())
+                enable = true;
+            else
+                enable = getEnable(sfp.mEnable);
 
+            if (enable)
+            {
+                bool rv = config2110.SetNetworkConfiguration (SFP_2,
+                                                              sfp.mIPAddress.toStdString(),
+                                                              sfp.mSubnetMask.toStdString(),
+                                                              sfp.mGateway.toStdString());
+                if (!rv)
+                {
+                    cerr << "Error: " << config2110.getLastError() << endl;
+                    return false;
+                }
+            }
+            else
+            {
+                config2110.DisableNetworkInterface(SFP_2);
+            }
         }
     }
 

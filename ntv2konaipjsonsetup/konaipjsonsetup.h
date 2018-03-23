@@ -15,6 +15,7 @@ typedef struct
     QString mIPAddress;
     QString mSubnetMask;
     QString mGateway;
+    QString mEnable;
 
 }SFPStruct;
 
