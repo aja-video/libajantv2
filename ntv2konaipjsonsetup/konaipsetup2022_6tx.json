@@ -1,4 +1,6 @@
 {
+    "protocol" : "2022",
+    "enable2022_7":"false",
     "sfps":[
         {
             "designator":"sfp1",

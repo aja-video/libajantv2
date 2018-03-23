@@ -1,4 +1,5 @@
 {
+    "protocol" : "2022",
     "enable2022_7":"true",
     "networkPathDifferential":"50",
     "sfps":[
@@ -9,7 +10,7 @@
             "gateway":"255.255.255.255"
         },
         {
-            "designator":"bottom",
+            "designator":"sfp2",
             "ipAddress":"172.16.19.11",
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255"

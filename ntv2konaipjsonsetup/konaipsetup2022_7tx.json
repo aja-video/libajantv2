@@ -1,4 +1,5 @@
 {
+    "protocol" : "2022",
     "enable2022_7":"true",
     "sfps":[
         {

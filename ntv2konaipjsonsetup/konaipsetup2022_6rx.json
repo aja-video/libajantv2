@@ -1,6 +1,6 @@
 {
     "protocol" : "2022",
-    "Enable2022_7":"false",
+    "enable2022_7":"false",
     "networkPathDifferential":"50",
     "sfps":[
         {
