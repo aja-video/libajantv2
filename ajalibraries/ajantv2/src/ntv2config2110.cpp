@@ -41,12 +41,12 @@ void tx_2110Config::init()
     payloadLen          = 0;
     lastPayLoadLen      = 0;
     pktsPerLine         = 0;
-    ttl                 = 0x80;
+    ttl                 = 0x40;
     tos                 = 0x64;
     ssrc                = 1000;
     numAudioChannels    = 0;
     firstAudioChannel   = 0;
-    audioPacketInterval = PACKET_INTERVAL_125uS;
+    audioPacketInterval = PACKET_INTERVAL_1mS;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
