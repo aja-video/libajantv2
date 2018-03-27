@@ -292,7 +292,7 @@ typedef enum
 	
 	kVRegEFTNeedsUpdating					= VIRTUALREG_START+373,		// set when any retail virtual register has been changed
 	
-	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,	 // set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
+	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,     // set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
 	kVRegAcquireReferenceCounter			= VIRTUALREG_START+375,
 
 	kVRegTimeStampLastOutput8VerticalHi		= VIRTUALREG_START+376,
@@ -303,12 +303,12 @@ typedef enum
 	kVRegFrameBufferGangCount				= VIRTUALREG_START+379,
 
 	kVRegChannelCrosspointFirst				= VIRTUALREG_START+380,
-																	//	kVRegChannelCrosspointFirst+1
-																	//	kVRegChannelCrosspointFirst+2
-																	//	kVRegChannelCrosspointFirst+3
-																	//	kVRegChannelCrosspointFirst+4
-																	//	kVRegChannelCrosspointFirst+5
-																	//	kVRegChannelCrosspointFirst+6
+                                                                        //	kVRegChannelCrosspointFirst+1
+                                                                        //	kVRegChannelCrosspointFirst+2
+                                                                        //	kVRegChannelCrosspointFirst+3
+                                                                        //	kVRegChannelCrosspointFirst+4
+                                                                        //	kVRegChannelCrosspointFirst+5
+                                                                        //	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
 	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		// supported by all three platforms

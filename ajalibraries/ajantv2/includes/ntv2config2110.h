@@ -16,13 +16,13 @@
 #include <fstream>
 #include <sstream>
 
-#define RX_MATCH_2110_VLAN                   BIT(0)
-#define RX_MATCH_2110_SOURCE_IP              BIT(1)
-#define RX_MATCH_2110_DEST_IP                BIT(2)
-#define RX_MATCH_2110_SOURCE_PORT            BIT(3)
-#define RX_MATCH_2110_DEST_PORT              BIT(4)
-#define RX_MATCH_2110_PAYLOAD                BIT(5)
-#define RX_MATCH_2110_SSRC                   BIT(6)
+#define RX_MATCH_2110_VLAN              BIT(0)
+#define RX_MATCH_2110_SOURCE_IP         BIT(1)
+#define RX_MATCH_2110_DEST_IP           BIT(2)
+#define RX_MATCH_2110_SOURCE_PORT       BIT(3)
+#define RX_MATCH_2110_DEST_PORT         BIT(4)
+#define RX_MATCH_2110_PAYLOAD           BIT(5)
+#define RX_MATCH_2110_SSRC              BIT(6)
 
 #define VOIP_SEMAPHORE_SET              0x2
 #define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
@@ -38,8 +38,6 @@
 #define PLL_CONFIG_PCR                  BIT(0)
 #define PLL_CONFIG_PTP                  BIT(1)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
-
-#define IP_STRSIZE						32
 
 enum NTV2PacketInterval
 {

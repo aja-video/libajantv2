@@ -62,7 +62,6 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
         case DEVICE_ID_IOIP_2110:
             pDeviceServices = new IoIP2110Services();
             break;
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
         case DEVICE_ID_KONAIP_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
@@ -245,19 +244,23 @@ void DeviceServices::ReadDriverState (void)
 		//mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
 	}
 
-    if ((NTV2DeviceGetNum2022ChannelsSFP1(mDeviceID) > 0) && (mCard->IsDeviceReady(true) == true))
-	{
+    if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2022) ||
+        (mDeviceID == DEVICE_ID_IOIP_2022))
+    {
         mCard->ReadRegister(kVReg2022_7Enable,              (ULWord*)&m2022_7Mode);
         mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     (ULWord*)&mNetworkPathDiff);
-        
+
         mCard->ReadRegister(kVRegIPAddrEth0,                &mEth0.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth0,                &mEth0.ipc_subnet);
         mCard->ReadRegister(kVRegGatewayEth0,               &mEth0.ipc_gateway);
-        
+
         mCard->ReadRegister(kVRegIPAddrEth1,                &mEth1.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth1,                &mEth1.ipc_subnet);
         mCard->ReadRegister(kVRegGatewayEth1,               &mEth1.ipc_gateway);
-        
+
         mCard->ReadRegister(kVRegRxcEnable1,				&mRx2022Config1.rxc_enable32);
         mCard->ReadRegister(kVRegRxcSfp1RxMatch1,           &mRx2022Config1.rxc_sfp1RxMatch);
         mCard->ReadRegister(kVRegRxcSfp1SourceIp1,          &mRx2022Config1.rxc_sfp1SourceIp);
@@ -271,7 +274,7 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcSfp2SourcePort1,        &mRx2022Config1.rxc_sfp2SourcePort);
         mCard->ReadRegister(kVRegRxcSfp2DestPort1,          &mRx2022Config1.rxc_sfp2DestPort);
         mCard->ReadRegister(kVRegRxcSfp2Vlan1,              &mRx2022Config1.rxc_sfp2Vlan);
-		mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcPlayoutDelay1,			&mRx2022Config1.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegRxcEnable2,				&mRx2022Config2.rxc_enable32);
@@ -287,7 +290,7 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegRxcSfp2SourcePort2,        &mRx2022Config2.rxc_sfp2SourcePort);
         mCard->ReadRegister(kVRegRxcSfp2DestPort2,          &mRx2022Config2.rxc_sfp2DestPort);
         mCard->ReadRegister(kVRegRxcSfp2Vlan2,              &mRx2022Config2.rxc_sfp2Vlan);
-		mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcPlayoutDelay2,			&mRx2022Config2.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegTxcEnable3,				&mTx2022Config3.txc_enable32);
@@ -297,7 +300,7 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegTxcSfp2LocalPort3,         &mTx2022Config3.txc_sfp2LocalPort);
         mCard->ReadRegister(kVRegTxcSfp2RemoteIp3,          &mTx2022Config3.txc_sfp2RemoteIp);
         mCard->ReadRegister(kVRegTxcSfp2RemotePort3,        &mTx2022Config3.txc_sfp2RemotePort);
-		
+
         mCard->ReadRegister(kVRegTxcEnable4,				&mTx2022Config4.txc_enable32);
         mCard->ReadRegister(kVRegTxcSfp1LocalPort4,         &mTx2022Config4.txc_sfp1LocalPort);
         mCard->ReadRegister(kVRegTxcSfp1RemoteIp4,          &mTx2022Config4.txc_sfp1RemoteIp);
@@ -305,42 +308,70 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegTxcSfp2LocalPort4,         &mTx2022Config4.txc_sfp2LocalPort);
         mCard->ReadRegister(kVRegTxcSfp2RemoteIp4,          &mTx2022Config4.txc_sfp2RemoteIp);
         mCard->ReadRegister(kVRegTxcSfp2RemotePort4,        &mTx2022Config4.txc_sfp2RemotePort);
-		
-		mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	&mRx2022J2kConfig1.programPID);
-		mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	&mRx2022J2kConfig1.audioNumber);
-		
-		mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	(ULWord*)&mRx2022J2kConfig2.selectionMode);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	&mRx2022J2kConfig2.programNumber);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	&mRx2022J2kConfig2.programPID);
-		mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	&mRx2022J2kConfig2.audioNumber);
-		
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	(ULWord*)&mTx2022J2kConfig1.videoFormat);
-		mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		&mTx2022J2kConfig1.ullMode);
-		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
-		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
-		mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
-		mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
-		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
-		mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		&mTx2022J2kConfig1.pcrPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		&mTx2022J2kConfig1.audio1Pid);
-		
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	(ULWord*)&mTx2022J2kConfig2.videoFormat);
-		mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		&mTx2022J2kConfig2.ullMode);
-		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
-		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
-		mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
-		mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
-		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
-		mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		&mTx2022J2kConfig2.pcrPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		&mTx2022J2kConfig2.audio1Pid);
-	}
+    }
+
+    if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+    {
+        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	&mRx2022J2kConfig1.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	&mRx2022J2kConfig1.audioNumber);
+
+        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	(ULWord*)&mRx2022J2kConfig2.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	&mRx2022J2kConfig2.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	&mRx2022J2kConfig2.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	&mRx2022J2kConfig2.audioNumber);
+
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	(ULWord*)&mTx2022J2kConfig1.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		&mTx2022J2kConfig1.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
+        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
+        mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		&mTx2022J2kConfig1.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		&mTx2022J2kConfig1.audio1Pid);
+
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	(ULWord*)&mTx2022J2kConfig2.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		&mTx2022J2kConfig2.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
+        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
+        mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		&mTx2022J2kConfig2.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		&mTx2022J2kConfig2.audio1Pid);
+    }
+
+    if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
+        (mDeviceID == DEVICE_ID_IOIP_2110))
+    {
+        // Only do this once a second
+        uint32_t	count	(0);
+        mCard->ReadRegister(kVRegAgentCheck, &count);
+        if (count % 60 == 0)
+        {
+            uint32_t sizeRead = 0;
+            bool bOk = mCard->ReadVirtualData(kNetworkVData2110, &m2110Network, sizeof(NetworkVData2110), &sizeRead);
+            if (bOk == false || sizeRead != sizeof(NetworkVData2110))
+            {
+                memset(&m2110Network, 0, sizeof(NetworkVData2110));
+                printf("Failed to get 2110 Network params\n");
+            }
+            else
+            {
+                Print2110Network(m2110Network);
+            }
+        }
+    }
 }
+
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -2296,7 +2327,7 @@ void DeviceServices::GetIPError(NTV2Channel channel, uint32_t configType, uint32
     val = errCode;
 }
 
-void DeviceServices::PrintRxConfig(rx_2022_channel chan)
+void DeviceServices::PrintRxConfig(const rx_2022_channel chan)
 {
     printf("sfp1Enable          %s\n", chan.sfp1Enable == true? "true":"false");
     printf("sfp1SourceIP        %s\n", chan.sfp1SourceIP.c_str());
@@ -2315,7 +2346,7 @@ void DeviceServices::PrintRxConfig(rx_2022_channel chan)
     printf("sfp2RxMatch         %d\n\n", chan.sfp2RxMatch);
 }
 
-void DeviceServices::PrintTxConfig(tx_2022_channel chan)
+void DeviceServices::PrintTxConfig(const tx_2022_channel chan)
 {
     printf("sfp1Enable          %s\n", chan.sfp1Enable == true? "true":"false");
     printf("sfp1RemoteIP        %s\n", chan.sfp1RemoteIP.c_str());
@@ -2328,7 +2359,7 @@ void DeviceServices::PrintTxConfig(tx_2022_channel chan)
     printf("sfp2RemotePort		%d\n", chan.sfp2RemotePort);
 }
 
-void DeviceServices::PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
+void DeviceServices::PrintEncoderConfig(const j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
 {
     printf("videoFormat	   %6d%6d\n", modelConfig.videoFormat, encoderConfig.videoFormat);
     printf("ullMode		   %6d%6d\n", modelConfig.ullMode, encoderConfig.ullMode);
@@ -2343,13 +2374,42 @@ void DeviceServices::PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoder
     printf("audio1Pid	   %6d%6d\n\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
 }
 
-void DeviceServices::PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
+void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
 {
     printf("selectionMode  %6d%6d\n", modelConfig.selectionMode, encoderConfig.selectionMode);
     printf("programNumber  %6d%6d\n", modelConfig.programNumber, encoderConfig.programNumber);
     printf("programPID	   %6d%6d\n", modelConfig.programPID, encoderConfig.programPID);
     printf("audioNumber    %6d%6d\n\n", modelConfig.audioNumber, encoderConfig.audioNumber);
 }
+
+
+void DeviceServices::Print2110Network(const NetworkVData2110 m2110Network)
+{
+    printf("id           %d\n", m2110Network.id);
+    PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
+
+
+
+//    uint32_t                id;
+//    char                    ptpMasterIP[IP_STRSIZE];
+//    uint32_t                numSFPs;
+//    SFPVData2110            sfp[2];
+
+
+}
+
+void DeviceServices::PrintChArray(const std::string title, const char* chstr)
+{
+    printf("%4s          ", title.c_str());
+    for (uint32_t i=0; i< IP_STRSIZE; i++)
+    {
+        printf("%c", chstr[i]);
+    }
+    printf("\n");
+
+
+}
+
 
 
 // MARK: -
