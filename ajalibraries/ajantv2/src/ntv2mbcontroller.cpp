@@ -95,7 +95,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     return false;
 }
 
-bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
+bool CNTV2MBController::DisableNetworkInterface(eSFP port)
 {
    if (!(getFeatures() & SAREK_MB_PRESENT))
        return true;

@@ -243,7 +243,7 @@ CNTV2Config2022::~CNTV2Config2022()
     }
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & netConfig)
+bool CNTV2Config2022::SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig & netConfig)
 {
     string ip, subnet, gateway;
     struct in_addr addr;
@@ -258,7 +258,19 @@ bool CNTV2Config2022::SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & net
     return rv;
 }
 
-bool CNTV2Config2022::SetNetworkConfiguration (eSFP sfp, string localIPAddress, string netmask, string gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & netConfig)
+{
+    string ip, subnet, gateway;
+    GetNetworkConfiguration(sfp, ip, subnet, gateway);
+
+    netConfig.ipc_ip      = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
+    netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
+    netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)inet_addr(gateway.c_str()));
+
+    return true;
+}
+
+bool CNTV2Config2022::SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -337,28 +349,11 @@ bool CNTV2Config2022::SetNetworkConfiguration (eSFP sfp, string localIPAddress, 
         mDevice.WriteRegister(kReg2022_6_tx_sec_mac_hi_addr  + core2,boardHi2);
     }
 
-    bool rv = SetMBNetworkConfiguration (sfp, localIPAddress, netmask, gateway);
+    bool rv = SetMBNetworkConfiguration (sfp, localIPAddress, subnetMask, gateway);
     return rv;
 }
 
-bool  CNTV2Config2022::DisableNetworkInterface(eSFP sfp)
-{
-    return DisableNetworkConfiguration(sfp);
-}
-
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP sfp, IPVNetConfig & netConfig)
-{
-    string ip, subnet, gateway;
-    GetNetworkConfiguration(sfp, ip, subnet, gateway);
-
-    netConfig.ipc_ip      = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
-    netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
-    netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)inet_addr(gateway.c_str()));
-
-    return true;
-}
-
-bool CNTV2Config2022::GetNetworkConfiguration(eSFP sfp, string & localIPAddress, string & subnetMask, string & gateway)
+bool CNTV2Config2022::GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway)
 {
     struct in_addr addr;
 
@@ -394,6 +389,12 @@ bool CNTV2Config2022::GetNetworkConfiguration(eSFP sfp, string & localIPAddress,
     }
     return true;
 }
+
+bool  CNTV2Config2022::DisableNetworkInterface(const eSFP sfp)
+{
+    return CNTV2MBController::DisableNetworkInterface(sfp);
+}
+
 
 bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const rx_2022_channel &rxConfig)
 {
