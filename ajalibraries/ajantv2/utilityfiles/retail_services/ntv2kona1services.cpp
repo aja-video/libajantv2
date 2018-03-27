@@ -412,72 +412,50 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 }
 	
-	
-//-------------------------------------------------------------------------------------------------------
-//	SetDeviceXPointCapture
-//-------------------------------------------------------------------------------------------------------
+
 void Kona1Services::SetDeviceXPointCapture ()
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
-	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
-	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
+	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
-	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
-	int							bFb2Disable			= 1;					// Assume Channel 2 IS disabled by default
-													  
-	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
-	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect; // Input format select (YUV, RGB, Stereo 3D)
-	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
-	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
-	
-	
-	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	
-	
-	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (b2FbLevelBHfr || bStereoIn)
-	{
-		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
-	}
-	
-	
-	// input 1 select
+	//bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	//bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
+	//bool						bStereoIn			= false;
+	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
+	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
+	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
+	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
+
+	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+
+	// get selected input video format
+	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	bool levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;
-	
-	
-	// Frame Sync 1
-	//NTV2CrosspointID frameSync1YUV = inputXptYUV1;
-	
-	
-	// Frame Sync 2
-	//NTV2CrosspointID frameSync2YUV = inputXptYUV1;
+
+	// SDI In 1
+	bool b3GbInEnabled;
+	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputFormatSelect != NTV2_RGBSelect));
 
 
-	// Compression Module
-	if (inputFormat == mFb1VideoFormat)
-	{
-		mCard->Connect (NTV2_XptCompressionModInput, inputXptYUV1);
-	}
-	else
-	{
-		mCard->Connect (NTV2_XptCompressionModInput, NTV2_XptConversionModule);
-	}
-	
 	// Dual Link In 1
-	if (bInRGB)
+	if (inputFormatSelect == NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
+
+		inputXptYUV1 = NTV2_XptCSC1VidYUV;
+		inputXptYUV2 = NTV2_XptBlack;
 	}
 	else
 	{
@@ -485,65 +463,79 @@ void Kona1Services::SetDeviceXPointCapture ()
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
 	}
 
-	
 	// CSC 1
-	if (bInRGB)
+	if (inputFormatSelect != NTV2_RGBSelect)
+	{
+			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
+	}
+	else
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
-	else
-	{
-		if (inputFormat == mFb1VideoFormat)
-		{
-			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptBlack);
-		}
-	}
-	
-	
-	// CSC 2
-	mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptBlack);
-	
 
 	// LUT 1
-	if (!bInRGB)
+	if (inputFormatSelect != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else
 	{
-		mCard->Connect(NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
+		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
 
 		// if RGB-to-RGB apply LUT converter
 		if (bFb1RGB)
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1,					
-												 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
-												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,
+											mSDIInput1RGBRange == NTV2_RGBRangeFull ?
+											kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 		}
 		else
 		{
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);	
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}
 	}
-	
-	
-	// LUT 2 
-	mCard->Connect(NTV2_XptLUT2Input, NTV2_XptBlack);
-	
+
+	// Dual Link Out 1,2,3,4 3 Out
+	if (inputFormat == mFb1VideoFormat)
+	{
+		// Input is NOT secondary
+		if (inputFormatSelect != NTV2_RGBSelect)
+		{
+			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
+		}
+		else
+		{
+			if (mSDIInput1RGBRange == mSDIOutput1RGBRange && mLUTType != NTV2_LUTCustom)
+			{
+				// no range change
+				mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptDuallinkIn1);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
+			}
+		}
+	}
+	else
+	{
+		// Input is Secondary format
+		// NOTE: This is the same logic as above but we can't do the dual link case because we would
+		// need two LUT's to convert RGB to YUB then back again.
+		if (inputFormatSelect != NTV2_RGBSelect)
+		{
+			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptDuallinkIn1);
+		}
+	}
 
 	// Frame Buffer 1
-	if (b2FbLevelBHfr || bStereoIn)
+	if (bFb1RGB)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
-	}
-	else if (bFb1RGB)
-	{
-		if (bInRGB)
+		if (inputFormatSelect == NTV2_RGBSelect)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -551,7 +543,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// range change needed
+				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);			// range change needed
 			}
 		}
 		else
@@ -559,72 +551,31 @@ void Kona1Services::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// CSC converted
 		}
 	}
-	else 
+	else
 	{
-		if (bInRGB)
-		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
-		}
+		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
-	
-	
-	// Frame Buffer 2
-	if (b2FbLevelBHfr || bStereoIn)
-	{
-		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
-	}
-	else 
-	{
-		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
-	}
-	
-	
-	// Make sure both channels are enable for stereo, level B
-	if (b2FbLevelBHfr || bStereoIn)
-	{
-		bFb1Disable = bFb2Disable = false;
-	}
-		
-	// set Channel disable mode (0 = enable, 1 = disable)
-	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);		
 
+	// Frame Buffer Disabling
+	mCard->WriteRegister(kRegCh2Control, true, kRegMaskChannelDisable, kRegShiftChannelDisable);
 
-	// SDI Out 1 
-	if (IsVideoFormatB(mFb1VideoFormat) ||							// Dual Stream - p60b
-		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||	// Stereo 3D
-		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)	// Video + Key
+	// SDI Out 1
+	if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
-			mCard->Connect (NTV2_XptSDIOut1InputDS2, inputXptYUV2);
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);							// 1 3Gb wire
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);							// 2 wires
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (bSdiOutRGB)
+	else // NTV2_PrimaryOutputSelect													// Primary
 	{
-		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);		// 1 3Gb wire
-		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
-	}
-	else // NTV2_PrimaryOutputSelect											// Primary
-	{
-		if (bInRGB)
-		{
-			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
-		}
+		mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 	}
 }
