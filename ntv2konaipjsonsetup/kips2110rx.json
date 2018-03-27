@@ -77,7 +77,7 @@
         },
         {
             "designator":"channel2",
-            "stream":"audio1",
+            "stream":"audio2",
             "sfp1SrcIPAddress":"172.16.144.1",
             "sfp1DestIPAddress":"239.30.45.41",
             "sfp1SrcPort":"5001",
@@ -120,7 +120,7 @@
         },
         {
             "designator":"channel3",
-            "stream":"audio1",
+            "stream":"audio3",
             "sfp1SrcIPAddress":"172.16.144.1",
             "sfp1DestIPAddress":"239.30.45.51",
             "sfp1SrcPort":"5001",
@@ -163,7 +163,7 @@
         },
         {
             "designator":"channel4",
-            "stream":"audio1",
+            "stream":"audio4",
             "sfp1SrcIPAddress":"172.16.144.1",
             "sfp1DestIPAddress":"239.30.45.61",
             "sfp1SrcPort":"5001",

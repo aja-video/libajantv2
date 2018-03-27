@@ -55,7 +55,6 @@
             "sfp2Enable":"false",
             "enable":"true"
         },
-		
         {
             "designator":"channel2",
             "stream":"video",
@@ -79,7 +78,7 @@
         },
         {
             "designator":"channel2",
-            "stream":"audio1",
+            "stream":"audio2",
             "sfp1srcIPAddress":"172.16.45.4",
             "sfp1srcPort":"5000",
             "sfp1DestIPAddress":"239.30.45.10",
@@ -94,7 +93,6 @@
             "sfp2Enable":"false",
             "enable":"true"
         },
-		
         {
             "designator":"channel3",
             "stream":"video",
@@ -118,7 +116,7 @@
         },
         {
             "designator":"channel3",
-            "stream":"audio1",
+            "stream":"audio3",
             "sfp2srcIPAddress":"172.16.45.5",
             "sfp2srcPort":"5000",
             "sfp2DestIPAddress":"239.30.45.120",
@@ -133,7 +131,6 @@
             "sfp2Enable":"true",
             "enable":"true"
         },
-		
         {
             "designator":"channel4",
             "stream":"video",
@@ -157,7 +154,7 @@
         },
         {
             "designator":"channel4",
-            "stream":"audio1",
+            "stream":"audio4",
             "sfp2srcIPAddress":"172.16.45.5",
             "sfp2srcPort":"5000",
             "sfp2DestIPAddress":"239.30.45.130",

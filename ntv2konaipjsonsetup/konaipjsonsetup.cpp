@@ -709,19 +709,32 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         bool ok;
         NTV2Channel channel = getChannel(receive.mChannelDesignator);
+
         NTV2Stream stream;
-        if (receive.mStream == "audio1")
-        {
-            stream = NTV2_AUDIO1_STREAM;
-        }
-        else if (receive.mStream == "video")
+        if (receive.mStream == "video")
         {
             stream = NTV2_VIDEO_STREAM;
         }
+        else if (receive.mStream == "audio1")
+        {
+            stream = NTV2_AUDIO1_STREAM;
+        }
+        else if (receive.mStream == "audio2")
+        {
+            stream = NTV2_AUDIO2_STREAM;
+        }
+        else if (receive.mStream == "audio3")
+        {
+            stream = NTV2_AUDIO3_STREAM;
+        }
+        else if (receive.mStream == "audio4")
+        {
+            stream = NTV2_AUDIO4_STREAM;
+        }
         else
         {
-            cerr << "Invalid RX Stream: " << receive.mStream.toStdString() << endl;
-            return false;
+            cout << "Error: Rx stream <" << receive.mStream.toStdString() << "> is invalid" << endl;
+            continue;
         }
 
         // If sfp2 is on use it otherwise assume we are always dealing with sfp1
