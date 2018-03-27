@@ -28,6 +28,7 @@
 #include "ntv2ioip2022services.h"
 #include "ntv2ioip2110services.h"
 #include "ntv2io4kplusservices.h"
+#include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
 #include "ntv2kona1services.h"
@@ -124,6 +125,8 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_KONA1:
 			pDeviceServices = new Kona1Services();
 			break;
+		case DEVICE_ID_KONAHDMI:
+			pDeviceServices = new KonaHDMIServices();
 		default:
 		case DEVICE_ID_CORVID1:
 		case DEVICE_ID_CORVID22:
@@ -2976,7 +2979,15 @@ void DeviceServices::SetDeviceXPointCapture()
 			{
 			default:
 			case NTV2_Input1Select:
-				mCard->SetReference(NTV2_REFERENCE_INPUT1);
+				switch(mDeviceID)
+				{
+				case DEVICE_ID_KONAHDMI:
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+					break;
+				default:
+					mCard->SetReference(NTV2_REFERENCE_INPUT1);
+					break;
+				}
 				break;
 			case NTV2_Input2Select:
 				switch(mDeviceID)
@@ -2988,6 +2999,8 @@ void DeviceServices::SetDeviceXPointCapture()
 				case DEVICE_ID_LHE_PLUS:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 					break;
+				case DEVICE_ID_KONAHDMI:
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT2);
 				default:
 					mCard->SetReference(NTV2_REFERENCE_INPUT2);
 					break;
@@ -3000,10 +3013,23 @@ void DeviceServices::SetDeviceXPointCapture()
 					case DEVICE_ID_LHI:
 						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 						break;
+					case DEVICE_ID_KONAHDMI:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT3);
+						break;
 					case DEVICE_ID_IO4KUFC:
 					case DEVICE_ID_IOXT:
 					default:
 						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					}
+				}
+				break;
+			case NTV2_Input4Select:
+				{
+					switch(mDeviceID)
+					{
+					case DEVICE_ID_KONAHDMI:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT3);
 						break;
 					}
 				}
@@ -3037,7 +3063,7 @@ void DeviceServices::SetDeviceXPointCapture()
 		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
 	}
 
-	//if(!b4K)//if we are 4k all connections are inputs
+	if(mDeviceID != DEVICE_ID_KONAHDMI)
 	{
 		//Following the logic from each individual file
 		//this should cover almost all cases
