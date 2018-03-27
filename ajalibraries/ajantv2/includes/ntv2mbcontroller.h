@@ -20,17 +20,12 @@ enum eMBCmd
     MB_CMD_FETCH_SFP_INFO         = 11
 };
 
-#if 0
-enum eSFP
+enum eNTV2PacketInterval
 {
-    SFP_TOP,
-    SFP_LINK_A = SFP_TOP,
-    SFP_BOTTOM,
-    SFP_LINK_B = SFP_BOTTOM,
-    SFP_MAX_NUM_SFPS,
-    SFP_INVALID		= SFP_MAX_NUM_SFPS
+    PACKET_INTERVAL_125uS,
+    PACKET_INTERVAL_1mS
 };
-#else
+
 enum eSFP
 {
     SFP_1,
@@ -38,8 +33,6 @@ enum eSFP
     SFP_MAX_NUM_SFPS,
     SFP_INVALID		= SFP_MAX_NUM_SFPS
 };
-
-#endif
 
 #define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_1)  &&  ((__sfp__) < SFP_INVALID))
 
@@ -113,8 +106,8 @@ public:
 
 protected:
     // all these methods block until response received or timeout
-    bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
-    bool DisableNetworkConfiguration (eSFP port);
+    bool SetMBNetworkConfiguration(eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
+    bool DisableNetworkInterface(eSFP port);
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
     bool FetchGrandMasterInfo(std::string & grandmasterInfo);

@@ -16,35 +16,6 @@
 #include <fstream>
 #include <sstream>
 
-#define RX_MATCH_2110_VLAN              BIT(0)
-#define RX_MATCH_2110_SOURCE_IP         BIT(1)
-#define RX_MATCH_2110_DEST_IP           BIT(2)
-#define RX_MATCH_2110_SOURCE_PORT       BIT(3)
-#define RX_MATCH_2110_DEST_PORT         BIT(4)
-#define RX_MATCH_2110_PAYLOAD           BIT(5)
-#define RX_MATCH_2110_SSRC              BIT(6)
-
-#define VOIP_SEMAPHORE_SET              0x2
-#define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
-#define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
-#define VOIP_SECONDARY_ENABLE           0x80000000
-
-#define PLL_MATCH_SOURCE_IP             BIT(0)
-#define PLL_MATCH_DEST_IP               BIT(1)
-#define PLL_MATCH_SOURCE_PORT           BIT(2)
-#define PLL_MATCH_DEST_PORT             BIT(3)
-#define PLL_MATCH_ES_PID                BIT(4)
-
-#define PLL_CONFIG_PCR                  BIT(0)
-#define PLL_CONFIG_PTP                  BIT(1)
-#define PLL_CONFIG_DCO_MODE             BIT(28)
-
-enum NTV2PacketInterval
-{
-    PACKET_INTERVAL_125uS,
-    PACKET_INTERVAL_1mS
-};
-
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
@@ -75,7 +46,7 @@ public:
     uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
-    NTV2PacketInterval  audioPacketInterval;
+    eNTV2PacketInterval audioPacketInterval;
 };
 
 /**
@@ -108,7 +79,7 @@ public:
     uint32_t            lastPayloadLen;
     uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
-    NTV2PacketInterval  audioPacketInterval;
+    eNTV2PacketInterval audioPacketInterval;
 };
 
 
@@ -123,12 +94,11 @@ public:
     CNTV2Config2110 (CNTV2Card & device);
     ~CNTV2Config2110();
 
-    bool        SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & netConfig);
-    bool        SetNetworkConfiguration(eSFP sfp, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        DisableNetworkInterface(eSFP sfp);
-
-    bool        GetNetworkConfiguration(eSFP sfp, IPVNetConfig & netConfig);
-    bool        GetNetworkConfiguration(eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig & netConfig);
+    bool        GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & netConfig);
+    bool        SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway);
+    bool        GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        DisableNetworkInterface(const eSFP sfp);
 
     bool        EnableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
     bool        DisableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);

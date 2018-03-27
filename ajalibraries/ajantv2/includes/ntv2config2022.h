@@ -14,26 +14,6 @@
 #include "ntv2tshelper.h"
 #include <string.h>
 
-#define RX_MATCH_2022_VLAN              BIT(0)
-#define RX_MATCH_2022_SOURCE_IP         BIT(1)
-#define RX_MATCH_2022_DEST_IP           BIT(2)
-#define RX_MATCH_2022_SOURCE_PORT       BIT(3)
-#define RX_MATCH_2022_DEST_PORT         BIT(4)
-#define RX_MATCH_2022_SSRC              BIT(5)
-
-#define VOIP_SEMAPHORE_SET              0x2
-#define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
-#define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
-#define VOIP_SECONDARY_ENABLE           0x80000000
-
-#define PLL_MATCH_SOURCE_IP             BIT(0)
-#define PLL_MATCH_DEST_IP               BIT(1)
-#define PLL_MATCH_SOURCE_PORT           BIT(2)
-#define PLL_MATCH_DEST_PORT             BIT(3)
-#define PLL_MATCH_ES_PID                BIT(4)
-
-#define PLL_CONFIG_PCR                  BIT(0)
-
 /**
     @brief	Configures a SMPTE 2022 Transmit Channel.
 **/
@@ -181,12 +161,11 @@ public:
     CNTV2Config2022 (CNTV2Card & device);
     ~CNTV2Config2022();
 
-    bool        SetNetworkConfiguration(eSFP sfp, const IPVNetConfig & netConfig);
-    bool        SetNetworkConfiguration(eSFP sfp, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        DisableNetworkInterface(eSFP sfp);
-
-    bool        GetNetworkConfiguration(eSFP sfp, IPVNetConfig & netConfig);
-    bool        GetNetworkConfiguration(eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig & netConfig);
+    bool        GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & netConfig);
+    bool        SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway);
+    bool        GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        DisableNetworkInterface(const eSFP sfp);
 
     bool        SetRxChannelConfiguration(const NTV2Channel channel, const rx_2022_channel & rxConfig);
     bool        GetRxChannelConfiguration(const NTV2Channel channel, rx_2022_channel & rxConfig);
