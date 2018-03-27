@@ -127,6 +127,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			break;
 		case DEVICE_ID_KONAHDMI:
 			pDeviceServices = new KonaHDMIServices();
+			break;
 		default:
 		case DEVICE_ID_CORVID1:
 		case DEVICE_ID_CORVID22:
