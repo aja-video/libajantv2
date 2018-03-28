@@ -7,6 +7,7 @@
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ntv2endian.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
@@ -21,6 +22,30 @@ ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 	for (UWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
 	{
 		inOutStream << HEX0N(*iter,4);
+		if (++iter != inData.end())
+			inOutStream << " ";
+	}
+	return inOutStream;
+}
+
+ostream & operator << (ostream & inOutStream, const ULWordSequence & inData)
+{
+	inOutStream << DEC(inData.size()) << " ULWords: ";
+	for (ULWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
+	{
+		inOutStream << HEX0N(*iter,8);
+		if (++iter != inData.end())
+			inOutStream << " ";
+	}
+	return inOutStream;
+}
+
+ostream & operator << (ostream & inOutStream, const ULWord64Sequence & inData)
+{
+	inOutStream << DEC(inData.size()) << " ULWord64s: ";
+	for (ULWord64SequenceConstIter iter(inData.begin());  iter != inData.end();  )
+	{
+		inOutStream << HEX0N(*iter,16);
 		if (++iter != inData.end())
 			inOutStream << " ";
 	}
@@ -155,7 +180,7 @@ ostream & operator << (ostream & inOutStream, const NTV2_POINTER & inObj)
 
 ostream & NTV2_POINTER::Print (ostream & inOutStream) const
 {
-	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << hex << GetRawHostPointer() << dec << "/" << GetByteCount();
+	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DEC(GetByteCount());
 	return inOutStream;
 }
 
@@ -170,12 +195,214 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 		if (inDumpMaxBytes > 64)
 			inDumpMaxBytes = 64;
 		if (ULWord(inDumpMaxBytes) > GetByteCount())
-			inDumpMaxBytes = GetByteCount();
-		const UByte *	pBytes	((const UByte *) GetHostPointer());
+			inDumpMaxBytes = UWord(GetByteCount());
+		const UByte *	pBytes	(reinterpret_cast<const UByte *>(GetHostPointer()));
 		for (UWord ndx(0);  ndx < inDumpMaxBytes;  ndx++)
 			oss << HEX0N(uint16_t(pBytes[ndx]),2);
 	}
 	return oss.str();
+}
+
+static string print_address_offset (const size_t inRadix, const ULWord64 inOffset)
+{
+	const streamsize	maxAddrWidth (sizeof(ULWord64) * 2);
+	ostringstream		oss;
+	if (inRadix == 8)
+		oss << OCT0N(inOffset,maxAddrWidth) << ": ";
+	else if (inRadix == 10)
+		oss << DEC0N(inOffset,maxAddrWidth) << ": ";
+	else
+		oss << HEX0N(inOffset,maxAddrWidth) << ": ";
+	return oss.str();
+}
+
+ostream & NTV2_POINTER::Dump (	const size_t	inStartOffset,
+								const size_t	inByteCount,
+								ostream &		inOStream,
+								const size_t	inRadix,
+								const size_t	inBytesPerGroup,
+								const size_t	inGroupsPerRow,
+								const size_t	inAddressRadix,
+								const bool		inShowAscii,
+								const size_t	inAddrOffset) const
+{
+	if (IsNULL())
+		return inOStream;
+	if (inRadix != 8 && inRadix != 10 && inRadix != 16 && inRadix != 2)
+		return inOStream;
+	if (inAddressRadix != 0 && inAddressRadix != 8 && inAddressRadix != 10 && inAddressRadix != 16)
+		return inOStream;
+	if (inBytesPerGroup == 0)	//	|| inGroupsPerRow == 0)
+		return inOStream;
+
+	{
+		const void *	pInStartAddress		(GetHostAddress(ULWord(inStartOffset)));
+		size_t			bytesRemaining		(inByteCount ? inByteCount : GetByteCount());
+		size_t			bytesInThisGroup	(0);
+		size_t			groupsInThisRow		(0);
+		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
+		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
+		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
+		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : NULL);
+
+		if (!pInStartAddress)
+			return inOStream;
+
+		if (pAsciiBuffer)
+			::memset (pAsciiBuffer, 0, asciiBufferSize);
+
+		if (inGroupsPerRow && inAddressRadix)
+			inOStream << print_address_offset (inAddressRadix, ULWord64(pBuffer) - ULWord64(pInStartAddress) + ULWord64(inAddrOffset));
+		while (bytesRemaining)
+		{
+			if (inRadix == 2)
+				inOStream << BIN08(*pBuffer);
+			else if (inRadix == 8)
+				inOStream << oOCT(uint16_t(*pBuffer));
+			else if (inRadix == 10)
+				inOStream << DEC0N(uint16_t(*pBuffer),maxByteWidth);
+			else if (inRadix == 16)
+				inOStream << HEX0N(uint16_t(*pBuffer),2);
+
+			if (pAsciiBuffer)
+				pAsciiBuffer[groupsInThisRow * inBytesPerGroup + bytesInThisGroup] = std::isprint(*pBuffer) ? *pBuffer : '.';
+			pBuffer++;
+			bytesRemaining--;
+
+			bytesInThisGroup++;
+			if (bytesInThisGroup >= inBytesPerGroup)
+			{
+				groupsInThisRow++;
+				if (inGroupsPerRow && groupsInThisRow >= inGroupsPerRow)
+				{
+					if (pAsciiBuffer)
+					{
+						inOStream << " " << pAsciiBuffer;
+						::memset (pAsciiBuffer, 0, asciiBufferSize);
+					}
+					inOStream << endl;
+					if (inAddressRadix && bytesRemaining)
+						inOStream << print_address_offset (inAddressRadix, reinterpret_cast <ULWord64> (pBuffer) - reinterpret_cast <ULWord64> (pInStartAddress) + ULWord64 (inAddrOffset));
+					groupsInThisRow = 0;
+				}	//	if time for new row
+				else
+					inOStream << " ";
+				bytesInThisGroup = 0;
+			}	//	if time for new group
+		}	//	loop til no bytes remaining
+
+		if (bytesInThisGroup && bytesInThisGroup < inBytesPerGroup && pAsciiBuffer)
+		{
+			groupsInThisRow++;
+			inOStream << string ((inBytesPerGroup - bytesInThisGroup) * maxByteWidth + 1, ' ');
+		}
+
+		if (groupsInThisRow)
+		{
+			if (groupsInThisRow < inGroupsPerRow && pAsciiBuffer)
+				inOStream << string (((inGroupsPerRow - groupsInThisRow) * inBytesPerGroup * maxByteWidth + (inGroupsPerRow - groupsInThisRow)), ' ');
+			if (pAsciiBuffer)
+				inOStream << pAsciiBuffer;
+			inOStream << endl;
+		}
+		else if (bytesInThisGroup && bytesInThisGroup < inBytesPerGroup)
+			inOStream << endl;
+
+		if (pAsciiBuffer)
+			delete [] pAsciiBuffer;
+	}	//	else radix is 16, 10, 8 or 2
+
+	return inOStream;
+}	//	Dump
+
+
+bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inMaxSize, const bool inByteSwap) const
+{
+	outUint64s.clear();
+	if (IsNULL())
+		return false;
+
+	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint64_t));
+	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostPointer()));
+	if (inMaxSize < maxSize)
+		maxSize = inMaxSize;
+
+	try
+	{
+		outUint64s.reserve(maxSize);
+		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		{
+			const uint32_t	u64	(*pU64++);
+			outUint64s.push_back(inByteSwap ? NTV2EndianSwap64(u64) : u64);
+		}
+	}
+	catch (...)
+	{
+		outUint64s.clear();
+		outUint64s.reserve(0);
+		return false;
+	}
+	return true;
+}
+
+
+bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inMaxSize, const bool inByteSwap) const
+{
+	outUint32s.clear();
+	if (IsNULL())
+		return false;
+
+	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint32_t));
+	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostPointer()));
+	if (inMaxSize < maxSize)
+		maxSize = inMaxSize;
+
+	try
+	{
+		outUint32s.reserve(maxSize);
+		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		{
+			const uint32_t	u32	(*pU32++);
+			outUint32s.push_back(inByteSwap ? NTV2EndianSwap32(u32) : u32);
+		}
+	}
+	catch (...)
+	{
+		outUint32s.clear();
+		outUint32s.reserve(0);
+		return false;
+	}
+	return true;
+}
+
+
+bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inMaxSize, const bool inByteSwap) const
+{
+	outUint16s.clear();
+	if (IsNULL())
+		return false;
+
+	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint16_t));
+	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostPointer()));
+	if (inMaxSize < maxSize)
+		maxSize = inMaxSize;
+
+	try
+	{
+		outUint16s.reserve(maxSize);
+		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		{
+			const uint16_t	u16	(*pU16++);
+			outUint16s.push_back(inByteSwap ? NTV2EndianSwap32(u16) : u16);
+		}
+	}
+	catch (...)
+	{
+		outUint16s.clear();
+		outUint16s.reserve(0);
+		return false;
+	}
+	return true;
 }
 
 
@@ -1814,7 +2041,7 @@ bool NTV2RegInfo::operator < (const NTV2RegInfo & inRHS) const
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2RasterLineOffsets & inObj)
+ostream & NTV2PrintRasterLineOffsets(const NTV2RasterLineOffsets & inObj, ostream & inOutStream)
 {
 	NTV2StringList	pieces;
 	NTV2RasterLineOffsetsConstIter	iter (inObj.begin());

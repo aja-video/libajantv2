@@ -4122,11 +4122,11 @@ typedef enum
 
 	/**
 		@brief		Streams a human-readable dump of the given NTV2RasterLineOffsets sequence into the specified output stream.
-		@param		inOutStream		Specifies the output stream to receive the dump.
-		@param[in]	inObj			Specifies the NTV2_RP188 to append to the list.
+		@param[in]	inObj			Specifies the NTV2RasterLineOffsets to be streamed to the output stream.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
 		@return		A non-constant reference to the given output stream.
 	**/
-	AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2RasterLineOffsets & inObj);
+	AJAExport std::ostream & NTV2PrintRasterLineOffsets (const NTV2RasterLineOffsets & inObj, std::ostream & inOutStream = std::cout);
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
@@ -5566,10 +5566,14 @@ typedef enum
 			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."					\
 												<< std::bitset<8>( uint16_t(__x__)&0x00FF)
 			#define	BIN08(__x__)			std::bitset<8>(uint8_t(__x__))
+			#define	BIN04(__x__)			std::bitset<4>(uint8_t(__x__))
+			#define	BIN0N(__x__,__n__)		std::bitset<__n__>(uint8_t(__x__))
 			#define	bBIN064(__x__)			"b"	<< BIN064(__x__)
 			#define	bBIN032(__x__)			"b"	<< BIN032(__x__)
 			#define	bBIN016(__x__)			"b"	<< BIN016(__x__)
 			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
+			#define	bBIN04(__x__)			"b"	<< BIN04(__x__)
+			#define	bBIN0N(__x__,__n__)		"b"	<< BIN0N(__x__,__n__)
 			#define	fDEC(__x__,__w__,__p__)	std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__) << std::dec
 		#else
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
@@ -5858,6 +5862,104 @@ typedef enum
 				**/
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
 
+				/**
+					@brief	Dumps me in hex/octal/decimal, with/without Ascii, to the given output stream.
+					@param	inStartOffset		The starting offset, in bytes, where the dump will start.
+					@param	inByteCount			The number of bytes to be dumped. If zero, all bytes will be dumped.
+					@param	inOutputStream		Output stream that will receive the dump. Defaults to std::cout.
+					@param	inRadix				Specifies the radix of the dumped memory values.
+												16=hex, 10=decimal, 8=octal, 2=binary -- all others disallowed.
+					@param	inBytesPerGroup		Number of bytes to dump per contiguous group of numbers. Defaults to 4.
+					@param	inGroupsPerLine		Number of contiguous groups of numbers to dump per output line.
+												If zero, no grouping is done, and address & ASCII display is suppressed.
+												Defaults to 8.
+					@param	inAddressRadix		Specifies the radix of the address column.
+												0=omit, 2=binary, 8=octal, 10=decimal, 16=hex -- all others disallowed.
+												Defaults to 0.
+					@param	inShowAscii			If True, show ASCII characters; otherwise no ASCII characters.
+												Overridden to false if inGroupsPerLine is zero. Defaults to false.
+					@param	inAddrOffset		Specifies a value to be added to the addresses that appear in the dump.
+												Ignored if inGroupsPerLine is zero.
+					@return	A non-constant reference to the output stream that received the dump.
+				**/
+				std::ostream &	Dump (	const size_t	inStartByteOffset	= 0,
+										const size_t	inByteCount			= 0,
+										std::ostream &	inOutputStream		= std::cout,
+										const size_t	inRadix				= 16,
+										const size_t	inBytesPerGroup		= 4,
+										const size_t	inGroupsPerLine		= 8,
+										const size_t	inAddressRadix		= 0,
+										const bool		inShowAscii			= false,
+										const size_t	inAddrOffset		= 0) const;
+
+				/**
+					@param[out]	outU64s			Receives my contents as a vector of unsigned 64-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 64-bit values to be returned.
+												The actual number of returned 64-bit values may be less than this, depending on my size.
+												Defaults to 16.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							GetU64s (std::vector<uint64_t> & outU64s, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
+
+				/**
+					@return		My contents as a vector of unsigned 64-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 64-bit values to be returned.
+												The actual number of returned 64-bit values may be less than this, depending on my size.
+												Defaults to 16.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+				**/
+				inline std::vector<uint64_t>	GetU64s (const size_t inMaxSize = 16, const bool inByteSwap = false) const	{std::vector<uint64_t> result; GetU64s(result, inMaxSize, inByteSwap); return result;}
+
+				/**
+					@param[out]	outU32s			Receives my contents as a vector of unsigned 32-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 32-bit values to be returned.
+												The actual number of returned 32-bit values may be less than this, depending on my size.
+												Defaults to 32.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							GetU32s (std::vector<uint32_t> & outU32s, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
+
+				/**
+					@return		My contents as a vector of unsigned 32-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 32-bit values to be returned.
+												The actual number of returned 32-bit values may be less than this, depending on my size.
+												Defaults to 32.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+				**/
+				inline std::vector<uint32_t>	GetU32s (const size_t inMaxSize = 32, const bool inByteSwap = false) const	{std::vector<uint32_t> result; GetU32s(result, inMaxSize, inByteSwap); return result;}
+
+				/**
+					@param[out]	outU16s			Receives my contents as a vector of unsigned 16-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 16-bit values to be returned.
+												The actual number of returned 16-bit values may be less than this, depending on my size.
+												Defaults to 64.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							GetU16s (std::vector<uint16_t> & outU32s, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+
+				/**
+					@return		My contents as a vector of unsigned 16-bit values.
+					@param[in]	inMaxSize		Specifies the maximum number of 16-bit values to be returned.
+												The actual number of returned 16-bit values may be less than this, depending on my size.
+												Defaults to 64.
+					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
+												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
+												Defaults to 'false'.
+				**/
+				inline std::vector<uint16_t>	GetU16s (const size_t inMaxSize = 64, const bool inByteSwap = false) const	{std::vector<uint16_t> result; GetU16s(result, inMaxSize, inByteSwap); return result;}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 
@@ -7216,6 +7318,14 @@ typedef enum
 			typedef	UWordSequence::const_iterator				UWordSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UWordSequence.
 			typedef	UWordSequence::iterator						UWordSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UWordSequence.
 
+			typedef	std::vector <uint32_t>						ULWordSequence;						///< @brief	An ordered sequence of ULWord (uint32_t) values.
+			typedef	ULWordSequence::const_iterator				ULWordSequenceConstIter;			///< @brief	A handy const iterator for iterating over a ULWordSequence.
+			typedef	ULWordSequence::iterator					ULWordSequenceIter;					///< @brief	A handy non-const iterator for iterating over a ULWordSequence.
+
+			typedef	std::vector <uint64_t>						ULWord64Sequence;					///< @brief	An ordered sequence of ULWord64 (uint64_t) values.
+			typedef	ULWord64Sequence::const_iterator			ULWord64SequenceConstIter;			///< @brief	A handy const iterator for iterating over a ULWord64Sequence.
+			typedef	ULWord64Sequence::iterator					ULWord64SequenceIter;				///< @brief	A handy non-const iterator for iterating over a ULWord64Sequence.
+
 			/**
 				@brief		Prints the given UWordSequence's contents into the given output stream.
 				@param		inOStream	The stream into which the given UWordSequence will be printed.
@@ -7223,6 +7333,22 @@ typedef enum
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
+
+			/**
+				@brief		Prints the given ULWordSequence's contents into the given output stream.
+				@param		inOStream	The stream into which the given ULWordSequence will be printed.
+				@param[in]	inData		Specifies the ULWordSequence to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWordSequence & inData);
+
+			/**
+				@brief		Prints the given ULWord64Sequence's contents into the given output stream.
+				@param		inOStream	The stream into which the given ULWord64Sequence will be printed.
+				@param[in]	inData		Specifies the ULWord64Sequence to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWord64Sequence & inData);
 
 			/**
 				@return		A string that contains the human-readable representation of the given NTV2AutoCirculateState value.
