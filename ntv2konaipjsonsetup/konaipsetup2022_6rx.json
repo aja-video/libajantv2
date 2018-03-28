@@ -1,35 +1,39 @@
 {
     "protocol" : "2022",
-    "Enable2022_7":"false",
+    "enable2022_7":"false",
     "networkPathDifferential":"50",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.0.14",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+        {
+            "designator":"sfp1",
+            "ipAddress":"172.16.0.14",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
-            "primaryDestIPAddress":"239.0.4.50",
-            "primaryDestPort":"6010",
-            "primaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.50",
+            "sfp1DestPort":"6010",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "Enable":"true"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
-            "primaryDestIPAddress":"239.0.4.51",
-            "primaryDestPort":"6011",
-            "primaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.51",
+            "sfp1DestPort":"6011",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
-            "Enable":"false"
-    }
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"false"
+        }
     ]
 }

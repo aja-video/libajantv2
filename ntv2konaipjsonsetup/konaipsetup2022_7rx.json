@@ -1,64 +1,73 @@
 {
-    "Enable2022_7":"true",
+    "protocol" : "2022",
+    "enable2022_7":"true",
     "networkPathDifferential":"50",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    },
-    {
-            "designator":"bottom",
-            "IPAddress":"172.16.19.11",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+        {
+            "designator":"sfp1",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        },
+        {
+            "designator":"sfp2",
+            "ipAddress":"172.16.19.11",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
-            "primaryDestIPAddress":"239.0.4.11",
-            "primaryDestPort":"6011",
-            "primaryFilter":"0x14",
-            "secondaryDestIPAddress":"239.0.4.21",
-            "secondaryDestPort":"6021",
-            "secondaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.11",
+            "sfp1DestPort":"6011",
+            "sfp1Filter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.21",
+            "sfp2DestPort":"6021",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"true"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"true",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
-            "primaryDestIPAddress":"239.0.4.12",
-            "primaryDestPort":"6012",
-            "primaryFilter":"0x14",
-            "secondaryDestIPAddress":"239.0.4.22",
-            "secondaryDestPort":"6022",
-            "secondaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.12",
+            "sfp1DestPort":"6012",
+            "sfp1Filter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.22",
+            "sfp2DestPort":"6022",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel3",
-            "primaryDestIPAddress":"239.0.4.13",
-            "primaryDestPort":"6013",
-            "primaryFilter":"0x14",
-            "secondaryDestIPAddress":"239.0.4.23",
-            "secondaryDestPort":"6023",
-            "secondaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.13",
+            "sfp1DestPort":"6013",
+            "sfp1Filter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.23",
+            "sfp2DestPort":"6023",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"true",
+            "enable":"false"
+        },
+        {
             "designator":"channel4",
-            "primaryDestIPAddress":"239.0.4.14",
-            "primaryDestPort":"6014",
-            "primaryFilter":"0x14",
-            "secondaryDestIPAddress":"239.0.4.24",
-            "secondaryDestPort":"6024",
-            "secondaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.14",
+            "sfp1DestPort":"6014",
+            "sfp1Filter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.24",
+            "sfp2DestPort":"6024",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    }
+            "sfp1Enable":"true",
+            "sfp2Enable":"true",
+            "enable":"false"
+        }
     ]
 }
