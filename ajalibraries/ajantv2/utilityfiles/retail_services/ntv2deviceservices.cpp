@@ -362,10 +362,10 @@ void DeviceServices::ReadDriverState (void)
         if (count % 60 == 0)
         {
             uint32_t sizeRead = 0;
-            bool bOk = mCard->ReadVirtualData(kNetworkVData2110, &m2110Network, sizeof(NetworkVData2110), &sizeRead);
-            if (bOk == false || sizeRead != sizeof(NetworkVData2110))
+            bool bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110), &sizeRead);
+            if (bOk == false || sizeRead != sizeof(NetworkData2110))
             {
-                memset(&m2110Network, 0, sizeof(NetworkVData2110));
+                memset(&m2110Network, 0, sizeof(NetworkData2110));
                 printf("Failed to get 2110 Network params\n");
             }
             else
@@ -2387,7 +2387,7 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
 }
 
 
-void DeviceServices::Print2110Network(const NetworkVData2110 m2110Network)
+void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
     printf("id           %d\n", m2110Network.id);
     PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);

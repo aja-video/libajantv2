@@ -115,7 +115,7 @@ public:
     virtual void PrintTxConfig(const tx_2022_channel chan);
     virtual void PrintEncoderConfig(const j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
     virtual void PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig);
-    virtual void Print2110Network(const NetworkVData2110 m2110Network);
+    virtual void Print2110Network(const NetworkData2110 m2110Network);
     virtual void PrintChArray(std::string title, const char* chstr);
 
 	// overridden in some classes
@@ -232,7 +232,7 @@ public:
     bool                    m2022_7Mode;
     uint32_t				mNetworkPathDiff;
 
-    NetworkVData2110        m2110Network;
+    NetworkData2110			m2110Network;
     uint32_t                m2110NetworkID;
 
 	// real register state - common
