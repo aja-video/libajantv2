@@ -524,34 +524,6 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 		mCard->SetLHIVideoDACMode (new2Mode);
 	if (curr2Standard != new2Standard)
 		mCard->SetLHIVideoDACStandard (new2Standard);
-	
-	// Set SDI out 1 control video standard (reg 129, bits 2-0)
-	if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, secondaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, secondaryStandard);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	}
-
-	// Set SDI out 2 control video standard (reg 130, bits 2-0)
-	if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, secondaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, secondaryStandard);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, primaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-	}
 
 	// Set conversion control (reg 131)
 	// Set converter output standard (bits 14-12)
