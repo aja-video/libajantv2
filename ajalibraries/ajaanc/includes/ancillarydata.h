@@ -10,6 +10,7 @@
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ajaexport.h"
+#include "ntv2publicinterface.h"
 #include "ajabase/common/common.h"
 #include <sstream>
 #include <vector>
@@ -105,6 +106,8 @@ enum AJAAncillaryDataLink
 {
 	AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
 	AJAAncillaryDataLink_B,			///< @brief	The ancillary data is associated with Link B of the video stream.
+	AJAAncillaryDataLink_LeftEye	= AJAAncillaryDataLink_A,	///< @brief	The ancillary data is associated with the Left Eye stereoscopic video stream.
+	AJAAncillaryDataLink_RightEye	= AJAAncillaryDataLink_B,	///< @brief	The ancillary data is associated with the Right Eye stereoscopic video stream.
 	AJAAncillaryDataLink_Unknown,	///< @brief	It is not known which link of the video stream the ancillary data is associated with.
 	AJAAncillaryDataLink_Size
 };
@@ -191,6 +194,14 @@ enum AJAAncillaryDataSpace
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
 AJAExport const std::string &	AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValue, const bool inCompact = true);
+
+
+#define	AJAAncDataLineNumber_Unknown	uint16_t(0x0000)	///< @brief	Packet line number is unknown.
+#define	AJAAncDataLineNumber_DontCare	uint16_t(0x07FF)	///< @brief	Packet placed/found on any legal line number.
+
+#define	IS_UNKNOWN_AJAAncDataLineNumber(_x_)		((_x_) == AJAAncDataLineNumber_Unknown)
+#define	IS_IRRELEVANT_AJAAncDataLineNumber(_x_)		((_x_) == AJAAncDataLineNumber_DontCare)
+#define	IS_GOOD_AJAAncDataLineNumber(_x_)			((_x_) > 0  &&  (_x_) < AJAAncDataLineNumber_DontCare)
 
 
 /**
@@ -318,9 +329,11 @@ typedef struct AJAAncillaryDataLocation
 		/**
 			@brief	Sets my anc data line number value.
 			@param[in]	inLineNum		Specifies the new line number value to use.
+										Can also be AJAAncDataLineNumber_DontCare.
 			@return	A non-const reference to myself.
 		**/
 		inline AJAAncillaryDataLocation &	SetLineNumber (const uint16_t inLineNum)							{lineNum = inLineNum; return *this;}
+
 
 		/**
 			@brief		Specifies the horizontal offset of the packet.
@@ -470,7 +483,12 @@ public:
 	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}		///< @return	My current ancillary data space (HANC or VANC).
 	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}		///< @return	My current frame line number value (SMPTE line numbering).
 	virtual inline uint16_t					GetLocationHorizOffset (void) const			{return GetDataLocation().GetHorizontalOffset();}		///< @return	My current horizontal offset value.
+	virtual uint16_t						GetStreamInfo (void) const;												///< @return	My 7-bit stream info (if relevant)
 
+	/**
+		@return	True if I have valid DataLink/DataStream stream information (rather than unknown).
+	**/
+	virtual inline bool						HasStreamInfo (void) const					{return IS_VALID_AJAAncillaryDataLink(GetLocationVideoLink()) && IS_VALID_AJAAncillaryDataStream(GetLocationDataStream());}
 	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}							///< @return	True if I have an empty payload.
 	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}	///< @return	True if my location component stream is Y (luma).
 	virtual inline bool						IsChromaChannel (void) const				{return GetDataLocation().IsChromaChannel ();}	///< @return	True if my location component stream is C (chroma).
@@ -512,6 +530,15 @@ public:
 		@return		True if I differ from the RHS packet.
 	**/
 	virtual inline bool						operator != (const AJAAncillaryData & inRHS) const		{return !(*this == inRHS);}
+
+	/**
+		@brief		Compares me with another packet.
+		@param[in]	inRHS				The packet I am to be compared with.
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
+		@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
+	**/
+	virtual AJAStatus						Compare (const AJAAncillaryData & inRHS, const bool inIgnoreLocation = true, const bool inIgnoreChecksum = true) const;
 
 
 	#if 1	//	BEGIN DEPRECATED SECTION
@@ -769,6 +796,18 @@ public:
 	**/
 	virtual AJAStatus						InitWithReceivedData (	const std::vector<uint8_t> &		inData,
 																	const AJAAncillaryDataLocation &	inLocationInfo);
+
+	/**
+		@brief		Initializes me from the given 32-bit IP packet words received from hardware (ingest).
+		@param[in]	inData				Specifies the "raw" packet data (in network byte order).
+		@param		inOutStartIndex		On entry, specifies the zero-based starting index number of the first
+										32-bit word associated with this Ancillary data packet.
+										On exit, if successful, receives the zero-based starting index number
+										of the first 32-bit word associated with the NEXT packet that may be
+										in the vector.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						InitWithReceivedData (const std::vector<uint32_t> & inData, uint16_t & inOutStartIndex);
 	///@}
 
 
@@ -787,7 +826,7 @@ public:
 
 	/**
 		@brief		Generates "raw" ancillary data from my internal ancillary data (playback) -- see \ref ancgumpformat.
-		@param[in]	pBuffer				Pointer to "raw" packet data buffer to be filled.
+		@param		pBuffer				Pointer to "raw" packet data buffer to be filled.
 		@param[in]	inMaxBytes			Maximum number of bytes left in the given data buffer.
 		@param[out]	outPacketSize		Receives the size, in bytes, of the generated packet.
 		@return		AJA_STATUS_SUCCESS if successful.
@@ -796,10 +835,18 @@ public:
 
 	/**
 		@brief		Generates "raw" 10-bit ancillary packet component data from my internal ancillary data (playback).
-		@param[in]	outData				Specifies the vector to which data will be appended.
+		@param		outData				Specifies the vector to which data will be appended.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GenerateTransmitData (std::vector<uint16_t> & outData) const;
+
+	/**
+		@brief		Generates the 32-bit IP packet words necessary for constructing an outgoing IP/RTP stream.
+		@param		outData				Specifies the vector into which data will be appended.
+										The data will be in network byte order (big-endian).
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GenerateTransmitData (std::vector<uint32_t> & outData) const;
 	///@}
 
 
@@ -821,6 +868,15 @@ public:
 		@return		The given output stream.
 	**/
 	virtual std::ostream &					DumpPayload (std::ostream & inOutStream) const;
+
+	/**
+		@brief		Compares me with another packet and returns a string that describes what's different.
+		@param[in]	inRHS				The packet I am to be compared with.
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
+		@return		Empty string if equal;  otherwise a string that contains the differences.
+	**/
+	virtual std::string						CompareWithInfo (const AJAAncillaryData & inRHS, const bool inIgnoreLocation = true, const bool inIgnoreChecksum = true) const;
 
 	virtual inline std::string				IDAsString (void) const	{return DIDSIDToString (GetDID(), GetSID());}	///< @return	A string representing my DID/SID.
 
@@ -875,6 +931,132 @@ public:
 	@param[in]	inAncData		Specifies the AJAAncillaryData to be rendered into the output stream.
 	@return		A non-constant reference to the specified output stream.
 **/
-inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryData & inAncData)		{return inAncData.Print (inOutStream);}
+static inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryData & inAncData)		{return inAncData.Print (inOutStream);}
+
+
+/**
+	@brief		I represent the header of an RTP packet.
+**/
+class AJAExport AJARTPAncPayloadHeader
+{
+	//	Instance Methods
+	public:
+								AJARTPAncPayloadHeader();
+		virtual inline			~AJARTPAncPayloadHeader()			{}
+
+		//	Inquiry Methods
+		virtual inline bool		IsEndOfFieldOrFrame(void) const		{return mMarkerBit;}
+		virtual inline uint8_t	GetPayloadType(void) const			{return mPayloadType;}
+		virtual inline uint32_t	GetSequenceNumber(void) const		{return mSequenceNumber;}
+		virtual inline uint32_t	GetTimeStamp(void) const			{return mTimeStamp;}
+		virtual inline uint32_t	GetSyncSourceID(void) const			{return mSyncSourceID;}
+		virtual inline uint16_t	GetPacketLength(void) const			{return mPacketLength;}
+		virtual inline uint8_t	GetAncPacketCount(void) const		{return mAncCount;}
+		virtual inline uint8_t	GetFieldSignal(void) const			{return mFieldSignal & 3;}
+		virtual inline bool		IsProgressive(void) const			{return mFieldSignal == 0;}
+		virtual inline bool		NoFieldSpecified(void) const		{return IsProgressive();}
+		virtual inline bool		IsField1(void) const				{return mFieldSignal == 2;}
+		virtual inline bool		IsField2(void) const				{return mFieldSignal == 3;}
+		virtual bool			GetULWordAtIndex(const unsigned inIndex0, uint32_t & outULWord) const;
+		virtual inline uint32_t	GetULWordAtIndex(const unsigned inIndex0) const		{uint32_t result(0); GetULWordAtIndex(inIndex0, result); return result;}
+		virtual bool			IsNULL(void) const;
+		virtual bool			IsValid(void) const;
+
+		//	I/O
+		virtual bool			WriteULWordVector(std::vector<uint32_t> & outVector, const bool inReset = true) const;
+		virtual bool			WriteBuffer(NTV2_POINTER & outBuffer) const;
+		virtual bool			ReadULWordVector(const std::vector<uint32_t> & inVector);
+		virtual bool			ReadBuffer(const NTV2_POINTER & inBuffer);
+		static inline size_t	GetHeaderByteCount(void)			{return 5 * sizeof(uint32_t);}
+
+		//	Setting
+		virtual bool							SetULWordAtIndex(const unsigned inIndex0, const uint32_t inULWord);
+		virtual inline AJARTPAncPayloadHeader &	SetField1 (void)								{return SetFieldSignal(2);}
+		virtual inline AJARTPAncPayloadHeader &	SetField2 (void)								{return SetFieldSignal(3);}
+		virtual inline AJARTPAncPayloadHeader &	SetProgressive (void)							{return SetFieldSignal(0);}
+		virtual inline AJARTPAncPayloadHeader &	SetPayloadType (const uint8_t inPayloadType)	{mPayloadType = inPayloadType & 0x7F;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetPacketLength (const uint16_t inPktLength)	{mPacketLength = inPktLength;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetAncPacketCount (const uint8_t inAncCount)	{mAncCount = inAncCount;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetTimeStamp (const uint32_t inTimeStamp)		{mTimeStamp = inTimeStamp;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetSyncSourceID (const uint32_t inSyncSrcID)	{mSyncSourceID = inSyncSrcID;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetSequenceNumber (const uint32_t inSeqNumber)	{mSequenceNumber = inSeqNumber;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetCCBits (const uint8_t inCCBits)				{mCCBits = inCCBits & 0x0F;  return *this;}
+
+		//	Debugging
+		virtual bool							operator == (const AJARTPAncPayloadHeader & inRHS) const;
+		virtual inline bool						operator != (const AJARTPAncPayloadHeader & inRHS) const	{return !(operator == (inRHS));}
+		virtual std::ostream &					Print (std::ostream & inOutStream) const;
+		static const std::string &				FieldSignalToString (const uint8_t inFBits);
+
+	protected:
+		virtual inline AJARTPAncPayloadHeader &	SetFieldSignal (const uint8_t inFieldSignal)	{mFieldSignal = (inFieldSignal & 0x03);  return *this;}
+
+	//	Instance Data
+	private:
+		uint8_t		mVBits;			//	Version:			Hardware gets/sets this -- should be 2
+		bool		mPBit;			//	Padding:			Hardware gets/sets this
+		bool		mXBit;			//	Extended Header:	Hardware gets/sets this
+		bool		mMarkerBit;		//	Marker Bit:			Hardware gets/sets this
+		uint8_t		mCCBits;		//	CSRC Count:			Hardware gets/sets this
+		uint8_t		mPayloadType;	//	Payload Type:		Hardware gets/sets this
+		uint32_t	mSequenceNumber;//	Sequence Number:	Hardware gets/sets this
+		uint32_t	mTimeStamp;		//	Time Stamp:			Hardware gets/sets this
+		uint32_t	mSyncSourceID;	//	Sync Source ID:		Playout: client sets this
+		uint16_t	mPacketLength;	//	Packet Length:		Playout: WriteIPAncData sets this
+		uint8_t		mAncCount;		//	Anc Packet Count:	Playout: WriteIPAncData sets this
+		uint8_t		mFieldSignal;	//	Field Signal:		Playout: WriteIPAncData sets this
+};	//	AJARTPAncPayloadHeader
+
+static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTPAncPayloadHeader & inObj)	{return inObj.Print(inOutStrm);}
+
+
+/**
+	@brief		I represent the 4-byte header of an anc packet that's inside an RTP packet.
+**/
+class AJAExport AJARTPAncPacketHeader
+{
+	//	Instance Methods
+	public:
+								AJARTPAncPacketHeader();
+		explicit				AJARTPAncPacketHeader(const AJAAncillaryDataLocation & inLocation);
+		virtual inline			~AJARTPAncPacketHeader()			{}
+
+		//	Inquiry Methods
+		virtual inline bool		IsCBitSet(void) const				{return mCBit;}
+		virtual inline bool		IsSBitSet(void) const				{return mSBit;}
+		virtual inline uint16_t	GetLineNumber(void) const			{return mLineNum;}
+		virtual inline uint16_t	GetHorizOffset(void) const			{return mHOffset;}
+		virtual inline uint8_t	GetStreamNumber(void) const			{return mStreamNum;}
+		virtual AJAAncillaryDataLocation	AsDataLocation(void) const;
+
+		virtual uint32_t		GetULWord(void) const;
+		virtual bool			SetFromULWord (const uint32_t inULWord);
+		virtual bool			WriteToULWordVector(std::vector<uint32_t> & outVector, const bool inReset = true) const;
+		virtual bool			ReadFromULWordVector(const std::vector<uint32_t> & inVector, const unsigned inIndex0);
+
+		//	Setting
+		virtual inline AJARTPAncPacketHeader &	SetCChannel(void)							{mCBit = true;  return *this;}
+		virtual inline AJARTPAncPacketHeader &	SetYChannel(void)							{mCBit = false;  return *this;}
+		virtual inline AJARTPAncPacketHeader &	SetLineNumber(const uint16_t inLineNum)		{mLineNum = inLineNum & 0x7FF;  return *this;}
+		virtual inline AJARTPAncPacketHeader &	SetHorizOffset(const uint16_t inHOffset)	{mHOffset = inHOffset & 0x0FFF;  return *this;}
+		virtual inline AJARTPAncPacketHeader &	SetStreamNumber(const uint8_t inStreamNum)	{mStreamNum = inStreamNum & 0x07F;  return *this;}
+		virtual inline AJARTPAncPacketHeader &	SetDataStreamFlag(const bool inFlag)		{mSBit = inFlag;  return *this;}
+		virtual AJARTPAncPacketHeader &	SetFrom(const AJAAncillaryDataLocation & inLocation);
+		virtual inline AJARTPAncPacketHeader &	operator = (const AJAAncillaryDataLocation & inLocation)	{return SetFrom(inLocation);}
+
+		//	Streaming
+		virtual std::ostream &		Print (std::ostream & inOutStream) const;
+
+	//	Instance Data
+	private:
+		bool		mCBit;		//	C-channel bit
+		bool		mSBit;		//	Data Stream Flag bit
+		uint16_t	mLineNum;	//	Line number			(host byte order)
+		uint16_t	mHOffset;	//	Horizontal offset	(host byte order)
+		uint8_t		mStreamNum;	//	Stream number
+};	//	AJARTPAncPacketHeader
+
+static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTPAncPacketHeader & inObj)	{return inObj.Print(inOutStrm);}
+AJAExport std::string PrintULWordsBE (const ULWordSequence & inData, const unsigned inMaxNum = 32);
 
 #endif	// AJA_ANCILLARYDATA_H

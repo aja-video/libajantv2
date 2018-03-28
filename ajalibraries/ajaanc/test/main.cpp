@@ -22,6 +22,7 @@ using namespace std;
 
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2_POINTER gIPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 
 
@@ -1262,13 +1263,13 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 			AncillaryList 'a' to buffer to AncillaryList 'b':
 				AJAAncillaryList 'a'	=>	8-bit GUMP			=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBuffer8BitGumpToAncList
-				AJAAncillaryList 'a'	=>	IP-GUMP				=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBufferIPGumpToAncList
+				AJAAncillaryList 'a'	=>	IP-RTP				=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToIPBufferToAncList
 				AJAAncillaryList 'a'	=>	FB-VANC-8bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBufferYUV8ToAncList
 				AJAAncillaryList 'a'	=>	FB-VANC-10bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBufferYUV10ToAncList
 
 			Buffer 'a' to AncillaryList to buffer 'b':
 				8-bit GUMP 'a'			=>	AJAAncillaryList	=>	8-bit GUMP 'b'				Verify buffer contents 'a' == 'b'	BFT_Buffer8BitGumpToAncListToBuffer8BitGump
-				IP-GUMP 'a'				=>	AJAAncillaryList	=>	IP-GUMP 'b'					Verify buffer contents 'a' == 'b'	BFT_BufferIPGumpToAncListToBufferIPGump
+				IP-RTP 'a'				=>	AJAAncillaryList	=>	IP-RTP 'b'					Verify buffer contents 'a' == 'b'	BFT_BufferIPGumpToAncListToBufferIPGump
 				FB-VANC-8bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-8bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_BufferYUV8ToAncListToBufferYUV8
 				FB-VANC-10bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-10bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_BufferYUV10ToAncListToBufferYUV10
 		*/
@@ -1353,11 +1354,90 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			return true;
 		}
 
-		static bool BFT_AncListToBufferIPGumpToAncList (void)
+		static bool BFT_AncListToIPBufferToAncList (void)
 		{
-			cerr << "BFT_AncListToBufferIPGumpToAncList passed" << endl;
+			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
+			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			{
+				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Trying " << ::NTV2VideoFormatToString(vFormat));
+				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				//	Make the transmit packets...
+				AJAAncillaryData_Cea608_Vanc	pkt608F1;
+				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
+				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
+				SHOULD_SUCCEED(pkt608F1.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F1.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+	
+				AJAAncillaryData_Cea608_Vanc	pkt608F2;
+				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
+				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
+				SHOULD_SUCCEED(pkt608F2.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F2.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+	
+				AJAAncillaryData_HDR_HLG		pktHDR;
+				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+	
+				AJAAncillaryData				pktCustomY;
+				SHOULD_SUCCEED(pktCustomY.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
+				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
+				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+	
+				AJAAncillaryData				pktCustomC;
+				SHOULD_SUCCEED(pktCustomC.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 11 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
+				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
+				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+	
+				//	Make the transmit packet list...
+				AJAAncillaryList	txPkts;
+				SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
+				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
+				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
+				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+				if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
+
+				//	Transmit the packets into the IP buffer...
+				NTV2_POINTER	IPF1(4096), IPF2(4096);
+				SHOULD_SUCCEED(txPkts.GetAncillaryDataTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
+
+				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_IPBufferToAncListToIPBuffer...
+				gIPBuffers[vFormat] = NTV2_POINTER(IPF1);
+
+				//	Receive packets from the IP buffer...
+				AJAAncillaryList	rxPkts;
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromIPAncData(IPF1, IPF2, rxPkts));
+				if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
+
+				//	Compare the Tx and Rx packet lists...
+				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, false/*ignoreLocation*/, false/*ignoreChecksum*/));
+				if (!cmpInfo.empty())
+					cerr << "Mis-compare:" << endl << cmpInfo << endl;
+				SHOULD_BE_TRUE(cmpInfo.empty());
+			}	//	for each video format
+			AJA_sNOTICE(AJA_DebugUnit_Unused_40, "BFT_AncListToIPBufferToAncList passed");
+			cerr << "BFT_AncListToIPBufferToAncList passed" << endl;
 			return true;
-		}
+		}	//	BFT_AncListToIPBufferToAncList
+
 		static bool BFT_AncListToBufferYUV8ToAncList (void)
 		{
 			cerr << "BFT_AncListToBufferYUV8ToAncList passed" << endl;
@@ -1493,16 +1573,65 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			return true;
 		}
 
-		static bool BFT_BufferIPGumpToAncListToBufferIPGump (void)
+		static bool BFT_IPBufferToAncListToIPBuffer (void)
 		{
-			cerr << "BFT_BufferIPGumpToAncListToBufferIPGump passed" << endl;
+			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			if (gIsVerbose)	cerr << endl << "Starting BFT_IPBufferToAncListToIPBuffer..." << endl;
+			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			{
+				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				AJAAncillaryList			rxPkts;
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Trying " << ::NTV2VideoFormatToString(vFormat));
+				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToIPBufferToAncList...
+				const NTV2_POINTER	F1RTP_a	(gIPBuffers[vFormat]);
+				NTV2_POINTER		F1RTP_b	(F1RTP_a.GetByteCount()),	F2RTP_b(F1RTP_a.GetByteCount());
+				//	Unpack into an AJAAncillaryList of anc packets...
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromIPAncData(F1RTP_a, NTV2_POINTER(), rxPkts));
+				//	Re-pack into a n AJAAncillaryList of anc packets...
+				SHOULD_SUCCEED(rxPkts.GetAncillaryDataTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				//	Content of "A" and "B" buffers should be the same...
+				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4))
+				{
+					cerr << "MIS-COMPARE:" << endl
+						 << "Rx RTP: " << F1RTP_a.GetU32s(32, true) << endl
+						 << "CmpRTP: " << F1RTP_b.GetU32s(32,true) << endl;
+					AJAAncillaryList	b_pkts;
+					AJAAncillaryList::SetFromIPAncData(F1RTP_b, NTV2_POINTER(), b_pkts);
+					const string	info	(rxPkts.CompareWithInfo(b_pkts, false, false));
+					if (!info.empty())
+						cerr << "RxPkts != B-Pkts --- MISCOMPARE" << endl << info << endl;
+					cerr << "RxPkts: " << rxPkts << endl
+						<<  "B Pkts: " << b_pkts << endl;
+					const AJAAncillaryData *	rxA(rxPkts.GetAncillaryDataAtIndex(1));
+					const AJAAncillaryData *	rxB(b_pkts.GetAncillaryDataAtIndex(1));
+					if (*rxA != *rxB)
+						cerr << rxA->AsString() << " != " << rxB->AsString() << endl;
+					else
+						cerr << rxA->AsString() << " == " << rxB->AsString() << endl;
+					cerr << rxA->CompareWithInfo(*rxB, false, false) << endl;
+				}
+				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4));
+			}	//	for each vFormat
+			cerr << "BFT_IPBufferToAncListToIPBuffer passed" << endl;
 			return true;
-		}
+		}	//	BFT_IPBufferToAncListToIPBuffer
+
 		static bool BFT_BufferYUV8ToAncListToBufferYUV8 (void)
 		{
 			cerr << "BFT_BufferYUV8ToAncListToBufferYUV8 passed" << endl;
 			return true;
 		}
+
 		static bool BFT_BufferYUV10ToAncListToBufferYUV10 (void)
 		{
 			//	NOTE:	This test relies on YUV10 buffers generated by BFT_AncListToBufferYUV10ToAncList
@@ -1625,6 +1754,62 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		}
 
 
+		static bool RTPHeaderBFT (void)
+		{
+			AJARTPAncPayloadHeader	hdrA, hdrB;
+			SHOULD_BE_TRUE(hdrA.IsValid());
+			SHOULD_BE_TRUE(hdrA == hdrB);
+			SHOULD_BE_EQUAL(hdrA, hdrB);
+			//	Set stuff the hardware ordinarily sets...
+			hdrB.SetCCBits(0x5).SetPayloadType(0xF5).SetSequenceNumber(0x12345678).SetTimeStamp(0x6789ABCD).SetSyncSourceID(0xBaadF00d);
+			//	Set stuff the client needs to set...
+			hdrB.SetPacketLength(0x4321).SetAncPacketCount(20).SetField2();
+			SHOULD_BE_TRUE(hdrB.IsValid());
+			SHOULD_BE_UNEQUAL(hdrA, hdrB);
+			SHOULD_BE_FALSE(hdrB.IsField1());
+			SHOULD_BE_TRUE(hdrB.IsField2());
+			SHOULD_BE_FALSE(hdrB.IsProgressive());
+			SHOULD_BE_EQUAL(hdrB.GetPacketLength(), 0x4321);
+			SHOULD_BE_EQUAL(hdrB.GetAncPacketCount(), 20);
+			SHOULD_BE_EQUAL(hdrB.GetSyncSourceID(), 0xBaadF00d);
+			SHOULD_BE_EQUAL(hdrB.GetPayloadType(), 0x75);
+			NTV2_POINTER	nullBuffer;
+			SHOULD_BE_FALSE(hdrB.WriteBuffer(nullBuffer));
+
+			//	HdrB => buffer => HdrC	. . .	verify HdrB == HdrC
+			AJARTPAncPayloadHeader	hdrC, hdrD, hdrE;
+			NTV2_POINTER	bBuffer(4096);
+			SHOULD_BE_TRUE(hdrB.WriteBuffer(bBuffer));
+			if (gIsVerbose)
+				cerr << "hdrB: " << hdrB << endl << bBuffer.AsString(20) << endl;
+			SHOULD_BE_TRUE(hdrC.ReadBuffer(bBuffer));
+			if (gIsVerbose)
+				cerr << "hdrC: " << hdrC << endl;
+
+			//	bufferB => HdrD => bufferC . . .	verify bufferA == bufferB
+			NTV2_POINTER	cBuffer(bBuffer.GetByteCount());
+			SHOULD_BE_TRUE(hdrD.ReadBuffer(bBuffer));
+			SHOULD_BE_TRUE(hdrD.WriteBuffer(cBuffer));
+			SHOULD_BE_TRUE(cBuffer.IsContentEqual(bBuffer));
+
+			//	HdrB => u32vectorA => HdrE	. . .	verify HdrB == HdrE
+			vector<uint32_t>	u32vectorA, u32vectorTooSmall;
+			for (unsigned ndx(0);  ndx < 20;  ndx++)	u32vectorA.push_back(0xFFFFFFFF);
+			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is 20
+			vector<uint32_t>	u32vectorB (u32vectorA);
+			SHOULD_BE_EQUAL(u32vectorB.size(), 20);	//	Size is 20
+			SHOULD_BE_TRUE(hdrB.WriteULWordVector(u32vectorA, false));
+			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is unchanged -- still 20
+			SHOULD_BE_TRUE(hdrB.WriteULWordVector(u32vectorB, true));
+			SHOULD_BE_EQUAL(u32vectorB.size(), 5);	//	Size is changed to 5 due to "reset" param being 'true'
+			SHOULD_BE_FALSE(hdrE.ReadULWordVector(u32vectorTooSmall));
+			SHOULD_BE_FALSE(hdrE.SetULWordAtIndex(5, 0xFFFFFFFF));
+			SHOULD_BE_TRUE(hdrE.ReadULWordVector(u32vectorA));
+			SHOULD_BE_EQUAL(hdrB, hdrE);
+			return true;
+		}
+
+
 		static bool BFT (void)
 		{
 			//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
@@ -1698,6 +1883,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SD10BitYUVComponents.push_back(SD10BitYCbCrLine[ndx]);
 			SHOULD_BE_TRUE(BFT_YUVComponentsTo10BitYUVPackedBuffer(SD10BitYUVComponents));
 			YUVLine = SD10BitYUVComponents;
+AJADebug::Open();
+AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Starting CNTV2AncDataTester BFT");
 
 			if (false)
 				SHOULD_BE_TRUE(BFT_AncEnums());
@@ -1719,26 +1906,28 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 			if (true)	//	ROUND-TRIP AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer BFTs...
 			{
+				if (true)
+					SHOULD_BE_TRUE(RTPHeaderBFT());
 				if (false)
 					SHOULD_BE_TRUE(BFT_AncListToBuffer8BitGumpToAncList());
 				if (false)
 					SHOULD_BE_TRUE(BFT_Buffer8BitGumpToAncListToBuffer8BitGump());
-				if (false)
-					SHOULD_BE_TRUE(BFT_AncListToBufferIPGumpToAncList());
-				if (false)
-					SHOULD_BE_TRUE(BFT_BufferIPGumpToAncListToBufferIPGump());
+				if (true)
+					SHOULD_BE_TRUE(BFT_AncListToIPBufferToAncList());
+				if (true)
+					SHOULD_BE_TRUE(BFT_IPBufferToAncListToIPBuffer());
 				if (false)
 					SHOULD_BE_TRUE(BFT_AncListToBufferYUV8ToAncList());
 				if (false)
 					SHOULD_BE_TRUE(BFT_BufferYUV8ToAncListToBufferYUV8());
-				if (true)
+				if (false)
 					SHOULD_BE_TRUE(BFT_AncListToBufferYUV10ToAncList());
-				if (true)
+				if (false)
 					SHOULD_BE_TRUE(BFT_BufferYUV10ToAncListToBufferYUV10());
 				cerr << "AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer round-trip BFTs passed" << endl;
 			}
 
-			if (true)
+			if (false)
 				SHOULD_BE_TRUE (BFT_AncDataCEA608Vanc());
 
 			if (false /* NOT YET READY FOR PRIME TIME */)
@@ -1751,6 +1940,45 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		}	//	BFT
 
 };	//	CNTV2AncDataTester
+
+
+//	This explicitly tests AJAAncillaryData::GenerateTransmitData:
+static bool GenerateIPPacketWordsBFT (void)
+{
+	static const string	pkts[]	=	{	"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A",
+										"\x01\x02\x03\x04\x05\x06\x07\x08\x09",
+										"\x01\x02\x03\x04\x05\x06\x07\x08",
+										"\x01\x02\x03\x04\x05\x06\x07",
+										"\x01\x02\x03\x04\x05\x06",
+										"\x01\x02\x03\x04\x05",
+										"\x01\x02\x03\x04",
+										"\x01\x02\x03",
+										"\x01\x02",
+										"\x01",
+										""};
+	vector<uint32_t>	pktWords;
+	unsigned			ndx(0);
+	while(true)
+	{
+		AJAAncillaryData	pkt;
+		const string &		data(pkts[ndx++]);
+		pkt.SetDID(0x33);  pkt.SetSID(0x55);  pkt.SetLocationLineNumber(9);
+		if (!data.empty())
+			SHOULD_SUCCEED(pkt.SetPayloadData(reinterpret_cast<const uint8_t *>(data.c_str()), uint32_t(data.length())));
+		SHOULD_SUCCEED(pkt.GenerateTransmitData(pktWords));
+		if (data.empty())
+			break;	//	Done
+	};
+	return true;
+}
 
 
 static bool RunAllTests (void)

@@ -18,6 +18,24 @@ using namespace std;
 #define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
 #define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
+#if defined(AJAHostIsBigEndian)
+	//	Host is BigEndian (BE)
+	#define AJA_ENDIAN_16NtoH(__val__)		(__val__)
+	#define AJA_ENDIAN_16HtoN(__val__)		(__val__)
+	#define AJA_ENDIAN_32NtoH(__val__)		(__val__)
+	#define AJA_ENDIAN_32HtoN(__val__)		(__val__)
+	#define AJA_ENDIAN_64NtoH(__val__)		(__val__)
+	#define AJA_ENDIAN_64HtoN(__val__)		(__val__)
+#else
+	//	Host is LittleEndian (LE)
+	#define AJA_ENDIAN_16NtoH(__val__)		AJA_ENDIAN_SWAP16(__val__)
+	#define AJA_ENDIAN_16HtoN(__val__)		AJA_ENDIAN_SWAP16(__val__)
+	#define AJA_ENDIAN_32NtoH(__val__)		AJA_ENDIAN_SWAP32(__val__)
+	#define AJA_ENDIAN_32HtoN(__val__)		AJA_ENDIAN_SWAP32(__val__)
+	#define AJA_ENDIAN_64NtoH(__val__)		AJA_ENDIAN_SWAP64(__val__)
+	#define AJA_ENDIAN_64HtoN(__val__)		AJA_ENDIAN_SWAP64(__val__)
+#endif
+
 
 static bool	gIncludeZeroLengthPackets	(false);
 
@@ -190,7 +208,8 @@ AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncDat
 	// Note: this makes a clone of the incoming AJAAncillaryData object and
 	// saves it in the List. The caller is responsible for deleting the original,
 	// and the List owns the clone.
-	AJAAncillaryData *	pData = pInAncData->Clone();
+	const bool			wasEmpty	(m_ancList.empty());
+	AJAAncillaryData *	pData		(pInAncData->Clone());
 	if (!pData)
 		return AJA_STATUS_FAIL;
 
@@ -198,7 +217,7 @@ AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncDat
 	if (pData)
 		m_ancList.push_back(pData);
 
-	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) stored after appending packet " << pData->AsString(32));
+	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) stored" << (wasEmpty ? " from" : " after appending") << " packet " << pData->AsString(32));
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -314,25 +333,28 @@ AJAStatus AJAAncillaryList::Compare (const AJAAncillaryList & inCompareList, con
 	{
 		AJAAncillaryData *	pPktA	(inCompareList.GetAncillaryDataAtIndex(ndx));
 		AJAAncillaryData *	pPktB	(inCompareList.GetAncillaryDataAtIndex(ndx));
-		if (pPktA->GetDID() != pPktB->GetDID())
+		if (AJA_FAILURE(pPktA->Compare(*pPktB, inIgnoreLocation, inIgnoreChecksum)))
 			return AJA_STATUS_FAIL;
-		if (pPktA->GetSID() != pPktB->GetSID())
-			return AJA_STATUS_FAIL;
-		if (pPktA->GetDC() != pPktB->GetDC())
-			return AJA_STATUS_FAIL;
-		if (pPktA->GetDataCoding() != pPktB->GetDataCoding())
-			return AJA_STATUS_FAIL;
-		if (!inIgnoreChecksum)
-			if (pPktA->GetChecksum() != pPktB->GetChecksum())
-				return AJA_STATUS_FAIL;
-		if (!inIgnoreLocation)
-			if (!(pPktA->GetDataLocation() == pPktB->GetDataLocation()))
-				return AJA_STATUS_FAIL;
-		if (!pPktA->IsEmpty())
-			if (::memcmp(pPktA->GetPayloadData(), pPktB->GetPayloadData(), pPktA->GetPayloadByteCount()))
-				return AJA_STATUS_FAIL;
 	}	//	for each packet
 	return AJA_STATUS_SUCCESS;
+}
+
+
+string AJAAncillaryList::CompareWithInfo (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation,  const bool inIgnoreChecksum) const
+{
+	ostringstream	oss;
+	if (inCompareList.CountAncillaryData() != CountAncillaryData())
+		{oss << "Packet count mismatch: " << DEC(CountAncillaryData()) << " vs " << DEC(inCompareList.CountAncillaryData());  return oss.str();}
+
+	for (uint32_t ndx (0);  ndx < CountAncillaryData();  ndx++)
+	{
+		AJAAncillaryData *	pPktA	(inCompareList.GetAncillaryDataAtIndex(ndx));
+		AJAAncillaryData *	pPktB	(inCompareList.GetAncillaryDataAtIndex(ndx));
+		const string		info	(pPktA->CompareWithInfo(*pPktB, inIgnoreLocation, inIgnoreChecksum));
+		if (!info.empty())
+			return info;
+	}	//	for each packet
+	return string();
 }
 
 
@@ -468,6 +490,58 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 }	//	AddReceivedAncillaryData
 
 
+//	Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
+//	AJAAncillaryData objects and append them to me.
+AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const vector<uint32_t> & inReceivedData)
+{
+	AJAStatus	status	(AJA_STATUS_SUCCESS);
+	if (inReceivedData.empty())
+		{LOGMYWARN("Empty RTP data vector");  return AJA_STATUS_SUCCESS;}
+
+LOGMYDEBUG(PrintULWordsBE(inReceivedData));
+
+	//	Crack open the RTP packet header...
+	AJARTPAncPayloadHeader	RTPheader;
+	if (!RTPheader.ReadULWordVector(inReceivedData))
+		{LOGMYERROR("AJARTPAncPayloadHeader::ReadULWordVector failed, " << DEC(4*inReceivedData.size()) << " header bytes");  return AJA_STATUS_FAIL;}
+	if (RTPheader.IsNULL())
+		{LOGMYWARN("No anc packets added: NULL RTP header: " << RTPheader);  return AJA_STATUS_SUCCESS;}	//	Not an error
+	if (!RTPheader.IsValid())
+		{LOGMYWARN("RTP header invalid: " << RTPheader);  return AJA_STATUS_FAIL;}
+
+	const size_t	numBytes		(RTPheader.GetPacketLength());
+	const uint32_t	numPackets		(RTPheader.GetAncPacketCount());
+	const size_t	actualBytes		(inReceivedData.size() * 4 - RTPheader.GetHeaderByteCount());
+
+	if (actualBytes < numBytes)
+		{LOGMYERROR("RTP header says " << DEC(numBytes) << "-byte pkt, but only given " << DEC(actualBytes) << " bytes: " << RTPheader);  return AJA_STATUS_BADBUFFERCOUNT;}
+	else if (actualBytes != numBytes)
+		;//LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
+	if (!numPackets)
+		{LOGMYWARN("No Anc packets to append: " << RTPheader);  return AJA_STATUS_SUCCESS;}
+
+LOGMYDEBUG(RTPheader);
+
+	uint16_t	u32Ndx	(5);	//	First Anc packet starts at ULWord[5]
+	unsigned	pktNum	(0);
+	for (;  pktNum < numPackets  &&  AJA_SUCCESS(status);  pktNum++)
+	{
+		AJAAncillaryData	pkt;
+		status = pkt.InitWithReceivedData(inReceivedData, u32Ndx);
+		if (AJA_FAILURE(status))
+			continue;
+		status = AddAncillaryData(pkt);
+	}	//	for each anc packet
+	if (AJA_FAILURE(status))
+		LOGMYERROR(::AJAStatusToString(status) << ": Failed at pkt " << DEC(pktNum) << " of " << DEC(numPackets));
+	if (CountAncillaryData() < numPackets)
+		LOGMYWARN(DEC(CountAncillaryData()) << " of " << DEC(numPackets) << " anc packet(s) decoded from RTP packet");
+	else
+		LOGMYINFO(DEC(numPackets) << " added from RTP packet: " << *this);
+	return status;
+}	//	AddReceivedAncillaryData
+
+
 static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
 											const vector<uint16_t> &		inPacketWords,
 											const AJAAncillaryDataLocation	inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A,
@@ -479,8 +553,9 @@ static AJAStatus AppendUWordPacketToGump (	vector<uint8_t> &				outGumpPkt,
 
 	if (inPacketWords.size () < 7)
 		return AJA_STATUS_RANGE;
-	if (false)	//	!inLoc.IsValid())		//	NOTE: Tough call. Decided not to validate the AJAAncillaryDataLocation here.
-		return AJA_STATUS_BAD_PARAM;
+//	NOTE: Tough call. Decided not to validate the AJAAncillaryDataLocation here:
+//	if (!inLoc.IsValid())
+//		return AJA_STATUS_BAD_PARAM;
 
 	//	Use this as an uninitialized template...
 	vector<uint16_t>::const_iterator	iter	(inPacketWords.begin());
@@ -650,6 +725,8 @@ AJAStatus AJAAncillaryList::SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffe
 {
 	AJAStatus	result	(AJA_STATUS_SUCCESS);
 	outPackets.Clear();
+	if (inF1AncBuffer.IsNULL())
+		LOGMYWARN("Empty/null F1 RTP anc buffer");
 	if (!inF1AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
 		result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF1AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
 	if (!inF2AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
@@ -658,18 +735,31 @@ AJAStatus AJAAncillaryList::SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffe
 }
 
 
-AJAStatus AJAAncillaryList::SetFromIPAncData (const NTV2_POINTER & inRTPAncBuffer,
+AJAStatus AJAAncillaryList::SetFromIPAncData (const NTV2_POINTER & inF1AncBuffer,
+											const NTV2_POINTER & inF2AncBuffer,
 											AJAAncillaryList & outPackets)
 {
+	AJAStatus	result	(AJA_STATUS_SUCCESS);
 	outPackets.Clear();
-	if (inRTPAncBuffer.IsNULL())
 	{
-		LOGMYWARN("AJA_STATUS_NULL: empty/null RTP anc buffer");
-		return AJA_STATUS_NULL;
+		vector<uint32_t>	F1U32s;
+
+		if (inF1AncBuffer.IsNULL())
+			LOGMYWARN("Empty/null F1 RTP anc buffer");
+		else if (!inF1AncBuffer.GetU32s(F1U32s))
+			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer.GetU32s failed, AJA_STATUS_MEMORY");}	//	Fail
+		if (AJA_SUCCESS(result)  &&  !F1U32s.empty())
+			result = outPackets.AddReceivedAncillaryData(F1U32s);
 	}
-	LOGMYERROR("AJA_STATUS_UNSUPPORTED: unimplemented");
-	return AJA_STATUS_UNSUPPORTED;
-//	return outPackets.AppendReceivedRTPAncillaryData (reinterpret_cast <const uint32_t *> (inRTPAncBuffer.GetHostPointer()), inRTPAncBuffer.GetByteCount());
+	if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.IsNULL())
+	{
+		vector<uint32_t>	F2U32s;
+		if (!inF2AncBuffer.GetU32s(F2U32s))
+			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer.GetU32s failed, AJA_STATUS_MEMORY");}
+		else
+			result = outPackets.AddReceivedAncillaryData(F2U32s);
+	}
+	return result;
 }
 
 
@@ -959,17 +1049,212 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 }	//	WriteVANCData
 
 
-AJAStatus AJAAncillaryList::WriteRTPAncData (NTV2_POINTER & inRTPBuffer) const
+AJAStatus AJAAncillaryList::GetIPAncDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
+														uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
+														uint32_t & outF1PktCount, uint32_t & outF2PktCount) const
 {
-	if (inRTPBuffer.IsNULL())
+	outF1ByteCount = outF2ByteCount = uint32_t(AJARTPAncPayloadHeader::GetHeaderByteCount());	//	5 uint32_t's ... 20-byte minimum header size
+	outF1PktCount = outF2PktCount = 0;
+
+	for (AJAAncDataListConstIter it(m_ancList.begin ());  it != m_ancList.end();  ++it)
 	{
-		LOGMYERROR("AJA_STATUS_NULL: null/empty destination buffer");
-		return AJA_STATUS_NULL;
+		const AJAAncillaryData *	pAncData	(*it);
+		if (!pAncData)
+			return AJA_STATUS_NULL;	//	Fail
+
+		const AJAAncillaryData &	pkt	(*pAncData);
+		if (pkt.GetDataCoding() != AJAAncillaryDataCoding_Digital)
+			continue;	//	Skip analog/raw packets
+
+		uint32_t	dc(pkt.GetDC() > 255 ? 255 : pkt.GetDC());	//	Data count, clamped at 255
+		uint32_t	packetSize(4);								//	4 bytes of header (C, LineNum, HOffset, StreamNum)
+		packetSize += 5 * (dc + 4) / 4;							//	+ 10 bits per UDW & CS & DID & SID & DC, packed into 4-byte longwords
+		if ((5 * (dc + 4)) % 4)
+			packetSize += 1;									//	+ extra byte, if needed
+		if ((packetSize % 4) != 0)
+			packetSize += packetSize % 4;						//	+ pad to whole longword
+
+		if (!inIsProgressive)
+		{
+			if (pkt.GetLocationLineNumber() < inF2StartLine)
+			{
+				outF1ByteCount += packetSize;
+				outF1PktCount++;
+			}
+			else
+			{
+				outF2ByteCount += packetSize;
+				outF2PktCount++;
+			}
+		}
+		else
+		{
+			outF1ByteCount += packetSize;
+			outF1PktCount++;
+		}
+	}	//	for each packet
+	return AJA_STATUS_SUCCESS;
+}	//	GetIPAncDataTransmitSize
+
+
+AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+															const bool inIsProgressive, const uint32_t inF2StartLine) const
+{
+	if (F1Buffer.IsNULL())
+		{LOGMYERROR("AJA_STATUS_NULL: null/empty F1 buffer");	return AJA_STATUS_NULL;}
+	if (!inIsProgressive  &&  F2Buffer.IsNULL())
+		{LOGMYERROR("AJA_STATUS_NULL: null/empty F2 buffer");	return AJA_STATUS_NULL;}
+
+	uint32_t	F1ByteCount(0), F2ByteCount(0), F1PktCnt(0), F2PktCnt(0), actF1PktCnt(0), actF2PktCnt(0);
+	AJAStatus	status	(GetIPAncDataTransmitSize (inIsProgressive, inF2StartLine, F1ByteCount, F2ByteCount, F1PktCnt, F2PktCnt));
+	if (AJA_FAILURE(status))
+		return status;	//	Failure here unlikely, don't log it, just return the status code
+
+	if (F1PktCnt > 255)
+		LOGMYWARN("F1 packet count " << DEC(F1PktCnt) << " exceeds 255");
+	if (!inIsProgressive  &&  F2PktCnt > 255)
+		LOGMYWARN("F2 packet count " << DEC(F2PktCnt) << " exceeds 255");
+
+	if (F1Buffer.GetByteCount() < F1ByteCount)	//	F1 buffer too small?
+	{
+		if (F1Buffer.IsProvidedByClient())
+		{
+			LOGMYERROR("AJA_STATUS_BADBUFFERSIZE: F1 buffer size " << DEC(F1Buffer.GetByteCount())
+						<< " too small, needs " << DEC(F1ByteCount) << " to hold " << F1PktCnt << " packet(s)");
+			return AJA_STATUS_BADBUFFERSIZE;
+		}
+		//	Resize...
+		if (!F1Buffer.Allocate(F1ByteCount))
+		{
+			LOGMYERROR("AJA_STATUS_MEMORY: Unable to resize F1 buffer to " << DEC(F1ByteCount) << " bytes to hold "
+						<< F1PktCnt << " packet(s)");
+			return AJA_STATUS_MEMORY;
+		}
+		LOGMYDEBUG("Resized F1 buffer to " << DEC(F1ByteCount) << " bytes to hold " << F1PktCnt << " packet(s)");
 	}
 
-	LOGMYERROR("AJA_STATUS_UNSUPPORTED: unimplemented");
-	return AJA_STATUS_UNSUPPORTED;
-}
+	if (!inIsProgressive  &&  F2Buffer.GetByteCount() < F2ByteCount)
+	{
+		if (F2Buffer.IsProvidedByClient())
+		{
+			LOGMYERROR("AJA_STATUS_BADBUFFERSIZE: F2 buffer size " << DEC(F2Buffer.GetByteCount())
+						<< " too small, needs " << DEC(F2ByteCount) << " to hold " << F2PktCnt << " packet(s)");
+			return AJA_STATUS_BADBUFFERSIZE;
+		}
+		//	Resize...
+		if (!F2Buffer.Allocate(F2ByteCount))
+		{
+			LOGMYERROR("AJA_STATUS_MEMORY: Unable to resize F2 buffer to " << DEC(F2ByteCount) << " bytes to hold "
+						<< F2PktCnt << " packet(s)");
+			return AJA_STATUS_MEMORY;
+		}
+		LOGMYDEBUG("Resized F2 buffer to " << DEC(F2ByteCount) << " bytes to hold " << F2PktCnt << " packet(s)");
+	}
+
+	//	Reserve space in ULWord vectors...
+	AJAStatus			result	(AJA_STATUS_SUCCESS);
+	vector<uint32_t>	U32F1s, U32F2s;	//	32-bit network-byte-order data
+	U32F1s.reserve(F1ByteCount/sizeof(uint32_t));
+	if (F2PktCnt)
+		U32F2s.reserve(F2ByteCount/sizeof(uint32_t));
+
+	//	Generate transmit data for each of my packets...
+	for (uint32_t pktNdx(0);  pktNdx < CountAncillaryData();  pktNdx++)
+	{
+		const AJAAncillaryData *	pAncData	(GetAncillaryDataAtIndex(pktNdx));
+		if (!pAncData)
+			return AJA_STATUS_NULL;	//	Fail
+
+		const AJAAncillaryData &	pkt	(*pAncData);
+		if (pkt.GetDataCoding() != AJAAncillaryDataCoding_Digital)
+		{
+			LOGMYDEBUG("Skipped Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " -- Analog/Raw");
+			continue;	//	Skip analog/raw packets
+		}
+
+		if (!inIsProgressive)
+		{
+			if (pkt.GetLocationLineNumber() < inF2StartLine)
+			{
+				result = pkt.GenerateTransmitData(U32F1s);
+				if (AJA_SUCCESS(result))
+					actF1PktCnt++;
+			}
+			else
+			{
+				result = pkt.GenerateTransmitData(U32F2s);
+				if (AJA_SUCCESS(result))
+					actF2PktCnt++;
+			}
+		}
+		else
+		{
+			result = pkt.GenerateTransmitData(U32F1s);
+			if (AJA_SUCCESS(result))
+				actF1PktCnt++;
+		}
+		if (AJA_FAILURE(result))
+		{
+			LOGMYERROR("Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData())
+						<< " failed in GenerateTransmitData: " << ::AJAStatusToString(result));
+			break;
+		}
+	}	//	for each packet
+
+	//	Write F1 RTP header...
+	AJARTPAncPayloadHeader	RTPHeaderF1, RTPHeaderF2;
+	if (inIsProgressive)
+		RTPHeaderF1.SetProgressive();
+	else
+		RTPHeaderF1.SetField1();
+	RTPHeaderF1.SetAncPacketCount(uint8_t(F1PktCnt));
+	RTPHeaderF1.SetPacketLength (uint16_t(U32F1s.size() * sizeof(uint32_t)));
+	size_t	RTPsize	(RTPHeaderF1.GetPacketLength() + RTPHeaderF1.GetHeaderByteCount());
+	if (actF1PktCnt != F1PktCnt)
+		LOGMYWARN("Predicted F1PktCnt " << DEC(F1PktCnt) << " doesn't match actual pkt count " << DEC(actF1PktCnt));
+	if (RTPsize != F1ByteCount)
+		LOGMYWARN("Predicted F1ByteCount " << DEC(F1ByteCount) << " for " << DEC(actF1PktCnt) << " pkts doesn't match actual size " << DEC(RTPsize));
+	if (!RTPHeaderF1.WriteBuffer(F1Buffer))
+		LOGMYWARN("AJA_STATUS_BADBUFFERSIZE: F1 buffer size " << DEC(F1Buffer.GetByteCount())
+					<< " too small, needs " << DEC(F1ByteCount) << " to hold " << F1PktCnt << " packet(s)");
+
+	if (!inIsProgressive)
+	{
+		RTPHeaderF2.SetField2();
+		RTPHeaderF2.SetAncPacketCount(uint8_t(F2PktCnt));
+		RTPHeaderF2.SetPacketLength (uint16_t(U32F2s.size() * sizeof(uint32_t)));
+		RTPsize = RTPHeaderF2.GetPacketLength() + RTPHeaderF2.GetHeaderByteCount();
+		if (actF2PktCnt != F2PktCnt)
+			LOGMYWARN("Predicted F2PktCnt " << DEC(F2PktCnt) << " doesn't match actual pkt count " << DEC(actF2PktCnt));
+		if (RTPsize != F2ByteCount)
+			LOGMYWARN("Predicted F2ByteCount " << DEC(F2ByteCount) << " for " << DEC(actF2PktCnt) << " pkts doesn't match actual size " << DEC(RTPsize));
+		if (!RTPHeaderF2.WriteBuffer(F2Buffer))
+			LOGMYWARN("AJA_STATUS_BADBUFFERSIZE: F2 buffer size " << DEC(F2Buffer.GetByteCount())
+						<< " too small, needs " << DEC(F2ByteCount) << " to hold " << F2PktCnt << " packet(s)");
+	}
+
+	//	Write the packed data into the packet buffers...
+	if (!U32F1s.empty())
+	{
+		NTV2_ASSERT(F1Buffer.GetByteCount() >= ((5+U32F1s.size()) * sizeof(uint32_t)));
+		::memcpy (F1Buffer.GetHostAddress(5*sizeof(uint32_t)),  &U32F1s[0],  U32F1s.size()*sizeof(uint32_t));
+		LOGMYINFO("Wrote " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer " << F1Buffer << ": " << RTPHeaderF1);
+		#if defined(AJA_DEBUG)
+			LOGMYDEBUG("F1 Output Buffer: " << F1Buffer.GetU32s(U32F1s.size()+5, true));	// True means Byte-swapped
+		#endif
+	}
+	if (!U32F2s.empty())
+	{
+		NTV2_ASSERT(F2Buffer.GetByteCount() >= ((5+U32F2s.size()) * sizeof(uint32_t)));
+		::memcpy (F2Buffer.GetHostAddress(5*sizeof(uint32_t)),  &U32F2s[0],  U32F2s.size()*sizeof(uint32_t));
+		LOGMYINFO("Wrote " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer " << F2Buffer << ": " << RTPHeaderF2);
+		#if defined(AJA_DEBUG)
+			LOGMYDEBUG("F2 Output Buffer: " << F2Buffer.GetU32s(U32F2s.size()+5, true));	// True means Byte-swapped
+		#endif
+	}
+
+	return AJA_STATUS_SUCCESS;
+}	//	GetAncillaryDataTransmitData
 
 
 ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPayload) const

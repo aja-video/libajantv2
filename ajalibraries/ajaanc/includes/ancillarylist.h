@@ -36,7 +36,7 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 				-	For encoding into a "tall" or "taller" VANC frame buffer, call AJAAncillaryList::WriteVANCData.
 				-	To fill the Anc buffer used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers function,
 					-	call AJAAncillaryList::GetAncillaryDataTransmitData for SDI (see \ref ancgumpformat).
-					-	call AJAAncillaryList::WriteRTPAncData for IP/RTP.
+					-	call AJAAncillaryList::WriteIPAncData for IP/RTP.
 
 				<b>Receive:</b> Create Packet List(s) From Other Buffer Sources
 				-	For a "tall" or "taller" VANC frame geometry, call the AJAAncillaryList::SetFromVANCData class method,
@@ -67,7 +67,7 @@ public:	//	CLASS METHODS
 															AJAAncillaryList & outPackets);
 
 	/**
-		@brief		Returns all packets found in the given F1 and F2 ancillary data buffers.
+		@brief		Returns all ancillary data packets found in the given F1 and F2 ancillary data buffers.
 		@param[in]	inF1AncBuffer		Specifies the F1 ancillary data ("GUMP") buffer.
 		@param[in]	inF2AncBuffer		Specifies the F2 ancillary data ("GUMP") buffer.
 		@param[out]	outPackets			Receives the packet list.
@@ -78,12 +78,14 @@ public:	//	CLASS METHODS
 															AJAAncillaryList & outPackets);
 
 	/**
-		@brief		Returns all packets found in the given RTP ancillary data buffer.
-		@param[in]	inRTPAncBuffer		Specifies the RTP ancillary data buffer.
+		@brief		Returns all ancillary data packets found in the given F1 and F2 RTP packet buffers.
+		@param[in]	inF1AncBuffer		Specifies the F1 RTP packet buffer.
+		@param[in]	inF2AncBuffer		Specifies the F2 RTP packet buffer.
 		@param[out]	outPackets			Receives the packet list.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	static AJAStatus						SetFromIPAncData (const NTV2_POINTER & inRTPAncBuffer,
+	static AJAStatus						SetFromIPAncData (const NTV2_POINTER & inF1AncBuffer,
+															const NTV2_POINTER & inF2AncBuffer,
 															AJAAncillaryList & outPackets);
 
 public:	//	INSTANCE METHODS
@@ -233,6 +235,7 @@ public:	//	INSTANCE METHODS
 		@note		The sort order of each list, to be considered identical, must be the same.
 	**/
 	virtual AJAStatus						Compare (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation = true,  const bool inIgnoreChecksum = true) const;
+	virtual std::string						CompareWithInfo (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation = true,  const bool inIgnoreChecksum = true) const;
 	///@}
 
 
@@ -281,13 +284,36 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const;
 
+
 	/**
-		@brief		Writes my AJAAncillaryData objects into the given buffer as an RTP packet suitable for Anc insertion.
-		@param		inRTPBuffer			Specifies the buffer memory into which the RTP packet will be written.
-		@note		It's a good idea to always call AJAAncillaryList::SortListByLocation before calling this function.
+		@brief		Answers with the number of bytes required to store my ancillary data in an IP/RTP data structure.
+		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+		@param		outF1ByteCount		Receives field 1's requisite byte count.
+		@param		outF2ByteCount		Receives field 2's requisite byte count.
+		@param		outF1PktCount		Receives field 1's packet count.
+		@param		outF2PktCount		Receives field 2's packet count.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						WriteRTPAncData (NTV2_POINTER & inRTPBuffer) const;
+	virtual AJAStatus						GetIPAncDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
+																		uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
+																		uint32_t & outF1PktCount, uint32_t & outF2PktCount) const;
+
+	/**
+		@brief		Writes my AJAAncillaryData objects into the given buffer as an IP/RTP data structure suitable for
+					insertion into an IP ancillary data stream.
+		@param		F1Buffer			Specifies the buffer memory into which Field 1's IP/RTP data will be written.
+		@param		F2Buffer			Specifies the buffer memory into which Field 2's IP/RTP data will be written.
+		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+										Defaults to zero (progressive).
+		@note		It's assumed that my packets are already sorted by location.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+																			const bool inIsProgressive = true, const uint32_t inF2StartLine = 0) const;
 	///@}
 
 
@@ -304,6 +330,15 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount);
+
+
+	/**
+		@brief		Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
+					AJAAncillaryData objects and appends them to me.
+		@param[in]	inReceivedData		The received packet words in network byte order.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						AddReceivedAncillaryData (const std::vector<uint32_t> & inReceivedData);
 
 
 	/**
