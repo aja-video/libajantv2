@@ -14,6 +14,8 @@
 #include "ntv2config2022.h"
 #include "virtualregistermodel.h"
 
+#include <string.h>
+
 #ifndef ISO_CONVERT_FMT
 #define ISO_CONVERT_FMT(fmt)	(mIsoConvertEnable && (fmt == NTV2_FORMAT_525_5994 || fmt == NTV2_FORMAT_625_5000))
 #endif
@@ -109,10 +111,12 @@ public:
     virtual bool NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7);
     virtual void SetIPError(NTV2Channel channel, uint32_t configType, uint32_t val);
     virtual void GetIPError(NTV2Channel channel, uint32_t configType, uint32_t & val);
-    virtual void PrintRxConfig(rx_2022_channel chan);
-    virtual void PrintTxConfig(tx_2022_channel chan);
-    virtual void PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
-    virtual void PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig);
+    virtual void PrintRxConfig(const rx_2022_channel chan);
+    virtual void PrintTxConfig(const tx_2022_channel chan);
+    virtual void PrintEncoderConfig(const j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
+    virtual void PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig);
+    virtual void Print2110Network(const NetworkData2110 m2110Network);
+    virtual void PrintChArray(std::string title, const char* chstr);
 
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
@@ -227,6 +231,9 @@ public:
     IPVNetConfig            mEth1;
     bool                    m2022_7Mode;
     uint32_t				mNetworkPathDiff;
+
+    NetworkData2110			m2110Network;
+    uint32_t                m2110NetworkID;
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;

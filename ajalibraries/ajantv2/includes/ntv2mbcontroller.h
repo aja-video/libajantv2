@@ -20,17 +20,21 @@ enum eMBCmd
     MB_CMD_FETCH_SFP_INFO         = 11
 };
 
+enum eNTV2PacketInterval
+{
+    PACKET_INTERVAL_125uS,
+    PACKET_INTERVAL_1mS
+};
+
 enum eSFP
 {
-    SFP_TOP,
-    SFP_LINK_A = SFP_TOP,
-    SFP_BOTTOM,
-    SFP_LINK_B = SFP_BOTTOM,
+    SFP_1,
+    SFP_2,
     SFP_MAX_NUM_SFPS,
     SFP_INVALID		= SFP_MAX_NUM_SFPS
 };
 
-#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_TOP)  &&  ((__sfp__) < SFP_INVALID))
+#define	NTV2_IS_VALID_SFP(__sfp__)		(((__sfp__) >= SFP_1)  &&  ((__sfp__) < SFP_INVALID))
 
 enum eArpState
 {
@@ -58,7 +62,7 @@ typedef struct
     uint8_t data[64];
 } SFPMSAData;
 
-struct sLinkStatus
+struct sSFPStatus
 {
     bool SFP_present;
     bool SFP_rx_los;    // loss of signal
@@ -102,8 +106,8 @@ public:
 
 protected:
     // all these methods block until response received or timeout
-    bool SetMBNetworkConfiguration (eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
-    bool DisableNetworkConfiguration (eSFP port);
+    bool SetMBNetworkConfiguration(eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
+    bool DisableNetworkInterface(eSFP port);
     bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
     bool FetchGrandMasterInfo(std::string & grandmasterInfo);
@@ -112,10 +116,10 @@ protected:
     void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
     void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
 
-    bool SetTxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
-    bool SetRxLinkState(NTV2Channel channel, bool linkAEnable,   bool linkBEnable);
-    bool GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable);
+    bool SetTxLinkState(NTV2Channel channel, bool sfp1Enable,   bool sfp2Enable);
+    bool GetTxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable);
+    bool SetRxLinkState(NTV2Channel channel, bool sfp1Enable,   bool sfp2Enable);
+    bool GetRxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable);
 
     bool SetDualLinkMode(bool enable);
     bool GetDualLinkMode(bool & enable);
@@ -123,9 +127,9 @@ protected:
     bool SetRxMatch(NTV2Channel channel, eSFP link, uint8_t match);
     bool GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & match);
 
-    bool SetLinkActive(eSFP Link);
-    bool SetLinkInactive(eSFP Link);
-    bool GetLinkActive(eSFP link);
+    bool SetSFPActive(eSFP sfp);
+    bool SetSFPInactive(eSFP sfp);
+    bool GetSFPActive(eSFP sfp);
 
     bool SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt);
     bool GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt);

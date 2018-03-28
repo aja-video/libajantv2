@@ -1156,7 +1156,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
         string hwIp,hwNet,hwGate;       // current hardware config
 
 		// On J2K IP we just use the top SFP 
-        rv = config->GetNetworkConfiguration(SFP_TOP,hwIp,hwNet,hwGate);
+        rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
         if (rv)
         {
             uint32_t ip, net, gate;
@@ -1166,7 +1166,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 
             if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
             {
-                SetNetConfig(config, SFP_TOP);
+                SetNetConfig(config, SFP_1);
             }
         }
         else

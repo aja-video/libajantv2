@@ -82,12 +82,12 @@ extern void __cdecl log_odprintf(const char *format, ...);
 
 #endif
 
-
+#ifndef Make4CC
 #define Make4CC(my4CC)  ((my4CC < 0x40) ?  ' '						 : ((char*)(&my4CC))[3]), \
 						((my4CC < 0x40) ?  ' '						 : ((char*)(&my4CC))[2]), \
 						((my4CC < 0x40) ? ('0' + (char)(my4CC / 10)) : ((char*)(&my4CC))[1]), \
 						((my4CC < 0x40) ? ('0' + (char)(my4CC % 10)) : ((char*)(&my4CC))[0])
-
+#endif
 
 /** 
  *	Supports auto initialization of logger, if needed

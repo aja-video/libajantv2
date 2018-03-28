@@ -12,6 +12,8 @@
 
 KonaIP2110Services::KonaIP2110Services()
 {
+    // Make sure we configure network the first time
+    m2110NetworkID = -1;
 }
 
 //-------------------------------------------------------------------------------------------------------

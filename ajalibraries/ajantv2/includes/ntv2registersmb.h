@@ -12,6 +12,36 @@
 
 #define SAREK_IF_VERSION 4  // update this if mb protocol is changed (here and in mb)
 
+#define RX_MATCH_2022_VLAN              BIT(0)
+#define RX_MATCH_2022_SOURCE_IP         BIT(1)
+#define RX_MATCH_2022_DEST_IP           BIT(2)
+#define RX_MATCH_2022_SOURCE_PORT       BIT(3)
+#define RX_MATCH_2022_DEST_PORT         BIT(4)
+#define RX_MATCH_2022_SSRC              BIT(5)
+
+#define RX_MATCH_2110_VLAN              BIT(0)
+#define RX_MATCH_2110_SOURCE_IP         BIT(1)
+#define RX_MATCH_2110_DEST_IP           BIT(2)
+#define RX_MATCH_2110_SOURCE_PORT       BIT(3)
+#define RX_MATCH_2110_DEST_PORT         BIT(4)
+#define RX_MATCH_2110_PAYLOAD           BIT(5)
+#define RX_MATCH_2110_SSRC              BIT(6)
+
+#define VOIP_SEMAPHORE_SET              0x2
+#define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
+#define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
+#define VOIP_SECONDARY_ENABLE           0x80000000
+
+#define PLL_MATCH_SOURCE_IP             BIT(0)
+#define PLL_MATCH_DEST_IP               BIT(1)
+#define PLL_MATCH_SOURCE_PORT           BIT(2)
+#define PLL_MATCH_DEST_PORT             BIT(3)
+#define PLL_MATCH_ES_PID                BIT(4)
+
+#define PLL_CONFIG_PCR                  BIT(0)
+#define PLL_CONFIG_PTP                  BIT(1)
+#define PLL_CONFIG_DCO_MODE             BIT(28)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -85,7 +115,7 @@
 #define TS_BLOCK_BASE               0
 #define IGMP_BLOCK_BASE             100
 #define ENCODER_BLOCK_BASE          200
-#define UNUSED_BLOCK_BASE           300
+#define S2110_BLOCK_BASE            300
 
 #define kRegSarekMBSeqNum           0
 #define kRegSarekActProgramNum      1
