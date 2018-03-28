@@ -1580,7 +1580,7 @@ bool CNTV2Config2022::GetSFPMSAData(eSFP sfp, SFPMSAData & data)
     return GetSFPInfo(sfp, data);
 }
 
-bool CNTV2Config2022::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
+bool CNTV2Config2022::GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
@@ -1589,17 +1589,17 @@ bool CNTV2Config2022::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
 
     if (sfp == SFP_2)
     {
-        sfpStatus.linkUp            = (val  & LINK_B_UP) ? true : false;
+        sfpStatus.SFP_linkUp        = (val  & LINK_B_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_2_NOT_PRESENT) ? false : true;
-        sfpStatus.SFP_rx_los        = (val2 & SFP_2_RX_LOS) ? true : false;
-        sfpStatus.SFP_tx_fault      = (val2 & SFP_2_TX_FAULT) ? true : false;
+        sfpStatus.SFP_rxLoss        = (val2 & SFP_2_RX_LOS) ? true : false;
+        sfpStatus.SFP_txFault       = (val2 & SFP_2_TX_FAULT) ? true : false;
     }
     else
     {
-        sfpStatus.linkUp            = (val  & LINK_A_UP) ? true : false;
+        sfpStatus.SFP_linkUp        = (val  & LINK_A_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_1_NOT_PRESENT) ? false : true;
-        sfpStatus.SFP_rx_los        = (val2 & SFP_1_RX_LOS) ? true : false;
-        sfpStatus.SFP_tx_fault      = (val2 & SFP_1_TX_FAULT) ? true : false;
+        sfpStatus.SFP_rxLoss        = (val2 & SFP_1_RX_LOS) ? true : false;
+        sfpStatus.SFP_txFault       = (val2 & SFP_1_TX_FAULT) ? true : false;
     }
 
     return true;

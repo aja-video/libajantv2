@@ -209,7 +209,7 @@ public:
     bool        GetMACAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP sfp, SFPMSAData & data);
-    bool        GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus);
+    bool        GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus);
     bool        Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & status);
 
     // If method returns false call this to get details

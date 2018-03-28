@@ -16,7 +16,6 @@
 #include <fstream>
 #include <sstream>
 
-
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
@@ -111,11 +110,12 @@ public:
     bool        SetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
     bool        GetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
 
-    bool        SetPTPMaster(std::string ptpMaster);
+    bool        SetPTPMaster(const std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
+    bool        GetPTPStatus(PTPStatus & ptpStatus);
 
-    bool        Set2110_4K_Mode(bool enable);
-    bool        Get2110_4K_Mode(bool & enable);
+    bool        Set4KMode(bool enable);
+    bool        Get4KMode(bool & enable);
 
     std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
@@ -141,7 +141,7 @@ public:
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
-    bool        GetLinkStatus(eSFP port, sSFPStatus & sfpStatus);
+    bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);

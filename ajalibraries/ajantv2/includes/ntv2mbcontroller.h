@@ -62,13 +62,21 @@ typedef struct
     uint8_t data[64];
 } SFPMSAData;
 
-struct sSFPStatus
+struct SFPStatus
 {
-    bool SFP_present;
-    bool SFP_rx_los;    // loss of signal
-    bool SFP_tx_fault;
-    bool linkUp;
+    bool SFP_present;           // true indicates SFP plugged in
+    bool SFP_rxLoss;            // true indicates loss of signal
+    bool SFP_txFault;           // true indicates tx fault
+    bool SFP_linkUp;            // true indicates link is up
 };
+
+struct PTPStatus
+{
+    bool PTP_packetStatus;      // true indicates PTP packets
+    bool PTP_frequencyLocked;   // true indicates frequency locked
+    bool PTP_phaseLocked;       // true indicates phase locked
+};
+
 
 // IGMP Control Block
 #define IGMPCB_REG_STATE       0

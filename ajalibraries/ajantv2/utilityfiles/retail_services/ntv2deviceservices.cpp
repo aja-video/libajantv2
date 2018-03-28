@@ -359,7 +359,7 @@ void DeviceServices::ReadDriverState (void)
         // Only do this once a second
         uint32_t	count	(0);
         mCard->ReadRegister(kVRegAgentCheck, &count);
-        if (count % 60 == 0)
+        if (count % 30 == 0)
         {
             uint32_t sizeRead = 0;
             bool bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110), &sizeRead);
