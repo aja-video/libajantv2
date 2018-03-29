@@ -653,6 +653,23 @@ bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Channel channe
     return true;
 }
 
+bool CNTV2Config2110::GetRxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets)
+{
+    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        mDevice.ReadRegister(kReg4175_depkt_rx_pkt_cnt+ depacketizerBaseAddr, &packets);
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+        // TODO:
+        // mDevice.ReadRegister(kReg3190_rx_byte_cnt + depacketizerBaseAddr, &packets);
+        packets = 0;
+    }
+
+    return true;
+}
+
 bool CNTV2Config2110::GetRxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes)
 {
     uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
@@ -670,21 +687,61 @@ bool CNTV2Config2110::GetRxByteCount(const NTV2Channel channel, NTV2Stream strea
     return true;
 }
 
-bool CNTV2Config2110::GetRxByteCount(const eSFP sfp, uint32_t &bytes)
+bool CNTV2Config2110::GetRxByteCount(const eSFP sfp, uint64_t &bytes)
 {
-    bytes = 100;
+    uint32_t val_lo, val_hi;
+
+    if (sfp == SFP_1)
+    {
+        mDevice.ReadRegister(SAREK_10G_EMAC_0 + kReg10gemac_rx_bytes_lo, &val_lo);
+        mDevice.ReadRegister(SAREK_10G_EMAC_0 + kReg10gemac_rx_bytes_hi, &val_hi);
+    }
+    else
+    {
+        mDevice.ReadRegister(SAREK_10G_EMAC_1 + kReg10gemac_rx_bytes_lo, &val_lo);
+        mDevice.ReadRegister(SAREK_10G_EMAC_1 + kReg10gemac_rx_bytes_hi, &val_hi);
+    }
+
+    bytes = ((uint64_t)val_hi << 32) + val_lo;
     return true;
 }
 
-bool CNTV2Config2110::GetTxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes)
+bool CNTV2Config2110::GetTxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets)
 {
-    bytes = 300;
+    if (stream == NTV2_VIDEO_STREAM)
+    {
+        uint32_t baseAddrPacketizer;
+        SetTxPacketizerChannel(channel,NTV2_VIDEO_STREAM,baseAddrPacketizer);
+
+        uint32_t count;
+        mDevice.ReadRegister(kReg4175_pkt_tx_pkt_cnt + baseAddrPacketizer,&count);
+        packets = count;
+    }
+    else if (stream == NTV2_AUDIO1_STREAM)
+    {
+        // TODO:
+        packets = 0;
+    }
+
     return true;
 }
 
-bool CNTV2Config2110::GetTxByteCount(const eSFP sfp, uint32_t &bytes)
+bool CNTV2Config2110::GetTxByteCount(const eSFP sfp, uint64_t &bytes)
 {
-    bytes = 200;
+    uint32_t val_lo, val_hi;
+
+    if (sfp == SFP_1)
+    {
+        mDevice.ReadRegister(SAREK_10G_EMAC_0 + kReg10gemac_tx_bytes_lo, &val_lo);
+        mDevice.ReadRegister(SAREK_10G_EMAC_0 + kReg10gemac_tx_bytes_hi, &val_hi);
+    }
+    else
+    {
+        mDevice.ReadRegister(SAREK_10G_EMAC_1 + kReg10gemac_tx_bytes_lo, &val_lo);
+        mDevice.ReadRegister(SAREK_10G_EMAC_1 + kReg10gemac_tx_bytes_hi, &val_hi);
+    }
+
+    bytes = ((uint64_t)val_hi << 32) + val_lo;
     return true;
 }
 
