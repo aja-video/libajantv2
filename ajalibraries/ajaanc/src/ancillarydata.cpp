@@ -1519,12 +1519,7 @@ bool AJARTPAncPayloadHeader::WriteBuffer(NTV2_POINTER & outBuffer) const
 	if (outBuffer.IsNULL())
 		return false;
 	if (outBuffer.GetByteCount() < GetHeaderByteCount())
-	{
-		if (outBuffer.IsProvidedByClient())
-			return false;	//	Too small and cannot enlarge
-		if (!outBuffer.Allocate(2048))	//	Allocate 2K
-			return false;	//	Realloc failed
-	}
+		return false;	//	Too small
 	uint32_t *	pU32s	(reinterpret_cast <uint32_t *> (outBuffer.GetHostPointer()));
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
 		pU32s[ndx] = GetULWordAtIndex(ndx);
