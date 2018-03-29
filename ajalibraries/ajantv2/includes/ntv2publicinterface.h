@@ -5642,6 +5642,10 @@ typedef enum
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				/**
 					@brief		Constructs me from a client-supplied address and size.
 					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
 					@param[in]	inByteCount		Specifies the byte count.
@@ -5671,64 +5675,12 @@ typedef enum
 					@brief		My destructor. If I'm responsible for the memory, I free it here.
 				**/
 								~NTV2_POINTER ();
+				///@}
 
 				/**
-					@brief		Sets (or resets) me from a client-supplied address and size.
-					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
-					@param[in]	inByteCount		Specifies the byte count.
-					@return		True if successful;  otherwise false.
-					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
+					@name	Inquiry
 				**/
-				bool			Set (const void * pInUserPointer, const size_t inByteCount);
-
-				/**
-					@brief		Sets (or resets) me from a client-supplied address and size.
-					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
-					@param[in]	inByteCount		Specifies the byte count.
-					@param[in]	inValue			Specifies the value to fill the buffer with.
-					@return		True if successful;  otherwise false.
-					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
-				**/
-				bool			SetAndFill (const void * pInUserPointer, const size_t inByteCount, const UByte inValue);
-
-				/**
-					@brief		Allocates (or re-allocates) my user-space storage using the given byte count.
-								I assume full responsibility for any memory that I allocate.
-					@param[in]	inByteCount		Specifies the number of bytes to allocate.
-												Specifying zero is the same as calling Set(NULL, 0).
-					@return		True if successful;  otherwise false.
-					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
-				**/
-				bool			Allocate (const size_t inByteCount);
-
-				/**
-					@brief		Fills me with the given UByte value.
-					@param[in]	inValue		The UByte value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const UByte inValue);
-
-				/**
-					@brief		Fills me with the given UWord value.
-					@param[in]	inValue		The UWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const UWord inValue);
-
-				/**
-					@brief		Fills me with the given ULWord value.
-					@param[in]	inValue		The ULWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord inValue);
-
-				/**
-					@brief		Fills me with the given ULWord64 value.
-					@param[in]	inValue		The ULWord64 value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord64 inValue);
-
+				///@{
 				/**
 					@return		My user-space host virtual address, as seen by the host process.
 				**/
@@ -5769,6 +5721,11 @@ typedef enum
 				inline bool		IsNULL (void) const						{return GetHostPointer() == NULL || GetByteCount() == 0;}
 
 				/**
+					@return		True if my host pointer is non-NULL and my byte count is non-zero;  otherwise false.
+				**/
+				inline operator bool() const	{return !IsNULL();}
+
+				/**
 					@param[in]	inByteOffset	Specifies the offset from the start (or end) of my memory buffer.
 												Must be less than my size (see GetByteCount).
 					@param[in]	inFromEnd		Specify 'true' to reference the end of my buffer.
@@ -5776,6 +5733,97 @@ typedef enum
 					@return		The host address of the given byte. Returns NULL upon failure.
 				**/
 				void *			GetHostAddress (const ULWord inByteOffset, const bool inFromEnd = false) const;
+
+				/**
+					@return		True if the given memory buffer's contents are identical to my own.
+					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
+					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.
+					@param[in]	inByteCount		Specifies the maximum number of bytes to compare. Defaults to 0xFFFFFFFF (entire buffer).
+				**/
+				bool			IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
+
+				/**
+					@brief		Assuming my contents and the contents of the given buffer comprise ring buffers that periodically get overwritten
+								in contiguous variable-length chunks, answers with the contiguous byte range that differs between the two.
+					@param[in]	inBuffer			Specifies the memory buffer whose contents are to be compared with mine. Contents are
+													assumed to comprise a ring buffer, where data periodically gets overwritten in chunks.
+					@param[out]	outByteOffsetFirst	Receives the offset, in bytes, from the start of the buffer, of the first byte of the contiguous
+													range that's different.
+													Zero indicates the first byte in the buffer.
+													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
+													If greater than 'outByteOffsetLast', then a wrap condition exists (see Note).
+					@param[out]	outByteOffsetLast	Receives the offset, in bytes, from the start of the buffer, of the last byte of the contiguous
+													range that's different.
+													Zero indicates the first byte in the buffer.
+													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
+													If less than 'outByteOffsetFirst', a wrap condition exists (see Note).
+					@note		If a wrap condition exists -- i.e., the contiguous byte range that differs starts near the end and wraps around
+								to near the front -- then 'outByteOffsetFirst' will be greater than 'outByteOffsetLast'.
+					@return		True if successful;  otherwise false.
+				**/
+				bool			GetRingChangedByteRange (const NTV2_POINTER & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const;
+				///@}
+
+				/**
+					@name	Changing
+				**/
+				///@{
+				/**
+					@brief		Allocates (or re-allocates) my user-space storage using the given byte count.
+								I assume full responsibility for any memory that I allocate.
+					@param[in]	inByteCount		Specifies the number of bytes to allocate.
+												Specifying zero is the same as calling Set(NULL, 0).
+					@return		True if successful;  otherwise false.
+					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
+				**/
+				bool			Allocate (const size_t inByteCount);
+
+				/**
+					@brief		Fills me with the given UByte value.
+					@param[in]	inValue		The UByte value to fill me with.
+					@note		Ignored if I'm not currently allocated.
+				**/
+				void			Fill (const UByte inValue);
+
+				/**
+					@brief		Fills me with the given UWord value.
+					@param[in]	inValue		The UWord value to fill me with.
+					@note		Ignored if I'm not currently allocated.
+				**/
+				void			Fill (const UWord inValue);
+
+				/**
+					@brief		Fills me with the given ULWord value.
+					@param[in]	inValue		The ULWord value to fill me with.
+					@note		Ignored if I'm not currently allocated.
+				**/
+				void			Fill (const ULWord inValue);
+
+				/**
+					@brief		Fills me with the given ULWord64 value.
+					@param[in]	inValue		The ULWord64 value to fill me with.
+					@note		Ignored if I'm not currently allocated.
+				**/
+				void			Fill (const ULWord64 inValue);
+
+				/**
+					@brief		Sets (or resets) me from a client-supplied address and size.
+					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
+					@param[in]	inByteCount		Specifies the byte count.
+					@return		True if successful;  otherwise false.
+					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
+				**/
+				bool			Set (const void * pInUserPointer, const size_t inByteCount);
+
+				/**
+					@brief		Sets (or resets) me from a client-supplied address and size.
+					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
+					@param[in]	inByteCount		Specifies the byte count.
+					@param[in]	inValue			Specifies the value to fill the buffer with.
+					@return		True if successful;  otherwise false.
+					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
+				**/
+				bool			SetAndFill (const void * pInUserPointer, const size_t inByteCount, const UByte inValue);
 
 				/**
 					@brief		Replaces my contents from the given memory buffer.
@@ -5814,41 +5862,12 @@ typedef enum
 								that was allocated in an EXE).
 				**/
 				bool			SwapWith (NTV2_POINTER & inBuffer);
+				///@}
 
 				/**
-					@return		True if the given memory buffer's contents are identical to my own.
-					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
-					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.
-					@param[in]	inByteCount		Specifies the maximum number of bytes to compare. Defaults to 0xFFFFFFFF (entire buffer).
+					@name	Debugging/Printing
 				**/
-				bool			IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
-
-				/**
-					@brief		Assuming my contents and the contents of the given buffer comprise ring buffers that periodically get overwritten
-								in contiguous variable-length chunks, answers with the contiguous byte range that differs between the two.
-					@param[in]	inBuffer			Specifies the memory buffer whose contents are to be compared with mine. Contents are
-													assumed to comprise a ring buffer, where data periodically gets overwritten in chunks.
-					@param[out]	outByteOffsetFirst	Receives the offset, in bytes, from the start of the buffer, of the first byte of the contiguous
-													range that's different.
-													Zero indicates the first byte in the buffer.
-													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
-													If greater than 'outByteOffsetLast', then a wrap condition exists (see Note).
-					@param[out]	outByteOffsetLast	Receives the offset, in bytes, from the start of the buffer, of the last byte of the contiguous
-													range that's different.
-													Zero indicates the first byte in the buffer.
-													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
-													If less than 'outByteOffsetFirst', a wrap condition exists (see Note).
-					@note		If a wrap condition exists -- i.e., the contiguous byte range that differs starts near the end and wraps around
-								to near the front -- then 'outByteOffsetFirst' will be greater than 'outByteOffsetLast'.
-					@return		True if successful;  otherwise false.
-				**/
-				bool			GetRingChangedByteRange (const NTV2_POINTER & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const;
-
-				/**
-					@return		True if my host pointer is non-NULL and my byte count is non-zero;  otherwise false.
-				**/
-				inline operator bool() const	{return !IsNULL();}
-
+				///@{
 				/**
 					@brief	Prints a human-readable representation of me into the given output stream.
 					@param	inOutStream		The output stream to receive my human-readable representation.
@@ -5864,9 +5883,9 @@ typedef enum
 
 				/**
 					@brief	Dumps me in hex/octal/decimal, with/without Ascii, to the given output stream.
-					@param	inStartOffset		The starting offset, in bytes, where the dump will start.
-					@param	inByteCount			The number of bytes to be dumped. If zero, all bytes will be dumped.
 					@param	inOutputStream		Output stream that will receive the dump. Defaults to std::cout.
+					@param	inStartByteOffset	The starting offset, in bytes, where the dump will start.
+					@param	inByteCount			The number of bytes to be dumped. If zero, all bytes will be dumped.
 					@param	inRadix				Specifies the radix of the dumped memory values.
 												16=hex, 10=decimal, 8=octal, 2=binary -- all others disallowed.
 					@param	inBytesPerGroup		Number of bytes to dump per contiguous group of numbers. Defaults to 4.
@@ -5882,84 +5901,198 @@ typedef enum
 												Ignored if inGroupsPerLine is zero.
 					@return	A non-constant reference to the output stream that received the dump.
 				**/
-				std::ostream &	Dump (	const size_t	inStartByteOffset	= 0,
+				std::ostream &	Dump (	std::ostream &	inOutputStream		= std::cout,
+										const size_t	inStartByteOffset	= 0,
 										const size_t	inByteCount			= 0,
-										std::ostream &	inOutputStream		= std::cout,
 										const size_t	inRadix				= 16,
 										const size_t	inBytesPerGroup		= 4,
 										const size_t	inGroupsPerLine		= 8,
 										const size_t	inAddressRadix		= 0,
 										const bool		inShowAscii			= false,
 										const size_t	inAddrOffset		= 0) const;
+				///@}
 
 				/**
+					@name	Conversion To/From Vectors
+				**/
+				///@{
+				/**
+					@brief		Answers with my contents as a vector of unsigned 16-bit values.
 					@param[out]	outU64s			Receives my contents as a vector of unsigned 64-bit values.
+					@param[in]	inU64Offset		The starting offset, in 64-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 64-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 64-bit values may be less than this, depending on my size.
 												Defaults to 16.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
 					@return						True if successful;  otherwise false.
+					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU64s (std::vector<uint64_t> & outU64s, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
+				bool							GetU64s (std::vector<uint64_t> & outU64s, const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 64-bit values.
+					@param[in]	inU64Offset		The starting offset, in 64-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 64-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 64-bit values may be less than this, depending on my size.
 												Defaults to 16.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
+					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint64_t>	GetU64s (const size_t inMaxSize = 16, const bool inByteSwap = false) const	{std::vector<uint64_t> result; GetU64s(result, inMaxSize, inByteSwap); return result;}
+				inline std::vector<uint64_t>	GetU64s (const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const	{std::vector<uint64_t> result; GetU64s(result, inU64Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
+					@brief		Answers with my contents as a vector of unsigned 32-bit values.
 					@param[out]	outU32s			Receives my contents as a vector of unsigned 32-bit values.
+					@param[in]	inU32Offset		The starting offset, in 32-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 32-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 32-bit values may be less than this, depending on my size.
 												Defaults to 32.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
 					@return						True if successful;  otherwise false.
+					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU32s (std::vector<uint32_t> & outU32s, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
+				bool							GetU32s (std::vector<uint32_t> & outU32s, const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 32-bit values.
+					@param[in]	inU32Offset		The starting offset, in 32-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 32-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 32-bit values may be less than this, depending on my size.
 												Defaults to 32.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
+					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint32_t>	GetU32s (const size_t inMaxSize = 32, const bool inByteSwap = false) const	{std::vector<uint32_t> result; GetU32s(result, inMaxSize, inByteSwap); return result;}
+				inline std::vector<uint32_t>	GetU32s (const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const	{std::vector<uint32_t> result; GetU32s(result, inU32Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
+					@brief		Answers with my contents as a vector of unsigned 16-bit values.
 					@param[out]	outU16s			Receives my contents as a vector of unsigned 16-bit values.
+					@param[in]	inU16Offset		The starting offset, in 16-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 16-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 16-bit values may be less than this, depending on my size.
 												Defaults to 64.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
 					@return						True if successful;  otherwise false.
+					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				bool							GetU16s (std::vector<uint16_t> & outU32s, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+				bool							GetU16s (std::vector<uint16_t> & outU32s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 16-bit values.
+					@param[in]	inU16Offset		The starting offset, in 16-bit words, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 16-bit values to be returned.
+												Use zero for unlimited.
 												The actual number of returned 16-bit values may be less than this, depending on my size.
 												Defaults to 64.
 					@param[in]	inByteSwap		Specifies if the resulting values will be byte-swapped or not.
 												Specify 'true' to byte-swap;  specify 'false' to return the normal, unswapped values.
 												Defaults to 'false'.
+					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint16_t>	GetU16s (const size_t inMaxSize = 64, const bool inByteSwap = false) const	{std::vector<uint16_t> result; GetU16s(result, inMaxSize, inByteSwap); return result;}
+				inline std::vector<uint16_t>	GetU16s (const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const	{std::vector<uint16_t> result; GetU16s(result, inU16Offset, inMaxSize, inByteSwap); return result;}
+
+				/**
+					@brief		Answers with my contents as a vector of unsigned 8-bit values.
+					@param[out]	outU8s			Receives my contents as a vector of unsigned 8-bit values.
+					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
+					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
+												Use zero for unlimited.
+												The actual number of returned 8-bit values may be less than this, depending on my size.
+												Defaults to 128.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							GetU8s (std::vector<uint8_t> & outU32s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+
+				/**
+					@return		My contents as a vector of unsigned 8-bit values.
+					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
+					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
+												Use zero for unlimited.
+												The actual number of returned 8-bit values may be less than this, depending on my size.
+												Defaults to 128.
+				**/
+				inline std::vector<uint8_t>		GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{std::vector<uint8_t> result; GetU8s(result, inU8Offset, inMaxSize); return result;}
+
+				/**
+					@brief		Answers with my contents as a character string.
+					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
+					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
+												Use zero for unlimited.
+												The actual number of returned 8-bit values may be less than this, depending on my size.
+												Defaults to 128.
+					@return						True if successful;  otherwise false.
+					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+				**/
+				bool							GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+
+				/**
+					@return		My contents as a character string.
+					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
+					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
+												Use zero for unlimited.
+												The actual number of returned 8-bit values may be less than this, depending on my size.
+												Defaults to 128.
+					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+				**/
+				inline std::string				GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
+
+				/**
+					@brief		Copies a vector of unsigned 64-bit values into me.
+					@param[in]	inU64s			The vector of unsigned 64-bit values to be copied into me.
+					@param[in]	inU64Offset		Specifies my starting offset (of 64-bit values) at which the vector values will be written.
+												Defaults to zero.
+					@param[in]	inByteSwap		Specifies if the 64-bit values will be byte-swapped or not before being written into me.
+												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							PutU64s (const std::vector<uint64_t> & inU16s, const size_t inU64Offset = 0, const bool inByteSwap = false);
+
+				/**
+					@brief		Copies a vector of unsigned 32-bit values into me.
+					@param[in]	inU32s			The vector of unsigned 32-bit values to be copied into me.
+					@param[in]	inU32Offset		Specifies my starting offset (of 32-bit values) at which the vector values will be written.
+												Defaults to zero.
+					@param[in]	inByteSwap		Specifies if the 32-bit values will be byte-swapped or not before being written into me.
+												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							PutU32s (const std::vector<uint32_t> & inU16s, const size_t inU32Offset = 0, const bool inByteSwap = false);
+
+				/**
+					@brief		Copies a vector of unsigned 16-bit values into me.
+					@param[in]	inU16s			The vector of unsigned 16-bit values to be copied into me.
+					@param[in]	inU16Offset		Specifies my starting offset (of 16-bit values) at which the vector values will be written.
+												Defaults to zero.
+					@param[in]	inByteSwap		Specifies if the 16-bit values will be byte-swapped or not before being written into me.
+												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							PutU16s (const std::vector<uint16_t> & inU16s, const size_t inU16Offset = 0, const bool inByteSwap = false);
+
+				/**
+					@brief		Copies a vector of unsigned 8-bit values into me.
+					@param[in]	inU8s			The vector of unsigned 8-bit values to be copied into me.
+					@param[in]	inU8Offset		Specifies my starting byte offset at which the vector values will be written.
+												Defaults to zero.
+					@return						True if successful;  otherwise false.
+				**/
+				bool							PutU8s (const std::vector<uint8_t> & inU8s, const size_t inU8Offset = 0);
+				///@}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 

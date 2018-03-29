@@ -216,9 +216,9 @@ static string print_address_offset (const size_t inRadix, const ULWord64 inOffse
 	return oss.str();
 }
 
-ostream & NTV2_POINTER::Dump (	const size_t	inStartOffset,
+ostream & NTV2_POINTER::Dump (	ostream &		inOStream,
+								const size_t	inStartOffset,
 								const size_t	inByteCount,
-								ostream &		inOStream,
 								const size_t	inRadix,
 								const size_t	inBytesPerGroup,
 								const size_t	inGroupsPerRow,
@@ -316,15 +316,22 @@ ostream & NTV2_POINTER::Dump (	const size_t	inStartOffset,
 }	//	Dump
 
 
-bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inU64Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint64s.clear();
 	if (IsNULL())
 		return false;
 
 	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint64_t));
-	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostPointer()));
-	if (inMaxSize < maxSize)
+	if (maxSize < inU64Offset)
+		return false;	//	Past end
+	maxSize -= inU64Offset;	//	Remove starting offset
+
+	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostAddress(inU64Offset * sizeof(uint64_t))));
+	if (!pU64)
+		return false;	//	Past end
+
+	if (inMaxSize  &&  inMaxSize < maxSize)
 		maxSize = inMaxSize;
 
 	try
@@ -332,7 +339,7 @@ bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inMaxSiz
 		outUint64s.reserve(maxSize);
 		for (size_t ndx(0);  ndx < maxSize;  ndx++)
 		{
-			const uint32_t	u64	(*pU64++);
+			const uint64_t	u64	(*pU64++);
 			outUint64s.push_back(inByteSwap ? NTV2EndianSwap64(u64) : u64);
 		}
 	}
@@ -346,15 +353,22 @@ bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inMaxSiz
 }
 
 
-bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inU32Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint32s.clear();
 	if (IsNULL())
 		return false;
 
 	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint32_t));
-	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostPointer()));
-	if (inMaxSize < maxSize)
+	if (maxSize < inU32Offset)
+		return false;	//	Past end
+	maxSize -= inU32Offset;	//	Remove starting offset
+
+	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostAddress(inU32Offset * sizeof(uint32_t))));
+	if (!pU32)
+		return false;	//	Past end
+
+	if (inMaxSize  &&  inMaxSize < maxSize)
 		maxSize = inMaxSize;
 
 	try
@@ -376,15 +390,22 @@ bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inMaxSiz
 }
 
 
-bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inU16Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint16s.clear();
 	if (IsNULL())
 		return false;
 
 	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint16_t));
-	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostPointer()));
-	if (inMaxSize < maxSize)
+	if (maxSize < inU16Offset)
+		return false;	//	Past end
+	maxSize -= inU16Offset;	//	Remove starting offset
+
+	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostAddress(inU16Offset * sizeof(uint16_t))));
+	if (!pU16)
+		return false;	//	Past end
+
+	if (inMaxSize  &&  inMaxSize < maxSize)
 		maxSize = inMaxSize;
 
 	try
@@ -393,7 +414,7 @@ bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inMaxSiz
 		for (size_t ndx(0);  ndx < maxSize;  ndx++)
 		{
 			const uint16_t	u16	(*pU16++);
-			outUint16s.push_back(inByteSwap ? NTV2EndianSwap32(u16) : u16);
+			outUint16s.push_back(inByteSwap ? NTV2EndianSwap16(u16) : u16);
 		}
 	}
 	catch (...)
@@ -402,6 +423,172 @@ bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inMaxSiz
 		outUint16s.reserve(0);
 		return false;
 	}
+	return true;
+}
+
+
+bool NTV2_POINTER::GetU8s (vector<uint8_t> & outUint8s, const size_t inU8Offset, const size_t inMaxSize) const
+{
+	outUint8s.clear();
+	if (IsNULL())
+		return false;
+
+	size_t			maxSize	(GetByteCount());
+	if (maxSize < inU8Offset)
+		return false;	//	Past end
+	maxSize -= inU8Offset;	//	Remove starting offset
+
+	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(inU8Offset)));
+	if (!pU8)
+		return false;	//	Past end
+
+	if (inMaxSize  &&  inMaxSize < maxSize)
+		maxSize = inMaxSize;
+
+	try
+	{
+		outUint8s.reserve(maxSize);
+		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		{
+			outUint8s.push_back(*pU8++);
+		}
+	}
+	catch (...)
+	{
+		outUint8s.clear();
+		outUint8s.reserve(0);
+		return false;
+	}
+	return true;
+}
+
+
+bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, const size_t inMaxSize) const
+{
+	outString.clear();
+	if (IsNULL())
+		return false;
+
+	size_t			maxSize	(GetByteCount());
+	if (maxSize < inU8Offset)
+		return false;		//	Past end
+	maxSize -= inU8Offset;	//	Remove starting offset
+
+	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(inU8Offset)));
+	if (!pU8)
+		return false;	//	Past end
+
+	if (inMaxSize  &&  inMaxSize < maxSize)
+		maxSize = inMaxSize;
+
+	try
+	{
+		outString.reserve(maxSize);
+		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+			outString += char(*pU8++);
+	}
+	catch (...)
+	{
+		outString.clear();
+		outString.reserve(0);
+		return false;
+	}
+	return true;
+}
+
+
+bool NTV2_POINTER::PutU64s (const vector<uint64_t> & inU64s, const size_t inU64Offset, const bool inByteSwap)
+{
+	if (IsNULL())
+		return false;	//	No buffer or space
+
+	size_t		maxU64s	(GetByteCount() / sizeof(uint64_t));
+	uint64_t *	pU64	(reinterpret_cast <uint64_t *> (GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
+	if (!pU64)
+		return false;	//	Start offset is past end
+	if (maxU64s > inU64Offset)
+		maxU64s -= inU64Offset;	//	Don't go past end
+	if (maxU64s > inU64s.size())
+		maxU64s = inU64s.size();	//	Truncate incoming vector to not go past my end
+
+	for (unsigned ndx(0);  ndx < maxU64s;  ndx++)
+#if defined(_DEBUG)
+		*pU64++ = inByteSwap ? NTV2EndianSwap64(inU64s.at(ndx)) : inU64s.at(ndx);
+#else
+		*pU64++ = inByteSwap ? NTV2EndianSwap64(inU64s[ndx]) : inU64s[ndx];
+#endif
+	return true;
+}
+
+
+bool NTV2_POINTER::PutU32s (const vector<uint32_t> & inU32s, const size_t inU32Offset, const bool inByteSwap)
+{
+	if (IsNULL())
+		return false;	//	No buffer or space
+
+	size_t		maxU32s	(GetByteCount() / sizeof(uint32_t));
+	uint32_t *	pU32	(reinterpret_cast <uint32_t *> (GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
+	if (!pU32)
+		return false;	//	Start offset is past end
+	if (maxU32s > inU32Offset)
+		maxU32s -= inU32Offset;	//	Don't go past end
+	if (maxU32s > inU32s.size())
+		maxU32s = inU32s.size();	//	Truncate incoming vector to not go past my end
+
+	for (unsigned ndx(0);  ndx < maxU32s;  ndx++)
+#if defined(_DEBUG)
+		*pU32++ = inByteSwap ? NTV2EndianSwap32(inU32s.at(ndx)) : inU32s.at(ndx);
+#else
+		*pU32++ = inByteSwap ? NTV2EndianSwap32(inU32s[ndx]) : inU32s[ndx];
+#endif
+	return true;
+}
+
+
+bool NTV2_POINTER::PutU16s (const vector<uint16_t> & inU16s, const size_t inU16Offset, const bool inByteSwap)
+{
+	if (IsNULL())
+		return false;	//	No buffer or space
+
+	size_t		maxU16s	(GetByteCount() / sizeof(uint16_t));
+	uint16_t *	pU16	(reinterpret_cast <uint16_t *> (GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
+	if (!pU16)
+		return false;	//	Start offset is past end
+	if (maxU16s > inU16Offset)
+		maxU16s -= inU16Offset;	//	Don't go past end
+	if (maxU16s > inU16s.size())
+		maxU16s = inU16s.size();	//	Truncate incoming vector to not go past my end
+
+	for (unsigned ndx(0);  ndx < maxU16s;  ndx++)
+#if defined(_DEBUG)
+		*pU16++ = inByteSwap ? NTV2EndianSwap16(inU16s.at(ndx)) : inU16s.at(ndx);
+#else
+		*pU16++ = inByteSwap ? NTV2EndianSwap16(inU16s[ndx]) : inU16s[ndx];
+#endif
+	return true;
+}
+
+
+bool NTV2_POINTER::PutU8s (const vector<uint8_t> & inU8s, const size_t inU8Offset)
+{
+	if (IsNULL())
+		return false;	//	No buffer or space
+
+	size_t		maxU8s	(GetByteCount());
+	uint8_t *	pU8		(reinterpret_cast <uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
+	if (!pU8)
+		return false;	//	Start offset is past end
+	if (maxU8s > inU8Offset)
+		maxU8s -= inU8Offset;	//	Don't go past end
+	if (maxU8s > inU8s.size())
+		maxU8s = inU8s.size();	//	Truncate incoming vector to not go past end
+
+	for (unsigned ndx(0);  ndx < maxU8s;  ndx++)
+#if defined(_DEBUG)
+		*pU8++ = inU8s.at(ndx);
+#else
+		*pU8++ = inU8s[ndx];
+#endif
 	return true;
 }
 
