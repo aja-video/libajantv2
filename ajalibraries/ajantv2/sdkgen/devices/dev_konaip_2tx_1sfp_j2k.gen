@@ -63,6 +63,7 @@ NTV2_WgtLUT2
 NTV2_Wgt3GSDIOut1
 NTV2_Wgt3GSDIOut2
 NTV2_WgtMixer1
+NTV2_WgtMixer2
 NTV2_WgtGenLock
 NTV2_WgtHDMIOut1v3
 
@@ -88,7 +89,7 @@ NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
 NTV2DeviceGetNumFrameStores					4
 NTV2DeviceGetNumHDMIAudioOutputChannels		8
 NTV2DeviceGetNumHDMIVideoOutputs			1
-NTV2DeviceGetNumLUTs						4
+NTV2DeviceGetNumLUTs						2
 NTV2DeviceGetNumMixers						2
 NTV2DeviceGetNumReferenceVideoInputs		1
 NTV2DeviceGetNumVideoOutputs				2

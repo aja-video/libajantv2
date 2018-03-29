@@ -71,31 +71,31 @@ NTV2_WgtFrameBuffer3
 NTV2_WgtFrameBuffer4
 NTV2_WgtCSC1
 NTV2_WgtCSC2
+NTV2_WgtCSC3
+NTV2_WgtCSC4
 NTV2_WgtLUT1
 NTV2_WgtLUT2
+NTV2_WgtLUT3
+NTV2_WgtLUT4
 NTV2_Wgt3GSDIIn1
 NTV2_Wgt3GSDIIn2
 NTV2_Wgt3GSDIIn3
 NTV2_Wgt3GSDIIn4
+NTV2_WgtDualLinkV2In1
+NTV2_WgtDualLinkV2In2
+NTV2_WgtDualLinkV2In3
+NTV2_WgtDualLinkV2In4
 NTV2_Wgt3GSDIOut1
 NTV2_Wgt3GSDIOut2
 NTV2_Wgt3GSDIOut3
 NTV2_Wgt3GSDIOut4
-NTV2_WgtDualLinkV2In1
-NTV2_WgtDualLinkV2In2
 NTV2_WgtDualLinkV2Out1
 NTV2_WgtDualLinkV2Out2
-NTV2_WgtMixer1
-NTV2_WgtGenLock
-NTV2_WgtMixer2
-NTV2_WgtLUT3
-NTV2_WgtLUT4
-NTV2_WgtDualLinkV2In3
-NTV2_WgtDualLinkV2In4
 NTV2_WgtDualLinkV2Out3
 NTV2_WgtDualLinkV2Out4
-NTV2_WgtCSC3
-NTV2_WgtCSC4
+NTV2_WgtMixer1
+NTV2_WgtMixer2
+NTV2_WgtGenLock
 NTV2_WgtHDMIOut1v3
 
 
@@ -117,13 +117,13 @@ NTV2DeviceGetNumDMAEngines					2
 NTV2DeviceGetNumVideoChannels				4
 NTV2DeviceGetPingLED						BIT(16)
 NTV2DeviceGetNumAudioSystems				4
-NTV2DeviceGetNumCSCs						5
+NTV2DeviceGetNumCSCs						4
 NTV2DeviceGetNumEmbeddedAudioInputChannels	16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
 NTV2DeviceGetNumFrameStores					4
 NTV2DeviceGetNumHDMIAudioOutputChannels		8
 NTV2DeviceGetNumHDMIVideoOutputs			1
-NTV2DeviceGetNumLUTs						5
+NTV2DeviceGetNumLUTs						4
 NTV2DeviceGetNumMixers						2
 NTV2DeviceGetNumReferenceVideoInputs		1
 NTV2DeviceGetNumVideoInputs					4
