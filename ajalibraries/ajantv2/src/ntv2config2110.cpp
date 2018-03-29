@@ -759,7 +759,7 @@ int CNTV2Config2110::LeastCommonMultiple(int a,int b)
     return m;
 }
 
-bool CNTV2Config2110::SetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig)
+bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig)
 {
     bool        rv = true;
 
@@ -955,7 +955,7 @@ bool CNTV2Config2110::SetFramerStream(const eSFP sfp, const NTV2Channel channel,
     return true;
 }
 
-bool CNTV2Config2110::GetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig)
+bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig)
 {
 
     GetFramerStream(channel,stream,SFP_1,txConfig);
@@ -1055,7 +1055,7 @@ void CNTV2Config2110::GetFramerStream(NTV2Channel channel, NTV2Stream stream, eS
     ReadChannelRegister(kRegFramer_udp_dst_port + baseAddrFramer,&txConfig.remotePort[index]);
 }
 
-bool CNTV2Config2110::SetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2)
+bool CNTV2Config2110::SetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2)
 {
     if (enableSfp1 && (GetSFPActive(SFP_1) == false))
     {
@@ -1137,7 +1137,7 @@ void CNTV2Config2110::EnableFramerStream(const eSFP sfp, const NTV2Channel chann
     // ** Framer end
 }
 
-bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled)
+bool CNTV2Config2110::GetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled)
 {
     GetArbiter(SFP_1, channel, stream, sfp1Enabled);
     GetArbiter(SFP_2, channel, stream, sfp2Enabled);
@@ -1598,7 +1598,7 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
         }
         if (!rv)
         {
-            SetTxChannelEnable(channel, stream, false); // stop transmit
+            SetTxStreamEnable(channel, stream, false); // stop transmit
             mIpErrorCode = NTV2IpErrCannotGetMacAddress;
             return false;
         }
@@ -1711,14 +1711,14 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     // TODO - fix this to work with sfp2
     bool enabledA;
     bool enabledB;
-    GetTxChannelEnable(channel,NTV2_VIDEO_STREAM,enabledA,enabledB);
+    GetTxStreamEnable(channel,NTV2_VIDEO_STREAM,enabledA,enabledB);
     if (!enabledA)
     {
         return true;
     }
 
     tx_2110Config config;
-    GetTxChannelConfiguration(channel, NTV2_VIDEO_STREAM, config);
+    GetTxStreamConfiguration(channel, NTV2_VIDEO_STREAM, config);
 
     uint32_t baseAddrPacketizer;
     SetTxPacketizerChannel(channel,NTV2_VIDEO_STREAM,baseAddrPacketizer);
@@ -1794,14 +1794,14 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     // TODO - fix this to work with sfp2
     bool enabledA;
     bool enabledB;
-    GetTxChannelEnable(channel,stream,enabledA,enabledB);
+    GetTxStreamEnable(channel,stream,enabledA,enabledB);
     if (!enabledA)
     {
         return true;
     }
 
     tx_2110Config config;
-    GetTxChannelConfiguration(channel, stream, config);
+    GetTxStreamConfiguration(channel, stream, config);
 
     // media name
     sdp << "m=audio ";

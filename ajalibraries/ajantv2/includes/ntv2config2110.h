@@ -107,10 +107,10 @@ public:
     bool        GetRxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
     bool        GetRxByteCount(const eSFP sfp, uint64_t &bytes);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig);
-    bool        SetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
-    bool        GetTxChannelEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
+    bool        SetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
+    bool        GetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig);
+    bool        SetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
+    bool        GetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
     bool        GetTxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets);
     bool        GetTxByteCount(const eSFP sfp, uint64_t &bytes);
 
