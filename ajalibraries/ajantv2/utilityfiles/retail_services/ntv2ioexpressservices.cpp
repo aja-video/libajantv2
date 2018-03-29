@@ -337,7 +337,7 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
-	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
+	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	

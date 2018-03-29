@@ -2043,7 +2043,7 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	
 	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 

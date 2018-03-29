@@ -2014,7 +2014,7 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	//bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	
 	// single wire 3Gb out
@@ -2101,8 +2101,8 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	//
 	
 	// is 2K frame buffer geometry, includes 4K mode
-	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
+	//bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
+	//NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
 	
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 

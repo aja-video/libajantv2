@@ -610,12 +610,7 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	// VPID
-	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bSdiOutRGB;
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	
 	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )

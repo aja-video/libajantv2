@@ -3032,6 +3032,8 @@ void DeviceServices::SetDeviceXPointCapture()
 					case DEVICE_ID_KONAHDMI:
 						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT3);
 						break;
+					default: 
+						break;
 					}
 				}
 				break;

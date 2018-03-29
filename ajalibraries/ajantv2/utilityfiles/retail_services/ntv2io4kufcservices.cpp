@@ -1176,15 +1176,15 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	// VPID
-	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bSdiOutRGB;
+	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
+	//											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
+	//											  IsVideoFormatB(mFb1VideoFormat) ||
+	//											  bSdiOutRGB;
 											  
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
-	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);
+	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);
 	
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2FrameRate			secondaryFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
