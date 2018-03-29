@@ -670,6 +670,24 @@ bool CNTV2Config2110::GetRxByteCount(const NTV2Channel channel, NTV2Stream strea
     return true;
 }
 
+bool CNTV2Config2110::GetRxByteCount(const eSFP sfp, uint32_t &bytes)
+{
+    bytes = 100;
+    return true;
+}
+
+bool CNTV2Config2110::GetTxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes)
+{
+    bytes = 300;
+    return true;
+}
+
+bool CNTV2Config2110::GetTxByteCount(const eSFP sfp, uint32_t &bytes)
+{
+    bytes = 200;
+    return true;
+}
+
 int CNTV2Config2110::LeastCommonMultiple(int a,int b)
 {
     int m = a;
