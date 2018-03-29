@@ -1793,53 +1793,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 
 
 	//
-	// SDI Out 1
+	// SDI Out
 	//
-
-	// is 2K frame buffer geometry, includes 4K mode
-	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
-
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-
-
-	//
-	// SDI Out 2
-	//
-
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
-	
-	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	mCard->WriteRegister(kRegSDIOut1Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
 	mCard->WriteRegister(kRegSDIOut2Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);

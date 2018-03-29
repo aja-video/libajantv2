@@ -622,27 +622,6 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-	
-	
-	//
-	// SDI Out 1
-	//
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-	
 		
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter

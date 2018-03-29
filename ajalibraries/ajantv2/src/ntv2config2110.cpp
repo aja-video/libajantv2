@@ -1069,7 +1069,7 @@ bool CNTV2Config2110::GetTxChannelEnable(const NTV2Channel channel, const NTV2St
     return true;
 }
 
-bool  CNTV2Config2110::SetPTPMaster(std::string ptpMaster)
+bool  CNTV2Config2110::SetPTPMaster(const std::string ptpMaster)
 {
     uint32_t addr = inet_addr(ptpMaster.c_str());
     addr = NTV2EndianSwap32(addr);
@@ -1100,7 +1100,19 @@ bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
     return true;
 }
 
-bool CNTV2Config2110::Set2110_4K_Mode(bool enable)
+bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
+{
+    uint32_t val = 0;
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_Status, &val);
+
+    ptpStatus.PTP_packetStatus      = (val & BIT(16)) ? true : false;
+    ptpStatus.PTP_frequencyLocked   = (val & BIT(17)) ? true : false;
+    ptpStatus.PTP_phaseLocked       = (val & BIT(18)) ? true : false;
+
+    return true;
+}
+
+bool CNTV2Config2110::Set4KMode(bool enable)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -1109,7 +1121,7 @@ bool CNTV2Config2110::Set2110_4K_Mode(bool enable)
     }
 
     bool old_enable = false;
-    Get2110_4K_Mode(old_enable);
+    Get4KMode(old_enable);
     bool enableChange = (old_enable != enable);
 
     if (enableChange)
@@ -1130,7 +1142,7 @@ bool CNTV2Config2110::Set2110_4K_Mode(bool enable)
     return true;
 }
 
-bool  CNTV2Config2110::Get2110_4K_Mode(bool & enable)
+bool  CNTV2Config2110::Get4KMode(bool & enable)
 {
     uint32_t reg;
     reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
@@ -1369,7 +1381,7 @@ bool CNTV2Config2110::GetSFPMSAData(eSFP sfp, SFPMSAData & data)
     return GetSFPInfo(sfp, data);
 }
 
-bool CNTV2Config2110::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
+bool CNTV2Config2110::GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus)
 {
     uint32_t val;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
@@ -1378,22 +1390,21 @@ bool CNTV2Config2110::GetLinkStatus(eSFP sfp, sSFPStatus & sfpStatus)
 
     if (sfp == SFP_2)
     {
-        sfpStatus.linkUp            = (val  & LINK_B_UP) ? true : false;
+        sfpStatus.SFP_linkUp        = (val  & LINK_B_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_2_NOT_PRESENT) ? false : true;
-        sfpStatus.SFP_rx_los        = (val2 & SFP_2_RX_LOS) ? true : false;
-        sfpStatus.SFP_tx_fault      = (val2 & SFP_2_TX_FAULT) ? true : false;
+        sfpStatus.SFP_rxLoss        = (val2 & SFP_2_RX_LOS) ? true : false;
+        sfpStatus.SFP_txFault       = (val2 & SFP_2_TX_FAULT) ? true : false;
     }
     else
     {
-        sfpStatus.linkUp            = (val  & LINK_A_UP) ? true : false;
+        sfpStatus.SFP_linkUp        = (val  & LINK_A_UP) ? true : false;
         sfpStatus.SFP_present       = (val2 & SFP_1_NOT_PRESENT) ? false : true;
-        sfpStatus.SFP_rx_los        = (val2 & SFP_1_RX_LOS) ? true : false;
-        sfpStatus.SFP_tx_fault      = (val2 & SFP_1_TX_FAULT) ? true : false;
+        sfpStatus.SFP_rxLoss        = (val2 & SFP_1_RX_LOS) ? true : false;
+        sfpStatus.SFP_txFault       = (val2 & SFP_1_TX_FAULT) ? true : false;
     }
 
     return true;
 }
-
 
 string CNTV2Config2110::getLastError()
 {
