@@ -361,9 +361,8 @@ void DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegAgentCheck, &count);
         if (count % 30 == 0)
         {
-            uint32_t sizeRead = 0;
-            bool bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110), &sizeRead);
-            if (bOk == false || sizeRead != sizeof(NetworkData2110))
+            bool bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110));
+            if (bOk == false)
             {
                 memset(&m2110Network, 0, sizeof(NetworkData2110));
                 printf("Failed to get 2110 Network params\n");
