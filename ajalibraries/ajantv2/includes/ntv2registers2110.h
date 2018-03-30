@@ -54,6 +54,9 @@
 #define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
+#define SAREK_2110_TEST_GENERATOR               (0x308000/4)
+
+
 /////////////////////////////////////////////////////////////////////
 //
 // 4175 Packeteizer
