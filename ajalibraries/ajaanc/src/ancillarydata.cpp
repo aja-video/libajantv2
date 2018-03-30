@@ -154,6 +154,15 @@ AJAStatus AJAAncillaryData::SetSID (const uint8_t inSID)
 	return AJA_STATUS_SUCCESS;
 }
 
+AJAStatus AJAAncillaryData::SetChecksum (const uint8_t inChecksum, const bool inValidate)
+{
+	m_checksum = inChecksum;
+	if (inValidate)
+		if (inChecksum != Calculate8BitChecksum())
+			return AJA_STATUS_FAIL;
+	return AJA_STATUS_SUCCESS;
+}
+
 
 uint16_t AJAAncillaryData::GetStreamInfo (void) const
 {
@@ -176,6 +185,7 @@ uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 	if (!m_payload.empty())
 		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
 			sum += m_payload[ndx];
+NTV2_ASSERT(sum == uint8_t(Calculate9BitChecksum()));
 	return sum;
 }
 
@@ -1021,6 +1031,10 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	//	Copy in the Anc packet data, while stripping off parity...
 	for (size_t ndx(0);  ndx < dataCount;  ndx++)
 		m_payload.push_back(uint8_t(u16s.at(ndx+3)));
+
+	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true);	//	'true' means 'validate'
+	if (AJA_FAILURE(result))
+		{LOGMYERROR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
 
 	/*	The Pattern:  (unrolling the above loop):
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(0));

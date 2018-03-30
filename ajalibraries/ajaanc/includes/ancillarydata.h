@@ -576,10 +576,13 @@ public:
 	/**
 		@brief		Sets my 8-bit checksum. Note that it is not usually necessary to generate an 8-bit checksum, since the ANC Insertion
 					hardware ignores this field and (for SMPTE-291 Anc packets) generates and inserts its own "proper" 9-bit SMPTE-291 checksum.
-		@param[in]	checksum8	8-bit checksum
+		@param[in]	inChecksum8		Specifies the new 8-bit checksum.
+		@param[in]	inValidate		If 'true', fails the function if the given checksum doesn't match the result
+									of the AJAAncillaryData::Calculate8BitChecksum function.
+									If 'false', does not validate the given checksum. Defaults to 'false'.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetChecksum (const uint8_t checksum8)	{m_checksum = checksum8;  return AJA_STATUS_SUCCESS;}
+	virtual AJAStatus						SetChecksum (const uint8_t checksum8, const bool inValidate = false);
 
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.

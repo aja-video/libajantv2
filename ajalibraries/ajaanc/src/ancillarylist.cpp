@@ -1208,7 +1208,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 	else
 		RTPHeaderF1.SetField1();
 	RTPHeaderF1.SetAncPacketCount(uint8_t(F1PktCnt));
-	RTPHeaderF1.SetPacketLength (uint16_t(U32F1s.size() * sizeof(uint32_t)));
+	RTPHeaderF1.SetPacketLength(uint16_t(U32F1s.size() * sizeof(uint32_t)));
 	size_t	RTPsize	(RTPHeaderF1.GetPacketLength() + RTPHeaderF1.GetHeaderByteCount());
 	if (actF1PktCnt != F1PktCnt)
 		LOGMYWARN("Predicted F1PktCnt " << DEC(F1PktCnt) << " doesn't match actual pkt count " << DEC(actF1PktCnt));
@@ -1220,9 +1220,10 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 
 	if (!inIsProgressive)
 	{
+		//	Write F2 RTP header...
 		RTPHeaderF2.SetField2();
 		RTPHeaderF2.SetAncPacketCount(uint8_t(F2PktCnt));
-		RTPHeaderF2.SetPacketLength (uint16_t(U32F2s.size() * sizeof(uint32_t)));
+		RTPHeaderF2.SetPacketLength(uint16_t(U32F2s.size() * sizeof(uint32_t)));
 		RTPsize = RTPHeaderF2.GetPacketLength() + RTPHeaderF2.GetHeaderByteCount();
 		if (actF2PktCnt != F2PktCnt)
 			LOGMYWARN("Predicted F2PktCnt " << DEC(F2PktCnt) << " doesn't match actual pkt count " << DEC(actF2PktCnt));
@@ -1236,20 +1237,26 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 	//	Write the packed data into the packet buffers...
 	if (!U32F1s.empty())
 	{
-		NTV2_ASSERT(F1Buffer.GetByteCount() >= ((5+U32F1s.size()) * sizeof(uint32_t)));
-		::memcpy (F1Buffer.GetHostAddress(5*sizeof(uint32_t)),  &U32F1s[0],  U32F1s.size()*sizeof(uint32_t));
-		LOGMYINFO("Wrote " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer " << F1Buffer << ": " << RTPHeaderF1);
-		#if defined(AJA_DEBUG)
-			LOGMYDEBUG("F1 Output Buffer: " << F1Buffer.GetU32s(U32F1s.size()+5, true));	// True means Byte-swapped
+		if (!F1Buffer.PutU32s(U32F1s, 5))
+		{
+			LOGMYERROR("F1Buffer.PutU32s failed: F1Buffer=" << F1Buffer << ", U32F1s: " << ULWordSequence(U32F1s));
+			return AJA_STATUS_FAIL;
+		}
+		LOGMYINFO("Put " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer " << F1Buffer << ": " << RTPHeaderF1);
+		#if defined(_DEBUG)
+			LOGMYDEBUG("F1 Output Buffer: " << F1Buffer.GetU32s(0, U32F1s.size()+5, true));	// True means Byte-swapped
 		#endif
 	}
 	if (!U32F2s.empty())
 	{
-		NTV2_ASSERT(F2Buffer.GetByteCount() >= ((5+U32F2s.size()) * sizeof(uint32_t)));
-		::memcpy (F2Buffer.GetHostAddress(5*sizeof(uint32_t)),  &U32F2s[0],  U32F2s.size()*sizeof(uint32_t));
-		LOGMYINFO("Wrote " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer " << F2Buffer << ": " << RTPHeaderF2);
-		#if defined(AJA_DEBUG)
-			LOGMYDEBUG("F2 Output Buffer: " << F2Buffer.GetU32s(U32F2s.size()+5, true));	// True means Byte-swapped
+		if (!F2Buffer.PutU32s(U32F2s, 5))
+		{
+			LOGMYERROR("F2Buffer.PutU32s failed: F2Buffer=" << F2Buffer << ", U32F2s: " << ULWordSequence(U32F2s));
+			return AJA_STATUS_FAIL;
+		}
+		LOGMYINFO("Put " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer " << F2Buffer << ": " << RTPHeaderF2);
+		#if defined(_DEBUG)
+			LOGMYDEBUG("F2 Output Buffer: " << F2Buffer.GetU32s(0, U32F2s.size()+5, true));	// True means Byte-swapped
 		#endif
 	}
 
