@@ -977,7 +977,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	size_t				dataCount		(0);
 	uint32_t			u32				(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
 	const size_t		startU32Ndx		(inOutU32Ndx);
-	LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
+	//LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
 	do
 	{
 		uint16_t	u16	(0);
@@ -989,7 +989,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 			const uint32_t	mask	(gMasks[loopNdx]);
 			if (is4th)
 			{
-				u16 = uint16_t((u32 & mask) >> shift);
+				u16 = uint16_t((u32 & mask) << shift);
 
 				//	Grab next u32 value...
 				if (++inOutU32Ndx >= numU32s)
@@ -998,15 +998,23 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 					break;	//	Past end
 				}
 				u32 = AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
-				LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
+				//LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
+				//			<< " from " << DEC(loopNdx) << "(" << xHEX0N(inU32s.at(inOutU32Ndx-1),8) << " & " << xHEX0N(mask,8) << ") << " << DEC(shift));
 			}
 			else
 			{
 				if (is1st)
+				{
+					//LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
+					//			<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
 					u16 |= uint16_t((u32 & mask) >> shift);
+				}
 				else
+				{
 					u16 = uint16_t((u32 & mask) >> shift);
-				u16s.push_back(u16);	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
+					//LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
+				}
+				u16s.push_back(u16);//	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
 				switch(u16s.size())
 				{
 					case 1:		SetDID(uint8_t(u16));				break;	//	Got DID
@@ -1022,65 +1030,63 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 				break;
 	} while (inOutU32Ndx < numU32s);
 
-	LOGMYDEBUG("Consumed " << DEC(inOutU32Ndx - startU32Ndx + 1) << " ULWord(s)");
+	LOGMYDEBUG("Consumed " << DEC(inOutU32Ndx - startU32Ndx + 1) << " ULWord(s), unpacked " << u16s);
 	if (inOutU32Ndx < numU32s)
 		inOutU32Ndx++;	//	Bump to next Anc packet, if any
-
-	LOGMYDEBUG("Unpacked " << u16s);
 
 	//	Copy in the Anc packet data, while stripping off parity...
 	for (size_t ndx(0);  ndx < dataCount;  ndx++)
 		m_payload.push_back(uint8_t(u16s.at(ndx+3)));
 
-	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true);	//	'true' means 'validate'
+	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true /*validate*/);
 	if (AJA_FAILURE(result))
 		{LOGMYERROR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
 
 	/*	The Pattern:  (unrolling the above loop):
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(0));
-		u16  = uint16_t((u32 & 0xFFC00000) >> 22);		//	all 10 bits
+		u16  = uint16_t((u32 & 0xFFC00000) >> 22);		//	all 10 bits				0
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x003FF000) >> 12);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x003FF000) >> 12);		//	all 10 bits				1
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x00000FFC) >>  2);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x00000FFC) >>  2);		//	all 10 bits				2
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x00000003) <<  8);		//	first (MS 2 bits)
+		u16  = uint16_t((u32 & 0x00000003) <<  8);		//	first (MS 2 bits)		3
 
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(1));
-		u16 |= uint16_t((u32 & 0xFF000000) >> 24);		//	last (LS 8 bits)
+		u16 |= uint16_t((u32 & 0xFF000000) >> 24);		//	last (LS 8 bits)		4
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x00FFC000) >> 14);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x00FFC000) >> 14);		//	all 10 bits				5
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x00003FF0) >>  4);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x00003FF0) >>  4);		//	all 10 bits				6
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x0000000F) <<  6);		//	first (MS 4 bits)
+		u16  = uint16_t((u32 & 0x0000000F) <<  6);		//	first (MS 4 bits)		7
 
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(2));
-		u16 |= uint16_t((u32 & 0xFC000000) >> 26);		//	last (LS 6 bits)
+		u16 |= uint16_t((u32 & 0xFC000000) >> 26);		//	last (LS 6 bits)		8
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x03FF0000) >> 16);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x03FF0000) >> 16);		//	all 10 bits				9
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x0000FFC0) >>  6);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x0000FFC0) >>  6);		//	all 10 bits				10
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x0000003F) <<  4);		//	first (MS 6 bits)
+		u16  = uint16_t((u32 & 0x0000003F) <<  4);		//	first (MS 6 bits)		11
 
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(3));
-		u16 |= uint16_t((u32 & 0xF0000000) >> 28);		//	last (LS 4 bits)
+		u16 |= uint16_t((u32 & 0xF0000000) >> 28);		//	last (LS 4 bits)		12
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x0FFC0000) >> 18);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x0FFC0000) >> 18);		//	all 10 bits				13
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x0003FF00) >>  8);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x0003FF00) >>  8);		//	all 10 bits				14
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x000000FF) <<  2);		//	first (MS 8 bits)
+		u16  = uint16_t((u32 & 0x000000FF) <<  2);		//	first (MS 8 bits)		15
 
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(4));
-		u16 |= uint16_t((u32 & 0xC0000000) >> 30);		//	last (LS 2 bits)
+		u16 |= uint16_t((u32 & 0xC0000000) >> 30);		//	last (LS 2 bits)		16
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x3FF00000) >> 20);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x3FF00000) >> 20);		//	all 10 bits				17
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x000FFC00) >> 10);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x000FFC00) >> 10);		//	all 10 bits				18
 		u16s.push_back(u16);
-		u16  = uint16_t((u32 & 0x000003FF) >>  0);		//	all 10 bits
+		u16  = uint16_t((u32 & 0x000003FF) >>  0);		//	all 10 bits				19
 		u16s.push_back(u16);
 */
 	LOGMYDEBUG(AsString(64));

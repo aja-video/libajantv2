@@ -20,6 +20,12 @@
 
 using namespace std;
 
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gIPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
@@ -1356,6 +1362,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 		static bool BFT_AncListToIPBufferToAncList (void)
 		{
+			LOGMYNOTE("Starting");
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
@@ -1364,8 +1371,9 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
-				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Trying " << ::NTV2VideoFormatToString(vFormat));
+//if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
+				if (gIsVerbose)	cerr << "Trying " << fd << endl;
+				LOGMYNOTE("Trying " << fd);
 				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
@@ -1415,12 +1423,14 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
 
 				//	Transmit the packets into the IP buffer...
-				NTV2_POINTER	IPF1(4096), IPF2(4096);
+				NTV2_POINTER	IPF1(2048), IPF2(2048);
 				SHOULD_SUCCEED(txPkts.GetAncillaryDataTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_IPBufferToAncListToIPBuffer...
 				gIPBuffers[vFormat] = NTV2_POINTER(IPF1);
+//{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F1 RTP Buffer:" << endl << oss.str());}
+//{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
 
 				//	Receive packets from the IP buffer...
 				AJAAncillaryList	rxPkts;
@@ -1428,12 +1438,13 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
 
 				//	Compare the Tx and Rx packet lists...
-				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, false/*ignoreLocation*/, false/*ignoreChecksum*/));
+				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, false/*don't ignoreLocation*/, false/*don't ignoreChecksum*/));
 				if (!cmpInfo.empty())
 					cerr << "Mis-compare:" << endl << cmpInfo << endl;
 				SHOULD_BE_TRUE(cmpInfo.empty());
 			}	//	for each video format
-			AJA_sNOTICE(AJA_DebugUnit_Unused_40, "BFT_AncListToIPBufferToAncList passed");
+
+			LOGMYNOTE("Passed");
 			cerr << "BFT_AncListToIPBufferToAncList passed" << endl;
 			return true;
 		}	//	BFT_AncListToIPBufferToAncList
@@ -1576,6 +1587,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		static bool BFT_IPBufferToAncListToIPBuffer (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			LOGMYNOTE("Starting");
 			if (gIsVerbose)	cerr << endl << "Starting BFT_IPBufferToAncListToIPBuffer..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
@@ -1584,8 +1596,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
 				AJAAncillaryList			rxPkts;
-				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Trying " << ::NTV2VideoFormatToString(vFormat));
+				if (gIsVerbose)	cerr << "Trying " << fd << endl;
+				LOGMYNOTE("Trying " << fd);
 				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
@@ -1593,6 +1605,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToIPBufferToAncList...
+if (gIPBuffers[vFormat].IsNULL())
+	{cerr << "Skipping " << fd << " because " << gIPBuffers[vFormat] << endl;	continue;}
 				const NTV2_POINTER	F1RTP_a	(gIPBuffers[vFormat]);
 				NTV2_POINTER		F1RTP_b	(F1RTP_a.GetByteCount()),	F2RTP_b(F1RTP_a.GetByteCount());
 				//	Unpack into an AJAAncillaryList of anc packets...
@@ -1622,6 +1636,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				}
 				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4));
 			}	//	for each vFormat
+			LOGMYNOTE("Passed");
 			cerr << "BFT_IPBufferToAncListToIPBuffer passed" << endl;
 			return true;
 		}	//	BFT_IPBufferToAncListToIPBuffer
@@ -1812,6 +1827,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 		static bool BFT (void)
 		{
+			AJADebug::Open();
+			LOGMYNOTE("Starting");
 			//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
 			//	as they would appear in a NTV2_FBF_10BIT_YCBCR frame buffer.
 			//		DID=0x45 SDID=0x01 DC=216 CS=0xD2
@@ -1883,8 +1900,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SD10BitYUVComponents.push_back(SD10BitYCbCrLine[ndx]);
 			SHOULD_BE_TRUE(BFT_YUVComponentsTo10BitYUVPackedBuffer(SD10BitYUVComponents));
 			YUVLine = SD10BitYUVComponents;
-AJADebug::Open();
-AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Starting CNTV2AncDataTester BFT");
 
 			if (false)
 				SHOULD_BE_TRUE(BFT_AncEnums());
@@ -1936,6 +1951,7 @@ AJA_sNOTICE(AJA_DebugUnit_AJAAncData, "Starting CNTV2AncDataTester BFT");
 			if (false)
 				SHOULD_BE_TRUE (BFT_AncDataCEA708());
 
+			LOGMYNOTE("Passed");
 			return true;
 		}	//	BFT
 
