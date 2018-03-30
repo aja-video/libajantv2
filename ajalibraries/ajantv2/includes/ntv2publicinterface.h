@@ -6060,7 +6060,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU64s (const std::vector<uint64_t> & inU16s, const size_t inU64Offset = 0, const bool inByteSwap = false);
+				bool							PutU64s (const std::vector<uint64_t> & inU64s, const size_t inU64Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 32-bit values into me.
@@ -6071,7 +6071,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU32s (const std::vector<uint32_t> & inU16s, const size_t inU32Offset = 0, const bool inByteSwap = false);
+				bool							PutU32s (const std::vector<uint32_t> & inU32s, const size_t inU32Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 16-bit values into me.
