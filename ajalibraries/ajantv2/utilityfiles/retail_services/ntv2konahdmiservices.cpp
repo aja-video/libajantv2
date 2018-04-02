@@ -94,6 +94,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 		inputXpt3 = NTV2_XptBlack;
 		inputXpt4 = NTV2_XptBlack;
 		break;
+	default:
+		break;
 	}
 
 	// make sure formats/modes match for multibuffer modes

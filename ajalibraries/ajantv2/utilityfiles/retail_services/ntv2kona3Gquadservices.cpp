@@ -1715,12 +1715,12 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	bool					b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool 					b2wire4kOut 		= (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool 					b2wire4kIn 			= (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bSdiOutRGB || b2wire4kIn || b2wire4kOut;
-	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bSdiOutRGB) || b2wire4kOut || b2wire4kIn;
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
+	//											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
+	//											  IsVideoFormatB(mFb1VideoFormat) ||
+	//											  bSdiOutRGB || b2wire4kIn || b2wire4kOut;
+	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bSdiOutRGB) || b2wire4kOut || b2wire4kIn;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
