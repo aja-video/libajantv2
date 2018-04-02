@@ -357,24 +357,62 @@ void DeviceServices::ReadDriverState (void)
         (mDeviceID == DEVICE_ID_IOIP_2110))
     {
         // Only do this once a second
-        uint32_t	count	(0);
+        uint32_t	count = 0;
+        bool        bOk;
         mCard->ReadRegister(kVRegAgentCheck, &count);
-        if (count % 30 == 0)
+        if ((count + 0) % 30 == 0)
         {
-            bool bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110));
+            bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110));
             if (bOk == false)
             {
                 memset(&m2110Network, 0, sizeof(NetworkData2110));
                 printf("Failed to get 2110 Network params\n");
             }
             else
-            {
                 Print2110Network(m2110Network);
+        }
+
+        if ((count + 2) % 30 == 0)
+        {
+            bool bOk = mCard->ReadVirtualData(kTransmitVideoData2110, &m2110TxVideoData, sizeof(TransmitVideoData2110));
+            if (bOk == false)
+            {
+                memset(&m2110TxVideoData, 0, sizeof(TransmitVideoData2110));
+                printf("Failed to get 2110 Transmit Video params\n");
+            }
+        }
+
+        if ((count + 4) % 30 == 0)
+        {
+            bool bOk = mCard->ReadVirtualData(kTransmitAudioData2110, &m2110TxAudioData, sizeof(TransmitAudioData2110));
+            if (bOk == false)
+            {
+                memset(&m2110TxAudioData, 0, sizeof(TransmitAudioData2110));
+                printf("Failed to get 2110 Transmit Audio params\n");
+            }
+        }
+
+        if ((count + 6) % 30 == 0)
+        {
+            bool bOk = mCard->ReadVirtualData(kReceiveVideoData2110, &m2110RxVideoData, sizeof(ReceiveVideoData2110));
+            if (bOk == false)
+            {
+                memset(&m2110RxVideoData, 0, sizeof(ReceiveVideoData2110));
+                printf("Failed to get 2110 Receive Video params\n");
+            }
+        }
+
+        if ((count + 8) % 30 == 0)
+        {
+            bool bOk = mCard->ReadVirtualData(kReceiveAudioData2110, &m2110RxAudioData, sizeof(ReceiveAudioData2110));
+            if (bOk == false)
+            {
+                memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
+                printf("Failed to get 2110 Receive Audio params\n");
             }
         }
     }
 }
-
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -2390,14 +2428,13 @@ void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
     printf("id           %d\n", m2110Network.id);
     PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
-
-
-
-//    uint32_t                id;
-//    char                    ptpMasterIP[IP_STRSIZE];
-//    uint32_t                numSFPs;
-//    SFPVData2110            sfp[2];
-
+    PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[0].gateWay[0]);
+    PrintChArray("ptpMaster", &m2110Network.sfp[1].ipAddress[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[1].subnetMask[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[1].gateWay[0]);
+    printf("\n");
 
 }
 

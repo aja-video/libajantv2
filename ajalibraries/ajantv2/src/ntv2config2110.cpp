@@ -1624,6 +1624,12 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
+string CNTV2Config2110::GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream)
+{
+    return "http://172.16.0.109/txch4v.sdp";
+}
+
+
 string CNTV2Config2110::GetTxSDP(NTV2Channel chan, NTV2Stream stream)
 {
     int ch = (int)chan;
