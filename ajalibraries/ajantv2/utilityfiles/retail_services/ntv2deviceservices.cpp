@@ -368,8 +368,8 @@ void DeviceServices::ReadDriverState (void)
                 memset(&m2110Network, 0, sizeof(NetworkData2110));
                 printf("Failed to get 2110 Network params\n");
             }
-            else
-                Print2110Network(m2110Network);
+            //else
+            //    Print2110Network(m2110Network);
         }
 
         if ((count + 2) % 30 == 0)
