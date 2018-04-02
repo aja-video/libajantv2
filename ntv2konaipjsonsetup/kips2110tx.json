@@ -18,14 +18,14 @@
     ],
     "transmit":[
         {
-            "designator":"channel1",
+            "designator":"channel3",
             "stream":"video",
+            "sfp1LocalPort":"5001",
             "sfp1RemoteIPAddress":"239.20.45.31",
             "sfp1RemotePort":"3100",
-            "sfp1LocalPort":"5001",
+            "sfp2LocalPort":"5002",
             "sfp2RemoteIPAddress":"239.20.45.32",
             "sfp2RemotePort":"3200",
-            "sfp2LocalPort":"5002",
             "videoFormat":"720p5994",
             "payload":"96",
             "ssrc":"1000",
@@ -34,14 +34,48 @@
             "sfp2Enable":"false"
         },
         {
-            "designator":"channel1",
+            "designator":"channel3",
             "stream":"audio1",
+            "sfp1LocalPort":"5001",
             "sfp1RemoteIPAddress":"239.30.45.31",
             "sfp1RemotePort":"3100",
-            "sfp1LocalPort":"5001",
+            "sfp2LocalPort":"5002",
             "sfp2RemoteIPAddress":"239.30.45.32",
             "sfp2RemotePort":"3200",
+            "payload":"100",
+            "ssrc":"1000",
+            "ttl":"64",
+            "numAudioChannels":"16",
+            "firstAudioChannel":"0",
+            "audioPktInterval" :"1000",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false"
+        },
+        {
+            "designator":"channel4",
+            "stream":"video",
+            "sfp1LocalPort":"5001",
+            "sfp1RemoteIPAddress":"239.20.45.41",
+            "sfp1RemotePort":"4100",
             "sfp2LocalPort":"5002",
+            "sfp2RemoteIPAddress":"239.20.45.42",
+            "sfp2RemotePort":"4200",
+            "videoFormat":"720p5994",
+            "payload":"96",
+            "ssrc":"1000",
+            "ttl":"64",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false"
+        },
+        {
+            "designator":"channel4",
+            "stream":"audio1",
+            "sfp1LocalPort":"5001",
+            "sfp1RemoteIPAddress":"239.30.45.41",
+            "sfp1RemotePort":"4100",
+            "sfp2LocalPort":"5002",
+            "sfp2RemoteIPAddress":"239.30.45.42",
+            "sfp2RemotePort":"4200",
             "payload":"100",
             "ssrc":"1000",
             "ttl":"64",
@@ -51,5 +85,6 @@
             "sfp1Enable":"true",
             "sfp2Enable":"false"
         }
+
     ]
 }

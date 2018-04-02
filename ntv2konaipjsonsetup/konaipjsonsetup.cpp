@@ -887,8 +887,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             continue;
         }
 
-        config2110.SetTxChannelConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxChannelEnable(channel, stream, getEnable(transmit.mSfp1Enable), getEnable(transmit.mSfp2Enable));
+        config2110.SetTxStreamConfiguration (channel, stream, txChannelConfig);
+        config2110.SetTxStreamEnable(channel, stream, getEnable(transmit.mSfp1Enable), getEnable(transmit.mSfp2Enable));
     }
     return true;
 }

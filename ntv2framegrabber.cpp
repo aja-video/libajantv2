@@ -608,7 +608,7 @@ bool NTV2FrameGrabber::SetupInput (void)
                 for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL3;  channel = NTV2Channel(channel+1))
                 {
                     mNTV2Card.EnableChannel (channel);
-                    mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
+					mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
                     mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
                 }
 
@@ -652,7 +652,7 @@ bool NTV2FrameGrabber::SetupInput (void)
                 {
                     mNumChannels++;
                     mNTV2Card.EnableChannel (channel);
-                    mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
+					mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
                     mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
                     if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
                     {
@@ -715,10 +715,23 @@ void NTV2FrameGrabber::StopAutoCirculate (void)
 	if (mNTV2Card.IsOpen ())
 	{
 		mNTV2Card.AutoCirculateStop (mChannel);
-        for (ULWord i = 0; i < mNumChannels; i++)
-        {
-            mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
-        }
+
+		bool tsiEnable;
+		mNTV2Card.GetTsiFrameEnable(&tsiEnable, NTV2_CHANNEL1);
+		if (tsiEnable)
+		{
+			for (ULWord i = 0; i < 2; i++)
+			{
+				mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
+			}
+		}
+		else
+		{
+			for (ULWord i = 0; i < mNumChannels; i++)
+			{
+				mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
+			}
+		}
 	}
 	ClearCaptionBuffer (true);
 
