@@ -780,8 +780,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig.sourcePort   = receive.mSfp2SrcPort.toUInt();
             rxChannelConfig.destPort     = receive.mSfp2DestPort.toUInt();
         }
-        rxChannelConfig.SSRC         = receive.mSSRC.toUInt();
-        rxChannelConfig.VLAN         = receive.mVLAN.toUInt();
+        rxChannelConfig.ssrc         = receive.mSSRC.toUInt();
+        rxChannelConfig.vlan         = receive.mVLAN.toUInt();
         rxChannelConfig.payloadType  = receive.mPayload.toUInt();
 
         if (!receive.mVideoFormat.isEmpty())
@@ -922,8 +922,8 @@ void CKonaIpJsonSetup::dumpRx2110Config(const NTV2Channel channel, const NTV2Str
     qDebug() << "  destIP              " << QString::fromStdString(rxConfig.destIP);
     qDebug() << "  sourcePort          "<< rxConfig.sourcePort;
     qDebug() << "  destPort            "<< rxConfig.destPort;
-    qDebug() << "  SSRC                "<< rxConfig.SSRC;
-    qDebug() << "  VLAN                "<< rxConfig.VLAN;
+    qDebug() << "  ssrc                "<< rxConfig.ssrc;
+    qDebug() << "  vlan                "<< rxConfig.vlan;
     qDebug() << "  payloadType         "<< rxConfig.payloadType;
     qDebug() << "  videoFormat         "<< rxConfig.videoFormat;
     qDebug() << "  videoSamples        "<< rxConfig.videoSamples;
