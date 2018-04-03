@@ -2489,7 +2489,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
 
             m2110TxVideoDataID = m2110TxVideoData.id;
-
         }
 
     }
