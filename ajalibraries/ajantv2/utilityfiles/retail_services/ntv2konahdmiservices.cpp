@@ -163,10 +163,40 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	}
 
 	// 425 muxs
-	mCard->Connect(NTV2_Xpt425Mux1AInput, inputXpt1);
-	mCard->Connect(NTV2_Xpt425Mux1BInput, b4K ? inputXpt2 : NTV2_XptBlack);
-	mCard->Connect(NTV2_Xpt425Mux2AInput, b4K ? inputXpt3 : NTV2_XptBlack);
-	mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? inputXpt4 : NTV2_XptBlack);
+	if(inputFormatSelect == NTV2_RGBSelect)
+	{
+		if(bFb1RGB)
+		{
+			mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptLUT1RGB);
+			mCard->Connect(NTV2_Xpt425Mux1BInput, b4K ? NTV2_XptLUT2RGB : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2AInput, b4K ? NTV2_XptLUT3Out: NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? NTV2_XptLUT4Out : NTV2_XptBlack);
+		}
+		else
+		{
+			mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptCSC1VidRGB);
+			mCard->Connect(NTV2_Xpt425Mux1BInput, b4K ? NTV2_XptCSC2VidRGB : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2AInput, b4K ? NTV2_XptCSC3VidRGB : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? NTV2_XptCSC4VidRGB : NTV2_XptBlack);
+		}
+	}
+	else//inputFormatSelect == NTV2_YUVSelect
+	{
+		if(bFb1RGB)
+		{
+			mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptLUT1RGB);
+			mCard->Connect(NTV2_Xpt425Mux1BInput, b4K ? NTV2_XptLUT2RGB : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2AInput, b4K ? NTV2_XptLUT3Out : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? NTV2_XptLUT4Out : NTV2_XptBlack);
+		}
+		else
+		{
+			mCard->Connect(NTV2_Xpt425Mux1AInput, inputXpt1);
+			mCard->Connect(NTV2_Xpt425Mux1BInput, b4K ? inputXpt2 : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2AInput, b4K ? inputXpt3 : NTV2_XptBlack);
+			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? inputXpt4 : NTV2_XptBlack);
+		}
+	}
 	mCard->Connect(NTV2_Xpt425Mux3AInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux3BInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
@@ -194,25 +224,11 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
-			{
-				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
-				{
-					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);		// no range change
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);			// range change needed
-				}
-			}
-			else
-			{
-				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// CSC converted
-			}
+			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);				// CSC converted
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, inputXpt1);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC1VidRGB : inputXpt1);
 		}
 		mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_XptBlack);

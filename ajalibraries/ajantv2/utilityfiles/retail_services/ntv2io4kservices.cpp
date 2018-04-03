@@ -3351,15 +3351,15 @@ void Io4KServices::SetDeviceMiscRegisters ()
 				break;
 			}
 			
-			mCard->SetHDMIOutVideoFPS(tempRate);
+			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		else
 		{	
-			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
+			//mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		
 		// color space sample rate
@@ -3380,7 +3380,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 				break;
 		}
 
-		mCard->SetHDMIOutVideoStandard(v2Standard);
+		//mCard->SetHDMIOutVideoStandard(v2Standard);
 		
 		// HDMI out colorspace auto-detect status
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
