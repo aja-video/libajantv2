@@ -47,6 +47,7 @@ const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID +
 
 //const uint8_t  AJAAncillaryDataAnalogDID = 0x00;		// used in header DID field when ancillary data is "analog"
 //const uint8_t  AJAAncillaryDataAnalogSID = 0x00;		// used in header SID field when ancillary data is "analog"
+static bool	DetailedDebugging	(false);
 
 
 
@@ -861,7 +862,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData) co
 	//	My first 32-bit longword is the Anc packet header, which contains location info...
 	const AJARTPAncPacketHeader	pktHdr	(GetDataLocation());
 	outData.push_back(pktHdr.GetULWord());
-	LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(AJA_ENDIAN_32HtoN(pktHdr.GetULWord()),8));
+	if (DetailedDebugging)	LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(AJA_ENDIAN_32HtoN(pktHdr.GetULWord()),8));
 
 	//	All subsequent 32-bit longwords come from the array of 10-bit values I built earlier.
 	const size_t	numUDWs	(UDW16s.size());
@@ -877,12 +878,12 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData) co
 			const uint32_t	UDW			(isPastEnd  ?  0  :  uint32_t(UDW16s[ndx]));
 			const unsigned	shift		(gShifts[loopNdx]);
 			const uint32_t	mask		(gMasks[loopNdx]);
-			if (!isPastEnd)	LOGMYDEBUG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
+			if (!isPastEnd)	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
 			if (is4th)
 			{
 				u32 |=  (UDW >> shift) & mask;
 				outData.push_back(AJA_ENDIAN_32HtoN(u32));
-				LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8));
+				if (DetailedDebugging)	LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8));
 				u32 = 0;	//	Reset, start over
 				if (isPastEnd)
 					break;	//	Done, 32-bit longword aligned
@@ -921,16 +922,17 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData) co
 	u32 |= (uint32_t(UDW16s.at(15)) >>  0) & 0x000003FF;	//	0b10011|0x13|19: [15] all 10 bits		22+10=32				10-10=0
 	outData.push_back(AJA_ENDIAN_32HtoN(u32));	*/
 
-#if defined(AJA_DEBUG)
+if (true)	{
 	ostringstream	oss;
-	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " ULWords:";
+	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " 32-bit words:";
 	for (size_t ndx(origSize);  ndx < outData.size();  ndx++)
 		oss << " " << HEX0N(AJA_ENDIAN_32NtoH(outData[ndx]),8);
+	oss << " from " << AsString(32);
 	LOGMYDEBUG(oss.str());
-#else
+} else
 	LOGMYDEBUG((origSize ? "Appended " : "Generated ")
 					<< (outData.size() - origSize)  << " 32-bit words from " << AsString(32));
-#endif
+
 	return AJA_STATUS_SUCCESS;
 }	//	GenerateTransmitData
 
@@ -949,7 +951,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		{LOGMYERROR("AJARTPAncPacketHeader::ReadFromULWordVector failed at [" << DEC(inOutU32Ndx) << "]");	return AJA_STATUS_FAIL;}
 
 	const AJAAncillaryDataLocation	dataLoc	(ancPktHeader.AsDataLocation());
-	LOGMYDEBUG("u32=" << xHEX0N(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
+	if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
 
 	if (++inOutU32Ndx >= numU32s)
 		{LOGMYERROR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
@@ -977,7 +979,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	size_t				dataCount		(0);
 	uint32_t			u32				(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
 	const size_t		startU32Ndx		(inOutU32Ndx);
-	//LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
+	if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
 	do
 	{
 		uint16_t	u16	(0);
@@ -994,38 +996,37 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 				//	Grab next u32 value...
 				if (++inOutU32Ndx >= numU32s)
 				{
-					u16s.push_back(u16);	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
+					u16s.push_back(u16);	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
 					break;	//	Past end
 				}
 				u32 = AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
-				//LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
-				//			<< " from " << DEC(loopNdx) << "(" << xHEX0N(inU32s.at(inOutU32Ndx-1),8) << " & " << xHEX0N(mask,8) << ") << " << DEC(shift));
+				if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
+										<< " from " << DEC(loopNdx) << "(" << xHEX0N(inU32s.at(inOutU32Ndx-1),8) << " & " << xHEX0N(mask,8) << ") << " << DEC(shift));
+				if (shift)
+					continue;	//	go around
+			}
+			else if (is1st)
+			{
+				if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
+													<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
+				u16 |= uint16_t((u32 & mask) >> shift);
 			}
 			else
 			{
-				if (is1st)
-				{
-					//LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
-					//			<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
-					u16 |= uint16_t((u32 & mask) >> shift);
-				}
-				else
-				{
-					u16 = uint16_t((u32 & mask) >> shift);
-					//LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
-				}
-				u16s.push_back(u16);//	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
-				switch(u16s.size())
-				{
-					case 1:		SetDID(uint8_t(u16));				break;	//	Got DID
-					case 2:		SetSID(uint8_t(u16));				break;	//	Got SID
-					case 3:		dataCount = size_t(u16 & 0x0FF);	break;	//	Got DC
-					default:	if (u16s.size() == (dataCount + 4))
-									gotChecksum = true;						//	Got CS
-								break;
-				}
+				u16 = uint16_t((u32 & mask) >> shift);
+				if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
 			}
-		}	//	loop til break
+			u16s.push_back(u16);	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
+			switch(u16s.size())
+			{
+				case 1:		SetDID(uint8_t(u16));				break;	//	Got DID
+				case 2:		SetSID(uint8_t(u16));				break;	//	Got SID
+				case 3:		dataCount = size_t(u16 & 0x0FF);	break;	//	Got DC
+				default:	if (u16s.size() == (dataCount + 4))
+								{gotChecksum = true; if (DetailedDebugging)	LOGMYDEBUG("Got checksum");}	//	Got CS
+							break;
+			}
+		}	//	loop 20 times (or until gotChecksum)
 		if (gotChecksum)
 				break;
 	} while (inOutU32Ndx < numU32s);
@@ -1041,6 +1042,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true /*validate*/);
 	if (AJA_FAILURE(result))
 		{LOGMYERROR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
+	LOGMYDEBUG(AsString(64));
 
 	/*	The Pattern:  (unrolling the above loop):
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(0));
@@ -1089,7 +1091,6 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16  = uint16_t((u32 & 0x000003FF) >>  0);		//	all 10 bits				19
 		u16s.push_back(u16);
 */
-	LOGMYDEBUG(AsString(64));
 	return result;
 }	//	InitWithReceivedData (const vector<uint32_t>&,uint16_t&)
 
@@ -1488,36 +1489,32 @@ bool AJARTPAncPayloadHeader::GetULWordAtIndex (const unsigned inIndex0, uint32_t
 
 bool AJARTPAncPayloadHeader::SetULWordAtIndex(const unsigned inIndex0, const uint32_t inULWord)
 {
+	const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
 	switch (inIndex0)
 	{
-		case 0:
-		{
-			const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
-			mVBits = uint8_t(u32 >> 30);
-			mPBit = (u32 & 0x20000000) ? true : false;
-			mXBit = (u32 & 0x10000000) ? true : false;
-			mCCBits = uint8_t((u32 & 0x0F000000) >> 24);
-			mMarkerBit = (u32 & 0x00800000) ? true : false;
-			mPayloadType = (u32 & 0x007F0000) >> 16;
-			mSequenceNumber = (mSequenceNumber & 0xFFFF0000) | (u32 & 0x0000FFFF);	//	Replace LS 16 bits
-			break;
-		}
-		case 1:		mTimeStamp = AJA_ENDIAN_32NtoH(inULWord);		break;
-		case 2:		mSyncSourceID = AJA_ENDIAN_32NtoH(inULWord);	break;
-		case 3:
-		{
-			const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
-			mSequenceNumber = (u32 & 0xFFFF0000) | (mSequenceNumber & 0x0000FFFF);	//	Replace MS 16 bits
-			mPacketLength = uint16_t(u32 & 0x0000FFFF);
-			break;
-		}
-		case 4:
-		{
-			const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
-			mAncCount = uint8_t((u32 & 0xFF000000) >> 24);
-			mFieldSignal = uint8_t((u32 & 0x00C00000) >> 22);
-			break;
-		}
+		case 0:		mVBits = uint8_t(u32 >> 30);
+					mPBit = (u32 & 0x20000000) ? true : false;
+					mXBit = (u32 & 0x10000000) ? true : false;
+					mCCBits = uint8_t((u32 & 0x0F000000) >> 24);
+					mMarkerBit = (u32 & 0x00800000) ? true : false;
+					mPayloadType = (u32 & 0x007F0000) >> 16;
+					mSequenceNumber = (mSequenceNumber & 0xFFFF0000) | (u32 & 0x0000FFFF);	//	Replace LS 16 bits
+					break;
+
+		case 1:		mTimeStamp = u32;
+					break;
+
+		case 2:		mSyncSourceID = u32;
+					break;
+
+		case 3:		mSequenceNumber = (u32 & 0xFFFF0000) | (mSequenceNumber & 0x0000FFFF);	//	Replace MS 16 bits
+					mPacketLength = uint16_t(u32 & 0x0000FFFF);
+					break;
+
+		case 4:		mAncCount = uint8_t((u32 & 0xFF000000) >> 24);
+					mFieldSignal = uint8_t((u32 & 0x00C00000) >> 22);
+					break;
+
 		default:	return false;
 	}
 	return true;
@@ -1560,7 +1557,7 @@ bool AJARTPAncPayloadHeader::ReadULWordVector(const std::vector<uint32_t> & inVe
 bool AJARTPAncPayloadHeader::ReadBuffer(const NTV2_POINTER & inBuffer)
 {
 	if (inBuffer.GetByteCount() < GetHeaderByteCount())
-		return true;
+		return false;	//	Too small
 	const uint32_t *	pU32s	(reinterpret_cast <const uint32_t *> (inBuffer.GetHostPointer()));
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
 		if (!SetULWordAtIndex(ndx, pU32s[ndx]))
@@ -1606,7 +1603,7 @@ ostream & AJARTPAncPayloadHeader::Print (ostream & inOutStream) const
 }
 
 bool AJARTPAncPayloadHeader::IsNULL(void) const
-{	//	Return TRUE if any of my fields are non-zero...
+{	//	Return TRUE if all of my fields are zero...
 	return !(mVBits || mPBit || mXBit || mCCBits || mMarkerBit || mPayloadType || mSequenceNumber || mTimeStamp || mSyncSourceID || mPacketLength || mAncCount || mFieldSignal);
 }
 

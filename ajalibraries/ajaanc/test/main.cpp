@@ -1362,9 +1362,8 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 		static bool BFT_AncListToIPBufferToAncList (void)
 		{
-			LOGMYNOTE("Starting");
+			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1372,8 +1371,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
 //if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
-				if (gIsVerbose)	cerr << "Trying " << fd << endl;
-				LOGMYNOTE("Trying " << fd);
+				LOGMYNOTE("Trying " << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
 				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
@@ -1401,7 +1399,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
 				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
-				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20	};
 				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
 	
 				AJAAncillaryData				pktCustomC;
@@ -1434,18 +1432,19 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 				//	Receive packets from the IP buffer...
 				AJAAncillaryList	rxPkts;
+				LOGMYNOTE("Receive packets from IP buffers");
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromIPAncData(IPF1, IPF2, rxPkts));
-				if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
+				LOGMYNOTE("Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
 
 				//	Compare the Tx and Rx packet lists...
+				LOGMYNOTE("Compare Tx vs Rx packets");
 				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, false/*don't ignoreLocation*/, false/*don't ignoreChecksum*/));
 				if (!cmpInfo.empty())
-					cerr << "Mis-compare:" << endl << cmpInfo << endl;
+					LOGMYWARN(cmpInfo);
 				SHOULD_BE_TRUE(cmpInfo.empty());
 			}	//	for each video format
 
-			LOGMYNOTE("Passed");
-			cerr << "BFT_AncListToIPBufferToAncList passed" << endl;
+			LOGMYNOTE("Passed");	cerr << "BFT_AncListToIPBufferToAncList passed" << endl;
 			return true;
 		}	//	BFT_AncListToIPBufferToAncList
 

@@ -746,17 +746,38 @@ AJAStatus AJAAncillaryList::SetFromIPAncData (const NTV2_POINTER & inF1AncBuffer
 
 		if (inF1AncBuffer.IsNULL())
 			LOGMYWARN("Empty/null F1 RTP anc buffer");
-		else if (!inF1AncBuffer.GetU32s(F1U32s))
-			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer.GetU32s failed, AJA_STATUS_MEMORY");}	//	Fail
-		if (AJA_SUCCESS(result)  &&  !F1U32s.empty())
+		else
+		{
+			//	Peek into the F1 packet header and discover its true length...
+			AJARTPAncPayloadHeader	F1PayloadHdr;
+			if (!F1PayloadHdr.ReadBuffer(inF1AncBuffer))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
+
+			const size_t	F1ULWordCnt	((F1PayloadHdr.GetHeaderByteCount() + F1PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
+
+			//	Read F1ULWordCnt x 32-bit words from the F1 buffer...
+			if (AJA_SUCCESS(result)  &&  !inF1AncBuffer.GetU32s(F1U32s, 0, F1ULWordCnt))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading " << DEC(F1ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
+		}
+		if (AJA_SUCCESS(result))
 			result = outPackets.AddReceivedAncillaryData(F1U32s);
 	}
+
 	if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.IsNULL())
 	{
-		vector<uint32_t>	F2U32s;
-		if (!inF2AncBuffer.GetU32s(F2U32s))
-			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer.GetU32s failed, AJA_STATUS_MEMORY");}
-		else
+		vector<uint32_t>		F2U32s;
+		AJARTPAncPayloadHeader	F2PayloadHdr;
+
+		//	Peek into the F2 packet header and discover its true length...
+		if (!F2PayloadHdr.ReadBuffer(inF2AncBuffer))
+			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
+
+		const size_t	F2ULWordCnt	((F2PayloadHdr.GetHeaderByteCount() + F2PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
+
+		//	Read F2ULWordCnt x 32-bit words from the F2 buffer...
+		if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.GetU32s(F2U32s, 0, F2ULWordCnt))
+			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading " << DEC(F2ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
+		if (AJA_SUCCESS(result)  &&  !F2U32s.empty())
 			result = outPackets.AddReceivedAncillaryData(F2U32s);
 	}
 	return result;
@@ -1100,11 +1121,6 @@ AJAStatus AJAAncillaryList::GetIPAncDataTransmitSize (const bool inIsProgressive
 AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
 															const bool inIsProgressive, const uint32_t inF2StartLine) const
 {
-	if (F1Buffer.IsNULL())
-		{LOGMYERROR("AJA_STATUS_NULL: null/empty F1 buffer");	return AJA_STATUS_NULL;}
-	if (!inIsProgressive  &&  F2Buffer.IsNULL())
-		{LOGMYERROR("AJA_STATUS_NULL: null/empty F2 buffer");	return AJA_STATUS_NULL;}
-
 	uint32_t	F1ByteCount(0), F2ByteCount(0), F1PktCnt(0), F2PktCnt(0), actF1PktCnt(0), actF2PktCnt(0);
 	AJAStatus	status	(GetIPAncDataTransmitSize (inIsProgressive, inF2StartLine, F1ByteCount, F2ByteCount, F1PktCnt, F2PktCnt));
 	if (AJA_FAILURE(status))
@@ -1242,7 +1258,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 			LOGMYERROR("F1Buffer.PutU32s failed: F1Buffer=" << F1Buffer << ", U32F1s: " << ULWordSequence(U32F1s));
 			return AJA_STATUS_FAIL;
 		}
-		LOGMYINFO("Put " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer " << F1Buffer << ": " << RTPHeaderF1);
+		LOGMYINFO("Put " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer starting at ULWord 5: " << F1Buffer << ": " << RTPHeaderF1);
 		#if defined(_DEBUG)
 			LOGMYDEBUG("F1 Output Buffer: " << F1Buffer.GetU32s(0, U32F1s.size()+5, true));	// True means Byte-swapped
 		#endif
@@ -1254,7 +1270,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 			LOGMYERROR("F2Buffer.PutU32s failed: F2Buffer=" << F2Buffer << ", U32F2s: " << ULWordSequence(U32F2s));
 			return AJA_STATUS_FAIL;
 		}
-		LOGMYINFO("Put " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer " << F2Buffer << ": " << RTPHeaderF2);
+		LOGMYINFO("Put " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer starting at ULWord 5: " << F2Buffer << ": " << RTPHeaderF2);
 		#if defined(_DEBUG)
 			LOGMYDEBUG("F2 Output Buffer: " << F2Buffer.GetU32s(0, U32F2s.size()+5, true));	// True means Byte-swapped
 		#endif
