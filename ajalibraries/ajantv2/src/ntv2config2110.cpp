@@ -80,8 +80,8 @@ void rx_2110Config::init()
     destIP.erase();
     sourcePort          = 0;
     destPort            = 0;
-    SSRC                = 1000;
-    VLAN                = 1;
+    ssrc                = 1000;
+    vlan                = 1;
     payloadType         = 0;
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
@@ -104,8 +104,8 @@ bool rx_2110Config::operator == ( const rx_2110Config &other )
             (destIP            == other.destIP)             &&
             (sourcePort        == other.sourcePort)         &&
             (destPort          == other.destPort)           &&
-            (SSRC              == other.SSRC)               &&
-            (VLAN              == other.VLAN)               &&
+            (ssrc              == other.ssrc)               &&
+            (vlan              == other.vlan)               &&
             (videoFormat       == other.videoFormat)        &&
             (videoSamples      == other.videoSamples)       &&
             (numAudioChannels == other.numAudioChannels)    &&
@@ -359,7 +359,7 @@ void  CNTV2Config2110::SetupDecapsulatorStream(eSFP sfp, NTV2Channel channel, NT
     mDevice.WriteRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.destPort);
 
     // ssrc
-    mDevice.WriteRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.SSRC);
+    mDevice.WriteRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.ssrc);
 
     // vlan
     //WriteRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
@@ -607,7 +607,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channe
     mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
 
     // ssrc
-    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
+    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.ssrc);
 
     // vlan
     //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, &val);

@@ -2481,11 +2481,10 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 }
                 else
                 {
-                    printf("SetNetworkConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                    printf("SetTxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
                     SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                 }
             }
-
             m2110TxVideoDataID = m2110TxVideoData.id;
         }
 
@@ -2523,14 +2522,61 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 }
                 else
                 {
-                    printf("SetNetworkConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
+                    printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                     SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                 }
             }
-            
             m2110TxAudioDataID = m2110TxAudioData.id;
         }
 
+        // See if receive video needs configuring
+        if (m2110RxVideoDataID != m2110RxVideoData.id)
+        {
+            rx_2110Config rxVideoConfig;
+
+            printf("Configuring 2110 RX Video\n");
+
+            for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
+            {
+                if (m2110RxVideoData.rxVideoCh[i].enable[1])
+                {
+                    // Use SFP 2 params
+                    rxVideoConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
+                    rxVideoConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
+                    rxVideoConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
+                    rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
+                    rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[1];
+                }
+                else if (m2110RxVideoData.rxVideoCh[i].enable[0])
+                {
+                    // Use SFP 1 params
+                    rxVideoConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
+                    rxVideoConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
+                    rxVideoConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
+                    rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
+                    rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
+                }
+                rxVideoConfig.ssrc = m2110RxVideoData.rxVideoCh[i].ssrc;
+                rxVideoConfig.vlan = m2110RxVideoData.rxVideoCh[i].vlan;
+                rxVideoConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
+
+                // Video specific
+                rxVideoConfig.videoFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+                rxVideoConfig.videoSamples = VPIDSampling_YUV_422;
+
+                //if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, txVideoConfig) == true)
+                //{
+                //    printf("SetRxStreamConfiguration Video OK\n");
+                //    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+                //}
+                //else
+                //{
+                //    printf("SetRxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                //    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                //}
+            }
+            m2110RxVideoDataID = m2110RxVideoData.id;
+        }
     }
 	
 	// VPID
