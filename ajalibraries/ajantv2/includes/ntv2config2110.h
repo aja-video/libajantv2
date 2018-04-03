@@ -121,6 +121,7 @@ public:
     bool        Set4KMode(bool enable);
     bool        Get4KMode(bool & enable);
 
+    std::string GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream);
     std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
