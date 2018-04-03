@@ -1,32 +1,38 @@
 {
+    "protocol" : "2022",
+    "enable2022_7":"false",
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255"
-    }
+        {
+            "designator":"sfp1",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
     ],
     "transmit":[
-    {
+        {
             "designator":"channel3",
-            "primaryRemoteIPAddress":"239.0.4.50",
-            "primaryRemotePort":"6010",
-            "primaryLocalPort":"5010",
+            "sfp1RemoteIPAddress":"239.0.4.50",
+            "sfp1RemotePort":"6010",
+            "sfp1LocalPort":"5010",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"true"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"true"
+        },
+        {
             "designator":"channel4",
-            "primaryRemoteIPAddress":"239.0.4.51",
-            "primaryRemotePort":"6011",
-            "primaryLocalPort":"5011",
+            "sfp1RemoteIPAddress":"239.0.4.51",
+            "sfp1RemotePort":"6011",
+            "sfp1LocalPort":"5011",
             "tos":"100",
             "ttl":"128",
             "ssrc":"1000",
-            "Enable":"false"
-    }
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"false"
+        }
     ]
 }

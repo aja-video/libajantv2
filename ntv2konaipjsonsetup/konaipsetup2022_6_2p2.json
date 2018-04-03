@@ -1,54 +1,58 @@
 {
     "sfps":[
-    {
-            "designator":"top",
-            "IPAddress":"172.16.19.10",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-    },
-    {
-            "designator":"bottom",
-            "IPAddress":"172.16.19.11",
-            "SubnetMask":"255.255.0.0",
-            "Router":"255.255.255.255",
-    }
+        {
+            "designator":"sfp1",
+            "ipAddress":"172.16.19.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255",
+        },
+        {
+            "designator":"sfp2",
+            "ipAddress":"172.16.19.11",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255",
+        }
     ],
     "receive":[
-    {
+        {
             "designator":"channel1",
-            "primaryDestIPAddress":"239.0.4.16",
-            "primaryDestPort":"20016",
-            "primaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.16",
+            "sfp1DestPort":"20016",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"true"
-    },
-    {
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"true"
+        },
+        {
             "designator":"channel2",
-            "primaryDestIPAddress":"239.0.4.17",
-            "primaryDestPort":"20017",
-            "primaryFilter":"0x14",
+            "sfp1DestIPAddress":"239.0.4.17",
+            "sfp1DestPort":"20017",
+            "sfp1Filter":"0x14",
             "playoutDelay":"50",
-            "Enable":"false"
-    },
-	{
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+            "enable":"false"
+        },
+        {
             "designator":"channel3",
-            "secondaryDestIPAddress":"239.0.4.16",
-            "secondaryDestPort":"20016",
-            "secondaryFilter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.16",
+            "sfp2DestPort":"20016",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-			"LinkAEnable":"false",
-			"LinkBEnable":"true",
-            "Enable":"true"
-    },
-    {
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
+            "enable":"true"
+        },
+        {
             "designator":"channel4",
-            "secondaryDestIPAddress":"239.0.4.17",
-            "secondaryDestPort":"20017",
-            "secondaryFilter":"0x14",
+            "sfp2DestIPAddress":"239.0.4.17",
+            "sfp2DestPort":"20017",
+            "sfp2Filter":"0x14",
             "playoutDelay":"50",
-			"LinkAEnable":"false",
-			"LinkBEnable":"true",
-            "Enable":"false"
-    }
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
+            "enable":"false"
+        }
     ]
 }

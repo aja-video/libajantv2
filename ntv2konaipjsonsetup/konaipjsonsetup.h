@@ -11,29 +11,30 @@
 
 typedef struct
 {
-    QString mSFPDesignator;
+    QString mSfpDesignator;
     QString mIPAddress;
     QString mSubnetMask;
-    QString mRouter;
+    QString mGateway;
+    QString mEnable;
 
 }SFPStruct;
 
 typedef struct
 {
     QString mChannelDesignator;
-    QString mLinkAEnable;
-    QString mLinkBEnable;
+    QString mSfp1Enable;
+    QString mSfp2Enable;
     QString mStream;
-    QString mPrimarySrcPort;
-    QString mPrimarySrcIPAddress;
-    QString mPrimaryDestIPAddress;
-    QString mPrimaryDestPort;
-    QString mPrimaryFilter;
-    QString mSecondarySrcPort;
-    QString mSecondarySrcIPAddress;
-    QString mSecondaryDestIPAddress;
-    QString mSecondaryDestPort;
-    QString mSecondaryFilter;
+    QString mSfp1SrcPort;
+    QString mSfp1SrcIPAddress;
+    QString mSfp1DestIPAddress;
+    QString mSfp1DestPort;
+    QString mSfp1Filter;
+    QString mSfp2SrcPort;
+    QString mSfp2SrcIPAddress;
+    QString mSfp2DestIPAddress;
+    QString mSfp2DestPort;
+    QString mSfp2Filter;
     QString mNetworkPathDifferential;
     QString mPlayoutDelay;
     QString mVLAN;
@@ -51,15 +52,15 @@ typedef struct
 typedef struct
 {
     QString mChannelDesignator;
-    QString mLinkAEnable;
-    QString mLinkBEnable;
+    QString mSfp1Enable;
+    QString mSfp2Enable;
     QString mStream;
-    QString mPrimaryLocalPort;
-    QString mPrimaryRemoteIPAddress;
-    QString mPrimaryRemotePort;
-    QString mSecondaryLocalPort;
-    QString mSecondaryRemoteIPAddress;
-    QString mSecondaryRemotePort;
+    QString mSfp1LocalPort;
+    QString mSfp1RemoteIPAddress;
+    QString mSfp1RemotePort;
+    QString mSfp2LocalPort;
+    QString mSfp2RemoteIPAddress;
+    QString mSfp2RemotePort;
     QString mSSRC;
     QString mTOS;
     QString mTTL;
@@ -100,6 +101,7 @@ protected:
 private:
     bool        mEnable2022_7;
     bool        mIs2110;
+    bool        m4KMode;
     uint32_t    mNetworkPathDifferential;
     QString     mPTPMasterAddr;
 };
