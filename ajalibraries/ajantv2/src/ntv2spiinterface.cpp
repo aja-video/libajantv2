@@ -341,7 +341,7 @@ bool CNTV2AxiSpiFlash::Write(const uint32_t address, const std::vector<uint8_t> 
         SpiEnableWrite(false);
 
         pageAddress += pageSize;
-        bytesTransfered += pageData.size();
+		bytesTransfered += static_cast<uint32_t>(pageData.size());
 
         if (mVerbose && maxWrite > 0)
             print_flash_status("Program", bytesTransfered, maxWrite, lastPercent);

@@ -1676,7 +1676,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel, NTV2Stream stream)
     sdp << "o=- ";
 
     uint64_t t = GetNTPTimestamp();
-    sdp <<  To_String(t);
+	sdp <<  To_String((int)t);
 
     sdp << " 0 IN IP4 ";
 
@@ -2269,5 +2269,5 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Channel channel, NTV2Stream
     mDevice.ReadRegister(reg,&val);
 
     uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(sfp) * 16);
-    enable = (val & bit);
+	enable = (val & bit) > 0 ? true : false;
 }
