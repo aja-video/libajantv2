@@ -2451,32 +2451,30 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         // See if transmit video needs configuring
         if (m2110TxVideoDataID != m2110TxVideoData.id)
         {
-            tx_2110Config txConfig;
+            tx_2110Config txVideoConfig;
 
             printf("Configuring 2110 TX Video\n");
 
             for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
             {
-                txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
-                txConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
+                txVideoConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
+                txVideoConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
+                txVideoConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
+                txVideoConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
+                txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
+                txVideoConfig.ssrc = m2110TxVideoData.txVideoCh[i].ssrc;
+                txVideoConfig.ttl = 0x40;
+                txVideoConfig.tos = 0x64;
 
-                txConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
-                txConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
+                // Video specific
+                txVideoConfig.videoFormat = mFb1VideoFormat;
+                txVideoConfig.videoSamples = VPIDSampling_YUV_422;
 
-                txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-
-                txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-
-                txConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
-                txConfig.ssrc = m2110TxVideoData.txVideoCh[i].ssrc;
-                txConfig.videoFormat = mFb1VideoFormat;
-                txConfig.videoSamples = VPIDSampling_YUV_422;
-                txConfig.ttl = 0x40;
-                txConfig.tos = 0x64;
-
-                if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, txConfig) == true)
+                if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, txVideoConfig) == true)
                 {
                     printf("SetTxStreamConfiguration Video OK\n");
                     SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
@@ -2489,6 +2487,48 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
 
             m2110TxVideoDataID = m2110TxVideoData.id;
+        }
+
+        // See if transmit audio needs configuring
+        if (m2110TxAudioDataID != m2110TxAudioData.id)
+        {
+            tx_2110Config txAudioConfig;
+
+            printf("Configuring 2110 TX Audio\n");
+
+            for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
+            {
+                txAudioConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
+                txAudioConfig.remoteIP[1] = m2110TxAudioData.txAudioCh[i].remoteIP[1];
+                txAudioConfig.remotePort[0] = m2110TxAudioData.txAudioCh[i].remotePort[0];
+                txAudioConfig.remotePort[1] = m2110TxAudioData.txAudioCh[i].remotePort[1];
+                txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
+                txAudioConfig.ssrc = m2110TxAudioData.txAudioCh[i].ssrc;
+                txAudioConfig.ttl = 0x40;
+                txAudioConfig.tos = 0x64;
+
+                // Audio specific
+                txAudioConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
+                txAudioConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
+                txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPacketInterval;
+
+                if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].streamType, txAudioConfig) == true)
+                {
+                    printf("SetTxStreamConfiguration Audio OK\n");
+                    SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+                }
+                else
+                {
+                    printf("SetNetworkConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                }
+            }
+            
+            m2110TxAudioDataID = m2110TxAudioData.id;
         }
 
     }
