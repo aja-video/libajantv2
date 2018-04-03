@@ -12,8 +12,12 @@
 
 KonaIP2110Services::KonaIP2110Services()
 {
-    // Make sure we configure network the first time
-    m2110NetworkID = -1;
+    // Make sure we configure IP stuff the first time
+    m2110NetworkID = 0;
+    m2110TxVideoDataID = 0;
+    m2110TxAudioDataID = 0;
+    m2110RxVideoDataID = 0;
+    m2110RxAudioDataID = 0;
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -2398,6 +2402,182 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
+
+    if (mCard->IsDeviceReady(true) == true)
+    {
+        if (config2110 == NULL)
+        {
+            config2110 = new CNTV2Config2110(*mCard);
+        }
+
+        // See if network needs configuring
+        if (m2110NetworkID != m2110Network.id)
+        {
+            std::string  ip, subnet, gateway;
+
+            printf("Configuring 2110 Network\n");
+
+            ip = m2110Network.sfp[0].ipAddress;
+            subnet = m2110Network.sfp[0].subnetMask;
+            gateway = m2110Network.sfp[0].gateWay;
+            if (config2110->SetNetworkConfiguration(SFP_1, ip, subnet, gateway) == true)
+            {
+                printf("SetNetworkConfiguration SFP_1 OK\n");
+                SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+                m2110NetworkID = m2110Network.id;
+            }
+            else
+            {
+                printf("SetNetworkConfiguration SFP_1 ERROR %s\n", config2110->getLastError().c_str());
+                SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+            }
+
+            ip = m2110Network.sfp[1].ipAddress;
+            subnet = m2110Network.sfp[1].subnetMask;
+            gateway = m2110Network.sfp[1].gateWay;
+            if (config2110->SetNetworkConfiguration(SFP_2, ip, subnet, gateway) == true)
+            {
+                printf("SetNetworkConfiguration SFP_2 OK\n");
+                SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+                m2110NetworkID = m2110Network.id;
+            }
+            else
+            {
+                printf("SetNetworkConfiguration SFP_2 ERROR %s\n", config2110->getLastError().c_str());
+                SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+            }
+        }
+
+        // See if transmit video needs configuring
+        if (m2110TxVideoDataID != m2110TxVideoData.id)
+        {
+            tx_2110Config txVideoConfig;
+
+            printf("Configuring 2110 TX Video\n");
+
+            for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
+            {
+                txVideoConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
+                txVideoConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
+                txVideoConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
+                txVideoConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
+                txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
+                txVideoConfig.ssrc = m2110TxVideoData.txVideoCh[i].ssrc;
+                txVideoConfig.ttl = 0x40;
+                txVideoConfig.tos = 0x64;
+
+                // Video specific
+                txVideoConfig.videoFormat = mFb1VideoFormat;
+                txVideoConfig.videoSamples = VPIDSampling_YUV_422;
+
+                if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, txVideoConfig) == true)
+                {
+                    printf("SetTxStreamConfiguration Video OK\n");
+                    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+                }
+                else
+                {
+                    printf("SetTxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                }
+            }
+            m2110TxVideoDataID = m2110TxVideoData.id;
+        }
+
+        // See if transmit audio needs configuring
+        if (m2110TxAudioDataID != m2110TxAudioData.id)
+        {
+            tx_2110Config txAudioConfig;
+
+            printf("Configuring 2110 TX Audio\n");
+
+            for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
+            {
+                txAudioConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
+                txAudioConfig.remoteIP[1] = m2110TxAudioData.txAudioCh[i].remoteIP[1];
+                txAudioConfig.remotePort[0] = m2110TxAudioData.txAudioCh[i].remotePort[0];
+                txAudioConfig.remotePort[1] = m2110TxAudioData.txAudioCh[i].remotePort[1];
+                txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
+                txAudioConfig.ssrc = m2110TxAudioData.txAudioCh[i].ssrc;
+                txAudioConfig.ttl = 0x40;
+                txAudioConfig.tos = 0x64;
+
+                // Audio specific
+                txAudioConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
+                txAudioConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
+                txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPacketInterval;
+
+                if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].streamType, txAudioConfig) == true)
+                {
+                    printf("SetTxStreamConfiguration Audio OK\n");
+                    SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+                }
+                else
+                {
+                    printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                }
+            }
+            m2110TxAudioDataID = m2110TxAudioData.id;
+        }
+
+        // See if receive video needs configuring
+        if (m2110RxVideoDataID != m2110RxVideoData.id)
+        {
+            rx_2110Config rxVideoConfig;
+
+            printf("Configuring 2110 RX Video\n");
+
+            for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
+            {
+                if (m2110RxVideoData.rxVideoCh[i].enable[1])
+                {
+                    // Use SFP 2 params
+                    rxVideoConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
+                    rxVideoConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
+                    rxVideoConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
+                    rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
+                    rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[1];
+                }
+                else if (m2110RxVideoData.rxVideoCh[i].enable[0])
+                {
+                    // Use SFP 1 params
+                    rxVideoConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
+                    rxVideoConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
+                    rxVideoConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
+                    rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
+                    rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
+                }
+                rxVideoConfig.ssrc = m2110RxVideoData.rxVideoCh[i].ssrc;
+                rxVideoConfig.vlan = m2110RxVideoData.rxVideoCh[i].vlan;
+                rxVideoConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
+
+                // Video specific
+                rxVideoConfig.videoFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+                rxVideoConfig.videoSamples = VPIDSampling_YUV_422;
+
+                //if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, txVideoConfig) == true)
+                //{
+                //    printf("SetRxStreamConfiguration Video OK\n");
+                //    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+                //}
+                //else
+                //{
+                //    printf("SetRxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                //    SetIPError(m2110TxVideoData.txVideoCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                //}
+            }
+            m2110RxVideoDataID = m2110RxVideoData.id;
+        }
+    }
 	
 	// VPID
 	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);

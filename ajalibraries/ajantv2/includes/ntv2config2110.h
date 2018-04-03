@@ -69,8 +69,8 @@ public:
     std::string         destIP;             ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
     uint32_t            sourcePort;         ///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
     uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
-    uint32_t            SSRC;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
-    uint16_t            VLAN;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
+    uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
+    uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t            payloadType;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
@@ -121,6 +121,7 @@ public:
     bool        Set4KMode(bool enable);
     bool        Get4KMode(bool & enable);
 
+    std::string GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream);
     std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);

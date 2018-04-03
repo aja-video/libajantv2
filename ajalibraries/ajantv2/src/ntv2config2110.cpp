@@ -80,8 +80,8 @@ void rx_2110Config::init()
     destIP.erase();
     sourcePort          = 0;
     destPort            = 0;
-    SSRC                = 1000;
-    VLAN                = 1;
+    ssrc                = 1000;
+    vlan                = 1;
     payloadType         = 0;
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
@@ -104,8 +104,8 @@ bool rx_2110Config::operator == ( const rx_2110Config &other )
             (destIP            == other.destIP)             &&
             (sourcePort        == other.sourcePort)         &&
             (destPort          == other.destPort)           &&
-            (SSRC              == other.SSRC)               &&
-            (VLAN              == other.VLAN)               &&
+            (ssrc              == other.ssrc)               &&
+            (vlan              == other.vlan)               &&
             (videoFormat       == other.videoFormat)        &&
             (videoSamples      == other.videoSamples)       &&
             (numAudioChannels == other.numAudioChannels)    &&
@@ -359,7 +359,7 @@ void  CNTV2Config2110::SetupDecapsulatorStream(eSFP sfp, NTV2Channel channel, NT
     mDevice.WriteRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.destPort);
 
     // ssrc
-    mDevice.WriteRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.SSRC);
+    mDevice.WriteRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.ssrc);
 
     // vlan
     //WriteRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
@@ -607,7 +607,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channe
     mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, &rxConfig.destPort);
 
     // ssrc
-    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.SSRC);
+    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, &rxConfig.ssrc);
 
     // vlan
     //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
@@ -1624,6 +1624,12 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
     return true;
 }
 
+string CNTV2Config2110::GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream)
+{
+    return "http://172.16.0.109/txch4v.sdp";
+}
+
+
 string CNTV2Config2110::GetTxSDP(NTV2Channel chan, NTV2Stream stream)
 {
     int ch = (int)chan;
@@ -1670,7 +1676,7 @@ bool CNTV2Config2110::GenSDP(NTV2Channel channel, NTV2Stream stream)
     sdp << "o=- ";
 
     uint64_t t = GetNTPTimestamp();
-    sdp <<  To_String(t);
+	sdp <<  To_String((int)t);
 
     sdp << " 0 IN IP4 ";
 
@@ -2263,5 +2269,5 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Channel channel, NTV2Stream
     mDevice.ReadRegister(reg,&val);
 
     uint32_t bit = (1 << get2110TxStream(channel,stream)) << (int(sfp) * 16);
-    enable = (val & bit);
+	enable = (val & bit) > 0 ? true : false;
 }
