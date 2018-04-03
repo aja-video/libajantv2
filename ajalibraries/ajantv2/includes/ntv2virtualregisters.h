@@ -292,7 +292,7 @@ typedef enum
 	
 	kVRegEFTNeedsUpdating					= VIRTUALREG_START+373,		// set when any retail virtual register has been changed
 	
-	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,	 // set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
+	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,     // set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
 	kVRegAcquireReferenceCounter			= VIRTUALREG_START+375,
 
 	kVRegTimeStampLastOutput8VerticalHi		= VIRTUALREG_START+376,
@@ -303,12 +303,12 @@ typedef enum
 	kVRegFrameBufferGangCount				= VIRTUALREG_START+379,
 
 	kVRegChannelCrosspointFirst				= VIRTUALREG_START+380,
-																	//	kVRegChannelCrosspointFirst+1
-																	//	kVRegChannelCrosspointFirst+2
-																	//	kVRegChannelCrosspointFirst+3
-																	//	kVRegChannelCrosspointFirst+4
-																	//	kVRegChannelCrosspointFirst+5
-																	//	kVRegChannelCrosspointFirst+6
+                                                                        //	kVRegChannelCrosspointFirst+1
+                                                                        //	kVRegChannelCrosspointFirst+2
+                                                                        //	kVRegChannelCrosspointFirst+3
+                                                                        //	kVRegChannelCrosspointFirst+4
+                                                                        //	kVRegChannelCrosspointFirst+5
+                                                                        //	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
 	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		// supported by all three platforms
@@ -346,52 +346,52 @@ typedef enum
 	kVRegGatewayEth1						= VIRTUALREG_START+414,
 	
 	kVRegRxcEnable1							= VIRTUALREG_START+415,
-	kVRegRxcPrimaryRxMatch1					= VIRTUALREG_START+416,
-	kVRegRxcPrimarySourceIp1				= VIRTUALREG_START+417,
-	kVRegRxcPrimaryDestIp1					= VIRTUALREG_START+418,
-	kVRegRxcPrimarySourcePort1				= VIRTUALREG_START+419,
-	kVRegRxcPrimaryDestPort1				= VIRTUALREG_START+420,
-	kVRegRxcPrimaryVlan1					= VIRTUALREG_START+421,
-	kVRegRxcSecondaryRxMatch1				= VIRTUALREG_START+422,
-	kVRegRxcSecondarySourceIp1				= VIRTUALREG_START+423,
-	kVRegRxcSecondaryDestIp1				= VIRTUALREG_START+424,
-	kVRegRxcSecondarySourcePort1			= VIRTUALREG_START+425,
-	kVRegRxcSecondaryDestPort1				= VIRTUALREG_START+426,
-	kVRegRxcSecondaryVlan1					= VIRTUALREG_START+427,
+    kVRegRxcSfp1RxMatch1					= VIRTUALREG_START+416,
+    kVRegRxcSfp1SourceIp1                   = VIRTUALREG_START+417,
+    kVRegRxcSfp1DestIp1                     = VIRTUALREG_START+418,
+    kVRegRxcSfp1SourcePort1                 = VIRTUALREG_START+419,
+    kVRegRxcSfp1DestPort1                   = VIRTUALREG_START+420,
+    kVRegRxcSfp1Vlan1                       = VIRTUALREG_START+421,
+    kVRegRxcSfp2RxMatch1                    = VIRTUALREG_START+422,
+    kVRegRxcSfp2SourceIp1                   = VIRTUALREG_START+423,
+    kVRegRxcSfp2DestIp1                     = VIRTUALREG_START+424,
+    kVRegRxcSfp2SourcePort1                 = VIRTUALREG_START+425,
+    kVRegRxcSfp2DestPort1                   = VIRTUALREG_START+426,
+    kVRegRxcSfp2Vlan1                       = VIRTUALREG_START+427,
 	kVRegRxcSsrc1							= VIRTUALREG_START+428,
 	kVRegRxcPlayoutDelay1					= VIRTUALREG_START+429,
 
 	kVRegRxcEnable2							= VIRTUALREG_START+430,
-	kVRegRxcPrimaryRxMatch2					= VIRTUALREG_START+431,
-	kVRegRxcPrimarySourceIp2				= VIRTUALREG_START+432,
-	kVRegRxcPrimaryDestIp2					= VIRTUALREG_START+433,
-	kVRegRxcPrimarySourcePort2				= VIRTUALREG_START+434,
-	kVRegRxcPrimaryDestPort2				= VIRTUALREG_START+435,
-	kVRegRxcPrimaryVlan2					= VIRTUALREG_START+436,
-	kVRegRxcSecondaryRxMatch2				= VIRTUALREG_START+437,
-	kVRegRxcSecondarySourceIp2				= VIRTUALREG_START+438,
-	kVRegRxcSecondaryDestIp2				= VIRTUALREG_START+439,
-	kVRegRxcSecondarySourcePort2			= VIRTUALREG_START+440,
-	kVRegRxcSecondaryDestPort2				= VIRTUALREG_START+441,
-	kVRegRxcSecondaryVlan2					= VIRTUALREG_START+442,
+    kVRegRxcSfp1RxMatch2					= VIRTUALREG_START+431,
+    kVRegRxcSfp1SourceIp2                   = VIRTUALREG_START+432,
+    kVRegRxcSfp1DestIp2                     = VIRTUALREG_START+433,
+    kVRegRxcSfp1SourcePort2                 = VIRTUALREG_START+434,
+    kVRegRxcSfp1DestPort2                   = VIRTUALREG_START+435,
+    kVRegRxcSfp1Vlan2                       = VIRTUALREG_START+436,
+    kVRegRxcSfp2RxMatch2                    = VIRTUALREG_START+437,
+    kVRegRxcSfp2SourceIp2                   = VIRTUALREG_START+438,
+    kVRegRxcSfp2DestIp2                     = VIRTUALREG_START+439,
+    kVRegRxcSfp2SourcePort2                 = VIRTUALREG_START+440,
+    kVRegRxcSfp2DestPort2                   = VIRTUALREG_START+441,
+    kVRegRxcSfp2Vlan2                       = VIRTUALREG_START+442,
 	kVRegRxcSsrc2							= VIRTUALREG_START+443,
 	kVRegRxcPlayoutDelay2					= VIRTUALREG_START+444,
 
 	kVRegTxcEnable3							= VIRTUALREG_START+445,
-	kVRegTxcPrimaryLocalPort3				= VIRTUALREG_START+446,
-	kVRegTxcPrimaryRemoteIp3				= VIRTUALREG_START+447,
-	kVRegTxcPrimaryRemotePort3				= VIRTUALREG_START+448,
-	kVRegTxcSecondaryLocalPort3				= VIRTUALREG_START+449,
-	kVRegTxcSecondaryRemoteIp3				= VIRTUALREG_START+450,
-	kVRegTxcSecondaryRemotePort3			= VIRTUALREG_START+451,
+    kVRegTxcSfp1LocalPort3                  = VIRTUALREG_START+446,
+    kVRegTxcSfp1RemoteIp3                   = VIRTUALREG_START+447,
+    kVRegTxcSfp1RemotePort3                 = VIRTUALREG_START+448,
+    kVRegTxcSfp2LocalPort3                  = VIRTUALREG_START+449,
+    kVRegTxcSfp2RemoteIp3                   = VIRTUALREG_START+450,
+    kVRegTxcSfp2RemotePort3                 = VIRTUALREG_START+451,
 
 	kVRegTxcEnable4							= VIRTUALREG_START+452,
-	kVRegTxcPrimaryLocalPort4				= VIRTUALREG_START+453,
-	kVRegTxcPrimaryRemoteIp4				= VIRTUALREG_START+454,
-	kVRegTxcPrimaryRemotePort4				= VIRTUALREG_START+455,
-	kVRegTxcSecondaryLocalPort4				= VIRTUALREG_START+456,
-	kVRegTxcSecondaryRemoteIp4				= VIRTUALREG_START+457,
-	kVRegTxcSecondaryRemotePort4			= VIRTUALREG_START+458,
+    kVRegTxcSfp1LocalPort4                  = VIRTUALREG_START+453,
+    kVRegTxcSfp1RemoteIp4                   = VIRTUALREG_START+454,
+    kVRegTxcSfp1RemotePort4                 = VIRTUALREG_START+455,
+    kVRegTxcSfp2LocalPort4                  = VIRTUALREG_START+456,
+    kVRegTxcSfp2RemoteIp4                   = VIRTUALREG_START+457,
+    kVRegTxcSfp2RemotePort4                 = VIRTUALREG_START+458,
 	
 	kVRegMailBoxAcquire						= VIRTUALREG_START+459,
 	kVRegMailBoxRelease						= VIRTUALREG_START+460,

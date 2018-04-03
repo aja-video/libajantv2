@@ -1715,12 +1715,12 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	bool					b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool 					b2wire4kOut 		= (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	bool 					b2wire4kIn 			= (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bSdiOutRGB || b2wire4kIn || b2wire4kOut;
-	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bSdiOutRGB) || b2wire4kOut || b2wire4kIn;
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
+	//											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
+	//											  IsVideoFormatB(mFb1VideoFormat) ||
+	//											  bSdiOutRGB || b2wire4kIn || b2wire4kOut;
+	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || (b4K && bSdiOutRGB) || b2wire4kOut || b2wire4kIn;
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
@@ -1888,94 +1888,7 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	if (curr2Mode != new2Mode)
 		mCard->SetLHIVideoDACMode (new2Mode);
 	if (curr2Standard != new2Standard)
-		mCard->SetLHIVideoDACStandard (new2Standard);
-
-	
-	//
-	// SDI Out 1
-	//
-	
-	// is 2K frame buffer geometry, includes 4K mode
-	bool b2KFbGeom = primaryGeometry == NTV2_FG_2048x1080 || primaryGeometry == NTV2_FG_4x2048x1080;
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-
-	//
-	// SDI Out 2
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, b3GbOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
-	
-	
-	//
-	// SDI Out 3
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, b3GbOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
-	}
-
-
-	//
-	// SDI Out 4
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
-	mCard-> SetSDIOutputStandard(NTV2_CHANNEL4, primaryStandard);
-	
-	// 3Ga / 3Gb / Neither
-	if (bDualStreamOut && b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, b3GbOut);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, IsVideoFormatA(mFb1VideoFormat));
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
-	}
-	
+		mCard->SetLHIVideoDACStandard (new2Standard);	
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	if (b4K)

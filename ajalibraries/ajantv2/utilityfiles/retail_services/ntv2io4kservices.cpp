@@ -3103,7 +3103,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	bool					bFbLevelA             = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	//bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
@@ -3351,15 +3351,15 @@ void Io4KServices::SetDeviceMiscRegisters ()
 				break;
 			}
 			
-			mCard->SetHDMIOutVideoFPS(tempRate);
+			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		else
 		{	
-			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
+			//mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
 		}
 		
 		// color space sample rate
@@ -3380,7 +3380,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 				break;
 		}
 
-		mCard->SetHDMIOutVideoStandard(v2Standard);
+		//mCard->SetHDMIOutVideoStandard(v2Standard);
 		
 		// HDMI out colorspace auto-detect status
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
@@ -3480,98 +3480,14 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 			
-			
-	//
-	// SDI Out 1
-	//
-	
-	// is 2K frame buffer geometry, includes 4K mode
-	bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, transportStandard);
+
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
-	
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-	}
-	
-	
-	//
-	// SDI Out 2
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, transportStandard);
+
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
-	
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut)
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-	}
-	
-	
-	//
-	// SDI Out 3
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL3, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL3, transportStandard);
+
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL3, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL3, false);
-	}
-	
-	
-	//
-	// SDI Out 4
-	//
-	
-	// Select primary standard
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL4, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL4, transportStandard);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
-	
-	// 3Ga / 3Gb / Neither
-	if (b3GbOut || (b2pi && !b4kHfr))
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, true);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, true);
-	}
-	else
-	{
-		mCard->SetSDIOut3GEnable(NTV2_CHANNEL4, bFbLevelA);
-		mCard->SetSDIOut3GbEnable(NTV2_CHANNEL4, false);
-	}
-	
 	
 	//
 	// SDI Out 5
@@ -3587,52 +3503,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	//  If it is a quad signal it is downconverted to HD
 	//	   Otherwise it is passed through
 	
-	mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL5, b2KFbGeom);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL5, transportStandard);
-
-	bool sdi5_3GbTransportOut = false;
-
-	if (b4K)
-	{
-		if (b4kHfr)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
-			sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-				(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-		}
-		else
-		{
-			if (bSdiOutRGB && !b2pi)
-			{
-				sdi5_3GbTransportOut = true;         // DAC this works UHD 29.97 YUV playback and RGB but not if TSI
-			}
-			else
-			{
-				//sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-				sdi5_3GbTransportOut = false;       // DAC - this works for 29.97 UHD YUV playback
-			}
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-		}
-	}
-	else
-	{
-		if (bHfr)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
-			sdi5_3GbTransportOut = IsVideoFormatB(mFb1VideoFormat)
-				|| (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-		}
-		else
-		{
-			sdi5_3GbTransportOut = b3GbOut || bSdiOutRGB;
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, sdi5_3GbTransportOut);
-		}
-	}
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && b3GbOut));
 	
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE

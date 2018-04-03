@@ -576,12 +576,5 @@ void Corvid22Services::SetDeviceMiscRegisters ()
 {	
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters();
-
-	NTV2Standard			primaryStandard;
-	mCard->GetStandard(&primaryStandard);
-		
-	// Set SDI out 1 control video standard (reg 129, bits 2-0)
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
 }
 

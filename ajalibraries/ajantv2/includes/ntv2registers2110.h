@@ -9,50 +9,53 @@
 
 #include "ntv2registersmb.h"
 
-#define SAREK_4175_TX_PACKETIZER_1      (0x200000/4)
-#define SAREK_4175_TX_PACKETIZER_2      (0x201000/4)
-#define SAREK_4175_TX_PACKETIZER_3      (0x202000/4)
-#define SAREK_4175_TX_PACKETIZER_4      (0x203000/4)
+#define SAREK_4175_TX_PACKETIZER_1              (0x200000/4)
+#define SAREK_4175_TX_PACKETIZER_2              (0x201000/4)
+#define SAREK_4175_TX_PACKETIZER_3              (0x202000/4)
+#define SAREK_4175_TX_PACKETIZER_4              (0x203000/4)
 
-#define SAREK_3190_TX_PACKETIZER_0      (0x220000/4)
-#define SAREK_3190_TX_PACKETIZER_1      (0x221000/4)
-#define SAREK_3190_TX_PACKETIZER_2      (0x222000/4)
-#define SAREK_3190_TX_PACKETIZER_3      (0x223000/4)
-#define SAREK_3190_TX_PACKETIZER_4      (0x224000/4)
-#define SAREK_3190_TX_PACKETIZER_5      (0x225000/4)
-#define SAREK_3190_TX_PACKETIZER_6      (0x226000/4)
-#define SAREK_3190_TX_PACKETIZER_7      (0x227000/4)
-#define SAREK_3190_TX_PACKETIZER_8      (0x228000/4)
-#define SAREK_3190_TX_PACKETIZER_9      (0x229000/4)
-#define SAREK_3190_TX_PACKETIZER_10     (0x22a000/4)
-#define SAREK_3190_TX_PACKETIZER_11     (0x22b000/4)
-#define SAREK_3190_TX_PACKETIZER_12     (0x22c000/4)
-#define SAREK_3190_TX_PACKETIZER_13     (0x22d000/4)
-#define SAREK_3190_TX_PACKETIZER_14     (0x22e000/4)
-#define SAREK_3190_TX_PACKETIZER_15     (0x22f000/4)
+#define SAREK_3190_TX_PACKETIZER_0              (0x220000/4)
+#define SAREK_3190_TX_PACKETIZER_1              (0x221000/4)
+#define SAREK_3190_TX_PACKETIZER_2              (0x222000/4)
+#define SAREK_3190_TX_PACKETIZER_3              (0x223000/4)
+#define SAREK_3190_TX_PACKETIZER_4              (0x224000/4)
+#define SAREK_3190_TX_PACKETIZER_5              (0x225000/4)
+#define SAREK_3190_TX_PACKETIZER_6              (0x226000/4)
+#define SAREK_3190_TX_PACKETIZER_7              (0x227000/4)
+#define SAREK_3190_TX_PACKETIZER_8              (0x228000/4)
+#define SAREK_3190_TX_PACKETIZER_9              (0x229000/4)
+#define SAREK_3190_TX_PACKETIZER_10             (0x22a000/4)
+#define SAREK_3190_TX_PACKETIZER_11             (0x22b000/4)
+#define SAREK_3190_TX_PACKETIZER_12             (0x22c000/4)
+#define SAREK_3190_TX_PACKETIZER_13             (0x22d000/4)
+#define SAREK_3190_TX_PACKETIZER_14             (0x22e000/4)
+#define SAREK_3190_TX_PACKETIZER_15             (0x22f000/4)
 
-#define SAREK_ANC_TX_PACKETIZER_1       (0x304000/4)
-#define SAREK_ANC_TX_PACKETIZER_2       (0x305000/4)
-#define SAREK_ANC_TX_PACKETIZER_3       (0x306000/4)
-#define SAREK_ANC_TX_PACKETIZER_4       (0x307000/4)
+#define SAREK_ANC_TX_PACKETIZER_1               (0x304000/4)
+#define SAREK_ANC_TX_PACKETIZER_2               (0x305000/4)
+#define SAREK_ANC_TX_PACKETIZER_3               (0x306000/4)
+#define SAREK_ANC_TX_PACKETIZER_4               (0x307000/4)
 
-#define SAREK_4175_RX_DEPACKETIZER_1    (0x208000/4)
-#define SAREK_4175_RX_DEPACKETIZER_2    (0x209000/4)
-#define SAREK_4175_RX_DEPACKETIZER_3    (0x20a000/4)
-#define SAREK_4175_RX_DEPACKETIZER_4    (0x20b000/4)
-#define SAREK_3190_RX_DEPACKETIZER_1    (0x20c000/4)
-#define SAREK_3190_RX_DEPACKETIZER_2    (0x20d000/4)
-#define SAREK_3190_RX_DEPACKETIZER_3    (0x20e000/4)
-#define SAREK_3190_RX_DEPACKETIZER_4    (0x20f000/4)
+#define SAREK_4175_RX_DEPACKETIZER_1            (0x208000/4)
+#define SAREK_4175_RX_DEPACKETIZER_2            (0x209000/4)
+#define SAREK_4175_RX_DEPACKETIZER_3            (0x20a000/4)
+#define SAREK_4175_RX_DEPACKETIZER_4            (0x20b000/4)
+#define SAREK_3190_RX_DEPACKETIZER_1            (0x20c000/4)
+#define SAREK_3190_RX_DEPACKETIZER_2            (0x20d000/4)
+#define SAREK_3190_RX_DEPACKETIZER_3            (0x20e000/4)
+#define SAREK_3190_RX_DEPACKETIZER_4            (0x20f000/4)
 
-#define SAREK_2110_VIDEO_FRAMER_0       (0x210000/4)
-#define SAREK_2110_AUDIO_FRAMER_0       (0x212000/4)
-#define SAREK_2110_VIDEO_FRAMER_1       (0x213000/4)
-#define SAREK_2110_AUDIO_FRAMER_1       (0x214000/4)
-#define SAREK_2110_TX_ARBITRATOR        (0x215000/4)
-#define SAREK_2110_DECAPSULATOR_0       (0x211000/4)
-#define SAREK_2110_DECAPSULATOR_1       (0x216000/4)
-#define SAREK_2110_AUDIO_STREAMSELECT   (0x230000/4)
+#define SAREK_2110_VIDEO_FRAMER_0               (0x210000/4)
+#define SAREK_2110_AUDIO_FRAMER_0               (0x212000/4)
+#define SAREK_2110_VIDEO_FRAMER_1               (0x213000/4)
+#define SAREK_2110_AUDIO_FRAMER_1               (0x214000/4)
+#define SAREK_2110_TX_ARBITRATOR                (0x215000/4)
+#define SAREK_2110_DECAPSULATOR_0               (0x211000/4)
+#define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
+#define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
+
+#define SAREK_2110_TEST_GENERATOR               (0x308000/4)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -60,22 +63,22 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kReg4175_pkt_ctrl                       (0x0000/4)
-#define kReg4175_pkt_width                      (0x0010/4)
-#define kReg4175_pkt_height                     (0x0018/4)
-#define kReg4175_pkt_vid_fmt                    (0x0020/4)
-#define kReg4175_pkt_pkts_per_line              (0x0028/4)
-#define kReg4175_pkt_payload_len                (0x0030/4)
-#define kReg4175_pkt_payload_len_last           (0x0038/4)
-#define kReg4175_pkt_ssrc                       (0x0040/4)
-#define kReg4175_pkt_payload_type               (0x0048/4)
-#define kReg4175_pkt_bpc_reg                    (0x0050/4)
-#define kReg4175_pkt_chan_num                   (0x0058/4)
-#define kReg4175_pkt_tx_pkt_cnt                 (0x0060/4)
-#define kReg4175_pkt_tx_pkt_cnt_valid           (0x0064/4)
-#define kReg4175_pkt_pix_per_pkt                (0x0068/4)
-#define kReg4175_pkt_stat_reset                 (0x0070/4)
-#define kReg4175_pkt_interlace_ctrl             (0x0078/4)
+#define kReg4175_pkt_ctrl                       0x00
+#define kReg4175_pkt_width                      0x04
+#define kReg4175_pkt_height                     0x06
+#define kReg4175_pkt_vid_fmt                    0x08
+#define kReg4175_pkt_pkts_per_line              0x0a
+#define kReg4175_pkt_payload_len                0x0c
+#define kReg4175_pkt_payload_len_last           0x0e
+#define kReg4175_pkt_ssrc                       0x10
+#define kReg4175_pkt_payload_type               0x12
+#define kReg4175_pkt_bpc_reg                    0x14
+#define kReg4175_pkt_chan_num                   0x16
+#define kReg4175_pkt_tx_pkt_cnt                 0x18
+#define kReg4175_pkt_tx_pkt_cnt_valid           0x19
+#define kReg4175_pkt_pix_per_pkt                0x1a
+#define kReg4175_pkt_stat_reset                 0x1c
+#define kReg4175_pkt_interlace_ctrl             0x1e
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -189,12 +192,32 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#define kRegArb_video               0
-#define kRegArb_audio               1
-#define kRegRxVideoDecode1          8
-#define kRegRxVideoDecode2          9
-#define kRegRxVideoDecode3          10
-#define kRegRxVideoDecode4          11
+#define kRegArb_video                   0x00
+#define kRegArb_audio                   0x01
+#define kRegArb_4KMode                  0x07
+#define kRegRxVideoDecode1              0x08
+#define kRegRxVideoDecode2              0x09
+#define kRegRxVideoDecode3              0x0a
+#define kRegRxVideoDecode4              0x0b
+#define kRegTxVideoDecode1              0x0c
+#define kRegTxVideoDecode2              0x0d
+#define kRegTxVideoDecode3              0x0e
+#define kRegTxVideoDecode4              0x0f
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// 2110 Block scratch pad registers
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegRxNtv2VideoDecode1      (S2110_BLOCK_BASE+0)
+#define kRegRxNtv2VideoDecode2      (S2110_BLOCK_BASE+1)
+#define kRegRxNtv2VideoDecode3      (S2110_BLOCK_BASE+2)
+#define kRegRxNtv2VideoDecode4      (S2110_BLOCK_BASE+3)
+#define kRegTxNtv2VideoDecode1      (S2110_BLOCK_BASE+4)
+#define kRegTxNtv2VideoDecode2      (S2110_BLOCK_BASE+5)
+#define kRegTxNtv2VideoDecode3      (S2110_BLOCK_BASE+6)
+#define kRegTxNtv2VideoDecode4      (S2110_BLOCK_BASE+7)
 
 #endif // REGISTERS_2110_H

@@ -73,7 +73,7 @@ AJAExport const std::string & AJAAncillaryDataTypeToString (const AJAAncillaryDa
 **/
 enum AJAAncillaryDataLink
 {
-	AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
+    AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
 	AJAAncillaryDataLink_B,			///< @brief	The ancillary data is associated with Link B of the video stream.
 
 	AJAAncillaryDataLink_Unknown,	///< @brief	It is not known which link of the video stream the ancillary data is associated with.

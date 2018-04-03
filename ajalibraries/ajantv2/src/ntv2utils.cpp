@@ -4083,8 +4083,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
 		case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
-		case DEVICE_ID_KONA1:					return "Kona 1";
-        case DEVICE_ID_KONAHDMI:				return "Kona HDMI";
+		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
+        case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 #if !defined (_DEBUG)
 	    default:					break;
 #endif
@@ -7150,8 +7150,8 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrUllNotSupported:              return "Ull mode not supported";
         case NTV2IpErrNotReady:                     return "KonaIP card not ready";
         case NTV2IpErrSoftwareMismatch:             return "Host software does not match device firmware";
-        case NTV2IpErrLinkANotConfigured:           return "SFP 1 (Link A) not configured";
-        case NTV2IpErrLinkBNotConfigured:           return "SFP 2 (Link B) not configured";
+        case NTV2IpErrSFP1NotConfigured:            return "SFP 1 not configured";
+        case NTV2IpErrSFP2NotConfigured:            return "SFP 2 not configured";
         case NTV2IpErrInvalidIGMPVersion:           return "Invalid IGMP version";
         case NTV2IpErrCannotGetMacAddress:          return "Failed to retrieve MAC address from ARP table";
         case NTV2IpErr2022_7NotSupported:           return "2022-7 not supported for by this firmware";
@@ -7226,7 +7226,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
 			case DEVICE_ID_KONA1:						return "kona1_pcie.bit";
-            case DEVICE_ID_KONAHDMI:					return "kona_hdmi.bit";
+            case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
             default:									return "";
 		}
 	#else
@@ -7307,7 +7307,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
-            case DEVICE_ID_KONAHDMI:					return "kona_hdmi.bit";
+            case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
             case DEVICE_ID_KONA1:						return "kona1.bit";
             default:									return "";
 		}

@@ -722,7 +722,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
-	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
+	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
@@ -819,43 +819,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 			mCard->SetConverterInStandard(primaryStandard);
 		else
 			mCard->SetConverterInStandard(secondaryStandard);		// input conversion needed - need converter on input
-	}
-
-	
-	//
-	// SDI Out 1
-	//
-	if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, secondaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, secondaryStandard);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-	}
-
-
-	//
-	// SDI Out 2
-	//
-	if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, secondaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, secondaryStandard);
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL2, primaryGeometry == NTV2_FG_2048x1080 );
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-	}
-	
-	
+	}	
 	
 	//
 	// Analog-In locking state machine (from Hell)

@@ -6541,7 +6541,6 @@ typedef enum
             NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
                 ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
                 ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
-                ULWord          mByteCount;			///< @brief	return value used by get to indicate the size of vData in the event tag is found but doesn't match size of user buffer
                 NTV2_POINTER	mVirtualData;		///< @brief	Pointer object to virtual data. The SDK owns this memory.
             NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 

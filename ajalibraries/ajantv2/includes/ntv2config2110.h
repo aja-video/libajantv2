@@ -16,138 +16,6 @@
 #include <fstream>
 #include <sstream>
 
-#define RX_MATCH_2110_VLAN                   BIT(0)
-#define RX_MATCH_2110_SOURCE_IP              BIT(1)
-#define RX_MATCH_2110_DEST_IP                BIT(2)
-#define RX_MATCH_2110_SOURCE_PORT            BIT(3)
-#define RX_MATCH_2110_DEST_PORT              BIT(4)
-#define RX_MATCH_2110_PAYLOAD                BIT(5)
-#define RX_MATCH_2110_SSRC                   BIT(6)
-
-#define VOIP_SEMAPHORE_SET              0x2
-#define VOIP_SEMAPHORE_CLEAR            0xFFFFFFFD
-#define VOIP_PRIMARY_ENABLE             0x7FFFFFFF
-#define VOIP_SECONDARY_ENABLE           0x80000000
-
-#define PLL_MATCH_SOURCE_IP             BIT(0)
-#define PLL_MATCH_DEST_IP               BIT(1)
-#define PLL_MATCH_SOURCE_PORT           BIT(2)
-#define PLL_MATCH_DEST_PORT             BIT(3)
-#define PLL_MATCH_ES_PID                BIT(4)
-
-#define PLL_CONFIG_PCR                  BIT(0)
-#define PLL_CONFIG_PTP                  BIT(1)
-#define PLL_CONFIG_DCO_MODE             BIT(28)
-
-enum NTV2PacketInterval
-{
-    PACKET_INTERVAL_125uS,
-    PACKET_INTERVAL_1mS
-};
-
-/**
-    @brief	Structs and enums that define the virtual config data used by services and the Control panel to set and maintain 2110 configuration
-**/
-
-typedef enum
-{
-    kNetworkVData2110      	= 'n210',           // 4CC of network config virtual data
-    kTransmitVData2110     	= 't210',           // 4CC of transmit config virtual data
-    kReceiveVData2110     	= 'r210',           // 4CC of receive config virtual data
-    kMetadataVData2110     	= 'm210',           // 4CC of metadata config virtual data
-} VDataTag2110 ;
-
-
-typedef struct
-{
-    char                    remoteIP[32][2];
-    uint32_t                localPort[2];
-    uint32_t                remotePort[2];
-    uint16_t                payloadType;
-    uint32_t                ssrc;
-
-} TxNetworkChVData2110;
-
-typedef struct
-{
-    TxNetworkChVData2110    txAudioNetwork;
-    uint8_t                 numAudioChannels;
-    uint8_t                 firstAudioChannel;
-    NTV2PacketInterval      audioPacketInterval;
-} TxAudioChVData2110;
-
-typedef struct
-{
-    uint32_t                numVideoStreams;
-    TxNetworkChVData2110    txVideo[1];
-    uint32_t                numAudioStreams;
-    TxAudioChVData2110      txAudio[4];
-} TxChVData2110;
-
-typedef struct
-{
-    char                    sourceIP[32];
-    char                    destIP[32];
-    uint32_t                sourcePort;
-    uint32_t                destPort;
-    uint32_t                rxMatch;
-    uint32_t                ssrc;
-    uint16_t                vlan;
-    uint16_t                payloadType;
-} RxNetworkChVData2110;
-
-typedef struct
-{
-    RxNetworkChVData2110    rxAudioNetwork;
-    uint8_t                 numAudioChannels;
-    NTV2PacketInterval      audioPacketInterval;
-} RxAudioChVData2110;
-
-typedef struct
-{
-    uint32_t                numVideoStreams;
-    RxNetworkChVData2110    rxVideo[1];
-    uint32_t                numAudioStreams;
-    RxAudioChVData2110      rxAudio[4];
-} RxChVData2110;
-
-
-typedef struct
-{
-    char                    ipAddress[32];
-    char                    subnetMask[32];
-    char                    gateWay[32];
-} SFPVData2110;
-
-typedef struct
-{
-    uint32_t                id;
-    char                    ptpMasterIP[32];
-    uint32_t                numSFPs;
-    SFPVData2110            link[2];
-} NetworkVData2110;
-
-typedef struct
-{
-    uint32_t                id;
-    uint32_t                numTxChannels;
-    TxChVData2110           txCh[4];
-} TransmitVData2110; 
-
-typedef struct
-{
-    uint32_t                id;
-    uint32_t                numRxChannels;
-    RxChVData2110           rxCh[4];
-} ReceiveVData2110;
-
-typedef struct
-{
-    uint32_t                id;
-} MetadataVData2110;
-
-
-
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
@@ -177,7 +45,7 @@ public:
     uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
-    NTV2PacketInterval  audioPacketInterval;
+    eNTV2PacketInterval audioPacketInterval;
 };
 
 /**
@@ -201,8 +69,8 @@ public:
     std::string         destIP;             ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
     uint32_t            sourcePort;         ///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
     uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
-    uint32_t            SSRC;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
-    uint16_t            VLAN;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
+    uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
+    uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t            payloadType;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
@@ -210,7 +78,7 @@ public:
     uint32_t            lastPayloadLen;
     uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
-    NTV2PacketInterval  audioPacketInterval;
+    eNTV2PacketInterval audioPacketInterval;
 };
 
 
@@ -225,45 +93,49 @@ public:
     CNTV2Config2110 (CNTV2Card & device);
     ~CNTV2Config2110();
 
-    bool        SetNetworkConfiguration(eSFP port, const IPVNetConfig & netConfig);
-    bool        SetNetworkConfiguration(eSFP port, std::string localIPAddress, std::string subnetMask, std::string gateway = "");
-    bool        SetNetworkConfiguration(std::string localIPAddress0, std::string subnetMask0, std::string gateway0,
-                                        std::string localIPAddress1, std::string subnetMask1, std::string gateway1);
-    bool        DisableNetworkInterface(eSFP port);
+    bool        SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig & netConfig);
+    bool        GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & netConfig);
+    bool        SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway);
+    bool        GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
+    bool        DisableNetworkInterface(const eSFP sfp);
 
-    bool        GetNetworkConfiguration(eSFP port, IPVNetConfig & netConfig);
-    bool        GetNetworkConfiguration(eSFP port, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
-    bool        GetNetworkConfiguration(std::string & localIPAddress0, std::string & subnetMask0, std::string & gateway0,
-                                        std::string & localIPAddress1, std::string & subnetMask1, std::string & gateway1);
+    bool        EnableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
+    bool        DisableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
+    bool        GetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
+    bool        GetRxStreamEnable(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, bool & enabled);
+    bool        GetRxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets);
+    bool        GetRxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
+    bool        GetRxByteCount(const eSFP sfp, uint64_t &bytes);
 
-    bool        EnableRxStream(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
-    bool        DisableRxStream(const NTV2Channel channel, const NTV2Stream stream);
-    bool        GetRxStreamConfiguration(const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
-    bool        GetRxStreamEnable(const NTV2Channel channel, NTV2Stream stream, bool & enabled);
-	bool        GetRxByteCount( const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
+    bool        SetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
+    bool        GetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig);
+    bool        SetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
+    bool        GetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
+    bool        GetTxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets);
+    bool        GetTxByteCount(const eSFP sfp, uint64_t &bytes);
 
-    bool        SetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, const tx_2110Config & txConfig);
-    bool        GetTxChannelConfiguration(const NTV2Channel channel, NTV2Stream stream, tx_2110Config & txConfig);
-    bool        SetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool enableLinkA, bool enableLinkB = false);
-    bool        GetTxChannelEnable(const NTV2Channel channel, NTV2Stream stream, bool & linkAEnabled, bool & linkBEnabled);
-
-    bool        SetPTPMaster(std::string ptpMaster);
+    bool        SetPTPMaster(const std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
+    bool        GetPTPStatus(PTPStatus & ptpStatus);
 
+    bool        Set4KMode(bool enable);
+    bool        Get4KMode(bool & enable);
+
+    std::string GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream);
     std::string GetTxSDP(NTV2Channel chan, NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
-        @param[in]	port                Specifies SFP connector used.
+        @param[in]	sfp                 Specifies SFP connector used.
         @param[in]	disable             If true, IGMP messages will not be sent to join multicast groups
         @note       When Rx channels are enabled for multicast IP addresses, by default the multicast group is joined. When Rx Channels
                     are disabled, if the channel is the last user of the group, then the subscription to the multicast group will be ended.
                     When IGMP is disabled, the above actions are not performed,
     **/
-    bool        SetIGMPDisable(eSFP port, bool disable);
-    bool        GetIGMPDisable(eSFP port, bool & disabled);
+    bool        SetIGMPDisable(eSFP sfp, bool disable);
+    bool        GetIGMPDisable(eSFP sfp, bool & disabled);
 
     bool        SetIGMPVersion(eIGMPVersion_t version);
     bool        GetIGMPVersion(eIGMPVersion_t & version);
@@ -274,12 +146,12 @@ public:
     bool        GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
-    bool        GetLinkStatus(eSFP port, sLinkStatus & linkStatus);
+    bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
     static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static bool      decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
-    static uint32_t  GetDecapsulatorAddress(NTV2Channel channel, NTV2Stream stream);
+    static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
 
     // If method returns false call this to get details
     std::string getLastError();
@@ -290,38 +162,41 @@ public:
     static uint32_t m_packetizers[4];
 
 protected:
-    uint32_t    GetFramerAddress(eSFP link, NTV2Channel channel, NTV2Stream stream);
+    uint32_t    GetFramerAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
     void        SelectTxFramerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t baseAddr);
     void        AcquireFramerControlAccess(uint32_t baseAddr);
     void        ReleaseFramerControlAccess(uint32_t baseAddr);
 
-    void        EnableFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, bool enable);
-    bool        SetFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, const tx_2110Config  & txConfig);
-    void        GetFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP link, tx_2110Config  & txConfig);
-    void        SetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool enable);
-    void        GetArbiter(NTV2Channel channel, NTV2Stream stream,eSFP link,bool & enable);
+    void        EnableFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable);
+    bool        SetFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
+    void        GetFramerStream(NTV2Channel channel, NTV2Stream stream,eSFP sfp, tx_2110Config  & txConfig);
+    void        SetArbiter(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable);
+    void        GetArbiter(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool & enable);
 
     void        DisableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
     void        EnableDepacketizerStream(NTV2Channel channel, NTV2Stream stream);
-    void        DisableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
-    void        EnableDecapsulatorStream(NTV2Channel channel, NTV2Stream stream);
+    void        DisableDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
+    void        EnableDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
 
-    void        SetupDecapsulatorStream(NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
+    void        SetupDecapsulatorStream(eSFP sfp, NTV2Channel channel, NTV2Stream stream, rx_2110Config &rxConfig);
+
+    void        ResetPacketizerStream(const NTV2Channel channel, NTV2Stream stream);
 
     void        SetupDepacketizerStream(const NTV2Channel channel, NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Channel channel, NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(NTV2Channel channel, NTV2Stream stream);
     bool        SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t  & baseAddr);
 
-    bool		ConfigurePTP(eSFP port, std::string localIPAddress);
+    void        SetVideoFormatForRxTx(const NTV2Channel channel, const NTV2VideoFormat format, const bool rx);
+    void        GetVideoFormatForRxTx(const NTV2Channel channel, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
+
+    bool		ConfigurePTP(eSFP sfp, std::string localIPAddress);
 
     bool        GenSDP(NTV2Channel channel, NTV2Stream stream);
     bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
     bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);
 
 private:
-    eSFP        GetRxPort(NTV2Channel chan);
-    eSFP        GetTxPort(NTV2Channel chan);
     std::string To_String(int val);
 
     std::vector<std::string> split(const char *str, char delim);

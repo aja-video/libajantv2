@@ -2244,13 +2244,22 @@ public:
 	AJA_VIRTUAL bool	GetRP188Mode			(const NTV2Channel inChannel,	NTV2_RP188Mode & outMode);
 
 	/**
-		@note		This needs to be documented.
+		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given channel.
+		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel value.
+		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
+		@note		This call won't have any effect if the channel is in "bypass mode".
+					See CNTV2Card::IsRP188BypassEnabled and CNTV2Card::DisableRP188Bypass.
 	**/
-	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, const RP188_STRUCT & inRP188Data);
+	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const NTV2_RP188 & inRP188Data);
 
 	/**
-		@note		This needs to be documented.
+		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given channel.
+		@param[in]	inChannel		Specifies the SDI input of interest as an NTV2Channel value.
+		@param[out]	outRP188Data	Receives the raw RP188 data values.
 	**/
+	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	NTV2_RP188 & outRP188Data);
+
+	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, const RP188_STRUCT & inRP188Data);
 	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, RP188_STRUCT & outRP188Data);
 
 	/**
@@ -3277,22 +3286,20 @@ public:
         @param[in]		inTag               Tag for the virtual data.
         @param[in]		inVirtualData       Virtual data to be written
         @param[in]		inVirtualDataSize   Virtual data size to write
-        @param[out]		outVirtualDataSize   Virtual data size actually written
-        @return			True if all requested registers were successfully written; otherwise false.
+        @return			True if all requested data was successfully written; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
+    AJA_VIRTUAL bool    WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize);
 
     /**
         @brief			Reads the block of virtual data for a specific tag
-        @param[in]		inTag                Tag for the virtual data.
-        @param[out]		outVirtualData       Virtual data buffer to be written
-        @param[in]		inVirtualDataSize    Virtual data size to read
-        @param[out]		outVirtualDataSize   Virtual data size of tagged data regardless of how much read
-        @return			True if all requested registers were successfully written; otherwise false.
+        @param[in]		inTag               Tag for the virtual data.
+        @param[out]		outVirtualData      Virtual data buffer to be written
+        @param[in]		inVirtualDataSize   Virtual data size to read
+        @return			True if all requested data was successfully read; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
+    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize);
 
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),

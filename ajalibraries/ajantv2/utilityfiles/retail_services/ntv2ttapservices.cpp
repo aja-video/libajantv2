@@ -191,8 +191,4 @@ void TTapServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-	
-	// Set SDI out control video standard (reg 129, bits 2-0)
-	mCard->SetSDIOut2Kx1080Enable( NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080 );
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
 }

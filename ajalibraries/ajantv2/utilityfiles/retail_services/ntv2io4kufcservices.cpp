@@ -1176,15 +1176,15 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(&primaryGeometry);
 	
 	// VPID
-	bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
-												  bSdiOutRGB;
+	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
+	//											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
+	//											  IsVideoFormatB(mFb1VideoFormat) ||
+	//											  bSdiOutRGB;
 											  
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
-	NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);
+	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat(mVirtualSecondaryFormatSelect);
 	
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2FrameRate			secondaryFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
@@ -1328,111 +1328,6 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
-	
-	//
-	// SDI Out 1
-	//
-	if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, secondaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, secondaryStandard);
-		
-		// 3Ga / 3Gb / Neither
-		if (bDualStreamOut && b3GbOut)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbOut);
-		}
-		else
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mVirtualSecondaryFormatSelect));
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-		}
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL1, primaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
-		
-		// 3Ga / 3Gb / Neither
-		if (bDualStreamOut && b3GbOut)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, true);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, b3GbOut);
-		}
-		else
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL1, IsVideoFormatA(mFb1VideoFormat));
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL1, false);
-		}
-	}
-
-
-	//
-	// SDI Out 2
-	//
-	if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
-	{
-		// Select secondary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, secondaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, secondaryStandard);
-		
-		// 3Ga / 3Gb / Neither
-		if (bDualStreamOut && b3GbOut)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, b3GbOut);
-		}
-		else
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mVirtualSecondaryFormatSelect));
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-		}
-	}
-	else
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL2, primaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL2, primaryStandard);
-		
-		// 3Ga / 3Gb / Neither
-		if (bDualStreamOut && b3GbOut)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, true);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, b3GbOut);
-		}
-		else
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL2, IsVideoFormatA(mFb1VideoFormat));
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL2, false);
-		}
-	}
-	
-	
-	//
-	// SDI Out Mon
-	//
-	{
-		// Select primary standard
-		mCard->SetSDIOut2Kx1080Enable(NTV2_CHANNEL5, primaryGeometry == NTV2_FG_2048x1080);
-		mCard->SetSDIOutputStandard(NTV2_CHANNEL5, primaryStandard);
-		
-		// 3Ga / 3Gb / Neither
-		if (bDualStreamOut && b3GbOut)
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, true);
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, b3GbOut);
-		}
-		else
-		{
-			mCard->SetSDIOut3GEnable(NTV2_CHANNEL5, IsVideoFormatA(mFb1VideoFormat));
-			mCard->SetSDIOut3GbEnable(NTV2_CHANNEL5, false);
-		}
-	}
-	
 
 	//
 	// Up/Down Converter
