@@ -245,12 +245,12 @@ typedef struct AJAAncillaryDataLocation
 			return IS_VALID_AJAAncillaryDataLink(link) && IS_VALID_AJAAncillaryDataStream(stream) && IS_VALID_AJAAncillaryDataChannel(channel) && IS_VALID_AJAAncillaryDataSpace(ancSpace);
 		}
 
-		inline void		Set (	const AJAAncillaryDataLink		inLink,
-								const AJAAncillaryDataChannel	inChannel,
-								const AJAAncillaryDataSpace		inAncSpace,
-								const uint16_t					inLineNum,
-								const uint16_t					inHorizOffset = AJAAncDataHorizOffset_Default,
-								const AJAAncillaryDataStream	inStream = AJAAncillaryDataStream_1)
+		inline AJAAncillaryDataLocation &	Set (	const AJAAncillaryDataLink		inLink,
+													const AJAAncillaryDataChannel	inChannel,
+													const AJAAncillaryDataSpace		inAncSpace,
+													const uint16_t					inLineNum,
+													const uint16_t					inHorizOffset = AJAAncDataHorizOffset_Default,
+													const AJAAncillaryDataStream	inStream = AJAAncillaryDataStream_1)
 		{
 			link		= inLink;
 			stream		= inStream;
@@ -258,9 +258,10 @@ typedef struct AJAAncillaryDataLocation
 			ancSpace	= inAncSpace;
 			lineNum		= inLineNum;
 			horizOffset	= inHorizOffset;
+			return *this;
 		}
 
-		inline void		Reset (void)
+		inline AJAAncillaryDataLocation &	Reset (void)
 		{
 			link		= AJAAncillaryDataLink_Unknown;
 			stream		= AJAAncillaryDataStream_Unknown;
@@ -268,6 +269,7 @@ typedef struct AJAAncillaryDataLocation
 			ancSpace	= AJAAncillaryDataSpace_Unknown;
 			lineNum		= 0;
 			horizOffset	= AJAAncDataHorizOffset_Default;
+			return *this;
 		}
 
 		inline AJAAncillaryDataLink			GetDataLink (void) const				{return link;}
