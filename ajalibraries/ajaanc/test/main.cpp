@@ -6,6 +6,7 @@
 //#define	DEBUG_BREAK_AFTER_FAILURE	(true)
 #include "ntv2bft.h"
 #include "ajabase/common/options_popt.h"
+#include "ajabase/common/performance.h"
 #include "ancillarydata_cea608_line21.h"
 #include "ancillarydata_cea608_vanc.h"
 #include "ancillarydata_cea708.h"
@@ -1824,10 +1825,74 @@ if (gIPBuffers[vFormat].IsNULL())
 		}
 
 
+		static bool RTPTimingTest (void)
+		{
+			unsigned numRoundTrips(1000);
+			unsigned numF1Packets(90), numF2Packets(163);
+			vector<uint8_t>	payloadData;
+			for (unsigned ndx(0);  ndx < 255;  ndx++)
+				payloadData.push_back(ndx);
+			NTV2_POINTER	payloadBuffer(255);
+			payloadBuffer.PutU8s(payloadData);
+			AJAAncillaryList	ancPkts;
+			AJAAncillaryDataLocation	loc;
+			for (unsigned pktNum(0);  pktNum < numF1Packets;  pktNum++)
+			{
+				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
+				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
+				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
+				loc.SetLineNumber(9+pktNum&0x0F);
+				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
+				AJAAncillaryData	pkt;
+				pkt.SetDID(pktNum);
+				pkt.SetSID(200-pktNum);
+				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetDataLocation(loc);
+				pkt.SetPayloadData(&payloadData[0], payloadData.size());
+				ancPkts.AddAncillaryData(pkt);
+			}	//	for numF1Packets
+			for (unsigned pktNum(0);  pktNum < numF2Packets;  pktNum++)
+			{
+				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
+				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
+				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
+				loc.SetLineNumber(567+pktNum&0x0F);
+				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
+				AJAAncillaryData	pkt;
+				pkt.SetDID(pktNum);
+				pkt.SetSID(200-pktNum);
+				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetDataLocation(loc);
+				pkt.SetPayloadData(&payloadData[0], payloadData.size());
+				ancPkts.AddAncillaryData(pkt);
+			}	//	for numF2Packets
+
+			NTV2_POINTER		F1Buffer(4096),	F2Buffer(4096);
+			AJAAncillaryList	packetList;
+	        AJAPerformance		perfOverall("RTPTimingTest"), perfTx("RTPTimingTx"), perfRx("RTPTimingRx");
+	        perfOverall.Start();
+			for (unsigned tripNum(0);  tripNum < numRoundTrips;  tripNum++)
+			{
+				
+				perfTx.Start();
+				ancPkts.GetAncillaryDataTransmitData (F1Buffer, F2Buffer, false, 564);
+				perfTx.Stop();
+				perfRx.Start();
+				AJAAncillaryList::SetFromIPAncData (F1Buffer, F2Buffer, packetList);
+				perfRx.Stop();
+			}	//	for numRoundTrips
+			perfOverall.Stop();
+			perfTx.Report();
+			perfRx.Report();
+			perfOverall.Report();
+			return true;
+		}
+
 		static bool BFT (void)
 		{
 			AJADebug::Open();
 			LOGMYNOTE("Starting");
+RTPTimingTest();
 			//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
 			//	as they would appear in a NTV2_FBF_10BIT_YCBCR frame buffer.
 			//		DID=0x45 SDID=0x01 DC=216 CS=0xD2
