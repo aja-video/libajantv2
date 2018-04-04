@@ -264,7 +264,7 @@ bool wstring_to_string(const std::wstring& wstr, std::string& str)
 
 inline size_t local_min(const size_t& a, const size_t& b)
 {
-#if defined(AJA_WINDOWS) and !defined(AJA_BASE_USECPP_11)
+#if defined(AJA_WINDOWS) && !defined(AJA_BASE_USECPP_11)
     // By including the Windows.h header that brings in the min() macro which prevents us from using std::min()
     // so implement our own
     size_t size = b;
