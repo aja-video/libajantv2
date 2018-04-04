@@ -2448,6 +2448,16 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
         }
 
+        if (mFb1Mode == NTV2_MODE_DISPLAY)
+        {
+        }
+        else
+        {
+        }
+
+        printIpEnable(m21110IpEnable);
+
+
         // See if transmit video needs configuring
         if (m2110TxVideoDataID != m2110TxVideoData.id)
         {
@@ -3007,3 +3017,22 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
+
+
+void KonaIP2110Services::printIpEnable(IpEnable2110 ipEnable)
+{
+    printf("Id   %d\n", ipEnable.id);
+    printf("Sfp  %s   %s\n", (ipEnable.sfpEnable[0] == true) ? "on " : "off", (ipEnable.sfpEnable[1] == true) ? "on " : "off");
+    printf("Tx   %s   %s   %s   %s\n", (ipEnable.txChEnable[0] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[1] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[2] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[3] == true) ? "on " : "off");
+
+    printf("Rx   %s   %s   %s   %s\n\n", (ipEnable.rxChEnable[0] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[1] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[2] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[3] == true) ? "on " : "off");
+}
+
+
+
