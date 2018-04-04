@@ -238,8 +238,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	// Frame Buffer Disabling
 	mCard->WriteRegister(kRegCh1Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh2Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh3Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh4Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
 }
 
 

@@ -2466,7 +2466,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                 txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                 txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
-                txVideoConfig.ssrc = m2110TxVideoData.txVideoCh[i].ssrc;
                 txVideoConfig.ttl = 0x40;
                 txVideoConfig.tos = 0x64;
 
@@ -2506,7 +2505,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                 txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                 txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
-                txAudioConfig.ssrc = m2110TxAudioData.txAudioCh[i].ssrc;
                 txAudioConfig.ttl = 0x40;
                 txAudioConfig.tos = 0x64;
 
@@ -2556,8 +2554,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
                     rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
                 }
-                rxVideoConfig.ssrc = m2110RxVideoData.rxVideoCh[i].ssrc;
-                rxVideoConfig.vlan = m2110RxVideoData.rxVideoCh[i].vlan;
                 rxVideoConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
                 // Video specific
