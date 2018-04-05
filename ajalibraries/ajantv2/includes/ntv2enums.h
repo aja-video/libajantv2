@@ -267,6 +267,9 @@ typedef enum
     } NTV2BoardSubType;			///< @deprecated	This is obsolete.
 #endif	//	!defined (NTV2_DEPRECATE)
 
+#define	NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)			((__d__) == DEVICE_ID_KONAIP_2110 || (__d__) == DEVICE_ID_IOIP_2110)
+#define	NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)			((__d__) == DEVICE_ID_KONAIP_2022 || (__d__) == DEVICE_ID_IOIP_2022)
+
 
 /**
     @brief	Identifies a particular video standard.
