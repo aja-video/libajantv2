@@ -674,8 +674,7 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
 		mVancMode				(kDefaultVANCMode),
 		mPlayerQuit				(false),
-		mCaptionGeneratorQuit	(false),
-		mpVideoBuffer(NULL)
+		mCaptionGeneratorQuit	(false)
 {
 	::memset (mGeneratorThreads, 0, sizeof (mGeneratorThreads));
 
@@ -696,12 +695,6 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 		mDevice.UnsubscribeOutputVerticalEvent (NTV2Channel (mOutputChannel + 1));
 	}
 	mDevice.UnsubscribeOutputVerticalEvent (mOutputChannel);
-
-	if (mpVideoBuffer)
-	{
-		delete [] mpVideoBuffer;
-		mpVideoBuffer = NULL;
-	}
 
 	if (!mConfig.fDoMultiFormat)
 	{
@@ -830,8 +823,7 @@ AJAStatus NTV2CCPlayer::Init (void)
 AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 {
 	//	Allocate and clear the host video buffer memory...
-	mpVideoBuffer = new uint8_t [mVideoBufferSize];
-	::memset (mpVideoBuffer, 0, mVideoBufferSize);
+	mVideoBuffer.Allocate(::GetVideoWriteSize(mVideoFormat, mPixelFormat, mVancMode));
 
 	//	Generate the test pattern...
 	AJATestPatternBuffer		testPatternBuffer;
@@ -846,25 +838,26 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	}
 
 	//	Set the VANC area, if any, to legal black...
-	if (formatDesc.IsVANC () && !::SetRasterLinesBlack (mPixelFormat, mpVideoBuffer, formatDesc.GetBytesPerRow (), formatDesc.firstActiveLine))
-	{
-		cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
-		return AJA_STATUS_FAIL;
-	}
+	if (formatDesc.IsVANC())
+		if (!::SetRasterLinesBlack(mPixelFormat, (UByte*)mVideoBuffer.GetHostPointer(), formatDesc.GetBytesPerRow (), formatDesc.firstActiveLine))
+		{
+			cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
+			return AJA_STATUS_FAIL;
+		}
 
 	//	Stuff the gray pattern into my video buffer...
-	::memcpy (formatDesc.GetTopVisibleRowAddress (mpVideoBuffer), &testPatternBuffer[0], testPatternBuffer.size ());
+	::memcpy (formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()), &testPatternBuffer[0], testPatternBuffer.size ());
 
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString (mVideoFormat)));
 	{ostringstream	oss;	oss << setw (32) << left << string ("CCPlayer ") + strVideoFormat + string (formatDesc.IsVANC() ? " VANC" : "");
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress (mpVideoBuffer),
-										formatDesc.GetVisibleRasterDimensions (), mPixelFormat, formatDesc.GetBytesPerRow (),  1, 1);	}	//	row 1, col 1
+										formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
+										formatDesc.GetVisibleRasterDimensions(), mPixelFormat, formatDesc.GetBytesPerRow(),  1, 1);	}	//	row 1, col 1
 	{ostringstream	oss;	oss << formatDesc.GetRasterWidth() << "Wx" << formatDesc.GetFullRasterHeight() << "H  " << ::NTV2FrameBufferFormatToString (mPixelFormat, true) << string (20, ' ');
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress (mpVideoBuffer),
-										formatDesc.GetVisibleRasterDimensions (), mPixelFormat, formatDesc.GetBytesPerRow (),  2, 1);	}	//	row 2, col 1
+										formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
+										formatDesc.GetVisibleRasterDimensions(), mPixelFormat, formatDesc.GetBytesPerRow(),  2, 1);	}	//	row 2, col 1
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpBackgroundPatternBuffer
@@ -963,7 +956,6 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		mDevice.SubscribeOutputVerticalEvent (NTV2Channel (mOutputChannel + 3));
 	}
 
-	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
 	mDevice.GetFrameRate (mFrameRate);
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString (mVideoFormat) << "' using " << (mConfig.fForceVanc ? "VANC" : "device Anc inserter")
@@ -1319,7 +1311,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	}	//	if audio not suppressed
 
 	//	Set up the transfer buffers...
-	xferInfo.SetVideoBuffer (reinterpret_cast <ULWord *> (mpVideoBuffer), mVideoBufferSize);
+	xferInfo.SetVideoBuffer(reinterpret_cast<ULWord *>(mVideoBuffer.GetHostPointer()), mVideoBuffer.GetByteCount());
 	if (!mConfig.fForceVanc)
 	{
 		if (!IsProgressivePicture (mVideoFormat))				//	Interlaced?
@@ -1366,8 +1358,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 					const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
 					UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
 					UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
-					UByte *			pF1Line21InBuffer	(mpVideoBuffer + (kLine21F1RowNum * bytesPerRow));
-					UByte *			pF2Line21InBuffer	(mpVideoBuffer + (kLine21F2RowNum * bytesPerRow));
+					UByte *			pF1Line21InBuffer	((UByte*)mVideoBuffer.GetHostPointer() + (kLine21F1RowNum * bytesPerRow));
+					UByte *			pF2Line21InBuffer	((UByte*)mVideoBuffer.GetHostPointer() + (kLine21F2RowNum * bytesPerRow));
 	
 					if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
 						::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace F1 line 21 with resulting F1 line from EncodeLine
@@ -1402,7 +1394,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate F1's SMPTE-334 Anc data packet
 				{
 					if (mConfig.fForceVanc)		//	True if --vanc option set, or no Anc inserters
-						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mVideoBuffer.GetHostPointer(), mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
 					else
 					{
 						uint32_t					pktSizeInBytes	(0);
@@ -1416,7 +1408,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				if (!IsProgressivePicture (mVideoFormat) && m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field2))		//	Generate F2 Anc packet (interlace only)
 				{
 					if (mConfig.fForceVanc)	//	True if --vanc option set, or no Anc inserters
-						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mpVideoBuffer, mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
+						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mVideoBuffer.GetHostPointer(), mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
 					else
 					{
 						uint32_t					pktSizeInBytes	(0);
@@ -1458,8 +1450,9 @@ void NTV2CCPlayer::PlayoutFrames (void)
 					tcOK = xferInfo.SetOutputTimeCodes (timecodes);
 				}
 				::memcpy (tcString + colShift, rp188.GetRP188CString (), 11);
-				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow, formatDesc.GetTopVisibleRowAddress (mpVideoBuffer),
-												formatDesc.GetVisibleRasterDimensions (), mPixelFormat, bytesPerRow, 3, 1);
+				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow,
+												formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
+												formatDesc.GetVisibleRasterDimensions(), mPixelFormat, bytesPerRow, 3, 1);
 			}	//	if not suppressing timecode injection
 
 			if (!mConfig.fSuppressAudio && !pAudioBuffer.IsNULL ())
