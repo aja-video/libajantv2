@@ -2403,7 +2403,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 
-    if (mCard->IsDeviceReady(true) == true)
+    if (0)              // Turn off for NAB
+    //if (mCard->IsDeviceReady(true) == true)
     {
         if (config2110 == NULL)
         {
