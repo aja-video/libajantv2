@@ -3502,7 +3502,7 @@ typedef enum
 // This is necessary since the NWL registers lives in another PCI BAR and these offsets conflict with normal VP registers.  With this 
 // offset the driver knows which mapped BAR to use.  Windows maps individual registers at start so this isn't necessary for Windows.
 #ifdef AJAMac
-	#define NWL_REG_START 12000
+	#define NWL_REG_START 18000
 #else
 	#define NWL_REG_START 0
 #endif

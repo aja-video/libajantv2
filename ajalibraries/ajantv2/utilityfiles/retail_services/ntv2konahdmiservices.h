@@ -21,6 +21,9 @@ public:
 	~KonaHDMIServices() {}
 	
 	virtual void UpdateAutoState (void);
+	virtual NTV2VideoFormat GetSelectedInputVideoFormat(
+									NTV2VideoFormat fbVideoFormat,
+									NTV2SDIInputFormatSelect* inputFormatSelect);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
