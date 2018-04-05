@@ -72,17 +72,16 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 }
 
 
-AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t index) const
+AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inIndex) const
 {
-	AJAAncillaryData *	pAncData	(NULL);
+	AJAAncillaryData *	pAncData(NULL);
 
-	if (m_ancList.size () > 0  &&  index < m_ancList.size ())
+	if (!m_ancList.empty()  &&  inIndex < m_ancList.size())
 	{
-		AJAAncDataListConstIter	it	(m_ancList.begin ());
+		AJAAncDataListConstIter	it	(m_ancList.begin());
 
-		for (uint32_t i = 0;  i < index;  i++)	// the problem with lists is: no random access...
+		for (uint32_t i(0);  i < inIndex;  i++)	//	Dang, std::list has no random access
 			++it;
-
 		pAncData = *it;
 	}
 
@@ -94,7 +93,7 @@ AJAStatus AJAAncillaryList::ParseAllAncillaryData (void)
 {
 	AJAStatus result = AJA_STATUS_SUCCESS;
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData = *it;
 		AJAStatus status = pAncData->ParsePayloadData ();
@@ -112,7 +111,7 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncillaryDataTyp
 {
 	uint32_t count = 0;
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *		pAncData	(*it);
 		AJAAncillaryDataType	ancType		(pAncData->GetAncillaryDataType());
@@ -389,6 +388,10 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 	return bResult;
 }
 
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////	R E C E I V E
+/////////////////////////////////////////////////////////////////
 
 // Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
 // Break the stream into separate AJAAncillaryData objects and add them to the list.
@@ -833,14 +836,18 @@ AJAAncillaryDataType AJAAncillaryList::GetAnalogAncillaryDataTypeForLine (const 
 }
 
 
+///////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////	T R A N S M I T
+///////////////////////////////////////////////////////////////////
 
-AJAStatus AJAAncillaryList::GetAncillaryDataTransmitSize (const bool bProgressive, const uint32_t f2StartLine, uint32_t & ancSizeF1, uint32_t & ancSizeF2) const
+
+AJAStatus AJAAncillaryList::GetAncillaryDataTransmitSize (const bool bProgressive, const uint32_t f2StartLine, uint32_t & ancSizeF1, uint32_t & ancSizeF2)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 	uint32_t	f1Size	(0);
 	uint32_t	f2Size	(0);
 
-	for (AJAAncillaryDataList::const_iterator it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData	(*it);
 		uint32_t			packetSize	(0);
@@ -860,47 +867,61 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitSize (const bool bProgressiv
 }
 
 
-AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressive, const uint32_t f2StartLine, uint8_t * pF1AncData, const uint32_t inMaxF1Data, uint8_t * pF2AncData, const uint32_t inMaxF2Data) const
+AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressive, const uint32_t f2StartLine, uint8_t * pF1AncData, const uint32_t inMaxF1Data, uint8_t * pF2AncData, const uint32_t inMaxF2Data)
+{
+	NTV2_POINTER	F1Buffer(pF1AncData, inMaxF1Data), F2Buffer(pF2AncData, inMaxF2Data);
+	if (!F1Buffer.IsNULL())
+		NTV2_ASSERT(F1Buffer.IsProvidedByClient());
+	if (!F2Buffer.IsNULL())
+		NTV2_ASSERT(F2Buffer.IsProvidedByClient());
+	return GetSDITransmitData(F1Buffer, F2Buffer, bProgressive, f2StartLine);
+}
+
+
+AJAStatus AJAAncillaryList::GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	AJAStatus	status		(AJA_STATUS_SUCCESS);
-	uint32_t	maxF1Data	(inMaxF1Data);
-	uint32_t	maxF2Data	(inMaxF2Data);
+	uint32_t	maxF1Data	(F1Buffer.GetByteCount());
+	uint32_t	maxF2Data	(F2Buffer.GetByteCount());
+	uint8_t *	pF1AncData	(reinterpret_cast<uint8_t*>(F1Buffer.GetHostPointer()));
+	uint8_t *	pF2AncData	(reinterpret_cast<uint8_t*>(F2Buffer.GetHostPointer()));
 
-	for (AJAAncDataListConstIter it (m_ancList.begin ());  it != m_ancList.end ();  ++it)
+	//	Generate transmit data for each of my packets...
+	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
-		AJAAncillaryData *	pAncData = *it;
+		uint32_t			pktSize(0);
+		AJAAncillaryData *	pPkt(*it);
+		if (!pPkt)
+			{status = AJA_STATUS_NULL;	break;}	//	Fail
 
-		uint32_t packetSize = 0;
-		if (bProgressive || pAncData->GetLocationLineNumber() < f2StartLine)
+		if (inIsProgressive || pPkt->GetLocationLineNumber() < inF2StartLine)
 		{
-			if (pF1AncData != NULL && maxF1Data > 0)
+			if (pF1AncData  &&  maxF1Data)
 			{
-				status = pAncData->GenerateTransmitData(pF1AncData, maxF1Data, packetSize);
-				if (status != AJA_STATUS_SUCCESS)
+				status = pPkt->GenerateTransmitData(pF1AncData, maxF1Data, pktSize);
+				if (AJA_FAILURE(status))
 					break;
 
-				pF1AncData += packetSize;
-				maxF1Data  -= packetSize;
+				pF1AncData += pktSize;
+				maxF1Data  -= pktSize;
 			}
 		}
-		else
+		else if (pF2AncData  &&  maxF2Data)
 		{
-			if (pF2AncData != NULL && maxF2Data > 0)
-			{
-				status = pAncData->GenerateTransmitData(pF2AncData, maxF2Data, packetSize);
-				if (status != AJA_STATUS_SUCCESS)
-					break;
+			status = pPkt->GenerateTransmitData(pF2AncData, maxF2Data, pktSize);
+			if (AJA_FAILURE(status))
+				break;
 
-				pF2AncData += packetSize;
-				maxF2Data  -= packetSize;
-			}
+			pF2AncData += pktSize;
+			maxF2Data  -= pktSize;
 		}
-	}
+	}	//	for each of my anc packets
 	return status;
 }
 
 
-AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const
+AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc)
 {
 	if (inFrameBuffer.IsNULL())
 	{
@@ -943,7 +964,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 		for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
 		{
 			bool								muxedOK	(false);
-			const AJAAncillaryData &			ancData (**iter);
+			AJAAncillaryData &					ancData (**iter);
 			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
 			vector<uint16_t>					u16PktComponents;
 			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)	//	Ignore "Raw" or "Analog" or "Unknown" packets
@@ -1027,7 +1048,7 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 	for (AJAAncDataListConstIter iter(m_ancList.begin());   (iter != m_ancList.end()) && *iter;   ++iter)
 	{
 		bool								success		(inFormatDesc.IsSDFormat());
-		const AJAAncillaryData &			ancData		(**iter);
+		AJAAncillaryData &					ancData		(**iter);
 		const AJAAncillaryDataLocation &	loc			(ancData.GetDataLocation());
 		ULWord								lineOffset	(0);
 		if (!ancData.IsRaw())
@@ -1070,56 +1091,8 @@ AJAStatus AJAAncillaryList::WriteVANCData (NTV2_POINTER & inFrameBuffer,  const 
 }	//	WriteVANCData
 
 
-AJAStatus AJAAncillaryList::GetIPAncDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
-														uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-														uint32_t & outF1PktCount, uint32_t & outF2PktCount) const
-{
-	outF1ByteCount = outF2ByteCount = uint32_t(AJARTPAncPayloadHeader::GetHeaderByteCount());	//	5 uint32_t's ... 20-byte minimum header size
-	outF1PktCount = outF2PktCount = 0;
-
-	for (AJAAncDataListConstIter it(m_ancList.begin ());  it != m_ancList.end();  ++it)
-	{
-		const AJAAncillaryData *	pAncData	(*it);
-		if (!pAncData)
-			return AJA_STATUS_NULL;	//	Fail
-
-		const AJAAncillaryData &	pkt	(*pAncData);
-		if (pkt.GetDataCoding() != AJAAncillaryDataCoding_Digital)
-			continue;	//	Skip analog/raw packets
-
-		uint32_t	dc(pkt.GetDC() > 255 ? 255 : pkt.GetDC());	//	Data count, clamped at 255
-		uint32_t	packetSize(4);								//	4 bytes of header (C, LineNum, HOffset, StreamNum)
-		packetSize += 5 * (dc + 4) / 4;							//	+ 10 bits per UDW & CS & DID & SID & DC, packed into 4-byte longwords
-		if ((5 * (dc + 4)) % 4)
-			packetSize += 1;									//	+ extra byte, if needed
-		if ((packetSize % 4) != 0)
-			packetSize += packetSize % 4;						//	+ pad to whole longword
-
-		if (!inIsProgressive)
-		{
-			if (pkt.GetLocationLineNumber() < inF2StartLine)
-			{
-				outF1ByteCount += packetSize;
-				outF1PktCount++;
-			}
-			else
-			{
-				outF2ByteCount += packetSize;
-				outF2PktCount++;
-			}
-		}
-		else
-		{
-			outF1ByteCount += packetSize;
-			outF1PktCount++;
-		}
-	}	//	for each packet
-	return AJA_STATUS_SUCCESS;
-}	//	GetIPAncDataTransmitSize
-
-
-AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
-															const bool inIsProgressive, const uint32_t inF2StartLine) const
+AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	const size_t		maxPktLengthBytes		(0x0000FFFF);	//	65535 max
 	const size_t		maxPktLengthWords		((maxPktLengthBytes+1) / sizeof(uint32_t) - 1);	//	16383 max
@@ -1140,11 +1113,11 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 	//	Generate transmit data for each of my packets...
 	for (uint32_t pktNdx(0);  pktNdx < CountAncillaryData();  pktNdx++)
 	{
-		const AJAAncillaryData *	pAncData	(GetAncillaryDataAtIndex(pktNdx));
+		AJAAncillaryData *	pAncData	(GetAncillaryDataAtIndex(pktNdx));
 		if (!pAncData)
 			return AJA_STATUS_NULL;	//	Fail
 
-		const AJAAncillaryData &	pkt	(*pAncData);
+		AJAAncillaryData &	pkt	(*pAncData);
 		if (pkt.GetDataCoding() != AJAAncillaryDataCoding_Digital)
 		{
 			LOGMYDEBUG("Skipped Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " -- Analog/Raw");
@@ -1301,7 +1274,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffe
 	if (overflowWords)
 		{LOGMYERROR(DEC(overflowWords*4) << " bytes skipped due to RTP pkt length overflow (65535 max capacity)");	return AJA_STATUS_RANGE;}
 	return AJA_STATUS_SUCCESS;
-}	//	GetAncillaryDataTransmitData
+}	//	GetIPTransmitData
 
 
 ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPayload) const

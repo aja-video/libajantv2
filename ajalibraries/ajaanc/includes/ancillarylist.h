@@ -115,7 +115,7 @@ public:	//	INSTANCE METHODS
 		@brief	Answers with the number of AJAAncillaryData objects I contain (any/all types).
 		@return	The number of AJAAncillaryData objects I contain.
 	**/
-	virtual inline uint32_t					CountAncillaryData (void) const				{return uint32_t (m_ancList.size ());}
+	virtual inline uint32_t					CountAncillaryData (void) const				{return uint32_t(m_ancList.size());}
 
 	/**
 		@brief		Answers with the AJAAncillaryData object at the given index.
@@ -184,7 +184,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inAncData	Specifies the AJAAncillaryData object to be copied and added to me.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual inline AJAStatus				AddAncillaryData (const AJAAncillaryData & inAncData)	{return AddAncillaryData (&inAncData);}
+	virtual inline AJAStatus				AddAncillaryData (const AJAAncillaryData & inAncData)	{return AddAncillaryData(&inAncData);}
 
 	/**
 		@brief		Removes all copies of the AJAAncillaryData object from me.
@@ -243,7 +243,6 @@ public:	//	INSTANCE METHODS
 		@name	Transmit to AJA Hardware
 	**/
 	///@{
-
 	/**
 		@brief		Answers with the sizes of the buffers (one for field 1, one for field 2) needed to hold the anc data inserter
 					"transmit" data for all of my AJAAncillaryData objects.
@@ -254,7 +253,7 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetAncillaryDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
-																			uint32_t & outF1ByteCount, uint32_t & outF2ByteCount) const;
+																			uint32_t & outF1ByteCount, uint32_t & outF2ByteCount);
 
 
 	/**
@@ -272,7 +271,22 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						GetAncillaryDataTransmitData (const bool inIsProgressive, const uint32_t inF2StartLine,
 																			uint8_t * pOutF1AncData, const uint32_t inF1ByteCountMax,
-																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax) const;
+																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax);
+
+	/**
+		@brief		Writes my AJAAncillaryData objects into the given buffers for insertion into an SDI data stream
+					in \ref ancgumpformat.
+		@param		F1Buffer			Specifies the buffer memory into which Field 1's anc data will be written.
+		@param		F2Buffer			Specifies the buffer memory into which Field 2's anc data will be written.
+		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+										Defaults to zero (progressive).
+		@note		It's assumed that my packets are already sorted by location.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 
 	/**
 		@brief		Writes my AJAAncillaryData objects into the given tall/taller frame buffer having the given raster/format.
@@ -282,27 +296,11 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 		@bug		Currently ignores each packet's horizontal offset (assumes AJAAncDataHorizOffset_Anywhere).
 	**/
-	virtual AJAStatus						WriteVANCData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc) const;
-
-
-	/**
-		@brief		Answers with the number of bytes required to store my ancillary data in an IP/RTP data structure.
-		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
-										otherwise, specify false. Defaults to true (is progressive).
-		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
-		@param		outF1ByteCount		Receives field 1's requisite byte count.
-		@param		outF2ByteCount		Receives field 2's requisite byte count.
-		@param		outF1PktCount		Receives field 1's packet count.
-		@param		outF2PktCount		Receives field 2's packet count.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GetIPAncDataTransmitSize (const bool inIsProgressive, const uint32_t inF2StartLine,
-																		uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-																		uint32_t & outF1PktCount, uint32_t & outF2PktCount) const;
+	virtual AJAStatus						GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc);
 
 	/**
-		@brief		Writes my AJAAncillaryData objects into the given buffer as an IP/RTP data structure suitable for
-					insertion into an IP ancillary data stream.
+		@brief		Writes my AJAAncillaryData objects into the given buffers as an IP/RTP data structure suitable for
+					insertion into an IP ancillary data stream in \ref ancrtpformat.
 		@param		F1Buffer			Specifies the buffer memory into which Field 1's IP/RTP data will be written.
 		@param		F2Buffer			Specifies the buffer memory into which Field 2's IP/RTP data will be written.
 		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
@@ -312,8 +310,8 @@ public:	//	INSTANCE METHODS
 		@note		It's assumed that my packets are already sorted by location.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GetAncillaryDataTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
-																			const bool inIsProgressive = true, const uint32_t inF2StartLine = 0) const;
+	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 	///@}
 
 

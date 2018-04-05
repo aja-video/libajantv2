@@ -801,13 +801,13 @@ cerr << __FUNCTION__ << ":  " << fd << endl;
 								const uint8_t		pTestData[]	=	{0xAA, 0xBB, uint8_t(vf), uint8_t(fbf), uint8_t(pkt.GetLocationVideoLink()), uint8_t(pkt.GetLocationDataChannel()), uint8_t(pkt.GetLocationVideoSpace()), uint8_t(smpteLine), uint8_t(pkt.GetDataCoding()), 0xBB, 0xAA};
 								SHOULD_SUCCEED(pkt.SetPayloadData (pTestData, sizeof(pTestData)));
 								SHOULD_SUCCEED(pkts.AddAncillaryData(pkt));
-//cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") BEFORE WriteVANCData:" << endl;
+//cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") BEFORE GetVANCTransmitData:" << endl;
 //CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
 fb.Fill(UWord(0x8080));	//	** MrBill **	FOR NOW
-								SHOULD_SUCCEED(pkts.WriteVANCData (fb,  fd));
+								SHOULD_SUCCEED(pkts.GetVANCTransmitData (fb,  fd));
 								//	At this point, the packet should be in the frame buffer's VANC area.
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
-cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") AFTER WriteVANCData:" << endl;
+cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") AFTER GetVANCTransmitData:" << endl;
 CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
 vector<uint16_t>	u16pktComponents;
@@ -1341,9 +1341,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 				//	Transmit the packets into the 8-bit GUMP buffer...
 				NTV2_POINTER	gumpF1(4096), gumpF2(4096);
-				SHOULD_SUCCEED(txPkts.GetAncillaryDataTransmitData (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2,
-																	(uint8_t*) gumpF1.GetHostPointer(), gumpF1.GetByteCount(),
-																	(uint8_t*) gumpF2.GetHostPointer(), gumpF2.GetByteCount()));
+				SHOULD_SUCCEED(txPkts.GetSDITransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "GUMP F1: " << gumpF1.AsString(64) << endl << "GUMP F2: " << gumpF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 GUMP buffers for use later by BFT_Buffer8BitGumpToAncListToBuffer8BitGump...
@@ -1423,7 +1421,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 				//	Transmit the packets into the IP buffer...
 				NTV2_POINTER	IPF1(2048), IPF2(2048);
-				SHOULD_SUCCEED(txPkts.GetAncillaryDataTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_IPBufferToAncListToIPBuffer...
@@ -1516,7 +1514,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				//	Transmit the packets into the 10-bit YCbCr frame buffer...
 				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc10.Fill(uint8_t(0x80));
-				SHOULD_SUCCEED(txPkts.WriteVANCData (vanc10, fd));
+				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc10, fd));
 /* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
 for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
 	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
@@ -1574,9 +1572,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 				//	Transmit the packets into another 8-bit GUMP buffer...
 				NTV2_POINTER	gumpF1(4096), gumpF2;
-				SHOULD_SUCCEED(pkts.GetAncillaryDataTransmitData (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2,
-																	(uint8_t*) gumpF1.GetHostPointer(), gumpF1.GetByteCount(),
-																	(uint8_t*) gumpF2.GetHostPointer(), gumpF2.GetByteCount()));
+				SHOULD_SUCCEED(pkts.GetSDITransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "        GUMP F1: " << gumpF1.AsString(64) << endl;
 				SHOULD_BE_TRUE(gGumpBuffers[vFormat].IsContentEqual(gumpF1));
 			}	//	for each video format
@@ -1612,7 +1608,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				//	Unpack into an AJAAncillaryList of anc packets...
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromIPAncData(F1RTP_a, NTV2_POINTER(), rxPkts));
 				//	Re-pack into a n AJAAncillaryList of anc packets...
-				SHOULD_SUCCEED(rxPkts.GetAncillaryDataTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				SHOULD_SUCCEED(rxPkts.GetIPTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				//	Content of "A" and "B" buffers should be the same...
 				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4))
 				{
@@ -1675,7 +1671,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				//	Transmit the packets into another YUV10 frame buffer...
 				NTV2_POINTER	yuv10vanc(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				yuv10vanc.Fill(uint8_t(0x80));
-				SHOULD_SUCCEED(pkts.WriteVANCData(yuv10vanc, fd));
+				SHOULD_SUCCEED(pkts.GetVANCTransmitData(yuv10vanc, fd));
 				SHOULD_BE_TRUE(gVanc10Buffers[vFormat].IsContentEqual(yuv10vanc));
 			}	//	for each video format
 			cerr << "BFT_BufferYUV10ToAncListToBufferYUV10 passed" << endl;
@@ -1875,7 +1871,7 @@ if (gIPBuffers[vFormat].IsNULL())
 			{
 				
 				perfTx.Start();
-				ancPkts.GetAncillaryDataTransmitData (F1Buffer, F2Buffer, false, 564);
+				ancPkts.GetIPTransmitData (F1Buffer, F2Buffer, false, 564);
 				perfTx.Stop();
 				perfRx.Start();
 				AJAAncillaryList::SetFromIPAncData (F1Buffer, F2Buffer, packetList);
@@ -1892,7 +1888,9 @@ if (gIPBuffers[vFormat].IsNULL())
 		{
 			AJADebug::Open();
 			LOGMYNOTE("Starting");
-RTPTimingTest();
+			if (false)
+				RTPTimingTest();
+
 			//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
 			//	as they would appear in a NTV2_FBF_10BIT_YCBCR frame buffer.
 			//		DID=0x45 SDID=0x01 DC=216 CS=0xD2

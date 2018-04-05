@@ -659,9 +659,9 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize) const
 //**********
 //	Writes my payload data into the given 8-bit GUMP buffer (playback)
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize) const
+AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize)
 {
-	AJAStatus status	(AJA_STATUS_SUCCESS);
+	AJAStatus status	(GeneratePayloadData());
 
 	outPacketSize = 0;
 
@@ -775,9 +775,9 @@ uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 }
 
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawComponents) const
+AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawComponents)
 {
-	AJAStatus							status		(AJA_STATUS_SUCCESS);
+	AJAStatus							status		(GeneratePayloadData());
 	const vector<uint16_t>::size_type	origSize	(outRawComponents.size());
 
 	if (IsDigital())
@@ -825,9 +825,9 @@ static const uint32_t	gMasks[]	=	{	0xFFC00000, 0x003FF000, 0x00000FFC, 0x0000000
 											0xC0000000, 0x3FF00000, 0x000FFC00, 0x000003FF	};
 
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData) const
+AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 {
-	AJAStatus							status		(AJA_STATUS_SUCCESS);
+	AJAStatus							status		(GeneratePayloadData());
 	const vector<uint32_t>::size_type	origSize	(outData.size());
 	uint32_t							u32			(0);	//	32-bit value
 

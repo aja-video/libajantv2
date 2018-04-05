@@ -836,14 +836,14 @@ public:
 		@param[out]	outPacketSize		Receives the size, in bytes, of the generated packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, uint32_t inMaxBytes, uint32_t & outPacketSize) const;
+	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, uint32_t inMaxBytes, uint32_t & outPacketSize);
 
 	/**
 		@brief		Generates "raw" 10-bit ancillary packet component data from my internal ancillary data (playback).
 		@param		outData				Specifies the vector to which data will be appended.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (std::vector<uint16_t> & outData) const;
+	virtual AJAStatus						GenerateTransmitData (std::vector<uint16_t> & outData);
 
 	/**
 		@brief		Generates the 32-bit IP packet words necessary for constructing an outgoing IP/RTP stream.
@@ -851,7 +851,7 @@ public:
 										The data will be in network byte order (big-endian).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (std::vector<uint32_t> & outData) const;
+	virtual AJAStatus						GenerateTransmitData (std::vector<uint32_t> & outData);
 	///@}
 
 
