@@ -3066,7 +3066,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 void KonaIP2110Services::printIpEnable(IpEnable2110 ipEnable)
 {
     printf("Id   %d\n", ipEnable.id);
-    printf("Sfp  %s   %s\n", (ipEnable.sfpEnable[0] == true) ? "on " : "off", (ipEnable.sfpEnable[1] == true) ? "on " : "off");
     printf("Tx   %s   %s   %s   %s\n", (ipEnable.txChEnable[0] == true) ? "on " : "off",
                                        (ipEnable.txChEnable[1] == true) ? "on " : "off",
                                        (ipEnable.txChEnable[2] == true) ? "on " : "off",
