@@ -1629,7 +1629,24 @@ bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream s
 
 string CNTV2Config2110::GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream stream)
 {
-    return "http://172.16.0.109/txch4v.sdp";
+    string localIPAddress, subnetMask, gateway;
+    string preAmble = "http://";
+    string namePre = "txch";
+    string namePost;
+
+    GetNetworkConfiguration(sfp, localIPAddress, subnetMask, gateway);
+
+    switch (stream)
+    {
+    case NTV2_VIDEO_STREAM:     namePost = "v.sdp";     break;
+    case NTV2_AUDIO1_STREAM:    namePost = "a1.sdp";    break;
+    case NTV2_AUDIO2_STREAM:    namePost = "a2.sdp";    break;
+    case NTV2_AUDIO3_STREAM:    namePost = "a3.sdp";    break;
+    case NTV2_AUDIO4_STREAM:    namePost = "a4.sdp";    break;
+    default:                    namePost = "";          break;
+    }
+
+    return preAmble + localIPAddress + "/" + namePre + std::to_string(chan+1) + namePost;
 }
 
 
