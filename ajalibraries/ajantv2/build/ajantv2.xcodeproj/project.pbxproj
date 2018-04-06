@@ -143,6 +143,8 @@
 		B41B5E8016E5330C00A9E0DC /* ntv2serialcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1916E5330C00A9E0DC /* ntv2serialcontrol.cpp */; };
 		B41B5E8116E5330C00A9E0DC /* ntv2serialcontrol.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */; };
 		B41B5E9716E537C600A9E0DC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41B5E9616E537C600A9E0DC /* IOKit.framework */; };
+		B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
+		B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B480B6441C6291E1003210EE /* ntv2hevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B480B6431C6291E1003210EE /* ntv2hevc.cpp */; };
 		B480B6451C6291E1003210EE /* ntv2hevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B480B6431C6291E1003210EE /* ntv2hevc.cpp */; };
 		B4940CA71AF1B23500189CAB /* ntv2devicefeatures.hh in Headers */ = {isa = PBXBuildFile; fileRef = B4940CA61AF1B23500189CAB /* ntv2devicefeatures.hh */; };
@@ -353,6 +355,7 @@
 		B42AA906182AA42500E0584A /* ntv2publicinterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2publicinterface.h; path = ../includes/ntv2publicinterface.h; sourceTree = SOURCE_ROOT; };
 		B42AA907182AA42500E0584A /* ntv2virtualregisters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2virtualregisters.h; path = ../includes/ntv2virtualregisters.h; sourceTree = SOURCE_ROOT; };
 		B42AA908182AA42500E0584A /* videodefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = videodefines.h; path = ../includes/videodefines.h; sourceTree = SOURCE_ROOT; };
+		B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hdmi.cpp; path = ../src/ntv2hdmi.cpp; sourceTree = SOURCE_ROOT; };
 		B480B6431C6291E1003210EE /* ntv2hevc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hevc.cpp; path = ../src/ntv2hevc.cpp; sourceTree = SOURCE_ROOT; };
 		B4940CA61AF1B23500189CAB /* ntv2devicefeatures.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ntv2devicefeatures.hh; path = ../includes/ntv2devicefeatures.hh; sourceTree = SOURCE_ROOT; };
 		B4A4507A1AA15583003AED85 /* ntv2devicefeatures.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ntv2devicefeatures.hpp; path = ../src/ntv2devicefeatures.hpp; sourceTree = SOURCE_ROOT; };
@@ -447,6 +450,7 @@
 				B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */,
 				B41B5DDA16E5330C00A9E0DC /* ntv2fltknetprefs.cpp */,
 				B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */,
+				B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */,
 				B480B6431C6291E1003210EE /* ntv2hevc.cpp */,
 				B41B5DDE16E5330C00A9E0DC /* ntv2interrupts.cpp */,
 				B40064E41CC9409400389528 /* ntv2konaflashprogram.cpp */,
@@ -791,6 +795,7 @@
 				B4CE1E2016E582A10092B564 /* ntv2rp188.cpp in Sources */,
 				B411E9431DDBDA0900B9E206 /* ntv2formatdescriptor.cpp in Sources */,
 				B4ACCA971C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
+				B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */,
 				B4CE1E2116E582A10092B564 /* ntv2rp215.cpp in Sources */,
 				B4CE1E2216E582A10092B564 /* ntv2status.cpp in Sources */,
 				8A6F1B0F1CBEE70C008A0557 /* ntv2configts2022.cpp in Sources */,
@@ -848,6 +853,7 @@
 				B41B5E5416E5330C00A9E0DC /* ntv2rp188.cpp in Sources */,
 				B411E9411DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp in Sources */,
 				B4ACCA961C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
+				B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */,
 				B41B5E5616E5330C00A9E0DC /* ntv2rp215.cpp in Sources */,
 				B41B5E5816E5330C00A9E0DC /* ntv2status.cpp in Sources */,
 				8A6F1B0E1CBEE70C008A0557 /* ntv2configts2022.cpp in Sources */,

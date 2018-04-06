@@ -4187,7 +4187,7 @@ public:
 	AJA_VIRTUAL bool		SetHDMIInColorSpace (NTV2HDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIInColorSpace (NTV2HDMIColorSpace * pOutValue)						{return pOutValue ? GetHDMIInColorSpace (*pOutValue) : false;}
-	AJA_VIRTUAL bool		SetHDMIOutColorSpace (NTV2HDMIColorSpace inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutColorSpace (NTV2HDMIColorSpace * pOutValue)						{return pOutValue ? GetHDMIOutColorSpace (*pOutValue) : false;}
 	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace inNewValue);
