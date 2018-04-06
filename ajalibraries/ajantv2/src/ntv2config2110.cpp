@@ -1646,7 +1646,7 @@ string CNTV2Config2110::GetTxSDPUrl(eSFP sfp, NTV2Channel chan, NTV2Stream strea
     default:                    namePost = "";          break;
     }
 
-    return preAmble + localIPAddress + "/" + namePre + std::to_string(chan+1) + namePost;
+    return preAmble + localIPAddress + "/" + namePre + To_String(chan+1) + namePost;
 }
 
 
