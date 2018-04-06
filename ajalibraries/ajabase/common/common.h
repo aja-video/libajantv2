@@ -18,7 +18,7 @@
 namespace aja
 {
 
-static const std::string WHITESPACE(" \t\n\r");
+static const std::string WHITESPACE;
 
 /**
  *	Replaces all occurrences of a substring within a string with a new string
