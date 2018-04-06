@@ -20,10 +20,7 @@
 #endif
 
 uint32_t CNTV2Config2110::v_packetizers[4] = {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4};
-uint32_t CNTV2Config2110::a_packetizers[16] ={SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
-                                              SAREK_3190_TX_PACKETIZER_4, SAREK_3190_TX_PACKETIZER_5, SAREK_3190_TX_PACKETIZER_6, SAREK_3190_TX_PACKETIZER_7,
-                                              SAREK_3190_TX_PACKETIZER_8, SAREK_3190_TX_PACKETIZER_9, SAREK_3190_TX_PACKETIZER_10,SAREK_3190_TX_PACKETIZER_11,
-                                              SAREK_3190_TX_PACKETIZER_12,SAREK_3190_TX_PACKETIZER_13,SAREK_3190_TX_PACKETIZER_14,SAREK_3190_TX_PACKETIZER_15};
+uint32_t CNTV2Config2110::a_packetizers[16] ={SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3};
 uint32_t CNTV2Config2110::m_packetizers[4] = {SAREK_ANC_TX_PACKETIZER_1,  SAREK_ANC_TX_PACKETIZER_2,  SAREK_ANC_TX_PACKETIZER_3,  SAREK_ANC_TX_PACKETIZER_4};
 
 using namespace std;
@@ -888,8 +885,8 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
 
         // audio select
         uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + (audioChans-1);
-        uint32_t offset  =  get2110TxStream(channel,stream) * 4;
-        mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset,aselect);
+        uint32_t offset  =  get2110TxStream(channel, stream) * 4;
+        mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset, aselect);
 
         // num samples
         mDevice.WriteRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, samples);
@@ -1012,7 +1009,7 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Channel channel, const 
         // audio select
         uint32_t offset  =  get2110TxStream(channel,stream) * 4;
         uint32_t aselect;
-        mDevice.ReadRegister(SAREK_2110_AUDIO_STREAMSELECT + offset,&aselect);
+        mDevice.ReadRegister(SAREK_2110_AUDIO_STREAMSELECT + offset, &aselect);
 
         txConfig.firstAudioChannel = (aselect >> 16) & 0xff;
         txConfig.numAudioChannels  = (aselect & 0xff) + 1;
@@ -1516,19 +1513,25 @@ void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x02);
 }
 
-uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch,NTV2Stream str)
+uint32_t CNTV2Config2110::get2110TxStream(NTV2Channel ch, NTV2Stream str)
 {
     // this stream number is a core 'channel' number
     uint32_t iStream = 0;
     switch (str)
     {
-		case NTV2_VIDEO_STREAM:			iStream = (uint32_t)ch;				break;
-		case NTV2_AUDIO1_STREAM:		iStream = (uint32_t)ch * 4;			break;
-		case NTV2_AUDIO2_STREAM:		iStream = ((uint32_t)ch * 4) + 1;	break;
-		case NTV2_AUDIO3_STREAM:		iStream = ((uint32_t)ch * 4) + 2;	break;
-		case NTV2_AUDIO4_STREAM:		iStream = ((uint32_t)ch * 4) + 3;	break;
-		case NTV2_METADATA_STREAM:		break;
-		case NTV2_MAX_NUM_STREAMS:		break;
+        case NTV2_VIDEO_STREAM:
+            iStream = ch;
+            break;
+        case NTV2_AUDIO1_STREAM:
+        case NTV2_AUDIO2_STREAM:
+        case NTV2_AUDIO3_STREAM:
+        case NTV2_AUDIO4_STREAM:
+            iStream = str - NTV2_AUDIO1_STREAM;
+            break;
+        case NTV2_METADATA_STREAM:
+            break;
+        case NTV2_MAX_NUM_STREAMS:
+            break;
     }
     return iStream;
 }
