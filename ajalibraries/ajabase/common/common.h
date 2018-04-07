@@ -12,13 +12,14 @@
 	#pragma warning(disable:4800)
 #endif
 
+#include "ajabase/common/export.h"
 #include "ajabase/common/public.h"
 #include "ajabase/system/debug.h"
 
 namespace aja
 {
 
-static const std::string WHITESPACE;
+static std::string WHITESPACE = " \t\n\r";
 
 /**
  *	Replaces all occurrences of a substring within a string with a new string
