@@ -375,7 +375,7 @@ void  CNTV2Config2110::DisableDepacketizerStream(NTV2Channel channel, NTV2Stream
     {
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x00);
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
     }
@@ -388,7 +388,7 @@ void  CNTV2Config2110::EnableDepacketizerStream(NTV2Channel channel, NTV2Stream 
     {
         mDevice.WriteRegister(kReg4175_depkt_control + depacketizerBaseAddr, 0x01);
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x01);
     }
@@ -503,8 +503,7 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, NTV2St
     {
         SetVideoFormatForRxTx(channel, (NTV2VideoFormat) rxConfig.videoFormat, true);
     }
-
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
         // setup 3190 depacketizer
         uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel,stream);
@@ -627,7 +626,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channe
         GetVideoFormatForRxTx(channel, format, hwFormat, true);
         rxConfig.videoFormat = format;
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
         uint32_t samples;
         mDevice.ReadRegister(kReg3190_depkt_config + depacketizerBaseAddr, &samples);
@@ -657,11 +656,9 @@ bool CNTV2Config2110::GetRxPacketCount(const NTV2Channel channel, NTV2Stream str
     {
         mDevice.ReadRegister(kReg4175_depkt_rx_pkt_cnt+ depacketizerBaseAddr, &packets);
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
-        // TODO:
-        // mDevice.ReadRegister(kReg3190_rx_byte_cnt + depacketizerBaseAddr, &packets);
-        packets = 0;
+        mDevice.ReadRegister(kReg3190_depkt_rx_pkt_count + depacketizerBaseAddr, &packets);
     }
 
     return true;
@@ -674,10 +671,10 @@ bool CNTV2Config2110::GetRxByteCount(const NTV2Channel channel, NTV2Stream strea
     {
         mDevice.ReadRegister(kReg4175_depkt_rx_byte_cnt+ depacketizerBaseAddr, &bytes);
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
-		// TODO: 
-		// mDevice.ReadRegister(kReg3190_rx_byte_cnt + depacketizerBaseAddr, &bytes);
+        // Bytes not packets, reg doesn't exist
+        //mDevice.ReadRegister(kReg3190_depkt_rx_pkt_count + depacketizerBaseAddr, &bytes);
 		bytes = 0;
     }
 
@@ -714,7 +711,7 @@ bool CNTV2Config2110::GetTxPacketCount(const NTV2Channel channel, NTV2Stream str
         mDevice.ReadRegister(kReg4175_pkt_tx_pkt_cnt + baseAddrPacketizer,&count);
         packets = count;
     }
-    else if (stream == NTV2_AUDIO1_STREAM)
+    else
     {
         // TODO:
         packets = 0;
@@ -1510,28 +1507,6 @@ void CNTV2Config2110::AcquireFramerControlAccess(uint32_t baseAddr)
 void CNTV2Config2110::ReleaseFramerControlAccess(uint32_t baseAddr)
 {
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x02);
-}
-
-bool  CNTV2Config2110::decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
-{
-    if (istream > 3)
-        return false;
-
-    ch  = (NTV2Channel)istream;
-    str = NTV2_VIDEO_STREAM;
-    return true;
-}
-
-bool  CNTV2Config2110::decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str)
-{
-    if (istream > 15)
-        return false;
-
-    int channel = istream / 4;
-    int stream  = istream - (channel * 4);
-    ch          = (NTV2Channel) channel;
-    str         = (NTV2Stream) (stream + NTV2_AUDIO1_STREAM);
-    return true;
 }
 
 bool CNTV2Config2110::GetMACAddress(eSFP port, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)

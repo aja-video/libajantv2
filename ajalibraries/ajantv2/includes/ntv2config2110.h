@@ -148,8 +148,6 @@ public:
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
-    static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
-    static bool      decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
 
     // If method returns false call this to get details
