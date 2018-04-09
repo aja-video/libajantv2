@@ -3167,9 +3167,8 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 	regValue = 0;
 	do
 	{
-		ULWord regValue = BIT(8);
+		regValue = BIT(8);
 		ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-		
 		if( !(regValue & BIT(8)) )
 		{
 			busy = false;
@@ -5462,7 +5461,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
         case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);							break;
         case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);							break;
         case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);							break;
-        case NTV2_INPUTSOURCE_ANALOG:	return GetAnalogInputVideoFormat ();									break;
+        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
 		default:						return NTV2_FORMAT_UNKNOWN;												break;
 	}
 }
@@ -9135,7 +9134,7 @@ bool CNTV2Card::GetMultiFormatMode (bool & outEnabled)
 
 bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	if (inRS422Parity == NTV2_RS422_NO_PARITY)
@@ -9167,7 +9166,7 @@ bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PA
 
 bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9188,7 +9187,7 @@ bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY &
 
 bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE inRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9212,7 +9211,7 @@ bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_R
 
 bool CNTV2Card::GetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);

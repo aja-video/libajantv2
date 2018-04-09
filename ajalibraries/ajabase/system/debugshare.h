@@ -142,7 +142,7 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_Unused_83                 = 83,
     AJA_DebugUnit_Unused_84                 = 84,
 
-    AJA_DebugUnit_Size						= 85,
+    AJA_DebugUnit_Size						= 85
 
 } AJADebugUnit;
 
