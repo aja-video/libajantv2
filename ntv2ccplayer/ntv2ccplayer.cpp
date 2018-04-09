@@ -1337,7 +1337,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		acOptionFlags |= AUTOCIRCULATE_WITH_ANC;
 	if (!mConfig.fSuppressTimecode)
 		acOptionFlags |= AUTOCIRCULATE_WITH_RP188;
-	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  ::NTV2DeviceCanDoLTCOutN (mDeviceID, 0))
+	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  ::NTV2DeviceGetNumLTCOutputs(mDeviceID))
 		acOptionFlags |= AUTOCIRCULATE_WITH_LTC;		//	Emit analog LTC if we "own" the device
 	mDevice.AutoCirculateStop (mOutputChannel);			//	Maybe some other app left this A/C channel running
 	if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fForceVanc)
@@ -1450,7 +1450,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 						if (acOptionFlags & AUTOCIRCULATE_WITH_LTC)
 						{
 							timecodes [NTV2_TCINDEX_LTC1] = tc;
-							if (::NTV2DeviceCanDoLTCOutN (mDeviceID, 1))
+							if (::NTV2DeviceGetNumLTCOutputs(mDeviceID) > 1)
 								timecodes [NTV2_TCINDEX_LTC2] = tc;
 						}
 						if (!NTV2_IS_QUAD_FRAME_FORMAT (mVideoFormat))

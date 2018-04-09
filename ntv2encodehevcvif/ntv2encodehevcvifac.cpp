@@ -600,7 +600,7 @@ AJAStatus NTV2EncodeHEVCVifAc::SetupVideo (void)
 AJAStatus NTV2EncodeHEVCVifAc::SetupAudio (void)
 {
     //	In multiformat mode, base the audio system on the channel...
-    if (mMultiStream && ::NTV2DeviceGetNumAudioStreams (mDeviceID) > 1 && UWord (mInputChannel) < ::NTV2DeviceGetNumAudioStreams (mDeviceID))
+    if (mMultiStream && ::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1 && UWord(mInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
 		mAudioSystem = ::NTV2ChannelToAudioSystem (mInputChannel);
 
 	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
