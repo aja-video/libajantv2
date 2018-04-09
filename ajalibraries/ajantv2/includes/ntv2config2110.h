@@ -148,7 +148,6 @@ public:
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
-    static uint32_t  get2110TxStream(NTV2Channel ch, NTV2Stream str );
     static bool      decompose2110TxVideoStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static bool      decompose2110TxAudioStream(uint32_t istream, NTV2Channel & ch, NTV2Stream & str);
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
@@ -158,7 +157,7 @@ public:
     NTV2IpError getLastErrorCode();
 
     static uint32_t v_packetizers[4];
-    static uint32_t a_packetizers[16];
+    static uint32_t a_packetizers[4];
     static uint32_t m_packetizers[4];
 
 protected:
