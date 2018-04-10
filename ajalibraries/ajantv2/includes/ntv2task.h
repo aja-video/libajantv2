@@ -20,9 +20,9 @@
 #include <sstream>
 
 /**
-	@deprecated	The AutoCirculate "task" facility is being phased out. Use the new AutoCirculate APIs.
+	@brief	The AutoCirculate "task" facility is deprecated. Use the new AutoCirculate APIs.
 **/
-class AJAExport NTV2_DEPRECATED CNTV2Task
+class AJAExport NTV2_DEPRECATED_CLASS CNTV2Task
 {
 public:
 
@@ -50,16 +50,16 @@ public:
 
 	#if !defined (NTV2_DEPRECATE)
 		// convert routing entries to register write tasks
-		AJA_VIRTUAL NTV2_DEPRECATED AutoCircGenericTask *	AddRoutingEntry (const NTV2RoutingEntry & inEntry);
-		AJA_VIRTUAL NTV2_DEPRECATED AutoCircGenericTask *	AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue);
-		AJA_VIRTUAL NTV2_DEPRECATED void					AddSignalRouting (const CNTV2SignalRouter & inRouter);
+		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddRoutingEntry (const NTV2RoutingEntry & inEntry));
+		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
+		NTV2_DEPRECATED(AJA_VIRTUAL void					AddSignalRouting (const CNTV2SignalRouter & inRouter));
 
 
-		AJA_VIRTUAL NTV2_DEPRECATED AutoCircGenericTask *	AddXena2Routing (const NTV2RoutingEntry & inEntry);
-		AJA_VIRTUAL NTV2_DEPRECATED AutoCircGenericTask *	AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue);
-		AJA_VIRTUAL NTV2_DEPRECATED void					CopyXena2Routing (const CNTV2SignalRouter * pInRouter);
+		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddXena2Routing (const NTV2RoutingEntry & inEntry));
+		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
+		NTV2_DEPRECATED(AJA_VIRTUAL void					CopyXena2Routing (const CNTV2SignalRouter * pInRouter));
 		// dump the task list to debug output
-		AJA_VIRTUAL NTV2_DEPRECATED void					DumpTaskList (void) const;
+		NTV2_DEPRECATED(AJA_VIRTUAL void					DumpTaskList (void) const);
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	// add time code write

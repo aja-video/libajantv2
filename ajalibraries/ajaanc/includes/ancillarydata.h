@@ -497,7 +497,7 @@ public:
 	/**
 		@deprecated	Use AppendPayload(const AJAAncillaryData &) instead.
 	**/
-	virtual inline AJAStatus				AppendPayload (const AJAAncillaryData * pInAncData)		{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
+	NTV2_DEPRECATED(virtual inline AJAStatus				AppendPayload (const AJAAncillaryData * pInAncData))	{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
 
 
 	/**
@@ -573,7 +573,7 @@ public:
 	/**
 		@deprecated	Use InitWithReceivedData(const uint8_t *, const uint32_t, const AJAAncillaryDataLocation &, uint32_t &) instead.
 	**/
-	virtual inline AJAStatus				InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation * pInLoc, uint32_t & outPacketByteCount)
+	NTV2_DEPRECATED(virtual inline AJAStatus				InitWithReceivedData (const uint8_t * pInData, const uint32_t inMaxBytes, const AJAAncillaryDataLocation * pInLoc, uint32_t & outPacketByteCount))
 	{
 		return pInLoc ? InitWithReceivedData (pInData, inMaxBytes, *pInLoc, outPacketByteCount) : AJA_STATUS_NULL;
 	}

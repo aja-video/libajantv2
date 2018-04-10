@@ -6657,7 +6657,7 @@ typedef enum
 					ULWord64			acCurrentUserCookie;			///< @brief	The frame's acInUserCookie value that was set at AutoCirculateTransfer time.
 																		///			This can tell clients which frame was on-air at the last VBI.
 					ULWord				acFrame;						///< @brief	Record/capture -- current frame number
-					NTV2_DEPRECATED	NTV2_RP188	acRP188;				///< @deprecated	Call GetInputTimeCode instead.
+					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call GetInputTimeCode instead.
 					///@}
 				NTV2_TRAILER		acTrailer;						///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -6870,8 +6870,8 @@ typedef enum
 					ULWord							acPeerToPeerFlags;			//// @brief	Used to control P2P transfers.
 					ULWord							acFrameRepeatCount;			///< @brief Intended for playout. The number of times to repeat the frame being transferred.
 					LWord							acDesiredFrame;				///< @brief	Used to specify a different frame in the circulate ring to transfer to/from.
-					NTV2_DEPRECATED	NTV2_RP188		acRP188;					///< @deprecated	Use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
-					NTV2_DEPRECATED	NTV2Crosspoint	acCrosspoint;				///< @deprecated	The SDK will set this field. It will eventually be obsolete.
+					NTV2_SHOULD_BE_DEPRECATED(NTV2_RP188		acRP188);		///< @brief	Will be deprecated -- use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
+					NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	acCrosspoint);	///< @brief	Will be deprecated -- used internally by the SDK. Will be removed when the driver changes to use NTV2Channel/NTV2Mode.
 					///@}
 				NTV2_TRAILER					acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -7141,7 +7141,7 @@ typedef enum
 				**/
 				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.acAudioTransferSize;}
 
-				NTV2_DEPRECATED inline ULWord			GetAudioByteCount (void) const					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
+				NTV2_DEPRECATED_INLINE inline ULWord	GetAudioByteCount (void) const					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
 
 				/**
 					@brief	Returns the number of actual ancillary data bytes that were transferred.

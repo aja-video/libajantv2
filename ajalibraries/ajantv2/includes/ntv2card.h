@@ -296,7 +296,7 @@ public:
 	**/
 	///@{
 	#if !defined (NTV2_DEPRECATE)
-		virtual NTV2_DEPRECATED	bool	SetBoard (UWord inDeviceIndex);		///< @deprecated	Use CNTV2DeviceScanner or Open(deviceIndex) instead.
+		NTV2_DEPRECATED(virtual bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use CNTV2DeviceScanner or Open(deviceIndex) instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
@@ -378,11 +378,11 @@ public:
 	AJA_VIRTUAL NTV2BreakoutType	GetBreakoutHardware (void);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED	inline NTV2BoardID	GetBoardID (void)				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
-		AJA_VIRTUAL NTV2_DEPRECATED	inline UWord		GetBoardNumber (void) const		{return GetIndexNumber ();}		///< @deprecated	Use GetIndexNumber instead.
-		AJA_VIRTUAL NTV2_DEPRECATED	NTV2BoardType		GetBoardType (void) const;										///< @deprecated	NTV2BoardType is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED	NTV2BoardSubType	GetBoardSubType (void);											///< @deprecated	NTV2BoardSubType is obsolete.
-		static NTV2_DEPRECATED		UWord				GetNumNTV2Boards (void);										///< @deprecated	Use CNTV2DeviceScanner instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE	inline NTV2BoardID	GetBoardID (void)				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE	inline UWord		GetBoardNumber (void) const		{return GetIndexNumber ();}		///< @deprecated	Use GetIndexNumber instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL	NTV2BoardType		GetBoardType (void) const);										///< @deprecated	NTV2BoardType is obsolete.
+		NTV2_DEPRECATED(AJA_VIRTUAL	NTV2BoardSubType	GetBoardSubType (void));											///< @deprecated	NTV2BoardSubType is obsolete.
+		NTV2_DEPRECATED(static		UWord				GetNumNTV2Boards (void));										///< @deprecated	Use CNTV2DeviceScanner instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
@@ -668,8 +668,8 @@ public:
 
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true);	///< @deprecated	Use DMARead instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMARead instead.
 
 		AJA_VIRTUAL NTV2_DEPRECATED bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
 														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true);	///< @deprecated	Use DMAWrite instead.
@@ -2310,13 +2310,13 @@ public:
 	**/
 	AJA_VIRTUAL bool	EnableRP188Bypass		(const NTV2Channel inChannel);
 
-		AJA_VIRTUAL NTV2_DEPRECATED inline bool	DisableRP188Bypass	(const NTV2Channel inChannel, const bool inBypassDisabled)
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	DisableRP188Bypass	(const NTV2Channel inChannel, const bool inBypassDisabled)
 									{(void) inBypassDisabled;  return DisableRP188Bypass (inChannel);}					///< @deprecated	Use DisableRP188Bypass(const NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetRP188Mode (NTV2Channel inChannel, NTV2_RP188Mode * pOutMode)
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetRP188Mode (NTV2Channel inChannel, NTV2_RP188Mode * pOutMode)
 									{return pOutMode ? GetRP188Mode (inChannel, *pOutMode) : false;}					///< @deprecated	Use GetRP188Mode(const NTV2Channel, NTV2_RP188Mode &) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetRP188Data (NTV2Channel inChannel, ULWord inFrame, RP188_STRUCT * pOutRP188Data)
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetRP188Data (NTV2Channel inChannel, ULWord inFrame, RP188_STRUCT * pOutRP188Data)
 									{return pOutRP188Data ? GetRP188Data (inChannel, inFrame, *pOutRP188Data) : false;}	///< @deprecated	Use GetRP188Mode(const NTV2Channel, const ULWord, RP188_STRUCT &) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetRP188Source (NTV2Channel inChannel, ULWord * pOutValue)
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetRP188Source (NTV2Channel inChannel, ULWord * pOutValue)
 									{return pOutValue ? GetRP188Source (inChannel, *pOutValue) : false;}				///< @deprecated	Use GetRP188Mode(const NTV2Channel, ULWord &) instead.
 	///@}
 
@@ -2580,244 +2580,244 @@ public:
 
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableVerticalInterrupt();					///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput2VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput3VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput4VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput5VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput6VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput7VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableOutput8VerticalInterrupt();			///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput1Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput2Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput3Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput4Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput5Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput6Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput7Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableInput8Interrupt();					///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableAudioInterrupt();						///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableAudioInWrapInterrupt();				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableAudioOutWrapInterrupt();				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableUartTxInterrupt();					///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableUart2TxInterrupt();					///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableUartRxInterrupt();					///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableUart2RxInterrupt();					///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableHDMIHotplugInterrupt();				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	EnableAuxVerticalInterrupt();				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableVerticalInterrupt(void));				///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput2VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput3VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput4VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput5VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput6VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput7VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableOutput8VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput1Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput2Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput3Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput4Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput5Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput6Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput7Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableInput8Interrupt(void));				///< @deprecated	Use EnableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableAudioInterrupt(void));				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableAudioInWrapInterrupt(void));			///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableAudioOutWrapInterrupt(void));			///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableUartTxInterrupt(void));				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableUart2TxInterrupt(void));				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableUartRxInterrupt(void));				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableUart2RxInterrupt(void));				///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableHDMIHotplugInterrupt(void));			///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	EnableAuxVerticalInterrupt(void));			///< @deprecated	Use EnableInterrupt(INTERRUPT_ENUMS) instead.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableVerticalInterrupt();					///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput2VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput3VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput4VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput5VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput6VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput7VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableOutput8VerticalInterrupt();			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput1Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput2Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput3Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput4Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput5Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput6Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput7Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableInput8Interrupt();					///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableAudioInterrupt();					///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableAudioInWrapInterrupt();				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableAudioOutWrapInterrupt();				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableUartTxInterrupt();					///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableUart2TxInterrupt();					///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableUartRxInterrupt();					///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableUart2RxInterrupt();					///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableHDMIHotplugInterrupt();				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	DisableAuxVerticalInterrupt();				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetCurrentInterruptMask (NTV2InterruptMask * outInterruptMask);		///< @deprecated	Use GetCurrentInterruptMasks instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableVerticalInterrupt(void));			///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput2VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput3VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput4VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput5VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput6VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput7VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableOutput8VerticalInterrupt(void));		///< @deprecated	Use DisableOutputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput1Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput2Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput3Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput4Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput5Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput6Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput7Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableInput8Interrupt(void));				///< @deprecated	Use DisableInputInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableAudioInterrupt(void));				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableAudioInWrapInterrupt(void));			///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableAudioOutWrapInterrupt(void));		///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableUartTxInterrupt(void));				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableUart2TxInterrupt(void));				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableUartRxInterrupt(void));				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableUart2RxInterrupt(void));				///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableHDMIHotplugInterrupt(void));			///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	DisableAuxVerticalInterrupt(void));			///< @deprecated	Use DisableInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetCurrentInterruptMask (NTV2InterruptMask * outInterruptMask));		///< @deprecated	Use GetCurrentInterruptMasks instead.
 
 		//	Subscribe to events
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutputVerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput2VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput3VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput4VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput5VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput6VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput7VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeOutput8VerticalEvent ();			///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput1VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput2VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput3VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput4VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput5VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput6VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput7VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeInput8VerticalEvent ();			///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeAudioInterruptEvent ();			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeAudioInWrapInterruptEvent ();		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeAudioOutWrapInterruptEvent ();		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeUartTxInterruptEvent ();			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeUartRxInterruptEvent ();			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeUart2TxInterruptEvent ();			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeUart2RxInterruptEvent ();			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeHDMIHotplugInterruptEvent ();		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeAuxVerticalInterruptEvent ();		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeDMA1InterruptEvent ();				///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeDMA2InterruptEvent ();				///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeDMA3InterruptEvent ();				///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeDMA4InterruptEvent ();				///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SubscribeChangeEvent();	// subscribe to get notified upon any Register changes
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutputVerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput2VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput3VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput4VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput5VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput6VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput7VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeOutput8VerticalEvent(void));		///< @deprecated	Use SubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput1VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput2VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput3VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput4VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput5VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput6VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput7VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeInput8VerticalEvent(void));		///< @deprecated	Use SubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeAudioInterruptEvent(void));		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeAudioInWrapInterruptEvent(void));	///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeAudioOutWrapInterruptEvent(void));	///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeUartTxInterruptEvent(void));		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeUartRxInterruptEvent(void));		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeUart2TxInterruptEvent(void));		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeUart2RxInterruptEvent(void));		///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeHDMIHotplugInterruptEvent(void));	///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeAuxVerticalInterruptEvent(void));	///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeDMA1InterruptEvent(void));			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeDMA2InterruptEvent(void));			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeDMA3InterruptEvent(void));			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeDMA4InterruptEvent(void));			///< @deprecated	Use SubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SubscribeChangeEvent(void));	// subscribe to get notified upon any Register changes
 
 		//	Unsubscribe from events
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutputVerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput2VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput3VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput4VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput5VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput6VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput7VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeOutput8VerticalEvent ();			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput1VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput2VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput3VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput4VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput5VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput6VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput7VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeInput8VerticalEvent ();			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeAudioInterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeAudioInWrapInterruptEvent ();	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeAudioOutWrapInterruptEvent ();	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeUartTxInterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeUartRxInterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeUart2TxInterruptEvent ();		///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeUart2RxInterruptEvent ();		///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeHDMIHotplugInterruptEvent ();	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeAuxVerticalInterruptEvent ();	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeDMA1InterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeDMA2InterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeDMA3InterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeDMA4InterruptEvent ();			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	UnsubscribeChangeEvent ();
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput2VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput3VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput4VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput5VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput6VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput7VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeOutput8VerticalEvent(void));			///< @deprecated	Use UnsubscribeOutputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput1VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput2VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput3VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput4VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput5VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput6VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput7VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeInput8VerticalEvent(void));			///< @deprecated	Use UnsubscribeInputVerticalEvent(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeAudioInterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeAudioInWrapInterruptEvent(void));	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeAudioOutWrapInterruptEvent(void));	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeUartTxInterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeUartRxInterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeUart2TxInterruptEvent(void));		///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeUart2RxInterruptEvent(void));		///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeHDMIHotplugInterruptEvent(void));	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeAuxVerticalInterruptEvent(void));	///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeDMA1InterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeDMA2InterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeDMA3InterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeDMA4InterruptEvent(void));			///< @deprecated	Use UnsubscribeEvent(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	UnsubscribeChangeEvent(void));
 
 		//	Get interrupt counts
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutputVerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput2VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput3VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput4VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput5VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput6VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput7VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput8VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput1VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput2VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput3VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput4VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput5VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput6VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput7VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput8VerticalInterruptCount (ULWord *pCount);		///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioInterruptCount (ULWord *pCount);				///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioInWrapInterruptCount (ULWord *pCount);			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioOutWrapInterruptCount (ULWord *pCount);			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAuxVerticalInterruptCount (ULWord *pCount);			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutputVerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput2VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput3VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput4VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput5VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput6VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput7VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput8VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetOutputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput1VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput2VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput3VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput4VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput5VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput6VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput7VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput8VerticalInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInputVerticalInterruptCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioInterruptCount (ULWord *pCount));			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioInWrapInterruptCount (ULWord *pCount));		///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioOutWrapInterruptCount (ULWord *pCount));	///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAuxVerticalInterruptCount (ULWord *pCount));		///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
 
 		//	Get event counts
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutputVerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput2VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput3VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput4VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput5VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput6VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput7VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetOutput8VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput1VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput2VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput3VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput4VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput5VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput6VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput7VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetInput8VerticalEventCount (ULWord *pCount);			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioInterruptEventCount (ULWord *pCount);			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioInWrapInterruptEventCount (ULWord *pCount);		///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAudioOutWrapInterruptEventCount (ULWord *pCount);	///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAuxVerticalEventCount (ULWord *pCount);				///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutputVerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput2VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput3VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput4VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput5VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput6VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput7VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetOutput8VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetOutputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput1VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput2VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput3VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput4VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput5VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput6VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput7VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetInput8VerticalEventCount (ULWord *pCount));			///< @deprecated	Use GetInputVerticalEventCount(ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioInterruptEventCount (ULWord *pCount));			///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioInWrapInterruptEventCount (ULWord *pCount));	///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAudioOutWrapInterruptEventCount (ULWord *pCount));	///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAuxVerticalEventCount (ULWord *pCount));				///< @deprecated	Use GetInterruptEventCount(INTERRUPT_ENUMS,ULWord&) instead.
 
 		//	Set event counts
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput2VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput3VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput4VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput5VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput6VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput7VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetOutput8VerticalEventCount (ULWord Count);			///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput1VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput2VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput3VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput4VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput5VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput6VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput7VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetInput8VerticalEventCount (ULWord Count);				///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAudioInterruptEventCount (ULWord Count);				///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAudioInWrapInterruptEventCount (ULWord Count);		///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAudioOutWrapInterruptEventCount (ULWord Count);		///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAuxVerticalEventCount (ULWord Count);				///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput2VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput3VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput4VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput5VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput6VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput7VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetOutput8VerticalEventCount (ULWord Count));		///< @deprecated	Use SetOutputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput1VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput2VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput3VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput4VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput5VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput6VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput7VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetInput8VerticalEventCount (ULWord Count));		///< @deprecated	Use SetInputVerticalEventCount(ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAudioInterruptEventCount (ULWord Count));		///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAudioInWrapInterruptEventCount (ULWord Count));	///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAudioOutWrapInterruptEventCount (ULWord Count));	///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAuxVerticalEventCount (ULWord Count));			///< @deprecated	Use SetInterruptEventCount(INTERRUPT_ENUMS,ULWord) instead.
 
 		//	Wait for event
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForVerticalInterrupt();								///< @deprecated	Use WaitForOutputVerticalInterrupt or WaitForInputVerticalInterrupt, as appropriate, instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput1VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput2VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput3VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput4VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput5VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput6VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput7VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput8VerticalInterrupt();						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForFieldID (NTV2FieldID fieldID);					///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput1FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput2FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput3FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput4FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput5FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput6FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput7FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForOutput8FieldID (NTV2FieldID fieldID);			///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput1FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput2FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput3FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput4FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput5FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput6FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput7FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput8FieldID (NTV2FieldID fieldID);				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput1Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput2Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput3Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput4Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput5Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput6Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput7Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForInput8Vertical();								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForAudioInterrupt();								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForAudioInWrapInterrupt();							///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForAudioOutWrapInterrupt();							///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForUartTxInterruptEvent(ULWord timeoutMS=15);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForUart2TxInterruptEvent(ULWord timeoutMS=15);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForUartRxInterruptEvent(ULWord timeoutMS=15);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForUart2RxInterruptEvent(ULWord timeoutMS=15);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForHDMIHotplugInterruptEvent(ULWord timeoutMS=15);	///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForAuxVerticalInterrupt();							///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForDMA1Interrupt();									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForDMA2Interrupt();									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForDMA3Interrupt();									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForDMA4Interrupt();									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForPushButtonChangeInterrupt(ULWord timeoutMS=200);	///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForLowPowerInterrupt(ULWord timeoutMS=1000);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForDisplayFIFOInterrupt(ULWord timeoutMS=1000);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForSATAChangeInterrupt(ULWord timeoutMS=200);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForTemp1HighInterrupt(ULWord timeoutMS=1000);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForTemp2HighInterrupt(ULWord timeoutMS=1000);		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForPowerButtonChangeInterrupt(ULWord timeoutMS=1000);	///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	WaitForChangeEvent();									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForVerticalInterrupt(void));							///< @deprecated	Use WaitForOutputVerticalInterrupt or WaitForInputVerticalInterrupt, as appropriate, instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput1VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput2VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput3VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput4VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput5VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput6VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput7VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput8VerticalInterrupt(void));						///< @deprecated	Use WaitForOutputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForFieldID (NTV2FieldID fieldID));						///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput1FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput2FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput3FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput4FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput5FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput6FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput7FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForOutput8FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForOutputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput1FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput2FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput3FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput4FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput5FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput6FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput7FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput8FieldID (NTV2FieldID fieldID));				///< @deprecated	Use WaitForInputFieldID(NTV2FieldID,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput1Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput2Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput3Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput4Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput5Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput6Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput7Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForInput8Vertical(void));								///< @deprecated	Use WaitForInputVerticalInterrupt(NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForAudioInterrupt(void));								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForAudioInWrapInterrupt(void));							///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForAudioOutWrapInterrupt(void));						///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForUartTxInterruptEvent(ULWord timeoutMS=15));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForUart2TxInterruptEvent(ULWord timeoutMS=15));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForUartRxInterruptEvent(ULWord timeoutMS=15));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForUart2RxInterruptEvent(ULWord timeoutMS=15));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForHDMIHotplugInterruptEvent(ULWord timeoutMS=15));		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForAuxVerticalInterrupt(void));							///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForDMA1Interrupt(void));								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForDMA2Interrupt(void));								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForDMA3Interrupt(void));								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForDMA4Interrupt(void));								///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForPushButtonChangeInterrupt(ULWord timeoutMS=200));	///< @deprecated	This function is obsolete.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForLowPowerInterrupt(ULWord timeoutMS=1000));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForDisplayFIFOInterrupt(ULWord timeoutMS=1000));		///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForSATAChangeInterrupt(ULWord timeoutMS=200));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForTemp1HighInterrupt(ULWord timeoutMS=1000));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForTemp2HighInterrupt(ULWord timeoutMS=1000));			///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForPowerButtonChangeInterrupt(ULWord timeoutMS=1000));	///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	WaitForChangeEvent(void));									///< @deprecated	Use WaitForInterrupt(INTERRUPT_ENUMS) instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
@@ -2881,8 +2881,8 @@ public:
 																		PAUTOCIRCULATE_TASK_STRUCT pTaskStruct = NULL);								///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_12_6 bool	SetAutoCirculateCaptureTask(NTV2Crosspoint channelSpec, PAUTOCIRCULATE_TASK_STRUCT pTaskStruct);	///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
 	#endif	//	!defined (NTV2_DEPRECATE_12_6)
-	AJA_VIRTUAL NTV2_DEPRECATED bool	GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FRAME_STAMP_STRUCT* pFrameStamp);		///< @deprecated	Use CNTV2Card::AutoCirculateGetFrame instead.
-	AJA_VIRTUAL NTV2_DEPRECATED bool	GetAutoCirculate (NTV2Crosspoint channelSpec, AUTOCIRCULATE_STATUS_STRUCT* autoCirculateStatus);	///< @deprecated	Use CNTV2Card::AutoCirculateGetStatus instead.
+	NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FRAME_STAMP_STRUCT* pFrameStamp));		///< @deprecated	Use CNTV2Card::AutoCirculateGetFrame instead.
+	NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAutoCirculate (NTV2Crosspoint channelSpec, AUTOCIRCULATE_STATUS_STRUCT* autoCirculateStatus));	///< @deprecated	Use CNTV2Card::AutoCirculateGetStatus instead.
 
 
 	/**
@@ -3294,7 +3294,7 @@ public:
     /**
         @brief			Reads the block of virtual data for a specific tag
         @param[in]		inTag               Tag for the virtual data.
-        @param[out]		inOutVirtualData    Virtual data buffer to be written
+        @param[out]		outVirtualData      Virtual data buffer to be written
         @param[in]		inVirtualDataSize   Virtual data size to read
         @return			True if all requested data was successfully read; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
@@ -3361,12 +3361,12 @@ public:
 	AJA_VIRTUAL bool	IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetChannel2Disable (bool value);								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetChannel2Disable (bool* value);								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetChannel3Disable (bool value);								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetChannel3Disable (bool* value);								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetChannel4Disable (bool value);								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetChannel4Disable (bool* value);								///< @deprecated	Use IsChannelEnabled instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetChannel2Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetChannel2Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetChannel3Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetChannel3Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetChannel4Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetChannel4Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL bool	SetVideoDACMode (NTV2VideoDACMode inValue);
@@ -3384,8 +3384,8 @@ public:
 	AJA_VIRTUAL bool	SetVideoVOffset (int vOffset);
 	AJA_VIRTUAL bool	GetVideoVOffset (int* vOffset);
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetVideoFinePhase (int fOffset);		///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetVideoFinePhase (int* fOffset);		///< @deprecated	This function is obsolete.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetVideoFinePhase (int fOffset));		///< @deprecated	This function is obsolete.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetVideoFinePhase (int* fOffset));		///< @deprecated	This function is obsolete.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL bool	SetAnalogOutHTiming (ULWord inValue);
@@ -3442,46 +3442,46 @@ public:
 	AJA_VIRTUAL bool	GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard & outValue);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetSDIOutStandard (const NTV2Standard value, const NTV2Channel channel = NTV2_CHANNEL1);	///< @deprecated	Use SetSDIOutputStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIOutStandard (NTV2Standard & outStandard, const NTV2Channel channel = NTV2_CHANNEL1);	///< @deprecated	Use GetSDIOutputStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIOutStandard (NTV2Standard* value, NTV2Channel channel);								///< @deprecated	Use GetSDIOutputStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI1OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI1OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI2OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI2OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI3OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI3OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI4OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI4OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI5OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI5OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI6OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI6OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI7OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI7OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI8OutStandard (NTV2Standard value);		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI8OutStandard (NTV2Standard* value);		///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetSDIOutStandard (const NTV2Standard value, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use SetSDIOutputStandard instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDIOutStandard (NTV2Standard & outStandard, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use GetSDIOutputStandard instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDIOutStandard (NTV2Standard* value, NTV2Channel channel));								///< @deprecated	Use GetSDIOutputStandard instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI1OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI1OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI2OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI2OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI3OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI3OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI4OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI4OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI5OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI5OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI6OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI6OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI7OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI7OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI8OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI8OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool	SetSDIOutVPID (const ULWord inValueA, const ULWord inValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI1OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI1OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI2OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI2OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI3OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI3OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI4OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI4OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI5OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI5OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI6OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI6OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI7OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI7OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2SDI8OutVPID(ULWord valueA, ULWord valueB = 0);			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2SDI8OutVPID(ULWord* valueA, ULWord* valueB = NULL);	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI1OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI1OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI2OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI2OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI3OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI3OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI4OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI4OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI5OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI5OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI6OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI6OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI7OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI7OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2SDI8OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2SDI8OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 
@@ -3532,14 +3532,14 @@ public:
 	///@}
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord value);						///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord *value);					///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2FrameSyncControlStandard (NTV2FrameSyncSelect select, NTV2Standard value);					///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2FrameSyncControlStandard (NTV2FrameSyncSelect select, NTV2Standard *value);				///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2FrameSyncControlGeometry (NTV2FrameSyncSelect select, NTV2FrameGeometry value);			///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2FrameSyncControlGeometry (NTV2FrameSyncSelect select, NTV2FrameGeometry *value);			///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetK2FrameSyncControlFrameFormat (NTV2FrameSyncSelect select, NTV2FrameBufferFormat value);		///< @deprecated	This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetK2FrameSyncControlFrameFormat (NTV2FrameSyncSelect select, NTV2FrameBufferFormat *value);	///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord value));					///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord *value));					///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2FrameSyncControlStandard (NTV2FrameSyncSelect select, NTV2Standard value));				///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2FrameSyncControlStandard (NTV2FrameSyncSelect select, NTV2Standard *value));				///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2FrameSyncControlGeometry (NTV2FrameSyncSelect select, NTV2FrameGeometry value));			///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2FrameSyncControlGeometry (NTV2FrameSyncSelect select, NTV2FrameGeometry *value));			///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetK2FrameSyncControlFrameFormat (NTV2FrameSyncSelect select, NTV2FrameBufferFormat value));	///< @deprecated	This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetK2FrameSyncControlFrameFormat (NTV2FrameSyncSelect select, NTV2FrameBufferFormat *value));	///< @deprecated	This SDK no longer supports the FS1.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
@@ -3742,12 +3742,12 @@ public:
 
 	AJA_VIRTUAL bool	GetSDIInput3GPresent (bool & outValue, const NTV2Channel channel);
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2VideoFormat GetInputVideoFormat (int inputNum, bool progressivePicture = false);	///< @deprecated	Use GetInputVideoFormat(NTV2InputSource...) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIInput3GPresent (bool* value, NTV2Channel channel);	///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI1Input3GPresent (bool* value);						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI2Input3GPresent (bool* value);						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI3Input3GPresent (bool* value);						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI4Input3GPresent (bool* value);						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL NTV2VideoFormat GetInputVideoFormat (int inputNum, bool progressivePicture = false));	///< @deprecated	Use GetInputVideoFormat(NTV2InputSource...) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDIInput3GPresent (bool* value, NTV2Channel channel));	///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI1Input3GPresent (bool* value));						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI2Input3GPresent (bool* value));						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI3Input3GPresent (bool* value));						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI4Input3GPresent (bool* value));						///< @deprecated	Use GetSDIInput3GPresent(bool&,NTV2Channel) instead.
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool	GetSDIInput3GbPresent (bool & outValue, const NTV2Channel channel);
@@ -3756,31 +3756,31 @@ public:
 	AJA_VIRTUAL bool	GetSDIInput12GPresent (bool & outValue, const NTV2Channel channel);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDIInput3GbPresent (bool* value, NTV2Channel channel);	///< @deprecated	Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI1Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI2Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI3Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetSDI4Input3GbPresent (bool* value);				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDIInput3GbPresent (bool* value, NTV2Channel channel));	///< @deprecated	Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI1Input3GbPresent (bool* value));				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI2Input3GbPresent (bool* value));				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI3Input3GbPresent (bool* value));				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetSDI4Input3GbPresent (bool* value));				///< @deprecated		Use GetSDIInput3GbPresent(bool&,NTV2Channel) instead.
 
 		// Kona/Xena LS specific
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLSVideoADCMode(NTV2LSVideoADCMode value);		///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetLSVideoADCMode(NTV2LSVideoADCMode* value);		///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLSVideoADCMode(NTV2LSVideoADCMode value));		///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetLSVideoADCMode(NTV2LSVideoADCMode* value));		///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetKLSInputSelect(NTV2InputSource value);			///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetKLSInputSelect(NTV2InputSource* value);			///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetKLSInputSelect(NTV2InputSource value));			///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetKLSInputSelect(NTV2InputSource* value));			///< @deprecated		The Kona/Xena LS is obsolete and unsupported.
 
 		// Kona/Xena LH specific
 		// Used to pick downconverter on inputs(sd bitfile only)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLHDownconvertInput(bool value);					///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetLHDownconvertInput(bool* value);					///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLHDownconvertInput(bool value));					///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetLHDownconvertInput(bool* value));					///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
 
 		// Used to pick downconverter on outputs(hd bitfile only)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLHSDIOutput1Select(NTV2LHOutputSelect value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetLHSDIOutput1Select(NTV2LHOutputSelect* value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLHSDIOutput2Select(NTV2LHOutputSelect value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetLHSDIOutput2Select(NTV2LHOutputSelect* value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLHAnalogOutputSelect(NTV2LHOutputSelect value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetLHAnalogOutputSelect(NTV2LHOutputSelect* value);	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLHSDIOutput1Select(NTV2LHOutputSelect value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetLHSDIOutput1Select(NTV2LHOutputSelect* value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLHSDIOutput2Select(NTV2LHOutputSelect value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetLHSDIOutput2Select(NTV2LHOutputSelect* value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLHAnalogOutputSelect(NTV2LHOutputSelect value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetLHAnalogOutputSelect(NTV2LHOutputSelect* value));	///< @deprecated		The Kona/Xena LH is obsolete and unsupported.
 	#endif	//	!NTV2_DEPRECATE
 
 #if !defined (NTV2_DEPRECATE)
@@ -3797,167 +3797,167 @@ public:
 		@note	This functionality is now performed automatically by the driver when AutoCirculate is initialized.
 		@note	This function will be deprecated in a future SDK.
 	**/
-	AJA_VIRTUAL NTV2_DEPRECATED bool	SetVideoOutputStandard (const NTV2Channel inChannel);				///< @deprecated	This function is obsolete.
+	NTV2_DEPRECATED(AJA_VIRTUAL bool	SetVideoOutputStandard (const NTV2Channel inChannel));				///< @deprecated	This function is obsolete.
 	// kRegXptSelectGroup1
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCompressionModInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCompressionModInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCompressionModInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCompressionModInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptConversionModInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptConversionModInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptConversionModInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptConversionModInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptColorSpaceConverterInputSelect	(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptColorSpaceConverterInputSelect	(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC1VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC1VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptLUTInputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT1Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptLUTInputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCompressionModInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCompressionModInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCompressionModInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCompressionModInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptConversionModInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptConversionModInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptConversionModInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptConversionModInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptColorSpaceConverterInputSelect	(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptColorSpaceConverterInputSelect	(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC1VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC1VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptLUTInputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT1Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptLUTInputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup2
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDuallinkOutInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDuallinkOutInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameSync2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameSync2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameSync2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameSync2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameSync1InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameSync1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameSync1InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameSync1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameBuffer1InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameBuffer1InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDuallinkOutInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDuallinkOutInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameSync2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameSync2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameSync2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameSync2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameSync1InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameSync1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameSync1InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameSync1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameBuffer1InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameBuffer1InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup3
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC1KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC1KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut1InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut1InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptAnalogOutInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptAnalogOutInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptAnalogOutInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptAnalogOutInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC1KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC1KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC1KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC1KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut1InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut1InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptAnalogOutInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptAnalogOutInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptAnalogOutInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptAnalogOutInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup4
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer1BGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1BGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer1BGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1BGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer1BGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1BGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer1BGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1BGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer1FGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1FGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer1FGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1FGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer1FGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1FGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer1FGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1FGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer1BGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1BGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer1BGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1BGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer1BGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1BGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer1BGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1BGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer1FGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1FGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer1FGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1FGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer1FGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer1FGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer1FGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer1FGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup5
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC2KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC2KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC2KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC2KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC2VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC2VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC2VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC2VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptLUT2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT2Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptLUT2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameBuffer2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameBuffer2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC2KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC2KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC2KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC2KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC2VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC2VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC2VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC2VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptLUT2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT2Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptLUT2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameBuffer2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameBuffer2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	//	kRegXptSelectGroup6
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptWaterMarkerInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptWaterMarker1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptWaterMarkerInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptWaterMarker1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptIICTInputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptIICT1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptIICTInputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptIICT1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptHDMIOutInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptHDMIOutInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSecondConverterInputSelect		(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptConversionMod2Input,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSecondConverterInputSelect		(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptConversionMod2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptWaterMarkerInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptWaterMarker1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptWaterMarkerInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptWaterMarker1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptIICTInputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptIICT1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptIICTInputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptIICT1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptHDMIOutInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptHDMIOutInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSecondConverterInputSelect		(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptConversionMod2Input,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSecondConverterInputSelect		(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptConversionMod2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	//	kRegXptSelectGroup7
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptWaterMarker2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptWaterMarker2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptWaterMarker2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptWaterMarker2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptIICT2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptIICT2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptIICT2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptIICT2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDuallinkOut2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDuallinkOut2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptWaterMarker2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptWaterMarker2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptWaterMarker2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptWaterMarker2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptIICT2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptIICT2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptIICT2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptIICT2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDuallinkOut2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDuallinkOut2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	//	kRegXptSelectGroup8
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut3InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut3Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut3InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut3Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut4InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut4Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut4InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut4Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut5InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut5Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut5InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut5Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut3InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut3Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut3InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut3Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut4InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut4Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut4InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut4Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut5InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut5Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut5InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut5Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	//	kRegXptSelectGroup9
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer2BGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2BGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer2BGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2BGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer2BGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2BGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer2BGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2BGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer2FGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2FGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer2FGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2FGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptMixer2FGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2FGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptMixer2FGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2FGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer2BGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2BGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer2BGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2BGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer2BGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2BGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer2BGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2BGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer2FGKeyInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2FGKeyInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer2FGKeyInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2FGKeyInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptMixer2FGVidInputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptMixer2FGVidInput,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptMixer2FGVidInputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptMixer2FGVidInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup10
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut1DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut1InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut1DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut1InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut2DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut2InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut2DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut2InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut1DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut1InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut1DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut1InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut2DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut2InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut2DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut2InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup11
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn1Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn1Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn1DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn1DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn1DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn1DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn2Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn2Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn2DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn2DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn2DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn2DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn1Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn1Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn1Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn1DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn1DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn1DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn1DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn2Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn2Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn2Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn2DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn2DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn2DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn2DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup12
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptLUT3InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT3Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptLUT3InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT3Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptLUT4InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT4Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptLUT4InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT4Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptLUT5InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT5Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptLUT5InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT5Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptLUT3InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT3Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptLUT3InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT3Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptLUT4InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT4Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptLUT4InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT4Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptLUT5InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptLUT5Input,				inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptLUT5InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptLUT5Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup13
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameBuffer3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameBuffer3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptFrameBuffer4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptFrameBuffer4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameBuffer3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameBuffer3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptFrameBuffer4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptFrameBuffer4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptFrameBuffer4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptFrameBuffer4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup14
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut3DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut3InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut3DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut3InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut4DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut4InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut4DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut4InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptSDIOut5DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut5InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptSDIOut5DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut5InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut3DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut3InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut3DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut3InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut4DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut4InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut4DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut4InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptSDIOut5DS2InputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptSDIOut5InputDS2,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptSDIOut5DS2InputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptSDIOut5InputDS2);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup15
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn3Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn3Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn3DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn3DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn3DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn3DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn4Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn4Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDualLinkIn4DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn4DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDualLinkIn4DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn4DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn3Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn3Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn3DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn3DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn3DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn3DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn4Select					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn4Select					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDualLinkIn4DSSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkIn4DSInput,	inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDualLinkIn4DSSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkIn4DSInput);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup16
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDuallinkOut3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDuallinkOut3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDuallinkOut4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDuallinkOut4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptDuallinkOut5InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut5Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptDuallinkOut5InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut5Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDuallinkOut3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDuallinkOut3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut3Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDuallinkOut4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDuallinkOut4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut4Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptDuallinkOut5InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptDualLinkOut5Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptDuallinkOut5InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptDualLinkOut5Input);}						///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup17
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC3VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC3VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC3VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC3VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC3KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC3KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC3KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC3KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC4VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC4VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC4VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC4VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC4KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC4KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC4KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC4KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC3VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC3VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC3VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC3VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC3KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC3KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC3KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC3KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC4VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC4VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC4VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC4VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC4KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC4KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC4KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC4KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup18
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC5VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC5VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC5VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC5VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptCSC5KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC5KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptCSC5KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC5KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC5VidInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC5VidInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC5VidInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC5VidInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptCSC5KeyInputSelect				(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptCSC5KeyInput,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptCSC5KeyInputSelect				(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptCSC5KeyInput);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup19
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXpt4KDCQ1InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXpt4KDCQ1InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXpt4KDCQ2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXpt4KDCQ2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXpt4KDCQ3InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ3Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXpt4KDCQ3InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ3Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXpt4KDCQ4InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ4Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXpt4KDCQ4InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ4Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXpt4KDCQ1InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ1Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXpt4KDCQ1InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ1Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXpt4KDCQ2InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ2Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXpt4KDCQ2InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ2Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXpt4KDCQ3InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ3Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXpt4KDCQ3InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ3Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXpt4KDCQ4InputSelect					(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_Xpt4KDCQ4Input,			inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXpt4KDCQ4InputSelect					(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_Xpt4KDCQ4Input);}								///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 	// kRegXptSelectGroup20
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptHDMIOutV2Q1InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptHDMIOutV2Q1InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptHDMIOutV2Q2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptHDMIOutV2Q2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptHDMIOutV2Q3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptHDMIOutV2Q3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ3Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	SetXptHDMIOutV2Q4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool	GetXptHDMIOutV2Q4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ4Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptHDMIOutV2Q1InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ1Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptHDMIOutV2Q1InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ1Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptHDMIOutV2Q2InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ2Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptHDMIOutV2Q2InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ2Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptHDMIOutV2Q3InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ3Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptHDMIOutV2Q3InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ3Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	SetXptHDMIOutV2Q4InputSelect			(const NTV2OutputCrosspointID inOutputXpt)		{return Connect (NTV2_XptHDMIOutQ4Input,		inOutputXpt);}		///< @deprecated	Use CNTV2Card::Connect or CNTV2Card::Disconnect instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	GetXptHDMIOutV2Q4InputSelect			(NTV2OutputCrosspointID * pOutOutputXpt)		{GETXPTMACRO	(NTV2_XptHDMIOutQ4Input);}							///< @deprecated	Use CNTV2Card::GetConnectedOutput instead.
 #endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
@@ -4076,7 +4076,7 @@ public:
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable);	///< @deprecated	Use the ApplySignalRoute call instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable));	///< @deprecated	Use the ApplySignalRoute call instead.
 	#endif	//	!NTV2_DEPRECATE
 	///@}
 
@@ -4272,13 +4272,13 @@ public:
 	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & outIsEnabled);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIV2OutVideoStandard (NTV2V2Standard * pOutValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIV2OutVideoStandard (NTV2V2Standard & outValue)	{return GetHDMIV2OutVideoStandard (&outValue);}	///< @deprecated	Use GetHDMIOutVideoStandard instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair * pOutValue, NTV2Channel * pOutChannel = NULL);		///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2Channel & outChannel);				///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect * pOutValue, NTV2Channel * pOutChannel = NULL);	///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
-		AJA_VIRTUAL NTV2_DEPRECATED bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2Channel & outChannel);			///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		GetHDMIV2OutVideoStandard (NTV2V2Standard * pOutValue);	///< @deprecated	Use GetHDMIOutVideoStandard instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE bool		GetHDMIV2OutVideoStandard (NTV2V2Standard & outValue)	{return GetHDMIV2OutVideoStandard (&outValue);}	///< @deprecated	Use GetHDMIOutVideoStandard instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair * pOutValue, NTV2Channel * pOutChannel = NULL));		///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2Channel & outChannel));				///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect * pOutValue, NTV2Channel * pOutChannel = NULL));	///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2Channel & outChannel));			///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
@@ -4337,131 +4337,131 @@ public:
 
 	#if !defined (NTV2_DEPRECATE)		////	FS1		////////////////////////////////////////
 		// Analog (FS1 / MOAB)
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2VideoFormat GetFS1AnalogCompositeInputVideoFormat();						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL NTV2VideoFormat GetFS1AnalogCompositeInputVideoFormat());						///< @deprecated		This SDK no longer supports the FS1.
 
 		// Reg 95 stuff
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1ReferenceSelect(NTV2FS1ReferenceSelect value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1ReferenceSelect(NTV2FS1ReferenceSelect *value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1ColorFIDSubcarrierReset(bool value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1ColorFIDSubcarrierReset(bool *value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1FreezeOutput(NTV2FS1FreezeOutput value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1FreezeOutput(NTV2FS1FreezeOutput *value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID value);				///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID *value);				///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID value);		///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID *value);		///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1ReferenceSelect(NTV2FS1ReferenceSelect value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1ReferenceSelect(NTV2FS1ReferenceSelect *value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1ColorFIDSubcarrierReset(bool value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1ColorFIDSubcarrierReset(bool *value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1FreezeOutput(NTV2FS1FreezeOutput value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1FreezeOutput(NTV2FS1FreezeOutput *value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID value));				///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID *value));				///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID value));		///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID *value));		///< @deprecated		This SDK no longer supports the FS1.
 
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioDelay(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1AudioDelay(int *value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetLossOfInput(ULWord value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioAnalogLevel(NTV2FS1AudioLevel value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1AudioAnalogLevel(NTV2FS1AudioLevel *value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioTone(NTV2FS1AudioTone value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1AudioTone(NTV2FS1AudioTone *value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1OutputTone(NTV2FS1OutputTone value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1OutputTone(NTV2FS1OutputTone *value);								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioDelay(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1AudioDelay(int *value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetLossOfInput(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioAnalogLevel(NTV2FS1AudioLevel value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1AudioAnalogLevel(NTV2FS1AudioLevel *value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioTone(NTV2FS1AudioTone value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1AudioTone(NTV2FS1AudioTone *value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1OutputTone(NTV2FS1OutputTone value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1OutputTone(NTV2FS1OutputTone *value));								///< @deprecated		This SDK no longer supports the FS1.
 
 		// Audio Channel Mapping registers
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch1(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch2(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch3(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch4(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch5(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch6(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch7(int value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioGain_Ch8(int value);											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch1(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch2(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch3(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch4(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch5(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch6(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch7(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioGain_Ch8(int value));											///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch1(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch2(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch3(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch4(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch5(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch6(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch7(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioPhase_Ch8(bool value);										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch1(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch2(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch3(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch4(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch5(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch6(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch7(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioPhase_Ch8(bool value));										///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch1(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch2(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch3(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch4(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch5(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch6(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch7(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioSource_Ch8(NTV2AudioChannelMapping value);					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch1(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch2(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch3(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch4(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch5(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch6(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch7(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioSource_Ch8(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch1(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch2(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch3(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch4(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch5(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch6(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch7(bool value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1AudioMute_Ch8(bool value);										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch1(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch2(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch3(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch4(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch5(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch6(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch7(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1AudioMute_Ch8(bool value));										///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1VideoDAC2Mode (NTV2K2VideoDACMode value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1VideoDAC2Mode (NTV2K2VideoDACMode* value);						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1VideoDAC2Mode (NTV2K2VideoDACMode value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1VideoDAC2Mode (NTV2K2VideoDACMode* value));						///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1ControlWrite(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C1ControlWrite(ULWord value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1ControlRead(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C1ControlRead(ULWord value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1ControlBusy(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1ControlError(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1Address(ULWord *value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C1Address(ULWord value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1SubAddress(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C1SubAddress(ULWord value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C1Data(ULWord *value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C1Data(ULWord value);											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1ControlWrite(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C1ControlWrite(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1ControlRead(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C1ControlRead(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1ControlBusy(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1ControlError(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1Address(ULWord *value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C1Address(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1SubAddress(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C1SubAddress(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C1Data(ULWord *value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C1Data(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2ControlWrite(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C2ControlWrite(ULWord value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2ControlRead(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C2ControlRead(ULWord value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2ControlBusy(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2ControlError(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2Address(ULWord *value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C2Address(ULWord value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2SubAddress(ULWord *value);									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C2SubAddress(ULWord value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1I2C2Data(ULWord *value);											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1I2C2Data(ULWord value);											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2ControlWrite(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C2ControlWrite(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2ControlRead(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C2ControlRead(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2ControlBusy(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2ControlError(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2Address(ULWord *value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C2Address(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2SubAddress(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C2SubAddress(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1I2C2Data(ULWord *value));											///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1I2C2Data(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1DownConvertAFDAutoEnable(bool value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1DownConvertAFDAutoEnable(bool* value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1SecondDownConvertAFDAutoEnable(bool value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1SecondDownConvertAFDAutoEnable(bool* value);						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1DownConvertAFDAutoEnable(bool value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1DownConvertAFDAutoEnable(bool* value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1SecondDownConvertAFDAutoEnable(bool value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1SecondDownConvertAFDAutoEnable(bool* value));						///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1DownConvertAFDDefaultHoldLast(bool value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1DownConvertAFDDefaultHoldLast(bool* value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetFS1SecondDownConvertAFDDefaultHoldLast(bool value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetFS1SecondDownConvertAFDDefaultHoldLast(bool* value);					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1DownConvertAFDDefaultHoldLast(bool value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1DownConvertAFDDefaultHoldLast(bool* value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetFS1SecondDownConvertAFDDefaultHoldLast(bool value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetFS1SecondDownConvertAFDDefaultHoldLast(bool* value));					///< @deprecated		This SDK no longer supports the FS1.
 
 		// Received AFD (Read-only)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDReceivedCode(ULWord* value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDReceivedAR(ULWord* value);										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDReceivedVANCPresent(bool* value);									///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDReceivedCode(ULWord* value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDReceivedAR(ULWord* value));										///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDReceivedVANCPresent(bool* value));									///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertMode_SDI1(NTV2AFDInsertMode value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertMode_SDI1(NTV2AFDInsertMode* value);						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertMode_SDI2(NTV2AFDInsertMode value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertMode_SDI2(NTV2AFDInsertMode* value);						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertMode_SDI1(NTV2AFDInsertMode value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertMode_SDI1(NTV2AFDInsertMode* value));						///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertMode_SDI2(NTV2AFDInsertMode value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertMode_SDI2(NTV2AFDInsertMode* value));						///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio* value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio value);					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio* value);					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio* value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio value));					///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio* value));					///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsert_SDI1(NTV2AFDInsertCode value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsert_SDI1(NTV2AFDInsertCode* value);							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsert_SDI2(NTV2AFDInsertCode value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsert_SDI2(NTV2AFDInsertCode* value);							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsert_SDI1(NTV2AFDInsertCode value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsert_SDI1(NTV2AFDInsertCode* value));							///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsert_SDI2(NTV2AFDInsertCode value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsert_SDI2(NTV2AFDInsertCode* value));							///< @deprecated		This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertLineNumber_SDI1(ULWord value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertLineNumber_SDI1(ULWord* value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	SetAFDInsertLineNumber_SDI2(ULWord value);								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED bool	GetAFDInsertLineNumber_SDI2(ULWord* value);								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertLineNumber_SDI1(ULWord value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertLineNumber_SDI1(ULWord* value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	SetAFDInsertLineNumber_SDI2(ULWord value));								///< @deprecated		This SDK no longer supports the FS1.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	GetAFDInsertLineNumber_SDI2(ULWord* value));								///< @deprecated		This SDK no longer supports the FS1.
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool	SetLHIVideoDACStandard(NTV2Standard value);
@@ -5000,8 +5000,8 @@ public:
 public:
 	#if !defined (NTV2_DEPRECATE)
 		// Functions for cards that support more than one bitfile
-		virtual NTV2_DEPRECATED bool			CheckBitfile(NTV2VideoFormat newValue = NTV2_FORMAT_UNKNOWN);	///< @deprecated	This function is obsolete.
-		static NTV2_DEPRECATED int				FormatCompare (NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);		///< @deprecated	This function is obsolete.
+		NTV2_DEPRECATED(virtual bool			CheckBitfile(NTV2VideoFormat newValue = NTV2_FORMAT_UNKNOWN));	///< @deprecated	This function is obsolete.
+		NTV2_DEPRECATED(static int				FormatCompare (NTV2VideoFormat fmt1, NTV2VideoFormat fmt2));		///< @deprecated	This function is obsolete.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
@@ -5031,7 +5031,7 @@ public:
 	AJA_VIRTUAL inline bool	GetRS422BaudRate (NTV2Channel inChannel, NTV2_RS422_BAUD_RATE * pOutRS422BaudRate)	{return pOutRS422BaudRate ? GetRS422BaudRate (inChannel, *pOutRS422BaudRate) : false;}
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED bool	ReadUartRxFifoSize (ULWord * pOutSizeInBytes);
+		NTV2_DEPRECATED(AJA_VIRTUAL bool	ReadUartRxFifoSize (ULWord * pOutSizeInBytes));
 	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
@@ -5112,17 +5112,17 @@ public:
 public:
 	#if !defined (NTV2_DEPRECATE)
 		//	These functions all came from the CNTV2Status module...
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2ButtonState GetButtonState (int buttonBit);														///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED inline Word		GetBoardVersion (void)								{return GetDeviceVersion ();}	///< @deprecated	Use GetDeviceVersion instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline void		GetBoardVersionString (std::string & outString)		{outString = GetDeviceVersionString ();}	///< @deprecated	Use GetDeviceVersionString instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline void		GetFPGAVersionString (std::string & outString, const NTV2XilinxFPGA inFPGA = eFPGAVideoProc)	{outString = GetFPGAVersionString (inFPGA);}	///< @deprecated	Use the GetFPGAVersionString function that returns a std::string instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline void		GetPCIFPGAVersionString (std::string & outString)	{outString = GetPCIFPGAVersionString ();}	///< @deprecated	Use the GetPCIFPGAVersionString function that returns a std::string instead.
-		AJA_VIRTUAL NTV2_DEPRECATED inline void		GetBootFPGAVersionString (std::string & outString)	{outString.clear ();}		///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED inline void		GetDriverVersionString (std::string & outString)	{outString = GetDriverVersionString ();}	///< @deprecated	Use the GetDriverVersionString function that returns a std::string instead.
-		AJA_VIRTUAL NTV2_DEPRECATED void			GetBoardIDString (std::string & outString);//			{outString = GetBoardIDString ();}	///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hexa string instead.
-		AJA_VIRTUAL NTV2_DEPRECATED std::string		GetBoardIDString (void);		///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hex string instead.
-		AJA_VIRTUAL NTV2_DEPRECATED bool			GetBitFileInformation (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr, NTV2XilinxFPGA inFPGA = eFPGAVideoProc);	///< @deprecated	This function is obsolete (from CNTV2Status).
-		AJA_VIRTUAL NTV2_DEPRECATED Word			GetFPGAVersion (const NTV2XilinxFPGA inFPGA = eFPGAVideoProc);			///< @deprecated	This function is obsolete (from CNTV2Status).
+		NTV2_DEPRECATED(AJA_VIRTUAL NTV2ButtonState GetButtonState (int buttonBit));														///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline Word		GetBoardVersion (void)								{return GetDeviceVersion ();}	///< @deprecated	Use GetDeviceVersion instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void		GetBoardVersionString (std::string & outString)		{outString = GetDeviceVersionString ();}	///< @deprecated	Use GetDeviceVersionString instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void		GetFPGAVersionString (std::string & outString, const NTV2XilinxFPGA inFPGA = eFPGAVideoProc)	{outString = GetFPGAVersionString (inFPGA);}	///< @deprecated	Use the GetFPGAVersionString function that returns a std::string instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void		GetPCIFPGAVersionString (std::string & outString)	{outString = GetPCIFPGAVersionString ();}	///< @deprecated	Use the GetPCIFPGAVersionString function that returns a std::string instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void		GetBootFPGAVersionString (std::string & outString)	{outString.clear ();}		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void		GetDriverVersionString (std::string & outString)	{outString = GetDriverVersionString ();}	///< @deprecated	Use the GetDriverVersionString function that returns a std::string instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL void			GetBoardIDString (std::string & outString));		///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hexa string instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL std::string		GetBoardIDString (void));		///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hex string instead.
+		NTV2_DEPRECATED(AJA_VIRTUAL bool			GetBitFileInformation (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr, NTV2XilinxFPGA inFPGA = eFPGAVideoProc));	///< @deprecated	This function is obsolete (from CNTV2Status).
+		NTV2_DEPRECATED(AJA_VIRTUAL Word			GetFPGAVersion (const NTV2XilinxFPGA inFPGA = eFPGAVideoProc));			///< @deprecated	This function is obsolete (from CNTV2Status).
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL std::string		GetFPGAVersionString (const NTV2XilinxFPGA inFPGA = eFPGAVideoProc);
@@ -5148,11 +5148,11 @@ public:
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////
 				//////////////////////////////////////////////////////////
-	AJA_VIRTUAL NTV2_DEPRECATED bool			GetInput1Autotimed (void);			//	DEPRECATION CANDIDATE
-	AJA_VIRTUAL NTV2_DEPRECATED bool			GetInput2Autotimed (void);			//	DEPRECATION CANDIDATE
-	AJA_VIRTUAL NTV2_DEPRECATED bool			GetAnalogInputAutotimed (void);		//	DEPRECATION CANDIDATE
-	AJA_VIRTUAL NTV2_DEPRECATED bool			GetHDMIInputAutotimed (void);		//	DEPRECATION CANDIDATE
-	AJA_VIRTUAL NTV2_DEPRECATED bool			GetInputAutotimed (int inInputNum);	//	DEPRECATION CANDIDATE
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInput1Autotimed (void));				//	DEPRECATION CANDIDATE
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInput2Autotimed (void));				//	DEPRECATION CANDIDATE
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetAnalogInputAutotimed (void));		//	DEPRECATION CANDIDATE
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetHDMIInputAutotimed (void));			//	DEPRECATION CANDIDATE
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInputAutotimed (int inInputNum));	//	DEPRECATION CANDIDATE
 
 	/**
 		@brief		Returns a string containing the decoded, human-readable device serial number.
@@ -5173,48 +5173,48 @@ public:
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2TestPattern			//////////////
 				//////////////////////////////////////////////////////////
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetChannel (NTV2Channel channel)									{_channel = channel;}				///< @deprecated	Originally in CNTV2TestPattern.
-    AJA_VIRTUAL NTV2_DEPRECATED inline NTV2Channel				GetChannel (void)													{return _channel;}					///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetSignalMask (UWord signalMask)									{_signalMask = signalMask & 0x7;}	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline UWord					GetSignalMask (void) const											{return _signalMask;}				///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetTestPatternFrameBufferFormat (NTV2FrameBufferFormat fbFormat)	{_fbFormat = fbFormat;}				///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline NTV2FrameBufferFormat	GetTestPatternFrameBufferFormat (void) const						{return _fbFormat;}					///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetDualLinkTestPatternOutputEnable (bool enable)					{_dualLinkOutputEnable = enable;}	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool						GetDualLinkTestPatternOutputEnable (void) const						{return _dualLinkOutputEnable;}		///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline const TestPatternList &	GetTestPatternList (void) const										{return _testPatternList;}			///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetChannel (NTV2Channel channel)									{_channel = channel;}				///< @deprecated	Originally in CNTV2TestPattern.
+    AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline NTV2Channel				GetChannel (void)													{return _channel;}					///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetSignalMask (UWord signalMask)									{_signalMask = signalMask & 0x7;}	///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline UWord						GetSignalMask (void) const											{return _signalMask;}				///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetTestPatternFrameBufferFormat (NTV2FrameBufferFormat fbFormat)	{_fbFormat = fbFormat;}				///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline NTV2FrameBufferFormat		GetTestPatternFrameBufferFormat (void) const						{return _fbFormat;}					///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetDualLinkTestPatternOutputEnable (bool enable)					{_dualLinkOutputEnable = enable;}	///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool						GetDualLinkTestPatternOutputEnable (void) const						{return _dualLinkOutputEnable;}		///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline const TestPatternList &	GetTestPatternList (void) const										{return _testPatternList;}			///< @deprecated	Originally in CNTV2TestPattern.
 
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetClientDownloadBuffer (ULWord * buffer)							{_clientDownloadBuffer = buffer;}	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline ULWord *					GetClientDownloadBuffer (void) const								{return _clientDownloadBuffer;}		///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetTestPatternDMAEnable (bool enable)								{_bDMAtoBoard = enable;}			///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool						GetTestPatternDMAEnable (void) const								{return _bDMAtoBoard; }				///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						EnableFlipFlipPage (bool enable)									{_flipFlopPage = enable;}			///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool						GetEnableFlipFlipPage (void) const									{return _flipFlopPage;}				///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline void						SetAutoRouteOnXena2 (bool autoRoute)								{_autoRouteOnXena2 = autoRoute;}	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED inline bool						GetAutoRouteOnXena2 (void) const									{return _autoRouteOnXena2;}			///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED bool							DownloadTestPattern (UWord testPatternNumber);						///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadTestPattern (char * testPatternName);						///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadBlackTestPattern (void);									///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadBorderTestPattern (void);									///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadSlantRampTestPattern (void);								///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadYCbCrSlantRampTestPattern (void);							///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							Download48BitRGBSlantRampTestPattern (void);						///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadVerticalSweepTestPattern (void);							///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadZonePlateTestPattern (void);								///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetClientDownloadBuffer (ULWord * buffer)							{_clientDownloadBuffer = buffer;}	///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline ULWord *					GetClientDownloadBuffer (void) const								{return _clientDownloadBuffer;}		///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetTestPatternDMAEnable (bool enable)								{_bDMAtoBoard = enable;}			///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool						GetTestPatternDMAEnable (void) const								{return _bDMAtoBoard; }				///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						EnableFlipFlipPage (bool enable)									{_flipFlopPage = enable;}			///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool						GetEnableFlipFlipPage (void) const									{return _flipFlopPage;}				///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline void						SetAutoRouteOnXena2 (bool autoRoute)								{_autoRouteOnXena2 = autoRoute;}	///< @deprecated	Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool						GetAutoRouteOnXena2 (void) const									{return _autoRouteOnXena2;}			///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool							DownloadTestPattern (UWord testPatternNumber));						///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadTestPattern (char * testPatternName));						///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadBlackTestPattern (void));									///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadBorderTestPattern (void));									///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadSlantRampTestPattern (void));								///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadYCbCrSlantRampTestPattern (void));							///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							Download48BitRGBSlantRampTestPattern (void));						///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadVerticalSweepTestPattern (void));							///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadZonePlateTestPattern (void));								///< @deprecated	Originally in CNTV2TestPattern.
 
-	AJA_VIRTUAL NTV2_DEPRECATED void							RenderTestPatternToBuffer (UWord testPatternNumber, ULWord * buffer);					///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED bool							RenderTestPatternBuffer (NTV2Channel channel, UByte * buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes);	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadTestPatternBuffer (ULWord * buffer, ULWord size = 0);							///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED ULWord							GetPatternBufferSize (ULWord * width = 0, ULWord * height = 0, ULWord * rowBytes = 0, ULWord * firstLine = 0);	///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							RenderTestPatternToBuffer (UWord testPatternNumber, ULWord * buffer));					///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool							RenderTestPatternBuffer (NTV2Channel channel, UByte * buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes));	///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							DownloadTestPatternBuffer (ULWord * buffer, ULWord size = 0));							///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL ULWord						GetPatternBufferSize (ULWord * width = 0, ULWord * height = 0, ULWord * rowBytes = 0, ULWord * firstLine = 0));	///< @deprecated	Originally in CNTV2TestPattern.
 	
-	AJA_VIRTUAL NTV2_DEPRECATED int								MakeSineWaveVideo (double radians, bool bChroma);										///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_DEPRECATED void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels);	///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL int							MakeSineWaveVideo (double radians, bool bChroma));										///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< @deprecated	Originally in CNTV2TestPattern.
 
 #ifdef AJAMac
-	AJA_VIRTUAL NTV2_DEPRECATED void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes);	///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_DEPRECATED(AJA_VIRTUAL void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< @deprecated	Originally in CNTV2TestPattern.
 #endif
 
 	//LocalLoadTestPattern allows the generator to build the pattern independent of global controls to generate independent formats when inconverter is on.
-	AJA_VIRTUAL NTV2_DEPRECATED void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard);		///< @deprecated	Originally in CNTV2TestPattern.
+	NTV2_DEPRECATED(AJA_VIRTUAL void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));		///< @deprecated	Originally in CNTV2TestPattern.
 
 	protected:	//	CNTV2TestPattern Data
 		void													InitNTV2TestPattern (void);														///< @deprecated	Originally in CNTV2TestPattern.
@@ -5238,118 +5238,75 @@ public:
 	public:		//////////	From CNTV2VidProc				//////////////
 				//////////////////////////////////////////////////////////
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetupDefaultVidProc (void);									///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				DisableVidProc (void);										///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetupDefaultVidProc (void));									///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				DisableVidProc (void));										///< @deprecated	Originally in CNTV2VidProc class.
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetCh1VidProcMode (NTV2Ch1VidProcMode vidProcMode);			///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Ch1VidProcMode	GetCh1VidProcMode (void);									///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetCh2OutputMode (NTV2Ch2OutputMode outputMode);			///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Ch2OutputMode	GetCh2OutputMode (void);									///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetCh1VidProcMode (NTV2Ch1VidProcMode vidProcMode));			///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Ch1VidProcMode	GetCh1VidProcMode (void));									///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetCh2OutputMode (NTV2Ch2OutputMode outputMode));			///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Ch2OutputMode	GetCh2OutputMode (void));									///< @deprecated	Originally in CNTV2VidProc class.
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetForegroundVideoCrosspoint (NTV2Crosspoint crosspoint);	///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetForegroundKeyCrosspoint (NTV2Crosspoint crosspoint);		///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetBackgroundVideoCrosspoint (NTV2Crosspoint crosspoint);	///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetBackgroundKeyCrosspoint (NTV2Crosspoint crosspoint);		///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Crosspoint		GetForegroundVideoCrosspoint (void);						///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Crosspoint		GetForegroundKeyCrosspoint (void);							///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Crosspoint		GetBackgroundVideoCrosspoint (void);						///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2Crosspoint		GetBackgroundKeyCrosspoint (void);							///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetForegroundVideoCrosspoint (NTV2Crosspoint crosspoint));	///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetForegroundKeyCrosspoint (NTV2Crosspoint crosspoint));		///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetBackgroundVideoCrosspoint (NTV2Crosspoint crosspoint));	///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetBackgroundKeyCrosspoint (NTV2Crosspoint crosspoint));		///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Crosspoint		GetForegroundVideoCrosspoint (void));						///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Crosspoint		GetForegroundKeyCrosspoint (void));							///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Crosspoint		GetBackgroundVideoCrosspoint (void));						///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2Crosspoint		GetBackgroundKeyCrosspoint (void));							///< @deprecated	Originally in CNTV2VidProc class.
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetSplitMode (NTV2SplitMode splitMode);						///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2SplitMode		GetSplitMode (void);										///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetSplitParameters (Fixed_ position, Fixed_ softness);		///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetSlitParameters (Fixed_ start, Fixed_ width);				///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetSplitMode (NTV2SplitMode splitMode));						///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL NTV2SplitMode		GetSplitMode (void));										///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetSplitParameters (Fixed_ position, Fixed_ softness));		///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetSlitParameters (Fixed_ start, Fixed_ width));				///< @deprecated	Originally in CNTV2VidProc class.
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetMixCoefficient (Fixed_ coefficient);						///< @deprecated	Originally in CNTV2VidProc class.
-		AJA_VIRTUAL NTV2_DEPRECATED Fixed_				GetMixCoefficient (void);									///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetMixCoefficient (Fixed_ coefficient));						///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL Fixed_				GetMixCoefficient (void));									///< @deprecated	Originally in CNTV2VidProc class.
 
-		AJA_VIRTUAL NTV2_DEPRECATED void				SetMatteColor (YCbCr10BitPixel ycbcrPixel);					///< @deprecated	Originally in CNTV2VidProc class.
+		NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL void				SetMatteColor (YCbCr10BitPixel ycbcrPixel));					///< @deprecated	Originally in CNTV2VidProc class.
 
 		#ifdef MSWindows
-			AJA_VIRTUAL NTV2_DEPRECATED void			SetMatteColor (COLORREF rgbColor);							///< @deprecated	Originally in CNTV2VidProc class.
+			NTV2_DEPRECATED(AJA_VIRTUAL void			SetMatteColor (COLORREF rgbColor));							///< @deprecated	Originally in CNTV2VidProc class.
 		#endif   
 
 		#ifdef AJALinux
-			AJA_VIRTUAL NTV2_DEPRECATED void			SetMatteColor (AJARgb rgbColor);							///< @deprecated	Originally in CNTV2VidProc class.
+			NTV2_DEPRECATED(AJA_VIRTUAL void			SetMatteColor (AJARgb rgbColor));							///< @deprecated	Originally in CNTV2VidProc class.
 		#endif
-
-
-				//////////////////////////////////////////////////////////
-	public:		//////////	From CNTV2ColorCorrection		//////////////
-				//////////////////////////////////////////////////////////
-#if 0
-		AJA_VIRTUAL NTV2_DEPRECATED bool		SetupColorCorrectionPointers (bool ajamac = AJA_RETAIL_DEFAULT);			///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetColorCorrectionEnable (bool enable);										///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		PingPongColorCorrectionTable (void);										///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetColorCorrectionValues (ColorCorrectionColor color,double gamma, double gain, double offset);	///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetColorCorrectionGamma (ColorCorrectionColor colorChoice,double gamma);	///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetColorCorrectionGain (ColorCorrectionColor colorChoice,double gain);		///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetColorCorrectionOffset (ColorCorrectionColor colorChoice,double offset);	///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-		AJA_VIRTUAL NTV2_DEPRECATED ULWord *	GetHWTableBaseAddress (ColorCorrectionColor colorChoice);					///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED UWord *		GetTableBaseAddress (ColorCorrectionColor colorChoice);						///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		BuildTables (void);															///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		TransferTablesToHardware (void);											///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-		// TransferTablesToBuffer
-		// ccBuffer needs to be 512*4*3 bytes long.
-		// This is suitable to pass to transferutocirculate
-		AJA_VIRTUAL NTV2_DEPRECATED void		TransferTablesToBuffer (ULWord* ccBuffer);									///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-		// Copy external LUTs (each double LUT[1024]) to/from internal buffers
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetTables(double *redLUT, double *greenLUT, double *blueLUT);				///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		GetTables(double *redLUT, double *greenLUT, double *blueLUT);				///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-		// Copy external LUTs (each double LUT[1024]) direct to/from hardware
-		AJA_VIRTUAL NTV2_DEPRECATED void		SetTablesToHardware  (double *redLUT, double *greenLUT, double *blueLUT);	///< @deprecated	Originally in CNTV2ColorCorrection class.
-		AJA_VIRTUAL NTV2_DEPRECATED void		GetTablesFromHardware (double *redLUT, double *greenLUT, double *blueLUT);	///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-	protected:  //	CNTV2ColorCorrection Data
-		void									InitNTV2ColorCorrection (void);												///< @deprecated	Originally in CNTV2ColorCorrection class.
-		void									FreeNTV2ColorCorrection (void);												///< @deprecated	Originally in CNTV2ColorCorrection class.
-
-		ULWord *		_pHWTableBaseAddress [NUM_COLORS];		//	On-board base address
-		UWord *			_pColorCorrectionTable [NUM_COLORS];	//	Tables for holding calculations
-		double			_Gamma [NUM_COLORS];
-		double			_Gain [NUM_COLORS];
-		double			_Offset [NUM_COLORS];
-		//NTV2Channel	_channel;	//	Also in CNTV2TestPattern
-#endif
 
 #endif	//	defined (NTV2_DEPRECATE)
 
 	//	These functions can't be deprecated until CNTV2VidProc and CNTV2TestPattern go away...
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteVideoProcessingControlCrosspoint (ULWord value)			{return WriteRegister (kRegVidProcXptControl, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadVideoProcessingControlCrosspoint (ULWord *value)			{return ReadRegister (kRegVidProcXptControl, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteSplitControl (ULWord value)								{return WriteRegister (kRegSplitControl, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadSplitControl (ULWord *value)								{return ReadRegister (kRegSplitControl, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteVideoProcessingControlCrosspoint (ULWord value)			{return WriteRegister (kRegVidProcXptControl, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadVideoProcessingControlCrosspoint (ULWord *value)			{return ReadRegister (kRegVidProcXptControl, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteSplitControl (ULWord value)								{return WriteRegister (kRegSplitControl, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadSplitControl (ULWord *value)								{return ReadRegister (kRegSplitControl, value);}
 
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteVideoProcessingControl (ULWord value)						{return WriteRegister (kRegVidProc1Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadVideoProcessingControl (ULWord *value)						{return ReadRegister (kRegVidProc1Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteVideoProcessing2Control (ULWord value)						{return WriteRegister (kRegVidProc2Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadVideoProcessing2Control (ULWord *value)						{return ReadRegister (kRegVidProc2Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteVideoProcessing3Control (ULWord value)						{return WriteRegister (kRegVidProc3Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadVideoProcessing3Control (ULWord *value)						{return ReadRegister (kRegVidProc3Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteVideoProcessing4Control (ULWord value)						{return WriteRegister (kRegVidProc4Control, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadVideoProcessing4Control (ULWord *value)						{return ReadRegister (kRegVidProc4Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteVideoProcessingControl (ULWord value)						{return WriteRegister (kRegVidProc1Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadVideoProcessingControl (ULWord *value)						{return ReadRegister (kRegVidProc1Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteVideoProcessing2Control (ULWord value)						{return WriteRegister (kRegVidProc2Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadVideoProcessing2Control (ULWord *value)						{return ReadRegister (kRegVidProc2Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteVideoProcessing3Control (ULWord value)						{return WriteRegister (kRegVidProc3Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadVideoProcessing3Control (ULWord *value)						{return ReadRegister (kRegVidProc3Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteVideoProcessing4Control (ULWord value)						{return WriteRegister (kRegVidProc4Control, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadVideoProcessing4Control (ULWord *value)						{return ReadRegister (kRegVidProc4Control, value);}
 
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteMixerCoefficient (ULWord value)							{return WriteRegister (kRegMixer1Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadMixerCoefficient (ULWord *value)							{return ReadRegister (kRegMixer1Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteMixer2Coefficient (ULWord value)							{return WriteRegister (kRegMixer2Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadMixer2Coefficient (ULWord *value)							{return ReadRegister (kRegMixer2Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteMixer3Coefficient (ULWord value)							{return WriteRegister (kRegMixer3Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadMixer3Coefficient (ULWord *value)							{return ReadRegister (kRegMixer3Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteMixer4Coefficient (ULWord value)							{return WriteRegister (kRegMixer4Coefficient, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadMixer4Coefficient (ULWord *value)							{return ReadRegister (kRegMixer4Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteMixerCoefficient (ULWord value)							{return WriteRegister (kRegMixer1Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadMixerCoefficient (ULWord *value)							{return ReadRegister (kRegMixer1Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteMixer2Coefficient (ULWord value)							{return WriteRegister (kRegMixer2Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadMixer2Coefficient (ULWord *value)							{return ReadRegister (kRegMixer2Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteMixer3Coefficient (ULWord value)							{return WriteRegister (kRegMixer3Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadMixer3Coefficient (ULWord *value)							{return ReadRegister (kRegMixer3Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteMixer4Coefficient (ULWord value)							{return WriteRegister (kRegMixer4Coefficient, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadMixer4Coefficient (ULWord *value)							{return ReadRegister (kRegMixer4Coefficient, value);}
 
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatteValue (ULWord value)								{return WriteRegister (kRegFlatMatteValue, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatteValue (ULWord *value)								{return ReadRegister (kRegFlatMatteValue, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatte2Value (ULWord value)								{return WriteRegister (kRegFlatMatte2Value, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte2Value (ULWord *value)								{return ReadRegister (kRegFlatMatte2Value, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatte3Value (ULWord value)								{return WriteRegister (kRegFlatMatte3Value, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte3Value (ULWord *value)								{return ReadRegister (kRegFlatMatte3Value, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatte4Value (ULWord value)								{return WriteRegister (kRegFlatMatte4Value, value);}
-	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte4Value (ULWord *value)								{return ReadRegister (kRegFlatMatte4Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteFlatMatteValue (ULWord value)								{return WriteRegister (kRegFlatMatteValue, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadFlatMatteValue (ULWord *value)								{return ReadRegister (kRegFlatMatteValue, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteFlatMatte2Value (ULWord value)								{return WriteRegister (kRegFlatMatte2Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadFlatMatte2Value (ULWord *value)								{return ReadRegister (kRegFlatMatte2Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteFlatMatte3Value (ULWord value)								{return WriteRegister (kRegFlatMatte3Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadFlatMatte3Value (ULWord *value)								{return ReadRegister (kRegFlatMatte3Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	WriteFlatMatte4Value (ULWord value)								{return WriteRegister (kRegFlatMatte4Value, value);}
+	AJA_VIRTUAL NTV2_DEPRECATED_INLINE inline bool	ReadFlatMatte4Value (ULWord *value)								{return ReadRegister (kRegFlatMatte4Value, value);}
 
 public:
 	/**

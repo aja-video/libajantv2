@@ -224,8 +224,8 @@ public:
 
     // Utility methods:
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED NTV2BoardType	GetCompileFlag (void);
-		virtual NTV2_DEPRECATED inline bool			BoardOpened (void) const		{ return IsOpen (); }
+		NTV2_DEPRECATED(AJA_VIRTUAL NTV2BoardType	GetCompileFlag (void));
+		virtual NTV2_DEPRECATED_INLINE inline bool			BoardOpened (void) const		{ return IsOpen (); }
 	#endif	//	!NTV2_DEPRECATE
 
 	/**
@@ -244,7 +244,7 @@ public:
 	virtual inline ULWord		GetAudioFrameBufferNumber (void) const				{ return (GetNumFrameBuffers () - 1); }
 	virtual inline ULWord		GetFrameBufferSize (void) const						{ return _ulFrameBufferSize; }
 
-	virtual NTV2_DEPRECATED bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo,  NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);	///< @deprecated	This function is obsolete.
+	virtual bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo,  NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);
 
 	virtual bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
 
@@ -252,7 +252,7 @@ public:
 
 	// Functions for cards that support more than one bitfile
 
-	virtual NTV2_DEPRECATED bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile)		{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
+	virtual inline NTV2_DEPRECATED_INLINE bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile)		{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual inline const char *	GetHostName (void) const							{ return _hostname.c_str (); }
@@ -267,7 +267,7 @@ public:
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 protected:
-	virtual NTV2_DEPRECATED bool			DisplayNTV2Error (const char * str)		{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
+	virtual inline NTV2_DEPRECATED_INLINE bool			DisplayNTV2Error (const char * str)		{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual bool				OpenRemote (UWord inDeviceIndex,
 											bool displayErrorMessage,
