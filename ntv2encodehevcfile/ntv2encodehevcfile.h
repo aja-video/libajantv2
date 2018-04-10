@@ -47,26 +47,17 @@ class NTV2EncodeHEVCFile
 											Defaults to "0" (first device found).
 			@param[in]	inChannel			Specifies the channel to use.
 											Defaults to NTV2_CHANNEL1.
+            @param[in]	inFilePath			Specifies the path to the file to be written.
+            @param[in]	inFrameWidth		Specifies the frame width to use, in pixels.
+            @param[in]	inFrameHeight		Specifies the frame height to use, in lines.
 			@param[in]	inM31Preset			Specifies the m31 preset to use.
 											Defaults to 8-bit 1280x720 5994p.
-            @param[in]	inPixelFormat		Specifies the pixel format to use.
-                                            Defaults to NTV2_FBF_10BIT_YCBCR_420PL2.
-            @param[in]	inQuadMode  		Specifies UHD mode.
-                                            Defaults to HD mode.
-            @param[in]	inAudioChannels		Specifies number of audio channels to write to AIFF file.
-                                            Defaults to 2 channels.
-            @param[in]	inTimeCodeBurn      Add timecode burn.
-                                            Defaults to no timecode burn.
-            @param[in]	inInfoData          Use picture and encoded information.
-                                            Defaults to no info data.
-            @param[in]	inMaxFrames			Specifies the maximum number of frames to capture.
-            								Defaults to 0xFFFFFFFF (unlimited).
         **/
 		NTV2EncodeHEVCFile (const std::string			inDeviceSpecifier	= "0",
 							const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-                            const std::string           fileName            = "",
-                            const uint32_t              frameWidth          = 0,
-                            const uint32_t              frameHeight         = 0,
+                            const std::string           inFilePath          = "",
+                            const uint32_t              inFrameWidth        = 0,
+                            const uint32_t              inFrameHeight       = 0,
 							const M31VideoPreset		inM31Preset			= M31PRESET);
 
         virtual					~NTV2EncodeHEVCFile ();
