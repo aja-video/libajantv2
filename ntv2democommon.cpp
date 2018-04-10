@@ -122,8 +122,8 @@ class DemoCommonInitializer
 			gString2VideoFormatMap.insert (String2VideoFormatPair ("hd",			NTV2_FORMAT_1080i_5994));
             gString2VideoFormatMap.insert (String2VideoFormatPair ("1080i",			NTV2_FORMAT_1080i_5994));
             gString2VideoFormatMap.insert (String2VideoFormatPair ("1080i50",	    NTV2_FORMAT_1080i_5000));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p",	        NTV2_FORMAT_1080p_5994));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p50",	    NTV2_FORMAT_1080p_5000));
+            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p",	        NTV2_FORMAT_1080p_5994_B));
+            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p50",	    NTV2_FORMAT_1080p_5000_B));
 
             gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd",			NTV2_FORMAT_4x1920x1080p_6000));
 			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd2398",		NTV2_FORMAT_4x1920x1080p_2398));
@@ -741,17 +741,17 @@ bool CNTV2DemoCommon::Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 								{NTV2_FORMAT_1080p_2500,		NTV2_FORMAT_4x1920x1080p_2500},
 								{NTV2_FORMAT_1080p_2997,		NTV2_FORMAT_4x1920x1080p_2997},
 								{NTV2_FORMAT_1080p_3000,		NTV2_FORMAT_4x1920x1080p_3000},
-								{NTV2_FORMAT_1080p_5000,		NTV2_FORMAT_4x1920x1080p_5000},
-								{NTV2_FORMAT_1080p_5994,		NTV2_FORMAT_4x1920x1080p_5994},
-								{NTV2_FORMAT_1080p_6000,		NTV2_FORMAT_4x1920x1080p_6000},
+								{NTV2_FORMAT_1080p_5000_B,		NTV2_FORMAT_4x1920x1080p_5000},
+								{NTV2_FORMAT_1080p_5994_B,		NTV2_FORMAT_4x1920x1080p_5994},
+								{NTV2_FORMAT_1080p_6000_B,		NTV2_FORMAT_4x1920x1080p_6000},
 								{NTV2_FORMAT_1080p_2K_2398,		NTV2_FORMAT_4x2048x1080p_2398},
 								{NTV2_FORMAT_1080p_2K_2400,		NTV2_FORMAT_4x2048x1080p_2400},
 								{NTV2_FORMAT_1080p_2K_2500,		NTV2_FORMAT_4x2048x1080p_2500},
 								{NTV2_FORMAT_1080p_2K_2997,		NTV2_FORMAT_4x2048x1080p_2997},
 								{NTV2_FORMAT_1080p_2K_3000,		NTV2_FORMAT_4x2048x1080p_3000},
-								{NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_4x2048x1080p_5000},
-								{NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_4x2048x1080p_5994},
-								{NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_4x2048x1080p_6000},
+								{NTV2_FORMAT_1080p_2K_5000_A,	NTV2_FORMAT_4x2048x1080p_5000},
+								{NTV2_FORMAT_1080p_2K_5994_A,	NTV2_FORMAT_4x2048x1080p_5994},
+								{NTV2_FORMAT_1080p_2K_6000_A,	NTV2_FORMAT_4x2048x1080p_6000},
 
 								{NTV2_FORMAT_1080p_5000_A,		NTV2_FORMAT_4x1920x1080p_5000},
 								{NTV2_FORMAT_1080p_5994_A,		NTV2_FORMAT_4x1920x1080p_5994},
