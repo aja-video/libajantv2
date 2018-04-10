@@ -1,5 +1,5 @@
 {
-    "protocol" : "2110",
+    "protocol":"2110",
     "PTPMaster":"172.16.0.201",
     "4KMode":"false",
     "sfps":[
@@ -16,28 +16,29 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "receive":[
+    "receiveVideo2110":[
         {
             "designator":"channel1",
-            "stream":"video",
             "sfp1SrcIPAddress":"172.16.144.1",
             "sfp1DestIPAddress":"239.20.45.31",
             "sfp1SrcPort":"5001",
             "sfp1DestPort":"3100",
-            "sfp1Filter":"0x14",
+            "sfp1Filter":"0x04",
             "sfp2SrcIPAddress":"172.16.144.2",
             "sfp2DestIPAddress":"239.20.45.32",
             "sfp2SrcPort":"5002",
             "sfp2DestPort":"3200",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "vlan":"1",
             "ssrc":"1234",
             "payload":"100",
             "videoFormat":"720p5994",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
-            "enable":"true"
-        },
+			"enable":"true"
+        }
+    ],
+    "receiveAudio2110":[
         {
             "designator":"channel1",
             "stream":"audio1",
@@ -45,12 +46,12 @@
             "sfp1DestIPAddress":"239.30.45.31",
             "sfp1SrcPort":"5001",
             "sfp1DestPort":"3100",
-            "sfp1Filter":"0x14",
+            "sfp1Filter":"0x04",
             "sfp2SrcIPAddress":"172.16.144.2",
             "sfp2DestIPAddress":"239.30.45.32",
             "sfp2SrcPort":"5002",
             "sfp2DestPort":"3200",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "vlan":"1",
             "ssrc":"1234",
             "payload":"101",
@@ -58,13 +59,12 @@
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
-            "enable":"true"
+			"enable":"true"
         }
     ],
-    "transmit":[
+    "transmitVideo2110":[
         {
             "designator":"channel3",
-            "stream":"video",
             "sfp1RemoteIPAddress":"239.20.45.21",
             "sfp1RemotePort":"2100",
             "sfp1LocalPort":"5001",
@@ -76,8 +76,11 @@
             "ssrc":"1000",
             "ttl":"64",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
-        },
+            "sfp2Enable":"false",
+			"enable":"true"
+        }
+    ],
+    "transmitAudio2110":[
         {
             "designator":"channel3",
             "stream":"audio1",
@@ -94,7 +97,8 @@
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         }
     ]
 }

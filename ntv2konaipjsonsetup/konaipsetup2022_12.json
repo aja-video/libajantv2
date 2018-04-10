@@ -7,7 +7,7 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "transmit":[
+    "transmit2022":[
         {
             "designator":"channel1",
             "sfp1RemoteIPAddress":"239.0.45.15",
