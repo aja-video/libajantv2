@@ -17,7 +17,7 @@
 
 using namespace std;
 
-bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<uint8_t> &dataRead, bool verbose = false)
+static bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<uint8_t> &dataRead, bool verbose = false)
 {
     bool result = false;
 
@@ -100,7 +100,7 @@ inline bool has_4k_start_sectors(const uint32_t reportedSectorSize)
         return false;
 }
 
-uint32_t size_for_sector_number(const uint32_t reportedSectorSize, const uint32_t sector)
+static uint32_t size_for_sector_number(const uint32_t reportedSectorSize, const uint32_t sector)
 {
     if (has_4k_start_sectors(reportedSectorSize) && sector < 32)
         return 4 * 1024;
@@ -108,7 +108,7 @@ uint32_t size_for_sector_number(const uint32_t reportedSectorSize, const uint32_
         return reportedSectorSize;
 }
 
-uint32_t erase_cmd_for_sector(const uint32_t reportedSectorSize, const uint32_t sector)
+static uint32_t erase_cmd_for_sector(const uint32_t reportedSectorSize, const uint32_t sector)
 {
     if (has_4k_start_sectors(reportedSectorSize) && sector < 32)
         return CYPRESS_FLASH_SECTOR4K_ERASE_COMMAND; // 4P4E command, 4byte
@@ -116,7 +116,7 @@ uint32_t erase_cmd_for_sector(const uint32_t reportedSectorSize, const uint32_t 
         return CYPRESS_FLASH_SECTOR_ERASE_COMMAND; // 4SE command,  4byte
 }
 
-uint32_t sector_for_address(uint32_t sectorSizeBytes, uint32_t address)
+static uint32_t sector_for_address(uint32_t sectorSizeBytes, uint32_t address)
 {
     if (sectorSizeBytes == 0)
         return 0;
@@ -143,7 +143,7 @@ uint32_t sector_for_address(uint32_t sectorSizeBytes, uint32_t address)
     return sector;
 }
 
-uint32_t address_for_sector(uint32_t sectorSizeBytes, uint32_t sector)
+static uint32_t address_for_sector(uint32_t sectorSizeBytes, uint32_t sector)
 {
     uint32_t address=0;
     if (has_4k_start_sectors(sectorSizeBytes))
@@ -436,7 +436,7 @@ bool CNTV2AxiSpiFlash::Erase(const uint32_t address, uint32_t bytes)
             // enable write
             SpiEnableWrite(true);
 
-            vector<uint8_t> dummyInput;
+            //vector<uint8_t> dummyInput;
             SpiTransfer(commandSequence2, dummyInput, dummyOutput, bytes);
             wait_for_flash_status_ready();
 
