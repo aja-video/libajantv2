@@ -2676,7 +2676,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 			else
 			{
 				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-				if ( _fbFormat == NTV2_FBF_8BIT_YCBCR_YUY2 || _fbFormat == NTV2_FBF_8BIT_QREZ)
+				if ( _fbFormat == NTV2_FBF_8BIT_YCBCR_YUY2)
 					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
 			}
 
