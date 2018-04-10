@@ -672,43 +672,46 @@ unsigned NTV2CCGrabber::ExtractClosedCaptionData (const NTV2VideoFormat inVideoF
 	if (!mForceVanc)					//	::NTV2DeviceCanDoCustomAnc (mDeviceID))
 	{
 		//	See what's in the AUTOCIRCULATE_TRANSFER's F1 & F2 anc buffers...
-		AJAAncillaryList	ancPacketsF1, ancPacketsF2;
-		ancPacketsF1.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
-		ancPacketsF2.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
-		ancPacketsF1.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCBuffer.GetHostPointer (), mInputXferInfo.acANCBuffer.GetByteCount ());
-		ancPacketsF2.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCField2Buffer.GetHostPointer (), mInputXferInfo.acANCField2Buffer.GetByteCount ());
-		ancPacketsF1.ParseAllAncillaryData ();
-		ancPacketsF2.ParseAllAncillaryData ();
+		AJAAncillaryList	ancPackets;
+		ancPackets.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
+		ancPackets.SetAnalogAncillaryDataTypeForLine (284, AJAAncillaryDataType_Cea608_Line21);
+		if (NTV2_DEVICE_SUPPORTS_SMPTE2022(mDeviceID))
+			AJAAncillaryList::SetFromIPAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
+		else
+		{
+			ancPackets.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCBuffer.GetHostPointer(), mInputXferInfo.acANCBuffer.GetByteCount());
+			ancPackets.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCField2Buffer.GetHostPointer(), mInputXferInfo.acANCField2Buffer.GetByteCount());
+		}
+		ancPackets.ParseAllAncillaryData ();
 
-		if (ancPacketsF1.CountAncillaryDataWithType (AJAAncillaryDataType_Cea708))
+		if (ancPackets.CountAncillaryDataWithType(AJAAncillaryDataType_Cea708))
 		{
-			AJAAncillaryData	ancCEA708DataIn	(ancPacketsF1.GetAncillaryDataWithType (AJAAncillaryDataType_Cea708));
-			if (ancCEA708DataIn.GetPayloadData () && ancCEA708DataIn.GetPayloadByteCount ())
-				gotCaptionPacket = m708Decoder->SetSMPTE334AncData (ancCEA708DataIn.GetPayloadData (), ancCEA708DataIn.GetPayloadByteCount ());
-			//if (gotCaptionPacket)	oss << "Using F1 AJAAnc CEA708 packet(s)";
+			AJAAncillaryData	ancCEA708DataIn	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea708));
+			if (ancCEA708DataIn.GetPayloadData() && ancCEA708DataIn.GetPayloadByteCount())
+				gotCaptionPacket = m708Decoder->SetSMPTE334AncData (ancCEA708DataIn.GetPayloadData(), ancCEA708DataIn.GetPayloadByteCount());
+			if (gotCaptionPacket)	oss << "Using F1 AJAAnc CEA708 packet(s)";
 		}
-		if (ancPacketsF1.CountAncillaryDataWithType (AJAAncillaryDataType_Cea608_Vanc))
+		if (!gotCaptionPacket  &&  ancPackets.CountAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc))
 		{
-			AJAAncillaryData	ancCEA608DataIn	(ancPacketsF1.GetAncillaryDataWithType (AJAAncillaryDataType_Cea608_Vanc));
-			if (ancCEA608DataIn.GetPayloadData () && ancCEA608DataIn.GetPayloadByteCount ())
-				gotCaptionPacket = m708Decoder->SetSMPTE334AncData (ancCEA608DataIn.GetPayloadData (), ancCEA608DataIn.GetPayloadByteCount ());
-			//if (gotCaptionPacket)	oss << "Using F1 AJAAnc CEA608 packet(s)";
+			AJAAncillaryData	ancCEA608DataIn	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc));
+			if (ancCEA608DataIn.GetPayloadData () && ancCEA608DataIn.GetPayloadByteCount())
+				gotCaptionPacket = m708Decoder->SetSMPTE334AncData (ancCEA608DataIn.GetPayloadData(), ancCEA608DataIn.GetPayloadByteCount());
+			if (gotCaptionPacket)	oss << "Using F1 AJAAnc CEA608 packet(s)";
 		}
-		if (ancPacketsF1.CountAncillaryDataWithType (AJAAncillaryDataType_Cea608_Line21))
+		if (!gotCaptionPacket  &&  ancPackets.CountAncillaryDataWithType(AJAAncillaryDataType_Cea608_Line21))
 		{
-			AJAAncillaryData_Cea608_Line21	ancEIA608DataIn	(ancPacketsF1.GetAncillaryDataWithType (AJAAncillaryDataType_Cea608_Line21));
-			if (AJA_SUCCESS (ancEIA608DataIn.ParsePayloadData ()))
-				if (AJA_SUCCESS (ancEIA608DataIn.GetCEA608Bytes (captionData.f1_char1, captionData.f1_char2, captionData.bGotField1Data)))
+			AJAAncillaryData_Cea608_Line21	ancEIA608DataIn	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Line21, 0));
+			if (AJA_SUCCESS (ancEIA608DataIn.ParsePayloadData()))
+				if (AJA_SUCCESS (ancEIA608DataIn.GetCEA608Bytes(captionData.f1_char1, captionData.f1_char2, captionData.bGotField1Data)))
 					gotCaptionPacket = true;
-			//if (gotCaptionPacket)	oss << "Using F1 AJAAnc EIA608 packet(s)";
-		}
-		if (ancPacketsF2.CountAncillaryDataWithType (AJAAncillaryDataType_Cea608_Line21))
-		{
-			AJAAncillaryData_Cea608_Line21	ancEIA608DataIn	(ancPacketsF2.GetAncillaryDataWithType (AJAAncillaryDataType_Cea608_Line21));
-			if (AJA_SUCCESS (ancEIA608DataIn.ParsePayloadData ()))
-				if (AJA_SUCCESS (ancEIA608DataIn.GetCEA608Bytes (captionData.f2_char1, captionData.f2_char2, captionData.bGotField2Data)))
-					gotCaptionPacket = true;
-			//if (gotCaptionPacket)	oss << "Using F2 AJAAnc EIA608 packet(s)";
+			if (gotCaptionPacket)	oss << "Using F1 AJAAnc EIA608 packet(s)";
+			if (ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Line21, 1))
+			{
+				AJAAncillaryData_Cea608_Line21	ancEIA608F2	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Line21, 1));
+				if (AJA_SUCCESS (ancEIA608F2.ParsePayloadData()))
+				if (AJA_SUCCESS (ancEIA608F2.GetCEA608Bytes (captionData.f2_char1, captionData.f2_char2, captionData.bGotField2Data)))
+					oss << "Using F2 AJAAnc EIA608 packet(s)";
+			}
 		}
 	}	//	if able to use Anc buffers
 
