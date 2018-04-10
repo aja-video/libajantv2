@@ -27,13 +27,13 @@ typedef map <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCList;
 typedef ChannelToPerFrameTCList::const_iterator		ChannelToPerFrameTCListConstIter;
 typedef pair <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCListPair;
 
-std::string makeHeader(std::ostringstream& oss, const std::string& name)
+static std::string makeHeader(std::ostringstream& oss, const std::string& name)
 {
     oss << setfill('=') << setw(96) << " " << name << ":" << setfill(' ') << endl << endl;
     return oss.str();
 }
 
-std::string timecodeToString(const NTV2_RP188 & inRP188)
+static std::string timecodeToString(const NTV2_RP188 & inRP188)
 {
     ostringstream oss;
     if (inRP188.IsValid())
@@ -49,7 +49,7 @@ std::string timecodeToString(const NTV2_RP188 & inRP188)
     return oss.str();
 }
 
-std::string appSignatureToString(const ULWord inAppSignature)
+static std::string appSignatureToString(const ULWord inAppSignature)
 {
     ostringstream oss;
     const string sigStr	(NTV2_4CC_AS_STRING (inAppSignature));
@@ -62,7 +62,7 @@ std::string appSignatureToString(const ULWord inAppSignature)
     return oss.str();
 }
 
-std::string pidToString(const uint32_t inPID)
+static std::string pidToString(const uint32_t inPID)
 {
     ostringstream	oss;
     #if defined (MSWindows)
@@ -110,14 +110,14 @@ static uint32_t maxSampleCountForNTV2AudioBufferSize (const NTV2AudioBufferSize 
     return 0;
 }
 
-NTV2VideoFormat getVideoFormat(CNTV2Card& device, const NTV2Channel inChannel)
+static NTV2VideoFormat getVideoFormat(CNTV2Card& device, const NTV2Channel inChannel)
 {
     NTV2VideoFormat	result(NTV2_FORMAT_UNKNOWN);
     device.GetVideoFormat(result, inChannel);
     return result;
 }
 
-ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+static ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
 {
     ULWord result(0);
     if (NTV2_IS_OUTPUT_MODE (mode))
@@ -127,25 +127,25 @@ ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioSystem, 
     return result;
 }
 
-ULWord getNumAudioChannels(CNTV2Card& device, NTV2AudioSystem audioSystem)
+static ULWord getNumAudioChannels(CNTV2Card& device, NTV2AudioSystem audioSystem)
 {
     ULWord numChannels = 1;
     device.GetNumberAudioChannels(numChannels, audioSystem);
     return numChannels;
 }
 
-ULWord bytesToSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, const ULWord inBytes)
+static ULWord bytesToSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, const ULWord inBytes)
 {
     return inBytes / sizeof (uint32_t) / getNumAudioChannels(device, audioSystem);
 }
 
-ULWord getCurrentPositionSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+static ULWord getCurrentPositionSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
 {
     ULWord bytes = readCurrentAudioPosition(device, audioSystem, mode);
     return bytesToSamples(device, audioSystem, bytes);
 }
 
-ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
+static ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
 {
     NTV2AudioBufferSize bufferSize;
     device.GetAudioBufferSize(bufferSize, audioSystem);
@@ -153,7 +153,7 @@ ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
     return maxSampleCountForNTV2AudioBufferSize (bufferSize, getNumAudioChannels(device, audioSystem));
 }
 
-NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioSystem, AUTOCIRCULATE_STATUS & outStatus)
+static NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioSystem, AUTOCIRCULATE_STATUS & outStatus)
 {
     for (UWord chan (0);  chan < ::NTV2DeviceGetNumVideoChannels (device.GetDeviceID());  chan++)
         if (device.AutoCirculateGetStatus (NTV2Channel(chan), outStatus))
@@ -169,7 +169,7 @@ NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioSystem, 
     return NTV2_CHANNEL_INVALID;
 }
 
-bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSource,
+static bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSource,
                              const NTV2EmbeddedAudioInput inEmbeddedSource,
                              NTV2AudioChannelPairs & outChannelPairsPresent)
 {
@@ -206,7 +206,7 @@ bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSou
     return false;
 }
 
-bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
+static bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
 {
     BITFILE_INFO_STRUCT bitFileInfo;
     memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));

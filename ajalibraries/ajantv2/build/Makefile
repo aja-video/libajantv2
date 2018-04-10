@@ -42,6 +42,7 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2dma.cpp \
 		ntv2dpx.cpp	\
 		ntv2draw.cpp \
+		ntv2hdmi.cpp \
 		ntv2hevc.cpp \
 		ntv2driverinterface.cpp \
 		ntv2enhancedcsc.cpp \

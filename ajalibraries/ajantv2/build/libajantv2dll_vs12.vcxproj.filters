@@ -120,6 +120,9 @@
     <ClCompile Include="..\src\ntv2audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2hdmi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2signalrouter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

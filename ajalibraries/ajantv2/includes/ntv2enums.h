@@ -3235,7 +3235,7 @@ typedef enum
     NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
 
-#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
 
 
 // LHI version HDMI Color Space I/O
