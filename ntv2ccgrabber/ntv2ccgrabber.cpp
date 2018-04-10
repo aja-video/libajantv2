@@ -678,10 +678,7 @@ unsigned NTV2CCGrabber::ExtractClosedCaptionData (const NTV2VideoFormat inVideoF
 		if (NTV2_DEVICE_SUPPORTS_SMPTE2022(mDeviceID))
 			AJAAncillaryList::SetFromIPAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
 		else
-		{
-			ancPackets.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCBuffer.GetHostPointer(), mInputXferInfo.acANCBuffer.GetByteCount());
-			ancPackets.AddReceivedAncillaryData ((uint8_t *) mInputXferInfo.acANCField2Buffer.GetHostPointer(), mInputXferInfo.acANCField2Buffer.GetByteCount());
-		}
+			AJAAncillaryList::SetFromSDIAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
 		ancPackets.ParseAllAncillaryData ();
 
 		if (ancPackets.CountAncillaryDataWithType(AJAAncillaryDataType_Cea708))
