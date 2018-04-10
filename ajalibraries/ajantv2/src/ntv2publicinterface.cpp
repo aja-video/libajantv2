@@ -265,7 +265,7 @@ ostream & NTV2_POINTER::Dump (	ostream &		inOStream,
 				inOStream << HEX0N(uint16_t(*pBuffer),2);
 
 			if (pAsciiBuffer)
-				pAsciiBuffer[groupsInThisRow * inBytesPerGroup + bytesInThisGroup] = std::isprint(*pBuffer) ? *pBuffer : '.';
+				pAsciiBuffer[groupsInThisRow * inBytesPerGroup + bytesInThisGroup] = isprint(*pBuffer) ? *pBuffer : '.';
 			pBuffer++;
 			bytesRemaining--;
 
