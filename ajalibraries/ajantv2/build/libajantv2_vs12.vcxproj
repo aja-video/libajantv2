@@ -223,6 +223,7 @@
     <ClCompile Include="..\src\ntv2dma.cpp" />
     <ClCompile Include="..\src\ntv2driverinterface.cpp" />
     <ClCompile Include="..\src\ntv2formatdescriptor.cpp" />
+    <ClCompile Include="..\src\ntv2hdmi.cpp" />
     <ClCompile Include="..\src\ntv2hevc.cpp" />
     <ClCompile Include="..\src\ntv2interrupts.cpp" />
     <ClCompile Include="..\src\ntv2konaflashprogram.cpp" />

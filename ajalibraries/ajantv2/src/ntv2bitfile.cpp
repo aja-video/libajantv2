@@ -439,11 +439,11 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_LHI:			return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
-        case DEVICE_ID_IO4KPLUS:        return "io4kp";
-        case DEVICE_ID_IOIP_2022:       return "ioip_s2022";
-        case DEVICE_ID_IOIP_2110:       return "ioip_s2110";
+        case DEVICE_ID_IO4KPLUS:	return "io4kp";
+        case DEVICE_ID_IOIP_2022:	return "ioip_s2022";
+        case DEVICE_ID_IOIP_2110:	return "ioip_s2110";
 		case DEVICE_ID_KONA1:		return "kona1";
-        case DEVICE_ID_KONAHDMI:		return "kona_hdmi";
+        case DEVICE_ID_KONAHDMI:	return "kona_hdmi_4rx";
         default:
 			break;
 	}
@@ -477,9 +477,11 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| _designName == "corvid88_top";
 		case DEVICE_ID_CORVIDHBR:	return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_CORVIDHBR) == _designName
 											|| _designName == "ZARTAN";
-		case DEVICE_ID_IO4KPLUS:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == _designName;
-        case DEVICE_ID_IOIP_2022:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == _designName;
-        case DEVICE_ID_IOIP_2110:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
+		case DEVICE_ID_IO4KPLUS:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == _designName;
+        case DEVICE_ID_IOIP_2022:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == _designName;
+        case DEVICE_ID_IOIP_2110:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
+		case DEVICE_ID_KONAHDMI:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == _designName
+											|| _designName == "Corvid_HDMI_4Rx_Top";
 		default:					break;
 	}
 	return false;

@@ -2403,7 +2403,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 
-    if (mCard->IsDeviceReady(true) == true)
+    if (0)              // Turn off for NAB
+    //if (mCard->IsDeviceReady(true) == true)
     {
         if (config2110 == NULL)
         {
@@ -2466,7 +2467,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                 txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                 txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
-                txVideoConfig.ssrc = m2110TxVideoData.txVideoCh[i].ssrc;
                 txVideoConfig.ttl = 0x40;
                 txVideoConfig.tos = 0x64;
 
@@ -2506,7 +2506,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                 txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                 txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
-                txAudioConfig.ssrc = m2110TxAudioData.txAudioCh[i].ssrc;
                 txAudioConfig.ttl = 0x40;
                 txAudioConfig.tos = 0x64;
 
@@ -2528,6 +2527,58 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
             m2110TxAudioDataID = m2110TxAudioData.id;
         }
+
+        bool sfp1Enabled, sfp2Enabled;
+
+        // Process TX video enables
+        if (mFb1Mode == NTV2_MODE_DISPLAY)
+        {
+            for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
+            {
+                config2110->GetTxStreamEnable(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, sfp1Enabled, sfp2Enabled);
+                if (m21110IpEnable.txChEnable[i] && (!sfp1Enabled) && (!sfp2Enabled))
+                {
+                    printf("SetTxStreamEnable playback mode on %d\n", m2110TxVideoData.txVideoCh[i].channel);
+                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, (bool)m2110TxVideoData.txVideoCh[i].enable[0], (bool)m2110TxVideoData.txVideoCh[i].enable[1]);
+                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].streamType, (bool)m2110TxAudioData.txAudioCh[i].enable[0], (bool)m2110TxAudioData.txAudioCh[i].enable[1]);
+                }
+                else if (!m21110IpEnable.txChEnable[i] && sfp1Enabled | sfp2Enabled)
+                {
+                    printf("SetTxStreamEnable playback mode off %d\n", m2110TxVideoData.txVideoCh[i].channel);
+                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, false, false);
+                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].streamType, false, false);
+                }
+            }
+        }
+        else
+        {
+            for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
+            {
+                config2110->GetTxStreamEnable(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, sfp1Enabled, sfp2Enabled);
+                if (sfp1Enabled | sfp2Enabled)
+                {
+                    printf("SetTxStreamEnable capture mode off %d\n", m2110TxVideoData.txVideoCh[i].channel);
+                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].channel, NTV2_VIDEO_STREAM, false, false);
+                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].streamType, false, false);
+                }
+            }
+        }
+
+        
+        if (mFb1Mode == NTV2_MODE_DISPLAY)
+        {
+        }
+        else
+        {
+        }
+
+        //printIpEnable(m21110IpEnable);
+
+        
+
+
+
+#if 0
 
         // See if receive video needs configuring
         if (m2110RxVideoDataID != m2110RxVideoData.id)
@@ -2556,8 +2607,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     rxVideoConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
                     rxVideoConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
                 }
-                rxVideoConfig.ssrc = m2110RxVideoData.rxVideoCh[i].ssrc;
-                rxVideoConfig.vlan = m2110RxVideoData.rxVideoCh[i].vlan;
                 rxVideoConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
                 // Video specific
@@ -2577,6 +2626,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
             m2110RxVideoDataID = m2110RxVideoData.id;
         }
+#endif
+        
     }
 	
 	// VPID
@@ -2912,7 +2963,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 		}
 	}
 	
-	
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);
@@ -3011,3 +3061,21 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
+
+
+void KonaIP2110Services::printIpEnable(IpEnable2110 ipEnable)
+{
+    printf("Id   %d\n", ipEnable.id);
+    printf("Tx   %s   %s   %s   %s\n", (ipEnable.txChEnable[0] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[1] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[2] == true) ? "on " : "off",
+                                       (ipEnable.txChEnable[3] == true) ? "on " : "off");
+
+    printf("Rx   %s   %s   %s   %s\n\n", (ipEnable.rxChEnable[0] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[1] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[2] == true) ? "on " : "off",
+                                         (ipEnable.rxChEnable[3] == true) ? "on " : "off");
+}
+
+
+

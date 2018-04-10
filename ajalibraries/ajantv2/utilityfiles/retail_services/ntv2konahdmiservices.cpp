@@ -30,6 +30,47 @@ void KonaHDMIServices::UpdateAutoState (void)
 	}
 }
 
+
+//-------------------------------------------------------------------------------------------------------
+//	GetSelectedInputVideoFormat
+//	Note:	Determine input video format based on input select and fbVideoFormat
+//			which currently is videoformat of ch1-framebuffer
+//-------------------------------------------------------------------------------------------------------
+NTV2VideoFormat KonaHDMIServices::GetSelectedInputVideoFormat(
+											NTV2VideoFormat fbVideoFormat,
+											NTV2SDIInputFormatSelect* inputFormatSelect)
+{
+	(void)fbVideoFormat;
+	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
+	if (inputFormatSelect)
+		*inputFormatSelect = NTV2_YUVSelect;
+	
+	// Figure out what our input format is based on what is selected
+    switch (mVirtualInputSelect)
+    {
+		case NTV2_Input1Select:
+		case NTV2_Input2Select:
+		case NTV2_Input3Select:
+		case NTV2_Input4Select:
+			{
+				inputFormat = mCard->GetHDMIInputVideoFormat((NTV2Channel)mVirtualInputSelect);
+			
+				NTV2LHIHDMIColorSpace hdmiInputColor;
+				mCard->GetHDMIInputColor(hdmiInputColor, (NTV2Channel)mVirtualInputSelect);
+
+				if (inputFormatSelect)
+					*inputFormatSelect = (hdmiInputColor == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_YUVSelect : NTV2_RGBSelect;
+			}
+			break;
+
+		default:
+			break;
+	}
+	
+	return inputFormat;
+}
+
+
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
@@ -48,7 +89,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
 
-	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
+	//NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 
@@ -238,8 +279,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	// Frame Buffer Disabling
 	mCard->WriteRegister(kRegCh1Control, 0, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh2Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, b4K ? 0 : 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh3Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	mCard->WriteRegister(kRegCh4Control, 1, kRegMaskChannelDisable, kRegShiftChannelDisable);
 }
 
 

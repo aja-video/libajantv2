@@ -79,7 +79,7 @@ public:
 	/**
 	 *	Set/Get the Distributed Binary Bits
 	 *
-	 *	@param[in]	uint8_t		DBB bits 
+	 *	@param[in]	dbb1		DBB bits 
 	 *	@return					AJA_STATUS_SUCCESS
 	 */
 	virtual AJAStatus SetDBB1(uint8_t  dbb1);
