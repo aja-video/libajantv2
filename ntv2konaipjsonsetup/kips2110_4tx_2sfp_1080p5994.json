@@ -1,5 +1,5 @@
 {
-    "protocol" : "2110",
+    "protocol":"2110",
     "PTPMaster":"172.16.0.201",
     "sfps":[
         {
@@ -14,11 +14,10 @@
             "subnetMask":"255.255.0.0",
             "gateway":"255.255.255.255"
         }
-        ],
-    "transmit":[
+    ],
+    "transmitVideo2110":[
         {
             "designator":"channel1",
-            "stream":"video",
             "sfp1LocalPort":"5000",
             "sfp1RemoteIPAddress":"239.20.45.0",
             "sfp1RemotePort":"6000",
@@ -30,8 +29,59 @@
             "ssrc":"1000",
             "ttl":"64",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
+        {
+            "designator":"channel2",
+            "sfp1LocalPort":"5010",
+            "sfp1RemoteIPAddress":"239.20.45.10",
+            "sfp1RemotePort":"6010",
+            "sfp2RemoteIPAddress":"239.20.45.110",
+            "sfp2RemotePort":"6110",
+            "sfp2LocalPort":"5110",
+            "videoFormat":"1080p5994",
+            "payload":"96",
+            "ssrc":"1000",
+            "ttl":"64",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+			"enable":"true"
+        },
+        {
+            "designator":"channel3",
+            "sfp1LocalPort":"5020",
+            "sfp1RemoteIPAddress":"239.20.45.20",
+            "sfp1RemotePort":"6020",
+            "sfp2RemoteIPAddress":"239.20.45.120",
+            "sfp2RemotePort":"6120",
+            "sfp2LocalPort":"5120",
+            "videoFormat":"1080p5994",
+            "payload":"96",
+            "ssrc":"1000",
+            "ttl":"64",
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
+			"enable":"true"
+        },
+        {
+            "designator":"channel4",
+            "sfp1LocalPort":"5030",
+            "sfp1RemoteIPAddress":"239.20.45.30",
+            "sfp1RemotePort":"6030",
+            "sfp2RemoteIPAddress":"239.20.45.130",
+            "sfp2RemotePort":"6130",
+            "sfp2LocalPort":"5130",
+            "videoFormat":"1080p5994",
+            "payload":"96",
+            "ssrc":"1000",
+            "ttl":"64",
+            "sfp1Enable":"false",
+            "sfp2Enable":"true",
+			"enable":"true"
+        }
+    ],
+    "transmitAudio2110":[
         {
             "designator":"channel1",
             "stream":"audio1",
@@ -48,7 +98,8 @@
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
         {
             "designator":"channel1",
@@ -66,7 +117,8 @@
             "firstAudioChannel":"4",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
         {
             "designator":"channel1",
@@ -84,7 +136,8 @@
             "firstAudioChannel":"8",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
         {
             "designator":"channel1",
@@ -102,55 +155,8 @@
             "firstAudioChannel":"12",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
-        },
-        {
-            "designator":"channel2",
-            "stream":"video",
-            "sfp1LocalPort":"5010",
-            "sfp1RemoteIPAddress":"239.20.45.10",
-            "sfp1RemotePort":"6010",
-            "sfp2RemoteIPAddress":"239.20.45.110",
-            "sfp2RemotePort":"6110",
-            "sfp2LocalPort":"5110",
-            "videoFormat":"1080p5994",
-            "payload":"96",
-            "ssrc":"1000",
-            "ttl":"64",
-            "sfp1Enable":"true",
-            "sfp2Enable":"false"
-        },
-        {
-            "designator":"channel3",
-            "stream":"video",
-            "sfp1LocalPort":"5020",
-            "sfp1RemoteIPAddress":"239.20.45.20",
-            "sfp1RemotePort":"6020",
-            "sfp2RemoteIPAddress":"239.20.45.120",
-            "sfp2RemotePort":"6120",
-            "sfp2LocalPort":"5120",
-            "videoFormat":"1080p5994",
-            "payload":"96",
-            "ssrc":"1000",
-            "ttl":"64",
-            "sfp1Enable":"false",
-            "sfp2Enable":"true"
-        },
-        {
-            "designator":"channel4",
-            "stream":"video",
-            "sfp1LocalPort":"5030",
-            "sfp1RemoteIPAddress":"239.20.45.30",
-            "sfp1RemotePort":"6030",
-            "sfp2RemoteIPAddress":"239.20.45.130",
-            "sfp2RemotePort":"6130",
-            "sfp2LocalPort":"5130",
-            "videoFormat":"1080p5994",
-            "payload":"96",
-            "ssrc":"1000",
-            "ttl":"64",
-            "sfp1Enable":"false",
-            "sfp2Enable":"true"
+            "sfp2Enable":"false",
+			"enable":"true"
         }
     ]
 }

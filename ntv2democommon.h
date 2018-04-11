@@ -175,8 +175,8 @@ class CNTV2DemoCommon
 		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
 		/**
-			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
-			@param[out]	On entry, specifies the wire format;  on exit, receives the 4K video format.
+			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K, this function does the promotion.
+			@param		inOutVideoFormat	On entry, specifies the wire format;  on exit, receives the 4K video format.
 			@return		True if successful;  otherwise false.
 		**/
 		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);

@@ -16,10 +16,9 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "transmit":[
+    "transmitVideo2110":[
         {
             "designator":"channel3",
-            "stream":"video",
             "sfp1LocalPort":"5001",
             "sfp1RemoteIPAddress":"239.20.45.31",
             "sfp1RemotePort":"3100",
@@ -31,8 +30,27 @@
             "ssrc":"1000",
             "ttl":"64",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
+        {
+            "designator":"channel4",
+            "sfp1LocalPort":"5001",
+            "sfp1RemoteIPAddress":"239.20.45.41",
+            "sfp1RemotePort":"4100",
+            "sfp2LocalPort":"5002",
+            "sfp2RemoteIPAddress":"239.20.45.42",
+            "sfp2RemotePort":"4200",
+            "videoFormat":"720p5994",
+            "payload":"96",
+            "ssrc":"1000",
+            "ttl":"64",
+            "sfp1Enable":"true",
+            "sfp2Enable":"false",
+			"enable":"true"
+        }
+    ],
+    "transmitAudio2110":[
         {
             "designator":"channel3",
             "stream":"audio1",
@@ -49,27 +67,12 @@
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         },
         {
             "designator":"channel4",
-            "stream":"video",
-            "sfp1LocalPort":"5001",
-            "sfp1RemoteIPAddress":"239.20.45.41",
-            "sfp1RemotePort":"4100",
-            "sfp2LocalPort":"5002",
-            "sfp2RemoteIPAddress":"239.20.45.42",
-            "sfp2RemotePort":"4200",
-            "videoFormat":"720p5994",
-            "payload":"96",
-            "ssrc":"1000",
-            "ttl":"64",
-            "sfp1Enable":"true",
-            "sfp2Enable":"false"
-        },
-        {
-            "designator":"channel4",
-            "stream":"audio1",
+            "stream":"audio2",
             "sfp1LocalPort":"5001",
             "sfp1RemoteIPAddress":"239.30.45.41",
             "sfp1RemotePort":"4100",
@@ -83,8 +86,8 @@
             "firstAudioChannel":"0",
             "audioPktInterval" :"1000",
             "sfp1Enable":"true",
-            "sfp2Enable":"false"
+            "sfp2Enable":"false",
+			"enable":"true"
         }
-
     ]
 }

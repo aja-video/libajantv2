@@ -1,5 +1,5 @@
 {
-    "protocol" : "2022",
+    "protocol":"2022",
     "enable2022_7":"false",
     "sfps":[
         {
@@ -9,7 +9,7 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "transmit":[
+    "transmit2022":[
         {
             "designator":"channel3",
             "sfp1RemoteIPAddress":"239.0.4.50",
