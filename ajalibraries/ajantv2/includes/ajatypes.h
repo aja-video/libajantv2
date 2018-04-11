@@ -196,9 +196,7 @@
         typedef void * 				LPVOID;
         typedef int32_t				Fixed_;
         typedef bool				BOOL_;
-        #ifndef FS1
-            typedef bool			BOOL;
-        #endif
+        typedef bool			    BOOL;
         typedef UWord				UWord_;
         typedef uint32_t            DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
@@ -214,9 +212,7 @@
         typedef void * 				LPVOID;
         typedef LWord				Fixed_;
         typedef bool				BOOL_;
-        #ifndef FS1
-            typedef bool			BOOL;
-        #endif
+        typedef bool			    BOOL;
         typedef UWord				UWord_;
         typedef unsigned int        DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
@@ -535,6 +531,7 @@ typedef struct NTV2FrameDimensions
 #if 0
 // Check at compile time if all the defined types are the correct size
 // must support C++11 for this to work
+static_assert(sizeof(bool) == 1,      "bool: size is not correct");
 static_assert(sizeof(int8_t) == 1,    "int8_t: size is not correct");
 static_assert(sizeof(int16_t) == 2,   "int16_t: size is not correct");
 static_assert(sizeof(int32_t) == 4,   "int32_t: size is not correct");
@@ -559,11 +556,24 @@ static_assert(sizeof(LWord64) == 8,   "LWord64: size is not correct");
 static_assert(sizeof(PVOID) == 8,     "PVOID: size is not correct");
 static_assert(sizeof(LPVOID) == 8,    "LPVOID: size is not correct");
 static_assert(sizeof(Fixed_) == 4,    "Fixed_: size is not correct");
-static_assert(sizeof(BOOL_) == 1,     "BOOL_: size is not correct");
-static_assert(sizeof(BOOL) == 1,      "BOOL: size is not correct");
 static_assert(sizeof(UWord_) == 2,    "UWord_: size is not correct");
 static_assert(sizeof(DWORD) == 4,     "DWORD: size is not correct");
+
+// ideally these whould be the same across the platforms but historically they have not been
+#if defined(MSWindows)
+static_assert(sizeof(BOOL) == 4,      "BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 1,     "BOOL_: size is not correct");
+static_assert(sizeof(AJASocket) == 8, "AJASocket: size is not correct");
+#elif defined(AJAMac)
+static_assert(sizeof(BOOL) == 1,      "BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 4,     "BOOL_: size is not correct");
 static_assert(sizeof(AJASocket) == 4, "AJASocket: size is not correct");
+#elif defined(AJALinux)
+static_assert(sizeof(BOOL) == 1,      "BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 1,     "BOOL_: size is not correct");
+static_assert(sizeof(AJASocket) == 4, "AJASocket: size is not correct");
+#endif
+
 #endif
 
 #endif	//	AJATYPES_H
