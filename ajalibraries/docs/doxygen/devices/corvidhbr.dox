@@ -1,5 +1,9 @@
 /**
-	@page	corvidhbr		Corvid HB-R
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvidhbr		Corvid HB-R
 
 	This page describes the <b>Corvid HB-R</b> OEM capture board.
 
@@ -41,8 +45,7 @@
 	@note	A hardware 4K down-converter can convert incoming 4K/UHD video to standard HD (1080) rasters.
 
 	@par		Firmware
-
-	(Coming Soon)
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/203/25>
 
 	@par	Physical
 

@@ -1,5 +1,9 @@
 /**
-	@page	konalhi		KONA LHi
+	@page			ntv2devices
+
+	@section		ntv2hwkona
+
+	@subsection		konalhi		KONA LHi
 
 	This page describes the KONA LHi video capture/playout board.
 

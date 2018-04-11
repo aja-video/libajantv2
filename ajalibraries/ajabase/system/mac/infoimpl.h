@@ -1,5 +1,5 @@
 /**
-    @file		mac/infoimpl.h
+    @file		ajabase/system/mac/infoimpl.h
 	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
     @brief		Declares the AJASystemInfoImpl class.
 **/

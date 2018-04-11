@@ -1,5 +1,9 @@
 /**
-	@page	corvid88		Corvid 88
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvid88		Corvid 88
 
 	This page describes the <b>Corvid 88</b> OEM capture/playout board, which features eight SDI connectors that can be programmatically
 	configured as inputs or outputs.

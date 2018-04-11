@@ -1341,7 +1341,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
 		@param[in]	inEnable		Specify 'true' to use 20-bit mode;  specify 'false' for normal (24-bit) mode.
-		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
     AJA_VIRTUAL bool		SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
@@ -1352,7 +1352,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
 									if audio is in 24 bit mode.
-		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
     AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
@@ -3294,7 +3294,7 @@ public:
     /**
         @brief			Reads the block of virtual data for a specific tag
         @param[in]		inTag               Tag for the virtual data.
-        @param[out]		inOutVirtualData    Virtual data buffer to be written
+        @param[out]		outVirtualData      Virtual data buffer to be written
         @param[in]		inVirtualDataSize   Virtual data size to read
         @return			True if all requested data was successfully read; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
@@ -3608,8 +3608,8 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range * pOutRange,  const NTV2Channel inChannel = NTV2_CHANNEL1)	///< @deprecated	Use the version of this function with the NTV2_CSC_RGB_Range & outRange parameter.
-							{return pOutRange ? GetColorSpaceRGBBlackRange (*pOutRange, inChannel) : false;}
+	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range * pOutRange,  const NTV2Channel inChannel = NTV2_CHANNEL1)
+							{return pOutRange ? GetColorSpaceRGBBlackRange (*pOutRange, inChannel) : false;}	///< @deprecated	Use the version of this function with the NTV2_CSC_RGB_Range & outRange parameter.
 
 	AJA_VIRTUAL bool	SetColorSpaceUseCustomCoefficient(ULWord useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetColorSpaceUseCustomCoefficient(ULWord* useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);

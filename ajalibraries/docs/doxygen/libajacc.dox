@@ -1,0 +1,201 @@
+/**
+	@page	ajacc		“libajacc” Closed-Caption Library
+
+	The AJA Closed-Caption Library (AJACCLib) is a suite of classes and data types which allow end-users to easily encode or decode
+	CEA-608 or CEA-708 closed-caption data using nearly any NTV2-compatible AJA device using the C++ programming language.
+	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
+
+	The purpose of the AJACCLib library is to enable third-parties to easily access and/or control the caption data entering or
+	leaving an AJA NTV2 device. The library currently is very focused on CEA-608. AJA is interested in learning from its OEM developers
+	what kind of captioning support they're interesting in having added to the library (e.g., “full/native” CEA-708, Teletext, OP-42/47, etc.).
+
+	@par	Demonstration Applications
+	-	\ref ntv2ccgrabber
+	-	\ref ntv2ccplayer
+
+	@par	Principal Classes
+	-	CNTV2SMPTEAncData — Utilities for finding and extracting VANC packets in “tall” or “taller” frame buffers.
+	-	CNTV2CaptionDecoder608 — Decodes CEA-608 captions.
+	-	CNTV2CaptionEncoder608 — Encodes CEA-608 captions.
+	-	CNTV2CaptionDecoder708 — Decodes CEA-708 anc packets.
+	-	CNTV2CaptionEncoder708 — Encodes CEA-708 anc packets.
+	-	\ref CNTV2Line21Captioner — Encodes or decodes line-21 waveforms for U.S. captioning, per EIA-608.
+	-	\ref CNTV2CaptionRenderer — Renders (draws) CEA-608-compatible captions into frame buffers.
+
+	@par	Object Lifespan
+
+	Caption library class instances are provided using type-safe “smart” pointers, which helps to simplify memory management,
+	and eliminate leaks and double-free's. Client programs are freed from having to manually micromanage the lifespans of these
+	objects.
+
+	Client programs instantiate library objects using a <b>Create</b> class method, which always return a valid smart pointer if the
+	function result is true, an invalid one if the result is false, and never throw \c std::bad_alloc.
+
+	@code
+		{
+			{
+				XPtr	y;
+				{
+					XPtr	x;
+					if (X::Create (x))
+					{
+						y = x;
+						x->DoSomething ();
+					}
+				}
+				assert (y);
+				(*y).DoSomething ();  //  The 'X' instance still exists
+			}
+			//  The 'X' instance has been freed
+		}
+	@endcode
+
+	@section	ajacc-decoding608	Decoding CEA-608 Captions
+
+	The CNTV2CaptionDecoder608 class is a full-featured CEA-608 caption decoder that can decode message or control bytes
+	found in line 21 of an SD frame buffer, parse it to the appropriate channel (CC1, CC2, etc.), where the current state
+	and buffer status is maintained. The class handles parsing for captioning channels CC1-CC4, TX1-TX4, and XDS in parallel —
+	i.e., it decodes them all simultaneously.
+
+	For display purposes, the class provides CNTV2CaptionDecoder608::SetDisplayChannel to select the current displayed channel of interest.
+	However, since all channels are decoded simultaneously in parallel, the decoder's “display” channel can be changed at any
+	time, with the state of the newly-selected channel immediately seen without having to wait for the channel to receive
+	enough new data to get back in-sync.
+
+	To implement a basic decoder, create an instance (using the CNTV2CaptionDecoder608::Create method), then call
+	CNTV2CaptionDecoder608::SetDisplayChannel to select the current displayed channel of interest (if any).
+	Clients should then call CNTV2CaptionDecoder608::ProcessNew608FrameData with the four bytes of CEA-608 CaptionData
+	that arrive every frame. If interlaced video is being decoded, 2 bytes of data are often arriving with each field.
+	The best thing to do is wait until the end of the frame and package both fields' data into the one call.
+
+	CNTV2CaptionDecoder608::ProcessNew608FrameData should be called every frame, even if the captioning data for that frame is all zeroes.
+	CEA-608 caption rules call for certain commands to be sent twice on adjacent frames. This means that there is a difference between
+	<tt>command|command</tt> and <tt>command|NULL|command</tt>, and if the decoder never sees the intervening NULL frames,
+	it may mistakenly think two commands came from adjacent frames and misinterpret them.
+
+	To display the caption data, call CNTV2CaptionDecoder608::SetDisplayChannel to select which captioning channel to display,
+	then call CNTV2CaptionDecoder608::BurnCaptions with a pointer to the frame buffer holding the video. Clients may also
+	iteratively call CNTV2CaptionDecoder608::GetOnAirCharacter to get the character at each “cell” of the frame buffer,
+	and implement your own burn-in. When using the burn-in feature, CNTV2CaptionDecoder608::IdleFrame should be called
+	once per frame to properly cause characters having the “blink” display attribute to flash.
+
+	The decoder also has a simple notification callback mechanism that notifies a client program of caption changes in the channel
+	of interest. Call CNTV2CaptionDecoder608::SubscribeChangeNotification to install the client callback, and
+	CNTV2CaptionDecoder608::UnsubscribeChangeNotification to remove it. As changes to the caption channel occur — e.g.,
+	the character to be displayed at a given row/column, or its attributes (color, italics, etc.) — the client callback
+	function is called. This permits an event-driven caption display model, as opposed to a polled model. (Note that this
+	mechanism cannot “blink” characters that have the “flash” display attribute.)
+
+	@section	ajacc-encoding608	Encoding CEA-608 Captions
+
+	The CNTV2CaptionEncoder608 class is used to encode CEA-608 compliant caption messages into a valid “Line 21” waveform
+	for copying into an SD frame buffer. It supports the three principal caption types — “pop-on”, “paint-on”, and “roll-up” —
+	with optional character display attributes (color, italics, etc.).
+
+	Call CNTV2CaptionEncoder608::Create to instantiate a new instance.
+
+	There are three instance methods for enqueueing messages for each display method:
+	-	CNTV2CaptionEncoder608::EnqueuePopOnMessage
+	-	CNTV2CaptionEncoder608::EnqueuePaintOnMessage
+	-	CNTV2CaptionEncoder608::EnqueueRollUpMessage
+	-	…plus the CNTV2CaptionEncoder608::EnqueueTextMessage method for enqueueing messages into channels TX1-TX4.
+		(There currently is no provision for encoding XDS messages.)
+
+	There are three instance methods for dequeueing messages, from lowest (least abstract) to highest (most abstract) level:
+	-	CNTV2CaptionEncoder608::GetNextTransmitCaptionBytes
+	-	CNTV2CaptionEncoder608::GetNextLine21TransmitCaptions
+	-	CNTV2CaptionEncoder608::EncodeNextCaptionBytesIntoLine21
+
+	@note	The encoder’s dequeueing methods currently give priority to display messages (CC1-CC4) over non-display messages (TX1-TX4),
+			sending TXn messages only when there are no CCn messages waiting to go. Because of CEA-608’s slow 4-byte-per-frame data rate,
+			it’s easy to “saturate the pipeline” with display messages, causing non-display messages to never get sent. Client programs
+			must take care to regulate the rate at which display messages are enqueued.
+
+	There are two methods for reporting the queue status:
+	-	CNTV2CaptionEncoder608::GetQueuedMessageCount
+	-	CNTV2CaptionEncoder608::GetQueuedByteCount
+
+	Finally, there are five methods for reporting usage statistics — i.e., querying the total bytes or messages ever enqueued or
+	dequeued, plus querying the highest queue depth.
+
+	The queues used in this class are thread-safe, so it’s okay to use one thread to enqueue messages, and another thread
+	to dequeue them and encode them into your host frame buffer.
+
+	@section	ajacc-line21captioner		Encoding and Decoding SD “Line 21” Waveforms
+
+	The CNTV2Line21Captioner class is used to encode or decode EIA-608 compliant raw data bytes to/from
+	line 21 of an SD frame buffer.
+
+	The CNTV2Line21Captioner::DecodeLine (static) class method decodes line 21 into raw caption bytes.
+
+	The CNTV2Line21Captioner::EncodeLine instance method encodes raw caption bytes into a line 21 waveform.
+
+
+	@section	ajacc-decoding708	Decoding CEA-708 Captions
+
+	The CNTV2CaptionDecoder708 class is a CEA-708 caption decoder that can decode “service level 1” caption data found
+	in SMPTE-334-compliant ancillary data packets. This is useful for extracting CEA-608 caption bytes from an HD video stream.
+
+	There are two ways to feed a decoder instance the requisite ancillary data it needs to decode captions:
+	-#	<b>Manually</b> — If the ancillary data is already available in a buffer, use the CNTV2CaptionDecoder708::SetSMPTE334AncData method,
+		passing it a pointer to the buffer, and a byte count.
+	-#	<b>Host Frame Buffer</b> — If a video frame exists in host memory that includes VANC data, use the
+		CNTV2CaptionDecoder708::FindSMPTE334AncPacketInVideoFrame method to have the decoder parse it.
+
+	Once the decoder has the ancillary data, call its CNTV2CaptionDecoder708::ParseSMPTE334AncPacket method to have it parsed.
+
+	To obtain any embedded 608-style captions it was able to decode, call its CNTV2CaptionDecoder708::GetCC608CaptionData method,
+	then pass them into the CNTV2CaptionDecoder608 instance's CNTV2CaptionDecoder608::ProcessNew608FrameData function.
+
+	@note	This decoder does not currently decode “native” CEA-708 captions — i.e., service levels 2 and up, that make use of
+			windows of varying dimensions and transparency, fonts of varying sizes and styles, characters of varying colors and
+			opacity, etc.
+
+	@section	ajacc-encoding708	Encoding CEA-708 Captions
+
+	The CNTV2CaptionEncoder708 class is a CEA-708 caption encoder that encodes caption data into SMPTE-334-compliant
+	ancillary data packets.
+
+	There are two principal sets of methods:
+	-	Those that deal with relatively primitive 708 commands, and accumulates results in a private buffer,
+		which can be retrieved using CNTV2CaptionEncoder708::GetCaptionChannelPacket, or left in place for use by
+		CNTV2CaptionEncoder708::MakeSMPTE334AncPacket.
+	-	Those that deal with building SMPTE-334 Ancillary Packets from its internal buffer. The principal method is
+		CNTV2CaptionEncoder708::MakeSMPTE334AncPacket, which assumes that a valid Caption Channel Packet has already
+		been built, copies it into a full SMPTE-334 Ancillary Packet, then returns a pointer to its internal buffer.
+
+	To output SMPTE-334 ancillary data into a host frame buffer for eventual transfer to an AJA device,
+	call CNTV2CaptionEncoder708::InsertSMPTE334AncPacketInVideoFrame.
+
+	@note	This encoder implementation is capable of encoding what is necessary for translating CEA-608 captions
+			into “708-compliant” captions suitable for transmission into HD video streams.
+
+	@section	ajacc-rendering		Rendering Captions
+
+	@par	Debugging & Logging
+
+	The caption library provides an extensive amount of logging capabilites to help diagnose problems that may arise during
+	caption encoding or decoding. Most library classes derive from the CNTV2CaptionLogging class (see “ntv2captionlogging.h”),
+	which provides an extensive amount of logging options.
+
+	Clients can get and set the log label that appears at the start of each entry in the log on a per-instance basis by
+	calling SetLogLabel, or some text can be appended to the instance's existing label by calling AppendToLogLabel.
+	Note that the label for instances defaults to the name of the instance class with “-n” appended to it, where “n” is a
+	unique instance number.
+
+	The kind and amount of information that’s written to the log stream on a per-instance basis can be controlled by changing
+	the instance’s NTV2CaptionLogMask, by calling its \c SetLogMask function. This can be changed globally by calling the global
+	SetDefaultCaptionLogMask function, but this will only affect caption library objects that are created after calling the
+	function. (The default behavior when client applications start is \c kCaptionLog_Off… which doesn’t log anything.)
+
+	The output stream that receives the log stream can be controlled on a per-instance basis by calling the instance’s
+	SetLogStream function. This can be changed globally by calling the global SetDefaultLogOutputStream function, but this will
+	only affect caption library objects created after calling the function. The default output stream is standard error (std::cerr).
+
+	Note that many caption objects contain (by aggregation) other caption objects. Beware that these classes usually override
+	SetLogMask and SetLogStream, so that when the log mask or stream is changed for, say, a CNTV2CaptionDecoder608 instance,
+	each of its several CNTV2CaptionDecoderChannel608 instances will also have their log mask or stream changed as well.
+
+	The available NTV2CaptionLogMask bit values are documented in the “ntv2captionlogging.h” header file.
+
+**/

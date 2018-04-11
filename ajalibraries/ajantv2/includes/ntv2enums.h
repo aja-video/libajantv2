@@ -34,65 +34,6 @@
 
 
 /**
-    @mainpage	The NTV2 SDK
-
-    @copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
-
-    @details	The NTV2 Software Development Kit (SDK) is a suite of classes and data types which allow end-users to access and control
-                nearly any NTV2-compatible AJA device using the C++ programming language.
-
-                AJA hardware products play back or ingest video/audio, plus ancillary data (e.g., timecode, captions, etc.) to
-                or from a host computer. The purpose of the SDK is to enable third-party developers to easily access and/or control
-                the video, audio or ancillary data entering or leaving the device. The SDK has two major parts -- a low-level device driver,
-                and a user-space library.
-
-    @image	html	fig01-ntv2architecture.png
-
-    @details	The device driver runs at the kernel level and handles low-level communication with the device. It is a required component
-                of the SDK and provides the user-space library with the means to communicate and control the device.
-
-                The "ajantv2" library ('libajantv2.lib' on Windows, or 'libajantv2.a' on Linux and MacOS) is the principal user-space library that
-                an application must link with in order to access and control AJA devices. It implements a suite of C++ classes which an
-                application can instantiate and use to perform various operations on an AJA device. This library contains many functions that
-                are useful for interrogating and controlling AJA devices.
-
-    @image	html	classhierarchy.png
-
-    @details	Most NTV2 object class instances can be created in the usual ways -- using <b>operator new</b>, creating it directly on the stack,
-                or by aggregation (incorporating the NTV2 object as a member variable in your own class). For destruction, the usual rules apply.
-                NTV2 objects that were created on the stack will automatically destruct when they go out of scope. Instances that were created
-                via aggregation will destruct when the owning object's destructor is called. Instances that were explicitly created using
-                <b>operator new</b> must be explicitly destroyed using operator delete.
-
-                As a general rule, AJA recommends never deriving your application's classes from any NTV2 classes.
-
-    @par		The Principal Classes
-
-    CNTV2DeviceScanner
-
-    @subpage	ntv2devicefeatures
-
-    CNTV2Card
-
-    CNTV2SignalRouter
-
-    @par		More Information
-
-    @subpage	gettingstarted
-
-    @subpage	commondeviceinfo
-
-    @subpage	demoapps
-
-    @subpage	ajacc
-
-    @subpage	ajaanc
-
-    @subpage	ajabase
-**/
-
-
-/**
     @brief	Identifies a particular AJA device type.
             In modern NTV2 SDKs, there really is only one device type: DEVICETYPE_NTV2.
 **/

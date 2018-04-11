@@ -1,5 +1,9 @@
 /**
-	@page	ajaklhibox		KLHi-Box Breakout Box
+	@page			ntv2devices
+
+	@section		ntv2hwaccessories
+
+	@subsection		ajaklhibox		KLHi-Box Breakout Box
 
 	This page describes the AJA KLHi-Box Breakout Box, which can be connected to a \ref konalhi capture/playout board.
 
