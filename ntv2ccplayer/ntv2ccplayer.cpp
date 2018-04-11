@@ -1262,16 +1262,18 @@ void NTV2CCPlayer::PlayoutFrames (void)
 														842.79835391,	1123.73113855,	1498.30818473,	1997.74424630,	2663.65899507,	3551.54532676,
 														4735.39376902,	6313.85835869,	8418.47781159,	11224.63708211};
 	static const uint16_t		kF1PktLineNumCEA608(12), kF2PktLineNumCEA608(kF1PktLineNumCEA608+1);
-	const TimecodeFormat		tcFormat			(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (mFrameRate));
-	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat (mVideoFormat));
+	const TimecodeFormat		tcFormat			(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(mFrameRate));
+	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat(mVideoFormat));
 	const NTV2FormatDescriptor	formatDesc			(mVideoFormat, mPixelFormat, mVancMode);
-	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow ());
-	const ULWord				vancLineNum			(CNTV2SMPTEAncData::GetVancLineOffset (formatDesc, ::GetSmpteLineNumber (standard),
-																							CNTV2SMPTEAncData::GetCaptionAncLineNumber (mVideoFormat)));
-	NTV2_POINTER				F1AncBuffer	(2048);	//	F1 Anc buffer
-	NTV2_POINTER				F2AncBuffer;		//	F2 Anc buffer
+	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
+	const ULWord				vancLineNum			(CNTV2SMPTEAncData::GetVancLineOffset (formatDesc, smpteLineNumInfo,
+																							CNTV2SMPTEAncData::GetCaptionAncLineNumber(mVideoFormat)));
+	NTV2_POINTER				F1AncBuffer			(2048);	//	F1 Anc buffer
+	NTV2_POINTER				F2AncBuffer			(2048);	//	F2 Anc buffer
 	CNTV2Line21Captioner		F1Line21Encoder;	//	Used to encode Field 1 analog (line 21) waveform
 	CNTV2Line21Captioner		F2Line21Encoder;	//	Used to encode Field 2 analog (line 21) waveform
+	uint32_t					inF2StartLine		(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
 	CaptionData					captionData;		//	Current frame's 608 caption bytes (Fields 1 and 2)
 	ULWord						acOptionFlags		(0);
 	ULWord						currentSample		(0);
@@ -1314,8 +1316,6 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	xferInfo.SetVideoBuffer(reinterpret_cast<ULWord *>(mVideoBuffer.GetHostPointer()), mVideoBuffer.GetByteCount());
 	if (!mConfig.fForceVanc)
 	{
-		if (!IsProgressivePicture (mVideoFormat))				//	Interlaced?
-			F2AncBuffer.Allocate(F1AncBuffer.GetByteCount());	//	Allocate an F2 Anc buffer (same size as F1)
 		//	Always transfer this/these Anc buffer/s...
 		xferInfo.SetAncBuffers ((ULWord *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(),
 								(ULWord *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount());
@@ -1348,6 +1348,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			if (!mConfig.fForceVanc)
 				{F1AncBuffer.Fill(ULWord(0));	F2AncBuffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
 
+			AJAAncillaryList	packetList;
 			m608Encoder->GetNextCaptionData (captionData);	//	Pop queued captions from 608 encoder waiting to be transmitted
 
 			if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat))
@@ -1373,18 +1374,21 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				}
 				if (!mConfig.fForceVanc)	//	If --vanc option not specified and Anc inserters available
 				{
-					uint32_t						pktSizeInBytes	(0);
+					//uint32_t						pktSizeInBytes	(0);
 					AJAAncillaryData_Cea608_Vanc	pkt608F1,  pkt608F2;
 
 					pkt608F1.SetLocationLineNumber (kF1PktLineNumCEA608);	//	pkt608F1.SetLine (0, kF1PktLineNumCEA608);
 					pkt608F1.SetCEA608Bytes (captionData.f1_char1, captionData.f1_char2);
-					pkt608F1.GeneratePayloadData();
-					pkt608F1.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+					//pkt608F1.GeneratePayloadData();
+					//pkt608F1.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
 
 					pkt608F2.SetLocationLineNumber (kF2PktLineNumCEA608);	//	pkt608F2.SetLine (0, kF2PktLineNumCEA608);
 					pkt608F2.SetCEA608Bytes (captionData.f2_char1, captionData.f2_char2);
-					pkt608F2.GeneratePayloadData();
-					pkt608F2.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+					//pkt608F2.GeneratePayloadData();
+					//pkt608F2.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+
+					packetList.AddAncillaryData(pkt608F1);
+					packetList.AddAncillaryData(pkt608F2);
 				}
 			}	//	if SD video
 			else
@@ -1397,11 +1401,12 @@ void NTV2CCPlayer::PlayoutFrames (void)
 						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mVideoBuffer.GetHostPointer(), mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
 					else
 					{
-						uint32_t					pktSizeInBytes	(0);
+						//uint32_t					pktSizeInBytes	(0);
 						AJAAncillaryData_Cea708		pkt;
 						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
-						pkt.Calculate8BitChecksum ();
-						pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+						//pkt.Calculate8BitChecksum ();
+						//pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
+						packetList.AddAncillaryData(pkt);
 					}
 				}
 	
@@ -1414,11 +1419,20 @@ void NTV2CCPlayer::PlayoutFrames (void)
 						uint32_t					pktSizeInBytes	(0);
 						AJAAncillaryData_Cea708		pkt;
 						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
-						pkt.Calculate8BitChecksum ();
-						pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+						//pkt.Calculate8BitChecksum ();
+						//pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
+						packetList.AddAncillaryData(pkt);
 					}
 				}
 			}	//	else HD video
+
+			if (packetList.CountAncillaryData()  &&  !mConfig.fForceVanc)
+			{
+				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
+					packetList.GetIPTransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), inF2StartLine);
+				else
+					packetList.GetSDITransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), inF2StartLine);
+			}
 
 			if (!mConfig.fSuppressTimecode)
 			{

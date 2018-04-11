@@ -675,7 +675,7 @@ unsigned NTV2CCGrabber::ExtractClosedCaptionData (const NTV2VideoFormat inVideoF
 		AJAAncillaryList	ancPackets;
 		ancPackets.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
 		ancPackets.SetAnalogAncillaryDataTypeForLine (284, AJAAncillaryDataType_Cea608_Line21);
-		if (NTV2_DEVICE_SUPPORTS_SMPTE2022(mDeviceID))
+		if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
 			AJAAncillaryList::SetFromIPAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
 		else
 			AJAAncillaryList::SetFromSDIAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
