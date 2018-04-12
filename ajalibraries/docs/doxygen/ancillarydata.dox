@@ -76,8 +76,8 @@
 	@section	anccapturingwithac	Capturing Anc Packets Using AutoCirculate
 
 	For capturing Ancillary data packets (e.g., RP-215, VITC, SMPTE 334, etc.), newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc)
-	provide per-SDI-input ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
-	packet data into a separate host data buffer independent of the video buffer (see the new \c AUTOCIRCULATE_TRANSFER class).
+	provide ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
+	packet data into a separate host data buffer that's independent of the video buffer (see the \c AUTOCIRCULATE_TRANSFER class).
 
 	@subsection	ancgumpformat	SDI Device Anc Buffer Data Format
 	The data bytes in the buffer consist of one or more packets having the following format:
@@ -99,11 +99,21 @@
 	Note that while the first byte of each packet is set to \c 0xFF, this is not a protected value and can legally occur within packets.
 	Software parsers must use the packet Data Count (<b>DC</b>) value to determine the length of each packet.
 
+	@subsection	ancrtpformat	IP Device Anc Buffer RTP Data Format
+
+	The data bytes in the ancillary data buffer will meet the RTP specification, which has the following format:
+
+	@image	html	fbf-rtp.png
+
+	Clients are free to parse the data themselves, or call AJAAncillaryList::SetFromIPAncData to transform the buffer contents
+	into an \c AJAAncillaryList containing one \c AJAAncillaryData instance per ancillary data packet.
+
 	@section	ancplayingwithac	Playing Anc Packets Using AutoCirculate
 
-	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide per-SDI-output
-	ANC data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from a separate host buffer
-	(see the new \c AUTOCIRCULATE_TRANSFER class). The data must be packaged as specified in \ref ancgumpformat prior to calling CNTV2Card::AutoCirculateTransfer.
+	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide
+	ancillary data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from
+	a separate host buffer (see the \c AUTOCIRCULATE_TRANSFER class). Prior to calling CNTV2Card::AutoCirculateTransfer, the data
+	must be packaged as specified in \ref ancgumpformat for SDI, or \ref ancrtpformat for IP/RTP.
 
 	@note	Because the outgoing line number can be specified, it's possible to overrun a line. Be certain that the data packets to be
 			inserted on a given line will fit for the output video standard.
