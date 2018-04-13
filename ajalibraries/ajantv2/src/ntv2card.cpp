@@ -1005,3 +1005,6 @@ NTV2DIDSet CNTV2Card::GetDefaultAncExtractorDIDs (void)
 	}	///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hexa string instead.
 
 #endif	//	!defined (NTV2_DEPRECATE)
+
+
+NTV2_POINTER CNTV2Card::NULL_POINTER (NULL, 0);
