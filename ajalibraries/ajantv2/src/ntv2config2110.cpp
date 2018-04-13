@@ -1257,7 +1257,7 @@ bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
     return true;
 }
 
-bool CNTV2Config2110::Set4KMode(const bool enable)
+bool CNTV2Config2110::Set4KModeEnable(const bool enable)
 {
     if (!mDevice.IsMBSystemReady())
     {
@@ -1266,7 +1266,7 @@ bool CNTV2Config2110::Set4KMode(const bool enable)
     }
 
     bool old_enable = false;
-    Get4KMode(old_enable);
+    Get4KModeEnable(old_enable);
     bool enableChange = (old_enable != enable);
 
     if (enableChange)
@@ -1287,7 +1287,7 @@ bool CNTV2Config2110::Set4KMode(const bool enable)
     return true;
 }
 
-bool  CNTV2Config2110::Get4KMode(bool & enable)
+bool  CNTV2Config2110::Get4KModeEnable(bool & enable)
 {
     uint32_t reg;
     reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
@@ -1296,6 +1296,38 @@ bool  CNTV2Config2110::Get4KMode(bool & enable)
     mDevice.ReadRegister(reg,&val);
 
     enable = val & 0x01;
+    return true;
+}
+
+bool CNTV2Config2110::SetIPServicesControl(const bool enable, const bool forceReconfig)
+{
+    uint32_t val = 0;
+    if (enable)
+        val |= BIT(0);
+
+    if (forceReconfig)
+        val |= BIT(0);
+
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekServices, val);
+
+    return true;
+}
+
+bool CNTV2Config2110::GetIPServicesControl(bool & enable, bool & forceReconfig)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekServices, &val);
+
+    if (val & BIT(0))
+        enable = true;
+    else
+        enable = false;
+
+    if (val & BIT(1))
+        forceReconfig = true;
+    else
+        forceReconfig = false;
+
     return true;
 }
 
