@@ -166,10 +166,12 @@
 	Video data in the device frame buffer is always stored full-frame. Interlaced video is
 	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
 	buffer, followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc.,
-	alternating to the end of the frame. <small> (A very <i>very</i> long time ago, AJA made devices
-	that stored all of Field 1’s lines in the top half of the buffer, and all of Field 2’s
-	lines in the bottom half of the buffer. These devices and buffer formats are no longer
-	supported.) </small>
+	alternating to the end of the frame. An exception to this is NTSC SD 525i, which starts
+	with Field 2 at the top of the buffer (F2L1, F1L1, F2L2, F1L2, etc.).
+
+	@note	A very <i>very</i> long time ago, AJA had devices that stored all of F1’s lines in
+			the top half of the buffer, and all of F2’s lines in the bottom half. These devices
+			and buffer formats are no longer supported.
 
 
 	<hr size="50px" />
@@ -200,17 +202,23 @@
 		-	the Frame Store is Enabled;
 		-	its Mode is Capture;
 		-	and a signal is routed to the Frame Store’s input.
-	-	Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
-		Calling CNTV2Card::SetInputFrame can change it.
+	
+		Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
+		Call CNTV2Card::SetInputFrame to change it.
 	-	<b>Output Frame</b> — This is a zero-based index number that identifies the specific Frame
-		Buffer in SDRAM that will continuously be read from <b>if</b> the Frame Store is Enabled,
-		and its Mode is set to Display. (This video can be monitored <b>if</b> the Frame Store’s
-		output signal is routed to a video output widget, and a monitor is connected to that output
-		connector.) Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b>
-		buffer number. Calling CNTV2Card::SetOutputFrame can change it.
+		Buffer in SDRAM that will continuously be read from <b>if</b>…
+		-	the Frame Store is Enabled;
+		-	its Mode is Display. (The output video can be monitored <b>if</b> the Frame Store’s
+			output signal is routed to a video output widget, and a monitor is connected to that
+			output connector.)
+		
+		Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
+		Call CNTV2Card::SetOutputFrame to change it.
 
 	Some AJA devices have only one Frame Store, so that device is limited to Capturing or Playing
 	one single stream of video at a time.
+
+	Some older AJA devices with two Frame Stores dedicate the first to Capture and the other to Playout.
 
 	@note	In NTV2 parlance, the terms <b>Channel</b> and <b>Frame Store</b> are often used interchangeably.
 
@@ -229,11 +237,12 @@
 	Call CNTV2Card::DMAWriteFrame to transfer a single frame from a local host buffer to device SDRAM.
 
 	It’s important to remember that <b>the host computer always has access to frame memory</b>.
-	Thus it’s important to synchronize or gate transfers to/from the host:
-	-	using the vertical blanking interrupt (e.g., CNTV2Card::WaitForOutputVerticalInterrupt,
-		CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.);
-	-	using the device’s current line counter (e.g., monitoring the \c kRegLineCount register
-		using CNTV2Card::ReadRegister).
+	Thus it’s important to synchronize or gate transfers to/from the host using the vertical blanking
+	interrupt (e.g., CNTV2Card::WaitForOutputVerticalInterrupt, CNTV2Card::WaitForInputVerticalInterrupt,
+	CNTV2Card::WaitForInputFieldID, etc.). The device’s current line counter can also be used (i.e., by
+	monitoring the \c kRegLineCount register using CNTV2Card::ReadRegister), but the \c kRegLineCount
+	register only reflects the read/write line position of Frame Store 1, and there are no other Line
+	Count registers for other Frame Stores.
 
 	@warning	Calling CNTV2Card::DMAWriteFrame at a significant fraction of frame time <i>after</i>
 				the VBI to write the same frame on the device that’s being read for the currently-playing
