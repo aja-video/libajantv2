@@ -5816,6 +5816,9 @@ typedef enum
 					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
 					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.
 					@param[in]	inByteCount		Specifies the maximum number of bytes to compare. Defaults to 0xFFFFFFFF (entire buffer).
+					@bug		Should be able to compare a portion of my contents with inBuffer's contents when inByteCount is less than
+								or equal to the largest byte count (NTV2_POINTER::GetByteCount) of me or inBuffer, and inByteOffset is less
+								than the smallest byte count of me or inBuffer.
 				**/
 				bool			IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
 
