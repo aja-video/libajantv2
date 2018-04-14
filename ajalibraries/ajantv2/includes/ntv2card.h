@@ -635,6 +635,21 @@ public:
 										const ULWord			inByteCount);
 
 	/**
+		@brief		Transfers the contents of the ancillary data buffer(s) from a given frame on the AJA device to the host.
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+		@param[out]	outAncF1Buffer		Specifies the host buffer that is to receive the device F1 ancillary data buffer contents.
+		@param[out]	outAncF2Buffer		Optionally specifies the host buffer that is to receive the device F2 ancillary data
+										buffer contents.
+		@return		True if successful; otherwise false.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
+	**/
+	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
+										NTV2_POINTER &	outAncF1Buffer,
+										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER);
+
+	/**
 		@brief		Transfers ancillary data from a given field/frame on the AJA device to the host.
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
 		@param		pOutAncBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the ancillary data.
@@ -644,6 +659,8 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord			inFrameNumber,
 										UByte *					pOutAncBuffer,
@@ -660,11 +677,28 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
 										const UByte *			pInAncBuffer,
 										const NTV2FieldID		inFieldID		= NTV2_FIELD0,
 										const ULWord			inByteCount		= 2048);
+
+	/**
+		@brief		Transfers the contents of the ancillary data buffer(s) from the host to a given frame on the AJA device.
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+		@param[in]	inAncF1Buffer		Specifies the host buffer that is to supply the F1 ancillary data buffer content.
+		@param[in]	inAncF2Buffer		Optionally specifies the host buffer that is to supply the F2 ancillary data
+										buffer content.
+		@return		True if successful; otherwise false.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
+	**/
+	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
+										const NTV2_POINTER &	inAncF1Buffer,
+										const NTV2_POINTER &	inAncF2Buffer	= NULL_POINTER);
 
 
 	#if !defined (NTV2_DEPRECATE)
@@ -5350,6 +5384,9 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte3Value (ULWord *value)								{return ReadRegister (kRegFlatMatte3Value, value);}
 	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatte4Value (ULWord value)								{return WriteRegister (kRegFlatMatte4Value, value);}
 	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte4Value (ULWord *value)								{return ReadRegister (kRegFlatMatte4Value, value);}
+
+protected:
+	static NTV2_POINTER	NULL_POINTER;	///< @brief	Used for default empty NTV2_POINTER parameters -- do not modify.
 
 public:
 	/**

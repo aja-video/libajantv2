@@ -2403,8 +2403,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->GetStandard(&primaryStandard);
 	mCard->GetFrameGeometry(&primaryGeometry);
 
-    if (0)              // Turn off for NAB
-    //if (mCard->IsDeviceReady(true) == true)
+    if (mCard->IsDeviceReady(true) == true)
     {
         if (config2110 == NULL)
         {
@@ -2564,19 +2563,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
         }
 
-        
-        if (mFb1Mode == NTV2_MODE_DISPLAY)
-        {
-        }
-        else
-        {
-        }
-
         //printIpEnable(m21110IpEnable);
-
-        
-
-
 
 #if 0
 
