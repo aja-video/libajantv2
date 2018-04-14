@@ -916,7 +916,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         config2110.SetPTPMaster(mPTPMasterAddr.toStdString());
     }
 
-    config2110.Set4KMode(m4KMode);
+    config2110.Set4KModeEnable(m4KMode);
 
     if (mKonaIP2110Params.mSFPs.size() < 1)
     {
