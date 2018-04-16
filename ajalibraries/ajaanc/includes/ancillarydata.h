@@ -16,35 +16,6 @@
 #include <vector>
 
 
-/**
-	@page	ajaanc		The AJA Ancillary Data Library
-
-	The AJA Ancillary Data Library (AJAAncLib) is a suite of classes and data types which allow end-users to easily encode or decode
-	ancillary data using nearly any NTV2-compatible AJA device using the C++ programming language.
-	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
-
-	The purpose of the library is to enable third-parties to easily access and/or control ancillary data bytes entering or leaving
-	an AJA NTV2 device. It's currently very much tied to the 8-bit \ref ancgumpformat that's expected by the inserter/extractor
-	widgets introduced in NTV2 SDK 12.3.
-
-	The \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications show how to use this library.
-
-	<b>Principal Classes</b>
-	- AJAAncillaryData:  A single, generic Anc packet (or "raw" raster line of "analog" waveform data).
-		- AJAAncillaryData_Cea608:  A CEA-608 data packet.
-			- AJAAncillaryData_Cea608_Line21:  An "analog" CEA-608 data packet (decoded/encoded from/to line 21 or 284 of a 525i raster).
-			- AJAAncillaryData_Cea608_Vanc:  A CEA-608 data packet sourced from or destined to a frame buffer using a tall (or taller) frame geometry.
-		- AJAAncillaryData_Cea708:  A single CEA-708 SMPTE 334 packet.
-		- AJAAncillaryData_Timecode:  A single timecode packet.
-			- AJAAncillaryData_Timecode_ATC:  An "analog" (ATC) timecode packet.
-			- AJAAncillaryData_Timecode_VITC:  A VITC timecode packet.
-		- AJAAncillaryData_FrameStatusInfo524D:  A "524D" frame status info packet.
-		- AJAAncillaryData_FrameStatusInfo5251:  A "5251" frame status info packet.
-	- AJAAncillaryDataFactory:  Provides AJAAncillaryDataFactory::Create and AJAAncillaryDataFactory::GuessAncillaryDataType class methods.
-	- AJAAncillaryList:  An ordered collection of AJAAncillaryData packets.
-**/
-
-
 // Default Packet IDs used when building "analog" packets
 // NOTE: there is NO guarantee that the Anc Extractor hardware will use these codes - nor does the
 //       Anc Inserter hardware care. If you want to know whether a given packet is "analog" or
