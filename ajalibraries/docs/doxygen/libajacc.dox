@@ -172,30 +172,25 @@
 
 	@section	ajacc-rendering		Rendering Captions
 
-	@par	Debugging & Logging
+	The CNTV2CaptionRenderer class renders CEA-608-compliant characters and/or strings into NTV2 frame buffers.
+	It currently only supports the following frame buffer formats:
+	-	NTV2_FBF_10BIT_YCBCR
+	-	NTV2_FBF_8BIT_YCBCR
+	-	NTV2_FBF_ABGR
+	-	NTV2_FBF_RGBA
+	-	NTV2_FBF_ARGB
+	-	NTV2_FBF_10BIT_DPX
+	-	NTV2_FBF_10BIT_RGB
 
-	The caption library provides an extensive amount of logging capabilites to help diagnose problems that may arise during
-	caption encoding or decoding. Most library classes derive from the CNTV2CaptionLogging class (see “ntv2captionlogging.h”),
-	which provides an extensive amount of logging options.
+	It's easiest to use its class methods, which automatically take care of creating, opening and initializing the
+	specific renderer instance for a given frame buffer format and frame geometry.
+	-	CNTV2CaptionRenderer::BurnChar, which "blits" a single CEA-608 character at a specific pixel position in the raster buffer;
+	-	CNTV2CaptionRenderer::BurnString "blits" a UTF-8-encoded string into a specific row/column position;
+	-	CNTV2CaptionRenderer::BurnStringAtXY "blits" a UTF-8-encoded string into a specific pixel position.
 
-	Clients can get and set the log label that appears at the start of each entry in the log on a per-instance basis by
-	calling SetLogLabel, or some text can be appended to the instance's existing label by calling AppendToLogLabel.
-	Note that the label for instances defaults to the name of the instance class with “-n” appended to it, where “n” is a
-	unique instance number.
-
-	The kind and amount of information that’s written to the log stream on a per-instance basis can be controlled by changing
-	the instance’s NTV2CaptionLogMask, by calling its \c SetLogMask function. This can be changed globally by calling the global
-	SetDefaultCaptionLogMask function, but this will only affect caption library objects that are created after calling the
-	function. (The default behavior when client applications start is \c kCaptionLog_Off… which doesn’t log anything.)
-
-	The output stream that receives the log stream can be controlled on a per-instance basis by calling the instance’s
-	SetLogStream function. This can be changed globally by calling the global SetDefaultLogOutputStream function, but this will
-	only affect caption library objects created after calling the function. The default output stream is standard error (std::cerr).
-
-	Note that many caption objects contain (by aggregation) other caption objects. Beware that these classes usually override
-	SetLogMask and SetLogStream, so that when the log mask or stream is changed for, say, a CNTV2CaptionDecoder608 instance,
-	each of its several CNTV2CaptionDecoderChannel608 instances will also have their log mask or stream changed as well.
-
-	The available NTV2CaptionLogMask bit values are documented in the “ntv2captionlogging.h” header file.
+	If more control is needed over when (and which) renderer instances get allocated or freed, use these class methods:
+	-	CNTV2CaptionRenderer::GetRenderer fetches the renderer for a given frame buffer format and frame geometry,
+		creating it if necessary, and opening it, if needed.
+	-	CNTV2CaptionRenderer::FlushGlyphCaches closes and destroys all existing renderers.
 
 **/
