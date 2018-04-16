@@ -10,6 +10,10 @@
 #include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
 												//	CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence
 												//	CNTV2SMPTEAncData::GetAncPacketsFromVANCLine
+#if defined (AJALinux)
+	#include <string.h>		//	For memcpy
+#endif	//	AJALinux
+
 using namespace std;
 
 #define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
