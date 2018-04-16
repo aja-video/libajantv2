@@ -137,23 +137,6 @@ AJAStatus AJAAncillaryData_Cea608::GetCEA608Characters (uint8_t & char1, uint8_t
 }
 
 
-AJAStatus AJAAncillaryData_Cea608::ParsePayloadData (void)
-{
-	// Since the AJAAncillaryData_Cea608 object has no "concrete" transport of its own,
-	// this has to be done by its subclasses.
-	m_rcvDataValid = false;
-	return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus AJAAncillaryData_Cea608::GeneratePayloadData (void)
-{
-	// Since the AJAAncillaryData_Cea608 object has no "concrete" transport of its own,
-	// this has to be done by its subclasses.
-	return AJA_STATUS_SUCCESS;
-}
-
-
 AJAAncillaryDataType AJAAncillaryData_Cea608::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	(void) pInAncData;

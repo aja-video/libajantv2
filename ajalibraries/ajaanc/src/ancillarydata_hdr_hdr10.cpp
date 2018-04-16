@@ -1,5 +1,5 @@
 /**
-	@file		ancillarydata_framestatusinfo5251.cpp
+	@file		ancillarydata_hdr_hdr10.cpp
 	@brief		Implements the AJAAncillaryData_HDR_HDR10 class.
 	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
@@ -56,7 +56,7 @@ void AJAAncillaryData_HDR_HDR10::Init (void)
 	m_coding       = AJAAncillaryDataCoding_Digital;
 	m_DID          = AJAAncillaryData_HDR_HDR10_DID;
 	m_SID          = AJAAncillaryData_HDR_HDR10_SID;
-	m_location.Set(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC, 16);
+	m_location.Set(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 16);
 	uint8_t payload[29] = {0x08,0x02,0x00,0xC2,0x33,0xC4,0x86,0x4C,0x1D,0xB8,0x0B,0xD0,0x84,0x80,0x3E,0x13,0x3D,0x42,0x40,0xE8,0x03,0x05,0x00,0xE8,0x03,0x90,0x01,0x00,0x00};
 	SetPayloadData(payload, 29);
 }
@@ -84,7 +84,7 @@ AJAAncillaryData_HDR_HDR10 & AJAAncillaryData_HDR_HDR10::operator = (const AJAAn
 AJAStatus AJAAncillaryData_HDR_HDR10::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_HDR_HDR10_PayloadSize))
+	if (GetDC() != AJAAncillaryData_HDR_HDR10_PayloadSize)
 	{
 		// Load default values
 		Init();
@@ -94,12 +94,6 @@ AJAStatus AJAAncillaryData_HDR_HDR10::ParsePayloadData (void)
 
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus AJAAncillaryData_HDR_HDR10::GeneratePayloadData (void)
-{
-	return AJA_STATUS_FAIL;
 }
 
 

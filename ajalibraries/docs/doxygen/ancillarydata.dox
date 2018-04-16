@@ -35,6 +35,7 @@
 			or CNTV2Card::AutoCirculateInitForOutput.
 	@note	The newer custom Anc inserter/extractor firmware feature works only with AutoCirculate.  A new API for operating the Anc
 			inserter/extractor widgets without AutoCirculate will be introduced in a future SDK/driver.
+	@note	\ref ajaanc can make it easier to pack/unpack the data to/from the host Anc data buffer(s).
 
 	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
 			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate \c NTV2_CHANNEL3.
@@ -75,10 +76,10 @@
 	@section	anccapturingwithac	Capturing Anc Packets Using AutoCirculate
 
 	For capturing Ancillary data packets (e.g., RP-215, VITC, SMPTE 334, etc.), newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc)
-	provide per-SDI-input ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
-	packet data into a separate host data buffer independent of the video buffer (see the new \c AUTOCIRCULATE_TRANSFER class).
+	provide ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
+	packet data into a separate host data buffer that's independent of the video buffer (see the \c AUTOCIRCULATE_TRANSFER class).
 
-	@subsection	ancgumpformat	Anc Buffer Data Format
+	@subsection	ancgumpformat	SDI Device Anc Buffer Data Format
 	The data bytes in the buffer consist of one or more packets having the following format:
 	<table>
 		<tr><td>Byte[0]		<td>\c 0xFF (start-of-packet marker). Note that \c 0xFF can be found in packet data, so you should use the packet data count (<b>DC</b>) to find subsequent packets in the Anc buffer.
@@ -98,11 +99,21 @@
 	Note that while the first byte of each packet is set to \c 0xFF, this is not a protected value and can legally occur within packets.
 	Software parsers must use the packet Data Count (<b>DC</b>) value to determine the length of each packet.
 
+	@subsection	ancrtpformat	IP Device Anc Buffer RTP Data Format
+
+	The data bytes in the ancillary data buffer will meet the RTP specification, which has the following format:
+
+	@image	html	fbf-rtp.png
+
+	Clients are free to parse the data themselves, or call AJAAncillaryList::SetFromIPAncData to transform the buffer contents
+	into an \c AJAAncillaryList containing one \c AJAAncillaryData instance per ancillary data packet.
+
 	@section	ancplayingwithac	Playing Anc Packets Using AutoCirculate
 
-	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide per-SDI-output
-	ANC data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from a separate host buffer
-	(see the new \c AUTOCIRCULATE_TRANSFER class). The data must be packaged as specified in \ref ancgumpformat prior to calling CNTV2Card::AutoCirculateTransfer.
+	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide
+	ancillary data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from
+	a separate host buffer (see the \c AUTOCIRCULATE_TRANSFER class). Prior to calling CNTV2Card::AutoCirculateTransfer, the data
+	must be packaged as specified in \ref ancgumpformat for SDI, or \ref ancrtpformat for IP/RTP.
 
 	@note	Because the outgoing line number can be specified, it's possible to overrun a line. Be certain that the data packets to be
 			inserted on a given line will fit for the output video standard.
@@ -122,15 +133,15 @@
 
 	The easiest format to use is \c NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
 	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the \c NTV2_VANCDATA_8BITSHIFT_ENABLE
-	mode, VANC lines can be readily parsed for Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
+	mode, VANC lines can be easily parsed into Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
 	found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
 	The CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc, etc.) to help with this.
-	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into the \ref ajaanc.
+	A future SDK will incorporate the CNTV2SMPTEAncData class' functionality into \ref ajaanc.
+
+	@bug	VANC Shift Mode is not implemented for SD video formats.
 
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
 	However, dual-link RGB video to/from RGB frame buffers will work.
-
-	@note	VANC Shift Mode is not implemented for SD video formats.
 
 	The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
 

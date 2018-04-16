@@ -84,7 +84,7 @@ AJAAncillaryData_FrameStatusInfo524D & AJAAncillaryData_FrameStatusInfo524D::ope
 AJAStatus AJAAncillaryData_FrameStatusInfo524D::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_FrameStatusInfo524D_PayloadSize))
+	if (GetDC() != AJAAncillaryData_FrameStatusInfo524D_PayloadSize)
 	{
 		// Load default values
 		Init();
@@ -94,15 +94,9 @@ AJAStatus AJAAncillaryData_FrameStatusInfo524D::ParsePayloadData (void)
 
 	// This is valid for the Canon C300 and C500, and bit 1 (0x02) is
 	// valid for the Sony F3.
-	m_IsRecording  = (((m_pPayload[10] & 0x03) == 0) ? false : true);
+	m_IsRecording  = (((m_payload[10] & 0x03) == 0) ? false : true);
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus AJAAncillaryData_FrameStatusInfo524D::GeneratePayloadData (void)
-{
-	return AJA_STATUS_FAIL;
 }
 
 

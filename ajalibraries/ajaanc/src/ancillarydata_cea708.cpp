@@ -56,10 +56,7 @@ void AJAAncillaryData_Cea708::Init (void)
 AJAAncillaryData_Cea708 & AJAAncillaryData_Cea708::operator = (const AJAAncillaryData_Cea708 & rhs)
 {
 	if (this != &rhs)		// ignore self-assignment
-	{
 		AJAAncillaryData::operator= (rhs);		// copy the base class stuff
-	}
-
 	return *this;
 }
 
@@ -73,7 +70,7 @@ void AJAAncillaryData_Cea708::Clear (void)
 
 AJAStatus AJAAncillaryData_Cea708::ParsePayloadData (void)
 {
-	if (m_pPayload == NULL_PTR || m_DC == 0)
+	if (IsEmpty())
 	{
 		Init();						// load default values
 		m_rcvDataValid = false;
@@ -106,9 +103,11 @@ AJAStatus AJAAncillaryData_Cea708::GeneratePayloadData (void)
 
 AJAAncillaryDataType AJAAncillaryData_Cea708::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	if (pInAncData->GetDID() == AJAAncillaryData_CEA708_DID)
-		if (pInAncData->GetSID() == AJAAncillaryData_CEA708_SID)
-			return AJAAncillaryDataType_Cea708;
+	if (pInAncData->GetLocationVideoSpace() == AJAAncillaryDataSpace_VANC)			//	Must be VANC (per SMPTE 334-2)
+		if (pInAncData->GetLocationDataChannel() == AJAAncillaryDataChannel_Y)		//	Must be Y-channel (per SMPTE 334-2)
+			if (pInAncData->GetDID() == AJAAncillaryData_CEA708_DID)				//	DID == 0x61
+				if (pInAncData->GetSID() == AJAAncillaryData_CEA708_SID)			//	SDID == 0x01
+					return AJAAncillaryDataType_Cea708;
 	return AJAAncillaryDataType_Unknown;
 }
 

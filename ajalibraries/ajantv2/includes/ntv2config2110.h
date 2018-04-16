@@ -121,8 +121,11 @@ public:
     bool        GetPTPMaster(std::string & ptpMaster);
     bool        GetPTPStatus(PTPStatus & ptpStatus);
 
-    bool        Set4KMode(const bool enable);
-    bool        Get4KMode(bool & enable);
+    bool        Set4KModeEnable(const bool enable);
+    bool        Get4KModeEnable(bool & enable);
+
+    bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
+    bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
 
     std::string GetTxSDPUrl(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
     std::string GetTxSDP(const NTV2Channel chan, const NTV2Stream stream);
@@ -197,7 +200,7 @@ protected:
 
     bool        GenSDP(const NTV2Channel channel, const NTV2Stream stream);
     bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
-    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);
+    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);    
 
 private:
     std::string To_String(int val);
