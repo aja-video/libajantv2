@@ -27,25 +27,9 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 				I can be built from the ancillary data received by the hardware during one field/frame, and/or
 				built "from scratch" and used as the source of outgoing ancillary data to hardware.
 
-	@details	By default, packets (AJAAncillaryData instances) remain in the order added to me. I have methods to sort
-				my contents by DID, SDID or location.
-
-				<b>Transmit:</b> Put My Packets Into Other Buffer Destinations
-				-	Call AJAAncillaryList::AddAncillaryData for each packet to be added to me.
-				-	For AJA hardware, it's best to call AJAAncillaryList::SortListByLocation before transmission.
-				-	For encoding into a "tall" or "taller" VANC frame buffer, call AJAAncillaryList::GetVANCTransmitData.
-				-	To fill the Anc buffer used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers function,
-					-	call AJAAncillaryList::GetSDITransmitData for SDI (see \ref ancgumpformat).
-					-	call AJAAncillaryList::GetIPTransmitData for IP/RTP (see \ref ancrtpformat).
-
-				<b>Receive:</b> Create Packet List(s) From Other Buffer Sources
-				-	For decoding VANC lines in a "tall" or "taller" frame buffer,
-					call the AJAAncillaryList::SetFromVANCData class method,
-					passing it an NTV2_POINTER that references the frame buffer (or just the VANC portion of one),
-					and an NTV2FormatDescriptor that describes the raster.
-				-	For newer devices with Anc extractors, using the buffer(s) used in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call...
-					-	call AJAAncillaryList::SetFromSDIAncData for SDI (see \ref ancgumpformat);
-					-	call AJAAncillaryList::SetFromIPAncData for IP/RTP (see \ref ancrtpformat).
+				By default, packets (AJAAncillaryData instances) remain in the order added to me.
+				Use my SortListByDID, SortListBySID or SortListByLocation methods to sort my packets by DID,
+				SDID or location.
 
 	@warning	I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
