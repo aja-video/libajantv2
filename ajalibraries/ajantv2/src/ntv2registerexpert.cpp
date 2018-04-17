@@ -2483,13 +2483,14 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
-			oss	<< "Limiting: "		<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-				<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
-				<< "FG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
-				<< "BG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
-				<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+			oss	<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
+				<< "Limiting: "			<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+				<< "VANC Pass-Thru: "	<< ((inRegValue & BIT(13)) ? "Background" : "Foreground")														<< endl
+				<< "FG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
+				<< "BG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
+				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "Input Sync: "		<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
 				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}

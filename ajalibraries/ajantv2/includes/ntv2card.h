@@ -1224,6 +1224,7 @@ public:
 
 	/**
 		@brief		Sets the VANC source for the given mixer/keyer to the foreground video (or not).
+					See the \ref ancillarydata discussion for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer			Specifies the mixer/keyer to be affected as a zero-based index number.
 		@param[in]	inFromForegroundSource	If true, sets the mixer/keyer's VANC source to its foreground video input;
@@ -1233,6 +1234,7 @@ public:
 
 	/**
 		@brief		Answers whether or not the VANC source for the given mixer/keyer is currently the foreground video.
+					See the \ref ancillarydata discussion for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer				Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
