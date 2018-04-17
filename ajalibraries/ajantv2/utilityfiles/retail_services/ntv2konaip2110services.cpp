@@ -2511,7 +2511,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                 // Audio specific
                 txAudioConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                 txAudioConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
-                txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPacketInterval;
+                txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
                 if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].stream, txAudioConfig) == true)
                 {
