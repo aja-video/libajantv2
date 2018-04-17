@@ -707,7 +707,6 @@ bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Channel channe
 
         DisableDecapsulatorStream(sfp, channel, stream);
         DisableDepacketizerStream(channel, stream);
-
     }
     return true;
 }
