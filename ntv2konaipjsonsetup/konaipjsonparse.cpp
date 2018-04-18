@@ -368,31 +368,48 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, Re
         QJsonObject vObj = vArray[i].toObject();
 
         rVideo2110.rxVideoCh[i].sourcePort[0]	= vObj["sfp1srcPort"].toInt();
+        if (m_verbose) std::cout << " sfp1srcPort " << rVideo2110.rxVideoCh[i].sourcePort[0] << std::endl;
         rVideo2110.rxVideoCh[i].destPort[0]     = vObj["sfp1DestPort"].toInt();
+        if (m_verbose) std::cout << " sfp1DestPort " << rVideo2110.rxVideoCh[i].destPort[0] << std::endl;
         rVideo2110.rxVideoCh[i].rxMatch[0]		= vObj["sfp1Filter"].toInt();
+        if (m_verbose) std::cout << " sfp1Filter " << rVideo2110.rxVideoCh[i].rxMatch[0] << std::endl;
         str = vObj["sfp1srcIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1srcIPAddress " << str.c_str() << std::endl;
         strncpy(rVideo2110.rxVideoCh[i].sourceIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1DestIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1DestIPAddress " << str.c_str() << std::endl;
         strncpy(rVideo2110.rxVideoCh[i].destIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].sfpEnable[0] = GetEnable(str);
 
         rVideo2110.rxVideoCh[i].sourcePort[1]	= vObj["sfp2srcPort"].toInt();
+        if (m_verbose) std::cout << " sfp2srcPort " << rVideo2110.rxVideoCh[i].sourcePort[1] << std::endl;
         rVideo2110.rxVideoCh[i].destPort[1]     = vObj["sfp2DestPort"].toInt();
+        if (m_verbose) std::cout << " sfp2DestPort " << rVideo2110.rxVideoCh[i].destPort[1] << std::endl;
         rVideo2110.rxVideoCh[i].rxMatch[1]		= vObj["sfp2Filter"].toInt();
-        str = vObj["sfp2SourceIP"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Filter " << rVideo2110.rxVideoCh[i].rxMatch[1] << std::endl;
+        str = vObj["sfp2srcIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2srcIPAddress " << str.c_str() << std::endl;
         strncpy(rVideo2110.rxVideoCh[i].sourceIP[1], str.c_str(), kStrMax);
-        str = vObj["sfp2DestIP"].toString().toStdString();
+        str = vObj["sfp2DestIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2DestIPAddress " << str.c_str() << std::endl;
         strncpy(rVideo2110.rxVideoCh[i].destIP[1], str.c_str(), kStrMax);
         str = vObj["sfp2Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].sfpEnable[1] = GetEnable(str);
 
         rVideo2110.rxVideoCh[i].vlan            = vObj["vlan"].toInt();
+        if (m_verbose) std::cout << " vlan " << rVideo2110.rxVideoCh[i].vlan << std::endl;
         rVideo2110.rxVideoCh[i].ssrc            = vObj["ssrc"].toInt();
+        if (m_verbose) std::cout << " ssrc " << rVideo2110.rxVideoCh[i].ssrc << std::endl;
         rVideo2110.rxVideoCh[i].payload         = vObj["payload"].toInt();
+        if (m_verbose) std::cout << " payload " << rVideo2110.rxVideoCh[i].payload << std::endl;
         str = vObj["enable"].toString().toStdString();
+        if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].enable = GetEnable(str);
         str = vObj["designator"].toString().toStdString();
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].channel = GetChannel(str);
     }
 
@@ -448,35 +465,55 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveAudio(const QJsonArray& aArray, Re
         QJsonObject vObj = aArray[i].toObject();
 
         rAudio2110.rxAudioCh[i].sourcePort[0]	= vObj["sfp1srcPort"].toInt();
+        if (m_verbose) std::cout << " sfp1srcPort " << rAudio2110.rxAudioCh[i].sourcePort[0] << std::endl;
         rAudio2110.rxAudioCh[i].destPort[0]     = vObj["sfp1DestPort"].toInt();
+        if (m_verbose) std::cout << " sfp1DestPort " << rAudio2110.rxAudioCh[i].destPort[0] << std::endl;
         rAudio2110.rxAudioCh[i].rxMatch[0]		= vObj["sfp1Filter"].toInt();
+        if (m_verbose) std::cout << " sfp1Filter " << rAudio2110.rxAudioCh[i].rxMatch[0] << std::endl;
         str = vObj["sfp1srcIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1srcIPAddress " << str.c_str() << std::endl;
         strncpy(rAudio2110.rxAudioCh[i].sourceIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1DestIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1DestIPAddress " << str.c_str() << std::endl;
         strncpy(rAudio2110.rxAudioCh[i].destIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].sfpEnable[0] = GetEnable(str);
 
         rAudio2110.rxAudioCh[i].sourcePort[1]	= vObj["sfp2srcPort"].toInt();
+        if (m_verbose) std::cout << " sfp2srcPort " << rAudio2110.rxAudioCh[i].sourcePort[1] << std::endl;
         rAudio2110.rxAudioCh[i].destPort[1]     = vObj["sfp2DestPort"].toInt();
+        if (m_verbose) std::cout << " sfp2DestPort " << rAudio2110.rxAudioCh[i].destPort[1] << std::endl;
         rAudio2110.rxAudioCh[i].rxMatch[1]		= vObj["sfp2Filter"].toInt();
-        str = vObj["sfp2SourceIP"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Filter " << rAudio2110.rxAudioCh[i].rxMatch[1] << std::endl;
+        str = vObj["sfp2srcIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2srcIPAddress " << str.c_str() << std::endl;
         strncpy(rAudio2110.rxAudioCh[i].sourceIP[1], str.c_str(), kStrMax);
-        str = vObj["sfp2DestIP"].toString().toStdString();
+        str = vObj["sfp2DestIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2DestIPAddress " << str.c_str() << std::endl;
         strncpy(rAudio2110.rxAudioCh[i].destIP[1], str.c_str(), kStrMax);
         str = vObj["sfp2Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].sfpEnable[1] = GetEnable(str);
 
         rAudio2110.rxAudioCh[i].vlan                = vObj["vlan"].toInt();
+        if (m_verbose) std::cout << " vlan " << rAudio2110.rxAudioCh[i].vlan << std::endl;
         rAudio2110.rxAudioCh[i].ssrc                = vObj["ssrc"].toInt();
+        if (m_verbose) std::cout << " ssrc " << rAudio2110.rxAudioCh[i].ssrc << std::endl;
         rAudio2110.rxAudioCh[i].payload             = vObj["payload"].toInt();
+        if (m_verbose) std::cout << " payload " << rAudio2110.rxAudioCh[i].payload << std::endl;
         rAudio2110.rxAudioCh[i].numAudioChannels    = vObj["numAudioChannels"].toInt();
+        if (m_verbose) std::cout << " numAudioChannels " << rAudio2110.rxAudioCh[i].numAudioChannels << std::endl;
         rAudio2110.rxAudioCh[i].audioPktInterval    = (eNTV2PacketInterval)vObj["audioPktInterval"].toInt();
+        if (m_verbose) std::cout << " audioPktInterval " << rAudio2110.rxAudioCh[i].audioPktInterval << std::endl;
         str = vObj["enable"].toString().toStdString();
+        if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].enable = GetEnable(str);
         str = vObj["stream"].toString().toStdString();
+        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].stream = GetStream(str);
         str = vObj["designator"].toString().toStdString();
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].channel = GetChannel(str);
     }
 
@@ -522,6 +559,8 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
 {
     memset(&tVideo2110, 0, sizeof(TransmitVideoData2110));
 
+    std::cout << "TransmitVideo2110" << std::endl;
+
     // up to 4 channels
     tVideo2110.numTxVideoChannels = MinVal(vArray.count(), 4);
     if (tVideo2110.numTxVideoChannels == 0)
@@ -534,25 +573,38 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         QJsonObject vObj = vArray[i].toObject();
 
         tVideo2110.txVideoCh[i].localPort[0]	= vObj["sfp1LocalPort"].toInt();
+        if (m_verbose) std::cout << " sfp1LocalPort " << tVideo2110.txVideoCh[i].localPort[0] << std::endl;
         tVideo2110.txVideoCh[i].remotePort[0]   = vObj["sfp1RemotePort"].toInt();
+        if (m_verbose) std::cout << " sfp1RemotePort " << tVideo2110.txVideoCh[i].remotePort[0] << std::endl;
         str = vObj["sfp1RemoteIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1RemoteIPAddress " << str.c_str() << std::endl;
         strncpy(tVideo2110.txVideoCh[i].remoteIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].sfpEnable[0] = GetEnable(str);
 
         tVideo2110.txVideoCh[i].localPort[1]	= vObj["sfp2LocalPort"].toInt();
+        if (m_verbose) std::cout << " sfp2LocalPort " << tVideo2110.txVideoCh[i].localPort[1] << std::endl;
         tVideo2110.txVideoCh[i].remotePort[1]   = vObj["sfp2RemotePort"].toInt();
+        if (m_verbose) std::cout << " sfp2RemotePort " << tVideo2110.txVideoCh[i].remotePort[1] << std::endl;
         str = vObj["sfp2RemoteIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2RemoteIPAddress " << str.c_str() << std::endl;
         strncpy(tVideo2110.txVideoCh[i].remoteIP[1], str.c_str(), kStrMax);
         str = vObj["sfp2Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].sfpEnable[1] = GetEnable(str);
 
         tVideo2110.txVideoCh[i].ttl             = vObj["ttl"].toInt();
+        if (m_verbose) std::cout << " ttl " << tVideo2110.txVideoCh[i].ttl << std::endl;
         tVideo2110.txVideoCh[i].ssrc            = vObj["ssrc"].toInt();
+        if (m_verbose) std::cout << " ssrc " << tVideo2110.txVideoCh[i].ssrc << std::endl;
         tVideo2110.txVideoCh[i].payload         = vObj["payload"].toInt();
+        if (m_verbose) std::cout << " payload " << tVideo2110.txVideoCh[i].payload << std::endl;
         str = vObj["enable"].toString().toStdString();
+        if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].enable = GetEnable(str);
         str = vObj["designator"].toString().toStdString();
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].channel = GetChannel(str);
     }
 
@@ -590,6 +642,8 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAudio(const QJsonArray& aArray, T
 {
     memset(&tAudio2110, 0, sizeof(TransmitAudioData2110));
 
+    std::cout << "TransmitAudio2110" << std::endl;
+
     // up to 4 channels
     tAudio2110.numTxAudioChannels = MinVal(aArray.count(), 4);
     if (tAudio2110.numTxAudioChannels == 0)
@@ -602,31 +656,48 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAudio(const QJsonArray& aArray, T
         QJsonObject vObj = aArray[i].toObject();
 
         tAudio2110.txAudioCh[i].localPort[0]	= vObj["sfp1LocalPort"].toInt();
+        if (m_verbose) std::cout << " sfp1LocalPort " << tAudio2110.txAudioCh[i].localPort[0] << std::endl;
         tAudio2110.txAudioCh[i].remotePort[0]   = vObj["sfp1RemotePort"].toInt();
+        if (m_verbose) std::cout << " sfp1RemotePort " << tAudio2110.txAudioCh[i].remotePort[0] << std::endl;
         str = vObj["sfp1RemoteIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1RemoteIPAddress " << str.c_str() << std::endl;
         strncpy(tAudio2110.txAudioCh[i].remoteIP[0], str.c_str(), kStrMax);
         str = vObj["sfp1Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].sfpEnable[0] = GetEnable(str);
 
         tAudio2110.txAudioCh[i].localPort[1]	= vObj["sfp2LocalPort"].toInt();
+        if (m_verbose) std::cout << " sfp2LocalPort " << tAudio2110.txAudioCh[i].localPort[1] << std::endl;
         tAudio2110.txAudioCh[i].remotePort[1]   = vObj["sfp2RemotePort"].toInt();
+        if (m_verbose) std::cout << " sfp2RemotePort " << tAudio2110.txAudioCh[i].remotePort[1] << std::endl;
         str = vObj["sfp2RemoteIPAddress"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2RemoteIPAddress " << str.c_str() << std::endl;
         strncpy(tAudio2110.txAudioCh[i].remoteIP[1], str.c_str(), kStrMax);
         str = vObj["sfp2Enable"].toString().toStdString();
+        if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].sfpEnable[1] = GetEnable(str);
 
         tAudio2110.txAudioCh[i].ttl                 = vObj["ttl"].toInt();
+        if (m_verbose) std::cout << " ttl " << tAudio2110.txAudioCh[i].ttl << std::endl;
         tAudio2110.txAudioCh[i].ssrc                = vObj["ssrc"].toInt();
+        if (m_verbose) std::cout << " ssrc " << tAudio2110.txAudioCh[i].ssrc << std::endl;
         tAudio2110.txAudioCh[i].payload             = vObj["payload"].toInt();
+        if (m_verbose) std::cout << " payload " << tAudio2110.txAudioCh[i].payload << std::endl;
         tAudio2110.txAudioCh[i].numAudioChannels    = vObj["numAudioChannels"].toInt();
+        if (m_verbose) std::cout << " numAudioChannels " << tAudio2110.txAudioCh[i].numAudioChannels << std::endl;
         tAudio2110.txAudioCh[i].firstAudioChannel   = vObj["firstAudioChannel"].toInt();
-        tAudio2110.txAudioCh[i].audioPktInterval    = (eNTV2PacketInterval)vObj["audioPacketInterval"].toInt();
+        if (m_verbose) std::cout << " firstAudioChannel " << tAudio2110.txAudioCh[i].firstAudioChannel << std::endl;
+        tAudio2110.txAudioCh[i].audioPktInterval    = (eNTV2PacketInterval)vObj["audioPktInterval"].toInt();
+        if (m_verbose) std::cout << " audioPktInterval " << tAudio2110.txAudioCh[i].audioPktInterval << std::endl;
 
         str = vObj["enable"].toString().toStdString();
+        if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].enable = GetEnable(str);
         str = vObj["stream"].toString().toStdString();
+        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].stream = GetStream(str);
         str = vObj["designator"].toString().toStdString();
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].channel = GetChannel(str);
     }
 
