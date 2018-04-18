@@ -5650,6 +5650,12 @@ public:
     AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
+
+	AJA_VIRTUAL bool AncInsertInit(NTV2Channel channel, NTV2VideoFormat videoFormat);
+	AJA_VIRTUAL bool AncExtractInit(NTV2Channel channel, NTV2VideoFormat videoFormat);
+
+	AJA_VIRTUAL bool SetAncInsertParameters(NTV2Channel channel, uint32_t frameNumber);
+	AJA_VIRTUAL bool SetAncExtractParameters(NTV2Channel channel, uint32_t frameNumber);
 	///@}
 
 protected:
