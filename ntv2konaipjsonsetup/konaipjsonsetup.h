@@ -2,6 +2,7 @@
 #define KONAIPBOARD_H
 
 #include "ntv2card.h"
+#include "konaipjsonparse.h"
 
 #include <QJsonObject>
 #include <QList>
@@ -175,11 +176,13 @@ protected:
     KonaIP2110ParamSetupStruct mKonaIP2110Params;
 
 private:
-    bool        mEnable2022_7;
-    bool        mIs2110;
-    bool        m4KMode;
-    uint32_t    mNetworkPathDifferential;
-    QString     mPTPMasterAddr;
+    bool                    mEnable2022_7;
+    bool                    mIs2110;
+    bool                    m4KMode;
+    uint32_t                mNetworkPathDifferential;
+    QString                 mPTPMasterAddr;
+
+    CKonaIpJsonParse2110    parse2110;
 };
 
 #endif // KONAIPBOARD_H

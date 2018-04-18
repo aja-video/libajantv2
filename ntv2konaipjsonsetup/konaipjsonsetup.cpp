@@ -26,6 +26,95 @@ CKonaIpJsonSetup::CKonaIpJsonSetup()
     mNetworkPathDifferential = 50;
 }
 
+bool CKonaIpJsonSetup::openJson(QString fileName)
+{
+    bool result = false;
+
+    QFile loadFile(fileName);
+    if ( !loadFile.open(QIODevice::ReadOnly))
+    {
+        qWarning("Couldn't open json file.");
+        return false;
+
+    }
+    QByteArray saveData = loadFile.readAll();
+
+    QJsonParseError err;
+    QJsonDocument loadDoc = (QJsonDocument::fromJson(saveData,&err));
+    if (err.error != QJsonParseError::NoError)
+    {
+        qDebug() << "JSON ERROR" << err.errorString() << "offset=" << err.offset;
+        saveData[err.offset = 0];
+        qDebug() << saveData;
+        return false;
+    }
+
+    const QJsonObject & json = loadDoc.object();
+    QJsonValue qjv = json.value("protocol");
+    if (qjv != QJsonValue::Undefined)
+    {
+        QString protocol = qjv.toString();
+        if (protocol == "2110")
+        {
+            mIs2110 = true;
+            cout << "Protocol 2110 " << endl;
+        }
+        else
+            cout << "Protocol 2022 " << endl;
+    }
+
+    if (mIs2110)
+    {
+        qjv = json.value("PTPMaster");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mPTPMasterAddr = qjv.toString();
+            cout << "PTP Master Address " << mPTPMasterAddr.toStdString() << endl;
+        }
+        qjv = json.value("4KMode");
+        if (qjv != QJsonValue::Undefined)
+        {
+            m4KMode = getEnable(qjv.toString());
+        }
+        else
+        {
+            m4KMode = false;
+        }
+        cout << "4K Mode " << m4KMode << endl;
+
+        result = readJson2110(json);
+    }
+    else
+    {
+        qjv = json.value("enable2022_7");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mEnable2022_7 = getEnable(qjv.toString());
+        }
+        else
+        {
+            mEnable2022_7 = false;
+        }
+        cout << "2022-7 mode " << mEnable2022_7 << endl;
+
+        qjv = json.value("networkPathDifferential");
+        if (qjv != QJsonValue::Undefined)
+        {
+            mNetworkPathDifferential = qjv.toString().toUInt();
+        }
+        else
+        {
+            mNetworkPathDifferential = 50;
+        }
+        cout << "NetworkPathDifferential " << mNetworkPathDifferential << endl;
+
+        result = readJson2022(json);
+    }
+
+    return result;
+}
+
+
 bool CKonaIpJsonSetup::readJson2022(const QJsonObject &json)
 {
     mKonaIP2022Params.mSFPs.clear();
@@ -575,94 +664,6 @@ bool CKonaIpJsonSetup::readJson2110(const QJsonObject &json)
     return true;
 }
 
-bool CKonaIpJsonSetup::openJson(QString fileName)
-{
-    bool result = false;
-
-    QFile loadFile(fileName);
-    if ( !loadFile.open(QIODevice::ReadOnly))
-    {
-        qWarning("Couldn't open json file.");
-        return false;
-
-    }
-    QByteArray saveData = loadFile.readAll();
-
-    QJsonParseError err;
-    QJsonDocument loadDoc = (QJsonDocument::fromJson(saveData,&err));
-    if (err.error != QJsonParseError::NoError)
-    {
-        qDebug() << "JSON ERROR" << err.errorString() << "offset=" << err.offset;
-        saveData[err.offset = 0];
-        qDebug() << saveData;
-        return false;
-    }
-
-    const QJsonObject & json = loadDoc.object();
-    QJsonValue qjv = json.value("protocol");
-    if (qjv != QJsonValue::Undefined)
-    {
-        QString protocol = qjv.toString();
-        if (protocol == "2110")
-        {
-            mIs2110 = true;
-            cout << "Protocol 2110 " << endl;
-        }
-        else
-            cout << "Protocol 2022 " << endl;
-    }
-
-    if (mIs2110)
-    {
-        qjv = json.value("PTPMaster");
-        if (qjv != QJsonValue::Undefined)
-        {
-            mPTPMasterAddr = qjv.toString();
-            cout << "PTP Master Address " << mPTPMasterAddr.toStdString() << endl;
-        }
-        qjv = json.value("4KMode");
-        if (qjv != QJsonValue::Undefined)
-        {
-            m4KMode = getEnable(qjv.toString());
-        }
-        else
-        {
-            m4KMode = false;
-        }
-        cout << "4K Mode " << m4KMode << endl;
-
-        result = readJson2110(json);
-    }
-    else
-    {
-        qjv = json.value("enable2022_7");
-        if (qjv != QJsonValue::Undefined)
-        {
-            mEnable2022_7 = getEnable(qjv.toString());
-        }
-        else
-        {
-            mEnable2022_7 = false;
-        }
-        cout << "2022-7 mode " << mEnable2022_7 << endl;
-
-        qjv = json.value("networkPathDifferential");
-        if (qjv != QJsonValue::Undefined)
-        {
-            mNetworkPathDifferential = qjv.toString().toUInt();
-        }
-        else
-        {
-            mNetworkPathDifferential = 50;
-        }
-        cout << "NetworkPathDifferential " << mNetworkPathDifferential << endl;
-
-        result = readJson2022(json);
-    }
-
-    return result;
-}
-
 bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 {
     if (mIs2110)
@@ -677,6 +678,8 @@ bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 
 bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 {
+    return true;
+
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
