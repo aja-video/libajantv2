@@ -15,18 +15,26 @@ const int kStrMax			= IP_STRSIZE-1;
 
 CKonaIpJsonParse2110::CKonaIpJsonParse2110()
 {
+    m_verbose = false;
 }
 
 CKonaIpJsonParse2110::~CKonaIpJsonParse2110()
 {
 }
 
-bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj)
+bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
 {
     if (topObj.isEmpty())
         return false;
 
     bool success = true;
+    m_verbose = verbose;
+
+    memset(&m_net2110, 0, sizeof(NetworkData2110));
+    memset(&m_receiveVideo2110, 0, sizeof(ReceiveVideoData2110));
+    memset(&m_receiveAudio2110, 0, sizeof(ReceiveAudioData2110));
+    memset(&m_transmitVideo2110, 0, sizeof(TransmitVideoData2110));
+    memset(&m_transmitAudio2110, 0, sizeof(TransmitAudioData2110));
 
     //
     // Network
@@ -269,15 +277,15 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 {
     memset(&n2110, 0, sizeof(NetworkData2110));
 
-    std::cout << "Network" << std::endl;
+    std::cout << "Network2110" << std::endl;
 
     // ptpMasterIP
     std::string str = topObj["ptpMasterIP"].toString().toStdString();
-    std::cout << " ptpMasterIP " << str.c_str() << std::endl;
+    if (m_verbose) std::cout << " ptpMasterIP " << str.c_str() << std::endl;
     strncpy(n2110.ptpMasterIP, str.c_str(), kStrMax);
 
     str = topObj["setup4k"].toString().toStdString();
-    std::cout << " setup4k " << str.c_str() << std::endl;
+    if (m_verbose) std::cout << " setup4k " << str.c_str() << std::endl;
     n2110.setup4k = GetEnable(str);
 
     // sfp
@@ -288,28 +296,28 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 
     for (uint32_t i=0; i<n2110.numSFPs; i++)
     {
-        std::cout << " SFP " << i << std::endl;
+        if (m_verbose) std::cout << " SFP " << i << std::endl;
 
         QJsonObject sfpObj = sfpArray[i].toObject();
 
         str = sfpObj["designator"].toString().toStdString();
-        std::cout << "  designator " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  designator " << str.c_str() << std::endl;
         n2110.sfp[i].sfp = GetSfp(str);
 
         str = sfpObj["ipAddress"].toString().toStdString();
-        std::cout << "  ipAddress " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  ipAddress " << str.c_str() << std::endl;
         strncpy(n2110.sfp[i].ipAddress, str.c_str(), kStrMax);
 
         str = sfpObj["subnetMask"].toString().toStdString();
-        std::cout << "  subnetMask " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  subnetMask " << str.c_str() << std::endl;
         strncpy(n2110.sfp[i].subnetMask, str.c_str(), kStrMax);
 
         str = sfpObj["gateWay"].toString().toStdString();
-        std::cout << "  gateWay " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  gateWay " << str.c_str() << std::endl;
         strncpy(n2110.sfp[i].gateWay, str.c_str(), kStrMax);
 
         str = sfpObj["enable"].toString().toStdString();
-        std::cout << "  enable " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  enable " << str.c_str() << std::endl;
         n2110.sfp[i].enable = GetEnable(str);
     }
 
@@ -345,6 +353,8 @@ bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJs
 bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, ReceiveVideoData2110& rVideo2110)
 {
     memset(&rVideo2110, 0, sizeof(ReceiveVideoData2110));
+
+    std::cout << "ReceiveVideo2110" << std::endl;
 
     // up to 4 channels
     rVideo2110.numRxVideoChannels = MinVal(vArray.count(), 4);
@@ -423,6 +433,8 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveVideo(const ReceiveVideoData2110& 
 bool CKonaIpJsonParse2110::JsonToStructReceiveAudio(const QJsonArray& aArray, ReceiveAudioData2110& rAudio2110)
 {
     memset(&rAudio2110, 0, sizeof(ReceiveAudioData2110));
+
+    std::cout << "ReceiveAudio2110" << std::endl;
 
     // up to 4 channels
     rAudio2110.numRxAudioChannels = MinVal(aArray.count(), 4);

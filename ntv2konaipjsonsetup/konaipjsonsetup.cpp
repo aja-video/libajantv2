@@ -57,32 +57,15 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         if (protocol == "2110")
         {
             mIs2110 = true;
-            cout << "Protocol 2110 " << endl;
+            cout << "Protocol2110 " << endl;
         }
         else
-            cout << "Protocol 2022 " << endl;
+            cout << "Protocol2022 " << endl;
     }
 
     if (mIs2110)
     {
-        qjv = json.value("PTPMaster");
-        if (qjv != QJsonValue::Undefined)
-        {
-            mPTPMasterAddr = qjv.toString();
-            cout << "PTP Master Address " << mPTPMasterAddr.toStdString() << endl;
-        }
-        qjv = json.value("4KMode");
-        if (qjv != QJsonValue::Undefined)
-        {
-            m4KMode = getEnable(qjv.toString());
-        }
-        else
-        {
-            m4KMode = false;
-        }
-        cout << "4K Mode " << m4KMode << endl;
-
-        result = readJson2110(json);
+        result = parse2110.SetJson(json, false);
     }
     else
     {
@@ -298,372 +281,6 @@ bool CKonaIpJsonSetup::readJson2022(const QJsonObject &json)
     return true;
 }
 
-bool CKonaIpJsonSetup::readJson2110(const QJsonObject &json)
-{
-    mKonaIP2110Params.mSFPs.clear();
-    QJsonArray sfpArray = json["sfps"].toArray();
-    for (int sfpIndex = 0; sfpIndex < sfpArray.size(); ++sfpIndex)
-    {
-        cout << "SFP" << endl;
-
-        QJsonObject sfpObject = sfpArray[sfpIndex].toObject();
-        SFPStruct sfpStruct;
-
-        sfpStruct.mSfpDesignator = sfpObject["designator"].toString();
-        if (!sfpStruct.mSfpDesignator.isEmpty())
-            cout << "SFPDesignator " << sfpStruct.mSfpDesignator.toStdString() << endl;
-
-        sfpStruct.mIPAddress = sfpObject["ipAddress"].toString();
-        if (!sfpStruct.mIPAddress.isEmpty())
-            cout << "IPAddress " << sfpStruct.mIPAddress.toStdString() << endl;
-
-        sfpStruct.mSubnetMask = sfpObject["subnetMask"].toString();
-        if (!sfpStruct.mSubnetMask.isEmpty())
-            cout << "SubnetMask " << sfpStruct.mSubnetMask.toStdString() << endl;
-
-        sfpStruct.mGateway = sfpObject["gateway"].toString();
-        if (!sfpStruct.mGateway.isEmpty())
-            cout << "Gateway " << sfpStruct.mGateway.toStdString() << endl;
-
-        sfpStruct.mEnable = sfpObject["enable"].toString();
-        if (!sfpStruct.mEnable.isEmpty())
-            cout << "Enable " << sfpStruct.mEnable.toStdString() << endl;
-        cout << endl;
-
-        mKonaIP2110Params.mSFPs.append(sfpStruct);
-    }
-
-    mKonaIP2110Params.mReceiveVideo2110Channels.clear();
-    QJsonArray receiveVideoChannelArray = json["receiveVideo2110"].toArray();
-    for (int receiveChannelIndex = 0; receiveChannelIndex < receiveVideoChannelArray.size(); ++receiveChannelIndex)
-    {
-        cout << "Receive2110VideoChannels" << endl;
-
-        QJsonObject receiveChannelObject = receiveVideoChannelArray[receiveChannelIndex].toObject();
-        ReceiveStructVideo2110 receiveStruct;
-
-        receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
-        if (!receiveStruct.mChannelDesignator.isEmpty())
-            cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
-
-        receiveStruct.mSfp1SrcIPAddress = receiveChannelObject["sfp1SrcIPAddress"].toString();
-        if (!receiveStruct.mSfp1SrcIPAddress.isEmpty())
-            cout << "SFP1SrcIPAddress " << receiveStruct.mSfp1SrcIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp1SrcPort = receiveChannelObject["sfp1SrcPort"].toString();
-        if (!receiveStruct.mSfp1SrcPort.isEmpty())
-            cout << "SFP1SrcPort " << receiveStruct.mSfp1SrcPort.toStdString() << endl;
-
-        receiveStruct.mSfp1DestIPAddress = receiveChannelObject["sfp1DestIPAddress"].toString();
-        if (!receiveStruct.mSfp1DestIPAddress.isEmpty())
-            cout << "SFP1DestIPAddress " << receiveStruct.mSfp1DestIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp1DestPort = receiveChannelObject["sfp1DestPort"].toString();
-        if (!receiveStruct.mSfp1DestPort.isEmpty())
-            cout << "SFP1DestPort " << receiveStruct.mSfp1DestPort.toStdString() << endl;
-
-        receiveStruct.mSfp1Filter = receiveChannelObject["sfp1Filter"].toString();
-        if (!receiveStruct.mSfp1Filter.isEmpty())
-            cout << "SFP1Filter " << receiveStruct.mSfp1Filter.toStdString() << endl;
-
-        receiveStruct.mSfp2SrcIPAddress = receiveChannelObject["sfp2SrcIPAddress"].toString();
-        if (!receiveStruct.mSfp2SrcIPAddress.isEmpty())
-            cout << "SFP2SrcIAddress " << receiveStruct.mSfp2SrcIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp2SrcPort = receiveChannelObject["sfp2SrcPort"].toString();
-        if (!receiveStruct.mSfp2SrcPort.isEmpty())
-            cout << "SFP2SrcPort " << receiveStruct.mSfp2SrcPort.toStdString() << endl;
-
-        receiveStruct.mSfp2DestIPAddress = receiveChannelObject["sfp2DestIPAddress"].toString();
-        if (!receiveStruct.mSfp2DestIPAddress.isEmpty())
-            cout << "SFP2DestIPAddress " << receiveStruct.mSfp2DestIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp2DestPort = receiveChannelObject["sfp2DestPort"].toString();
-        if (!receiveStruct.mSfp2DestPort.isEmpty())
-            cout << "SFP2DestPort " << receiveStruct.mSfp2DestPort.toStdString() << endl;
-
-        receiveStruct.mSfp2Filter = receiveChannelObject["sfp2Filter"].toString();
-        if (!receiveStruct.mSfp2Filter.isEmpty())
-            cout << "SFP2Filter " << receiveStruct.mSfp2Filter.toStdString() << endl;
-
-        receiveStruct.mVLAN = receiveChannelObject["vlan"].toString();
-        if (!receiveStruct.mVLAN.isEmpty())
-            cout << "VLAN " << receiveStruct.mVLAN.toStdString() << endl;
-
-        receiveStruct.mSSRC = receiveChannelObject["ssrc"].toString();
-        if (!receiveStruct.mSSRC.isEmpty())
-            cout << "SSRC " << receiveStruct.mSSRC.toStdString() << endl;
-
-        receiveStruct.mPayload = receiveChannelObject["payload"].toString();
-        if (!receiveStruct.mPayload.isEmpty())
-            cout << "Payload " << receiveStruct.mPayload.toStdString() << endl;
-
-        receiveStruct.mVideoFormat = receiveChannelObject["videoFormat"].toString();
-        if (!receiveStruct.mVideoFormat.isEmpty())
-            cout << "Video Format " << receiveStruct.mVideoFormat.toStdString() << endl;
-
-        receiveStruct.mSfp1Enable = receiveChannelObject["sfp1Enable"].toString();
-        if (!receiveStruct.mSfp1Enable.isEmpty())
-            cout << "SFP1 Enable " << receiveStruct.mSfp1Enable.toStdString() << endl;
-
-        receiveStruct.mSfp2Enable = receiveChannelObject["sfp2Enable"].toString();
-        if (!receiveStruct.mSfp2Enable.isEmpty())
-            cout << "SFP2 Enable " << receiveStruct.mSfp2Enable.toStdString() << endl;
-
-        receiveStruct.mEnable = receiveChannelObject["enable"].toString();
-        if (!receiveStruct.mEnable.isEmpty())
-            cout << "Enable " << receiveStruct.mEnable.toStdString() << endl;
-        cout << endl;
-
-        mKonaIP2110Params.mReceiveVideo2110Channels.append(receiveStruct);
-    }
-
-    mKonaIP2110Params.mReceiveAudio2110Channels.clear();
-    QJsonArray receiveAudioChannelArray = json["receiveAudio2110"].toArray();
-    for (int receiveChannelIndex = 0; receiveChannelIndex < receiveAudioChannelArray.size(); ++receiveChannelIndex)
-    {
-        cout << "Receive2110AudioChannels" << endl;
-
-        QJsonObject receiveChannelObject = receiveAudioChannelArray[receiveChannelIndex].toObject();
-        ReceiveStructAudio2110 receiveStruct;
-
-        receiveStruct.mChannelDesignator = receiveChannelObject["designator"].toString();
-        if (!receiveStruct.mChannelDesignator.isEmpty())
-            cout << "ChannelDesignator " << receiveStruct.mChannelDesignator.toStdString() << endl;
-
-        receiveStruct.mStream = receiveChannelObject["stream"].toString();
-        if (!receiveStruct.mStream.isEmpty())
-            cout << "Stream " << receiveStruct.mStream.toStdString() << endl;
-
-        receiveStruct.mSfp1SrcIPAddress = receiveChannelObject["sfp1SrcIPAddress"].toString();
-        if (!receiveStruct.mSfp1SrcIPAddress.isEmpty())
-            cout << "SFP1SrcIPAddress " << receiveStruct.mSfp1SrcIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp1SrcPort = receiveChannelObject["sfp1SrcPort"].toString();
-        if (!receiveStruct.mSfp1SrcPort.isEmpty())
-            cout << "SFP1SrcPort " << receiveStruct.mSfp1SrcPort.toStdString() << endl;
-
-        receiveStruct.mSfp1DestIPAddress = receiveChannelObject["sfp1DestIPAddress"].toString();
-        if (!receiveStruct.mSfp1DestIPAddress.isEmpty())
-            cout << "SFP1DestIPAddress " << receiveStruct.mSfp1DestIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp1DestPort = receiveChannelObject["sfp1DestPort"].toString();
-        if (!receiveStruct.mSfp1DestPort.isEmpty())
-            cout << "SFP1DestPort " << receiveStruct.mSfp1DestPort.toStdString() << endl;
-
-        receiveStruct.mSfp1Filter = receiveChannelObject["sfp1Filter"].toString();
-        if (!receiveStruct.mSfp1Filter.isEmpty())
-            cout << "SFP1Filter " << receiveStruct.mSfp1Filter.toStdString() << endl;
-
-        receiveStruct.mSfp2SrcIPAddress = receiveChannelObject["sfp2SrcIPAddress"].toString();
-        if (!receiveStruct.mSfp2SrcIPAddress.isEmpty())
-            cout << "SFP2SrcIAddress " << receiveStruct.mSfp2SrcIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp2SrcPort = receiveChannelObject["sfp2SrcPort"].toString();
-        if (!receiveStruct.mSfp2SrcPort.isEmpty())
-            cout << "SFP2SrcPort " << receiveStruct.mSfp2SrcPort.toStdString() << endl;
-
-        receiveStruct.mSfp2DestIPAddress = receiveChannelObject["sfp2DestIPAddress"].toString();
-        if (!receiveStruct.mSfp2DestIPAddress.isEmpty())
-            cout << "SFP2DestIPAddress " << receiveStruct.mSfp2DestIPAddress.toStdString() << endl;
-
-        receiveStruct.mSfp2DestPort = receiveChannelObject["sfp2DestPort"].toString();
-        if (!receiveStruct.mSfp2DestPort.isEmpty())
-            cout << "SFP2DestPort " << receiveStruct.mSfp2DestPort.toStdString() << endl;
-
-        receiveStruct.mSfp2Filter = receiveChannelObject["sfp2Filter"].toString();
-        if (!receiveStruct.mSfp2Filter.isEmpty())
-            cout << "SFP2Filter " << receiveStruct.mSfp2Filter.toStdString() << endl;
-
-        receiveStruct.mVLAN = receiveChannelObject["vlan"].toString();
-        if (!receiveStruct.mVLAN.isEmpty())
-            cout << "VLAN " << receiveStruct.mVLAN.toStdString() << endl;
-
-        receiveStruct.mSSRC = receiveChannelObject["ssrc"].toString();
-        if (!receiveStruct.mSSRC.isEmpty())
-            cout << "SSRC " << receiveStruct.mSSRC.toStdString() << endl;
-
-        receiveStruct.mPayload = receiveChannelObject["payload"].toString();
-        if (!receiveStruct.mPayload.isEmpty())
-            cout << "Payload " << receiveStruct.mPayload.toStdString() << endl;
-
-        receiveStruct.mNumAudioChannels = receiveChannelObject["numAudioChannels"].toString();
-        if (!receiveStruct.mNumAudioChannels.isEmpty())
-            cout << "Num Audio Channels " << receiveStruct.mNumAudioChannels.toStdString() << endl;
-
-        receiveStruct.mAudioPktInterval = receiveChannelObject["audioPktInterval"].toString();
-        if (!receiveStruct.mAudioPktInterval.isEmpty())
-            cout << "Audio Packet Interval " << receiveStruct.mAudioPktInterval.toStdString() << endl;
-
-        receiveStruct.mSfp1Enable = receiveChannelObject["sfp1Enable"].toString();
-        if (!receiveStruct.mSfp1Enable.isEmpty())
-            cout << "SFP1 Enable " << receiveStruct.mSfp1Enable.toStdString() << endl;
-
-        receiveStruct.mSfp2Enable = receiveChannelObject["sfp2Enable"].toString();
-        if (!receiveStruct.mSfp2Enable.isEmpty())
-            cout << "SFP2 Enable " << receiveStruct.mSfp2Enable.toStdString() << endl;
-
-        receiveStruct.mEnable = receiveChannelObject["enable"].toString();
-        if (!receiveStruct.mEnable.isEmpty())
-            cout << "Enable " << receiveStruct.mEnable.toStdString() << endl;
-        cout << endl;
-
-        mKonaIP2110Params.mReceiveAudio2110Channels.append(receiveStruct);
-    }
-
-    mKonaIP2110Params.mTransmitVideo2110Channels.clear();
-    QJsonArray transmitVideoChannelArray = json["transmitVideo2110"].toArray();
-    for (int transmitChannelIndex = 0; transmitChannelIndex < transmitVideoChannelArray.size(); ++transmitChannelIndex)
-    {
-        cout << "Transmit2110VideoChannels" << endl;
-
-        QJsonObject transmitChannelObject = transmitVideoChannelArray[transmitChannelIndex].toObject();
-        TransmitStructVideo2110 transmitStruct;
-
-        transmitStruct.mChannelDesignator = transmitChannelObject["designator"].toString();
-        if (!transmitStruct.mChannelDesignator.isEmpty())
-            cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << endl;
-
-        transmitStruct.mSfp1RemoteIPAddress = transmitChannelObject["sfp1RemoteIPAddress"].toString();
-        if (!transmitStruct.mSfp1RemoteIPAddress.isEmpty())
-            cout << "SFP1RemoteIPAddress " << transmitStruct.mSfp1RemoteIPAddress.toStdString() << endl;
-
-        transmitStruct.mSfp1RemotePort = transmitChannelObject["sfp1RemotePort"].toString();
-        if (!transmitStruct.mSfp1RemotePort.isEmpty())
-            cout << "SFP1RemotePort " << transmitStruct.mSfp1RemotePort.toStdString() << endl;
-
-        transmitStruct.mSfp1LocalPort = transmitChannelObject["sfp1LocalPort"].toString();
-        if (!transmitStruct.mSfp1LocalPort.isEmpty())
-            cout << "SFP1LocalPort " << transmitStruct.mSfp1LocalPort.toStdString() << endl;
-
-        transmitStruct.mSfp2RemoteIPAddress = transmitChannelObject["sfp2RemoteIPAddress"].toString();
-        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
-            cout << "SFP2RemoteIPAddress " << transmitStruct.mSfp2RemoteIPAddress.toStdString() << endl;
-
-        transmitStruct.mSfp2RemotePort = transmitChannelObject["sfp2RemotePort"].toString();
-        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
-            cout << "SFP2RemotePort " << transmitStruct.mSfp2RemotePort.toStdString() << endl;
-
-        transmitStruct.mSfp2LocalPort = transmitChannelObject["sfp2LocalPort"].toString();
-        if (!transmitStruct.mSfp2LocalPort.isEmpty())
-            cout << "SFP2LocalPort " << transmitStruct.mSfp2LocalPort.toStdString() << endl;
-
-        transmitStruct.mVideoFormat = transmitChannelObject["videoFormat"].toString();
-        if (!transmitStruct.mVideoFormat.isEmpty())
-            cout << "Video format " << transmitStruct.mVideoFormat.toStdString() << endl;
-
-        transmitStruct.mPayload = transmitChannelObject["payload"].toString();
-        if (!transmitStruct.mPayload.isEmpty())
-            cout << "Payload " << transmitStruct.mPayload.toStdString() << endl;
-
-        transmitStruct.mSSRC = transmitChannelObject["ssrc"].toString();
-        if (!transmitStruct.mSSRC.isEmpty())
-            cout << "SSRC " << transmitStruct.mSSRC.toStdString() << endl;
-
-        transmitStruct.mTTL = transmitChannelObject["ttl"].toString();
-        if (!transmitStruct.mTTL.isEmpty())
-            cout << "TTL " << transmitStruct.mTTL.toStdString() << endl;
-
-        transmitStruct.mSfp1Enable = transmitChannelObject["sfp1Enable"].toString();
-        if (!transmitStruct.mSfp1Enable.isEmpty())
-            cout << "SFP1 Enable " << transmitStruct.mSfp1Enable.toStdString() << endl;
-
-        transmitStruct.mSfp2Enable = transmitChannelObject["sfp2Enable"].toString();
-        if (!transmitStruct.mSfp2Enable.isEmpty())
-            cout << "SFP2 Enable " << transmitStruct.mSfp2Enable.toStdString() << endl;
-
-        transmitStruct.mEnable = transmitChannelObject["enable"].toString();
-        if (!transmitStruct.mSfp2Enable.isEmpty())
-            cout << "Enable " << transmitStruct.mEnable.toStdString() << endl;
-        cout << endl;
-
-        mKonaIP2110Params.mTransmitVideo2110Channels.append(transmitStruct);
-    }
-
-    mKonaIP2110Params.mTransmitAudio2110Channels.clear();
-    QJsonArray transmitAudioChannelArray = json["transmitAudio2110"].toArray();
-    for (int transmitChannelIndex = 0; transmitChannelIndex < transmitVideoChannelArray.size(); ++transmitChannelIndex)
-    {
-        cout << "Transmit2110AudioChannels" << endl;
-
-        QJsonObject transmitChannelObject = transmitAudioChannelArray[transmitChannelIndex].toObject();
-        TransmitStructAudio2110 transmitStruct;
-
-        transmitStruct.mChannelDesignator = transmitChannelObject["designator"].toString();
-        if (!transmitStruct.mChannelDesignator.isEmpty())
-            cout << "ChannelDesignator " << transmitStruct.mChannelDesignator.toStdString() << endl;
-
-        transmitStruct.mStream = transmitChannelObject["stream"].toString();
-        if (!transmitStruct.mStream.isEmpty())
-            cout << "Stream " << transmitStruct.mStream.toStdString() << endl;
-
-        transmitStruct.mSfp1RemoteIPAddress = transmitChannelObject["sfp1RemoteIPAddress"].toString();
-        if (!transmitStruct.mSfp1RemoteIPAddress.isEmpty())
-            cout << "SFP1RemoteIPAddress " << transmitStruct.mSfp1RemoteIPAddress.toStdString() << endl;
-
-        transmitStruct.mSfp1RemotePort = transmitChannelObject["sfp1RemotePort"].toString();
-        if (!transmitStruct.mSfp1RemotePort.isEmpty())
-            cout << "SFP1RemotePort " << transmitStruct.mSfp1RemotePort.toStdString() << endl;
-
-        transmitStruct.mSfp1LocalPort = transmitChannelObject["sfp1LocalPort"].toString();
-        if (!transmitStruct.mSfp1LocalPort.isEmpty())
-            cout << "SFP1LocalPort " << transmitStruct.mSfp1LocalPort.toStdString() << endl;
-
-        transmitStruct.mSfp2RemoteIPAddress = transmitChannelObject["sfp2RemoteIPAddress"].toString();
-        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
-            cout << "SFP2RemoteIPAddress " << transmitStruct.mSfp2RemoteIPAddress.toStdString() << endl;
-
-        transmitStruct.mSfp2RemotePort = transmitChannelObject["sfp2RemotePort"].toString();
-        if (!transmitStruct.mSfp2RemoteIPAddress.isEmpty())
-            cout << "SFP2RemotePort " << transmitStruct.mSfp2RemotePort.toStdString() << endl;
-
-        transmitStruct.mSfp2LocalPort = transmitChannelObject["sfp2LocalPort"].toString();
-        if (!transmitStruct.mSfp2LocalPort.isEmpty())
-            cout << "SFP2LocalPort " << transmitStruct.mSfp2LocalPort.toStdString() << endl;
-
-        transmitStruct.mNumAudioChannels = transmitChannelObject["numAudioChannels"].toString();
-        if (!transmitStruct.mNumAudioChannels.isEmpty())
-            cout << "Num Audio Channels " << transmitStruct.mNumAudioChannels.toStdString() << endl;
-
-        transmitStruct.mFirstAudioChannel = transmitChannelObject["firstAudioChannel"].toString();
-        if (!transmitStruct.mFirstAudioChannel.isEmpty())
-            cout << "First Audio Channel " << transmitStruct.mFirstAudioChannel.toStdString() << endl;
-
-        transmitStruct.mAudioPktInterval = transmitChannelObject["audioPktInterval"].toString();
-        if (!transmitStruct.mAudioPktInterval.isEmpty())
-            cout << "Audio Packet Interval " << transmitStruct.mAudioPktInterval.toStdString() << endl;
-
-        transmitStruct.mPayload = transmitChannelObject["payload"].toString();
-        if (!transmitStruct.mPayload.isEmpty())
-            cout << "Payload " << transmitStruct.mPayload.toStdString() << endl;
-
-        transmitStruct.mSSRC = transmitChannelObject["ssrc"].toString();
-        if (!transmitStruct.mSSRC.isEmpty())
-            cout << "SSRC " << transmitStruct.mSSRC.toStdString() << endl;
-
-        transmitStruct.mTTL = transmitChannelObject["ttl"].toString();
-        if (!transmitStruct.mTTL.isEmpty())
-            cout << "TTL " << transmitStruct.mTTL.toStdString() << endl;
-
-        transmitStruct.mSfp1Enable = transmitChannelObject["sfp1Enable"].toString();
-        if (!transmitStruct.mSfp1Enable.isEmpty())
-            cout << "SFP1 Enable " << transmitStruct.mSfp1Enable.toStdString() << endl;
-
-        transmitStruct.mSfp2Enable = transmitChannelObject["sfp2Enable"].toString();
-        if (!transmitStruct.mSfp2Enable.isEmpty())
-            cout << "SFP2 Enable " << transmitStruct.mSfp2Enable.toStdString() << endl;
-
-        transmitStruct.mEnable = transmitChannelObject["enable"].toString();
-        if (!transmitStruct.mSfp2Enable.isEmpty())
-            cout << "Enable " << transmitStruct.mEnable.toStdString() << endl;
-        cout << endl;
-
-        mKonaIP2110Params.mTransmitAudio2110Channels.append(transmitStruct);
-    }
-
-    return true;
-}
-
 bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 {
     if (mIs2110)
@@ -678,8 +295,6 @@ bool CKonaIpJsonSetup::setupBoard(std::string deviceSpec)
 
 bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
 {
-    return true;
-
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, mDevice);
     if (!mDevice.IsOpen())
@@ -910,6 +525,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
+    return true;
+
+#if 0
     CNTV2Config2110	config2110 (device);
 	const NTV2VideoFormatKinds allowedVideoFormatTypes(::NTV2DeviceCanDo4KVideo(device.GetDeviceID()) ? VIDEO_FORMATS_ALL : VIDEO_FORMATS_NON_4KUHD);
 
@@ -1231,6 +849,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
     return true;
+#endif
 }
 
 NTV2Channel getChannel(QString channelDesignator)
@@ -1250,26 +869,4 @@ NTV2Channel getChannel(QString channelDesignator)
 bool getEnable(QString enableBoolString)
 {
     return (enableBoolString == "true");
-}
-
-
-void CKonaIpJsonSetup::dumpRx2110Config(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
-{
-    qDebug() << "Rx2110Config for channel " << channel << "and stream " << stream;
-
-    qDebug() << "  rxMatch             " << rxConfig.rxMatch;
-    qDebug() << "  sourceIP            " << QString::fromStdString(rxConfig.sourceIP);
-    qDebug() << "  destIP              " << QString::fromStdString(rxConfig.destIP);
-    qDebug() << "  sourcePort          "<< rxConfig.sourcePort;
-    qDebug() << "  destPort            "<< rxConfig.destPort;
-    qDebug() << "  ssrc                "<< rxConfig.ssrc;
-    qDebug() << "  vlan                "<< rxConfig.vlan;
-    qDebug() << "  payloadType         "<< rxConfig.payloadType;
-    qDebug() << "  videoFormat         "<< rxConfig.videoFormat;
-    qDebug() << "  videoSamples        "<< rxConfig.videoSamples;
-    qDebug() << "  payloadLen          "<< rxConfig.payloadLen;
-    qDebug() << "  lastPayloadLen      "<< rxConfig.lastPayloadLen;
-    qDebug() << "  pktsPerLine         "<< rxConfig.pktsPerLine;
-    qDebug() << "  numAudioChannels    "<< rxConfig.numAudioChannels;
-    qDebug() << "  audioPacketInterval "<< rxConfig.audioPacketInterval << endl;
 }

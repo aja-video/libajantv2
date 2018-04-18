@@ -28,7 +28,7 @@ public:
     CKonaIpJsonParse2110();
     ~CKonaIpJsonParse2110();
 
-    bool SetJson(const QJsonObject& topObj);
+    bool SetJson(const QJsonObject& topObj, bool verbose);
     bool SetJsonNetwork(const QJsonObject& obj);
     bool SetJsonReceiveVideo(const QJsonArray& jsonArray);
     bool SetJsonReceiveAudio(const QJsonArray& jsonArray);
@@ -59,7 +59,9 @@ public:
     NTV2Stream GetStream(std::string streamString);
     QString GetStream(NTV2Stream stream);
 
-protected:	
+protected:
+    bool                    m_verbose;
+
     QJsonObject             m_topJson;
     QJsonObject             m_netJson;
     QJsonArray              m_receiveVideoJson;
