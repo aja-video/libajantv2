@@ -21,7 +21,7 @@ SRCS = main.cpp ntv2player.cpp ntv2democommon.cpp
 
 INCS = ntv2player.h ntv2democommon.h
 
-LIBS = -lajaanc
+LIBS = -lajaanc -lajacc
 
 include $(DIR)/../../../../build/common.mk
 
