@@ -25,13 +25,13 @@
 
 typedef enum
 {
-    kIpEnable2110               = 0x69653130,       // ie10
-    kNetworkData2110            = 0x6e743130,       // nt10
-    kTransmitVideoData2110     	= 0x74763130,       // tv10
-    kTransmitAudioData2110     	= 0x74613130,       // ta10
-    kReceiveVideoData2110     	= 0x72763130,       // rv10
-    kReceiveAudioData2110     	= 0x72613130,       // ra10
-    kMetadataVData2110          = 0x6d643130        // md10
+    kIpEnable2110           = NTV2_FOURCC('i','e','1','0'), // 4CC of enable data
+    kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
+    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
+    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
+    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
+    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
+    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
 } VirtualDataTag2110 ;
 
 typedef struct
