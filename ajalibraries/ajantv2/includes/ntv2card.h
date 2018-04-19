@@ -4545,12 +4545,21 @@ public:
 		@brief	Reads the current contents of the device's analog LTC input registers.
 		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
 									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
-		@param[out]	outRP188Data	Receives the timecode read from the device registers. Only the "Low" and "High" fields are set --
-									the "DBB" field is set to zero.
+		@param[out]	outRP188Data	Receives the timecode read from the device registers.
 		@return		True if successful; otherwise false.
 		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
 	**/
 	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data);
+
+	/**
+		@brief	Reads the current contents of the device's analog LTC input registers.
+		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
+									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
+		@param[out]	outRP188Data	Receives the timecode read from the device registers.
+		@return		True if successful; otherwise false.
+		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
+	**/
+	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) input channel that's providing the clock reference being used by the given device's analog LTC input.
@@ -4578,11 +4587,21 @@ public:
 		@brief	Writes the given timecode to the specified analog LTC output register.
 		@param[in]	inLTCOutput		Specifies the device's analog LTC output to use. Use 0 for LTC Out 1, 1 for LTC Out 2, etc.
 									(Call ::NTV2DeviceGetNumLTCOutputs to determine the number of analog LTC outputs.)
-		@param[in]	inRP188Data		Specifies the timecode to write into the device registers. Only the "Low" and "High" fields are used --
-									the "DBB" field is ignored.
+		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
+									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data);
+
+	/**
+		@brief	Writes the given timecode to the specified analog LTC output register.
+		@param[in]	inLTCOutput		Specifies the device's analog LTC output to use. Use 0 for LTC Out 1, 1 for LTC Out 2, etc.
+									(Call ::NTV2DeviceGetNumLTCOutputs to determine the number of analog LTC outputs.)
+		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
+									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) output channel that's providing the clock reference being used by the given device's analog LTC output.
