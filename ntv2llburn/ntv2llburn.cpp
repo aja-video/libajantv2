@@ -41,10 +41,6 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 		mAudioSystem			(NTV2_AUDIOSYSTEM_1),
 		mDoMultiChannel			(inDoMultiChannel),
 		mGlobalQuit				(false),
-		mVideoBufferSize		(0),
-		mAudioBufferSize		(0),
-		mpHostVideoBuffer		(NULL),
-		mpHostAudioBuffer		(NULL),
 		mFramesProcessed		(0),
 		mFramesDropped			(0)
 {
@@ -61,19 +57,6 @@ NTV2LLBurn::~NTV2LLBurn ()
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
-
-	//	Free all my host buffers...
-	if (mpHostVideoBuffer)
-	{
-		AJAMemory::FreeAligned (mpHostVideoBuffer);
-		mpHostVideoBuffer = NULL;
-	}
-
-	if (mpHostAudioBuffer)
-	{
-		AJAMemory::FreeAligned (mpHostAudioBuffer);
-		mpHostAudioBuffer = NULL;
-	}
 
 	if (!mDoMultiChannel)
 	{
@@ -111,6 +94,12 @@ AJAStatus NTV2LLBurn::Init (void)
     if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
+	mDeviceID = mDevice.GetDeviceID ();		//	Keep the device ID handy since it will be used frequently
+
+	//	Burn requires device capable of capturing and playing video...
+	if (!(::NTV2DeviceCanDoCapture(mDeviceID)  &&  ::NTV2DeviceCanDoPlayback(mDeviceID)))
+		{cerr << "## ERROR:  Device cannot both capture & play video" << endl;	return AJA_STATUS_BAD_PARAM; }
+
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetEveryFrameServices (mSavedTaskMode);				//	Save the current device state
@@ -127,8 +116,6 @@ AJAStatus NTV2LLBurn::Init (void)
 	}
 	else
 		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Force OEM tasks
-
-	mDeviceID = mDevice.GetDeviceID ();							//	Keep the device ID handy since it will be used frequently
 
 	//	Configure the SDI relays if present
 	if (::NTV2DeviceHasSDIRelays (mDeviceID))
@@ -161,10 +148,6 @@ AJAStatus NTV2LLBurn::Init (void)
 	if (AJA_FAILURE (status))
 		return status;
 
-	//	Set up the device signal routing, and both playout and capture AutoCirculate...
-	RouteInputSignal ();
-	RouteOutputSignal ();
-
 	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mTimecodeIndex))
 		mDevice.SetLTCInputEnable(true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 
@@ -181,16 +164,11 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 {
 	const uint16_t	numFrameStores	(::NTV2DeviceGetNumFrameStores (mDeviceID));
 
-	//	Set the video format to match the incoming video format.
-	//	Does the device support the desired input source?
+	//	Can the device support the desired input source?
 	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mInputSource))
-	{
-		cerr << "## ERROR:  This device cannot receive input from the specified source" << endl;
-		return AJA_STATUS_BAD_PARAM;	//	Nope
-	}
+		{cerr << "## ERROR:  This device cannot receive input from the specified source" << endl;	return AJA_STATUS_BAD_PARAM;}
 
-	mInputChannel = ::NTV2InputSourceToChannel (mInputSource);
-
+	mInputChannel = ::NTV2InputSourceToChannel(mInputSource);
 	switch (mInputSource)
 	{
 		case NTV2_INPUTSOURCE_ANALOG1:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
@@ -207,13 +185,13 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	}
 
 	bool	isTransmit	(false);
-	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors (Io4K, Corvid24, etc.)...
+	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors...
 		&& NTV2_INPUT_SOURCE_IS_SDI (mInputSource)							//	...and desired input source is SDI...
 			&& mDevice.GetSDITransmitEnable (mInputChannel, &isTransmit)	//	...and GetSDITransmitEnable succeeds...
 				&& isTransmit)												//	...and input is set to "transmit"...
 	{
 		mDevice.SetSDITransmitEnable (mInputChannel, false);				//	...then disable transmit mode...
-		AJATime::Sleep (500);												//	...and give the device a dozen frames or so to lock to the input signal
+		mDevice.WaitForInputVerticalInterrupt(mInputChannel, 12);			//	...and give the device a dozen frames or so to lock to the input signal
 	}	//	if input SDI connector needs to switch from transmit mode
 
 	//	Determine the input video signal format, and set the device's reference source to that input...
@@ -262,24 +240,11 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.EnableOutputInterrupt (mInputChannel);
 	mDevice.SubscribeOutputVerticalEvent (mInputChannel);
 
-	//
-	//	Normally, timecode embedded in the output signal comes from whatever is written
-	//	into the RP188 registers (30/31 for SDI out 1, 65/66 for SDIout2, etc.).
-	//	Under this scheme, in this demo, the timecode embedded in the output will be up
-	//	to 3 frames ahead of the timecode that's actually burned into the frame. Modern
-	//	AJA devices can bypass the RP188 registers and simply copy whatever timecode appears
-	//	in any input source (called the "bypass source"). To ensure that the playout timecode
-	//	will actually be seen in the output signal, "bypass mode" must be disabled...
-	//
-	bool	isBypassEnabled	(false);
-	mDevice.IsRP188BypassEnabled (mInputChannel, isBypassEnabled);
-	if (isBypassEnabled)
-		mDevice.DisableRP188Bypass (mInputChannel);
+	//	Set the Frame Store modes
+	mDevice.SetMode	(mInputChannel,  NTV2_MODE_CAPTURE);
+	mDevice.SetMode (mOutputChannel, NTV2_MODE_DISPLAY);
 
-	//	Be sure the RP188 source for the input channel is being grabbed from the right input...
-	mDevice.SetRP188Source (mInputChannel, mInputSource);
-
-	if (!NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat))
+	if (!NTV2_IS_SD_VIDEO_FORMAT(mVideoFormat))
 	{
 		//	Enable VANC for non-SD formats, to pass thru captions, etc.
 		mDevice.SetEnableVANCData (false);
@@ -292,13 +257,31 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	}	//	if not SD video
 	mDevice.GetVANCMode (mVancMode, mInputChannel);
 
-	//	Tell the hardware which buffers to use until the main worker thread runs
-	mDevice.SetInputFrame	(mInputChannel,  0);
-	mDevice.SetOutputFrame	(mOutputChannel, 2);
+	//	Set up the device signal routing, and both playout and capture AutoCirculate...
+	RouteInputSignal();
+	RouteOutputSignal();
 
-	//	Set the Frame Store modes
-	mDevice.SetMode	(mInputChannel,  NTV2_MODE_CAPTURE);
-	mDevice.SetMode (mOutputChannel, NTV2_MODE_DISPLAY);
+	//	Be sure the RP188 mode for the SDI input (expressed as an NTV2Channel),
+	//	is set to NTV2_RP188_INPUT...
+	bool	isBypassEnabled	(false);
+	mDevice.IsRP188BypassEnabled (mInputChannel, isBypassEnabled);
+	if (isBypassEnabled)
+		mDevice.DisableRP188Bypass (mInputChannel);
+	mDevice.SetRP188Mode (mInputChannel, NTV2_RP188_INPUT);
+	mDevice.SetRP188Source (mInputChannel, 0);
+
+	//	Make sure the RP188 mode for all SDI outputs is NTV2_RP188_OUTPUT, and that their RP188
+	//	registers are not bypassed (i.e. timecode isn't sourced from an SDI input, as for E-E mode)...
+	NTV2_ASSERT(!mRP188Outputs.empty());
+	for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
+	{
+		mDevice.SetRP188Mode (*iter, NTV2_RP188_OUTPUT);
+		mDevice.DisableRP188Bypass (*iter);
+	}
+
+	//	Tell the hardware which buffers to use until the main worker thread runs
+	mDevice.SetInputFrame (mInputChannel,  0);
+	mDevice.SetOutputFrame(mOutputChannel, 2);
 
 	return AJA_STATUS_SUCCESS;
 
@@ -347,13 +330,10 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 
 AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 {
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
-	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
-
 	//	Allocate and add each in-host buffer to my member variables.
 	//	Note that DMA performance can be accelerated slightly by using page-aligned video buffers...
-	mpHostVideoBuffer = reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mVideoBufferSize, AJA_PAGE_SIZE));
-	mpHostAudioBuffer = reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mAudioBufferSize, AJA_PAGE_SIZE));
+	mpHostVideoBuffer = NTV2_POINTER(::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode));
+	mpHostAudioBuffer = NTV2_POINTER(NTV2_AUDIOSIZE_MAX);
 
 	if (!mpHostVideoBuffer || !mpHostAudioBuffer)
 	{
@@ -394,6 +374,8 @@ void NTV2LLBurn::RouteOutputSignal (void)
 	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel, ::IsRGBFormat (mPixelFormat)));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
 
+	mRP188Outputs.clear();
+	mRP188Outputs.insert(mOutputChannel);
 	if (::IsRGBFormat (mPixelFormat))
 	{
 		const NTV2OutputCrosspointID	cscVidOutputXpt	(::GetCSCOutputXptFromChannel (mOutputChannel));	//	Use CSC's YUV video output
@@ -410,22 +392,20 @@ void NTV2LLBurn::RouteOutputSignal (void)
 	{
 		//	Route all SDI outputs to the outputXpt...
 		const NTV2Channel	startNum		(NTV2_CHANNEL1);
-		const NTV2Channel	endNum			(NTV2Channel (::NTV2DeviceGetNumVideoChannels (mDeviceID)));
+		const NTV2Channel	endNum			(NTV2Channel(::NTV2DeviceGetNumVideoChannels(mDeviceID)));
 		NTV2WidgetID		outputWidgetID	(NTV2_WIDGET_INVALID);
 
-		for (NTV2Channel chan (startNum);  chan < endNum;  chan = NTV2Channel (chan + 1))
+		for (NTV2Channel chan(startNum);  chan < endNum;  chan = NTV2Channel(chan+1))
 		{
 			mDevice.SetRP188Source (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
-
-			if (chan == mInputChannel || chan == mOutputChannel)
+			if (chan == mInputChannel  ||  chan == mOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
+			mRP188Outputs.insert(chan);	//	Add this SDI spigot to those we'll push timecode into
 			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 				mDevice.SetSDITransmitEnable (chan, true);
-			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, ::NTV2DeviceCanDoDualLink (mDeviceID)), outputWidgetID))
+			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, ::NTV2DeviceCanDoDualLink(mDeviceID)), outputWidgetID))
 				if (::NTV2DeviceCanDoWidget (mDeviceID, outputWidgetID))
-				{
-					mDevice.Connect (::GetSDIOutputInputXpt (chan), outputXpt);
-				}
+					mDevice.Connect (::GetSDIOutputInputXpt(chan), outputXpt);
 		}	//	for each output spigot
 
 		//	If HDMI and/or analog video outputs are available, route them, too...
@@ -545,10 +525,10 @@ void NTV2LLBurn::ProcessFrames (void)
 				//	Do the calculations and transfer from the last address to the end of the buffer...
 				audioBytesCaptured 	= audioInWrapAddress - mAudioInLastAddress;
 
-				mDevice.DMAReadAudio (mAudioSystem, mpHostAudioBuffer, mAudioInLastAddress, audioBytesCaptured);
+				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioInLastAddress, audioBytesCaptured);
 
 				//	Transfer the new samples from the start of the buffer to the current address...
-				mDevice.DMAReadAudio (mAudioSystem, &mpHostAudioBuffer [audioBytesCaptured / sizeof (uint32_t)],
+				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostAddress(audioBytesCaptured),
 										audioReadOffset, currentAudioInAddress - audioReadOffset);
 
 				audioBytesCaptured += currentAudioInAddress - audioReadOffset;
@@ -558,7 +538,7 @@ void NTV2LLBurn::ProcessFrames (void)
 				audioBytesCaptured = currentAudioInAddress - mAudioInLastAddress;
 
 				//	No wrap, so just perform a linear DMA from the buffer...
-				mDevice.DMAReadAudio (mAudioSystem, mpHostAudioBuffer, mAudioInLastAddress, audioBytesCaptured);
+				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioInLastAddress, audioBytesCaptured);
 			}
 
 			mAudioInLastAddress = currentAudioInAddress;
@@ -569,23 +549,25 @@ void NTV2LLBurn::ProcessFrames (void)
 		currentOutFrame	^= 1;
 
 		//	DMA the new frame to system memory...
-		mDevice.DMAReadFrame (currentInFrame, mpHostVideoBuffer, mVideoBufferSize);
+		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
 
 		//	Determine which timecode value should be burned in to the video frame
-		RP188_STRUCT	timecodeValue;
-		if (mTimecodeIndex != NTV2_TCINDEX_LTC1 && mTimecodeIndex != NTV2_TCINDEX_LTC2 && InputSignalHasTimecode ())
+		NTV2_RP188	timecodeValue;
+		if (!NTV2_IS_ANALOG_TIMECODE_INDEX(mTimecodeIndex)  &&  InputSignalHasTimecode())
 		{
 			//	Use the embedded input time code...
-			mDevice.GetRP188Data (mInputChannel, 0, timecodeValue);
+			mDevice.GetRP188Data (mInputChannel, timecodeValue);
 			CRP188	inputRP188Info	(timecodeValue);
-			inputRP188Info.GetRP188Str (timeCodeString);
+			inputRP188Info.GetRP188Str(timeCodeString);
+			//cerr << "SDI" << DEC(mTimecodeIndex) << ":" << timeCodeString << ":" << timecodeValue << endl;
 		}
-		else if ((mTimecodeIndex == NTV2_TCINDEX_LTC1 || mTimecodeIndex == NTV2_TCINDEX_LTC2) && AnalogLTCInputHasTimecode ())
+		else if (NTV2_IS_ANALOG_TIMECODE_INDEX(mTimecodeIndex)  &&  AnalogLTCInputHasTimecode())
 		{
 			//	Use the analog input time code...
-			mDevice.ReadAnalogLTCInput (mTimecodeIndex== NTV2_TCINDEX_LTC1 ? 0 : 1, timecodeValue);
+			mDevice.ReadAnalogLTCInput (mTimecodeIndex == NTV2_TCINDEX_LTC1 ? 0 : 1, timecodeValue);
 			CRP188	analogRP188Info	(timecodeValue);
-			analogRP188Info.GetRP188Str (timeCodeString);
+			analogRP188Info.GetRP188Str(timeCodeString);
+			//cerr << "Ana" << DEC(mTimecodeIndex) << ":" << timeCodeString << ":" << timecodeValue << endl;
 		}
 		else
 		{
@@ -594,18 +576,20 @@ void NTV2LLBurn::ProcessFrames (void)
 			const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 			const	CRP188			frameRP188Info	(mFramesProcessed, tcFormat);
 
-			frameRP188Info.GetRP188Reg (timecodeValue);
-			frameRP188Info.GetRP188Str (timeCodeString);
+			frameRP188Info.GetRP188Reg(timecodeValue);
+			frameRP188Info.GetRP188Str(timeCodeString);
+			//cerr << "Inv:" << timeCodeString << ":" << timecodeValue << endl;
 		}
 
 		//	"Burn" the timecode into the host buffer while we have full access to it...
-		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (mpHostVideoBuffer), timeCodeString.c_str (), 80);
+		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (mpHostVideoBuffer.GetHostPointer()), timeCodeString.c_str (), 80);
 
 		//	Send the updated frame back to the board for display...
-		mDevice.DMAWriteFrame (currentOutFrame, mpHostVideoBuffer, mVideoBufferSize);
+		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
 
-		//	Write the output timecode...
-		mDevice.SetRP188Data (mOutputChannel, currentOutFrame, timecodeValue);
+		//	Write the output timecode (for all SDI output spigots)...
+		for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
+			mDevice.SetRP188Data (*iter, timecodeValue);
 
 		if (mWithAudio)
 		{
@@ -613,10 +597,10 @@ void NTV2LLBurn::ProcessFrames (void)
 			if ((mAudioOutLastAddress + audioBytesCaptured) > audioOutWrapAddress)
 			{
 				//	The audio will wrap. Transfer enough bytes to fill the buffer to the end...
-				mDevice.DMAWriteAudio (mAudioSystem, mpHostAudioBuffer, mAudioOutLastAddress, audioOutWrapAddress - mAudioOutLastAddress);
+				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioOutLastAddress, audioOutWrapAddress - mAudioOutLastAddress);
 
 				//	Now transfer the remaining bytes to the front of the buffer...
-				mDevice.DMAWriteAudio (mAudioSystem, &mpHostAudioBuffer [(audioOutWrapAddress - mAudioOutLastAddress) / sizeof (uint32_t)],
+				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostAddress(audioOutWrapAddress - mAudioOutLastAddress),
 									   0, audioBytesCaptured - (audioOutWrapAddress - mAudioOutLastAddress));
 
 				mAudioOutLastAddress = audioBytesCaptured - (audioOutWrapAddress - mAudioOutLastAddress);
@@ -624,7 +608,7 @@ void NTV2LLBurn::ProcessFrames (void)
 			else
 			{
 				//	No wrap, so just do a linear DMA from the buffer...
-				mDevice.DMAWriteAudio (mAudioSystem, mpHostAudioBuffer, mAudioOutLastAddress, audioBytesCaptured);
+				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioOutLastAddress, audioBytesCaptured);
 
 				mAudioOutLastAddress += audioBytesCaptured;
 			}
@@ -666,36 +650,33 @@ void NTV2LLBurn::GetStatus (ULWord & outFramesProcessed, ULWord & outFramesDropp
 }	//	GetACStatus
 
 
-static ULWord GetRP188RegisterForInput (const NTV2InputSource inInputSource)
+static ULWord GetRP188DBBRegNumForInput (const NTV2InputSource inInputSource)
 {
 	switch (inInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	break;	//	reg 29
-		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	break;	//	reg 64
-		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	break;	//	reg 268
-		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	break;	//	reg 273
-		case NTV2_INPUTSOURCE_SDI5:		return kRegRP188InOut5DBB;	break;	//	reg 342
-		case NTV2_INPUTSOURCE_SDI6:		return kRegRP188InOut6DBB;	break;	//	reg 418
-		case NTV2_INPUTSOURCE_SDI7:		return kRegRP188InOut7DBB;	break;	//	reg 427
-		case NTV2_INPUTSOURCE_SDI8:		return kRegRP188InOut8DBB;	break;	//	reg 436
-		default:						return 0;					break;
+		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	//	reg 29
+		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	//	reg 64
+		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	//	reg 268
+		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	//	reg 273
+		case NTV2_INPUTSOURCE_SDI5:		return kRegRP188InOut5DBB;	//	reg 342
+		case NTV2_INPUTSOURCE_SDI6:		return kRegRP188InOut6DBB;	//	reg 418
+		case NTV2_INPUTSOURCE_SDI7:		return kRegRP188InOut7DBB;	//	reg 427
+		case NTV2_INPUTSOURCE_SDI8:		return kRegRP188InOut8DBB;	//	reg 436
+		default:						return 0;
 	}	//	switch on input source
 
-}	//	GetRP188RegisterForInput
+}	//	GetRP188DBBRegNumForInput
 
 
 bool NTV2LLBurn::InputSignalHasTimecode (void)
 {
 	bool			result		(false);
-	const ULWord	regNum		(GetRP188RegisterForInput (mInputSource));
+	const ULWord	regNum		(GetRP188DBBRegNumForInput(mInputSource));
 	ULWord			regValue	(0);
 
-	//
 	//	Bit 16 of the RP188 DBB register will be set if there is timecode embedded in the input signal...
-	//
-	if (regNum && mDevice.ReadRegister (regNum, &regValue) && regValue & BIT(16))
+	if (regNum  &&  mDevice.ReadRegister(regNum, &regValue)  &&  regValue & BIT(16))
 		result = true;
-
 	return result;
 
 }	//	InputSignalHasTimecode
