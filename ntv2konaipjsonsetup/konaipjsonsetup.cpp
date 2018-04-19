@@ -65,7 +65,7 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
 
     if (mIs2110)
     {
-        result = parse2110.SetJson(json, false);
+        result = parse2110.SetJson(json, true);
     }
     else
     {
@@ -525,25 +525,54 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
-    return true;
-
-#if 0
     CNTV2Config2110	config2110 (device);
 	const NTV2VideoFormatKinds allowedVideoFormatTypes(::NTV2DeviceCanDo4KVideo(device.GetDeviceID()) ? VIDEO_FORMATS_ALL : VIDEO_FORMATS_NON_4KUHD);
 
-    if (!mPTPMasterAddr.isEmpty())
+    // fetch parsed newtwork struct
+    NetworkData2110 net2110 = parse2110.m_net2110;
+
+    if (net2110.ptpMasterIP[0])
     {
         device.SetReference(NTV2_REFERENCE_SFP1_PTP);
-        config2110.SetPTPMaster(mPTPMasterAddr.toStdString());
+        config2110.SetPTPMaster(net2110.ptpMasterIP);
     }
 
-    config2110.Set4KModeEnable(m4KMode);
+    config2110.Set4KModeEnable(net2110.setup4k);
 
-    if (mKonaIP2110Params.mSFPs.size() < 1)
+    if (net2110.numSFPs < 1)
     {
         cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;
         return false;
     }
+
+    for (uint32_t i = 0; i < net2110.numSFPs; i++)
+    {
+        eSFP sfp = SFP_1;
+        if (i > 0)
+            sfp = SFP_2;
+
+        bool rv;
+        if (net2110.sfp[i].enable)
+        {
+            rv =  config2110.SetNetworkConfiguration(sfp,
+                                                     net2110.sfp[i].ipAddress,
+                                                     net2110.sfp[i].subnetMask,
+                                                     net2110.sfp[i].gateWay);
+            if (!rv)
+            {
+                cerr << "Error: " << config2110.getLastError() << endl;
+                return false;
+            }
+        }
+        else
+        {
+            config2110.DisableNetworkInterface(sfp);
+        }
+    }
+
+    return true;
+#if 0
+
 
     QListIterator<SFPStruct> sfpIter(mKonaIP2110Params.mSFPs);
     while (sfpIter.hasNext())

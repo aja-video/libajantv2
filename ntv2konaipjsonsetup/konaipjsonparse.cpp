@@ -317,7 +317,7 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
         strncpy(n2110.sfp[i].gateWay, str.c_str(), kStrMax);
 
         str = sfpObj["enable"].toString().toStdString();
-        if (m_verbose) std::cout << "  enable " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << "  enable " << str.c_str() << std::endl << std::endl;
         n2110.sfp[i].enable = GetEnable(str);
     }
 
@@ -409,7 +409,7 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, Re
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].enable = GetEnable(str);
         str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         rVideo2110.rxVideoCh[i].channel = GetChannel(str);
     }
 
@@ -513,7 +513,7 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveAudio(const QJsonArray& aArray, Re
         if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].stream = GetStream(str);
         str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         rAudio2110.rxAudioCh[i].channel = GetChannel(str);
     }
 
@@ -604,7 +604,7 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].enable = GetEnable(str);
         str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         tVideo2110.txVideoCh[i].channel = GetChannel(str);
     }
 
@@ -697,7 +697,7 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAudio(const QJsonArray& aArray, T
         if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].stream = GetStream(str);
         str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl;
+        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         tAudio2110.txAudioCh[i].channel = GetChannel(str);
     }
 

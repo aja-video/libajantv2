@@ -59,7 +59,7 @@ public:
     NTV2Stream GetStream(std::string streamString);
     QString GetStream(NTV2Stream stream);
 
-protected:
+public:
     bool                    m_verbose;
 
     QJsonObject             m_topJson;
