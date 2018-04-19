@@ -1169,6 +1169,7 @@
 					"-lajantv2d",
 					"-lajabased",
 					"-lajaanc",
+					"-lajacc",
 				);
 				PRODUCT_NAME = ntv2player4k;
 			};
@@ -1181,6 +1182,7 @@
 					"-lajantv2",
 					"-lajabase",
 					"-lajaanc",
+					"-lajacc",
 				);
 				PRODUCT_NAME = ntv2player4k;
 			};
@@ -1207,6 +1209,7 @@
 					"-lajantv2d",
 					"-lajabased",
 					"-lajaanc",
+					"-lajacc",
 				);
 				PRODUCT_NAME = ntv2player;
 			};
@@ -1219,6 +1222,7 @@
 					"-lajantv2",
 					"-lajabase",
 					"-lajaanc",
+					"-lajacc",
 				);
 				PRODUCT_NAME = ntv2player;
 			};
