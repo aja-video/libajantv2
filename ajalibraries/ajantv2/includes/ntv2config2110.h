@@ -17,6 +17,148 @@
 #include <sstream>
 
 /**
+    @brief	Structs and enums that hold the virtual config data used by services the ControlPanel application and JSON parsers
+**/
+
+#define RX_USE_SFP_IP       BIT(31)
+#define IP_STRSIZE          32
+
+typedef enum
+{
+    kIpEnable2110           = NTV2_FOURCC('i','e','1','0'), // 4CC of enable data
+    kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
+    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
+    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
+    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
+    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
+    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
+} VirtualDataTag2110 ;
+
+typedef struct
+{
+    NTV2Channel             channel;
+    char                    remoteIP[2][IP_STRSIZE];
+    uint32_t                remotePort[2];
+    uint32_t                localPort[2];
+    uint32_t                sfpEnable[2];
+    uint32_t                ttl;
+    uint32_t                ssrc;
+    uint32_t                payload;
+    NTV2VideoFormat         videoFormat;
+    uint32_t                enable;
+} TxVideoChData2110;
+
+typedef struct
+{
+    NTV2Channel             channel;
+    NTV2Stream              stream;
+    char                    remoteIP[2][IP_STRSIZE];
+    uint32_t                localPort[2];
+    uint32_t                remotePort[2];
+    uint32_t                sfpEnable[2];
+    uint32_t                ttl;
+    uint32_t                ssrc;
+    uint32_t                payload;
+    uint32_t                numAudioChannels;
+    uint32_t                firstAudioChannel;
+    eNTV2PacketInterval     audioPktInterval;
+    uint32_t                enable;
+} TxAudioChData2110;
+
+typedef struct
+{
+    NTV2Channel             channel;
+    char                    sourceIP[2][IP_STRSIZE];
+    char                    destIP[2][IP_STRSIZE];
+    uint32_t                sourcePort[2];
+    uint32_t                destPort[2];
+    uint32_t                rxMatch[2];
+    uint32_t                sfpEnable[2];
+    uint32_t                vlan;
+    uint32_t                ssrc;
+    uint32_t                payload;
+    NTV2VideoFormat         videoFormat;
+    uint32_t                enable;
+} RxVideoChData2110;
+
+typedef struct
+{
+    NTV2Channel             channel;
+    NTV2Stream              stream;
+    char                    sourceIP[2][IP_STRSIZE];
+    char                    destIP[2][IP_STRSIZE];
+    uint32_t                sourcePort[2];
+    uint32_t                destPort[2];
+    uint32_t                rxMatch[2];
+    uint32_t                sfpEnable[2];
+    uint32_t                vlan;
+    uint32_t                ssrc;
+    uint32_t                payload;
+    uint32_t                numAudioChannels;
+    eNTV2PacketInterval     audioPktInterval;
+    uint32_t                enable;
+} RxAudioChData2110;
+
+typedef struct
+{
+    eSFP                    sfp;
+    char                    ipAddress[IP_STRSIZE];
+    char                    subnetMask[IP_STRSIZE];
+    char                    gateWay[IP_STRSIZE];
+    uint32_t                enable;
+} SFPData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    bool					txChEnable[4];
+    bool					rxChEnable[4];
+} IpEnable2110;
+
+typedef struct
+{
+    uint32_t                id;
+    bool                    setup4k;
+    char                    ptpMasterIP[IP_STRSIZE];
+    uint32_t                numSFPs;
+    SFPData2110             sfp[2];
+} NetworkData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numTxVideoChannels;
+    TxVideoChData2110       txVideoCh[4];
+} TransmitVideoData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numTxAudioChannels;
+    TxAudioChData2110       txAudioCh[4];
+} TransmitAudioData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numRxVideoChannels;
+    RxVideoChData2110       rxVideoCh[4];
+} ReceiveVideoData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t                numRxAudioChannels;
+    RxAudioChData2110       rxAudioCh[4];
+} ReceiveAudioData2110;
+
+typedef struct
+{
+    uint32_t                id;
+} MetadataVData2110;
+
+
+/**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
@@ -98,10 +240,6 @@ public:
     bool        SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway);
     bool        GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
     bool        DisableNetworkInterface(const eSFP sfp);
-
-    bool        EnableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config &rxConfig);
-    bool        DisableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
-
     bool        SetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const rx_2110Config & rxConfig);
     bool        GetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
     bool        SetRxStreamEnable(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, bool enable);

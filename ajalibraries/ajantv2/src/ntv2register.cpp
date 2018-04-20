@@ -8506,13 +8506,24 @@ bool CNTV2Card::GetLTCEmbeddedOutEnable (bool & outValue)
 
 bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data)
 {
-	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs (_boardID))
+	NTV2_RP188	result;
+	if (!ReadAnalogLTCInput(inLTCInput, result))
+		return false;
+	outRP188Data = result;
+	return true;
+}
+
+
+bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data)
+{
+	outRP188Data.Set();
+	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs(_boardID))
 		return false;
 
-	ULWord	regLow	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
+	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
 	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
-	outRP188Data.DBB = 0;
-	return regLow && regHi && CNTV2DriverInterface::ReadRegister (regLow, outRP188Data.Low) && CNTV2DriverInterface::ReadRegister (regHi, outRP188Data.High);
+	outRP188Data.fDBB = 0;
+	return regLo  &&  regHi  &&  CNTV2DriverInterface::ReadRegister(regLo, outRP188Data.fLo)  &&  CNTV2DriverInterface::ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
@@ -8546,11 +8557,18 @@ bool CNTV2Card::SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Ch
 
 bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data)
 {
+	const NTV2_RP188	rp188data (inRP188Data);
+	return WriteAnalogLTCOutput (inLTCOutput, rp188data);
+}
+
+
+bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data)
+{
 	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs (_boardID))
 		return false;
 
-	return WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits0_31  : kRegLTC2AnalogBits0_31,  inRP188Data.Low)
-			&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.High);
+	return WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits0_31  : kRegLTC2AnalogBits0_31,  inRP188Data.fLo)
+			&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.fHi);
 }
 
 
