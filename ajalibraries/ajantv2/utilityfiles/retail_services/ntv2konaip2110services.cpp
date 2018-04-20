@@ -2417,42 +2417,46 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
         if (ipServiceEnable)
         {
-
             // See if network needs configuring
             if (m2110NetworkID != m2110Network.id || ipServiceForceConfig)
             {
-                std::string  ip, subnet, gateway;
-
-                printf("Configuring 2110 Network\n");
-
-                ip = m2110Network.sfp[0].ipAddress;
-                subnet = m2110Network.sfp[0].subnetMask;
-                gateway = m2110Network.sfp[0].gateWay;
-                if (config2110->SetNetworkConfiguration(SFP_1, ip, subnet, gateway) == true)
+                // configure PTP master
+                if (m2110Network.ptpMasterIP[0])
                 {
-                    printf("SetNetworkConfiguration SFP_1 OK\n");
-                    SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                    m2110NetworkID = m2110Network.id;
-                }
-                else
-                {
-                    printf("SetNetworkConfiguration SFP_1 ERROR %s\n", config2110->getLastError().c_str());
-                    SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+                    mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
+                    config2110->SetPTPMaster(m2110Network.ptpMasterIP);
+                    config2110->Set4KModeEnable(m2110Network.setup4k);
                 }
 
-                ip = m2110Network.sfp[1].ipAddress;
-                subnet = m2110Network.sfp[1].subnetMask;
-                gateway = m2110Network.sfp[1].gateWay;
-                if (config2110->SetNetworkConfiguration(SFP_2, ip, subnet, gateway) == true)
+                for (uint32_t i = 0; i < m2110Network.numSFPs; i++)
                 {
-                    printf("SetNetworkConfiguration SFP_2 OK\n");
-                    SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                    m2110NetworkID = m2110Network.id;
-                }
-                else
-                {
-                    printf("SetNetworkConfiguration SFP_2 ERROR %s\n", config2110->getLastError().c_str());
-                    SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+                    eSFP sfp = SFP_1;
+                    if (i > 0)
+                        sfp = SFP_2;
+
+                    bool rv;
+                    if (m2110Network.sfp[i].enable)
+                    {
+                        rv =  config2110->SetNetworkConfiguration(sfp,
+                                                                 m2110Network.sfp[i].ipAddress,
+                                                                 m2110Network.sfp[i].subnetMask,
+                                                                 m2110Network.sfp[i].gateWay);
+                        if (rv)
+                        {
+                            printf("SetNetworkConfiguration OK\n");
+                            SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+                            m2110NetworkID = m2110Network.id;
+                        }
+                        else
+                        {
+                            printf("SetNetworkConfiguration ERROR %s\n", config2110->getLastError().c_str());
+                            SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+                        }
+                    }
+                    else
+                    {
+                        config2110->DisableNetworkInterface(sfp);
+                    }
                 }
             }
 
