@@ -1882,44 +1882,66 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 	if(enable && isQuad)
 	{
 		//This should only be set high if we are already in a 4k/uhd format
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12);
+			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);
 			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
-		else
+		else if (inChannel < NTV2_CHANNEL7)
 		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56);
+			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+		}
+		else
+		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
 			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 	else if (isQuad)
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
 			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
-		else
+		else if (inChannel < NTV2_CHANNEL7)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
+			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
+		}
+		else
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 	else
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+		}
+		if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+		}
+		if (inChannel < NTV2_CHANNEL7)
+		{
+			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 		}
 		else
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 		return (enable ? false : true);
@@ -1940,10 +1962,14 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	// Return false (0) if this mode is disabled
 	ULWord	returnVal	(0);
 	bool	readOkay	(false);
-	if (inChannel < NTV2_CHANNEL5)
+	if (inChannel < NTV2_CHANNEL3)
 		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB12, kRegShift425FB12);
+	if (inChannel < NTV2_CHANNEL5)
+		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB34, kRegShift425FB34);
+	if (inChannel < NTV2_CHANNEL7)
+		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB56, kRegShift425FB56);
 	else
-		readOkay = ReadRegister(kRegGlobalControl2, &returnVal, kRegMask425FB56, kRegShift425FB56);
+		readOkay = ReadRegister(kRegGlobalControl2, &returnVal, kRegMask425FB78, kRegShift425FB78);
 	outIsEnabled = readOkay ? returnVal : 0;
 	return readOkay;
 }
