@@ -1,5 +1,5 @@
 /**
-	@file		ancillarydata_framestatusinfo5251.h
+	@file		ancillarydata_hdr_hdr10.h
 	@brief		Declares the AJAAncillaryData_HDR_HDR10 class.
 	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
@@ -59,13 +59,6 @@ public:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						ParsePayloadData (void);
-
-	/**
-		@brief		Generate the payload data from my "local" ancillary data.
-		@note		This method is overridden for the specific Anc data type.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GeneratePayloadData (void);
 
 	/**
 		@brief		Streams a human-readable representation of me to the given output stream.

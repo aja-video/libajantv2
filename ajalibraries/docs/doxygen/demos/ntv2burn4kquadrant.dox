@@ -1,5 +1,7 @@
 /**
-@page	ntv2burn4kquadrant		NTV2Burn4KQuadrant Demo
+@page	demoapps
+
+@section	ntv2burn4kquadrant		NTV2Burn4KQuadrant Demo
 
 This command-line program captures 4K/UHD video provided to four SDI inputs of an AJA device and "burns" timecode into the video,
 then plays it out onto four SDI outputs of a second AJA device (or the same device, if it has at least 8 channels).

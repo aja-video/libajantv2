@@ -1,17 +1,20 @@
 /**
-@page	ntv2qtpreview		NTV2QtPreview Demo
+@page	demoapps
 
-This Qt-based GUI demonstration application captures and displays a single video stream from an AJA capture device in a
-single dialog window, with or without audio playout on the host.
+@section	ntv2qtpreview		NTV2QtPreview Demo
+
+This <a href="https://doc.qt.io/" target="_qt">Qt</a>-based GUI demonstration application captures and displays a single
+video stream from an AJA capture device in a single dialog window, with or without audio playout on the host.
 
 @image	html	ntv2qtpreview.png
 
-Screenshot of the Qt-based ‘ntv2qtpreview’ application running on MacOS.
+Screenshot of the <a href="https://doc.qt.io/" target="_qt">Qt</a>-based <b>ntv2qtpreview</b> application running on MacOS.
 
 It demonstrates…
--	how to use the AJAPreviewWidget, a reusable Qt-based GUI element that displays realtime video;
+-	how to use the AJAPreviewWidget, a reusable <a href="https://doc.qt.io/" target="_qt">Qt</a>-based GUI element that
+	displays realtime video;
 -	how to use the NTV2FrameGrabber class, a QThread that captures a video stream from any NTV2-compatible AJA device,
-	and uses Qt signals to emit captured ARGB video frames.
--	how to play up to two channels of audio on the host using Qt's QAudioOutput class.
+	and uses <a href="https://doc.qt.io/" target="_qt">Qt</a> signals to emit captured ARGB video frames.
+-	how to play up to two channels of audio on the host using <a href="https://doc.qt.io/" target="_qt">Qt</a>’s QAudioOutput class.
 -	how to react to detachment/attachment of AJA devices (e.g., via Thunderbolt) or to input video signal changes.
 **/

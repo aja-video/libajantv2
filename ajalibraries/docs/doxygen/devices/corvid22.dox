@@ -1,5 +1,9 @@
 /**
-	@page	corvid22		Corvid 22
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvid22		Corvid 22
 
 	This page describes the <b>Corvid 22</b> capture/playout board.
 
@@ -67,5 +71,5 @@
 
 	@par		Additional Topics
 
-	@subpage	aja102953
+	@subsubpage	aja102953
 **/

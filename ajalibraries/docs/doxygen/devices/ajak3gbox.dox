@@ -1,5 +1,9 @@
 /**
-	@page	ajak3gbox		K3G-Box Breakout Box
+	@page			ntv2devices
+
+	@section		ntv2hwaccessories
+
+	@subsection		ajak3gbox		K3G-Box Breakout Box
 
 	This page describes the AJA K3G-Box Breakout Box, which can be connected to a KONA 3G or KONA 4 capture/playout boards.
 

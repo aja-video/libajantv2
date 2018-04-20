@@ -1,7 +1,9 @@
 /**
-@page	ntv2encodehevc		NTV2EncodeHEVC Demo
+@page	demoapps
 
-@section	ntv2encodehevc-overview		Overview
+@section	ntv2encodehevc		NTV2EncodeHEVC Demo
+
+@subsection	ntv2encodehevc-overview		Overview
 
 The NTV2 encode HEVC application demonstrates capture of live video from an SDI source to a raw HEVC disk file
 using the \ref corvidhevc board. Encode HEVC programs the hardware using the NTV2 classes library, including using the new HEVC extensions
@@ -12,7 +14,7 @@ While in operation, the NTV2 components can be monitored using the <b>Watcher</b
 The HEVC codec can be monitored using the NTV2 <b>HEVC Monitor</b> application.
 
 
-@section	ntv2encodehevc-build		Build and Run
+@subsection	ntv2encodehevc-build		Build and Run
 
 <b>ntv2encodehevc</b> is located in the <tt>demoapps</tt> folder of the NTV2 distribution.
 It uses the NTV2EncodeHEVC class from the <tt>democlasses</tt> folder to do the video setup and capture.
@@ -108,7 +110,7 @@ HEVC playback is a CPU intensive process and may not run in real-time.  Use the 
 The space-key resumes normal playback.
 
 
-@section	ntv2encodehevc-design		Design
+@subsection	ntv2encodehevc-design		Design
 
 <b>ntv2encodehevc</b> captures uncompressed video from the SDI input and writes an HEVC compressed file.
 The current data flow captures the uncompressed video to system memory to allow video processing by the application before being HEVC encoded.
@@ -121,7 +123,7 @@ It also determines the raster and pixel format expected by the codec.
 The preset also configures the characteristics of the video compression.
 Code could be added to modify these codec parameters before processing starts to change bit rates, etc.
 
-@section	ntv2encodehevc-threads		Thread Model
+@subsection	ntv2encodehevc-threads		Thread Model
 
 Encode HEVC uses a simple threading model to move the captured SDI video from the NTV2 frame buffer to system buffers,
 the HEVC codec, and finally the output file.  The threads move data to and from the HEVC board using DMA.
@@ -141,7 +143,7 @@ The file writer thread uses standard C library file functions to write each comp
 <tt>raw.hevc</tt> output file.
 
 
-@section	ntv2encodehevc-startupshutdown		Startup and Shutdown
+@subsection	ntv2encodehevc-startupshutdown		Startup and Shutdown
 
 <b>ntv2encodehevc</b> configures the HEVC codec to run in asynchronous mode.  This makes stream startup simple, as the codec waits
 for data to begin compression.  However the codec is particular about how it is shutdown to avoid an error state.  This is not as
@@ -154,7 +156,7 @@ appear that the codec requires raw frames to the flush the encoded data after th
 frame has been transferred from the codec, it can be moved cleanly to the stop state.
 
 
-@section	ntv2encodehevc-futuredev		Future Development
+@subsection	ntv2encodehevc-futuredev		Future Development
 
 The first version of the <b>ntv2encodehevc</b> demonstrates encoding of a single video stream in various HD and UHD formats and
 pixel resolutions.  Future work could include:

@@ -1,70 +1,74 @@
 /**
-@page	corvidhevc		Corvid HEVC
+	@page			ntv2devices
 
-This page describes the <b>Corvid HEVC</b> OEM capture/playout board, which features four SDI inputs to support
-real time, low-latency HEVC encoding up to 4Kp60.
+	@section		ntv2hwcorvid
 
-@image	html	corvidhevc.png
+	@subsection		corvidhevc		Corvid HEVC
 
-The Corvid HEVC has 4 x input SDI connectors and an LTC/reference input BNC.
+	This page describes the <b>Corvid HEVC</b> OEM capture/playout board, which features four SDI inputs to support
+	real time, low-latency HEVC encoding up to 4Kp60.
 
-@par	PCI Interface
+	@image	html	corvidhevc.png
 
--	PCI device ID: <b>0xEB15</b>
--	Eight-lane gen 2 PCI Express
--	2 DMA engines
+	The Corvid HEVC has 4 x input SDI connectors and an LTC/reference input BNC.
 
-@par	Inputs
+	@par	PCI Interface
 
--	4 x 3G-SDI inputs
--	1 x LTC input
+	-	PCI device ID: <b>0xEB15</b>
+	-	Eight-lane gen 2 PCI Express
+	-	2 DMA engines
 
-@par	Frame Buffer
+	@par	Inputs
 
--	1GB SDRAM
--	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	4 x 3G-SDI inputs
+	-	1 x LTC input
 
-@par	Audio
+	@par	Frame Buffer
 
--	4 subsystems
--	16 channels (max.) per subsystem
+	-	1GB SDRAM
+	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
-@par	Video Formats
+	@par	Audio
 
--	Supports all HD, 2K and 4K video formats, including 4Kp60.
--	Multiple, independent video formats supported (provided all in same clock family).
--	Does not support DVCPro HD or HDV.
--	RGB on SDI inputs/outputs supported.
--	3GbA and 3GbB (dual-link) supported.
--	SMPTE 425 2si mux supported
+	-	4 subsystems
+	-	16 channels (max.) per subsystem
 
-@note	A hardware color-space converter (CSC) can convert input YCbCr SDI to RGB when using RGB buffer formats.
+	@par	Video Formats
 
-@par		Ancillary Data
+	-	Supports all HD, 2K and 4K video formats, including 4Kp60.
+	-	Multiple, independent video formats supported (provided all in same clock family).
+	-	Does not support DVCPro HD or HDV.
+	-	RGB on SDI inputs/outputs supported.
+	-	3GbA and 3GbB (dual-link) supported.
+	-	SMPTE 425 2si mux supported
 
--	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
--	VANC geometries
+	@note	A hardware color-space converter (CSC) can convert input YCbCr SDI to RGB when using RGB buffer formats.
 
-@par		Firmware
-TBD
+	@par		Ancillary Data
 
-@par	Physical
+	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
+	-	VANC geometries
 
--	Size, without bracket (W x D x H):  0.875" x 7.5" x 5" (22.23mm × 190.5mm × 127mm)
--	Weight:  0.9 lb (0.4 kg)
--	Power: Requires either PCIe bus power via graphics slot or ATX 6-pin from host power supply
+	@par		Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/172/25>
 
-@par	Environment
+	@par	Physical
 
--	Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
--	Operating Relative Humidity: 10-90% non-condensing
--	Operating Altitude: under 3,000 meters (under 10,000 feet)
--	Safe Storage Temperature (Power OFF): -40 to 70 degrees Celcius (-40 to 158 degrees Fahrenheit)
+	-	Size, without bracket (W x D x H):  0.875" x 7.5" x 5" (22.23mm × 190.5mm × 127mm)
+	-	Weight:  0.9 lb (0.4 kg)
+	-	Power: Requires either PCIe bus power via graphics slot or ATX 6-pin from host power supply
 
-@par	SDK/Driver Support
+	@par	Environment
 
--	NTV2 SDK versions 12.4.2 and later
+	-	Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 70 degrees Celcius (-40 to 158 degrees Fahrenheit)
 
-<b>See Also:</b>  \ref hevcsupplement
+	@par	SDK/Driver Support
+
+	-	NTV2 SDK versions 12.4.2 and later
+
+	<b>See Also:</b>  \ref hevcsupplement
 
 **/

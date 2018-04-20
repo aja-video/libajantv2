@@ -1,7 +1,9 @@
 /**
-@page	audioformats	Audio Data Formats
+@page	dataformats		Data Formats
 
-Each Audio System on AJA's NTV2 devices support up to 8 or 16 audio channels.
+@section	audioformats	Audio Data Formats
+
+Each Audio System on AJA’s NTV2 devices support up to 8 or 16 audio channels.
 (While some devices can be configured to support 6 channels, this may cause problems and should be avoided.)
 
 The format of audio sample data in the host buffer exactly mirrors the format of audio sample data in the
@@ -10,12 +12,12 @@ Audio System's audio buffer in SDRAM on the device. See \ref audiooperation for 
 @note	These formats apply even if the audio sample data is not PCM. See \ref audiooperation for more information about non-PCM audio.
 
 
-##	Single-Channel Individual Audio Samples
+@subsection	audfmt-singlech		Single-Channel Individual Audio Samples
 
 Each single-channel audio sample requires exactly four bytes of storage.
 
 
-###	24-Bit (HD) Audio
+@subsubsection	audfmt-24bit	24-Bit (HD) Audio
 
 Only the upper (most-significant) 24 bits are used, as follows:
 
@@ -26,7 +28,7 @@ most-significant 24 bits will end up in the transmitted audio packets. The least
 from each 32-bit sample word in the host buffer are ignored.
 
 
-###	20-Bit (SD) Audio
+@subsubsection	audfmt-20bit	20-Bit (SD) Audio
 
 Only the upper (most-significant) 20 bits are used, as follows:
 
@@ -41,7 +43,7 @@ bits from each 32-bit sample word in the host buffer are ignored.
 
 
 
-##	6-Channel Mode
+@subsection	audfmt-6chan	6-Channel Mode
 
 This format was used on older AJA devices, and is still provided for backward compatibility.
 
@@ -51,7 +53,7 @@ This format was used on older AJA devices, and is still provided for backward co
 
 
 
-##	8-Channel Mode
+@subsection	audfmt-8chan	8-Channel Mode
 
 The layout for two samples of 8-channel audio data is:
 
@@ -61,7 +63,7 @@ Within each 32-bit word, the 20/24-bit audio sample is left-justified identicall
 
 
 
-##	16-Channel Mode
+@subsection	audfmt-16chan	16-Channel Mode
 
 The layout for two samples of 16-channel audio data is:
 

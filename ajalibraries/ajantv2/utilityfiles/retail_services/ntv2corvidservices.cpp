@@ -92,7 +92,4 @@ void CorvidServices::SetDeviceMiscRegisters ()
 
 	NTV2Standard			primaryStandard;
 	mCard->GetStandard(&primaryStandard);
-		
-	// Set SDI out 1 control video standard (reg 129, bits 2-0)
-	mCard->SetSDIOutputStandard(NTV2_CHANNEL1, primaryStandard);
 }

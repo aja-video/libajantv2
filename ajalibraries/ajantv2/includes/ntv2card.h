@@ -635,6 +635,21 @@ public:
 										const ULWord			inByteCount);
 
 	/**
+		@brief		Transfers the contents of the ancillary data buffer(s) from a given frame on the AJA device to the host.
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+		@param[out]	outAncF1Buffer		Specifies the host buffer that is to receive the device F1 ancillary data buffer contents.
+		@param[out]	outAncF2Buffer		Optionally specifies the host buffer that is to receive the device F2 ancillary data
+										buffer contents.
+		@return		True if successful; otherwise false.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
+	**/
+	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
+										NTV2_POINTER &	outAncF1Buffer,
+										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER);
+
+	/**
 		@brief		Transfers ancillary data from a given field/frame on the AJA device to the host.
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
 		@param		pOutAncBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the ancillary data.
@@ -644,6 +659,8 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord			inFrameNumber,
 										UByte *					pOutAncBuffer,
@@ -660,11 +677,28 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
 										const UByte *			pInAncBuffer,
 										const NTV2FieldID		inFieldID		= NTV2_FIELD0,
 										const ULWord			inByteCount		= 2048);
+
+	/**
+		@brief		Transfers the contents of the ancillary data buffer(s) from the host to a given frame on the AJA device.
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+		@param[in]	inAncF1Buffer		Specifies the host buffer that is to supply the F1 ancillary data buffer content.
+		@param[in]	inAncF2Buffer		Optionally specifies the host buffer that is to supply the F2 ancillary data
+										buffer content.
+		@return		True if successful; otherwise false.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+					to determine the Anc data boundary locations within each frame buffer in device memory.
+	**/
+	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
+										const NTV2_POINTER &	inAncF1Buffer,
+										const NTV2_POINTER &	inAncF2Buffer	= NULL_POINTER);
 
 
 	#if !defined (NTV2_DEPRECATE)
@@ -1190,6 +1224,7 @@ public:
 
 	/**
 		@brief		Sets the VANC source for the given mixer/keyer to the foreground video (or not).
+					See the \ref ancillarydata discussion for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer			Specifies the mixer/keyer to be affected as a zero-based index number.
 		@param[in]	inFromForegroundSource	If true, sets the mixer/keyer's VANC source to its foreground video input;
@@ -1199,6 +1234,7 @@ public:
 
 	/**
 		@brief		Answers whether or not the VANC source for the given mixer/keyer is currently the foreground video.
+					See the \ref ancillarydata discussion for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer				Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
@@ -1341,7 +1377,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
 		@param[in]	inEnable		Specify 'true' to use 20-bit mode;  specify 'false' for normal (24-bit) mode.
-		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
     AJA_VIRTUAL bool		SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
@@ -1352,7 +1388,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
 									if audio is in 24 bit mode.
-		@note		This function is relevant only for the \ref konaip4i or \ref konaip22.
+		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
     AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
@@ -2244,13 +2280,22 @@ public:
 	AJA_VIRTUAL bool	GetRP188Mode			(const NTV2Channel inChannel,	NTV2_RP188Mode & outMode);
 
 	/**
-		@note		This needs to be documented.
+		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given channel.
+		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel value.
+		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
+		@note		This call won't have any effect if the channel is in "bypass mode".
+					See CNTV2Card::IsRP188BypassEnabled and CNTV2Card::DisableRP188Bypass.
 	**/
-	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, const RP188_STRUCT & inRP188Data);
+	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const NTV2_RP188 & inRP188Data);
 
 	/**
-		@note		This needs to be documented.
+		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given channel.
+		@param[in]	inChannel		Specifies the SDI input of interest as an NTV2Channel value.
+		@param[out]	outRP188Data	Receives the raw RP188 data values.
 	**/
+	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	NTV2_RP188 & outRP188Data);
+
+	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, const RP188_STRUCT & inRP188Data);
 	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, RP188_STRUCT & outRP188Data);
 
 	/**
@@ -3277,22 +3322,20 @@ public:
         @param[in]		inTag               Tag for the virtual data.
         @param[in]		inVirtualData       Virtual data to be written
         @param[in]		inVirtualDataSize   Virtual data size to write
-        @param[out]		outVirtualDataSize   Virtual data size actually written
-        @return			True if all requested registers were successfully written; otherwise false.
+        @return			True if all requested data was successfully written; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
+    AJA_VIRTUAL bool    WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize);
 
     /**
         @brief			Reads the block of virtual data for a specific tag
         @param[in]		inTag               Tag for the virtual data.
-        @param[out]		inOutVirtualData    Virtual data buffer to be written
+        @param[out]		outVirtualData      Virtual data buffer to be written
         @param[in]		inVirtualDataSize   Virtual data size to read
-        @param[out]		outVirtualDataSize   Virtual data size of tagged data regardless of how much read
-        @return			True if all requested registers were successfully written; otherwise false.
+        @return			True if all requested data was successfully read; otherwise false.
         @note			This operation is not guaranteed to be performed atomically.
     **/
-    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize, ULWord* outVirtualDataSize);
+    AJA_VIRTUAL bool    ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize);
 
 	/**
 		@brief			For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
@@ -3601,8 +3644,8 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range * pOutRange,  const NTV2Channel inChannel = NTV2_CHANNEL1)	///< @deprecated	Use the version of this function with the NTV2_CSC_RGB_Range & outRange parameter.
-							{return pOutRange ? GetColorSpaceRGBBlackRange (*pOutRange, inChannel) : false;}
+	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range * pOutRange,  const NTV2Channel inChannel = NTV2_CHANNEL1)
+							{return pOutRange ? GetColorSpaceRGBBlackRange (*pOutRange, inChannel) : false;}	///< @deprecated	Use the version of this function with the NTV2_CSC_RGB_Range & outRange parameter.
 
 	AJA_VIRTUAL bool	SetColorSpaceUseCustomCoefficient(ULWord useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetColorSpaceUseCustomCoefficient(ULWord* useCustomCoefficient, NTV2Channel channel= NTV2_CHANNEL1);
@@ -4180,7 +4223,7 @@ public:
 	AJA_VIRTUAL bool		SetHDMIInColorSpace (NTV2HDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIInColorSpace (NTV2HDMIColorSpace * pOutValue)						{return pOutValue ? GetHDMIInColorSpace (*pOutValue) : false;}
-	AJA_VIRTUAL bool		SetHDMIOutColorSpace (NTV2HDMIColorSpace inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue);
 	AJA_VIRTUAL inline bool	GetHDMIOutColorSpace (NTV2HDMIColorSpace * pOutValue)						{return pOutValue ? GetHDMIOutColorSpace (*pOutValue) : false;}
 	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace inNewValue);
@@ -4502,12 +4545,21 @@ public:
 		@brief	Reads the current contents of the device's analog LTC input registers.
 		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
 									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
-		@param[out]	outRP188Data	Receives the timecode read from the device registers. Only the "Low" and "High" fields are set --
-									the "DBB" field is set to zero.
+		@param[out]	outRP188Data	Receives the timecode read from the device registers.
 		@return		True if successful; otherwise false.
 		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
 	**/
 	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data);
+
+	/**
+		@brief	Reads the current contents of the device's analog LTC input registers.
+		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
+									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
+		@param[out]	outRP188Data	Receives the timecode read from the device registers.
+		@return		True if successful; otherwise false.
+		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
+	**/
+	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) input channel that's providing the clock reference being used by the given device's analog LTC input.
@@ -4535,11 +4587,21 @@ public:
 		@brief	Writes the given timecode to the specified analog LTC output register.
 		@param[in]	inLTCOutput		Specifies the device's analog LTC output to use. Use 0 for LTC Out 1, 1 for LTC Out 2, etc.
 									(Call ::NTV2DeviceGetNumLTCOutputs to determine the number of analog LTC outputs.)
-		@param[in]	inRP188Data		Specifies the timecode to write into the device registers. Only the "Low" and "High" fields are used --
-									the "DBB" field is ignored.
+		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
+									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data);
+
+	/**
+		@brief	Writes the given timecode to the specified analog LTC output register.
+		@param[in]	inLTCOutput		Specifies the device's analog LTC output to use. Use 0 for LTC Out 1, 1 for LTC Out 2, etc.
+									(Call ::NTV2DeviceGetNumLTCOutputs to determine the number of analog LTC outputs.)
+		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
+									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) output channel that's providing the clock reference being used by the given device's analog LTC output.
@@ -5343,6 +5405,9 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte3Value (ULWord *value)								{return ReadRegister (kRegFlatMatte3Value, value);}
 	AJA_VIRTUAL NTV2_DEPRECATED bool	WriteFlatMatte4Value (ULWord value)								{return WriteRegister (kRegFlatMatte4Value, value);}
 	AJA_VIRTUAL NTV2_DEPRECATED bool	ReadFlatMatte4Value (ULWord *value)								{return ReadRegister (kRegFlatMatte4Value, value);}
+
+protected:
+	static NTV2_POINTER	NULL_POINTER;	///< @brief	Used for default empty NTV2_POINTER parameters -- do not modify.
 
 public:
 	/**

@@ -4,12 +4,23 @@
 	Synopsis:
 		Builds the SDK docs.
 
-	Usage:
+	Usage (current directory contains 'ajalibraries', 'bin', etc.):
 		build_sdk   -v {maj.min.point.build}  [-b betaNum]
 
 	Options:
 		--verbose						Use verbose output.
 		--failwarnings					Treat warnings as errors.
+
+	Assumptions (normal build):
+		-	Current directory contains:
+			-	'ntv2sdk' zip files for linux, mac and windows
+			-	'_scripts' and 'doxygen' folders from 'ajalibraries/docs'
+			-	'ajastyles.css' and 'config.doxy' from 'ajalibraries/docs'
+			-	'installers/pythonlib' folder
+
+	Assumptions (local development build):
+		-	Desktop or Downloads folder contains: 'ntv2sdk*.zip' files for linux, mac and windows.
+		-	Current directory contains full 'ajalibraries' source tree.
 """
 
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
@@ -73,11 +84,41 @@ def main ():
     expected_point = versionComponents [2]
     #test_number = versionComponents [3]
     #print "## DEBUG:  Expecting SDK %s.%s.%s   test_number: '%s'" % (expected_major, expected_minor, expected_point, test_number)
+
     print "## NOTE:  Platform node is '%s'" % (platform.node())
+    if args.local == True and platform.node() == "mrbillmp.aja.com":
+        build_dir = os.path.join("build-doxygen")
+        home_dir = os.path.expanduser("~")
+        print "## NOTE:  Local development build, using build folder '%s', home='%s'" % (build_dir, home_dir)
+        if os.path.exists(build_dir):
+            shutil.rmtree(build_dir)
+        os.makedirs(build_dir)
+        
+        # Copy essentials into 'build_dir'...
+        # Copy 'ajastyles.css' and 'config.doxy' from 'ajalibraries/docs'...
+        aja.utils.copy_filelist(os.path.join('ajalibraries','docs'), build_dir, ['ajastyles.css', 'config.doxy'], False, "3")
+        
+        # Copy '_scripts' and 'doxygen' folders from 'ajalibraries/docs'...
+        aja.utils.copy_filelist(os.path.join('ajalibraries','docs'), build_dir, ['_scripts', 'doxygen'], False, "3")
+        
+        # Try copying 'ntv2sdk*.zip' files out of current dir...
+        copied_items = aja.utils.copy_filelist(os.path.join('.'), build_dir, ['ntv2sdk*.zip'], False, "3")
+        if len(copied_items) == 0:
+            # Try copying 'ntv2sdk*.zip' files out of Desktop...
+            copied_items = aja.utils.copy_filelist(os.path.join(home_dir,'Desktop'), build_dir, ['ntv2sdk*.zip'], False, "3")
+        if len(copied_items) == 0:
+            # Try Downloads folder... 'ntv2sdk*.zip' files for linux, mac and windows...
+            copied_items = aja.utils.copy_filelist(os.path.join(home_dir,'Downloads'), build_dir, ['ntv2sdk*.zip'], False, "3")
+        if len(copied_items) != 3:
+            print ("## ERROR:  %d SDK .zip file(s) copied, should be 3" % (len(copied_items)))
+            print (copied_items)
+            return 502
+        # "cd" into 'build_dir' and continue...
+        os.chdir(build_dir)
 
     print "## NOTE:  Starting Pre-Check"
     result_code = aja.utils.check ({'name':	'Pre-Check',	'must-exist': [	'ntv2sdkmac_*.zip',		'ntv2sdkwin_*.zip',		'ntv2sdklinux_*.zip',
-    																		'config.doxy',			'doxygen',				'installers/pythonlib'	] })
+    																		'config.doxy',			'doxygen'	] })
     if result_code <> 0:
         print "## NOTE:  Unzip Phase skipped due to error(s)"
         return result_code
@@ -183,6 +224,28 @@ def main ():
     html_folder_path = "NTV2SDK_docs_%s" % (underscore_version)
     client_browser_url = "https://sdksupport.aja.com/docs/" + html_folder_path + "/"
 
+    if args.local == True and platform.node() == "mrbillmp.aja.com":
+        # Local dev builds use the local dev tree's ajalibraries ... not those extracted from the SDK zips...
+        print("Local dev build ... replace ajalibraries/ajabase with dev tree's ajabase folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajabase"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajabase'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajaanc with dev tree's ajaanc folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajaanc"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajaanc'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajacc with dev tree's ajacc folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajacc"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajacc'], False, "3")
+        
+        print("Local dev build ... replace ajalibraries/ajantv2 with dev tree's ajantv2 folder...")
+        shutil.rmtree(os.path.join("ajalibraries","ajantv2"))
+        copied_items = aja.utils.copy_filelist(os.path.join("..", "ajalibraries"), os.path.join("ajalibraries"), ['ajantv2'], False, "3")
+        shutil.rmtree(os.path.join("ajalibraries","ajantv2","gpuclasses"))
+
+    """
+    Patch in version number, remove NTV2_NUB_CLIENT_SUPPORT...
+    """
     stuff_to_patch =	[	{	'name':		'Versionize Doxy Config File',
     							'files':	'patched_config.doxy',
     							'replace':	{'0.0.0':	display_version}				},
@@ -214,7 +277,7 @@ def main ():
         return result_code
 
     destination_rsync_url = "sdkdocs@sdksupport.aja.com:/docs/"
-    if platform.node () == "mrbillpro.aja.com":
+    if platform.node () == "mrbillmp.aja.com":
         destination_rsync_url = "/Users/demo/Sites/"
     print "## NOTE:  rsync '%s' to '%s'..." % (html_folder_path, destination_rsync_url)
     cmd_lines = []

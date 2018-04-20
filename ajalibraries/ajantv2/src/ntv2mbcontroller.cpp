@@ -56,7 +56,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
             (int)MB_CMD_SET_NET,(int)port,ipaddr.c_str(),netmask.c_str(),gateway.c_str());
 
-    rv = sendMsg(1000);
+    rv = sendMsg(5000);
     if (!rv)
     {
         ReleaseMailbox();
@@ -75,7 +75,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
         if (rv && (status == "OK"))
         {
             ReleaseMailbox();
-            SetLinkActive(port);
+            SetSFPActive(port);
             return true;
         }
         else if (rv && (status == "FAIL"))
@@ -95,7 +95,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
     return false;
 }
 
-bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
+bool CNTV2MBController::DisableNetworkInterface(eSFP port)
 {
    if (!(getFeatures() & SAREK_MB_PRESENT))
        return true;
@@ -106,7 +106,7 @@ bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
     sprintf((char*)txBuf,"cmd=%d,port=%d",
             (int)MB_CMD_DISABLE_NET_IF,(int)port);
 
-    rv = sendMsg(1000);
+    rv = sendMsg(5000);
     if (!rv)
     {
         ReleaseMailbox();
@@ -125,7 +125,7 @@ bool CNTV2MBController::DisableNetworkConfiguration(eSFP port)
         if (rv && (status == "OK"))
         {
             ReleaseMailbox();
-            SetLinkInactive(port);
+            SetSFPInactive(port);
             return true;
         }
         else if (rv && (status == "FAIL"))
@@ -151,7 +151,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
         return true;
 
     sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -191,7 +191,7 @@ bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
         return true;
 
     sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_FETCH_GM_INFO);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -278,7 +278,7 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
             (int)port,
             (int)channel,
             (int)stream);
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         return ARP_ERROR;
@@ -335,7 +335,7 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
             remote_IPAddress.c_str(),
             int(port));
 
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         return ARP_ERROR;
@@ -482,13 +482,13 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2
 
 
 
-bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
+bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool sfp1Enable, bool sfp2Enable)
 {
     uint32_t chan = (uint32_t)channel;
 
     uint32_t val = 0;
-    if (linkAEnable) val |= 0x2;
-    if (linkBEnable) val |= 0x1;
+    if (sfp1Enable) val |= 0x2;
+    if (sfp2Enable) val |= 0x1;
     val <<= (chan * 2);
 
     uint32_t state;
@@ -500,7 +500,7 @@ bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool linkAEnable, bo
     return rv;
 }
 
-bool CNTV2MBController::GetTxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
+bool CNTV2MBController::GetTxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable)
 {
     uint32_t chan = (uint32_t)channel;
 
@@ -509,19 +509,19 @@ bool CNTV2MBController::GetTxLinkState(NTV2Channel channel, bool & linkAEnable, 
     if (!rv) return false;
     state  &=  ( 0x3 << (chan * 2) );
     state >>= (chan * 2);
-    linkAEnable = (state & 0x02) ? true : false;
-    linkBEnable = (state & 0x01) ? true : false;
+    sfp1Enable = (state & 0x02) ? true : false;
+    sfp2Enable = (state & 0x01) ? true : false;
     return true;
 }
 
 
-bool CNTV2MBController::SetRxLinkState(NTV2Channel channel, bool linkAEnable, bool linkBEnable)
+bool CNTV2MBController::SetRxLinkState(NTV2Channel channel, bool sfp1Enable, bool sfp2Enable)
 {
     uint32_t chan = (uint32_t)channel;
 
     uint32_t val = 0;
-    if (linkAEnable) val |= 0x2;
-    if (linkBEnable) val |= 0x1;
+    if (sfp1Enable) val |= 0x2;
+    if (sfp2Enable) val |= 0x1;
     val <<= (chan * 2);
 
     uint32_t state;
@@ -533,7 +533,7 @@ bool CNTV2MBController::SetRxLinkState(NTV2Channel channel, bool linkAEnable, bo
     return rv;
 }
 
-bool CNTV2MBController::GetRxLinkState(NTV2Channel channel, bool & linkAEnable, bool & linkBEnable)
+bool CNTV2MBController::GetRxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable)
 {
     uint32_t chan = (uint32_t)channel;
 
@@ -543,8 +543,8 @@ bool CNTV2MBController::GetRxLinkState(NTV2Channel channel, bool & linkAEnable, 
     state >>= 8;
     state  &=  ( 0x3 << (chan * 2) );
     state >>= (chan * 2);
-    linkAEnable = (state & 0x02) ? true : false;
-    linkBEnable = (state & 0x01) ? true : false;
+    sfp1Enable = (state & 0x02) ? true : false;
+    sfp2Enable = (state & 0x01) ? true : false;
     return true;
 }
 
@@ -553,7 +553,7 @@ bool  CNTV2MBController::SetRxMatch(NTV2Channel channel, eSFP link, uint8_t matc
     uint32_t chan = (uint32_t)channel;
 
     uint32_t val;
-    if (link == SFP_TOP)
+    if (link == SFP_1)
     {
         mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
     }
@@ -565,7 +565,7 @@ bool  CNTV2MBController::SetRxMatch(NTV2Channel channel, eSFP link, uint8_t matc
     val  &= ~( 0xff << (chan * 8));
     val  |= ( match << (chan * 8) );
 
-    if (link == SFP_TOP)
+    if (link == SFP_1)
     {
         mDevice.WriteRegister(SAREK_REGS + kRegSarekRxMatchesA, val);
     }
@@ -581,7 +581,7 @@ bool  CNTV2MBController::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & ma
     uint32_t chan = (uint32_t)channel;
 
     uint32_t val;
-    if (link == SFP_TOP)
+    if (link == SFP_1)
     {
         mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
     }
@@ -597,11 +597,11 @@ bool  CNTV2MBController::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & ma
 }
 
 
-bool CNTV2MBController::SetLinkActive(eSFP link)
+bool CNTV2MBController::SetSFPActive(eSFP sfp)
 {
     uint32_t state;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (link == SFP_BOTTOM)
+    if (sfp == SFP_2)
     {
         state  |= S2022_LINK_B_ACTIVE;
     }
@@ -613,11 +613,11 @@ bool CNTV2MBController::SetLinkActive(eSFP link)
     return true;
 }
 
-bool CNTV2MBController::SetLinkInactive(eSFP link)
+bool CNTV2MBController::SetSFPInactive(eSFP sfp)
 {
     uint32_t state;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (link == SFP_BOTTOM)
+    if (sfp == SFP_2)
     {
         state  &= ~S2022_LINK_B_ACTIVE;
     }
@@ -630,11 +630,11 @@ bool CNTV2MBController::SetLinkInactive(eSFP link)
 }
 
 
-bool CNTV2MBController::GetLinkActive(eSFP link)
+bool CNTV2MBController::GetSFPActive(eSFP sfp)
 {
     uint32_t state;
     mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
-    if (link == SFP_BOTTOM)
+    if (sfp == SFP_2)
     {
         if (state & S2022_LINK_B_ACTIVE)
             return true;
@@ -732,7 +732,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
     }
 
     sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
-    bool rv = sendMsg(250);
+    bool rv = sendMsg(500);
     if (!rv)
     {
         mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -778,7 +778,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
      }
 
      sprintf((char*)txBuf,"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
-     bool rv = sendMsg(1000);
+     bool rv = sendMsg(5000);
      if (!rv)
      {
          mIpErrorCode = NTV2IpErrNoResponseFromMB;
@@ -832,7 +832,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
          return true;
 
      sprintf((char*)txBuf,"cmd=%d,port=%d",(int)MB_CMD_FETCH_SFP_INFO,(int)port);
-     bool rv = sendMsg(1000);
+     bool rv = sendMsg(5000);
      if (!rv)
      {
          mIpErrorCode = NTV2IpErrNoResponseFromMB;

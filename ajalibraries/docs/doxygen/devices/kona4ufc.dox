@@ -1,78 +1,82 @@
 /**
-@page	kona4ufc		KONA 4 (UFC Mode)
+	@page			ntv2devices
 
-This page describes the KONA 4 capture/playout board in its 2-channel mode of operation.
-It can be "flashed" with different firmware to become a 4-channel device (see \ref kona4quad).
+	@section		ntv2hwkona
 
-@image	html	kona4.png
+	@subsection		kona4ufc		KONA 4 (UFC Mode)
 
-The KONA 4 has a breakout connector on the far left, followed by the HDMI output, then the
-four SDI connectors. In UFC mode operation, SDI connectors 1 and 2 are inputs; connectors 3 and 4 are outputs.
+	This page describes the KONA 4 capture/playout board in its 2-channel mode of operation.
+	It can be "flashed" with different firmware to become a 4-channel device (see \ref kona4quad).
 
-@par	PCI Interface
+	@image	html	kona4.png
 
--	PCI device ID: <b>0xEB0C</b>
--	Four-lane gen 2 PCI Express
--	2 DMA engines
--	Legacy and MSI interrupt delivery supported
+	The KONA 4 has a breakout connector on the far left, followed by the HDMI output, then the
+	four SDI connectors. In UFC mode operation, SDI connectors 1 and 2 are inputs; connectors 3 and 4 are outputs.
 
-@par	Inputs & Outputs
+	@par	PCI Interface
 
--	2 x SDI inputs
--	2 x SDI outputs
--	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
--	1 x analog component video output
--	2 x reference/LTC inputs
--	2 x LTC outputs
--	1 x RS-422 serial port
+	-	PCI device ID: <b>0xEB0C</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+	-	Legacy and MSI interrupt delivery supported
 
-@par	Frame Buffer
+	@par	Inputs & Outputs
 
--	512 MB SDRAM
--	64 x 8MB frames
--	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	2 x SDI inputs
+	-	2 x SDI outputs
+	-	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
+	-	1 x analog component video output
+	-	2 x reference/LTC inputs
+	-	2 x LTC outputs
+	-	1 x RS-422 serial port
 
-@par	Audio
+	@par	Frame Buffer
 
--	2 subsystems
--	16 channels (max.) per subsystem
--	16 channels (max.) of AES audio
--	First subsystem's buffer memory starts 8MB from end of memory
--	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+	-	512 MB SDRAM
+	-	64 x 8MB frames
+	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
-@par	Video Formats
+	@par	Audio
 
--	Supports all standard video formats (except 4K/UHD).
--	Supports DVCPro HD and HDV.
+	-	2 subsystems
+	-	16 channels (max.) per subsystem
+	-	16 channels (max.) of AES audio
+	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
 
-@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+	@par	Video Formats
 
-@par	Ancillary Data
+	-	Supports all standard video formats (except 4K/UHD).
+	-	Supports DVCPro HD and HDV.
 
--	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
--	VANC geometries
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-@par	Video Processing
+	@par	Ancillary Data
 
--	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
--	Can mix keys on and off
--	Can differentiate between shaped and unshaped video
+	-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
+	-	VANC geometries
 
-@par	External Connectivity
+	@par	Video Processing
 
--	Optional \ref aja103226 provides access to other inputs and outputs
--	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+	-	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
+	-	Can mix keys on and off
+	-	Can differentiate between shaped and unshaped video
 
-@par	Physical
+	@par	External Connectivity
 
--	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
--	Weight: 0.7 lb (0.4 kg)
+	-	Optional \ref aja103226 provides access to other inputs and outputs
+	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
 
-@par	Environment
+	@par	Physical
 
--	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
--	Operating Relative Humidity: 10-90% non-condensing
--	Operating Altitude: under 3,000 meters (under 10,000 feet)
--	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Weight: 0.7 lb (0.4 kg)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
 **/

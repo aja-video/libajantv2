@@ -8,89 +8,81 @@
 Registered OEMs are given login credentials to access AJA's SDK support site, which can be securely accessed using any modern
 web browser at <https://sdksupport.aja.com/>.
 
--#	Log in to the SDK support site using the credentials that were provided by AJA.
--#	Go to the "NTV2 SDK Downloads" article in the "Knowledgebase" --- <https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/4>.
--#	SDK downloads are organized into "Current" and "Legacy" categories on a per-platform basis (Mac, Windows and Linux).
--#	Under the "Current" SDK category for a given platform, there will be one release version listed.
-	There may also be a "beta" version available, which should be considered experimental and not for use in software that is released to end-users.
+-#	Log in to the <a href="https://sdksupport.aja.com/">SDK support site</a> using the credentials that were provided by AJA.
+-#	Go to the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/4">NTV2 SDK Downloads</a> article in
+	the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
+-#	SDK downloads are organized into “Current” and “Legacy” categories on a per-platform basis (Mac, Windows and Linux).
+-#	Under the “Current” SDK category for a given platform, there will be one release version listed.
+	There may also be a “beta” version available, which should be considered experimental and not for use in software that is released to end-users.
 -#	Click on the article title that corresponds to the desired SDK version.
 -#	Read the notes associated with the release.
--#	Near the page bottom, click on the .zip file appropriate to your development platform to start the download.
+-#	Near the page bottom, click on the <b>.zip</b> file appropriate to your development platform to start the download.
 -#	When finished, it can be unzipped (expanded) into a folder, which can then be renamed and/or moved as needed.
 
 @image	html	sdkdownloadpage-75.png
 
-@note	On MacOS, if the .zip file was downloaded using a web browser, it will have a "quarantine" attribute.
+@note	On MacOS, if the .zip file was downloaded using a web browser, it will have a “quarantine” attribute.
 		AJA recommends clearing this attribute prior to unzipping, to avoid quarantining the unzipped SDK,
 		which may interfere with your development. To remove the quarantine attributes, open a Terminal window and enter the command:
 		<tt>xattr -c ~/Downloads/ntv2sdk*.zip</tt>
 
 
-The SDK's complete documentation set is available online. On the download page, look for the documentation link,
+The SDK’s complete documentation set is available online. On the download page, look for the documentation link,
 whose URL is typically of the form:
 <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z/</tt>
-...where <tt>x</tt>, <tt>y</tt> and <tt>z</tt> are the SDK's major, minor and point version numbers, respectively.
+...where <tt>x</tt>, <tt>y</tt> and <tt>z</tt> are the SDK’s major, minor and point version numbers, respectively.
 The documentation is fully cross-referenced, searchable, and includes collaboration diagrams and call graphs.
 
 
+<hr size="50px" />
 @section	gs-sdkcontents		SDK Contents
 
 This section explores the contents of the SDK, which is nearly identical on all three platforms.
 
--	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- This is the folder that resulted after extracting the .zip file. "PPP" indicates the platform, "XX" is the major version number, "YY" is the minor version number, and "ZZ" is the point release number.
-	-	<b>ajaapps</b> -- Contains sources used to build applications and tools.
+-	<b>ntv2sdk</b><i>PPP</i>_<i>XX</i><b>.</b><i>YY</i><b>.</b><i>ZZ</i><b>.</b><i>nn</i> — This is the folder that results from
+	extracting the <b>.zip</b> file.  <i>PPP</i> is the platform, <i>XX</i> is the major version number, <i>YY</i> is the minor
+	version number, <i>ZZ</i> is the point release number, and <i>nn</i> is the build number.
+	-	<b>ajaapps</b> — Contains sources used to build applications and tools.
 		-	<b>crossplatform  </b>
-			-	<b>demoapps</b> -- Contains sources for \ref demoapps.
+			-	<b>demoapps</b> — Contains sources for \ref demoapps.
 		-	<b>lin  </b><i>(Linux-only apps)</i>
 		-	<b>mac  </b><i>(MacOS-only apps)</i>
 		-	<b>win  </b><i>(Windows-only apps)</i>
 	-	<b>ajadriver  </b><i>(Linux only)</i>
-		-	<b>linux</b> -- Device driver source code <i>(Linux only)</i>.
+		-	<b>linux</b> — Device driver source code <i>(Linux only)</i>.
 	-	<b>ajalibraries</b>
-		-	<b>ajabase</b> -- Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
-		-	<b>ajaanc</b> -- Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
-		-	<b>ajacc</b> -- Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
-		-	<b>ajantv2</b> -- Contains source code for the "libajantv2" library:
-			-	<b>build</b> -- <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
-			-	<b>codecs</b> -- Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only, <i>Windows and Linux only</i>).
-			-	<b>includes</b> -- SDK header/include files.
-			-	<b>src</b> -- SDK implementation source files (with platform-specific subdirectories).
-	-	<b>bin</b> -- Destination directory for all executables and requisite dynamically-loaded libraries. Also contains all pre-built tools and utilities.
-		-	<b>NTV2Watcher</b> -- \ref usingntv2watcher is a handy debugging utility that shows the inner workings of NTV2 devices.
-		-	<b>AJA System Test</b> -- Measures the DMA performance of any AJA device attached to the host, as well as the read/write performance of local host storage.
-			@image	html	gs-systemtest-75.png
-		-	<b>Data Rate Calculator</b> calculates DMA performance requirements for various video and pixel formats. It's now universally available on mobile devices:
-			-	iOS: https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8
-			-	Android: https://play.google.com/store/apps/details?id=com.aja.datacalc
-		-	<b>Support Log</b> -- Sometimes when diagnosing an issue, AJA's OEM SDK support staff may request a "register dump" or "register log".
-			This log file can be generated using either the <b>supportlog</b> command line tool or the <b>NTV2Watcher</b> utility.
-			Instructions on how to generate these logs can be found here:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168>.
-		-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to "flash" new firmware into a connected AJA device. The command usage is documented in
-			the <b>NTV2 Firmware</b> section of the <b>Knowledgebase</b>:  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129>.
-			This tool is included because AJA developers or their customers need to be able to program new firmware on an AJA device,
-			and may not need or have access to the AJA retail services, including the <b>AJA ControlPanel</b>, which is commonly used to perform this task.
-			@note	The \ref corvidhevc requires a somewhat different procedure for checking and updating its firmware.  See \ref hevcsupplement for more information.
-		-	<b>ntv2konaipjsonsetup</b> -- A command-line tool used to configure the \ref konaip22 from a JSON configuration file.
-		-	<b>ntv2thermo</b> -- \ref ntv2thermo
-	-	<b>build</b> -- Provided for developers who prefer to use <b>Qt</b> and/or <b>Qt Creator</b>. See \ref gs-qtbuild.
-	-	<b>docs</b> -- Contains a webloc file that points to the NTV2 online API documentation.
-	-	<b>lib</b> -- Destination directory for all static libraries.
-	-	<b>gpustuff</b> -- <i>(Linux & Windows only)</i>
+		-	<b>ajabase</b> — Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
+		-	<b>ajaanc</b> — Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
+		-	<b>ajacc</b> — Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
+		-	<b>ajantv2</b> — Contains the \ref ajantv2.
+			-	<b>build</b> — <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
+			-	<b>codecs</b> — Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only, <i>Windows and Linux only</i>).
+				See \ref hevcsupplement.
+			-	<b>includes</b> — SDK header/include files.
+			-	<b>src</b> — SDK implementation source files (with platform-specific subdirectories).
+	-	<b>bin</b> — Destination directory for all executables and requisite dynamically-loaded libraries.
+		Also contains all pre-built \ref toolsandutilities.
+	-	<b>build</b> — Provided for developers who prefer to use <a href="https://doc.qt.io/" target="_qt">Qt</a>
+		and/or <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>.
+		See \ref gs-qtbuild.
+	-	<b>docs</b> — Contains a webloc file that points to the NTV2 online API documentation.
+	-	<b>lib</b> — Destination directory for all static libraries.
+	-	<b>gpustuff</b> — <i>(Linux & Windows only)</i>
 
 
 @subsection		gs-contents-libs	SDK Libraries
 
 The SDK distribution comes with the following libraries:
--	<b>libajacc</b> --- AJA's library for encoding/decoding closed-captions.
--	<b>libajaanc</b> --- AJA's library to aid ancillary data insertion/extraction.
--	<b>libajabase</b> --- Classes used by the demonstration applications that provide platform-independent abstractions for processes, threads, locks, etc.
--	<b>libajantv2</b> --- The complete NTV2 SDK that can access and control AJA NTV2-compatible devices.
+-	\ref ajabase
+-	\ref ajantv2
+-	\ref ajacc
+-	\ref ajaanc
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
 These can be built using the provided Visual Studio project files.
 
 On Linux, except for the proprietary libraries, pre-built versions of the static libraries are not provided.
-They must be built using the provided Makefiles. Follow the instructions below ("Building the Libraries on Linux").
+They must be built using the provided Makefiles. Follow the instructions below (\ref gs-linuxsdkbuild).
 
 @note	Please avoid deriving subclasses from AJA-provided classes.
 		AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
@@ -98,6 +90,7 @@ They must be built using the provided Makefiles. Follow the instructions below (
 
 
 
+<hr size="50px" />
 @section	gs-compatibility	SDK Forward and Backward Compatibility
 
 The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA. These products ceased being dependent
@@ -128,67 +121,31 @@ To build with the obsolete APIs, the @code #define NTV2_DEPRECATE @endcode line 
 then the 'classes' library will need to be rebuilt.
 
 Starting with SDK 12.5, the '<b>NTV2_DEPRECATE_12_5</b>' macro has also been defined in 'ajatypes.h'.
-Going forward, all API deprecations that are new to that SDK can be reverted by uncommenting the respective "NTV2_DEPRECATE_..." macro.
+Going forward, all API deprecations that are new to that SDK can be reverted by uncommenting the respective \c NTV2_DEPRECATE_… macro.
 
-@note	Do not undefine "NTV2_DEPRECATE" while leaving "NTV2_DEPRECATE_12_5" (or subsequent macros) defined.
-		Unexpected results -- probably bad ones -- will occur.
+@note	Do not undefine \c NTV2_DEPRECATE while leaving \c NTV2_DEPRECATE_12_5 (or subsequent macros) defined.
+		Unexpected results — probably bad ones — will occur.
 
-@subsection	gs-movingtonewapis	Moving to the New APIs
+@note	AJA will, at some point, remove the deprecated symbols and APIs in a future SDK.
+		Please prepare for this by porting your code to the latest SDK.
+		The <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/186" target="_kb">NTV2 SDK Porting Guide</a> can help you.
 
-The biggest changes you'll notice are as follows:
--	Symbols that started with 'NTV2K2...' now simply start with 'NTV2...'
--	Symbols that started with 'GetK2...' now simply start with 'Get...'
--	Symbols that started with 'SetK2...' now simply start with 'Set...'
--	Symbols that started with 'Xena2...' now simply start with 'NTV2...'.
--	Functions with index numbers in them have been deprecated in favor of a single function with an index parameter
-	(e.g., 'GetInput3VideoFormat' is gone; use 'GetInputVideoFormat' instead).
--	Symbols that contain "Board" now contain "Device".
--	<b>CNTV2Status</b> class has been deprecated, its essential functions rolled into <b>CNTV2Card</b>.
--	<b>CNTV2ColorCorrection</b> class has been deprecated, its essential functions and data rolled into <b>CNTV2Card</b>. (This is new in SDK 12.4.)
--	<b>CNTV2TestPattern</b> class has been deprecated, its essential functions and data rolled into <b>CNTV2Card</b>. (This is new in SDK 12.4.)
--	<b>CNTV2ProcAmp</b> class has been deprecated, its essential functions and data rolled into <b>CNTV2Card</b>. (This is new in SDK 12.4.)
--	<b>CNTV2VidProc</b> class has been deprecated, its essential functions and data rolled into <b>CNTV2Card</b>. (This is new in SDK 12.4.)
--	<b>CXena2VidProc</b> class has been deprecated, its essential functions and data rolled into <b>CNTV2Card</b>. (This is new in SDK 12.4.)
--	Global data that used to be accessed directly (via 'extern') must now be accessed via "getter" functions.
--	Symbols tied to obsolete, unsupported devices (e.g., "Borg", "FS1" etc.) have been deprecated.
-
-@subsubsection	gs-newacapis	New AutoCirculate APIs
-
-The 12.3 SDK introduced new AutoCirculate APIs to replace the originals:
--	CNTV2Card::AutoCirculateInitForInput (replaced CNTV2Card::InitAutoCirculate)
--	CNTV2Card::AutoCirculateInitForOutput (replaced CNTV2Card::InitAutoCirculate)
--	CNTV2Card::AutoCirculateTransfer (replaced CNTV2Card::TransferWithAutoCirculate, CNTV2Card::TransferWithAutoCirculateEx, CNTV2Card::TransferWithAutoCirculateEx2 and CNTV2Card::SetAutoCirculateCaptureTask)
--	CNTV2Card::AutoCirculatePause and CNTV2Card::AutoCirculateResume (replaced CNTV2Card::PauseAutoCirculate)
--	CNTV2Card::AutoCirculateStart (replaced CNTV2Card::StartAutoCirculate)
--	CNTV2Card::AutoCirculateStop (replaced CNTV2Card::StopAutoCirculate and CNTV2Card::AbortAutoCirculate)
--	...etc...
-
-You must code to these new APIs to use the firmware Ancillary data insertion/extraction feature.
-The new APIs also eliminate old hacks introduced long ago, such as <b>NTV2Tasks</b>, size limits on register changes, etc.
-These are now much more easily accomplished using simple, high-level C++ STL constructs.
-
-@subsubsection	gs-newroutingapis	New Routing APIs
-
-The 12.3 SDK introduced new '<b>NTV2OutputCrosspointID</b>' and '<b>NTV2InputCrosspointID</b>' enums (the former replacing the existing
-'<b>NTV2CrosspointID</b>') ... and some new APIs for connecting, disconnecting, and determining if a connection between them exists.
-The existing '<b>NTV2RoutingEntry</b>' struct will eventually become private in a future SDK, and the hundreds of functions that
-referred to it will be deprecated at that time.
 
 @subsubsection		gs-condcompsdkvers	Conditional Compilation Based on NTV2 SDK Version
 
 The NTV2 SDK now contains its version information as symbols defined in 'ntv2enums.h' (located inside 'ntv2projects/includes'). It defines the following symbols:
 -	<b>AJA_NTV2_SDK_VERSION_MAJOR</b>	The SDK's major version number (an unsigned numeric constant).
 -	<b>AJA_NTV2_SDK_VERSION_MINOR</b>	The SDK's minor version number (an unsigned numeric constant).
--	<b>AJA_NTV2_SDK_VERSION_POINT</b>	The SDK's "point" version number (an unsigned numeric constant).
+-	<b>AJA_NTV2_SDK_VERSION_POINT</b>	The SDK's “point” version number (an unsigned numeric constant).
 -	<b>AJA_NTV2_SDK_BUILD_NUMBER</b>	The SDK build number (an unsigned numeric constant).
--	<b>AJA_NTV2_SDK_BUILD_DATETIME</b>	The date and time the SDK was built, a string literal of the form "MM/DD/YYYY +/-Z:hh:mm:ss",
+-	<b>AJA_NTV2_SDK_BUILD_DATETIME</b>	The date and time the SDK was built, a string literal of the form “MM/DD/YYYY +/-Z:hh:mm:ss”,
 	where MM is the 2-digit month (01 thru 12), DD is the 2-digit day number, YYYY is the 4-digit year, +/-Z is the number of hours relative to UTC,
 	'hh' is the 2-digit hour (0 thru 23), 'mm' is the number of minutes past the hour (0 thru 59), and 'ss' is the number of seconds past the minute (0 thru 59).
--	<b>AJA_NTV2_SDK_BUILD_TYPE</b>	The SDK build type, a string literal containing a single character, where "d" means "development",
-	"a" means "alpha", "b" means "beta" and the empty string means "release".
+-	<b>AJA_NTV2_SDK_BUILD_TYPE</b>	The SDK build type, a string literal containing a single character, where “d” means “development”,
+	“a” means “alpha”, “b” means “beta” and the empty string means “release”.
 -	<b>AJA_NTV2_SDK_VERSION</b>	An unsigned integer value built from the SDK version components that can be reliably compared with other version integer values.
 There's also a convenient macro for testing which SDK version is being used at compile-time:
-	-	<b>AJA_NTV2_SDK_VERSION_AT_LEAST(major, minor)</b>	Yields "true" if the major and minor version numbers of the current SDK being compiled
+	-	<b>AJA_NTV2_SDK_VERSION_AT_LEAST(major, minor)</b>	Yields “true” if the major and minor version numbers of the current SDK being compiled
 		are at least (greater than or equal to) the specified major and minor values, respectively.
 		To use this macro, first test for its existence. If it doesn't exist, the SDK being compiled is earlier than 12.0.
 		If it does exist, call it with the minimum version of the required SDK:
@@ -206,21 +163,22 @@ There's also a convenient macro for testing which SDK version is being used at c
 
 AJA always recommends that NTV2-based applications be built from the same SDK version as the installed driver they will be using.
 
-While AJA always tries to maintain backward compatibility between newer SDKs and older drivers, AJA cannot guarantee correct
-operation of applications built from an older SDK running on a newer version driver, nor applications built from a newer SDK
-running on an older version driver.
+@warning	While AJA always tries to maintain backward compatibility between newer SDKs and older drivers, AJA cannot guarantee correct
+			operation of applications built from an older SDK running on a newer version driver, nor applications built from a newer SDK
+			running on an older version driver.
 
 @subsubsection		gs-forwardcomp		Firmware and Device Features
 
-For a given SDK release, the "device features" API responses should be correct for all supported devices running the latest
-firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK's download
-page and/or the device firmware page in the Knowledgebase.
+For a given SDK release, the \ref ntv2devicefeatures responses should be correct for all supported devices running the latest
+firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s download
+page and/or the device firmware page in the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
 
 
 
+<hr size="50px" />
 @section		gs-sdkbuild		Building the Libraries
 
-@subsection		gs-linuxsdkbuild	Building the Libraries & Demo Apps --- Linux
+@subsection		gs-linuxsdkbuild	Building on Linux
 
 On Linux, the libraries and device drivers are not pre-built, and must be compiled and linked on the host they are expected to run on.
 -#	Be sure you have the requisite third-party software packages installed:
@@ -229,11 +187,12 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 	-	<tt>libsound2-dev</tt>.
 	Refer to your Linux distro's documentation for the correct utility for managing packages.
 	Note that package managers often install dependent packages, so it may not be necessary to explicitly load all the packages
-	in the aforementioned list. (The Knowledgebase article from which the SDK was downloaded is the authoritative source for this information.)
--#	To build the <b>Qt</b>-based demo applications, you'll need to install <b>Qt</b> (the <tt>qt5-dev-tools</tt> package).
-	-	If your Linux distro's package manager can't get it, AJA recommends downloading and building <b>Qt</b> directly from sources.
-	-	For more information about <b>Qt</b>, visit <http://qt.digia.com/>.
-	-	Be sure the path to <b>Qt</b>'s "bin" directory is in the current path.
+	in the aforementioned list. (The Knowledgebase article from which the SDK was downloaded is authoritative for this information.)
+-#	To build the <a href="https://doc.qt.io/" target="_qt">Qt</a>-based demo applications, you’ll need to install <a href="https://doc.qt.io/" target="_qt">Qt</a>
+	(the <tt>qt5-dev-tools</tt> package).
+	-	If your Linux distro's package manager can't get it, AJA recommends downloading and building <a href="https://doc.qt.io/" target="_qt">Qt</a> directly from sources.
+	-	For more information about <a href="https://doc.qt.io/" target="_qt">Qt</a>, visit <http://qt.digia.com/>.
+	-	Be sure the path to <a href="https://doc.qt.io/" target="_qt">Qt</a>’s <b>bin</b> directory is in the current path.
 -#	Using a terminal, change to the \c ntv2libraries/ajantv2/build directory in the SDK:
 	<tt>$ cd sdk/ntv2libraries/ajantv2/build</tt>
 -#	<b>Corvid HEVC Only:</b>  Export the environment variable <tt>AJA_HEVC=MB31</tt> to include the HEVC API:
@@ -243,88 +202,89 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	<b>Optional:</b> Export the environment variable <tt>AJA_DEBUG=1</tt> if a debug build is required:
 	<tt>$ export AJA_DEBUG=1</tt>
 -#	Enter the \c make command. This will build all libraries, tools, utilities, demo applications, and the device driver.
-	The built executables will appear in the "../bin" directory (a peer to <b>ntv2libraries</b>).
+	The built executables will appear in the “../bin” directory (a peer to <b>ntv2libraries</b>).
 -#	Load the device driver:
     <tt>$ sudo ../bin/load_ajantv2</tt>
 -#	Verify that the driver is installed by ...
-	-	issuing an \c lsmod, and look for "ajantv2" in the list;
-	-	look inside \c /dev/proc and look for devices with "ajantv2" in the name.
+	-	issuing an \c lsmod, and look for \c ajantv2 in the list;
+	-	look inside \c /dev/proc and look for devices with \c ajantv2 in the name.
 
-@note	On CentOS (and possibly other Linux variants), the DVP demo app 'dvplowlatencydemo' won't run unless the 'libdvp.so'
-		shared library is copied into '/usr/lib64'.
+@note	On CentOS (and possibly other Linux variants), the DVP demo app “dvplowlatencydemo” won’t run unless the \c libdvp.so
+		shared library is copied into \c /usr/lib64.
 
-@subsection		gs-macsdkbuild	Building the Libraries --- MacOS
+@subsection		gs-macsdkbuild	Building on MacOS
 
 On MacOS, the device driver is normally provided from the AJA Software installer, while the libraries are provided pre-built in the <tt>sdk/lib</tt> folder.
-The NTV2 "ajantv2" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
--#	Launch <b>Xcode</b> and open the <b>classes.xcodeproj</b> project file that's inside the <tt>sdk/ntv2projects/classes</tt> folder.
--#	Select the <b>libclasses</b> or <b>BuildAll</b> targets as the current target.
+The \ref ajantv2 source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
+-#	Launch <b>Xcode</b> and open the <b>ajantv2.xcodeproj</b> project file that’s inside the <tt>ajalibraries/ajantv2/build</tt> folder.
+-#	Select the <b>libclasses</b> or <b>BuildAll</b> target as the current target.
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
-Look for the new <b>libajantv2d.a</b> library in the <tt>sdk/lib</tt> folder.
-@note	The "ajantv2" library included in the SDK is built to link with the traditional, non-C++11 standard library.
-		If your application uses C++11, you must rebuild the "ajantv2" library to reference the LLVM C++11 standard library:
+-#	Look for the new \c libajantv2d.a library in the \c lib folder.
+
+@note	The \ref ajantv2 and \ref ajabase included in the SDK are built to link with the traditional, non-C++11 standard library.
+		If your application uses C++11, you must rebuild them both to reference the LLVM C++11 standard library:
 		\code{.sh}
 		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
-		\endcode
-		If you also use the "ajabase" library (e.g., for the demo apps), you'll need to rebuild the "ajabase" library as well:
-		\code{.sh}
 		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
 		\endcode
-		If you use the "ajaanc" and/or "ajacc" libraries, AJA supplies libc++-compatible versions of these libraries in the "libc++11" folder inside the "lib" folder.
+		If you use the \ref ajaanc and/or \ref ajacc, AJA supplies libc++-compatible versions of these libraries inside the \c lib/libc++11 folder.
+		Swap them with their counterparts in the \c lib folder.
 
-@subsection		gs-winsdkbuild	Building the Libraries --- Windows
+@subsection		gs-winsdkbuild	Building on Windows
 
 On Windows, the device driver is normally installed from the provided \c .msi, and the libraries are provided pre-built in the \c sdk\\lib folder.
-However, the NTV2 "ajantv2" library source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
+However, the \ref ajantv2 source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Visual Studio</b> and do one of the following:
-	-	open the <b>ntv2_vs12.sln</b> solution file that's inside the \c sdk\\ajalibraries\\ajantv2\\build folder, or...
-	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs12.vcxproj</b> project files into your own solution
+	-	open the <b>ntv2_vs12.sln</b> solution file that’s inside \c sdk\\ajalibraries\\ajantv2\\build, or…
+	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs12.vcxproj</b> project files into your solution.
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
--#	Build the <b>ajantv2</b> library.
+-#	Build the \ref ajantv2.
 Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
 
 @subsection		gs-qtbuild	Building With Qt
 
-<b>Qt</b> is a cross-platform application framework used for developing applications that run on Linux, MacOS and Windows with little or no change in the underlying codebase,
-while retaining native capabilities and speed.
+<a href="https://doc.qt.io/" target="_qt">Qt</a> is a cross-platform application framework used for developing applications that run on Linux,
+MacOS and Windows with little or no change in the underlying codebase, while retaining native capabilities and speed.
 
-<b>Qt Creator</b> is a feature-rich integrated development environment (IDE) that works identically on Linux, MacOS and Windows.
+<a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a> is a feature-rich integrated development environment (IDE)
+that works identically on Linux, MacOS and Windows.
 
-The NTV2 SDK now makes it easy to develop NTV2 applications with Qt's <b>qmake</b> facility or with the <b>Qt Creator</b> IDE. To get started, look for the <b>build</b> folder in the SDK:
+The NTV2 SDK now makes it easy to develop NTV2 applications with Qt’s <b>qmake</b> facility
+or with the <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a> IDE.
+To get started, look for the <b>build</b> folder in the SDK:
 
--	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> --- The extracted SDK folder.
-	-	<b>build</b> -- This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
-		-	<b>_ntv2demos.pro</b> -- This is the "solution file" or "project file" that builds everything -- the libraries and the demonstration applications.
-		-	<b>ajaanc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
-		-	<b>ajabase</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
-		-	<b>ajacc</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
-		-	<b>ajantv2</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
-		-	<b>config.pri</b> -- This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
-		-	<b>libs.pri</b> -- A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
-		-	<b>local_config.pri</b> -- An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
-		-	<b>ntv2demos</b> -- Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
+-	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> — The extracted SDK folder.
+	-	<b>build</b> — This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
+		-	<b>_ntv2demos.pro</b> — This is the "solution file" or "project file" that builds everything — the libraries and the demonstration applications.
+		-	<b>ajaanc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
+		-	<b>ajabase</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
+		-	<b>ajacc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
+		-	<b>ajantv2</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
+		-	<b>config.pri</b> — This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
+		-	<b>libs.pri</b> — A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
+		-	<b>local_config.pri</b> — An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
+		-	<b>ntv2demos</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
 
-<b>Building libraries and demos with qmake/make:</b>
+@par	Building with qmake/make:
 
-Assuming at least one version of Qt is already installed:
+Assuming at least one version of <a href="https://doc.qt.io/" target="_qt">Qt</a> is already installed:
 
 -#	Change the current directory to \c build inside the unzipped SDK folder.
--#	Enter \c path/to/qmake \c _ntv2demos.pro
--#	Enter \c make
+-#	Enter  \c path/to/qmake  \c _ntv2demos.pro
+-#	Enter  \c make
 
-<b>Building libraries and demos with Qt Creator:</b>
+@par	Building with <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>:</b>
 
-Assuming <b>Qt Creator</b> is installed...
+Assuming <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a> is installed...
 
--#	Double-click <b>_ntv2demos.pro</b> (or open it from inside <b>Qt Creator</b>).
+-#	In the \c build folder, double-click <b>_ntv2demos.pro</b> (or open it from inside <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>).
 -#	Assign it a kit.
 -#	Build the project.
 
-The built libraries will be placed into the <b>lib</b> directory (a peer to <b>sdk</b>).
-
-The built executables will be placed into the <b>bin</b> directory (a peer to <b>lib</b>).
+The built libraries will be in \c lib ; the built executables will be in \c bin (both are peers to \c ajalibraries).
 
 
+<hr size="50px" />
 
 @section	gs-newprojects	Creating New Projects With the SDK
 
@@ -336,46 +296,49 @@ NTV2-based applications are commonly built using makefiles on Linux, and using a
 NTV2-based Linux applications can be built using the static libraries or the shared objects (.so files). These should have been built when
 the SDK was built.
 
-Many OEM developers choose to create their own NTV2-based projects "from scratch." At a minimum, you'll need to do the following:
--	Linux makefiles employ the environment variable $NTV2_ROOT. If your new project is placed outside of the SDK tree, then it must
-	be defined (e.g., \c export NTV2_ROOT=path/to/ajalibraries/ajantv2).
--	Be sure to define '<b>AJALinux</b>'
--	If you need to be able to debug and step into SDK functions, you will need to build a debug version of the SDK, this time setting a
-	special environment variable: <b>export AJA_DEBUG=1</b>. The resulting libraries will have the same names, but will appear in the
-	directory "ajalibraries/ajantv2/lib-DEBUG".
+Many OEM developers choose to create their own NTV2-based projects “from scratch.” At a minimum, you’ll need to do the following:
+-	Linux makefiles employ the environment variable \c $NTV2_ROOT. If your new project is placed outside of the SDK tree, then it must
+	be defined (e.g., \c export \c NTV2_ROOT=path/to/ajalibraries/ajantv2 ).
+-	Be sure to define \c AJALinux.
+-	If you need to be able to debug and step into SDK functions, you will need to build a debug version of the SDK,
+	this time setting a special environment variable: \c export \c AJA_DEBUG=1. The resulting libraries will have
+	the same names, but will appear in the directory \c ajalibraries/ajantv2/lib-DEBUG.
 
 
 @subsection	gs-newmacprojects	Mac OS X
 
 NTV2-based MacOS applications must be built using the provided static libraries, or by including the NTV2 source
-code directly into the Xcode project. AJA will not provide dynamically-loaded libraries ('.dylib's) or frameworks
+code directly into the Xcode project. AJA will not provide dynamically-loaded libraries (<b>.dylib</b>s) or frameworks
 for any of its libraries on the MacOS platform.
 
-Many OEM developers choose to create their own NTV2-based Xcode projects "from scratch." At a minimum, the following
-XCode build parameters must be set:
--	Use the "Latest Mac OS X" SDK. (This SDK can be built against MacOS SDK 10.6 or later.)
--	Use a "Mac OS X Deployment Target of 10.9 ("Mountain Lion") or later.
--	Use Intel 32 or 64-bit architectures (or both). (AJA does not support the PowerPC architecture.)
--	Define both preprocessor macros "AJAMac" and "AJA_MAC" as "1".
+Many OEM developers choose to create their own NTV2-based Xcode projects “from scratch.” At a minimum, the following
+<b>XCode</b> build parameters must be set:
+-	Use the “Latest Mac OS X” SDK. (The SDK can be built against MacOS SDK 10.9 or later.)
+-	Use a “Mac OS X Deployment Target” of 10.9 (“Mountain Lion”) or later.
+-	Use \c x86_64 (64-bit) architecture.
+-	Define both preprocessor macros \c AJAMac and \c AJA_MAC as \c 1.
 -	Add the following header search paths:
-	-	<b>sdkdir/ajalibraries/ajantv2/includes</b>
-	-	<b>sdkdir/ajalibraries/ajantv2/src/mac</b>
-	-	<b>sdkdir/ajalibraries/ajabase</b> (only if "ajabase" is needed)
-	-	<b>sdkdir/ajalibraries/ajacc</b> (only if the AJA Captioning Library is needed)
-	-	<b>sdkdir/ajalibraries/ajaanc</b> (only if the AJA ancillary data library is needed)
--	It is not necessary to always search "user" header paths.
+	-	\c sdkdir/ajalibraries/ajantv2/includes
+	-	\c sdkdir/ajalibraries/ajantv2/src/mac
+	-	\c sdkdir/ajalibraries/ajabase (only if "ajabase" is needed)
+	-	\c sdkdir/ajalibraries/ajacc (only if the AJA Captioning Library is needed)
+	-	\c sdkdir/ajalibraries/ajaanc (only if the AJA ancillary data library is needed)
+-	It is not necessary to always search “user” header paths.
 -	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	Add the following library search paths:
-	-	<b>sdkdir/lib</b>
+	-	\c sdkdir/lib
 -	Add the following to the "Other Linker Flags" setting:
-	-	<b>-lajantv2</b> (Release) or <b>-lajantv2d</b> (Debug)
-	-	<b>-lajabase</b> (Release) or <b>-lajabased</b> (Debug), if needed
-	-	<b>-lajacc</b>, if the AJA captioning library is needed
-	-	<b>-lajaanc</b>, if the AJA ancillary data library is needed
+	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
+	-	\c -lajabase (Release) or <b>-lajabased</b> (Debug), if needed
+	-	\c -lajacc, if the AJA captioning library is needed
+	-	\c -lajaanc, if the AJA ancillary data library is needed
+
+@warning	The libraries shipped with the SDK for MacOS are \c x86_64 (64-bit) only.
+			AJA no longer supports the \c i386 (Intel 32-bit) or PowerPC architectures.
 
 @note	The libraries shipped with the SDK for MacOS are built without referencing C++11 standard library support.
-		The Xcode build setting that controls this is "CLANG_CXX_LIBRARY" (a.k.a. "C++ Standard Library").
-		This build setting must match for all compilands passed to the linker -- otherwise "undefined symbols" errors will result.
+		The Xcode build setting that controls this is \c CLANG_CXX_LIBRARY (a.k.a. “C++ Standard Library”).
+		This build setting must match for all compilands passed to the linker — otherwise “undefined symbols” errors will result.
 		See \ref gs-macsdkbuild for more information.
 
 
@@ -383,32 +346,32 @@ XCode build parameters must be set:
 
 Windows builds are structured with projects (.vcproj files) grouped into a solution (.sln file).
 The solution files for building the entire SDK can be found here:
--	sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln		(for VS2013+)
--	sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs9.sln		(for all others)
+-	\c sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln		(for VS2013+)
+-	\c sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs9.sln		(for all others)
 
-Choose "build all" to build all of the SDK libraries and the demo applications that use the libraries.
+Choose “build all” to build all of the SDK libraries and the demo applications that use the libraries.
 
-Many OEM developers choose to create their own solution and project files "from scratch." Here are the essential requirements:
--	Choose whether to use AJA's pre-built NTV2 dynamic libraries (.DLL's) or static libraries (.LIB's). There are advantages and disadvantages to both.
--	Define the preprocessor macros "WIN32", "_WINDOWS", "MSWindows" and "AJA_WINDOWS".
--	For Release builds, define the preprocessor macro "NDEBUG". For Debug builds, define both "_DEBUG" and "AJA_DEBUG".
--	If you use AJA's pre-built DLLs, define the preprocessor macro "AJA_NO_AUTOIMPORT".
+Many OEM developers choose to create their own solution and project files “from scratch.” Here are the essential requirements:
+-	Choose whether to use AJA’s pre-built NTV2 dynamic libraries (.DLL’s) or static libraries (.LIB’s). There are advantages and disadvantages to both.
+-	Define the preprocessor macros \c WIN32, \c _WINDOWS, \c MSWindows and \c AJA_WINDOWS.
+-	For Release builds, define the preprocessor macro \c NDEBUG. For Debug builds, define both \c _DEBUG and \c AJA_DEBUG.
+-	If you use AJA’s pre-built DLLs, define the preprocessor macro \c AJA_NO_AUTOIMPORT.
 -	Add the following header search paths:
-	-	<b>sdkdir\\ajalibraries\\ajantv2\\includes</b>
-	-	<b>sdkdir\\ajalibraries\\ajantv2\\src\\win</b>
-	-	<b>sdkdir\\ajalibraries\\ajabase</b> (only if "ajabase" is needed)
-	-	<b>sdkdir\\ajalibraries\\ajacc</b> (only if the AJA Captioning Library is needed)
-	-	<b>sdkdir\\ajalibraries\\ajaanc</b> (only if the AJA ancillary data library is needed)
--	The preprocessor should always search "user" header paths.
+	-	\c sdkdir\\ajalibraries\\ajantv2\\includes
+	-	\c sdkdir\\ajalibraries\\ajantv2\\src\\win
+	-	\c sdkdir\\ajalibraries\\ajabase (if \ref ajabase needed)
+	-	\c sdkdir\\ajalibraries\\ajacc (if \ref ajacc needed)
+	-	\c sdkdir\\ajalibraries\\ajaanc (if \ref ajaanc needed)
+-	The preprocessor should always search “user” header paths.
 -	Add the following library search paths:
-	-	<b>sdkdir\\bin</b>
--	Add the appropriate SDK .vcproj file(s) to your solution as needed, then make your build target(s) dependent upon them. This will configure the linker properly.
--	It's important to link with the correct runtime libraries. When using AJA's static libraries, link with Multi-threaded "/MT" or Multi-threaded debug "/Mtd"
-	runtime libraries. When using AJA's dynamic libraries, link with Multi-threaded-DLL "/MD" or Multi-threaded DLL debug "/MDd" runtime libraries.
--	When using the 'ajacc' and 'ajaanc' libraries (found in the "lib" directory), it's important to link with the ones that are correct for the Visual Studio
-	compiler being used. The library names have been decorated with the Visual Studio compiler version ('_vs10', '_vs11', etc.), Win32 or x64 ('_32' or '_64'),
-	and the runtime library they're compatible with (undecorated is "/MT", 'd' for "/Mtd", 'MD' for "/MD", and 'MDd' for "/MDd).
--	When using AJA's pre-built DLLs, AJA recommends configuring your solution to place build products in the same "bin" directory that contains AJA's pre-built
+	-	\c sdkdir\\bin
+-	Add the appropriate SDK <b>.vcproj</b> file(s) to your solution as needed, then make your build target(s) dependent upon them. This will configure the linker properly.
+-	It’s important to link with the correct runtime libraries. When using AJA’s static libraries, link with Multi-threaded \c /MT or Multi-threaded debug \c /Mtd
+	runtime libraries. When using AJA’s dynamic libraries, link with Multi-threaded-DLL \c /MD or Multi-threaded DLL debug \c /MDd runtime libraries.
+-	When using the \ref ajacc and \ref ajaanc (found in the \c lib directory), it’s important to link with the ones that are correct for the Visual Studio
+	compiler being used. The library names have been decorated with the Visual Studio compiler version (\c _vs10, \c _vs11, etc.), Win32 or x64 (\c _32 or \c _64),
+	and the runtime library they’re compatible with (undecorated is \c /MT, \c d for \c /Mtd, \c MD for \c /MD, and \c MDd for \c /MDd ).
+-	When using AJA’s pre-built DLLs, AJA recommends configuring your solution to place build products in the same \c bin directory that contains AJA’s pre-built
 	executables. This will speed development, since the requisite DLLs can readily be found by your application at run time.
 
 **/

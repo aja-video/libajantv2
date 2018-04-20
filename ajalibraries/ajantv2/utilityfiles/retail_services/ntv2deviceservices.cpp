@@ -28,6 +28,7 @@
 #include "ntv2ioip2022services.h"
 #include "ntv2ioip2110services.h"
 #include "ntv2io4kplusservices.h"
+#include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
 #include "ntv2kona1services.h"
@@ -62,7 +63,6 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
         case DEVICE_ID_IOIP_2110:
             pDeviceServices = new IoIP2110Services();
             break;
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
         case DEVICE_ID_KONAIP_2110:
 			pDeviceServices = new KonaIP2110Services();
 			break;
@@ -124,6 +124,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			break;
 		case DEVICE_ID_KONA1:
 			pDeviceServices = new Kona1Services();
+			break;
+		case DEVICE_ID_KONAHDMI:
+			pDeviceServices = new KonaHDMIServices();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
@@ -245,101 +248,157 @@ void DeviceServices::ReadDriverState (void)
 		//mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
 	}
 
-    if ((NTV2DeviceGetNum2022ChannelsSFP1(mDeviceID) > 0) && (mCard->IsDeviceReady(true) == true))
-	{
+    if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2022) ||
+        (mDeviceID == DEVICE_ID_IOIP_2022))
+    {
         mCard->ReadRegister(kVReg2022_7Enable,              (ULWord*)&m2022_7Mode);
         mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     (ULWord*)&mNetworkPathDiff);
-        
+
         mCard->ReadRegister(kVRegIPAddrEth0,                &mEth0.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth0,                &mEth0.ipc_subnet);
         mCard->ReadRegister(kVRegGatewayEth0,               &mEth0.ipc_gateway);
-        
+
         mCard->ReadRegister(kVRegIPAddrEth1,                &mEth1.ipc_ip);
         mCard->ReadRegister(kVRegSubnetEth1,                &mEth1.ipc_subnet);
         mCard->ReadRegister(kVRegGatewayEth1,               &mEth1.ipc_gateway);
-        
+
         mCard->ReadRegister(kVRegRxcEnable1,				&mRx2022Config1.rxc_enable32);
-        mCard->ReadRegister(kVRegRxcPrimaryRxMatch1,		&mRx2022Config1.rxc_primaryRxMatch);
-        mCard->ReadRegister(kVRegRxcPrimarySourceIp1,		&mRx2022Config1.rxc_primarySourceIp);
-        mCard->ReadRegister(kVRegRxcPrimaryDestIp1,			&mRx2022Config1.rxc_primaryDestIp);
-        mCard->ReadRegister(kVRegRxcPrimarySourcePort1,		&mRx2022Config1.rxc_primarySourcePort);
-        mCard->ReadRegister(kVRegRxcPrimaryDestPort1,		&mRx2022Config1.rxc_primaryDestPort);
-        mCard->ReadRegister(kVRegRxcPrimaryVlan1,			&mRx2022Config1.rxc_primaryVlan);
-        mCard->ReadRegister(kVRegRxcSecondaryRxMatch1,		&mRx2022Config1.rxc_secondaryRxMatch);
-        mCard->ReadRegister(kVRegRxcSecondarySourceIp1,		&mRx2022Config1.rxc_secondarySourceIp);
-        mCard->ReadRegister(kVRegRxcSecondaryDestIp1,		&mRx2022Config1.rxc_secondaryDestIp);
-        mCard->ReadRegister(kVRegRxcSecondarySourcePort1,	&mRx2022Config1.rxc_secondarySourcePort);
-        mCard->ReadRegister(kVRegRxcSecondaryDestPort1,		&mRx2022Config1.rxc_secondaryDestPort);
-        mCard->ReadRegister(kVRegRxcSecondaryVlan1,			&mRx2022Config1.rxc_secondaryVlan);
-		mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcSfp1RxMatch1,           &mRx2022Config1.rxc_sfp1RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp1SourceIp1,          &mRx2022Config1.rxc_sfp1SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp1DestIp1,            &mRx2022Config1.rxc_sfp1DestIp);
+        mCard->ReadRegister(kVRegRxcSfp1SourcePort1,        &mRx2022Config1.rxc_sfp1SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp1DestPort1,          &mRx2022Config1.rxc_sfp1DestPort);
+        mCard->ReadRegister(kVRegRxcSfp1Vlan1,              &mRx2022Config1.rxc_sfp1Vlan);
+        mCard->ReadRegister(kVRegRxcSfp2RxMatch1,           &mRx2022Config1.rxc_sfp2RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp2SourceIp1,          &mRx2022Config1.rxc_sfp2SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp2DestIp1,            &mRx2022Config1.rxc_sfp2DestIp);
+        mCard->ReadRegister(kVRegRxcSfp2SourcePort1,        &mRx2022Config1.rxc_sfp2SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp2DestPort1,          &mRx2022Config1.rxc_sfp2DestPort);
+        mCard->ReadRegister(kVRegRxcSfp2Vlan1,              &mRx2022Config1.rxc_sfp2Vlan);
+        mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcPlayoutDelay1,			&mRx2022Config1.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegRxcEnable2,				&mRx2022Config2.rxc_enable32);
-        mCard->ReadRegister(kVRegRxcPrimaryRxMatch2,		&mRx2022Config2.rxc_primaryRxMatch);
-        mCard->ReadRegister(kVRegRxcPrimarySourceIp2,		&mRx2022Config2.rxc_primarySourceIp);
-        mCard->ReadRegister(kVRegRxcPrimaryDestIp2,			&mRx2022Config2.rxc_primaryDestIp);
-        mCard->ReadRegister(kVRegRxcPrimarySourcePort2,		&mRx2022Config2.rxc_primarySourcePort);
-        mCard->ReadRegister(kVRegRxcPrimaryDestPort2,		&mRx2022Config2.rxc_primaryDestPort);
-        mCard->ReadRegister(kVRegRxcPrimaryVlan2,			&mRx2022Config2.rxc_primaryVlan);
-        mCard->ReadRegister(kVRegRxcSecondaryRxMatch2,		&mRx2022Config2.rxc_secondaryRxMatch);
-        mCard->ReadRegister(kVRegRxcSecondarySourceIp2,		&mRx2022Config2.rxc_secondarySourceIp);
-        mCard->ReadRegister(kVRegRxcSecondaryDestIp2,		&mRx2022Config2.rxc_secondaryDestIp);
-        mCard->ReadRegister(kVRegRxcSecondarySourcePort2,	&mRx2022Config2.rxc_secondarySourcePort);
-        mCard->ReadRegister(kVRegRxcSecondaryDestPort2,		&mRx2022Config2.rxc_secondaryDestPort);
-        mCard->ReadRegister(kVRegRxcSecondaryVlan2,			&mRx2022Config2.rxc_secondaryVlan);
-		mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcSfp1RxMatch2,           &mRx2022Config2.rxc_sfp1RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp1SourceIp2,          &mRx2022Config2.rxc_sfp1SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp1DestIp2,            &mRx2022Config2.rxc_sfp1DestIp);
+        mCard->ReadRegister(kVRegRxcSfp1SourcePort2,        &mRx2022Config2.rxc_sfp1SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp1DestPort2,          &mRx2022Config2.rxc_sfp1DestPort);
+        mCard->ReadRegister(kVRegRxcSfp1Vlan2,              &mRx2022Config2.rxc_sfp1Vlan);
+        mCard->ReadRegister(kVRegRxcSfp2RxMatch2,           &mRx2022Config2.rxc_sfp2RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp2SourceIp2,          &mRx2022Config2.rxc_sfp2SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp2DestIp2,            &mRx2022Config2.rxc_sfp2DestIp);
+        mCard->ReadRegister(kVRegRxcSfp2SourcePort2,        &mRx2022Config2.rxc_sfp2SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp2DestPort2,          &mRx2022Config2.rxc_sfp2DestPort);
+        mCard->ReadRegister(kVRegRxcSfp2Vlan2,              &mRx2022Config2.rxc_sfp2Vlan);
+        mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
         mCard->ReadRegister(kVRegRxcPlayoutDelay2,			&mRx2022Config2.rxc_playoutDelay);
 
         mCard->ReadRegister(kVRegTxcEnable3,				&mTx2022Config3.txc_enable32);
-        mCard->ReadRegister(kVRegTxcPrimaryLocalPort3,		&mTx2022Config3.txc_primaryLocalPort);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteIp3,		&mTx2022Config3.txc_primaryRemoteIp);
-        mCard->ReadRegister(kVRegTxcPrimaryRemotePort3,		&mTx2022Config3.txc_primaryRemotePort);
-        mCard->ReadRegister(kVRegTxcSecondaryLocalPort3,	&mTx2022Config3.txc_secondaryLocalPort);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteIp3,		&mTx2022Config3.txc_secondaryRemoteIp);
-        mCard->ReadRegister(kVRegTxcSecondaryRemotePort3,	&mTx2022Config3.txc_secondaryRemotePort);
-		
+        mCard->ReadRegister(kVRegTxcSfp1LocalPort3,         &mTx2022Config3.txc_sfp1LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp1RemoteIp3,          &mTx2022Config3.txc_sfp1RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp1RemotePort3,		&mTx2022Config3.txc_sfp1RemotePort);
+        mCard->ReadRegister(kVRegTxcSfp2LocalPort3,         &mTx2022Config3.txc_sfp2LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp2RemoteIp3,          &mTx2022Config3.txc_sfp2RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp2RemotePort3,        &mTx2022Config3.txc_sfp2RemotePort);
+
         mCard->ReadRegister(kVRegTxcEnable4,				&mTx2022Config4.txc_enable32);
-        mCard->ReadRegister(kVRegTxcPrimaryLocalPort4,		&mTx2022Config4.txc_primaryLocalPort);
-        mCard->ReadRegister(kVRegTxcPrimaryRemoteIp4,		&mTx2022Config4.txc_primaryRemoteIp);
-        mCard->ReadRegister(kVRegTxcPrimaryRemotePort4,		&mTx2022Config4.txc_primaryRemotePort);
-        mCard->ReadRegister(kVRegTxcSecondaryLocalPort4,	&mTx2022Config4.txc_secondaryLocalPort);
-        mCard->ReadRegister(kVRegTxcSecondaryRemoteIp4,		&mTx2022Config4.txc_secondaryRemoteIp);
-        mCard->ReadRegister(kVRegTxcSecondaryRemotePort4,	&mTx2022Config4.txc_secondaryRemotePort);
-		
-		mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	&mRx2022J2kConfig1.programPID);
-		mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	&mRx2022J2kConfig1.audioNumber);
-		
-		mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	(ULWord*)&mRx2022J2kConfig2.selectionMode);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	&mRx2022J2kConfig2.programNumber);
-		mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	&mRx2022J2kConfig2.programPID);
-		mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	&mRx2022J2kConfig2.audioNumber);
-		
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	(ULWord*)&mTx2022J2kConfig1.videoFormat);
-		mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		&mTx2022J2kConfig1.ullMode);
-		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
-		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
-		mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
-		mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
-		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
-		mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		&mTx2022J2kConfig1.pcrPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		&mTx2022J2kConfig1.audio1Pid);
-		
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	(ULWord*)&mTx2022J2kConfig2.videoFormat);
-		mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		&mTx2022J2kConfig2.ullMode);
-		mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
-		mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
-		mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
-		mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
-		mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
-		mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		&mTx2022J2kConfig2.pcrPid);
-		mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		&mTx2022J2kConfig2.audio1Pid);
-	}
+        mCard->ReadRegister(kVRegTxcSfp1LocalPort4,         &mTx2022Config4.txc_sfp1LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp1RemoteIp4,          &mTx2022Config4.txc_sfp1RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp1RemotePort4,		&mTx2022Config4.txc_sfp1RemotePort);
+        mCard->ReadRegister(kVRegTxcSfp2LocalPort4,         &mTx2022Config4.txc_sfp2LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp2RemoteIp4,          &mTx2022Config4.txc_sfp2RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp2RemotePort4,        &mTx2022Config4.txc_sfp2RemotePort);
+    }
+
+    if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+        (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+    {
+        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	&mRx2022J2kConfig1.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	&mRx2022J2kConfig1.audioNumber);
+
+        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	(ULWord*)&mRx2022J2kConfig2.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	&mRx2022J2kConfig2.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	&mRx2022J2kConfig2.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	&mRx2022J2kConfig2.audioNumber);
+
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	(ULWord*)&mTx2022J2kConfig1.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		&mTx2022J2kConfig1.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
+        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
+        mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		&mTx2022J2kConfig1.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		&mTx2022J2kConfig1.audio1Pid);
+
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	(ULWord*)&mTx2022J2kConfig2.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		&mTx2022J2kConfig2.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
+        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
+        mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		&mTx2022J2kConfig2.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		&mTx2022J2kConfig2.audio1Pid);
+    }
+
+    if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
+        (mDeviceID == DEVICE_ID_IOIP_2110))
+    {
+        bool        bOk;
+        bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110));
+        if (bOk == false)
+        {
+            memset(&m2110Network, 0, sizeof(NetworkData2110));
+            //printf("Failed to get 2110 Network params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kTransmitVideoData2110, &m2110TxVideoData, sizeof(TransmitVideoData2110));
+        if (bOk == false)
+        {
+            memset(&m2110TxVideoData, 0, sizeof(TransmitVideoData2110));
+            //printf("Failed to get 2110 Transmit Video params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kTransmitAudioData2110, &m2110TxAudioData, sizeof(TransmitAudioData2110));
+        if (bOk == false)
+        {
+            memset(&m2110TxAudioData, 0, sizeof(TransmitAudioData2110));
+            //printf("Failed to get 2110 Transmit Audio params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kReceiveVideoData2110, &m2110RxVideoData, sizeof(ReceiveVideoData2110));
+        if (bOk == false)
+        {
+            memset(&m2110RxVideoData, 0, sizeof(ReceiveVideoData2110));
+            //printf("Failed to get 2110 Receive Video params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kReceiveAudioData2110, &m2110RxAudioData, sizeof(ReceiveAudioData2110));
+        if (bOk == false)
+        {
+            memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
+            //printf("Failed to get 2110 Receive Audio params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kIpEnable2110, &m21110IpEnable, sizeof(IpEnable2110));
+        if (bOk == false)
+        {
+            memset(&m21110IpEnable, 0, sizeof(IpEnable2110));
+            //printf("Failed to get 2110 IP Enable params\n");
+        }
+    }
 }
 
 
@@ -1960,7 +2019,7 @@ void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
     
     switch (port)
     {
-        case SFP_BOTTOM:
+        case SFP_2:
             addr.s_addr = mEth1.ipc_ip;
             ip = inet_ntoa(addr);
             addr.s_addr = mEth1.ipc_subnet;
@@ -1968,7 +2027,7 @@ void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
             addr.s_addr = mEth1.ipc_gateway;
             gate = inet_ntoa(addr);
             break;
-        case SFP_TOP:
+        case SFP_1:
         default:
             addr.s_addr = mEth0.ipc_ip;
             ip = inet_ntoa(addr);
@@ -1996,56 +2055,57 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
     rx_2022_channel chan;
     struct in_addr addr;
     
-    // Always enable link A only enable link B if 2022_7 enabled
-    chan.linkAEnable	= true;
-    chan.linkBEnable	= is2022_7;
+    // Always enable sfp1 only enable sfp2 if 2022_7 enabled
+    chan.sfp1Enable	= true;
+    chan.sfp2Enable	= is2022_7;
     
     switch ((int)channel)
     {
         case NTV2_CHANNEL2:
-            addr.s_addr                 = mRx2022Config2.rxc_primarySourceIp;
-            chan.primarySourceIP        = inet_ntoa(addr);
-            addr.s_addr                 = mRx2022Config2.rxc_primaryDestIp;
-            chan.primaryDestIP          = inet_ntoa(addr);;
-            chan.primaryRxMatch         = mRx2022Config2.rxc_primaryRxMatch & 0x7fffffff;
-            chan.primarySourcePort      = mRx2022Config2.rxc_primarySourcePort;
-            chan.primaryDestPort        = mRx2022Config2.rxc_primaryDestPort;
-            chan.primaryVlan            = mRx2022Config2.rxc_primaryVlan;
+            addr.s_addr             = mRx2022Config2.rxc_sfp1SourceIp;
+            chan.sfp1SourceIP       = inet_ntoa(addr);
+            addr.s_addr             = mRx2022Config2.rxc_sfp1DestIp;
+            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1RxMatch        = mRx2022Config2.rxc_sfp1RxMatch & 0x7fffffff;
+            chan.sfp1SourcePort     = mRx2022Config2.rxc_sfp1SourcePort;
+            chan.sfp1DestPort       = mRx2022Config2.rxc_sfp1DestPort;
+            chan.sfp1Vlan           = mRx2022Config2.rxc_sfp1Vlan;
             
-            addr.s_addr                 = mRx2022Config2.rxc_secondarySourceIp;
-            chan.secondarySourceIP      = inet_ntoa(addr);
-            addr.s_addr                 = mRx2022Config2.rxc_secondaryDestIp;
-            chan.secondaryDestIP        = inet_ntoa(addr);;
-            chan.secondaryRxMatch       = mRx2022Config2.rxc_secondaryRxMatch & 0x7fffffff;
-            chan.secondarySourcePort    = mRx2022Config2.rxc_secondarySourcePort;
-            chan.secondaryDestPort      = mRx2022Config2.rxc_secondaryDestPort;
-            chan.secondaryVlan          = mRx2022Config2.rxc_secondaryVlan;
+            addr.s_addr             = mRx2022Config2.rxc_sfp2SourceIp;
+            chan.sfp2SourceIP       = inet_ntoa(addr);
+            addr.s_addr             = mRx2022Config2.rxc_sfp2DestIp;
+            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2RxMatch        = mRx2022Config2.rxc_sfp2RxMatch & 0x7fffffff;
+            chan.sfp2SourcePort     = mRx2022Config2.rxc_sfp2SourcePort;
+            chan.sfp2DestPort       = mRx2022Config2.rxc_sfp2DestPort;
+            chan.sfp2Vlan           = mRx2022Config2.rxc_sfp2Vlan;
             
-            chan.ssrc					= mRx2022Config2.rxc_ssrc;
-            chan.playoutDelay           = mRx2022Config2.rxc_playoutDelay;
+            chan.ssrc               = mRx2022Config2.rxc_ssrc;
+            chan.playoutDelay       = mRx2022Config2.rxc_playoutDelay;
             break;
+
         default:
         case NTV2_CHANNEL1:
-            addr.s_addr                 = mRx2022Config1.rxc_primarySourceIp;
-            chan.primarySourceIP        = inet_ntoa(addr);
-            addr.s_addr                 = mRx2022Config1.rxc_primaryDestIp;
-            chan.primaryDestIP          = inet_ntoa(addr);;
-            chan.primaryRxMatch         = mRx2022Config1.rxc_primaryRxMatch  & 0x7fffffff;
-            chan.primarySourcePort      = mRx2022Config1.rxc_primarySourcePort;
-            chan.primaryDestPort        = mRx2022Config1.rxc_primaryDestPort;
-            chan.primaryVlan            = mRx2022Config1.rxc_primaryVlan;
+            addr.s_addr             = mRx2022Config1.rxc_sfp1SourceIp;
+            chan.sfp1SourceIP       = inet_ntoa(addr);
+            addr.s_addr             = mRx2022Config1.rxc_sfp1DestIp;
+            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1RxMatch        = mRx2022Config1.rxc_sfp1RxMatch  & 0x7fffffff;
+            chan.sfp1SourcePort     = mRx2022Config1.rxc_sfp1SourcePort;
+            chan.sfp1DestPort       = mRx2022Config1.rxc_sfp1DestPort;
+            chan.sfp1Vlan           = mRx2022Config1.rxc_sfp1Vlan;
             
-            addr.s_addr                 = mRx2022Config1.rxc_secondarySourceIp;
-            chan.secondarySourceIP      = inet_ntoa(addr);
-            addr.s_addr                 = mRx2022Config1.rxc_secondaryDestIp;
-            chan.secondaryDestIP        = inet_ntoa(addr);;
-            chan.secondaryRxMatch       = mRx2022Config1.rxc_secondaryRxMatch & 0x7fffffff;
-            chan.secondarySourcePort    = mRx2022Config1.rxc_secondarySourcePort;
-            chan.secondaryDestPort      = mRx2022Config1.rxc_secondaryDestPort;
-            chan.secondaryVlan          = mRx2022Config1.rxc_secondaryVlan;
+            addr.s_addr             = mRx2022Config1.rxc_sfp2SourceIp;
+            chan.sfp2SourceIP       = inet_ntoa(addr);
+            addr.s_addr             = mRx2022Config1.rxc_sfp2DestIp;
+            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2RxMatch        = mRx2022Config1.rxc_sfp2RxMatch & 0x7fffffff;
+            chan.sfp2SourcePort     = mRx2022Config1.rxc_sfp2SourcePort;
+            chan.sfp2DestPort       = mRx2022Config1.rxc_sfp2DestPort;
+            chan.sfp2Vlan           = mRx2022Config1.rxc_sfp2Vlan;
             
-            chan.ssrc					= mRx2022Config1.rxc_ssrc;
-            chan.playoutDelay           = mRx2022Config1.rxc_playoutDelay;
+            chan.ssrc               = mRx2022Config1.rxc_ssrc;
+            chan.playoutDelay       = mRx2022Config1.rxc_playoutDelay;
             break;
     }
     
@@ -2067,34 +2127,34 @@ void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, b
     struct in_addr addr;
     
     // Always enable link A only enable link B if 2022_7 enabled
-    chan.linkAEnable	= true;
-    chan.linkBEnable	= is2022_7;
+    chan.sfp1Enable	= true;
+    chan.sfp2Enable	= is2022_7;
     
     switch((int)channel)
     {
         case NTV2_CHANNEL4:
-            addr.s_addr                 = mTx2022Config4.txc_primaryRemoteIp;
-            chan.primaryRemoteIP        = inet_ntoa(addr);
-            chan.primaryLocalPort       = mTx2022Config4.txc_primaryLocalPort;
-            chan.primaryRemotePort      = mTx2022Config4.txc_primaryRemotePort;
+            addr.s_addr             = mTx2022Config4.txc_sfp1RemoteIp;
+            chan.sfp1RemoteIP      = inet_ntoa(addr);
+            chan.sfp1LocalPort     = mTx2022Config4.txc_sfp1LocalPort;
+            chan.sfp1RemotePort    = mTx2022Config4.txc_sfp1RemotePort;
             
-            addr.s_addr                 = mTx2022Config4.txc_secondaryRemoteIp;
-            chan.secondaryRemoteIP      = inet_ntoa(addr);
-            chan.secondaryLocalPort     = mTx2022Config4.txc_secondaryLocalPort;
-            chan.secondaryRemotePort    = mTx2022Config4.txc_secondaryRemotePort;
+            addr.s_addr             = mTx2022Config4.txc_sfp2RemoteIp;
+            chan.sfp2RemoteIP      = inet_ntoa(addr);
+            chan.sfp2LocalPort     = mTx2022Config4.txc_sfp2LocalPort;
+            chan.sfp2RemotePort    = mTx2022Config4.txc_sfp2RemotePort;
             break;
         default:
             
         case NTV2_CHANNEL3:
-            addr.s_addr                 = mTx2022Config3.txc_primaryRemoteIp;
-            chan.primaryRemoteIP        = inet_ntoa(addr);
-            chan.primaryLocalPort       = mTx2022Config3.txc_primaryLocalPort;
-            chan.primaryRemotePort      = mTx2022Config3.txc_primaryRemotePort;
+            addr.s_addr             = mTx2022Config3.txc_sfp1RemoteIp;
+            chan.sfp1RemoteIP      = inet_ntoa(addr);
+            chan.sfp1LocalPort     = mTx2022Config3.txc_sfp1LocalPort;
+            chan.sfp1RemotePort    = mTx2022Config3.txc_sfp1RemotePort;
             
-            addr.s_addr                 = mTx2022Config3.txc_secondaryRemoteIp;
-            chan.secondaryRemoteIP      = inet_ntoa(addr);
-            chan.secondaryLocalPort     = mTx2022Config3.txc_secondaryLocalPort;
-            chan.secondaryRemotePort    = mTx2022Config3.txc_secondaryRemotePort;
+            addr.s_addr             = mTx2022Config3.txc_sfp2RemoteIp;
+            chan.sfp2RemoteIP      = inet_ntoa(addr);
+            chan.sfp2LocalPort     = mTx2022Config3.txc_sfp2LocalPort;
+            chan.sfp2RemotePort    = mTx2022Config3.txc_sfp2RemotePort;
             break;
     }
     
@@ -2112,28 +2172,28 @@ void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, b
 
 bool DeviceServices::IsValidConfig(const rx2022Config & virtual_config, bool is2022_7)
 {
-    if (virtual_config.rxc_primaryRxMatch == 0) return false;
-    if (virtual_config.rxc_primaryDestIp == 0) return false;
+    if (virtual_config.rxc_sfp1RxMatch == 0) return false;
+    if (virtual_config.rxc_sfp1DestIp == 0) return false;
     
-    // We only care about looking at secondary settings if we are doing 2022_7
+    // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.rxc_secondaryRxMatch == 0) return false;
-        if (virtual_config.rxc_secondaryDestIp == 0) return false;
+        if (virtual_config.rxc_sfp2RxMatch == 0) return false;
+        if (virtual_config.rxc_sfp2DestIp == 0) return false;
     }
     return true;
 }
 
 bool DeviceServices::IsValidConfig(const tx2022Config & virtual_config, bool is2022_7)
 {
-    if (virtual_config.txc_primaryRemoteIp == 0) return false;
-    if (virtual_config.txc_primaryRemotePort == 0) return false;
+    if (virtual_config.txc_sfp1RemoteIp == 0) return false;
+    if (virtual_config.txc_sfp1RemotePort == 0) return false;
     
-    // We only care about looking at secondary settings if we are doing 2022_7
+    // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.txc_secondaryRemoteIp == 0) return false;
-        if (virtual_config.txc_secondaryRemotePort == 0) return false;
+        if (virtual_config.txc_sfp2RemoteIp == 0) return false;
+        if (virtual_config.txc_sfp2RemotePort == 0) return false;
     }
     return true;
 }
@@ -2142,30 +2202,30 @@ bool DeviceServices::NotEqual(const rx_2022_channel & hw_channel, const rx2022Co
 {
     uint32_t addr;
     
-    if (virtual_config.rxc_primarySourcePort != hw_channel.primarySourcePort)return true;
-    if (virtual_config.rxc_primaryDestPort != hw_channel.primaryDestPort) return true;
-    if ((virtual_config.rxc_primaryRxMatch & 0x7fffffff) != (hw_channel.primaryRxMatch & 0x7fffffff)) return true;
+    if (virtual_config.rxc_sfp1SourcePort != hw_channel.sfp1SourcePort)return true;
+    if (virtual_config.rxc_sfp1DestPort != hw_channel.sfp1DestPort) return true;
+    if ((virtual_config.rxc_sfp1RxMatch & 0x7fffffff) != (hw_channel.sfp1RxMatch & 0x7fffffff)) return true;
     
-    addr = inet_addr(hw_channel.primaryDestIP.c_str());
-    if (virtual_config.rxc_primaryDestIp != addr) return true;
+    addr = inet_addr(hw_channel.sfp1DestIP.c_str());
+    if (virtual_config.rxc_sfp1DestIp != addr) return true;
     
-    addr = inet_addr(hw_channel.primarySourceIP.c_str());
-    if (virtual_config.rxc_primarySourceIp != addr) return true;
+    addr = inet_addr(hw_channel.sfp1SourceIP.c_str());
+    if (virtual_config.rxc_sfp1SourceIp != addr) return true;
     
     if (virtual_config.rxc_playoutDelay != hw_channel.playoutDelay) return true;
     
-    // We only care about looking at secondary settings if we are doing 2022_7
+    // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.rxc_secondarySourcePort != hw_channel.secondarySourcePort)return true;
-        if (virtual_config.rxc_secondaryDestPort != hw_channel.secondaryDestPort) return true;
-        if ((virtual_config.rxc_secondaryRxMatch & 0x7fffffff) != (hw_channel.secondaryRxMatch & 0x7fffffff)) return true;
+        if (virtual_config.rxc_sfp2SourcePort != hw_channel.sfp2SourcePort)return true;
+        if (virtual_config.rxc_sfp2DestPort != hw_channel.sfp2DestPort) return true;
+        if ((virtual_config.rxc_sfp2RxMatch & 0x7fffffff) != (hw_channel.sfp2RxMatch & 0x7fffffff)) return true;
         
-        addr = inet_addr(hw_channel.secondaryDestIP.c_str());
-        if (virtual_config.rxc_secondaryDestIp != addr) return true;
+        addr = inet_addr(hw_channel.sfp2DestIP.c_str());
+        if (virtual_config.rxc_sfp2DestIp != addr) return true;
         
-        addr = inet_addr(hw_channel.secondarySourceIP.c_str());
-        if (virtual_config.rxc_secondarySourceIp != addr) return true;
+        addr = inet_addr(hw_channel.sfp2SourceIP.c_str());
+        if (virtual_config.rxc_sfp2SourceIp != addr) return true;
     }
     
     return false;
@@ -2175,20 +2235,20 @@ bool DeviceServices::NotEqual(const tx_2022_channel & hw_channel, const tx2022Co
 {
     uint32_t addr;
     
-    if (virtual_config.txc_primaryLocalPort	!= hw_channel.primaryLocalPort)  return true;
-    if (virtual_config.txc_primaryRemotePort != hw_channel.primaryRemotePort) return true;
+    if (virtual_config.txc_sfp1LocalPort	!= hw_channel.sfp1LocalPort)  return true;
+    if (virtual_config.txc_sfp1RemotePort != hw_channel.sfp1RemotePort) return true;
     
-    addr = inet_addr(hw_channel.primaryRemoteIP.c_str());
-    if (virtual_config.txc_primaryRemoteIp != addr) return true;
+    addr = inet_addr(hw_channel.sfp1RemoteIP.c_str());
+    if (virtual_config.txc_sfp1RemoteIp != addr) return true;
     
-    // We only care about looking at secondary settings if we are doing 2022_7
+    // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.txc_secondaryLocalPort != hw_channel.secondaryLocalPort)  return true;
-        if (virtual_config.txc_secondaryRemotePort != hw_channel.secondaryRemotePort) return true;
+        if (virtual_config.txc_sfp2LocalPort != hw_channel.sfp2LocalPort)  return true;
+        if (virtual_config.txc_sfp2RemotePort != hw_channel.sfp2RemotePort) return true;
         
-        addr = inet_addr(hw_channel.secondaryRemoteIP.c_str());
-        if (virtual_config.txc_secondaryRemoteIp != addr) return true;
+        addr = inet_addr(hw_channel.sfp2RemoteIP.c_str());
+        if (virtual_config.txc_sfp2RemoteIp != addr) return true;
     }
     
     return false;
@@ -2295,41 +2355,39 @@ void DeviceServices::GetIPError(NTV2Channel channel, uint32_t configType, uint32
     val = errCode;
 }
 
-void DeviceServices::PrintRxConfig(rx_2022_channel chan)
+void DeviceServices::PrintRxConfig(const rx_2022_channel chan)
 {
-    printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
-    printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
-    
-    printf("primarySourceIP			%s\n", chan.primarySourceIP.c_str());
-    printf("primaryDestIP			%s\n", chan.primaryDestIP.c_str());
-    printf("primarySourcePort		%d\n", chan.primarySourcePort);
-    printf("primaryDestPort			%d\n", chan.primaryDestPort);
-    printf("primaryVlan				%d\n", chan.primaryVlan);
-    printf("primaryRxMatch			%d\n", chan.primaryRxMatch);
-    
-    printf("secondarySourceIP		%s\n", chan.secondarySourceIP.c_str());
-    printf("secondaryDestIP			%s\n", chan.secondaryDestIP.c_str());
-    printf("secondarySourcePort		%d\n", chan.secondarySourcePort);
-    printf("secondaryDestPort		%d\n", chan.secondaryDestPort);
-    printf("secondaryVlan			%d\n", chan.secondaryVlan);
-    printf("secondaryRxMatch		%d\n\n", chan.secondaryRxMatch);
+    printf("sfp1Enable          %s\n", chan.sfp1Enable == true? "true":"false");
+    printf("sfp1SourceIP        %s\n", chan.sfp1SourceIP.c_str());
+    printf("sfp1DestIP			%s\n", chan.sfp1DestIP.c_str());
+    printf("sfp1SourcePort		%d\n", chan.sfp1SourcePort);
+    printf("sfp1DestPort        %d\n", chan.sfp1DestPort);
+    printf("sfp1Vlan            %d\n", chan.sfp1Vlan);
+    printf("sfp1RxMatch         %d\n", chan.sfp1RxMatch);
+
+    printf("sfp2Enable          %s\n", chan.sfp2Enable == true? "true":"false");
+    printf("sfp2SourceIP		%s\n", chan.sfp2SourceIP.c_str());
+    printf("sfp2DestIP			%s\n", chan.sfp2DestIP.c_str());
+    printf("sfp2SourcePort		%d\n", chan.sfp2SourcePort);
+    printf("sfp2DestPort		%d\n", chan.sfp2DestPort);
+    printf("sfp2Vlan			%d\n", chan.sfp2Vlan);
+    printf("sfp2RxMatch         %d\n\n", chan.sfp2RxMatch);
 }
 
-void DeviceServices::PrintTxConfig(tx_2022_channel chan)
+void DeviceServices::PrintTxConfig(const tx_2022_channel chan)
 {
-    printf("linkAEnable				%s\n", chan.linkAEnable == true? "true":"false");
-    printf("linkBEnable				%s\n", chan.linkBEnable == true? "true":"false");
+    printf("sfp1Enable          %s\n", chan.sfp1Enable == true? "true":"false");
+    printf("sfp1RemoteIP        %s\n", chan.sfp1RemoteIP.c_str());
+    printf("sfp1LocalPort		%d\n", chan.sfp1LocalPort);
+    printf("sfp1RemotePort		%d\n", chan.sfp1RemotePort);
     
-    printf("primaryRemoteIP			%s\n", chan.primaryRemoteIP.c_str());
-    printf("primaryLocalPort		%d\n", chan.primaryLocalPort);
-    printf("primaryRemotePort		%d\n", chan.primaryRemotePort);
-    
-    printf("secondaryRemoteIP		%s\n", chan.secondaryRemoteIP.c_str());
-    printf("secondaryLocalPort		%d\n", chan.secondaryLocalPort);
-    printf("secondaryRemotePort		%d\n", chan.secondaryRemotePort);
+    printf("sfp2Enable          %s\n", chan.sfp2Enable == true? "true":"false");
+    printf("sfp2RemoteIP		%s\n", chan.sfp2RemoteIP.c_str());
+    printf("sfp2LocalPort		%d\n", chan.sfp2LocalPort);
+    printf("sfp2RemotePort		%d\n", chan.sfp2RemotePort);
 }
 
-void DeviceServices::PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
+void DeviceServices::PrintEncoderConfig(const j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig)
 {
     printf("videoFormat	   %6d%6d\n", modelConfig.videoFormat, encoderConfig.videoFormat);
     printf("ullMode		   %6d%6d\n", modelConfig.ullMode, encoderConfig.ullMode);
@@ -2344,13 +2402,41 @@ void DeviceServices::PrintEncoderConfig(j2kEncoderConfig modelConfig, j2kEncoder
     printf("audio1Pid	   %6d%6d\n\n", modelConfig.audio1Pid, encoderConfig.audio1Pid);
 }
 
-void DeviceServices::PrintDecoderConfig(j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
+void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig)
 {
     printf("selectionMode  %6d%6d\n", modelConfig.selectionMode, encoderConfig.selectionMode);
     printf("programNumber  %6d%6d\n", modelConfig.programNumber, encoderConfig.programNumber);
     printf("programPID	   %6d%6d\n", modelConfig.programPID, encoderConfig.programPID);
     printf("audioNumber    %6d%6d\n\n", modelConfig.audioNumber, encoderConfig.audioNumber);
 }
+
+
+void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
+{
+    printf("id           %d\n", m2110Network.id);
+    PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
+    PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[0].gateWay[0]);
+    PrintChArray("ptpMaster", &m2110Network.sfp[1].ipAddress[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[1].subnetMask[0]);
+    //PrintChArray("ptpMaster", &m2110Network.sfp[1].gateWay[0]);
+    printf("\n");
+
+}
+
+void DeviceServices::PrintChArray(const std::string title, const char* chstr)
+{
+    printf("%4s          ", title.c_str());
+    for (uint32_t i=0; i< IP_STRSIZE; i++)
+    {
+        printf("%c", chstr[i]);
+    }
+    printf("\n");
+
+
+}
+
 
 
 // MARK: -
@@ -2917,7 +3003,15 @@ void DeviceServices::SetDeviceXPointCapture()
 			{
 			default:
 			case NTV2_Input1Select:
-				mCard->SetReference(NTV2_REFERENCE_INPUT1);
+				switch(mDeviceID)
+				{
+				case DEVICE_ID_KONAHDMI:
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+					break;
+				default:
+					mCard->SetReference(NTV2_REFERENCE_INPUT1);
+					break;
+				}
 				break;
 			case NTV2_Input2Select:
 				switch(mDeviceID)
@@ -2929,6 +3023,8 @@ void DeviceServices::SetDeviceXPointCapture()
 				case DEVICE_ID_LHE_PLUS:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 					break;
+				case DEVICE_ID_KONAHDMI:
+					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT2);
 				default:
 					mCard->SetReference(NTV2_REFERENCE_INPUT2);
 					break;
@@ -2941,10 +3037,25 @@ void DeviceServices::SetDeviceXPointCapture()
 					case DEVICE_ID_LHI:
 						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 						break;
+					case DEVICE_ID_KONAHDMI:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT3);
+						break;
 					case DEVICE_ID_IO4KUFC:
 					case DEVICE_ID_IOXT:
 					default:
 						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
+						break;
+					}
+				}
+				break;
+			case NTV2_Input4Select:
+				{
+					switch(mDeviceID)
+					{
+					case DEVICE_ID_KONAHDMI:
+						mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT3);
+						break;
+					default: 
 						break;
 					}
 				}
@@ -2978,7 +3089,7 @@ void DeviceServices::SetDeviceXPointCapture()
 		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
 	}
 
-	//if(!b4K)//if we are 4k all connections are inputs
+	if(mDeviceID != DEVICE_ID_KONAHDMI)
 	{
 		//Following the logic from each individual file
 		//this should cover almost all cases

@@ -149,14 +149,16 @@ public:
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegClass (kRegStatus, kRegClass_Timecode);
 		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
-		DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
-		
+			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);
+			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
+		DefineRegister (kRegFS1ReferenceSelect,	"", mDecodeFS1RefSelectReg,		READWRITE,	kRegClass_Input,	kRegClass_Timecode, kRegClass_NULL);
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
@@ -237,11 +239,11 @@ private:
 		DefineRegister	(kRegRP188InOut7Bits32_63_2,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel7,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut8Bits0_31_2,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel8,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut8Bits32_63_2,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel8,	kRegClass_NULL);
-		DefineRegister	(kRegLTCStatusControl,			"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister	(kRegLTCStatusControl,			"",	mLTCStatusControlDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister	(kRegLTC2EmbeddedBits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
 		DefineRegister	(kRegLTC2EmbeddedBits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegLTC2AnalogBits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegLTC2AnalogBits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
+		DefineRegister	(kRegLTC2AnalogBits0_31,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister	(kRegLTC2AnalogBits32_63,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3DBB,			"",	mRP188InOutDBBRegDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3Bits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3Bits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
@@ -529,6 +531,124 @@ private:
 		DefineRegister (kRegHDMIV2VerticalMeasurementsField1,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 		DefineRegister (kRegHDMIV2i2c2Control,						"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 		DefineRegister (kRegHDMIV2i2c2Data,							"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
+
+		DefineRegister (0x1d00,	"reg_hdmiin4_videocontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d01,	"reg_hdmiin4_videodetect0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d02,	"reg_hdmiin4_videodetect1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d03,	"reg_hdmiin4_videodetect2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d04,	"reg_hdmiin4_videodetect3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d05,	"reg_hdmiin4_videodetect4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d06,	"reg_hdmiin4_videodetect5",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d07,	"reg_hdmiin4_videodetect6",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d08,	"reg_hdmiin4_videodetect7",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d09,	"reg_hdmiin4_auxcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0a,	"reg_hdmiin4_receiverstatus",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0b,	"reg_hdmiin4_auxpacketignore0",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0c,	"reg_hdmiin4_auxpacketignore1",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0d,	"reg_hdmiin4_auxpacketignore2",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0e,	"reg_hdmiin4_auxpacketignore3",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d0f,	"reg_hdmiin4_redrivercontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d10,	"reg_hdmiin4_refclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d11,	"reg_hdmiin4_tmdsclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d12,	"reg_hdmiin4_rxclockfrequency",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d13,	"reg_hdmiin4_rxoversampling",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d14,	"reg_hdmiin4_output_config",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d15,	"reg_hdmiin4_input_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d16,	"reg_hdmiin4_control",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d1e,	"reg_hdmiin4_croplocation",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (0x1d1f,	"reg_hdmiin4_pixelcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+
+		DefineRegister (0x2500,	"reg_hdmiin4_videocontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2501,	"reg_hdmiin4_videodetect0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2502,	"reg_hdmiin4_videodetect1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2503,	"reg_hdmiin4_videodetect2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2504,	"reg_hdmiin4_videodetect3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2505,	"reg_hdmiin4_videodetect4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2506,	"reg_hdmiin4_videodetect5",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2507,	"reg_hdmiin4_videodetect6",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2508,	"reg_hdmiin4_videodetect7",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2509,	"reg_hdmiin4_auxcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250a,	"reg_hdmiin4_receiverstatus",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250b,	"reg_hdmiin4_auxpacketignore0",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250c,	"reg_hdmiin4_auxpacketignore1",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250d,	"reg_hdmiin4_auxpacketignore2",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250e,	"reg_hdmiin4_auxpacketignore3",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x250f,	"reg_hdmiin4_redrivercontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2510,	"reg_hdmiin4_refclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2511,	"reg_hdmiin4_tmdsclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2512,	"reg_hdmiin4_rxclockfrequency",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2513,	"reg_hdmiin4_rxoversampling",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2514,	"reg_hdmiin4_output_config",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2515,	"reg_hdmiin4_input_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x2516,	"reg_hdmiin4_control",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x251e,	"reg_hdmiin4_croplocation",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (0x251f,	"reg_hdmiin4_pixelcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel2);
+
+		DefineRegister (0x2c00,	"reg_hdmiin_i2c_control",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c01,	"reg_hdmiin_i2c_data",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c02,	"reg_hdmiin_video_setup",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c03,	"reg_hdmiin_hsync_duration",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c04,	"reg_hdmiin_h_active",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c05,	"reg_hdmiin_vsync_duration_fld1",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c06,	"reg_hdmiin_vsync_duration_fld2",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c07,	"reg_hdmiin_v_active_fld1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c08,	"reg_hdmiin_v_active_fld2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c09,	"reg_hdmiin_video_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0a,	"reg_hdmiin_horizontal_data",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0b,	"reg_hdmiin_hblank_data0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0c,	"reg_hdmiin_hblank_data1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0d,	"reg_hdmiin_vertical_data_fld1",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0e,	"reg_hdmiin_vertical_data_fld2",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c0f,	"reg_hdmiin_color_depth",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c12,	"reg_hdmiin_output_config",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c13,	"reg_hdmiin_input_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (0x2c14,	"reg_hdmiin_control",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel3);
+
+		DefineRegister (0x3000,	"reg_hdmiin_i2c_control",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3001,	"reg_hdmiin_i2c_data",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3002,	"reg_hdmiin_video_setup",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3003,	"reg_hdmiin_hsync_duration",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3004,	"reg_hdmiin_h_active",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3005,	"reg_hdmiin_vsync_duration_fld1",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3006,	"reg_hdmiin_vsync_duration_fld2",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3007,	"reg_hdmiin_v_active_fld1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3008,	"reg_hdmiin_v_active_fld2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3009,	"reg_hdmiin_video_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300a,	"reg_hdmiin_horizontal_data",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300b,	"reg_hdmiin_hblank_data0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300c,	"reg_hdmiin_hblank_data1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300d,	"reg_hdmiin_vertical_data_fld1",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300e,	"reg_hdmiin_vertical_data_fld2",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x300f,	"reg_hdmiin_color_depth",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3012,	"reg_hdmiin_output_config",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3013,	"reg_hdmiin_input_status",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (0x3014,	"reg_hdmiin_control",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel4);
+
+		DefineRegister (0x1d40,	"reg_hdmiout4_videocontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d41,	"reg_hdmiout4_videosetup0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d42,	"reg_hdmiout4_videosetup1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d43,	"reg_hdmiout4_videosetup2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d44,	"reg_hdmiout4_videosetup3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d45,	"reg_hdmiout4_videosetup4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d46,	"reg_hdmiout4_videosetup5",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d47,	"reg_hdmiout4_videosetup6",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d48,	"reg_hdmiout4_videosetup7",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d49,	"reg_hdmiout4_auxcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d4b,	"reg_hdmiout4_audiocontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d4f,	"reg_hdmiout4_redrivercontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d50,	"reg_hdmiout4_refclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d51,	"reg_hdmiout4_tmdsclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d52,	"reg_hdmiout4_txclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d53,	"reg_hdmiout4_fpllclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d54,	"reg_hdmiout4_audio_cts1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d55,	"reg_hdmiout4_audio_cts2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d56,	"reg_hdmiout4_audio_cts3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d57,	"reg_hdmiout4_audio_cts4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d58,	"reg_hdmiout4_audio_n",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d5e,	"reg_hdmiout4_croplocation",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d5f,	"reg_hdmiout4_pixelcontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d60,	"reg_hdmiout4_i2ccontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (0x1d61,	"reg_hdmiout4_i2cedid",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 	}
 	
 	void SetupSDIError(void)
@@ -564,7 +684,7 @@ private:
 		DefineRegName	(kVRegFlashProgramKey,					"kVRegFlashProgramKey");
 		DefineRegName	(kVRegStrictTiming,						"kVRegStrictTiming");
 		DefineRegName	(kVRegInputSelect,						"kVRegInputSelect");
-		DefineRegName	(kVRegSecondaryFormatSelect,			"kVRegSecondaryFormatSelect");
+		DefineRegName	(kVRegSecondaryFormatSelect,            "kVRegSecondaryFormatSelect");
 		DefineRegName	(kVRegDigitalOutput1Select,				"kVRegDigitalOutput1Select");
 		DefineRegName	(kVRegDigitalOutput2Select,				"kVRegDigitalOutput2Select");
 		DefineRegName	(kVRegAnalogOutputSelect,				"kVRegAnalogOutputSelect");
@@ -817,49 +937,49 @@ private:
 		DefineRegName	(kVRegSubnetEth1,						"kVRegSubnetEth1");
 		DefineRegName	(kVRegGatewayEth1,						"kVRegGatewayEth1");
 		DefineRegName	(kVRegRxcEnable1,						"kVRegRxcEnable1");
-		DefineRegName	(kVRegRxcPrimaryRxMatch1,				"kVRegRxcPrimaryRxMatch1");
-		DefineRegName	(kVRegRxcPrimarySourceIp1,				"kVRegRxcPrimarySourceIp1");
-		DefineRegName	(kVRegRxcPrimaryDestIp1,				"kVRegRxcPrimaryDestIp1");
-		DefineRegName	(kVRegRxcPrimarySourcePort1,			"kVRegRxcPrimarySourcePort1");
-		DefineRegName	(kVRegRxcPrimaryDestPort1,				"kVRegRxcPrimaryDestPort1");
-		DefineRegName	(kVRegRxcPrimaryVlan1,					"kVRegRxcPrimaryVlan1");
-		DefineRegName	(kVRegRxcSecondaryRxMatch1,				"kVRegRxcSecondaryRxMatch1");
-		DefineRegName	(kVRegRxcSecondarySourceIp1,			"kVRegRxcSecondarySourceIp1");
-		DefineRegName	(kVRegRxcSecondaryDestIp1,				"kVRegRxcSecondaryDestIp1");
-		DefineRegName	(kVRegRxcSecondarySourcePort1,			"kVRegRxcSecondarySourcePort1");
-		DefineRegName	(kVRegRxcSecondaryDestPort1,			"kVRegRxcSecondaryDestPort1");
-		DefineRegName	(kVRegRxcSecondaryVlan1,				"kVRegRxcSecondaryVlan1");
+        DefineRegName	(kVRegRxcSfp1RxMatch1,                  "kVRegRxcSfp1RxMatch1");
+        DefineRegName	(kVRegRxcSfp1SourceIp1,                 "kVRegRxcSfp1SourceIp1");
+        DefineRegName	(kVRegRxcSfp1DestIp1,                   "kVRegRxcSfp1DestIp1");
+        DefineRegName	(kVRegRxcSfp1SourcePort1,               "kVRegRxcSfp1SourcePort1");
+        DefineRegName	(kVRegRxcSfp1DestPort1,                 "kVRegRxcSfp1DestPort1");
+        DefineRegName	(kVRegRxcSfp1Vlan1,                     "kVRegRxcSfp1Vlan1");
+        DefineRegName	(kVRegRxcSfp2RxMatch1,                  "kVRegRxcSfp2RxMatch1");
+        DefineRegName	(kVRegRxcSfp2SourceIp1,                 "kVRegRxcSfp2SourceIp1");
+        DefineRegName	(kVRegRxcSfp2DestIp1,                   "kVRegRxcSfp2DestIp1");
+        DefineRegName	(kVRegRxcSfp2SourcePort1,               "kVRegRxcSfp2SourcePort1");
+        DefineRegName	(kVRegRxcSfp2DestPort1,                 "kVRegRxcSfp2DestPort1");
+        DefineRegName	(kVRegRxcSfp2Vlan1,                     "kVRegRxcSfp2Vlan1");
 		DefineRegName	(kVRegRxcSsrc1,							"kVRegRxcSsrc1");
 		DefineRegName	(kVRegRxcPlayoutDelay1,					"kVRegRxcPlayoutDelay1");
 		DefineRegName	(kVRegRxcEnable2,						"kVRegRxcEnable2");
-		DefineRegName	(kVRegRxcPrimaryRxMatch2,				"kVRegRxcPrimaryRxMatch2");
-		DefineRegName	(kVRegRxcPrimarySourceIp2,				"kVRegRxcPrimarySourceIp2");
-		DefineRegName	(kVRegRxcPrimaryDestIp2,				"kVRegRxcPrimaryDestIp2");
-		DefineRegName	(kVRegRxcPrimarySourcePort2,			"kVRegRxcPrimarySourcePort2");
-		DefineRegName	(kVRegRxcPrimaryDestPort2,				"kVRegRxcPrimaryDestPort2");
-		DefineRegName	(kVRegRxcPrimaryVlan2,					"kVRegRxcPrimaryVlan2");
-		DefineRegName	(kVRegRxcSecondaryRxMatch2,				"kVRegRxcSecondaryRxMatch2");
-		DefineRegName	(kVRegRxcSecondarySourceIp2,			"kVRegRxcSecondarySourceIp2");
-		DefineRegName	(kVRegRxcSecondaryDestIp2,				"kVRegRxcSecondaryDestIp2");
-		DefineRegName	(kVRegRxcSecondarySourcePort2,			"kVRegRxcSecondarySourcePort2");
-		DefineRegName	(kVRegRxcSecondaryDestPort2,			"kVRegRxcSecondaryDestPort2");
-		DefineRegName	(kVRegRxcSecondaryVlan2,				"kVRegRxcSecondaryVlan2");
+        DefineRegName	(kVRegRxcSfp1RxMatch2,                  "kVRegRxcSfp1RxMatch2");
+        DefineRegName	(kVRegRxcSfp1SourceIp2,                 "kVRegRxcSfp1SourceIp2");
+        DefineRegName	(kVRegRxcSfp1DestIp2,                   "kVRegRxcSfp1DestIp2");
+        DefineRegName	(kVRegRxcSfp1SourcePort2,               "kVRegRxcSfp1SourcePort2");
+        DefineRegName	(kVRegRxcSfp1DestPort2,                 "kVRegRxcSfp1DestPort2");
+        DefineRegName	(kVRegRxcSfp1Vlan2,                     "kVRegRxcSfp1Vlan2");
+        DefineRegName	(kVRegRxcSfp2RxMatch2,                  "kVRegRxcSfp2RxMatch2");
+        DefineRegName	(kVRegRxcSfp2SourceIp2,                 "kVRegRxcSfp2SourceIp2");
+        DefineRegName	(kVRegRxcSfp2DestIp2,                   "kVRegRxcSfp2DestIp2");
+        DefineRegName	(kVRegRxcSfp2SourcePort2,               "kVRegRxcSfp2SourcePort2");
+        DefineRegName	(kVRegRxcSfp2DestPort2,                 "kVRegRxcSfp2DestPort2");
+        DefineRegName	(kVRegRxcSfp2Vlan2,                     "kVRegRxcSfp2Vlan2");
 		DefineRegName	(kVRegRxcSsrc2,							"kVRegRxcSsrc2");
 		DefineRegName	(kVRegRxcPlayoutDelay2,					"kVRegRxcPlayoutDelay2");
 		DefineRegName	(kVRegTxcEnable3,						"kVRegTxcEnable3");
-		DefineRegName	(kVRegTxcPrimaryLocalPort3,				"kVRegTxcPrimaryLocalPort3");
-		DefineRegName	(kVRegTxcPrimaryRemoteIp3,				"kVRegTxcPrimaryRemoteIp3");
-		DefineRegName	(kVRegTxcPrimaryRemotePort3,			"kVRegTxcPrimaryRemotePort3");
-		DefineRegName	(kVRegTxcSecondaryLocalPort3,			"kVRegTxcSecondaryLocalPort3");
-		DefineRegName	(kVRegTxcSecondaryRemoteIp3,			"kVRegTxcSecondaryRemoteIp3");
-		DefineRegName	(kVRegTxcSecondaryRemotePort3,			"kVRegTxcSecondaryRemotePort3");
+        DefineRegName	(kVRegTxcSfp1LocalPort3,				"kVRegTxcSfp1LocalPort3");
+        DefineRegName	(kVRegTxcSfp1RemoteIp3,                 "kVRegTxcSfp1RemoteIp3");
+        DefineRegName	(kVRegTxcSfp1RemotePort3,               "kVRegTxcSfp1RemotePort3");
+        DefineRegName	(kVRegTxcSfp2LocalPort3,                "kVRegTxcSfp2LocalPort3");
+        DefineRegName	(kVRegTxcSfp2RemoteIp3,                 "kVRegTxcSfp2RemoteIp3");
+        DefineRegName	(kVRegTxcSfp2RemotePort3,               "kVRegTxcSfp2RemotePort3");
 		DefineRegName	(kVRegTxcEnable4,						"kVRegTxcEnable4");
-		DefineRegName	(kVRegTxcPrimaryLocalPort4,				"kVRegTxcPrimaryLocalPort4");
-		DefineRegName	(kVRegTxcPrimaryRemoteIp4,				"kVRegTxcPrimaryRemoteIp4");
-		DefineRegName	(kVRegTxcPrimaryRemotePort4,			"kVRegTxcPrimaryRemotePort4");
-		DefineRegName	(kVRegTxcSecondaryLocalPort4,			"kVRegTxcSecondaryLocalPort4");
-		DefineRegName	(kVRegTxcSecondaryRemoteIp4,			"kVRegTxcSecondaryRemoteIp4");
-		DefineRegName	(kVRegTxcSecondaryRemotePort4,			"kVRegTxcSecondaryRemotePort4");
+        DefineRegName	(kVRegTxcSfp1LocalPort4,				"kVRegTxcSfp1LocalPort4");
+        DefineRegName	(kVRegTxcSfp1RemoteIp4,                 "kVRegTxcSfp1RemoteIp4");
+        DefineRegName	(kVRegTxcSfp1RemotePort4,               "kVRegTxcSfp1RemotePort4");
+        DefineRegName	(kVRegTxcSfp2LocalPort4,                "kVRegTxcSfp2LocalPort4");
+        DefineRegName	(kVRegTxcSfp2RemoteIp4,                 "kVRegTxcSfp2RemoteIp4");
+        DefineRegName	(kVRegTxcSfp2RemotePort4,               "kVRegTxcSfp2RemotePort4");
 		DefineRegName	(kVRegMailBoxAcquire,					"kVRegMailBoxAcquire");
 		DefineRegName	(kVRegMailBoxRelease,					"kVRegMailBoxRelease");
 		DefineRegName	(kVRegMailBoxAbort,						"kVRegMailBoxAbort");
@@ -1036,6 +1156,24 @@ public:
 		}
 		if (::NTV2DeviceHasXilinxDMA(inDeviceID))
 		{
+		}
+		if (inDeviceID == DEVICE_ID_IO4KPLUS)
+		{
+			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x1d40; regNum <= 0x1d5f; regNum++)
+				result.insert(regNum);
+		}
+		if (inDeviceID == DEVICE_ID_KONAHDMI)
+		{
+			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x2500; regNum <= 0x251f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x2c00; regNum <= 0x2c1f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x3000; regNum <= 0x301f; regNum++)
+				result.insert(regNum);
 		}
 		if (inIncludeVirtuals)
 		{
@@ -1414,6 +1552,8 @@ private:
 					<< "Uart 1 Tx Interrupt: "		<< ActInact(inRegValue & BIT(24))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID) > 1)
 				oss	<< "Uart 2 Tx Interrupt: "		<< ActInact(inRegValue & BIT(26))					<< endl;
+			if (::NTV2DeviceGetNumLTCInputs(inDeviceID))
+				oss	<< "LTC In 1 Present: "			<< YesNo(inRegValue & BIT(17))						<< endl;
 			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
 				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
 				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
@@ -1583,6 +1723,47 @@ private:
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
 	}	mDecodeSDIInputStatusReg;
+
+	struct DecodeFS1RefSelectReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;	(void) inRegNum;	//	kRegFS1ReferenceSelect
+			ostringstream	oss;
+			oss		<< "BNC Select(LHi): "				<< (inRegValue & 0x00000010 ? "LTCIn1" : "Ref")		<< endl
+					<< "Ref BNC (Corvid): "				<< EnabDisab(inRegValue & 0x00000020)				<< endl
+					<< "LTC Present (also Reg 21): "	<< YesNo(inRegValue & 0x00000040)					<< endl
+					<< "LTC Emb Out Enable: "			<< YesNo(inRegValue & 0x00000080)					<< endl
+					<< "LTC Emb In Enable: "			<< YesNo(inRegValue & 0x00000100)					<< endl
+					<< "LTC Emb In Received: "			<< YesNo(inRegValue & 0x00000200)					<< endl
+					<< "LTC BNC Out Source: "			<< (inRegValue & 0x00000400 ? "E-E" : "Reg112/113");
+			return oss.str();
+		}
+	}	mDecodeFS1RefSelectReg;
+
+	struct DecodeLTCStatusControlReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;	(void) inRegNum;	//	kRegLTCStatusControl
+			const uint16_t	LTC1InTimingSelect	((inRegValue >> 1) & 0x0000007);
+			const uint16_t	LTC2InTimingSelect	((inRegValue >> 9) & 0x0000007);
+			const uint16_t	LTC1OutTimingSelect	((inRegValue >> 16) & 0x0000007);
+			const uint16_t	LTC2OutTimingSelect	((inRegValue >> 20) & 0x0000007);
+			ostringstream	oss;
+			oss		<< "LTC 1 Input Present: "				<< YesNo(inRegValue & 0x00000001)												<< endl
+					<< "LTC 1 Input FB Timing Select): "	<< xHEX0N(LTC1InTimingSelect,2) << " (" << DEC(LTC1InTimingSelect) << ")"		<< endl
+					<< "LTC 1 Bypass: "						<< EnabDisab(inRegValue & 0x00000010)											<< endl
+					<< "LTC 1 Bypass Select: "				<< DEC(ULWord((inRegValue >> 5) & 0x00000001))									<< endl
+					<< "LTC 2 Input Present: "				<< YesNo(inRegValue & 0x00000100)												<< endl
+					<< "LTC 2 Input FB Timing Select): "	<< xHEX0N(LTC2InTimingSelect,2) << " (" << DEC(LTC2InTimingSelect) << ")"		<< endl
+					<< "LTC 2 Bypass: "						<< EnabDisab(inRegValue & 0x00001000)											<< endl
+					<< "LTC 2 Bypass Select: "				<< DEC(ULWord((inRegValue >> 13) & 0x00000001))									<< endl
+					<< "LTC 1 Output FB Timing Select): "	<< xHEX0N(LTC1OutTimingSelect,2) << " (" << DEC(LTC1OutTimingSelect) << ")"		<< endl
+					<< "LTC 2 Output FB Timing Select): "	<< xHEX0N(LTC2OutTimingSelect,2) << " (" << DEC(LTC2OutTimingSelect) << ")";
+			return oss.str();
+		}
+	}	mLTCStatusControlDecoder;
 
 	struct DecodeAudDetectReg : public Decoder
 	{
@@ -2302,13 +2483,14 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
-			oss	<< "Limiting: "		<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-				<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
-				<< "FG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
-				<< "BG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
-				<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+			oss	<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
+				<< "Limiting: "			<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+				<< "VANC Pass-Thru: "	<< ((inRegValue & BIT(13)) ? "Background" : "Foreground")														<< endl
+				<< "FG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
+				<< "BG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
+				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "Input Sync: "		<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
 				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}

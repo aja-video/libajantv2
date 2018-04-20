@@ -27,7 +27,7 @@
 #define	NTV2DeviceGetNumAudioEngines	NTV2DeviceGetNumAudioSystems
 
 
-//	Most of the device features functions are generated from '.csv' files using a Python script.
+//	Most of the device features functions are generated from a Python script.
 //	The script writes the implementations into 'ntv2devicefeatures.hpp', and the declarations into 'ntv2devicefeatures.hh'...
 #include "ntv2devicefeatures.hh"
 

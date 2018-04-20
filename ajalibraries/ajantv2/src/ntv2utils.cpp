@@ -103,19 +103,6 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 }
 
 
-ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
-{
-	inOutStream << dec << inData.size() << " UWords: ";
-	for (UWordSequenceConstIter iter (inData.begin ());  iter != inData.end ();  )
-	{
-		inOutStream << hex << setw (4) << setfill ('0') << *iter;
-		if (++iter != inData.end())
-			inOutStream << " ";
-	}
-	return inOutStream << dec << "";
-}
-
-
 bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels)
 {
 	out16BitYUVLine.clear ();
@@ -531,6 +518,98 @@ void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, con
 		pOut10BitYUVLine [outputCount + 2] = ULWord (pIn16BitYUVLine [inputCount + 6]) + (ULWord (pIn16BitYUVLine [inputCount + 7]) << 10) + (ULWord (pIn16BitYUVLine [inputCount + 8]) << 20);
 		pOut10BitYUVLine [outputCount + 3] = ULWord (pIn16BitYUVLine [inputCount + 9]) + (ULWord (pIn16BitYUVLine [inputCount +10]) << 10) + (ULWord (pIn16BitYUVLine [inputCount +11]) << 20);
 	}	//	for each component in the line
+}
+
+
+bool PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels)
+{
+	if (!pOut10BitYUVLine)
+		return false;	//	NULL buffer pointer
+	if (!inNumPixels)
+		return false;	//	Zero pixel count
+	if (ULWord(in16BitYUVLine.size()) < inNumPixels*2)
+		return false;	//	UWordSequence too small
+
+	for (ULWord inputCount = 0,  outputCount = 0;
+		  inputCount < (inNumPixels * 2);
+		  outputCount += 4,  inputCount += 12)
+	{
+		pOut10BitYUVLine[outputCount    ] = ULWord(in16BitYUVLine[inputCount + 0]) + (ULWord(in16BitYUVLine[inputCount + 1]) << 10) + (ULWord(in16BitYUVLine[inputCount + 2]) << 20);
+		pOut10BitYUVLine[outputCount + 1] = ULWord(in16BitYUVLine[inputCount + 3]) + (ULWord(in16BitYUVLine[inputCount + 4]) << 10) + (ULWord(in16BitYUVLine[inputCount + 5]) << 20);
+		pOut10BitYUVLine[outputCount + 2] = ULWord(in16BitYUVLine[inputCount + 6]) + (ULWord(in16BitYUVLine[inputCount + 7]) << 10) + (ULWord(in16BitYUVLine[inputCount + 8]) << 20);
+		pOut10BitYUVLine[outputCount + 3] = ULWord(in16BitYUVLine[inputCount + 9]) + (ULWord(in16BitYUVLine[inputCount +10]) << 10) + (ULWord(in16BitYUVLine[inputCount +11]) << 20);
+	}	//	for each component in the line
+	return true;
+}
+
+
+bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine,  NTV2_POINTER & inFrameBuffer,
+											const NTV2FormatDescriptor & inDescriptor,  const UWord inLineOffset)
+{
+	if (inYCbCrLine.size() < 12)
+		return false;	//	Input vector needs at least 12 components
+	if (inFrameBuffer.IsNULL())
+		return false;	//	NULL frame buffer
+	if (!inDescriptor.IsValid())
+		return false;	//	Bad format descriptor
+	if (ULWord(inLineOffset) >= inDescriptor.GetFullRasterHeight())
+		return false;	//	Illegal line offset
+	if (inDescriptor.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
+		return false;	//	Not 'v210' pixel format
+
+	const uint32_t	pixPerLineX2	(inDescriptor.GetRasterWidth() * 2);
+	uint32_t *		pOutPackedLine	(NULL);
+	if (inFrameBuffer.GetByteCount() < inDescriptor.GetBytesPerRow() * ULWord(inLineOffset+1))
+		return false;	//	Buffer too small
+
+	pOutPackedLine = (uint32_t*) inDescriptor.GetRowAddress(inFrameBuffer.GetHostAddress(0), inLineOffset);
+	if (pOutPackedLine == NULL)
+		return false;	//	Buffer too small
+
+	for (uint32_t inputCount = 0, outputCount = 0;   inputCount < pixPerLineX2;   outputCount += 4, inputCount += 12)
+	{
+		if ((inputCount+11) >= uint32_t(inYCbCrLine.size()))
+			break;	//	Early exit (not fatal)
+	#if defined(_DEBUG)	//	'at' throws upon bad index values
+		pOutPackedLine[outputCount]   = uint32_t(inYCbCrLine.at(inputCount+0)) | uint32_t(inYCbCrLine.at(inputCount+ 1)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 2)<<20);
+		pOutPackedLine[outputCount+1] = uint32_t(inYCbCrLine.at(inputCount+3)) | uint32_t(inYCbCrLine.at(inputCount+ 4)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 5)<<20);
+		pOutPackedLine[outputCount+2] = uint32_t(inYCbCrLine.at(inputCount+6)) | uint32_t(inYCbCrLine.at(inputCount+ 7)<<10) | uint32_t(inYCbCrLine.at(inputCount+ 8)<<20);
+		pOutPackedLine[outputCount+3] = uint32_t(inYCbCrLine.at(inputCount+9)) | uint32_t(inYCbCrLine.at(inputCount+10)<<10) | uint32_t(inYCbCrLine.at(inputCount+11)<<20);
+	#else				//	'operator[]' doesn't throw
+		pOutPackedLine[outputCount]   = uint32_t(inYCbCrLine[inputCount+0]) | uint32_t(inYCbCrLine[inputCount+ 1]<<10) | uint32_t(inYCbCrLine[inputCount+ 2]<<20);
+		pOutPackedLine[outputCount+1] = uint32_t(inYCbCrLine[inputCount+3]) | uint32_t(inYCbCrLine[inputCount+ 4]<<10) | uint32_t(inYCbCrLine[inputCount+ 5]<<20);
+		pOutPackedLine[outputCount+2] = uint32_t(inYCbCrLine[inputCount+6]) | uint32_t(inYCbCrLine[inputCount+ 7]<<10) | uint32_t(inYCbCrLine[inputCount+ 8]<<20);
+		pOutPackedLine[outputCount+3] = uint32_t(inYCbCrLine[inputCount+9]) | uint32_t(inYCbCrLine[inputCount+10]<<10) | uint32_t(inYCbCrLine[inputCount+11]<<20);
+	#endif
+	}
+	return true;
+}
+
+
+bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+								const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset)
+{
+	outYCbCrLine.clear();
+	if (inFrameBuffer.IsNULL())
+		return false;	//	NULL frame buffer
+	if (!inDescriptor.IsValid())
+		return false;	//	Bad format descriptor
+	if (ULWord(inLineOffset) >= inDescriptor.GetFullRasterHeight())
+		return false;	//	Illegal line offset
+	if (inDescriptor.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
+		return false;	//	Not 'v210' pixel format
+	if (inDescriptor.GetRasterWidth () < 6)
+		return false;	//	bad width
+
+	const ULWord *	pInputLine	(reinterpret_cast<const ULWord*>(inDescriptor.GetRowAddress(inFrameBuffer.GetHostPointer(), inLineOffset)));
+
+	for (ULWord inputCount(0);  inputCount < inDescriptor.linePitch;  inputCount++)
+	{
+		outYCbCrLine.push_back((pInputLine[inputCount]      ) & 0x3FF);
+		outYCbCrLine.push_back((pInputLine[inputCount] >> 10) & 0x3FF);
+		outYCbCrLine.push_back((pInputLine[inputCount] >> 20) & 0x3FF);
+	}
+	return true;
 }
 
 
@@ -4083,8 +4162,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP s2022";
         case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP s2110";
 		case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
-		case DEVICE_ID_KONA1:					return "Kona 1";
-        case DEVICE_ID_KONAHDMI:				return "Kona HDMI";
+		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
+        case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 #if !defined (_DEBUG)
 	    default:					break;
 #endif
@@ -7150,8 +7229,8 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
         case NTV2IpErrUllNotSupported:              return "Ull mode not supported";
         case NTV2IpErrNotReady:                     return "KonaIP card not ready";
         case NTV2IpErrSoftwareMismatch:             return "Host software does not match device firmware";
-        case NTV2IpErrLinkANotConfigured:           return "SFP 1 (Link A) not configured";
-        case NTV2IpErrLinkBNotConfigured:           return "SFP 2 (Link B) not configured";
+        case NTV2IpErrSFP1NotConfigured:            return "SFP 1 not configured";
+        case NTV2IpErrSFP2NotConfigured:            return "SFP 2 not configured";
         case NTV2IpErrInvalidIGMPVersion:           return "Invalid IGMP version";
         case NTV2IpErrCannotGetMacAddress:          return "Failed to retrieve MAC address from ARP table";
         case NTV2IpErr2022_7NotSupported:           return "2022-7 not supported for by this firmware";
@@ -7226,7 +7305,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
 			case DEVICE_ID_KONA1:						return "kona1_pcie.bit";
-            case DEVICE_ID_KONAHDMI:					return "kona_hdmi.bit";
+            case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
             default:									return "";
 		}
 	#else
@@ -7307,7 +7386,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
             case DEVICE_ID_IOIP_2110:					return "ioip_s2110.mcs";
             case DEVICE_ID_KONAIP_2110:                 return "kip_s2110.mcs";
-            case DEVICE_ID_KONAHDMI:					return "kona_hdmi.bit";
+            case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
             case DEVICE_ID_KONA1:						return "kona1.bit";
             default:									return "";
 		}

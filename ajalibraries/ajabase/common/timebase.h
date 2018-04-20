@@ -48,8 +48,6 @@ public:
 
 	/**
 	 *	Set to default value.
-	 *
-	 *	@return		void
 	 */
 	void SetToDefault(void);
 
@@ -60,7 +58,6 @@ public:
 	 *
 	 *	@param[in]	frameTimeScale	Time units per second (units/second)
 	 *	@param[in]	frameDuration	Time units per frame (units/frame)
-	 *	@return		void
 	 */
 	void SetFrameRate(int64_t frameTimeScale, int64_t frameDuration);
 
@@ -70,7 +67,6 @@ public:
 	 *	The frame rate is specified Frame rate define found in videotypes.h
 	 *
 	 *	@param[in]	ajaFrameRate	AJA_FrameRate
-	 *	@return		void
 	 */
 	void SetAJAFrameRate(AJA_FrameRate ajaFrameRate);
 
@@ -81,7 +77,6 @@ public:
 	 *
 	 *	@param[out]	frameTimeScale	Time units per second (units/second)
 	 *	@param[out]	frameDuration	Time units per frame (units/frame)
-	 *	@return		void
 	 */
 	void GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const;
 
@@ -110,7 +105,6 @@ public:
 	 *	Set the audio sample rate to use in conversions.
 	 *
 	 *	@param[in]	rate	Audio rate in samples/second.
-	 *	@return		void
 	 */
 	void SetAudioRate(int64_t rate);
 
@@ -133,7 +127,6 @@ public:
 	 *
 	 *	@param[in]	rate	System tick rate in ticks/second.
 	 *						0 == system native rate.
-	 *	@return		void
 	 */
 	void SetTickRate(int64_t rate);
 

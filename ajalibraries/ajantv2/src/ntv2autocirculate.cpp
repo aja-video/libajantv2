@@ -602,6 +602,23 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 	else if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
 		return false;
 
+#if defined(_DEBUG)	//	Look for interference from other framestores...
+	for (UWord chan(0);  chan < ::NTV2DeviceGetNumFrameStores(_boardID);  chan++)
+	{
+		ULWord		frameNum(0);
+		NTV2Mode	mode(NTV2_MODE_INVALID);
+		bool		isEnabled(false);
+		if (inChannel != chan)
+			if (IsChannelEnabled(NTV2Channel(chan), isEnabled)  &&  isEnabled)		//	FrameStore is enabled
+				if (GetMode(NTV2Channel(chan), mode)  &&  mode == NTV2_MODE_INPUT)	//	Channel is capturing
+					if (GetInputFrame(NTV2Channel(chan), frameNum))
+						if (frameNum >= ULWord(startFrameNumber)  &&  frameNum <= ULWord(endFrameNumber))	//	Frame in range
+							cerr << "WARNING: FrameStore " << DEC(chan+1) << " is writing into frame " << DEC(frameNum)
+								<< ", which will corrupt FrameStore " << DEC(inChannel+1) << " AutoCirculate input from frames "
+								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << endl;
+	}
+#endif	//	defined(_DEBUG)
+
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
 	autoCircData.channelSpec = ::NTV2ChannelToInputChannelSpec (inChannel);
@@ -649,6 +666,23 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	}
 	else if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
 		return false;
+
+#if defined(_DEBUG)	//	Look for interference from other framestores...
+	for (UWord chan(0);  chan < ::NTV2DeviceGetNumFrameStores(_boardID);  chan++)
+	{
+		ULWord		frameNum(0);
+		NTV2Mode	mode(NTV2_MODE_INVALID);
+		bool		isEnabled(false);
+		if (inChannel != chan)
+			if (IsChannelEnabled(NTV2Channel(chan), isEnabled)  &&  isEnabled)		//	FrameStore is enabled
+				if (GetMode(NTV2Channel(chan), mode)  &&  mode == NTV2_MODE_INPUT)	//	Channel is capturing
+					if (GetInputFrame(NTV2Channel(chan), frameNum))
+						if (frameNum >= ULWord(startFrameNumber)  &&  frameNum <= ULWord(endFrameNumber))	//	Frame in range
+							cerr << "WARNING: FrameStore " << DEC(chan+1) << " is writing into frame " << DEC(frameNum)
+								<< ", which will corrupt FrameStore " << DEC(inChannel+1) << " AutoCirculate output from frames "
+								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << endl;
+	}
+#endif	//	defined(_DEBUG)
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);

@@ -115,56 +115,16 @@
 	#define	NTV2_DEPRECATED_13_1
 	#define	NTV2_DEPRECATED_14_0
 	#define	NTV2_DEPRECATED_14_1
-	#if defined (NTV2_BUILDING_DRIVER)
-		#define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-		#define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-		#define NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-		#define NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-		#define NTV2_DEPRECATE_13_0			//	First deprecated in SDK 13.0
-		#define NTV2_DEPRECATE_13_1			//	First deprecated in SDK 13.1
-		#define NTV2_DEPRECATE_14_0			//	First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_1			//	First deprecated in SDK 14.1
-	#else
-		#if defined (NTV2_DEPRECATE)
-			#undef	NTV2_DEPRECATED
-			#define	NTV2_DEPRECATED			__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_5)
-			#undef	NTV2_DEPRECATED_12_5
-			#define	NTV2_DEPRECATED_12_5	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_6)
-			#undef	NTV2_DEPRECATED_12_6
-			#define	NTV2_DEPRECATED_12_6	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_7)
-			#undef	NTV2_DEPRECATED_12_7
-			#define	NTV2_DEPRECATED_12_7	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_13_0)
-			#undef	NTV2_DEPRECATED_13_0
-			#define	NTV2_DEPRECATED_13_0	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_13_1)
-			#undef	NTV2_DEPRECATED_13_1
-			#define	NTV2_DEPRECATED_13_1	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_14_0)
-			#undef	NTV2_DEPRECATED_14_0
-			#define	NTV2_DEPRECATED_14_0	__declspec(deprecated)
-		#endif
-
-		#if defined (NTV2_DEPRECATE_14_1)
-			#undef	NTV2_DEPRECATED_14_1
-			#define	NTV2_DEPRECATED_14_1	__declspec(deprecated)
-		#endif
-	#endif
+#if defined (NTV2_BUILDING_DRIVER)
+	#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
+	#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
+	#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
+	#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
+	#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
+	#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
+	#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
+	#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
+#endif
 
 #elif defined (AJAMac)				///////////////MAC OS X//////////////////////////
 

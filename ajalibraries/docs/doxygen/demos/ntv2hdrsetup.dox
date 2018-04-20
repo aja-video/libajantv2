@@ -1,5 +1,7 @@
 /**
-@page	ntv2hdrsetup		NTV2HDRSetup Demo
+@page	demoapps
+
+@section	ntv2hdrsetup		NTV2HDRSetup Demo
 
 This simple command-line program performs HDR configuration on the HDMI output for a compatible AJA device on the local host.
 

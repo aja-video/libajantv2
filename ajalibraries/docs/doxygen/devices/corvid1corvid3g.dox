@@ -1,5 +1,9 @@
 /**
-	@page	corvid1corvid3g		Corvid, Corvid 3G
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	@subsection		corvid1corvid3g		Corvid, Corvid 3G
 
 	This page describes the Corvid (sometimes called the <b>Corvid 1</b>), and the <b>Corvid 3G</b> OEM video capture/playout boards.
 

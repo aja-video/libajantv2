@@ -83,7 +83,7 @@ public:
 		@brief		Answers with my current raw "time" hex values.
 		@param[in]	inDigitNum	Specifies the index (0-7) of the time digit of interest, in "transmission" order:
 								0 = 1st (frame units) digit, 1 = 2nd digit, ... 7 = last (hour tens) digit.
-		@param[in]	inHexValue	Receives the hex value (least significant 4 bits) to be set.
+		@param[in]	outHexValue	Receives the hex value (least significant 4 bits) to be set.
 		@param[in]	inMask		Optionally specifies which bits to receive: (1 = set bit to new value, 0 = retain current bit value).
 								Defaults to 0x0F.
 		@return		AJA_STATUS_SUCCESS if successful.

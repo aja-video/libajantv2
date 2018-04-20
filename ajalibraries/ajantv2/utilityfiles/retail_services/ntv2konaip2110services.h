@@ -24,7 +24,11 @@ public:
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
-	
+
+protected:
+    void printIpEnable(IpEnable2110 ipEnable);
+    CNTV2Config2110     * config2110;
+
 };
 
 

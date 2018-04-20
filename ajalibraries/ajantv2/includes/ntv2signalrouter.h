@@ -344,6 +344,7 @@ AJAExport NTV2InputCrosspointID		GetCSCInputXptFromChannel (const NTV2Channel in
 /**
 @return		The appropriate NTV2InputCrosspointID for the given dual link (DL) widget.
 @param[in]	inChannel		Specifies the NTV2Channel of interest.
+@param[in]	inLinkB			Specifies whether to return the A or the B link crosspoint ID. Defaults to the A link crosspoint.
 **/
 AJAExport NTV2InputCrosspointID		GetDLInInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB = false);
 

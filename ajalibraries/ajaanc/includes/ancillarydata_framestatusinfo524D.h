@@ -63,14 +63,6 @@ public:
 	**/
 	virtual AJAStatus						ParsePayloadData (void);
 
-	/**
-		@brief		Generate the payload data from my "local" ancillary data.
-		@note		This method is overridden for the specific Anc data type.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GeneratePayloadData (void);
-
-
 	virtual inline bool				IsRecording (void) const		{return m_IsRecording;}		///< @return	The remote camera's recording state.
 
 	/**

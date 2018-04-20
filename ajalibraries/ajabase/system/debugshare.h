@@ -13,8 +13,8 @@
 /**
  *	The list of debug message severity codes.
  *	@ingroup AJAGroupDebug
- *	@{
  */
+///@{
 typedef enum _AJADebugSeverity
 {
 	AJA_DebugSeverity_Emergency		= 0,	/**< System is unusable */
@@ -28,13 +28,14 @@ typedef enum _AJADebugSeverity
 	AJA_DebugSeverity_Size			= 8		/**< Size of severity enum, must be last */
 
 } AJADebugSeverity;
+///@}
 
 
 /**
  *	The list of debug message groups.
  *	@ingroup AJAGroupDebug
- *	@{
  */
+///@{
 typedef enum _AJADebugUnit
 {
     AJA_DebugUnit_Unknown					= 0,
@@ -71,6 +72,7 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_SMPTEAnc					= 31,
     AJA_DebugUnit_AJAAncData				= 32,
     AJA_DebugUnit_AJAAncList				= 33,
+    AJA_DebugUnit_BFT						= 34,
 
     // to add a new unit:
     //
@@ -89,9 +91,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 34,
-    AJA_DebugUnit_Unused_34                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_35                 = 35,
+    AJA_DebugUnit_FirstUnused               = 35,
+    AJA_DebugUnit_Unused_35                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_36                 = 36,
     AJA_DebugUnit_Unused_37                 = 37,
     AJA_DebugUnit_Unused_38                 = 38,
@@ -145,6 +146,7 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_Size						= 85,
 
 } AJADebugUnit;
+///@}
 
 
 /**

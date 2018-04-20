@@ -10,12 +10,9 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2utils.h"
-#include "videodefines.h"
 #include "ntv2publicinterface.h"
 #include <string>
 #include <iostream>
-#include <vector>
 #if defined (AJALinux)
 	#include <stdint.h>
 #endif
@@ -257,6 +254,7 @@ public:
 
 	/**
 		@brief		Writes the given frame buffer line offset as a formatted SMPTE line number into the given output stream.
+		@param		inOutStream		The output stream to be written into.
 		@param[in]	inLineOffset	Specifies the zero-based line offset in the frame buffer.
 		@param[in]	inForTextMode	Defaults to false. If true, omits the space between the field indicator and the line number, and adds leading zeroes to line number.
 		@return		The output stream I was handed.
@@ -330,11 +328,10 @@ AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVi
 
 /**
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
-	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
+	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the packed NTV2_FBF_10BIT_YCBCR data
 									to be converted.
-	@param[out]	out16BitYUVLine		Receives the unpacked 16-bit-per-component YUV data. The sequence is cleared before filling.
-									The UWord sequence will be Cb0, Y0, Cr0, Y1, Cb1, Y2, Cr1, Y3, Cb2, Y4, Cr2, Y5, . . .
-	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
+	@param[out]	inFormatDesc		Specifies the format of the data in the memory pointed to by "pIn10BitYUVLine".
+	@param[in]	out16BitYUVLine		Receives the resulting UWordSequence.
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);

@@ -1,5 +1,7 @@
 /**
-@page	ntv2capture4k		NTV2Capture4K Demo
+@page	demoapps
+
+@section	ntv2capture4k		NTV2Capture4K Demo
 
 This command-line program is identical to the \ref ntv2capture except that it captures 4K/UHD video.
 

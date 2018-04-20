@@ -34,65 +34,6 @@
 
 
 /**
-    @mainpage	The NTV2 SDK
-
-    @copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
-
-    @details	The NTV2 Software Development Kit (SDK) is a suite of classes and data types which allow end-users to access and control
-                nearly any NTV2-compatible AJA device using the C++ programming language.
-
-                AJA hardware products play back or ingest video/audio, plus ancillary data (e.g., timecode, captions, etc.) to
-                or from a host computer. The purpose of the SDK is to enable third-party developers to easily access and/or control
-                the video, audio or ancillary data entering or leaving the device. The SDK has two major parts -- a low-level device driver,
-                and a user-space library.
-
-    @image	html	fig01-ntv2architecture.png
-
-    @details	The device driver runs at the kernel level and handles low-level communication with the device. It is a required component
-                of the SDK and provides the user-space library with the means to communicate and control the device.
-
-                The "ajantv2" library ('libajantv2.lib' on Windows, or 'libajantv2.a' on Linux and MacOS) is the principal user-space library that
-                an application must link with in order to access and control AJA devices. It implements a suite of C++ classes which an
-                application can instantiate and use to perform various operations on an AJA device. This library contains many functions that
-                are useful for interrogating and controlling AJA devices.
-
-    @image	html	classhierarchy.png
-
-    @details	Most NTV2 object class instances can be created in the usual ways -- using <b>operator new</b>, creating it directly on the stack,
-                or by aggregation (incorporating the NTV2 object as a member variable in your own class). For destruction, the usual rules apply.
-                NTV2 objects that were created on the stack will automatically destruct when they go out of scope. Instances that were created
-                via aggregation will destruct when the owning object's destructor is called. Instances that were explicitly created using
-                <b>operator new</b> must be explicitly destroyed using operator delete.
-
-                As a general rule, AJA recommends never deriving your application's classes from any NTV2 classes.
-
-    @par		The Principal Classes
-
-    CNTV2DeviceScanner
-
-    @subpage	ntv2devicefeatures
-
-    CNTV2Card
-
-    CNTV2SignalRouter
-
-    @par		More Information
-
-    @subpage	gettingstarted
-
-    @subpage	commondeviceinfo
-
-    @subpage	demoapps
-
-    @subpage	ajacc
-
-    @subpage	ajaanc
-
-    @subpage	ajabase
-**/
-
-
-/**
     @brief	Identifies a particular AJA device type.
             In modern NTV2 SDKs, there really is only one device type: DEVICETYPE_NTV2.
 **/
@@ -266,6 +207,9 @@ typedef enum
         BOARDSUBTYPE_NONE		///< @deprecated	Obsolete.
     } NTV2BoardSubType;			///< @deprecated	This is obsolete.
 #endif	//	!defined (NTV2_DEPRECATE)
+
+#define	NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)			((__d__) == DEVICE_ID_KONAIP_2110 || (__d__) == DEVICE_ID_IOIP_2110)
+#define	NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)			((__d__) == DEVICE_ID_KONAIP_2022 || (__d__) == DEVICE_ID_IOIP_2022)
 
 
 /**
@@ -1133,13 +1077,14 @@ typedef enum
 
 typedef enum
 {
-  NTV2_VIDEO_STREAM      = 0,
-  NTV2_AUDIO1_STREAM     = 1,
-  NTV2_AUDIO2_STREAM     = 2,
-  NTV2_AUDIO3_STREAM     = 3,
-  NTV2_AUDIO4_STREAM     = 4,
-  NTV2_METADATA_STREAM   = 5,
-  NTV2_MAX_NUM_STREAMS   = 6
+    NTV2_VIDEO_STREAM      = 0,
+    NTV2_AUDIO1_STREAM     = 1,
+    NTV2_AUDIO2_STREAM     = 2,
+    NTV2_AUDIO3_STREAM     = 3,
+    NTV2_AUDIO4_STREAM     = 4,
+    NTV2_METADATA_STREAM   = 5,
+    NTV2_MAX_NUM_STREAMS   = 6,
+    NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
 
 #define NTV2_ALLOCATED_RX_STREAMS   4
@@ -1996,7 +1941,6 @@ typedef enum
 
 typedef enum
 {
-    NTV2_SDITransport_Auto=-1,				// auto mode
     NTV2_SDITransport_Off,					// transport disabled, disconnected
     NTV2_SDITransport_1_5,					// Single Link, 1 wire 1.5G
     NTV2_SDITransport_3Ga,					// Single Link, 1 wire 3Ga
@@ -2008,7 +1952,10 @@ typedef enum
     NTV2_SDITransport_OctLink_3Gb,			// Oct Link, 4 wire 3Gb (4K RGB, HFR)
     NTV2_SDITransport_6G,					// 6G see Quad Link
     NTV2_SDITransport_12G,					// 12G see Oct Link
-    NTV2_MAX_NUM_SDITransportTypes
+    NTV2_MAX_NUM_SDITransportTypes,			// last
+	NTV2_SDITransport_Auto					// auto mode
+		=NTV2_MAX_NUM_SDITransportTypes,				
+
 } NTV2SDITransportType;
 
 
@@ -3232,7 +3179,7 @@ typedef enum
     NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
 
-#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
 
 
 // LHI version HDMI Color Space I/O
@@ -3569,20 +3516,20 @@ typedef enum
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2TCIndex, NTV2TimecodeIndex;
 
-#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				((__x__) >= NTV2_TCINDEX_DEFAULT && (__x__) < NTV2_MAX_NUM_TIMECODE_INDEXES)
+#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				((__x__) >= NTV2_TCINDEX_DEFAULT  &&  (__x__) < NTV2_MAX_NUM_TIMECODE_INDEXES)
 
 #define	NTV2_IS_ANALOG_TIMECODE_INDEX(__x__)			((__x__) == NTV2_TCINDEX_LTC1 || (__x__) == NTV2_TCINDEX_LTC2)
 
-#define	NTV2_IS_ATC_VITC1_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI1 && (__x__) <= NTV2_TCINDEX_SDI4	)	\
-                                                            ||  (__x__) >= NTV2_TCINDEX_SDI5 && (__x__) <= NTV2_TCINDEX_SDI8	)
+#define	NTV2_IS_ATC_VITC1_TIMECODE_INDEX(__x__)			(	    ((__x__) >= NTV2_TCINDEX_SDI1  &&  (__x__) <= NTV2_TCINDEX_SDI4)	\
+                                                            ||  ((__x__) >= NTV2_TCINDEX_SDI5  &&  (__x__) <= NTV2_TCINDEX_SDI8)	)
 
-#define	NTV2_IS_ATC_VITC2_TIMECODE_INDEX(__x__)			(	(__x__) >= NTV2_TCINDEX_SDI1_2 && (__x__) <= NTV2_TCINDEX_SDI8_2	)
+#define	NTV2_IS_ATC_VITC2_TIMECODE_INDEX(__x__)			(	(__x__) >= NTV2_TCINDEX_SDI1_2  &&  (__x__) <= NTV2_TCINDEX_SDI8_2	)
 
-#define	NTV2_IS_ATC_LTC_TIMECODE_INDEX(__x__)			(	(	(__x__) >= NTV2_TCINDEX_SDI3_LTC && (__x__) <= NTV2_TCINDEX_SDI8_LTC	)	\
-                                                            ||  (__x__) == NTV2_TCINDEX_SDI1_LTC											\
-                                                            ||	(__x__) == NTV2_TCINDEX_SDI2_LTC	)
+#define	NTV2_IS_ATC_LTC_TIMECODE_INDEX(__x__)			(	    ((__x__) >= NTV2_TCINDEX_SDI3_LTC  &&  (__x__) <= NTV2_TCINDEX_SDI8_LTC)	\
+                                                            ||  ((__x__) == NTV2_TCINDEX_SDI1_LTC)											\
+                                                            ||	((__x__) == NTV2_TCINDEX_SDI2_LTC)	)
 
-#define	NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX (__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX (__x__))
+#define	NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX(__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX(__x__))
 
 
 //	These will be deprecated in the SDK 13 era		#if !defined (NTV2_DEPRECATE)
@@ -4296,8 +4243,8 @@ typedef enum
     NTV2IpErrUllNotSupported,
     NTV2IpErrNotReady,
     NTV2IpErrSoftwareMismatch,
-    NTV2IpErrLinkANotConfigured,
-    NTV2IpErrLinkBNotConfigured,
+    NTV2IpErrSFP1NotConfigured,
+    NTV2IpErrSFP2NotConfigured,
     NTV2IpErrInvalidIGMPVersion,
     NTV2IpErrCannotGetMacAddress,
     NTV2IpErr2022_7NotSupported,

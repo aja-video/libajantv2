@@ -14,6 +14,39 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+// check for C++11 compatibility
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+    // Visual Studio 2013 (_MSC_VER 1800) has the C++11 support we
+    // need, even though it reports 199711L for __cplusplus
+    #define AJA_BASE_USECPP_11  1
+#elif defined(__clang__)
+    // Note that the __clang__ test needs to go before the __GNUC__ test since it also defines __GNUC__
+    #if __cplusplus >= 201103L
+		#if !defined(AJA_MAC)
+			#define AJA_BASE_USECPP_11  1
+		#endif
+    #endif
+#elif defined(__GNUC__)
+    // GCC < 5 says it supports C++11 but does not support "Standard code conversion facets"
+    // aka the stuff in <codecvt> we need. The facet support was added in 5.0
+    #if __GNUC__ >= 5
+        #define AJA_BASE_USECPP_11  1
+    #endif
+#elif __cplusplus >= 201103L
+    // By this point we should be at a compiler that tells the truth (does that exist?)
+    #define AJA_BASE_USECPP_11  1
+#endif
+
+// use C++11 functionality if available
+#if defined(AJA_BASE_USECPP_11)
+    #include <locale>
+    #include <codecvt>
+#else
+    #if defined(AJA_WINDOWS)
+        #include <Windows.h>
+    #endif
+#endif
+
 namespace aja
 {
 
@@ -157,34 +190,90 @@ std::string to_string(long double val)
 
 bool string_to_wstring(const std::string& str, std::wstring& wstr)
 {
-    std::mbstate_t state = std::mbstate_t();
-    mbrlen(NULL, 0, &state);
-    const char *tmpPtr = str.c_str();
-    size_t len = 1 + mbsrtowcs(NULL, &tmpPtr, 0, &state);
-    std::vector<wchar_t> tmp(len);
-    int num_chars = (int)mbsrtowcs(&tmp[0], &tmpPtr, str.size(), &state);
-    if (num_chars < 0)
-        return false;
-    else
-        wstr.assign(&tmp[0]);
-
+// use C++11 functionality if available
+#if defined(AJA_BASE_USECPP_11)
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    wstr = converterX.from_bytes(str);
     return true;
+#else
+    #if defined(AJA_WINDOWS)
+        const char *tmpPtr = str.c_str();
+        uint32_t codePage = CP_UTF8;
+        uint32_t flags = 0;
+        size_t len = MultiByteToWideChar(codePage, flags, tmpPtr, (int)str.length(), NULL, 0);
+        wstr.resize(len);
+        int retVal = MultiByteToWideChar(codePage, flags, tmpPtr, (int)str.length(), &wstr[0], (int)len);
+        if (retVal == 0)
+            return false;
+
+        return true;
+    #else
+        std::mbstate_t state = std::mbstate_t();
+        mbrlen(NULL, 0, &state);
+        const char *tmpPtr = str.c_str();
+        int len = (int)mbsrtowcs(NULL, &tmpPtr, 0, &state);
+        if (len == -1)
+            return false;
+
+        wstr.resize((size_t)len);
+        int num_chars = (int)mbsrtowcs(&wstr[0], &tmpPtr, wstr.length(), &state);
+        if (num_chars < 0)
+            return false;
+
+        return true;
+    #endif
+#endif
 }
 
 bool wstring_to_string(const std::wstring& wstr, std::string& str)
 {
-    std::mbstate_t state = std::mbstate_t();
-    mbrlen(NULL, 0, &state);
-    const wchar_t *tmpPtr = wstr.c_str();
-    size_t len = 1 + wcsrtombs(NULL, &tmpPtr, 0, &state);
-    std::vector<char> tmp(len);
-    int num_chars = (int)wcsrtombs(&tmp[0], &tmpPtr, tmp.size(), &state);
-    if (num_chars < 0)
-        return false;
-    else
-        str.assign(&tmp[0]);
-
+// use C++11 functionality if available
+#if defined(AJA_BASE_USECPP_11)
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    str = converterX.to_bytes(wstr);
     return true;
+#else
+    #if defined(AJA_WINDOWS)
+        const wchar_t *tmpPtr = wstr.c_str();
+        uint32_t codePage = CP_UTF8;
+        uint32_t flags = 0;
+        size_t len = WideCharToMultiByte(codePage, flags, tmpPtr, (int)wstr.length(), NULL, 0, NULL, NULL);
+        str.resize(len);
+        int retVal = WideCharToMultiByte(codePage, flags, tmpPtr, (int)wstr.length(), &str[0], (int)len, NULL, NULL);
+        if (retVal == 0)
+            return false;
+
+        return true;
+    #else
+        std::mbstate_t state = std::mbstate_t();
+        mbrlen(NULL, 0, &state);
+        const wchar_t *tmpPtr = wstr.c_str();
+        int len = (int)wcsrtombs(NULL, &tmpPtr, 0, &state);
+        if (len == -1)
+            return false;
+
+        str.resize((size_t)len);
+        int num_chars = (int)wcsrtombs(&str[0], &tmpPtr, str.length(), &state);
+        if (num_chars < 0)
+            return false;
+
+        return true;
+    #endif
+#endif
+}
+
+inline size_t local_min(const size_t& a, const size_t& b)
+{
+#if defined(AJA_WINDOWS) && !defined(AJA_BASE_USECPP_11)
+    // By including the Windows.h header that brings in the min() macro which prevents us from using std::min()
+    // so implement our own
+    size_t size = b;
+    if (a < b)
+        size = a;
+    return size;
+#else
+    return std::min(a, b);
+#endif
 }
 
 bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
@@ -192,7 +281,7 @@ bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
     if(c_str == NULL || c_str_size < 1)
         return false;
 
-    size_t maxSize = std::min(str.size(), c_str_size-1);
+    size_t maxSize = local_min(str.size(), c_str_size-1);
     for(size_t i=0;i<maxSize;++i)
     {
         c_str[i] = str[i];

@@ -1,10 +1,12 @@
 /**
-@page	videoformats	Video Data Formats
+@page	dataformats
+
+@section	videoformats	Video Data Formats
 
 All AJA devices provide and/or accept video, audio and ancillary data to/from the host in several formats.
 This section details the video formats and device frame buffer (data) formats.
 
-@section	vidformats	Video Formats
+@subsection		vidformat	Video Format
 
 A video format describes a particular video signal, which implies a frame geometry, video standard, and frame rate.
 Each format is identified by a specific <tt>NTV2VideoFormat</tt> enumeration constant. All AJA devices support the "basic" SD-SDI
@@ -17,7 +19,7 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 		Converter widget (see \c NTV2DeviceCanDoWidget for \c NTV2_WgtUpDownConverter1), these formats
 		may be convertible into "legal" SDI wire formats (see \c NTV2DeviceCanDoConversionMode).
 
-@subsection		vidformatssd	SD Formats
+@subsubsection		vidformatssd	SD Formats
 <table>
 	<tr><td><b>525i 2398</b>	<td>\c NTV2_FORMAT_525_2398 *
 	<tr><td><b>525i 24</b>		<td>\c NTV2_FORMAT_525_2400 *
@@ -27,7 +29,7 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 	<tr><td><b>625psf 2500</b>	<td>\c NTV2_FORMAT_625psf_2500
 </table>
 
-@subsection		vidformatshd	HD Formats
+@subsubsection		vidformatshd	HD Formats
 <table>
 	<tr><td><b>720p 2398</b>				<td>\c NTV2_FORMAT_720p_2398 *
 	<tr><td><b>720p 25</b>					<td>\c NTV2_FORMAT_720p_2500 *
@@ -39,7 +41,7 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 	<tr><td><b>1080i 60, 1080psf 30</b>		<td>\c NTV2_FORMAT_1080i_6000
 </table>
 
-@subsection		vidformats2k	2K Formats
+@subsubsection		vidformats2k	2K Formats
 <table>
 	<tr><td><b>2K 1498</b>	<td>\c NTV2_FORMAT_2K_1498
 	<tr><td><b>2K 15</b>	<td>\c NTV2_FORMAT_2K_1500
@@ -55,7 +57,7 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 	<tr><td><b>2K 60</b>	<td>\c NTV2_FORMAT_1080p_2K_6000
 </table>
 
-@subsection		vidformats4k	4K Formats
+@subsubsection		vidformats4k	4K Formats
 <table>
 	<tr><td><b>4×1920×1080psf 2398</b>	<td>\c NTV2_FORMAT_4x1920x1080psf_2398
 	<tr><td><b>4×1920×1080p 2398</b>	<td>\c NTV2_FORMAT_4x1920x1080p_2398
@@ -75,7 +77,7 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 	<tr><td><b>4×2048×1080p 30</b>		<td>\c NTV2_FORMAT_4x2048x1080p_3000
 </table>
 
-@subsection		vidformats4khfr		4K HFR Formats
+@subsubsection		vidformats4khfr		4K HFR Formats
 <table>
 	<tr><td><b>4×2048×1080p 4795</b>	<td>\c NTV2_FORMAT_4x2048x1080p_4795  <i>new in 12.0</i>
 	<tr><td><b>4×2048×1080p 48</b>		<td>\c NTV2_FORMAT_4x2048x1080p_4800  <i>new in 12.0</i>
@@ -89,7 +91,20 @@ dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video a
 
 To determine if a given device can handle a particular video format, call ::NTV2DeviceCanDoVideoFormat.
 
-@section	devicefbformats		Device Frame Buffer Formats
+
+@subsection	fbframegeometries		Frame Buffer Geometries
+
+For each video format and frame buffer (pixel) format, video is arranged differently in memory.
+This means that for each format, there's a different number of bytes per horizontal line (or “line pitch”,
+in 32-bit words) for each standard.
+
+The \c NTV2FormatDescriptor class is used to inquire about rasters of any \ref NTV2Standard and \ref NTV2FrameBufferFormat.
+Once constructed, it can tell you the frame pixel dimensions (with or without VANC lines), the number of bytes per row,
+the byte count required to hold the frame, the byte offset to a particular line, etc.
+
+
+
+@subsection	devicefbformats		Device Frame Buffer Formats
 
 Non-planar, uncompressed RGB and YCbCr video data in the device frame buffer is always stored full-frame.
 Interlaced video is always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the buffer,
@@ -123,7 +138,7 @@ Many AJA devices support most of these additional frame buffer formats:
 	<tr><td><b>8-Bit HDV</b>					<td>\c NTV2_FBF_8BIT_HDV
 	<tr><td><b>24-Bit RGB</b>					<td>\c NTV2_FBF_24BIT_RGB
 	<tr><td><b>24-Bit BGR</b>					<td>\c NTV2_FBF_24BIT_BGR
-	<tr><td><b>10-Bit DPX little-endian</b>		<td>\c NTV2_FBF_10BIT_DPX_LITTLEENDIAN
+	<tr><td><b>10-Bit DPX little-endian</b>		<td>\c NTV2_FBF_10BIT_DPX_LE
 	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>\c NTV2_FBF_48BIT_RGB
 	<tr><td><b>10-Bit Raw YCbCr</b>				<td>\c NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
 	<tr><td><b>10-Bit Raw RGB</b>				<td>\c NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
@@ -170,14 +185,14 @@ If the device can't handle RGB over SDI, RGB data from the frame buffer must be 
 Similarly, when an RGB frame buffer format is desired, the incoming YCbCr data must go through a color space converter
 <i>en route</i> to the frame buffer.
 
-@subsection		fbformat8bitycbcr		8-Bit YCbCr Format
+@subsubsection		fbformat8bitycbcr		8-Bit YCbCr Format
 
 This format, identified by the \c NTV2_FBF_8BIT_YCBCR enumeration constant, is used by both Windows ('UYVY') and QuickTime
 ('2vuy') for 8-Bit YCbCr video. Here's the memory layout of two pixels:
 
 @image	html	fbf-8bitycbcr-75.png
 
-@subsection		fbformat10bitycbcr	10-Bit YCbCr Format
+@subsubsection		fbformat10bitycbcr	10-Bit YCbCr Format
 
 This format, identified by the \c NTV2_FBF_10BIT_YCBCR enumeration constant, has twelve 10-bit unsigned components that are packed into four 32-bit little-endian words.
 (Six pixels are represented in each 16 bytes.) This is the format used by Quicktime to store 10-bit YCbCr video and is referred to (in both QuickTime and Windows)
@@ -191,7 +206,7 @@ Here are the same six pixels -- the four 32-bit little-endian words -- in decrea
 
 @image	html	fbf-10bitycbcr-75.png
 
-@subsection		fbformats8bitrgb		8-Bit ARGB, RGBA, ABGR Formats
+@subsubsection		fbformats8bitrgb		8-Bit ARGB, RGBA, ABGR Formats
 
 These formats incorporate 8-bit Red, Green, Blue and Alpha (key) components.
 The device Color Space Converter(s) will perform the proper conversion to/from 10-Bit YCbCr and Key.
@@ -209,7 +224,7 @@ to an SDI output for ARGB 4:4:4:4 over-the-wire):
 
 @image	html	fbf-8bitabgr-75.png
 
-@subsection		fbformats10bitrgb		10-Bit RGB Format
+@subsubsection		fbformats10bitrgb		10-Bit RGB Format
 
 This format is identified by the \c NTV2_FBF_10BIT_RGB enumeration constant. For playout, the AJA device firmware converts the 10-bit RGB video data
 formatted as in the table below to the expected SMPTE-standard 10-Bit YCbCr output signal. Conversely, for capture/ingest, 10-bit YCbCr input video
@@ -221,7 +236,7 @@ The most significant two bits of each 32-bit pixel contain its alpha information
 
 @image	html	fbf-10bitrgb-alpha-75.png
 
-@subsection		fbformats10bitrgbdpx	10-Bit RGB - DPX Format
+@subsubsection		fbformats10bitrgbdpx	10-Bit RGB - DPX Format
 
 This format, identified by the \c NTV2_FBF_10BIT_DPX enumeration constant, is laid out as follows, before byte-swapping:
 
@@ -231,7 +246,7 @@ This is the memory layout after byte-swapping:
 
 @image	html	fbf-10bitrgbdpx-after-75.png
 
-@subsection		fbformats10bitycbcrdpx	10-Bit YCbCr - DPX Format
+@subsubsection		fbformats10bitycbcrdpx	10-Bit YCbCr - DPX Format
 
 This format, identified by the \c NTV2_FBF_10BIT_YCBCR_DPX enumeration constant, is laid out as follows, before byte-swapping:
 
@@ -241,25 +256,25 @@ After byte-swapping:
 
 @image	html	fbf-10bitycbcrdpx-after-75.png
 
-@subsection		fbformats24bitrgb		24-Bit RGB
+@subsubsection		fbformats24bitrgb		24-Bit RGB
 
 This format, identified by the \c NTV2_FBF_24BIT_RGB enumeration constant, is laid out as follows:
 
 @image	html	fbf-24bitrgb-75.png
 
-@subsection		fbformats24bitbgr		24-Bit BGR
+@subsubsection		fbformats24bitbgr		24-Bit BGR
 
 This format, identified by the \c NTV2_FBF_24BIT_BGR enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-24bitbgr-75.png
 
-@subsection		fbformats10bitdpxle	10-Bit DPX Little-Endian
+@subsubsection		fbformats10bitdpxle	10-Bit DPX Little-Endian
 
 This format, identified by the \c NTV2_FBF_10BIT_DPX_LITTLEENDIAN enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-10bitdpxle-75.png
 
-@subsection		fbformats48bitrgb		48-Bit RGB
+@subsubsection		fbformats48bitrgb		48-Bit RGB
 
 This format, identified by the \c NTV2_FBF_48BIT_RGB enumeration constant, has this single-pixel layout:
 
@@ -267,21 +282,21 @@ This format, identified by the \c NTV2_FBF_48BIT_RGB enumeration constant, has t
 
 @note	The least-significant 4 bits of each color component in this format are zero or irrelevant.
 
-@subsection		fbformatsyuy2		Alternate 8-Bit YCbCr ('YUY2')
+@subsubsection		fbformatsyuy2		Alternate 8-Bit YCbCr ('YUY2')
 
 This format, identified by the \c NTV2_FBF_8BIT_YCBCR_YUY2 enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-8bityuy2-75.png
 
-@subsection		fbformats8bitdvcpro	8-Bit DVCPro
+@subsubsection		fbformats8bitdvcpro	8-Bit DVCPro
 
 This format, identified by the \c NTV2_FBF_8BIT_DVCPRO enumeration constant, is a popular lossy 4:1:1 compression scheme.
 
-@subsection		fbformats8bithdv		8-Bit HDV
+@subsubsection		fbformats8bithdv		8-Bit HDV
 
 This format, identified by the \c NTV2_FBF_8BIT_HDV enumeration constant, is a lossy H.262/MPEG-2 (video) and MPEG-1 Layer 2 (audio) compression scheme.
 
-@subsection		fbformats10bitcion	10-Bit Raw YCbCr (CION)
+@subsubsection		fbformats10bitcion	10-Bit Raw YCbCr (CION)
 
 This format, identified by the \c NTV2_FBF_10BIT_RAW_YCBCR enumeration constant, is used for raw RGB Bayer capture from the AJA CION camera.
 Bayer pixels are 10-bit resolution stored in big-endian packed format, as required by the 'DNG' (TIFF) file specification.
@@ -294,7 +309,7 @@ See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgeba
 CION data using NTV2 devices.
 
 
-@subsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar ('I420')
+@subsubsection		fbformats8bitycbcrplanar3	8-Bit YCbCr 4:2:0 Planar ('I420')
 
 This format, identified by the \c NTV2_FBF_8BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -312,7 +327,7 @@ the Cb plane preceding the Cr plane. Chroma values are 8-bit (0-255) values, one
 Since all values are byte values, there are no endianness issues.
 
 
-@subsection		fbformats8bitycbcr422pl3	8-Bit YCbCr 4:2:2 Planar (Weitek 'Y42B')
+@subsubsection		fbformats8bitycbcr422pl3	8-Bit YCbCr 4:2:2 Planar (Weitek 'Y42B')
 
 This format, identified by the \c NTV2_FBF_8BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -330,7 +345,7 @@ Chroma values are 8-bit (0-255) values, one per horizontal pixel pair (horizonta
 Since all values are byte values, there are no endianness issues.
 
 
-@subsection		fbformats10bitycbcr420pl3	10-Bit YCbCr 4:2:0 Planar ('I420_10LE')
+@subsubsection		fbformats10bitycbcr420pl3	10-Bit YCbCr 4:2:0 Planar ('I420_10LE')
 
 This format, identified by the \c NTV2_FBF_10BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -346,7 +361,7 @@ The chroma planes immediately follow the luma plane in memory, each being one-fo
 Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per 2x2 pixel quad (horizontal and vertical subsampling).
 
 
-@subsection		fbformats10bitycbcr422pl3	10-Bit YCbCr 4:2:2 Planar ('I422_10LE')
+@subsubsection		fbformats10bitycbcr422pl3	10-Bit YCbCr 4:2:2 Planar ('I422_10LE')
 
 This format, identified by the \c NTV2_FBF_10BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -360,15 +375,5 @@ with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the l
 
 The chroma planes immediately follow the luma plane in memory, each half the size of the luma plane, the Cb plane preceding the Cr plane.
 Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per horizontal pixel pair (horizontal-only subsampling).
-
-
-@section	fbframegeometries		Frame Buffer Geometries
-
-For each format, video is arranged differently in memory. This means that for each format, there's a different number of 32-bit words per horizontal line
-(i.e., "line pitch") for each standard.
-
-The \c NTV2FormatDescriptor class is used to inquire about rasters of any NTV2Standard and NTV2FrameBufferFormat.
-Once constructed, it can tell you the frame pixel dimensions (with or without VANC lines), the number of bytes per row,
-the byte count required to hold the frame, the byte offset to a particular line, etc.
 
 **/

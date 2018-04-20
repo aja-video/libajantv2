@@ -1,5 +1,9 @@
 /**
-	@page	ioexpress		IoExpress
+	@page			ntv2devices
+
+	@section		ntv2hwio
+
+	@subsection		ioexpress		Io Express
 
 	This page describes the IoExpress capture/playout device.
 

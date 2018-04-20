@@ -128,14 +128,22 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(aja::wstring_to_string(wstr, str));
         CHECK(str == "hello");
 
+#if !defined(AJA_WINDOWS)
         str  = "z\u00df\u6c34\U0001f34c";
         wstr = L"";
         CHECK(aja::string_to_wstring(str, wstr));
         CHECK(aja::wstring_to_string(wstr, str2));
         CHECK(str == str2);
-
+#endif
         str  = "";
         wstr = L"a¥z";
+        wstr2= L"";
+        CHECK(aja::wstring_to_string(wstr, str));
+        CHECK(aja::string_to_wstring(str, wstr2));
+        CHECK(wstr == wstr2);
+
+        str  = "";
+        wstr = L"漢字";
         wstr2= L"";
         CHECK(aja::wstring_to_string(wstr, str));
         CHECK(aja::string_to_wstring(str, wstr2));
@@ -667,7 +675,7 @@ TEST_SUITE("performance -- functions in ajabase/common/performance.h");
         CHECK(p.MinTime() != 0);
         CHECK(p.MaxTime() != 0);
         // There could be variablitiy in the sleep call, so make sure in range
-        CHECK(p.StandardDeviation() > 95);
+        CHECK(p.StandardDeviation() > 94);
         CHECK(p.StandardDeviation() < 110);
 
         AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
