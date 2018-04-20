@@ -526,27 +526,22 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
     CNTV2Config2110	config2110 (device);
-	const NTV2VideoFormatKinds allowedVideoFormatTypes(::NTV2DeviceCanDo4KVideo(device.GetDeviceID()) ? VIDEO_FORMATS_ALL : VIDEO_FORMATS_NON_4KUHD);
 
     // fetch parsed newtwork struct
     NetworkData2110 net2110 = parse2110.m_net2110;
 
+    // configure PTP master
     if (net2110.ptpMasterIP[0])
     {
         device.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(net2110.ptpMasterIP);
-    }
-
-    config2110.Set4KModeEnable(net2110.setup4k);
-
-    if (net2110.numSFPs < 1)
-    {
-        cerr << "## ERROR:  Need To Specify at Least 1 SFP" << endl;
-        return false;
+        config2110.Set4KModeEnable(net2110.setup4k);
     }
 
     for (uint32_t i = 0; i < net2110.numSFPs; i++)
     {
+        cerr << "## network did" << endl;
+
         eSFP sfp = SFP_1;
         if (i > 0)
             sfp = SFP_2;
@@ -570,315 +565,228 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
-    return true;
-#if 0
-
-
-    QListIterator<SFPStruct> sfpIter(mKonaIP2110Params.mSFPs);
-    while (sfpIter.hasNext())
-    {
-        SFPStruct sfp = sfpIter.next();
-
-        if ( sfp.mSfpDesignator == "sfp1")
-        {
-            bool enable;
-            if (sfp.mEnable.isEmpty())
-                enable = true;
-            else
-                enable = getEnable(sfp.mEnable);
-
-            if (enable)
-            {
-                bool rv = config2110.SetNetworkConfiguration (SFP_1,
-                                                              sfp.mIPAddress.toStdString(),
-                                                              sfp.mSubnetMask.toStdString(),
-                                                              sfp.mGateway.toStdString());
-                if (!rv)
-                {
-                    cerr << "Error: " << config2110.getLastError() << endl;
-                    return false;
-                }
-            }
-            else
-            {
-                config2110.DisableNetworkInterface(SFP_1);
-            }
-        }
-        else if ( sfp.mSfpDesignator == "sfp2")
-        {
-            bool enable;
-            if (sfp.mEnable.isEmpty())
-                enable = true;
-            else
-                enable = getEnable(sfp.mEnable);
-
-            if (enable)
-            {
-                bool rv = config2110.SetNetworkConfiguration (SFP_2,
-                                                              sfp.mIPAddress.toStdString(),
-                                                              sfp.mSubnetMask.toStdString(),
-                                                              sfp.mGateway.toStdString());
-                if (!rv)
-                {
-                    cerr << "SetNetworkConfiguration Error: " << config2110.getLastError() << endl;
-                    return false;
-                }
-            }
-            else
-            {
-                config2110.DisableNetworkInterface(SFP_2);
-            }
-        }
-    }
-
-    cerr << "## receiveVideoIter" << endl;
-    QListIterator<ReceiveStructVideo2110> receive2110VideoIter(mKonaIP2110Params.mReceiveVideo2110Channels);
-
     rx_2110Config rxChannelConfig;
-    while (receive2110VideoIter.hasNext())
+
+    // fetch parsed receive video struct
+    ReceiveVideoData2110 receiveVideo2110 = parse2110.m_receiveVideo2110;
+    for (uint32_t i = 0; i < receiveVideo2110.numRxVideoChannels; i++)
     {
-        cerr << "## receiveVideoIter did" << endl;
+        cerr << "## receiveVideo did" << endl;
 
-        ReceiveStructVideo2110 receiveVideo = receive2110VideoIter.next();
-
+        bool rv;
         rxChannelConfig.init();
-        bool ok;
-        NTV2Channel channel = getChannel(receiveVideo.mChannelDesignator);
-        NTV2Stream stream = NTV2_VIDEO_STREAM;
 
         // If sfp2 is on use it otherwise assume we are always dealing with sfp1
         // (RX does not support both at the moment)
-        bool sfp2On = false;
-        if (!receiveVideo.mSfp2Enable.isEmpty())
-            sfp2On = getEnable(receiveVideo.mSfp2Enable);
-
-        eSFP sfp;
-        if (sfp2On)
-            sfp = SFP_2;
-        else
+        eSFP sfp = SFP_INVALID;
+        if (receiveVideo2110.rxVideoCh[i].sfpEnable[0])
             sfp = SFP_1;
-
-        bool enable = getEnable(receiveVideo.mEnable);
-        if (!enable)
-        {
-            bool rv = config2110.DisableRxStream (sfp, channel, stream);
-            if (!rv)
-            {
-                cerr << "DisableRxStream: FAILED: " << config2110.getLastError() << endl;
-                return false;
-            }
-        }
+        else if (receiveVideo2110.rxVideoCh[i].sfpEnable[1])
+            sfp = SFP_2;
 
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch      = receiveVideo.mSfp1Filter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receiveVideo.mSfp1SrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receiveVideo.mSfp1DestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receiveVideo.mSfp1SrcPort.toUInt();
-            rxChannelConfig.destPort     = receiveVideo.mSfp1DestPort.toUInt();
+            rxChannelConfig.rxMatch     = receiveVideo2110.rxVideoCh[i].rxMatch[0];
+            rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[0];
+            rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[0];
+            rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[0];
+            rxChannelConfig.destPort    = receiveVideo2110.rxVideoCh[i].destPort[0];
         }
         else
         {
-            rxChannelConfig.rxMatch      = receiveVideo.mSfp2Filter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receiveVideo.mSfp2SrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receiveVideo.mSfp2DestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receiveVideo.mSfp2SrcPort.toUInt();
-            rxChannelConfig.destPort     = receiveVideo.mSfp2DestPort.toUInt();
+            rxChannelConfig.rxMatch     = receiveVideo2110.rxVideoCh[i].rxMatch[1];
+            rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[1];
+            rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[1];
+            rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[1];
+            rxChannelConfig.destPort    = receiveVideo2110.rxVideoCh[i].destPort[1];
         }
-        rxChannelConfig.ssrc         = receiveVideo.mSSRC.toUInt();
-        rxChannelConfig.vlan         = receiveVideo.mVLAN.toUInt();
-        rxChannelConfig.payloadType  = receiveVideo.mPayload.toUInt();
+        rxChannelConfig.ssrc            = receiveVideo2110.rxVideoCh[i].vlan;
+        rxChannelConfig.vlan            = receiveVideo2110.rxVideoCh[i].ssrc;
+        rxChannelConfig.payloadType     = receiveVideo2110.rxVideoCh[i].payload;
 
-        if (!receiveVideo.mVideoFormat.isEmpty())
-        {
-            rxChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(receiveVideo.mVideoFormat.toStdString(), allowedVideoFormatTypes);
-            rxChannelConfig.videoSamples = VPIDSampling_YUV_422;
-        }
+        rxChannelConfig.videoFormat     = receiveVideo2110.rxVideoCh[i].videoFormat;
+        rxChannelConfig.videoSamples    = VPIDSampling_YUV_422;
 
-        //dumpRx2110Config (channel, stream, rxChannelConfig);
-        bool rv = config2110.EnableRxStream (sfp, channel, stream, rxChannelConfig);
+        rv = config2110.SetRxStreamConfiguration (sfp,
+                                                       receiveVideo2110.rxVideoCh[i].channel,
+                                                       NTV2_VIDEO_STREAM,
+                                                       rxChannelConfig);
         if (!rv)
         {
-            cerr << "EnableRxVideoStream: FAILED: " << config2110.getLastError() << endl;
+            cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
+            return false;
+        }
+
+        rv = config2110.SetRxStreamEnable(sfp,
+                                               receiveVideo2110.rxVideoCh[i].channel,
+                                               NTV2_VIDEO_STREAM,
+                                               receiveVideo2110.rxVideoCh[i].enable);
+        if (!rv)
+        {
+            cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
             return false;
         }
     }
 
-    cerr << "## receiveAudioIter" << endl;
-    QListIterator<ReceiveStructAudio2110> receive2110AudioIter(mKonaIP2110Params.mReceiveAudio2110Channels);
-
-    while (receive2110AudioIter.hasNext())
+    // fetch parsed receive audio struct
+    ReceiveAudioData2110 receiveAudio2110 = parse2110.m_receiveAudio2110;
+    for (uint32_t i = 0; i < receiveAudio2110.numRxAudioChannels; i++)
     {
-        cerr << "## receiveAudioIter did" << endl;
+        cerr << "## receiveAudio did" << endl;
 
-        ReceiveStructAudio2110 receiveAudio = receive2110AudioIter.next();
-
+        bool rv;
         rxChannelConfig.init();
-        bool ok;
-        NTV2Channel channel = getChannel(receiveAudio.mChannelDesignator);
-
-        NTV2Stream stream = NTV2_AUDIO1_STREAM;
-        if (receiveAudio.mStream == "audio1")
-        {
-            stream = NTV2_AUDIO1_STREAM;
-        }
-        else if (receiveAudio.mStream == "audio2")
-        {
-            stream = NTV2_AUDIO2_STREAM;
-        }
-        else if (receiveAudio.mStream == "audio3")
-        {
-            stream = NTV2_AUDIO3_STREAM;
-        }
-        else if (receiveAudio.mStream == "audio4")
-        {
-            stream = NTV2_AUDIO4_STREAM;
-        }
-        else
-        {
-            cout << "Error: Rx stream <" << receiveAudio.mStream.toStdString() << "> is invalid" << endl;
-        }
 
         // If sfp2 is on use it otherwise assume we are always dealing with sfp1
         // (RX does not support both at the moment)
-        bool sfp2On = false;
-        if (!receiveAudio.mSfp2Enable.isEmpty())
-            sfp2On = getEnable(receiveAudio.mSfp2Enable);
-
-        eSFP sfp;
-        if (sfp2On)
-            sfp = SFP_2;
-        else
+        eSFP sfp = SFP_INVALID;
+        if (receiveAudio2110.rxAudioCh[i].sfpEnable[0])
             sfp = SFP_1;
-
-        bool enable = getEnable(receiveAudio.mEnable);
-        if (!enable)
-        {
-            bool rv = config2110.DisableRxStream (sfp, channel, stream);
-            if (!rv)
-            {
-                cerr << "DisableRxStream: FAILED: " << config2110.getLastError() << endl;
-                return false;
-            }
-        }
+        else if (receiveAudio2110.rxAudioCh[i].sfpEnable[1])
+            sfp = SFP_2;
 
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch      = receiveAudio.mSfp1Filter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receiveAudio.mSfp1SrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receiveAudio.mSfp1DestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receiveAudio.mSfp1SrcPort.toUInt();
-            rxChannelConfig.destPort     = receiveAudio.mSfp1DestPort.toUInt();
+            rxChannelConfig.rxMatch     = receiveAudio2110.rxAudioCh[i].rxMatch[0];
+            rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[0];
+            rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[0];
+            rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[0];
+            rxChannelConfig.destPort    = receiveAudio2110.rxAudioCh[i].destPort[0];
         }
         else
         {
-            rxChannelConfig.rxMatch      = receiveAudio.mSfp2Filter.toUInt(&ok, 16);
-            rxChannelConfig.sourceIP     = receiveAudio.mSfp2SrcIPAddress.toStdString();
-            rxChannelConfig.destIP       = receiveAudio.mSfp2DestIPAddress.toStdString();
-            rxChannelConfig.sourcePort   = receiveAudio.mSfp2SrcPort.toUInt();
-            rxChannelConfig.destPort     = receiveAudio.mSfp2DestPort.toUInt();
+            rxChannelConfig.rxMatch     = receiveAudio2110.rxAudioCh[i].rxMatch[1];
+            rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[1];
+            rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[1];
+            rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[1];
+            rxChannelConfig.destPort    = receiveAudio2110.rxAudioCh[i].destPort[1];
         }
-        rxChannelConfig.ssrc                = receiveAudio.mSSRC.toUInt();
-        rxChannelConfig.vlan                = receiveAudio.mVLAN.toUInt();
-        rxChannelConfig.payloadType         = receiveAudio.mPayload.toUInt();
-        rxChannelConfig.numAudioChannels    = receiveAudio.mNumAudioChannels.toUInt();
-        rxChannelConfig.audioPacketInterval = (eNTV2PacketInterval)receiveAudio.mAudioPktInterval.toUInt();
+        rxChannelConfig.ssrc            = receiveAudio2110.rxAudioCh[i].vlan;
+        rxChannelConfig.vlan            = receiveAudio2110.rxAudioCh[i].ssrc;
+        rxChannelConfig.payloadType     = receiveAudio2110.rxAudioCh[i].payload;
+        rxChannelConfig.numAudioChannels    = receiveAudio2110.rxAudioCh[i].numAudioChannels;
+        rxChannelConfig.audioPacketInterval = receiveAudio2110.rxAudioCh[i].audioPktInterval;
 
-        //dumpRx2110Config (channel, stream, rxChannelConfig);
-        bool rv = config2110.EnableRxStream (sfp, channel, stream, rxChannelConfig);
+
+        rv = config2110.SetRxStreamConfiguration (sfp,
+                                                  receiveAudio2110.rxAudioCh[i].channel,
+                                                  receiveAudio2110.rxAudioCh[i].stream,
+                                                  rxChannelConfig);
         if (!rv)
         {
-            cerr << "EnableRxAudioStream: FAILED: " << config2110.getLastError() << endl;
+            cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
+            return false;
+        }
+
+        rv = config2110.SetRxStreamEnable(sfp,
+                                          receiveAudio2110.rxAudioCh[i].channel,
+                                          receiveAudio2110.rxAudioCh[i].stream,
+                                          receiveAudio2110.rxAudioCh[i].enable);
+        if (!rv)
+        {
+            cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
             return false;
         }
     }
-
-    cerr << "## transmitVideoIter" << endl;
-    QListIterator<TransmitStructVideo2110> transmitVideoIter(mKonaIP2110Params.mTransmitVideo2110Channels);
 
     tx_2110Config txChannelConfig;
-    while (transmitVideoIter.hasNext())
+
+    // fetch parsed transmit video struct
+    TransmitVideoData2110 transmitVideo2110 = parse2110.m_transmitVideo2110;
+    for (uint32_t i = 0; i < transmitVideo2110.numTxVideoChannels; i++)
     {
-        cerr << "## transmitVideoIter did" << endl;
+        cerr << "## transmitVideo did" << endl;
 
-        TransmitStructVideo2110 transmitVideo = transmitVideoIter.next();
-
+        bool rv;
         txChannelConfig.init();
-        NTV2Channel channel = getChannel(transmitVideo.mChannelDesignator);
-        NTV2Stream stream = NTV2_VIDEO_STREAM;
 
-        txChannelConfig.localPort[0] = transmitVideo.mSfp1LocalPort.toUInt();
-        txChannelConfig.remoteIP[0]  = transmitVideo.mSfp1RemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[0]= transmitVideo.mSfp1RemotePort.toUInt();
-        txChannelConfig.localPort[1] = transmitVideo.mSfp2LocalPort.toUInt();
-        txChannelConfig.remoteIP[1]  = transmitVideo.mSfp2RemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[1]= transmitVideo.mSfp2RemotePort.toUInt();
-        txChannelConfig.payloadType  = transmitVideo.mPayload.toUInt();
-        txChannelConfig.ssrc         = transmitVideo.mSSRC.toUInt();
-        txChannelConfig.ttl          = transmitVideo.mTTL.toUInt();
-        txChannelConfig.videoFormat  = CNTV2DemoCommon::GetVideoFormatFromString(transmitVideo.mVideoFormat.toStdString(), allowedVideoFormatTypes);
-        txChannelConfig.videoSamples = VPIDSampling_YUV_422;
+        txChannelConfig.localPort[0]    = transmitVideo2110.txVideoCh[i].localPort[0];
+        txChannelConfig.remoteIP[0]     = transmitVideo2110.txVideoCh[i].remoteIP[0];
+        txChannelConfig.remotePort[0]   = transmitVideo2110.txVideoCh[i].remotePort[0];
+        txChannelConfig.localPort[1]    = transmitVideo2110.txVideoCh[i].localPort[1];
+        txChannelConfig.remoteIP[1]     = transmitVideo2110.txVideoCh[i].remoteIP[1];
+        txChannelConfig.remotePort[1]   = transmitVideo2110.txVideoCh[i].remotePort[1];
 
-        config2110.SetTxStreamConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxStreamEnable(channel, stream, getEnable(transmitVideo.mSfp1Enable), getEnable(transmitVideo.mSfp2Enable));
+        txChannelConfig.payloadType     = transmitVideo2110.txVideoCh[i].payload;
+        txChannelConfig.ssrc            = transmitVideo2110.txVideoCh[i].ssrc;
+        txChannelConfig.ttl             = transmitVideo2110.txVideoCh[i].ttl;
+        txChannelConfig.videoFormat     = transmitVideo2110.txVideoCh[i].videoFormat;
+        txChannelConfig.videoSamples    = VPIDSampling_YUV_422;
+
+        rv = config2110.SetTxStreamConfiguration(transmitVideo2110.txVideoCh[i].channel,
+                                                 NTV2_VIDEO_STREAM,
+                                                 txChannelConfig);
+        if (!rv)
+        {
+            cerr << "SetTxStreamConfiguration Video: FAILED: " << config2110.getLastError() << endl;
+            return false;
+        }
+
+        if (transmitVideo2110.txVideoCh[i].enable)
+        {
+            rv = config2110.SetTxStreamEnable(transmitVideo2110.txVideoCh[i].channel,
+                                              NTV2_VIDEO_STREAM,
+                                              transmitVideo2110.txVideoCh[i].sfpEnable[0],
+                                              transmitVideo2110.txVideoCh[i].sfpEnable[1]);
+            if (!rv)
+            {
+                cerr << "SetTxStreamEnable Audio: FAILED: " << config2110.getLastError() << endl;
+                return false;
+            }
+        }
     }
 
-    cerr << "## transmitAudioIter" << endl;
-    QListIterator<TransmitStructAudio2110> transmitAudioIter(mKonaIP2110Params.mTransmitAudio2110Channels);
+    // fetch parsed transmit audio struct
+    TransmitAudioData2110 transmitAudio2110 = parse2110.m_transmitAudio2110;
 
-    while (transmitVideoIter.hasNext())
+    for (uint32_t i = 0; i < transmitAudio2110.numTxAudioChannels; i++)
     {
-        cerr << "## transmitAudioIter did" << endl;
+        cerr << "## transmitAudio did" << endl;
 
-        TransmitStructAudio2110 transmitAudio = transmitAudioIter.next();
-
+        bool rv;
         txChannelConfig.init();
-        NTV2Channel channel = getChannel(transmitAudio.mChannelDesignator);
 
-        NTV2Stream stream = NTV2_AUDIO1_STREAM;
-        if (transmitAudio.mStream == "audio1")
+        txChannelConfig.localPort[0]    = transmitAudio2110.txAudioCh[i].localPort[0];
+        txChannelConfig.remoteIP[0]     = transmitAudio2110.txAudioCh[i].remoteIP[0];
+        txChannelConfig.remotePort[0]   = transmitAudio2110.txAudioCh[i].remotePort[0];
+        txChannelConfig.localPort[1]    = transmitAudio2110.txAudioCh[i].localPort[1];
+        txChannelConfig.remoteIP[1]     = transmitAudio2110.txAudioCh[i].remoteIP[1];
+        txChannelConfig.remotePort[1]   = transmitAudio2110.txAudioCh[i].remotePort[1];
+
+        txChannelConfig.payloadType     = transmitAudio2110.txAudioCh[i].payload;
+        txChannelConfig.ssrc            = transmitAudio2110.txAudioCh[i].ssrc;
+        txChannelConfig.ttl             = transmitAudio2110.txAudioCh[i].ttl;
+
+        txChannelConfig.numAudioChannels    = transmitAudio2110.txAudioCh[i].numAudioChannels;
+        txChannelConfig.firstAudioChannel   = transmitAudio2110.txAudioCh[i].firstAudioChannel;
+        txChannelConfig.audioPacketInterval = transmitAudio2110.txAudioCh[i].audioPktInterval;
+
+        rv = config2110.SetTxStreamConfiguration(transmitAudio2110.txAudioCh[i].channel,
+                                                 transmitAudio2110.txAudioCh[i].stream,
+                                                 txChannelConfig);
+        if (!rv)
         {
-            stream = NTV2_AUDIO1_STREAM;
-        }
-        else if (transmitAudio.mStream == "audio2")
-        {
-            stream = NTV2_AUDIO2_STREAM;
-        }
-        else if (transmitAudio.mStream == "audio3")
-        {
-            stream = NTV2_AUDIO3_STREAM;
-        }
-        else if (transmitAudio.mStream == "audio4")
-        {
-            stream = NTV2_AUDIO4_STREAM;
-        }
-        else
-        {
-            cout << "Error: Tx stream <" << transmitAudio.mStream.toStdString() << "> is invalid" << endl;
+            cerr << "SetTxStreamConfiguration Audio: FAILED: " << config2110.getLastError() << endl;
+            return false;
         }
 
-        txChannelConfig.localPort[0] = transmitAudio.mSfp1LocalPort.toUInt();
-        txChannelConfig.remoteIP[0]  = transmitAudio.mSfp1RemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[0]= transmitAudio.mSfp1RemotePort.toUInt();
-        txChannelConfig.localPort[1] = transmitAudio.mSfp2LocalPort.toUInt();
-        txChannelConfig.remoteIP[1]  = transmitAudio.mSfp2RemoteIPAddress.toStdString();
-        txChannelConfig.remotePort[1]= transmitAudio.mSfp2RemotePort.toUInt();
-        txChannelConfig.payloadType  = transmitAudio.mPayload.toUInt();
-        txChannelConfig.ssrc         = transmitAudio.mSSRC.toUInt();
-        txChannelConfig.ttl          = transmitAudio.mTTL.toUInt();
-
-        txChannelConfig.numAudioChannels    = transmitAudio.mNumAudioChannels.toUInt();
-        txChannelConfig.firstAudioChannel   = transmitAudio.mFirstAudioChannel.toUInt();
-        txChannelConfig.audioPacketInterval = (eNTV2PacketInterval)transmitAudio.mAudioPktInterval.toUInt();
-
-        config2110.SetTxStreamConfiguration (channel, stream, txChannelConfig);
-        config2110.SetTxStreamEnable(channel, stream, getEnable(transmitAudio.mSfp1Enable), getEnable(transmitAudio.mSfp2Enable));
+        if (transmitAudio2110.txAudioCh[i].enable)
+        {
+            rv = config2110.SetTxStreamEnable(transmitAudio2110.txAudioCh[i].channel,
+                                              transmitAudio2110.txAudioCh[i].stream,
+                                              transmitAudio2110.txAudioCh[i].sfpEnable[0],
+                                              transmitAudio2110.txAudioCh[i].sfpEnable[1]);
+            if (!rv)
+            {
+                cerr << "SetTxStreamEnable Audio: FAILED: " << config2110.getLastError() << endl;
+                return false;
+            }
+        }
     }
 
     return true;
-#endif
 }
 
 NTV2Channel getChannel(QString channelDesignator)

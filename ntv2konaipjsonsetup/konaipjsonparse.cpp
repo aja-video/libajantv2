@@ -6,6 +6,7 @@
 //	Proprietary and Confidential information.  All rights reserved.
 //-------------------------------------------------------------------------------------------
 #include "konaipjsonparse.h"
+#include "ntv2democommon.h"
 
 const int kStrMax			= IP_STRSIZE-1;
 
@@ -405,6 +406,9 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, Re
         if (m_verbose) std::cout << " ssrc " << rVideo2110.rxVideoCh[i].ssrc << std::endl;
         rVideo2110.rxVideoCh[i].payload         = vObj["payload"].toInt();
         if (m_verbose) std::cout << " payload " << rVideo2110.rxVideoCh[i].payload << std::endl;
+        str = vObj["videoFormat"].toString().toStdString();
+        if (m_verbose) std::cout << " videoFormat " << str.c_str() << std::endl;
+        rVideo2110.rxVideoCh[i].videoFormat = CNTV2DemoCommon::GetVideoFormatFromString(str, VIDEO_FORMATS_ALL);
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].enable = GetEnable(str);
