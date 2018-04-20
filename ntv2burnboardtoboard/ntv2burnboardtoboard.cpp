@@ -630,7 +630,7 @@ void NTV2BurnBoardToBoard::CaptureThreadStatic (AJAThread * pThread, void * pCon
 void NTV2BurnBoardToBoard::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;		//	A/C input transfer info
-	Bouncer					yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Used to "bounce" timecode up & down in raster
+	Bouncer<UWord>			yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Used to "bounce" timecode up & down in raster
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mInDevice.AutoCirculateStop (mInputChannel);
