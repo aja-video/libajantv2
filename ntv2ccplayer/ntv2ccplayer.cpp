@@ -1279,7 +1279,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	ULWord						currentSample		(0);
 	NTV2AudioSystem				audioSystem			(NTV2_AUDIOSYSTEM_INVALID);
 	ULWord						numAudioChannels	(0);
-	Bouncer						colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
+	Bouncer<UWord>				colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
 	NTV2_POINTER				pAudioBuffer		(0);
 	AUTOCIRCULATE_STATUS		acStatus;
 	AUTOCIRCULATE_TRANSFER		xferInfo;
