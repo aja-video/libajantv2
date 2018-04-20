@@ -604,6 +604,9 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         if (m_verbose) std::cout << " ssrc " << tVideo2110.txVideoCh[i].ssrc << std::endl;
         tVideo2110.txVideoCh[i].payload         = vObj["payload"].toInt();
         if (m_verbose) std::cout << " payload " << tVideo2110.txVideoCh[i].payload << std::endl;
+        str = vObj["videoFormat"].toString().toStdString();
+        if (m_verbose) std::cout << " videoFormat " << str.c_str() << std::endl;
+        tVideo2110.txVideoCh[i].videoFormat = CNTV2DemoCommon::GetVideoFormatFromString(str, VIDEO_FORMATS_ALL);
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].enable = GetEnable(str);
