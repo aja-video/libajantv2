@@ -277,66 +277,6 @@ bool  CNTV2Config2110::DisableNetworkInterface(const eSFP sfp)
     return CNTV2MBController::DisableNetworkInterface(sfp);
 }
 
-bool CNTV2Config2110::DisableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream)
-{
-    if (GetSFPActive(sfp) == false)
-    {
-        mIpErrorCode = NTV2IpErrSFP1NotConfigured;
-        return false;
-    }
-
-    // disable IGMP subscription
-    bool disableIGMP;
-    GetIGMPDisable(sfp, disableIGMP);
-    if (!disableIGMP)
-    {
-        EnableIGMPGroup(sfp, channel, stream, false);
-    }
-
-    DisableDecapsulatorStream(sfp, channel, stream);
-    DisableDepacketizerStream(channel, stream);
-    return true;
-}
-
-bool CNTV2Config2110::EnableRxStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig)
-{
-    if (GetSFPActive(sfp) == false)
-    {
-        mIpErrorCode = NTV2IpErrSFP1NotConfigured;
-        return false;
-    }
-
-    // make IGMP subsciption if needed
-    uint32_t destIp = inet_addr(rxConfig.destIP.c_str());
-    destIp = NTV2EndianSwap32(destIp);
-
-    uint32_t srcIp = inet_addr(rxConfig.sourceIP.c_str());
-    srcIp = NTV2EndianSwap32(srcIp);
-
-    uint8_t ip0 = (destIp & 0xff000000)>> 24;
-    if (ip0 >= 224 && ip0 <= 239)
-    {
-        // is multicast
-        SetIGMPGroup(sfp, channel, stream, destIp, srcIp, true);
-    }
-    else
-    {
-        UnsetIGMPGroup(sfp, channel, stream);
-    }
-
-    DisableDecapsulatorStream(sfp, channel, stream);
-    DisableDepacketizerStream(channel,stream);
-
-    ResetDepacketizerStream(channel,stream);
-    SetupDepacketizerStream(channel,stream,rxConfig);
-    SetupDecapsulatorStream(sfp, channel, stream, rxConfig);
-
-    EnableDepacketizerStream(channel, stream);
-    EnableDecapsulatorStream(sfp, channel, stream);
-
-    return true;
-}
-
 bool CNTV2Config2110::SetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const rx_2110Config & rxConfig)
 {
     if (GetSFPActive(sfp) == false)
