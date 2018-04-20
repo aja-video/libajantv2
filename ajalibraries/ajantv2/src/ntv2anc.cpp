@@ -57,7 +57,7 @@ const static ANCInserterInitParams inserterInitParamsTable[NTV2_NUM_STANDARDS] =
 	/*NTV2_STANDARD_4096x2160p*/	{	42,		0,		2048,	2640,	1125,	0,		0	},
 	/*NTV2_STANDARD_3840HFR*/		{	42,		0,		1920,	2640,	1125,	0,		0	},
 	/*NTV2_STANDARD_4096HFR*/		{	42,		0,		2048,	2640,	1125,	0,		0	}
-}
+};
 
 
 
@@ -118,7 +118,7 @@ const static ANCExtractorInitParams extractorInitParamsTable[NTV2_NUM_STANDARDS]
 	/*NTV2_STANDARD_4096x2160p*/	{	1122,	1125,	0,		0,		1125,	0,		0,		0,	0,		0,			0,			0,	0,	0x07800000	},
 	/*NTV2_STANDARD_3840HFR*/		{	1122,	1125,	0,		0,		1125,	0,		0,		0,	0,		0,			0,			0,	0,	0x07800000	},
 	/*NTV2_STANDARD_4096HFR*/		{	1122,	1125,	0,		0,		1125,	0,		0,		0,	0,		0,			0,			0,	0,	0x07800000	},
-}
+};
 
 bool CNTV2Card::AncExtractInit(NTV2Channel channel, NTV2VideoFormat videoFormat)
 {
