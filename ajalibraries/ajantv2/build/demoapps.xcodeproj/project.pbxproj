@@ -33,6 +33,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3AE8038E208A60D700FCC91B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
 		A401623C1EBA8095001B8830 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		A401623D1EBA8095001B8830 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		A401623E1EBA80A4001B8830 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
@@ -254,6 +255,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3AE8038D208A60D700FCC91B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A40162351EBA804E001B8830 /* ntv2hdrsetup */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2hdrsetup; sourceTree = BUILT_PRODUCTS_DIR; };
 		A40162431EBA835B001B8830 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B439717516F2BB7900A53B64 /* ntv2outputtestpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2outputtestpattern.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2outputtestpattern/ntv2outputtestpattern.cpp; sourceTree = SOURCE_ROOT; };
@@ -326,6 +328,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AE8038E208A60D700FCC91B /* Foundation.framework in Frameworks */,
 				B43C7CBC17259FE50030A94E /* CoreFoundation.framework in Frameworks */,
 				B43C7CBD17259FF50030A94E /* IOKit.framework in Frameworks */,
 				B43C7CBE1725A0030030A94E /* CoreServices.framework in Frameworks */,
@@ -596,6 +599,7 @@
 		B4A7FC431679155A001D4AA8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3AE8038D208A60D700FCC91B /* Foundation.framework */,
 				B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */,
 				B4A7FD7B167915A7001D4AA8 /* IOKit.framework */,
 				B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */,
@@ -1320,7 +1324,7 @@
 					../..,
 				);
 				LIBRARY_SEARCH_PATHS = ../../../lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
 					"-lajantv2d",
@@ -1364,7 +1368,7 @@
 					../..,
 				);
 				LIBRARY_SEARCH_PATHS = ../../../lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = build;
 				OTHER_LDFLAGS = (
 					"-lajantv2",
