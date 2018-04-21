@@ -109,6 +109,9 @@
 	Clients are free to parse the data themselves, or call AJAAncillaryList::SetFromIPAncData to transform the buffer contents
 	into an \c AJAAncillaryList containing one \c AJAAncillaryData instance per ancillary data packet.
 
+	@note	In <b>Playout</b> mode, the KonaIP and IoIP 2110 firmware expect the total RTP packet bytecount to appear in the
+			<b>Sequence Number</b> field in the first longword of the RTP packet header.
+
 	@section	ancplayingwithac	Playing Anc Packets Using AutoCirculate
 
 	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide
