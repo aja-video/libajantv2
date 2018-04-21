@@ -187,16 +187,20 @@
 	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget will not access SDRAM.
 		Call CNTV2Card::IsChannelEnabled to determine if a Frame Store is enabled or not.
 		Calling CNTV2Card::EnableChannel or CNTV2Card::DisableChannel will change it.
+		Note that AutoCirculate sets this for you, but won’t “un-set” it.
 	-	<b>Mode</b> — This correlates to the NTV2Mode enumeration in the SDK.
 		In \c NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
 		in \c NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
 		to determine the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
+		Note that AutoCirculate sets this for you, but doesn’t “un-set” it.
 	-	<b>Frame Buffer Format</b> — This coincides with the NTV2FrameBufferFormat enumeration
 		in the SDK. Call CNTV2Card::GetFrameBufferFormat to determine the current format;
 		calling CNTV2Card::SetFrameBufferFormat will change it. See \ref devicefbformats for details.
+		AutoCirculate users must set this.
 	-	<b>Video Format</b> — This correlates to the NTV2VideoFormat enumeration in the SDK,
 		and implies a Frame Geometry, Video Standard and Frame Rate. Call CNTV2Card::GetVideoFormat
 		to determine the current format; calling CNTV2Card::SetVideoFormat will set it.
+		AutoCirculate users must set this.
 	-	<b>Input Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will be continually written with video frame data <b>if</b>…
 		-	the Frame Store is Enabled;
@@ -205,6 +209,7 @@
 	
 		Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		Call CNTV2Card::SetInputFrame to change it.
+		Note that AutoCirculate manages this for you.
 	-	<b>Output Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will continuously be read from <b>if</b>…
 		-	the Frame Store is Enabled;
@@ -214,6 +219,7 @@
 		
 		Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
 		Call CNTV2Card::SetOutputFrame to change it.
+		Note that AutoCirculate manages this for you.
 
 	Some AJA devices have only one Frame Store, so that device is limited to Capturing or Playing
 	one single stream of video at a time.
