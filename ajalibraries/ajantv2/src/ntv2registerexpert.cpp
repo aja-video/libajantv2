@@ -149,14 +149,16 @@ public:
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegClass (kRegStatus, kRegClass_Timecode);
 		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
 		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
-		DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
-		
+			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);
+			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
+		DefineRegister (kRegFS1ReferenceSelect,	"", mDecodeFS1RefSelectReg,		READWRITE,	kRegClass_Input,	kRegClass_Timecode, kRegClass_NULL);
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
@@ -237,11 +239,11 @@ private:
 		DefineRegister	(kRegRP188InOut7Bits32_63_2,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel7,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut8Bits0_31_2,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel8,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut8Bits32_63_2,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel8,	kRegClass_NULL);
-		DefineRegister	(kRegLTCStatusControl,			"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister	(kRegLTCStatusControl,			"",	mLTCStatusControlDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister	(kRegLTC2EmbeddedBits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
 		DefineRegister	(kRegLTC2EmbeddedBits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegLTC2AnalogBits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegLTC2AnalogBits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel2,	kRegClass_NULL);
+		DefineRegister	(kRegLTC2AnalogBits0_31,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister	(kRegLTC2AnalogBits32_63,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Timecode,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3DBB,			"",	mRP188InOutDBBRegDecoder,	READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3Bits0_31,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
 		DefineRegister	(kRegRP188InOut3Bits32_63,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Timecode,	kRegClass_Channel3,	kRegClass_NULL);
@@ -1550,6 +1552,8 @@ private:
 					<< "Uart 1 Tx Interrupt: "		<< ActInact(inRegValue & BIT(24))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID) > 1)
 				oss	<< "Uart 2 Tx Interrupt: "		<< ActInact(inRegValue & BIT(26))					<< endl;
+			if (::NTV2DeviceGetNumLTCInputs(inDeviceID))
+				oss	<< "LTC In 1 Present: "			<< YesNo(inRegValue & BIT(17))						<< endl;
 			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
 				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
 				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
@@ -1719,6 +1723,47 @@ private:
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
 	}	mDecodeSDIInputStatusReg;
+
+	struct DecodeFS1RefSelectReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;	(void) inRegNum;	//	kRegFS1ReferenceSelect
+			ostringstream	oss;
+			oss		<< "BNC Select(LHi): "				<< (inRegValue & 0x00000010 ? "LTCIn1" : "Ref")		<< endl
+					<< "Ref BNC (Corvid): "				<< EnabDisab(inRegValue & 0x00000020)				<< endl
+					<< "LTC Present (also Reg 21): "	<< YesNo(inRegValue & 0x00000040)					<< endl
+					<< "LTC Emb Out Enable: "			<< YesNo(inRegValue & 0x00000080)					<< endl
+					<< "LTC Emb In Enable: "			<< YesNo(inRegValue & 0x00000100)					<< endl
+					<< "LTC Emb In Received: "			<< YesNo(inRegValue & 0x00000200)					<< endl
+					<< "LTC BNC Out Source: "			<< (inRegValue & 0x00000400 ? "E-E" : "Reg112/113");
+			return oss.str();
+		}
+	}	mDecodeFS1RefSelectReg;
+
+	struct DecodeLTCStatusControlReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;	(void) inRegNum;	//	kRegLTCStatusControl
+			const uint16_t	LTC1InTimingSelect	((inRegValue >> 1) & 0x0000007);
+			const uint16_t	LTC2InTimingSelect	((inRegValue >> 9) & 0x0000007);
+			const uint16_t	LTC1OutTimingSelect	((inRegValue >> 16) & 0x0000007);
+			const uint16_t	LTC2OutTimingSelect	((inRegValue >> 20) & 0x0000007);
+			ostringstream	oss;
+			oss		<< "LTC 1 Input Present: "				<< YesNo(inRegValue & 0x00000001)												<< endl
+					<< "LTC 1 Input FB Timing Select): "	<< xHEX0N(LTC1InTimingSelect,2) << " (" << DEC(LTC1InTimingSelect) << ")"		<< endl
+					<< "LTC 1 Bypass: "						<< EnabDisab(inRegValue & 0x00000010)											<< endl
+					<< "LTC 1 Bypass Select: "				<< DEC(ULWord((inRegValue >> 5) & 0x00000001))									<< endl
+					<< "LTC 2 Input Present: "				<< YesNo(inRegValue & 0x00000100)												<< endl
+					<< "LTC 2 Input FB Timing Select): "	<< xHEX0N(LTC2InTimingSelect,2) << " (" << DEC(LTC2InTimingSelect) << ")"		<< endl
+					<< "LTC 2 Bypass: "						<< EnabDisab(inRegValue & 0x00001000)											<< endl
+					<< "LTC 2 Bypass Select: "				<< DEC(ULWord((inRegValue >> 13) & 0x00000001))									<< endl
+					<< "LTC 1 Output FB Timing Select): "	<< xHEX0N(LTC1OutTimingSelect,2) << " (" << DEC(LTC1OutTimingSelect) << ")"		<< endl
+					<< "LTC 2 Output FB Timing Select): "	<< xHEX0N(LTC2OutTimingSelect,2) << " (" << DEC(LTC2OutTimingSelect) << ")";
+			return oss.str();
+		}
+	}	mLTCStatusControlDecoder;
 
 	struct DecodeAudDetectReg : public Decoder
 	{
@@ -2438,13 +2483,14 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
-			oss	<< "Limiting: "		<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-				<< "Limiting: "		<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
-				<< "FG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
-				<< "BG Matte: "		<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
-				<< "FG Control: "	<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "BG Control: "	<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "Input Sync: "	<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+			oss	<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
+				<< "Limiting: "			<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+				<< "VANC Pass-Thru: "	<< ((inRegValue & BIT(13)) ? "Background" : "Foreground")														<< endl
+				<< "FG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
+				<< "BG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
+				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "Input Sync: "		<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
 				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}

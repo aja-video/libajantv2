@@ -1882,44 +1882,66 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 	if(enable && isQuad)
 	{
 		//This should only be set high if we are already in a 4k/uhd format
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12);
+			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);
 			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
-		else
+		else if (inChannel < NTV2_CHANNEL7)
 		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56);
+			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+		}
+		else
+		{
 			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
 			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 	else if (isQuad)
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
 			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
-		else
+		else if (inChannel < NTV2_CHANNEL7)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
+			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
+		}
+		else
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 	else
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (inChannel < NTV2_CHANNEL3)
 		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+		}
+		if (inChannel < NTV2_CHANNEL5)
+		{
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+		}
+		if (inChannel < NTV2_CHANNEL7)
+		{
+			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 		}
 		else
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 		return (enable ? false : true);
@@ -1940,10 +1962,14 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	// Return false (0) if this mode is disabled
 	ULWord	returnVal	(0);
 	bool	readOkay	(false);
-	if (inChannel < NTV2_CHANNEL5)
+	if (inChannel < NTV2_CHANNEL3)
 		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB12, kRegShift425FB12);
+	if (inChannel < NTV2_CHANNEL5)
+		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB34, kRegShift425FB34);
+	if (inChannel < NTV2_CHANNEL7)
+		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB56, kRegShift425FB56);
 	else
-		readOkay = ReadRegister(kRegGlobalControl2, &returnVal, kRegMask425FB56, kRegShift425FB56);
+		readOkay = ReadRegister(kRegGlobalControl2, &returnVal, kRegMask425FB78, kRegShift425FB78);
 	outIsEnabled = readOkay ? returnVal : 0;
 	return readOkay;
 }
@@ -8505,13 +8531,24 @@ bool CNTV2Card::GetLTCEmbeddedOutEnable (bool & outValue)
 
 bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data)
 {
-	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs (_boardID))
+	NTV2_RP188	result;
+	if (!ReadAnalogLTCInput(inLTCInput, result))
+		return false;
+	outRP188Data = result;
+	return true;
+}
+
+
+bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data)
+{
+	outRP188Data.Set();
+	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs(_boardID))
 		return false;
 
-	ULWord	regLow	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
+	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
 	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
-	outRP188Data.DBB = 0;
-	return regLow && regHi && CNTV2DriverInterface::ReadRegister (regLow, outRP188Data.Low) && CNTV2DriverInterface::ReadRegister (regHi, outRP188Data.High);
+	outRP188Data.fDBB = 0;
+	return regLo  &&  regHi  &&  CNTV2DriverInterface::ReadRegister(regLo, outRP188Data.fLo)  &&  CNTV2DriverInterface::ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
@@ -8545,11 +8582,18 @@ bool CNTV2Card::SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Ch
 
 bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data)
 {
+	const NTV2_RP188	rp188data (inRP188Data);
+	return WriteAnalogLTCOutput (inLTCOutput, rp188data);
+}
+
+
+bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data)
+{
 	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs (_boardID))
 		return false;
 
-	return WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits0_31  : kRegLTC2AnalogBits0_31,  inRP188Data.Low)
-			&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.High);
+	return WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits0_31  : kRegLTC2AnalogBits0_31,  inRP188Data.fLo)
+			&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.fHi);
 }
 
 

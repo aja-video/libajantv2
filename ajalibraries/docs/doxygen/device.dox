@@ -1,0 +1,42 @@
+/**
+	@page		ntv2devices		NTV2 Devices
+
+	@section	ntv2hwcorvid	Corvid OEM Boards
+
+	-	\ref corvid1corvid3g
+	-	\ref corvid22
+	-	\ref corvid24
+	-	\ref corvid44
+	-	\ref corvid88
+	-	\ref corvidhbr
+	-	\ref corvidhevc
+
+	@section	ntv2hwio		Io Thunderbolt and PCMCIA Devices
+
+	-	\ref io4kplus
+	-	\ref io4kquad and \ref io4kufc
+	-	\ref ioexpress
+	-	\ref ioip
+	-	\ref ioxt
+	-	\ref ttap
+
+	@section	ntv2hwkona		Kona Boards
+
+	-	\ref kona1
+	-	\ref kona3gquad and \ref kona3gufc
+	-	\ref kona4quad and \ref kona4ufc
+	-	\ref konahdmi
+	-	\ref konaip
+	-	\ref konalheplus
+	-	\ref konalhi
+
+	@section	ntv2hwaccessories	Breakout Boxes and Cables
+
+	-	\ref aja101884
+	-	\ref aja102953
+	-	\ref aja103226
+	-	\ref ajak3gbox
+	-	\ref ajaklboxlh
+	-	\ref ajaklhibox
+
+**/

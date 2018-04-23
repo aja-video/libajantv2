@@ -1,5 +1,5 @@
 /**
-	@file		ancillarydata_framestatusinfo5251.cpp
+	@file		ancillarydata_hdr_sdr.cpp
 	@brief		Implements the AJAAncillaryData_HDR_SDR class.
 	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
@@ -56,7 +56,7 @@ void AJAAncillaryData_HDR_SDR::Init (void)
 	m_coding       = AJAAncillaryDataCoding_Digital;
 	m_DID          = AJAAncillaryData_HDR_SDR_DID;
 	m_SID          = AJAAncillaryData_HDR_SDR_SID;
-	m_location.Set(AJAAncillaryDataLink_A, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC, 16);
+	m_location.Set(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 16);
 	uint8_t payload[29] = {0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	SetPayloadData(payload, 29);
 }
@@ -84,7 +84,7 @@ AJAAncillaryData_HDR_SDR & AJAAncillaryData_HDR_SDR::operator = (const AJAAncill
 AJAStatus AJAAncillaryData_HDR_SDR::ParsePayloadData (void)
 {
 	// The size is specific to Canon
-	if ((m_pPayload == NULL_PTR) || (m_DC != AJAAncillaryData_HDR_SDR_PayloadSize))
+	if (GetDC() != AJAAncillaryData_HDR_SDR_PayloadSize)
 	{
 		// Load default values
 		Init();
@@ -94,12 +94,6 @@ AJAStatus AJAAncillaryData_HDR_SDR::ParsePayloadData (void)
 
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus AJAAncillaryData_HDR_SDR::GeneratePayloadData (void)
-{
-	return AJA_STATUS_FAIL;
 }
 
 

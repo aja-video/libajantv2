@@ -96,19 +96,6 @@ public:
 	static uint8_t					AddOddParity (const uint8_t inValue);
 
 	/**
-		@brief		Parses out (interprets) the "local" ancillary data from my payload data.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus				ParsePayloadData (void);
-
-	/**
-		@brief		Generate the payload data from the "local" ancillary data.
-		@note		This method is overridden for the specific Anc data type.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus				GeneratePayloadData (void);
-
-	/**
 		@brief		Streams a human-readable representation of me to the given output stream.
 		@param		inOutStream		Specifies the output stream.
 		@param[in]	inDetailed		Specify 'true' for a detailed representation;  otherwise use 'false' for a brief one.

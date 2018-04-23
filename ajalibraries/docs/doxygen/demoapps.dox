@@ -1,5 +1,5 @@
 /**
-	@page	demoapps		The Demonstration Applications
+	@page	demoapps		Demonstration Applications
 
 	The SDK includes a number of demonstration applications that are designed to help new users quickly understand how to use the NTV2 SDK
 	to solve real-world problems using AJA devices.
@@ -11,12 +11,12 @@
 	based on the Qt cross-platform application framework. For more information about Qt, please visit http://www.qt.io/   The Qt-based demos
 	should work with Qt version 5.4 or later.
 
-	All of the demos are "future ready" and will build and run with the "NTV2_DEPRECATE" macro defined.
+	All of the demos are "future ready" and will build and run with the "NTV2_DEPRECATE" macro defined (see \ref gs-deprecatemacro).
 
 	@note	Demos that use third-party libraries to enable direct DMA video transfers between AJA devices and third-party graphics cards
 			(e.g., to exploit the GPU) are not supported on MacOS.
 
-	@section	demobuildingapps	Building the Demo Apps
+	@par	Building the Demo Apps
 
 	-#	Unzip the downloaded SDK.
 	-#	Look inside the resulting folder that appears after unzipping.
@@ -37,10 +37,9 @@
 
 
 
-	@subsection	demos			The Demo Apps, Simple to Complex
+	@par	The Demo Apps, Simple to Complex
 	-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
 	-	\ref	ntv2enumerateboards
-	-	\ref	ntv2konaipjsonsetup  <i>(KONA IP only)</i>
 	-	\ref	ntv2outputtestpattern
 	-	\ref	ntv2capture
 	-	\ref	ntv2player
@@ -52,18 +51,20 @@
 	-	\ref	ntv2ccgrabber
 	-	\ref	ntv2ccplayer
 	-	\ref	ntv2llburn
-	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
+	-	\ref	ntv2konaipjsonsetup  <i>(\ref konaip and \ref ioip only)</i>
+	-	\ref	ntv2konaipj2ksetup  <i>(\ref konaip and \ref ioip only)</i>
+	-	\ref	ntv2encodehevc  <i>(\ref corvidhevc only)</i>
 	-	\ref	ntv2qtpreview
 	-	\ref	ntv2qtmultiinput
 
-	@subsection	demoscrvhevc	Demo Apps, Alphabetical
+	@par	The Demo Apps, Alphabetical
 	-	\ref	ntv2burn
 	-	\ref	ntv2burn4kquadrant
 	-	\ref	ntv2capture
 	-	\ref	ntv2capture4k
 	-	\ref	ntv2ccgrabber
 	-	\ref	ntv2ccplayer
-	-	\ref	ntv2encodehevc  <i>(Corvid HEVC only)</i>
+	-	\ref	ntv2encodehevc  <i>(\ref corvidhevc only)</i>
 	-	\ref	ntv2enumerateboards
 	-	\ref	ntv2fieldburn
 	-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
@@ -74,4 +75,5 @@
 	-	\ref	ntv2player4k
 	-	\ref	ntv2qtmultiinput
 	-	\ref	ntv2qtpreview
+
 **/

@@ -1,5 +1,9 @@
 /**
-	@page	aja102953		102953 Breakout Cable
+	@page			ntv2devices
+
+	@section		ntv2hwaccessories
+
+	@subsection		aja102953		102953 Breakout Cable
 
 	The AJA 102953 Breakout Cable is designed to connect to the \ref corvid22 and \ref corvid24 ingest/playout boards.
 

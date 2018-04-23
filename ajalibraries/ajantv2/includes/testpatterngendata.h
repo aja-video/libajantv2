@@ -1,5 +1,5 @@
 /**
-	@file		testpatterngendata.h
+	@file		ajantv2/includes/testpatterngendata.h
 	@brief		The NTV2 test pattern data.
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 	@note		Starting in SDK 12.4, the test pattern data moved from here into testpatterngen.cpp.

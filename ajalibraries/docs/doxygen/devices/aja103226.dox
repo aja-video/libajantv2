@@ -1,5 +1,9 @@
 /**
-	@page	aja103226		103226 Breakout Cable
+	@page			ntv2devices
+
+	@section		ntv2hwaccessories
+
+	@subsection		aja103226		103226 Breakout Cable
 
 	The AJA 103226 Breakout Cable is designed to connect to the \ref kona3gquad / \ref kona3gufc and \ref kona4quad and \ref kona4ufc ingest/playout boards.
 

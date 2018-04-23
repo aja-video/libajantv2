@@ -1,7 +1,7 @@
 /**
-@page	usinghevcmon		The HEVC Monitor Tool
+@page	toolsandutilities
 
-@section	hevcmon-about	About HEVC Monitor
+@section	hevcmon-about	"HEVC Monitor"
 
 The NTV2 <b>HEVC Monitor</b> is a development tool that provides setup, control and state information for the \ref corvidhevc codec board,
 which is a standard NTV2 video video ingest board coupled with an HEVC hardware codec.
@@ -24,7 +24,7 @@ The "Stream" tab monitors the codec DMA interfaces and maintains statistics for 
 The "Debug" tab provides driver and firmware revision information and can enable/disable driver debug output to the system log file.
 
 
-@section	hevcmon-tab-control		Control Tab
+@subsection	hevcmon-tab-control		Control Tab
 
 The HEVC monitor control tab provides access to the codec command interface and encoding setup parameters.
 
@@ -55,7 +55,7 @@ The file is formatted as simple 32-bit address/value pairs that can be viewed wi
 text file comparison applications.  This can be useful in debugging encoder settings.
 There is also a parameter peek/poke interface to allow examining and changing individual parameter registers.
 
-@section	hevcmon-tab-stream	Stream Tab
+@subsection	hevcmon-tab-stream	Stream Tab
 
 The <b>Stream</b> tab monitors the codec DMA interfaces and maintains statistics for the driver queues that stream data.
 
@@ -101,7 +101,7 @@ The DMA duration of the HEVC stream does not reflect the actual hardware DMA tim
 There is a <b>Reset Statistics</b> button that can be used to restart the statistics tracking at any time. 
 
 
-@section	hevcmon-tab-debug	Debug Tab
+@subsection	hevcmon-tab-debug	Debug Tab
 
 The <b>Debug</b> tab provides driver and firmware revision information and can enable/disable driver debug output to the system log file.
 

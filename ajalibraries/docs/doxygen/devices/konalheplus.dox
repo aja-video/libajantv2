@@ -1,5 +1,9 @@
 /**
-	@page	konalheplus		KONA LHe Plus
+	@page			ntv2devices
+
+	@section		ntv2hwkona
+
+	@subsection		konalheplus		KONA LHe Plus
 
 	This page describes the KONA LHe Plus video capture/playout board.
 

@@ -1,5 +1,5 @@
 /**
-	@file		testpatterngen.h
+	@file		ajantv2/includes/testpatterngen.h
 	@brief		Declares the AJATestPatternGenEx class.
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/

@@ -1,0 +1,73 @@
+/**
+	@page			ntv2devices
+
+	@section		ntv2hwkona
+
+	@subsection		konahdmi		KONA HDMI
+
+	This page describes the KONA HDMI capture board.
+
+	@image	html	konahdmi.png
+
+	The KONA HDMI has four input-only HDMI connectors.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xEB24</b>
+	-	Gen 2 x 8 PCIe
+	-	2 DMA engines
+	-	MSI interrupt delivery supported
+
+	@par	Inputs & Outputs
+
+	-	4 x HDMI 2.0 inputs
+
+	@par	Frame Buffer
+
+	-	2 GB SDRAM
+	-	256 x 8MB frames
+	-	128 x 16MB frames for 2K (1080x2048) and RGB-16+
+	-	64 x 32MB frames for 4K RGB
+
+	@par	Audio
+
+	-	4 subsystems
+	-	Maximum number of audio channels, per-subsystem:
+		-	Quad-stream mode:
+			-	32 channels (max.)
+		-	Single-stream mode:
+			-	8 channels (max.)
+	-	First subsystem's buffer memory starts 8MB from end of memory
+
+	@par	Video Formats
+
+	-	Supports all standard video formats, plus 2K, 4K and UHD formats.
+	-	Single-stream mode:
+		-	4K/UHD with HFR support up to 60p 4:2:2 10-bit
+		-	30/36 bits per pixel, RGB or YUV, 6 Gbps per color component
+	-	Quad-stream mode:
+		-	SD/HD/2K with HFR support up to 60p 4:2:2 10-bit
+		-	30/36 bits per pixel, RGB or YUV, 2.25 Gbps per color component
+
+	@note	Hardware color-space converters (CSCs) can convert input YUV to RGB when using RGB buffer formats.
+
+	@par	Ancillary Data
+
+	-	HDMI HDR
+
+	@par	Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/201/25>
+
+	@par	Physical
+
+	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Weight: 0.7 lb (0.4 kg)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+
+**/

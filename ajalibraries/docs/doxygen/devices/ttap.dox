@@ -1,5 +1,9 @@
 /**
-	@page	ttap		T-Tap
+	@page			ntv2devices
+
+	@section		ntv2hwio
+
+	@subsection		ttap		T-Tap
 
 	This page describes the T-Tapvideo playout device.
 

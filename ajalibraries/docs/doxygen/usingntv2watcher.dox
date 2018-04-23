@@ -1,16 +1,18 @@
 /**
-@page	usingntv2watcher		The "NTV2 Watcher" Tool
+@page	toolsandutilities
+
+@section	usingntv2watcher		"NTV2Watcher"
 
 This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor an AJA device.
 
-@section	generaloperation	General Operation
+@par	General Operation
 
 The <b>NTV2 Watcher</b> is a graphical tool that replaces the original <b>Watcher</b> utility to interactively monitor and configure any NTV2 device.
 The user interface consists of one or more windows, the main window having three panels:
 
 @image	html	watcherlayout.png
 
-@subsection	deviceselection		Device Selection
+@par	Device Selection
 
 @image	html	watcher-deviceselection.png
 
@@ -28,7 +30,7 @@ To remove a remote device, be sure it's the currently selected one, then click t
 
 @note	The "NTV2 Nub" must be running on any machine to permit its devices to be monitored remotely.
 
-@subsection	commonsettings		Common Settings
+@par	Common Settings
 
 @image	html	watcher-commonsettings.png
 
@@ -41,7 +43,7 @@ There are several settings that are common to the device and apply to all inspec
 -	<b>Reference</b> -- Indicates the device's current clock reference setting, and allows it to be changed by choosing a different setting.
 -	<b>FBSize</b> -- Indicates the device's current frame buffer size, and allows it to be changed by choosing a different setting.
 
-@section	inspectors	Inspectors
+@par	Inspectors
 
 @image	html	watcher-inspectorlist.png
 

@@ -1,7 +1,9 @@
 /**
-@page	usingcables		The "Cables" Tool
+@page	toolsandutilities
 
-This page describes signal paths in AJA devices, and how to use the <b>Cables</b> tool to interactively configure an AJA device.
+@section	usingcables		"Cables"
+
+This page describes how to use the <b>Cables</b> tool to monitor or configure signal routing in an AJA device.
 
 <b>Cables</b> is a graphical tool that can be used to interactively configure any NTV2 device.
 The user interface consists of a single window that's split horizontally into three panels:

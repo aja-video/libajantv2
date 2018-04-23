@@ -1,5 +1,7 @@
 /**
-@page	ntv2ccplayer		NTV2CCPlayer Demo
+@page	demoapps
+
+@section	ntv2ccplayer		NTV2CCPlayer Demo
 
 This command-line program reads text either from the standard input stream or from a built-in test document stream,
 and encodes that text into CEA-608 captions that are embedded into an outgoing SDI signal.

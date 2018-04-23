@@ -12,6 +12,7 @@
 #include "ntv2enums.h"
 #include "videodefines.h"
 #include "ntv2publicinterface.h"
+#include "ntv2formatdescriptor.h"
 #include "ntv2m31publicinterface.h"
 #include "ntv2signalrouter.h"
 #include <string>
@@ -67,15 +68,6 @@ AJAExport void CopyToQuadrant (uint8_t* srcBuffer, uint32_t srcHeight, uint32_t 
 //////////////////////////////////////////////////////
 
 /**
-	@brief	An ordered sequence of UWord (uint16_t) values.
-**/
-typedef	std::vector <UWord>					UWordSequence;
-typedef	UWordSequence::const_iterator		UWordSequenceConstIter;
-typedef	UWordSequence::iterator				UWordSequenceIter;
-
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
-
-/**
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
 	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
 									to be converted.
@@ -85,6 +77,43 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSeq
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels);
+
+/**
+	@brief		Packs a line of 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) video into 10-bit-per-component YCbCr data.
+	@param[in]	in16BitYUVLine		The UWordSequence that contains the 16-bit-per-component YUV data to be converted into
+									10-bit-per-component YUV.
+	@param[out]	pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
+	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
+
+/**
+	@brief		Packs up to one raster line of uint16_t YUV components into an NTV2_FBF_10BIT_YCBCR frame buffer.
+	@param[in]	inYCbCrLine		The YUV components to be packed into the frame buffer. This must contain at least 12 values.
+	@param		inFrameBuffer	The frame buffer in host memory that is to be modified.
+	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
+	@param[in]	inLineOffset	The zero-based line offset into the frame buffer where the packed components will be written.
+	@return		True if successful;  otherwise false.
+	@note		Neighboring components in the packed output will be corrupted if input component values exceed 0x3FF.
+	@note		This is a safer version of the ::PackLine_UWordSequenceTo10BitYUV function.
+**/
+AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2_POINTER & inFrameBuffer,
+													const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
+
+/**
+	@brief		Unpacks up to one raster line of an NTV2_FBF_10BIT_YCBCR frame buffer into an array of uint16_t values
+				containing the 10-bit YUV data.
+	@param[out]	outYCbCrLine	The YUV components unpacked from the frame buffer. This will be cleared upon entry, and
+								if successful, will contain at least 12 values upon exit.
+	@param		inFrameBuffer	The frame buffer in host memory that is to be read.
+	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
+	@param[in]	inLineOffset	The zero-based line offset into the frame buffer.
+	@return		True if successful;  otherwise false.
+	@note		This is a safer version of the ::UnpackLine_10BitYUVtoUWordSequence function.
+**/
+AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+											const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -154,10 +183,10 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 									ULWord* pDstBuffer, ULWord dstHeight, ULWord dstWidth);
 
 /**
-	@brief	Copies all or part of a source raster image into another raster at a given position.
+	@brief	Sets all or part of a destination raster image to legal black.
 	@param[in]	inPixelFormat			Specifies the NTV2FrameBufferFormat of the destination buffer.
 										(Note that many pixel formats are not currently supported.)
-	@param		pDstBuffer				Specifies the starting address of the destination buffer to be modified. Must be non-NULL.
+	@param		pDstBuffer				Specifies the address of the destination buffer to be modified. Must be non-NULL.
 	@param[in]	inDstBytesPerLine		The number of bytes per raster line of the destination buffer. Note that this value
 										is used to compute the maximum pixel width of the destination raster. Also note that
 										some pixel formats set constraints on this value (e.g., NTV2_FBF_10BIT_YCBCR requires

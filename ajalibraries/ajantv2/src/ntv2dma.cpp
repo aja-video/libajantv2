@@ -166,18 +166,57 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 							const NTV2FieldID	inFieldID,
 							const ULWord		inByteCount)
 {
-	const ULWord	maxAncBytesPerField	(4096);
-	const ULWord	bytesToTransfer		(inByteCount > maxAncBytesPerField ? maxAncBytesPerField : inByteCount);
-	NTV2Framesize	frameSize			(NTV2_FRAMESIZE_INVALID);
-
 	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
 		return false;
+	if (!NTV2_IS_VALID_FIELD(inFieldID))
+		return false;
 
-	GetFrameBufferSize (NTV2_CHANNEL1, frameSize);
+	NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
+	NTV2_POINTER	ancF2Buffer	(inFieldID ? pOutAncBuffer : NULL, inFieldID ? inByteCount : 0);
+	return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
+}
 
-	const ULWord	currentFrameSizeInBytes	(::NTV2FramesizeToByteCount (frameSize));
-	const ULWord	byteOffsetToAncData		(currentFrameSizeInBytes - maxAncBytesPerField * (inFieldID == NTV2_FIELD0 ? 2 : 1));
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, reinterpret_cast <ULWord *> (pOutAncBuffer), byteOffsetToAncData, bytesToTransfer, true);
+
+bool CNTV2Card::DMAReadAnc (const ULWord	inFrameNumber,
+							NTV2_POINTER & 	outAncF1Buffer,
+							NTV2_POINTER & 	outAncF2Buffer)
+{
+	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
+	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
+	bool			result(true);
+	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+		return false;
+	if (!ReadRegister (kVRegAncField1Offset, &F1Offset))
+		return false;
+	if (!ReadRegister (kVRegAncField2Offset, &F2Offset))
+		return false;
+	if (outAncF1Buffer.IsNULL()  &&  outAncF2Buffer.IsNULL())
+		return false;
+	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
+		return false;
+
+	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+
+	//	IMPORTANT ASSUMPTION:	F1 data is first (at lower address) in the frame buffer...!
+	inByteCount      =  outAncF1Buffer.IsNULL()  ?  0  :  outAncF1Buffer.GetByteCount();
+	bytesToTransfer  =  inByteCount > F1Offset  ?  F1Offset  :  inByteCount;
+	if (bytesToTransfer)
+	{
+		byteOffsetToAncData = frameSizeInBytes - F1Offset;
+		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/true, inFrameNumber,
+								reinterpret_cast <ULWord *> (outAncF1Buffer.GetHostPointer()),
+								byteOffsetToAncData, bytesToTransfer, true);
+	}
+	inByteCount      =  outAncF2Buffer.IsNULL()  ?  0  :  outAncF2Buffer.GetByteCount();
+	bytesToTransfer  =  inByteCount > F2Offset  ?  F2Offset  :  inByteCount;
+	if (result  &&  bytesToTransfer)
+	{
+		byteOffsetToAncData = frameSizeInBytes - F2Offset;
+		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/true, inFrameNumber,
+								reinterpret_cast <ULWord *> (outAncF2Buffer.GetHostPointer()),
+								byteOffsetToAncData, bytesToTransfer, true);
+	}
+	return result;
 }
 
 
@@ -186,19 +225,57 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 							const NTV2FieldID	inFieldID,
 							const ULWord		inByteCount)
 {
-	const ULWord	maxAncBytesPerField	(4096);
-	const ULWord	bytesToTransfer		(inByteCount > maxAncBytesPerField ? maxAncBytesPerField : inByteCount);
-	NTV2Framesize	frameSize			(NTV2_FRAMESIZE_INVALID);
-
 	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
 		return false;
+	if (!NTV2_IS_VALID_FIELD(inFieldID))
+		return false;
 
-	GetFrameBufferSize (NTV2_CHANNEL1, frameSize);
+	const NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
+	const NTV2_POINTER	ancF2Buffer	(inFieldID ? pInAncBuffer : NULL, inFieldID ? inByteCount : 0);
+	return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
+}
 
-	const ULWord	currentFrameSizeInBytes	(::NTV2FramesizeToByteCount (frameSize));
-	const ULWord	byteOffsetToAncData		(currentFrameSizeInBytes - maxAncBytesPerField * (inFieldID == NTV2_FIELD0 ? 2 : 1));
-	UByte *			pHostBuffer				(const_cast <UByte *> (pInAncBuffer));
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, reinterpret_cast <ULWord *> (pHostBuffer), byteOffsetToAncData, bytesToTransfer, true);
+
+bool CNTV2Card::DMAWriteAnc (const ULWord			inFrameNumber,
+							const NTV2_POINTER &	inAncF1Buffer,
+							const NTV2_POINTER &	inAncF2Buffer)
+{
+	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
+	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
+	bool			result(true);
+	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+		return false;
+	if (!ReadRegister (kVRegAncField1Offset, &F1Offset))
+		return false;
+	if (!ReadRegister (kVRegAncField2Offset, &F2Offset))
+		return false;
+	if (inAncF1Buffer.IsNULL()  &&  inAncF2Buffer.IsNULL())
+		return false;
+	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
+		return false;
+
+	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+
+	//	IMPORTANT ASSUMPTION:	F1 data is first (at lower address) in the frame buffer...!
+	inByteCount      =  inAncF1Buffer.IsNULL()  ?  0  :  inAncF1Buffer.GetByteCount();
+	bytesToTransfer  =  inByteCount > F1Offset  ?  F1Offset  :  inByteCount;
+	if (bytesToTransfer)
+	{
+		byteOffsetToAncData = frameSizeInBytes - F1Offset;
+		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, inFrameNumber,
+								reinterpret_cast <ULWord *> (inAncF1Buffer.GetHostPointer()),
+								byteOffsetToAncData, bytesToTransfer, true);
+	}
+	inByteCount      =  inAncF2Buffer.IsNULL()  ?  0  :  inAncF2Buffer.GetByteCount();
+	bytesToTransfer  =  inByteCount > F2Offset  ?  F2Offset  :  inByteCount;
+	if (result  &&  bytesToTransfer)
+	{
+		byteOffsetToAncData = frameSizeInBytes - F2Offset;
+		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, inFrameNumber,
+								reinterpret_cast <ULWord *> (inAncF2Buffer.GetHostPointer()),
+								byteOffsetToAncData, bytesToTransfer, true);
+	}
+	return result;
 }
 
 

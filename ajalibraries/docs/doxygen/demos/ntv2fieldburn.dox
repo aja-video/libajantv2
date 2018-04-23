@@ -1,5 +1,7 @@
 /**
-@page	ntv2fieldburn		NTV2FieldBurn Demo
+@page	demoapps
+
+@section	ntv2fieldburn		NTV2FieldBurn Demo
 
 This command-line program captures interlaced SDI video into two separate host buffers, one for each field,
 "burns" timecode into each of them, then recombines and plays out the "burned" fields onto an SDI output of

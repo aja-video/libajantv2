@@ -6,6 +6,8 @@ The most popular are:
 -	<b>Ping-Pong</b>
 -	<b>AutoCirculate</b>
 
+
+
 @section	aboutpingpong	Ping-Pong
 
 The "ping-pong" method is a good choice when lower latency is required.
@@ -24,6 +26,8 @@ Any unexpected delays or slow-downs in frame processing or DMA transfers will ca
 
 Ping-Pong Capture/Playout Demos:
 -	@subpage	ntv2llburn
+
+
 
 @section	aboutautocirculate	Using AutoCirculate
 
@@ -53,6 +57,7 @@ and on playback, the driver cycles through its associated output frames.
 AutoCirculate is intended for use in applications that require high reliability and that don't require low latency.
 For low latency ingest or playout applications, the application must get "closer to the metal" and use another method,
 such as the "Ping-Pong" method, documented earlier in this chapter.
+
 
 @subsection	autocirculatecapture	AutoCirculate Capture
 
@@ -88,6 +93,7 @@ AutoCirculate capture demos:
 -	@subpage	ntv2qtpreview
 -	@subpage	ntv2qtmultiinput
 
+
 @subsection	autocirculateplayout	AutoCirculate Playout
 
 @image	html	ac-playout.png
@@ -115,6 +121,7 @@ AutoCirculate playout demos:
 -	@subpage	ntv2player4k
 -	@subpage	ntv2ccplayer
 
+
 @subsection	autocirculateinandout	AutoCirculate Capture and Playout
 
 Figure 32 shows an example of how this would work when simultaneously capturing from one device input,
@@ -132,6 +139,7 @@ AutoCirculate Capture/Playout Demos:
 -	@subpage	ntv2ccgrabber
 -	@subpage	ntv2fieldburn
 
+
 @subsection	autocirculateapi	AutoCirculate API Functions
 
 There are five principal member functions that comprise the AutoCirculate API in the CNTV2Card class:
@@ -147,6 +155,7 @@ In addition, there are several special-purpose methods that are available for mo
 -	CNTV2Card::AutoCirculatePause
 -	CNTV2Card::AutoCirculateResume
 -	CNTV2Card::AutoCirculateFlush
+
 
 @subsection	autocirculateflow	Recommended Program Flow
 
@@ -184,26 +193,46 @@ CNTV2Card instances have been destroyed. The driver will continue to AutoCircula
 the activity. OEMs are encouraged to be good citizens and call CNTV2Card::AutoCirculateStop at exit to reduce unnecessary driver
 activity.
 
+
 @subsection	autocirculatechannels	AutoCirculate Channels
 
-AutoCirculate is driven by vertical blanking interrupts (VBIs), so a channel's frame store must be connected to one of the
-device's inputs (for ingest/capture) or outputs (for playout).
+The \c NTV2Channel passed to CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AutoCirculateInitForOutput) identifies the
+device \ref vidop-fs that is to be configured and operated by AutoCirculate in the device driver (i.e.
+\c NTV2_CHANNEL1 == 0 == FrameStore 1 == \c NTV2_WgtFrameBuffer1,  \c NTV2_CHANNEL2 == 1 == FrameStore 2 == \c NTV2_WgtFrameBuffer2, etc.).
 
 @image	html	ac-whichinterrupt.png
 
-The NTV2Channel passed to CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AutoCirculateInitForOutput) identifies the
-Frame Store on the device that is to be clocked from an input or output VBI.
+AutoCirculate is driven by vertical blanking interrupts (VBIs) received by the channel's \ref vidop-fs. If these interrupts
+aren’t received by the hardware, the driver’s ISR won’t get called, and AutoCirculate (for that channel) will be stuck.
+-	<b>Playout</b> mode:
+	-	The \ref vidop-fs need not be connected to anything. The device hardware has one clock that always runs,
+		and delivers an output VBI to every enabled \ref vidop-fs that’s set to Playout mode.
+	-	CNTV2Card::WaitForOutputVerticalInterrupt should theoretically never return False (time-out failure).
+-	<b>Capture</b> mode:
+	-	The \ref vidop-fs <i>MUST</i> be connected to an input widget (e.g., “SDI In”, “HDMI In”, “Analog In” widget) either…
+		-	directly, or…
+		-	indirectly through another widget (e.g., Dual-Link converter, CSC, etc.).
+-	If AutoCirculate is stuck in the <b>Starting</b> phase, then interrupts weren’t being received by the \ref vidop-fs when the
+	application called CNTV2Card::AutoCirculateStart.
+-	If AutoCirculate is stuck in the <b>Running</b> or <b>Paused</b> state, then interrupts stopped being delivered to the
+	\ref vidop-fs sometime after the application successfully called CNTV2Card::AutoCirculateTransfer.
 
-A Frame Store is RAM on the AJA device that
-stores a fixed number of frames of video data (a few of which are reserved for storing audio). The maximum number of frames
-that the device's Frame Store can hold depends on the frame buffer format (e.g., 8-bit YCbCr, 10-bit RGB, etc.), the video
-format (e.g., SD, HD, 2K, 4K, etc.), and other factors.
+<b>How Many Frames to Circulate?</b>
 
-<b>HINT:</b> To obtain the optimal size of your host-based video buffer, in bytes (padded to the nearest 4K multiple),
-that will accommodate a single frame of video data, call ::GetVideoWriteSize.
+This choice can depend on a number of factors that each affect how many frames are available for buffering on the device:
+-	The application’s frame-dropping tolerance;
+-	The hardware devices it may need to run on (some devices have less SDRAM);
+-	The largest video raster expected;
+-	The frame buffer (pixel) format to be used.
 
-<b>HINT:</b> To determine the maximum number of frame buffers a given device's Frame Store can accommodate for a given frame
-geometry and buffer format, call the 3-parameter version of ::NTV2DeviceGetNumberFrameBuffers.
+To obtain the size of your host-based video buffer, in bytes (to accommodate a single frame), try…
+-	::GetVideoActiveSize — returns the minimum number of bytes (including VANC lines for “tall” geometries);
+-	::GetVideoWriteSize — this calls ::GetVideoActiveSize, but pads up to the nearest 4K page size multiple;
+-	NTV2FormatDescriptor::GetTotalRasterBytes — gives the exact number (per-plane for planar formats).
+
+To determine the maximum number of frame buffers a given device can accommodate for a given frame geometry and buffer format,
+call ::NTV2DeviceGetNumberFrameBuffers.
+
 
 @subsection	autocirculatepreload	Pre-Loading Frames For Playback
 

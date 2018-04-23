@@ -1,5 +1,9 @@
 /**
-	@page	ioxt	IoXT
+	@page			ntv2devices
+
+	@section		ntv2hwio
+
+	@subsection		ioxt	IoXT
 
 	This page describes the IoXT Thunderbolt-based capture/playout device.
 
