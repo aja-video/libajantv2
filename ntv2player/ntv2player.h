@@ -15,9 +15,6 @@
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 #include "ajaanc/includes/ancillarydata.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
@@ -51,6 +48,7 @@ class NTV2Player
 			@param[in]	inWithVanc			If true, enable VANC; otherwise disable VANC. Defaults to false.
 			@param[in]	inLevelConversion	If true, demonstrate level A to B conversion; otherwise don't. Defaults to false.
 			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
+			@param[in]	inSendHDRType		Specifies which, if any, HDR ancillary data packet should be transmitted.
 		**/
 								NTV2Player (const std::string &			inDeviceSpecifier	= "0",
 											const bool					inWithAudio			= true,

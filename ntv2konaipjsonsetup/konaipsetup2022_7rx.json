@@ -1,5 +1,5 @@
 {
-    "protocol" : "2022",
+    "protocol":"2022",
     "enable2022_7":"true",
     "networkPathDifferential":"50",
     "sfps":[
@@ -16,7 +16,7 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "receive":[
+    "receive2022":[
         {
             "designator":"channel1",
             "sfp1DestIPAddress":"239.0.4.11",
@@ -24,7 +24,7 @@
             "sfp1Filter":"0x14",
             "sfp2DestIPAddress":"239.0.4.21",
             "sfp2DestPort":"6021",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "playoutDelay":"50",
             "sfp1Enable":"true",
             "sfp2Enable":"true",
@@ -37,7 +37,7 @@
             "sfp1Filter":"0x14",
             "sfp2DestIPAddress":"239.0.4.22",
             "sfp2DestPort":"6022",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "playoutDelay":"50",
             "sfp1Enable":"true",
             "sfp2Enable":"true",
@@ -50,7 +50,7 @@
             "sfp1Filter":"0x14",
             "sfp2DestIPAddress":"239.0.4.23",
             "sfp2DestPort":"6023",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "playoutDelay":"50",
             "sfp1Enable":"true",
             "sfp2Enable":"true",
@@ -63,7 +63,7 @@
             "sfp1Filter":"0x14",
             "sfp2DestIPAddress":"239.0.4.24",
             "sfp2DestPort":"6024",
-            "sfp2Filter":"0x14",
+            "sfp2Filter":"0x04",
             "playoutDelay":"50",
             "sfp1Enable":"true",
             "sfp2Enable":"true",

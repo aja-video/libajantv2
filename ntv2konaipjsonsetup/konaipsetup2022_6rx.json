@@ -1,5 +1,5 @@
 {
-    "protocol" : "2022",
+    "protocol":"2022",
     "enable2022_7":"false",
     "networkPathDifferential":"50",
     "sfps":[
@@ -10,12 +10,12 @@
             "gateway":"255.255.255.255"
         }
     ],
-    "receive":[
+    "receive2022":[
         {
             "designator":"channel1",
             "sfp1DestIPAddress":"239.0.4.50",
             "sfp1DestPort":"6010",
-            "sfp1Filter":"0x14",
+            "sfp1Filter":"0x04",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",
@@ -27,7 +27,7 @@
             "designator":"channel2",
             "sfp1DestIPAddress":"239.0.4.51",
             "sfp1DestPort":"6011",
-            "sfp1Filter":"0x14",
+            "sfp1Filter":"0x04",
             "playoutDelay":"50",
             "vlan":"1",
             "ssrc":"1234",

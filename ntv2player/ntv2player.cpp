@@ -13,6 +13,10 @@
 #include "ajabase/system/memory.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
+#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
+#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
+#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
+#include "ajaanc/includes/ancillarylist.h"
 
 using namespace std;
 

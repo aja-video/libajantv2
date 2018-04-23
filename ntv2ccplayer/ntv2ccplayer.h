@@ -250,8 +250,7 @@ class NTV2CCPlayer
 		CNTV2CaptionEncoder608Ptr	m608Encoder;						///< @brief	My CEA-608 caption encoder
 		CNTV2CaptionEncoder708Ptr	m708Encoder;						///< @brief	My 708 caption encoder
 
-		uint8_t *					mpVideoBuffer;						///< @brief	Pointer to my video buffer
-		uint32_t					mVideoBufferSize;					///< @brief	Size of my video buffer, in bytes
+		NTV2_POINTER				mVideoBuffer;						///< @brief	My video buffer
 
 };	//	NTV2CCPlayer
 

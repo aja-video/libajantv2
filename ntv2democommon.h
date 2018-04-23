@@ -51,19 +51,20 @@ const unsigned int	CIRCULAR_BUFFER_SIZE	(10);		///< @brief	Specifies how many AV
 /**
 	@brief	A handy class that makes it easy to "bounce" an unsigned integer value between a minimum and maximum value.
 **/
-class Bouncer
+template <typename T> class Bouncer
 {
 	public:
-		inline Bouncer (const UWord inUpperLimit, const UWord inLowerLimit = 0, const UWord inStartValue = 0, const bool inStartAscend = true)
-			:	mMin	(inLowerLimit),
-				mMax	(inUpperLimit),
-				mValue	(inStartValue),
-				mAscend	(inStartAscend)
+		inline Bouncer (const T inUpperLimit, const T inLowerLimit = T(0), const T inStartValue = T(0), const bool inStartAscend = true)
+			:	mMin		(inLowerLimit),
+				mMax		(inUpperLimit),
+				mValue		(inStartValue),
+				mIncrement	(T(1)),
+				mAscend		(inStartAscend)
 		{
 			if (mMin > mMax)
 				std::swap (mMin, mMax);
 			else if (mMin == mMax)
-				mMax = mMin + 1;
+				mMax = mMin + mIncrement;
 			if (mValue < mMin)
 			{
 				mValue = mMin;
@@ -76,29 +77,30 @@ class Bouncer
 			}
 		}
 
-		inline UWord	Next (void)
+		inline T	Next (void)
 		{
 			if (mAscend)
 			{
-				if (mValue < UWord (mMax))
-					mValue++;
+				if (mValue < mMax)
+					mValue += mIncrement;
 				else
 					mAscend = false;
 			}
 			else
 			{
 				if (mValue > mMin)
-					mValue--;
+					mValue -= mIncrement;
 				else
 					mAscend = true;
 			}
 			return mValue;
 		}
 
-		inline UWord	Value (void) const	{return mValue;}
+		inline void	SetIncrement (const T inValue)	{mIncrement = inValue;}
+		inline T	Value (void) const	{return mValue;}
 
 	private:
-		UWord	mMin, mMax, mValue;
+		T		mMin, mMax, mValue, mIncrement;
 		bool	mAscend;
 
 };	//	Bouncer
@@ -175,8 +177,8 @@ class CNTV2DemoCommon
 		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
 		/**
-			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K this function does the promotion.
-			@param[out]	On entry, specifies the wire format;  on exit, receives the 4K video format.
+			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K, this function does the promotion.
+			@param		inOutVideoFormat	On entry, specifies the wire format;  on exit, receives the 4K video format.
 			@return		True if successful;  otherwise false.
 		**/
 		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);

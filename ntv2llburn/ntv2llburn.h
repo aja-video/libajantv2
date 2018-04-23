@@ -19,6 +19,7 @@
 #include "ajabase/system/thread.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
+#include <set>
 
 
 /**
@@ -135,6 +136,10 @@ class NTV2LLBurn
 		static void	RunThreadStatic (AJAThread * pThread, void * pContext);
 
 
+		typedef std::set <NTV2Channel>			NTV2ChannelSet;
+		typedef NTV2ChannelSet::const_iterator	NTV2ChannelSetConstIter;
+
+
 	//	Private Member Data
 	private:
 		AJAThread *					mRunThread;				///< @brief	My worker thread object
@@ -157,11 +162,10 @@ class NTV2LLBurn
 
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn				mTCBurner;				///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
+		NTV2ChannelSet				mRP188Outputs;			///< @brief	SDI outputs into which I'll inject timecode
 
-		uint32_t *					mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
-		uint32_t *					mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
+		NTV2_POINTER				mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
+		NTV2_POINTER				mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
 
 		uint32_t					mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
 		uint32_t					mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played

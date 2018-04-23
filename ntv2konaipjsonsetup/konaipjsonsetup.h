@@ -2,6 +2,7 @@
 #define KONAIPBOARD_H
 
 #include "ntv2card.h"
+#include "konaipjsonparse.h"
 
 #include <QJsonObject>
 #include <QList>
@@ -16,70 +17,51 @@ typedef struct
     QString mSubnetMask;
     QString mGateway;
     QString mEnable;
-
 }SFPStruct;
 
 typedef struct
 {
     QString mChannelDesignator;
-    QString mSfp1Enable;
-    QString mSfp2Enable;
-    QString mStream;
-    QString mSfp1SrcPort;
     QString mSfp1SrcIPAddress;
+    QString mSfp1SrcPort;
     QString mSfp1DestIPAddress;
     QString mSfp1DestPort;
     QString mSfp1Filter;
-    QString mSfp2SrcPort;
     QString mSfp2SrcIPAddress;
+    QString mSfp2SrcPort;
     QString mSfp2DestIPAddress;
     QString mSfp2DestPort;
     QString mSfp2Filter;
-    QString mNetworkPathDifferential;
     QString mPlayoutDelay;
     QString mVLAN;
     QString mSSRC;
-    QString mPayload;
-    QString mVideoFormat;
+    QString mSfp1Enable;
+    QString mSfp2Enable;
     QString mEnable;
-    QString mPayloadLen;
-    QString mLastPayloadLen;
-    QString mPktsPerLine;
-    QString mNumAudioChannels;
-    QString mAudioPktInterval;
-}ReceiveStruct;
+}ReceiveStruct2022;
 
 typedef struct
 {
     QString mChannelDesignator;
-    QString mSfp1Enable;
-    QString mSfp2Enable;
-    QString mStream;
-    QString mSfp1LocalPort;
     QString mSfp1RemoteIPAddress;
     QString mSfp1RemotePort;
-    QString mSfp2LocalPort;
+    QString mSfp1LocalPort;
     QString mSfp2RemoteIPAddress;
     QString mSfp2RemotePort;
-    QString mSSRC;
+    QString mSfp2LocalPort;
     QString mTOS;
     QString mTTL;
-    QString mPayload;
-    QString mVideoFormat;
+    QString mSSRC;
+    QString mSfp1Enable;
+    QString mSfp2Enable;
     QString mEnable;
-    QString mPayloadLen;
-    QString mLastPayloadLen;
-    QString mPktsPerLine;
-    QString mNumAudioChannels;
-    QString mFirstAudioChannel;
-    QString mAudioPktInterval;
-}TransmitStruct;
+}TransmitStruct2022;
 
 typedef  struct {
     QList<SFPStruct> mSFPs;
-    QList<ReceiveStruct> mReceiveChannels;
-    QList<TransmitStruct> mTransmitChannels;
-} KonaIPParamSetupStruct;
+    QList<ReceiveStruct2022> mReceive2022Channels;
+    QList<TransmitStruct2022> mTransmit2022Channels;
+} KonaIP2022ParamSetupStruct;
 
 
 class CKonaIpJsonSetup
@@ -93,17 +75,18 @@ public:
 protected:
     bool setupBoard2110(std::string deviceSpec);
     bool setupBoard2022(std::string deviceSpec);
-    bool readJson(const QJsonObject &json);
-    void dumpRx2110Config(const NTV2Channel channel, const NTV2Stream stream, rx_2110Config & rxConfig);
+    bool readJson2022(const QJsonObject &json);
 
-    KonaIPParamSetupStruct mKonaIPParams;
+    KonaIP2022ParamSetupStruct mKonaIP2022Params;
 
 private:
-    bool        mEnable2022_7;
-    bool        mIs2110;
-    bool        m4KMode;
-    uint32_t    mNetworkPathDifferential;
-    QString     mPTPMasterAddr;
+    bool                    mEnable2022_7;
+    bool                    mIs2110;
+    bool                    m4KMode;
+    uint32_t                mNetworkPathDifferential;
+    QString                 mPTPMasterAddr;
+
+    CKonaIpJsonParse2110    parse2110;
 };
 
 #endif // KONAIPBOARD_H

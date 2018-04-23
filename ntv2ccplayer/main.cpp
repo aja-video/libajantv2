@@ -49,15 +49,16 @@ void SignalHandler (int inSignal)
 static string GetLine21ChannelNames (string inDelimiterStr = "|")
 {
 	static string	gChannelNames;
-	if (gChannelNames.empty ())
-		for (unsigned enumVal (0);  enumVal < NTV2_CC608_XDS; )
+	if (gChannelNames.empty())
+		for (unsigned enumVal(0);  enumVal < NTV2_CC608_XDS; )
 		{
-			gChannelNames += ::NTV2Line21ChannelToStr (static_cast <NTV2Line21Channel> (enumVal++));
+			gChannelNames += ::NTV2Line21ChannelToStr(static_cast <NTV2Line21Channel> (enumVal++));
 			if (enumVal < NTV2_CC608_XDS)
 				gChannelNames += inDelimiterStr;
 			else
 				break;
 		}
+//cerr << endl << "gChannelNames='" << gChannelNames << "'" << endl;
 	return gChannelNames;
 
 }	//	GetLine21ChannelNames
@@ -140,7 +141,7 @@ int main (int argc, const char ** argv)
 		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle,..."},
 		{"rate",		'r',	POPT_ARG_STRING,	&pCaptionRate,		0,	"caption rate",					"chars/min,..."},
 		{"608mode",		0,		POPT_ARG_STRING,	&pMode,				0,	"608 caption mode",				"roll|roll4|roll3|roll2|paint|pop,..."},
-		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption channel",			::GetLine21ChannelNames ().c_str ()},
+		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption channel",			::GetLine21ChannelNames().c_str ()},
 		{"newline",		0,		POPT_ARG_NONE,		&bBreakNewLines,	0,	"newlines break rows?",			NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND

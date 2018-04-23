@@ -73,10 +73,6 @@ int main (int argc, const char ** argv)
 	if (channelNumber < 1 || channelNumber > 8)
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
 
-	if (channelNumber >= 1 && channelNumber <= 4)
-		channelNumber = 1;
-	else
-		channelNumber = 5;
 	//	Instantiate the NTV2Capture object, using the specified AJA device...
 	NTV2Capture4K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0", (noAudio ? false : true), ::GetNTV2ChannelForIndex (channelNumber - 1), pixelFormat, false, doMultiFormat ? true : false, doTsiRouting ? true : false);
 
