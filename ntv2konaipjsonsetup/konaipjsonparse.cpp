@@ -6,7 +6,11 @@
 //	Proprietary and Confidential information.  All rights reserved.
 //-------------------------------------------------------------------------------------------
 #include "konaipjsonparse.h"
-#include "ntv2democommon.h"
+
+#ifdef BUILD_DEMO
+    #include "ntv2democommon.h"
+#endif
+
 
 const int kStrMax			= IP_STRSIZE-1;
 
@@ -244,9 +248,9 @@ NTV2Stream CKonaIpJsonParse2110::GetStream(std::string streamString)
     else if (streamString == "audio2")
         stream = NTV2_AUDIO2_STREAM;
     else if (streamString == "audio3")
-        stream = NTV2_AUDIO2_STREAM;
+        stream = NTV2_AUDIO3_STREAM;
     else if (streamString == "audio4")
-        stream = NTV2_AUDIO2_STREAM;
+        stream = NTV2_AUDIO4_STREAM;
     else
         stream = NTV2_STREAM_INVALID;
 
@@ -408,7 +412,11 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, Re
         if (m_verbose) std::cout << " payload " << rVideo2110.rxVideoCh[i].payload << std::endl;
         str = vObj["videoFormat"].toString().toStdString();
         if (m_verbose) std::cout << " videoFormat " << str.c_str() << std::endl;
+#ifdef BUILD_DEMO
         rVideo2110.rxVideoCh[i].videoFormat = CNTV2DemoCommon::GetVideoFormatFromString(str, VIDEO_FORMATS_ALL);
+#else
+        rVideo2110.rxVideoCh[i].videoFormat = NTV2_FORMAT_UNKNOWN;
+#endif
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].enable = GetEnable(str);
@@ -606,7 +614,11 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         if (m_verbose) std::cout << " payload " << tVideo2110.txVideoCh[i].payload << std::endl;
         str = vObj["videoFormat"].toString().toStdString();
         if (m_verbose) std::cout << " videoFormat " << str.c_str() << std::endl;
+#ifdef BUILD_DEMO
         tVideo2110.txVideoCh[i].videoFormat = CNTV2DemoCommon::GetVideoFormatFromString(str, VIDEO_FORMATS_ALL);
+#else
+        tVideo2110.txVideoCh[i].videoFormat = NTV2_FORMAT_UNKNOWN;
+#endif
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].enable = GetEnable(str);
