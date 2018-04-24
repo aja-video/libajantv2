@@ -397,7 +397,7 @@ AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const string & inFileName, const u
     }
 
     // Get the size of the file using fstat
-	fstat(fileno(mYuvFd), &fileStat);
+	fstat(_fileno(mYuvFd), &fileStat);
 	mYuvFileSize = fileStat.st_size;
 
     // Now save width, height and calculate frame size and number of frames
