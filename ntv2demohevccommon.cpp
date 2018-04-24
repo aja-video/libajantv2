@@ -12,7 +12,16 @@
 #include <map>
 #include <sys/stat.h>
 
+
 using namespace std;
+
+
+#if defined (MSWindows)
+	#define	FILENO_FUNCTION		_fileno
+#else
+	#define	FILENO_FUNCTION		fileno
+#endif
+
 
 CNTV2DemoHevcCommon::CNTV2DemoHevcCommon ()
 :   mHevcFd                 (NULL),
@@ -397,7 +406,7 @@ AJAStatus CNTV2DemoHevcCommon::OpenYuv420File(const string & inFileName, const u
     }
 
     // Get the size of the file using fstat
-	fstat(_fileno(mYuvFd), &fileStat);
+	fstat(FILENO_FUNCTION(mYuvFd), &fileStat);
 	mYuvFileSize = fileStat.st_size;
 
     // Now save width, height and calculate frame size and number of frames
