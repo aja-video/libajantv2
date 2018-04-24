@@ -1569,18 +1569,14 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	// If quad frame geometry, each of 4 frame buffers geometry is one quarter of full size
 	if (::NTV2DeviceCanDo4KVideo(_boardID))
 	{
-		NTV2Channel quadChannel = NTV2_CHANNEL1;
-		if (channel > NTV2_CHANNEL4)
-			quadChannel = NTV2_CHANNEL5;
-			
 		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newGeometry))
 		{
-			SetQuadFrameEnable(true, quadChannel);
+			SetQuadFrameEnable(true, channel);
 			newFrameStoreGeometry = GetQuarterSizedGeometry(newGeometry);
 		}
 		else
 		{
-			SetQuadFrameEnable(false, quadChannel);
+			SetQuadFrameEnable(false, channel);
 		}
 	}
 
@@ -1593,19 +1589,58 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	{
 		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newGeometry))
 		{
-			if (channel < NTV2_CHANNEL5)
+			bool tsiEnable = false;
+			status = GetTsiFrameEnable(&tsiEnable, channel);
+			if (!IsMultiFormatActive ())
 			{
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+			}
+			else if (status & tsiEnable)
+			{
+				if (channel < NTV2_CHANNEL3)
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
+				else if (channel < NTV2_CHANNEL5)
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
+				else if (channel < NTV2_CHANNEL7)
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
+				else
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
 			}
 			else
 			{
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				if (channel < NTV2_CHANNEL5)
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
+				else
+				{
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+				}
 			}
 		}
 	}
@@ -1645,9 +1680,8 @@ bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inCh
 	if (status && (::NTV2DeviceCanDo4KVideo (_boardID) || NTV2DeviceCanDo425Mux (_boardID)))
 	{
 		ULWord	quadFrameEnabled	(0);
-		bool	smpte425Enabled		(false);
 		status = GetQuadFrameEnable (quadFrameEnabled, inChannel);
-		if (status && (quadFrameEnabled || smpte425Enabled))
+		if (status && quadFrameEnabled)
 			outValue = Get4xSizedGeometry (outValue);
 	}
 	return status;
@@ -1737,50 +1771,142 @@ bool CNTV2Card::GetProgressivePicture (ULWord & outValue)
 bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel)
 {
 	bool status = true;
+	bool smpte425Enabled = false;
+	Get425FrameEnable(&smpte425Enabled, inChannel);
+	bool squaresEnabled = false;
+	Get4kSquaresEnable(&squaresEnabled, inChannel);
+
 	// Set true (1) to enable a Quad Frame Geometry
 	// Set false (0) to disable this mode
 	if(!inValue)
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (!IsMultiFormatActive())
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
-			return WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
-		else
+		else if (smpte425Enabled)
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
-			return WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			// disable 425 and squares
+			if (inChannel < NTV2_CHANNEL3)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+			}
+			else if (inChannel < NTV2_CHANNEL7)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
+			}
+			else
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			}
+		}
+		else if (squaresEnabled)
+		{
+			// disable squares and 425
+			if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+			}
+			else
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			}
 		}
 	}
 	else
 	{
-		bool smpte425Enabled = false;
-		Get425FrameEnable(&smpte425Enabled, inChannel);
 		if(smpte425Enabled)
 		{
-			if (inChannel < NTV2_CHANNEL5)
+			// make sure squares disabled
+			if (!IsMultiFormatActive())
 			{
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 			}
 			else
 			{
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+			}
+		}
+		else if (squaresEnabled)
+		{
+			// make sure 425 disabled
+			if (!IsMultiFormatActive())
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+			}
+			else
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 			}
 		}
 		else
 		{
-			if (inChannel < NTV2_CHANNEL5)
+			// enable 425 by default (not squares)
+			if (!IsMultiFormatActive())
 			{
-				WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
+			}
+			else if (inChannel < NTV2_CHANNEL3)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);
+			}
+			else if (inChannel < NTV2_CHANNEL7)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56);
 			}
 			else
 			{
-				WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
 			}
 		}
 	}
+
 	return (status);
 }
 
@@ -1798,58 +1924,58 @@ bool CNTV2Card::GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChann
 	if (::NTV2DeviceCanDo425Mux (_boardID))
 		status2 = GetTsiFrameEnable (s425Enabled, inChannel);
 
-	outValue = (status1 & status2) ? (quadEnabled | (s425Enabled ? 1 : 0)) : 0;
+	outValue = (status1 & status2) ? ((quadEnabled | s425Enabled) ? 1 : 0) : 0;
 	return status1;
 }
 
 bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 {
+	bool status = true;
+
 	if(!::NTV2DeviceCanDo4KVideo(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
-	ULWord isQuad;
-	if (!GetQuadFrameEnable(&isQuad, inChannel))
-		return false;
-	if (inEnable && isQuad)
+	if (inEnable)
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		// enable quad frame, disable 425
+		if (!IsMultiFormatActive())
 		{
-			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode)	//	Enable quad mode on lower bank 1-4
-				&& WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12)		//	Disable Tsi mode on FrameStores 1 & 2
-				&& WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);		//	Disable Tsi mode on FrameStores 3 & 4
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
+			status = WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&	//	Enable quad mode on lower bank 1-4
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&			//	Disable Tsi mode on FrameStores 1 & 2
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);			//	Disable Tsi mode on FrameStores 3 & 4
 		}
 		else
 		{
-			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2)	//	Enable quad mode on higher bank 5-8
-				&& WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56)		//	Disable Tsi mode on FSs 5 & 6
-				&& WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);		//	Disable Tsi mode on FSs 7 & 8
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&	//	Enable quad mode on higher bank 5-8
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&			//	Disable Tsi mode on FSs 5 & 6
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);			//	Disable Tsi mode on FSs 7 & 8
 		}
 	}
-	else if (isQuad)
+	else
 	{
-		if (inChannel < NTV2_CHANNEL5)
+		if (!IsMultiFormatActive())
 		{
-			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode)	//	Disable quad mode on lower bank 1-4
-				&& WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12)		//	Enable Tsi on FSs 1 & 2
-				&& WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);		//	Enable Tsi on FSs 3 & 4
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
+		else if (inChannel < NTV2_CHANNEL5)
+			status = WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);	//	Disable quad mode on lower bank 1-4
 		else
-		{
-			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2)	//	Disable quad mode on higher bank 5-8
-				&& WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56)		//	Enable Tsi on FSs 5 & 6
-				&& WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);		//	Enable Tsi on FSs 7 & 8
-		}
+			status = WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);	//	Disable quad mode on higher bank 5-8
 	}
-	else	//	disable
-	{
-		if (inChannel < NTV2_CHANNEL5)
-			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);		//	Disable quad mode on lower bank 1-4
-		else
-			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);	//	Disable quad mode on higher bank 5-8
-	}
-	return false;
+
+	return status;
 }
 
 bool CNTV2Card::Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inChannel)
@@ -1859,10 +1985,12 @@ bool CNTV2Card::Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inCha
 		return false;
 	ULWord	squaresEnabled	(0);
 	bool status = true;
+
 	if (inChannel < NTV2_CHANNEL5)
 		status = ReadRegister (kRegGlobalControl2, &squaresEnabled, kRegMaskQuadMode, kRegShiftQuadMode);
 	else
 		status = ReadRegister(kRegGlobalControl2, &squaresEnabled, kRegMaskQuadMode2, kRegShiftQuadMode2);
+
 	outIsEnabled = (squaresEnabled ? true : false);
 	return status;
 }
@@ -1872,80 +2000,75 @@ bool CNTV2Card::Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inCha
 // Output: NONE
 bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChannel)
 {
+	bool status = true;
+
 	if(!NTV2DeviceCanDo425Mux(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
-	ULWord isQuad;
-	GetQuadFrameEnable(&isQuad);
-	if(enable && isQuad)
+	if(enable)
 	{
-		//This should only be set high if we are already in a 4k/uhd format
-		if (inChannel < NTV2_CHANNEL3)
+		// enable 425 mode, disable squares
+		if (!IsMultiFormatActive())
 		{
-			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12);
-			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
+		}
+		else if (inChannel < NTV2_CHANNEL3)
+		{
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);
-			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
 		else if (inChannel < NTV2_CHANNEL7)
 		{
-			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56);
-			return WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 		else
 		{
-			WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
-			return WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-		}
-	}
-	else if (isQuad)
-	{
-		if (inChannel < NTV2_CHANNEL3)
-		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
-			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
-		}
-		else if (inChannel < NTV2_CHANNEL5)
-		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
-			return WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode);
-		}
-		else if (inChannel < NTV2_CHANNEL7)
-		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
-			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
-		}
-		else
-		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			return WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2);
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
+				WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 	else
 	{
-		if (inChannel < NTV2_CHANNEL3)
+		// disable 425 mode
+		if (!IsMultiFormatActive())
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
-		if (inChannel < NTV2_CHANNEL5)
+		else if (inChannel < NTV2_CHANNEL3)
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
 		}
-		if (inChannel < NTV2_CHANNEL7)
+		else if (inChannel < NTV2_CHANNEL5)
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+		}
+		else if (inChannel < NTV2_CHANNEL7)
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 		}
 		else
 		{
-			WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
-		return (enable ? false : true);
 	}
+
+	return status;
 }
 
 // Method: GetTsiFrameEnable
@@ -1962,14 +2085,16 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	// Return false (0) if this mode is disabled
 	ULWord	returnVal	(0);
 	bool	readOkay	(false);
+
 	if (inChannel < NTV2_CHANNEL3)
 		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB12, kRegShift425FB12);
-	if (inChannel < NTV2_CHANNEL5)
+	else if (inChannel < NTV2_CHANNEL5)
 		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB34, kRegShift425FB34);
-	if (inChannel < NTV2_CHANNEL7)
+	else if (inChannel < NTV2_CHANNEL7)
 		readOkay = ReadRegister (kRegGlobalControl2, &returnVal, kRegMask425FB56, kRegShift425FB56);
 	else
 		readOkay = ReadRegister(kRegGlobalControl2, &returnVal, kRegMask425FB78, kRegShift425FB78);
+
 	outIsEnabled = readOkay ? returnVal : 0;
 	return readOkay;
 }
