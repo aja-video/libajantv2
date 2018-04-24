@@ -1412,7 +1412,7 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 					case NTV2_STANDARD_525:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_525);							break;
 					case NTV2_STANDARD_625:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_625);							break;
 					case NTV2_STANDARD_2K:		result.Set (HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
-					default:					DisplayNTV2Error ("Unsupported video standard requested.");						break;
+					default:																									break;
 				}
 
 	return result;

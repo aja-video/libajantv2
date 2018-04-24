@@ -2104,7 +2104,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
-		if (!NTV2DownloadTestPatternRemote(	
+		return NTV2DownloadTestPatternRemote(	
 					_sockfd,
 					_remoteHandle,
 					_nubProtocolVersion,
@@ -2112,12 +2112,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 					GetTestPatternFrameBufferFormat(),
 					GetSignalMask(),
 					GetTestPatternDMAEnable(),
-					testPatternNumber))
-		{
-			DisplayNTV2Error("NTV2DownloadTestPatternRemote failed");
-			return false;
-		}
-		return true;
+					testPatternNumber);
 	}
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
@@ -2222,15 +2217,12 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	case NTV2_STANDARD_2K:
 		//dataLinePitch = HD_YCBCRLINEPITCH_2K;
 		//break;
-	default:
-		DisplayNTV2Error("Signal Generator Unsupported video standard format.\n");
-		return;
-		break;
+	default:	return;		//	Signal Generator Unsupported video standard format
 	}
 
 	if ( numOutputPixels == 0 || numPixels == 0 || linePitch == 0)
 	{
-		DisplayNTV2Error("Signal Generator Unsupported video standard/framebuffer format.\n");
+		//	Signal Generator Unsupported video standard/framebuffer format
 		return;
 
 	}
@@ -2286,9 +2278,7 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	            case NTV2_FBF_10BIT_YCBCR:
 		            ::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
                     break;
-				default:
-					DisplayNTV2Error("ERROR: Signal Generator not set up for this format.\n");
-					break;
+				default:	return;	//	ERROR: Signal Generator not set up for this format
 			}
 
 			for ( UWord lineCount = 0; lineCount < numLines; lineCount++ )
@@ -2332,15 +2322,9 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	ULWord dataLinePitch;
 
 	// Avoid divide by 0 error/floating point exception for unsupported formats.
-	if ( 
-			(standard == NTV2_STANDARD_525 || standard == NTV2_STANDARD_625)
-        &&	(_fbFormat == NTV2_FBF_8BIT_DVCPRO || _fbFormat == NTV2_FBF_8BIT_HDV)
-	   )
-	{
-		DisplayNTV2Error("DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625.");
-		return;
-	}
-
+	if (standard == NTV2_STANDARD_525  ||  standard == NTV2_STANDARD_625)
+		if (_fbFormat == NTV2_FBF_8BIT_DVCPRO  ||  _fbFormat == NTV2_FBF_8BIT_HDV)
+			return;	//	DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625
 	
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
@@ -2397,12 +2381,8 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
 
-	if ( numOutputPixels == 0 || numPixels == 0 || linePitch == 0)
-	{
-		DisplayNTV2Error("Unsupported video standard/framebuffer format.");
-		return;
-
-	}
+	if (numOutputPixels == 0  ||  numPixels == 0  ||  linePitch == 0)
+		return;	//	Unsupported video standard/framebuffer format
 
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -2510,15 +2490,6 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 					ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
 					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numOutputPixels);
 					break;
-/*				case NTV2_FBF_8BIT_QREZ:
-					// need to squeeze test pattern to 1/2 pixels and 1/2 lines
-					ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
-					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
-					nLines = (nLines/2);
-					//linePitch = 1280*2/4;
-					currentAddress = baseAddress + (startLine/2*linePitch);
-					break;	*/
 				case NTV2_FBF_24BIT_RGB:
 					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
 					ConvertARGBToRGB((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
@@ -2538,9 +2509,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
 					Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer ,(UWord *) packedBuffer, numPixels);
 					break;
-				default:
-					DisplayNTV2Error("Unsupported framebuffer standard requested.");
-					break;
+				default:	return;	//	Unsupported framebuffer standard requested
 			}
 			
 			for ( UWord lineCount = 0; lineCount < nLines; lineCount++ )
@@ -2699,9 +2668,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	case NTV2_FBF_48BIT_RGB:
 		memset(currentAddress,0,linePitch*numLines*4);
 		break;
-	default:
-		DisplayNTV2Error("Unsupported framebuffer standard requested.");
-		break;
+	default:	return;	//	Unsupported framebuffer standard requested
 	}
 
 		// DMA the resulting frame to Kona memory
@@ -2808,9 +2775,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 			linePitch /= 2;
 			break;
 
-		default:
-			DisplayNTV2Error("DownloadBorderTestPattern(): Unsupported framebuffer standard requested.");
-			break;
+		default:	return;	//	DownloadBorderTestPattern(): Unsupported framebuffer standard requested
 		}
 	}
 
@@ -3787,9 +3752,7 @@ void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord
 			Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer, (UWord *) packedBuffer, numPixels);
 			break;
 
-		default:
-			DisplayNTV2Error("Unsupported framebuffer standard requested.");
-			break;
+		default:	return;		//	Unsupported framebuffer standard requested
 	}
 }
 
