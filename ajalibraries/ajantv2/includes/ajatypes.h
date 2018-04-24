@@ -232,14 +232,14 @@
 	#define POINTER_32
 	#define MAX_PATH	4096
 	#if defined (NTV2_BUILDING_DRIVER)
-		#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-		#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-		#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
-		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
-		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
+//		#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
+//		#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
+//		#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
+//		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
+//		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
+//		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
+//		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
+//		#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
 	#endif
 
 										//////////////////////////////////////////////////////////////////
