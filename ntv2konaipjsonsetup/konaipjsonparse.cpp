@@ -741,3 +741,44 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
 
     return true;
 }
+
+bool CKonaIpJsonParse2110::StructToJson(const NetworkData2110& net2110,
+										const ReceiveVideoData2110& vRec2110, 
+										const ReceiveAudioData2110& aRec2110, 
+										const TransmitVideoData2110& vTran2110, 
+										const TransmitAudioData2110& aTran2110,
+										QJsonObject& topObj)
+{
+	QJsonObject netJson;
+	memcpy(&m_net2110, &net2110, sizeof(NetworkData2110));
+	StructToJsonNetwork(m_net2110, netJson);
+	m_netJson = netJson;
+
+	QJsonArray vRecJson;
+	memcpy(&m_receiveVideo2110, &vRec2110, sizeof(ReceiveVideoData2110));
+	StructToJsonReceiveVideo(m_receiveVideo2110, vRecJson);
+	m_receiveVideoJson = vRecJson;
+
+	QJsonArray aRecJson;
+	memcpy(&m_receiveAudio2110, &aRec2110, sizeof(ReceiveAudioData2110));
+	StructToJsonReceiveAudio(m_receiveAudio2110, aRecJson);
+	m_receiveAudioJson = aRecJson;
+
+	QJsonArray vTransJson;
+	memcpy(&m_transmitVideo2110, &vTran2110, sizeof(TransmitVideoData2110));
+	StructToJsonTransmitVideo(m_transmitVideo2110, vTransJson);
+	m_transmitVideoJson = vTransJson;
+
+	QJsonArray aTransJson;
+	memcpy(&m_transmitAudio2110, &aTran2110, sizeof(TransmitAudioData2110));
+	StructToJsonTransmitAudio(m_transmitAudio2110, aTransJson);
+	m_transmitAudioJson = aTransJson;
+
+	topObj.insert("network2110", m_netJson);
+	topObj.insert("receiveVideo2110", m_receiveVideoJson);
+	topObj.insert("receiveAudio2110", m_receiveAudioJson);
+	topObj.insert("transmitVideo2110", m_transmitVideoJson);
+	topObj.insert("transmitAudio2110", m_transmitAudioJson);
+	
+	return true;
+}

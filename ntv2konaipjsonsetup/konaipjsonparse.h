@@ -49,6 +49,13 @@ public:
 
     bool JsonToStructTransmitAudio(const QJsonArray& aArray, TransmitAudioData2110& n2110);
     bool StructToJsonTransmitAudio(const TransmitAudioData2110& n2110, QJsonArray& aArray);
+    
+	bool StructToJson(	const NetworkData2110& net2110,
+						const ReceiveVideoData2110& vRec2110, 
+						const ReceiveAudioData2110& aRec2110, 
+						const TransmitVideoData2110& vTran2110, 
+						const TransmitAudioData2110& aTran2110,
+						QJsonObject& topObj);
 
     bool GetEnable(std::string enableBoolString);
     QString GetEnable(bool enabled);
