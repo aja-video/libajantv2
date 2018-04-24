@@ -710,7 +710,7 @@ public:
 	/**
 		@deprecated	Use AppendPayload(const AJAAncillaryData &) instead.
 	**/
-	NTV2_DEPRECATED(virtual inline AJAStatus				AppendPayload (const AJAAncillaryData * pInAncData))	{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
+	virtual inline NTV2_DEPRECATED_f(AJAStatus	AppendPayload (const AJAAncillaryData * pInAncData))	{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
 
 	/**
 	 	@brief	Copies payload data from an external 16-bit source into local payload memory.

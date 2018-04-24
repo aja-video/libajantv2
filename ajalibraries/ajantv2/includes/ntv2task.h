@@ -50,16 +50,16 @@ public:
 
 	#if !defined (NTV2_DEPRECATE)
 		// convert routing entries to register write tasks
-		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddRoutingEntry (const NTV2RoutingEntry & inEntry));
-		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
-		NTV2_DEPRECATED(AJA_VIRTUAL void					AddSignalRouting (const CNTV2SignalRouter & inRouter));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddRoutingEntry (const NTV2RoutingEntry & inEntry));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(void					AddSignalRouting (const CNTV2SignalRouter & inRouter));
 
 
-		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddXena2Routing (const NTV2RoutingEntry & inEntry));
-		NTV2_DEPRECATED(AJA_VIRTUAL AutoCircGenericTask *	AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
-		NTV2_DEPRECATED(AJA_VIRTUAL void					CopyXena2Routing (const CNTV2SignalRouter * pInRouter));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddXena2Routing (const NTV2RoutingEntry & inEntry));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
+		AJA_VIRTUAL NTV2_DEPRECATED_f(void					CopyXena2Routing (const CNTV2SignalRouter * pInRouter));
 		// dump the task list to debug output
-		NTV2_DEPRECATED(AJA_VIRTUAL void					DumpTaskList (void) const);
+		AJA_VIRTUAL NTV2_DEPRECATED_f(void					DumpTaskList (void) const);
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	// add time code write

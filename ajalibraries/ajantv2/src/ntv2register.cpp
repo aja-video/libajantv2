@@ -4503,16 +4503,8 @@ bool CNTV2Card::GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWo
 	{
 		if (valueA)
 		{
-			if (_boardID == BOARD_ID_XENA2)
-			{
-				if (!ReadRegister (kRegSDIOut1VPIDB, (ULWord*) valueA))
-					return false;
-			}
-			else
-			{
-				if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
-					return false;
-			}
+			if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
+				return false;
 		}
 		if(valueB)
 		{
@@ -5755,7 +5747,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		break;
 
 	case 1:	
-		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetHDMIInputVideoFormat();
 		else if (boardID == DEVICE_ID_LHE_PLUS)
 			result = GetAnalogInputVideoFormat();
@@ -5766,7 +5758,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 	case 2:
 		if (boardID == DEVICE_ID_IOXT)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
 			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
@@ -5837,7 +5829,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 		if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 		{
 			//This is a hack, LHI does not have a second input
-			if ((_boardID == DEVICE_ID_LHI || _boardID == BOARD_ID_LHI_DVI || _boardID == BOARD_ID_LHI_T) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+			if ((_boardID == DEVICE_ID_LHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5845,7 +5837,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 					(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 					progressivePicture);												//progressive picture
 			}
-			else if (_boardID != DEVICE_ID_LHI && _boardID != BOARD_ID_LHI_DVI && _boardID != BOARD_ID_LHI_T)
+			else if (_boardID != DEVICE_ID_LHI)
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 				((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 				(status & BIT_15) >> 15,											//progressive transport
@@ -6275,106 +6267,7 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 		#if !defined (NTV2_DEPRECATE)
 		NTV2BitfileType newBitfile = NTV2_BITFILE_NO_CHANGE;
 		const char *whyString = "No change";
-		// Does support multiple bitfiles?
-		// Note: XenaHS == XenaDXT
-		if (boardID == BOARD_ID_XENA2)
-		{
-			// get the frame buffer (primary) format
-			// Note: when called from SetVideoFormat(), "newValue" is the Primary format
-			// we are about to switch to (but haven't yet). When called from other methods
-			// newValue == NTV2_FORMAT_UNKNOWN.
-			NTV2VideoFormat primaryFormat = newValue;
-			if (primaryFormat == NTV2_FORMAT_UNKNOWN)
-				GetVideoFormat(&primaryFormat);
-			
-			// get the source (secondary) format
-			NTV2VideoFormat secondaryFormat = NTV2_FORMAT_UNKNOWN;
-			GetSecondaryVideoFormat(&secondaryFormat);
-			
-			// if the Secondary Format == Primary Format, or it is SD to SD conversion
-			//if (primaryFormat != secondaryFormat )
-			{
-				// are we in capture or playback mode?
-				NTV2Mode mode = NTV2_MODE_DISPLAY;
-				GetMode(NTV2_CHANNEL1, &mode);
-				
-				int compare = 0;
-				if (mode == NTV2_MODE_CAPTURE)
-				{
-					// In Capture mode, we need to see if the current input in using an up/down-converter:
-					// if so, we do what's right for the input. If NOT, we may need to use the converter
-					// for one of the outputs.
-					
-						// get the current selected input
-					NTV2InputVideoSelect input = NTV2_Input1Select;
-					GetInputVideoSelect(&input);
-					
-						// now get the video format of the selected input
-					NTV2VideoFormat inFormat = NTV2_FORMAT_UNKNOWN;
-					if (input == NTV2_Input2Select)
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI2);	// input 2
-					else
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI1);	// input 1 or DualLink
-					
-					if ( (inFormat == secondaryFormat) && (secondaryFormat != primaryFormat) )
-					{		// we're converting the input FROM the Secondary format TO the Primary format
-						compare = FormatCompare (secondaryFormat, primaryFormat);
-					}
-					else
-					{		// we DON'T need the converter for input, so assign it according to the output needs
-						compare = FormatCompare (primaryFormat, secondaryFormat);
-					}
-				}	// Xena2 mode == Capture
-				
-				else	// Xena2 mode == Playback
-				{		// we're converting FROM the Primary format TO the Secondary format
-					compare = FormatCompare (primaryFormat, secondaryFormat);
-				}
-				
-					// which bitfile do we need?
-				bool isCrossConvert = NTV2_IS_HD_VIDEO_FORMAT(primaryFormat) && NTV2_IS_HD_VIDEO_FORMAT(secondaryFormat);
-				if (compare > 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XDCVT : NTV2_BITFILE_XENA2_DNCVT;
-				else if (compare < 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XUCVT : NTV2_BITFILE_XENA2_UPCVT;
-				else if ( primaryFormat == secondaryFormat && NTV2_IS_SD_VIDEO_FORMAT(primaryFormat) )
-					newBitfile = NTV2_BITFILE_XENA2_DNCVT;		// SD to SD conversion
-				else
-					newBitfile = NTV2_BITFILE_NO_CHANGE;
-
-				// Note: this code assumes we can read which bitfile is currently loaded (upconvert or downconvert).
-				// The Mac code is using a combination of being able to read the current BITFILE_INFO_STRUCT from
-				// the driver, and using a new field ("bitFileType") in that struct. As of this writing, our Linux
-				// code partially supports writing/reading the BITFILE_INFO (only works for systems that enable PIO),
-				// and our Windows code doesn't support it at all.
-			
-					// which bitfile is currently loaded?
-				NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-				BITFILE_INFO_STRUCT bitFileInfo;
-				memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));	// Initializing suppresses valgrind error
-				if ( DriverGetBitFileInformation(bitFileInfo, NTV2_VideoProcBitFile) )
-					currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-				
-					// do we need to make a change?
-				if ( (newBitfile != NTV2_BITFILE_NO_CHANGE) && (newBitfile != currentBitfile) )
-				{
-					result = newBitfile;
-					
-					if (result == NTV2_BITFILE_XENA2_DNCVT)
-						whyString = "Change to down converter";
-					else if (result == NTV2_BITFILE_XENA2_UPCVT)
-						whyString = "Change to upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XDCVT)
-						whyString = "Change to cross down upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XUCVT)
-						whyString = "Change to cross up upconverter";
-				}
-				if (ajaRetail == false)
-					result = NTV2_BITFILE_NO_CHANGE;
-					
-			}	// if (primaryFormat != secondaryFormat)
-		} // if (boardID == BOARD_ID_XENA2)
-		#else	//	!defined (NTV2_DEPRECATE)
+		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
 			(void) newValue;
 			(void) ajaRetail;
@@ -7034,17 +6927,6 @@ bool CNTV2Card::SetConversionMode (NTV2ConversionMode mode)
 	}
 	SetConverterPulldown( isPulldown );
 	SetDeinterlaceMode(isDeinterlace);
-
-	#if !defined (NTV2_DEPRECATE)
-		// which bitfile is currently loaded?
-		NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-		BITFILE_INFO_STRUCT bitFileInfo;
-		if ( DriverGetBitFileInformation(bitFileInfo) )
-			currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-
-		if (GetDeviceID () == BOARD_ID_XENA2 && desiredX2BitFile != currentBitfile)
-			SwitchBitfile (BOARD_ID_XENA2, desiredX2BitFile);
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	return true;
 

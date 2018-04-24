@@ -3722,12 +3722,12 @@ bool NTV2DeviceHasNWL (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONA1:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_KONALHI:
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_IOIP_2022:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_CORVID3G:
@@ -4243,7 +4243,6 @@ bool NTV2DeviceHasXilinxDMA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IOIP_2022:
 		case DEVICE_ID_IOIP_2110:
-		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAHDMI:
 			return true;
 	#if defined(_DEBUG)
@@ -4255,6 +4254,7 @@ bool NTV2DeviceHasXilinxDMA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONA1:
 		case DEVICE_ID_KONAIP_2022:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONA4:

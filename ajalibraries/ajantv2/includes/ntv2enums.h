@@ -44,15 +44,6 @@ typedef enum
     DEVICETYPE_MAX=256
     #if !defined (NTV2_DEPRECATE)
         ,BOARDTYPE_UNKNOWN	= DEVICETYPE_UNKNOWN,
-        BOARDTYPE_HDNTV		= 1,
-        BOARDTYPE_KSD		= 2,	// SD only
-        BOARDTYPE_KHD		= 4,	// HD only
-        BOARDTYPE_AJAXENA2	= 8,	// SD and HD
-        BOARDTYPE_AJAKONA	= 8,	// SD and HD
-        BOARDTYPE_KONA2		= 16,	// deprecated.
-        BOARDTYPE_KONAX		= 32,	// deprecated.
-        BOARDTYPE_FS1		= 64,	// SD and HD
-        BOARDTYPE_BORG		= 128,	// SD and HD
         BOARDTYPE_NTV2		= DEVICETYPE_NTV2,
         BOARDTYPE_MAX		= DEVICETYPE_MAX
     #endif	//	!defined (NTV2_DEPRECATE)
@@ -61,16 +52,10 @@ typedef enum
 
 #if !defined (NTV2_DEPRECATE)
     typedef NTV2DeviceType	NTV2BoardType;
-    #define BOARDTYPE_SCANNABLE					(BOARDTYPE_KSD | BOARDTYPE_KHD | BOARDTYPE_AJAKONA | BOARDTYPE_FS1 | BOARDTYPE_BORG | BOARDTYPE_NTV2)
-#else
-    #define BOARDTYPE_SCANNABLE					(BOARDTYPE_NTV2)
+	#define BOARDTYPE_SCANNABLE					(BOARDTYPE_NTV2)
+	#define BOARDTYPE_AS_COMPILED				(DEVICETYPE_NTV2)
 #endif
 
-#if defined XENA2
-    #define BOARDTYPE_AS_COMPILED               (BOARDTYPE_AJAXENA2)
-#else
-    #define BOARDTYPE_AS_COMPILED				(DEVICETYPE_NTV2)
-#endif
 
 /**
     @brief	Identifies a specific AJA NTV2 device model number.
@@ -79,55 +64,6 @@ typedef enum
 **/
 typedef enum
 {
-#if !defined (NTV2_DEPRECATE)
-    BOARD_ID_XENA_SD		= 0x10133700,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_SD22		= 0x10152100,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_HD		= 0x10133900,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_HD22		= 0x10148300,		///< @deprecated	Obsolete.
-    BOARD_ID_HDNTV2			= 0x10156100,		///< @deprecated	Obsolete.
-    BOARD_ID_KSD11			= 0x10114400,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_SD_MM		= BOARD_ID_KSD11,	///< @deprecated	Obsolete.
-    BOARD_ID_KSD22			= 0x10128600,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_SD22_MM	= BOARD_ID_KSD22, 	///< @deprecated	Obsolete.
-    BOARD_ID_KHD11			= 0x10113800,		///< @deprecated	Obsolete.
-    BOARD_ID_XENA_HD_MM		= BOARD_ID_KHD11,	///< @deprecated	Obsolete.
-    BOARD_ID_XENA_HD22_MM	= 0x10160100,		///< @deprecated	Obsolete.
-    BOARD_ID_HDNTV2_MM		= 0x10160200,		///< @deprecated	Obsolete.
-    BOARD_ID_KONA_SD		= 0x10111900,		///< @deprecated	Obsolete.
-    BOARD_ID_KONA_HD		= 0x10120900,		///< @deprecated	Obsolete.
-    BOARD_ID_KONA_HD2		= 0x10120901,		///< @deprecated	Obsolete.		//	Mac version of the KonaR
-    BOARD_ID_KONAR			= 0x10133901,		///< @deprecated	Obsolete.		//	PC version of KonaR (revisited)
-    BOARD_ID_KONAR_MM		= 0x10113801,		///< @deprecated	Obsolete.
-    BOARD_ID_KONA2			= 0x10174700,		///< @deprecated	Obsolete.
-    BOARD_ID_HDNTV			= 0,				///< @deprecated	Obsolete.		//	Not strictly true, this is an alias of HDNTV's Register 19, which
-                                                                                    //	is an unused register that's initialized to 0
-    BOARD_ID_KONALS			= 0x10183400,		///< @deprecated	Obsolete.
-    BOARD_ID_XENALS			= BOARD_ID_KONALS,	///< @deprecated	Obsolete.
-    BOARD_ID_KONAHDS		= 0x10184500,		///< @deprecated	Obsolete.
-    BOARD_ID_KONALH			= BOARD_ID_KONAHDS,	///< @deprecated	Obsolete.
-    BOARD_ID_XENALH			= BOARD_ID_KONAHDS,	///< @deprecated	Obsolete.
-    BOARD_ID_XENADXT		= 0x10182800,		///< @deprecated	Obsolete.
-    BOARD_ID_XENAHS			= BOARD_ID_XENADXT,	///< @deprecated	Obsolete.
-    BOARD_ID_KONAX			= 0x10203000,		///< @deprecated	Obsolete.
-    BOARD_ID_XENAX			= 0x10212300,		///< @deprecated	Obsolete.
-    BOARD_ID_XENAHS2		= 0x10182801,		///< @deprecated	Obsolete.		//	XenaHS replacement
-    BOARD_ID_FS1			= 0x10207701,		///< @deprecated	Obsolete.
-    BOARD_ID_FS2			= 0x10301200,		///< @deprecated	Obsolete.
-    BOARD_ID_MOAB			= 0x10224000,		///< @deprecated	Obsolete.
-    BOARD_ID_XENAX2			= 0x10212304,		///< @deprecated	Obsolete.
-    BOARD_ID_BORG			= 0x10244100,		///< @deprecated	Obsolete.
-    BOARD_ID_BONES			= 0x10327200,		///< @deprecated	Obsolete.
-    BOARD_ID_BARCLAY		= 0x10355900, 		///< @deprecated	Obsolete.
-    BOARD_ID_KIPRO_QUAD		= 0x10393100, 		///< @deprecated	Obsolete.
-    BOARD_ID_KIPRO_SPARE1	= 0x10424900, 		///< @deprecated	Obsolete.
-    BOARD_ID_KIPRO_SPARE2	= 0x10425000, 		///< @deprecated	Obsolete.
-    BOARD_ID_FORGE			= 0x10363700, 		///< @deprecated	Obsolete.
-    BOARD_ID_XENA2			= 0x10196500,		///< @deprecated	Obsolete.
-    BOARD_ID_KONA3			= BOARD_ID_XENA2,	///< @deprecated	Obsolete.
-    BOARD_ID_LHI_DVI		= 0x10266401,		///< @deprecated	Obsolete.
-    BOARD_ID_LHI_T			= 0x10266402,		///< @deprecated	Obsolete.
-#endif	//	NTV2_DEPRECATE
-
     DEVICE_ID_CORVID1					= 0x10244800,
     DEVICE_ID_CORVID22					= 0x10293000,
     DEVICE_ID_CORVID24					= 0x10402100,
@@ -163,6 +99,7 @@ typedef enum
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
+#if !defined (NTV2_DEPRECATE_14_0)
     DEVICE_ID_LHE_PLUS				= DEVICE_ID_KONALHEPLUS,	//	Will deprecate eventually
     DEVICE_ID_LHI					= DEVICE_ID_KONALHI,		//	Will deprecate eventually
     DEVICE_ID_LHI_DVI				= DEVICE_ID_KONALHIDVI,		//	Will deprecate eventually
@@ -170,30 +107,8 @@ typedef enum
     DEVICE_ID_KONAIP4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
     DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,    //	Will deprecate eventually
     DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
+#endif	//	NTV2_DEPRECATE_14_0
     DEVICE_ID_NOTFOUND				= -1
-
-#if !defined (NTV2_DEPRECATE)
-    //	These will probably go away in the SDK 13 epoch...
-    ,BOARD_ID_CORVID1		= DEVICE_ID_CORVID1,	///< @deprecated	Use DEVICE_ID_CORVID1 instead.
-    BOARD_ID_CORVID22		= DEVICE_ID_CORVID22,	///< @deprecated	Use DEVICE_ID_CORVID22 instead.
-    BOARD_ID_CORVID24		= DEVICE_ID_CORVID24,	///< @deprecated	Use DEVICE_ID_CORVID24 instead.
-    BOARD_ID_CORVID3G		= DEVICE_ID_CORVID3G,	///< @deprecated	Use DEVICE_ID_CORVID3G instead.
-    BOARD_ID_CORVID44		= DEVICE_ID_CORVID44,	///< @deprecated	Use DEVICE_ID_CORVID44 instead.
-    BOARD_ID_CORVID88		= DEVICE_ID_CORVID88,	///< @deprecated	Use DEVICE_ID_CORVID88 instead.
-    BOARD_ID_IO4K			= DEVICE_ID_IO4K,		///< @deprecated	Use DEVICE_ID_IO4K instead.
-    BOARD_ID_IO4KUFC		= DEVICE_ID_IO4KUFC,	///< @deprecated	Use DEVICE_ID_IO4KUFC instead.
-    BOARD_ID_IOEXPRESS		= DEVICE_ID_IOEXPRESS,	///< @deprecated	Use DEVICE_ID_IOEXPRESS instead.
-    BOARD_ID_IOXT			= DEVICE_ID_IOXT,		///< @deprecated	Use DEVICE_ID_IOXT instead.
-    BOARD_ID_KONA3G			= DEVICE_ID_KONA3G,		///< @deprecated	Use DEVICE_ID_KONA3G instead.
-    BOARD_ID_KONA3GQUAD		= DEVICE_ID_KONA3GQUAD,	///< @deprecated	Use DEVICE_ID_KONA3GQUAD instead.
-    BOARD_ID_KONA4			= DEVICE_ID_KONA4,		///< @deprecated	Use DEVICE_ID_KONA4 instead.
-    BOARD_ID_KONA4UFC		= DEVICE_ID_KONA4UFC,	///< @deprecated	Use DEVICE_ID_KONA4UFC instead.
-    BOARD_ID_LHE_PLUS		= DEVICE_ID_LHE_PLUS,	///< @deprecated	Use DEVICE_ID_LHE_PLUS instead.
-    BOARD_ID_LHI			= DEVICE_ID_LHI,		///< @deprecated	Use DEVICE_ID_LHI instead.
-    BOARD_ID_TTAP			= DEVICE_ID_TTAP,		///< @deprecated	Use DEVICE_ID_TTAP instead.
-    BOARD_ID_NOTFOUND		= DEVICE_ID_NOTFOUND	///< @deprecated	Use DEVICE_ID_NOTFOUND instead.
-
-#endif	//	!defined (NTV2_DEPRECATE)
 
 } NTV2DeviceID;
 
@@ -321,15 +236,15 @@ typedef enum
 
 
 #if !defined(NTV2_DEPRECATE_14_0)
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ,					NTV2_FBF_8BIT_YCBCR_420PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL3 instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN,	NTV2_FBF_10BIT_DPX_LE);			///< @deprecated	Use NTV2_FBF_10BIT_DPX_LE instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_23,					NTV2_FBF_8BIT_YCBCR_422PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL3 instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_26,					NTV2_FBF_10BIT_YCBCR_420PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL3_LE instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_27,					NTV2_FBF_10BIT_YCBCR_422PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL3_LE instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_420PL,			NTV2_FBF_10BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL2 instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_422PL,			NTV2_FBF_10BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL2 instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_420PL,			NTV2_FBF_8BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL2 instead.
-NTV2_DEPRECATED_VAR(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_422PL,			NTV2_FBF_8BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL2 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ,					NTV2_FBF_8BIT_YCBCR_420PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL3 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN,	NTV2_FBF_10BIT_DPX_LE);			///< @deprecated	Use NTV2_FBF_10BIT_DPX_LE instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_23,					NTV2_FBF_8BIT_YCBCR_422PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL3 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_26,					NTV2_FBF_10BIT_YCBCR_420PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL3_LE instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_27,					NTV2_FBF_10BIT_YCBCR_422PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL3_LE instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_420PL,			NTV2_FBF_10BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL2 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_422PL,			NTV2_FBF_10BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL2 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_420PL,			NTV2_FBF_8BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL2 instead.
+	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_422PL,			NTV2_FBF_8BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL2 instead.
 #endif	//	NTV2_DEPRECATE_14_0
 
 
@@ -637,20 +552,20 @@ typedef enum _NTV2VideoFormat
 
 
 #if !defined(NTV2_DEPRECATE_14_1)
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080psf_2500,			NTV2_FORMAT_1080i_5000);		///< @deprecated	Use NTV2_FORMAT_1080i_5000 instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080psf_2997,			NTV2_FORMAT_1080i_5994);		///< @deprecated	Use NTV2_FORMAT_1080i_5994 instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080psf_3000,			NTV2_FORMAT_1080i_6000);		///< @deprecated	Use NTV2_FORMAT_1080i_6000 instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_525_5994,	NTV2_FORMAT_1080p_2K_2398);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2398 instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_625_5000,	NTV2_FORMAT_1080p_2K_2400);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2400 instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_5000,			NTV2_FORMAT_1080p_5000_B);		///< @deprecated	Use NTV2_FORMAT_1080p_5000_B instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_5994,			NTV2_FORMAT_1080p_5994_B);		///< @deprecated	Use NTV2_FORMAT_1080p_5994_B instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_6000,			NTV2_FORMAT_1080p_6000_B);		///< @deprecated	Use NTV2_FORMAT_1080p_6000_B instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_2500,			NTV2_FORMAT_1080i_5000);		///< @deprecated	Use NTV2_FORMAT_1080i_5000 instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_2997,			NTV2_FORMAT_1080i_5994);		///< @deprecated	Use NTV2_FORMAT_1080i_5994 instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_3000,			NTV2_FORMAT_1080i_6000);		///< @deprecated	Use NTV2_FORMAT_1080i_6000 instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_525_5994,	NTV2_FORMAT_1080p_2K_2398);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2398 instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_625_5000,	NTV2_FORMAT_1080p_2K_2400);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_2400 instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_5000,			NTV2_FORMAT_1080p_5000_B);		///< @deprecated	Use NTV2_FORMAT_1080p_5000_B instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_5994,			NTV2_FORMAT_1080p_5994_B);		///< @deprecated	Use NTV2_FORMAT_1080p_5994_B instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_6000,			NTV2_FORMAT_1080p_6000_B);		///< @deprecated	Use NTV2_FORMAT_1080p_6000_B instead.
 
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_1080p_2K_6000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000_A instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_1080p_2K_5994_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994_A instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_1080p_2K_5000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000_A instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795,		NTV2_FORMAT_1080p_2K_4795_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795_A instead.
-	NTV2_DEPRECATED_VAR(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800,		NTV2_FORMAT_1080p_2K_4800_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800_A instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_1080p_2K_6000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000_A instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_1080p_2K_5994_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994_A instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_1080p_2K_5000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000_A instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795,		NTV2_FORMAT_1080p_2K_4795_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795_A instead.
+	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800,		NTV2_FORMAT_1080p_2K_4800_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800_A instead.
 #endif	//	NTV2_DEPRECATE_14_1
 
 #define NTV2_IS_VALID_VIDEO_FORMAT(__f__)							\
@@ -959,27 +874,27 @@ typedef enum
 } NTV2InputSource;
 
 #if !defined (NTV2_DEPRECATE_14_1)
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_ANALOG,	NTV2_INPUTSOURCE_ANALOG1);	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_HDMI,	NTV2_INPUTSOURCE_HDMI1);	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_ANALOG,	NTV2_INPUTSOURCE_ANALOG1);	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_HDMI,	NTV2_INPUTSOURCE_HDMI1);	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
 #endif
 #if !defined (NTV2_DEPRECATE)
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK1,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK2,	NTV2_INPUTSOURCE_SDI2);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK3,	NTV2_INPUTSOURCE_SDI3);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK4,	NTV2_INPUTSOURCE_SDI4);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK5,	NTV2_INPUTSOURCE_SDI5);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK6,	NTV2_INPUTSOURCE_SDI6);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK7,	NTV2_INPUTSOURCE_SDI7);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK8,	NTV2_INPUTSOURCE_SDI8);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI1_DS2,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI2_DS2,	NTV2_INPUTSOURCE_SDI2);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI3_DS2,	NTV2_INPUTSOURCE_SDI3);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI4_DS2,	NTV2_INPUTSOURCE_SDI4);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI5_DS2,	NTV2_INPUTSOURCE_SDI5);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI6_DS2,	NTV2_INPUTSOURCE_SDI6);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI7_DS2,	NTV2_INPUTSOURCE_SDI7);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
-	NTV2_DEPRECATED_VAR(const NTV2InputSource NTV2_INPUTSOURCE_SDI8_DS2,	NTV2_INPUTSOURCE_SDI8);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK1,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK2,	NTV2_INPUTSOURCE_SDI2);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK3,	NTV2_INPUTSOURCE_SDI3);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK4,	NTV2_INPUTSOURCE_SDI4);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK5,	NTV2_INPUTSOURCE_SDI5);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK6,	NTV2_INPUTSOURCE_SDI6);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK7,	NTV2_INPUTSOURCE_SDI7);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK8,	NTV2_INPUTSOURCE_SDI8);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI1_DS2,	NTV2_INPUTSOURCE_SDI1);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI2_DS2,	NTV2_INPUTSOURCE_SDI2);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI3_DS2,	NTV2_INPUTSOURCE_SDI3);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI4_DS2,	NTV2_INPUTSOURCE_SDI4);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI5_DS2,	NTV2_INPUTSOURCE_SDI5);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI6_DS2,	NTV2_INPUTSOURCE_SDI6);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI7_DS2,	NTV2_INPUTSOURCE_SDI7);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
+	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI8_DS2,	NTV2_INPUTSOURCE_SDI8);	///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
 #endif
 
 #define	NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_HDMI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_HDMI4)

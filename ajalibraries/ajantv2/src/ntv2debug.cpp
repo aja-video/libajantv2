@@ -30,53 +30,6 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 {
 	switch (id)
 	{
-	#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_XENA_SD:
-		case BOARD_ID_XENA_SD22:
-		case BOARD_ID_XENA_HD:
-		case BOARD_ID_XENA_HD22:
-		case BOARD_ID_HDNTV2:
-		case BOARD_ID_KSD11:
-		//case BOARD_ID_XENA_SD_MM:
-		case BOARD_ID_KSD22:
-		//case BOARD_ID_XENA_SD22_MM:
-		case BOARD_ID_KHD11:
-		//case BOARD_ID_XENA_HD_MM:
-		case BOARD_ID_XENA_HD22_MM:
-		case BOARD_ID_HDNTV2_MM:
-		case BOARD_ID_KONA_SD:
-		case BOARD_ID_KONA_HD:
-		case BOARD_ID_KONA_HD2:
-		case BOARD_ID_KONAR:
-		case BOARD_ID_KONAR_MM:
-		case BOARD_ID_KONA2:
-		case BOARD_ID_HDNTV:
-		case BOARD_ID_KONALS:
-		//case BOARD_ID_XENALS:
-		case BOARD_ID_KONAHDS:
-		//case BOARD_ID_KONALH:
-		//case BOARD_ID_XENALH:
-		case BOARD_ID_XENADXT:
-		//case BOARD_ID_XENAHS:
-		case BOARD_ID_KONAX:
-		case BOARD_ID_XENAX:
-		case BOARD_ID_XENAHS2:
-		case BOARD_ID_FS1:
-		case BOARD_ID_FS2:
-		case BOARD_ID_MOAB:
-		case BOARD_ID_XENAX2:
-		case BOARD_ID_BORG:
-		case BOARD_ID_BONES:
-		case BOARD_ID_BARCLAY:
-		case BOARD_ID_KIPRO_QUAD:
-		case BOARD_ID_KIPRO_SPARE1:
-		case BOARD_ID_KIPRO_SPARE2:
-		case BOARD_ID_FORGE:			break;
-
-		//case BOARD_ID_KONA3:
-        case BOARD_ID_XENA2:						return "BOARD_ID_KONA3";						break;
-        case BOARD_ID_LHI_T:						return "BOARD_ID_LHI_T";						break;
-	#endif	//	!defined (NTV2_DEPRECATE)
         case DEVICE_ID_KONALHI:						return "DEVICE_ID_KONALHI";
         case DEVICE_ID_KONALHIDVI:					return "DEVICE_ID_KONALHIDVI";
         case DEVICE_ID_IOEXPRESS:					return "DEVICE_ID_IOEXPRESS";
@@ -119,53 +72,6 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 {
 	switch (id)
 	{
-	#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_XENA_SD:
-		case BOARD_ID_XENA_SD22:
-		case BOARD_ID_XENA_HD:
-		case BOARD_ID_XENA_HD22:
-		case BOARD_ID_HDNTV2:
-		case BOARD_ID_KSD11:
-		//case BOARD_ID_XENA_SD_MM:
-		case BOARD_ID_KSD22:
-		//case BOARD_ID_XENA_SD22_MM:
-		case BOARD_ID_KHD11:
-		//case BOARD_ID_XENA_HD_MM:
-		case BOARD_ID_XENA_HD22_MM:
-		case BOARD_ID_HDNTV2_MM:
-		case BOARD_ID_KONA_SD:
-		case BOARD_ID_KONA_HD:
-		case BOARD_ID_KONA_HD2:
-		case BOARD_ID_KONAR:
-		case BOARD_ID_KONAR_MM:
-		case BOARD_ID_KONA2:
-		case BOARD_ID_HDNTV:
-		case BOARD_ID_KONALS:
-		//case BOARD_ID_XENALS:
-		case BOARD_ID_KONAHDS:
-		//case BOARD_ID_KONALH:
-		//case BOARD_ID_XENALH:
-		case BOARD_ID_XENADXT:
-		//case BOARD_ID_XENAHS:
-		case BOARD_ID_KONAX:
-		case BOARD_ID_XENAX:
-		case BOARD_ID_XENAHS2:
-		case BOARD_ID_FS1:
-		case BOARD_ID_FS2:
-		case BOARD_ID_MOAB:
-		case BOARD_ID_XENAX2:
-		case BOARD_ID_BORG:
-		case BOARD_ID_BONES:
-		case BOARD_ID_BARCLAY:
-		case BOARD_ID_KIPRO_QUAD:
-		case BOARD_ID_KIPRO_SPARE1:
-		case BOARD_ID_KIPRO_SPARE2:
-		case BOARD_ID_FORGE:			break;
-
-		//case BOARD_ID_KONA3:
-		case BOARD_ID_XENA2:						return "Kona3";						break;
-		case BOARD_ID_LHI_T:						return "KonaLHiT";					break;
-	#endif	//	!defined (NTV2_DEPRECATE)
 		case DEVICE_ID_KONALHI:						return "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:					return "KonaLHiDVI";
 		case DEVICE_ID_IOEXPRESS:					return "IoExpress";

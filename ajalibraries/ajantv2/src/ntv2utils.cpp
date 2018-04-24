@@ -4109,9 +4109,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	switch (inValue)
 	{
 	#if defined (AJAMac) || defined (MSWindows)
-        #if !defined (NTV2_DEPRECATE)	//                          Retail Name                 Nickname (for dev purposes)
-        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"KONA 3"                    : "Kona3";
-		#endif	//	!defined (NTV2_DEPRECATE)
         case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "KonaLHi";
         case DEVICE_ID_KONALHIDVI:              return inForRetailDisplay ?	"KONA LHi DVI"              : "KonaLHiDVI";
 	#endif
@@ -4141,9 +4138,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOXT:                    return inForRetailDisplay ?	"IoXT"                      : "IoXT";
         case DEVICE_ID_CORVID24:                return inForRetailDisplay ?	"Corvid 24"                 : "Corvid24";
         case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-Tap"                     : "TTap";
-		#if !defined (NTV2_DEPRECATE)
-        case BOARD_ID_LHI_T:                    return inForRetailDisplay ?	"KONA LHi T"                : "KonaLHiT";
-		#endif	//	!defined (NTV2_DEPRECATE)
 		case DEVICE_ID_IO4K:					return inForRetailDisplay ?	"Io4K"						: "Io4K";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ?	"Io4K UFC"					: "Io4KUfc";
 		case DEVICE_ID_KONA4:					return inForRetailDisplay ?	"KONA 4"					: "Kona4";
@@ -4180,10 +4174,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 
 	NTV2BoardType GetNTV2BoardTypeForBoardID (NTV2BoardID inBoardID)
 	{
-		if (inBoardID == BOARD_ID_XENA2)
-			return BOARDTYPE_AJAXENA2;
-		else
-			return BOARDTYPE_NTV2;
+		return BOARDTYPE_NTV2;
 	}
 
 	void GetNTV2BoardString (NTV2BoardID inBoardID, string & outName)
@@ -7311,53 +7302,6 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	#else
 		switch (inBoardID)
 		{
-		#if !defined (NTV2_DEPRECATE)
-			case BOARD_ID_XENA_SD:
-			case BOARD_ID_XENA_SD22:
-			case BOARD_ID_XENA_HD:
-			case BOARD_ID_XENA_HD22:
-			case BOARD_ID_HDNTV2:
-			case BOARD_ID_KSD11:
-			//case BOARD_ID_XENA_SD_MM:
-			case BOARD_ID_KSD22:
-			//case BOARD_ID_XENA_SD22_MM:
-			case BOARD_ID_KHD11:
-			//case BOARD_ID_XENA_HD_MM:
-			case BOARD_ID_XENA_HD22_MM:
-			case BOARD_ID_HDNTV2_MM:
-			case BOARD_ID_KONA_SD:
-			case BOARD_ID_KONA_HD:
-			case BOARD_ID_KONA_HD2:
-			case BOARD_ID_KONAR:
-			case BOARD_ID_KONAR_MM:
-			case BOARD_ID_KONA2:
-			case BOARD_ID_HDNTV:
-			case BOARD_ID_KONALS:
-			//case BOARD_ID_XENALS:
-			case BOARD_ID_KONAHDS:
-			//case BOARD_ID_KONALH:
-			//case BOARD_ID_XENALH:
-			case BOARD_ID_XENADXT:
-			//case BOARD_ID_XENAHS:
-			case BOARD_ID_KONAX:
-			case BOARD_ID_XENAX:
-			case BOARD_ID_XENAHS2:
-			case BOARD_ID_FS1:
-			case BOARD_ID_FS2:
-			case BOARD_ID_MOAB:
-			case BOARD_ID_XENAX2:
-			case BOARD_ID_BORG:
-			case BOARD_ID_BONES:
-			case BOARD_ID_BARCLAY:
-			case BOARD_ID_KIPRO_QUAD:
-			case BOARD_ID_KIPRO_SPARE1:
-			case BOARD_ID_KIPRO_SPARE2:
-			case BOARD_ID_FORGE:
-			case BOARD_ID_XENA2:
-			//case BOARD_ID_KONA3:
-			case BOARD_ID_LHI_DVI:
-			case BOARD_ID_LHI_T:
-		#endif	//	!defined (NTV2_DEPRECATE)
 			case DEVICE_ID_NOTFOUND:					break;
 			case DEVICE_ID_CORVID1:						return "corvid1pcie.bit";
 			case DEVICE_ID_CORVID22:					return "Corvid22.bit";

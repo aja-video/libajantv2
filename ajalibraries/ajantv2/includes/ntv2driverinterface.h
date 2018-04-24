@@ -224,8 +224,8 @@ public:
 
     // Utility methods:
 	#if !defined (NTV2_DEPRECATE)
-		NTV2_DEPRECATED(AJA_VIRTUAL NTV2BoardType	GetCompileFlag (void));
-		virtual NTV2_DEPRECATED_INLINE inline bool			BoardOpened (void) const		{ return IsOpen (); }
+		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2BoardType	GetCompileFlag (void));
+		virtual inline NTV2_DEPRECATED_f(bool		BoardOpened (void) const)		{ return IsOpen (); }
 	#endif	//	!NTV2_DEPRECATE
 
 	/**
@@ -252,7 +252,7 @@ public:
 
 	// Functions for cards that support more than one bitfile
 
-	virtual inline NTV2_DEPRECATED_INLINE bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile)		{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
+	virtual inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual inline const char *	GetHostName (void) const							{ return _hostname.c_str (); }
@@ -267,7 +267,7 @@ public:
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 protected:
-	virtual inline NTV2_DEPRECATED_INLINE bool			DisplayNTV2Error (const char * str)		{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
+	virtual inline NTV2_DEPRECATED_f(bool	DisplayNTV2Error (const char * str))	{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual bool				OpenRemote (UWord inDeviceIndex,
 											bool displayErrorMessage,

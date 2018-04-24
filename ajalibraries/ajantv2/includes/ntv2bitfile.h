@@ -43,7 +43,7 @@ class AJAExport CNTV2Bitfile
 		virtual bool						Open (const std::string & inBitfilePath);
 
 		#if !defined (NTV2_DEPRECATE)
-			virtual NTV2_DEPRECATED	bool	Open (const char * const & inBitfilePath);	///< @deprecated	Use the std::string version of Open instead.
+			virtual NTV2_DEPRECATED_f(bool	Open (const char * const & inBitfilePath));	///< @deprecated	Use the std::string version of Open instead.
 		#endif	//	!defined (NTV2_DEPRECATE)
 
 		/**

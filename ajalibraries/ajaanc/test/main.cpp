@@ -12,8 +12,8 @@
 #include "ancillarydata_cea708.h"
 #include "ancillarydata_hdr_hlg.h"
 #include "ancillarylist.h"
-#include "ntv2smpteancdata.h"
-#include "ntv2captionlogging.h"
+#include "ajacc/includes/ntv2smpteancdata.h"
+#include "ajacc/includes/ntv2captionlogging.h"
 #include <iomanip>
 #if defined(AJA_LINUX)
 	#include <string.h>

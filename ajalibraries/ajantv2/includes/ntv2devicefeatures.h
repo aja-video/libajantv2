@@ -99,62 +99,62 @@ AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2
 AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);
 AJAExport NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);
-NTV2_DEPRECATED(AJAExport UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID));		///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
-NTV2_DEPRECATED(AJAExport bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
-NTV2_DEPRECATED(AJAExport bool NTV2DeviceCanDoLTCOutN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCOutputs instead.
-NTV2_DEPRECATED(AJAExport bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCInputs instead.
-NTV2_DEPRECATED(AJAExport bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inChannel));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumSerialPorts instead.
+AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID));		///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
+AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
+AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCOutputs instead.
+AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCInputs instead.
+AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inChannel));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumSerialPorts instead.
 
 #if !defined (NTV2_DEPRECATE)
-	NTV2_DEPRECATED(AJAExport	bool NTV2DeviceCanDoProAudio (NTV2DeviceID boardID));											///< @deprecated	This function is obsolete.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoProcAmp(NTV2DeviceID boardID));												///< @deprecated	This function is obsolete.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoBrightnessAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoContrastAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoSaturationAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoHueAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));		///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoProAudio (NTV2DeviceID boardID));											///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoProcAmp(NTV2DeviceID boardID));												///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoBrightnessAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoContrastAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoSaturationAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));	///< @deprecated	This function is obsolete.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoHueAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode));		///< @deprecated	This function is obsolete.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio5 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio6 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio7 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoAudio8 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio5 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio6 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio7 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoAudio8 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoAudioN instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3G (NTV2DeviceID boardID));					///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut5 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut6 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut7 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDo3GOut8 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3G (NTV2DeviceID boardID));					///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut5 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut6 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut7 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDo3GOut8 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDo3GOut instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCOut (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCOutN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCOut2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCOutN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCOut (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCOutN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCOut2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCOutN instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoMixer2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoMixer3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoMixer4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoMixer2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoMixer3 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoMixer4 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceGetNumMixers instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoUART (NTV2DeviceID boardID));					///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoUART2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoUART (NTV2DeviceID boardID));					///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoUART2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCIn (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCInN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCIn2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCInN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCIn (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCInN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCIn2 (NTV2DeviceID boardID));				///< @deprecated	Use NTV2DeviceCanDoLTCInN instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded2 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded3 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded4 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded5 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded6 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded7 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoLTCEmbedded8 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded2 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded3 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded4 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded5 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded6 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded7 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoLTCEmbedded8 (NTV2DeviceID boardID));			///< @deprecated	Use NTV2DeviceCanDoLTCEmbeddedN instead.
 
-	NTV2_DEPRECATED(AJAExport	bool NTV2BoardCanDoUARTN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
-	NTV2_DEPRECATED(AJAExport	bool NTV2DeviceCanDoUARTN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2BoardCanDoUARTN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoUARTN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Use NTV2DeviceCanDoRS422N instead.
 #endif	//	!defined (NTV2_DEPRECATE)
 
 #if 1	//	NOTE:  THESE WILL BE UNDEFINED WITH NTV2_DEPRECATE STARTING WITH SDK 13.0

@@ -7377,7 +7377,7 @@ typedef enum
 				**/
 				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.acAudioTransferSize;}
 
-				NTV2_DEPRECATED_INLINE inline ULWord	GetAudioByteCount (void) const					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
+				inline NTV2_DEPRECATED_f(ULWord	GetAudioByteCount (void) const)					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
 
 				/**
 					@brief	Returns the number of actual ancillary data bytes that were transferred.

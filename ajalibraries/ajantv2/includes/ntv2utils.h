@@ -117,8 +117,8 @@ AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, 
 
 
 #if !defined (NTV2_DEPRECATE)
-	AJAExport NTV2_DEPRECATED	void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels);	///< @deprecated	Replaced by UnpackLine_10BitYUVto16BitYUV.
-	AJAExport NTV2_DEPRECATED	void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);		///< @deprecated	Replaced by PackLine_16BitYUVto10BitYUV.
+	AJAExport NTV2_DEPRECATED_f(void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels));	///< @deprecated	Replaced by UnpackLine_10BitYUVto16BitYUV.
+	AJAExport NTV2_DEPRECATED_f(void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels));		///< @deprecated	Replaced by PackLine_16BitYUVto10BitYUV.
 #endif	//	NTV2_DEPRECATE
 
 /**
@@ -928,19 +928,19 @@ AJAExport NTV2RegNumSet		ToRegNumSet		(const NTV2RegisterReads &	inRegReads);
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...
 #define	NTV2CrosspointIDToString	NTV2OutputCrosspointIDToString	///< @deprecated	Use NTV2OutputCrosspointIDToString
 #if !defined (NTV2_DEPRECATE)
-	AJAExport std::string NTV2V2StandardToString			(const NTV2V2Standard			inValue,	const bool inForRetailDisplay = false);
-	extern AJAExport NTV2_DEPRECATED_VARIABLE	const char *	NTV2VideoFormatStrings		[];	///< @deprecated	Use NTV2VideoFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_VARIABLE	const char *	NTV2VideoStandardStrings	[];	///< @deprecated	Use NTV2StandardToString instead.
-	extern AJAExport NTV2_DEPRECATED_VARIABLE	const char *	NTV2PixelFormatStrings		[];	///< @deprecated	Use NTV2FrameBufferFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_VARIABLE	const char *	NTV2FrameRateStrings		[];	///< @deprecated	Use NTV2FrameRateToString instead.
-	extern AJAExport NTV2_DEPRECATED_VARIABLE	const char *	frameBufferFormats			[];	///< @deprecated	Use NTV2FrameBufferFormatToString instead.
+	AJAExport NTV2_DEPRECATED_f(std::string NTV2V2StandardToString	(const NTV2V2Standard inValue,	const bool inForRetailDisplay = false));
+	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2VideoFormatStrings[]);		///< @deprecated	Use NTV2VideoFormatToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2VideoStandardStrings[]);	///< @deprecated	Use NTV2StandardToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2PixelFormatStrings[]);		///< @deprecated	Use NTV2FrameBufferFormatToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2FrameRateStrings[]);		///< @deprecated	Use NTV2FrameRateToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char *	frameBufferFormats[]);			///< @deprecated	Use NTV2FrameBufferFormatToString instead.
 
-	NTV2_DEPRECATED(AJAExport	std::string		frameBufferFormatString		(NTV2FrameBufferFormat inFrameBufferFormat));		///< @deprecated	Use NTV2FrameBufferFormatToString and pass 'true' for 'inForRetailDisplay'
-	NTV2_DEPRECATED(AJAExport	void			GetNTV2BoardString			(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString and concatenate a space instead
+	AJAExport NTV2_DEPRECATED_f(std::string		frameBufferFormatString		(NTV2FrameBufferFormat inFrameBufferFormat));		///< @deprecated	Use NTV2FrameBufferFormatToString and pass 'true' for 'inForRetailDisplay'
+	AJAExport NTV2_DEPRECATED_f(void			GetNTV2BoardString			(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString and concatenate a space instead
 
-	NTV2_DEPRECATED(AJAExport	std::string		NTV2BoardIDToString			(const NTV2BoardID inValue, const bool inForRetailDisplay = false));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
-	NTV2_DEPRECATED(AJAExport	void			GetNTV2RetailBoardString	(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
-	NTV2_DEPRECATED(AJAExport	NTV2BoardType	GetNTV2BoardTypeForBoardID	(NTV2BoardID inBoardID));							///< @deprecated	This function is obsolete because NTV2BoardType is obsolete.
+	AJAExport NTV2_DEPRECATED_f(std::string		NTV2BoardIDToString			(const NTV2BoardID inValue, const bool inForRetailDisplay = false));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
+	AJAExport NTV2_DEPRECATED_f(void			GetNTV2RetailBoardString	(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
+	AJAExport NTV2_DEPRECATED_f(NTV2BoardType	GetNTV2BoardTypeForBoardID	(NTV2BoardID inBoardID));							///< @deprecated	This function is obsolete because NTV2BoardType is obsolete.
 #endif	//	!defined (NTV2_DEPRECATE)
 
 #endif	//	NTV2UTILS_H
