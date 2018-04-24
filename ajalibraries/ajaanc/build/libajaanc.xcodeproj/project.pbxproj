@@ -499,6 +499,7 @@
 					"-lajaanc",
 					"-lajantv2d",
 					"-lajabased",
+					"-lajacc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ../../../bin;
@@ -517,6 +518,7 @@
 					"-lajaanc",
 					"-lajantv2",
 					"-lajabase",
+					"-lajacc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ../../../bin;
