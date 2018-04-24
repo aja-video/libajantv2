@@ -251,9 +251,9 @@ public:
     virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
 
 	// Functions for cards that support more than one bitfile
-
+#if !defined(NTV2_DEPRECATE_12_7)
 	virtual inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
-
+#endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual inline const char *	GetHostName (void) const							{ return _hostname.c_str (); }
 
@@ -267,7 +267,9 @@ public:
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 protected:
+#if !defined(NTV2_DEPRECATE_12_7)
 	virtual inline NTV2_DEPRECATED_f(bool	DisplayNTV2Error (const char * str))	{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
+#endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	virtual bool				OpenRemote (UWord inDeviceIndex,
 											bool displayErrorMessage,
