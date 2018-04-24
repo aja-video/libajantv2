@@ -83,43 +83,6 @@ CNTV2LinuxDriverInterface::Open(
 	const char *s = NULL;
 	switch  ( _boardType )
 	{
-	#if !defined (NTV2_DEPRECATE)
-	case BOARDTYPE_KHD:
-		s = "khd";
-		break;
-	case BOARDTYPE_KSD:
-		s = "ksd";
-		break;
-	case BOARDTYPE_AJAXENA2:
-        s = "ajantv2";
-		break;
-	case BOARDTYPE_FS1:
-		s = "fs1";
-		break;
-	case BOARDTYPE_BORG:
-		s = "borg";			// TODO: External product name
-		break;
-	case BOARDTYPE_HDNTV:	// HDNTV is no longer supported.
-		if ( _displayErrorMessage )
-		{
-			DisplayNTV2Error("Tried to call open with BOARDTYPE_HDNTV");
-		}
-		return false;
-
-	// TODO: We may want to support KONA2 and KONAX here someday.
-	case BOARDTYPE_KONA2:
-		if ( _displayErrorMessage )
-		{
-			DisplayNTV2Error("Tried to call open with BOARDTYPE_KONA2");
-		}
-		return false;
-	case BOARDTYPE_KONAX:
-		if ( _displayErrorMessage )
-		{
-			DisplayNTV2Error("Tried to call open with BOARDTYPE_KONAX");
-		}
-		return false;
-	#endif	//	!defined (NTV2_DEPRECATE)
 	case DEVICETYPE_NTV2:
         s = "ajantv2";
 		break;
@@ -133,17 +96,7 @@ CNTV2LinuxDriverInterface::Open(
 
 	if (hostname && hostname[0] != '\0')	// Non-null: card on remote host
 	{
-		#if !defined (NTV2_DEPRECATE)
-		if(_boardType == BOARDTYPE_FS1 || _boardType == BOARDTYPE_BORG)
-		{
-			snprintf(boardStr, BOARDSTRMAX - 1, "%s:%s", hostname, s);
-		}
-		else
-		#endif	//	!defined (NTV2_DEPRECATE)
-		{
-			snprintf(boardStr, BOARDSTRMAX - 1, "%s:%s%d", hostname, s, _boardNumber);
-		}
-
+		snprintf(boardStr, BOARDSTRMAX - 1, "%s:%s%d", hostname, s, _boardNumber);
 		if ( !OpenRemote(boardNumber, displayError, eBoardType, hostname))
 		{
 			DisplayNTV2Error("Failed to open board on remote host.");
@@ -151,27 +104,7 @@ CNTV2LinuxDriverInterface::Open(
 	}
 	else
 	{
-		#if !defined (NTV2_DEPRECATE)
-		if(_boardType == BOARDTYPE_FS1)
-		{
-			snprintf(boardStr, BOARDSTRMAX - 1, "/dev/fs1");
-		}
-		else if(_boardType == BOARDTYPE_BORG)
-		{
-#ifdef BORG
-			snprintf(boardStr, BOARDSTRMAX - 1, "/dev/borg");
-#else
-			// Hack to prevent boardscan from thinking every host is a borg
-			// until we have a driver.
-			snprintf(boardStr, BOARDSTRMAX - 1, "/dev/%s", s);
-#endif
-		}
-		else
-		#endif	//	!defined (NTV2_DEPRECATE)
-		{
-			snprintf(boardStr, BOARDSTRMAX - 1, "/dev/%s%d", s, _boardNumber);
-		}
-
+		snprintf(boardStr, BOARDSTRMAX - 1, "/dev/%s%d", s, _boardNumber);
 		_hDevice = open(boardStr,O_RDWR);
 	}
 
@@ -226,22 +159,7 @@ CNTV2LinuxDriverInterface::Open(
 		}
 		else						// what's the right thing do do here?
 		{							// Guess  :-)
-			switch(_boardID)
-			{
-			#if !defined (NTV2_DEPRECATE)
-			case BOARD_ID_XENA_SD:
-			case BOARD_ID_XENA_SD_MM:
-			case BOARD_ID_XENA_SD22:
-			case BOARD_ID_KSD22:
-			case BOARD_ID_KONA_SD:
-			case BOARD_ID_KONALS:
-				fg = NTV2_FG_720x486; // SD boards default
-				break;
-			#endif	//	!defined (NTV2_DEPRECATE)
-			default:
-				fg = NTV2_FG_1920x1080;	// we usually load the bitfiles for HD, so assume 1080
-				break;
-			}
+			fg = NTV2_FG_1920x1080;	// we usually load the bitfiles for HD, so assume 1080
 		}
 	}
 
@@ -396,34 +314,6 @@ CNTV2LinuxDriverInterface::WriteRegister (
 			return false;
 		}
 	}
-	#if !defined (NTV2_DEPRECATE)
-	else if (_boardType == BOARDTYPE_FS1 && registerNumber != kRegFlashProgramReg)
-	{
-		if ( registerNumber < VIRTUALREG_START )
-		{
-			// Range check.  Disallow nonexistent registers to prevent segfault.
-			if (registerNumber > NTV2BoardGetNumberRegisters(BOARD_ID_FS1))
-			{
-				fprintf(stderr, "WriteRegister failed due to out of bounds regnum: %d\n", registerNumber);
-				return false;
-			}
-
-			if (registerMask != 0xFFFFFFFF)
-			{
-				ULWord oldValue = *(_pRegisterBaseAddress + registerNumber);
-				oldValue &= ~registerMask;
-				registerValue <<= registerShift;
-				registerValue |= oldValue;
-			}
-			*(_pRegisterBaseAddress + registerNumber) = registerValue;
-		}
-		else
-		{
-			// Virtual registers not supported yet.
-			return false;
-		}
-	}
-	#endif	//	!defined (NTV2_DEPRECATE)
 	else
 	{
 		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
@@ -652,11 +542,7 @@ CNTV2LinuxDriverInterface::MapFrameBuffers (void)
 		// Set the CH1 and CH2 frame base addresses for cards that require them.
 		ULWord boardIDRegister;
 		ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
-		#if !defined (NTV2_DEPRECATE)
-		if ( boardIDRegister == BOARD_ID_HDNTV )       // No longer supported
-			return false;
-		#endif	//	!defined (NTV2_DEPRECATE)
-		if ( ! NTV2BoardIsDirectAddressable( (NTV2DeviceID)boardIDRegister ) )
+		if ( ! ::NTV2DeviceIsDirectAddressable( (NTV2DeviceID)boardIDRegister ) )
 			_pCh1FrameBaseAddress = _pFrameBaseAddress;
 	}
 
@@ -2139,11 +2025,7 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 
 	ReadRegister(kRegBoardID, (ULWord *)&boardID);
 	ReadRegister(kVRegRP188SourceSelect, (ULWord *)&source);
-	#if !defined (NTV2_DEPRECATE)
-		bool bLTCPort = (source == kRP188SourceLTCPort && boardID != BOARD_ID_MOAB);
-	#else	//	defined (NTV2_DEPRECATE)
-		bool bLTCPort = (source == kRP188SourceLTCPort);
-	#endif	//	defined (NTV2_DEPRECATE)
+	bool bLTCPort = (source == kRP188SourceLTCPort);
 	// values come from LTC port registers
 	if (bLTCPort)
 	{
@@ -2167,11 +2049,6 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 
 		switch (boardID)
 		{
-		#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_KONA2:
-		case BOARD_ID_XENA2:
-		case BOARD_ID_MOAB:
-		#endif	//	!defined (NTV2_DEPRECATE)
 		case DEVICE_ID_LHI:
 		case DEVICE_ID_IOXT:
 		case DEVICE_ID_CORVID22:
@@ -2181,10 +2058,6 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 			ReadRegister (kVRegInputSelect, (ULWord *)&inputSelect);
 			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
 			break;
-		#if !defined (NTV2_DEPRECATE)
-		case BOARD_ID_KONALS:
-		case BOARD_ID_XENALH:
-		#endif	//	!defined (NTV2_DEPRECATE)
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_CORVID1:
 		default:

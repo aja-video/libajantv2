@@ -4117,13 +4117,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	#elif defined (MSWindows)
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"KONA IoExpress"            : "IoExpress";
 	#else
-		#if !defined (NTV2_DEPRECATE)
-        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"Kona3"                     : "OEM 2K";
-        case BOARD_ID_XENALH:                   return inForRetailDisplay ?	"Xena LH"                   : "OEM LH";
-        case BOARD_ID_XENALS:                   return inForRetailDisplay ?	"Xena LS"                   : "OEM LS";
-        case BOARD_ID_XENAHS:                   return inForRetailDisplay ?	"Xena HS"                   : "OEM HS";
-        case BOARD_ID_XENAHS2:                  return inForRetailDisplay ?	"Xena HS2"                  : "OEM HS2";
-		#endif	//	!defined (NTV2_DEPRECATE)
         case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
         case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
