@@ -228,7 +228,7 @@ AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncDat
 AJAStatus AJAAncillaryList::Clear (void)
 {
 	uint32_t		numDeleted	(0);
-	const uint32_t	oldSize		(m_ancList.size());
+	const uint32_t	oldSize		(uint32_t(m_ancList.size()));
 	for (AJAAncDataListConstIter it (m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
 		AJAAncillaryData *	pAncData(*it);
@@ -522,8 +522,7 @@ LOGMYDEBUG(PrintULWordsBE(inReceivedData));
 
 	if (actualBytes < numBytes)
 		{LOGMYERROR("RTP header says " << DEC(numBytes) << "-byte pkt, but only given " << DEC(actualBytes) << " bytes: " << RTPheader);  return AJA_STATUS_BADBUFFERCOUNT;}
-	else if (actualBytes != numBytes)
-		;//LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
+	//else if (actualBytes != numBytes) LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
 	if (!numPackets)
 		{LOGMYWARN("No Anc packets to append: " << RTPheader);  return AJA_STATUS_SUCCESS;}
 
@@ -692,7 +691,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		{
 			UWordVANCPacketList			ycPackets;
 			UWordSequence				ycHOffsets;
-			AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, smpteLineNum);
+			AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
 
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets, ycHOffsets);
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
@@ -704,8 +703,8 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		{
 			UWordVANCPacketList			yPackets, cPackets;
 			UWordSequence				yHOffsets, cHOffsets;
-			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, smpteLineNum);
-			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, smpteLineNum);
+			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
 			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
@@ -1040,7 +1039,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 
 			if (muxedOK)
 			{
-				lineOffsetsWritten.insert(fbLineOffset);	//	Remember which FB line offsets we overwrote
+				lineOffsetsWritten.insert(uint16_t(fbLineOffset));	//	Remember which FB line offsets we overwrote
 				successes.AddAncillaryData(ancData);
 			}
 			else
@@ -1060,7 +1059,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 
 		if (success)
 			success = inFormatDesc.GetLineOffsetFromSMPTELine (loc.GetLineNumber(), lineOffset);
-		if (success  &&  lineOffsetsWritten.find(lineOffset) != lineOffsetsWritten.end())
+		if (success  &&  lineOffsetsWritten.find(uint16_t(lineOffset)) != lineOffsetsWritten.end())
 			success = false;	//	Line already written -- "analog" data overwrites entire line
 		if (success)
 		{
@@ -1071,13 +1070,13 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 				vector<uint16_t>	pktComponentData;
 				success = AJA_SUCCESS(ancData.GenerateTransmitData(pktComponentData));
 				if (success)
-					success = ::YUVComponentsTo10BitYUVPackedBuffer (pktComponentData, inFrameBuffer, inFormatDesc, lineOffset);
+					success = ::YUVComponentsTo10BitYUVPackedBuffer (pktComponentData, inFrameBuffer, inFormatDesc, UWord(lineOffset));
 			}
 		}
 
 		if (success)
 		{
-			lineOffsetsWritten.insert(lineOffset);	//	Remember which FB line offsets we overwrote
+			lineOffsetsWritten.insert(uint16_t(lineOffset));	//	Remember which FB line offsets we overwrote
 			successes.AddAncillaryData(ancData);
 		}
 		else
@@ -1105,7 +1104,7 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 	uint32_t			actF1PktCnt				(0);
 	uint32_t			actF2PktCnt				(0);
 	unsigned			countOverflows			(0);
-	unsigned			overflowWords			(0);
+	size_t				overflowWords			(0);
 	AJAStatus			result					(AJA_STATUS_SUCCESS);
 	vector<uint32_t>	U32F1s, U32F2s;		//	32-bit network-byte-order data
 
@@ -1255,7 +1254,7 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 		//	Write F2 RTP header...
 		RTPHeaderF2.SetField2();
 		RTPHeaderF2.SetAncPacketCount(uint8_t(actF2PktCnt));
-		RTPHeaderF2.SetPacketLength(RTP_pkt_length_bytes);
+		RTPHeaderF2.SetPacketLength(uint16_t(RTP_pkt_length_bytes));
 			//	Playout:  JeffL needs full RTP pkt bytecount -- firmware looks for it in LS 16 bits of SequenceNumber in RTP header:
 			RTPHeaderF2.SetSequenceNumber(uint32_t(F2BytesNeeded) & 0x0000FFFF);
 		RTPsize = RTPHeaderF2.GetPacketLength() + RTPHeaderF2.GetHeaderByteCount();

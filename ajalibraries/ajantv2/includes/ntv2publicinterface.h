@@ -9,7 +9,7 @@
 
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#if !defined (NTV2_BUILDING_DRIVER)
+#if !defined(NTV2_BUILDING_DRIVER)
 	#include <iostream>
 	#include <set>
 	#include <map>
@@ -17,6 +17,10 @@
 	#include <iomanip>
 	#include <bitset>
 	#include "ajaexport.h"
+	#if defined(MSWindows)
+		#pragma warning(disable:4800)	//	int/bool conversion
+		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
+	#endif
 #endif	//	user-space clients only
 
 #if defined (MSWindows)

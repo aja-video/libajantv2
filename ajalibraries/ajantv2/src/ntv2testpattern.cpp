@@ -2112,7 +2112,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 					GetTestPatternFrameBufferFormat(),
 					GetSignalMask(),
 					GetTestPatternDMAEnable(),
-					testPatternNumber);
+					testPatternNumber) ? false : true;
 	}
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
