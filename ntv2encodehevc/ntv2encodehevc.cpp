@@ -476,7 +476,10 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 		mDevice.SetVideoFormat (mVideoFormat, false, false, NTV2_CHANNEL1);
 
 		//	Set two sample interleave
-		mDevice.SetTsiFrameEnable(mTsi, NTV2_CHANNEL1);
+		if(mTsi)
+			mDevice.SetTsiFrameEnable(true, NTV2_CHANNEL1);
+		else
+			mDevice.Set4kSquaresEnable(true, NTV2_CHANNEL1);
 
 		//	Set frame buffer format
 		mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
@@ -528,9 +531,6 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 		//	Set the channel video format
 		mDevice.SetVideoFormat (mVideoFormat, false, false, mInputChannel);
 
-		//	Set square division
-		mDevice.SetTsiFrameEnable(false, NTV2_CHANNEL1);
-
 		//	Set frame buffer format
 		mDevice.SetFrameBufferFormat (mInputChannel, mPixelFormat);
         mDevice.SetFrameBufferFormat (mOutputChannel, mPixelFormat);
@@ -554,9 +554,6 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 
 		//	Set the board format
 		mDevice.SetVideoFormat (mVideoFormat, false, false, NTV2_CHANNEL1);
-
-		//	Set square division
-		mDevice.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
 		//	Set frame buffer format
 		mDevice.SetFrameBufferFormat (mInputChannel, mPixelFormat);
