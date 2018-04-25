@@ -469,6 +469,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 			case DEVICE_ID_IO4K:
 			case DEVICE_ID_KONA4:
 			case DEVICE_ID_KONA4UFC:
+			case DEVICE_ID_KONA5:
 				//	Do we have a K3G-Box?
 				if ((audioCtlReg & kK2RegMaskKBoxDetect) || bPhonyKBox)
 					result = NTV2_K3GBox;
