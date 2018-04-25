@@ -5660,6 +5660,7 @@ private:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
+	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
 
 };	//	CNTV2Card
 
