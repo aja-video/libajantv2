@@ -405,13 +405,11 @@ void NTV2Player4K::RouteOutputSignal (void)
 
 	if (mDoTsiRouting)
 	{
-		mDevice.Set4kSquaresEnable (false, mChannel);
 		mDevice.SetTsiFrameEnable  (true,  mChannel);
 	}
 	else
 	{
 		mDevice.Set4kSquaresEnable (true,  mChannel);
-		mDevice.SetTsiFrameEnable  (false, mChannel);
 	}
 
 	//	Send signal to secondary outputs, if supported
