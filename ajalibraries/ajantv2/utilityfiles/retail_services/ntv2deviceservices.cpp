@@ -32,6 +32,7 @@
 #include "ntv2vpidfromspec.h"
 #include "ntv2corvid88services.h"
 #include "ntv2kona1services.h"
+#include "ntv2kona5services.h"
 #include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
@@ -127,6 +128,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			break;
 		case DEVICE_ID_KONAHDMI:
 			pDeviceServices = new KonaHDMIServices();
+			break;
+		case DEVICE_ID_KONA5:
+			pDeviceServices = new Kona5Services();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
