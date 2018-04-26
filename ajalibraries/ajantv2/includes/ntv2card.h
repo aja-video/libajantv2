@@ -457,7 +457,7 @@ public:
         @brief		Returns true if the device can convert HDMI tsi to/from quad raster.
         @return		True if the device supports quad raster conversion.
     **/
-    AJA_VIRTUAL inline bool	DeviceCanDoHDMIQuadRasterConversion () { return !DeviceCanDoAudioMixer (); }
+	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion ();
 
     /**
 		@brief		Returns true if the device having the given ID supports the audio mixer.
