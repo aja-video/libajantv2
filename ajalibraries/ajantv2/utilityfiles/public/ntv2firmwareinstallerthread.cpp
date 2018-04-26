@@ -469,6 +469,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 				designName == "K3G_p2p");		//	K3G_p2p.ncd
 	case DEVICE_ID_KONA4UFC:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4));
+	case DEVICE_ID_KONA5:
+		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5));
 	case DEVICE_ID_IO4K:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KUFC));
 	case DEVICE_ID_IO4KUFC:
@@ -560,6 +562,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_KONAIP_2110:                                     return "s2110_4tx";
         case DEVICE_ID_KONA1:					return "kona_alpha";
         case DEVICE_ID_KONAHDMI:					return "kona_hdmi";
+		case DEVICE_ID_KONA5:						return "kona_5";
         default: return "";
 	}
 }
