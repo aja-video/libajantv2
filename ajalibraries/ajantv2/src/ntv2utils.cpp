@@ -7615,7 +7615,7 @@ ostream & operator << (ostream & inOutStr, const NTV2OutputCrosspointIDs & inLis
 	return inOutStr;
 }
 
-
+/*
 static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs & inList)
 {
 	inOutStr << "[";
@@ -7629,7 +7629,7 @@ static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs &
 	inOutStr << "]";
 	return inOutStr;
 }
-
+*/
 
 ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
 {

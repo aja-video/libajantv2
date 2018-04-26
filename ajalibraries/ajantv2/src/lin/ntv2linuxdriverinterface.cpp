@@ -124,13 +124,15 @@ CNTV2LinuxDriverInterface::Open(
 	ULWord driverVersionMajor;
 	GetDriverVersion(&driverVersionMajor);
 	driverVersionMajor = (driverVersionMajor >> 4) & 0xF;
+#if AJA_NTV2_SDK_VERSION_MAJOR != 0
     if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
 	{
-		printf("Failing open as driver version %d is older than SDK version %d\n",
+		printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
 				driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
 		Close();
 		return false;
 	}
+#endif
 
 	ReadRegister(kRegBoardID, reinterpret_cast<ULWord*>(&_boardID));
 	//Kludge Warning.....

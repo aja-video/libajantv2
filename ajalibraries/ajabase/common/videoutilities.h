@@ -26,7 +26,6 @@
 #define MAX_RGB_8BIT 255
 #define MIN_RGB_10BIT 0
 #define MAX_RGB_10BIT 1023
-
 #define MIN_RGB_16BIT 0
 #define MAX_RGB_16BIT 65535
 
@@ -38,8 +37,19 @@
 #define FRAME_QUADHD_8BIT_SIZE (FRAME_1080_8BIT_LINEPITCH*2160)
 #define FRAME_BASE(__frameNum__,__frameSize__)	((__frameNum__)*(__frameSize__))
 
-#define ClipRGB_8BIT(X) ((X) > MAX_RGB_8BIT ? (MAX_RGB_8BIT) : ((X) < MIN_RGB_8BIT ? (MIN_RGB_8BIT) : (X)))
-#define ClipRGB_10BIT(X) ((X) > MAX_RGB_10BIT ? (MAX_RGB_10BIT) : ((X) < MIN_RGB_10BIT ? (MIN_RGB_10BIT) : (X)))
+//	NOTE:	Changed the "(__x__) < MIN_RGB_nBIT" comparisons to "(__x__) <= MIN_RGB_nBIT"
+//			in the following three macros to eliminate gcc "comparison always true" warnings
+//			when __x__ is an unsigned value.
+#if !defined(ClipRGB_8BIT)
+	#define ClipRGB_8BIT(__x__)			((__x__) > MAX_RGB_8BIT   ?  (MAX_RGB_8BIT)									\
+										                          :  ((__x__) <= MIN_RGB_8BIT   ?  (MIN_RGB_8BIT)	\
+										                                                        :  (__x__)))
+#endif
+#if !defined(ClipRGB_10BIT)
+	#define ClipRGB_10BIT(__x__)		((__x__) > MAX_RGB_10BIT  ?  (MAX_RGB_10BIT)								\
+										                          :  ((__x__) <= MIN_RGB_10BIT  ?  (MIN_RGB_10BIT)	\
+										                                                        :  (__x__)))
+#endif
 
 #define MIN_YCBCR_10BIT 4
 #define MAX_YCBCR_10BIT 1019

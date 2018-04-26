@@ -1186,7 +1186,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			//	Validate AJAAncillaryData payload append...
 			SHOULD_SUCCEED(defaultPkt.SetPayloadData(buffer4K.data(), buffer4K.size()));
 			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096);
-			SHOULD_SUCCEED(defaultPkt.AppendPayload(pDefaultPkt));
+			SHOULD_SUCCEED(defaultPkt.AppendPayload(*pDefaultPkt));
 			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096+sizeof(pTestBytes));
 			SHOULD_FAIL(defaultPkt.AppendPayloadData(NULL, 50));
 			SHOULD_FAIL(defaultPkt.AppendPayloadData(pTestBytes, 0));
@@ -1837,7 +1837,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
 				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
 				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
-				loc.SetLineNumber(9+pktNum&0x0F);
+				loc.SetLineNumber(9+(pktNum&0x0F));
 				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
 				AJAAncillaryData	pkt;
 				pkt.SetDID(pktNum);
@@ -1852,7 +1852,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
 				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
 				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
-				loc.SetLineNumber(567+pktNum&0x0F);
+				loc.SetLineNumber(567+(pktNum&0x0F));
 				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
 				AJAAncillaryData	pkt;
 				pkt.SetDID(pktNum);

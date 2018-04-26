@@ -2860,7 +2860,7 @@ bool CNTV2Card::ReadOutputTimingControl (ULWord & outValue, const UWord inOutput
 {
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
-	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : NTV2_CHANNEL1], &outValue);
+	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : UWord(NTV2_CHANNEL1)], &outValue);
 }
 
 
@@ -4362,29 +4362,17 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
 
-	NTV2Standard newStandard = inValue;
 	bool is2kx1080 = false;
 	switch(inValue)
 	{
-	case NTV2_STANDARD_2Kx1080p:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_2Kx1080i:
-		newStandard = NTV2_STANDARD_1080;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_3840x2160p:
-	case NTV2_STANDARD_3840HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		break;
-	case NTV2_STANDARD_4096x2160p:
-	case NTV2_STANDARD_4096HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	default:
-		break;
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:
+			is2kx1080 = true;
+			break;
+		default:
+			break;
 	}
 
 	WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);

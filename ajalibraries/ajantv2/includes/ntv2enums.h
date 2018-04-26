@@ -3451,7 +3451,7 @@ typedef enum
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2TCIndex, NTV2TimecodeIndex;
 
-#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				((__x__) >= NTV2_TCINDEX_DEFAULT  &&  (__x__) < NTV2_MAX_NUM_TIMECODE_INDEXES)
+#define	NTV2_IS_VALID_TIMECODE_INDEX(__x__)				(int32_t(__x__) >= int32_t(NTV2_TCINDEX_DEFAULT)  &&  int32_t(__x__) < int32_t(NTV2_MAX_NUM_TIMECODE_INDEXES))
 
 #define	NTV2_IS_ANALOG_TIMECODE_INDEX(__x__)			((__x__) == NTV2_TCINDEX_LTC1 || (__x__) == NTV2_TCINDEX_LTC2)
 

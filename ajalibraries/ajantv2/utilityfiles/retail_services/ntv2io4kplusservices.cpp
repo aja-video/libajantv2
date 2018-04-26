@@ -1260,7 +1260,6 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
 	
 	if (bDSKOn)
@@ -1321,10 +1320,6 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 				
 			case NTV2_DSKModeGraphicOverMatte:
@@ -1386,10 +1381,6 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 				
 			case NTV2_DSKModeGraphicOverFB:
@@ -3363,7 +3354,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters ()
 		{
 			//Only do this for formats that half rate supported
 			//50,5994,60
-			NTV2FrameRate tempRate = primaryFrameRate;
+			//NTV2FrameRate tempRate = primaryFrameRate;
 			bool decimate = false;
 
 			switch(primaryFrameRate)
@@ -3373,7 +3364,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters ()
 			case NTV2_FRAMERATE_5000:
 			case NTV2_FRAMERATE_4800:
 			case NTV2_FRAMERATE_4795:
-				tempRate = HalfFrameRate(primaryFrameRate);
+				//tempRate = HalfFrameRate(primaryFrameRate);
 				decimate = true;
 				break;
 			default:

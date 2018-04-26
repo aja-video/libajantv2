@@ -462,7 +462,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 				{
 					//	The new data is just a continuation of the previous packet: simply append the
 					//	new payload data to the previous payload...
-					pPrevData->AppendPayload (&newAncData);
+					pPrevData->AppendPayload (newAncData);
 					bAppendAnalog = true;
 				}
 			}
@@ -1209,7 +1209,6 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 	RTPHeaderF1.SetPacketLength(uint16_t(RTP_pkt_length_bytes));
 		//	Playout:  JeffL needs full RTP pkt bytecount -- firmware looks for it in LS 16 bits of SequenceNumber in RTP header:
 		RTPHeaderF1.SetSequenceNumber(uint32_t(F1BytesNeeded) & 0x0000FFFF);
-	size_t	RTPsize	(RTPHeaderF1.GetPacketLength() + RTPHeaderF1.GetHeaderByteCount());
 	if (!RTPHeaderF1.WriteBuffer(F1Buffer))
 		{LOGMYERROR("F1 RTP anc payload header WriteBuffer failed, " << F1Buffer);	return AJA_STATUS_FAIL;}
 	//	Write F1 packed data...
@@ -1257,7 +1256,6 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 		RTPHeaderF2.SetPacketLength(uint16_t(RTP_pkt_length_bytes));
 			//	Playout:  JeffL needs full RTP pkt bytecount -- firmware looks for it in LS 16 bits of SequenceNumber in RTP header:
 			RTPHeaderF2.SetSequenceNumber(uint32_t(F2BytesNeeded) & 0x0000FFFF);
-		RTPsize = RTPHeaderF2.GetPacketLength() + RTPHeaderF2.GetHeaderByteCount();
 		if (!RTPHeaderF2.WriteBuffer(F2Buffer))
 			{LOGMYERROR("F2 RTP anc payload header WriteBuffer failed, " << F2Buffer);	return AJA_STATUS_FAIL;}
 

@@ -238,8 +238,12 @@
 		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
 		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
 		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
-		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
+		#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
+			#define NTV2_DEPRECATE_14_0     //  First deprecated in SDK 14.0
+		#endif
+		#if !defined(NTV2_DEPRECATE_14_1)	//	Linux driver Makefile usually defines this
+			#define NTV2_DEPRECATE_14_1     //  First deprecated in SDK 14.1
+		#endif
 	#endif
 
 										//////////////////////////////////////////////////////////////////

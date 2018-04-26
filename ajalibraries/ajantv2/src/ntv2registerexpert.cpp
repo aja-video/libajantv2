@@ -2435,7 +2435,7 @@ private:
 			oss	<< "Strap: "									<< ((inRegValue & BIT(7)) ? "Installed" : "Not Installed")	<< endl
 				<< "Firmware Rev: "								<< xHEX0N(fwRev, 2) << " (" << DEC(fwRev) << ")"			<< endl
 				<< "Gen: "										<< gen << ((gen > 0 && gen < 4) ? "" : " <invalid>")		<< endl
-				<< "Lanes: "									<< lanes << ((lanes >= 0  &&  lanes < 9) ? "" : " <invalid>");
+				<< "Lanes: "									<< DEC(lanes) << ((lanes < 9) ? "" : " <invalid>");
 			return oss.str();
 		}
 		virtual	~DecodeDMAControl()	{}
