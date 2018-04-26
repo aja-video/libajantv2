@@ -151,7 +151,6 @@ void CKonaIpJ2kJsonReader::initMaps()
 
 bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams)
 {
-    bool rv;
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
     if (!mDevice.IsOpen())
@@ -218,12 +217,12 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
         // For the J2K encoder we only configure output channels NTV2_CHANNEL1 and NTV2_CHANNEL2
         if (encoder.channels & 1)
         {
-            rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
+            config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderCfg);
         }
 
         if (encoder.channels & 2)
         {
-            rv = config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
+            config2022.SetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderCfg);
         }
     }
 
@@ -235,7 +234,6 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
 
 bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetupStruct* pKonaIpJ2kParams)
 {
-    bool rv;
     CNTV2Card mDevice;
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
     if (!mDevice.IsOpen())
@@ -287,7 +285,7 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
         decoderCfg.programPID       = decoder.programPID;
         decoderCfg.audioNumber      = decoder.audioNumber;
 
-        rv = config2022.SetJ2KDecoderConfiguration(decoderCfg);
+        config2022.SetJ2KDecoderConfiguration(decoderCfg);
     }
 
     std::cerr << "## NOTE:  Decoder is setup and running" << std::endl;

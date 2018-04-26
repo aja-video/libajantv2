@@ -216,9 +216,9 @@ int main (int argc, const char ** argv)
 			<< ", noTC=" << (noTimecode?"Y":"N") << endl;
 
 	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels:
-	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4		\
-	//						--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200						\
-	//						--end idle,loop,idle,loop,idle,loop,idle,loop										\
+	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4
+	//						--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200
+	//						--end idle,loop,idle,loop,idle,loop,idle,loop
 	//						English.txt  Spanish.txt  French.txt  German.txt  txt1  txt2  txt3  txt4
 
 	//	Users can play one or more caption channels by specifying more than one, separating each with a comma:		--608chan cc2,cc4,tx1,tx2
