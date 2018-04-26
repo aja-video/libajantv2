@@ -173,18 +173,8 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 	else
 	{
-		if (mDoTsiRouting)
-		{
-			if (mInputChannel == 2) mInputChannel = NTV2_CHANNEL1;
-			if (mInputChannel == 4) mInputChannel = NTV2_CHANNEL3;
-			if (mInputChannel == 6) mInputChannel = NTV2_CHANNEL5;
-			if (mInputChannel == 7) mInputChannel = NTV2_CHANNEL7;
-		}
-		else
-		{
-			if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL1;
-			else mInputChannel = NTV2_CHANNEL5;
-		}
+		if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL1;
+		else mInputChannel = NTV2_CHANNEL5;
 	}
 
 	//	Set up the video and audio...
