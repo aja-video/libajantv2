@@ -1419,7 +1419,7 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Channel channel, const NTV
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddrPacketizer)
 {
-    if (channel > _numTxChans)
+    if (uint32_t(channel) > _numTxChans)
         return false;
 
     uint32_t index = Get2110TxStreamIndex(channel, stream);

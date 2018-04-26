@@ -353,7 +353,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (pktRX.GotValidReceiveData());
 
 			//	Test GUMP encoding...
-			SHOULD_SUCCEED (pktTX.SetPayloadData(pktRX.GetPayloadData(), pktRX.GetPayloadByteCount()));
+			SHOULD_SUCCEED (pktTX.SetPayloadData(pktRX.GetPayloadData(), uint32_t(pktRX.GetPayloadByteCount())));
 			SHOULD_BE_EQUAL(::memcmp(pktTX.GetPayloadData(), pktRX.GetPayloadData(), pktTX.GetDC()), 0);
 			//SHOULD_BE_EQUAL(pktRX, pktTX);
 			return true;
@@ -1184,7 +1184,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			}	//	Clone Tests
 
 			//	Validate AJAAncillaryData payload append...
-			SHOULD_SUCCEED(defaultPkt.SetPayloadData(buffer4K.data(), buffer4K.size()));
+			SHOULD_SUCCEED(defaultPkt.SetPayloadData(buffer4K.data(), uint32_t(buffer4K.size())));
 			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096);
 			SHOULD_SUCCEED(defaultPkt.AppendPayload(*pDefaultPkt));
 			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096+sizeof(pTestBytes));
@@ -1844,7 +1844,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				pkt.SetSID(200-pktNum);
 				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
 				pkt.SetDataLocation(loc);
-				pkt.SetPayloadData(&payloadData[0], payloadData.size());
+				pkt.SetPayloadData(&payloadData[0], uint32_t(payloadData.size()));
 				ancPkts.AddAncillaryData(pkt);
 			}	//	for numF1Packets
 			for (unsigned pktNum(0);  pktNum < numF2Packets;  pktNum++)
@@ -1859,7 +1859,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				pkt.SetSID(200-pktNum);
 				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
 				pkt.SetDataLocation(loc);
-				pkt.SetPayloadData(&payloadData[0], payloadData.size());
+				pkt.SetPayloadData(&payloadData[0], uint32_t(payloadData.size()));
 				ancPkts.AddAncillaryData(pkt);
 			}	//	for numF2Packets
 
