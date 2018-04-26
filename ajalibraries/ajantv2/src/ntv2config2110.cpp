@@ -1686,16 +1686,16 @@ bool CNTV2Config2110::GenSDP(const NTV2Channel channel, const NTV2Stream stream)
     int ch = (int)channel;
     int st = (int)stream;
 
-    string filename = "txch" + To_String(ch+1);
+    string filename;
     if (stream == NTV2_VIDEO_STREAM)
     {
+        filename = "txchannel" + To_String(ch+1);
         filename += "v.sdp";
     }
     else
     {
-        filename += "a";
-        filename += To_String(st);
-        filename += ".sdp";
+        filename = "txstream" + To_String(st);
+        filename += "a.sdp";
     }
     stringstream & sdp = txsdp[ch][st];
 
