@@ -176,7 +176,7 @@ public:
     std::string         remoteIP[2];        ///< @brief	Specifies remote (destination) IP address.
     uint32_t            localPort[2];		///< @brief	Specifies the local (source) port number.
     uint32_t            remotePort[2];		///< @brief	Specifies the remote (destination) port number.
-    uint16_t            payloadType;
+    uint16_t            payload;
     uint8_t             tos;                // type of service
     uint8_t             ttl;                // time to live
     uint32_t            ssrc;
@@ -187,7 +187,7 @@ public:
     uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
-    eNTV2PacketInterval audioPacketInterval;
+    eNTV2PacketInterval audioPktInterval;
 };
 
 /**
@@ -213,14 +213,14 @@ public:
     uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
-    uint16_t            payloadType;
+    uint16_t            payload;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            payloadLen;
     uint32_t            lastPayloadLen;
     uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
-    eNTV2PacketInterval audioPacketInterval;
+    eNTV2PacketInterval audioPktInterval;
 };
 
 
