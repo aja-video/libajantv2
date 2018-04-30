@@ -2467,7 +2467,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                     txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                     txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payload;
+                    txVideoConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
                     txVideoConfig.ttl = 0x40;
                     txVideoConfig.tos = 0x64;
 
@@ -2506,14 +2506,14 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                     txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                     txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payload;
+                    txAudioConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
                     txAudioConfig.ttl = 0x40;
                     txAudioConfig.tos = 0x64;
 
                     // Audio specific
                     txAudioConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txAudioConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
-                    txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
+                    txAudioConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].stream, txAudioConfig) == true)
                     {
