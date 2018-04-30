@@ -603,7 +603,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         rxChannelConfig.ssrc            = receiveVideo2110.rxVideoCh[i].vlan;
         rxChannelConfig.vlan            = receiveVideo2110.rxVideoCh[i].ssrc;
-        rxChannelConfig.payloadType     = receiveVideo2110.rxVideoCh[i].payload;
+        rxChannelConfig.payload         = receiveVideo2110.rxVideoCh[i].payload;
 
         rxChannelConfig.videoFormat     = receiveVideo2110.rxVideoCh[i].videoFormat;
         rxChannelConfig.videoSamples    = VPIDSampling_YUV_422;
@@ -665,9 +665,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         rxChannelConfig.ssrc            = receiveAudio2110.rxAudioCh[i].vlan;
         rxChannelConfig.vlan            = receiveAudio2110.rxAudioCh[i].ssrc;
-        rxChannelConfig.payloadType     = receiveAudio2110.rxAudioCh[i].payload;
+        rxChannelConfig.payload         = receiveAudio2110.rxAudioCh[i].payload;
         rxChannelConfig.numAudioChannels    = receiveAudio2110.rxAudioCh[i].numAudioChannels;
-        rxChannelConfig.audioPacketInterval = receiveAudio2110.rxAudioCh[i].audioPktInterval;
+        rxChannelConfig.audioPktInterval    = receiveAudio2110.rxAudioCh[i].audioPktInterval;
 
 
         rv = config2110.SetRxStreamConfiguration (sfp,
@@ -709,7 +709,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remoteIP[1]     = transmitVideo2110.txVideoCh[i].remoteIP[1];
         txChannelConfig.remotePort[1]   = transmitVideo2110.txVideoCh[i].remotePort[1];
 
-        txChannelConfig.payloadType     = transmitVideo2110.txVideoCh[i].payload;
+        txChannelConfig.payload         = transmitVideo2110.txVideoCh[i].payload;
         txChannelConfig.ssrc            = transmitVideo2110.txVideoCh[i].ssrc;
         txChannelConfig.ttl             = transmitVideo2110.txVideoCh[i].ttl;
         txChannelConfig.videoFormat     = transmitVideo2110.txVideoCh[i].videoFormat;
@@ -755,13 +755,13 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remoteIP[1]     = transmitAudio2110.txAudioCh[i].remoteIP[1];
         txChannelConfig.remotePort[1]   = transmitAudio2110.txAudioCh[i].remotePort[1];
 
-        txChannelConfig.payloadType     = transmitAudio2110.txAudioCh[i].payload;
+        txChannelConfig.payload         = transmitAudio2110.txAudioCh[i].payload;
         txChannelConfig.ssrc            = transmitAudio2110.txAudioCh[i].ssrc;
         txChannelConfig.ttl             = transmitAudio2110.txAudioCh[i].ttl;
 
         txChannelConfig.numAudioChannels    = transmitAudio2110.txAudioCh[i].numAudioChannels;
         txChannelConfig.firstAudioChannel   = transmitAudio2110.txAudioCh[i].firstAudioChannel;
-        txChannelConfig.audioPacketInterval = transmitAudio2110.txAudioCh[i].audioPktInterval;
+        txChannelConfig.audioPktInterval    = transmitAudio2110.txAudioCh[i].audioPktInterval;
 
         rv = config2110.SetTxStreamConfiguration(transmitAudio2110.txAudioCh[i].channel,
                                                  transmitAudio2110.txAudioCh[i].stream,
