@@ -31,7 +31,7 @@ typedef enum
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
-    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
+    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0') // 4CC of metadata config data
 } VirtualDataTag2110 ;
 
 typedef struct

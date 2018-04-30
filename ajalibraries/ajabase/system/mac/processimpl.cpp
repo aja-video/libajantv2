@@ -29,7 +29,7 @@ AJAProcessImpl::GetPid()
 bool
 AJAProcessImpl::IsValid(uint64_t pid)
 {
-    if(kill(pid,0)==0)
+    if(kill(pid_t(pid),0)==0)
         return true;
     else
         return false;

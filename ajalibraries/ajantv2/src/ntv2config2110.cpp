@@ -2037,7 +2037,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before
@@ -2135,7 +2135,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before

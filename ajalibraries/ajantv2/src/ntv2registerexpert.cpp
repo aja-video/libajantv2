@@ -2326,11 +2326,8 @@ private:
 					const uint16_t	maxValue	((inRegValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
 					const double	minFloat	(double(minValue) * 0.00001);
 					const double	maxFloat	(maxValue);
-					if (NTV2_IS_VALID_HDR_MASTERING_LUMINENCE (minValue))
-						oss	<< "Min: "	<< fDEC(minFloat,7,5) << endl;
-					else
-						oss	<< "Min: "	<< HEX0N(minValue, 4)	<< "(invalid)" << endl;
-					oss	<< "Max: "	<< fDEC(maxFloat,7,5);
+					oss	<< "Min: "	<< fDEC(minFloat,7,5) << endl
+						<< "Max: "	<< fDEC(maxFloat,7,5);
 					break;
 				}
 				case kRegHDMIHDRLightLevel:
@@ -2339,14 +2336,8 @@ private:
 					const uint16_t	frmValue	((inRegValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 					const double	cntFloat	(cntValue);
 					const double	frmFloat	(frmValue);
-					if (NTV2_IS_VALID_HDR_LIGHT_LEVEL (cntValue))
-						oss	<< "Max Content Light Level: "	<< fDEC(cntFloat,7,5)					<< endl;
-					else
-						oss	<< "Max Content Light Level: "	<< HEX0N(cntValue, 4) << "(invalid)"	<< endl;
-					if (NTV2_IS_VALID_HDR_LIGHT_LEVEL (frmValue))
-						oss	<< "Max Frame Light Level: "	<< fDEC(frmFloat,7,5);
-					else
-						oss	<< "Max Frame Light Level: "	<< HEX0N(frmValue, 4) << "(invalid)";
+					oss	<< "Max Content Light Level: "	<< fDEC(cntFloat,7,5)					<< endl
+						<< "Max Frame Light Level: "	<< fDEC(frmFloat,7,5);
 					break;
 				}
 				default:	NTV2_ASSERT(false);

@@ -99,13 +99,11 @@ public:
 
     /**
 	 *	Singleton initialization of logging service.
-	 *  @param[in]	...			Variable length parameter list for logging. Same formatting as printf
 	 */
 	AJALog();
     
     /**
 	 *	Singleton release of logging service.
-	 *  @param[in]	...			Variable length parameter list for logging. Same formatting as printf
 	 */
 	virtual ~AJALog();
     

@@ -299,13 +299,13 @@ inline void AJA_SDConvertRGBAlphatoYCbCr(AJA_RGBAlphaPixel * pSource, AJA_YCbCr1
 		(int32_t)0x4A7E*pSource->Green +
 		(int32_t)0x7070*pSource->Blue )>>14);
 
-	pTarget->cb = (int16_t)(Cb&0x3FF);
+	pTarget->cb = uint16_t(Cb&0x3FF);
 
 	Cr = CCIR601_10BIT_CHROMAOFFSET + (((int32_t)0x7070*pSource->Red -
 		(int32_t)0x5E27*pSource->Green -
 		(int32_t)0x1249*pSource->Blue )>>14);
 
-	pTarget->cr = (int16_t)(Cr&0x3FF);
+	pTarget->cr = uint16_t(Cr&0x3FF);
 }
 
 inline void AJA_HDConvertRGBAlphatoYCbCr(AJA_RGBAlphaPixel * pSource, AJA_YCbCr10BitPixel * pTarget)
@@ -321,13 +321,13 @@ inline void AJA_HDConvertRGBAlphatoYCbCr(AJA_RGBAlphaPixel * pSource, AJA_YCbCr1
 		(int32_t)0x545B*pSource->Green +
 		(int32_t)0x6DA9*pSource->Blue )>>14);
 
-	pTarget->cb = (int16_t)(Cb&0x3FF);
+	pTarget->cb = uint16_t(Cb&0x3FF);
 
 	Cr = CCIR601_10BIT_CHROMAOFFSET + (((int32_t)0x6D71*pSource->Red -
 		(int32_t)0x6305*pSource->Green -
 		(int32_t)0x0A06*pSource->Blue )>>14);
 
-	pTarget->cr = (int16_t)(Cr&0x3FF);
+	pTarget->cr = uint16_t(Cr&0x3FF);
 }
 
 inline void AJA_HDConvertRGBAlpha10toYCbCr(AJA_RGBAlpha10BitPixel * pSource, AJA_YCbCr10BitPixel * pTarget,bool rgbFullRange)
@@ -336,52 +336,45 @@ inline void AJA_HDConvertRGBAlpha10toYCbCr(AJA_RGBAlpha10BitPixel * pSource, AJA
 	int32_t Y,Cb,Cr;
 	if ( rgbFullRange)
 	{
-		dY = ((double)pSource->Red*0.182068) + 
-			((double)pSource->Green*0.612427) +
-			((double)pSource->Blue*0.061829);
-		Y = CCIR601_10BIT_BLACK + (uint32_t)dY; /// should do rounding
-		pTarget->y = (uint16_t)(Y&0x3FF);
+		dY =	(double(pSource->Red  ) * 0.182068) +
+				(double(pSource->Green) * 0.612427) +
+				(double(pSource->Blue ) * 0.061829);
+		Y = CCIR601_10BIT_BLACK + int32_t(dY); /// should do rounding
+		pTarget->y = uint16_t(Y&0x3FF);
 
-		dCb = ((double)pSource->Red*(-0.100342)) + 
-			((double)pSource->Green*(-0.337585)) +
-			((double)pSource->Blue*(0.437927));
+		dCb =	(double(pSource->Red  ) * (-0.100342)) +
+				(double(pSource->Green) * (-0.337585)) +
+				(double(pSource->Blue ) * (0.437927));
+		Cb = CCIR601_10BIT_CHROMAOFFSET + int32_t(dCb);
+		pTarget->cb = uint16_t(Cb&0x3FF);
 
-		Cb = CCIR601_10BIT_CHROMAOFFSET + (uint32_t)dCb;
-		pTarget->cb = (int16_t)(Cb&0x3FF);
-
-		dCr = ((double)pSource->Red*(0.437927)) + 
-			((double)pSource->Green*(-0.397766)) +
-			((double)pSource->Blue*(-0.040161));
-
-		Cr = CCIR601_10BIT_CHROMAOFFSET + (uint32_t)dCr;
-		pTarget->cr = (int16_t)(Cr&0x3FF);
+		dCr =	(double(pSource->Red  ) * (0.437927)) +
+				(double(pSource->Green) * (-0.397766)) +
+				(double(pSource->Blue ) * (-0.040161));
+		Cr = CCIR601_10BIT_CHROMAOFFSET + int32_t(dCr);
+		pTarget->cr = uint16_t(Cr&0x3FF);
 
 	}
 	else
 	{
-		dY = ((double)pSource->Red*0.212585) + 
-			((double)pSource->Green*0.715210) +
-			((double)pSource->Blue*0.072205);
-		Y = (uint32_t)dY;
-		pTarget->y = (uint16_t)(Y&0x3FF);
+		dY =	(double(pSource->Red  ) * 0.212585) +
+				(double(pSource->Green) * 0.715210) +
+				(double(pSource->Blue ) * 0.072205);
+		Y = int32_t(dY);
+		pTarget->y = uint16_t(Y&0x3FF);
 
-		dCb = ((double)pSource->Red*(-0.117188)) + 
-			((double)pSource->Green*(-0.394226)) +
-			((double)pSource->Blue*(0.511414));
+		dCb =	(double(pSource->Red  ) * (-0.117188)) +
+				(double(pSource->Green) * (-0.394226)) +
+				(double(pSource->Blue ) * (0.511414));
+		Cb = CCIR601_10BIT_CHROMAOFFSET + int32_t(dCb);
+		pTarget->cb = uint16_t(Cb&0x3FF);
 
-		Cb = CCIR601_10BIT_CHROMAOFFSET + (uint32_t)dCb;
-		pTarget->cb = (int16_t)(Cb&0x3FF);
-
-		dCr = ((double)pSource->Red*(0.511414)) + 
-			((double)pSource->Green*(-0.464508)) +
-			((double)pSource->Blue*(-0.046906));
-
-		Cr = CCIR601_10BIT_CHROMAOFFSET + (uint32_t)dCr;
-		pTarget->cr = (int16_t)(Cr&0x3FF);
-
+		dCr =	(double(pSource->Red  ) * (0.511414)) +
+				(double(pSource->Green) * (-0.464508)) +
+				(double(pSource->Blue ) * (-0.046906));
+		Cr = CCIR601_10BIT_CHROMAOFFSET + int32_t(dCr);
+		pTarget->cr = uint16_t(Cr&0x3FF);
 	}
-
-
 }
 
 #endif	//	AJA_VIDEOUTILS_H

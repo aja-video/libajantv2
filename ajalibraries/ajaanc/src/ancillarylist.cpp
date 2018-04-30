@@ -630,11 +630,12 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 }	//	AddVANCData
 
 
-AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
-{
-	return AddVANCData (inPacketWords, AJAAncillaryDataLocation (AJAAncillaryDataLink_A,  inChannel, AJAAncillaryDataSpace_VANC,  inLineNum));
-
-}	//	AddVANCData
+#if !defined(NTV2_DEPRECATE_14_1)
+	AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
+	{
+		return AddVANCData (inPacketWords, AJAAncillaryDataLocation (AJAAncillaryDataLink_A,  inChannel, AJAAncillaryDataSpace_VANC,  inLineNum));
+	}	//	AddVANCData
+#endif	//	!defined(NTV2_DEPRECATE_14_1)
 
 
 AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffer,
@@ -711,13 +712,13 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
 			NTV2_ASSERT(cPackets.size() == cHOffsets.size());
 
-			unsigned	ndx(0);
-			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it, ndx++)
-				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndx]));
+			unsigned	ndxx(0);
+			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it, ndxx++)
+				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]));
 
-			ndx = 0;
-			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it, ndx++)
-				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndx]));
+			ndxx = 0;
+			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it, ndxx++)
+				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]));
 		}
 	}	//	for each VANC line
 	LOGMYDEBUG("returning " << outPackets);

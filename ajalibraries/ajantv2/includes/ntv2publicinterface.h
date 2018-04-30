@@ -5538,23 +5538,23 @@ typedef enum
 			//	Convenience macros for compactly formatting ostream output...
 			#define	Hex(__x__)				std::hex << (__x__) << std::dec
 			#define	xHex(__x__)				"0x" << Hex(__x__)
-			#define	HexN(__x__,__n__)		std::hex << std::setw(__n__) << (__x__) << std::dec
+			#define	HexN(__x__,__n__)		std::hex << std::setw(int(__n__)) << (__x__) << std::dec
 			#define	xHexN(__x__,__n__)		"0x" << HexN((__x__),(__n__))
-			#define	Hex0N(__x__,__n__)		std::hex << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	Hex0N(__x__,__n__)		std::hex << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	xHex0N(__x__,__n__)		"0x" << Hex0N((__x__),(__n__))
 			#define	HEX(__x__)				std::hex << std::uppercase << (__x__) << std::dec << std::nouppercase
 			#define	xHEX(__x__)				"0x" << HEX(__x__)
-			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << (__x__) << std::dec << std::nouppercase
+			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << (__x__) << std::dec << std::nouppercase
 			#define	xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
-			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
+			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
 			#define	xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
 			#define	DEC(__x__)				std::dec << (__x__)
-			#define	DECN(__x__,__n__)		std::dec << std::setw(__n__) << (__x__)
-			#define	DEC0N(__x__,__n__)		std::dec << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << (__x__)
+			#define	DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	OCT(__x__)				std::oct << (__x__) << std::dec
-			#define	OCT0N(__x__,__n__)		std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	OCT0N(__x__,__n__)		std::oct << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	oOCT(__x__)				"o" << std::oct << (__x__) << std::dec
-			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	BIN064(__x__)			std::bitset<8>((uint64_t(__x__)&0xFF00000000000000)>>56) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x00FF000000000000)>>48) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x0000FF0000000000)>>40) << "."		\
@@ -5994,7 +5994,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				bool							GetU16s (std::vector<uint16_t> & outU32s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+				bool							GetU16s (std::vector<uint16_t> & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 16-bit values.
@@ -6020,7 +6020,7 @@ typedef enum
 												Defaults to 128.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							GetU8s (std::vector<uint8_t> & outU32s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+				bool							GetU8s (std::vector<uint8_t> & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
 				/**
 					@return		My contents as a vector of unsigned 8-bit values.
@@ -7465,24 +7465,24 @@ typedef enum
 
 			/**
 				@brief		Prints the given UWordSequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given UWordSequence will be printed.
-				@param[in]	inData		Specifies the UWordSequence to be streamed.
+				@param		inOutStream		The stream into which the given UWordSequence will be printed.
+				@param[in]	inData			Specifies the UWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
 
 			/**
 				@brief		Prints the given ULWordSequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given ULWordSequence will be printed.
-				@param[in]	inData		Specifies the ULWordSequence to be streamed.
+				@param		inOutStream		The stream into which the given ULWordSequence will be printed.
+				@param[in]	inData			Specifies the ULWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWordSequence & inData);
 
 			/**
 				@brief		Prints the given ULWord64Sequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given ULWord64Sequence will be printed.
-				@param[in]	inData		Specifies the ULWord64Sequence to be streamed.
+				@param		inOutStream		The stream into which the given ULWord64Sequence will be printed.
+				@param[in]	inData			Specifies the ULWord64Sequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWord64Sequence & inData);

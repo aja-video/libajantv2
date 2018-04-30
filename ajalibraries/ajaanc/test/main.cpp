@@ -1143,7 +1143,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pClone->SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
 				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
 				SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-				SHOULD_SUCCEED(pClone->SetLocationVideoStream(AJAAncillaryDataChannel_C));
+				SHOULD_SUCCEED(pClone->SetLocationDataChannel(AJAAncillaryDataChannel_C));
 				SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_C);
 				SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
 				SHOULD_SUCCEED(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B));
@@ -1171,13 +1171,13 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				for (unsigned ndx(0);  ndx < sizeof(gDataTypes)/sizeof(AJAAncillaryDataType);  ndx++)
 				{
 					const AJAAncillaryDataType	dataType	(gDataTypes[ndx]);
-					AJAAncillaryData *	pDefaultPkt	= AJAAncillaryDataFactory::Create(dataType);
-					SHOULD_BE_NON_NULL(pDefaultPkt);
-					SHOULD_SUCCEED(pDefaultPkt->GeneratePayloadData());
+					AJAAncillaryData *	pDefaultPkt2	= AJAAncillaryDataFactory::Create(dataType);
+					SHOULD_BE_NON_NULL(pDefaultPkt2);
+					SHOULD_SUCCEED(pDefaultPkt2->GeneratePayloadData());
 					AJAAncillaryData *	pClonePkt	= pDefaultPkt->Clone();
 					SHOULD_BE_NON_NULL(pClonePkt);
-					SHOULD_BE_UNEQUAL(pDefaultPkt, pClonePkt);
-					SHOULD_BE_EQUAL(*pDefaultPkt, *pClonePkt);
+					SHOULD_BE_UNEQUAL(pDefaultPkt2, pClonePkt);
+					SHOULD_BE_EQUAL(*pDefaultPkt2, *pClonePkt);
 					SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
 					cerr << "BFT_AncillaryData:  Validated AJAAncillaryDataFactory::GuessAncillaryDataType for '" << ::AJAAncillaryDataTypeToString(dataType) << "'" << endl;
 				}
@@ -1567,7 +1567,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromSDIAncData(gGumpBuffers[vFormat], NTV2_POINTER(), pkts));
 				if (gIsVerbose)
 					cerr	<< "Received buffer: " << gGumpBuffers[vFormat].AsString(64) << " has " << DEC(pkts.CountAncillaryData()) << " packet(s)"
-							//<< ": " << pkts
+							//  << ": " << pkts
 							<< endl;
 
 				//	Transmit the packets into another 8-bit GUMP buffer...

@@ -62,7 +62,7 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 	struct stat	fsinfo;
 	::stat (inBitfileName.c_str (), &fsinfo);
-	_fileSize = fsinfo.st_size;
+	_fileSize = unsigned(fsinfo.st_size);
 
 	_bitFileStream.open (inBitfileName.c_str (), std::ios::binary);
 

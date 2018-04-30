@@ -39,7 +39,7 @@ public:
 	/**
 	 *	Set current format value.
 	 *
-	 *	@param[in]	format:    new AJA_PixelFormat.
+	 *	@param[in]	format    new AJA_PixelFormat.
 	 */
 	void			Set(AJA_PixelFormat format);
 
@@ -87,7 +87,7 @@ public:
 
 	/**
 	 *  Static method to get number of possible formats
-	 *  Usefull for filling out GUI's
+	 *  Useful for filling out GUI's
 	 *
 	 *	@return		number of possible formats
 	 */
@@ -96,8 +96,8 @@ public:
 	/**
 	 *  Static method to get a format out of table of all possible formats
 	 *
-	 *	@param[out]	fmt:    fmt gets filled in with format for index
-	 *						does not get touched if index out of bounds
+	 *	@param[out]	fmt     fmt gets filled in with format for index.
+	 *						Unmodified if index out of bounds.
 	 *	@return		returns true if index within bounds
 	 */
 	static bool		QueryFormatAtIndex(int index,AJAPixelFormat& fmt);
@@ -105,8 +105,12 @@ public:
 	/**
 	 *  Static method to see if a source and target resolution are scalable
 	 *
-	 *	@param[in]  bitmapWidth:  width of the bitmap in PC memory
-	 *  @param[in]  wireWidth:    width of the bitmap in Kona memory
+	 *	@param[in]  bitmapWidth  width of the bitmap in PC memory
+	 *  @param[in]  wireWidth    width of the bitmap in Kona memory
+	 *  @param[in]  xAspect      Horizontal component of aspect ratio
+	 *  @param[in]  yAspect      Vertical component of aspect ratio
+	 *  @param[in]  pMatchingFormat  Pixel format used for matching
+	 *  @param[out] pScalingFormat   Receives scaling pixel format
 	 *	@return		returns true if one of the pixel formats will suffice for scaling
 	 */
 	static bool		QueryIsScalable(uint32_t bitmapWidth,uint32_t wireWidth,uint32_t xAspect,uint32_t yAspect,
@@ -115,9 +119,9 @@ public:
 	/**
 	 *  Static method to convert scaled x resolution
 	 *
-	 *	@param[in]  scaleType:  type of scaling to be done
-	 *  @param[in]  xIn:        either the wire or bitmap resolution
-	 *	@param[out] xOut:       the corrected resolution
+	 *	@param[in]  scaleType   type of scaling to be done
+	 *  @param[in]  xIn         either the wire or bitmap resolution
+	 *	@param[out] xOut        the corrected resolution
 	 *  @return		returns true if conversion occurred
 	 */
 	static bool		ConvertWidth(AJAScaleType scaleType,int xIn,int &xOut);
@@ -137,11 +141,10 @@ public:
 	/**
 	 *  Static method to provide a suggested scaling type and primary pixel format
 	 *
-	 *	@param[in]  xWire:       wire resolution
-	 *  @param[in]  xBitmap:     bitmap resolution
-	 *  @param[in]  bCapture:   'true' if xRes1 is wire resolution and xRes2 is bitmap resolution, false if reversed
-	 *	@param[out] primaryFormat: unscaled pixel format
-	 *	@param[out] scaleType:  type of scaling that needs to occur 
+	 *	@param[in]  xWire          wire resolution
+	 *  @param[in]  xBitmap        bitmap resolution
+	 *	@param[out] primaryFormat  unscaled pixel format
+	 *	@param[out] scaleType      type of scaling that needs to occur
 	 *  @return		returns true if conversion occurred
 	 */
 	static bool		QueryScaleType(int xWire,int xBitmap,AJA_PixelFormat &primaryFormat,AJAScaleType &scaleType);
@@ -150,8 +153,8 @@ public:
 	/**
 	 *  Static method to provide expanded width for width-scaled rasters (e.g. DVCPro, HDV)
 	 *
-	 *	@param[in]  scaledWidth:		width of scaled raster prior to full-width video expansion
-	 *  @param[in]  height:				height of scaled raster
+	 *	@param[in]  scaledWidth		width of scaled raster prior to full-width video expansion
+	 *  @param[in]  height			height of scaled raster
 	 *  @return		returns expanded width if input raster size matches known scaled raster type, otherwise returns input (scaledWidth)
 	 */
 	static int		QueryFullScaleWidth(int scaledWidth, int height);
@@ -160,8 +163,8 @@ public:
 	/**
 	 *  Static method to provide associated pixel format (e.g. DVCPro, HDV)
 	 *
-	 *	@param[in]  scaledWidth:		width of scaled raster prior to full-width video expansion
-	 *  @param[in]  height:				height of scaled raster
+	 *	@param[in]  scaledWidth		width of scaled raster prior to full-width video expansion
+	 *  @param[in]  height			height of scaled raster
 	 *  @return		returns associated pixel format
 	 */
 	static AJA_PixelFormat	QueryScaledPixelFormat(int scaledWidth, int height);

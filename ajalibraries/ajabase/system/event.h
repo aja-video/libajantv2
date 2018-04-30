@@ -31,7 +31,7 @@ public:
 	 *
 	 *	@param[in]	manualReset		true if event must be reset by caller.
 	 *								false if event automatically reset.
-	 *	@param[in]	pName			Name of a shared lock object.
+	 *	@param[in]	name			Name of a shared lock object.
 	 */
 	AJAEvent(bool manualReset = true, const std::string& name = "");
 	virtual ~AJAEvent();

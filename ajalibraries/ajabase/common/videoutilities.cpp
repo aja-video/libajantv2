@@ -1169,7 +1169,7 @@ void AJA_ConvertARGBToABGR(uint8_t* rgbaBuffer,uint32_t numPixels)
 }
 
 // Converts 8 Bit ARGB 8 Bit ABGR in place
-void AJA_ConvertARGBToRGB(uint8_t* rgbaBuffer,uint8_t * rgbBuffer, uint32_t numPixels)
+static void AJA_ConvertARGBToRGB(uint8_t* rgbaBuffer,uint8_t * rgbBuffer, uint32_t numPixels)
 {
 	for ( uint32_t pixel=0;pixel<numPixels*4;pixel+=4)
 	{
@@ -1183,7 +1183,7 @@ void AJA_ConvertARGBToRGB(uint8_t* rgbaBuffer,uint8_t * rgbBuffer, uint32_t numP
 }
 
 // Converts 8 Bit ARGB 8 Bit ABGR in place
-void AJA_ConvertARGBToBGR(uint8_t* rgbaBuffer, uint8_t * rgbBuffer, uint32_t numPixels)
+static void AJA_ConvertARGBToBGR(uint8_t* rgbaBuffer, uint8_t * rgbBuffer, uint32_t numPixels)
 {
 	for ( uint32_t pixel=0;pixel<numPixels*4;pixel+=4)
 	{

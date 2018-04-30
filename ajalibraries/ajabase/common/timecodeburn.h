@@ -24,9 +24,9 @@ public:
 	 *	Render a small set of characters for timecode ahead of time...This needs to be called before
 	 *  BurnTimeCode or BurnTimeCode will fail.
 	 *
-	 *	@param[in]	pixelFormat
-	 *	@param[in]	numPixels
-	 *	@param[in]	numLines
+	 *	@param[in]	pixelFormat		Specifies the pixel format of the rendering buffer.
+	 *	@param[in]	numPixels		Specifies the raster bitmap width.
+	 *	@param[in]	numLines		Specifies the raster bitmap height.
 	 */
 	AJA_EXPORT bool RenderTimeCodeFont (AJA_PixelFormat pixelFormat, uint32_t numPixels, uint32_t numLines);
 

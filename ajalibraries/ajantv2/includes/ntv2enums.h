@@ -1889,7 +1889,7 @@ typedef enum
     NTV2_SDITransport_12G,					// 12G see Oct Link
     NTV2_MAX_NUM_SDITransportTypes,			// last
 	NTV2_SDITransport_Auto					// auto mode
-		=NTV2_MAX_NUM_SDITransportTypes,				
+		=NTV2_MAX_NUM_SDITransportTypes				
 
 } NTV2SDITransportType;
 
