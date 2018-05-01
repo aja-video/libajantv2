@@ -31,8 +31,16 @@ typedef enum
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
-    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0') // 4CC of metadata config data
+    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
+    kChStatusVData2110      = NTV2_FOURCC('s','t','1','0'), // 4CC of metadata config data
 } VirtualDataTag2110 ;
+
+typedef enum
+{
+    kIpStatusFail           = 0,
+    kIpStatusStopped        = 1,
+    kIpStatusRunning        = 2
+} IpChStatusState ;
 
 typedef struct
 {
@@ -107,6 +115,13 @@ typedef struct
     char                    gateWay[IP_STRSIZE];
     uint32_t                enable;
 } SFPData2110;
+
+typedef struct
+{
+    uint32_t                id;
+    uint32_t				txChStatus[4];
+    uint32_t				rxChStatus[4];
+} IpStatus2110;
 
 typedef struct
 {
