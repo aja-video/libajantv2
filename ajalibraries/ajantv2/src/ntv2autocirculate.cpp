@@ -484,18 +484,12 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStartFrame, LWord & outEndFrame)
 {
 	//	Look for a contiguous group of available frame buffers...
-	static const NTV2Crosspoint	gCrosspoints[] = {	NTV2CROSSPOINT_CHANNEL1,	NTV2CROSSPOINT_CHANNEL2,	NTV2CROSSPOINT_CHANNEL3,	NTV2CROSSPOINT_CHANNEL4,
-													NTV2CROSSPOINT_CHANNEL5,	NTV2CROSSPOINT_CHANNEL6,	NTV2CROSSPOINT_CHANNEL7,	NTV2CROSSPOINT_CHANNEL8,
-													NTV2CROSSPOINT_INPUT1,		NTV2CROSSPOINT_INPUT2,		NTV2CROSSPOINT_INPUT3,		NTV2CROSSPOINT_INPUT4,
-													NTV2CROSSPOINT_INPUT5,		NTV2CROSSPOINT_INPUT6,		NTV2CROSSPOINT_INPUT7,		NTV2CROSSPOINT_INPUT8 };
-	static const unsigned		nCrosspoints	(sizeof (gCrosspoints) / sizeof (NTV2Crosspoint));
-
-	AUTOCIRCULATE_STATUS_STRUCT			acStatus;
-	typedef	std::set <LWord>			LWordSet;
-	typedef LWordSet::const_iterator	LWordSetConstIter;
-	LWordSet							allocatedFrameNumbers;
-	ULWord								isQuadMode1	(0);
-	ULWord								isQuadMode5	(0);
+	AUTOCIRCULATE_STATUS			acStatus;
+	typedef	std::set <uint16_t>		U16Set;
+	typedef U16Set::const_iterator	U16SetConstIter;
+	U16Set							allocatedFrameNumbers;
+	ULWord							isQuadMode1	(0);
+	ULWord							isQuadMode5	(0);
 
 	outStartFrame = outEndFrame = 0;
 	if (!_boardOpened)
@@ -507,36 +501,31 @@ bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStar
 	GetQuadFrameEnable (isQuadMode5, NTV2_CHANNEL5);
 
 	//	Inventory all allocated frames...
-	for (unsigned ndx (0);  ndx < nCrosspoints;  ndx++)
-	{
-		const NTV2Crosspoint	xpt	(gCrosspoints [ndx]);
-		::memset (&acStatus, 0, sizeof (acStatus));
-
-		if (GetAutoCirculate (xpt, &acStatus)  &&  acStatus.state != NTV2_AUTOCIRCULATE_DISABLED)
+	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2_MAX_NUM_CHANNELS;  chan = NTV2Channel(chan+1))
+		if (AutoCirculateGetStatus(chan, acStatus)  &&  !acStatus.IsStopped())
 		{
-			LWord	endFrameNum	(acStatus.endFrame);
+			uint16_t	endFrameNum	(acStatus.GetEndFrame());
 
 			//	Quadruple the number of allocated frame buffers if quad mode is enabled and this is channel 1 or 5...
-			if (isQuadMode1  &&  (xpt == NTV2CROSSPOINT_INPUT1 || xpt == NTV2CROSSPOINT_CHANNEL1))
-				endFrameNum = (acStatus.endFrame - acStatus.startFrame + 1) * 4  +  acStatus.startFrame  -  1;
-			else if (isQuadMode5  &&  (xpt == NTV2CROSSPOINT_INPUT5 || xpt == NTV2CROSSPOINT_CHANNEL5))
-				endFrameNum = (acStatus.endFrame - acStatus.startFrame + 1) * 4  +  acStatus.startFrame  -  1;
+			if (isQuadMode1  &&  chan == NTV2_CHANNEL1)
+				endFrameNum = acStatus.GetFrameCount() * 4  +  acStatus.GetStartFrame()  -  1;
+			else if (isQuadMode5  &&  chan == NTV2_CHANNEL5)
+				endFrameNum = acStatus.GetFrameCount() * 4  +  acStatus.GetStartFrame()  -  1;
 
-			for (LWord num (acStatus.startFrame);  num <= endFrameNum;  num++)
-				allocatedFrameNumbers.insert (num);
+			for (uint16_t num(acStatus.GetStartFrame());  num <= endFrameNum;  num++)
+				allocatedFrameNumbers.insert(num);
 		}	//	if A/C active
-	}	//	for each AutoCirculate crosspoint
 
 	//	Find a contiguous band of unallocated frame numbers...
-	const LWord			finalFrameNumber	(::NTV2DeviceGetNumberFrameBuffers (_boardID) - 1);
-	LWord				startFrameNumber	(0);
-	LWord				endFrameNumber		(startFrameNumber + inFrameCount - 1);
-	LWordSetConstIter	iter				(allocatedFrameNumbers.begin ());
+	const uint16_t		finalFrameNumber	(::NTV2DeviceGetNumberFrameBuffers(_boardID) - 1);
+	uint16_t			startFrameNumber	(0);
+	uint16_t			endFrameNumber		(startFrameNumber + inFrameCount - 1);
+	U16SetConstIter		iter				(allocatedFrameNumbers.begin());
 
-	while (iter != allocatedFrameNumbers.end ())
+	while (iter != allocatedFrameNumbers.end())
 	{
-		LWord	allocatedStartFrame	(*iter);
-		LWord	allocatedEndFrame	(allocatedStartFrame);
+		uint16_t	allocatedStartFrame	(*iter);
+		uint16_t	allocatedEndFrame	(allocatedStartFrame);
 
 		//	Find the end of this allocated band...
 		while (++iter != allocatedFrameNumbers.end ()  &&  *iter == (allocatedEndFrame + 1))
@@ -553,8 +542,8 @@ bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStar
 	if (startFrameNumber > finalFrameNumber || endFrameNumber > finalFrameNumber)
 		return false;
 
-	outStartFrame = startFrameNumber;
-	outEndFrame = endFrameNumber;
+	outStartFrame = LWord(startFrameNumber);
+	outEndFrame = LWord(endFrameNumber);
 	return true;
 
 }	//	FindUnallocatedFrames
@@ -816,48 +805,17 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 		return false;
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (!NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStatus)))
-	{
-		//	Try it the old way...
-		AUTOCIRCULATE_STATUS_STRUCT	tmpStruct;
-		::memset (&tmpStruct, 0, sizeof (tmpStruct));
-
-		tmpStruct.channelSpec = ::NTV2ChannelToInputCrosspoint (inChannel);
-		GetAutoCirculate (tmpStruct.channelSpec, &tmpStruct);
-		if (tmpStruct.state != NTV2_AUTOCIRCULATE_DISABLED)
-			return outStatus.CopyFrom (tmpStruct);
-
-		tmpStruct.channelSpec = ::NTV2ChannelToOutputCrosspoint (inChannel);
-		GetAutoCirculate (tmpStruct.channelSpec, &tmpStruct);
-		if (tmpStruct.state != NTV2_AUTOCIRCULATE_DISABLED)
-			return outStatus.CopyFrom (tmpStruct);
-
-		AUTOCIRCULATE_STATUS	notRunning (::NTV2ChannelToOutputCrosspoint (inChannel));
-		outStatus = notRunning;
-		return true;	//	AutoCirculate not running on this channel
-	}
-	return true;
+	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStatus));
 
 }	//	AutoCirculateGetStatus
 
 
 bool CNTV2Card::AutoCirculateGetFrameStamp (const NTV2Channel inChannel, const ULWord inFrameNum, FRAME_STAMP & outFrameStamp)
 {
-	//	Try the new driver call first...
+	//	Use the new driver call...
 	outFrameStamp.acFrameTime = LWord64 (inChannel);
 	outFrameStamp.acRequestedFrame = inFrameNum;
-	if (!NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outFrameStamp)))
-	{
-		//	Fail -- try it the old way...
-		NTV2Crosspoint		crosspoint	(NTV2CROSSPOINT_INVALID);
-		if (!GetCurrentACChannelCrosspoint (*this, inChannel, crosspoint))
-			return false;
-
-		//	Use the old A/C driver call...
-		FRAME_STAMP_STRUCT	oldFrameStampStruct;
-		return GetFrameStamp (crosspoint, inFrameNum, &oldFrameStampStruct)  &&  outFrameStamp.SetFrom (oldFrameStampStruct);
-	}
-	return true;
+	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outFrameStamp));
 
 }	//	AutoCirculateGetFrameStamp
 

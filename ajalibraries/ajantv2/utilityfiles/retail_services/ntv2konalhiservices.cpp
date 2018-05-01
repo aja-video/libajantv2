@@ -405,7 +405,6 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);			// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
 	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
@@ -492,10 +491,6 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 							mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 							mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 						}
-						
-						// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-						if (mDSKAudioMode == NTV2_DSKAudioBackground)
-							audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 						break;
 
 
@@ -574,10 +569,6 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 						
 						bFb1Disable = 1;			// disable Ch 1
 						bFb2Disable = 0;			// enable Ch 2
-						
-						// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-						if (mDSKAudioMode == NTV2_DSKAudioBackground)
-							audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 						break;
 			
 			
@@ -664,7 +655,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID	inputSelectPrimary = NTV2_XptBlack; 
-	NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
+	//NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
 	bool				bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 	bool 				bFb1RGB = IsFormatRGB(mFb1Format);
 	bool 				bFb1Compressed = IsFormatCompressed(mFb1Format);
@@ -678,25 +669,25 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 	{
 		// Select input 1 (0x01)
 		inputSelectPrimary = NTV2_XptSDIIn1;
-		inputSelectSecondary = NTV2_XptSDIIn2;
+		//inputSelectSecondary = NTV2_XptSDIIn2;
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		// Select input 2 (0x17)
 		inputSelectPrimary = NTV2_XptHDMIIn;
-		inputSelectSecondary = NTV2_XptBlack;
+		//inputSelectSecondary = NTV2_XptBlack;
 	}
 	else if (mVirtualInputSelect == NTV2_Input3Select)
 	{
 		// Select input 3 (0x16)
 		inputSelectPrimary = NTV2_XptAnalogIn;
-		inputSelectSecondary = NTV2_XptBlack;
+		//inputSelectSecondary = NTV2_XptBlack;
 	}
 	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
 	{
 		// Select color space converter (0x05)
 		inputSelectPrimary = NTV2_XptCSC1VidYUV;
-		inputSelectSecondary = NTV2_XptBlack;
+		//inputSelectSecondary = NTV2_XptBlack;
 	}
 
 

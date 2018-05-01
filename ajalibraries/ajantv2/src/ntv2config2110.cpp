@@ -1419,7 +1419,7 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Channel channel, const NTV
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddrPacketizer)
 {
-    if (channel > _numTxChans)
+    if (uint32_t(channel) > _numTxChans)
         return false;
 
     uint32_t index = Get2110TxStreamIndex(channel, stream);
@@ -2037,7 +2037,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before
@@ -2135,7 +2135,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before

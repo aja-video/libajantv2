@@ -435,7 +435,7 @@ bool CNTV2Card::GetHDMIHDRWhitePointY(uint16_t & outWhitePointY)
 
 bool CNTV2Card::SetHDMIHDRMaxMasteringLuminance(const uint16_t inMaxMasteringLuminance)
 {
-	if (!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMaxMasteringLuminance) && NTV2DeviceCanDoHDMIHDROut(_boardID))
+	if (::NTV2DeviceCanDoHDMIHDROut(_boardID)  &&  !NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMaxMasteringLuminance))
 		return false;
 	return WriteRegister(kRegHDMIHDRMasteringLuminence, (uint32_t)inMaxMasteringLuminance, kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
 }
@@ -452,7 +452,7 @@ bool CNTV2Card::GetHDMIHDRMaxMasteringLuminance(uint16_t & outMaxMasteringLumina
 
 bool CNTV2Card::SetHDMIHDRMinMasteringLuminance(const uint16_t inMinMasteringLuminance)
 {
-	if (!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMinMasteringLuminance) && NTV2DeviceCanDoHDMIHDROut(_boardID))
+	if (::NTV2DeviceCanDoHDMIHDROut(_boardID)  &&  !NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMinMasteringLuminance))
 		return false;
 	return WriteRegister(kRegHDMIHDRMasteringLuminence, (uint32_t)inMinMasteringLuminance, kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
 }
@@ -469,7 +469,7 @@ bool CNTV2Card::GetHDMIHDRMinMasteringLuminance(uint16_t & outMinMasteringLumina
 
 bool CNTV2Card::SetHDMIHDRMaxContentLightLevel(const uint16_t inMaxContentLightLevel)
 {
-	if (!NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxContentLightLevel) && NTV2DeviceCanDoHDMIHDROut(_boardID))
+	if (::NTV2DeviceCanDoHDMIHDROut(_boardID)  &&  !NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxContentLightLevel))
 		return false;
 	return WriteRegister(kRegHDMIHDRLightLevel, (uint32_t)inMaxContentLightLevel, kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
 }
@@ -486,7 +486,7 @@ bool CNTV2Card::GetHDMIHDRMaxContentLightLevel(uint16_t & outMaxContentLightLeve
 
 bool CNTV2Card::SetHDMIHDRMaxFrameAverageLightLevel(const uint16_t inMaxFrameAverageLightLevel)
 {
-	if (!NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxFrameAverageLightLevel) && NTV2DeviceCanDoHDMIHDROut(_boardID))
+	if (::NTV2DeviceCanDoHDMIHDROut(_boardID)  &&  !NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxFrameAverageLightLevel))
 		return false;
 	return WriteRegister(kRegHDMIHDRLightLevel, (uint32_t)inMaxFrameAverageLightLevel, kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 }

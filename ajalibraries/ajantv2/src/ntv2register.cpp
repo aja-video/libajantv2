@@ -1369,7 +1369,7 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 					case NTV2_STANDARD_525:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_525);							break;
 					case NTV2_STANDARD_625:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_625);							break;
 					case NTV2_STANDARD_2K:		result.Set (HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
-					default:					DisplayNTV2Error ("Unsupported video standard requested.");						break;
+					default:																									break;
 				}
 
 	return result;
@@ -2896,7 +2896,7 @@ bool CNTV2Card::ReadOutputTimingControl (ULWord & outValue, const UWord inOutput
 {
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
-	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : NTV2_CHANNEL1], &outValue);
+	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : UWord(NTV2_CHANNEL1)], &outValue);
 }
 
 
@@ -3229,9 +3229,8 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 	regValue = 0;
 	do
 	{
-		ULWord regValue = BIT(8);
+		regValue = BIT(8);
 		ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-		
 		if( !(regValue & BIT(8)) )
 		{
 			busy = false;
@@ -4399,29 +4398,17 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
 
-	NTV2Standard newStandard = inValue;
 	bool is2kx1080 = false;
 	switch(inValue)
 	{
-	case NTV2_STANDARD_2Kx1080p:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_2Kx1080i:
-		newStandard = NTV2_STANDARD_1080;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_3840x2160p:
-	case NTV2_STANDARD_3840HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		break;
-	case NTV2_STANDARD_4096x2160p:
-	case NTV2_STANDARD_4096HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	default:
-		break;
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:
+			is2kx1080 = true;
+			break;
+		default:
+			break;
 	}
 
 	WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
@@ -4540,16 +4527,8 @@ bool CNTV2Card::GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWo
 	{
 		if (valueA)
 		{
-			if (_boardID == BOARD_ID_XENA2)
-			{
-				if (!ReadRegister (kRegSDIOut1VPIDB, (ULWord*) valueA))
-					return false;
-			}
-			else
-			{
-				if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
-					return false;
-			}
+			if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
+				return false;
 		}
 		if(valueB)
 		{
@@ -5524,7 +5503,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
         case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);							break;
         case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);							break;
         case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);							break;
-        case NTV2_INPUTSOURCE_ANALOG:	return GetAnalogInputVideoFormat ();									break;
+        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
 		default:						return NTV2_FORMAT_UNKNOWN;												break;
 	}
 }
@@ -5792,7 +5771,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		break;
 
 	case 1:	
-		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetHDMIInputVideoFormat();
 		else if (boardID == DEVICE_ID_LHE_PLUS)
 			result = GetAnalogInputVideoFormat();
@@ -5803,7 +5782,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 	case 2:
 		if (boardID == DEVICE_ID_IOXT)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
 			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
@@ -5874,7 +5853,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 		if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 		{
 			//This is a hack, LHI does not have a second input
-			if ((_boardID == DEVICE_ID_LHI || _boardID == BOARD_ID_LHI_DVI || _boardID == BOARD_ID_LHI_T) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+			if ((_boardID == DEVICE_ID_LHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5882,7 +5861,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 					(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 					progressivePicture);												//progressive picture
 			}
-			else if (_boardID != DEVICE_ID_LHI && _boardID != BOARD_ID_LHI_DVI && _boardID != BOARD_ID_LHI_T)
+			else if (_boardID != DEVICE_ID_LHI)
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 				((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 				(status & BIT_15) >> 15,											//progressive transport
@@ -6312,106 +6291,7 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 		#if !defined (NTV2_DEPRECATE)
 		NTV2BitfileType newBitfile = NTV2_BITFILE_NO_CHANGE;
 		const char *whyString = "No change";
-		// Does support multiple bitfiles?
-		// Note: XenaHS == XenaDXT
-		if (boardID == BOARD_ID_XENA2)
-		{
-			// get the frame buffer (primary) format
-			// Note: when called from SetVideoFormat(), "newValue" is the Primary format
-			// we are about to switch to (but haven't yet). When called from other methods
-			// newValue == NTV2_FORMAT_UNKNOWN.
-			NTV2VideoFormat primaryFormat = newValue;
-			if (primaryFormat == NTV2_FORMAT_UNKNOWN)
-				GetVideoFormat(&primaryFormat);
-			
-			// get the source (secondary) format
-			NTV2VideoFormat secondaryFormat = NTV2_FORMAT_UNKNOWN;
-			GetSecondaryVideoFormat(&secondaryFormat);
-			
-			// if the Secondary Format == Primary Format, or it is SD to SD conversion
-			//if (primaryFormat != secondaryFormat )
-			{
-				// are we in capture or playback mode?
-				NTV2Mode mode = NTV2_MODE_DISPLAY;
-				GetMode(NTV2_CHANNEL1, &mode);
-				
-				int compare = 0;
-				if (mode == NTV2_MODE_CAPTURE)
-				{
-					// In Capture mode, we need to see if the current input in using an up/down-converter:
-					// if so, we do what's right for the input. If NOT, we may need to use the converter
-					// for one of the outputs.
-					
-						// get the current selected input
-					NTV2InputVideoSelect input = NTV2_Input1Select;
-					GetInputVideoSelect(&input);
-					
-						// now get the video format of the selected input
-					NTV2VideoFormat inFormat = NTV2_FORMAT_UNKNOWN;
-					if (input == NTV2_Input2Select)
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI2);	// input 2
-					else
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI1);	// input 1 or DualLink
-					
-					if ( (inFormat == secondaryFormat) && (secondaryFormat != primaryFormat) )
-					{		// we're converting the input FROM the Secondary format TO the Primary format
-						compare = FormatCompare (secondaryFormat, primaryFormat);
-					}
-					else
-					{		// we DON'T need the converter for input, so assign it according to the output needs
-						compare = FormatCompare (primaryFormat, secondaryFormat);
-					}
-				}	// Xena2 mode == Capture
-				
-				else	// Xena2 mode == Playback
-				{		// we're converting FROM the Primary format TO the Secondary format
-					compare = FormatCompare (primaryFormat, secondaryFormat);
-				}
-				
-					// which bitfile do we need?
-				bool isCrossConvert = NTV2_IS_HD_VIDEO_FORMAT(primaryFormat) && NTV2_IS_HD_VIDEO_FORMAT(secondaryFormat);
-				if (compare > 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XDCVT : NTV2_BITFILE_XENA2_DNCVT;
-				else if (compare < 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XUCVT : NTV2_BITFILE_XENA2_UPCVT;
-				else if ( primaryFormat == secondaryFormat && NTV2_IS_SD_VIDEO_FORMAT(primaryFormat) )
-					newBitfile = NTV2_BITFILE_XENA2_DNCVT;		// SD to SD conversion
-				else
-					newBitfile = NTV2_BITFILE_NO_CHANGE;
-
-				// Note: this code assumes we can read which bitfile is currently loaded (upconvert or downconvert).
-				// The Mac code is using a combination of being able to read the current BITFILE_INFO_STRUCT from
-				// the driver, and using a new field ("bitFileType") in that struct. As of this writing, our Linux
-				// code partially supports writing/reading the BITFILE_INFO (only works for systems that enable PIO),
-				// and our Windows code doesn't support it at all.
-			
-					// which bitfile is currently loaded?
-				NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-				BITFILE_INFO_STRUCT bitFileInfo;
-				memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));	// Initializing suppresses valgrind error
-				if ( DriverGetBitFileInformation(bitFileInfo, NTV2_VideoProcBitFile) )
-					currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-				
-					// do we need to make a change?
-				if ( (newBitfile != NTV2_BITFILE_NO_CHANGE) && (newBitfile != currentBitfile) )
-				{
-					result = newBitfile;
-					
-					if (result == NTV2_BITFILE_XENA2_DNCVT)
-						whyString = "Change to down converter";
-					else if (result == NTV2_BITFILE_XENA2_UPCVT)
-						whyString = "Change to upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XDCVT)
-						whyString = "Change to cross down upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XUCVT)
-						whyString = "Change to cross up upconverter";
-				}
-				if (ajaRetail == false)
-					result = NTV2_BITFILE_NO_CHANGE;
-					
-			}	// if (primaryFormat != secondaryFormat)
-		} // if (boardID == BOARD_ID_XENA2)
-		#else	//	!defined (NTV2_DEPRECATE)
+		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
 			(void) newValue;
 			(void) ajaRetail;
@@ -7071,17 +6951,6 @@ bool CNTV2Card::SetConversionMode (NTV2ConversionMode mode)
 	}
 	SetConverterPulldown( isPulldown );
 	SetDeinterlaceMode(isDeinterlace);
-
-	#if !defined (NTV2_DEPRECATE)
-		// which bitfile is currently loaded?
-		NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-		BITFILE_INFO_STRUCT bitFileInfo;
-		if ( DriverGetBitFileInformation(bitFileInfo) )
-			currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-
-		if (GetDeviceID () == BOARD_ID_XENA2 && desiredX2BitFile != currentBitfile)
-			SwitchBitfile (BOARD_ID_XENA2, desiredX2BitFile);
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	return true;
 
@@ -9215,7 +9084,7 @@ bool CNTV2Card::GetMultiFormatMode (bool & outEnabled)
 
 bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	if (inRS422Parity == NTV2_RS422_NO_PARITY)
@@ -9247,7 +9116,7 @@ bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PA
 
 bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9268,7 +9137,7 @@ bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY &
 
 bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE inRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9292,7 +9161,7 @@ bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_R
 
 bool CNTV2Card::GetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);

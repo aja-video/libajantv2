@@ -389,13 +389,13 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(EFFECTIVE_PLATFORM_NAME)";
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					AJAMac,
 					AJA_MAC,
-					_DEBUG,
 					AJA_DEBUG,
-					"AJA_PRINTTYPE=3",
+					_DEBUG,
 				);
 				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
@@ -415,18 +415,16 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../includes,
-					../../ajantv2/includes,
-					../../ajantv2/classes,
-					../../ajantv2/macclasses,
-					../..,
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = build;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wreorder",
+				);
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SYMROOT = ../../../lib;
+				USER_HEADER_SEARCH_PATHS = "../includes ../../ajantv2/includes ../../ajantv2/classes ../../ajantv2/macclasses ../..";
 			};
 			name = Debug;
 		};
@@ -448,11 +446,11 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(EFFECTIVE_PLATFORM_NAME)";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					AJAMac,
 					AJA_MAC,
 					_NDEBUG,
-					"AJA_PRINTTYPE=3",
 				);
 				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
@@ -472,17 +470,15 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../includes,
-					../../ajantv2/includes,
-					../../ajantv2/classes,
-					../../ajantv2/macclasses,
-					../..,
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = build;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wreorder",
+				);
 				SDKROOT = macosx;
 				SYMROOT = ../../../lib;
+				USER_HEADER_SEARCH_PATHS = "../includes ../../ajantv2/includes ../../ajantv2/classes ../../ajantv2/macclasses ../..";
 			};
 			name = Release;
 		};
@@ -497,6 +493,7 @@
 				LIBRARY_SEARCH_PATHS = ../../../lib;
 				OTHER_LDFLAGS = (
 					"-lajaanc",
+					"-lajacc",
 					"-lajantv2d",
 					"-lajabased",
 				);
@@ -515,6 +512,7 @@
 				LIBRARY_SEARCH_PATHS = ../../../lib;
 				OTHER_LDFLAGS = (
 					"-lajaanc",
+					"-lajacc",
 					"-lajantv2",
 					"-lajabase",
 				);

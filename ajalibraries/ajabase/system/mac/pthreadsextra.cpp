@@ -21,7 +21,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 	
 }
 
-bool times_up(const struct timespec *timeout)
+static bool times_up(const struct timespec *timeout)
 {
 	// get the current time of day
 	struct timespec ts;

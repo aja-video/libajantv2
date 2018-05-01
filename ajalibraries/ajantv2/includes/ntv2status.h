@@ -19,39 +19,39 @@
 	/**
 		@deprecated	Use CNTV2Card instead.
 	**/
-	class AJAExport NTV2_DEPRECATED CNTV2Status : public CNTV2Card
+	class AJAExport NTV2_DEPRECATED_CLASS CNTV2Status : public CNTV2Card
 	{
 		public:
-			NTV2_DEPRECATED inline				CNTV2Status ()				{}
+			inline NTV2_DEPRECATED_f(			CNTV2Status ())				{}
 
-			NTV2_DEPRECATED						CNTV2Status (UWord			inDeviceIndex,
+			NTV2_DEPRECATED_f(					CNTV2Status (UWord			inDeviceIndex,
 															bool			displayErrorMessage	= false,
 															UWord			ulBoardType			= BOARDTYPE_NTV2,
-															const char *	pInHostname			= NULL);
+															const char *	pInHostname			= NULL));
 			virtual								~CNTV2Status ();
 
 		public:
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetBoardString						(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetFrameBufferVideoFormatString		(std::string & outString);
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetBoardString						(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetFrameBufferVideoFormatString		(std::string & outString));
 
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput1VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput2VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput3VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput4VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput5VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput6VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput7VideoFormatString			(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInput8VideoFormatString			(std::string & outString);
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput1VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput2VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput3VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput4VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput5VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput6VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput7VideoFormatString			(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInput8VideoFormatString			(std::string & outString));
 
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetHDMIInputVideoFormatString		(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetAnalogInputVideoFormatString		(std::string & outString);
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetReferenceVideoFormatString		(std::string & outString);
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetHDMIInputVideoFormatString		(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetAnalogInputVideoFormatString		(std::string & outString));
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetReferenceVideoFormatString		(std::string & outString));
 
-			AJA_VIRTUAL NTV2_DEPRECATED void	GetInputVideoFormatString			(int inputNum, std::string & outString);
+			AJA_VIRTUAL NTV2_DEPRECATED_f(void	GetInputVideoFormatString			(int inputNum, std::string & outString));
 
-			static NTV2_DEPRECATED void			GetVideoFormatString				(NTV2VideoFormat format, std::string & outString);
-			static NTV2_DEPRECATED void			GetVideoStandardString				(NTV2Standard standard, std::string & outString);
-			static NTV2_DEPRECATED void			GetFrameRateString					(NTV2FrameRate frameRate, std::string & outString);
+			static NTV2_DEPRECATED_f(void			GetVideoFormatString				(NTV2VideoFormat format, std::string & outString));
+			static NTV2_DEPRECATED_f(void			GetVideoStandardString				(NTV2Standard standard, std::string & outString));
+			static NTV2_DEPRECATED_f(void			GetFrameRateString					(NTV2FrameRate frameRate, std::string & outString));
 
 	};	//	CNTV2Status
 

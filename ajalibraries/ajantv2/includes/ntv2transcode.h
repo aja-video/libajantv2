@@ -108,15 +108,15 @@ AJAExport void	ConvertLineto10BitRGB (UWord *				ycbcrBuffer,
 									  bool					fUseSMPTERange	= false);
 // ConvertLineto10BitYCbCrA
 // 10 Bit YCbCr to 10 Bit YCbCrA
-AJAExport void	ConvertLineto10BitYCbCrA (UWord *	ycbcrBuffer,
-										  ULWord *	ycbcraBuffer,
-										  ULWord	numPixels);
+AJAExport void	ConvertLineto10BitYCbCrA (const UWord *	pInYCbCrBuffer,
+										  ULWord *		pOutYCbCrABuffer,
+										  const ULWord	inNumPixels);
 
-// ConvertLineto10BitRGB
+// ConvertRGBLineto10BitRGB
 // 8 Bit RGB and 10 Bit RGB Version
-AJAExport void	ConvertRGBLineto10BitRGB (RGBAlphaPixel *		rgbaBuffer,
-										  RGBAlpha10BitPixel *	rgba10BitBuffer,
-										  ULWord				numPixels);
+AJAExport void	ConvertRGBLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
+										  RGBAlpha10BitPixel *	pOutRGBA10Buffer,
+										  const ULWord			inNumPixels);
 
 // ConvertRGBALineToRGB
 // 8 bit RGBA to 8 bit RGB (RGB24)
@@ -132,9 +132,9 @@ AJAExport void	ConvertRGBALineToBGR (RGBAlphaPixel *	rgbaBuffer,
 
 // ConvertLineto10BitRGB
 // 8 Bit RGBA to  and 10 Bit RGB Packed Version
-AJAExport void	ConvertLineto10BitRGB (RGBAlphaPixel *	rgbaBuffer,
-										ULWord *		rgb10BitBuffer,
-										ULWord			numPixels);
+AJAExport void	ConvertLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
+										ULWord *		pOutRGB10BitBuffer,
+										ULWord			inNumPixels);
 
 // ConvertLineto8BitYCbCr
 // 10 Bit YCbCr to 8 Bit YCbCr
@@ -193,17 +193,17 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 */
 
 // Pack 10 Bit RGBA to 10 Bit RGB Format for our board
-AJAExport void	PackRGB10BitFor10BitRGB (RGBAlpha10BitPixel *	rgba10BitBuffer,
-										ULWord					numPixels);
+AJAExport void	PackRGB10BitFor10BitRGB (RGBAlpha10BitPixel *	pBuffer,
+										const ULWord					inNumPixels);
 
 // Pack 10 Bit RGBA to 10 Bit DPX Format for our board
-AJAExport void	PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel *	rgba10BitBuffer,
-										ULWord					numPixels,
-										bool					bigEndian	= true);
+AJAExport void	PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel *	pBuffer,
+										const ULWord			inNumPixels,
+										const bool				bigEndian	= true);
 
 // Pack 10 Bit RGBA to NTV2_FBF_10BIT_RGB_PACKED Format for our board
-AJAExport void	PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel *	rgba10BitBuffer,
-												ULWord				numPixels);
+AJAExport void	PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel *	pBuffer,
+												const ULWord		inNumPixels);
 
 
 inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarget)
@@ -219,13 +219,13 @@ inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarg
 					                          (Fixed_)0x4A7E*pSource->Green +
 					                          (Fixed_)0x7070*pSource->Blue );
 
-  pTarget->cb = (SByte)Cb;
+  pTarget->cb = (UByte)Cb;
 
   Cr = CCIR601_8BIT_CHROMAOFFSET + FixedRound((Fixed_)0x7070*pSource->Red -
 					                          (Fixed_)0x5E27*pSource->Green -
 					                          (Fixed_)0x1249*pSource->Blue );
 
-  pTarget->cr = (SByte)Cr;
+  pTarget->cr = (UByte)Cr;
 }
 
 inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarget)
@@ -235,19 +235,19 @@ inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarg
   Y = CCIR601_8BIT_BLACK + FixedRound((Fixed_)0x2E8A*pSource->Red +
 					                  (Fixed_)0x9C9F*pSource->Green +
 					                  (Fixed_)0x0FD2*pSource->Blue );
-  pTarget->y = (UByte)Y;
+  pTarget->y = UByte(Y);
 
   Cb = CCIR601_8BIT_CHROMAOFFSET + FixedRound((Fixed_)-0x18F4*pSource->Red -
 					                          (Fixed_)0x545B*pSource->Green +
 					                          (Fixed_)0x6DA9*pSource->Blue );
 
-  pTarget->cb = (SByte)Cb;
+  pTarget->cb = uint8_t(SByte(Cb));
 
   Cr = CCIR601_8BIT_CHROMAOFFSET + FixedRound((Fixed_)0x6D71*pSource->Red -
 					                          (Fixed_)0x6305*pSource->Green -
 					                          (Fixed_)0x0A06*pSource->Blue );
 
-  pTarget->cr = (SByte)Cr;
+  pTarget->cr = uint8_t(SByte(Cr));
 }
 
  
@@ -258,19 +258,19 @@ inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * 
   Y = CCIR601_10BIT_BLACK + (((Fixed_)0x41BC*pSource->Red +
 					          (Fixed_)0x810F*pSource->Green +
 					          (Fixed_)0x1910*pSource->Blue )>>14);
-  pTarget->y = (UWord)Y;
+  pTarget->y = UWord(Y);
 
   Cb = CCIR601_10BIT_CHROMAOFFSET + (((Fixed_)-0x25F1*pSource->Red -
 					                  (Fixed_)0x4A7E*pSource->Green +
 					                  (Fixed_)0x7070*pSource->Blue )>>14);
 
-  pTarget->cb = (Word)(Cb&0x3FF);
+  pTarget->cb = UWord(Cb&0x3FF);
 
   Cr = CCIR601_10BIT_CHROMAOFFSET + (((Fixed_)0x7070*pSource->Red -
 					                  (Fixed_)0x5E27*pSource->Green -
 					                  (Fixed_)0x1249*pSource->Blue )>>14);
 
-  pTarget->cr = (Word)(Cr&0x3FF);
+  pTarget->cr = UWord(Cr&0x3FF);
 }
 
 inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
@@ -286,13 +286,13 @@ inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * 
 					                  (Fixed_)0x545B*pSource->Green +
 					                  (Fixed_)0x6DA9*pSource->Blue )>>14);
 
-  pTarget->cb = (Word)(Cb&0x3FF);
+  pTarget->cb = UWord(Cb&0x3FF);
 
   Cr = CCIR601_10BIT_CHROMAOFFSET + (((Fixed_)0x6D71*pSource->Red -
 					                  (Fixed_)0x6305*pSource->Green -
 					                  (Fixed_)0x0A06*pSource->Blue )>>14);
 
-  pTarget->cr = (Word)(Cr&0x3FF);
+  pTarget->cr = UWord(Cr&0x3FF);
 }
  
 inline 	void SDConvertYCbCrtoRGB(YCbCrAlphaPixel *pSource,
@@ -467,21 +467,21 @@ inline 	void SDConvert10BitYCbCrto16BitRGB(YCbCr10BitAlphaPixel *pSource,
 
   ConvertedY = 0x12A15*((LWord)pSource->y - CCIR601_10BIT_BLACK);
 
-  Red = FixedRound(ConvertedY +
-		   0x19895*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET)));
+  Red = ULWord(FixedRound(ConvertedY +
+				0x19895*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET))));
 
   //Red = Red<<4; // only 12 bits used, put them in the MSB
   pTarget->Red = (UWord)ClipRGB_16BIT(Red<<6); // TBD: fix coefficents instead
 
-  Blue = FixedRound(ConvertedY +
-		    0x20469*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+  Blue = ULWord(FixedRound(ConvertedY +
+				0x20469*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) )));
 
   //Blue = Blue<<4; // only 12 bits used, put them in the MSB
   pTarget->Blue = (UWord)ClipRGB_16BIT(Blue<<6); // TBD: fix coefficents instead
 
-  Green = FixedRound(ConvertedY - 
-		     0x644A*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     0xD01F*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+  Green = ULWord(FixedRound(ConvertedY -
+				0x644A*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+				0xD01F*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) )));
 
   //Green = Green<<4; // only 12 bits used, put them in the MSB
   pTarget->Green = (UWord)ClipRGB_16BIT(Green<<6); // TBD: fix coefficents instead
@@ -498,21 +498,21 @@ inline 	void HDConvert10BitYCbCrto16BitRGB(YCbCr10BitAlphaPixel *pSource,
 
   ConvertedY = 0x12ACF*((LWord)pSource->y - CCIR601_10BIT_BLACK);
 
-  Red = FixedRound(ConvertedY +
-		   0x1DF71*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET)));
+  Red = ULWord(FixedRound(ConvertedY +
+				0x1DF71*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET))));
 
   //Red = Red<<4; // only 12 bits used, put them in the MSB
   pTarget->Red = (UWord)ClipRGB_16BIT(Red); // TBD: fix coefficents instead
 
-  Blue = FixedRound(ConvertedY +
-		    0x22A86*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+  Blue = ULWord(FixedRound(ConvertedY +
+				0x22A86*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) )));
 
   //Blue = Blue<<4; // only 12 bits used, put them in the MSB
   pTarget->Blue = (UWord)ClipRGB_16BIT(Blue); // TBD: fix coefficents instead
 
-  Green = FixedRound(ConvertedY - 
-		     0x3806*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     0x8C32*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+  Green = ULWord(FixedRound(ConvertedY -
+				0x3806*((LWord)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+				0x8C32*((LWord)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) )));
 
   //Green = Green<<4; // only 12 bits used, put them in the MSB
   pTarget->Green = (UWord)ClipRGB_16BIT(Green); // TBD: fix coefficents instead

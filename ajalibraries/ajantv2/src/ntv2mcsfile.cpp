@@ -50,10 +50,10 @@ void CNTV2MCSfile::Init(void)
 bool CNTV2MCSfile::isReady()
 {
 	return true;
-	if (mFileLines.size() > 0)
-		return true;
-	else
-		return false;
+//	if (mFileLines.size() > 0)
+//		return true;
+//	else
+//		return false;
 }
 
 bool CNTV2MCSfile::Open(const string & inMCSFileName)
@@ -62,7 +62,7 @@ bool CNTV2MCSfile::Open(const string & inMCSFileName)
 	mCommentString.clear();
 	struct stat	fsinfo;
 	::stat(inMCSFileName.c_str(), &fsinfo);
-	mFileSize = fsinfo.st_size;
+	mFileSize = uint32_t(fsinfo.st_size);
 	
 	struct tm * fileTimeInfo;
 	fileTimeInfo = localtime(&fsinfo.st_ctime);

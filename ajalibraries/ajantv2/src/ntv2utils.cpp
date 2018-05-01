@@ -1748,47 +1748,47 @@ NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, co
 
 NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
 {
-	NTV2VideoFormat quaterSizedFormat;
+	NTV2VideoFormat quarterSizedFormat;
 
 	switch (videoFormat)
 	{
-		case NTV2_FORMAT_4x1920x1080psf_2398:	quaterSizedFormat = NTV2_FORMAT_1080psf_2398;   break;
-		case NTV2_FORMAT_4x1920x1080psf_2400:	quaterSizedFormat = NTV2_FORMAT_1080psf_2400;   break;
-		case NTV2_FORMAT_4x1920x1080psf_2500:	quaterSizedFormat = NTV2_FORMAT_1080psf_2500_2; break;
-		case NTV2_FORMAT_4x1920x1080psf_2997:	quaterSizedFormat = NTV2_FORMAT_1080psf_2997;   break;
-		case NTV2_FORMAT_4x1920x1080psf_3000:	quaterSizedFormat = NTV2_FORMAT_1080psf_3000;   break;
+		case NTV2_FORMAT_4x1920x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2398;   break;
+		case NTV2_FORMAT_4x1920x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2400;   break;
+		case NTV2_FORMAT_4x1920x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2500_2; break;
+		case NTV2_FORMAT_4x1920x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080i_5994;   break;	//	NTV2_FORMAT_1080psf_2997
+		case NTV2_FORMAT_4x1920x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080i_6000;   break;	//	NTV2_FORMAT_1080psf_3000
             
-		case NTV2_FORMAT_4x2048x1080psf_2398:	quaterSizedFormat = NTV2_FORMAT_1080psf_2K_2398; break;
-		case NTV2_FORMAT_4x2048x1080psf_2400:	quaterSizedFormat = NTV2_FORMAT_1080psf_2K_2400; break;
-		case NTV2_FORMAT_4x2048x1080psf_2500:	quaterSizedFormat = NTV2_FORMAT_1080psf_2K_2500; break;
-		//case NTV2_FORMAT_4x2048x1080psf_2997:	quaterSizedFormat = NTV2_FORMAT_1080psf_2K_2997; break;
-		//case NTV2_FORMAT_4x2048x1080psf_3000:	quaterSizedFormat = NTV2_FORMAT_1080psf_2K_3000; break;
+		case NTV2_FORMAT_4x2048x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2398; break;
+		case NTV2_FORMAT_4x2048x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2400; break;
+		case NTV2_FORMAT_4x2048x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2500; break;
+		//case NTV2_FORMAT_4x2048x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2997; break;
+		//case NTV2_FORMAT_4x2048x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_3000; break;
             
-		case NTV2_FORMAT_4x1920x1080p_2398:		quaterSizedFormat = NTV2_FORMAT_1080p_2398; break;
-		case NTV2_FORMAT_4x1920x1080p_2400:		quaterSizedFormat = NTV2_FORMAT_1080p_2400; break;
-		case NTV2_FORMAT_4x1920x1080p_2500:		quaterSizedFormat = NTV2_FORMAT_1080p_2500; break;
-		case NTV2_FORMAT_4x1920x1080p_2997:		quaterSizedFormat = NTV2_FORMAT_1080p_2997; break;
-		case NTV2_FORMAT_4x1920x1080p_3000:		quaterSizedFormat = NTV2_FORMAT_1080p_3000; break;
-		case NTV2_FORMAT_4x1920x1080p_5000:		quaterSizedFormat = NTV2_FORMAT_1080p_5000_A; break;
-		case NTV2_FORMAT_4x1920x1080p_5994:		quaterSizedFormat = NTV2_FORMAT_1080p_5994_A; break;
-		case NTV2_FORMAT_4x1920x1080p_6000:		quaterSizedFormat = NTV2_FORMAT_1080p_6000_A; break;
+		case NTV2_FORMAT_4x1920x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2398; break;
+		case NTV2_FORMAT_4x1920x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2400; break;
+		case NTV2_FORMAT_4x1920x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2500; break;
+		case NTV2_FORMAT_4x1920x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2997; break;
+		case NTV2_FORMAT_4x1920x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_3000; break;
+		case NTV2_FORMAT_4x1920x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_5000_A; break;
+		case NTV2_FORMAT_4x1920x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_5994_A; break;
+		case NTV2_FORMAT_4x1920x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_6000_A; break;
             
-		case NTV2_FORMAT_4x2048x1080p_2398:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_2398; break;
-		case NTV2_FORMAT_4x2048x1080p_2400:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_2400; break;
-		case NTV2_FORMAT_4x2048x1080p_2500:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_2500; break;
-		case NTV2_FORMAT_4x2048x1080p_2997:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_2997; break;
-		case NTV2_FORMAT_4x2048x1080p_3000:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_3000; break;
-		case NTV2_FORMAT_4x2048x1080p_4795:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_4795; break;
-		case NTV2_FORMAT_4x2048x1080p_4800:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_4800; break;
-		case NTV2_FORMAT_4x2048x1080p_5000:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_5000_A; break;
-		case NTV2_FORMAT_4x2048x1080p_5994:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_5994_A; break;
-		case NTV2_FORMAT_4x2048x1080p_6000:		quaterSizedFormat = NTV2_FORMAT_1080p_2K_6000_A; break;
+		case NTV2_FORMAT_4x2048x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2398; break;
+		case NTV2_FORMAT_4x2048x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2400; break;
+		case NTV2_FORMAT_4x2048x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2500; break;
+		case NTV2_FORMAT_4x2048x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2997; break;
+		case NTV2_FORMAT_4x2048x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_3000; break;
+		case NTV2_FORMAT_4x2048x1080p_4795:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4795_A; break;
+		case NTV2_FORMAT_4x2048x1080p_4800:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4800_A; break;
+		case NTV2_FORMAT_4x2048x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5000_A; break;
+		case NTV2_FORMAT_4x2048x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5994_A; break;
+		case NTV2_FORMAT_4x2048x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_6000_A; break;
 		// No quarter sized formats for 119.88 or 120 Hz
 
-		default:								quaterSizedFormat = videoFormat; break;
+		default:								quarterSizedFormat = videoFormat; break;
 	}
 
-	return quaterSizedFormat;
+	return quarterSizedFormat;
 }
 
 
@@ -1801,8 +1801,8 @@ NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat)
 	case  NTV2_FORMAT_1080psf_2398:		quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_2398;	break;
 	case  NTV2_FORMAT_1080psf_2400:		quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_2400;	break;
 	case  NTV2_FORMAT_1080psf_2500_2:	quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_2500;	break;
-	case  NTV2_FORMAT_1080psf_2997:		quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_2997;	break;
-	case  NTV2_FORMAT_1080psf_3000:		quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_3000;	break;
+	case  NTV2_FORMAT_1080i_5994:	/*NTV2_FORMAT_1080psf_2997:*/	quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_2997;	break;
+	case  NTV2_FORMAT_1080i_6000:	/*NTV2_FORMAT_1080psf_3000:*/	quadSizedFormat = NTV2_FORMAT_4x1920x1080psf_3000;	break;
                                                                 
 	case  NTV2_FORMAT_1080psf_2K_2398:	quadSizedFormat = NTV2_FORMAT_4x2048x1080psf_2398; break;
 	case  NTV2_FORMAT_1080psf_2K_2400:	quadSizedFormat = NTV2_FORMAT_4x2048x1080psf_2400; break;
@@ -1827,8 +1827,8 @@ NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat)
 	case  NTV2_FORMAT_1080p_2K_2500: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_2500; break;
 	case  NTV2_FORMAT_1080p_2K_2997: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_2997; break;
 	case  NTV2_FORMAT_1080p_2K_3000: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_3000; break;
-	case  NTV2_FORMAT_1080p_2K_4795: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_4795; break;
-	case  NTV2_FORMAT_1080p_2K_4800: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_4800; break;
+	case  NTV2_FORMAT_1080p_2K_4795_A: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_4795; break;
+	case  NTV2_FORMAT_1080p_2K_4800_A: 	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_4800; break;
 	case  NTV2_FORMAT_1080p_2K_5000_A:	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_5000; break;
 	case  NTV2_FORMAT_1080p_2K_5994_A:	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_5994; break;
 	case  NTV2_FORMAT_1080p_2K_6000_A:	quadSizedFormat = NTV2_FORMAT_4x2048x1080p_6000; break;
@@ -1910,11 +1910,11 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080p_2K_2500:
 		case NTV2_FORMAT_1080p_2K_2997:
 		case NTV2_FORMAT_1080p_2K_3000:
-		case NTV2_FORMAT_1080p_2K_4795:
-		case NTV2_FORMAT_1080p_2K_4800:
-		case NTV2_FORMAT_1080p_2K_5000:
-		case NTV2_FORMAT_1080p_2K_5994:
-		case NTV2_FORMAT_1080p_2K_6000:
+		case NTV2_FORMAT_1080p_2K_4795_A:
+		case NTV2_FORMAT_1080p_2K_4800_A:
+		case NTV2_FORMAT_1080p_2K_5000_A:
+		case NTV2_FORMAT_1080p_2K_5994_A:
+		case NTV2_FORMAT_1080p_2K_6000_A:
 		case NTV2_FORMAT_1080p_2K_4795_B:
 		case NTV2_FORMAT_1080p_2K_4800_B:
 		case NTV2_FORMAT_1080p_2K_5000_B:
@@ -2084,15 +2084,15 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 		case NTV2_FORMAT_1080psf_2K_2500:
 		case NTV2_FORMAT_1080p_2K_2997:
 		case NTV2_FORMAT_1080p_2K_3000:
-		case NTV2_FORMAT_1080p_2K_4795:
+		case NTV2_FORMAT_1080p_2K_4795_A:
 		case NTV2_FORMAT_1080p_2K_4795_B:
-		case NTV2_FORMAT_1080p_2K_4800:
+		case NTV2_FORMAT_1080p_2K_4800_A:
 		case NTV2_FORMAT_1080p_2K_4800_B:
-		case NTV2_FORMAT_1080p_2K_5000:
+		case NTV2_FORMAT_1080p_2K_5000_A:
 		case NTV2_FORMAT_1080p_2K_5000_B:
-		case NTV2_FORMAT_1080p_2K_5994:
+		case NTV2_FORMAT_1080p_2K_5994_A:
 		case NTV2_FORMAT_1080p_2K_5994_B:
-		case NTV2_FORMAT_1080p_2K_6000:
+		case NTV2_FORMAT_1080p_2K_6000_A:
 		case NTV2_FORMAT_1080p_2K_6000_B:
 			result = NTV2_FG_2048x1080;
 			break;
@@ -2943,7 +2943,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_1080p_5994_A:
 	case NTV2_FORMAT_1080p_5994_B:
 	case NTV2_FORMAT_720p_5994:
-	case NTV2_FORMAT_1080p_2K_5994:
+	case NTV2_FORMAT_1080p_2K_5994_A:
 	case NTV2_FORMAT_1080p_2K_5994_B:
 	case NTV2_FORMAT_4x1920x1080p_5994:
 	case NTV2_FORMAT_4x2048x1080p_5994:
@@ -2953,7 +2953,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_720p_6000:
 	case NTV2_FORMAT_1080p_6000_A:
 	case NTV2_FORMAT_1080p_6000_B:
-	case NTV2_FORMAT_1080p_2K_6000:
+	case NTV2_FORMAT_1080p_2K_6000_A:
 	case NTV2_FORMAT_1080p_2K_6000_B:
 	case NTV2_FORMAT_4x1920x1080p_6000:
 	case NTV2_FORMAT_4x2048x1080p_6000:
@@ -2974,7 +2974,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_1080p_5000_A:
 	case NTV2_FORMAT_1080p_5000_B:
 	case NTV2_FORMAT_720p_5000:
-	case NTV2_FORMAT_1080p_2K_5000:
+	case NTV2_FORMAT_1080p_2K_5000_A:
 	case NTV2_FORMAT_1080p_2K_5000_B:
 	case NTV2_FORMAT_4x1920x1080p_5000:
 	case NTV2_FORMAT_4x2048x1080p_5000:
@@ -3034,12 +3034,12 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 		frameRate = NTV2_FRAMERATE_2500;
 		break;
 
-	case NTV2_FORMAT_1080p_2K_4795:
+	case NTV2_FORMAT_1080p_2K_4795_A:
 	case NTV2_FORMAT_1080p_2K_4795_B:
 	case NTV2_FORMAT_4x2048x1080p_4795:
 		frameRate = NTV2_FRAMERATE_4795;
 		break;
-	case NTV2_FORMAT_1080p_2K_4800:
+	case NTV2_FORMAT_1080p_2K_4800_A:
 	case NTV2_FORMAT_1080p_2K_4800_B:
 	case NTV2_FORMAT_4x2048x1080p_4800:
 		frameRate = NTV2_FRAMERATE_4800;
@@ -3244,11 +3244,11 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_1080p_2K_2500:
 		case NTV2_FORMAT_1080p_2K_2997:
 		case NTV2_FORMAT_1080p_2K_3000:
-		case NTV2_FORMAT_1080p_2K_4795:
-		case NTV2_FORMAT_1080p_2K_4800:
-		case NTV2_FORMAT_1080p_2K_5000:
-		case NTV2_FORMAT_1080p_2K_5994:
-		case NTV2_FORMAT_1080p_2K_6000:
+		case NTV2_FORMAT_1080p_2K_4795_A:
+		case NTV2_FORMAT_1080p_2K_4800_A:
+		case NTV2_FORMAT_1080p_2K_5000_A:
+		case NTV2_FORMAT_1080p_2K_5994_A:
+		case NTV2_FORMAT_1080p_2K_6000_A:
 		case NTV2_FORMAT_1080p_2K_4795_B:
 		case NTV2_FORMAT_1080p_2K_4800_B:
 		case NTV2_FORMAT_1080p_2K_5000_B:
@@ -3363,11 +3363,11 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_1080p_2K_2500:
 		case NTV2_FORMAT_1080p_2K_2997:
 		case NTV2_FORMAT_1080p_2K_3000:
-		case NTV2_FORMAT_1080p_2K_4795:
-		case NTV2_FORMAT_1080p_2K_4800:
-		case NTV2_FORMAT_1080p_2K_5000:
-		case NTV2_FORMAT_1080p_2K_5994:
-		case NTV2_FORMAT_1080p_2K_6000:
+		case NTV2_FORMAT_1080p_2K_4795_A:
+		case NTV2_FORMAT_1080p_2K_4800_A:
+		case NTV2_FORMAT_1080p_2K_5000_A:
+		case NTV2_FORMAT_1080p_2K_5994_A:
+		case NTV2_FORMAT_1080p_2K_6000_A:
 		case NTV2_FORMAT_1080p_2K_4795_B:
 		case NTV2_FORMAT_1080p_2K_4800_B:
 		case NTV2_FORMAT_1080p_2K_5000_B:
@@ -3588,13 +3588,13 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 	"4x2048x1080p 48.00",		//	NTV2_FORMAT_4x2048x1080p_4800			//	107
 	"4x2048x1080p 119.88",		//	NTV2_FORMAT_4x2048x1080p_11988			//	108
 	"4x2048x1080p 120.00",		//	NTV2_FORMAT_4x2048x1080p_12000			//	109
-	"2048x1080p 60.00a",		//	NTV2_FORMAT_1080p_2K_6000				//	110
-	"2048x1080p 59.94a",		//	NTV2_FORMAT_1080p_2K_5994				//	111
+	"2048x1080p 60.00a",		//	NTV2_FORMAT_1080p_2K_6000_A				//	110
+	"2048x1080p 59.94a",		//	NTV2_FORMAT_1080p_2K_5994_A				//	111
 	"2048x1080p 29.97",			//	NTV2_FORMAT_1080p_2K_2997				//	112
 	"2048x1080p 30.00",			//	NTV2_FORMAT_1080p_2K_3000				//	113
-	"2048x1080p 50.00a",		//	NTV2_FORMAT_1080p_2K_5000				//	114
-	"2048x1080p 47.95a",		//	NTV2_FORMAT_1080p_2K_4795				//	115
-	"2048x1080p 48.00a",		//	NTV2_FORMAT_1080p_2K_4800				//	116
+	"2048x1080p 50.00a",		//	NTV2_FORMAT_1080p_2K_5000_A				//	114
+	"2048x1080p 47.95a",		//	NTV2_FORMAT_1080p_2K_4795_A				//	115
+	"2048x1080p 48.00a",		//	NTV2_FORMAT_1080p_2K_4800_A				//	116
 	"2048x1080p 60.00b",		// 	NTV2_FORMAT_1080p_2K_6000_B,			// 117
 	"2048x1080p 59.94b",		// 	NTV2_FORMAT_1080p_2K_5994_B,			// 118
 	"2048x1080p 50.00b",		// 	NTV2_FORMAT_1080p_2K_5000_B,			// 119
@@ -4109,9 +4109,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	switch (inValue)
 	{
 	#if defined (AJAMac) || defined (MSWindows)
-        #if !defined (NTV2_DEPRECATE)	//                          Retail Name                 Nickname (for dev purposes)
-        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"KONA 3"                    : "Kona3";
-		#endif	//	!defined (NTV2_DEPRECATE)
         case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "KonaLHi";
         case DEVICE_ID_KONALHIDVI:              return inForRetailDisplay ?	"KONA LHi DVI"              : "KonaLHiDVI";
 	#endif
@@ -4120,13 +4117,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	#elif defined (MSWindows)
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"KONA IoExpress"            : "IoExpress";
 	#else
-		#if !defined (NTV2_DEPRECATE)
-        case BOARD_ID_XENA2:                    return inForRetailDisplay ?	"Kona3"                     : "OEM 2K";
-        case BOARD_ID_XENALH:                   return inForRetailDisplay ?	"Xena LH"                   : "OEM LH";
-        case BOARD_ID_XENALS:                   return inForRetailDisplay ?	"Xena LS"                   : "OEM LS";
-        case BOARD_ID_XENAHS:                   return inForRetailDisplay ?	"Xena HS"                   : "OEM HS";
-        case BOARD_ID_XENAHS2:                  return inForRetailDisplay ?	"Xena HS2"                  : "OEM HS2";
-		#endif	//	!defined (NTV2_DEPRECATE)
         case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
         case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
@@ -4141,9 +4131,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOXT:                    return inForRetailDisplay ?	"IoXT"                      : "IoXT";
         case DEVICE_ID_CORVID24:                return inForRetailDisplay ?	"Corvid 24"                 : "Corvid24";
         case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-Tap"                     : "TTap";
-		#if !defined (NTV2_DEPRECATE)
-        case BOARD_ID_LHI_T:                    return inForRetailDisplay ?	"KONA LHi T"                : "KonaLHiT";
-		#endif	//	!defined (NTV2_DEPRECATE)
 		case DEVICE_ID_IO4K:					return inForRetailDisplay ?	"Io4K"						: "Io4K";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ?	"Io4K UFC"					: "Io4KUfc";
 		case DEVICE_ID_KONA4:					return inForRetailDisplay ?	"KONA 4"					: "Kona4";
@@ -4180,10 +4167,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 
 	NTV2BoardType GetNTV2BoardTypeForBoardID (NTV2BoardID inBoardID)
 	{
-		if (inBoardID == BOARD_ID_XENA2)
-			return BOARDTYPE_AJAXENA2;
-		else
-			return BOARDTYPE_NTV2;
+		return BOARDTYPE_NTV2;
 	}
 
 	void GetNTV2BoardString (NTV2BoardID inBoardID, string & outName)
@@ -5762,7 +5746,7 @@ NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat 
 		case NTV2_FORMAT_720p_5000:
 			if ( outFormat == NTV2_FORMAT_625_5000 )
 				cMode = NTV2_720p_5000to625_2500;
-			else if ( outFormat == NTV2_FORMAT_1080psf_2500 )
+			else if ( outFormat == NTV2_FORMAT_1080i_5000)	//	NTV2_FORMAT_1080psf_2500
 				cMode = NTV2_720p_5000to1080i_2500;
 			else if ( outFormat == NTV2_FORMAT_1080psf_2500_2)
 				cMode = NTV2_720p_5000to1080i_2500;
@@ -5787,7 +5771,7 @@ NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat 
 			break;
 
 		case NTV2_FORMAT_625_5000:
-			if ( outFormat == NTV2_FORMAT_1080psf_2500)
+			if ( outFormat == NTV2_FORMAT_1080i_5000)	//	NTV2_FORMAT_1080psf_2500
 				cMode = NTV2_625_2500to1080i_2500;
 			else if ( outFormat == NTV2_FORMAT_1080psf_2500_2)
 				cMode = NTV2_625_2500to1080i_2500;
@@ -5800,7 +5784,7 @@ NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat 
 			break;
 
 		case NTV2_FORMAT_720p_6000:
-			if ( outFormat == NTV2_FORMAT_1080psf_3000 )
+			if ( outFormat == NTV2_FORMAT_1080i_6000)	//	NTV2_FORMAT_1080psf_3000
 				cMode = NTV2_720p_6000to1080i_3000;
 			else if (outFormat == NTV2_FORMAT_1080psf_3000_2 )
 				cMode = NTV2_720p_6000to1080i_3000;
@@ -7311,53 +7295,6 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	#else
 		switch (inBoardID)
 		{
-		#if !defined (NTV2_DEPRECATE)
-			case BOARD_ID_XENA_SD:
-			case BOARD_ID_XENA_SD22:
-			case BOARD_ID_XENA_HD:
-			case BOARD_ID_XENA_HD22:
-			case BOARD_ID_HDNTV2:
-			case BOARD_ID_KSD11:
-			//case BOARD_ID_XENA_SD_MM:
-			case BOARD_ID_KSD22:
-			//case BOARD_ID_XENA_SD22_MM:
-			case BOARD_ID_KHD11:
-			//case BOARD_ID_XENA_HD_MM:
-			case BOARD_ID_XENA_HD22_MM:
-			case BOARD_ID_HDNTV2_MM:
-			case BOARD_ID_KONA_SD:
-			case BOARD_ID_KONA_HD:
-			case BOARD_ID_KONA_HD2:
-			case BOARD_ID_KONAR:
-			case BOARD_ID_KONAR_MM:
-			case BOARD_ID_KONA2:
-			case BOARD_ID_HDNTV:
-			case BOARD_ID_KONALS:
-			//case BOARD_ID_XENALS:
-			case BOARD_ID_KONAHDS:
-			//case BOARD_ID_KONALH:
-			//case BOARD_ID_XENALH:
-			case BOARD_ID_XENADXT:
-			//case BOARD_ID_XENAHS:
-			case BOARD_ID_KONAX:
-			case BOARD_ID_XENAX:
-			case BOARD_ID_XENAHS2:
-			case BOARD_ID_FS1:
-			case BOARD_ID_FS2:
-			case BOARD_ID_MOAB:
-			case BOARD_ID_XENAX2:
-			case BOARD_ID_BORG:
-			case BOARD_ID_BONES:
-			case BOARD_ID_BARCLAY:
-			case BOARD_ID_KIPRO_QUAD:
-			case BOARD_ID_KIPRO_SPARE1:
-			case BOARD_ID_KIPRO_SPARE2:
-			case BOARD_ID_FORGE:
-			case BOARD_ID_XENA2:
-			//case BOARD_ID_KONA3:
-			case BOARD_ID_LHI_DVI:
-			case BOARD_ID_LHI_T:
-		#endif	//	!defined (NTV2_DEPRECATE)
 			case DEVICE_ID_NOTFOUND:					break;
 			case DEVICE_ID_CORVID1:						return "corvid1pcie.bit";
 			case DEVICE_ID_CORVID22:					return "Corvid22.bit";
@@ -7678,8 +7615,8 @@ ostream & operator << (ostream & inOutStr, const NTV2OutputCrosspointIDs & inLis
 	return inOutStr;
 }
 
-
-ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs & inList)
+/*
+static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs & inList)
 {
 	inOutStr << "[";
 	for (NTV2InputCrosspointIDsConstIter it (inList.begin());  it != inList.end();  )
@@ -7692,7 +7629,7 @@ ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs & inList
 	inOutStr << "]";
 	return inOutStr;
 }
-
+*/
 
 ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
 {

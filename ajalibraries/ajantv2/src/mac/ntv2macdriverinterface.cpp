@@ -427,9 +427,9 @@ class DeviceMap
 			kern_return_t	kernResult	(OS_IOConnectCallScalarMethod (inConnection, kDriverGetDrvrVersion, 0, 0, scalarO_64, &outputCount));
 			if (kernResult == KERN_SUCCESS)
 			{
-				const UInt32	interfaceVers	(scalarO_64 [0]);
+				const UInt32	interfaceVers	= UInt32(scalarO_64[0]);
 				if (!mDriverVersion)
-					mDriverVersion = scalarO_64 [1];
+					mDriverVersion = uint32_t(scalarO_64[1]);
 				if (interfaceVers == AJA_MAC_DRIVER_INTERFACE_VERSION)
 					return true;
 				MDIFAIL ("connection " << inConnection << " -- incompatible driver interface " << interfaceVers << ", expected " << AJA_MAC_DRIVER_INTERFACE_VERSION

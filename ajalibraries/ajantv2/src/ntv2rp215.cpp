@@ -335,7 +335,7 @@ UWord raw215Data[] =
 
 /////////////////////////////////////////////////////////////////////////////
 // Constructor
-;
+
 
 CNTV2RP215Decoder::CNTV2RP215Decoder(ULWord* pFrameBufferBaseAddress,NTV2VideoFormat videoFormat,NTV2FrameBufferFormat fbFormat)
 	: _frameBufferBasePointer(pFrameBufferBaseAddress),
