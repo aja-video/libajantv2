@@ -66,7 +66,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 	bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
-	NTV2VideoFormat				inputFormat;									// Input video format
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -94,7 +93,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1115,7 +1114,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
 	
 	if (bDSKOn)
@@ -1179,10 +1177,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 				
 			case NTV2_DSKModeGraphicOverMatte:
@@ -1246,10 +1240,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 				
 			case NTV2_DSKModeGraphicOverFB:
@@ -2477,7 +2467,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                     txVideoConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                     txVideoConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txVideoConfig.payloadType = m2110TxVideoData.txVideoCh[i].payload;
+                    txVideoConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
                     txVideoConfig.ttl = 0x40;
                     txVideoConfig.tos = 0x64;
 
@@ -2516,14 +2506,14 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                     txAudioConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                     txAudioConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txAudioConfig.payloadType = m2110TxAudioData.txAudioCh[i].payload;
+                    txAudioConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
                     txAudioConfig.ttl = 0x40;
                     txAudioConfig.tos = 0x64;
 
                     // Audio specific
                     txAudioConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txAudioConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
-                    txAudioConfig.audioPacketInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
+                    txAudioConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].channel, m2110TxAudioData.txAudioCh[i].stream, txAudioConfig) == true)
                     {
@@ -2640,7 +2630,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	
 	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
-	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
@@ -2978,7 +2967,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	//
 	// Analog-Out

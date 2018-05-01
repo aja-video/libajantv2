@@ -79,11 +79,11 @@ class VPIDTableInitializer
 			stTable2048psf[VPIDPictureRate_2500] = NTV2_FORMAT_1080psf_2K_2500;
 	//		stTable2048psf[VPIDPictureRate_2997] = NTV2_FORMAT_1080psf_2K_2997;
 	//		stTable2048psf[VPIDPictureRate_3000] = NTV2_FORMAT_1080psf_2K_3000;
-			stTable2048psf[VPIDPictureRate_4795] = NTV2_FORMAT_1080p_2K_4795;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_4800] = NTV2_FORMAT_1080p_2K_4800;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_5000] = NTV2_FORMAT_1080p_2K_5000;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_5994] = NTV2_FORMAT_1080p_2K_5994;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_6000] = NTV2_FORMAT_1080p_2K_6000;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_4795] = NTV2_FORMAT_1080p_2K_4795_A;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_4800] = NTV2_FORMAT_1080p_2K_4800_A;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_5000] = NTV2_FORMAT_1080p_2K_5000_A;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_5994] = NTV2_FORMAT_1080p_2K_5994_A;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_6000] = NTV2_FORMAT_1080p_2K_6000_A;		// 3G-B or Duallink 1.5G
 		
 			stTable1920psf[VPIDPictureRate_2398] = NTV2_FORMAT_1080psf_2398;
 			stTable1920psf[VPIDPictureRate_2400] = NTV2_FORMAT_1080psf_2400;

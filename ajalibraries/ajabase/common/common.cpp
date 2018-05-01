@@ -77,12 +77,12 @@ long stol(const std::string& str, std::size_t* idx, int base)
     }
     return retVal;
 }
-
+/*
 long long stoll(const std::string& str, std::size_t* idx, int base)
 {
     return (long long)aja::stol(str, idx, base);
 }
-
+*/
 unsigned long stoul(const std::string& str, std::size_t* idx, int base)
 {
     char* pEnd = NULL;
@@ -93,12 +93,12 @@ unsigned long stoul(const std::string& str, std::size_t* idx, int base)
     }
     return retVal;
 }
-
+/*
 unsigned long long stoull(const std::string& str, std::size_t* idx, int base)
 {
     return (unsigned long long)aja::stoul(str, idx, base);
 }
-
+*/
 float stof(const std::string& str, std::size_t* idx)
 {
     return (float)aja::stod(str, idx);
@@ -136,13 +136,13 @@ std::string to_string(long val)
     std::ostringstream oss; oss << val;
     return oss.str();
 }
-
+/*
 std::string to_string(long long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
-
+*/
 std::string to_string(unsigned val)
 {
     std::ostringstream oss; oss << val;
@@ -154,13 +154,13 @@ std::string to_string(unsigned long val)
     std::ostringstream oss; oss << val;
     return oss.str();
 }
-
+/*
 std::string to_string(unsigned long long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
-
+*/
 std::string to_string(float val)
 {
     std::ostringstream oss;

@@ -16,18 +16,25 @@
 #define CCIR601_10BIT_WHITE  940
 #define CCIR601_10BIT_CHROMAOFFSET 512
 
-#define MIN_RGB_8BIT 0
-#define MAX_RGB_8BIT 255
-#define MIN_RGB_10BIT 0
-#define MAX_RGB_10BIT 1023
-// KAM
-#define MIN_RGB_16BIT 0
-#define MAX_RGB_16BIT 65535
+#define MIN_RGB_8BIT	0
+#define MAX_RGB_8BIT	255
+#define MIN_RGB_10BIT	0
+#define MAX_RGB_10BIT	1023
+#define MIN_RGB_16BIT	0			//	KAM
+#define MAX_RGB_16BIT	65535		//	KAM
 
-#define ClipRGB_8BIT(X) ((X) > MAX_RGB_8BIT ? (MAX_RGB_8BIT) : ((X) < MIN_RGB_8BIT ? (MIN_RGB_8BIT) : (X)))
-#define ClipRGB_10BIT(X) ((X) > MAX_RGB_10BIT ? (MAX_RGB_10BIT) : ((X) < MIN_RGB_10BIT ? (MIN_RGB_10BIT) : (X)))
-// KAM
-#define ClipRGB_16BIT(X) ((X) > MAX_RGB_16BIT ? (MAX_RGB_16BIT) : ((X) < MIN_RGB_16BIT ? (MIN_RGB_16BIT) : (X)))
+//	NOTE:	Changed the "(__x__) < MIN_RGB_nBIT" comparisons to "(__x__) <= MIN_RGB_nBIT"
+//			in the following three macros to eliminate gcc "comparison always true" warnings
+//			when __x__ is an unsigned value.
+#define ClipRGB_8BIT(__x__)			((__x__) > MAX_RGB_8BIT   ?  (MAX_RGB_8BIT)									\
+									                          :  ((__x__) <= MIN_RGB_8BIT   ?  (MIN_RGB_8BIT)	\
+									                                                        :  (__x__)))
+#define ClipRGB_10BIT(__x__)		((__x__) > MAX_RGB_10BIT  ?  (MAX_RGB_10BIT)								\
+									                          :  ((__x__) <= MIN_RGB_10BIT  ?  (MIN_RGB_10BIT)	\
+									                                                        :  (__x__)))
+#define ClipRGB_16BIT(__x__)		((__x__) > MAX_RGB_16BIT  ?  (MAX_RGB_16BIT)								\
+									                          :  ((__x__) <= MIN_RGB_16BIT  ?  (MIN_RGB_16BIT)	\
+									                                                        :  (__x__)))
 
 #define NUMACTIVELINES_525 486
 #define NUMACTIVELINES_625 576

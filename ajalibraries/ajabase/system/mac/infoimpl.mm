@@ -16,7 +16,7 @@
 #import <Foundation/Foundation.h>
 #include <Availability.h>
 
-AJAStatus
+static AJAStatus
 aja_sysctl(const char *name, std::string &result)
 {
     AJAStatus ret = AJA_STATUS_FAIL;

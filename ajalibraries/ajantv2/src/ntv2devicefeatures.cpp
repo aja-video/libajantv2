@@ -154,14 +154,9 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	switch (boardID)
 	{
 	// based on FrameGeometry
-	#if !defined (NTV2_DEPRECATE)
-	case BOARD_ID_XENA2:
-	//case BOARD_ID_LHI_DVI:
-	case BOARD_ID_LHI_T:
-	#endif	//	!defined (NTV2_DEPRECATE)
 	case DEVICE_ID_KONALHIDVI:
-	case DEVICE_ID_LHI:
-	case DEVICE_ID_LHE_PLUS:
+	case DEVICE_ID_KONALHI:
+	case DEVICE_ID_KONALHEPLUS:
 	case DEVICE_ID_IOEXPRESS:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID22:
@@ -273,16 +268,11 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	switch (boardID)
 	{
 	case DEVICE_ID_IOEXPRESS:
-	case DEVICE_ID_LHE_PLUS:
+	case DEVICE_ID_KONALHEPLUS:
 	case DEVICE_ID_TTAP:
 		return 16;
-	#if !defined (NTV2_DEPRECATE)
-	case BOARD_ID_XENA2:
-	//case BOARD_ID_LHI_DVI:
-	case BOARD_ID_LHI_T:
-	#endif	//	!defined (NTV2_DEPRECATE)
 	case DEVICE_ID_KONALHIDVI:
-	case DEVICE_ID_LHI:
+	case DEVICE_ID_KONALHI:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID3G:
 		return 32;
@@ -328,13 +318,9 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	switch (boardID)
 	{
 		// based on FrameGeometry
-	#if !defined (NTV2_DEPRECATE)
-	case BOARD_ID_XENA2:
-	case BOARD_ID_LHI_T:
-	#endif	//	!defined (NTV2_DEPRECATE)
 	case DEVICE_ID_KONALHIDVI:
-	case DEVICE_ID_LHI:
-	case DEVICE_ID_LHE_PLUS:
+	case DEVICE_ID_KONALHI:
+	case DEVICE_ID_KONALHEPLUS:
 	case DEVICE_ID_IOEXPRESS:
 	case DEVICE_ID_CORVID1:
 	case DEVICE_ID_CORVID22:

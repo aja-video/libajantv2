@@ -63,7 +63,7 @@ const int sizeOf_data   = 8;
 	#define AjaWavBigEndian64(x)      AjaWavSwap64(x)
 #endif
 
-void getDataAndTimeInBextFormat(std::string& formattedDate, std::string& formattedTime)
+static void getDataAndTimeInBextFormat(std::string& formattedDate, std::string& formattedTime)
 {
     char tmp[16];
     time_t now = time(NULL);

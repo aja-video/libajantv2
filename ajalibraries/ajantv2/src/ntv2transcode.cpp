@@ -10,17 +10,17 @@
 using namespace std;
 
 
-bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine, ULWord * pDstv210Line, const ULWord inNumPixels)
+bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine,  ULWord * pDstv210Line,  const ULWord inNumPixels)
 {
 	if (!pSrc2vuyLine || !pDstv210Line || !inNumPixels)
 		return false;
 
 	for (UWord inputCount = 0, outputCount = 0;   inputCount < (inNumPixels * 2);   outputCount += 4, inputCount += 12)
 	{
-		pDstv210Line [outputCount    ] = NTV2EndianSwap32HtoL ((pSrc2vuyLine [inputCount + 0] << 2) + (pSrc2vuyLine [inputCount + 1 ] << 12) + (pSrc2vuyLine [inputCount + 2 ] << 22));
-		pDstv210Line [outputCount + 1] = NTV2EndianSwap32HtoL ((pSrc2vuyLine [inputCount + 3] << 2) + (pSrc2vuyLine [inputCount + 4 ] << 12) + (pSrc2vuyLine [inputCount + 5 ] << 22));
-		pDstv210Line [outputCount + 2] = NTV2EndianSwap32HtoL ((pSrc2vuyLine [inputCount + 6] << 2) + (pSrc2vuyLine [inputCount + 7 ] << 12) + (pSrc2vuyLine [inputCount + 8 ] << 22));
-		pDstv210Line [outputCount + 3] = NTV2EndianSwap32HtoL ((pSrc2vuyLine [inputCount + 9] << 2) + (pSrc2vuyLine [inputCount + 10] << 12) + (pSrc2vuyLine [inputCount + 11] << 22));
+		pDstv210Line[outputCount+0] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+0]) << 2) + (ULWord(pSrc2vuyLine[inputCount+ 1]) << 12) + (ULWord(pSrc2vuyLine[inputCount+ 2]) << 22));
+		pDstv210Line[outputCount+1] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+3]) << 2) + (ULWord(pSrc2vuyLine[inputCount+ 4]) << 12) + (ULWord(pSrc2vuyLine[inputCount+ 5]) << 22));
+		pDstv210Line[outputCount+2] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+6]) << 2) + (ULWord(pSrc2vuyLine[inputCount+ 7]) << 12) + (ULWord(pSrc2vuyLine[inputCount+ 8]) << 22));
+		pDstv210Line[outputCount+3] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+9]) << 2) + (ULWord(pSrc2vuyLine[inputCount+10]) << 12) + (ULWord(pSrc2vuyLine[inputCount+11]) << 22));
 	}
 
 	return true;
@@ -445,48 +445,48 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 
 // ConvertLineto10BitYCbCrA
 // 10 Bit YCbCr to 10 Bit YCbCrA
-void ConvertLineto10BitYCbCrA(UWord * ycbcrBuffer, 
-					  ULWord* ycbcraBuffer,
-					  ULWord numPixels)
+void ConvertLineto10BitYCbCrA (const UWord *	pInYCbCrBuffer,
+								ULWord *		pOutYCbCrABuffer,
+								const ULWord	inNumPixels)
 {
-	for ( ULWord count=0; count < numPixels; count++ )
+	for (ULWord count(0);  count < inNumPixels;  count++)
 	{
-		ULWord value = CCIR601_10BIT_WHITE<<20; /// Set Alpha to '1';
-		value |= (*ycbcrBuffer++<<10); // Cb or Cr
-		value |= *ycbcrBuffer++;		// Y
-		ycbcraBuffer[count] = value; 
+		ULWord value = CCIR601_10BIT_WHITE<<20;		// Set Alpha to '1';
+		value |= (ULWord(*pInYCbCrBuffer++)<<10);	// Cb or Cr
+		value |= *pInYCbCrBuffer++;					// Y
+		pOutYCbCrABuffer[count] = value;
 	}
 }
 
 // ConvertLineto10BitRGB
 // 8 Bit RGBA to  and 10 Bit RGB Packed Version
-void ConvertLineto10BitRGB(RGBAlphaPixel * rgbaBuffer, 
-					  ULWord * rgb10BitBuffer,
-					  ULWord numPixels)
-					  
+void ConvertLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
+							ULWord *				pOutRGB10Buffer,
+							const ULWord			inNumPixels)
+
 {
-	for ( ULWord count = 0; count < numPixels; count++ )
+	for (ULWord count(0);  count < inNumPixels;  count++)
 	{
-		*rgb10BitBuffer = (rgbaBuffer->Blue<<22) + 
-					      (rgbaBuffer->Green<<12) + 
-						  (rgbaBuffer->Red<<2);
-		rgb10BitBuffer++;
-		rgbaBuffer++;
+		*pOutRGB10Buffer = (ULWord(pInRGBA8Buffer->Blue)<<22) +
+					      (ULWord(pInRGBA8Buffer->Green)<<12) +
+						  (ULWord(pInRGBA8Buffer->Red)<<2);
+		pOutRGB10Buffer++;
+		pInRGBA8Buffer++;
 	}
 }
 
 // ConvertRGBLineto10BitRGB
 // 8 Bit RGB and 10 Bit RGB Version
-void ConvertRGBLineto10BitRGB(RGBAlphaPixel * rgbaBuffer, 
-					  RGBAlpha10BitPixel * rgba10BitBuffer,
-					  ULWord numPixels)
+void ConvertRGBLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
+								RGBAlpha10BitPixel *	pOutRGBA10Buffer,
+								const ULWord			inNumPixels)
 {
-	for ( ULWord i = 0; i < numPixels; i++ )
+	for (ULWord i(0);  i < inNumPixels;  i++)
 	{
-		rgba10BitBuffer[i].Blue  = (rgbaBuffer[i].Blue<<2);
-		rgba10BitBuffer[i].Green = (rgbaBuffer[i].Green<<2);
-		rgba10BitBuffer[i].Red   = (rgbaBuffer[i].Red<<2);
-		rgba10BitBuffer[i].Alpha = (rgbaBuffer[i].Alpha<<2);
+		pOutRGBA10Buffer[i].Blue  = (pInRGBA8Buffer[i].Blue<<2);
+		pOutRGBA10Buffer[i].Green = (pInRGBA8Buffer[i].Green<<2);
+		pOutRGBA10Buffer[i].Red   = (pInRGBA8Buffer[i].Red<<2);
+		pOutRGBA10Buffer[i].Alpha = (pInRGBA8Buffer[i].Alpha<<2);
 	}
  
 }
@@ -615,14 +615,14 @@ void ConvertARGBToBGR (const UByte * pInRGBALineBuffer, UByte * pOutRGBLineBuffe
 }
 
 // Pack 10 Bit RGBA to 10 Bit RGB Format for our board
-void PackRGB10BitFor10BitRGB(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord numPixels)
+void PackRGB10BitFor10BitRGB (RGBAlpha10BitPixel* pBuffer, const ULWord inNumPixels)
 {
-	ULWord* outputBuffer = (ULWord*)rgba10BitBuffer;
-	for ( ULWord pixel=0;pixel<numPixels;pixel++)
+	ULWord* outputBuffer(reinterpret_cast<ULWord*>(pBuffer));
+	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
 	{
-		UWord Red = rgba10BitBuffer[pixel].Red;
-		UWord Green = rgba10BitBuffer[pixel].Green;
-		UWord Blue = rgba10BitBuffer[pixel].Blue;
+		const ULWord Red	(pBuffer[pixel].Red);
+		const ULWord Green	(pBuffer[pixel].Green);
+		const ULWord Blue	(pBuffer[pixel].Blue);
 		outputBuffer[pixel] = (Blue<<20) + (Green<<10) + Red;
 	}
 
@@ -630,41 +630,38 @@ void PackRGB10BitFor10BitRGB(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord numPixel
 }
 
 // Pack 10 Bit RGBA to 10 Bit DPX Format for our board
-void PackRGB10BitFor10BitDPX(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord numPixels, bool bigEndian)
+void PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels, const bool inBigEndian)
 {
-	ULWord* outputBuffer = (ULWord*)rgba10BitBuffer;
-	for ( ULWord pixel=0;pixel<numPixels;pixel++)
+	ULWord * pOutputBuffer (reinterpret_cast<ULWord*>(pBuffer));
+	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
 	{
-		UWord Red = rgba10BitBuffer[pixel].Red;
-		UWord Green = rgba10BitBuffer[pixel].Green;
-		UWord Blue = rgba10BitBuffer[pixel].Blue;
-		ULWord value = (Red<<22) + (Green<<12) + (Blue<<2);
-		if ( bigEndian)
-			outputBuffer[pixel] = ((value&0xFF)<<24) + (((value>>8)&0xFF)<<16) + (((value>>16)&0xFF)<<8) + ((value>>24)&0xFF);
+		const ULWord Red	(pBuffer[pixel].Red);
+		const ULWord Green	(pBuffer[pixel].Green);
+		const ULWord Blue	(pBuffer[pixel].Blue);
+		const ULWord value	((Red << 22) + (Green << 12) + (Blue << 2));
+		if (inBigEndian)
+			pOutputBuffer[pixel] = ((value&0xFF)<<24) + (((value>>8)&0xFF)<<16) + (((value>>16)&0xFF)<<8) + ((value>>24)&0xFF);
 		else
-			outputBuffer[pixel] =value;
+			pOutputBuffer[pixel] = value;
 	}
 
 
 }
 
 // Pack 10 Bit RGBA to NTV2_FBF_10BIT_RGB_PACKED Format for our board
-void PackRGB10BitFor10BitRGBPacked(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord numPixels)
+void PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels)
 {
-	ULWord* outputBuffer = (ULWord*)rgba10BitBuffer;
-	for ( ULWord pixel=0;pixel<numPixels;pixel++)
+	ULWord *	pOutputBuffer (reinterpret_cast<ULWord*>(pBuffer));
+	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
 	{
-		UWord Red = rgba10BitBuffer[pixel].Red;
-		UWord Green = rgba10BitBuffer[pixel].Green;
-		UWord Blue = rgba10BitBuffer[pixel].Blue;
-		ULWord value = (((Red>>2)&0xFF)<<16) + (((Green>>2)&0xFF)<<8) + ((Blue>>2)&0xFF);
+		const ULWord Red	(pBuffer[pixel].Red);
+		const ULWord Green	(pBuffer[pixel].Green);
+		const ULWord Blue	(pBuffer[pixel].Blue);
+		ULWord	value	=	(((Red>>2)&0xFF)<<16) + (((Green>>2)&0xFF)<<8) + ((Blue>>2)&0xFF);
 		value |= ((Red&0x3)<<28) + ((Green&0x3)<<26) + ((Blue&0x3)<<24);
 
-		outputBuffer[pixel] = value;
-
+		pOutputBuffer[pixel] = value;
 	}
-
-
 }
 
 /* KAM

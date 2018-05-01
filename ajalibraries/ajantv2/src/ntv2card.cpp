@@ -575,6 +575,23 @@ bool CNTV2Card::DeviceCanDoAudioMixer ()
 	return false;
 }
 
+bool CNTV2Card::DeviceCanDoHDMIQuadRasterConversion ()
+{
+	NTV2DeviceID deviceID = GetDeviceID();
+
+	if ((NTV2DeviceGetNumHDMIVideoInputs(deviceID) == 0) &&
+			(NTV2DeviceGetNumHDMIVideoOutputs(deviceID) == 0))
+		return false;
+
+	if (deviceID == DEVICE_ID_KONAHDMI)
+		return false;
+
+	if (DeviceCanDoAudioMixer())
+		return false;
+
+	return true;
+}
+
 bool CNTV2Card::DeviceIsDNxIV ()
 {
 	ULWord isMicSupported = 0;

@@ -881,65 +881,22 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		// Set SMPTE 372 1080p60 Dual Link option
 		SetSmpte372(NTV2Smpte372[value], channel);
 
+		// set virtual video format
+		WriteRegister (kVRegVideoFormatCh1 + channel, value);
+
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-			if (channel < NTV2_CHANNEL5)
-			{
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL1);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL2);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL3);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL4);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL1);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL2);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL3);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL4);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL1);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL2);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL3);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL4);
-				WriteRegister(kVRegVideoFormatCh1, value);
-				WriteRegister(kVRegVideoFormatCh2, value);
-				WriteRegister(kVRegVideoFormatCh3, value);
-				WriteRegister(kVRegVideoFormatCh4, value);
-			}
-			else
-			{
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL5);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL6);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL7);
-				SetStandard(NTV2VideoFormatStandards[value], NTV2_CHANNEL8);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL5);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL6);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL7);
-				SetFrameRate(NTV2VideoFormatFrameRates[value], NTV2_CHANNEL8);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL5);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL6);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL7);
-				SetSmpte372(NTV2Smpte372[value], NTV2_CHANNEL8);
-				WriteRegister(kVRegVideoFormatCh5, value);
-				WriteRegister(kVRegVideoFormatCh6, value);
-				WriteRegister(kVRegVideoFormatCh7, value);
-				WriteRegister(kVRegVideoFormatCh8, value);
-			}
+			SetQuadFrameEnable(true, channel);
 		}
 		else
 		{
 			//	Non-quad format
-			bool isMultiFormatModeActive = false;
-			GetMultiFormatMode (isMultiFormatModeActive);
+			SetQuadFrameEnable(false, channel);
 
-			if (::NTV2DeviceCanDoMultiFormat (GetDeviceID ()) &&
-				isMultiFormatModeActive)
+			if (!IsMultiFormatActive())
 			{
-				WriteRegister (kVRegVideoFormatCh1 + channel, value);
-			}
-			else
-			{
-				for (ULWord i = 0; i < ::NTV2DeviceGetNumVideoChannels (GetDeviceID ()); i++)
-				{
-					WriteRegister (kVRegVideoFormatCh1 + i, value);
-				}
+				CopyVideoFormat(channel, NTV2_CHANNEL1, NTV2_CHANNEL8);
 			}
 		}
 	}
@@ -1412,7 +1369,7 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 					case NTV2_STANDARD_525:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_525);							break;
 					case NTV2_STANDARD_625:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_625);							break;
 					case NTV2_STANDARD_2K:		result.Set (HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
-					default:					DisplayNTV2Error ("Unsupported video standard requested.");						break;
+					default:																									break;
 				}
 
 	return result;
@@ -1571,12 +1528,7 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	{
 		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newGeometry))
 		{
-			SetQuadFrameEnable(true, channel);
 			newFrameStoreGeometry = GetQuarterSizedGeometry(newGeometry);
-		}
-		else
-		{
-			SetQuadFrameEnable(false, channel);
 		}
 	}
 
@@ -1585,65 +1537,6 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	bool changeBufferSize =	::NTV2DeviceCanChangeFrameBufferSize(_boardID) && (oldFrameBufferSize != newFrameBufferSize);
 
 	status = WriteRegister (regNum, newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-	if (::NTV2DeviceCanDo4KVideo(_boardID))
-	{
-		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newGeometry))
-		{
-			bool tsiEnable = false;
-			status = GetTsiFrameEnable(&tsiEnable, channel);
-			if (!IsMultiFormatActive ())
-			{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-			}
-			else if (status & tsiEnable)
-			{
-				if (channel < NTV2_CHANNEL3)
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-				else if (channel < NTV2_CHANNEL5)
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-				else if (channel < NTV2_CHANNEL7)
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-				else
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-			}
-			else
-			{
-				if (channel < NTV2_CHANNEL5)
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL1], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL2], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL3], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL4], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-				else
-				{
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL5], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL6], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL7], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-					WriteRegister(gChannelToGlobalControlRegNum[NTV2_CHANNEL8], newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
-				}
-			}
-		}
-	}
 
 	// If software set the frame buffer size, read the values from hardware
 	if ( GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) )
@@ -1771,15 +1664,86 @@ bool CNTV2Card::GetProgressivePicture (ULWord & outValue)
 bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel)
 {
 	bool status = true;
-	bool smpte425Enabled = false;
-	Get425FrameEnable(&smpte425Enabled, inChannel);
-	bool squaresEnabled = false;
-	Get4kSquaresEnable(&squaresEnabled, inChannel);
+
+	if (!::NTV2DeviceCanDo4KVideo(_boardID))
+		return false;
 
 	// Set true (1) to enable a Quad Frame Geometry
 	// Set false (0) to disable this mode
-	if(!inValue)
+	if(inValue)
 	{
+		if(NTV2DeviceCanDo425Mux(_boardID))
+		{
+			if (!IsMultiFormatActive())
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			}
+			else if (inChannel < NTV2_CHANNEL3)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+			}
+			else if (inChannel < NTV2_CHANNEL7)
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
+			}
+			else
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
+					WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
+			}
+		}
+		else
+		{
+			if (!IsMultiFormatActive())
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			}
+			else if (inChannel < NTV2_CHANNEL5)
+			{
+				status = WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+			}
+			else
+			{
+				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
+			}
+		}
+	}
+	else
+	{
+		bool smpte425Enabled = false;
+		Get425FrameEnable(&smpte425Enabled, inChannel);
+		bool squaresEnabled = false;
+		Get4kSquaresEnable(&squaresEnabled, inChannel);
+
 		if (!IsMultiFormatActive())
 		{
 			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
@@ -1830,82 +1794,6 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 			}
 		}
 	}
-	else
-	{
-		if(smpte425Enabled)
-		{
-			// make sure squares disabled
-			if (!IsMultiFormatActive())
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-			}
-		}
-		else if (squaresEnabled)
-		{
-			// make sure 425 disabled
-			if (!IsMultiFormatActive())
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			}
-		}
-		else
-		{
-			// enable 425 by default (not squares)
-			if (!IsMultiFormatActive())
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
-			}
-			else if (inChannel < NTV2_CHANNEL3)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34);
-			}
-			else if (inChannel < NTV2_CHANNEL7)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
-			}
-		}
-	}
 
 	return (status);
 }
@@ -1937,6 +1825,11 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
+	ULWord quadEnable = 0;
+	GetQuadFrameEnable(&quadEnable, inChannel);
+	if (quadEnable == 0)
+		return false;
+
 	if (inEnable)
 	{
 		// enable quad frame, disable 425
@@ -1947,32 +1840,28 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			status = WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&	//	Enable quad mode on lower bank 1-4
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&			//	Disable Tsi mode on FrameStores 1 & 2
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);			//	Disable Tsi mode on FrameStores 3 & 4
+			status = WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
 		}
 		else
 		{
-			status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&	//	Enable quad mode on higher bank 5-8
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&			//	Disable Tsi mode on FSs 5 & 6
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);			//	Disable Tsi mode on FSs 7 & 8
+			status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
 		}
 	}
 	else
 	{
-		if (!IsMultiFormatActive())
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-		}
-		else if (inChannel < NTV2_CHANNEL5)
-			status = WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);	//	Disable quad mode on lower bank 1-4
-		else
-			status = WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);	//	Disable quad mode on higher bank 5-8
+		// enable tsi
+		status = SetTsiFrameEnable (true, inChannel);
 	}
 
 	return status;
@@ -2007,6 +1896,11 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
+	ULWord quadEnable = 0;
+	GetQuadFrameEnable(&quadEnable, inChannel);
+	if (quadEnable == 0)
+		return false;
+
 	if(enable)
 	{
 		// enable 425 mode, disable squares
@@ -2017,55 +1911,38 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
 				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78);
+				WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
 		}
 		else if (inChannel < NTV2_CHANNEL3)
 		{
 			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
 		{
 			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
 		}
 		else if (inChannel < NTV2_CHANNEL7)
 		{
 			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
 		}
 		else
 		{
 			status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
-				WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+				WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
 		}
 	}
 	else
 	{
-		// disable 425 mode
-		if (!IsMultiFormatActive())
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-		}
-		else if (inChannel < NTV2_CHANNEL3)
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
-		}
-		else if (inChannel < NTV2_CHANNEL5)
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
-		}
-		else if (inChannel < NTV2_CHANNEL7)
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
-		}
-		else
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-		}
+		// enable squares
+		status = Set4kSquaresEnable (true, inChannel);
 	}
 
 	return status;
@@ -2097,6 +1974,40 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 
 	outIsEnabled = readOkay ? returnVal : 0;
 	return readOkay;
+}
+
+bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast)
+{
+	ULWord standard = 0;
+	ULWord rate1 = 0;
+	ULWord rate2 = 0;
+	ULWord s372 = 0;
+	ULWord geometry = 0;
+	ULWord format = 0;
+	bool status = false;
+
+	status = ReadRegister (gChannelToGlobalControlRegNum [inSrc], &standard,  kRegMaskStandard,  kRegShiftStandard);
+	status &= ReadRegister (gChannelToGlobalControlRegNum [inSrc], &rate1, kRegMaskFrameRate, kRegShiftFrameRate);
+	status &= ReadRegister (gChannelToGlobalControlRegNum [inSrc], &rate2, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
+	status &= ReadRegister (gChannelToSmpte372RegisterNum [inSrc], &s372, gChannelToSmpte372Masks [inSrc], gChannelToSmpte372Shifts [inSrc]);
+	status &= ReadRegister (gChannelToGlobalControlRegNum [inSrc], &geometry, kRegMaskGeometry, kRegShiftGeometry);
+	status &= ReadRegister (kVRegVideoFormatCh1 + inSrc, &format);
+
+	if (!status) return false;
+
+	for (int channel = inFirst; channel <= inLast; channel++)
+	{
+		status = WriteRegister (gChannelToGlobalControlRegNum [channel], standard, kRegMaskStandard, kRegShiftStandard);
+		status &= WriteRegister (gChannelToGlobalControlRegNum [channel], rate1, kRegMaskFrameRate, kRegShiftFrameRate);
+		status &= WriteRegister (gChannelToGlobalControlRegNum [channel], rate2, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
+		status &= WriteRegister (gChannelToSmpte372RegisterNum [channel], s372, gChannelToSmpte372Masks [channel], gChannelToSmpte372Shifts [channel]);
+		status &= WriteRegister (gChannelToGlobalControlRegNum [channel], geometry, kRegMaskGeometry, kRegShiftGeometry);
+		status &= WriteRegister (kVRegVideoFormatCh1 + channel, format);
+
+		if (!status) return false;
+	}
+
+	return true;
 }
 
 // Method: SetReference
@@ -2985,7 +2896,7 @@ bool CNTV2Card::ReadOutputTimingControl (ULWord & outValue, const UWord inOutput
 {
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
-	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : NTV2_CHANNEL1], &outValue);
+	return ReadRegister (gChannelToOutputTimingCtrlRegNum [IsMultiFormatActive() ? inOutputSpigot : UWord(NTV2_CHANNEL1)], &outValue);
 }
 
 
@@ -3318,9 +3229,8 @@ bool CNTV2Card::WaitForFlashNOTBusy()
 	regValue = 0;
 	do
 	{
-		ULWord regValue = BIT(8);
+		regValue = BIT(8);
 		ReadRegister(kRegXenaxFlashControlStatus, &regValue);
-		
 		if( !(regValue & BIT(8)) )
 		{
 			busy = false;
@@ -4488,29 +4398,17 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
 		return false;
 
-	NTV2Standard newStandard = inValue;
 	bool is2kx1080 = false;
 	switch(inValue)
 	{
-	case NTV2_STANDARD_2Kx1080p:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_2Kx1080i:
-		newStandard = NTV2_STANDARD_1080;
-		is2kx1080 = true;
-		break;
-	case NTV2_STANDARD_3840x2160p:
-	case NTV2_STANDARD_3840HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		break;
-	case NTV2_STANDARD_4096x2160p:
-	case NTV2_STANDARD_4096HFR:
-		newStandard = NTV2_STANDARD_1080p;
-		is2kx1080 = true;
-		break;
-	default:
-		break;
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:
+			is2kx1080 = true;
+			break;
+		default:
+			break;
 	}
 
 	WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
@@ -4629,16 +4527,8 @@ bool CNTV2Card::GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWo
 	{
 		if (valueA)
 		{
-			if (_boardID == BOARD_ID_XENA2)
-			{
-				if (!ReadRegister (kRegSDIOut1VPIDB, (ULWord*) valueA))
-					return false;
-			}
-			else
-			{
-				if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
-					return false;
-			}
+			if (!ReadRegister (kRegSDIOut2VPIDA, (ULWord*) valueA))
+				return false;
 		}
 		if(valueB)
 		{
@@ -5613,7 +5503,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
         case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);							break;
         case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);							break;
         case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);							break;
-        case NTV2_INPUTSOURCE_ANALOG:	return GetAnalogInputVideoFormat ();									break;
+        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
 		default:						return NTV2_FORMAT_UNKNOWN;												break;
 	}
 }
@@ -5881,7 +5771,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		break;
 
 	case 1:	
-		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetHDMIInputVideoFormat();
 		else if (boardID == DEVICE_ID_LHE_PLUS)
 			result = GetAnalogInputVideoFormat();
@@ -5892,7 +5782,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 	case 2:
 		if (boardID == DEVICE_ID_IOXT)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS || boardID == BOARD_ID_LHI_DVI || boardID == BOARD_ID_LHI_T)
+		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
 			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
@@ -5963,7 +5853,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 		if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 		{
 			//This is a hack, LHI does not have a second input
-			if ((_boardID == DEVICE_ID_LHI || _boardID == BOARD_ID_LHI_DVI || _boardID == BOARD_ID_LHI_T) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+			if ((_boardID == DEVICE_ID_LHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5971,7 +5861,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 					(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 					progressivePicture);												//progressive picture
 			}
-			else if (_boardID != DEVICE_ID_LHI && _boardID != BOARD_ID_LHI_DVI && _boardID != BOARD_ID_LHI_T)
+			else if (_boardID != DEVICE_ID_LHI)
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 				((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 				(status & BIT_15) >> 15,											//progressive transport
@@ -6401,106 +6291,7 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 		#if !defined (NTV2_DEPRECATE)
 		NTV2BitfileType newBitfile = NTV2_BITFILE_NO_CHANGE;
 		const char *whyString = "No change";
-		// Does support multiple bitfiles?
-		// Note: XenaHS == XenaDXT
-		if (boardID == BOARD_ID_XENA2)
-		{
-			// get the frame buffer (primary) format
-			// Note: when called from SetVideoFormat(), "newValue" is the Primary format
-			// we are about to switch to (but haven't yet). When called from other methods
-			// newValue == NTV2_FORMAT_UNKNOWN.
-			NTV2VideoFormat primaryFormat = newValue;
-			if (primaryFormat == NTV2_FORMAT_UNKNOWN)
-				GetVideoFormat(&primaryFormat);
-			
-			// get the source (secondary) format
-			NTV2VideoFormat secondaryFormat = NTV2_FORMAT_UNKNOWN;
-			GetSecondaryVideoFormat(&secondaryFormat);
-			
-			// if the Secondary Format == Primary Format, or it is SD to SD conversion
-			//if (primaryFormat != secondaryFormat )
-			{
-				// are we in capture or playback mode?
-				NTV2Mode mode = NTV2_MODE_DISPLAY;
-				GetMode(NTV2_CHANNEL1, &mode);
-				
-				int compare = 0;
-				if (mode == NTV2_MODE_CAPTURE)
-				{
-					// In Capture mode, we need to see if the current input in using an up/down-converter:
-					// if so, we do what's right for the input. If NOT, we may need to use the converter
-					// for one of the outputs.
-					
-						// get the current selected input
-					NTV2InputVideoSelect input = NTV2_Input1Select;
-					GetInputVideoSelect(&input);
-					
-						// now get the video format of the selected input
-					NTV2VideoFormat inFormat = NTV2_FORMAT_UNKNOWN;
-					if (input == NTV2_Input2Select)
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI2);	// input 2
-					else
-						inFormat = GetInputVideoFormat (NTV2_INPUTSOURCE_SDI1);	// input 1 or DualLink
-					
-					if ( (inFormat == secondaryFormat) && (secondaryFormat != primaryFormat) )
-					{		// we're converting the input FROM the Secondary format TO the Primary format
-						compare = FormatCompare (secondaryFormat, primaryFormat);
-					}
-					else
-					{		// we DON'T need the converter for input, so assign it according to the output needs
-						compare = FormatCompare (primaryFormat, secondaryFormat);
-					}
-				}	// Xena2 mode == Capture
-				
-				else	// Xena2 mode == Playback
-				{		// we're converting FROM the Primary format TO the Secondary format
-					compare = FormatCompare (primaryFormat, secondaryFormat);
-				}
-				
-					// which bitfile do we need?
-				bool isCrossConvert = NTV2_IS_HD_VIDEO_FORMAT(primaryFormat) && NTV2_IS_HD_VIDEO_FORMAT(secondaryFormat);
-				if (compare > 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XDCVT : NTV2_BITFILE_XENA2_DNCVT;
-				else if (compare < 0)
-					newBitfile = isCrossConvert ? NTV2_BITFILE_XENA2_XUCVT : NTV2_BITFILE_XENA2_UPCVT;
-				else if ( primaryFormat == secondaryFormat && NTV2_IS_SD_VIDEO_FORMAT(primaryFormat) )
-					newBitfile = NTV2_BITFILE_XENA2_DNCVT;		// SD to SD conversion
-				else
-					newBitfile = NTV2_BITFILE_NO_CHANGE;
-
-				// Note: this code assumes we can read which bitfile is currently loaded (upconvert or downconvert).
-				// The Mac code is using a combination of being able to read the current BITFILE_INFO_STRUCT from
-				// the driver, and using a new field ("bitFileType") in that struct. As of this writing, our Linux
-				// code partially supports writing/reading the BITFILE_INFO (only works for systems that enable PIO),
-				// and our Windows code doesn't support it at all.
-			
-					// which bitfile is currently loaded?
-				NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-				BITFILE_INFO_STRUCT bitFileInfo;
-				memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));	// Initializing suppresses valgrind error
-				if ( DriverGetBitFileInformation(bitFileInfo, NTV2_VideoProcBitFile) )
-					currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-				
-					// do we need to make a change?
-				if ( (newBitfile != NTV2_BITFILE_NO_CHANGE) && (newBitfile != currentBitfile) )
-				{
-					result = newBitfile;
-					
-					if (result == NTV2_BITFILE_XENA2_DNCVT)
-						whyString = "Change to down converter";
-					else if (result == NTV2_BITFILE_XENA2_UPCVT)
-						whyString = "Change to upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XDCVT)
-						whyString = "Change to cross down upconverter";
-					else if (result == NTV2_BITFILE_XENA2_XUCVT)
-						whyString = "Change to cross up upconverter";
-				}
-				if (ajaRetail == false)
-					result = NTV2_BITFILE_NO_CHANGE;
-					
-			}	// if (primaryFormat != secondaryFormat)
-		} // if (boardID == BOARD_ID_XENA2)
-		#else	//	!defined (NTV2_DEPRECATE)
+		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
 			(void) newValue;
 			(void) ajaRetail;
@@ -7160,17 +6951,6 @@ bool CNTV2Card::SetConversionMode (NTV2ConversionMode mode)
 	}
 	SetConverterPulldown( isPulldown );
 	SetDeinterlaceMode(isDeinterlace);
-
-	#if !defined (NTV2_DEPRECATE)
-		// which bitfile is currently loaded?
-		NTV2BitfileType currentBitfile = NTV2_BITFILE_NO_CHANGE;
-		BITFILE_INFO_STRUCT bitFileInfo;
-		if ( DriverGetBitFileInformation(bitFileInfo) )
-			currentBitfile = (NTV2BitfileType)bitFileInfo.bitFileType;
-
-		if (GetDeviceID () == BOARD_ID_XENA2 && desiredX2BitFile != currentBitfile)
-			SwitchBitfile (BOARD_ID_XENA2, desiredX2BitFile);
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	return true;
 
@@ -9304,7 +9084,7 @@ bool CNTV2Card::GetMultiFormatMode (bool & outEnabled)
 
 bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	if (inRS422Parity == NTV2_RS422_NO_PARITY)
@@ -9336,7 +9116,7 @@ bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PA
 
 bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9357,7 +9137,7 @@ bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY &
 
 bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE inRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
@@ -9381,7 +9161,7 @@ bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_R
 
 bool CNTV2Card::GetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate)
 {
-	if (!::NTV2DeviceCanDoRS422N (_boardID, inChannel))
+	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);

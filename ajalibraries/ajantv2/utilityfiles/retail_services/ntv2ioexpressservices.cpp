@@ -192,7 +192,7 @@ void IoExpressServices::SetDeviceXPointCapture()
 
 	NTV2VideoFormat				inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID			inputSelectPrimary = NTV2_XptSDIIn1;
-	NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
+	//NTV2CrosspointID			inputSelectSecondary = NTV2_XptSDIIn2;
 	bool 						bFb1Compressed = IsFormatCompressed(mFb1Format);
 	
 	// if user select LTC port as input - loop it back during capture
@@ -209,13 +209,13 @@ void IoExpressServices::SetDeviceXPointCapture()
 	{
 		// Select input 1 (0x01)
 		inputSelectPrimary = NTV2_XptSDIIn1;
-		inputSelectSecondary = NTV2_XptSDIIn2;
+		//inputSelectSecondary = NTV2_XptSDIIn2;
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		// Select input 2 (0x17)
 		inputSelectPrimary = NTV2_XptHDMIIn;
-		inputSelectSecondary = NTV2_XptBlack;
+		//inputSelectSecondary = NTV2_XptBlack;
 	}
 	
 	// Set Up/Down converter module input (reg 136, bits 23-16)

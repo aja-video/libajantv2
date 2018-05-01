@@ -45,7 +45,7 @@ void tx_2110Config::init()
     ssrc                = 1000;
     numAudioChannels    = 0;
     firstAudioChannel   = 0;
-    audioPacketInterval = PACKET_INTERVAL_1mS;
+    audioPktInterval    = PACKET_INTERVAL_1mS;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
@@ -62,7 +62,7 @@ bool tx_2110Config::operator == ( const tx_2110Config &other )
         (videoSamples           == other.videoSamples)          &&
         (numAudioChannels       == other.numAudioChannels)      &&
         (firstAudioChannel      == other.firstAudioChannel)     &&
-        (audioPacketInterval    == other.audioPacketInterval))
+        (audioPktInterval       == other.audioPktInterval))
     {
         return true;
     }
@@ -81,14 +81,14 @@ void rx_2110Config::init()
     destPort            = 0;
     ssrc                = 1000;
     vlan                = 1;
-    payloadType         = 0;
+    payload             = 0;
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
     payloadLen          = 0;
     lastPayloadLen      = 0;
     pktsPerLine         = 0;
     numAudioChannels    = 2;
-    audioPacketInterval = PACKET_INTERVAL_1mS;
+    audioPktInterval    = PACKET_INTERVAL_1mS;
 }
 
 bool rx_2110Config::operator != ( const rx_2110Config &other )
@@ -107,8 +107,8 @@ bool rx_2110Config::operator == ( const rx_2110Config &other )
             (vlan              == other.vlan)               &&
             (videoFormat       == other.videoFormat)        &&
             (videoSamples      == other.videoSamples)       &&
-            (numAudioChannels == other.numAudioChannels)    &&
-            (audioPacketInterval == other.audioPacketInterval))
+            (numAudioChannels  == other.numAudioChannels)    &&
+            (audioPktInterval  == other.audioPktInterval))
     {
         return true;
     }
@@ -339,8 +339,8 @@ void  CNTV2Config2110::SetupDecapsulatorStream(const eSFP sfp, const NTV2Channel
     // vlan
     //WriteRegister(kRegDecap_match_vlan + decapBaseAddr, rxConfig.VLAN);
 
-    // payload type
-    mDevice. WriteRegister(kRegDecap_match_payload + decapBaseAddr, rxConfig.payloadType);
+    // payload
+    mDevice. WriteRegister(kRegDecap_match_payload + decapBaseAddr, rxConfig.payload);
 
     // matching
     mDevice.WriteRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
@@ -487,7 +487,7 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Channel channel, const 
         uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(channel, stream);
 
         mDevice.WriteRegister(kReg3190_depkt_enable + depacketizerBaseAddr, 0x00);
-        uint32_t num_samples = (rxConfig.audioPacketInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
+        uint32_t num_samples = (rxConfig.audioPktInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
 		uint32_t num_channels = rxConfig.numAudioChannels;
         uint32_t val = (num_samples << 8) + num_channels;
         mDevice.WriteRegister(kReg3190_depkt_config + depacketizerBaseAddr,val);
@@ -587,9 +587,9 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channe
     //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, &val);
     //rxConfig.VLAN = val & 0xffff;
 
-    // payload type
+    // payload
     mDevice.ReadRegister(kRegDecap_match_payload + decapBaseAddr, &val);
-    rxConfig.payloadType = val & 0x7f;
+    rxConfig.payload = val & 0x7f;
 
     // matching
     mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, &rxConfig.rxMatch);
@@ -608,7 +608,7 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Channe
     {
         uint32_t samples;
         mDevice.ReadRegister(kReg3190_depkt_config + depacketizerBaseAddr, &samples);
-        rxConfig.audioPacketInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
+        rxConfig.audioPktInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
         rxConfig.numAudioChannels = samples & 0xff;
     }
 
@@ -869,8 +869,8 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
         // payload length last
         mDevice.WriteRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer,payloadLengthLast);
 
-        // payload type
-        mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,txConfig.payloadType);
+        // payload
+        mDevice.WriteRegister(kReg4175_pkt_payload_type + baseAddrPacketizer,txConfig.payload);
 
         // SSRC
         mDevice.WriteRegister(kReg4175_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
@@ -891,7 +891,7 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
         // audio setup 3190 packetizer
 
         uint32_t audioChans = txConfig.numAudioChannels;
-        uint32_t samples    = (txConfig.audioPacketInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
+        uint32_t samples    = (txConfig.audioPktInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
         uint32_t plength    = audioChans * samples * 3;
 
         // audio select
@@ -909,8 +909,8 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
         // payload length
         mDevice.WriteRegister(kReg3190_pkt_payload_len + baseAddrPacketizer, plength);
 
-        // payload type
-        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payloadType);
+        // payload
+        mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payload);
 
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
@@ -977,9 +977,9 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Channel channel, const 
     uint32_t val;
     if (stream == NTV2_VIDEO_STREAM)
     {
-        // payload type
+        // payload
         mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, &val);
-        txConfig.payloadType = (uint16_t)val;
+        txConfig.payload = (uint16_t)val;
 
         // SSRC
         mDevice.ReadRegister(kReg4175_pkt_ssrc + baseAddrPacketizer, &txConfig.ssrc);
@@ -1011,9 +1011,9 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Channel channel, const 
     }
     else
     {
-        // audio - payload type
+        // audio - payload
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, &val);
-        txConfig.payloadType = (uint16_t)val;
+        txConfig.payload = (uint16_t)val;
 
         // ssrc
         mDevice.ReadRegister(kReg3190_pkt_ssrc + baseAddrPacketizer, &txConfig.ssrc);
@@ -1029,7 +1029,7 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Channel channel, const 
         // packet interval
         uint32_t samples;
         mDevice.ReadRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, &samples);
-        txConfig.audioPacketInterval = (samples == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
+        txConfig.audioPktInterval = (samples == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
     }
 
     return true;
@@ -1419,7 +1419,7 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Channel channel, const NTV
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Channel channel, NTV2Stream stream, uint32_t & baseAddrPacketizer)
 {
-    if (channel > _numTxChans)
+    if (uint32_t(channel) > _numTxChans)
         return false;
 
     uint32_t index = Get2110TxStreamIndex(channel, stream);
@@ -1686,16 +1686,16 @@ bool CNTV2Config2110::GenSDP(const NTV2Channel channel, const NTV2Stream stream)
     int ch = (int)channel;
     int st = (int)stream;
 
-    string filename = "txch" + To_String(ch+1);
+    string filename;
     if (stream == NTV2_VIDEO_STREAM)
     {
+        filename = "txchannel" + To_String(ch+1);
         filename += "v.sdp";
     }
     else
     {
-        filename += "a";
-        filename += To_String(st);
-        filename += ".sdp";
+        filename = "txstream" + To_String(st);
+        filename += "a.sdp";
     }
     stringstream & sdp = txsdp[ch][st];
 
@@ -1785,7 +1785,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
     sdp << "m=video ";
     sdp << To_String(config.remotePort[0]);     // FIXME
     sdp << " RTP/AVP ";
-    sdp << To_String(config.payloadType) << endl;
+    sdp << To_String(config.payload) << endl;
 
     // connection information
     sdp << "c=IN IP4 ";
@@ -1794,12 +1794,12 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, NTV2Channel channel,
 
     // rtpmap
     sdp << "a=rtpmap:";
-    sdp << To_String(config.payloadType);
+    sdp << To_String(config.payload);
     sdp << " raw/90000" << endl;
 
     //fmtp
     sdp << "a=fmtp:";
-    sdp << To_String(config.payloadType);
+    sdp << To_String(config.payload);
     sdp << " sampling=YCbCr-4:2:2; width=";
     sdp << To_String(width);
     sdp << "; height=";
@@ -1846,7 +1846,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     sdp << "m=audio ";
     sdp << To_String(config.remotePort[0]);     // FIXME
     sdp << " RTP/AVP ";
-    sdp << To_String(config.payloadType) << endl;
+    sdp << To_String(config.payload) << endl;
 
     // connection information
     sdp << "c=IN IP4 ";
@@ -1855,13 +1855,13 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
 
     // rtpmap
     sdp << "a=rtpmap:";
-    sdp << To_String(config.payloadType);
+    sdp << To_String(config.payload);
     sdp << " L24/48000/";
     sdp << To_String(config.numAudioChannels) << endl;
 
     //fmtp
     sdp << "a=fmtp:";
-    sdp << To_String(config.payloadType);
+    sdp << To_String(config.payload);
     sdp << " channel-order=SMPTE2110.(";
     switch (config.numAudioChannels)
     {
@@ -1884,7 +1884,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, NTV2Channel channel,
     }
     sdp << endl;
 
-    if (config. audioPacketInterval == PACKET_INTERVAL_125uS)
+    if (config. audioPktInterval == PACKET_INTERVAL_125uS)
         sdp << "a=ptime:0.125" << endl;
     else
         sdp << "a=ptime:1.000" << endl;
@@ -2033,11 +2033,11 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
         }
         if ((tokens.size() >= 3) && !tokens[2].empty())
         {
-            rxConfig.payloadType = atoi(tokens[2].c_str());
+            rxConfig.payload = atoi(tokens[2].c_str());
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before
@@ -2059,7 +2059,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             tokens = split(value.c_str(), ' ');
             if ((tokens.size() >= 1) && !tokens[0].empty())
             {
-                rxConfig.payloadType = atoi(tokens[0].c_str());
+                rxConfig.payload = atoi(tokens[0].c_str());
                 rxMatch |= RX_MATCH_2110_PAYLOAD;
             }
         }
@@ -2131,11 +2131,11 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
 
         if ((tokens.size() >= 3) && !tokens[2].empty())
         {
-            rxConfig.payloadType = atoi(tokens[2].c_str());
+            rxConfig.payload = atoi(tokens[2].c_str());
             rxMatch |= RX_MATCH_2110_PAYLOAD;
         }
 
-        int rv = getDescriptionValue(index,"c=IN",value);
+        rv = getDescriptionValue(index,"c=IN",value);
         if (rv >= index)
         {
             // this overwrites if found before
@@ -2157,7 +2157,7 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
             tokens = split(value.c_str(), ' ');
             if ((tokens.size() >= 1)&& !tokens[0].empty())
             {
-                rxConfig.payloadType = atoi(tokens[0].c_str());
+                rxConfig.payload = atoi(tokens[0].c_str());
                 rxMatch |= RX_MATCH_2110_PAYLOAD;
             }
             if ((tokens.size() >= 2))

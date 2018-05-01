@@ -15,18 +15,11 @@ static bool				gTerminating	(false);
 static MasterPortPtr	gMasterPort;	//	Singleton
 
 
-ostream &	operator << (ostream & inOutStr, const MasterPort & inObj)
+static ostream &	operator << (ostream & inOutStr, const MasterPort & inObj)
 {
 	return inOutStr << "MasterPort instance " << hex << &inObj << dec << " portRef " << hex << inObj.GetPortRef () << dec << " " << (inObj.IsOkay () ? "OK" : "Not OK");
 
 }	//	MasterPort ostream operator <<
-
-
-ostream &	operator << (ostream & inOutStr, const MasterPortPtr & inObj)
-{
-	return inObj ? inOutStr << *inObj : inOutStr;
-
-}	//	MasterPortPtr ostream operator <<
 
 
 IONotificationPortRef MasterPort::Get (void)

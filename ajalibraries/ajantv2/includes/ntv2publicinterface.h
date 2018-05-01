@@ -9,7 +9,7 @@
 
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#if !defined (NTV2_BUILDING_DRIVER)
+#if !defined(NTV2_BUILDING_DRIVER)
 	#include <iostream>
 	#include <set>
 	#include <map>
@@ -17,6 +17,10 @@
 	#include <iomanip>
 	#include <bitset>
 	#include "ajaexport.h"
+	#if defined(MSWindows)
+		#pragma warning(disable:4800)	//	int/bool conversion
+		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
+	#endif
 #endif	//	user-space clients only
 
 #if defined (MSWindows)
@@ -5534,23 +5538,23 @@ typedef enum
 			//	Convenience macros for compactly formatting ostream output...
 			#define	Hex(__x__)				std::hex << (__x__) << std::dec
 			#define	xHex(__x__)				"0x" << Hex(__x__)
-			#define	HexN(__x__,__n__)		std::hex << std::setw(__n__) << (__x__) << std::dec
+			#define	HexN(__x__,__n__)		std::hex << std::setw(int(__n__)) << (__x__) << std::dec
 			#define	xHexN(__x__,__n__)		"0x" << HexN((__x__),(__n__))
-			#define	Hex0N(__x__,__n__)		std::hex << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	Hex0N(__x__,__n__)		std::hex << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	xHex0N(__x__,__n__)		"0x" << Hex0N((__x__),(__n__))
 			#define	HEX(__x__)				std::hex << std::uppercase << (__x__) << std::dec << std::nouppercase
 			#define	xHEX(__x__)				"0x" << HEX(__x__)
-			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << (__x__) << std::dec << std::nouppercase
+			#define	HEXN(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << (__x__) << std::dec << std::nouppercase
 			#define	xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
-			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
+			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
 			#define	xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
 			#define	DEC(__x__)				std::dec << (__x__)
-			#define	DECN(__x__,__n__)		std::dec << std::setw(__n__) << (__x__)
-			#define	DEC0N(__x__,__n__)		std::dec << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << (__x__)
+			#define	DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	OCT(__x__)				std::oct << (__x__) << std::dec
-			#define	OCT0N(__x__,__n__)		std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	OCT0N(__x__,__n__)		std::oct << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	oOCT(__x__)				"o" << std::oct << (__x__) << std::dec
-			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(__n__) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	oOCT0N(__x__,__n__)		"o" << std::oct << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	BIN064(__x__)			std::bitset<8>((uint64_t(__x__)&0xFF00000000000000)>>56) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x00FF000000000000)>>48) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x0000FF0000000000)>>40) << "."		\
@@ -5990,7 +5994,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				bool							GetU16s (std::vector<uint16_t> & outU32s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+				bool							GetU16s (std::vector<uint16_t> & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 16-bit values.
@@ -6016,7 +6020,7 @@ typedef enum
 												Defaults to 128.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							GetU8s (std::vector<uint8_t> & outU32s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+				bool							GetU8s (std::vector<uint8_t> & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
 				/**
 					@return		My contents as a vector of unsigned 8-bit values.
@@ -6893,7 +6897,7 @@ typedef enum
 					ULWord64			acCurrentUserCookie;			///< @brief	The frame's acInUserCookie value that was set at AutoCirculateTransfer time.
 																		///			This can tell clients which frame was on-air at the last VBI.
 					ULWord				acFrame;						///< @brief	Record/capture -- current frame number
-					NTV2_DEPRECATED	NTV2_RP188	acRP188;				///< @deprecated	Call GetInputTimeCode instead.
+					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call GetInputTimeCode instead.
 					///@}
 				NTV2_TRAILER		acTrailer;						///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -7106,8 +7110,8 @@ typedef enum
 					ULWord							acPeerToPeerFlags;			//// @brief	Used to control P2P transfers.
 					ULWord							acFrameRepeatCount;			///< @brief Intended for playout. The number of times to repeat the frame being transferred.
 					LWord							acDesiredFrame;				///< @brief	Used to specify a different frame in the circulate ring to transfer to/from.
-					NTV2_DEPRECATED	NTV2_RP188		acRP188;					///< @deprecated	Use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
-					NTV2_DEPRECATED	NTV2Crosspoint	acCrosspoint;				///< @deprecated	The SDK will set this field. It will eventually be obsolete.
+					NTV2_SHOULD_BE_DEPRECATED(NTV2_RP188		acRP188);		///< @brief	Will be deprecated -- use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
+					NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	acCrosspoint);	///< @brief	Will be deprecated -- used internally by the SDK. Will be removed when the driver changes to use NTV2Channel/NTV2Mode.
 					///@}
 				NTV2_TRAILER					acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -7377,7 +7381,7 @@ typedef enum
 				**/
 				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.acAudioTransferSize;}
 
-				NTV2_DEPRECATED inline ULWord			GetAudioByteCount (void) const					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
+				inline NTV2_DEPRECATED_f(ULWord	GetAudioByteCount (void) const)					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
 
 				/**
 					@brief	Returns the number of actual ancillary data bytes that were transferred.
@@ -7461,24 +7465,24 @@ typedef enum
 
 			/**
 				@brief		Prints the given UWordSequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given UWordSequence will be printed.
-				@param[in]	inData		Specifies the UWordSequence to be streamed.
+				@param		inOutStream		The stream into which the given UWordSequence will be printed.
+				@param[in]	inData			Specifies the UWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
 
 			/**
 				@brief		Prints the given ULWordSequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given ULWordSequence will be printed.
-				@param[in]	inData		Specifies the ULWordSequence to be streamed.
+				@param		inOutStream		The stream into which the given ULWordSequence will be printed.
+				@param[in]	inData			Specifies the ULWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWordSequence & inData);
 
 			/**
 				@brief		Prints the given ULWord64Sequence's contents into the given output stream.
-				@param		inOStream	The stream into which the given ULWord64Sequence will be printed.
-				@param[in]	inData		Specifies the ULWord64Sequence to be streamed.
+				@param		inOutStream		The stream into which the given ULWord64Sequence will be printed.
+				@param[in]	inData			Specifies the ULWord64Sequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWord64Sequence & inData);
@@ -8383,8 +8387,8 @@ typedef struct HDRFloatValues{
     uint8_t		staticMetadataDescriptorID;
 }HDRFloatValues;
 
-#define NTV2_IS_VALID_HDR_PRIMARY(__val__)				((__val__ >= 0x0000) && (__val__ <= 0xC350))
-#define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
-#define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			((__val__ >= 0x0000) && (__val__ <= 0xFFFF))
+#define NTV2_IS_VALID_HDR_PRIMARY(__val__)				((__val__) <= 0x0000C350)
+#define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	(true)
+#define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			(true)
 
 #endif	//	NTV2PUBLICINTERFACE_H

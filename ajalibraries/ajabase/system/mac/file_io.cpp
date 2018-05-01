@@ -231,7 +231,7 @@ AJAFileIO::Write(const uint8_t* pBuffer, uint32_t length) const
 uint32_t
 AJAFileIO::Write(const string& buffer) const
 {
-	return (Write((uint8_t*) buffer.c_str(), buffer.length()));
+	return (Write((uint8_t*) buffer.c_str(), uint32_t(buffer.length())));
 }
 
 
@@ -401,8 +401,8 @@ AJAFileIO::ReadDirectory(
 
 				// Make an upper case copy of the file name
 				char upperName[PATH_MAX];
-				int length = strlen( pName );
-				for (int i = 0; i < length; i++)
+				size_t length = strlen( pName );
+				for (size_t i = 0; i < length; i++)
 				{
 					upperName[i] = toupper( *pName++ );
 				}

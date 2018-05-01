@@ -861,7 +861,7 @@ getArgDescrip(const struct poptOption * opt,
  * @param lineLength	display positions remaining
  * @param opt		option(s)
  * @param translation_domain	translation domain
- * @return
+ * @return	a pointer to the display string.
  */
 static char *
 singleOptionDefaultValue(size_t lineLength,
@@ -1379,7 +1379,7 @@ typedef struct poptDone_s {
  * @param opt		option(s)
  * @param translation_domain	translation domain
  * @param done		tables already processed
- * @return
+ * @return the size of the current column
  */
 static size_t singleTableUsage(poptContext con, FILE * fp, columns_t columns,
 		const struct poptOption * opt,

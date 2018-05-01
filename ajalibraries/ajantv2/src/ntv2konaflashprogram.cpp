@@ -293,7 +293,7 @@ void CNTV2KonaFlashProgram::SetBitFile(const char *bitFileName, FlashBlockID blo
 	FILE* pFile = 0;
 	struct stat fsinfo;
 	stat(bitFileName, &fsinfo);
-	_bitFileSize = fsinfo.st_size;
+	_bitFileSize = uint32_t(fsinfo.st_size);
 	pFile = fopen(bitFileName, "rb");
 	if(pFile)
 	{

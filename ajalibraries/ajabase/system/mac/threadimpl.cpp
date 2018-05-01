@@ -372,8 +372,8 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 		uint32_t computation	=  2000000;
 		
 		thread_time_constraint_policy timeConstraint;
-		timeConstraint.period		= static_cast<long long>(period)      * info.denom / info.numer;
-		timeConstraint.computation	= static_cast<long long>(computation) * info.denom / info.numer;
+		timeConstraint.period		= uint32_t(static_cast<long long>(period)      * info.denom / info.numer);
+		timeConstraint.computation	= uint32_t(static_cast<long long>(computation) * info.denom / info.numer);
 		timeConstraint.constraint	= timeConstraint.computation * 2;
 		timeConstraint.preemptible	= true;
 		
