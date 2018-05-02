@@ -124,14 +124,23 @@ AutoCirculate playout demos:
 
 @subsection	autocirculateinandout	AutoCirculate Capture and Playout
 
-Figure 32 shows an example of how this would work when simultaneously capturing from one device input,
-and playing out another device output, while still using 10 frame buffers in all.
+@image	html	ac-captureplayout.png
 
-Note that for this to work, two independent "channels" must be AutoCirculated, each using its own reserved range of frame
-buffers on the device, each with its own Active Frame, and each with its own Transfer Frame (as well as the Driver Buffer Level
-that measures the gap, if any, between them).
+Here, AutoCirculate is simultaneously capturing from a device input and playing through a device output, while still using 10 frame buffers in all.
+
+For this to work, two independent “channels” must be used, each with its own reserved range of frame
+buffers on the device, each having its own Active Frame, Transfer Frame and Driver Buffer Level measuring
+the gap, if any, between them.
 
 The client application would typically use two execution threads for performing the DMA transfers -- one for capture, the other for playout.
+
+@note	It’s possible to have other Frame Stores writing into (or reading from) device frame buffer memory being used by
+		an AutoCirculate channel, its corresponding Frame Store, and the frame buffers being used.
+		See the \ref vidop-fbconflict discussion for more details.
+
+@note	It’s also possible to miscalculate the device frame buffer range being used for AutoCirculate such that the
+		last frame or two encroach on the audio buffers. On capture, this can yield some bad video frames; on playout,
+		this can cause audio distortion. See \ref audioclobber for more information.
 
 AutoCirculate Capture/Playout Demos:
 -	@subpage	ntv2burn
