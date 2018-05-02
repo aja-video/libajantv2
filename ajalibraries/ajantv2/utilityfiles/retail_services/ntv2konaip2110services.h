@@ -18,7 +18,7 @@ class KonaIP2110Services : public DeviceServices
 	
 public:
 	KonaIP2110Services();
-	~KonaIP2110Services() {}
+    ~KonaIP2110Services();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
@@ -26,7 +26,6 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-    void Ip2110Sleep(uint32_t mSeconds);
     void printIpEnable(IpEnable2110 ipEnable);
     CNTV2Config2110     * config2110;
 
