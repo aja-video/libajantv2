@@ -2397,8 +2397,10 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
     {
         if (config2110 == NULL)
         {
+            //Ip2110Sleep(1);
             config2110 = new CNTV2Config2110(*mCard);
             config2110->SetIPServicesControl(true, false);
+            //Ip2110Sleep(1);
         }
 
         bool    ipServiceEnable;
@@ -3053,6 +3055,17 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
 
+
+void KonaIP2110Services::Ip2110Sleep( uint32_t mSeconds )
+{
+#if defined(AJA_MAC)
+    usleep(mSeconds*1000);
+#elif defined(AJA_LINUX)
+    usleep(mSeconds*1000);
+#else
+    Sleep(mSeconds);
+#endif
+}
 
 void KonaIP2110Services::printIpEnable(IpEnable2110 ipEnable)
 {
