@@ -2395,12 +2395,12 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 
     if (mCard->IsDeviceReady(true) == true)
     {
-        if (config2110 == NULL)
+        while (config2110 == NULL)
         {
-            //Ip2110Sleep(1);
+            Ip2110Sleep(1);
             config2110 = new CNTV2Config2110(*mCard);
             config2110->SetIPServicesControl(true, false);
-            //Ip2110Sleep(1);
+            Ip2110Sleep(1);
         }
 
         bool    ipServiceEnable;
