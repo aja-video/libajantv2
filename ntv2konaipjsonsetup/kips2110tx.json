@@ -8,14 +8,14 @@
 		[
 			{
 				"designator":"sfp1",
-				"ipAddress":"172.16.45.6",
+				"ipAddress":"172.16.45.16",
 				"subnetMask":"255.255.0.0",
 				"gateWay":"255.255.255.255",
 				"enable":"true"
 			},
 			{
 				"designator":"sfp2",
-				"ipAddress":"172.16.45.7",
+				"ipAddress":"172.16.45.17",
 				"subnetMask":"255.255.0.0",
 				"gateWay":"255.255.255.255",
 				"enable":"true"
@@ -32,7 +32,7 @@
             "sfp2LocalPort":5100,
             "sfp2RemoteIPAddress":"239.20.45.100",
             "sfp2RemotePort":6100,
-            "videoFormat":"1080p5994",
+            "videoFormat":"720p5994",
             "payload":96,
             "ssrc":1000,
             "ttl":64,
@@ -48,7 +48,7 @@
             "sfp2LocalPort":5100,
             "sfp2RemoteIPAddress":"239.20.45.110",
             "sfp2RemotePort":6110,
-            "videoFormat":"1080p5994",
+            "videoFormat":"720p5994",
             "payload":96,
             "ssrc":1000,
             "ttl":64,
@@ -64,7 +64,7 @@
             "sfp2LocalPort":5100,
             "sfp2RemoteIPAddress":"239.20.45.120",
             "sfp2RemotePort":6120,
-            "videoFormat":"1080p5994",
+            "videoFormat":"720p5994",
             "payload":96,
             "ssrc":1000,
             "ttl":64,
@@ -80,7 +80,7 @@
             "sfp2LocalPort":5100,
             "sfp2RemoteIPAddress":"239.20.45.130",
             "sfp2RemotePort":6130,
-            "videoFormat":"1080p5994",
+            "videoFormat":"720p5994",
             "payload":96,
             "ssrc":1000,
             "ttl":64,
