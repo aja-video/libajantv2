@@ -630,12 +630,12 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 }	//	AddVANCData
 
 
-#if !defined(NTV2_DEPRECATE_14_1)
+#if !defined(NTV2_DEPRECATE_14_2)
 	AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
 	{
 		return AddVANCData (inPacketWords, AJAAncillaryDataLocation (AJAAncillaryDataLink_A,  inChannel, AJAAncillaryDataSpace_VANC,  inLineNum));
 	}	//	AddVANCData
-#endif	//	!defined(NTV2_DEPRECATE_14_1)
+#endif	//	!defined(NTV2_DEPRECATE_14_2)
 
 
 AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffer,

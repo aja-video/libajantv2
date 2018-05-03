@@ -628,13 +628,13 @@ public:
 	**/
 	virtual AJAStatus						SetDataCoding (const AJAAncillaryDataCoding inCodingType);
 
-#if !defined(NTV2_DEPRECATE_14_1)
+#if !defined(NTV2_DEPRECATE_14_2)
 		/**
 			@deprecated		Use SetLocationDataChannel function instead.
 		**/
 		virtual inline NTV2_DEPRECATED_f(AJAStatus	SetLocationVideoStream (const AJAAncillaryDataVideoStream inChannel))
 													{return SetLocationDataChannel(inChannel);}
-#endif	//	!defined(NTV2_DEPRECATE_14_1)
+#endif	//	!defined(NTV2_DEPRECATE_14_2)
 	///@}
 
 
