@@ -23,7 +23,7 @@ static const ULWord gHDMIChannelToInputStatusRegNum [] =    { kRegHDMIInputStatu
 // HDMI
 
 // kRegHDMIInputStatus
-bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue, NTV2Channel inChannel)
+bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue, const NTV2Channel inChannel)
 {
     ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
     if (numInputs < 1) return false;
@@ -38,7 +38,7 @@ bool CNTV2Card::GetHDMIInputStatusRegister			(ULWord & outValue, NTV2Channel inC
 	return false;
 }
 
-bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, NTV2Channel inChannel)
+bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inChannel)
 {
     ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
     if (numInputs < 1) return false;
@@ -54,49 +54,49 @@ bool CNTV2Card::GetHDMIInputColor					(NTV2LHIHDMIColorSpace & outValue, NTV2Cha
 }
 
 // kRegHDMIInputControl
-bool CNTV2Card::SetHDMIInputRange (NTV2HDMIRange value)
+bool CNTV2Card::SetHDMIInputRange (const NTV2HDMIRange inValue)
 {
-	return WriteRegister (kRegHDMIInputControl,	(ULWord)value,		kRegMaskHDMIInputRange,		kRegShiftHDMIInputRange);
+	return WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
 }
 
 bool CNTV2Card::GetHDMIInputRange (NTV2HDMIRange & outValue)
 {
-	return ReadRegister  (kRegHDMIInputControl,	(ULWord*)&outValue,	kRegMaskHDMIInputRange,		kRegShiftHDMIInputRange);
+	return ReadRegister  (kRegHDMIInputControl,	(ULWord*)&outValue, kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
 }
 
-bool CNTV2Card::SetHDMIInColorSpace (NTV2HDMIColorSpace value)
+bool CNTV2Card::SetHDMIInColorSpace (const NTV2HDMIColorSpace inValue)
 {
-	return WriteRegister (kRegHDMIInputControl,	(ULWord)value,		kRegMaskHDMIColorSpace,		kRegShiftHDMIColorSpace);
+	return WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
 }
 
 bool CNTV2Card::GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue)
 {
-	return ReadRegister  (kRegHDMIInputControl,	(ULWord*)&outValue,	kRegMaskHDMIColorSpace,		kRegShiftHDMIColorSpace);
+	return ReadRegister  (kRegHDMIInputControl,	(ULWord*)&outValue,	kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
 }
 
 // kRegHDMIOut3DControl
 bool CNTV2Card::SetHDMIOut3DPresent (bool value)
 {
-	return WriteRegister (kRegHDMIOut3DControl,	(ULWord)value,		kRegMaskHDMIOut3DPresent,	kRegShiftHDMIOut3DPresent);
+	return WriteRegister (kRegHDMIOut3DControl,	(ULWord)value, kRegMaskHDMIOut3DPresent, kRegShiftHDMIOut3DPresent);
 }
 
 bool CNTV2Card::GetHDMIOut3DPresent (bool & outValue)
 {
 	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegHDMIOut3DControl,	&tempVal,	kRegMaskHDMIOut3DPresent,	kRegShiftHDMIOut3DPresent));
+	bool	retVal	(ReadRegister (kRegHDMIOut3DControl, &tempVal, kRegMaskHDMIOut3DPresent, kRegShiftHDMIOut3DPresent));
 	if (retVal)
 		outValue = (bool) tempVal;
 	return retVal;
 }
 
-bool CNTV2Card::SetHDMIOut3DMode (NTV2HDMIOut3DMode value)
+bool CNTV2Card::SetHDMIOut3DMode (const NTV2HDMIOut3DMode inValue)
 {
-	return WriteRegister (kRegHDMIOut3DControl,	(ULWord)value,		kRegMaskHDMIOut3DMode,					kRegShiftHDMIOut3DMode);
+	return WriteRegister (kRegHDMIOut3DControl,	ULWord(inValue), kRegMaskHDMIOut3DMode, kRegShiftHDMIOut3DMode);
 }
 
 bool CNTV2Card::GetHDMIOut3DMode (NTV2HDMIOut3DMode & outValue)
 {
-	return ReadRegister  (kRegHDMIOut3DControl,	(ULWord*)&outValue,	kRegMaskHDMIOut3DMode,					kRegShiftHDMIOut3DMode);
+	return ReadRegister (kRegHDMIOut3DControl, (ULWord*)&outValue, kRegMaskHDMIOut3DMode, kRegShiftHDMIOut3DMode);
 }
 
 // kRegHDMIOutControl

@@ -811,7 +811,12 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		}
 		else
 		{
-			return true;
+            // Not enough to read MB State, we need to make sure MB is running
+            ReadRegister(SAREK_REGS + kRegSarekMBUptime, &val);
+            if (val < 2)
+                return false;
+            else
+                return true;
 		}
 	}
 	return false;

@@ -22,7 +22,7 @@
 #define NTV2_DEPRECATE_13_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.0
 #define NTV2_DEPRECATE_13_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.1
 #define NTV2_DEPRECATE_14_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.0
-#define NTV2_DEPRECATE_14_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.1
+#define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2.  NOTE: 14.1 was never released.
 #endif	//	0	** MrBill **
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
@@ -118,7 +118,7 @@
 		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
 		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
 		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
+		#define NTV2_DEPRECATE_14_2         //  First deprecated in SDK 14.2
 	#endif
 
 									//////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@
 		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
 		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
 		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_1         //  First deprecated in SDK 14.1
+		#define NTV2_DEPRECATE_14_2         //  First deprecated in SDK 14.2
 	#endif
 
 										//////////////////////////////////////////////////////////////////
@@ -241,8 +241,8 @@
 		#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
 			#define NTV2_DEPRECATE_14_0     //  First deprecated in SDK 14.0
 		#endif
-		#if !defined(NTV2_DEPRECATE_14_1)	//	Linux driver Makefile usually defines this
-			#define NTV2_DEPRECATE_14_1     //  First deprecated in SDK 14.1
+		#if !defined(NTV2_DEPRECATE_14_2)	//	Linux driver Makefile usually defines this
+			#define NTV2_DEPRECATE_14_2     //  First deprecated in SDK 14.2
 		#endif
 	#endif
 

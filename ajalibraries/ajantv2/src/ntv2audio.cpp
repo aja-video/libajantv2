@@ -1087,9 +1087,9 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 	return result;
 }
 
-bool CNTV2Card::SetAudioOutputMonitorSource (NTV2AudioMonitorSelect value, NTV2Channel channel)
+bool CNTV2Card::SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inValue, const NTV2Channel inChannel)
 {
-	const ULWord	encoding	((::GetIndexForNTV2Channel (channel) << 4) | value);
+	const ULWord	encoding	((::GetIndexForNTV2Channel(inChannel) << 4) | inValue);
     return WriteRegister (kRegAudioOutputSourceMap, encoding, kRegMaskMonitorSource, kRegShiftMonitorSource);
 }
 

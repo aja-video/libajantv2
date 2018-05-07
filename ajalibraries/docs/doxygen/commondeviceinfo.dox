@@ -236,6 +236,7 @@
 	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
 	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
 
+
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
 	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
@@ -314,6 +315,85 @@
 	internally revert to Free-Run if the reference signal disappears or is incompatible with
 	the output video format.
 
+
+	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
+
+	Note that it’s possible (and quite easy) to have two or more Frame Stores accessing the same
+	frame buffer memory.
+
+	Here’s an example where this would be really bad:
+	@code{.cpp}
+		CNTV2Card device;
+		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument("0", device))
+		{
+			//	Assume this device has valid video signals at SDI Inputs 1 and 2
+			//	(same video format, different content)...
+			device.ClearRouting();	//	Clear all existing connections
+			device.EnableChannel(NTV2_CHANNEL1);	//	Enable FrameStore 1
+			device.SetMode(NTV2_CHANNEL1, NTV2_MODE_CAPTURE);	//	Set FrameStore 1 to capture mode
+			device.SetSDITransmitEnable(NTV2_CHANNEL1, false);	//	Set SDI connector 1 to capture
+			device.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);	//	Connect SDI In 1 to FrameStore 1
+			device.SetInputFrame(NTV2_CHANNEL1, 0);	//	Write FrameStore 1 video into frame buffer 0
+
+			device.EnableChannel(NTV2_CHANNEL2);	//	Enable FrameStore 2
+			device.SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);	//	Set FrameStore 2 to capture mode
+			device.SetSDITransmitEnable(NTV2_CHANNEL2, false);	//	Set SDI connector 2 to capture
+			device.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);	//	Connect SDI In 2 to FrameStore 2
+			device.SetInputFrame(NTV2_CHANNEL2, 0);	//	Write FrameStore 2 video into frame buffer 0
+		}
+	@endcode
+	In this case, there are two video signals fighting to write video rasters into the same frame memory on the device.
+	If this frame were to be transferred to host memory, the image would look torn, a bad mixture of frames from SDI inputs 1 and 2.
+
+	On the other hand, Frame Stores sharing the same frame buffer memory can be beneficial, for example, as a <b>Frame Synchronizer</b>.
+	Here’s an example of how to synchronize an SDI signal with the AJA device’s free-running output clock:
+	@code{.cpp}
+		CNTV2Card device;
+		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument("0", device))
+		{
+			//	Assume this device has a valid video signal at SDI Input 1:
+			device.ClearRouting();	//	Clear all existing connections
+			device.EnableChannel(NTV2_CHANNEL1);	//	Enable FrameStore 1
+			device.SetMode(NTV2_CHANNEL1, NTV2_MODE_CAPTURE);	//	Set FrameStore 1 to capture mode
+			device.SetSDITransmitEnable(NTV2_CHANNEL1, false);	//	Set SDI connector 1 to capture
+			device.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);	//	Connect SDI In 1 to FrameStore 1
+			device.SetInputFrame(NTV2_CHANNEL1, 0);	//	Write FrameStore 1 video into frame buffer 0
+
+			device.SetReference(NTV2_REFERENCE_FREERUN);	//	Free run the outputs
+			device.EnableChannel(NTV2_CHANNEL2);	//	Enable FrameStore 2
+			device.SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);	//	Set FrameStore 2 to playout mode
+			device.SetInputFrame(NTV2_CHANNEL2, 0);	//	Read FrameStore 2 video from frame buffer 0
+			device.SetSDITransmitEnable(NTV2_CHANNEL3, true);	//	Set SDI connector 3 to output
+			device.Connect(NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer2YUV);	//	Connect FrameStore 2’s output to SDI Out 3
+		}
+	@endcode
+
+	When AutoCirculate is used, AutoCirculate manages the Frame Store’s InputFrame register (capture) or OutputFrame register (playout),
+	repeatedly circulating it from the <b>Start Frame</b> to the <b>End Frame</b> (e.g., 0 thu 6).
+	Another Frame Store can very easily write into any of the frames involved in another Frame Store’s AutoCirculate frame range.
+	For example:
+	@code{.cpp}
+		CNTV2Card device;
+		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument("0", device))
+		{
+			//	Assume this device has valid video signals at SDI Inputs 1 and 2
+			//	(same video format, different content)...
+			device.ClearRouting();	//	Clear all existing connections
+			device.EnableChannel(NTV2_CHANNEL1);	//	Enable FrameStore 1
+			device.SetSDITransmitEnable(NTV2_CHANNEL1, false);	//	Set SDI connector 1 to capture
+			device.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);	//	Connect SDI In 1 to FrameStore 1
+			device.AutoCirculateInitForInput(NTV2_CHANNEL1, 0, NTV2_AUDIOSYSTEM_INVALID, 0, 1, 0, 6);	//	AutoCirculate capture into FBs 0/1/2/3/4/5/6
+			device.AutoCirculateStart(NTV2_CHANNEL1);	//	Start AutoCirculate (assume another thread calls AutoCirculateTransfer)
+
+			//	UH-OH:  This code block will cause 1 of every 7 frames captured via AutoCirculate
+			//			on NTV2_CHANNEL1 to be corrupted by video from SDI Input 2...
+			device.EnableChannel(NTV2_CHANNEL2);	//	Enable FrameStore 2
+			device.SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);	//	Set FrameStore 2 to capture mode
+			device.SetSDITransmitEnable(NTV2_CHANNEL2, false);	//	Set SDI connector 2 to capture
+			device.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);	//	Connect SDI In 2 to FrameStore 2
+			device.SetInputFrame(NTV2_CHANNEL2, 3);	//	Write FrameStore 2 video into frame buffer 3
+		}
+	@endcode
 
 
 	<hr size="50px" />
@@ -450,6 +530,57 @@
 
 
 	<hr size="50px" />
+	@subsection	audioclobber	Audio Buffer Corruption
+
+	It’s possible (and quite easy) to configure a FrameStore to write video into audio buffer memory.
+	For example:
+	@code{.cpp}
+		CNTV2Card device;
+		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument("0", device))
+		{
+			//	Assume this device has valid video signal at SDI Input 1
+			device.ClearRouting();	//	Clear all existing connections
+			device.EnableChannel(NTV2_CHANNEL1);	//	Enable FrameStore 1
+			device.SetMode(NTV2_CHANNEL1, NTV2_MODE_CAPTURE);	//	Set FrameStore 1 to capture mode
+			device.SetSDITransmitEnable(NTV2_CHANNEL1, false);	//	Set SDI connector 1 to capture
+			device.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);	//	Connect SDI In 1 to FrameStore 1
+
+			//	Which video frame is the first to contain audio system audio?
+			//	You could just start incrementing frame numbers until you start getting bad audio.
+			//	But here’s how to really do it...
+			NTV2FrameGeometry		fg;
+			NTV2FrameBufferFormat	fbf;
+			device.GetFrameGeometry(fg, NTV2_CHANNEL1);
+			device.GetFrameBufferFormat(NTV2_CHANNEL1, fbf);
+			ULWord firstAudioFrameNum = ::NTV2DeviceGetNumberFrameBuffers(device.GetDeviceID(), fg, fbf);
+			if (::NTV2DeviceCanDoStackedAudio(device.GetDeviceID()))
+			{
+				ULWord			chan1CtrlBits(0);
+				mDevice.ReadRegister(kRegCh1Control, &chan1CtrlBits);
+				ULWord			frameSizeMB (1 << (((chan1CtrlBits & kK2RegMaskFrameSize) >> 20) + 1));
+				if (frameSizeMB < 8)
+					frameSizeMB = 8;	//	No 2MB mode!
+				const ULWord	maxRamBytes(::NTV2DeviceGetActiveMemorySize(device.GetDeviceID()));
+				const ULWord	numAudioSystems(::NTV2DeviceGetNumAudioSystems(device.GetDeviceID()));
+				const ULWord	totalAudioBytes(numAudioSystems * 8ULL*1024ULL*1024*ULL);	//	8MB per audio system
+				firstAudioFrameNum = (maxRamBytes - totalAudioBytes) / frameSizeMB;
+			}
+
+			//	UH-OH:  This will cause video to be written into the audio buffers...
+			device.SetInputFrame(NTV2_CHANNEL1, firstAudioFrameNum);	//	Write FrameStore 1 video into audio area
+		}
+	@endcode
+
+	In the above example...
+	-	On “stacked audio” devices, this will write video into the last audio system’s buffer memory.
+	-	On older “non-stacked audio” devices, this will write video into the first audio system’s buffer memory.
+	-	To notice the corruption, the affected audio system will need to be running (playout and/or capture).
+	-	It’s more likely to be noticed in audio playout, since the output audio buffer starts at the top of the frame.
+	-	Small frame geometries and pixel formats (e.g., 8-bit YUV 525i) are less likely to touch the audio capture
+		buffer that starts 4MB into the frame.
+
+
+	<hr size="50px" />
 	@subsection	audiomixer		Audio Mixer
 
 	Some newer NTV2 devices have firmware that implements a three-multichannel-input <b>Audio Mixer</b>.
@@ -475,5 +606,8 @@
 	-	CNTV2Card::SetAudioMixerMainInputGain
 	-	CNTV2Card::SetAudioMixerAux1InputGain
 	-	CNTV2Card::SetAudioMixerAux2InputGain
+
+
+	@subsection	audioproblems	Audio Corruption
 
 **/
