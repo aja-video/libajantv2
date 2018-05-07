@@ -94,7 +94,7 @@ typedef enum
     DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
     DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
-    DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5						= 0x10798400,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
