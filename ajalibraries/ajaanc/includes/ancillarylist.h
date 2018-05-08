@@ -336,13 +336,13 @@ public:	//	INSTANCE METHODS
 														const AJAAncillaryDataLocation & inLocation);
 
 
-#if !defined(NTV2_DEPRECATE_14_1)
+#if !defined(NTV2_DEPRECATE_14_2)
 	/**
 		@deprecated	Use the 2-parameter version of this function instead.
 	**/
 	virtual NTV2_DEPRECATED_f(AJAStatus		AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
 														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y));
-#endif	//	!defined(NTV2_DEPRECATE_14_1)
+#endif	//	!defined(NTV2_DEPRECATE_14_2)
 
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.

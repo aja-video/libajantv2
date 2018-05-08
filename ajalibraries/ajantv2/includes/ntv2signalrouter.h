@@ -62,9 +62,10 @@ typedef std::multimap <NTV2WidgetID, NTV2InputCrosspointID>	Widget2InputXpts;
 typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
-	@brief	This class is a collection of input-to-output connections that can be applied to an NTV2 device.
+	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by NTV2InputCrosspointID) to a widget's output (specified by NTV2OutputCrosspointID).
 			Call the NTV2 device's ApplySignalRoute function to apply this route to the device.
+	@note	Use of this class is optional, as widget signal routing can always be performed using direct calls to NTV2Card::Connect.
 	@note	This class is not thread-safe.
 	@note	Public access to the NTV2RoutingEntry structs will be deprecated. Please use NTV2InputCrosspointIDs instead.
 **/

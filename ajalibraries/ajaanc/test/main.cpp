@@ -677,7 +677,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts));	//	Should succeed, 1 Y-channel packet
 			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 Y-channel packet
 			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Y));	//	Make a packet list from it
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
 			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
@@ -705,7 +705,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts));	//	Should succeed, 1 C-channel packet
 			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 C-channel packet
 			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 C-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_C));	//	Make a packet list from it
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
 			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
@@ -728,7 +728,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no C-channel-only packets
 			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Both, u16Pkts));	//	Should succeed, 1 Y&C-channel packet
 			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y&C-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), 9, AJAAncillaryDataChannel_Both));	//	Make a packet list from it
+			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
 			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL

@@ -19,11 +19,6 @@
 #define SAREK_3190_TX_PACKETIZER_2              (0x222000/4)
 #define SAREK_3190_TX_PACKETIZER_3              (0x223000/4)
 
-#define SAREK_ANC_TX_PACKETIZER_1               (0x304000/4)
-#define SAREK_ANC_TX_PACKETIZER_2               (0x305000/4)
-#define SAREK_ANC_TX_PACKETIZER_3               (0x306000/4)
-#define SAREK_ANC_TX_PACKETIZER_4               (0x307000/4)
-
 #define SAREK_4175_RX_DEPACKETIZER_1            (0x208000/4)
 #define SAREK_4175_RX_DEPACKETIZER_2            (0x209000/4)
 #define SAREK_4175_RX_DEPACKETIZER_3            (0x20a000/4)

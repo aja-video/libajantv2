@@ -18,7 +18,7 @@ class KonaIP2110Services : public DeviceServices
 	
 public:
 	KonaIP2110Services();
-	~KonaIP2110Services() {}
+    ~KonaIP2110Services();
 	
 	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();

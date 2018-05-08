@@ -12,6 +12,9 @@
 
 	@image	html	hwref-fig0-blockdiagram.png
 
+	In addition, the FPGA firmware implements “widgets“ that can process video data in a particular way
+	(e.g., color correction, muxing/demuxing, etc.).
+
 	All AJA NTV2 hardware devices minimally support the following:
 	-	Capture or play to/from the host computer video and audio through at least one video connector.
 	-	SD video formats: 525i 59.94fps, and 625i 50fps
@@ -231,7 +234,7 @@
 	Multi-channel devices can simultaneously and independently ingest or playout video, and have
 	independent control of which SDRAM frame(s) will be read or writen with video.
 
-	In the SDK, Frame Stores are identified by an NTV2Channel enumeration and sometimes by a zero-based
+	In the SDK, Frame Stores are identified by an \c NTV2Channel enumeration and sometimes by a zero-based
 	unsigned integer value, where zero corresponds to \c NTV2_CHANNEL1 .
 	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
 	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
@@ -608,6 +611,204 @@
 	-	CNTV2Card::SetAudioMixerAux2InputGain
 
 
-	@subsection	audioproblems	Audio Corruption
 
+	<hr size="50px" />
+	@section	widgetsandrouting		Widgets and Signal Routing
+
+	NTV2 device FPGA firmware implements several types of “widgets“ for receiving, processing and transmitting video data.
+	These can be grouped as follows:
+	-	<b>Input Widgets</b>
+		-	\ref widget_sdiin
+		-	\ref widget_hdmiin
+		-	\ref widget_anlgin
+	-	<b>Output Widgets</b>
+		-	\ref widget_sdiout
+		-	\ref widget_hdmiout
+		-	\ref widget_anlgout
+	-	<b>Processing Widgets</b>
+		-	\ref widget_framestore
+		-	\ref widget_csc
+		-	Color Look-Up-Tables (LUTs)
+		-	Mixer/Keyer widgets
+		-	Dual-Link (DL) converters (input & output)
+		-	Two-sample-interleave (Tsi) muxers/demuxers
+		-	4K Down-converters
+		-	DVC Pro converters
+		-	Universal Frequency Converters (UFCs)
+
+	Most widgets typically have associated registers for reporting status and/or controlling their operation.
+	Rather than calling CNTV2Card::ReadRegister or CNTV2Card::WriteRegister, client applications should use the
+	appropriate widget-related API calls in the \c CNTV2Card class to inquire about and/or control the widget of interest.
+
+	All widgets have a unique identifier in software expressed by the \c NTV2WidgetID enumeration.
+	To determine if a device implements a particular widget, call ::NTV2DeviceCanDoWidget.
+
+	Video data paths between widgets are implemented using <b>crosspoints</b> in firmware.
+	-	Widget <b>inputs</b> are identified by \c NTV2InputCrosspointID.
+	-	Widget <b>outputs</b> are identified by \c NTV2OutputCrosspointID.
+	-	<b>Input Widgets</b> only have <b>output</b> crosspoint connections.
+	-	<b>Output Widgets</b> only have <b>input</b> crosspoint connections.
+	-	<b>Processing Widgets</b> have both <b>input</b> and <b>output</b> crosspoint connections.
+
+	The \c CNTV2SignalRouter class has static methods that are useful for inquiring about device widgets and their input and output crosspoints:
+	-	CNTV2SignalRouter::GetWidgetIDs answers with an \c NTV2WidgetIDSet of all widgets supported by a given device.
+	-	CNTV2SignalRouter::GetWidgetForInput reports the widget (\c NTV2WidgetID) that’s associated with a given \c NTV2InputCrosspointID.
+	-	CNTV2SignalRouter::GetWidgetForOutput reports the widget (\c NTV2WidgetID) associated with a given \c NTV2OutputCrosspointID.
+	-	CNTV2SignalRouter::GetWidgetInputs reports all input crosspoints for a given widget.
+	-	CNTV2SignalRouter::GetWidgetOutputs reports all output crosspoints for a given widget.
+
+	A set of “crosspoint select” registers (e.g., \c kRegXptSelectGroup1, \c kRegXptSelectGroup2, etc.) determine which widget output
+	will feed (source) each widget’s input.
+
+	@note	A widget’s output can source multiple widgets’ inputs,
+			while a widget’s input can only be sourced by one other widget’s output.
+			In other words, widget outputs are one-to-many, while widget inputs are one-to-one.
+
+	@note	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented.
+
+	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
+	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
+
+	Historically, there was no programmatic way in NTV2 to determine at runtime if a device implemented a specific connection path.
+	Starting in SDK 14.0, AJA finally implemented a program that inspects the FPGA source code to compile a static “implemented routes”
+	table that’s queried by the CNTV2Card::CanConnect function. These tables are correct and complete for firmware versions used
+	at the time of the SDK release. However, subsequent firmware updates may add or remove interconnect routes that would not be
+	reflected in the tables used by the SDK. We intend to improve this process going forward.
+
+
+	@subsection	widget_sdiin	SDI Input
+
+	An SDI Input widget represents a physical SDI input connector.
+	-	There is one of these widgets for each input SDI connector (e.g. \c NTV2_WgtSDIIn1, \c NTV2_WgtSDIIn2, …).
+	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
+		there will be one of these widgets for each <i>potential</i> SDI input connector.
+	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI input widgets — \c NTV2_WgtSDIIn1, \c NTV2_WgtSDIIn2, etc.
+	-	Devices that support 3Gbps SDI have “3G” SDI input widgets — \c NTV2_Wgt3GSDIIn1, \c NTV2_Wgt3GSDIIn2, etc.
+	-	Devices that support 6Gbps or higher SDI have “12G” SDI input widgets — \c NTV2_Wgt12GSDIIn1, \c NTV2_Wgt12GSDIIn2, etc.
+	-	3Gbps SDI inputs have two output crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
+		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used \c NTV2_WgtSDIIn2 for DS1 and \c NTV2_WgtSDIIn2 for DS2.
+	-	To obtain its \c NTV2OutputCrosspointID…
+		-	Call ::GetSDIInputOutputXptFromChannel…
+			-	Specify the SDI input connector by \c NTV2Channel (e.g., use NTV2_CHANNEL3 for SDI In 3).
+			-	For the 2nd dual-link stream in dual-link applications, specify \c true for \c inIsDS2.
+		-	Call ::GetInputSourceOutputXpt…
+			-	Specify the SDI input by passing it \c NTV2_INPUTSOURCE_SDI1, \c NTV2_INPUTSOURCE_SDI2, …etc.
+			-	For the 2nd dual-link stream in dual-link applications, specify \c true for \c inIsSDI_DS2.
+
+
+	@subsection	widget_hdmiin	HDMI Input
+
+	An HDMI Input widget represents a physical HDMI input connector.
+	-	There is one of these widgets for each input HDMI connector.
+	-	Older devices with our 1st-generation HDMI chip use \c NTV2_WgtSDIHDMIIn1.
+	-	Devices that support our 2nd-generation HDMI chip use \c NTV2_WgtHDMIIn1v2.
+	-	Devices that support our 3rd-generation HDMI chip use \c NTV2_WgtHDMIIn1v3.
+	-	Devices that support our 4th-generation HDMI chip use \c NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
+	-	To obtain its \c NTV2OutputCrosspointID…
+		-	Call ::GetInputSourceOutputXpt…
+			-	Specify which HDMI input by passing it \c NTV2_INPUTSOURCE_HDMI1, \c NTV2_INPUTSOURCE_HDMI2, …etc.
+			-	For 4K/UHD applications, specify the appropriate quadrant number 0, 1, 2 or 3 in the \c inHDMI_Quadrant
+				parameter.
+			-	For the RGB output crosspoint instead of the default YUV one (4th-generation HDMI only), pass \c true
+				for the \c inIsHDMI_RGB parameter.
+
+
+	@subsection	widget_anlgin	Analog Video Input
+
+	An Analog Video Input widget represents a physical analog video input connector (typically RCA connectors labeled Y/G/CVBS,
+	Pb/B/Y and Pr/R/C RCA connectors).
+	-	There is one of these widgets for devices that support analog video input — \c NTV2_WgtAnalogIn1.
+	-	To obtain its \c NTV2OutputCrosspointID…
+		-	Use \c NTV2_XptAnalogIn
+		-	Call ::GetInputSourceOutputXpt with \c NTV2_INPUTSOURCE_ANALOG1.
+
+
+	@subsection	widget_sdiout	SDI Output
+
+	An SDI Output widget represents one of the device’s physical SDI output connectors.
+	-	There is one of these widgets for each output SDI connector (e.g. \c NTV2_WgtSDIOut1, \c NTV2_WgtSDIOut2, …).
+	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
+		there will be one of these widgets for each <i>potential</i> SDI output connector.
+	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI output widgets — \c NTV2_WgtSDIOut1, \c NTV2_WgtSDIOut2, etc.
+	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — \c NTV2_Wgt3GSDIOut1, \c NTV2_Wgt3GSDIOut2, etc.
+	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — \c NTV2_Wgt12GSDIOut1, \c NTV2_Wgt12GSDIOut2, etc.
+	-	3Gbps SDI outputs have two input crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
+	-	To obtain its \c NTV2InputCrosspointID…
+		-	Call ::GetSDIOutputInputXpt…
+			-	Specify the SDI output connector by \c NTV2Channel (e.g. use \c NTV2_CHANNEL3 for SDI Out 3);
+			-	For dual-link applications, pass \c true for \c inIsDS2 for the 2nd dual-link stream.
+		-	Call ::GetOutputDestInputXpt…
+			-	Specify the SDI output connector using \c NTV2_OUTPUTDESTINATION_SDI1, \c NTV2_OUTPUTDESTINATION_SDI2, … etc.
+			-	For dual-link applications, pass \c true for \c inIsSDI_DS2 for the 2nd dual-link stream.
+
+
+	@subsection	widget_hdmiout	HDMI Output
+
+	An HDMI Output widget represents a physical HDMI output connector.
+	-	There is one of these widgets for the output HDMI connector — \c NTV2_WgtHDMIOut1.
+	-	Older devices use \c NTV2_WgtHDMIOut1.
+	-	Devices that support our 2nd-generation HDMI chip use \c NTV2_WgtHDMIOut1v2.
+	-	Devices that support our 3rd-generation HDMI chip use \c NTV2_WgtHDMIOut1v3.
+	-	Devices that support our 4th-generation HDMI chip use \c NTV2_WgtHDMIOut1v4.
+	-	To obtain its output crosspoint(s)…
+		-	Call ::GetOutputDestInputXpt, passing it \c NTV2_OUTPUTDESTINATION_HDMI.
+			For 4K/UHD quadrants, you can specify a quadrant number (0, 1, 2 or 3).
+
+
+	@subsection	widget_anlgout	Analog Video Output
+
+	An Analog Video Output widget represents a physical analog video output connector (typically RCA connectors labeled Y/G/CVBS,
+	Pb/B/Y and Pr/R/C RCA connectors).
+	-	There is one of these widgets for devices that support analog video output — \c NTV2_WgtAnalogOut1.
+	-	To obtain its \c NTV2InputCrosspointID…
+		-	Use \c NTV2_XptAnalogOut
+		-	Call ::GetOutputDestInputXpt with \c NTV2_OUTPUTDESTINATION_ANALOG.
+
+
+	@subsection	widget_framestore	Frame Stores
+
+	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
+	See \ref vidop-fs for its operational details.
+	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
+	-	Frame Store widgets are identified by \c NTV2_WgtFrameBuffer1, \c NTV2_WgtFrameBuffer2, etc.
+	-	In <b>Capture Mode</b>…
+		-	The normal (“Level A”) input crosspoint is available and should be used for most applications.
+		-	There is a “Level B” input crosspoint that is available for dual-link applications.
+		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s \c NTV2InputCrosspointID…
+			-	Specify the Frame Store of interest by \c NTV2Channel (i.e., \c NTV2_CHANNEL1, \c NTV2_CHANNEL2, …etc.).
+			-	Specify \c true for \c inIsBInput for the “Level B” input crosspoint.
+	-	In <b>Playout Mode</b>…
+		-	If the Frame Store is configured for SD, HD, or 4K/UHD Quads/Squares (i.e. non-Tsi) mode:
+			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr \c NTV2FrameBufferFormat.
+			-	Use the <b>RGB</b> output crosspoint when the FrameStore is using an RGB \c NTV2FrameBufferFormat.
+		-	If the Frame Store is configured for 4K/UHD Tsi (SMPTE 425 two-sample-interleave) mode:
+			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr \c NTV2FrameBufferFormat.
+			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB \c NTV2FrameBufferFormat.
+		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s \c NTV2OutputCrosspointID…
+			-	Specify the Frame Store of interest by \c NTV2Channel (i.e., \c NTV2_CHANNEL1, \c NTV2_CHANNEL2, …etc.).
+			-	If the Frame Store’s \c NTV2FrameBufferFormat is an RGB format, pass \c true for \c inIsRGB.
+			-	If the Frame Store is configured for 4K/UHD and for two-sample-interleave, pass \c true for \c inIs425.
+
+
+	@subsection	widget_csc	ColorSpace Converters (CSCs)
+
+	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
+	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
+	-	CSC widgets are identified by \c NTV2_WgtCSC1, \c NTV2_WgtCSC2, etc.
+	-	Each CSC has two input crosspoints:
+		-	Video Input:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
+			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data on its RGBA output crosspoint.
+			-	RGB[A] video, then the CSC will produce valid YCbCr data on its YUV output crosspoint.
+		-	Key Input:  This supplies the alpha channel data for the CSC’s RGBA output.
+		-	Call ::GetCSCInputXptFromChannel to obtain the \c NTV2InputCrosspointID for a CSC:
+			-	Specify the CSC by \c NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
+			-	To get the alpha/key input crosspoint, pass \c true for \c inIsKeyInput.
+	-	Each CSC has 3 output crosspoints:
+		-	YUV Video:  This will only produce valid YCbCr video data when the CSC’s Video Input is receiving RGB[A] video data.
+		-	RGB Video:	This will only produce valid RGB[A] video data when the CSC’s Video Input is receiving YCbCr video data.
+		-	Key YUV:  This will only produce valid YCbCr key data when the CSC’s Video Input is receiving RGB[A] video data.
+		-	Call ::GetCSCOutputXptFromChannel to obtain one of the CSC’s \c NTV2OutputCrosspointID values:
+			-	Specify the CSC by \c NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
+			-	For key output, pass \c true for \c inIsKey.
+			-	For RGB output, pass \c true for \c inIsRGB.
 **/

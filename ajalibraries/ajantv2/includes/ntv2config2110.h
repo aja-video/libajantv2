@@ -316,7 +316,6 @@ public:
 
     static uint32_t v_packetizers[4];
     static uint32_t a_packetizers[4];
-    static uint32_t m_packetizers[4];
     static uint32_t v_depacketizers[4];
     static uint32_t a_depacketizers[4];
 
