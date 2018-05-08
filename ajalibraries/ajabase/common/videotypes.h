@@ -152,6 +152,7 @@ enum AJA_PixelFormat
             AJA_PixelFormat_RFC4175_1080p,
             AJA_PixelFormat_RFC4175_525i30,
             AJA_PixelFormat_RFC4175_625i25,
+            AJA_PixelFormat_RFC4175_2160p,
 
             AJA_PixelFormat_RGB10_3DLUT,
 	AJA_PixelFormat_Size
