@@ -423,7 +423,7 @@ void NTV2EncodeHEVCVif::SetupHostBuffers (void)
     mEncInfoBufferSize = sizeof(HevcEncodedInfo)*2;
     mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
 	mOverlayBufferSize = GetVideoActiveSize(mVideoFormat, mOverlayPixelFormat, NTV2_VANCMODE_OFF) * 4;
-	NTV2FormatDescriptor overlayD = GetFormatDescriptor(mVideoFormat, mOverlayPixelFormat);
+	NTV2FormatDescriptor overlayD (mVideoFormat, mOverlayPixelFormat);
 	
 	// audio/video input ring
     mACInputCircularBuffer.SetAbortFlag (&mGlobalQuit);

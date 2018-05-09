@@ -937,7 +937,7 @@ void NTV2CCGrabber::PlayFrames (void)
 				fbNum = acStatus.acStartFrame;	//	Use them
 	}
 
-	const NTV2FormatDescriptor	formatDesc		(::GetFormatDescriptor (videoFormat, mPlayoutFBF, vancMode));
+	const NTV2FormatDescriptor	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
 	const ULWord				bytesPerRow		(formatDesc.GetBytesPerRow ());
 	const uint32_t				bufferSizeBytes	(formatDesc.GetTotalRasterBytes ());
 	const uint32_t				activeSizeBytes	(formatDesc.GetVisibleRasterBytes ());
