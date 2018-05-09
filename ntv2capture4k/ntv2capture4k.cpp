@@ -40,8 +40,6 @@ NTV2Capture4K::NTV2Capture4K (const string					inDeviceSpecifier,
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat		(pixelFormat),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
-		mVancEnabled		(false),
-		mWideVanc			(false),
 		mAudioSystem		(NTV2_AUDIOSYSTEM_1),
 		mDoLevelConversion	(inLevelConversion),
 		mDoMultiFormat		(inDoMultiFormat),
@@ -346,9 +344,7 @@ void NTV2Capture4K::SetupHostBuffers (void)
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	mVancEnabled = false;
-	mWideVanc = false;
-	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancEnabled, mWideVanc);
+	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat);
 	printf("video size = %d\n", mVideoBufferSize);
 	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
 	mAncBufferSize = NTV2_ANCSIZE_MAX;

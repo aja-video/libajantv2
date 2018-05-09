@@ -160,8 +160,6 @@ class NTV2Capture4K
 		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
-		bool						mVancEnabled;			///< @brief	VANC enabled?
-		bool						mWideVanc;				///< @brief	Wide VANC?
 		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
 		bool						mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
 		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
