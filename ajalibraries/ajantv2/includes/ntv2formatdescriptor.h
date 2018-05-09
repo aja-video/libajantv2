@@ -265,12 +265,12 @@ public:
 	inline NTV2VideoFormat			GetVideoFormat (void) const		{return mVideoFormat;}						///< @return	The video format I was created with.
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
 	inline NTV2VANCMode				GetVANCMode (void) const		{return mVancMode;}							///< @return	The VANC mode I was created with.
-	inline bool						Is2KFormat (void) const			{return m2Kby1080;}							///< @return	True if I was created with a 2Kx1080 video format.
 	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());}	///< @return	True if I was created with an SD video format or standard.
 	inline bool						IsQuadRaster (void) const		{return NTV2_IS_QUAD_STANDARD(mStandard) || NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat);}	///< @return	True if I was created with a 4K/UHD video format or standard.
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
 	inline NTV2FrameGeometry		GetFrameGeometry (void) const	{return mFrameGeometry;}					///< @return	The frame geometry I was created with.
+	bool							Is2KFormat (void) const;		///< @return	True if I was created with a 2Kx1080 video format.
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:
@@ -287,7 +287,6 @@ public:
 		NTV2VideoFormat			mVideoFormat;		///< @brief	My originating video format (if known)
 		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
 		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
-		bool					m2Kby1080;			///< @brief	My originating 2Kx1080 setting
 		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
 		UWord					mNumPlanes;			///< @brief	Number of planes
 		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
@@ -304,27 +303,18 @@ public:
 AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2FormatDescriptor & inFormatDesc)	{return inFormatDesc.Print (inOutStream);}
 
 
-//#if !defined (NTV2_DEPRECATE_12_6)
+#if !defined (NTV2_DEPRECATE_13_0)
 	AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2Standard			inVideoStandard,
 														const NTV2FrameBufferFormat	inFrameBufferFormat,
 														const bool					inVANCenabled	= false,
 														const bool					in2Kby1080		= false,
 														const bool					inWideVANC		= false);
-//#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
-
-/**
-	@brief		Returns a format descriptor that describes a video frame having the given video format and pixel format.
-	@param[in]	inVideoFormat			Specifies the video format being used.
-	@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-	@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
-	@param[in]	inWideVANC				Specifies if "wide VANC" is enabled or not. Defaults to false.
-	@return		A format descriptor that describes a video frame having the given video standard and pixel format.
-**/
 AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVideoFormat,
 													 const NTV2FrameBufferFormat	inFrameBufferFormat,
 													 const bool						inVANCenabled	= false,
 													 const bool						inWideVANC		= false);
+#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
 /**
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
