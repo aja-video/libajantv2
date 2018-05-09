@@ -73,12 +73,12 @@
 	"transmitVideo2110":
 	[
 		{
-		    "designator":"channel1",
+		    "designator":"channel3",
             "sfp1LocalPort":5000,
-            "sfp1RemoteIPAddress":"239.20.45.0",
+            "sfp1RemoteIPAddress":"239.20.45.1",
             "sfp1RemotePort":6000,
             "sfp2LocalPort":5100,
-            "sfp2RemoteIPAddress":"239.20.45.100",
+            "sfp2RemoteIPAddress":"239.20.45.101",
             "sfp2RemotePort":6100,
             "videoFormat":"1080p5994",
             "payload":96,
@@ -92,13 +92,13 @@
 	"transmitAudio2110":
 	[
 		{
-		    "designator":"channel1",
-            "stream":"audio1",
+		    "designator":"channel3",
+            "stream":"audio3",
             "sfp1LocalPort":5000,
-            "sfp1RemoteIPAddress":"239.30.45.0",
+            "sfp1RemoteIPAddress":"239.30.45.1",
             "sfp1RemotePort":6000,
             "sfp2LocalPort":5100,
-            "sfp2RemoteIPAddress":"239.30.45.100",
+            "sfp2RemoteIPAddress":"239.30.45.101",
             "sfp2RemotePort":6100,
             "payload":100,
             "ssrc":1000,
