@@ -47,13 +47,13 @@ public:
 		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
 		@param[in]	inVideoStandard			Specifies the video standard being used.
 		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-		@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
+		@param[in]	inVANCenabled			Specifies if VANC is enabled or not.
 		@param[in]	in2Kby1080				Specifies if a 2K format is in use or not. Defaults to false.
 		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2Standard			inVideoStandard,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled	= false,
+											const bool					inVANCenabled,
 											const bool					in2Kby1080		= false,
 											const bool					inWideVANC		= false);
 
@@ -61,12 +61,12 @@ public:
 		@brief		Constructs me from the given video format, pixel format and VANC settings.
 		@param[in]	inVideoFormat			Specifies the video format being used.
 		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-		@param[in]	inVANCenabled			Specifies if VANC is enabled or not. Defaults to false.
+		@param[in]	inVANCenabled			Specifies if VANC is enabled or not.
 		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled	= false,
+											const bool					inVANCenabled,
 											const bool					inWideVANC		= false);
 #endif	//	!defined (NTV2_DEPRECATE_13_0)
 
@@ -88,11 +88,7 @@ public:
 	**/
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const NTV2VANCMode			inVancMode
-#if defined (NTV2_DEPRECATE_13_0)
-											= NTV2_VANCMODE_OFF
-#endif	//	NTV2_DEPRECATE_13_0
-											);
+											const NTV2VANCMode			inVancMode	= NTV2_VANCMODE_OFF);
 
 	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
 	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.

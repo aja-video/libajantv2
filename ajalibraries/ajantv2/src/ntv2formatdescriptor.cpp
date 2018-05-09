@@ -633,6 +633,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 												const bool					in2Kby1080,
 												const bool					inWideVANC)
 	{
+		(void) in2Kby1080;
 		MakeInvalid ();
 		if (!NTV2_IS_VALID_STANDARD (inVideoStandard))
 			return;	//	bad standard
