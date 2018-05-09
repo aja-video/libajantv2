@@ -775,23 +775,48 @@ void Make10BitLine(UWord* lineData, UWord Y , UWord Cb , UWord Cr,UWord numPixel
 	}
 }
 
-void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-							 NTV2Standard standard,
-							 NTV2FrameBufferFormat frameBufferFormat,
-							 YCbCr10BitPixel color,
-							 bool vancEnabled,
-							 bool twoKby1080,
-							 bool wideVANC)
-{
-	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
-	UWord lineBuffer[2048*2];
-	Make10BitLine(lineBuffer,color.y,color.cb,color.cr,fd.numPixels);
-	for ( UWord i= 0; i<fd.numLines; i++)
+#if !defined(NTV2_DEPRECATE_13_0)
+	void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
+								 const NTV2Standard standard,
+								 const NTV2FrameBufferFormat frameBufferFormat,
+								 const YCbCr10BitPixel color,
+								 const bool vancEnabled,
+								 const bool twoKby1080,
+								 const bool wideVANC)
 	{
-		::PackLine_16BitYUVto10BitYUV(lineBuffer,_baseVideoAddress,fd.numPixels);
-		_baseVideoAddress += fd.linePitch;
+		NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+		UWord lineBuffer[2048*2];
+		Make10BitLine(lineBuffer,color.y,color.cb,color.cr,fd.numPixels);
+		for ( UWord i= 0; i<fd.numLines; i++)
+		{
+			::PackLine_16BitYUVto10BitYUV(lineBuffer,_baseVideoAddress,fd.numPixels);
+			_baseVideoAddress += fd.linePitch;
+		}
 	}
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+
+bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
+								const NTV2Standard inStandard,
+								const NTV2FrameBufferFormat inFBF,
+								const YCbCr10BitPixel inPixelColor,
+								const NTV2VANCMode inVancMode)
+{
+	if (!pBaseVideoAddress)
+		return false;
+
+	const NTV2FormatDescriptor fd (inStandard, inFBF, inVancMode);
+	UWord		lineBuffer[2048*2];
+	ULWord *	pBaseAddress	(reinterpret_cast<ULWord*>(pBaseVideoAddress));
+	Make10BitLine (lineBuffer, inPixelColor.y, inPixelColor.cb, inPixelColor.cr, fd.numPixels);
+
+	for (UWord lineNdx(0);  lineNdx < fd.numLines;  lineNdx++)
+	{
+		::PackLine_16BitYUVto10BitYUV (lineBuffer, pBaseAddress, fd.numPixels);
+		pBaseAddress += fd.linePitch;
+	}
+	return true;
 }
+
 
 void Make8BitBlackLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbFormat)
 {
@@ -866,21 +891,40 @@ void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixel
 	}
 }
 
-void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-							 NTV2Standard standard,
-							 NTV2FrameBufferFormat frameBufferFormat,
-							 YCbCrPixel color,
-							 bool vancEnabled,
-							 bool twoKby1080,
-							 bool wideVANC)
-{
-	NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
-
-	for ( UWord i= 0; i<fd.numLines; i++)
+#if !defined(NTV2_DEPRECATE_13_0)
+	void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
+								 NTV2Standard standard,
+								 NTV2FrameBufferFormat frameBufferFormat,
+								 YCbCrPixel color,
+								 bool vancEnabled,
+								 bool twoKby1080,
+								 bool wideVANC)
 	{
-		Make8BitLine((UByte*)_baseVideoAddress,color.y,color.cb,color.cr,fd.numPixels,frameBufferFormat);
-		_baseVideoAddress += fd.linePitch;
+		NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
+	
+		for ( UWord i= 0; i<fd.numLines; i++)
+		{
+			Make8BitLine((UByte*)_baseVideoAddress,color.y,color.cb,color.cr,fd.numPixels,frameBufferFormat);
+			_baseVideoAddress += fd.linePitch;
+		}
 	}
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+
+bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
+								const YCbCrPixel inPixelColor,  const NTV2VANCMode inVancMode)
+{
+	if (!pBaseVideoAddress)
+		return false;
+
+	const NTV2FormatDescriptor fd (inStandard, inFBF, inVancMode);
+	UByte *		pBaseAddress	(reinterpret_cast<UByte*>(pBaseVideoAddress));
+
+	for (UWord lineNdx(0);  lineNdx < fd.numLines;  lineNdx++)
+	{
+		Make8BitLine (pBaseAddress, inPixelColor.y, inPixelColor.cb, inPixelColor.cr, fd.numPixels, inFBF);
+		pBaseAddress += fd.GetBytesPerRow();
+	}
+	return true;
 }
 
 void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,

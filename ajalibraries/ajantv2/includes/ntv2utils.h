@@ -155,24 +155,30 @@ AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixe
 AJAExport void Make10BitBlackLine (UWord * pLineData, const UWord inNumPixels = 1920);
 
 AJAExport void Make10BitWhiteLine(UWord* lineData,UWord numPixels=1920);
-AJAExport void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-										NTV2Standard standard,
-										NTV2FrameBufferFormat frameBufferFormat,
-										YCbCr10BitPixel color,
-										bool vancEnabled=false,
-										bool twoKby1080=false,
-							 bool wideVANC=false);
+#if !defined(NTV2_DEPRECATE_13_0)
+	AJAExport void Fill10BitYCbCrVideoFrame (PULWord _baseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inPixelFormat,
+											const YCbCr10BitPixel inPixelColor,
+											const bool inVancEnabled = false,  const bool in2Kx1080 = false,  const bool inWideVANC = false);
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+/**
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
+										 const NTV2Standard inStandard,
+										 const NTV2FrameBufferFormat inPixelFormat,
+										 const YCbCr10BitPixel inPixelColor,
+										 const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
+
 AJAExport void Make8BitBlackLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make8BitWhiteLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make10BitLine(UWord* lineData, UWord Y , UWord Cb , UWord Cr,UWord numPixels=1920);
 AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
-AJAExport void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-									   NTV2Standard standard,
-									   NTV2FrameBufferFormat frameBufferFormat,
-									   YCbCrPixel color,
-									   bool vancEnabled=false,
-									   bool twoKby1080=false,
-									   bool wideVANC=false);
+#if !defined(NTV2_DEPRECATE_13_0)
+	AJAExport void Fill8BitYCbCrVideoFrame (PULWord _baseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,  const YCbCrPixel inPixelColor,
+											const bool inVancEnabled = false,  const bool in2Kx1080 = false,  const bool inWideVanc = false);
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+AJAExport bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
+										const YCbCrPixel inPixelColor,  const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 AJAExport void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 									   NTV2FrameBufferFormat frameBufferFormat,
 									   YCbCrPixel color,
