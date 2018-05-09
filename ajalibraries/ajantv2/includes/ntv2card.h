@@ -5183,8 +5183,10 @@ public:
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
 #endif
 
+#if !defined(NTV2_DEPRECATE_13_0)
 	//LocalLoadTestPattern allows the generator to build the pattern independent of global controls to generate independent formats when inconverter is on.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));		///< Originally in CNTV2TestPattern.
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 	protected:	//	CNTV2TestPattern Data
 		void													InitNTV2TestPattern (void);														///< Originally in CNTV2TestPattern.

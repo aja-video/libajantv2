@@ -368,7 +368,7 @@ bool CNTV2RP215Decoder::Locate()
 {
 	bool found = false;
 
-	NTV2FormatDescriptor fd = GetFormatDescriptor(_videoFormat,_fbFormat,NTV2_VANCMODE_OFF);
+	NTV2FormatDescriptor fd (_videoFormat,_fbFormat);
 	UWord* rp215Linebuffer = new UWord[fd.numPixels*2];
 	switch (_fbFormat )
 	{

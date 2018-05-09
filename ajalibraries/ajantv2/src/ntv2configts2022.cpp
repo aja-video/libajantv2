@@ -230,7 +230,7 @@ bool CNTV2ConfigTs2022::SetupJ2KForEncode(const NTV2Channel channel)
 
     // Calculate height and width based on video format
     NTV2Standard standard = GetNTV2StandardFromVideoFormat(videoFormat);
-    NTV2FormatDescriptor fd = GetFormatDescriptor(standard,NTV2_FBF_10BIT_YCBCR,false,false,false);
+    NTV2FormatDescriptor fd (standard, NTV2_FBF_10BIT_YCBCR);
     uint32_t    width = fd.GetRasterWidth();
     uint32_t    height = fd.GetVisibleRasterHeight();
 
@@ -782,7 +782,7 @@ void CNTV2ConfigTs2022::GenerateTableForMpegJ2kEncap(const NTV2Channel channel)
 
     // Calculate height and width based on video format
     NTV2Standard standard = GetNTV2StandardFromVideoFormat(videoFormat);
-    NTV2FormatDescriptor fd = GetFormatDescriptor(standard,NTV2_FBF_10BIT_YCBCR,false,false,false);
+    NTV2FormatDescriptor fd (standard, NTV2_FBF_10BIT_YCBCR);
     streamData.width = fd.GetRasterWidth();
     streamData.height = fd.GetVisibleRasterHeight();
 

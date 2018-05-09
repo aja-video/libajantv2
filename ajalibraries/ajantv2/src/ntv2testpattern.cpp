@@ -2167,6 +2167,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPattern(char* testPatternName )
 
 }
 
+#if !defined(NTV2_DEPRECATE_13_0)
 void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, NTV2Standard standard)
 {
 	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[testPatternNumber];
@@ -2183,13 +2184,8 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	::Make10BitBlackLine(unPackedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 	::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 
-	bool twoKby1080 = false;
-	bool vancEnabled =  false;
-	bool wideVANCSet = false;
-	NTV2FrameBufferFormat 	fbFormat = NTV2_FBF_10BIT_YCBCR; //always NTV2_FBF_10BIT_YCBCR				= 0,
-
-	//GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard, fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	const NTV2FrameBufferFormat fbFormat (NTV2_FBF_10BIT_YCBCR);
+	const NTV2FormatDescriptor	formatDescriptor (standard, fbFormat);
 
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
@@ -2291,6 +2287,7 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	}
 
 }
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatternSegmentData )
 {
@@ -2305,15 +2302,11 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
 
 
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -2569,13 +2562,9 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -2720,19 +2709,15 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
 
 	ULWord linePitch;
 	ULWord numPixels;
 	UWord   numLines;
 	UWord Y,Cb,Cr;
 	
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	numPixels = formatDescriptor.numPixels;
 	linePitch = formatDescriptor.linePitch;
 	numLines = formatDescriptor.numLines;
@@ -2748,7 +2733,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 
 
 // Kludge for now.....
-	if ( twoKby1080 )
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -2898,15 +2883,9 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -3006,22 +2985,16 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3156,21 +3129,16 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3351,21 +3319,16 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	GetStandard(&standard);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3539,7 +3502,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 		// Transfer the test pattern into the active area of the frame buffer
 		NTV2Standard standard;
 		GetStandard(&standard, _channel);
-		NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,false,false,false);
+		NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 
 		ULWord totalHeight = formatDescriptor.numLines;
 		if ( fg == NTV2_FG_1920x1112 )
@@ -3578,18 +3541,16 @@ ULWord CNTV2TESTPATTERNCLASS::GetPatternBufferSize(ULWord *width, ULWord *height
 	GetStandard(&standard, _channel);
 	NTV2FrameGeometry fg;
 	GetFrameGeometry(&fg, _channel);
-	bool twoKby1080 = false;
+	bool twoKby1080 = NTV2_IS_2K_1080_FRAME_GEOMETRY(fg);
 	bool fourKby2160 = false;
 	bool quadKby2160 = false;
-	if ( fg == NTV2_FG_2048x1080 || fg == NTV2_FG_2048x1112 || fg == NTV2_FG_2048x1114 )
-		twoKby1080 = true;
 	if ( fg == NTV2_FG_4x1920x1080 )
 		quadKby2160 = true;
 	if ( fg == NTV2_FG_4x2048x1080 )
 		fourKby2160 = true;
 
 	// Ignore VANC and just use the size of the active area
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,false,false,false);
+	NTV2FormatDescriptor formatDescriptor (standard,_fbFormat);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -3973,7 +3934,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 		// get current frame buffer size
 	NTV2Standard standard;
 	GetStandard(&standard);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard, _fbFormat);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;		// note: linePitch is in ULWords, not bytes!
 	ULWord numLines  = formatDescriptor.numLines;
