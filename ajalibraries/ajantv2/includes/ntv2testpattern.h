@@ -88,8 +88,7 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(void					DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));
 #endif
 #if !defined(NTV2_DEPRECATE_13_0)
-	//LocalLoadTestPattern allows the generator to build the pattern independent of global controls to generate independent formats when inconverter is on.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(void					LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void					LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 protected:   // Methods

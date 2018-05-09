@@ -89,10 +89,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IOEXPRESS:
 			pDeviceServices = new IoExpressServices();
 			break;
-		case DEVICE_ID_LHI:
+		case DEVICE_ID_KONALHI:
 			pDeviceServices = new KonaLHiServices();
 			break;
-		case DEVICE_ID_LHE_PLUS:
+		case DEVICE_ID_KONALHEPLUS:
 			pDeviceServices = new KonaLHePlusServices();
 			break;
 		case DEVICE_ID_IOXT:
@@ -3016,11 +3016,11 @@ void DeviceServices::SetDeviceXPointCapture()
 			case NTV2_Input2Select:
 				switch(mDeviceID)
 				{
-				case DEVICE_ID_LHI:
+				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOEXPRESS:
 					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 					break;
-				case DEVICE_ID_LHE_PLUS:
+				case DEVICE_ID_KONALHEPLUS:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 					break;
 				case DEVICE_ID_KONAHDMI:
@@ -3034,7 +3034,7 @@ void DeviceServices::SetDeviceXPointCapture()
 				{
 					switch(mDeviceID)
 					{
-					case DEVICE_ID_LHI:
+					case DEVICE_ID_KONALHI:
 						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 						break;
 					case DEVICE_ID_KONAHDMI:
@@ -3214,11 +3214,11 @@ void DeviceServices::SetDeviceXPointPlayback()
                     case NTV2_Input2Select:
                         switch(mDeviceID)
                         {
-                        case DEVICE_ID_LHI:
+                        case DEVICE_ID_KONALHI:
                         case DEVICE_ID_IOEXPRESS:
                             mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
                             break;
-                        case DEVICE_ID_LHE_PLUS:
+                        case DEVICE_ID_KONALHEPLUS:
                             mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
                             break;
                         default:
@@ -3234,7 +3234,7 @@ void DeviceServices::SetDeviceXPointPlayback()
                         case DEVICE_ID_IO4KUFC:
                             mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
                             break;
-                        case DEVICE_ID_LHI:
+                        case DEVICE_ID_KONALHI:
                             mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
                             break;
                         }

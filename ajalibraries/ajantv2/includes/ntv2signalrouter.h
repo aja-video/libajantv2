@@ -456,149 +456,149 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2Sig
 	AJAExport NTV2_DEPRECATED_f(std::ostream & operator << (std::ostream & inOutStream, const NTV2RoutingTable & inObj));
 
 	//	Per-widget input crosspoint selection register/mask/shift values
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8BInputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7KeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8VidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8KeyInputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT4InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT5InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT6InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT7InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT8InputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1StandardSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2StandardSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3StandardSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4StandardSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputDS2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputDS2SelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7DSInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8DSInputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut4InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut5InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut6InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut7InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut8InputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGVidInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGKeyInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGVidInputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ4InputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ3InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ4InputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1AInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2AInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3AInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3BInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4AInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4BInputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutCompositeOutSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoLeftInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoRightInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetProAmpInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker1InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetUpdateRegisterSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionMod2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCompressionModInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionModInputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyFromInput2SelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync2InputSelectEntry (void));
-	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync1InputSelectEntry (void));
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT2InputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutCompositeOutSelectEntry(void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoLeftInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoRightInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetProAmpInputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT1InputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetUpdateRegisterSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionMod2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCompressionModInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionModInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyFromInput2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
 #endif	//	!defined (NTV2_DEPRECATE_12_5)
 
 

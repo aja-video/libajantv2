@@ -43,31 +43,16 @@ public:
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
 #if !defined (NTV2_DEPRECATE_13_0)
-	/**
-		@brief		Constructs me from the given video standard, pixel format, whether or not a 2K format is in use, and VANC settings.
-		@param[in]	inVideoStandard			Specifies the video standard being used.
-		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-		@param[in]	inVANCenabled			Specifies if VANC is enabled or not.
-		@param[in]	in2Kby1080				Specifies if a 2K format is in use or not. Defaults to false.
-		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
-	**/
-	explicit		NTV2FormatDescriptor (	const NTV2Standard			inVideoStandard,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					in2Kby1080		= false,
-											const bool					inWideVANC		= false);
+	explicit	NTV2_DEPRECATED_f(NTV2FormatDescriptor (const NTV2Standard inVideoStandard,
+														const NTV2FrameBufferFormat inFrameBufferFormat,
+														const bool inVANCenabled,
+														const bool in2Kby1080 = false,
+														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an \c NTV2VANCMode parameter instead.
 
-	/**
-		@brief		Constructs me from the given video format, pixel format and VANC settings.
-		@param[in]	inVideoFormat			Specifies the video format being used.
-		@param[in]	inFrameBufferFormat		Specifies the pixel format of the frame buffer.
-		@param[in]	inVANCenabled			Specifies if VANC is enabled or not.
-		@param[in]	inWideVANC				Specifies if "taller VANC" is enabled or not. Defaults to false.
-	**/
-	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					inWideVANC		= false);
+	explicit	NTV2_DEPRECATED_f(NTV2FormatDescriptor (const NTV2VideoFormat inVideoFormat,
+														const NTV2FrameBufferFormat inFrameBufferFormat,
+														const bool inVANCenabled,
+														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an \c NTV2VANCMode parameter instead.
 #endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**

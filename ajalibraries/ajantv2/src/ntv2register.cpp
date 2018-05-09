@@ -5587,7 +5587,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 			{
 				//This is a hack, LHI does not have a second input
-				if ((_boardID == DEVICE_ID_LHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+				if ((_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 				{
 					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 						((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5595,7 +5595,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 						(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 						inIsProgressivePicture);												//progressive picture
 				}
-				else if (_boardID != DEVICE_ID_LHI || _boardID != DEVICE_ID_KONALHIDVI)
+				else if (_boardID != DEVICE_ID_KONALHI || _boardID != DEVICE_ID_KONALHIDVI)
 					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 					(status & BIT_15) >> 15,											//progressive transport
@@ -5795,9 +5795,9 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		break;
 
 	case 1:	
-		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
+		if ( boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHE_PLUS)
+		else if (boardID == DEVICE_ID_KONALHEPLUS)
 			result = GetAnalogInputVideoFormat();
 		else
 			result = GetInput2VideoFormat(progressivePicture);
@@ -5806,7 +5806,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 	case 2:
 		if (boardID == DEVICE_ID_IOXT)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
+		else if (boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
 			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
@@ -5877,7 +5877,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 		if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 		{
 			//This is a hack, LHI does not have a second input
-			if ((_boardID == DEVICE_ID_LHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+			if ((_boardID == DEVICE_ID_KONALHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5885,7 +5885,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 					(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 					progressivePicture);												//progressive picture
 			}
-			else if (_boardID != DEVICE_ID_LHI)
+			else if (_boardID != DEVICE_ID_KONALHI)
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 				((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 				(status & BIT_15) >> 15,											//progressive transport
@@ -6299,30 +6299,21 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 		if(mode == NTV2_STANDARD_TASKS)
 			ajaRetail = true;
 	#endif
-		NTV2BitfileType result = NTV2_BITFILE_NO_CHANGE;	// assume no change needed
-
-	//	printf ("BitfileSwitchNeeded:\n");
-
 		// if bit 30 of the debug register is set, we're not going to change bitfiles no matter what
 		ULWord debugRegValue;
 		ReadRegister(kVRegDebug1,&debugRegValue);
 		if (debugRegValue & BIT_30)
 		{
-	//		printf ("   Freeze Bitfile mode is ON\n");
 			return NTV2_BITFILE_NO_CHANGE;
 		}
 
 		#if !defined (NTV2_DEPRECATE)
-		NTV2BitfileType newBitfile = NTV2_BITFILE_NO_CHANGE;
-		const char *whyString = "No change";
 		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
 			(void) newValue;
 			(void) ajaRetail;
 		#endif	//	!defined (NTV2_DEPRECATE)
-		//printf ("   returning: %s\n", whyString);
-
-		return result;
+		return NTV2_BITFILE_NO_CHANGE;
 
 	}	//	BitfileSwitchNeeded
 

@@ -2179,7 +2179,7 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 }
 
 
-//#if !defined (NTV2_DEPRECATE_12_6)
+#if !defined(NTV2_DEPRECATE_13_0)
 	// GetVideoActiveSize: returns the number of bytes of active video (including VANC lines, if any)
 	ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const bool inTallVANC, const bool inTallerVANC)
 	{
@@ -2190,7 +2190,8 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoForma
 	{
 		return ::GetVideoWriteSize (inVideoFormat, inFBFormat, NTV2VANCModeFromBools (inTallVANC, inTallerVANC));
 	}
-//#endif	//	NTV2_DEPRECATE_12_6
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+
 
 ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const NTV2VANCMode inVancMode)
 {
@@ -4153,7 +4154,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	switch (inValue)
 	{
 	#if defined (AJAMac) || defined (MSWindows)
-        case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "KonaLHi";
+        case DEVICE_ID_KONALHI:                 return inForRetailDisplay ?	"KONA LHi"                  : "KonaLHi";
         case DEVICE_ID_KONALHIDVI:              return inForRetailDisplay ?	"KONA LHi DVI"              : "KonaLHiDVI";
 	#endif
 	#if defined (AJAMac)
@@ -4161,8 +4162,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	#elif defined (MSWindows)
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"KONA IoExpress"            : "IoExpress";
 	#else
-        case DEVICE_ID_LHI:                     return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
-        case DEVICE_ID_LHI_DVI:                 return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
+        case DEVICE_ID_KONALHI:                 return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
+        case DEVICE_ID_KONALHI_DVI:             return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
         case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"AJA Device"                : "(Not Found)";
@@ -4171,7 +4172,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_CORVID3G:                return inForRetailDisplay ?	"Corvid 3G"                 : "Corvid3G";
         case DEVICE_ID_KONA3G:                  return inForRetailDisplay ?	"KONA 3G"                   : "Kona3G";
         case DEVICE_ID_KONA3GQUAD:              return inForRetailDisplay ?	"KONA 3G QUAD"              : "Kona3GQuad";	//	Used to be "KONA 3G" for retail display
-        case DEVICE_ID_LHE_PLUS:                return inForRetailDisplay ?	"KONA LHe+"                 : "KonaLHe+";
+        case DEVICE_ID_KONALHEPLUS:             return inForRetailDisplay ?	"KONA LHe+"                 : "KonaLHe+";
         case DEVICE_ID_IOXT:                    return inForRetailDisplay ?	"IoXT"                      : "IoXT";
         case DEVICE_ID_CORVID24:                return inForRetailDisplay ?	"Corvid 24"                 : "Corvid24";
         case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-Tap"                     : "TTap";
@@ -7325,8 +7326,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
 			case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
-			case DEVICE_ID_LHE_PLUS:					return "lheplus_pcie.bit";
-			case DEVICE_ID_LHI:							return "lhi_pcie.bit";
+			case DEVICE_ID_KONALHEPLUS:					return "lheplus_pcie.bit";
+			case DEVICE_ID_KONALHI:						return "lhi_pcie.bit";
 			case DEVICE_ID_TTAP:						return "ttap_pcie.bit";
 			case DEVICE_ID_IO4KPLUS:					return "io4kplus_pcie.bit";
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
@@ -7360,8 +7361,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
             case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
             case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
             case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
-            case DEVICE_ID_LHE_PLUS:					return "lhe_12_pcie.bit";
-			case DEVICE_ID_LHI:							return "top_pike.bit";
+            case DEVICE_ID_KONALHEPLUS:					return "lhe_12_pcie.bit";
+			case DEVICE_ID_KONALHI:						return "top_pike.bit";
 			case DEVICE_ID_TTAP:						return "t_tap_top.bit";
             case DEVICE_ID_IO4KPLUS:					return "io4kp.bit";
             case DEVICE_ID_IOIP_2022:					return "ioip_s2022.mcs";
@@ -7406,8 +7407,8 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 	static BitfileName2DeviceID			sBitfileName2DeviceID;
 	if (sBitfileName2DeviceID.empty ())
 	{
-		static	NTV2DeviceID	sDeviceIDs [] =	{	DEVICE_ID_KONA3GQUAD,	DEVICE_ID_KONA3G,	DEVICE_ID_KONA4,		DEVICE_ID_KONA4UFC,	DEVICE_ID_LHI,
-													DEVICE_ID_LHE_PLUS,		DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22,	DEVICE_ID_CORVID24,
+		static	NTV2DeviceID	sDeviceIDs [] =	{	DEVICE_ID_KONA3GQUAD,	DEVICE_ID_KONA3G,	DEVICE_ID_KONA4,		DEVICE_ID_KONA4UFC,	DEVICE_ID_KONALHI,
+													DEVICE_ID_KONALHEPLUS,	DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22,	DEVICE_ID_CORVID24,
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
 													DEVICE_ID_KONA1,		DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);  ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)

@@ -2164,7 +2164,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (std::string & outDate, std::string & outTime);
 #if !defined(NTV2_DEPRECATE_14_2)
-	AJA_VIRTUAL bool	GetFirmwareRev (ULWord * pOutRevisionNumber);	///< @deprecated	Use GetRunningFirmwareRevision instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFirmwareRev (ULWord * pOutRevisionNumber));	///< @deprecated	Use GetRunningFirmwareRevision instead.
 #endif
 	///@}
 
@@ -2847,7 +2847,7 @@ public:
 																bool bUseAudioSystem2		= false));	///< @deprecated	This function is obsolete.
 	#endif	//	!defined (NTV2_DEPRECATE)
 	#if !defined (NTV2_DEPRECATE_12_6)
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	InitAutoCirculate (NTV2Crosspoint	inChannelSpec,
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	InitAutoCirculate (NTV2Crosspoint	inChannelSpec,
 																LWord			inStartFrameNumber,
 																LWord			inEndFrameNumber,
 																LWord			inNumChannels,
@@ -2860,30 +2860,30 @@ public:
 																bool			bWithVidProc			= false,
 																bool			bWithCustomAncData		= false,
 																bool			bWithLTC				= false));	///< @deprecated	Use CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	StartAutoCirculate (const NTV2Crosspoint inChannelSpec, const ULWord64 inStartTime = 0));			///< @deprecated	Use CNTV2Card::AutoCirculateStart instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	StartAutoCirculateAtTime (NTV2Crosspoint channelSpec, ULWord64 startTime)) {return StartAutoCirculate (channelSpec, startTime);}		///< @deprecated	Use CNTV2Card::AutoCirculateStart instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	StopAutoCirculate (NTV2Crosspoint channelSpec));														///< @deprecated	Use CNTV2Card::AutoCirculateStop instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	AbortAutoCirculate (NTV2Crosspoint channelSpec));													///< @deprecated	Use CNTV2Card::AutoCirculateStop instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	PauseAutoCirculate (NTV2Crosspoint channelSpec, bool bPlay));										///< @deprecated	Use CNTV2Card::AutoCirculatePause or CNTV2Card::AutoCirculateResume instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	GetFrameStampEx2 (NTV2Crosspoint channelSpec, ULWord frameNum,
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	StartAutoCirculate (const NTV2Crosspoint inChannelSpec, const ULWord64 inStartTime = 0));			///< @deprecated	Use CNTV2Card::AutoCirculateStart instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	StartAutoCirculateAtTime (NTV2Crosspoint channelSpec, ULWord64 startTime)) {return StartAutoCirculate (channelSpec, startTime);}		///< @deprecated	Use CNTV2Card::AutoCirculateStart instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	StopAutoCirculate (NTV2Crosspoint channelSpec));														///< @deprecated	Use CNTV2Card::AutoCirculateStop instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	AbortAutoCirculate (NTV2Crosspoint channelSpec));													///< @deprecated	Use CNTV2Card::AutoCirculateStop instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	PauseAutoCirculate (NTV2Crosspoint channelSpec, bool bPlay));										///< @deprecated	Use CNTV2Card::AutoCirculatePause or CNTV2Card::AutoCirculateResume instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFrameStampEx2 (NTV2Crosspoint channelSpec, ULWord frameNum,
 															FRAME_STAMP_STRUCT* pFrameStamp,
 															PAUTOCIRCULATE_TASK_STRUCT pTaskStruct = NULL));											///< @deprecated	Use CNTV2Card::AutoCirculateGetFrame instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	FlushAutoCirculate (NTV2Crosspoint channelSpec));													///< @deprecated	Use CNTV2Card::AutoCirculateFlush instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	SetActiveFrameAutoCirculate (NTV2Crosspoint channelSpec, ULWord lActiveFrame));						///< @deprecated	Use CNTV2Card::AutoCirculateSetActiveFrame instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	PrerollAutoCirculate (NTV2Crosspoint channelSpec, ULWord lPrerollFrames));							///< @deprecated	Use CNTV2Card::AutoCirculatePreRoll instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	TransferWithAutoCirculate (PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	FlushAutoCirculate (NTV2Crosspoint channelSpec));													///< @deprecated	Use CNTV2Card::AutoCirculateFlush instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetActiveFrameAutoCirculate (NTV2Crosspoint channelSpec, ULWord lActiveFrame));						///< @deprecated	Use CNTV2Card::AutoCirculateSetActiveFrame instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	PrerollAutoCirculate (NTV2Crosspoint channelSpec, ULWord lPrerollFrames));							///< @deprecated	Use CNTV2Card::AutoCirculatePreRoll instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	TransferWithAutoCirculate (PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
 																		 PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT pTransferStatusStruct));				///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	TransferWithAutoCirculateEx(PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	TransferWithAutoCirculateEx(PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
 																		PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT pTransferStatusStruct,
 																		NTV2RoutingTable* pXena2RoutingTable = NULL));								///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	TransferWithAutoCirculateEx2(PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	TransferWithAutoCirculateEx2(PAUTOCIRCULATE_TRANSFER_STRUCT pTransferStruct,
 																		PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT pTransferStatusStruct,
 																		NTV2RoutingTable* pXena2RoutingTable = NULL,
 																		PAUTOCIRCULATE_TASK_STRUCT pTaskStruct = NULL));								///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_12_6(bool	SetAutoCirculateCaptureTask(NTV2Crosspoint channelSpec, PAUTOCIRCULATE_TASK_STRUCT pTaskStruct));	///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAutoCirculateCaptureTask(NTV2Crosspoint channelSpec, PAUTOCIRCULATE_TASK_STRUCT pTaskStruct));	///< @deprecated	Use CNTV2Card::AutoCirculateTransfer instead.
 	#endif	//	!defined (NTV2_DEPRECATE_12_6)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FRAME_STAMP_STRUCT* pFrameStamp));		///< @deprecated	Use CNTV2Card::AutoCirculateGetFrame instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAutoCirculate (NTV2Crosspoint channelSpec, AUTOCIRCULATE_STATUS_STRUCT* autoCirculateStatus));	///< @deprecated	Use CNTV2Card::AutoCirculateGetStatus instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FRAME_STAMP_STRUCT* pFrameStamp));		///< @deprecated	Use CNTV2Card::AutoCirculateGetFrame instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	GetAutoCirculate (NTV2Crosspoint channelSpec, AUTOCIRCULATE_STATUS_STRUCT* autoCirculateStatus));	///< @deprecated	Use CNTV2Card::AutoCirculateGetStatus instead.
 
 
 	/**
@@ -5184,8 +5184,7 @@ public:
 #endif
 
 #if !defined(NTV2_DEPRECATE_13_0)
-	//LocalLoadTestPattern allows the generator to build the pattern independent of global controls to generate independent formats when inconverter is on.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));		///< Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 	protected:	//	CNTV2TestPattern Data

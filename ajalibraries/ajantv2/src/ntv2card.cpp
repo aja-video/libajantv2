@@ -453,14 +453,14 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 				else
 					result = NTV2_BreakoutCableBNC;
 				break;
-			case DEVICE_ID_LHE_PLUS:
+			case DEVICE_ID_KONALHEPLUS:
 				//	Do we have a KL-Box?
 				if ((audioCtlReg & kK2RegMaskKBoxDetect) || bPhonyKBox)
 					result = NTV2_KLBox;
 				else
 					result = NTV2_BreakoutCableXLR;		// no BNC breakout cable available
 				break;
-			case DEVICE_ID_LHI:
+			case DEVICE_ID_KONALHI:
 				//	Do we have a KLHi-Box?
 				if ((audioCtlReg & kK2RegMaskKBoxDetect) || bPhonyKBox)
 					result = NTV2_KLHiBox;
