@@ -678,6 +678,12 @@
 	at the time of the SDK release. However, subsequent firmware updates may add or remove interconnect routes that would not be
 	reflected in the tables used by the SDK. We intend to improve this process going forward.
 
+	The NTV2 SDK provides two tools that graphically show the available device widgets and the signal routing between them.
+	-	\ref usingcables — An ancient, but still functional utility that allows you to inspect and interactively change widget
+		configuration and signal routing paths between widgets.
+	-	The \ref inspectorroute in \ref usingntv2watcher — Currently an incomplete port of \ref usingcables that eventually
+		will incorporate all of its functionality.
+
 
 	@subsection	widget_sdiin	SDI Input
 
@@ -771,7 +777,6 @@
 	@subsection	widget_framestore	Frame Stores
 
 	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
-	See \ref vidop-fs for its operational details.
 	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
 	-	Frame Store widgets are identified by \c NTV2_WgtFrameBuffer1, \c NTV2_WgtFrameBuffer2, etc.
 	-	In <b>Capture Mode</b>…
@@ -779,7 +784,8 @@
 		-	There is a “Level B” input crosspoint that is available for dual-link applications.
 		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s \c NTV2InputCrosspointID…
 			-	Specify the Frame Store of interest by \c NTV2Channel (i.e., \c NTV2_CHANNEL1, \c NTV2_CHANNEL2, …etc.).
-			-	Specify \c true for \c inIsBInput for the “Level B” input crosspoint.
+			-	By default, the function returns the normal “Level A” input crosspoint.
+				Specify \c true for \c inIsBInput for the “Level B” crosspoint.
 	-	In <b>Playout Mode</b>…
 		-	If the Frame Store is configured for SD, HD, or 4K/UHD Quads/Squares (i.e. non-Tsi) mode:
 			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr \c NTV2FrameBufferFormat.
@@ -789,8 +795,13 @@
 			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB \c NTV2FrameBufferFormat.
 		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s \c NTV2OutputCrosspointID…
 			-	Specify the Frame Store of interest by \c NTV2Channel (i.e., \c NTV2_CHANNEL1, \c NTV2_CHANNEL2, …etc.).
-			-	If the Frame Store’s \c NTV2FrameBufferFormat is an RGB format, pass \c true for \c inIsRGB.
-			-	If the Frame Store is configured for 4K/UHD and for two-sample-interleave, pass \c true for \c inIs425.
+			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s \c NTV2FrameBufferFormat
+				is an RGB format, pass \c true for \c inIsRGB to obtain the RGB crosspoint.
+			-	By default, the function will return a normal, non-SMPTE-425 (non-Tsi) output crosspoint.
+				If the Frame Store is configured for 4K/UHD and for two-sample-interleave, pass \c true for \c inIs425,
+				to obtain the “425” crosspoint.
+
+	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
 
 
 	@subsection	widget_csc	ColorSpace Converters (CSCs)
@@ -799,24 +810,29 @@
 	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
 	-	CSC widgets are identified by \c NTV2_WgtCSC1, \c NTV2_WgtCSC2, etc.
 	-	Each CSC has two input crosspoints:
-		-	Video Input:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
+		-	<b>Video Input</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
 			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data on its RGBA output crosspoint.
 			-	RGB[A] video, then the CSC will produce valid YCbCr data on its YUV output crosspoint.
-		-	Key Input:  This supplies the alpha channel data for the CSC’s RGBA output.
+		-	<b>Key Input</b>:  This supplies the alpha channel data for the CSC’s RGBA output.
 		-	Call ::GetCSCInputXptFromChannel to obtain the \c NTV2InputCrosspointID for a CSC:
 			-	Specify the CSC by \c NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
-			-	To get the alpha/key input crosspoint, pass \c true for \c inIsKeyInput.
+			-	By default, the function returns the video input crosspoint. To obtain the alpha/key input
+				crosspoint, pass \c true for \c inIsKeyInput.
 	-	Each CSC has 3 output crosspoints:
-		-	YUV Video:  This will only produce valid YCbCr video data when the CSC’s Video Input is receiving RGB[A] video data.
-		-	RGB Video:	This will only produce valid RGB[A] video data when the CSC’s Video Input is receiving YCbCr video data.
-		-	Key YUV:  This will only produce valid YCbCr key data when the CSC’s Video Input is receiving RGB[A] video data.
+		-	<b>YUV Video</b>:  This will produce valid YCbCr video data only when the CSC’s Video Input is receiving RGB[A] video data.
+		-	<b>RGB Video</b>:	This will produce valid RGB[A] video data only when the CSC’s Video Input is receiving YCbCr video data.
+		-	<b>Key YUV</b>:  This will produce valid YCbCr key data only when the CSC’s Video Input is receiving RGB[A] video data.
 		-	Call ::GetCSCOutputXptFromChannel to obtain one of the CSC’s \c NTV2OutputCrosspointID values:
 			-	Specify the CSC by \c NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
-			-	For key output, pass \c true for \c inIsKey.
-			-	For RGB output, pass \c true for \c inIsRGB.
+			-	By default, the function returns the video output crosspoint.
+				To obtain the <b>Key</b> crosspoint, pass \c true for \c inIsKey.
+			-	By default, the function returns the <b>YUV</b> output crosspoint.
+				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
 
 	@subsection	widget_mixkey	Mixer/Keyer Widgets
+
+	@image	html	cables-mixerkeyerwidget.png
 
 	A <b>Mixer/Keyer</b> widget represents the firmware entity that can mix two YCbCr video sources into a single YCbCr
 	raster (and key).
@@ -840,32 +856,32 @@
 				-	Specify the Mixer/Keyer of interest by \c NTV2Channel (e.g. use NTV2_CHANNEL2 for Mixer/Keyer 2).
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 	-	Each Mixer/Keyer widget has two output crosspoints:
-		-	Video:  This produces the mixed/keyed YCbCr video raster.
-		-	Key:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
+		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
+		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
 		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s \c NTV2OutputCrosspointID:
 			-	Specify the Mixer/Keyer of interest by \c NTV2Channel (e.g. use NTV2_CHANNEL2 for Mixer/Keyer 2).
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
 	-	The Mixer is controlled using \c CNTV2Card API calls:
 		-	<b>Mode</b>:
+			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
+			-	Call CNTV2Card::SetMixerMode to change the Mixer’s mode.
 			-	Use \c NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the foreground video and key to the Mixer output.
 			-	Use \c NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the background video and key to the Mixer output.
 			-	Use \c NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
-			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
-			-	Call CNTV2Card::SetMixerMode to change the Mixer’s mode.
 		-	<b>Input Controls</b>:
-			-	Use \c NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
-			-	Use \c NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
-			-	Use \c NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
 			-	Call CNTV2Card::GetMixerFGInputControl to determine the Mixer’s current foreground control value;
 				call CNTV2Card::SetMixerFGInputControl to change it.
 			-	Call CNTV2Card::GetMixerBGInputControl to determine the Mixer’s current background control value;
 				call CNTV2Card::SetMixerBGInputControl to change it.
+			-	Use \c NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
+			-	Use \c NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
+			-	Use \c NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
 		-	<b>Mix Coefficient</b>:
 			-	This is an unsigned 16-bit integer that determines the transparency of the foreground mask/key.
 			-	Call CNTV2Card::GetMixerCoefficient to determine the Mixer’s current mix coefficient;
 				call CNTV2Card::SetMixerCoefficient to change it.
 
-	@note	The Mixer’s foreground and background inputs must be fairly closely synchronized or it won’t be able to
-			mix them, and its output will be unlocked/invalid. Call CNTV2Card::GetMixerSyncStatus to determine if
-			the Mixer is locked to both of its inputs and therefore if its output is locked/valid.
+	@note	The Mixer’s foreground and background inputs must be closely synchronized or the Mixer won’t be able to
+			mix them, and if unlocked, its output will be garbled/invalid. Call CNTV2Card::GetMixerSyncStatus to
+			determine if the Mixer is locked to both of its inputs and therefore if its output is locked/valid.
 **/
