@@ -120,9 +120,9 @@ protected:
     bool SetIGMPVersion(uint32_t version);
     bool FetchGrandMasterInfo(std::string & grandmasterInfo);
 
-    void SetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
-    void UnsetIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream);
-    void EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stream stream, bool enable);
+    void SetIGMPGroup(eSFP port, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable);
+    void UnsetIGMPGroup(eSFP port, NTV2Stream stream);
+    void EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enable);
 
     bool SetTxLinkState(NTV2Channel channel, bool sfp1Enable,   bool sfp2Enable);
     bool GetTxLinkState(NTV2Channel channel, bool & sfp1Enable, bool & sfp2Enable);
@@ -157,7 +157,7 @@ private:
     bool getDecimal(const std::string & resp, const std::string & parm, uint32_t & result);
     bool getHex(const std::string & resp, const std::string & parm, uint32_t &result);
     bool getString(const std::string & resp, const std::string & parm, std::string & result);
-    uint32_t getIGMPCBOffset(eSFP port, NTV2Channel channel, NTV2Stream stream);
+    uint32_t getIGMPCBOffset(eSFP port, NTV2Stream stream);
 
 private:
 };

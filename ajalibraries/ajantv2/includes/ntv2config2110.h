@@ -195,6 +195,7 @@ public:
     uint8_t             tos;                // type of service
     uint8_t             ttl;                // time to live
     uint32_t            ssrc;
+    NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            pktsPerLine;        // read-only
@@ -229,6 +230,7 @@ public:
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t            payload;
+    NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            payloadLen;
@@ -255,19 +257,19 @@ public:
     bool        SetNetworkConfiguration(const eSFP sfp, const std::string localIPAddress, const std::string subnetMask, const std::string gateway);
     bool        GetNetworkConfiguration(const eSFP sfp, std::string & localIPAddress, std::string & subnetMask, std::string & gateway);
     bool        DisableNetworkInterface(const eSFP sfp);
-    bool        SetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const rx_2110Config & rxConfig);
-    bool        GetRxStreamConfiguration(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, rx_2110Config & rxConfig);
-    bool        SetRxStreamEnable(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, bool enable);
-    bool        GetRxStreamEnable(const eSFP sfp, const NTV2Channel channel, NTV2Stream stream, bool & enabled);
-    bool        GetRxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets);
-    bool        GetRxByteCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &bytes);
+    bool        SetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, const rx_2110Config & rxConfig);
+    bool        GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, rx_2110Config & rxConfig);
+    bool        SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool enable);
+    bool        GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool & enabled);
+    bool        GetRxPacketCount(const NTV2Stream stream, uint32_t &packets);
+    bool        GetRxByteCount(const NTV2Stream stream, uint32_t &bytes);
     bool        GetRxByteCount(const eSFP sfp, uint64_t &bytes);
 
     bool        SetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
-    bool        GetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, tx_2110Config & txConfig);
-    bool        SetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
-    bool        GetTxStreamEnable(const NTV2Channel channel, const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
-    bool        GetTxPacketCount(const NTV2Channel channel, NTV2Stream stream, uint32_t &packets);
+    bool        GetTxStreamConfiguration(const NTV2Stream stream, tx_2110Config & txConfig);
+    bool        SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1, bool enableSfp2 = false);
+    bool        GetTxStreamEnable(const NTV2Stream stream, bool & sfp1Enabled, bool & sfp2Enabled);
+    bool        GetTxPacketCount(NTV2Stream stream, uint32_t &packets);
     bool        GetTxByteCount(const eSFP sfp, uint64_t &bytes);
 
     bool        SetPTPMaster(const std::string ptpMaster);
@@ -280,8 +282,8 @@ public:
     bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
 
-    std::string GetTxSDPUrl(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
-    std::string GetTxSDP(const NTV2Channel chan, const NTV2Stream stream);
+    std::string GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream);
+    std::string GetTxSDP(const NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
 
@@ -302,57 +304,58 @@ public:
     void        SetBiDirectionalChannels(const bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool        GetMACAddress(const eSFP port, const NTV2Channel channel, const NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
+    bool        GetMACAddress(const eSFP port, const NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
-    static uint32_t  Get2110TxStreamIndex(NTV2Channel ch, NTV2Stream str );
-    static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream);
+    static uint32_t  Get2110TxStreamIndex(NTV2Stream str );
+    static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
 
     // If method returns false call this to get details
     std::string getLastError();
     NTV2IpError getLastErrorCode();
 
-    static uint32_t v_packetizers[4];
-    static uint32_t a_packetizers[4];
-    static uint32_t v_depacketizers[4];
-    static uint32_t a_depacketizers[4];
+    static uint32_t packetizers[12];
+    static uint32_t depacketizers[12];
 
 protected:
-    uint32_t    GetFramerAddress(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
-    void        SelectTxFramerChannel(const NTV2Channel channel, const NTV2Stream stream, const uint32_t baseAddr);
+    uint32_t    GetFramerAddress(const eSFP sfp, const NTV2Stream stream);
+    void        SelectTxFramerChannel(const NTV2Stream stream, const uint32_t baseAddr);
     void        AcquireFramerControlAccess(const uint32_t baseAddr);
     void        ReleaseFramerControlAccess(const uint32_t baseAddr);
 
-    void        EnableFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable);
-    bool        SetFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig);
-    void        GetFramerStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, tx_2110Config  & txConfig);
-    void        SetArbiter(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool enable);
-    void        GetArbiter(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, bool & enable);
+    void        EnableFramerStream(const eSFP sfp, const NTV2Stream stream, bool enable);
+    bool        SetFramerStream(const eSFP sfp, const NTV2Stream stream, const tx_2110Config & txConfig);
+    void        GetFramerStream(const eSFP sfp, const NTV2Stream stream, tx_2110Config  & txConfig);
+    void        SetArbiter(const eSFP sfp, const NTV2Stream stream, bool enable);
+    void        GetArbiter(const eSFP sfp, const NTV2Stream stream, bool & enable);
 
-    void        DisableDepacketizerStream(const NTV2Channel channel, const NTV2Stream stream);
-    void        EnableDepacketizerStream(const NTV2Channel channel, const NTV2Stream stream);
-    void        DisableDecapsulatorStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
-    void        EnableDecapsulatorStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream);
+    void        DisableDepacketizerStream(const NTV2Stream stream);
+    void        EnableDepacketizerStream(const NTV2Stream stream);
+    void        DisableDecapsulatorStream(const eSFP sfp, const NTV2Stream stream);
+    void        EnableDecapsulatorStream(const eSFP sfp, const NTV2Stream stream);
 
-    void        SetupDecapsulatorStream(const eSFP sfp, const NTV2Channel channel, const NTV2Stream stream, const rx_2110Config &rxConfig);
+    void        SetupDecapsulatorStream(const eSFP sfp, const NTV2Stream stream, const rx_2110Config &rxConfig);
 
-    void        ResetPacketizerStream(const NTV2Channel channel, const NTV2Stream stream);
+    void        ResetPacketizerStream(const NTV2Stream stream);
 
-    void        SetupDepacketizerStream(const NTV2Channel channel, const NTV2Stream stream, const rx_2110Config & rxConfig);
-    void        ResetDepacketizerStream(const NTV2Channel channel, const NTV2Stream stream);
-    uint32_t    GetDepacketizerAddress(const NTV2Channel channel, const NTV2Stream stream);
-    bool        SetTxPacketizerChannel(const NTV2Channel channel, const NTV2Stream stream, uint32_t  & baseAddr);
+    void        SetupDepacketizerStream(const NTV2Stream stream, const rx_2110Config & rxConfig);
+    void        ResetDepacketizerStream(const NTV2Stream stream);
+    uint32_t    GetDepacketizerAddress(const NTV2Stream stream);
+    bool        SetTxPacketizerChannel(const NTV2Stream stream, uint32_t  & baseAddr);
 
-    void        SetVideoFormatForRxTx(const NTV2Channel channel, const NTV2VideoFormat format, const bool rx);
-    void        GetVideoFormatForRxTx(const NTV2Channel channel, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
+    void        SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2VideoFormat format, const bool rx);
+    void        GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
-    bool        GenSDP(const NTV2Channel channel, const NTV2Stream stream);
-    bool        GenSDPVideoStream(std::stringstream & sdp, NTV2Channel channel, std::string gmInfo);
-    bool        GenSDPAudioStream(std::stringstream & sdp, NTV2Channel channel, NTV2Stream stream, std::string gmInfo);    
+    bool        GenSDP(const NTV2Stream stream);
+    bool        GenSDPVideoStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
+    bool        GenSDPAudioStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
+
+    NTV2StreamType  StreamType(const NTV2Stream stream);
+    NTV2Channel VideoStreamToChannel(const NTV2Stream stream);
 
 private:
     std::string To_String(int val);
@@ -366,7 +369,7 @@ private:
     int         getDescriptionValue(int startLine, std::string type, std::string & value);
     std::string getVideoDescriptionValue(std::string type);
 
-    std::stringstream txsdp[4][5];  // indexed by channel and stream
+    std::stringstream txsdp[NTV2_MAX_NUM_STREAMS];
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;

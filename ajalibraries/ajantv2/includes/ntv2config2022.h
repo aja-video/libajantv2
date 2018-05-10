@@ -223,6 +223,8 @@ private:
     bool        SelectRxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr);
 
+    NTV2Stream VideoChannelToStream(const NTV2Channel channel);
+
     class CNTV2ConfigTs2022 * _tstreamConfig;
 
     eSFP        GetTxLink(NTV2Channel chan);
