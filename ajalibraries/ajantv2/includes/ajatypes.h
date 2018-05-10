@@ -18,12 +18,9 @@
 #define NTV2_DEPRECATE_12_7		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
 #define NTV2_DEPRECATE_13_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.0
 #define NTV2_DEPRECATE_13_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.1
-
-//	BEWARE: Symbols/APIs within #ifdef blocks using these names are still defined in this SDK, but will be deprecated by default in a future SDK:
 #define NTV2_DEPRECATE_14_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.0
-#if 0	//	0	** MrBill **
-#define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2.  NOTE: 14.1 was never released.
-#endif	//	0	** MrBill **
+#define NTV2_DEPRECATE_14_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.1 (never released)
+#define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -241,6 +238,9 @@
 	#endif
 	#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
 		#define NTV2_DEPRECATE_14_0
+	#endif
+	#if !defined(NTV2_DEPRECATE_14_1)	//	Linux driver Makefile usually defines this
+		#define NTV2_DEPRECATE_14_1		//	(never released)
 	#endif
 	#if !defined(NTV2_DEPRECATE_14_2)	//	Linux driver Makefile usually defines this
 		#define NTV2_DEPRECATE_14_2

@@ -1970,11 +1970,11 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormat(int32_t index, NTV2VideoForm
 		
 		// switch to LevelA transport format, use 3Gb flag as LevelB indicator
 		if (sdiInFormat == NTV2_FORMAT_1080p_5000_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5000 : NTV2_FORMAT_1080p_5000_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5000_A : NTV2_FORMAT_1080p_5000_A;
 		else if (sdiInFormat == NTV2_FORMAT_1080p_5994_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5994 : NTV2_FORMAT_1080p_5994_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5994_A : NTV2_FORMAT_1080p_5994_A;
 		else if (sdiInFormat == NTV2_FORMAT_1080p_6000_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_6000 : NTV2_FORMAT_1080p_6000_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_6000_A : NTV2_FORMAT_1080p_6000_A;
 	}
 	
 	return sdiInFormat;
