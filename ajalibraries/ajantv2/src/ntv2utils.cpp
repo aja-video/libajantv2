@@ -4163,7 +4163,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"KONA IoExpress"            : "IoExpress";
 	#else
         case DEVICE_ID_KONALHI:                 return inForRetailDisplay ?	"KONA LHi"                  : "OEM LHi";
-        case DEVICE_ID_KONALHI_DVI:             return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
+        case DEVICE_ID_KONALHIDVI:              return inForRetailDisplay ?	"KONA LHi DVI"              : "OEM LHi DVI";
         case DEVICE_ID_IOEXPRESS:               return inForRetailDisplay ?	"IoExpress"                 : "OEM IoExpress";
 	#endif
         case DEVICE_ID_NOTFOUND:                return inForRetailDisplay ?	"AJA Device"                : "(Not Found)";
