@@ -202,13 +202,21 @@ void CNTV2DemoHevcCommon::WriteEncData(void* pBuffer, uint32_t bufferSize)
         case 2: pPicType = "B-frame"; break;
         default: break;
     }
+	const char* pIdrState = "Unknown";
+	switch(pEncData->esIdrType)
+	{
+	case 0: pIdrState = "false"; break;
+	case 1: pIdrState = "true"; break;
+	case 3: pIdrState = "command"; break;
+	default: break;
+	}
     
     long long unsigned int offset = (((uint64_t)pEncData->esOffsetHigh)<<32) + (uint64_t)pEncData->esOffsetLow;
     long long int pts = ((((uint64_t)pEncData->ptsValueHigh)<<32) + (uint64_t)pEncData->ptsValueLow);
     long long int dts = ((((uint64_t)pEncData->dtsValueHigh)<<32) + (uint64_t)pEncData->dtsValueLow);
     
-    fprintf(mEncFd, "Serial number: %d   Picture type: %s   Last frame: %s\n",
-            pEncData->serialNumber, pPicType, pEncData->esLastFrame?"Y":"N");
+	fprintf(mEncFd, "Serial number: %d  Picture type: %s  IDR state: %s  Last frame: %s\n",
+			pEncData->serialNumber, pPicType, pIdrState, pEncData->esLastFrame?"Y":"N");
     fprintf(mEncFd, "Frame offset: 0x%0llx  Frame Size: %d\n",
             offset, pEncData->esSize);
     fprintf(mEncFd, "PTS: %lld   DTS: %lld\n",
@@ -651,7 +659,7 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
             if (mainState != Hevc_MainState_Encode)
             { cerr << "## ERROR:  Not in encode state after change" << endl;  return AJA_STATUS_INITIALIZE; }
         }
-        
+
         // Write out stream params
         if (!pM31->SetupVIParams(preset, encodeChannel))
         { cerr << "## ERROR:  SetupVIParams failed" << endl;  return AJA_STATUS_INITIALIZE; }
@@ -662,7 +670,7 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
         if (!pM31->SetupEHParams(preset, encodeChannel))
         { cerr << "## ERROR:  SetupEHParams failed" << endl;  return AJA_STATUS_INITIALIZE; }
         
-        if (withInfo)
+		if (withInfo)
         {
             // Enable picture information
             if (!pM31->mpM31VInParam->SetPTSMode(M31_PTSModeHost, (M31VirtualChannel)encodeChannel))
@@ -717,8 +725,6 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
         if (!pM31->LoadAllParams(preset))
         { cerr << "## ERROR:  LoadAllPresets failed" << endl;  return AJA_STATUS_INITIALIZE; }
         
-        // Here is where you can alter params sent to the M31 because all of these structures are public
-        
         // Write out all of the params to each of the 4 physical channels
         if (!pM31->SetAllParams(M31_CH0))
         { cerr << "## ERROR:  SetVideoPreset failed ch0 " << endl;  return AJA_STATUS_INITIALIZE; }
@@ -732,7 +738,14 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
         if (!pM31->SetAllParams(M31_CH3))
         { cerr << "## ERROR:  SetVideoPreset failed ch1 " << endl;  return AJA_STATUS_INITIALIZE; }
         
-        if (withInfo)
+		// Here is where you can alter params sent to the M31 because all of these structures are public
+		pM31->mpM31EHParam->SetFrameNumInGOP(16, (M31VirtualChannel)encodeChannel);
+		pM31->mpM31EHParam->SetIpPeriod(4, (M31VirtualChannel)encodeChannel);
+		pM31->mpM31EHParam->SetClosedGOP(1, (M31VirtualChannel)encodeChannel);
+		pM31->mpM31EHParam->SetGOPHierarchy(0, (M31VirtualChannel)encodeChannel);
+		pM31->mpM31EHParam->SetBitRate(1000, (M31VirtualChannel)encodeChannel);
+
+		if (withInfo)
         {
             // Enable picture information
             if (!pM31->mpM31VInParam->SetPTSMode(M31_PTSModeHost, (M31VirtualChannel)M31_CH0))
