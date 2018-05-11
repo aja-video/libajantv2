@@ -296,7 +296,7 @@ void NTV2FrameGrabber::run (void)
 		}
 		else
 		{
-			mNTV2Card.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
+			mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
 			mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
 			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID ()))		//	If device has bidirectional SDI connectors...
@@ -306,7 +306,7 @@ void NTV2FrameGrabber::run (void)
 				{
 					mNTV2Card.EnableChannel (NTV2Channel(offset));
 					bool outputEnabled;
-					mNTV2Card.GetSDITransmitEnable (NTV2Channel(offset), &outputEnabled);
+					mNTV2Card.GetSDITransmitEnable (NTV2Channel(offset), outputEnabled);
 					if (outputEnabled)
 					{
 						waitForInput = true;
@@ -368,7 +368,7 @@ void NTV2FrameGrabber::run (void)
 					continue;
 				}
 
-				mNTV2Card.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
+				mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
 				mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
 				mDeviceID = mNTV2Card.GetDeviceID ();
@@ -526,7 +526,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 		{
 			mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
 			bool outputEnabled;
-			mNTV2Card.GetSDITransmitEnable(NTV2Channel (mChannel + offset),&outputEnabled);
+			mNTV2Card.GetSDITransmitEnable(NTV2Channel (mChannel + offset), outputEnabled);
 			if (outputEnabled == true)
 			{
 				waitForInput = true;
@@ -718,7 +718,7 @@ void NTV2FrameGrabber::StopAutoCirculate (void)
 		mNTV2Card.AutoCirculateStop (mChannel);
 
 		bool tsiEnable;
-		mNTV2Card.GetTsiFrameEnable(&tsiEnable, NTV2_CHANNEL1);
+		mNTV2Card.GetTsiFrameEnable (tsiEnable, NTV2_CHANNEL1);
 		if (tsiEnable)
 		{
 			for (ULWord i = 0; i < 2; i++)

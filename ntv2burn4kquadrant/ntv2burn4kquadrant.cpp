@@ -146,7 +146,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	if (!mInputDevice.AcquireStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
 		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
-	mInputDevice.GetEveryFrameServices (&mInputSavedTaskMode);	//	Save the current state before changing it
+	mInputDevice.GetEveryFrameServices (mInputSavedTaskMode);	//	Save the current state before changing it
 	mInputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
 
 	if (!mSingleDevice)
@@ -154,7 +154,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 		if (!mOutputDevice.AcquireStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
 			{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 
-		mOutputDevice.GetEveryFrameServices (&mOutputSavedTaskMode);	//	Save the current state before changing it
+		mOutputDevice.GetEveryFrameServices (mOutputSavedTaskMode);		//	Save the current state before changing it
 		mOutputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 	}
 
@@ -169,10 +169,13 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 		case 8:	mInputDevice.EnableChannel (NTV2_CHANNEL8);
 				mInputDevice.EnableChannel (NTV2_CHANNEL7);
 				mInputDevice.EnableChannel (NTV2_CHANNEL6);
-				mInputDevice.EnableChannel (NTV2_CHANNEL5);	//	Fall thru
+				mInputDevice.EnableChannel (NTV2_CHANNEL5);
+				/* FALLTHRU */
 		case 4:	mInputDevice.EnableChannel (NTV2_CHANNEL4);
-				mInputDevice.EnableChannel (NTV2_CHANNEL3);	//	Fall thru
-		case 2:	mInputDevice.EnableChannel (NTV2_CHANNEL2);	//	Fall thru
+				mInputDevice.EnableChannel (NTV2_CHANNEL3);
+				/* FALLTHRU */
+		case 2:	mInputDevice.EnableChannel (NTV2_CHANNEL2);
+				/* FALLTHRU */
 		case 1:	mInputDevice.EnableChannel (NTV2_CHANNEL1);
 				break;
 	}
@@ -183,10 +186,13 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 			case 8:	mOutputDevice.EnableChannel (NTV2_CHANNEL8);
 					mOutputDevice.EnableChannel (NTV2_CHANNEL7);
 					mOutputDevice.EnableChannel (NTV2_CHANNEL6);
-					mOutputDevice.EnableChannel (NTV2_CHANNEL5);	//	Fall thru
+					mOutputDevice.EnableChannel (NTV2_CHANNEL5);
+					/* FALLTHRU */
 			case 4:	mOutputDevice.EnableChannel (NTV2_CHANNEL4);
-					mOutputDevice.EnableChannel (NTV2_CHANNEL3);	//	Fall thru
-			case 2:	mOutputDevice.EnableChannel (NTV2_CHANNEL2);	//	Fall thru
+					mOutputDevice.EnableChannel (NTV2_CHANNEL3);
+					/* FALLTHRU */
+			case 2:	mOutputDevice.EnableChannel (NTV2_CHANNEL2);
+					/* FALLTHRU */
 			case 1:	mOutputDevice.EnableChannel (NTV2_CHANNEL1);
 					break;
 		}

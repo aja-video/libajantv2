@@ -165,7 +165,7 @@ AJAStatus NTV2Player::Init (void)
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 
-		mDevice.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current service level
+		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current service level
 	}
 
 	mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Set OEM service level
@@ -218,7 +218,7 @@ AJAStatus NTV2Player::Init (void)
 AJAStatus NTV2Player::SetUpVideo ()
 {
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
-		mDevice.GetVideoFormat (&mVideoFormat, NTV2_CHANNEL1);
+		mDevice.GetVideoFormat (mVideoFormat, NTV2_CHANNEL1);
 
 	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mVideoFormat))
 		{cerr << "## ERROR:  This device cannot handle '" << ::NTV2VideoFormatToString (mVideoFormat) << "'" << endl;  return AJA_STATUS_UNSUPPORTED;}
@@ -698,7 +698,7 @@ uint32_t NTV2Player::AddTone (ULWord * pInAudioBuffer)
 	NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
 	ULWord			numChannels	(0);
 
-	mDevice.GetFrameRate (&frameRate, mOutputChannel);
+	mDevice.GetFrameRate (frameRate, mOutputChannel);
 	mDevice.GetAudioRate (audioRate, mAudioSystem);
 	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
 

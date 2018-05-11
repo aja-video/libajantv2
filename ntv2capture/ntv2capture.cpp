@@ -128,7 +128,7 @@ AJAStatus NTV2Capture::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
-		mDevice.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
+		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
 	}
 	mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 
