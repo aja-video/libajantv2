@@ -905,7 +905,7 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         // audio select
         uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + (audioChans-1);
-        // PSM fix this, channel should come into struct      aselect = (channel << 24) + aselect;
+        aselect = (txConfig.channel << 24) + aselect;
         uint32_t offset = (stream - NTV2_AUDIO1_STREAM) * 4;
         mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset, aselect);
 
