@@ -237,13 +237,47 @@ QString CKonaIpJsonParse2110::GetSfp(eSFP sfp)
     return str;
 }
 
-NTV2Stream CKonaIpJsonParse2110::GetStream(std::string streamString)
+NTV2Stream CKonaIpJsonParse2110::GetVideoStream(std::string streamString)
 {
     NTV2Stream stream;
 
-    if (streamString == "video")
-        stream = NTV2_VIDEO_STREAM;
-    else if (streamString == "audio1")
+    if (streamString == "video1")
+        stream = NTV2_VIDEO1_STREAM;
+    else if (streamString == "video2")
+        stream = NTV2_VIDEO2_STREAM;
+    else if (streamString == "video3")
+        stream = NTV2_VIDEO3_STREAM;
+    else if (streamString == "video4")
+        stream = NTV2_VIDEO4_STREAM;
+    else
+        stream = NTV2_STREAM_INVALID;
+
+    return stream;
+}
+
+QString CKonaIpJsonParse2110::GetVideoStream(NTV2Stream stream)
+{
+    QString str;
+
+    if (stream == NTV2_VIDEO1_STREAM)
+        str = "video1";
+    else if (stream == NTV2_VIDEO2_STREAM)
+        str = "video2";
+    else if (stream == NTV2_VIDEO3_STREAM)
+        str = "video3";
+    else if (stream == NTV2_VIDEO4_STREAM)
+        str = "video4";
+    else
+        str = "invalid";
+
+    return str;
+}
+
+NTV2Stream CKonaIpJsonParse2110::GetAudioStream(std::string streamString)
+{
+    NTV2Stream stream;
+
+    if (streamString == "audio1")
         stream = NTV2_AUDIO1_STREAM;
     else if (streamString == "audio2")
         stream = NTV2_AUDIO2_STREAM;
@@ -257,13 +291,11 @@ NTV2Stream CKonaIpJsonParse2110::GetStream(std::string streamString)
     return stream;
 }
 
-QString CKonaIpJsonParse2110::GetStream(NTV2Stream stream)
+QString CKonaIpJsonParse2110::GetAudioStream(NTV2Stream stream)
 {
     QString str;
 
-    if (stream == NTV2_VIDEO_STREAM)
-        str = "video";
-    else if (stream == NTV2_AUDIO1_STREAM)
+    if (stream == NTV2_AUDIO1_STREAM)
         str = "audio1";
     else if (stream == NTV2_AUDIO2_STREAM)
         str = "audio2";
@@ -276,7 +308,6 @@ QString CKonaIpJsonParse2110::GetStream(NTV2Stream stream)
 
     return str;
 }
-
 
 bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, NetworkData2110& n2110)
 {
@@ -420,9 +451,9 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveVideo(const QJsonArray& vArray, Re
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rVideo2110.rxVideoCh[i].enable = GetEnable(str);
-        str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
-        rVideo2110.rxVideoCh[i].channel = GetChannel(str);
+        str = vObj["stream"].toString().toStdString();
+        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl << std::endl;
+        rVideo2110.rxVideoCh[i].stream = GetVideoStream(str);
     }
 
     return true;
@@ -451,7 +482,7 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveVideo(const ReceiveVideoData2110& 
         obj.insert("ssrc",              QJsonValue((int)rVideo2110.rxVideoCh[i].ssrc));
         obj.insert("payload",           QJsonValue((int)rVideo2110.rxVideoCh[i].payload));
         obj.insert("enable",            QJsonValue(QString(GetEnable(rVideo2110.rxVideoCh[i].enable))));
-        obj.insert("designator",        QJsonValue(QString(GetEnable(rVideo2110.rxVideoCh[i].channel))));
+        obj.insert("stream",            QJsonValue(QString(GetVideoStream(rVideo2110.rxVideoCh[i].stream))));
 
         vArray += QJsonValue(obj);
     }
@@ -521,12 +552,12 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveAudio(const QJsonArray& aArray, Re
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].enable = GetEnable(str);
-        str = vObj["stream"].toString().toStdString();
-        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
-        rAudio2110.rxAudioCh[i].stream = GetStream(str);
         str = vObj["designator"].toString().toStdString();
         if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         rAudio2110.rxAudioCh[i].channel = GetChannel(str);
+        str = vObj["stream"].toString().toStdString();
+        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
+        rAudio2110.rxAudioCh[i].stream = GetAudioStream(str);
     }
 
     return true;
@@ -558,8 +589,8 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAudio(const ReceiveAudioData2110& 
         obj.insert("audioPktInterval",      QJsonValue((int)rAudio2110.rxAudioCh[i].audioPktInterval));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].enable))));
-        obj.insert("stream",                QJsonValue(QString(GetStream(rAudio2110.rxAudioCh[i].stream))));
         obj.insert("designator",            QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].channel))));
+        obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAudio2110.rxAudioCh[i].stream))));
 
         aArray += QJsonValue(obj);
     }
@@ -622,9 +653,9 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tVideo2110.txVideoCh[i].enable = GetEnable(str);
-        str = vObj["designator"].toString().toStdString();
-        if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
-        tVideo2110.txVideoCh[i].channel = GetChannel(str);
+        str = vObj["stream"].toString().toStdString();
+        if (m_verbose) std::cout << " stream " << str.c_str() << std::endl << std::endl;
+        tVideo2110.txVideoCh[i].stream = GetVideoStream(str);
     }
 
     return true;
@@ -650,7 +681,7 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitVideo(const TransmitVideoData2110
         obj.insert("payload",               QJsonValue((int)tVideo2110.txVideoCh[i].payload));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].enable))));
-        obj.insert("designator",            QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].channel))));
+        obj.insert("stream",                QJsonValue(QString(GetVideoStream(tVideo2110.txVideoCh[i].stream))));
         vArray += QJsonValue(obj);
     }
 
@@ -714,7 +745,7 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAudio(const QJsonArray& aArray, T
         tAudio2110.txAudioCh[i].enable = GetEnable(str);
         str = vObj["stream"].toString().toStdString();
         if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
-        tAudio2110.txAudioCh[i].stream = GetStream(str);
+        tAudio2110.txAudioCh[i].stream = GetAudioStream(str);
         str = vObj["designator"].toString().toStdString();
         if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
         tAudio2110.txAudioCh[i].channel = GetChannel(str);
@@ -746,7 +777,7 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
         obj.insert("audioPktInterval",      QJsonValue((int)tAudio2110.txAudioCh[i].audioPktInterval));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].enable))));
-        obj.insert("stream",                QJsonValue(QString(GetStream(tAudio2110.txAudioCh[i].stream))));
+        obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAudio2110.txAudioCh[i].stream))));
         obj.insert("designator",            QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].channel))));
         aArray += QJsonValue(obj);
     }

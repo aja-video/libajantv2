@@ -65,8 +65,10 @@ public:
     QString GetChannel(NTV2Channel channel);
     eSFP GetSfp(std::string sfpString);
     QString GetSfp(eSFP sfp);
-    NTV2Stream GetStream(std::string streamString);
-    QString GetStream(NTV2Stream stream);
+    NTV2Stream GetAudioStream(std::string streamString);
+    QString GetAudioStream(NTV2Stream stream);
+    NTV2Stream GetVideoStream(std::string streamString);
+    QString GetVideoStream(NTV2Stream stream);
 
 public:
     bool                    m_verbose;

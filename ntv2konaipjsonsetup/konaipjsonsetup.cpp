@@ -609,9 +609,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.videoSamples    = VPIDSampling_YUV_422;
 
         rv = config2110.SetRxStreamConfiguration (sfp,
-                                                       receiveVideo2110.rxVideoCh[i].channel,
-                                                       NTV2_VIDEO_STREAM,
-                                                       rxChannelConfig);
+                                                  receiveVideo2110.rxVideoCh[i].stream,
+                                                  rxChannelConfig);
         if (!rv)
         {
             cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
@@ -619,9 +618,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
 
         rv = config2110.SetRxStreamEnable(sfp,
-                                               receiveVideo2110.rxVideoCh[i].channel,
-                                               NTV2_VIDEO_STREAM,
-                                               receiveVideo2110.rxVideoCh[i].enable);
+                                          receiveVideo2110.rxVideoCh[i].stream,
+                                          receiveVideo2110.rxVideoCh[i].enable);
         if (!rv)
         {
             cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
@@ -671,7 +669,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
 
         rv = config2110.SetRxStreamConfiguration (sfp,
-                                                  receiveAudio2110.rxAudioCh[i].channel,
                                                   receiveAudio2110.rxAudioCh[i].stream,
                                                   rxChannelConfig);
         if (!rv)
@@ -681,7 +678,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
 
         rv = config2110.SetRxStreamEnable(sfp,
-                                          receiveAudio2110.rxAudioCh[i].channel,
                                           receiveAudio2110.rxAudioCh[i].stream,
                                           receiveAudio2110.rxAudioCh[i].enable);
         if (!rv)
@@ -715,8 +711,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.videoFormat     = transmitVideo2110.txVideoCh[i].videoFormat;
         txChannelConfig.videoSamples    = VPIDSampling_YUV_422;
 
-        rv = config2110.SetTxStreamConfiguration(transmitVideo2110.txVideoCh[i].channel,
-                                                 NTV2_VIDEO_STREAM,
+        rv = config2110.SetTxStreamConfiguration(transmitVideo2110.txVideoCh[i].stream,
                                                  txChannelConfig);
         if (!rv)
         {
@@ -726,8 +721,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         if (transmitVideo2110.txVideoCh[i].enable)
         {
-            rv = config2110.SetTxStreamEnable(transmitVideo2110.txVideoCh[i].channel,
-                                              NTV2_VIDEO_STREAM,
+            rv = config2110.SetTxStreamEnable(transmitVideo2110.txVideoCh[i].stream,
                                               transmitVideo2110.txVideoCh[i].sfpEnable[0],
                                               transmitVideo2110.txVideoCh[i].sfpEnable[1]);
             if (!rv)
@@ -763,8 +757,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.firstAudioChannel   = transmitAudio2110.txAudioCh[i].firstAudioChannel;
         txChannelConfig.audioPktInterval    = transmitAudio2110.txAudioCh[i].audioPktInterval;
 
-        rv = config2110.SetTxStreamConfiguration(transmitAudio2110.txAudioCh[i].channel,
-                                                 transmitAudio2110.txAudioCh[i].stream,
+        txChannelConfig.channel         = transmitAudio2110.txAudioCh[i].channel;
+
+        rv = config2110.SetTxStreamConfiguration(transmitAudio2110.txAudioCh[i].stream,
                                                  txChannelConfig);
         if (!rv)
         {
@@ -774,8 +769,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         if (transmitAudio2110.txAudioCh[i].enable)
         {
-            rv = config2110.SetTxStreamEnable(transmitAudio2110.txAudioCh[i].channel,
-                                              transmitAudio2110.txAudioCh[i].stream,
+            rv = config2110.SetTxStreamEnable(transmitAudio2110.txAudioCh[i].stream,
                                               transmitAudio2110.txAudioCh[i].sfpEnable[0],
                                               transmitAudio2110.txAudioCh[i].sfpEnable[1]);
             if (!rv)

@@ -25,7 +25,7 @@
 	"transmitVideo2110":
 	[
 		{
-		    "designator":"channel1",
+            "stream":"video1",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.20.45.0",
             "sfp1RemotePort":6000,
@@ -41,7 +41,7 @@
 			"enable":"true"
 		},
 		{
-		    "designator":"channel2",
+            "stream":"video2",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.20.45.10",
             "sfp1RemotePort":6010,
@@ -57,7 +57,7 @@
 			"enable":"false"
 		},
 		{
-		    "designator":"channel3",
+            "stream":"video3",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.20.45.20",
             "sfp1RemotePort":6020,
@@ -73,7 +73,7 @@
 			"enable":"false"
 		},
 		{
-		    "designator":"channel4",
+            "stream":"video4",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.20.45.30",
             "sfp1RemotePort":6030,
@@ -92,8 +92,8 @@
 	"transmitAudio2110":
 	[
 		{
-		    "designator":"channel1",
             "stream":"audio1",
+		    "designator":"channel1",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.30.45.0",
             "sfp1RemotePort":6000,
@@ -111,8 +111,8 @@
 			"enable":"true"
 		},
 		{
-		    "designator":"channel2",
             "stream":"audio2",
+		    "designator":"channel2",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.30.45.10",
             "sfp1RemotePort":6010,
@@ -130,8 +130,8 @@
 			"enable":"false"
 		},
 		{
-		    "designator":"channel3",
             "stream":"audio3",
+		    "designator":"channel3",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.30.45.20",
             "sfp1RemotePort":6020,
@@ -149,8 +149,8 @@
 			"enable":"false"
 		},
 		{
-		    "designator":"channel4",
             "stream":"audio4",
+		    "designator":"channel4",
             "sfp1LocalPort":5000,
             "sfp1RemoteIPAddress":"239.30.45.30",
             "sfp1RemotePort":6030,
