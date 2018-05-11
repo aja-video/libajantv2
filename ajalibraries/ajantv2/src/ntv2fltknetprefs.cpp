@@ -108,7 +108,7 @@ CNTV2FLTKNetPrefs::restore(Fl_Preferences &pref, const char *configName,
 		{
 			// See if it is already there
 			bool foundIt = false;
-			for (int i = 0; i < numAvailableBoards; i++)
+			for (int i = 0; i < int(numAvailableBoards); i++)
 			{
 				if (memcmp(&availableBoards[i], &savedBoard, sizeof(NTV2ChoosableBoard)) == 0)
 				{
