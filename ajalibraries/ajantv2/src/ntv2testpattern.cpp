@@ -2268,7 +2268,7 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
 
             bool  bIsSD;
-            IsSDStandard(&bIsSD);
+            IsSDStandard(bIsSD);
 			switch(_fbFormat)
 			{
 	            case NTV2_FBF_10BIT_YCBCR:
@@ -2299,9 +2299,9 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 
 
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
@@ -2437,7 +2437,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
 					
             bool  bIsSD;
-            IsSDStandard(&bIsSD);
+            IsSDStandard(bIsSD);
 			switch(_fbFormat) 
 			{
 	            case NTV2_FBF_10BIT_YCBCR:
@@ -2519,7 +2519,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -2559,9 +2559,9 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
@@ -2666,9 +2666,9 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord outputFrame;
 		if ( _flipFlopPage )
-			GetPCIAccessFrame (_channel, &outputFrame);
+			GetPCIAccessFrame (_channel, outputFrame);
 		else
-			GetOutputFrame (_channel, &outputFrame);
+			GetOutputFrame (_channel, outputFrame);
 		if ( outputFrame > GetNumFrameBuffers())
 			outputFrame = 0;
 			
@@ -2706,9 +2706,9 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	UWord   unPackedWhiteBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 
@@ -2832,7 +2832,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -2880,9 +2880,9 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	ULWord   packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
@@ -2948,7 +2948,7 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	{
 		// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
@@ -2982,9 +2982,9 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
@@ -3087,7 +3087,7 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 	{
 		// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
@@ -3126,9 +3126,9 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
@@ -3282,7 +3282,7 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -3316,9 +3316,9 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
@@ -3413,7 +3413,7 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -3474,7 +3474,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 		size = GetPatternBufferSize();
     
     NTV2FrameGeometry fg;
-    GetFrameGeometry(&fg, _channel);
+    GetFrameGeometry(fg, _channel);
     
     SetDualLinkOutputEnable(_dualLinkOutputEnable );
     if (NTV2_IS_QUAD_FRAME_GEOMETRY(fg))
@@ -3495,13 +3495,13 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
 		// Transfer the test pattern into the active area of the frame buffer
 		NTV2Standard standard;
-		GetStandard(&standard, _channel);
+		GetStandard(standard, _channel);
 		NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 
 		ULWord totalHeight = formatDescriptor.numLines;
@@ -3538,9 +3538,9 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 ULWord CNTV2TESTPATTERNCLASS::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
 {
 	NTV2Standard standard;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg, _channel);
+	GetFrameGeometry(fg, _channel);
 	bool twoKby1080 = NTV2_IS_2K_1080_FRAME_GEOMETRY(fg);
 	bool fourKby2160 = false;
 	bool quadKby2160 = false;
@@ -3619,7 +3619,7 @@ int CNTV2TESTPATTERNCLASS::MakeSineWaveVideo(double radians, bool bChroma)
 void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord *packedBuffer, int numPixels)
 {
 	bool  bIsSD;
-    IsSDStandard(&bIsSD);
+    IsSDStandard(bIsSD);
 
 	switch(_fbFormat) 
 	{
@@ -3933,7 +3933,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 	
 		// get current frame buffer size
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;		// note: linePitch is in ULWords, not bytes!
@@ -3941,7 +3941,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 
 // Kludge for now..... (2K isn't part of the table yet)
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	if ( fg == NTV2_FG_2048x1080)
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
@@ -4024,7 +4024,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			

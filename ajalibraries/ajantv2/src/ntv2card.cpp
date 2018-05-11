@@ -35,7 +35,7 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 		if (IsBufferSizeSetBySW ())
 		{
 			NTV2Framesize fbSize;
-			GetFrameBufferSize (NTV2_CHANNEL1, &fbSize);
+			GetFrameBufferSize (NTV2_CHANNEL1, fbSize);
 			SetFrameBufferSize (fbSize);
 		}
 		else
@@ -43,8 +43,8 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 			NTV2FrameGeometry fg;
 			NTV2FrameBufferFormat format;
 
-			GetFrameGeometry (&fg);
-			GetFrameBufferFormat (NTV2_CHANNEL1, &format);
+			GetFrameGeometry (fg);
+			GetFrameBufferFormat (NTV2_CHANNEL1, format);
 
 			_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize (GetDeviceID (), fg, format);
 			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);

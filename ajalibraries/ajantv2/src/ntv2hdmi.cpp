@@ -206,9 +206,12 @@ bool CNTV2Card::SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace value)
 	return WriteRegister (kRegHDMIOutControl,  ULWord(value),  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace);
 }
 
-bool CNTV2Card::GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace * pOutValue)	
+bool CNTV2Card::GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue)	
 {	//	Register 125												Bit 8
-	return ReadRegister (kRegHDMIOutControl,  (ULWord*)pOutValue,  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace);
+	ULWord	value(0);
+	bool result (ReadRegister (kRegHDMIOutControl,  &value,  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace));
+	outValue = NTV2LHIHDMIColorSpace(value);
+	return result;
 }
 
 

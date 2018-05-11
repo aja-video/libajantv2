@@ -3056,8 +3056,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
     uint32_t				networkPathDiffCard;
     uint32_t                configErr;
 
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
     
     if (mCard->IsDeviceReady(true) == true)
     {
@@ -3626,8 +3626,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
 			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
 			
-			mCard->GetHDMIOutDownstreamColorSpace (&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (&bitDepth);
+			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
+			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
 			
 			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;

@@ -597,8 +597,8 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
 	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
