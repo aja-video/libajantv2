@@ -100,8 +100,6 @@ NTV2DeviceGetNumLTCInputs		1
 NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDo3GLevelConversion
 NTV2DeviceCanDoRGBLevelAConversion
-NTV2DeviceCanDoAudio2Channels
-NTV2DeviceCanDoAudio6Channels
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay		
 NTV2DeviceCanDoCapture				

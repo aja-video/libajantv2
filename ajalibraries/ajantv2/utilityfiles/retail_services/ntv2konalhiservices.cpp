@@ -1012,8 +1012,8 @@ void KonaLHiServices::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
 	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
@@ -1072,8 +1072,8 @@ void KonaLHiServices::SetDeviceMiscRegisters ()
 			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
 			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
 			
-			mCard->GetHDMIOutDownstreamColorSpace (&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (&bitDepth);
+			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
+			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
 			
 			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
@@ -1258,8 +1258,8 @@ void KonaLHiServices::SetDeviceMiscRegisters ()
 	NTV2Standard curr2Standard, new2Standard;
 	
 	// get current value
-	mCard->GetLHIVideoDACMode (&curr2Mode);	
-	mCard->GetLHIVideoDACStandard (&curr2Standard);
+	mCard->GetLHIVideoDACMode (curr2Mode);	
+	mCard->GetLHIVideoDACStandard (curr2Standard);
 	
 	if (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)	
 	{

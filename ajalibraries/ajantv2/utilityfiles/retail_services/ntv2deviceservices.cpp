@@ -830,7 +830,7 @@ NTV2VideoFormat DeviceServices::GetLockedInputVideoFormat()
 	const int32_t kLockSleepTimeMs	= 30;
 	
 	NTV2VideoFormat frameBufferVideoFormat;
-	mCard->GetVideoFormat(&frameBufferVideoFormat);
+	mCard->GetVideoFormat(frameBufferVideoFormat);
 	
 	// default output
 	NTV2VideoFormat outVideoFormat = frameBufferVideoFormat;
@@ -2936,7 +2936,7 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	const uint32_t kBytesPerUnit = 512;		// each hardware click is 64 bytes
     
 	NTV2FrameRate rate =  NTV2_FRAMERATE_UNKNOWN;
-	mCard->GetFrameRate(&rate);
+	mCard->GetFrameRate(rate);
     
 	double frate		   = GetFramesPerSecond(rate);
 	double samplesPerFrame = 48000.0 / frate;

@@ -2026,8 +2026,8 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 
 	// VPID
 	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
