@@ -773,7 +773,7 @@ int CNTV2Config2110::LeastCommonMultiple(int a,int b)
     return m;
 }
 
-bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const NTV2Stream stream, const tx_2110Config & txConfig)
+bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx_2110Config & txConfig)
 {
     bool        rv = true;
 
@@ -890,7 +890,7 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
         mDevice.WriteRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer,ilace);
 
         // end setup 4175 packetizer
-        SetTxFormat(channel, txConfig.videoFormat);
+        SetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
 
         // Generate and push the video SDP
         GenSDP(stream);
@@ -905,7 +905,7 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Channel channel, const 
 
         // audio select
         uint32_t aselect = ((uint32_t)txConfig.firstAudioChannel << 16 ) + (audioChans-1);
-        aselect = (channel << 24) + aselect;
+        // PSM fix this, channel should come into struct      aselect = (channel << 24) + aselect;
         uint32_t offset = (stream - NTV2_AUDIO1_STREAM) * 4;
         mDevice.WriteRegister(SAREK_2110_AUDIO_STREAMSELECT + offset, aselect);
 
@@ -1932,21 +1932,11 @@ NTV2Channel CNTV2Config2110::VideoStreamToChannel(const NTV2Stream stream)
     NTV2Channel channel;
     switch (stream)
     {
-        case NTV2_VIDEO1_STREAM:
-            channel = NTV2_CHANNEL1;
-            break;
-        case NTV2_VIDEO2_STREAM:
-            channel = NTV2_CHANNEL2;
-            break;
-        case NTV2_VIDEO3_STREAM:
-            channel = NTV2_CHANNEL3;
-            break;
-        case NTV2_VIDEO4_STREAM:
-            channel = NTV2_CHANNEL4;
-            break;
-        default:
-            channel = NTV2_CHANNEL_INVALID;
-            break;
+        case NTV2_VIDEO1_STREAM:    channel = NTV2_CHANNEL1;            break;
+        case NTV2_VIDEO2_STREAM:    channel = NTV2_CHANNEL2;            break;
+        case NTV2_VIDEO3_STREAM:    channel = NTV2_CHANNEL3;            break;
+        case NTV2_VIDEO4_STREAM:    channel = NTV2_CHANNEL4;            break;
+        default:                    channel = NTV2_CHANNEL_INVALID;     break;
     }
     return channel;
 }
