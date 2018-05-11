@@ -272,10 +272,10 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     //  Grab board in a shared environment
 	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
 		return AJA_STATUS_BUSY;							//	Another app is using the device
-	mDevice.GetEveryFrameServices (&mSavedTaskMode);	//	Save the current state before we change it
-    mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
+	mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
+    mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
     
-    mDeviceID = mDevice.GetDeviceID ();						//	Keep the device ID handy, as it's used frequently
+    mDeviceID = mDevice.GetDeviceID ();					//	Keep the device ID handy, as it's used frequently
     
     // Make sure this device has an M31
     if (!NTV2DeviceHasHEVCM31 (mDeviceID))

@@ -146,7 +146,7 @@ AJAStatus NTV2Player4K::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast <uint32_t> (AJAProcess::GetPid ())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
-		mDevice.GetEveryFrameServices (&mPreviousFrameServices);	//	Save the current service level
+		mDevice.GetEveryFrameServices (mPreviousFrameServices);	//	Save the current service level
 	}
 	mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);				//	Set OEM service level
 
@@ -1135,7 +1135,7 @@ uint32_t NTV2Player4K::AddTone (ULWord * audioBuffer)
 	NTV2AudioRate	audioRate;
 	ULWord			numChannels;
 
-	mDevice.GetFrameRate (&frameRate, mChannel);
+	mDevice.GetFrameRate (frameRate, mChannel);
 	mDevice.GetAudioRate (audioRate, mAudioSystem);
 	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
 
