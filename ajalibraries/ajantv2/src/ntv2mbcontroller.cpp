@@ -473,7 +473,7 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Stream stream)
 
     if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_RX_STREAM(stream))
     { 
-        uint32_t index = (int)stream + NTV2_MAX_NUM_STREAMS * (int)port;
+        uint32_t index = (int)stream + (NTV2_MAX_NUM_STREAMS * (int)port);
         uint32_t reg   = (index * sizeof(IGMPCB))/4;
         return reg;
     }
