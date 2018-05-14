@@ -1087,58 +1087,63 @@ public:
 	AJA_VIRTUAL bool		SetAlphaFromInput2Bit (ULWord inValue);
 	AJA_VIRTUAL bool		GetAlphaFromInput2Bit (ULWord & outValue);
 
-	AJA_VIRTUAL bool		SetPCIAccessFrame (NTV2Channel inChannel, ULWord inValue, bool inWaitForVertical = true);
-	AJA_VIRTUAL bool		GetPCIAccessFrame (NTV2Channel inChannel, ULWord & outValue);
+	AJA_VIRTUAL bool		SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVertical = true);
+	AJA_VIRTUAL bool		GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	/**
-		@brief		Sets the frame number of the frame to be output for the given FrameStore (expressed as an NTV2Channel).
-		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
-								and in playout mode.)
+		@brief		Sets the output frame number for the given channel. This identifies which particular frame
+					in device SDRAM will be used for playout after the next frame interrupt.
+		@brief		Sets the frame number of the frame to be output for the given FrameStore.
+		@param[in]	inChannel	Specifies the Frame Store of interest, expressed as an ::NTV2Channel.
 		@param[out]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
 								8MB or 16MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
+		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
+					and in playout mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
 		@note		Setting a new value takes effect at the next output VBI. For example, if line 300 of frame 5 is currently
 					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
 					until the output VBI fires after the last line of frame 5 has gone out the spigot.
+		@see		CNTV2Card::GetOutputFrame
 	**/
-	AJA_VIRTUAL bool		SetOutputFrame (NTV2Channel inChannel, ULWord inValue);
+	AJA_VIRTUAL bool		SetOutputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
 	/**
-		@brief		Answers with the current output frame number for the given FrameStore (expressed as an NTV2Channel).
+		@brief		Answers with the current output frame number for the given FrameStore (expressed as an ::NTV2Channel).
 		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
 								and in playout mode.)
 		@param[out]	outValue	Receives the current output frame number, a zero-based index into each 8MB or 16MB
 								block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetOutputFrame, vidop-fs
 	**/
-	AJA_VIRTUAL bool		GetOutputFrame (NTV2Channel inChannel, ULWord & outValue);
+	AJA_VIRTUAL bool		GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	/**
-		@brief		Sets the current input frame number for the given FrameStore (expressed as an NTV2Channel).
-		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
-								and in capture mode.)
-		@param[out]	inValue		Receives the current input frame number, a zero-based index into each 8MB or 16MB
-								block of SDRAM on the device.
+		@brief		Sets the current input frame number for the given channel. This identifies which particular frame
+					in device SDRAM will be written after the next frame interrupt.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+		@param[out]	inValue		Specifies the frame number in device memory to be written, which is a zero-based index
+								into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
-		@note		Setting a new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
+		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
+					and in capture mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
+		@note		The new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
 					currently being written in device memory at the instant this function is called with frame 6,
 					video won't be written into frame 6 in device memory until the input VBI fires after the last line
 					of frame 5 has been written.
 	**/
-	AJA_VIRTUAL bool		SetInputFrame (NTV2Channel inChannel, ULWord inValue);
+	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
 	/**
-		@brief		Answers with the current input frame number for the given FrameStore (expressed as an NTV2Channel).
-		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
-								and in capture mode.)
-		@param[out]	outValue	Receives the current input frame number. This number is a zero-based index into each
-								8MB or 16MB block of SDRAM on the device. If the designated FrameStore is routed from
-								an SDI or HDMI input (with no intervening widgets that add any frame delay), then the
-								input frame is also the frame that's currently being written into frame buffer memory
-								on the device.
+		@brief		Answers with the current input frame number for the given channel. This identifies which particular
+					frame in device SDRAM will be written after the next frame interrupt.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+								(The Frame Store should be enabled and set for capture mode.)
+		@param[out]	outValue	Receives the input frame number of the frame in device memory to be written, which is a
+								zero-based index into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool		GetInputFrame (NTV2Channel inChannel, ULWord & outValue);
+	AJA_VIRTUAL bool		GetInputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	AJA_VIRTUAL bool		SetDualLinkOutputEnable (bool inIsEnabled);
 	AJA_VIRTUAL bool		GetDualLinkOutputEnable (bool & outIsEnabled);
@@ -1154,25 +1159,42 @@ public:
 	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Retrieves the current VANC mode for the AJA device's Frame Store (channel).
+		@brief		Retrieves the current VANC mode for the given channel.
+		@param[out]	outVancMode		Receives the current ::NTV2VANCMode setting.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+									Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
-		@param[out]	outVancMode		Receives true if VANC is currently enabled for the given channel on the device.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest.
+		@see		CNTV2Card::SetVANCMode, vancframegeometries
 	**/
 	AJA_VIRTUAL bool		GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool		GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANCEnabled, NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Enables or disables the "VANC Shift Mode" feature for the given Frame Store (channel).
-		@param[in]	inChannel	Specifies the device FrameStore to be affected.
-		@param[in]	inMode		Specifies the new data shift mode. Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+		@brief		Enables or disables the "VANC Shift Mode" feature for the given channel.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+		@param[in]	inMode		Specifies the new data shift mode.
+								Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
 		@return		True if successful;  otherwise false.
-		@note		NTV2 devices only implement this feature for HD video formats (see \c NTV2_IS_HD_VIDEO_FORMAT macro).
-		@note		This only affects \c NTV2_FBF_8BIT_YCBCR pixel formats and only VANC lines (not visible raster lines).
-		@note		If enabled, be sure the device Frame Store's VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
-					\ref vancframegeometries
+		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device Frame Store is configured as follows:
+					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
+					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
+					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, vancframegeometries
 	**/
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
+
+	/**
+		@brief		Retrieves the current "VANC Shift Mode" feature for the given channel.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+		@param[out]	outValue	Receives the current ::NTV2VANCDataShiftMode setting.
+								If \c NTV2_VANCDATA_NORMAL, then bit shifting is disabled.
+								If \c NTV2_VANCDATA_8BITSHIFT_ENABLE, then it's enabled.
+		@return		True if successful;  otherwise false.
+		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device Frame Store is configured as follows:
+					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
+					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
+					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@see		CNTV2Card::SetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, vancframegeometries
+	**/
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);
 
 	AJA_VIRTUAL bool		SetPulldownMode (NTV2Channel inChannel, bool inValue);
@@ -2509,30 +2531,40 @@ public:
 	//	Wait for event
 	//
 	/**
-		@brief		Efficiently sleeps the calling thread/process until the next one (or more) output Vertical Blanking
-					Interrupt(s) for the given output channel occurs on the AJA device.
-		@param[in]	inChannel		Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@brief		Efficiently sleeps the calling thread/process until the next one or more field (interlaced video)
+					or frame (progressive or interlaced video) VBIs occur for the specified output channel.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+									Defaults to NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
+									supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
 		@param[in]	inRepeatCount	Specifies the number of output VBIs to wait for until returning. Defaults to 1.
 		@return		True if successful; otherwise false.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
+					See \ref deviceclockingandsync for more information.
+		@note		For interlaced video, callers that need to know whether the field or frame interrupt occurred should
+					call CNTV2Card::WaitForOutputFieldID instead.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
 					WaitForOutputVerticalInterrupt. This is historically different from Linux and MacOS, where the event
 					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
-					-	Call GetOutputVerticalInterruptCount before and after calling this function to verify that an
-						interrupt really occurred;
-					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
-						event before calling this function.
+					-	Call CNTV2Card::GetOutputVerticalInterruptCount before and after calling this function to verify
+						that an interrupt really occurred;
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to obtain the event \c HANDLE, and manually clear
+						it before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForOutputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
 	/**
-		@brief		Efficiently sleeps the calling thread/process until the next output VBI for the given field and output channel.
-		@param[in]	inFieldID	Specifies the field identifier of interest.
-		@param[in]	channel		Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@brief		Efficiently sleeps the calling thread/process until the next output VBI for the given field and output
+					channel.
+		@param[in]	inFieldID	Specifies the field identifier of interest. Use \c NTV2_FIELD0 to wait for the frame
+								interrupt of progressive or interlaced video. Use \c NTV2_FIELD1 to wait for the field
+								interrupt of interlaced video.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+								Defaults to NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
+								supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
 		@return		True if successful; otherwise false.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
-		@note		This function assumes an interlaced video format on the given channel on the device.
+					See \ref deviceclockingandsync for more information.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
 					WaitForOutputFieldID. This is historically different from Linux and MacOS, where the event
@@ -2542,12 +2574,13 @@ public:
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
 	**/
-	AJA_VIRTUAL bool	WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Efficiently sleeps the calling thread/process until the next input Vertical Blanking Interrupt
-					for the given input channel occurs on the AJA device.
-		@param[in]	inChannel		Identifies the Frame Store of interest, specified as an NTV2Channel. Defaults to NTV2_CHANNEL1.
+		@brief		Efficiently sleeps the calling thread/process until the next one or more field (interlaced video)
+					or frame (progressive or interlaced video) VBIs occur for the specified input channel.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+									Defaults to NTV2_CHANNEL1.
 		@param[in]	inRepeatCount	Specifies the number of input VBIs to wait for until returning. Defaults to 1.
 		@return		True if successful; otherwise false.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
@@ -2563,12 +2596,14 @@ public:
 	AJA_VIRTUAL bool	WaitForInputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
 	/**
-		@brief		Efficiently sleeps the calling thread/process until the next input VBI for the given field and input channel.
-		@param[in]	inFieldID	Specifies the field identifier of interest.
-		@param[in]	channel		Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@brief		Efficiently sleeps the calling thread/process until the next input VBI for the given field and input
+					channel.
+		@param[in]	inFieldID	Specifies the field identifier of interest. Use \c NTV2_FIELD0 to wait for the frame
+								interrupt of progressive or interlaced video. Use \c NTV2_FIELD1 to wait for the field
+								interrupt of interlaced or Psf video.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+								Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
-		@note		This function assumes an interlaced video format on the given channel on the device. Calling this
-					function with a progressive signal will give unpredictable results (although 24psf works).
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a previous call to
@@ -2579,7 +2614,7 @@ public:
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
 	**/
-	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 
 	#if !defined (NTV2_DEPRECATE)
@@ -3603,7 +3638,7 @@ public:
 	/**
 		@brief		Sets the RGB range for the given CSC.
 		@param[in]	inRange		Specifies the new RGB range (NTV2_CSC_RGB_RANGE_FULL or NTV2_CSC_RGB_RANGE_SMPTE).
-		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an NTV2Channel.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to CSC 0 (NTV2_CHANNEL1).
 		@return		True if successful;  otherwise false.
@@ -3613,7 +3648,7 @@ public:
 	/**
 		@brief		Answers with the current RGB range being used by a given CSC.
 		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
-		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an NTV2Channel.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to CSC 0 (NTV2_CHANNEL1).
 		@return		True if successful;  otherwise false.
@@ -5699,7 +5734,8 @@ public:
 
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetAudioOutputMonitorSource				(NTV2AudioMonitorSelect * pOutValue,					NTV2Channel * pOutChannel = NULL)				);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
-	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetEnableVANCData						(bool * pOutIsEnabled,	bool * pOutIsWideVANCEnabled = NULL,  const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetEnableVANCData						(bool * pOutIsEnabled,	bool * pOutIsWideVANCEnabled = NULL,  const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use CNTV2Card::GetVANCMode instead.
+	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetEnableVANCData						(bool & outIsEnabled, bool & outIsWideVANCEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use CNTV2Card::GetVANCMode instead.
 #endif	//	NTV2_DEPRECATE_14_3
 
 protected:

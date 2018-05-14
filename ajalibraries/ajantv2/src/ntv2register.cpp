@@ -857,8 +857,6 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	GetStandard(standard, channel);
 	NTV2FrameRate frameRate;
 	GetFrameRate(frameRate, channel);
-//	bool vancEnabled, wideVANCEnabled;							// UNUSED
-//	GetEnableVANCData (vancEnabled, wideVANCEnabled, channel);	//	UNUSED
 
 	
 #if !defined (NTV2_DEPRECATE)
@@ -2766,35 +2764,35 @@ bool CNTV2Card::FlipFlopPage(NTV2Channel channel )
 }
 
 
-bool CNTV2Card::GetPCIAccessFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return ReadRegister (gChannelToPCIAccessFrameRegNum [inChannel], &outValue);
 }
 
-bool CNTV2Card::SetOutputFrame (NTV2Channel inChannel, ULWord value)
+bool CNTV2Card::SetOutputFrame (const NTV2Channel inChannel, const ULWord value)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return WriteRegister (gChannelToOutputFrameRegNum [inChannel], value);
 }
 
-bool CNTV2Card::GetOutputFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return ReadRegister (gChannelToOutputFrameRegNum [inChannel], &outValue);
 }
 
-bool CNTV2Card::SetInputFrame (NTV2Channel inChannel, ULWord value)
+bool CNTV2Card::SetInputFrame (const NTV2Channel inChannel, const ULWord value)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return WriteRegister (gChannelToInputFrameRegNum [inChannel], value);
 }
 
-bool CNTV2Card::GetInputFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
@@ -3761,33 +3759,33 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 }
 
 
-bool CNTV2Card::GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANC, NTV2Channel inChannel)
-{
-	NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
-	outIsEnabled = outIsWideVANC = false;
-	if (!GetVANCMode (vancMode, inChannel))
-		return false;
-	if (!NTV2_IS_VALID_VANCMODE (vancMode))
-		return false;
-	outIsEnabled = NTV2_IS_VANCMODE_TALL (vancMode);
-	outIsWideVANC = NTV2_IS_VANCMODE_TALLER (vancMode);
-	return true;
-}
-
-
 #if !defined(NTV2_DEPRECATE_14_3)
-bool CNTV2Card::GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled, NTV2Channel inChannel)
-{
-	bool	isEnabled (false), isWide (false);
-	if (!pOutIsEnabled)
-		return false;
-	if (!GetEnableVANCData (isEnabled, isWide, inChannel))
-		return false;
-	*pOutIsEnabled = isEnabled;
-	if (pOutIsWideVANCEnabled)
-		*pOutIsWideVANCEnabled = isWide;
-	return true;
-}
+	bool CNTV2Card::GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANC, const NTV2Channel inChannel)
+	{
+		NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
+		outIsEnabled = outIsWideVANC = false;
+		if (!GetVANCMode (vancMode, inChannel))
+			return false;
+		if (!NTV2_IS_VALID_VANCMODE (vancMode))
+			return false;
+		outIsEnabled = NTV2_IS_VANCMODE_TALL (vancMode);
+		outIsWideVANC = NTV2_IS_VANCMODE_TALLER (vancMode);
+		return true;
+	}
+
+
+	bool CNTV2Card::GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled, NTV2Channel inChannel)
+	{
+		bool	isEnabled (false), isWide (false);
+		if (!pOutIsEnabled)
+			return false;
+		if (!GetEnableVANCData (isEnabled, isWide, inChannel))
+			return false;
+		*pOutIsEnabled = isEnabled;
+		if (pOutIsWideVANCEnabled)
+			*pOutIsWideVANCEnabled = isWide;
+		return true;
+	}
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
