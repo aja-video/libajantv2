@@ -179,8 +179,6 @@ void NTV2FrameGrabber::GrabCaptions (void)
 			bool			gotCaptionPacket	(false);
 			CaptionData		captionData;		//	The two byte pairs (one pair per field) our 608 decoder is looking for
 			ostringstream	oss;				//	DEBUG
-			bool	isTall (false), isTaller (false);
-			mNTV2Card.GetEnableVANCData (isTall, isTaller, mChannel);
 
 			//	See what's in the AUTOCIRCULATE_TRANSFER's F1 & F2 anc buffers...
 			AJAAncillaryList	ancPacketsF1, ancPacketsF2;

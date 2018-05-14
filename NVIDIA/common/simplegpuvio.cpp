@@ -51,10 +51,9 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	mChannel = desc->channel;
 
 	// Get source video info
-	bool isVANCEnabled;
-	bool isVANCWide;
-	mBoard->GetEnableVANCData(isVANCEnabled, isVANCWide);
-	mActiveVideoSize = GetVideoActiveSize(desc->videoFormat, desc->bufferFormat, isVANCEnabled, isVANCWide);
+	NTV2VANCMode vancMode;
+	mBoard->GetVANCMode(vancMode);
+	mActiveVideoSize = GetVideoActiveSize(desc->videoFormat, desc->bufferFormat, vancMode);
 	mActiveVideoHeight = GetDisplayHeight(desc->videoFormat);
 	mActiveVideoPitch = mActiveVideoSize / mActiveVideoHeight;
 	mTransferLines = mActiveVideoHeight / s_iSubFrameCount;
