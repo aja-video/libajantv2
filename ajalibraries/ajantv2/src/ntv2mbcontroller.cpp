@@ -231,7 +231,7 @@ bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
     return false;
 }
 
-bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
+bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Stream stream, string & MACaddress)
 {
     if ( (getFeatures() & SAREK_MB_PRESENT) == 0)
     return true;
@@ -246,7 +246,7 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NT
         if (!rv) return false;
 
         mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
-        eArpState as = GetRemoteMACFromArpTable(remote_IPAddress,port,channel,stream,MACaddress);
+        eArpState as = GetRemoteMACFromArpTable(remote_IPAddress, port, stream, MACaddress);
         switch (as)
         {
         case ARP_VALID:
@@ -267,7 +267,7 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NT
     return false;
 }
 
-eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, string & MACaddress)
+eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Stream stream, string & MACaddress)
 {
     if (!(getFeatures() & SAREK_MB_PRESENT))
         return ARP_VALID;
@@ -276,7 +276,6 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
             (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
             remote_IPAddress.c_str(),
             (int)port,
-            (int)channel,
             (int)stream);
     bool rv = sendMsg(500);
     if (!rv)

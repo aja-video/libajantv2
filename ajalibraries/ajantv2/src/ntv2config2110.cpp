@@ -1604,11 +1604,11 @@ bool CNTV2Config2110::GetMACAddress(const eSFP port, const NTV2Stream stream, st
             struct in_addr addr;
             addr.s_addr  = NTV2EndianSwap32(nc.ipc_gateway);
             string gateIp = inet_ntoa(addr);
-            rv = GetRemoteMAC(gateIp, port, VideoStreamToChannel(stream), stream, macAddr);
+            rv = GetRemoteMAC(gateIp, port, stream, macAddr);
         }
         else
         {
-            rv = GetRemoteMAC(remoteIP, port, VideoStreamToChannel(stream), stream, macAddr);
+            rv = GetRemoteMAC(remoteIP, port, stream, macAddr);
         }
         if (!rv)
         {

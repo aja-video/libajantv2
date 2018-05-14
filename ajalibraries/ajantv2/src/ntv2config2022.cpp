@@ -866,7 +866,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
         // Get or generate a Mac address if we have 2022-7 enabled.
         if (txConfig.sfp2Enable)
         {
-            rv = GetMACAddress(SFP_2, channel, NTV2_VIDEO1_STREAM, txConfig.sfp2RemoteIP,hi,lo);
+            rv = GetMACAddress(SFP_2, VideoChannelToStream(channel), txConfig.sfp2RemoteIP,hi,lo);
             if (!rv) return false;
             WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
             WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
@@ -915,7 +915,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 
     if (txConfig.sfp1Enable)
     {
-        rv = GetMACAddress(SFP_1, channel, NTV2_VIDEO1_STREAM, txConfig.sfp1RemoteIP,hi,lo);
+        rv = GetMACAddress(SFP_1, VideoChannelToStream(channel), txConfig.sfp1RemoteIP,hi,lo);
         if (!rv) return false;
         WriteChannelRegister(kReg2022_6_tx_dest_mac_low_addr + baseAddr,lo);
         WriteChannelRegister(kReg2022_6_tx_dest_mac_hi_addr  + baseAddr,hi);
@@ -1506,7 +1506,7 @@ void CNTV2Config2022::ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseAd
 }
 
 
-bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
+bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
 {
     uint32_t destIp = inet_addr(remoteIP.c_str());
     destIp = NTV2EndianSwap32(destIp);
@@ -1541,15 +1541,15 @@ bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Channel channel, NTV2Stream st
             struct in_addr addr;
             addr.s_addr  = NTV2EndianSwap32(nc.ipc_gateway);
             string gateIp = inet_ntoa(addr);
-            rv = GetRemoteMAC(gateIp, sfp, channel, stream, macAddr);
+            rv = GetRemoteMAC(gateIp, sfp, stream, macAddr);
         }
         else
         {
-            rv = GetRemoteMAC(remoteIP, sfp, channel, stream, macAddr);
+            rv = GetRemoteMAC(remoteIP, sfp, stream, macAddr);
         }
         if (!rv)
         {
-            SetTxChannelEnable(channel, false); // stop transmit
+            SetTxChannelEnable(VideoStreamToChannel(stream), false); // stop transmit
             mIpErrorCode = NTV2IpErrCannotGetMacAddress;
             return false;
         }
@@ -1625,22 +1625,26 @@ NTV2Stream CNTV2Config2022::VideoChannelToStream(const NTV2Channel channel)
     NTV2Stream stream;
     switch (channel)
     {
-        case NTV2_CHANNEL1:
-            stream = NTV2_VIDEO1_STREAM;
-            break;
-        case NTV2_CHANNEL2:
-            stream = NTV2_VIDEO2_STREAM;
-            break;
-        case NTV2_CHANNEL3:
-            stream = NTV2_VIDEO3_STREAM;
-            break;
-        case NTV2_CHANNEL4:
-            stream = NTV2_VIDEO4_STREAM;
-            break;
-        default:
-            stream = NTV2_STREAM_INVALID;
-            break;
+        case NTV2_CHANNEL1:     stream = NTV2_VIDEO1_STREAM;    break;
+        case NTV2_CHANNEL2:     stream = NTV2_VIDEO2_STREAM;    break;
+        case NTV2_CHANNEL3:     stream = NTV2_VIDEO3_STREAM;    break;
+        case NTV2_CHANNEL4:     stream = NTV2_VIDEO4_STREAM;    break;
+        default:                stream = NTV2_STREAM_INVALID;   break;
     }
     return stream;
+}
+
+NTV2Channel CNTV2Config2022::VideoStreamToChannel(const NTV2Stream stream)
+{
+    NTV2Channel channel;
+    switch (stream)
+    {
+        case NTV2_VIDEO1_STREAM:    channel = NTV2_CHANNEL1;            break;
+        case NTV2_VIDEO2_STREAM:    channel = NTV2_CHANNEL2;            break;
+        case NTV2_VIDEO3_STREAM:    channel = NTV2_CHANNEL3;            break;
+        case NTV2_VIDEO4_STREAM:    channel = NTV2_CHANNEL4;            break;
+        default:                    channel = NTV2_CHANNEL_INVALID;     break;
+    }
+    return channel;
 }
 

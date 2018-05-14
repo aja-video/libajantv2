@@ -116,7 +116,7 @@ protected:
     // all these methods block until response received or timeout
     bool SetMBNetworkConfiguration(eSFP port, std::string ipaddr, std::string netmask,std::string gateway);
     bool DisableNetworkInterface(eSFP port);
-    bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
+    bool GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Stream stream, std::string & MACaddress);
     bool SetIGMPVersion(uint32_t version);
     bool FetchGrandMasterInfo(std::string & grandmasterInfo);
 
@@ -150,7 +150,7 @@ protected:
 
 
 private:
-    eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Channel channel, NTV2Stream stream, std::string & MACaddress);
+    eArpState GetRemoteMACFromArpTable(std::string remote_IPAddress, eSFP port, NTV2Stream stream, std::string & MACaddress);
     bool SendArpRequest(std::string remote_IPAddress, eSFP port);
 
     void splitResponse(const std::string response, std::vector<std::string> & results);
