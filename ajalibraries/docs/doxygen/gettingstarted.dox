@@ -5,7 +5,7 @@
 
 @note	Only registered OEMs who have agreed to the AJA OEM Developer agreement are authorized to download and use the NTV2 SDK.
 
-Registered OEMs are given login credentials to access AJA's SDK support site, which can be securely accessed using any modern
+Registered OEMs are given login credentials to access AJA’s SDK support site, which can be securely accessed using any modern
 web browser at <https://sdksupport.aja.com/>.
 
 -#	Log in to the <a href="https://sdksupport.aja.com/">SDK support site</a> using the credentials that were provided by AJA.
@@ -84,7 +84,7 @@ These can be built using the provided Visual Studio project files.
 On Linux, except for the proprietary libraries, pre-built versions of the static libraries are not provided.
 They must be built using the provided Makefiles. Follow the instructions below (\ref gs-linuxsdkbuild).
 
-@note	Please avoid deriving subclasses from AJA-provided classes.
+@note	Avoid deriving subclasses from AJA-provided classes.
 		AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
 
 
@@ -93,61 +93,111 @@ They must be built using the provided Makefiles. Follow the instructions below (
 <hr size="50px" />
 @section	gs-compatibility	SDK Forward and Backward Compatibility
 
-The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA. These products ceased being dependent
-on NTV2 many years ago, but their legacy symbols remained in the SDK.
+The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA.
+These products ceased being dependent on NTV2 many years ago, but unfortunately, their legacy symbols remained
+in the SDK.
 
-In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit boards fixed in a specific motherboard
-slot with barely enough I/O capability to handle a single stream of 4:2:2 YUV SD video. Today's devices are hot-pluggable, support multiple channels,
-each with its own signal format, up to 4Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions,
-data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult for OEM developers to quickly get up to speed.
+In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit
+boards fixed in a specific motherboard slot with barely enough I/O capability to handle a single stream of 4:2:2
+YUV SD video. Today’s devices are hot-pluggable, support multiple channels, each with its own signal format, up
+to 4Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions,
+data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult
+for OEM developers to quickly get up to speed.
 
-@subsection	gs-deprecatemacro	The 'NTV2_DEPRECATE' Macros
+@subsection	gs-deprecatemacro	The ‘NTV2_DEPRECATE’ Macros
 
-Starting with the 11.3 SDK, AJA introduced the <b>NTV2_DEPRECATE</b> macro to finally start to address this problem. Most of the obsolete SDK functions,
-data types and constants were gathered under @code #if !defined (NTV2_DEPRECATE) @endcode preprocessor instructions.
+Starting with the 11.3 SDK, AJA introduced the first <b>NTV2_DEPRECATE</b> macro, and gathered many of the
+obsolete SDK functions, data types and constants under preprocessor \c #ifdef blocks:
+@code
+#if !defined(NTV2_DEPRECATE)
+	. . .
+	// Obsolete constants, data types and functions
+	. . .
+#endif  //  !defined(NTV2_DEPRECATE)
+@endcode
 
-This means that if the <b>NTV2_DEPRECATE</b> macro is undefined, then nothing has changed, and existing code that relies on the old, obsolete functions,
-data types and constants should continue to compile, link and run.
+This means that if the \c NTV2_DEPRECATE macro is undefined, then existing code that relies on the old APIs
+will continue to compile, link and run.  If the \c NTV2_DEPRECATE macro is defined, then the obsolete APIs
+disappear from the compilation, and build errors will result if they’re used.
 
-If, however, the '<b>NTV2_DEPRECATE</b>' macro is defined, then the obsolete functions, data types and constants disappear from the compilation, and build
-errors will result if they are used.
+Deprecation history:
+-	<b>SDK 11.3:</b> \c NTV2_DEPRECATE macro introduced (but not defined anywhere).
+-	<b>SDKs 11.3 - 12.3:</b> Shipped libraries built with old APIs intact (i.e. \c NTV2_DEPRECATE undefined, by default).
+-	<b>SDK 12.4:</b> \c NTV2_DEPRECATE macro first defined in <b>ajatypes.h</b> header file. This was the first SDK
+	that jettisoned the old APIs by default.
+-	<b>SDK 12.5:</b> \c NTV2_DEPRECATE_12_5 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	CNTV2SignalRouter’s ‘addWithValue’ and ‘AddConnection’ methods that accepted NTV2RoutingEntry’s.
+-	<b>SDK 12.6:</b> \c NTV2_DEPRECATE_12_6 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	The old AutoCirculate APIs (InitAutoCirculate, StartAutoCirculate, etc.)
+	-	Jettisoned some old NTV2DeviceID’s
+	-	GetFormatDescriptor global functions.
+-	<b>SDK 12.7:</b> \c NTV2_DEPRECATE_12_7 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	CNTV2Card’s runtime bitfile-swapping functions.
+	-	CNTV2Card::DisplayNTV2Error.
+	-	The old virtual register constant names (to force use of new “kVReg…” names).
+-	<b>SDK 13.0:</b> \c NTV2_DEPRECATE_13_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	NTV2FormatDescriptor constructors with bools for wide & tall VANC and 2Kx1080.
+	-	GetFormatDescriptor global functions.
+	-	\c kRegAuxInterruptDelay and \c kRegReserved89 registers got redeployed as \c kRegBitfileDate and \c kRegBitfileDate, respectively.
+	-	\c Fill8BitYCbCrVideoFrame and \c Fill10BitYCbCrVideoFrame utility functions.
+	-	\c GetVideoActiveSize and \c GetVideoWriteSize utility functions that accept bools for wide & tall VANC.
+-	<b>SDK 13.1:</b> \c NTV2_DEPRECATE_13_1 macro defined in <b>ajatypes.h</b>.
+-	<b>SDK 14.0:</b> \c NTV2_DEPRECATE_14_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	CNTV2Card’s RP188 functions that use RP188_STRUCT’s.
+	-	Retired several mis-named NTV2DeviceID’s.
+-	<b>SDK 14.1:</b> \c NTV2_DEPRECATE_14_1 macro defined in <b>ajatypes.h</b>.
+-	<b>SDK 14.2:</b> \c NTV2_DEPRECATE_14_2 and \c NTV2_DEPRECATE_14_2 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	AJAAncillaryData::SetLocationVideoStream
+	-	The 3-parameter variant of AJAAncillaryList::AddVANCData.
+	-	AJA CC library’s caption logging control flags.
 
-SDKs prior to 12.4 shipped with libraries built with the 'NTV2_DEPRECATE' macro undefined.
+To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define \c NTV2_DEPRECATE…
+line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
 
-SDK 12.4 and later shipped with the 'NTV2_DEPRECATE' macro defined in the 'ajatypes.h' header file.
-This is the first SDK that jettisoned the old APIs in its default state.
 
-To build with the obsolete APIs, the @code #define NTV2_DEPRECATE @endcode line in 'ajatypes.h' must be removed or commented out,
-then the 'classes' library will need to be rebuilt.
+@note	It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks or unexpected results will occur.
+		For example, do this:
+		@code
+		#define NTV2_DEPRECATE
+		#define NTV2_DEPRECATE_12_5
+		//#define NTV2_DEPRECATE_12_6
+		//#define NTV2_DEPRECATE_12_7
+		. . .
+		@endcode
+		… and not this:
+		@code
+		#define NTV2_DEPRECATE
+		//#define NTV2_DEPRECATE_12_5
+		//#define NTV2_DEPRECATE_12_6
+		#define NTV2_DEPRECATE_12_7
+		. . .
+		@endcode
 
-Starting with SDK 12.5, the '<b>NTV2_DEPRECATE_12_5</b>' macro has also been defined in 'ajatypes.h'.
-Going forward, all API deprecations that are new to that SDK can be reverted by uncommenting the respective \c NTV2_DEPRECATE_… macro.
-
-@note	Do not undefine \c NTV2_DEPRECATE while leaving \c NTV2_DEPRECATE_12_5 (or subsequent macros) defined.
-		Unexpected results — probably bad ones — will occur.
-
-@note	AJA will, at some point, remove the deprecated symbols and APIs in a future SDK.
+@note	AJA is planning to remove all deprecated symbols and APIs up through SDK 13.1 in SDK 15.0.
 		Please prepare for this by porting your code to the latest SDK.
 		The <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/186" target="_kb">NTV2 SDK Porting Guide</a> can help you.
 
 
 @subsubsection		gs-condcompsdkvers	Conditional Compilation Based on NTV2 SDK Version
 
-The NTV2 SDK now contains its version information as symbols defined in 'ntv2enums.h' (located inside 'ntv2projects/includes'). It defines the following symbols:
--	<b>AJA_NTV2_SDK_VERSION_MAJOR</b>	The SDK's major version number (an unsigned numeric constant).
--	<b>AJA_NTV2_SDK_VERSION_MINOR</b>	The SDK's minor version number (an unsigned numeric constant).
--	<b>AJA_NTV2_SDK_VERSION_POINT</b>	The SDK's “point” version number (an unsigned numeric constant).
+The NTV2 SDK now contains its version information as symbols defined in <b>ajatypes.h</b> (located inside <b>ajalibraries/ajantv2/includes</b>).
+It defines the following symbols:
+-	<b>AJA_NTV2_SDK_VERSION_MAJOR</b>	The SDK’s major version number (an unsigned numeric constant).
+-	<b>AJA_NTV2_SDK_VERSION_MINOR</b>	The SDK’s minor version number (an unsigned numeric constant).
+-	<b>AJA_NTV2_SDK_VERSION_POINT</b>	The SDK’s “point” version number (an unsigned numeric constant).
 -	<b>AJA_NTV2_SDK_BUILD_NUMBER</b>	The SDK build number (an unsigned numeric constant).
 -	<b>AJA_NTV2_SDK_BUILD_DATETIME</b>	The date and time the SDK was built, a string literal of the form “MM/DD/YYYY +/-Z:hh:mm:ss”,
-	where MM is the 2-digit month (01 thru 12), DD is the 2-digit day number, YYYY is the 4-digit year, +/-Z is the number of hours relative to UTC,
-	'hh' is the 2-digit hour (0 thru 23), 'mm' is the number of minutes past the hour (0 thru 59), and 'ss' is the number of seconds past the minute (0 thru 59).
--	<b>AJA_NTV2_SDK_BUILD_TYPE</b>	The SDK build type, a string literal containing a single character, where “d” means “development”,
-	“a” means “alpha”, “b” means “beta” and the empty string means “release”.
--	<b>AJA_NTV2_SDK_VERSION</b>	An unsigned integer value built from the SDK version components that can be reliably compared with other version integer values.
-There's also a convenient macro for testing which SDK version is being used at compile-time:
+	where <b>MM</b> is the 2-digit month (01 thru 12), <b>DD</b> is the 2-digit day number, <b>YYYY</b> is the 4-digit year, <b>+/-Z</b>
+	is the number of hours relative to UTC, <b>hh</b> is the 2-digit hour (0 thru 23), <b>mm</b> is the number of minutes past the hour
+	(0 thru 59), and <b>ss</b> is the number of seconds past the minute (0 thru 59).
+-	<b>AJA_NTV2_SDK_BUILD_TYPE</b>	The SDK build type, a string literal containing a single character, where <b>d</b> means “development”,
+	<b>a</b> means “alpha”, <b>b</b> means “beta” and the empty string means “release”.
+-	<b>AJA_NTV2_SDK_VERSION</b>	An unsigned integer value built from the SDK version components that can be reliably compared with other
+	version integer values.
+There’s also a convenient macro for testing which SDK version is being used at compile-time:
 	-	<b>AJA_NTV2_SDK_VERSION_AT_LEAST(major, minor)</b>	Yields “true” if the major and minor version numbers of the current SDK being compiled
 		are at least (greater than or equal to) the specified major and minor values, respectively.
-		To use this macro, first test for its existence. If it doesn't exist, the SDK being compiled is earlier than 12.0.
+		To use this macro, first test for its existence. If it doesn’t exist, the SDK being compiled is earlier than 12.0.
 		If it does exist, call it with the minimum version of the required SDK:
 @code
 	. . .
@@ -159,6 +209,7 @@ There's also a convenient macro for testing which SDK version is being used at c
 	#endif   //  if defined (AJA_NTV2_SDK_VERSION_AT_LEAST)
 @endcode
 
+
 @subsubsection		gs-backwardcomp		Backward Compatibility
 
 AJA always recommends that NTV2-based applications be built from the same SDK version as the installed driver they will be using.
@@ -166,6 +217,7 @@ AJA always recommends that NTV2-based applications be built from the same SDK ve
 @warning	While AJA always tries to maintain backward compatibility between newer SDKs and older drivers, AJA cannot guarantee correct
 			operation of applications built from an older SDK running on a newer version driver, nor applications built from a newer SDK
 			running on an older version driver.
+
 
 @subsubsection		gs-forwardcomp		Firmware and Device Features
 
@@ -185,12 +237,12 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 	-	<tt>g++</tt>
 	-	<tt>libasound2</tt>
 	-	<tt>libsound2-dev</tt>.
-	Refer to your Linux distro's documentation for the correct utility for managing packages.
+	Refer to your Linux distro’s documentation for the correct utility for managing packages.
 	Note that package managers often install dependent packages, so it may not be necessary to explicitly load all the packages
 	in the aforementioned list. (The Knowledgebase article from which the SDK was downloaded is authoritative for this information.)
 -#	To build the <a href="https://doc.qt.io/" target="_qt">Qt</a>-based demo applications, you’ll need to install <a href="https://doc.qt.io/" target="_qt">Qt</a>
 	(the <tt>qt5-dev-tools</tt> package).
-	-	If your Linux distro's package manager can't get it, AJA recommends downloading and building <a href="https://doc.qt.io/" target="_qt">Qt</a> directly from sources.
+	-	If your Linux distro’s package manager can’t get it, AJA recommends downloading and building <a href="https://doc.qt.io/" target="_qt">Qt</a> directly from sources.
 	-	For more information about <a href="https://doc.qt.io/" target="_qt">Qt</a>, visit <http://qt.digia.com/>.
 	-	Be sure the path to <a href="https://doc.qt.io/" target="_qt">Qt</a>’s <b>bin</b> directory is in the current path.
 -#	Using a terminal, change to the \c ntv2libraries/ajantv2/build directory in the SDK:
@@ -212,6 +264,7 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 @note	On CentOS (and possibly other Linux variants), the DVP demo app “dvplowlatencydemo” won’t run unless the \c libdvp.so
 		shared library is copied into \c /usr/lib64.
 
+
 @subsection		gs-macsdkbuild	Building on MacOS
 
 On MacOS, the device driver is normally provided from the AJA Software installer, while the libraries are provided pre-built in the <tt>sdk/lib</tt> folder.
@@ -230,6 +283,7 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 		If you use the \ref ajaanc and/or \ref ajacc, AJA supplies libc++-compatible versions of these libraries inside the \c lib/libc++11 folder.
 		Swap them with their counterparts in the \c lib folder.
 
+
 @subsection		gs-winsdkbuild	Building on Windows
 
 On Windows, the device driver is normally installed from the provided \c .msi, and the libraries are provided pre-built in the \c sdk\\lib folder.
@@ -240,6 +294,7 @@ However, the \ref ajantv2 source code is provided, and the libraries can be buil
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
 -#	Build the \ref ajantv2.
 Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
+
 
 @subsection		gs-qtbuild	Building With Qt
 
@@ -255,14 +310,14 @@ To get started, look for the <b>build</b> folder in the SDK:
 
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> — The extracted SDK folder.
 	-	<b>build</b> — This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
-		-	<b>_ntv2demos.pro</b> — This is the "solution file" or "project file" that builds everything — the libraries and the demonstration applications.
+		-	<b>_ntv2demos.pro</b> — This is the “solution file” or “project file” that builds everything — the libraries and the demonstration applications.
 		-	<b>ajaanc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
 		-	<b>ajabase</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
 		-	<b>ajacc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
 		-	<b>ajantv2</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
 		-	<b>config.pri</b> — This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
-		-	<b>libs.pri</b> — A helper <b>.pri</b> used by most of the <b>.pro</b>'s to simplify adding libraries and library dependencies.
-		-	<b>local_config.pri</b> — An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It's provided as an example to show how to produce <b>Debug</b> builds by default.
+		-	<b>libs.pri</b> — A helper <b>.pri</b> used by most of the <b>.pro</b>’s to simplify adding libraries and library dependencies.
+		-	<b>local_config.pri</b> — An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It’s provided as an example to show how to produce <b>Debug</b> builds by default.
 		-	<b>ntv2demos</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
 
 @par	Building with qmake/make:
@@ -320,14 +375,14 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 -	Add the following header search paths:
 	-	\c sdkdir/ajalibraries/ajantv2/includes
 	-	\c sdkdir/ajalibraries/ajantv2/src/mac
-	-	\c sdkdir/ajalibraries/ajabase (only if "ajabase" is needed)
+	-	\c sdkdir/ajalibraries/ajabase (only if <b>ajabase</b> is needed)
 	-	\c sdkdir/ajalibraries/ajacc (only if the AJA Captioning Library is needed)
 	-	\c sdkdir/ajalibraries/ajaanc (only if the AJA ancillary data library is needed)
 -	It is not necessary to always search “user” header paths.
 -	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	Add the following library search paths:
 	-	\c sdkdir/lib
--	Add the following to the "Other Linker Flags" setting:
+-	Add the following to the “Other Linker Flags” setting:
 	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
 	-	\c -lajabase (Release) or <b>-lajabased</b> (Debug), if needed
 	-	\c -lajacc, if the AJA captioning library is needed

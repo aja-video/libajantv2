@@ -2046,8 +2046,8 @@ void CNTV2KonaFlashProgram::ProgramCustom ( const char *sCustomFileName, const u
                 throw "Unable to open file";
             }
 
-            writeData.resize(sz);
-            customSize = fread(&writeData[0], 1, sz, fp);
+            writeData.resize(size_t(sz));
+            customSize = fread(&writeData[0], 1, size_t(sz), fp);
             if (customSize == 0) {
                 fclose(fp);
                 throw "Couldn't read any data from custom file";

@@ -836,7 +836,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 {
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(&mode);
+	GetEveryFrameServices(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #endif
@@ -1490,7 +1490,7 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 {
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(&mode);
+	GetEveryFrameServices(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #else

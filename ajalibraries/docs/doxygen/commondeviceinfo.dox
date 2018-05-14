@@ -696,13 +696,15 @@
 	-	Devices that support 6Gbps or higher SDI have “12G” SDI input widgets — \c NTV2_Wgt12GSDIIn1, \c NTV2_Wgt12GSDIIn2, etc.
 	-	3Gbps SDI inputs have two output crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
 		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used \c NTV2_WgtSDIIn2 for DS1 and \c NTV2_WgtSDIIn2 for DS2.
-	-	To obtain its \c NTV2OutputCrosspointID…
-		-	Call ::GetSDIInputOutputXptFromChannel…
+	-	There are two ways to obtain an SDI input’s \c NTV2OutputCrosspointID …
+		-	Call ::GetSDIInputOutputXptFromChannel …
 			-	Specify the SDI input connector by \c NTV2Channel (e.g., use NTV2_CHANNEL3 for SDI In 3).
-			-	For the 2nd dual-link stream in dual-link applications, specify \c true for \c inIsDS2.
-		-	Call ::GetInputSourceOutputXpt…
+			-	By default, it returns data stream 1’s crosspoint.
+				To obtain Data Stream 2’s crosspoint, specify \c true for \c inIsDS2.
+		-	Call ::GetInputSourceOutputXpt …
 			-	Specify the SDI input by passing it \c NTV2_INPUTSOURCE_SDI1, \c NTV2_INPUTSOURCE_SDI2, …etc.
-			-	For the 2nd dual-link stream in dual-link applications, specify \c true for \c inIsSDI_DS2.
+			-	By default, it returns Data Stream 1’s crosspoint.
+				For Data Stream 2’s crosspoint, specify \c true for \c inIsSDI_DS2.
 
 
 	@subsection	widget_hdmiin	HDMI Input
@@ -713,8 +715,8 @@
 	-	Devices that support our 2nd-generation HDMI chip use \c NTV2_WgtHDMIIn1v2.
 	-	Devices that support our 3rd-generation HDMI chip use \c NTV2_WgtHDMIIn1v3.
 	-	Devices that support our 4th-generation HDMI chip use \c NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
-	-	To obtain its \c NTV2OutputCrosspointID…
-		-	Call ::GetInputSourceOutputXpt…
+	-	To obtain its \c NTV2OutputCrosspointID …
+		-	Call ::GetInputSourceOutputXpt …
 			-	Specify which HDMI input by passing it \c NTV2_INPUTSOURCE_HDMI1, \c NTV2_INPUTSOURCE_HDMI2, …etc.
 			-	For 4K/UHD applications, specify the appropriate quadrant number 0, 1, 2 or 3 in the \c inHDMI_Quadrant
 				parameter.
@@ -728,8 +730,8 @@
 	Pb/B/Y and Pr/R/C RCA connectors).
 	-	There is one of these widgets for devices that support analog video input — \c NTV2_WgtAnalogIn1.
 	-	To obtain its \c NTV2OutputCrosspointID…
-		-	Use \c NTV2_XptAnalogIn
-		-	Call ::GetInputSourceOutputXpt with \c NTV2_INPUTSOURCE_ANALOG1.
+		-	Either use \c NTV2_XptAnalogIn directly;
+		-	Or call ::GetInputSourceOutputXpt with \c NTV2_INPUTSOURCE_ANALOG1.
 
 
 	@subsection	widget_sdiout	SDI Output
@@ -742,11 +744,11 @@
 	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — \c NTV2_Wgt3GSDIOut1, \c NTV2_Wgt3GSDIOut2, etc.
 	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — \c NTV2_Wgt12GSDIOut1, \c NTV2_Wgt12GSDIOut2, etc.
 	-	3Gbps SDI outputs have two input crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
-	-	To obtain its \c NTV2InputCrosspointID…
-		-	Call ::GetSDIOutputInputXpt…
+	-	There are two ways to obtain an SDI output’s \c NTV2InputCrosspointID …
+		-	Call ::GetSDIOutputInputXpt …
 			-	Specify the SDI output connector by \c NTV2Channel (e.g. use \c NTV2_CHANNEL3 for SDI Out 3);
 			-	For dual-link applications, pass \c true for \c inIsDS2 for the 2nd dual-link stream.
-		-	Call ::GetOutputDestInputXpt…
+		-	Or call ::GetOutputDestInputXpt …
 			-	Specify the SDI output connector using \c NTV2_OUTPUTDESTINATION_SDI1, \c NTV2_OUTPUTDESTINATION_SDI2, … etc.
 			-	For dual-link applications, pass \c true for \c inIsSDI_DS2 for the 2nd dual-link stream.
 
