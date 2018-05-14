@@ -32,7 +32,15 @@ typedef enum
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
     kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','0'), // 4CC of metadata config data
 } VirtualDataTag2110 ;
+
+typedef enum
+{
+    kIpStatusFail           = 0,
+    kIpStatusStopped        = 1,
+    kIpStatusRunning        = 2
+} IpChStatusState ;
 
 typedef struct
 {
@@ -111,6 +119,13 @@ typedef struct
 typedef struct
 {
     uint32_t                id;
+    uint32_t				txChStatus[4];
+    uint32_t				rxChStatus[4];
+} IpStatus2110;
+
+typedef struct
+{
+    uint32_t                id;
     bool					txChEnable[4];
     bool					rxChEnable[4];
 } IpEnable2110;
@@ -176,7 +191,7 @@ public:
     std::string         remoteIP[2];        ///< @brief	Specifies remote (destination) IP address.
     uint32_t            localPort[2];		///< @brief	Specifies the local (source) port number.
     uint32_t            remotePort[2];		///< @brief	Specifies the remote (destination) port number.
-    uint16_t            payloadType;
+    uint16_t            payload;
     uint8_t             tos;                // type of service
     uint8_t             ttl;                // time to live
     uint32_t            ssrc;
@@ -187,7 +202,7 @@ public:
     uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
-    eNTV2PacketInterval audioPacketInterval;
+    eNTV2PacketInterval audioPktInterval;
 };
 
 /**
@@ -213,14 +228,14 @@ public:
     uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
-    uint16_t            payloadType;
+    uint16_t            payload;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            payloadLen;
     uint32_t            lastPayloadLen;
     uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
-    eNTV2PacketInterval audioPacketInterval;
+    eNTV2PacketInterval audioPktInterval;
 };
 
 
@@ -301,7 +316,6 @@ public:
 
     static uint32_t v_packetizers[4];
     static uint32_t a_packetizers[4];
-    static uint32_t m_packetizers[4];
     static uint32_t v_depacketizers[4];
     static uint32_t a_depacketizers[4];
 

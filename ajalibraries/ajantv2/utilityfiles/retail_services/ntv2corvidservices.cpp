@@ -91,5 +91,5 @@ void CorvidServices::SetDeviceMiscRegisters ()
 	DeviceServices::SetDeviceMiscRegisters();
 
 	NTV2Standard			primaryStandard;
-	mCard->GetStandard(&primaryStandard);
+	mCard->GetStandard(primaryStandard);
 }

@@ -2104,7 +2104,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
-		if (!NTV2DownloadTestPatternRemote(	
+		return NTV2DownloadTestPatternRemote(	
 					_sockfd,
 					_remoteHandle,
 					_nubProtocolVersion,
@@ -2112,12 +2112,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 					GetTestPatternFrameBufferFormat(),
 					GetSignalMask(),
 					GetTestPatternDMAEnable(),
-					testPatternNumber))
-		{
-			DisplayNTV2Error("NTV2DownloadTestPatternRemote failed");
-			return false;
-		}
-		return true;
+					testPatternNumber) ? false : true;
 	}
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
@@ -2172,6 +2167,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPattern(char* testPatternName )
 
 }
 
+#if !defined(NTV2_DEPRECATE_13_0)
 void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, NTV2Standard standard)
 {
 	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[testPatternNumber];
@@ -2188,13 +2184,8 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	::Make10BitBlackLine(unPackedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 	::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 
-	bool twoKby1080 = false;
-	bool vancEnabled =  false;
-	bool wideVANCSet = false;
-	NTV2FrameBufferFormat 	fbFormat = NTV2_FBF_10BIT_YCBCR; //always NTV2_FBF_10BIT_YCBCR				= 0,
-
-	//GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard, fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	const NTV2FrameBufferFormat fbFormat (NTV2_FBF_10BIT_YCBCR);
+	const NTV2FormatDescriptor	formatDescriptor (standard, fbFormat);
 
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
@@ -2222,15 +2213,12 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	case NTV2_STANDARD_2K:
 		//dataLinePitch = HD_YCBCRLINEPITCH_2K;
 		//break;
-	default:
-		DisplayNTV2Error("Signal Generator Unsupported video standard format.\n");
-		return;
-		break;
+	default:	return;		//	Signal Generator Unsupported video standard format
 	}
 
 	if ( numOutputPixels == 0 || numPixels == 0 || linePitch == 0)
 	{
-		DisplayNTV2Error("Signal Generator Unsupported video standard/framebuffer format.\n");
+		//	Signal Generator Unsupported video standard/framebuffer format
 		return;
 
 	}
@@ -2280,15 +2268,13 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
 
             bool  bIsSD;
-            IsSDStandard(&bIsSD);
+            IsSDStandard(bIsSD);
 			switch(_fbFormat)
 			{
 	            case NTV2_FBF_10BIT_YCBCR:
 		            ::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
                     break;
-				default:
-					DisplayNTV2Error("ERROR: Signal Generator not set up for this format.\n");
-					break;
+				default:	return;	//	ERROR: Signal Generator not set up for this format
 			}
 
 			for ( UWord lineCount = 0; lineCount < numLines; lineCount++ )
@@ -2301,6 +2287,7 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 	}
 
 }
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatternSegmentData )
 {
@@ -2312,18 +2299,14 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
+	GetFrameGeometry(fg);
 
 
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -2332,15 +2315,9 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	ULWord dataLinePitch;
 
 	// Avoid divide by 0 error/floating point exception for unsupported formats.
-	if ( 
-			(standard == NTV2_STANDARD_525 || standard == NTV2_STANDARD_625)
-        &&	(_fbFormat == NTV2_FBF_8BIT_DVCPRO || _fbFormat == NTV2_FBF_8BIT_HDV)
-	   )
-	{
-		DisplayNTV2Error("DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625.");
-		return;
-	}
-
+	if (standard == NTV2_STANDARD_525  ||  standard == NTV2_STANDARD_625)
+		if (_fbFormat == NTV2_FBF_8BIT_DVCPRO  ||  _fbFormat == NTV2_FBF_8BIT_HDV)
+			return;	//	DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625
 	
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
@@ -2397,12 +2374,8 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
 
-	if ( numOutputPixels == 0 || numPixels == 0 || linePitch == 0)
-	{
-		DisplayNTV2Error("Unsupported video standard/framebuffer format.");
-		return;
-
-	}
+	if (numOutputPixels == 0  ||  numPixels == 0  ||  linePitch == 0)
+		return;	//	Unsupported video standard/framebuffer format
 
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -2464,7 +2437,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
 					
             bool  bIsSD;
-            IsSDStandard(&bIsSD);
+            IsSDStandard(bIsSD);
 			switch(_fbFormat) 
 			{
 	            case NTV2_FBF_10BIT_YCBCR:
@@ -2510,15 +2483,6 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 					ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
 					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numOutputPixels);
 					break;
-/*				case NTV2_FBF_8BIT_QREZ:
-					// need to squeeze test pattern to 1/2 pixels and 1/2 lines
-					ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
-					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
-					nLines = (nLines/2);
-					//linePitch = 1280*2/4;
-					currentAddress = baseAddress + (startLine/2*linePitch);
-					break;	*/
 				case NTV2_FBF_24BIT_RGB:
 					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
 					ConvertARGBToRGB((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
@@ -2538,9 +2502,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
 					Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer ,(UWord *) packedBuffer, numPixels);
 					break;
-				default:
-					DisplayNTV2Error("Unsupported framebuffer standard requested.");
-					break;
+				default:	return;	//	Unsupported framebuffer standard requested
 			}
 			
 			for ( UWord lineCount = 0; lineCount < nLines; lineCount++ )
@@ -2557,7 +2519,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -2597,16 +2559,12 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -2676,7 +2634,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 			else
 			{
 				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-				if ( _fbFormat == NTV2_FBF_8BIT_YCBCR_YUY2 || _fbFormat == NTV2_FBF_8BIT_QREZ)
+				if ( _fbFormat == NTV2_FBF_8BIT_YCBCR_YUY2)
 					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
 			}
 
@@ -2699,9 +2657,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	case NTV2_FBF_48BIT_RGB:
 		memset(currentAddress,0,linePitch*numLines*4);
 		break;
-	default:
-		DisplayNTV2Error("Unsupported framebuffer standard requested.");
-		break;
+	default:	return;	//	Unsupported framebuffer standard requested
 	}
 
 		// DMA the resulting frame to Kona memory
@@ -2710,9 +2666,9 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord outputFrame;
 		if ( _flipFlopPage )
-			GetPCIAccessFrame (_channel, &outputFrame);
+			GetPCIAccessFrame (_channel, outputFrame);
 		else
-			GetOutputFrame (_channel, &outputFrame);
+			GetOutputFrame (_channel, outputFrame);
 		if ( outputFrame > GetNumFrameBuffers())
 			outputFrame = 0;
 			
@@ -2750,22 +2706,18 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	UWord   unPackedWhiteBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
 
 	ULWord linePitch;
 	ULWord numPixels;
 	UWord   numLines;
 	UWord Y,Cb,Cr;
 	
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	numPixels = formatDescriptor.numPixels;
 	linePitch = formatDescriptor.linePitch;
 	numLines = formatDescriptor.numLines;
@@ -2781,7 +2733,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 
 
 // Kludge for now.....
-	if ( twoKby1080 )
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -2808,9 +2760,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 			linePitch /= 2;
 			break;
 
-		default:
-			DisplayNTV2Error("DownloadBorderTestPattern(): Unsupported framebuffer standard requested.");
-			break;
+		default:	return;	//	DownloadBorderTestPattern(): Unsupported framebuffer standard requested
 		}
 	}
 
@@ -2882,7 +2832,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -2930,18 +2880,12 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	ULWord   packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -3004,7 +2948,7 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	{
 		// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
@@ -3038,25 +2982,19 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3149,7 +3087,7 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 	{
 		// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
@@ -3188,24 +3126,19 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3349,7 +3282,7 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -3383,24 +3316,19 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2Standard standard;
-	GetStandard(&standard);
+	GetStandard(standard);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
-	bool twoKby1080 = false;
-	if ( fg == NTV2_FG_2048x1080)
-		twoKby1080 = true;
-
-	bool vancEnabled;
-	bool wideVANCSet;
-	GetEnableVANCData(&vancEnabled,&wideVANCSet);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,vancEnabled,twoKby1080,wideVANCSet);
+	GetFrameGeometry(fg);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 
 	// Kludge for now.....
-	if ( twoKby1080)
+	if (formatDescriptor.Is2KFormat())
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
 	}
@@ -3485,7 +3413,7 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			
@@ -3546,7 +3474,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 		size = GetPatternBufferSize();
     
     NTV2FrameGeometry fg;
-    GetFrameGeometry(&fg, _channel);
+    GetFrameGeometry(fg, _channel);
     
     SetDualLinkOutputEnable(_dualLinkOutputEnable );
     if (NTV2_IS_QUAD_FRAME_GEOMETRY(fg))
@@ -3567,14 +3495,14 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
 		// Transfer the test pattern into the active area of the frame buffer
 		NTV2Standard standard;
-		GetStandard(&standard, _channel);
-		NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,false,false,false);
+		GetStandard(standard, _channel);
+		NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 
 		ULWord totalHeight = formatDescriptor.numLines;
 		if ( fg == NTV2_FG_1920x1112 )
@@ -3610,21 +3538,19 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 ULWord CNTV2TESTPATTERNCLASS::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
 {
 	NTV2Standard standard;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg, _channel);
-	bool twoKby1080 = false;
+	GetFrameGeometry(fg, _channel);
+	bool twoKby1080 = NTV2_IS_2K_1080_FRAME_GEOMETRY(fg);
 	bool fourKby2160 = false;
 	bool quadKby2160 = false;
-	if ( fg == NTV2_FG_2048x1080 || fg == NTV2_FG_2048x1112 || fg == NTV2_FG_2048x1114 )
-		twoKby1080 = true;
 	if ( fg == NTV2_FG_4x1920x1080 )
 		quadKby2160 = true;
 	if ( fg == NTV2_FG_4x2048x1080 )
 		fourKby2160 = true;
 
 	// Ignore VANC and just use the size of the active area
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard,_fbFormat,false,false,false);
+	NTV2FormatDescriptor formatDescriptor (standard,_fbFormat);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -3693,7 +3619,7 @@ int CNTV2TESTPATTERNCLASS::MakeSineWaveVideo(double radians, bool bChroma)
 void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord *packedBuffer, int numPixels)
 {
 	bool  bIsSD;
-    IsSDStandard(&bIsSD);
+    IsSDStandard(bIsSD);
 
 	switch(_fbFormat) 
 	{
@@ -3787,9 +3713,7 @@ void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord
 			Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer, (UWord *) packedBuffer, numPixels);
 			break;
 
-		default:
-			DisplayNTV2Error("Unsupported framebuffer standard requested.");
-			break;
+		default:	return;		//	Unsupported framebuffer standard requested
 	}
 }
 
@@ -4009,15 +3933,15 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 	
 		// get current frame buffer size
 	NTV2Standard standard;
-	GetStandard(&standard);
-	NTV2FormatDescriptor formatDescriptor = GetFormatDescriptor(standard, _fbFormat);
+	GetStandard(standard);
+	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;		// note: linePitch is in ULWords, not bytes!
 	ULWord numLines  = formatDescriptor.numLines;
 
 // Kludge for now..... (2K isn't part of the table yet)
 	NTV2FrameGeometry fg;
-	GetFrameGeometry(&fg);
+	GetFrameGeometry(fg);
 	if ( fg == NTV2_FG_2048x1080)
 	{
 		AdjustFor2048x1080(numPixels,linePitch);
@@ -4100,7 +4024,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
 		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, &pciAccessFrame);
+		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 			

@@ -246,7 +246,6 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -294,10 +293,6 @@ void Kona1Services::SetDeviceXPointPlayback ()
 				// Background is video in
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1);
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -345,10 +340,6 @@ void Kona1Services::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			

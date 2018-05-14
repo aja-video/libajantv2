@@ -327,7 +327,7 @@ bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inU64Off
 		return false;	//	Past end
 	maxSize -= inU64Offset;	//	Remove starting offset
 
-	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostAddress(inU64Offset * sizeof(uint64_t))));
+	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
 	if (!pU64)
 		return false;	//	Past end
 
@@ -364,7 +364,7 @@ bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inU32Off
 		return false;	//	Past end
 	maxSize -= inU32Offset;	//	Remove starting offset
 
-	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostAddress(inU32Offset * sizeof(uint32_t))));
+	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
 	if (!pU32)
 		return false;	//	Past end
 
@@ -401,7 +401,7 @@ bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inU16Off
 		return false;	//	Past end
 	maxSize -= inU16Offset;	//	Remove starting offset
 
-	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostAddress(inU16Offset * sizeof(uint16_t))));
+	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
 	if (!pU16)
 		return false;	//	Past end
 
@@ -438,7 +438,7 @@ bool NTV2_POINTER::GetU8s (vector<uint8_t> & outUint8s, const size_t inU8Offset,
 		return false;	//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset
 
-	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(inU8Offset)));
+	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
 	if (!pU8)
 		return false;	//	Past end
 
@@ -474,7 +474,7 @@ bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, 
 		return false;		//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset
 
-	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(inU8Offset)));
+	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
 	if (!pU8)
 		return false;	//	Past end
 

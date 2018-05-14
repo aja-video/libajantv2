@@ -279,14 +279,14 @@ typedef struct AJAAncillaryDataLocation
 
 		/**
 			@brief	Sets my data link value to the given value (if valid).
-			@param[in]	inLink		Specifies the new data link value to use. Must be valid.
+			@param[in]	inStream		Specifies the new data stream value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
 		inline AJAAncillaryDataLocation &	SetDataStream (const AJAAncillaryDataStream inStream)				{if (IS_VALID_AJAAncillaryDataStream(inStream)) stream = inStream;	return *this;}
 
 		/**
 			@brief	Sets my data video stream value to the given value (if valid).
-			@param[in]	inStream	Specifies the new data stream value to use. Must be valid.
+			@param[in]	inChannel	Specifies the new data channel value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
 		inline AJAAncillaryDataLocation &	SetDataChannel (const AJAAncillaryDataChannel inChannel)			{if (IS_VALID_AJAAncillaryDataChannel(inChannel)) channel = inChannel; return *this;}
@@ -555,7 +555,7 @@ public:
 									If 'false', does not validate the given checksum. Defaults to 'false'.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetChecksum (const uint8_t checksum8, const bool inValidate = false);
+	virtual AJAStatus						SetChecksum (const uint8_t inChecksum8, const bool inValidate = false);
 
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
@@ -628,13 +628,13 @@ public:
 	**/
 	virtual AJAStatus						SetDataCoding (const AJAAncillaryDataCoding inCodingType);
 
-	#if 1	//	BEGIN DEPRECATED SECTION
+#if !defined(NTV2_DEPRECATE_14_2)
 		/**
 			@deprecated		Use SetLocationDataChannel function instead.
 		**/
-		virtual inline AJAStatus			SetLocationVideoStream (const AJAAncillaryDataVideoStream inChannel)
-											{return SetLocationDataChannel(inChannel);}
-	#endif	//	END DEPRECATED SECTION
+		virtual inline NTV2_DEPRECATED_f(AJAStatus	SetLocationVideoStream (const AJAAncillaryDataVideoStream inChannel))
+													{return SetLocationDataChannel(inChannel);}
+#endif	//	!defined(NTV2_DEPRECATE_14_2)
 	///@}
 
 
@@ -710,7 +710,7 @@ public:
 	/**
 		@deprecated	Use AppendPayload(const AJAAncillaryData &) instead.
 	**/
-	virtual inline AJAStatus				AppendPayload (const AJAAncillaryData * pInAncData)		{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
+	virtual inline NTV2_DEPRECATED_f(AJAStatus	AppendPayload (const AJAAncillaryData * pInAncData))	{return pInAncData ? AppendPayload (*pInAncData) : AJA_STATUS_NULL;}
 
 	/**
 	 	@brief	Copies payload data from an external 16-bit source into local payload memory.

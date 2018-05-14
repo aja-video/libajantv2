@@ -466,7 +466,6 @@ AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 {
 	uint32_t i;
 	uint32_t pixelIndex = 0;		// running pixel count
-	uint32_t group;
 	uint32_t bitPair;
 	bool bBit0, bBit1;
 	bool bPrevBit = false;		// the last bit of the previous group
@@ -479,7 +478,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 	// VITC consists of 9 "groups" of 10 bits each (or 5 bit-pairs). Each group starts with a '1' bit and a '0' bit,
 	// followed by 8 data bits. The first 8 groups carry the 64 bits of VITC data, and the last group carries an 8-bit
 	// CRC calculated from the preceding 82 bits.
-	for (group = 0; group < kNumTimeDigits; group++)
+	for (uint8_t group(0);  group < kNumTimeDigits;  group++)
 	{
 		uint8_t tcData, bgData;
 		GetTimeHexValue(group, tcData);

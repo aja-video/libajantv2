@@ -98,26 +98,26 @@ public:
 											const bool				inOutputIs6G = false,
 											const bool				inOutputIs12G = false);
 	#if !defined (NTV2_DEPRECATE)
-		static NTV2_DEPRECATED inline bool	SetVPIDData (ULWord *					pOutVPID,
+		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
 														const NTV2VideoFormat		inOutputFormat,
 														const NTV2FrameBufferFormat	inFrameBufferFormat,
 														const bool					inIsProgressive,
 														const bool					inIs16x9Aspect,
 														const VPIDChannel			inVPIDChannel,
-														const bool					inUseVPIDChannel = true)
+														const bool					inUseVPIDChannel = true))
 											{return pOutVPID ? SetVPIDData (*pOutVPID, inOutputFormat, inFrameBufferFormat, inIsProgressive, inIs16x9Aspect, inVPIDChannel, inUseVPIDChannel) : false;}
 
-		static NTV2_DEPRECATED inline bool	SetVPIDData (ULWord *				pOutVPID,
+		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
 														const NTV2VideoFormat	inOutputFormat,
 														const bool				inDualLinkRGB,
 														const bool				inIsRGB48Bit,
 														const bool				inIsOutput3Gb,
 														const bool				inIsSMPTE425,
 														const VPIDChannel		inVPIDChannel,
-														const bool				inUseChannel = true)
+														const bool				inUseChannel = true))
 											{return pOutVPID ? SetVPIDData (*pOutVPID, inOutputFormat, inDualLinkRGB, inIsRGB48Bit, inIsOutput3Gb, inIsSMPTE425, inVPIDChannel, inUseChannel) : false;}
 
-		virtual NTV2_DEPRECATED	inline void	Init (void)				{}		///< @deprecated	Obsolete. Do not use.
+		virtual inline NTV2_DEPRECATED_f(void	Init (void))				{}		///< @deprecated	Obsolete. Do not use.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 private:

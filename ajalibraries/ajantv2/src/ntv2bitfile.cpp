@@ -62,7 +62,7 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 	struct stat	fsinfo;
 	::stat (inBitfileName.c_str (), &fsinfo);
-	_fileSize = fsinfo.st_size;
+	_fileSize = unsigned(fsinfo.st_size);
 
 	_bitFileStream.open (inBitfileName.c_str (), std::ios::binary);
 
@@ -370,80 +370,33 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 {
 	switch (inBoardID)
 	{
-		#if !defined (NTV2_DEPRECATE)
-			case BOARD_ID_XENA_SD:
-			case BOARD_ID_XENA_SD22:
-			case BOARD_ID_XENA_HD:
-			case BOARD_ID_XENA_HD22:
-			case BOARD_ID_HDNTV2:
-			case BOARD_ID_KSD11:
-			//case BOARD_ID_XENA_SD_MM:
-			case BOARD_ID_KSD22:
-			//case BOARD_ID_XENA_SD22_MM:
-			case BOARD_ID_KHD11:
-			//case BOARD_ID_XENA_HD_MM:
-			case BOARD_ID_XENA_HD22_MM:
-			case BOARD_ID_HDNTV2_MM:
-			case BOARD_ID_KONA_SD:
-			case BOARD_ID_KONA_HD:
-			case BOARD_ID_KONA_HD2:
-			case BOARD_ID_KONAR:
-			case BOARD_ID_KONAR_MM:
-			case BOARD_ID_KONA2:
-			case BOARD_ID_HDNTV:
-			case BOARD_ID_KONALS:
-			//case BOARD_ID_XENALS:
-			case BOARD_ID_KONAHDS:
-			//case BOARD_ID_KONALH:
-			//case BOARD_ID_XENALH:
-			case BOARD_ID_XENADXT:
-			//case BOARD_ID_XENAHS:
-			case BOARD_ID_KONAX:
-			case BOARD_ID_XENAX:
-			case BOARD_ID_XENAHS2:
-			case BOARD_ID_FS1:
-			case BOARD_ID_FS2:
-			case BOARD_ID_MOAB:
-			case BOARD_ID_XENAX2:
-			case BOARD_ID_BORG:
-			case BOARD_ID_BONES:
-			case BOARD_ID_BARCLAY:
-			case BOARD_ID_KIPRO_QUAD:
-			case BOARD_ID_KIPRO_SPARE1:
-			case BOARD_ID_KIPRO_SPARE2:
-			case BOARD_ID_FORGE:
-			case BOARD_ID_XENA2:
-			//case BOARD_ID_KONA3:
-			case BOARD_ID_LHI_DVI:
-			case BOARD_ID_LHI_T:
-		#endif	//	!defined (NTV2_DEPRECATE)
-		case DEVICE_ID_NOTFOUND:	break;
-		case DEVICE_ID_CORVID1:		return "corvid1pcie";		//	top.ncd
-		case DEVICE_ID_CORVID3G:	return "corvid1_3Gpcie";	//	corvid1_3Gpcie
-		case DEVICE_ID_CORVID22:	return "top_c22";			//	top_c22.ncd
-		case DEVICE_ID_CORVID24:	return "corvid24_quad";		//	corvid24_quad.ncd
-		case DEVICE_ID_CORVID44:	return "corvid_44";			//	corvid_44
-		case DEVICE_ID_CORVID88:	return "corvid_88";			//	CORVID88
-		case DEVICE_ID_CORVIDHEVC:  return "corvid_hevc";       //	CORVIDHEVC
-		case DEVICE_ID_KONA3G:		return "K3G_top";			//	K3G_top.ncd
-		//case DEVICE_ID_KONA3G:	return "K3G_p2p";			//	K3G_p2p.ncd
-		case DEVICE_ID_KONA3GQUAD:	return "K3G_quad";			//	K3G_quad.ncd
+		case DEVICE_ID_NOTFOUND:		break;
+		case DEVICE_ID_CORVID1:			return "corvid1pcie";		//	top.ncd
+		case DEVICE_ID_CORVID3G:		return "corvid1_3Gpcie";	//	corvid1_3Gpcie
+		case DEVICE_ID_CORVID22:		return "top_c22";			//	top_c22.ncd
+		case DEVICE_ID_CORVID24:		return "corvid24_quad";		//	corvid24_quad.ncd
+		case DEVICE_ID_CORVID44:		return "corvid_44";			//	corvid_44
+		case DEVICE_ID_CORVID88:		return "corvid_88";			//	CORVID88
+		case DEVICE_ID_CORVIDHEVC:		return "corvid_hevc";       //	CORVIDHEVC
+		case DEVICE_ID_KONA3G:			return "K3G_top";			//	K3G_top.ncd
+		//case DEVICE_ID_KONA3G:		return "K3G_p2p";			//	K3G_p2p.ncd
+		case DEVICE_ID_KONA3GQUAD:		return "K3G_quad";			//	K3G_quad.ncd
         //case DEVICE_ID_KONA3GQUAD:    return "K3G_quad_p2p";		//	K3G_quad_p2p.ncd
-		case DEVICE_ID_KONA4:		return "kona_4_quad";		//	kona_4_quad
-		case DEVICE_ID_KONA4UFC:	return "kona_4_ufc";		//	kona_4_ufc
-		case DEVICE_ID_IO4K:		return "IO_XT_4K";			//	IO_XT_4K
-		case DEVICE_ID_IO4KUFC:		return "IO_XT_4K_UFC";		//	IO_XT_4K_UFC
-		case DEVICE_ID_IOEXPRESS:	return "chekov_00_pcie";	//	chekov_00_pcie.ncd
-		case DEVICE_ID_IOXT:		return "top_IO_TX";			//	top_IO_TX.ncd
-		case DEVICE_ID_LHE_PLUS:	return "lhe_12_pcie";		//	lhe_12_pcie.ncd
-		case DEVICE_ID_LHI:			return "top_pike";			//	top_pike.ncd
-		case DEVICE_ID_TTAP:		return "t_tap_top";			//	t_tap_top.ncd
-		case DEVICE_ID_CORVIDHBR:	return "corvid_hb_r";		//	corvidhb-r
-        case DEVICE_ID_IO4KPLUS:	return "io4kp";
-        case DEVICE_ID_IOIP_2022:	return "ioip_s2022";
-        case DEVICE_ID_IOIP_2110:	return "ioip_s2110";
-		case DEVICE_ID_KONA1:		return "kona1";
-        case DEVICE_ID_KONAHDMI:	return "kona_hdmi_4rx";
+		case DEVICE_ID_KONA4:			return "kona_4_quad";		//	kona_4_quad
+		case DEVICE_ID_KONA4UFC:		return "kona_4_ufc";		//	kona_4_ufc
+		case DEVICE_ID_IO4K:			return "IO_XT_4K";			//	IO_XT_4K
+		case DEVICE_ID_IO4KUFC:			return "IO_XT_4K_UFC";		//	IO_XT_4K_UFC
+		case DEVICE_ID_IOEXPRESS:		return "chekov_00_pcie";	//	chekov_00_pcie.ncd
+		case DEVICE_ID_IOXT:			return "top_IO_TX";			//	top_IO_TX.ncd
+		case DEVICE_ID_KONALHEPLUS:		return "lhe_12_pcie";		//	lhe_12_pcie.ncd
+		case DEVICE_ID_KONALHI:			return "top_pike";			//	top_pike.ncd
+		case DEVICE_ID_TTAP:			return "t_tap_top";			//	t_tap_top.ncd
+		case DEVICE_ID_CORVIDHBR:		return "corvid_hb_r";		//	corvidhb-r
+        case DEVICE_ID_IO4KPLUS:		return "io4kp";
+        case DEVICE_ID_IOIP_2022:		return "ioip_s2022";
+        case DEVICE_ID_IOIP_2110:		return "ioip_s2110";
+		case DEVICE_ID_KONA1:			return "kona1";
+        case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
         default:
 			break;
 	}

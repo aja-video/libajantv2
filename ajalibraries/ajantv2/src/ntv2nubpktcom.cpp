@@ -298,7 +298,7 @@ int sendall(AJASocket s, char *buf, int *len)
     int n = -1;
 
     while(total < *len) {
-        n = send(s, buf+total, bytesleft, 0);
+        n = int(::send(s, buf+total, bytesleft, 0));
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
@@ -329,7 +329,7 @@ int recvtimeout_sec(AJASocket s, char *buf, int len, int timeout)
     if (n == -1) return -1; // error
 
     // data must be here, so do a normal recv()
-    return recv(s, buf, len, 0);
+    return int(::recv(s, buf, len, 0));
 }
 
 int recvtimeout_usec(AJASocket s, char *buf, int len, int timeout)
@@ -352,7 +352,7 @@ int recvtimeout_usec(AJASocket s, char *buf, int len, int timeout)
     if (n == -1) return -1; // error
 
     // data must be here, so do a normal recv()
-    return recv(s, buf, len, 0);
+    return int(::recv(s, buf, len, 0));
 }
 
 int recvfromtimeout(AJASocket s, char *buf, int len, int timeout,
@@ -376,7 +376,7 @@ int recvfromtimeout(AJASocket s, char *buf, int len, int timeout,
     if (n == -1) return -1; // error
 
     // data must be here, so do a normal recvfrom()
-	return recvfrom(s, buf, len, 0, their_addr, addr_len);
+	return int(::recvfrom(s, buf, len, 0, their_addr, addr_len));
 
 }
 

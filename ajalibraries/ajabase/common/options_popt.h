@@ -224,8 +224,8 @@ extern "C" {
  * @param con		context
  * @param reason	reason for callback
  * @param opt		option that triggered callback
- * @param arg		@todo Document.
- * @param data		@todo Document.
+ * @param arg		argument
+ * @param data		argument data
  */
 typedef void (*poptCallbackType) (poptContext con, 
 		enum poptCallbackReason reason,
@@ -319,7 +319,7 @@ const char ** poptGetArgs(poptContext con);
 /** \ingroup popt
  * Return the option which caused the most recent error.
  * @param con		context
- * @param flags
+ * @param flags		option flags
  * @return		offending option
  */
 const char * poptBadOption(poptContext con, unsigned int flags);
@@ -335,7 +335,7 @@ int poptStuffArgs(poptContext con, const char ** argv);
 /** \ingroup popt
  * Add alias to context.
  * @todo Pass alias by reference, not value.
- * @deprecated Use poptAddItem instead.
+ * @note This function is deprecated. Use poptAddItem instead.
  * @param con		context
  * @param alias		alias to add
  * @param flags		(unused)
@@ -468,7 +468,7 @@ this_is   =   fdsafdas
  * @bug Silently ignores invalid lines.
  *
  * @param fp		file handle to read
- * @param *argstrp	return string of options (malloc'd)
+ * @param argstrp	return string of options (malloc'd)
  * @param flags		unused
  * @return		0 on success
  * @see			poptParseArgvString

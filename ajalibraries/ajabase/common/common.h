@@ -71,7 +71,7 @@ AJA_EXPORT long stol(const std::string& str, std::size_t* idx=0, int base = 10);
  *                       If this is 0, the base is determined by the format (like strtol).
  *	@return         The long long value of the input str
  */
-AJA_EXPORT long long stoll(const std::string& str, std::size_t* idx=0, int base = 10);
+//AJA_EXPORT long long stoll(const std::string& str, std::size_t* idx=0, int base = 10);
 
 /**
  *	Convert string to unsigned long
@@ -97,7 +97,7 @@ AJA_EXPORT unsigned long stoul(const std::string& str, std::size_t* idx=0, int b
  *                       If this is 0, the base is determined by the format (like strtol).
  *	@return         The unsigned long long value of the input str
  */
-AJA_EXPORT unsigned long long stoull(const std::string& str, std::size_t* idx=0, int base = 10);
+//AJA_EXPORT unsigned long long stoull(const std::string& str, std::size_t* idx=0, int base = 10);
 
 /**
  *	Convert string to float
@@ -141,10 +141,10 @@ AJA_EXPORT long double stold(const std::string& str, std::size_t* idx=0);
 AJA_EXPORT std::string to_string(bool val);
 AJA_EXPORT std::string to_string(int val);
 AJA_EXPORT std::string to_string(long val);
-AJA_EXPORT std::string to_string(long long val);
+//AJA_EXPORT std::string to_string(long long val);
 AJA_EXPORT std::string to_string(unsigned val);
 AJA_EXPORT std::string to_string(unsigned long val);
-AJA_EXPORT std::string to_string(unsigned long long val);
+//AJA_EXPORT std::string to_string(unsigned long long val);
 AJA_EXPORT std::string to_string(float val);
 AJA_EXPORT std::string to_string(double val);
 AJA_EXPORT std::string to_string(long double val);

@@ -150,6 +150,12 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
+    case 0x009d6019:
+        _flashSize = 64 * 1024 * 1024;
+        _bankSize = 16 * 1024 * 1024;
+        _sectorSize = 64 * 1024;
+        knownChip = true;
+        break;
 	case 0x00C84018:
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
@@ -293,7 +299,7 @@ void CNTV2KonaFlashProgram::SetBitFile(const char *bitFileName, FlashBlockID blo
 	FILE* pFile = 0;
 	struct stat fsinfo;
 	stat(bitFileName, &fsinfo);
-	_bitFileSize = fsinfo.st_size;
+	_bitFileSize = uint32_t(fsinfo.st_size);
 	pFile = fopen(bitFileName, "rb");
 	if(pFile)
 	{
@@ -2046,8 +2052,8 @@ void CNTV2KonaFlashProgram::ProgramCustom ( const char *sCustomFileName, const u
                 throw "Unable to open file";
             }
 
-            writeData.resize(sz);
-            customSize = fread(&writeData[0], 1, sz, fp);
+            writeData.resize(size_t(sz));
+            customSize = fread(&writeData[0], 1, size_t(sz), fp);
             if (customSize == 0) {
                 fclose(fp);
                 throw "Couldn't read any data from custom file";

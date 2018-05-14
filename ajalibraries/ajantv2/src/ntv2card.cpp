@@ -35,7 +35,7 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 		if (IsBufferSizeSetBySW ())
 		{
 			NTV2Framesize fbSize;
-			GetFrameBufferSize (NTV2_CHANNEL1, &fbSize);
+			GetFrameBufferSize (NTV2_CHANNEL1, fbSize);
 			SetFrameBufferSize (fbSize);
 		}
 		else
@@ -43,8 +43,8 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 			NTV2FrameGeometry fg;
 			NTV2FrameBufferFormat format;
 
-			GetFrameGeometry (&fg);
-			GetFrameBufferFormat (NTV2_CHANNEL1, &format);
+			GetFrameGeometry (fg);
+			GetFrameBufferFormat (NTV2_CHANNEL1, format);
 
 			_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize (GetDeviceID (), fg, format);
 			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);
@@ -453,14 +453,14 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 				else
 					result = NTV2_BreakoutCableBNC;
 				break;
-			case DEVICE_ID_LHE_PLUS:
+			case DEVICE_ID_KONALHEPLUS:
 				//	Do we have a KL-Box?
 				if ((audioCtlReg & kK2RegMaskKBoxDetect) || bPhonyKBox)
 					result = NTV2_KLBox;
 				else
 					result = NTV2_BreakoutCableXLR;		// no BNC breakout cable available
 				break;
-			case DEVICE_ID_LHI:
+			case DEVICE_ID_KONALHI:
 				//	Do we have a KLHi-Box?
 				if ((audioCtlReg & kK2RegMaskKBoxDetect) || bPhonyKBox)
 					result = NTV2_KLHiBox;
@@ -572,6 +572,23 @@ bool CNTV2Card::DeviceCanDoAudioMixer ()
 	if(isMixerSupported == 1)
 		return true;
 	return false;
+}
+
+bool CNTV2Card::DeviceCanDoHDMIQuadRasterConversion ()
+{
+	NTV2DeviceID deviceID = GetDeviceID();
+
+	if ((NTV2DeviceGetNumHDMIVideoInputs(deviceID) == 0) &&
+			(NTV2DeviceGetNumHDMIVideoOutputs(deviceID) == 0))
+		return false;
+
+	if (deviceID == DEVICE_ID_KONAHDMI)
+		return false;
+
+	if (DeviceCanDoAudioMixer())
+		return false;
+
+	return true;
 }
 
 bool CNTV2Card::DeviceIsDNxIV ()

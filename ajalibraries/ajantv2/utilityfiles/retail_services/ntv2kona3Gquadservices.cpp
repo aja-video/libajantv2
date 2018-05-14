@@ -46,7 +46,6 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
-	NTV2VideoFormat				inputFormat;									// Input video format
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -68,7 +67,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	}
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	
 	// input 1 select
@@ -729,7 +728,6 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
 
 	if (bDSKOn)
@@ -807,10 +805,6 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -874,10 +868,6 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			
@@ -1707,8 +1697,8 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1779,8 +1769,8 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
 			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
 			
-			mCard->GetHDMIOutDownstreamColorSpace (&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (&bitDepth);
+			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
+			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
 			
 			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
@@ -1877,8 +1867,8 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	NTV2Standard curr2Standard, new2Standard;
 	
 	// get current value
-	mCard->GetLHIVideoDACMode (&curr2Mode);	
-	mCard->GetLHIVideoDACStandard (&curr2Standard);
+	mCard->GetLHIVideoDACMode (curr2Mode);	
+	mCard->GetLHIVideoDACStandard (curr2Standard);
 
 	// Select DAC mode from framebufferformat
 	new2Mode = GetLHIVideoDACMode (mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);

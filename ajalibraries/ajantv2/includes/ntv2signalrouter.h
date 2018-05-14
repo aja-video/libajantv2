@@ -62,9 +62,10 @@ typedef std::multimap <NTV2WidgetID, NTV2InputCrosspointID>	Widget2InputXpts;
 typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
-	@brief	This class is a collection of input-to-output connections that can be applied to an NTV2 device.
+	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by NTV2InputCrosspointID) to a widget's output (specified by NTV2OutputCrosspointID).
 			Call the NTV2 device's ApplySignalRoute function to apply this route to the device.
+	@note	Use of this class is optional, as widget signal routing can always be performed using direct calls to NTV2Card::Connect.
 	@note	This class is not thread-safe.
 	@note	Public access to the NTV2RoutingEntry structs will be deprecated. Please use NTV2InputCrosspointIDs instead.
 **/
@@ -76,21 +77,21 @@ class AJAExport CNTV2SignalRouter
 		virtual inline								~CNTV2SignalRouter ()								{}				///< @brief	My default destructor.
 
 		#if !defined (NTV2_DEPRECATE)
-			virtual NTV2_DEPRECATED operator						NTV2RoutingTable () const;																///< @deprecated	This function is obsolete.
-			virtual NTV2_DEPRECATED operator						NTV2RoutingTable* ();																	///< @deprecated	This function is obsolete.
-			virtual NTV2_DEPRECATED inline const NTV2RoutingEntry &	getRoutingEntry (const ULWord inIndex) const		{return GetRoutingEntry (inIndex);}	///< @deprecated	This function is obsolete.
-			virtual NTV2_DEPRECATED inline ULWord					getCurrentIndex (void) const						{return GetNumberOfConnections ();}	///< @deprecated	Use GetNumberOfRoutes instead.
-			virtual NTV2_DEPRECATED inline bool						add (const NTV2RoutingEntry & inEntry)				{return AddConnection (inEntry);}	///< @deprecated	Use AddConnection instead.
-			virtual NTV2_DEPRECATED bool							addWithRegisterAndValue (const NTV2RoutingEntry & inEntry, const ULWord inRegisterNum, const ULWord inValue,
-																							const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0);	///< @deprecated	This function is obsolete.
-			virtual NTV2_DEPRECATED inline void						clear (void)										{mConnections.clear ();}			///< @deprecated	Use Reset instead.
-			virtual NTV2_DEPRECATED const NTV2RoutingEntry &		GetRoutingEntry (const ULWord inIndex) const;		///< @deprecated	This function is obsolete.
-			virtual NTV2_DEPRECATED bool							GetRoutingTable (NTV2RoutingTable & outRoutingTable) const;								///< @deprecated	This function is obsolete.
+			virtual NTV2_DEPRECATED_f(operator						NTV2RoutingTable () const);																///< @deprecated	This function is obsolete.
+			virtual NTV2_DEPRECATED_f(operator						NTV2RoutingTable* ());																	///< @deprecated	This function is obsolete.
+			virtual inline NTV2_DEPRECATED_f(const NTV2RoutingEntry &	getRoutingEntry (const ULWord inIndex) const)		{return GetRoutingEntry (inIndex);}	///< @deprecated	This function is obsolete.
+			virtual inline NTV2_DEPRECATED_f(ULWord					getCurrentIndex (void) const)						{return GetNumberOfConnections ();}	///< @deprecated	Use GetNumberOfRoutes instead.
+			virtual inline NTV2_DEPRECATED_f(bool						add (const NTV2RoutingEntry & inEntry))				{return AddConnection (inEntry);}	///< @deprecated	Use AddConnection instead.
+			virtual NTV2_DEPRECATED_f(bool							addWithRegisterAndValue (const NTV2RoutingEntry & inEntry, const ULWord inRegisterNum, const ULWord inValue,
+																							const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0));	///< @deprecated	This function is obsolete.
+			virtual inline NTV2_DEPRECATED_f(void						clear (void))										{mConnections.clear ();}			///< @deprecated	Use Reset instead.
+			virtual NTV2_DEPRECATED_f(const NTV2RoutingEntry &		GetRoutingEntry (const ULWord inIndex) const);		///< @deprecated	This function is obsolete.
+			virtual NTV2_DEPRECATED_f(bool							GetRoutingTable (NTV2RoutingTable & outRoutingTable) const);								///< @deprecated	This function is obsolete.
 		#endif	//	!defined (NTV2_DEPRECATE)
 
 		#if !defined (NTV2_DEPRECATE_12_5)
-			virtual NTV2_DEPRECATED bool	addWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue);				///< @deprecated	Use AddConnection with NTV2InputCrosspointIDs instead.
-			virtual NTV2_DEPRECATED bool	AddConnection (const NTV2RoutingEntry & inEntry, const NTV2OutputCrosspointID inSignalOutput = NTV2_XptBlack);	///< @deprecated	Use AddConnection(NTV2InputCrosspointID, NTV2OutputCrosspointID) instead.
+			virtual NTV2_DEPRECATED_f(bool	addWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));				///< @deprecated	Use AddConnection with NTV2InputCrosspointIDs instead.
+			virtual NTV2_DEPRECATED_f(bool	AddConnection (const NTV2RoutingEntry & inEntry, const NTV2OutputCrosspointID inSignalOutput = NTV2_XptBlack));	///< @deprecated	Use AddConnection(NTV2InputCrosspointID, NTV2OutputCrosspointID) instead.
 		#endif	//	!defined (NTV2_DEPRECATE_12_5)
 
 		/**
@@ -195,7 +196,7 @@ class AJAExport CNTV2SignalRouter
 		virtual bool								PrintCode (std::string & outCode, const PrintCodeConfig & inConfig = PrintCodeConfig()) const;
 
 		#if !defined (NTV2_DEPRECATE_12_5)
-			virtual NTV2_DEPRECATED bool	PrintCode (std::string & outCode, const bool inShowComments, const bool inShowDeclarations, const bool inUseRouter) const;	///< @deprecated	Use the new PrintCode method that accepts a PrintCodeConfig parameter.
+			virtual NTV2_DEPRECATED_f(bool	PrintCode (std::string & outCode, const bool inShowComments, const bool inShowDeclarations, const bool inUseRouter) const);	///< @deprecated	Use the new PrintCode method that accepts a PrintCodeConfig parameter.
 		#endif	//	!defined (NTV2_DEPRECATE_12_5)
 
 	//	Instance Data
@@ -210,8 +211,8 @@ class AJAExport CNTV2SignalRouter
 	//	Class Methods
         public:
 		#if !defined (NTV2_DEPRECATE_12_5)
-			static NTV2_DEPRECATED const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt);	///< @deprecated	NTV2RoutingEntry is deprecated.
-			static NTV2_DEPRECATED NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry);	///< @deprecated	NTV2RoutingEntry is deprecated.
+			static NTV2_DEPRECATED_f(const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt));	///< @deprecated	NTV2RoutingEntry is deprecated.
+			static NTV2_DEPRECATED_f(NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry));	///< @deprecated	NTV2RoutingEntry is deprecated.
 		#endif	//	!defined (NTV2_DEPRECATE_12_5)
 
 		/**
@@ -451,153 +452,153 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2Sig
 
 #if !defined (NTV2_DEPRECATE_12_5)
 	//	Stream operators
-	AJAExport NTV2_DEPRECATED std::ostream & operator << (std::ostream & inOutStream, const NTV2RoutingEntry & inObj);
-	AJAExport NTV2_DEPRECATED std::ostream & operator << (std::ostream & inOutStream, const NTV2RoutingTable & inObj);
+	AJAExport NTV2_DEPRECATED_f(std::ostream & operator << (std::ostream & inOutStream, const NTV2RoutingEntry & inObj));
+	AJAExport NTV2_DEPRECATED_f(std::ostream & operator << (std::ostream & inOutStream, const NTV2RoutingTable & inObj));
 
 	//	Per-widget input crosspoint selection register/mask/shift values
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer1BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer2BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer3BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer4InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer4BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer5InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer5BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer6InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer6BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer7InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer7BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer8InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameBuffer8BInputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer1BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer2BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer3BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer4BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer5BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer6BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer7BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameBuffer8BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC1VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC1KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC2VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC2KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC3VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC3KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC4VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC4KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC5VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC5KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC6VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC6KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC7VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC7KeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC8VidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC8KeyInputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC2KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC3KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC4KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC5KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC6KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC7KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8VidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC8KeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT4InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT5InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT6InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT7InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetLUT8InputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetLUT8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut1StandardSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut2StandardSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut3StandardSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut4StandardSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut1InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut2InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut3InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut4InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut4InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut5InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut5InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut6InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut6InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut7InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut7InputDS2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut8InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetSDIOut8InputDS2SelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4StandardSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut1InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut2InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut3InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut4InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut5InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut6InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut7InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetSDIOut8InputDS2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn1DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn2DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn3DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn4InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn4DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn5InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn5DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn6InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn6DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn7InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn7DSInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn8InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkIn8DSInputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn1DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn2DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn3DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn4DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn5DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn6DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn7DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkIn8DSInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut4InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut5InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut6InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut7InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetDualLinkOut8InputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut5InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut6InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut7InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetDualLinkOut8InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer1BGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer1BGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer1FGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer1FGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer2BGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer2BGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer2FGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer2FGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer3BGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer3BGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer3FGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer3FGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer4BGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer4BGVidInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer4FGKeyInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetMixer4FGVidInputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer1FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer2FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer3FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4BGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGKeyInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetMixer4FGVidInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetHDMIOutInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetHDMIOutQ1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetHDMIOutQ2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetHDMIOutQ3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetHDMIOutQ4InputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetHDMIOutQ4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetXpt4KDCQ1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetXpt4KDCQ2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetXpt4KDCQ3InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetXpt4KDCQ4InputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ3InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetXpt4KDCQ4InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux1AInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux1BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux2AInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux2BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux3AInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux3BInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux4AInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	Get425Mux4BInputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux1BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux2BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux3BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4AInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	Get425Mux4BInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
 
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetAnalogOutInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetIICT2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetAnalogOutCompositeOutSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetStereoLeftInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetStereoRightInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetProAmpInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetIICT1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetWaterMarker1InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetWaterMarker2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetUpdateRegisterSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetConversionMod2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCompressionModInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetConversionModInputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetCSC1KeyFromInput2SelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameSync2InputSelectEntry (void);
-	AJAExport NTV2_DEPRECATED const NTV2RoutingEntry &	GetFrameSync1InputSelectEntry (void);
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT2InputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetAnalogOutCompositeOutSelectEntry(void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoLeftInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetStereoRightInputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetProAmpInputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetIICT1InputSelectEntry (void));			///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker1InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetWaterMarker2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetUpdateRegisterSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionMod2InputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCompressionModInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetConversionModInputSelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetCSC1KeyFromInput2SelectEntry (void));	///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync2InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
+	AJAExport NTV2_DEPRECATED_f(const NTV2RoutingEntry &	GetFrameSync1InputSelectEntry (void));		///< @deprecated	NTV2RoutingEntry is deprecated.
 #endif	//	!defined (NTV2_DEPRECATE_12_5)
 
 
@@ -650,132 +651,132 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2Sig
 	#define	GetXptLUT7InputSelectEntry			GetLUT7InputSelectEntry
 	#define	GetXptLUT8InputSelectEntry			GetLUT8InputSelectEntry
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer1InputSelectEntry;		///< @deprecated	Use GetFrameBuffer1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer2InputSelectEntry;		///< @deprecated	Use GetFrameBuffer2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer3InputSelectEntry;		///< @deprecated	Use GetFrameBuffer3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer4InputSelectEntry;		///< @deprecated	Use GetFrameBuffer4InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer5InputSelectEntry;		///< @deprecated	Use GetFrameBuffer5InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer6InputSelectEntry;		///< @deprecated	Use GetFrameBuffer6InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer7InputSelectEntry;		///< @deprecated	Use GetFrameBuffer7InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameBuffer8InputSelectEntry;		///< @deprecated	Use GetFrameBuffer8InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer1InputSelectEntry);			///< @deprecated	Use GetFrameBuffer1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer2InputSelectEntry);			///< @deprecated	Use GetFrameBuffer2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer3InputSelectEntry);			///< @deprecated	Use GetFrameBuffer3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer4InputSelectEntry);			///< @deprecated	Use GetFrameBuffer4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer5InputSelectEntry);			///< @deprecated	Use GetFrameBuffer5InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer6InputSelectEntry);			///< @deprecated	Use GetFrameBuffer6InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer7InputSelectEntry);			///< @deprecated	Use GetFrameBuffer7InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameBuffer8InputSelectEntry);			///< @deprecated	Use GetFrameBuffer8InputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC1VidInputSelectEntry;			///< @deprecated	Use GetCSC1VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC1KeyInputSelectEntry;			///< @deprecated	Use GetCSC1KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC2VidInputSelectEntry;			///< @deprecated	Use GetCSC2VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC2KeyInputSelectEntry;			///< @deprecated	Use GetCSC2KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC3VidInputSelectEntry;			///< @deprecated	Use GetCSC3VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC3KeyInputSelectEntry;			///< @deprecated	Use GetCSC3KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC4VidInputSelectEntry;			///< @deprecated	Use GetCSC4VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC4KeyInputSelectEntry;			///< @deprecated	Use GetCSC4KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC5VidInputSelectEntry;			///< @deprecated	Use GetCSC5VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC5KeyInputSelectEntry;			///< @deprecated	Use GetCSC5KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC6VidInputSelectEntry;			///< @deprecated	Use GetCSC6VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC6KeyInputSelectEntry;			///< @deprecated	Use GetCSC6KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC7VidInputSelectEntry;			///< @deprecated	Use GetCSC7VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC7KeyInputSelectEntry;			///< @deprecated	Use GetCSC7KeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC8VidInputSelectEntry;			///< @deprecated	Use GetCSC8VidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC8KeyInputSelectEntry;			///< @deprecated	Use GetCSC8KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC1VidInputSelectEntry);				///< @deprecated	Use GetCSC1VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC1KeyInputSelectEntry);				///< @deprecated	Use GetCSC1KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC2VidInputSelectEntry);				///< @deprecated	Use GetCSC2VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC2KeyInputSelectEntry);				///< @deprecated	Use GetCSC2KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC3VidInputSelectEntry);				///< @deprecated	Use GetCSC3VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC3KeyInputSelectEntry);				///< @deprecated	Use GetCSC3KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC4VidInputSelectEntry);				///< @deprecated	Use GetCSC4VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC4KeyInputSelectEntry);				///< @deprecated	Use GetCSC4KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC5VidInputSelectEntry);				///< @deprecated	Use GetCSC5VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC5KeyInputSelectEntry);				///< @deprecated	Use GetCSC5KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC6VidInputSelectEntry);				///< @deprecated	Use GetCSC6VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC6KeyInputSelectEntry);				///< @deprecated	Use GetCSC6KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC7VidInputSelectEntry);				///< @deprecated	Use GetCSC7VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC7KeyInputSelectEntry);				///< @deprecated	Use GetCSC7KeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC8VidInputSelectEntry);				///< @deprecated	Use GetCSC8VidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC8KeyInputSelectEntry);				///< @deprecated	Use GetCSC8KeyInputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUTInputSelectEntry;			///< @deprecated	Use GetLUT1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT2InputSelectEntry;			///< @deprecated	Use GetLUT2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT3InputSelectEntry;			///< @deprecated	Use GetLUT3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT4InputSelectEntry;			///< @deprecated	Use GetLUT4InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT5InputSelectEntry;			///< @deprecated	Use GetLUT5InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT6InputSelectEntry;			///< @deprecated	Use GetLUT6InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT7InputSelectEntry;			///< @deprecated	Use GetLUT7InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry XptLUT8InputSelectEntry;			///< @deprecated	Use GetLUT8InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUTInputSelectEntry);				///< @deprecated	Use GetLUT1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT2InputSelectEntry);				///< @deprecated	Use GetLUT2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT3InputSelectEntry);				///< @deprecated	Use GetLUT3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT4InputSelectEntry);				///< @deprecated	Use GetLUT4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT5InputSelectEntry);				///< @deprecated	Use GetLUT5InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT6InputSelectEntry);				///< @deprecated	Use GetLUT6InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT7InputSelectEntry);				///< @deprecated	Use GetLUT7InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry XptLUT8InputSelectEntry);				///< @deprecated	Use GetLUT8InputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut1StandardSelectEntry;		///< @deprecated	Use GetSDIOut1StandardSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut2StandardSelectEntry;		///< @deprecated	Use GetSDIOut2StandardSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut3StandardSelectEntry;		///< @deprecated	Use GetSDIOut3StandardSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut4StandardSelectEntry;		///< @deprecated	Use GetSDIOut4StandardSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut1InputSelectEntry;			///< @deprecated	Use GetSDIOut1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut1InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut1InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut2InputSelectEntry;			///< @deprecated	Use GetSDIOut2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut2InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut2InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut3InputSelectEntry;			///< @deprecated	Use GetSDIOut3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut3InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut3InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut4InputSelectEntry;			///< @deprecated	Use GetSDIOut4InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut4InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut4InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut5InputSelectEntry;			///< @deprecated	Use GetSDIOut5InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut5InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut5InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut6InputSelectEntry;			///< @deprecated	Use GetSDIOut6InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut6InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut6InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut7InputSelectEntry;			///< @deprecated	Use GetSDIOut7InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut7InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut7InputDS2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut8InputSelectEntry;			///< @deprecated	Use GetSDIOut8InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry SDIOut8InputDS2SelectEntry;		///< @deprecated	Use GetSDIOut8InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut1StandardSelectEntry);			///< @deprecated	Use GetSDIOut1StandardSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut2StandardSelectEntry);			///< @deprecated	Use GetSDIOut2StandardSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut3StandardSelectEntry);			///< @deprecated	Use GetSDIOut3StandardSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut4StandardSelectEntry);			///< @deprecated	Use GetSDIOut4StandardSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut1InputSelectEntry);				///< @deprecated	Use GetSDIOut1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut1InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut1InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut2InputSelectEntry);				///< @deprecated	Use GetSDIOut2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut2InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut2InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut3InputSelectEntry);				///< @deprecated	Use GetSDIOut3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut3InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut3InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut4InputSelectEntry);				///< @deprecated	Use GetSDIOut4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut4InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut4InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut5InputSelectEntry);				///< @deprecated	Use GetSDIOut5InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut5InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut5InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut6InputSelectEntry);				///< @deprecated	Use GetSDIOut6InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut6InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut6InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut7InputSelectEntry);				///< @deprecated	Use GetSDIOut7InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut7InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut7InputDS2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut8InputSelectEntry);				///< @deprecated	Use GetSDIOut8InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry SDIOut8InputDS2SelectEntry);			///< @deprecated	Use GetSDIOut8InputDS2SelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn1InputSelectEntry;		///< @deprecated	Use GetDualLinkIn1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn1DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn1DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn2InputSelectEntry;		///< @deprecated	Use GetDualLinkIn2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn2DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn2DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn3InputSelectEntry;		///< @deprecated	Use GetDualLinkIn3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn3DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn3DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn4InputSelectEntry;		///< @deprecated	Use GetDualLinkIn4InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn4DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn4DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn5InputSelectEntry;		///< @deprecated	Use GetDualLinkIn5InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn5DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn5DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn6InputSelectEntry;		///< @deprecated	Use GetDualLinkIn6InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn6DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn6DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn7InputSelectEntry;		///< @deprecated	Use GetDualLinkIn7InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn7DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn7DSInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn8InputSelectEntry;		///< @deprecated	Use GetDualLinkIn8InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkIn8DSInputSelectEntry;	///< @deprecated	Use GetDualLinkIn8DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn1InputSelectEntry);			///< @deprecated	Use GetDualLinkIn1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn1DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn1DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn2InputSelectEntry);			///< @deprecated	Use GetDualLinkIn2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn2DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn2DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn3InputSelectEntry);			///< @deprecated	Use GetDualLinkIn3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn3DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn3DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn4InputSelectEntry);			///< @deprecated	Use GetDualLinkIn4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn4DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn4DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn5InputSelectEntry);			///< @deprecated	Use GetDualLinkIn5InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn5DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn5DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn6InputSelectEntry);			///< @deprecated	Use GetDualLinkIn6InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn6DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn6DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn7InputSelectEntry);			///< @deprecated	Use GetDualLinkIn7InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn7DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn7DSInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn8InputSelectEntry);			///< @deprecated	Use GetDualLinkIn8InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkIn8DSInputSelectEntry);			///< @deprecated	Use GetDualLinkIn8DSInputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut1InputSelectEntry;		///< @deprecated	Use GetDualLinkOut1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut2InputSelectEntry;		///< @deprecated	Use GetDualLinkOut2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut3InputSelectEntry;		///< @deprecated	Use GetDualLinkOut3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut4InputSelectEntry;		///< @deprecated	Use GetDualLinkOut4InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut5InputSelectEntry;		///< @deprecated	Use GetDualLinkOut5InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut6InputSelectEntry;		///< @deprecated	Use GetDualLinkOut6InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut7InputSelectEntry;		///< @deprecated	Use GetDualLinkOut7InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry DualLinkOut8InputSelectEntry;		///< @deprecated	Use GetDualLinkOut8InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut1InputSelectEntry);			///< @deprecated	Use GetDualLinkOut1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut2InputSelectEntry);			///< @deprecated	Use GetDualLinkOut2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut3InputSelectEntry);			///< @deprecated	Use GetDualLinkOut3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut4InputSelectEntry);			///< @deprecated	Use GetDualLinkOut4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut5InputSelectEntry);			///< @deprecated	Use GetDualLinkOut5InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut6InputSelectEntry);			///< @deprecated	Use GetDualLinkOut6InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut7InputSelectEntry);			///< @deprecated	Use GetDualLinkOut7InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry DualLinkOut8InputSelectEntry);			///< @deprecated	Use GetDualLinkOut8InputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer1BGKeyInputSelectEntry;		///< @deprecated	Use GetMixer1BGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer1BGVidInputSelectEntry;		///< @deprecated	Use GetMixer1BGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer1FGKeyInputSelectEntry;		///< @deprecated	Use GetMixer1FGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer1FGVidInputSelectEntry;		///< @deprecated	Use GetMixer1FGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer2BGKeyInputSelectEntry;		///< @deprecated	Use GetMixer2BGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer2BGVidInputSelectEntry;		///< @deprecated	Use GetMixer2BGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer2FGKeyInputSelectEntry;		///< @deprecated	Use GetMixer2FGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer2FGVidInputSelectEntry;		///< @deprecated	Use GetMixer2FGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer3BGKeyInputSelectEntry;		///< @deprecated	Use GetMixer3BGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer3BGVidInputSelectEntry;		///< @deprecated	Use GetMixer3BGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer3FGKeyInputSelectEntry;		///< @deprecated	Use GetMixer3FGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer3FGVidInputSelectEntry;		///< @deprecated	Use GetMixer3FGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer4BGKeyInputSelectEntry;		///< @deprecated	Use GetMixer4BGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer4BGVidInputSelectEntry;		///< @deprecated	Use GetMixer4BGVidInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer4FGKeyInputSelectEntry;		///< @deprecated	Use GetMixer4FGKeyInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Mixer4FGVidInputSelectEntry;		///< @deprecated	Use GetMixer4FGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer1BGKeyInputSelectEntry);			///< @deprecated	Use GetMixer1BGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer1BGVidInputSelectEntry);			///< @deprecated	Use GetMixer1BGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer1FGKeyInputSelectEntry);			///< @deprecated	Use GetMixer1FGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer1FGVidInputSelectEntry);			///< @deprecated	Use GetMixer1FGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer2BGKeyInputSelectEntry);			///< @deprecated	Use GetMixer2BGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer2BGVidInputSelectEntry);			///< @deprecated	Use GetMixer2BGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer2FGKeyInputSelectEntry);			///< @deprecated	Use GetMixer2FGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer2FGVidInputSelectEntry);			///< @deprecated	Use GetMixer2FGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer3BGKeyInputSelectEntry);			///< @deprecated	Use GetMixer3BGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer3BGVidInputSelectEntry);			///< @deprecated	Use GetMixer3BGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer3FGKeyInputSelectEntry);			///< @deprecated	Use GetMixer3FGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer3FGVidInputSelectEntry);			///< @deprecated	Use GetMixer3FGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer4BGKeyInputSelectEntry);			///< @deprecated	Use GetMixer4BGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer4BGVidInputSelectEntry);			///< @deprecated	Use GetMixer4BGVidInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer4FGKeyInputSelectEntry);			///< @deprecated	Use GetMixer4FGKeyInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Mixer4FGVidInputSelectEntry);			///< @deprecated	Use GetMixer4FGVidInputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Xpt4KDCQ1InputSelectEntry;		///< @deprecated	Use GetXpt4KDCQ1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Xpt4KDCQ2InputSelectEntry;		///< @deprecated	Use GetXpt4KDCQ2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Xpt4KDCQ3InputSelectEntry;		///< @deprecated	Use GetXpt4KDCQ3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry Xpt4KDCQ4InputSelectEntry;		///< @deprecated	Use GetXpt4KDCQ4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Xpt4KDCQ1InputSelectEntry);				///< @deprecated	Use GetXpt4KDCQ1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Xpt4KDCQ2InputSelectEntry);				///< @deprecated	Use GetXpt4KDCQ2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Xpt4KDCQ3InputSelectEntry);				///< @deprecated	Use GetXpt4KDCQ3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry Xpt4KDCQ4InputSelectEntry);				///< @deprecated	Use GetXpt4KDCQ4InputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry HDMIOutQ1InputSelectEntry;		///< @deprecated	Use GetHDMIOutQ1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry HDMIOutQ2InputSelectEntry;		///< @deprecated	Use GetHDMIOutQ2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry HDMIOutQ3InputSelectEntry;		///< @deprecated	Use GetHDMIOutQ3InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry HDMIOutQ4InputSelectEntry;		///< @deprecated	Use GetHDMIOutQ4InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry HDMIOutQ1InputSelectEntry);				///< @deprecated	Use GetHDMIOutQ1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry HDMIOutQ2InputSelectEntry);				///< @deprecated	Use GetHDMIOutQ2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry HDMIOutQ3InputSelectEntry);				///< @deprecated	Use GetHDMIOutQ3InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry HDMIOutQ4InputSelectEntry);				///< @deprecated	Use GetHDMIOutQ4InputSelectEntry instead.
 
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CompressionModInputSelectEntry;	///< @deprecated	Use GetCompressionModInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry ConversionModInputSelectEntry;	///< @deprecated	Use GetConversionModInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry CSC1KeyFromInput2SelectEntry;		///< @deprecated	Use GetCSC1KeyFromInput2SelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameSync2InputSelectEntry;		///< @deprecated	Use GetFrameSync2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry FrameSync1InputSelectEntry;		///< @deprecated	Use GetFrameSync1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry AnalogOutInputSelectEntry;		///< @deprecated	Use GetAnalogOutInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry ProAmpInputSelectEntry;			///< @deprecated	Use GetProAmpInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry IICT1InputSelectEntry;			///< @deprecated	Use GetIICT1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry WaterMarker1InputSelectEntry;		///< @deprecated	Use GetWaterMarker1InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry WaterMarker2InputSelectEntry;		///< @deprecated	Use GetWaterMarker2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry UpdateRegisterSelectEntry;		///< @deprecated	Use GetUpdateRegisterSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry ConversionMod2InputSelectEntry;	///< @deprecated	Use GetConversionMod2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry HDMIOutInputSelectEntry;			///< @deprecated	Use GetHDMIOutInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry IICT2InputSelectEntry;			///< @deprecated	Use GetIICT2InputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry AnalogOutCompositeOutSelectEntry;	///< @deprecated	Use GetAnalogOutCompositeOutSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry StereoLeftInputSelectEntry;		///< @deprecated	Use GetStereoLeftInputSelectEntry instead.
-	extern NTV2_DEPRECATED	const NTV2RoutingEntry StereoRightInputSelectEntry;		///< @deprecated	Use GetStereoRightInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CompressionModInputSelectEntry);		///< @deprecated	Use GetCompressionModInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry ConversionModInputSelectEntry);			///< @deprecated	Use GetConversionModInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry CSC1KeyFromInput2SelectEntry);			///< @deprecated	Use GetCSC1KeyFromInput2SelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameSync2InputSelectEntry);			///< @deprecated	Use GetFrameSync2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry FrameSync1InputSelectEntry);			///< @deprecated	Use GetFrameSync1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry AnalogOutInputSelectEntry);				///< @deprecated	Use GetAnalogOutInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry ProAmpInputSelectEntry);				///< @deprecated	Use GetProAmpInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry IICT1InputSelectEntry);					///< @deprecated	Use GetIICT1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry WaterMarker1InputSelectEntry);			///< @deprecated	Use GetWaterMarker1InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry WaterMarker2InputSelectEntry);			///< @deprecated	Use GetWaterMarker2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry UpdateRegisterSelectEntry);				///< @deprecated	Use GetUpdateRegisterSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry ConversionMod2InputSelectEntry);		///< @deprecated	Use GetConversionMod2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry HDMIOutInputSelectEntry);				///< @deprecated	Use GetHDMIOutInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry IICT2InputSelectEntry);					///< @deprecated	Use GetIICT2InputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry AnalogOutCompositeOutSelectEntry);		///< @deprecated	Use GetAnalogOutCompositeOutSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry StereoLeftInputSelectEntry);			///< @deprecated	Use GetStereoLeftInputSelectEntry instead.
+	extern NTV2_DEPRECATED_v(const NTV2RoutingEntry StereoRightInputSelectEntry);			///< @deprecated	Use GetStereoRightInputSelectEntry instead.
 #endif	//	!defined (NTV2_DEPRECATE)
 
 #endif	//	NTV2SIGNALROUTER_H

@@ -31,7 +31,7 @@ typedef	struct
 /**
 	@deprecated	Use CNTV2Card instead.
 **/
-class AJAExport NTV2_DEPRECATED CNTV2ProcAmp : public CNTV2Status
+class AJAExport NTV2_DEPRECATED_CLASS CNTV2ProcAmp : public CNTV2Status
 {
 public:  // Constructor - Deconstructor
     CNTV2ProcAmp() {};

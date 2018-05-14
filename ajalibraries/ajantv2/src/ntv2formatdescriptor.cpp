@@ -596,7 +596,6 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
-	m2Kby1080		= NTV2_IS_2K1080_STANDARD(mStandard);
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -634,6 +633,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 												const bool					in2Kby1080,
 												const bool					inWideVANC)
 	{
+		(void) in2Kby1080;
 		MakeInvalid ();
 		if (!NTV2_IS_VALID_STANDARD (inVideoStandard))
 			return;	//	bad standard
@@ -714,7 +714,6 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		firstActiveLine = numLines - numActiveLines;
 		mStandard		= inVideoStandard;
 		mPixelFormat	= inFrameBufferFormat;
-		m2Kby1080		= in2Kby1080;
 		mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
 
 		if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
@@ -772,7 +771,6 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWor
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat	(NTV2_FBF_INVALID),
 		mVancMode		(NTV2_VANCMODE_INVALID),
-		m2Kby1080		(false),
 		mNumPlanes		(1),
 		mFrameGeometry	(NTV2_FG_INVALID)
 {
@@ -791,10 +789,18 @@ void NTV2FormatDescriptor::MakeInvalid (void)
 	mVideoFormat	= NTV2_FORMAT_UNKNOWN;
 	mPixelFormat	= NTV2_FBF_INVALID;
 	mVancMode		= NTV2_VANCMODE_INVALID;
-	m2Kby1080		= false;
 	mLinePitch[0] = mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
 	mNumPlanes		= 0;
 	mFrameGeometry	= NTV2_FG_INVALID;
+}
+
+bool NTV2FormatDescriptor::Is2KFormat (void) const
+{
+	if (NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))
+		return NTV2_IS_2K_1080_VIDEO_FORMAT(mVideoFormat);
+	else if (NTV2_IS_VALID_STANDARD(mStandard))
+		return NTV2_IS_2K1080_STANDARD(mStandard);
+	return false;
 }
 
 
@@ -979,7 +985,7 @@ ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetai
 		if (NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))
 			inOutStream << " '" << ::NTV2VideoFormatToString(mVideoFormat) << "'";
 		else
-			inOutStream << ", " << ::NTV2StandardToString(mStandard) << (m2Kby1080 ? " 2K" : "");
+			inOutStream << ", " << ::NTV2StandardToString(mStandard) << (Is2KFormat() ? " 2K" : "");
 		if (NTV2_IS_VANCMODE_ON(mVancMode))
 			inOutStream << (NTV2_IS_VANCMODE_TALLER(mVancMode) ? " TallerVANC" : " TallVANC");
 		if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))

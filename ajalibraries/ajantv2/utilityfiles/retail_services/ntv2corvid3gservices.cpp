@@ -82,7 +82,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
-	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
+	//NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
 	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
@@ -100,11 +100,11 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	}
 	else if (bFb1RGB)
 	{
-		frameSync2RGB = NTV2_XptLUT1RGB;
+		//frameSync2RGB = NTV2_XptLUT1RGB;
 	}
 	else
 	{
-		frameSync2RGB = NTV2_XptLUT1RGB;
+		//frameSync2RGB = NTV2_XptLUT1RGB;
 	}
 	
 	
@@ -214,7 +214,6 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
 	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
@@ -278,10 +277,6 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 				// Background is video in
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1);
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -330,10 +325,6 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			
@@ -606,8 +597,8 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
 	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);

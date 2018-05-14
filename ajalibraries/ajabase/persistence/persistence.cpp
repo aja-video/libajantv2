@@ -53,7 +53,7 @@
 
 //MARK: hidden helpers
 
-std::string makeCreateTableString(const std::string& tableName,bool blobTable = false)
+static std::string makeCreateTableString(const std::string& tableName,bool blobTable = false)
 {
 	std::string stmt;
 	if (blobTable)
@@ -68,7 +68,7 @@ std::string makeCreateTableString(const std::string& tableName,bool blobTable = 
 	return stmt;
 }
 
-bool PersistenceSetValue(std::string keyRoot, std::string key, void *value, AJAPersistenceType type, std::string devName = "", std::string devNum = "")
+static bool PersistenceSetValue(std::string keyRoot, std::string key, void *value, AJAPersistenceType type, std::string devName = "", std::string devNum = "")
 {
 	//int64_t start = AJATime::GetSystemMilliseconds();
 
@@ -217,7 +217,7 @@ bool PersistenceSetValue(std::string keyRoot, std::string key, void *value, AJAP
 	return isGood; 
 }
 
-bool PersistenceSetValueBlob(std::string keyRoot, std::string key, void *value, int blobBytes, std::string devName = "", std::string devNum = "")
+static bool PersistenceSetValueBlob(std::string keyRoot, std::string key, void *value, int blobBytes, std::string devName = "", std::string devNum = "")
 {
 	//int64_t start = AJATime::GetSystemMilliseconds();
 
@@ -380,7 +380,7 @@ bool PersistenceSetValueBlob(std::string keyRoot, std::string key, void *value, 
 		} \
 	}
 
-bool PersistenceGetValue(std::string keyRoot, std::string key, void *value, AJAPersistenceType type, std::string devName = "", std::string devNum = "")
+static bool PersistenceGetValue(std::string keyRoot, std::string key, void *value, AJAPersistenceType type, std::string devName = "", std::string devNum = "")
 {
 	//int64_t start = AJATime::GetSystemMilliseconds();
 
@@ -541,8 +541,8 @@ bool PersistenceGetValue(std::string keyRoot, std::string key, void *value, AJAP
 
 // This version with return multiple rows that match the 'key_query', in the query use '_' for a single character match
 // use '%' for multi character match. See http://www.sqlite.org/lang_expr.html for tips how the LIKE operator works in SQL expressions
-bool PresistenceGetValues(std::string keyRoot, std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values,
-						  std::string devName = "", std::string devNum = "")
+static bool PresistenceGetValues(std::string keyRoot, std::string key_query, std::vector<std::string>& keys, std::vector<std::string>& values,
+								std::string devName = "", std::string devNum = "")
 {
     bool isGood = false;
 
@@ -652,7 +652,7 @@ bool PresistenceGetValues(std::string keyRoot, std::string key_query, std::vecto
     return isGood;
 }
 
-bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, int blobBytes, std::string devName = "", std::string devNum = "")
+static bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *value, int blobBytes, std::string devName = "", std::string devNum = "")
 {
 	//int64_t start = AJATime::GetSystemMilliseconds();
 

@@ -104,7 +104,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
-	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
+	//NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
 	if (bStereoOut || b2FbLevelBHfr)
 	{
 		if (bFb1RGB)
@@ -124,16 +124,16 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	{
 		if (mGammaMode == NTV2_GammaNone)
 		{
-			frameSync2RGB = NTV2_XptLUT1RGB;
+			//frameSync2RGB = NTV2_XptLUT1RGB;
 		}
 		else
 		{
-			frameSync2RGB = NTV2_XptFrameBuffer1RGB;
+			//frameSync2RGB = NTV2_XptFrameBuffer1RGB;
 		}
 	}
 	else
 	{
-		frameSync2RGB = NTV2_XptLUT1RGB;
+		//frameSync2RGB = NTV2_XptLUT1RGB;
 	}
 	
 	
@@ -302,7 +302,6 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
 	
 	// The background video/key depends on the DSK mode
-	int audioLoopbackMode = 0;					// Assume playback mode. Will be set to '1' if we're in Loopback ("E-E") mode
 	int bFb1Disable = 0;						// Assume Channel 1 is NOT disabled
 	int bFb2Disable = 1;						// Assume Channel 2 IS disabled
 	bool bNoKey = false;						// Assume we DO have a foreground key
@@ -376,10 +375,6 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptAnalogIn);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptAnalogIn);
 				}
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 
 			case NTV2_DSKModeGraphicOverMatte:
@@ -438,10 +433,6 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 				
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
-				
-				// in "Frame Buffer over VideoIn" mode, where should the audio come from?
-				if (mDSKAudioMode == NTV2_DSKAudioBackground)
-					audioLoopbackMode = 1;							// set audio to "input loopthru" (aka "E-E") mode
 				break;
 			
 			case NTV2_DSKModeGraphicOverFB:			
@@ -718,8 +709,8 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat (mVirtualSecondaryFormatSelect);
 	//NTV2FrameGeometry		secondaryGeometry = GetNTV2FrameGeometryFromVideoFormat (mVirtualSecondaryFormatSelect);
@@ -758,8 +749,8 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 	NTV2Standard curr2Standard, new2Standard;
 	
 	// get current value
-	mCard->GetLHIVideoDACMode (&curr2Mode);	
-	mCard->GetLHIVideoDACStandard (&curr2Standard);
+	mCard->GetLHIVideoDACMode (curr2Mode);	
+	mCard->GetLHIVideoDACStandard (curr2Standard);
 	
 	if (mVirtualAnalogOutputSelect == NTV2_SecondaryOutputSelect)	
 	{

@@ -242,7 +242,7 @@ bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NT
     int count = 30;
     do
     {
-        bool rv = SendArpRequest(remote_IPAddress,port);
+        rv = SendArpRequest(remote_IPAddress,port);
         if (!rv) return false;
 
         mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1,2);
@@ -402,7 +402,7 @@ bool CNTV2MBController::getHex(const std::string & resp, const std::string & par
     bool rv = getString(resp,parm,val);
     if (rv)
     {
-        result = strtoul(val.c_str(),NULL,16);
+        result = uint32_t(::strtoul(val.c_str(),NULL,16));
         return true;
     }
     return false;
@@ -453,7 +453,7 @@ void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Channel channel, NTV2Stre
     {
         // is used or busy, so can enable/disable
         mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
-        uint32_t val = IGMPCB_STATE_USED;
+        val = IGMPCB_STATE_USED;
         if (enable)
         {
             val += IGMPCB_STATE_ENABLED;

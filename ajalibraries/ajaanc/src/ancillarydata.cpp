@@ -168,9 +168,9 @@ AJAStatus AJAAncillaryData::SetChecksum (const uint8_t inChecksum, const bool in
 uint16_t AJAAncillaryData::GetStreamInfo (void) const
 {
 	if (IS_VALID_AJAAncillaryDataStream(GetLocationDataStream()))
-		return GetLocationDataStream();
+		return uint16_t(GetLocationDataStream());
 	else if (IS_VALID_AJAAncillaryDataLink(GetLocationVideoLink()))
-		return GetLocationVideoLink();
+		return uint16_t(GetLocationVideoLink());
 	return 0;
 }
 
@@ -182,7 +182,7 @@ uint8_t AJAAncillaryData::Calculate8BitChecksum (void) const
 	//			of the 9-bit checksum...
 	uint8_t	sum	(m_DID);
 	sum += m_SID;
-	sum += m_payload.size();
+	sum += uint8_t(m_payload.size());
 	if (!m_payload.empty())
 		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
 			sum += m_payload[ndx];
@@ -196,7 +196,7 @@ uint16_t AJAAncillaryData::Calculate9BitChecksum (void) const
 	//	SMPTE 291-1:2011:	6.7 Checksum Word
 	uint16_t	sum	(CNTV2SMPTEAncData::AddEvenParity(m_DID));	//	DID
 	sum += CNTV2SMPTEAncData::AddEvenParity(m_SID);				//	+ SDID
-	sum += CNTV2SMPTEAncData::AddEvenParity(GetDC());			//	+ DC
+	sum += CNTV2SMPTEAncData::AddEvenParity(UByte(GetDC()));	//	+ DC
 	if (!m_payload.empty())										//	+ payload:
 		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
 			sum += CNTV2SMPTEAncData::AddEvenParity(m_payload[ndx]);
@@ -693,7 +693,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		pData[3] = m_DID;
 		pData[4] = m_SID;
 
-		uint8_t payloadSize = (GetDC() > 255) ? 255 : GetDC();	//	Truncate payload to max 255 bytes
+		uint8_t payloadSize = uint8_t((GetDC() > 255) ? 255 : GetDC());	//	Truncate payload to max 255 bytes
 		pData[5] = payloadSize;
 
 		//	Copy payload data to raw stream...
@@ -727,7 +727,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 			pData[3] = m_DID;
 			pData[4] = m_SID;
 
-			uint8_t payloadSize = (remainingPayloadData > 255) ? 255 : remainingPayloadData;	//	Truncate payload to max 255 bytes
+			uint8_t payloadSize = uint8_t((remainingPayloadData > 255) ? 255 : remainingPayloadData);	//	Truncate payload to max 255 bytes
 			pData[5] = payloadSize;		//	DC
 
 			//	Copy payload data into GUMP buffer...
@@ -1214,13 +1214,13 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 	oss << "]";
 	if (inMaxBytes  &&  GetDC())
 	{
-		uint16_t	bytesToDump(GetDC());
+		uint16_t	bytesToDump = uint16_t(GetDC());
 		oss << ": ";
 		if (inMaxBytes < bytesToDump)
 			bytesToDump = inMaxBytes;
 		for (uint16_t ndx(0);  ndx < bytesToDump;  ndx++)
 			oss << HEX0N(uint16_t(m_payload[ndx]),2);
-		if (bytesToDump < GetDC())
+		if (bytesToDump < uint16_t(GetDC()))
 			oss << "...";	//	Indicate dump was truncated
 	}
 	return oss.str();
@@ -1497,7 +1497,7 @@ bool AJARTPAncPayloadHeader::SetULWordAtIndex(const unsigned inIndex0, const uin
 					mXBit = (u32 & 0x10000000) ? true : false;
 					mCCBits = uint8_t((u32 & 0x0F000000) >> 24);
 					mMarkerBit = (u32 & 0x00800000) ? true : false;
-					mPayloadType = (u32 & 0x007F0000) >> 16;
+					mPayloadType = uint8_t((u32 & 0x007F0000) >> 16);
 					mSequenceNumber = (mSequenceNumber & 0xFFFF0000) | (u32 & 0x0000FFFF);	//	Replace LS 16 bits
 					break;
 
@@ -1725,9 +1725,9 @@ AJARTPAncPacketHeader &	AJARTPAncPacketHeader::SetFrom(const AJAAncillaryDataLoc
 	mSBit = IS_VALID_AJAAncillaryDataLink(lnk)  ||  IS_VALID_AJAAncillaryDataStream(ds);
 
 	if (IS_VALID_AJAAncillaryDataLink(lnk))
-		mStreamNum = lnk;
+		mStreamNum = uint8_t(lnk);
 	else if (IS_VALID_AJAAncillaryDataStream(ds))
-		mStreamNum = ds;
+		mStreamNum = uint8_t(ds);
 	else
 		mStreamNum = 0;
 
