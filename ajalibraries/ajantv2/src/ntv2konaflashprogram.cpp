@@ -150,6 +150,12 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
+    case 0x009d6019:
+        _flashSize = 64 * 1024 * 1024;
+        _bankSize = 16 * 1024 * 1024;
+        _sectorSize = 64 * 1024;
+        knownChip = true;
+        break;
 	case 0x00C84018:
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
