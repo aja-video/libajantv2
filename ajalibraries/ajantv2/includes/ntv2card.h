@@ -5583,6 +5583,15 @@ public:
 
 	AJA_VIRTUAL bool SetAncInsertParameters(NTV2Channel channel, uint32_t frameNumber);
 	AJA_VIRTUAL bool SetAncExtractParameters(NTV2Channel channel, uint32_t frameNumber);
+
+    AJA_VIRTUAL bool EnableAncExtractor(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtWriteParams(NTV2Channel channel, ULWord frameNumber);
+    AJA_VIRTUAL bool SetAncExtField2WriteParams(NTV2Channel channel, ULWord frameNumber);
+
+    AJA_VIRTUAL bool EnableAncInserter(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncInsReadParams(NTV2Channel channel, ULWord frameNumber, ULWord field1Size, ULWord field2Size);
+    AJA_VIRTUAL bool SetAncInsReadField2Params(NTV2Channel channel);
+
 	///@}
 
 #if !defined(NTV2_DEPRECATE_14_3)
@@ -5777,6 +5786,55 @@ private:
 	**/
 	AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+
+    AJA_VIRTUAL bool EnableAncExtHancY(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncExtHancC(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncExtVancY(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncExtVancC(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtSDDemux(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtProgressive(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtSynchro(NTV2Channel channel);
+    AJA_VIRTUAL bool SetAncExtLSBEnable(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtField1StartAddr(NTV2Channel channel, ULWord addr);
+    AJA_VIRTUAL bool SetAncExtField1EndAddr(NTV2Channel channel, ULWord addr);
+    AJA_VIRTUAL bool SetAncExtField2StartAddr(NTV2Channel channel, ULWord addr);
+    AJA_VIRTUAL bool SetAncExtField2EndAddr(NTV2Channel channel, ULWord addr);
+    AJA_VIRTUAL bool SetAncExtField1CutoffLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtField2CutoffLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool IsAncExtOverrun(NTV2Channel channel);
+
+    AJA_VIRTUAL bool SetAncExtField1StartLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtField2StartLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtTotalFrameLines(NTV2Channel channel, ULWord totalFrameLines);
+    AJA_VIRTUAL bool SetAncExtFidLow(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtFidHi(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtField1AnalogStartLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtField2AnalogStartLine(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncExtField1AnalogYFilter(NTV2Channel channel, ULWord lineFilter);
+    AJA_VIRTUAL bool SetAncExtField2AnalogYFilter(NTV2Channel channel, ULWord lineFilter);
+    AJA_VIRTUAL bool SetAncExtField1AnalogCFilter(NTV2Channel channel, ULWord lineFilter);
+    AJA_VIRTUAL bool SetAncExtField2AnalogCFilter(NTV2Channel channel, ULWord lineFilter);
+
+    AJA_VIRTUAL bool SetAncInsField1Bytes(NTV2Channel channel, ULWord numberOfBytes);
+    AJA_VIRTUAL bool SetAncInsField2Bytes(NTV2Channel channel, ULWord numberOfBytes);
+    AJA_VIRTUAL bool EnableAncInsHancY(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncInsHancC(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncInsVancY(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool EnableAncInsVancC(NTV2Channel channel, bool bEnable);
+    AJA_VIRTUAL bool SetAncInsProgressive(NTV2Channel channel, bool isProgressive);
+    AJA_VIRTUAL bool SetAncInsSDPacketSplit(NTV2Channel channel, bool inEnable);
+    AJA_VIRTUAL bool SetAncInsField1StartAddr(NTV2Channel channel, ULWord startAddr);
+    AJA_VIRTUAL bool SetAncInsField2StartAddr(NTV2Channel channel, ULWord startAddr);
+    AJA_VIRTUAL bool SetAncInsHancPixelDelay(NTV2Channel channel, ULWord numberOfPixels);
+    AJA_VIRTUAL bool SetAncInsVancPixelDelay(NTV2Channel channel, ULWord numberOfPixels);
+    AJA_VIRTUAL bool SetAncInsField1ActiveLine(NTV2Channel channel, ULWord activeLineNumber);
+    AJA_VIRTUAL bool SetAncInsField2ActiveLine(NTV2Channel channel, ULWord activeLineNumber);
+    AJA_VIRTUAL bool SetAncInsHActivePixels(NTV2Channel channel, ULWord numberOfActiveLinePixels);
+    AJA_VIRTUAL bool SetAncInsHTotalPixels(NTV2Channel channel, ULWord numberOfLinePixels);
+    AJA_VIRTUAL bool SetAncInsTotalLines(NTV2Channel channel, ULWord numberOfLines);
+    AJA_VIRTUAL bool SetAncInsFidHi(NTV2Channel channel, ULWord lineNumber);
+    AJA_VIRTUAL bool SetAncInsFidLow(NTV2Channel channel, ULWord lineNumber);
+
 
 };	//	CNTV2Card
 
