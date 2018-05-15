@@ -232,8 +232,6 @@ public:
     bool                    m2022_7Mode;
     uint32_t				mNetworkPathDiff;
 
-    IpEnable2110            m21110IpEnable;
-
     NetworkData2110			m2110Network;
     uint32_t                m2110NetworkID;
 

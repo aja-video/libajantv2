@@ -26,10 +26,6 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-    IpEnable2110    m21110IpEnableCache;
-
-    void printIpEnable(IpEnable2110 ipEnable);
-    bool NotEqual(const IpEnable2110 ipEnable1, const IpEnable2110 ipEnable2);
     CNTV2Config2110     * config2110;
 
 };

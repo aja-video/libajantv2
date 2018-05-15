@@ -25,7 +25,6 @@
 
 typedef enum
 {
-    kIpEnable2110           = NTV2_FOURCC('i','e','1','0'), // 4CC of enable data
     kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
     kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
