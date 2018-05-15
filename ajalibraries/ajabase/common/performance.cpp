@@ -16,6 +16,7 @@
 #include "ajabase/system/debug.h"
 
 #include <iomanip>
+#include <sstream>
 #include <math.h>
 
 using std::string;
@@ -183,7 +184,7 @@ void AJAPerformance::Stop(void)
 	}
 }
 
-void AJAPerformance::Report(const std::string& name)
+void AJAPerformance::Report(const std::string& name, const char* pFileName, int32_t lineNumber)
 {
     int entries = (int)Entries();
     if (entries > 0)
@@ -195,14 +196,41 @@ void AJAPerformance::Report(const std::string& name)
         string times = (entries == 1) ? "time,  " : "times, ";
         string reportName = name.empty() ? Name() : name;
 
-        AJA_sREPORT(AJA_DebugUnit_StatsGeneric,
-                    AJA_DebugSeverity_Debug,
-                    "  ["     << std::left  << std::setw(23) << std::setfill(' ') << reportName << "] " <<
-                    "called " << std::right << std::setw(4)  << entries << " "  << times <<
-                    "min: "   << std::right << std::setw(4)  << min     << ", " <<
-                    "mean: "  << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << mean  << ", " <<
-                    "stdev: " << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << stdev << ", " <<
-                    "max: "   << std::right << std::setw(4)  << max);
+        std::ostringstream oss;
+        oss << "  ["     << std::left  << std::setw(23) << std::setfill(' ') << reportName << "] " <<
+               "called " << std::right << std::setw(4)  << entries << " "  << times <<
+               "min: "   << std::right << std::setw(4)  << min     << ", " <<
+               "mean: "  << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << mean  << ", " <<
+               "stdev: " << std::right << std::setw(5)  << std::fixed << std::setprecision(2) << stdev << ", " <<
+               "max: "   << std::right << std::setw(4)  << max;
+
+        AJADebug::Report(AJA_DebugUnit_StatsGeneric,
+                         AJA_DebugSeverity_Debug,
+                         pFileName == NULL ? __FILE__ : pFileName,
+                         lineNumber < 0 ? __LINE__ : lineNumber,
+                         oss.str());
+    }
+}
+
+bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
+                                 std::string key, AJATimerPrecision precision)
+{
+    if(stats.find(key) == stats.end())
+    {
+        // not already in map
+        AJAPerformance newStatsGroup(key, precision);
+        stats[key] = newStatsGroup;
+    }
+
+    AJAPerformanceTracking::iterator foundAt = stats.find(key);
+    if(foundAt != stats.end())
+    {
+        foundAt->second.Start();
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -242,8 +270,11 @@ bool AJAPerformaceTracking_stop(AJAPerformanceTracking& stats, std::string key)
     }
 }
 
-bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string title)
+bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string title, const char *pFileName, int32_t lineNumber)
 {
+    const int32_t unit = (int32_t)AJA_DebugUnit_StatsGeneric;
+    const int32_t severity = (int32_t)AJA_DebugSeverity_Debug;
+
     if (stats.size() > 0)
     {
         if (title.empty())
@@ -251,13 +282,17 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             title = "stats_report";
         }
 
-        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
-                    title << ", tracking " << stats.size() << " {");
-
         string units = AJATimer::PrecisionName(stats.begin()->second.Precision(), true);
 
-        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug,
-                    "time units are in " << units);
+        std::ostringstream title_oss;
+        std::ostringstream units_oss;
+        std::ostringstream footer_oss;
+        title_oss << title << ", tracking " << stats.size() << " {";
+        units_oss << "  * time units are in " << units << " *";
+        footer_oss << "}";
+
+        AJADebug::Report(unit, severity, pFileName, lineNumber, title_oss.str());
+        AJADebug::Report(unit, severity, pFileName, lineNumber, units_oss.str());
 
         AJAPerformanceTracking::iterator foundAt = stats.begin();
         while (foundAt != stats.end())
@@ -265,12 +300,12 @@ bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string tit
             std::string key = foundAt->first;
             AJAPerformance perf = foundAt->second;
 
-            perf.Report(key);
+            perf.Report(key, pFileName, lineNumber);
 
             ++foundAt;
         }
-        AJA_sREPORT(AJA_DebugUnit_StatsGeneric, AJA_DebugSeverity_Debug, "}");
 
+        AJADebug::Report(unit, severity, pFileName, lineNumber, footer_oss.str());
         return true;
     }
     else
