@@ -233,7 +233,6 @@ public:
     uint32_t				mNetworkPathDiff;
 
     IpEnable2110            m21110IpEnable;
-    uint32_t                m2110IpEnableID;
 
     NetworkData2110			m2110Network;
     uint32_t                m2110NetworkID;
