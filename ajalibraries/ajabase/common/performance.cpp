@@ -32,7 +32,8 @@ using std::map;
 #endif
 
 AJAPerformance::AJAPerformance(const std::string& name,
-                               AJATimerPrecision precision)
+                               AJATimerPrecision precision,
+                               uint64_t skipEntries)
     : mTimer(precision)
 {
     mName       = name;
@@ -42,11 +43,13 @@ AJAPerformance::AJAPerformance(const std::string& name,
     mMaxTime    = 0;
     mMean       = 0.0;
     mM2         = 0.0;
+    mNumEntriesToSkipAtStart = skipEntries;
 }
 
 AJAPerformance::AJAPerformance(const std::string& name,
                                const AJAPerformaceExtraMap &values,
-                               AJATimerPrecision precision)
+                               AJATimerPrecision precision,
+                               uint64_t skipEntries)
     : mTimer(precision)
 {
     mName       = name;
@@ -57,9 +60,11 @@ AJAPerformance::AJAPerformance(const std::string& name,
     mExtras     = values;
     mMean       = 0.0;
     mM2         = 0.0;
+    mNumEntriesToSkipAtStart = skipEntries;
 }
 
-AJAPerformance::AJAPerformance(AJATimerPrecision precision)
+AJAPerformance::AJAPerformance(AJATimerPrecision precision,
+                               uint64_t skipEntries)
     : mTimer(precision)
 {
     mName       = "";
@@ -69,6 +74,7 @@ AJAPerformance::AJAPerformance(AJATimerPrecision precision)
     mMaxTime    = 0;
     mMean       = 0.0;
     mM2         = 0.0;
+    mNumEntriesToSkipAtStart = skipEntries;
 }
 
 AJAPerformance::~AJAPerformance(void)
@@ -154,6 +160,13 @@ void AJAPerformance::Stop(void)
 	mTimer.Stop();
 	elapsedTime = mTimer.ElapsedTime();
 
+    // Honor the number of entries asked to skip at start
+    if (mNumEntriesToSkipAtStart > 0)
+    {
+        mNumEntriesToSkipAtStart--;
+        return;
+    }
+
     mTotalTime += elapsedTime;
     mEntries++;
 
@@ -213,12 +226,12 @@ void AJAPerformance::Report(const std::string& name, const char* pFileName, int3
 }
 
 bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
-                                 std::string key, AJATimerPrecision precision)
+                                 std::string key, AJATimerPrecision precision, uint64_t skipEntries)
 {
     if(stats.find(key) == stats.end())
     {
         // not already in map
-        AJAPerformance newStatsGroup(key, precision);
+        AJAPerformance newStatsGroup(key, precision, skipEntries);
         stats[key] = newStatsGroup;
     }
 
@@ -235,12 +248,13 @@ bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
 }
 
 bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
-                                 std::string key, const AJAPerformaceExtraMap& extras, AJATimerPrecision precision)
+                                 std::string key, const AJAPerformaceExtraMap& extras, AJATimerPrecision precision,
+                                 uint64_t skipEntries)
 {
     if(stats.find(key) == stats.end())
     {
         // not already in map
-        AJAPerformance newStatsGroup(key, extras, precision);
+        AJAPerformance newStatsGroup(key, extras, precision, skipEntries);
         stats[key] = newStatsGroup;
     }
 
