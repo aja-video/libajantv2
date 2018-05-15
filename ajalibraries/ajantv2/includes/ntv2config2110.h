@@ -126,13 +126,6 @@ typedef struct
 typedef struct
 {
     uint32_t                id;
-    bool					txChEnable[4];
-    bool					rxChEnable[4];
-} IpEnable2110;
-
-typedef struct
-{
-    uint32_t                id;
     bool                    setup4k;
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
