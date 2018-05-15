@@ -233,19 +233,10 @@ public:
     uint32_t				mNetworkPathDiff;
 
     NetworkData2110			m2110Network;
-    uint32_t                m2110NetworkID;
-
     TransmitVideoData2110   m2110TxVideoData;
-    uint32_t                m2110TxVideoDataID;
-
     TransmitAudioData2110   m2110TxAudioData;
-    uint32_t                m2110TxAudioDataID;
-
     ReceiveVideoData2110    m2110RxVideoData;
-    uint32_t                m2110RxVideoDataID;
-
     ReceiveAudioData2110    m2110RxAudioData;
-    uint32_t                m2110RxAudioDataID;
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;

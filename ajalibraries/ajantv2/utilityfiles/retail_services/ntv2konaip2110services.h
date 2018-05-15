@@ -26,8 +26,20 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
+
+    bool NotEqual(const NetworkData2110 & netData2110a, const NetworkData2110 & netData2110b);
+    bool NotEqual(const TransmitVideoData2110 & txVideoData2110a, const TransmitVideoData2110 & txVideoData2110b);
+    bool NotEqual(const TransmitAudioData2110 & txAudioData2110a, const TransmitAudioData2110 & txAudioData2110b);
+    bool NotEqual(const ReceiveVideoData2110 & rxVideoData2110a, const ReceiveVideoData2110 & rxVideoData2110b);
+    bool NotEqual(const ReceiveAudioData2110 & rxAudioData2110a, const ReceiveAudioData2110 & rxAudioData2110b);
+
     CNTV2Config2110     * config2110;
 
+    NetworkData2110			m2110NetworkLast;
+    TransmitVideoData2110   m2110TxVideoDataLast;
+    TransmitAudioData2110   m2110TxAudioDataLast;
+    ReceiveVideoData2110    m2110RxVideoDataLast;
+    ReceiveAudioData2110    m2110RxAudioDataLast;
 };
 
 

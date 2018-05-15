@@ -14,12 +14,11 @@ KonaIP2110Services::KonaIP2110Services()
 {
     config2110 = NULL;
 
-    // Make sure we configure IP stuff the first time
-    m2110NetworkID = 0;
-    m2110TxVideoDataID = 0;
-    m2110TxAudioDataID = 0;
-    m2110RxVideoDataID = 0;
-    m2110RxAudioDataID = 0;
+    memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
+    memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
+    memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
+    memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
+    memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
 }
 
 KonaIP2110Services::~KonaIP2110Services()
@@ -2419,7 +2418,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         if (ipServiceEnable)
         {
             // See if network needs configuring
-            // PSM if (m2110NetworkID != m2110Network.id || ipServiceForceConfig)
+            if (NotEqual(m2110Network, m2110NetworkLast) || ipServiceForceConfig)
             {
                 // configure PTP master
                 if (m2110Network.ptpMasterIP[0])
@@ -2446,7 +2445,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         {
                             printf("SetNetworkConfiguration OK\n");
                             SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                            // PSM m2110NetworkID = m2110Network.id;
                         }
                         else
                         {
@@ -2459,6 +2457,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         config2110->DisableNetworkInterface(sfp);
                     }
                 }
+                m2110NetworkLast = m2110Network;
             }
 
             tx_2110Config txConfig;
@@ -3154,3 +3153,33 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }
+
+bool KonaIP2110Services::NotEqual(const NetworkData2110 & netData2110a, const NetworkData2110 & netData2110b)
+{
+    return false;
+}
+
+
+
+
+bool KonaIP2110Services::NotEqual(const TransmitVideoData2110 & txVideoData2110a, const TransmitVideoData2110 & txVideoData2110b)
+{
+    return false;
+}
+
+bool KonaIP2110Services::NotEqual(const TransmitAudioData2110 & txAudioData2110a, const TransmitAudioData2110 & txAudioData2110b)
+{
+    return false;
+}
+
+bool KonaIP2110Services::NotEqual(const ReceiveVideoData2110 & rxVideoData2110a, const ReceiveVideoData2110 & rxVideoData2110b)
+{
+    return false;
+}
+
+bool KonaIP2110Services::NotEqual(const ReceiveAudioData2110 & rxAudioData2110a, const ReceiveAudioData2110 & rxAudioData2110b)
+{
+    return false;
+}
+
+
