@@ -117,14 +117,12 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t				txChStatus[4];
     uint32_t				rxChStatus[4];
 } IpStatus2110;
 
 typedef struct
 {
-    uint32_t                id;
     bool                    setup4k;
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
@@ -133,35 +131,31 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numTxVideoChannels;
     TxVideoChData2110       txVideoCh[4];
 } TransmitVideoData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numTxAudioChannels;
     TxAudioChData2110       txAudioCh[4];
 } TransmitAudioData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numRxVideoChannels;
     RxVideoChData2110       rxVideoCh[4];
 } ReceiveVideoData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numRxAudioChannels;
     RxAudioChData2110       rxAudioCh[4];
 } ReceiveAudioData2110;
 
 typedef struct
 {
-    uint32_t                id;
+    uint32_t                placeHolder;
 } MetadataVData2110;
 
 

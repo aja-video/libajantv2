@@ -2419,7 +2419,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         if (ipServiceEnable)
         {
             // See if network needs configuring
-            if (m2110NetworkID != m2110Network.id || ipServiceForceConfig)
+            // PSM if (m2110NetworkID != m2110Network.id || ipServiceForceConfig)
             {
                 // configure PTP master
                 if (m2110Network.ptpMasterIP[0])
@@ -2446,7 +2446,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         {
                             printf("SetNetworkConfiguration OK\n");
                             SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                            m2110NetworkID = m2110Network.id;
+                            // PSM m2110NetworkID = m2110Network.id;
                         }
                         else
                         {
@@ -2464,7 +2464,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             tx_2110Config txConfig;
 
             // See if transmit video needs configuring
-            if (m2110TxVideoDataID != m2110TxVideoData.id || ipServiceForceConfig)
+            // PSM if (m2110TxVideoDataID != m2110TxVideoData.id || ipServiceForceConfig)
             {
                 printf("Configuring 2110 TX Video\n");
 
@@ -2500,11 +2500,11 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
                 }
-                m2110TxVideoDataID = m2110TxVideoData.id;
+                // PSM m2110TxVideoDataID = m2110TxVideoData.id;
             }
 
             // See if transmit audio needs configuring
-            if (m2110TxAudioDataID != m2110TxAudioData.id || ipServiceForceConfig)
+            // PSM if (m2110TxAudioDataID != m2110TxAudioData.id || ipServiceForceConfig)
             {
                 printf("Configuring 2110 TX Audio\n");
 
@@ -2540,14 +2540,14 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         SetIPError(m2110TxAudioData.txAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
                 }
-                m2110TxAudioDataID = m2110TxAudioData.id;
+                // PSM m2110TxAudioDataID = m2110TxAudioData.id;
             }
 
             rx_2110Config rxConfig;
             eSFP sfp = SFP_1;
 
             // See if receive video needs configuring
-            if (m2110RxVideoDataID != m2110RxVideoData.id || ipServiceForceConfig)
+            // PSM if (m2110RxVideoDataID != m2110RxVideoData.id || ipServiceForceConfig)
             {
                 printf("Configuring 2110 RX Video\n");
 
@@ -2595,11 +2595,11 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
                 }
-                m2110RxVideoDataID = m2110RxVideoData.id;
+                // PSM m2110RxVideoDataID = m2110RxVideoData.id;
             }
 
             // See if receive audio needs configuring
-            if (m2110RxAudioDataID != m2110RxAudioData.id || ipServiceForceConfig)
+            // PSM if (m2110RxAudioDataID != m2110RxAudioData.id || ipServiceForceConfig)
             {
                 printf("Configuring 2110 RX Video\n");
 
@@ -2647,7 +2647,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
                 }
-                m2110RxAudioDataID = m2110RxVideoData.id;
+                // PSM m2110RxAudioDataID = m2110RxVideoData.id;
             }
 
             // Process TX channel enables
