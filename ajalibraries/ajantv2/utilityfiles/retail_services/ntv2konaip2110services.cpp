@@ -2563,7 +2563,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     }
                     else
                     {
-                        printf("SetTxVideoStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                        printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
                         config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
                     }
                 }
@@ -2686,7 +2686,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     }
                     else
                     {
-                        printf("SetRxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                        printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
                         config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
                     }
 
