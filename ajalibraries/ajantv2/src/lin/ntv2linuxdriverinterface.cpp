@@ -246,32 +246,6 @@ CNTV2LinuxDriverInterface::ReadRegister(
 			return false;
 		}
 	}
-#ifdef BORG
-#ifndef KUMO //TODO: Resolve correct call to use for KUMO
-	else if ((_boardType == BOARDTYPE_BORG) && (registerNumber == 54)) // serial number low - see NTV2Status::GetSerialNumberString()
-	{
-		string serialNumber = SerialNumber_Borg::GetFormattedSerialNumber();
-		//string serialNumber = SerialNumber_Borg::FormatSerialNumber( SerialNumber_Borg::GetSerialNumber() );
-		char sn[8] = {0,0,0,0,0,0,0,0};
-		strncpy(sn,serialNumber.c_str(),8);
-		*registerValue = sn[0] | (sn[1]<<8) | (sn[2]<<16) | (sn[3]<<24);
-		*registerValue &= registerMask;
-		*registerValue >>= registerShift;
-	}
-
-	else if ((_boardType == BOARDTYPE_BORG) && (registerNumber == 55)) // serial number high - see NTV2Status::GetSerialNumberString()
-	{
-		string serialNumber = SerialNumber_Borg::GetFormattedSerialNumber();
-		//string serialNumber = SerialNumber_Borg::FormatSerialNumber( SerialNumber_Borg::GetSerialNumber() );
-		char sn[8] = {0,0,0,0,0,0,0,0};
-		strncpy(sn,serialNumber.c_str(),8);
-		*registerValue = sn[4] | (sn[5]<<8) | (sn[6]<<16) | (sn[7]<<24);
-		*registerValue &= registerMask;
-		*registerValue >>= registerShift;
-	}
-#endif
-#endif
-
 	else
 	{
 		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));

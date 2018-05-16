@@ -2220,16 +2220,7 @@ bool CNTV2Card::SetMode (const NTV2Channel inChannel, const NTV2Mode inValue,  b
 		(void) inIsRetail;
 	#endif	//	!defined (NTV2_DEPRECATE)
 
-	bool	bResult	(WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskMode, kRegShiftMode));
-
-	#if !defined (NTV2_DEPRECATE)
-		// If switching from Capture Mode to Display mode or vice versa
-		// some boards may need to have a different bitfile loaded.
-		if (!inIsRetail)
-			CheckBitfile ();
-	#endif	//	!defined (NTV2_DEPRECATE)
-
-	return bResult;
+	return WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskMode, kRegShiftMode);
 }
 
 bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
