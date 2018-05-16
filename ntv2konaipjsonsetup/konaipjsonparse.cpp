@@ -92,7 +92,6 @@ bool CKonaIpJsonParse2110::SetJsonNetwork(const QJsonObject& topObj)
 
     if (success)
     {
-        n2110.id = n2110.id+1;
         memcpy(&m_net2110, &n2110, sizeof(NetworkData2110));
         m_netJson = topObj;
     }
@@ -107,7 +106,6 @@ bool CKonaIpJsonParse2110::SetJsonReceiveVideo(const QJsonArray& jsonArray)
 
     if (success)
     {
-        rVideo2110.id = rVideo2110.id+1;
         memcpy(&m_receiveVideo2110, &rVideo2110, sizeof(ReceiveVideoData2110));
         m_receiveVideoJson = jsonArray;
     }
@@ -122,7 +120,6 @@ bool CKonaIpJsonParse2110::SetJsonReceiveAudio(const QJsonArray& jsonArray)
 
     if (success)
     {
-        rAudio2110.id = rAudio2110.id+1;
         memcpy(&m_receiveAudio2110, &rAudio2110, sizeof(ReceiveAudioData2110));
         m_receiveAudioJson = jsonArray;
     }
@@ -137,7 +134,6 @@ bool CKonaIpJsonParse2110::SetJsonTransmitVideo(const QJsonArray& jsonArray)
 
     if (success)
     {
-        tVideo2110.id = tVideo2110.id+1;
         memcpy(&m_transmitVideo2110, &tVideo2110, sizeof(TransmitVideoData2110));
         m_transmitVideoJson = jsonArray;
     }
@@ -152,7 +148,6 @@ bool CKonaIpJsonParse2110::SetJsonTransmitAudio(const QJsonArray& jsonArray)
 
     if (success)
     {
-        tAudio2110.id = tAudio2110.id+1;
         memcpy(&m_transmitAudio2110, &tAudio2110, sizeof(TransmitAudioData2110));
         m_transmitAudioJson = jsonArray;
     }
