@@ -756,7 +756,7 @@ bool NTV2Player::OutputDestHasRP188BypassEnabled (void)
 	//	Bit 23 of the RP188 DBB register will be set if output timecode will be
 	//	grabbed directly from an input (bypass source)...
 	//
-	if (regNum && mDevice.ReadRegister (regNum, &regValue) && regValue & BIT(23))
+	if (regNum  &&  mDevice.ReadRegister(regNum, regValue)  &&  regValue & BIT(23))
 		result = true;
 
 	return result;

@@ -807,9 +807,8 @@ bool NTV2Burn4KQuadrant::InputSignalHasTimecode (void)
 	//
 	//	Bit 16 of the RP188 DBB register will be set if there is timecode embedded in the input signal...
 	//
-	if (regNum && mInputDevice.ReadRegister (regNum, &regValue) && regValue & BIT(16))
+	if (regNum  &&  mInputDevice.ReadRegister(regNum, regValue)  &&  regValue & BIT(16))
 		result = true;
-
 	return result;
 
 }	//	InputSignalHasTimecode

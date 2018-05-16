@@ -675,7 +675,7 @@ bool NTV2LLBurn::InputSignalHasTimecode (void)
 	ULWord			regValue	(0);
 
 	//	Bit 16 of the RP188 DBB register will be set if there is timecode embedded in the input signal...
-	if (regNum  &&  mDevice.ReadRegister(regNum, &regValue)  &&  regValue & BIT(16))
+	if (regNum  &&  mDevice.ReadRegister(regNum, regValue)  &&  regValue & BIT(16))
 		result = true;
 	return result;
 
@@ -692,7 +692,7 @@ bool NTV2LLBurn::AnalogLTCInputHasTimecode (void)
 		case NTV2_TCINDEX_LTC2:	regMask = kRegMaskLTC2InPresent;	break;
 		default:				return false;						break;
 	}
-	mDevice.ReadRegister (kRegLTCStatusControl, &regValue, regMask);
+	mDevice.ReadRegister (kRegLTCStatusControl, regValue, regMask);
 	return regValue ? true : false;
 
 }	//	AnalogLTCInputHasTimecode

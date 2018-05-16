@@ -388,7 +388,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     }
 
     uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, val);
     bool supports2022_7 = ((val & SAREK_2022_7) != 0);
     if (supports2022_7)
     {
