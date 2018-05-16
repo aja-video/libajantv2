@@ -868,12 +868,12 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	{
 		//	Hack for retail mode capture
 		ULWord	inputSelect	(NTV2_Input1Select);
-		ReadRegister (kVRegInputSelect, &inputSelect);
+		ReadRegister (kVRegInputSelect, inputSelect);
 		if (inputSelect == NTV2_Input2Select)
 		{
 			//	Copy input 2 tc into default location
 			RP188SourceSelect TimecodeSource;
-			ReadRegister(kVRegRP188SourceSelect, (ULWord*)&TimecodeSource);
+			CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
 			NTV2TCIndex TimecodeIndex = NTV2_TCINDEX_DEFAULT;
 			switch (TimecodeSource)
 			{
@@ -893,7 +893,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		{
 			//	Copy input 2 tc into input 1...
 			RP188SourceSelect TimecodeSource;
-			ReadRegister(kVRegRP188SourceSelect, (ULWord*)&TimecodeSource);
+			CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
 			NTV2TCIndex TimecodeIndex = NTV2_TCINDEX_DEFAULT;
 			switch (TimecodeSource)
 			{
@@ -914,15 +914,15 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 		{
 			ULWord	doZeroing	(0);
-			if (ReadRegister(kVRegZeroDeviceAncPostCapture, &doZeroing)  &&  doZeroing)
+			if (ReadRegister(kVRegZeroDeviceAncPostCapture, doZeroing)  &&  doZeroing)
 			{	//	Zero out the Anc buffer on the device...
 				static NTV2_POINTER	gClearDeviceAncBuffer;
 				const LWord		xferFrame	(inOutXferInfo.GetTransferFrameNumber());
 				ULWord			ancOffsetF1	(0);
 				ULWord			ancOffsetF2	(0);
 				NTV2Framesize	fbSize		(NTV2_FRAMESIZE_INVALID);
-				ReadRegister(kVRegAncField1Offset, &ancOffsetF1);
-				ReadRegister(kVRegAncField2Offset, &ancOffsetF2);
+				ReadRegister(kVRegAncField1Offset, ancOffsetF1);
+				ReadRegister(kVRegAncField2Offset, ancOffsetF2);
 				GetFrameBufferSize(inChannel, fbSize);
 				const ULWord	fbByteCount	(::NTV2FramesizeToByteCount(fbSize));
 				const ULWord	ancOffset	(ancOffsetF2 > ancOffsetF1  ?  ancOffsetF2  :  ancOffsetF1);	//	Use whichever is larger
@@ -947,7 +947,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 		{
 			ULWord	doZeroing	(0);
-			if (ReadRegister(kVRegZeroHostAncPostCapture, &doZeroing)  &&  doZeroing)
+			if (ReadRegister(kVRegZeroHostAncPostCapture, doZeroing)  &&  doZeroing)
 			{	//	Zero out everything past the last captured Anc byte in the client's host buffer(s)... 
 				NTV2_POINTER &	clientAncBufferF1	(inOutXferInfo.acANCBuffer);
 				NTV2_POINTER &	clientAncBufferF2	(inOutXferInfo.acANCField2Buffer);

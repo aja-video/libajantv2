@@ -68,10 +68,16 @@ public:
 	bool				MapMemory( MemoryType memType, void **memPtr );
 
 	// Driver calls
-	virtual bool		ReadRegister( ULWord registerNumber,
-									  ULWord *registerValue,
-									  ULWord registerMask = 0xFFFFFFFF,
-									  ULWord registerShift = 0x0 );
+	virtual bool		ReadRegister (const ULWord inRegisterNumber,
+									  ULWord & outValue,
+									  const ULWord inRegisterMask = 0xFFFFFFFF,
+									  const ULWord inRegisterShift = 0x0);
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+	{
+		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 	virtual bool		WriteRegister( ULWord registerNumber,
 									   ULWord registerValue,
 									   ULWord registerMask = 0xFFFFFFFF,

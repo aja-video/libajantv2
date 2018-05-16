@@ -2158,13 +2158,13 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }

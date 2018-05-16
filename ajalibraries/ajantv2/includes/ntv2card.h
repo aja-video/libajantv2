@@ -5282,37 +5282,37 @@ public:
 #endif	//	defined (NTV2_DEPRECATE)
 
 	//	These functions can't be deprecated until CNTV2VidProc and CNTV2TestPattern go away...
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControlCrosspoint (const ULWord inValue))	{return WriteRegister (kRegVidProcXptControl, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessingControlCrosspoint (ULWord *value))			{return ReadRegister (kRegVidProcXptControl, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteSplitControl (const ULWord inValue))						{return WriteRegister (kRegSplitControl, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadSplitControl (ULWord *value))								{return ReadRegister (kRegSplitControl, value);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControlCrosspoint (const ULWord inValue))	{return WriteRegister(kRegVidProcXptControl, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessingControlCrosspoint (ULWord *pValue))			{return pValue ? ReadRegister(kRegVidProcXptControl, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteSplitControl (const ULWord inValue))						{return WriteRegister(kRegSplitControl, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadSplitControl (ULWord *pValue))								{return pValue ? ReadRegister(kRegSplitControl, *pValue) : false;}
 
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControl (const ULWord inValue))				{return WriteRegister (kRegVidProc1Control, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessingControl (ULWord *value))						{return ReadRegister (kRegVidProc1Control, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing2Control (const ULWord inValue))			{return WriteRegister (kRegVidProc2Control, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing2Control (ULWord *value))					{return ReadRegister (kRegVidProc2Control, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing3Control (const ULWord inValue))			{return WriteRegister (kRegVidProc3Control, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing3Control (ULWord *value))					{return ReadRegister (kRegVidProc3Control, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing4Control (const ULWord inValue))			{return WriteRegister (kRegVidProc4Control, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing4Control (ULWord *value))					{return ReadRegister (kRegVidProc4Control, value);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControl (const ULWord inValue))				{return WriteRegister(kRegVidProc1Control, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessingControl (ULWord *pValue))					{return pValue ? ReadRegister(kRegVidProc1Control, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing2Control (const ULWord inValue))			{return WriteRegister(kRegVidProc2Control, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing2Control (ULWord *pValue))					{return pValue ? ReadRegister(kRegVidProc2Control, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing3Control (const ULWord inValue))			{return WriteRegister(kRegVidProc3Control, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing3Control (ULWord *pValue))					{return pValue ? ReadRegister(kRegVidProc3Control, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessing4Control (const ULWord inValue))			{return WriteRegister(kRegVidProc4Control, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadVideoProcessing4Control (ULWord *pValue))					{return pValue ? ReadRegister(kRegVidProc4Control, *pValue) : false;}
 
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixerCoefficient (const ULWord inValue))					{return WriteRegister (kRegMixer1Coefficient, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixerCoefficient (ULWord *value))							{return ReadRegister (kRegMixer1Coefficient, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer2Coefficient (const ULWord inValue))					{return WriteRegister (kRegMixer2Coefficient, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer2Coefficient (ULWord *value))							{return ReadRegister (kRegMixer2Coefficient, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer3Coefficient (const ULWord inValue))					{return WriteRegister (kRegMixer3Coefficient, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer3Coefficient (ULWord *value))							{return ReadRegister (kRegMixer3Coefficient, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer4Coefficient (const ULWord inValue))					{return WriteRegister (kRegMixer4Coefficient, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer4Coefficient (ULWord *value))							{return ReadRegister (kRegMixer4Coefficient, value);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixerCoefficient (const ULWord inValue))					{return WriteRegister(kRegMixer1Coefficient, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixerCoefficient (ULWord *pValue))							{return pValue ? ReadRegister(kRegMixer1Coefficient, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer2Coefficient (const ULWord inValue))					{return WriteRegister(kRegMixer2Coefficient, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer2Coefficient (ULWord *pValue))							{return pValue ? ReadRegister(kRegMixer2Coefficient, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer3Coefficient (const ULWord inValue))					{return WriteRegister(kRegMixer3Coefficient, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer3Coefficient (ULWord *pValue))							{return pValue ? ReadRegister(kRegMixer3Coefficient, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteMixer4Coefficient (const ULWord inValue))					{return WriteRegister(kRegMixer4Coefficient, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadMixer4Coefficient (ULWord *pValue))							{return pValue ? ReadRegister(kRegMixer4Coefficient, *pValue) : false;}
 
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatteValue (const ULWord inValue))						{return WriteRegister (kRegFlatMatteValue, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatteValue (ULWord *value))								{return ReadRegister (kRegFlatMatteValue, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte2Value (const ULWord inValue))					{return WriteRegister (kRegFlatMatte2Value, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte2Value (ULWord *value))							{return ReadRegister (kRegFlatMatte2Value, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte3Value (const ULWord inValue))					{return WriteRegister (kRegFlatMatte3Value, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte3Value (ULWord *value))							{return ReadRegister (kRegFlatMatte3Value, value);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte4Value (const ULWord inValue))					{return WriteRegister (kRegFlatMatte4Value, inValue);}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte4Value (ULWord *value))							{return ReadRegister (kRegFlatMatte4Value, value);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatteValue (const ULWord inValue))						{return WriteRegister(kRegFlatMatteValue, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatteValue (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatteValue, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte2Value (const ULWord inValue))					{return WriteRegister(kRegFlatMatte2Value, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte2Value (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatte2Value, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte3Value (const ULWord inValue))					{return WriteRegister(kRegFlatMatte3Value, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte3Value (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatte3Value, *pValue) : false;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte4Value (const ULWord inValue))					{return WriteRegister(kRegFlatMatte4Value, inValue);}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte4Value (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatte4Value, *pValue) : false;}
 
 protected:
 	static NTV2_POINTER	NULL_POINTER;	///< @brief	Used for default empty NTV2_POINTER parameters -- do not modify.

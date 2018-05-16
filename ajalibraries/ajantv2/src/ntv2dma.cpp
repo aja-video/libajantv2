@@ -186,9 +186,9 @@ bool CNTV2Card::DMAReadAnc (const ULWord	inFrameNumber,
 	bool			result(true);
 	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
 		return false;
-	if (!ReadRegister (kVRegAncField1Offset, &F1Offset))
+	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
-	if (!ReadRegister (kVRegAncField2Offset, &F2Offset))
+	if (!ReadRegister (kVRegAncField2Offset, F2Offset))
 		return false;
 	if (outAncF1Buffer.IsNULL()  &&  outAncF2Buffer.IsNULL())
 		return false;
@@ -245,9 +245,9 @@ bool CNTV2Card::DMAWriteAnc (const ULWord			inFrameNumber,
 	bool			result(true);
 	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
 		return false;
-	if (!ReadRegister (kVRegAncField1Offset, &F1Offset))
+	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
-	if (!ReadRegister (kVRegAncField2Offset, &F2Offset))
+	if (!ReadRegister (kVRegAncField2Offset, F2Offset))
 		return false;
 	if (inAncF1Buffer.IsNULL()  &&  inAncF2Buffer.IsNULL())
 		return false;

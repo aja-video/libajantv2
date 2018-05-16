@@ -1112,7 +1112,7 @@ void KonaLHiServices::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 				{
 					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI, kLHIRegShiftHDMIOutputEDIDDVI);
+					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI, kLHIRegShiftHDMIOutputEDIDDVI);
 					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);				
 				}
 				break;

@@ -96,7 +96,7 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
         {
             // dynamically use input color space for
             ULWord colorSpace;
-            mCard->ReadRegister(kRegHDMIInputStatus, &colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+            mCard->ReadRegister(kRegHDMIInputStatus, colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
             
             inputFormat = mCard->GetHDMIInputVideoFormat();
             if (inputFormatSelect)
@@ -162,7 +162,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 																																								
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kOutput, &selectSwapQuad);
+	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
 	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
 	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 
@@ -1558,7 +1558,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
+	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
 	
 	// SMPTE 425 (2pi)
@@ -1629,7 +1629,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	if (bHdmiIn)
 	{
 		uint32_t valRgb = 0;
-		mCard->ReadRegister(kRegHDMIInputStatus, (ULWord*) &valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+		mCard->ReadRegister(kRegHDMIInputStatus, valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 		bHdmiInRGB = valRgb != 0;
 	}
 	
@@ -3444,7 +3444,7 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 			{
 				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			}
 			break;
@@ -3579,17 +3579,17 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 
 	//ULWord analogIOConfig = 0;
-	//mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, &analogIOConfig);
+	//mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, analogIOConfig);
 	//mCard->SetAnalogAudioIOConfiguration(NTV2_AnalogAudioIO_4In_4Out);
 }

@@ -181,7 +181,7 @@ inline ProgramState programstate_for_address(uint32_t address, int mode)
 inline uint32_t make_spi_ready(CNTV2Card& device)
 {
     uint32_t deviceId=0;
-    device.ReadRegister(kRegBoardID, &deviceId);
+    device.ReadRegister(kRegBoardID, deviceId);
     return deviceId;
 }
 
@@ -572,7 +572,7 @@ void CNTV2AxiSpiFlash::SpiEnableWrite(bool enable)
     // 4 enable the master transaction by setting 0x100 low in spi control reg
     uint32_t spi_ctrl_val = 0;
     make_spi_ready(mDevice);
-    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    mDevice.ReadRegister(mSpiControlReg, spi_ctrl_val);
     spi_ctrl_val &= ~0x100;
     make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
@@ -583,7 +583,7 @@ void CNTV2AxiSpiFlash::SpiEnableWrite(bool enable)
 
     // 6 disable the master transaction by setting 0x100 high in spi control reg
     make_spi_ready(mDevice);
-    mDevice.ReadRegister(mSpiControlReg, &spi_ctrl_val);
+    mDevice.ReadRegister(mSpiControlReg, spi_ctrl_val);
     spi_ctrl_val |= 0x100;
     make_spi_ready(mDevice);
     mDevice.WriteRegister(mSpiControlReg, spi_ctrl_val);
@@ -702,7 +702,7 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
         if (commandSequence.size() > 1)
         {
             make_spi_ready(mDevice);
-            mDevice.ReadRegister(mSpiReadReg, &dummyVal);
+            mDevice.ReadRegister(mSpiReadReg, dummyVal);
         }
     }
 
@@ -734,7 +734,7 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
             mDevice.WriteRegister(mSpiWriteReg, 0x0); //dummy
 
             make_spi_ready(mDevice);
-            mDevice.ReadRegister(mSpiReadReg, &val);
+            mDevice.ReadRegister(mSpiReadReg, val);
 
             // the first byte back is a dummy when reading flash
             if (i > 0)

@@ -110,8 +110,13 @@ public:
 	**/
 	virtual bool	WriteRegister (ULWord inRegisterNumber,  ULWord inValue,  ULWord inMask = 0xFFFFFFFF,  ULWord inShift = 0);
 
-protected:
-	virtual bool	ReadRegister (ULWord inRegisterNumber,  ULWord * pOutValue,  ULWord inMask = 0xFFFFFFFF,  ULWord inShift = 0);
+//protected:
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+	{
+		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 public:
 	/**
@@ -121,23 +126,40 @@ public:
 		@result		True if successful; otherwise false.
 		@param[in]	inRegisterNumber	Specifies the RegisterNum of the real register, or VirtualRegisterNum of the virtual register
 										on the AJA device to be read.
-		@param[out]	outValue			Specifies a valid, non-NULL address of the ULWord that is to receive the register value obtained
-										from the device.
-		@param[in]	inMask				Optionally specifies a bit mask to be applied after reading the real device register.
-										Defaults to 0xFFFFFFFF, which does not perform any masking.
-										A zero mask (0x00000000) is also ignored.
-										This parameter is ignored when reading a virtual register.
+		@param[out]	outValue			Receives the register value obtained from the device.
+		@param[in]	inMask				Optionally specifies a bit mask to be applied after reading the device register.
+										Zero and 0xFFFFFFFF masks are ignored. Defaults to 0xFFFFFFFF (no masking).
 		@param[in]	inShift				Optionally specifies the number of bits to right-shift the value obtained
-										from the device register after any mask has been applied.
-										Defaults to zero, which performs no bit shift.
-										This parameter is ignored when reading a virtual register.
+										from the device register after the mask has been applied. Defaults to zero (no shift).
 		@note		This function should be used only when there is no higher-level function available to accomplish the desired task.
 		@note		The mask and shift parameters are ignored when reading a virtual register.
 	**/
-	virtual inline bool	ReadRegister (const ULWord inRegisterNumber,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0)
-	{
-		return ReadRegister (inRegisterNumber, &outValue, inMask, inShift);
-	}
+	virtual bool	ReadRegister (const ULWord inRegisterNumber,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
+
+	/**
+		@brief		This template function reads all or part of the 32-bit contents of a specific register (real or virtual)
+					from the AJA device, and if successful, returns its value automatically casted to the scalar type of the
+					"outValue" parameter.
+		@result		True if successful; otherwise false.
+		@param[in]	inRegisterNumber	Specifies the RegisterNum of the real register, or VirtualRegisterNum of the virtual register
+										on the AJA device to be read.
+		@param[out]	outValue			Receives the register value obtained from the device, automatically casted to the parameter's type.
+										Its type must be statically castable from ULWord (i.e. it must be a scalar).
+		@param[in]	inMask				Optionally specifies a bit mask to be applied after reading the device register.
+										Zero and 0xFFFFFFFF masks are ignored. Defaults to 0xFFFFFFFF (no masking).
+		@param[in]	inShift				Optionally specifies the number of bits to right-shift the value obtained
+										from the device register after the mask has been applied. Defaults to zero (no shift).
+		@note		This function should be used only when there is no higher-level function available to accomplish the desired task.
+		@note		The mask and shift parameters are ignored when reading a virtual register.
+	**/
+	template<typename T>	bool ReadRegister(const ULWord inRegisterNumber,  T & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0)
+							{
+								ULWord regValue(0);
+								bool result (ReadRegister(inRegisterNumber, regValue, inMask, inShift));
+								if (result)
+									outValue = T(regValue);
+								return result;
+							}
 
 	// Read multiple registers at once.
 	virtual bool ReadRegisterMulti(	ULWord numRegs,

@@ -13,8 +13,7 @@ static const INTERRUPT_ENUMS	gChannelToOutputInterrupt [] =	{eOutput1,	eOutput2,
 
 bool CNTV2Card::GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2Interrupt2Mask & outIntMask2)
 {
-	return ReadRegister (kRegVidIntControl, reinterpret_cast <ULWord *> (outIntMask1))
-			&& ReadRegister (kRegVidIntControl2, reinterpret_cast <ULWord *> (outIntMask2));
+	return CNTV2DriverInterface::ReadRegister(kRegVidIntControl, outIntMask1)  &&  CNTV2DriverInterface::ReadRegister(kRegVidIntControl2, outIntMask2);
 }
 
 

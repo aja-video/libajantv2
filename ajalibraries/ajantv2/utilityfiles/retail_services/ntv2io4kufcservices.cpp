@@ -50,7 +50,7 @@ NTV2VideoFormat Io4KUfcServices::GetSelectedInputVideoFormat(
 		{
 			// dynamically use input color space for
 			ULWord colorSpace;
-			mCard->ReadRegister(kRegHDMIInputStatus, &colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+			mCard->ReadRegister(kRegHDMIInputStatus, colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 			*inputFormatSelect = (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_YUVSelect : NTV2_RGBSelect;
 		}
 	}
@@ -1273,7 +1273,7 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 			{
 				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			}
 			break;
@@ -1397,13 +1397,13 @@ void Io4KUfcServices::SetDeviceMiscRegisters ()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }

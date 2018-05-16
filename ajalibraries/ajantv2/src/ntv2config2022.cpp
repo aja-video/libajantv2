@@ -292,18 +292,18 @@ bool CNTV2Config2022::SetNetworkConfiguration(const eSFP sfp, const std::string 
 
     // get primaray mac address
     uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
-    mDevice.ReadRegister(macAddressRegister, &macHi);
+    mDevice.ReadRegister(macAddressRegister, macHi);
     macAddressRegister++;
-    mDevice.ReadRegister(macAddressRegister, &macLo);
+    mDevice.ReadRegister(macAddressRegister, macLo);
 
     uint32_t boardHi = (macHi & 0xffff0000) >>16;
     uint32_t boardLo = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
 
     // get sfp2 mac address
     macAddressRegister++;
-    mDevice.ReadRegister(macAddressRegister, &macHi);
+    mDevice.ReadRegister(macAddressRegister, macHi);
     macAddressRegister++;
-    mDevice.ReadRegister(macAddressRegister, &macLo);
+    mDevice.ReadRegister(macAddressRegister, macLo);
 
     uint32_t boardHi2 = (macHi & 0xffff0000) >>16;
     uint32_t boardLo2 = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
@@ -360,30 +360,30 @@ bool CNTV2Config2022::GetNetworkConfiguration(const eSFP sfp, std::string & loca
     if (sfp == SFP_1)
     {
         uint32_t val;
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
         addr.s_addr = val;
         localIPAddress = inet_ntoa(addr);
 
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekNET0,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekNET0, val);
         addr.s_addr = val;
         subnetMask = inet_ntoa(addr);
 
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE0,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE0, val);
         addr.s_addr = val;
         gateway = inet_ntoa(addr);
     }
     else
     {
         uint32_t val;
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
         addr.s_addr = val;
         localIPAddress = inet_ntoa(addr);
 
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekNET1,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekNET1, val);
         addr.s_addr = val;
         subnetMask = inet_ntoa(addr);
 
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE1,&val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE1, val);
         addr.s_addr = val;
         gateway = inet_ntoa(addr);
     }
@@ -1044,11 +1044,11 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
     {
         if (GetTxLink(channel) == SFP_1)
         {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0,&localIp);
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, localIp);
         }
         else
         {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, localIp);
         }
         WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
 
@@ -1075,7 +1075,7 @@ bool CNTV2Config2022::SetTxChannelEnable(const NTV2Channel channel, bool enable)
 
         if (enable && sfp2Enable)
         {
-            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1,&localIp);
+            mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, localIp);
             WriteChannelRegister(kReg2022_6_tx_src_ip_addr + baseAddr,NTV2EndianSwap32(localIp));
 
             // enable
@@ -1168,7 +1168,7 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
     {
         // save
         uint32_t addr;
-        mDevice.ReadRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_0,&addr);
+        mDevice.ReadRegister(kReg2022_6_tx_src_ip_addr + SAREK_2022_6_TX_CORE_0, addr);
 
         // reset the tx core
         uint32_t baseAddr;
@@ -1182,18 +1182,18 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
 
         // get primaray mac address
         uint32_t macAddressRegister = SAREK_REGS + kRegSarekMAC;
-        mDevice.ReadRegister(macAddressRegister, &macHi);
+        mDevice.ReadRegister(macAddressRegister, macHi);
         macAddressRegister++;
-        mDevice.ReadRegister(macAddressRegister, &macLo);
+        mDevice.ReadRegister(macAddressRegister, macLo);
 
         uint32_t boardHi = (macHi & 0xffff0000) >>16;
         uint32_t boardLo = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
 
         // get sfp2 mac address
         macAddressRegister++;
-        mDevice.ReadRegister(macAddressRegister, &macHi);
+        mDevice.ReadRegister(macAddressRegister, macHi);
         macAddressRegister++;
-        mDevice.ReadRegister(macAddressRegister, &macLo);
+        mDevice.ReadRegister(macAddressRegister, macLo);
 
         uint32_t boardHi2 = (macHi & 0xffff0000) >>16;
         uint32_t boardLo2 = ((macHi & 0x0000ffff) << 16) + ((macLo & 0xffff0000) >> 16);
@@ -1259,11 +1259,11 @@ bool CNTV2Config2022::GetIGMPDisable(eSFP sfp, bool & disabled)
     uint32_t val;
     if (sfp == SFP_1)
     {
-        mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable,&val);
+        mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable, val);
     }
     else
     {
-        mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable2,&val);
+        mDevice.ReadRegister(SAREK_REGS + kSarekRegIGMPDisable2, val);
     }
 
     disabled = (val == 1) ? true : false;
@@ -1292,7 +1292,7 @@ bool CNTV2Config2022::SetIGMPVersion(eIGMPVersion_t version)
 bool CNTV2Config2022::GetIGMPVersion(eIGMPVersion_t & version)
 {
     uint32_t version32;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion,&version32);
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekIGMPVersion, version32);
     version =  (version32 == 2) ? eIGMPVersion_2 : eIGMPVersion_3;
     return rv;
 }
@@ -1583,9 +1583,9 @@ bool CNTV2Config2022::GetSFPMSAData(eSFP sfp, SFPMSAData & data)
 bool CNTV2Config2022::GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus)
 {
     uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus,&val);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkStatus, val);
     uint32_t val2;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus,&val2);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekSFPStatus, val2);
 
     if (sfp == SFP_2)
     {
@@ -1647,4 +1647,3 @@ NTV2Channel CNTV2Config2022::VideoStreamToChannel(const NTV2Stream stream)
     }
     return channel;
 }
-

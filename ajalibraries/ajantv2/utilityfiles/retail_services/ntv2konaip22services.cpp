@@ -2524,7 +2524,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
         {
             rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
             rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
-            mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableChServices);
+            mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
             if (rv && rv2)
             {
                 // if the channel enable toggled
@@ -2567,7 +2567,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
         {
             rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
             rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
-            mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
+            mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
             if (rv && rv2)
             {
                 // if the channel enable toggled
@@ -2612,7 +2612,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
             rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
             GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-            mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableChServices);
+            mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
             if (rv && rv2)
             {
                 // if the channel enable toggled
@@ -2658,7 +2658,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
             rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
             GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-            mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableChServices);
+            mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
             if (rv && rv2)
             {
                 // if the channel enable toggled
@@ -2994,7 +2994,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 		case kHDMIOutProtocolAutoDetect:
 		{
 			ULWord detectedProtocol;
-			mCard->ReadRegister(kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+			mCard->ReadRegister(kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 			mCard->WriteRegister(kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 		}
 		break;
@@ -3201,13 +3201,13 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }

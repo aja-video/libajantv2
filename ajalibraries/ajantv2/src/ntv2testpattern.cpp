@@ -2741,7 +2741,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 
 	// trap quartersize mode 
 	ULWord quarterSizeMode = 0;
-	ReadRegister(kRegCh2Control, &quarterSizeMode, kRegMaskQuarterSizeMode, kRegShiftQuarterSizeMode);
+	ReadRegister(kRegCh2Control, quarterSizeMode, kRegMaskQuarterSizeMode, kRegShiftQuarterSizeMode);
 	if ( _fbFormat == NTV2_FBF_10BIT_YCBCR  && quarterSizeMode )
 	{
 		numLines /= 2;
