@@ -2237,7 +2237,9 @@ bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
 	ULWord		value	(0);
-	const bool	result	(CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum [inChannel], value, kRegMaskMode, kRegShiftMode));
+	const bool	result	(ReadRegister (gChannelToControlRegNum[inChannel], value, kRegMaskMode, kRegShiftMode));
+	CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskMode, kRegShiftMode);
+	NTV2_ASSERT(ULWord(outValue) == value);
 	if (result)
 		outValue = static_cast <NTV2Mode> (value);
 	return result;
@@ -3730,24 +3732,26 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 		outIsEnabled = outIsWideVANC = false;
 		if (!GetVANCMode (vancMode, inChannel))
 			return false;
-		if (!NTV2_IS_VALID_VANCMODE (vancMode))
+		if (!NTV2_IS_VALID_VANCMODE(vancMode))
 			return false;
-		outIsEnabled = NTV2_IS_VANCMODE_TALL (vancMode);
-		outIsWideVANC = NTV2_IS_VANCMODE_TALLER (vancMode);
+		outIsEnabled = NTV2_IS_VANCMODE_ON(vancMode);
+		outIsWideVANC = NTV2_IS_VANCMODE_TALLER(vancMode);
 		return true;
 	}
 
 
 	bool CNTV2Card::GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled, NTV2Channel inChannel)
 	{
-		bool	isEnabled (false), isWide (false);
+		NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
 		if (!pOutIsEnabled)
 			return false;
-		if (!GetEnableVANCData (isEnabled, isWide, inChannel))
+		if (!GetVANCMode (vancMode, inChannel))
 			return false;
-		*pOutIsEnabled = isEnabled;
+		if (!NTV2_IS_VALID_VANCMODE(vancMode))
+			return false;
+		*pOutIsEnabled = NTV2_IS_VANCMODE_ON(vancMode);
 		if (pOutIsWideVANCEnabled)
-			*pOutIsWideVANCEnabled = isWide;
+			*pOutIsWideVANCEnabled = NTV2_IS_VANCMODE_TALLER(vancMode);
 		return true;
 	}
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
