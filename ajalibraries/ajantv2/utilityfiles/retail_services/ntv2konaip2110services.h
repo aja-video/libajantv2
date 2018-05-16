@@ -34,7 +34,10 @@ protected:
     ReceiveVideoData2110    m2110RxVideoDataLast;
     ReceiveAudioData2110    m2110RxAudioDataLast;
 
-    NTV2VideoFormat         mFb1VideoFormatLast;
+    NTV2VideoFormat
+
+
+    mFb1VideoFormatLast;
 };
 
 
