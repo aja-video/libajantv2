@@ -113,7 +113,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 
 		// Get video standard
 		NTV2Standard videoStandard;
-		mBoard->GetStandard(&videoStandard);
+		mBoard->GetStandard(videoStandard);
 
 		// Allocate the source video buffer
 		mpVidBufferSource = (ULWord*)new char[mActiveVideoSize];
@@ -218,7 +218,7 @@ void
 CGpuVideoIO::WaitForCaptureStart()
 {
 	NTV2Mode mode;
-	mBoard->GetMode(mChannel, &mode);
+	mBoard->GetMode(mChannel, mode);
 	if (mode == NTV2_MODE_CAPTURE) {
 
 		// Wait for capture to start
@@ -262,8 +262,8 @@ CGpuVideoIO::Capture()
 	// Wait for frame interrupt
 	mBoard->WaitForInputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
 	ULWord loval, hival;
-	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo,&loval);
-	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, &hival);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, loval);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, hival);
 
 	// Get pointer to next GPU buffer
 	AVTextureBuffer* frameData = mGPUCircularBuffer->StartProduceNextBuffer();
@@ -339,8 +339,8 @@ CGpuVideoIO::Playout()
 	mGPUCircularBuffer->EndConsumeNextBuffer();
 
 	ULWord loval, hival;
-	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, &loval);
-	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, &hival);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, loval);
+	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, hival);
 //	uint64_t currentTime = ((uint64_t)hival << 32) + loval;
 //	odprintf("Latency Time %llu ", currentTime - frameData->currentTime);
 
