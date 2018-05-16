@@ -320,16 +320,13 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 		}
 	}
 	_boardOpened = true;
-	ReadRegister(kRegBoardID, reinterpret_cast<ULWord*>(&_boardID));
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
-	ReadRegister (kRegGlobalControl,
-				  (ULWord*)&fg,
-				  kRegMaskGeometry,
-				  kRegShiftGeometry);
+	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
 
 	ULWord returnVal1,returnVal2;
-	ReadRegister (kRegCh1Control,&returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
-	ReadRegister (kRegCh1Control,&returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
+	ReadRegister (kRegCh1Control,returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
+	ReadRegister (kRegCh1Control,returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
 	NTV2FrameBufferFormat format = (NTV2FrameBufferFormat)((returnVal1&0x0f) | ((returnVal2&0x1)<<4));
 
 	// Write the device ID
@@ -511,8 +508,8 @@ bool CNTV2WinDriverInterface::CompleteMemoryForDMA (ULWord * pFrameBuffer)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *registerValue, ULWord registerMask,
-							   ULWord registerShift)
+bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord & registerValue, const ULWord registerMask,
+							   const ULWord registerShift)
 {
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
@@ -569,7 +566,7 @@ bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *regist
 		}
 		if (fRet)
 		{
-			*registerValue=propStruct.ulRegisterValue;
+			registerValue = propStruct.ulRegisterValue;
 			return true;
 		}
 		else
