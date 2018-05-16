@@ -2466,9 +2466,12 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             // See if any transmit video channels need configuring/enabling
             for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
             {
-                if (memcmp(&m2110TxVideoData.txVideoCh[i], &m2110TxVideoDataLast.txVideoCh[i], sizeof(TxVideoChData2110)) != 0 || ipServiceForceConfig)
+                if (memcmp(&m2110TxVideoData.txVideoCh[i], &m2110TxVideoDataLast.txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
+                    mFb1VideoFormat != mFb1VideoFormatLast ||
+                    ipServiceForceConfig)
                 {
                     m2110TxVideoDataLast.txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
+                    mFb1VideoFormatLast = mFb1VideoFormat;
 
                     // Process the configuration
                     txConfig.init();
@@ -2604,7 +2607,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
 
                     // Video specific
-                    rxConfig.videoFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+                    rxConfig.videoFormat = m2110RxVideoData.rxVideoCh[i].videoFormat;
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
