@@ -25,7 +25,6 @@
 
 typedef enum
 {
-    kIpEnable2110           = NTV2_FOURCC('i','e','1','0'), // 4CC of enable data
     kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
     kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
@@ -118,21 +117,12 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t				txChStatus[4];
     uint32_t				rxChStatus[4];
 } IpStatus2110;
 
 typedef struct
 {
-    uint32_t                id;
-    bool					txChEnable[4];
-    bool					rxChEnable[4];
-} IpEnable2110;
-
-typedef struct
-{
-    uint32_t                id;
     bool                    setup4k;
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
@@ -141,35 +131,31 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numTxVideoChannels;
     TxVideoChData2110       txVideoCh[4];
 } TransmitVideoData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numTxAudioChannels;
     TxAudioChData2110       txAudioCh[4];
 } TransmitAudioData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numRxVideoChannels;
     RxVideoChData2110       rxVideoCh[4];
 } ReceiveVideoData2110;
 
 typedef struct
 {
-    uint32_t                id;
     uint32_t                numRxAudioChannels;
     RxAudioChData2110       rxAudioCh[4];
 } ReceiveAudioData2110;
 
 typedef struct
 {
-    uint32_t                id;
+    uint32_t                placeHolder;
 } MetadataVData2110;
 
 
