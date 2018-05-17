@@ -20,13 +20,11 @@ public:
 	CNTV2ToneGenerator(UWord boardNumber,
 			  float frequency,
 			  NTV2AudioRate audioRate,
-			  NTV2DeviceType boardType= DEVICETYPE_UNKNOWN,
 			  float amplitude=.25
 			)
         : _boardNumber(boardNumber),
 		  _toneFrequency(frequency),
 		  _audioRate(audioRate),
-		  _boardType(boardType),
 		  _toneAmplitude(amplitude),
 		  _audioFileBuffer(0),
 		  _audioReadSamplePointer(0),
@@ -48,18 +46,15 @@ public:
 	ULWord AddAudioFromFileBuffer(ULWord* audioBuffer,ULWord numSamples, ULWord numChannels);
 
 protected:
-
 	CNTV2OutputAudio	_ntv2Card;
 	UWord				_boardNumber;
 	float				_toneFrequency;
 	NTV2AudioRate		_audioRate;
-	NTV2DeviceType		_boardType;
 	float				_toneAmplitude;
 	ULWord*				_audioFileBuffer;
 	ULWord				_numSamplesInFile;
 	ULWord				_audioReadSamplePointer;
     bool				_active;
-
 };
 
 #endif
