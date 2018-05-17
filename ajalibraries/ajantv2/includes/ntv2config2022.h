@@ -206,7 +206,7 @@ public:
     void        SetBiDirectionalChannels(bool bidirectional) { _biDirectionalChannels = bidirectional;}
     bool        GetBiDirectionalChannels() {return _biDirectionalChannels;}
 
-    bool        GetMACAddress(eSFP sfp, NTV2Channel channel, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
+    bool        GetMACAddress(eSFP sfp, NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
 
     bool        GetSFPMSAData(eSFP sfp, SFPMSAData & data);
     bool        GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus);
@@ -222,6 +222,9 @@ private:
 
     bool        SelectRxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr);
     bool        SelectTxChannel(NTV2Channel channel, eSFP sfp, uint32_t & baseAddr);
+
+    NTV2Stream VideoChannelToStream(const NTV2Channel channel);
+    NTV2Channel VideoStreamToChannel(const NTV2Stream stream);
 
     class CNTV2ConfigTs2022 * _tstreamConfig;
 

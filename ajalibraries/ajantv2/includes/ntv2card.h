@@ -1093,8 +1093,7 @@ public:
 	/**
 		@brief		Sets the output frame number for the given channel. This identifies which particular frame
 					in device SDRAM will be used for playout after the next frame interrupt.
-		@brief		Sets the frame number of the frame to be output for the given FrameStore.
-		@param[in]	inChannel	Specifies the Frame Store of interest, expressed as an ::NTV2Channel.
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 		@param[out]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
 								8MB or 16MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
@@ -1103,18 +1102,17 @@ public:
 		@note		Setting a new value takes effect at the next output VBI. For example, if line 300 of frame 5 is currently
 					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
 					until the output VBI fires after the last line of frame 5 has gone out the spigot.
-		@see		CNTV2Card::GetOutputFrame
+		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetOutputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
 	/**
 		@brief		Answers with the current output frame number for the given FrameStore (expressed as an ::NTV2Channel).
-		@param[in]	inChannel	Specifies the channel (aka Frame Store) of interest. (This channel should be enabled
-								and in playout mode.)
-		@param[out]	outValue	Receives the current output frame number, a zero-based index into each 8MB or 16MB
+		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+		@param[out]	outValue	Receives the current output frame number, a zero-based index into each 8/16/32 MB
 								block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
-		@see		CNTV2Card::SetOutputFrame, vidop-fs
+		@see		CNTV2Card::SetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
@@ -1131,6 +1129,7 @@ public:
 					currently being written in device memory at the instant this function is called with frame 6,
 					video won't be written into frame 6 in device memory until the input VBI fires after the last line
 					of frame 5 has been written.
+		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
@@ -1142,6 +1141,7 @@ public:
 		@param[out]	outValue	Receives the input frame number of the frame in device memory to be written, which is a
 								zero-based index into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		GetInputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
@@ -1164,7 +1164,7 @@ public:
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 									Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
-		@see		CNTV2Card::SetVANCMode, vancframegeometries
+		@see		CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -1178,7 +1178,7 @@ public:
 					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
 					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
 					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
-		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, vancframegeometries
+		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 
@@ -1193,7 +1193,7 @@ public:
 					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
 					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
 					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
-		@see		CNTV2Card::SetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, vancframegeometries
+		@see		CNTV2Card::SetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);
 
@@ -3729,9 +3729,10 @@ protected:
 public:
 	/**
 		@brief		Returns the video format of the signal that is present on the given input source.
-		@param[in]	inVideoSource		Specifies the video input source.
+		@param[in]	inVideoSource		Specifies the video input source as an ::NTV2InputSource.
 		@param[in]	inIsProgressive		Optionally specifies if the video format is expected to be progressive or not.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+										Defaults to false (presumed to be interlaced).
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 		@details	This function allows client applications to determine the kind of video signal, if any, is being presented
 					to a given input source of the device. Because the hardware has no way of knowing if the incoming signal
 					is progressive or interlaced (e.g., 525/29.97fps progressive versus 525/59.94fps interlaced),
@@ -3741,37 +3742,38 @@ public:
 
 	/**
 		@brief		Returns the video format of the signal that is present on the given SDI input source.
-		@param[in]	inChannel			Specifies the input channel of interest.
+		@param[in]	inChannel			Specifies the SDI input connector as an ::NTV2Channel value, a zero-based index number.
 		@param[in]	inIsProgressive		Optionally specifies if the video format is expected to be progressive or not.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+										Defaults to false (presumed to be interlaced).
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 		@details	This function allows client applications to determine the kind of video signal, if any, is being presented
 					to a given input source of the device. Because the hardware has no way of knowing if the incoming signal
 					is progressive or interlaced (e.g., 525/29.97fps progressive versus 525/59.94fps interlaced),
-					the function assumes interlaced, but the caller can override the function's "interlace" assumption.
+					the function assumes interlaced, but the caller can override this assumption.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressive = false);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's HDMI input.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 	**/
     AJA_VIRTUAL NTV2VideoFormat GetHDMIInputVideoFormat (NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's analog video input.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetAnalogInputVideoFormat (void);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's composite video input.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetAnalogCompositeInputVideoFormat (void);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's reference input.
-		@return		A valid NTV2VideoFormat if successful; otherwise returns NTV2_FORMAT_UNKNOWN.
+		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 		@note		The returned video format, if valid, will be an SD format for black burst and HD for tri-level.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetReferenceVideoFormat (void);

@@ -391,13 +391,6 @@ void DeviceServices::ReadDriverState (void)
             memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
             //printf("Failed to get 2110 Receive Audio params\n");
         }
-
-        bOk = mCard->ReadVirtualData(kIpEnable2110, &m21110IpEnable, sizeof(IpEnable2110));
-        if (bOk == false)
-        {
-            memset(&m21110IpEnable, 0, sizeof(IpEnable2110));
-            //printf("Failed to get 2110 IP Enable params\n");
-        }
     }
 }
 
@@ -2413,7 +2406,6 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
 
 void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
-    printf("id           %d\n", m2110Network.id);
     PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
     PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
