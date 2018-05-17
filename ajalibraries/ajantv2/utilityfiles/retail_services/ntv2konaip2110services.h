@@ -26,9 +26,18 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-    void printIpEnable(IpEnable2110 ipEnable);
     CNTV2Config2110     * config2110;
 
+    NetworkData2110			m2110NetworkLast;
+    TransmitVideoData2110   m2110TxVideoDataLast;
+    TransmitAudioData2110   m2110TxAudioDataLast;
+    ReceiveVideoData2110    m2110RxVideoDataLast;
+    ReceiveAudioData2110    m2110RxAudioDataLast;
+
+    NTV2VideoFormat
+
+
+    mFb1VideoFormatLast;
 };
 
 

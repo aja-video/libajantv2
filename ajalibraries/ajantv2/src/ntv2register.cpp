@@ -836,7 +836,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 {
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(&mode);
+	GetEveryFrameServices(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #endif
@@ -849,16 +849,14 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	if (ajaRetail == true)
 	{
 		// Get the current H and V timing offsets
-		GetVideoHOffset (&hOffset);
-		GetVideoVOffset (&vOffset);
+		GetVideoHOffset (hOffset);
+		GetVideoVOffset (vOffset);
 	}
 
 	NTV2Standard standard;
-	GetStandard(&standard, channel);
+	GetStandard(standard, channel);
 	NTV2FrameRate frameRate;
-	GetFrameRate(&frameRate, channel);
-	bool vancEnabled, wideVANCEnabled;
-	GetEnableVANCData (vancEnabled, wideVANCEnabled, channel);
+	GetFrameRate(frameRate, channel);
 
 	
 #if !defined (NTV2_DEPRECATE)
@@ -1120,22 +1118,28 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 
 //	--------------------------------------------	END BLOCK
 
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool CNTV2Card::GetNominalMinMaxHV (int * pOutNominalH, int * pOutMinH, int * pOutMaxH, int * pOutNominalV, int * pOutMinV, int * pOutMaxV)
+	{
+		return pOutNominalH  &&  pOutMinH  &&  pOutMaxH  &&  pOutNominalV  &&  pOutMinV  &&  pOutMaxV
+				&& GetNominalMinMaxHV(*pOutNominalH, *pOutMinH, *pOutMaxH, *pOutNominalV, *pOutMinV, *pOutMaxV);
+	}
+#endif	//	NTV2_DEPRECATE_14_3
 
-bool CNTV2Card::GetNominalMinMaxHV (int* nominalH, int* minH, int* maxH, int* nominalV, int* minV, int* maxV)
+bool CNTV2Card::GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outMaxH, int & outNominalV, int & outMinV, int & outMaxV)
 {
 	NTV2VideoFormat		videoFormat;
-
 	// Get current video format to find nominal value
-	if (GetVideoFormat(&videoFormat))
+	if (GetVideoFormat(videoFormat))
 	{
 		// Kona2 has static nominal H value for all formats
-		*nominalH = K2_NOMINAL_H;
-		*minH = K2_MIN_H;
-		*maxH = K2_MAX_H;
+		outNominalH = K2_NOMINAL_H;
+		outMinH = K2_MIN_H;
+		outMaxH = K2_MAX_H;
 
-		*nominalV = K2_NOMINAL_V;
-		*minV = K2_MIN_V;
-		*maxV = K2_MAX_V;
+		outNominalV = K2_NOMINAL_V;
+		outMinV = K2_MIN_V;
+		outMaxV = K2_MAX_V;
 		return true;
 	}
 	return false;
@@ -1149,7 +1153,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 
 	
 	// Get the nominal values for H and V
-	if ( GetNominalMinMaxHV(&nominalH, &minH, &maxH, &nominalV, &minV, &maxV) )
+	if ( GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV) )
 	{
 		// Apply offset to nominal value (K2 you increment the timing by adding the timing value)
 		
@@ -1164,7 +1168,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 		else if (nominalH < minH)
 			nominalH = minH;
 		
-		ReadOutputTimingControl(&timingValue);
+		ReadOutputTimingControl(timingValue);
 		
 		// Handle special cases where we increment or decrement the timing by one
 		// Some hardware LS/LH cannot handle this and inorder to do 1 pixel timing moves
@@ -1184,10 +1188,10 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
-				ReadLineCount (&lineCount);
+				ReadLineCount (lineCount);
 				do
 				{	
-					ReadLineCount (&lineCount2);
+					ReadLineCount (lineCount2);
 				} while (lineCount != lineCount2);
 				
 				// Now move timing back by 2.
@@ -1203,10 +1207,10 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
-				ReadLineCount (&lineCount);
+				ReadLineCount (lineCount);
 				do
 				{	
-					ReadLineCount (&lineCount2);
+					ReadLineCount (lineCount2);
 				} while (lineCount != lineCount2);				
 				
 				// Now move timing forward by 2.
@@ -1229,87 +1233,72 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 	return false;
 }
 
-bool CNTV2Card::GetVideoHOffset (int* hOffset)
+bool CNTV2Card::GetVideoHOffset (int & outHOffset)
 {
-	int				nominalH, minH, maxH, nominalV, minV, maxV;
-	ULWord			timingValue;
-	NTV2DeviceID	boardID = GetDeviceID();
-	
-	// Get the nominal values for H and V
-	if ( GetNominalMinMaxHV(&nominalH, &minH, &maxH, &nominalV, &minV, &maxV) )
-	{
-		ReadOutputTimingControl(&timingValue);
+	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
 
-		timingValue &= 0xFFFF;
-		
-		// Get offset from nominal value (K2 you increment the timing by adding the timing value)
-		if (::NTV2DeviceNeedsRoutingSetup(boardID))
-			*hOffset = timingValue - nominalH;
-		else
-			*hOffset = nominalH - timingValue;
+	//	Get the nominal values for H and V...
+	if (!GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV))
+		return false;
 
-		return true; 
-	}
+	ULWord	timingValue(0);
+	ReadOutputTimingControl(timingValue);
+	timingValue &= 0xFFFF;
 	
-	return false;
+	// Get offset from nominal value (K2 you increment the timing by adding the timing value)
+	if (::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
+		outHOffset = int(timingValue) - nominalH;
+	else
+		outHOffset = nominalH - int(timingValue);
+	return true; 
 }
 
 bool CNTV2Card::SetVideoVOffset (int vOffset)
 {
-	int				nominalH, minH, maxH, nominalV, minV, maxV;
-	ULWord			timingValue;
-	NTV2DeviceID	boardID = GetDeviceID();
-	
+	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
+
 	// Get the nominal values for H and V
-	if ( GetNominalMinMaxHV(&nominalH, &minH, &maxH, &nominalV, &minV, &maxV) )
-	{
-		// Apply offset to nominal value (K2 you increment the timing by adding the timing value)
-		if (::NTV2DeviceNeedsRoutingSetup(boardID))
-			nominalV = nominalV + vOffset;
-		else
-			nominalV = nominalV - vOffset;
-			
-		// Clamp this value so that it doesn't exceed max, min 
-		if (nominalV > maxV)
-			nominalV = maxV;
-		else if (nominalV < minV)
-			nominalV = minV;
+	if (!GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV))
+		return false;
 
-		ReadOutputTimingControl(&timingValue);
-
-		timingValue &= 0x0000FFFF;
-		timingValue |= (nominalV << 16);
-		WriteOutputTimingControl(timingValue);
+	// Apply offset to nominal value (K2 you increment the timing by adding the timing value)
+	if (::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
+		nominalV = nominalV + vOffset;
+	else
+		nominalV = nominalV - vOffset;
 		
-		return true; 
-	}
-	
-	return false;
+	// Clamp this value so that it doesn't exceed max, min 
+	if (nominalV > maxV)
+		nominalV = maxV;
+	else if (nominalV < minV)
+		nominalV = minV;
+
+	ULWord	timingValue(0);
+	ReadOutputTimingControl(timingValue);
+	timingValue &= 0x0000FFFF;
+	timingValue |= (nominalV << 16);
+	WriteOutputTimingControl(timingValue);
+	return true; 
 }
 
-bool CNTV2Card::GetVideoVOffset (int* vOffset)
+bool CNTV2Card::GetVideoVOffset (int & outVOffset)
 {
-	int				nominalH, minH, maxH, nominalV, minV, maxV;
-	ULWord			timingValue;
-	NTV2DeviceID	boardID = GetDeviceID();
+	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
 	
 	// Get the nominal values for H and V
-	if ( GetNominalMinMaxHV(&nominalH, &minH, &maxH, &nominalV, &minV, &maxV) )
-	{
-		ReadOutputTimingControl(&timingValue);
+	if (!GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV))
+		return false;
 
-		timingValue = (timingValue >> 16);
-		
-		// Get offset from nominal value (K2 you increment the timing by adding the timing value)
-		if (::NTV2DeviceNeedsRoutingSetup(boardID))
-			*vOffset = timingValue - nominalV;
-		else
-			*vOffset = nominalV - timingValue;
+	ULWord	timingValue(0);
+	ReadOutputTimingControl(timingValue);
+	timingValue = (timingValue >> 16);
 
-		return true; 
-	}
-	
-	return false;
+	// Get offset from nominal value (K2 you increment the timing by adding the timing value)
+	if (::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
+		outVOffset = timingValue - nominalV;
+	else
+		outVOffset = nominalV - timingValue;
+	return true; 
 }
 
 
@@ -1324,7 +1313,7 @@ bool CNTV2Card::GetNumberActiveLines (ULWord & outNumActiveLines)
 	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
 
  	outNumActiveLines = 0;
-	if (!GetStandard (&standard))
+	if (!GetStandard(standard))
 		return false;
 
 	switch (standard)
@@ -1499,7 +1488,7 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 {
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(&mode);
+	GetEveryFrameServices(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #else
@@ -1515,11 +1504,11 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	// This is the geometry of a single FB widget. Note this is the same as newGeometry unless it is a 4K format
 	NTV2FrameGeometry newFrameStoreGeometry = newGeometry;
 	NTV2FrameGeometry oldGeometry;
-	bool status = GetFrameGeometry(&oldGeometry, channel);
+	bool status = GetFrameGeometry(oldGeometry, channel);
 	if ( !status )
 		return status;
 		
-	status = GetLargestFrameBufferFormatInUse(&format);
+	status = GetLargestFrameBufferFormatInUse(format);
 	if ( !status )
 		return status;
 	
@@ -1740,9 +1729,9 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 	else
 	{
 		bool smpte425Enabled = false;
-		Get425FrameEnable(&smpte425Enabled, inChannel);
+		GetTsiFrameEnable(smpte425Enabled, inChannel);
 		bool squaresEnabled = false;
-		Get4kSquaresEnable(&squaresEnabled, inChannel);
+		Get4kSquaresEnable(squaresEnabled, inChannel);
 
 		if (!IsMultiFormatActive())
 		{
@@ -1826,7 +1815,7 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 		return false;
 
 	ULWord quadEnable = 0;
-	GetQuadFrameEnable(&quadEnable, inChannel);
+	GetQuadFrameEnable(quadEnable, inChannel);
 	if (quadEnable == 0)
 		return false;
 
@@ -1897,7 +1886,7 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 		return false;
 
 	ULWord quadEnable = 0;
-	GetQuadFrameEnable(&quadEnable, inChannel);
+	GetQuadFrameEnable(quadEnable, inChannel);
 	if (quadEnable == 0)
 		return false;
 
@@ -2257,13 +2246,13 @@ bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
 	return result;
 }
 
-bool CNTV2Card::GetFrameInfo(NTV2Channel channel, NTV2FrameGeometry* geometry, NTV2FrameBufferFormat* format )
+bool CNTV2Card::GetFrameInfo (const NTV2Channel inChannel, NTV2FrameGeometry & outGeometry, NTV2FrameBufferFormat & outFBF)
 {
-	bool status = GetFrameGeometry(geometry);
+	bool status = GetFrameGeometry(outGeometry);	//	WHY ISN'T inChannel PASSED TO GetFrameGeometry?!?!?!
 	if ( !status )
 		return status; // TODO: fix me
 
-	status = GetFrameBufferFormat(channel,format);
+	status = GetFrameBufferFormat(inChannel, outFBF);
 	if ( !status )
 		return status; // TODO: fix me
 
@@ -2360,7 +2349,7 @@ bool CNTV2Card::GetFBSizeAndCountFromHW(ULWord* size, ULWord* count)
 	}
 
 	NTV2FrameGeometry geometry = NTV2_FG_NUMFRAMEGEOMETRIES;
-	GetFrameGeometry(&geometry);
+	GetFrameGeometry(geometry);
 	if(geometry == NTV2_FG_4x1920x1080 || geometry == NTV2_FG_4x2048x1080)
 	{
 		*size *= 4;
@@ -2393,36 +2382,29 @@ bool CNTV2Card::SetFrameBufferSize (NTV2Framesize size)
 	return true;
 }
 
-bool CNTV2Card::GetLargestFrameBufferFormatInUse(NTV2FrameBufferFormat* format)
+bool CNTV2Card::GetLargestFrameBufferFormatInUse(NTV2FrameBufferFormat & outFBF)
 {
 	NTV2FrameBufferFormat ch1format;
 	NTV2FrameBufferFormat ch2format = NTV2_FBF_8BIT_YCBCR;
 
-	if ( !GetFrameBufferFormat(NTV2_CHANNEL1,&ch1format) )
+	if ( !GetFrameBufferFormat(NTV2_CHANNEL1, ch1format) )
 		return false;
 
-	if ( !GetFrameBufferFormat(NTV2_CHANNEL2,&ch2format) &&
+	if ( !GetFrameBufferFormat(NTV2_CHANNEL2, ch2format) &&
 		::NTV2DeviceGetNumVideoChannels(_boardID) > 1)
 		return false;
 
 	NTV2FrameGeometry geometry;
-	bool status = GetFrameGeometry(&geometry);
-	if ( !status )
-		return status;
+	if (!GetFrameGeometry(geometry))
+		return false;
 
 	ULWord ch1FrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,geometry,ch1format);
 	ULWord ch2FrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,geometry,ch2format);
-
 	if ( ch1FrameBufferSize >= ch2FrameBufferSize )
-	{
-		*format = ch1format;
-	}
+		outFBF = ch1format;
 	else
-	{
-		*format = ch2format;
-	}
-
-	return status;
+		outFBF = ch2format;
+	return true;
 }
 
 bool CNTV2Card::IsMultiFormatActive (void)
@@ -2461,7 +2443,7 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 	const ULWord	regNum	(gChannelToControlRegNum [channel]);
 	NTV2FrameGeometry currentGeometry;
 	NTV2FrameBufferFormat currentFormat; // save for call to IsBufferSizeChangeRequired below
-	bool status = GetFrameInfo(channel,&currentGeometry,&currentFormat);
+	bool status = GetFrameInfo(channel,currentGeometry,currentFormat);
 	if ( !status )
 		return status;
 
@@ -2782,35 +2764,35 @@ bool CNTV2Card::FlipFlopPage(NTV2Channel channel )
 }
 
 
-bool CNTV2Card::GetPCIAccessFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return ReadRegister (gChannelToPCIAccessFrameRegNum [inChannel], &outValue);
 }
 
-bool CNTV2Card::SetOutputFrame (NTV2Channel inChannel, ULWord value)
+bool CNTV2Card::SetOutputFrame (const NTV2Channel inChannel, const ULWord value)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return WriteRegister (gChannelToOutputFrameRegNum [inChannel], value);
 }
 
-bool CNTV2Card::GetOutputFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return ReadRegister (gChannelToOutputFrameRegNum [inChannel], &outValue);
 }
 
-bool CNTV2Card::SetInputFrame (NTV2Channel inChannel, ULWord value)
+bool CNTV2Card::SetInputFrame (const NTV2Channel inChannel, const ULWord value)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return WriteRegister (gChannelToInputFrameRegNum [inChannel], value);
 }
 
-bool CNTV2Card::GetInputFrame (NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
@@ -2913,7 +2895,7 @@ bool CNTV2Card::ReadOutputTimingControl (ULWord & outValue, const UWord inOutput
 bool CNTV2Card::IsXilinxProgrammed()
 {
     ULWord programFlashValue;
-	if(ReadFlashProgramControl(&programFlashValue))
+	if(ReadFlashProgramControl(programFlashValue))
 	{
 		if ((programFlashValue & BIT(9)) == BIT(9))
 		{
@@ -3777,32 +3759,34 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 }
 
 
-bool CNTV2Card::GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANC, NTV2Channel inChannel)
-{
-	NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
-	outIsEnabled = outIsWideVANC = false;
-	if (!GetVANCMode (vancMode, inChannel))
-		return false;
-	if (!NTV2_IS_VALID_VANCMODE (vancMode))
-		return false;
-	outIsEnabled = NTV2_IS_VANCMODE_TALL (vancMode);
-	outIsWideVANC = NTV2_IS_VANCMODE_TALLER (vancMode);
-	return true;
-}
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool CNTV2Card::GetEnableVANCData (bool & outIsEnabled, bool & outIsWideVANC, const NTV2Channel inChannel)
+	{
+		NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
+		outIsEnabled = outIsWideVANC = false;
+		if (!GetVANCMode (vancMode, inChannel))
+			return false;
+		if (!NTV2_IS_VALID_VANCMODE (vancMode))
+			return false;
+		outIsEnabled = NTV2_IS_VANCMODE_TALL (vancMode);
+		outIsWideVANC = NTV2_IS_VANCMODE_TALLER (vancMode);
+		return true;
+	}
 
 
-bool CNTV2Card::GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled, NTV2Channel inChannel)
-{
-	bool	isEnabled (false), isWide (false);
-	if (!pOutIsEnabled)
-		return false;
-	if (!GetEnableVANCData (isEnabled, isWide, inChannel))
-		return false;
-	*pOutIsEnabled = isEnabled;
-	if (pOutIsWideVANCEnabled)
-		*pOutIsWideVANCEnabled = isWide;
-	return true;
-}
+	bool CNTV2Card::GetEnableVANCData (bool * pOutIsEnabled, bool * pOutIsWideVANCEnabled, NTV2Channel inChannel)
+	{
+		bool	isEnabled (false), isWide (false);
+		if (!pOutIsEnabled)
+			return false;
+		if (!GetEnableVANCData (isEnabled, isWide, inChannel))
+			return false;
+		*pOutIsEnabled = isEnabled;
+		if (pOutIsWideVANCEnabled)
+			*pOutIsWideVANCEnabled = isWide;
+		return true;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 bool CNTV2Card::SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inValue)
@@ -3979,7 +3963,7 @@ bool CNTV2Card::GetBaseAddress (NTV2Channel channel, ULWord **pBaseAddress)
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
 
-	GetPCIAccessFrame (channel, &ulFrame);
+	GetPCIAccessFrame (channel, ulFrame);
 	if ( ulFrame > GetNumFrameBuffers())
 		ulFrame = 0;
 
@@ -4438,7 +4422,7 @@ bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard &
 	bool is2kx1080 = false;
 	NTV2Standard newStandard = NTV2_STANDARD_INVALID;
 	ReadRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], reinterpret_cast <ULWord *> (&newStandard), kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
-	bool returnValue = GetSDIOut2Kx1080Enable((NTV2Channel)inOutputSpigot, &is2kx1080);
+	bool returnValue = GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080);
 	outValue = newStandard;
 	switch(newStandard)
 	{
@@ -5587,7 +5571,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 			{
 				//This is a hack, LHI does not have a second input
-				if ((_boardID == DEVICE_ID_LHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+				if ((_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 				{
 					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 						((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5595,7 +5579,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 						(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 						inIsProgressivePicture);												//progressive picture
 				}
-				else if (_boardID != DEVICE_ID_LHI || _boardID != DEVICE_ID_KONALHIDVI)
+				else if (_boardID != DEVICE_ID_KONALHI || _boardID != DEVICE_ID_KONALHIDVI)
 					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 					(status & BIT_15) >> 15,											//progressive transport
@@ -5730,7 +5714,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 {
 	NTV2VideoFormat format = NTV2_FORMAT_UNKNOWN;
 	ULWord status;
-    if ( GetHDMIInputStatusRegister(&status, inChannel) )
+    if ( GetHDMIInputStatusRegister(status, inChannel) )
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 		{
@@ -5795,9 +5779,9 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		break;
 
 	case 1:	
-		if ( boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
+		if ( boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHE_PLUS)
+		else if (boardID == DEVICE_ID_KONALHEPLUS)
 			result = GetAnalogInputVideoFormat();
 		else
 			result = GetInput2VideoFormat(progressivePicture);
@@ -5806,7 +5790,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 	case 2:
 		if (boardID == DEVICE_ID_IOXT)
 			result = GetHDMIInputVideoFormat();
-		else if (boardID == DEVICE_ID_LHI || boardID == DEVICE_ID_IOEXPRESS)
+		else if (boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
 			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
@@ -5877,7 +5861,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 		if (::NTV2DeviceCanDo3GOut (_boardID, 1) && ReadRegister (kRegSDIInput3GStatus, &threeGStatus))
 		{
 			//This is a hack, LHI does not have a second input
-			if ((_boardID == DEVICE_ID_LHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
+			if ((_boardID == DEVICE_ID_KONALHI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -5885,7 +5869,7 @@ NTV2VideoFormat CNTV2Card::GetInput2VideoFormat (bool progressivePicture)
 					(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
 					progressivePicture);												//progressive picture
 			}
-			else if (_boardID != DEVICE_ID_LHI)
+			else if (_boardID != DEVICE_ID_KONALHI)
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 				((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
 				(status & BIT_15) >> 15,											//progressive transport
@@ -6299,30 +6283,21 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 		if(mode == NTV2_STANDARD_TASKS)
 			ajaRetail = true;
 	#endif
-		NTV2BitfileType result = NTV2_BITFILE_NO_CHANGE;	// assume no change needed
-
-	//	printf ("BitfileSwitchNeeded:\n");
-
 		// if bit 30 of the debug register is set, we're not going to change bitfiles no matter what
 		ULWord debugRegValue;
 		ReadRegister(kVRegDebug1,&debugRegValue);
 		if (debugRegValue & BIT_30)
 		{
-	//		printf ("   Freeze Bitfile mode is ON\n");
 			return NTV2_BITFILE_NO_CHANGE;
 		}
 
 		#if !defined (NTV2_DEPRECATE)
-		NTV2BitfileType newBitfile = NTV2_BITFILE_NO_CHANGE;
-		const char *whyString = "No change";
 		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
 			(void) newValue;
 			(void) ajaRetail;
 		#endif	//	!defined (NTV2_DEPRECATE)
-		//printf ("   returning: %s\n", whyString);
-
-		return result;
+		return NTV2_BITFILE_NO_CHANGE;
 
 	}	//	BitfileSwitchNeeded
 
@@ -6986,8 +6961,8 @@ bool CNTV2Card::GetConversionMode(NTV2ConversionMode & outMode)
    NTV2Standard inStandard;
    NTV2Standard outStandard;
 
-   GetConverterInStandard(&inStandard);
-   GetConverterOutStandard(&outStandard);
+   GetConverterInStandard(inStandard);
+   GetConverterOutStandard(outStandard);
 
    outMode = NTV2_CONVERSIONMODE_INVALID;
 
@@ -7529,7 +7504,7 @@ bool CNTV2Card::GetLHIVideoDACMode(NTV2VideoDACMode & outValue)
 {
 	NTV2LHIVideoDACMode	lhiValue	(NTV2_MAX_NUM_LHIVideoDACModes);
 	NTV2Standard		standard	(NTV2_STANDARD_UNDEFINED);
-	bool				result		(GetLHIVideoDACMode(&lhiValue)  &&  GetLHIVideoDACStandard(&standard));
+	bool				result		(GetLHIVideoDACMode(lhiValue)  &&  GetLHIVideoDACStandard(standard));
 	
 	if (result)
 		switch(standard)

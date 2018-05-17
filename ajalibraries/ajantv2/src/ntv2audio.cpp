@@ -1107,7 +1107,7 @@ bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outValue, 
 	return result;
 }
 
-
+#if !defined(NTV2_DEPRECATE_14_3)
 bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel)
 {
 	NTV2AudioMonitorSelect	outValue	(NTV2_AudioMonitor1_2);
@@ -1123,7 +1123,7 @@ bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue,
 	
 	return result;
 }
-
+#endif	//	NTV2_DEPRECATE_14_3
 
 bool CNTV2Card::SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable)
 {

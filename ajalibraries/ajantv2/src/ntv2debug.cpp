@@ -265,11 +265,11 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 	switch (fmt)
 	{
 //		case NTV2_FORMAT_1080psf_2500:
-		case NTV2_FORMAT_1080i_5000:				result = "NTV2_FORMAT_1080i_5000  /  NTV2_FORMAT_1080psf_2500";			break;
+		case NTV2_FORMAT_1080i_5000:				result = "NTV2_FORMAT_1080i_5000/NTV2_FORMAT_1080psf_2500";			break;
 //		case NTV2_FORMAT_1080psf_2997:
-		case NTV2_FORMAT_1080i_5994:				result = "NTV2_FORMAT_1080i_5994  /  NTV2_FORMAT_1080psf_2997";			break;
+		case NTV2_FORMAT_1080i_5994:				result = "NTV2_FORMAT_1080i_5994/NTV2_FORMAT_1080psf_2997";			break;
 //		case NTV2_FORMAT_1080psf_3000:
-		case NTV2_FORMAT_1080i_6000:				result = "NTV2_FORMAT_1080i_6000  /  NTV2_FORMAT_1080psf_3000";			break;
+		case NTV2_FORMAT_1080i_6000:				result = "NTV2_FORMAT_1080i_6000/NTV2_FORMAT_1080psf_3000";			break;
 		case NTV2_FORMAT_720p_5994:					result = "NTV2_FORMAT_720p_5994";			break;
 		case NTV2_FORMAT_720p_6000:					result = "NTV2_FORMAT_720p_6000";			break;
 		case NTV2_FORMAT_1080psf_2398:				result = "NTV2_FORMAT_1080psf_2398";		break;
@@ -301,9 +301,9 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 		case NTV2_FORMAT_1080psf_2997_2:			result = "NTV2_FORMAT_1080psf_2997_2";		break;
 		case NTV2_FORMAT_1080psf_3000_2:			result = "NTV2_FORMAT_1080psf_3000_2";		break;
 		case NTV2_FORMAT_720p_5000:					result = "NTV2_FORMAT_720p_5000";			break;
-		case NTV2_FORMAT_1080p_5000_B:				result = "NTV2_FORMAT_1080p_5000_B  /  NTV2_FORMAT_1080p_5000";		break;
-		case NTV2_FORMAT_1080p_5994_B:				result = "NTV2_FORMAT_1080p_5994_B  /  NTV2_FORMAT_1080p_5994";		break;
-		case NTV2_FORMAT_1080p_6000_B:				result = "NTV2_FORMAT_1080p_6000_B  /  NTV2_FORMAT_1080p_6000";		break;
+		case NTV2_FORMAT_1080p_5000_B:				result = "NTV2_FORMAT_1080p_5000_B";		break;
+		case NTV2_FORMAT_1080p_5994_B:				result = "NTV2_FORMAT_1080p_5994_B";		break;
+		case NTV2_FORMAT_1080p_6000_B:				result = "NTV2_FORMAT_1080p_6000_B";		break;
 		case NTV2_FORMAT_1080p_5000_A:				result = "NTV2_FORMAT_1080p_5000_A";		break;
 		case NTV2_FORMAT_1080p_5994_A:				result = "NTV2_FORMAT_1080p_5994_A";		break;
 		case NTV2_FORMAT_1080p_6000_A:				result = "NTV2_FORMAT_1080p_6000_A";		break;

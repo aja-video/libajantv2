@@ -1622,8 +1622,8 @@ void Corvid24Services::SetDeviceMiscRegisters ()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 	
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
 	bool	b4K				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);

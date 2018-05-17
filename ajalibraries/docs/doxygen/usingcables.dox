@@ -1,12 +1,12 @@
 /**
 @page	toolsandutilities
 
-@section	usingcables		"Cables"
+@section	usingcables		“Cables”
 
 This page describes how to use the <b>Cables</b> tool to monitor or configure signal routing in an AJA device.
 
 <b>Cables</b> is a graphical tool that can be used to interactively configure any NTV2 device.
-The user interface consists of a single window that's split horizontally into three panels:
+The user interface consists of a single window that’s split horizontally into three panels:
 
 @image	html	cableslayout.png
 
@@ -25,68 +25,68 @@ It also contains a facility for saving and restoring named device configurations
 There are a number of tabbed control panels at the bottom of the window, only one of which can be frontmost at any given time:
 
 @image	html	cables-videopanel.png
--	<b>Video Tab</b> -- This tab has radio buttons for choosing the device's clock reference.
+-	<b>Video Tab</b> — This tab has radio buttons for choosing the device’s clock reference.
 @image	html	cables-audiopanel.png
--	<b>Audio Tab</b> -- There are one of these tabs for each audio subsystem supported by the device. There are controls in the panel to choose which input the audio subsystem's de-embedder will take its audio samples from, and a checkbox for enabling or disabling <i>loopback</i> (which automatically copies those de-embedded audio samples to the audio subsystem's output embedder).
+-	<b>Audio Tab</b> — There are one of these tabs for each audio subsystem supported by the device. There are controls in the panel to choose which input the audio subsystem’s de-embedder will take its audio samples from, and a checkbox for enabling or disabling <i>loopback</i> (which automatically copies those de-embedded audio samples to the audio subsystem’s output embedder).
 @image	html	cables-infopanel.png
--	<b>Info Tab</b> -- This tab shows general information about the device and its firmware.
+-	<b>Info Tab</b> — This tab shows general information about the device and its firmware.
 @image	html	cables-controlpanel.png
--	<b>Control Tab</b> -- This tab controls general operation of <b>Cables</b> and the device.
+-	<b>Control Tab</b> — This tab controls general operation of <b>Cables</b> and the device.
 	-	It has three pushbuttons:
-		-	<b>Clear Cables</b> -- When clicked, removes all signal interconnections between widgets on the device.
-		-	<b>Reset Positions</b> -- When clicked, moves all widgets to their default positions.
-		-	<b>Clear Host List</b> -- When clicked, removes all known host IP addresses from the popup menu in the <b>Device Selection Panel</b> at the top of the window.
+		-	<b>Clear Cables</b> — When clicked, removes all signal interconnections between widgets on the device.
+		-	<b>Reset Positions</b> — When clicked, moves all widgets to their default positions.
+		-	<b>Clear Host List</b> — When clicked, removes all known host IP addresses from the popup menu in the <b>Device Selection Panel</b> at the top of the window.
 	-	There are also three checkboxes:
-		-	<b>Validate Connections</b> -- When checked, prevents any invalid connection between two widgets from being made. When unchecked, connections made between widgets are not validated.
-		-	<b>Save Hardware State on Exit</b> -- When checked, saves the hardware state in a preferences file on the host when <b>Cables</b> terminates, such that the next time <b>Cables</b> is launched and the same device is selected, the widget positions and hardware state can be automatically restored.
-		-	<b>Hide Dual Link</b> -- When checked, hides all Dual-Link widgets, which may be desireable when always using sub-3Gbps signals.
+		-	<b>Validate Connections</b> — When checked, prevents any invalid connection between two widgets from being made. When unchecked, connections made between widgets are not validated.
+		-	<b>Save Hardware State on Exit</b> — When checked, saves the hardware state in a preferences file on the host when <b>Cables</b> terminates, such that the next time <b>Cables</b> is launched and the same device is selected, the widget positions and hardware state can be automatically restored.
+		-	<b>Hide Dual Link</b> — When checked, hides all Dual-Link widgets, which may be desireable when always using sub-3Gbps signals.
 	-	There is also a popup menu for controlling the retail service (Mac and Windows only), which has these modes:
-		-	<b>Disable Tasks</b> -- Device configuration is controlled exclusively by the client application(s).
-		-	<b>OEM Tasks</b> -- Device configuration is mostly controlled by the client application, although the driver may intervene in some cases as a convenience to the client (e.g., automatically setting the output standard when CNTV2Card::InitAutoCirculate is called, etc.).
-		-	<b>Standard Tasks</b> -- Device configuration is completely controlled by the <b>AJA ControlPanel</b> through the retail services. Any changes made to the device configuration in <b>Cables</b> will be overridden by the retail service at the next VBI.
+		-	<b>Disable Tasks</b> — Device configuration is controlled exclusively by the client application(s).
+		-	<b>OEM Tasks</b> — Device configuration is mostly controlled by the client application, although the driver may intervene in some cases as a convenience to the client (e.g., automatically setting the output standard when CNTV2Card::InitAutoCirculate is called, etc.).
+		-	<b>Standard Tasks</b> — Device configuration is completely controlled by the <b>AJA ControlPanel</b> through the retail services. Any changes made to the device configuration in <b>Cables</b> will be overridden by the retail service at the next VBI.
 @image	html	cables-controlpanel.png
--	<b>Code Tab</b> -- This tab is intended to be an NTV2 programming aid, and shows the C++ program code that's necessary in order to "wire" the AJA device in its current state, shown as a series of function calls.
+-	<b>Code Tab</b> — This tab is intended to be an NTV2 programming aid, and shows the C++ program code that’s necessary in order to “wire” the AJA device in its current state, shown as a series of function calls.
 @image	html	cablescodepanel.png
 Left-clicking in the Code panel will change the text selection, per normal mouse-based text editing techniques, including
 shift-clicking, double- and triple-clicking, etc.
 Right-clicking in the panel pops up a submenu with these choices:
--	<b>Copy All/Selection</b> -- Copies all text (or just the highlighted text, if any) in the panel to the host's pasteboard.
--	<b>Show/Hide Comments</b> -- Shows or hides C++ comments in the code.
--	<b>Show/Hide Declarations</b> -- Shows or hides C++ variable declarations in the code.
--	<b>Use CNTV2SignalRouter</b> -- Changes the code in the panel to use the CNTV2SignalRouter class.
--	<b>Use CNTV2Card</b> -- Changes the code in the panel to use the CNTV2Card class.
--	<b>Use Shorthand</b> -- Changes the code in the panel to a shorthand notation that can be copied and pasted between different devices.
--	<b>Paste Routing (Add)</b> -- Adds the routing connection(s) specified by the previously copied shorthand text on the clipboard.
--	<b>Paste Routing (Replace)</b> -- Replaces all existing routing connections with those specified by the previously copied shorthand text on the clipboard.
+-	<b>Copy All/Selection</b> — Copies all text (or just the highlighted text, if any) in the panel to the host’s pasteboard.
+-	<b>Show/Hide Comments</b> — Shows or hides C++ comments in the code.
+-	<b>Show/Hide Declarations</b> — Shows or hides C++ variable declarations in the code.
+-	<b>Use CNTV2SignalRouter</b> — Changes the code in the panel to use the CNTV2SignalRouter class.
+-	<b>Use CNTV2Card</b> — Changes the code in the panel to use the CNTV2Card class.
+-	<b>Use Shorthand</b> — Changes the code in the panel to a shorthand notation that can be copied and pasted between different devices.
+-	<b>Paste Routing (Add)</b> — Adds the routing connection(s) specified by the previously copied shorthand text on the clipboard.
+-	<b>Paste Routing (Replace)</b> — Replaces all existing routing connections with those specified by the previously copied shorthand text on the clipboard.
 
-@par	Signal Routing Panel Operation
+@subsection	cables-operation	Signal Routing Panel Operation
 
 The Signal Routing Panel is where routing changes are performed interactively. This is the panel in which most tasks are performed.
 
-Right-clicking in the panel's gray "desktop" pops up a menu for globally changing the video or pixel format for all channels
+Right-clicking in the panel’s gray “desktop” pops up a menu for globally changing the video or pixel format for all channels
 (Frame Stores) on the device:
 
--	<b>Video Format</b> -- If selected, pops up a sub-menu of video formats supported by the device. Choosing one of those formats globally changes the video format for all channels on the device. Note that if the device is multi-format capable, choosing a format from the sub-menu will place the device into single-format ("uniformat") mode before globally changing the video format.
--	<b>4K Mode</b> -- Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
-	-	<b>Tsi</b> -- Selects two-sample-interleave (per SMPTE 425-5).
-	-	<b>Squares</b> -- Selects the classic behavior.
--	<b>Frame Buffer Format</b> -- If selected, pops up a sub-menu of frame buffer pixel formats supported by the device. Choosing one of the formats globally changes the video format for all channels on the device.
+-	<b>Video Format</b> — If selected, pops up a sub-menu of video formats supported by the device. Choosing one of those formats globally changes the video format for all channels on the device. Note that if the device is multi-format capable, choosing a format from the sub-menu will place the device into single-format (“uniformat”) mode before globally changing the video format.
+-	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
+	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+	-	<b>Squares</b> — Selects the classic behavior.
+-	<b>Frame Buffer Format</b> — If selected, pops up a sub-menu of frame buffer pixel formats supported by the device. Choosing one of the formats globally changes the video format for all channels on the device.
 
-@note	Changing video or pixel formats by right-clicking in a Frame Store widget (see below) only changes that particular channel's
-		video or pixel format (except for "quad" formats that require ganging channels 1-4 or 5-8).
+@note	Changing video or pixel formats by right-clicking in a Frame Store widget (see below) only changes that particular channel’s
+		video or pixel format (except for “quad” formats that require ganging channels 1-4 or 5-8).
 
 @par	Widgets
 
 <b>Cables</b> exposes the many types of widgets that a device may have — e.g., inputs, outputs, frame stores, converters, etc.
 
-All widgets have at least one routing "junction" on them, which are the little dark gray boxes on the left or right edge of the widget.
-These are the connection points for signals. Some widgets have input junctions, which are always located on the widget's left side.
-Others have output junctions, which are always located on the widget's right side. Many have both.
+All widgets have at least one routing “junction” on them, which are the little dark gray boxes on the left or right edge of the widget.
+These are the connection points for signals. Some widgets have input junctions, which are always located on the widget’s left side.
+Others have output junctions, which are always located on the widget’s right side. Many have both.
 
 @par	Moving Widgets
 
-When <b>Cables</b> is first launched (or first encounters a new device it hasn't worked with before), it lays out the widgets in
-a default arrangement, which isn't always optimal for being able to clearly see the signal paths through the device.
+When <b>Cables</b> is first launched (or first encounters a new device it hasn’t worked with before), it lays out the widgets in
+a default arrangement, which isn’t always optimal for being able to clearly see the signal paths through the device.
 For this reason, widgets can be arbitrarily moved around in the routing panel. To move a widget, simply left-click inside of it,
 drag it to its new position in the panel, then release the mouse button.
 
@@ -94,55 +94,55 @@ Note that widget positions have no effect on the device or the signals leaving i
 
 @par	Connections
 
-A connection between two widgets is shown as a "wire" in the routing panel. The signal "flows" from a widget's output connection
-point to the other widget's input.
+A connection between two widgets is shown as a “wire” in the routing panel. The signal “flows” from a widget’s output connection
+point to the other widget’s input.
 
 @image	html	cables-widgetsignalflow.png
 
 To route a signal between two widgets:
--	Using the mouse, starting in the junction of one widget, click and drag out a "wire" from the junction,
+-	Using the mouse, starting in the junction of one widget, click and drag out a “wire” from the junction,
 	releasing the mouse button when the mouse pointer is inside the desired junction of the other widget.
-	It doesn't matter if the "wire" is dragged from an input to an output junction, or vice-versa.
+	It doesn’t matter if the “wire” is dragged from an input to an output junction, or vice-versa.
 
-@note	If the connection is not possible, it won't "stick" -- i.e., the "wire" that got created will simply vanish.
+@note	If the connection is not possible, it won’t “stick” — i.e., the “wire” that got created will simply vanish.
 
 There are two ways to remove an existing routing connection between two widgets:
--#	Using the mouse, starting in the input junction of the widget that's receiving the signal,
-	click and drag out a "wire" from the junction, but route it back into that same input junction ... then release the mouse button.
--#	Using the mouse, click anywhere on the connection "wire" and drag it away from its current location ... then release the mouse button.
+-#	Using the mouse, starting in the input junction of the widget that’s receiving the signal,
+	click and drag out a “wire” from the junction, but route it back into that same input junction … then release the mouse button.
+-#	Using the mouse, click anywhere on the connection “wire” and drag it away from its current location … then release the mouse button.
 
 @par	Signal Color Codes
 
 @image	html	cables-colorcodes.png
 
 Widgets having no upstream signal feeding them will appear white. Whenever a widget is receiving a signal, or an interconnect
-is carrying a signal, they illuminate with a color that indicates the signal they're carrying -- SD, HD, HD Level A/B, or UHD/4K.
+is carrying a signal, they illuminate with a color that indicates the signal they’re carrying — SD, HD, HD Level A/B, or UHD/4K.
 
-@par	Input Widgets
+@subsection	cables-inputs	Input Widgets
 
 @image	html	cables-inputwidgets.png
 
-Input widgets supply signals from a device's external connectors, and in <b>Cables</b> they only have output junctions.
-When a signal is present at the input, the name of the signal format will be shown in the widget's label (e.g., "1080psf 29.97")
-and the widget will be painted the signal's color. For devices with bidirectional SDI connectors that are set for output, the "(In)"
+Input widgets supply signals from a device’s external connectors, and in <b>Cables</b> they only have output junctions.
+When a signal is present at the input, the name of the signal format will be shown in the widget’s label (e.g., “1080psf 29.97”)
+and the widget will be painted the signal’s color. For devices with bidirectional SDI connectors that are set for output, the “(In)”
 widget is always shown white (with no signal format in its name).
 
 For AJA devices with bypass relays, if the bypass relay is in bypass mode, the corresponding input widget will be colored red,
 to indicate that the signal is not entering the device.
 
 Right-clicking on an SDI input widget may pop up a menu for configuring the SDI input:
--	<b>Enable 3Ga->3Gb</b> -- This menu item will appear if the device supports automatic 3G Level A to B.
--	<b>Enable Input</b> -- This menu item will appear if the device supports bi-directional SDI connectors.
-	It is both an indicator and a controller. If it's checked, the SDI connector is an input; otherwise, the SDI connector
+-	<b>Enable 3Ga->3Gb</b> — This menu item will appear if the device supports automatic 3G Level A to B.
+-	<b>Enable Input</b> — This menu item will appear if the device supports bi-directional SDI connectors.
+	It is both an indicator and a controller. If it’s checked, the SDI connector is an input; otherwise, the SDI connector
 	is an output. Clicking on the checkbox will toggle it, and switch the connector from an input to an output, or vice-versa.
 
-@par	Output Widgets
+@subsection	cables-outputs	Output Widgets
 
 @image	html	cables-outputwidgets.png
 
-Output widgets supply signals to a device's external connectors, and in <b>Cables</b> they only have input junctions.
-When a signal is present at the output, the name of the signal format will be shown in the widget's label (e.g., "1080psf 29.97").
-For devices with bidirectional SDI connectors that are set for input, the "(Out)" widget is always shown white (with no signal
+Output widgets supply signals to a device’s external connectors, and in <b>Cables</b> they only have input junctions.
+When a signal is present at the output, the name of the signal format will be shown in the widget’s label (e.g., “1080psf 29.97”).
+For devices with bidirectional SDI connectors that are set for input, the “(Out)” widget is always shown white (with no signal
 format in its name).
 
 For AJA devices with bypass relays, if the bypass relay is in bypass mode, the corresponding output widget will be colored red,
@@ -152,77 +152,78 @@ Right-clicking on the label of an output widget pops up a menu for changing the 
 device) or the output channel (if multiformat).
 
 Right-clicking on an SDI output widget pops up a menu for configuring the SDI output:
--	<b>SDI Output Standard</b> -- If selected, pops up a list of video output standards that are supported by the device’s SDI output. If one of those standards is clicked, the output standard for the SDI output is changed. (Note that the output standard should agree with the format of the video signal being routed to the output.)
--	<b>Enable Output</b> -- If the device supports bi-directional SDI connectors, this checkbox will be visible in the popup menu. It is both an indicator and a controller. If it’s checked, the SDI connector is an output; otherwise, the SDI connector is an input. Clicking on the checkbox will toggle it, and switch the connector from an input to an output, or vice-versa.
--	<b>Enable 3Ga->3Gb</b> -- If the device supports automatic 3G Level A to B… this checkbox will be shown in the popup menu. <i>FINISH</i>
--	<b>3G Enabled</b> -- If the device’s SDI port supports 3Gbps data rates, this checkbox will be shown in the popup menu. <i>FINISH</i>
--	<b>3Gb Enabled</b> -- If the device’s SDI port supports 3Gbps Level B (dual link), this checkbox will be shown in the popup menu. <i>FINISH</i>
+-	<b>SDI Output Standard</b> — If selected, pops up a list of video output standards that are supported by the device’s SDI output. If one of those standards is clicked, the output standard for the SDI output is changed. (Note that the output standard should agree with the format of the video signal being routed to the output.)
+-	<b>Enable Output</b> — If the device supports bi-directional SDI connectors, this checkbox will be visible in the popup menu. It is both an indicator and a controller. If it’s checked, the SDI connector is an output; otherwise, the SDI connector is an input. Clicking on the checkbox will toggle it, and switch the connector from an input to an output, or vice-versa.
+-	<b>Enable 3Ga->3Gb</b> — If the device supports automatic 3G Level A to B… this checkbox will be shown in the popup menu. <i>FINISH</i>
+-	<b>3G Enabled</b> — If the device’s SDI port supports 3Gbps data rates, this checkbox will be shown in the popup menu. <i>FINISH</i>
+-	<b>3Gb Enabled</b> — If the device’s SDI port supports 3Gbps Level B (dual link), this checkbox will be shown in the popup menu. <i>FINISH</i>
 
 Right-clicking on an HDMI output widget pops up a menu for configuring the HDMI output:
--	<b>HDMI Output Standard</b> -- If selected, pops up a list of HDMI video output standards that are supported by the device's HDMI output.
+-	<b>HDMI Output Standard</b> — If selected, pops up a list of HDMI video output standards that are supported by the device’s HDMI output.
 	If one of those standards is clicked, the output standard for that HDMI output is changed.
 	(Note that the output standard should agree with the format of the video signal being routed to the output.)
--	<b>HDMI Output Frame Rate</b> -- If selected, pops up a list of frame rates that are supported by the device's HDMI output.
+-	<b>HDMI Output Frame Rate</b> — If selected, pops up a list of frame rates that are supported by the device’s HDMI output.
 	If one of those rates is clicked, the frame rate for that HDMI output is changed.
 	(Note that the frame rate should agree with that of the video signal being routed to the output.)
--	<b>HDMI Mode</b> -- If selected, pops up a list of HDMI modes that are supported by the device's HDMI output
-	(e.g., "HD/SD", 4K Capture and 4K Playback). If one of those modes is clicked, the mode for that HDMI output is changed.
-	(Note that this menu item won't appear if the HDMI output widget is not capable of sending 4K/UHD video.)
--	<b>Color Space</b> -- If clicked, pops up a sub-menu:
-	-	<b>RGB</b> -- Sets the HDMI output color space to RGB.
-	-	<b>YCbCr</b> -- Sets the HDMI output color space to YCbCr.
--	<b>HDMI Range</b> -- If clicked, pops up a sub-menu:
-	-	<b>Full Range</b> -- Sets the HDMI output range to "full".
-	-	<b>SMPTE</b> -- Sets the HDMI output range to "SMPTE".
--	<b>Bit Depth</b> -- If clicked, pops up a sub-menu:
-	-	<b>10 Bit</b> -- Sets the HDMI output bit depth to "10 bit".
-	-	<b>8 Bit</b> -- Sets the HDMI output bit depth to "8 bit".
--	<b>Protocol</b> -- If clicked, pops up a sub-menu:
-	-	<b>DVI</b> -- Sets the HDMI output protocol to "DVI".
-	-	<b>HDMI</b> -- Sets the HDMI output protocol to "HDMI".
--	<b>Audio Channels</b> -- If clicked, pops up a sub-menu:
-	-	<b>2 Channels</b> -- Sets the HDMI output audio channel count to "2".
-	-	<b>8 Channels</b> -- Sets the HDMI output audio channel count to "8".
+-	<b>HDMI Mode</b> — If selected, pops up a list of HDMI modes that are supported by the device’s HDMI output
+	(e.g., “HD/SD”, 4K Capture and 4K Playback). If one of those modes is clicked, the mode for that HDMI output is changed.
+	(Note that this menu item won’t appear if the HDMI output widget is not capable of sending 4K/UHD video.)
+-	<b>Color Space</b> — If clicked, pops up a sub-menu:
+	-	<b>RGB</b> — Sets the HDMI output color space to RGB.
+	-	<b>YCbCr</b> — Sets the HDMI output color space to YCbCr.
+-	<b>HDMI Range</b> — If clicked, pops up a sub-menu:
+	-	<b>Full Range</b> — Sets the HDMI output range to “full”.
+	-	<b>SMPTE</b> — Sets the HDMI output range to “SMPTE”.
+-	<b>Bit Depth</b> — If clicked, pops up a sub-menu:
+	-	<b>10 Bit</b> — Sets the HDMI output bit depth to “10 bit”.
+	-	<b>8 Bit</b> — Sets the HDMI output bit depth to “8 bit”.
+-	<b>Protocol</b> — If clicked, pops up a sub-menu:
+	-	<b>DVI</b> — Sets the HDMI output protocol to “DVI”.
+	-	<b>HDMI</b> — Sets the HDMI output protocol to “HDMI”.
+-	<b>Audio Channels</b> — If clicked, pops up a sub-menu:
+	-	<b>2 Channels</b> — Sets the HDMI output audio channel count to “2”.
+	-	<b>8 Channels</b> — Sets the HDMI output audio channel count to “8”.
 
-@par	Frame Store Widgets
+@subsection	cables-framestores	Frame Store Widgets
 
 @image	html	cables-framestorewidget.png
 
 Frame Store widgets have one input junction (for capture/ingest), and one output junction (for playout).
-Only one of the junctions should be used -- never both.
+Only one of the junctions should be used — never both.
 
 There is one Frame Store widget for every possible capture/playout channel on the device.
-If the channel is disabled, its Frame Store widget will be white; otherwise its color will match its channel's assigned video format.
+If the channel is disabled, its Frame Store widget will be white; otherwise its color will match its channel’s assigned video format.
 On uni-format (non-multiformat) devices, setting the video format on one Frame Store (channel) will globally set the video format
 for the entire device. On devices that support multi-format (e.g., Corvid88) and that are set in multi-format mode, each Frame Store
 can have a different video format.
 
 Right-clicking on the widget pops up the channel configuration menu:
--	<b>Video Format</b> -- If selected, pops up a sub-menu of video formats supported by the device.
+-	<b>Video Format</b> — If selected, pops up a sub-menu of video formats supported by the device.
 	Clicking on one of those formats changes the video format for the channel. Note that if the device is not a multi-format device,
 	the video format for all channels is changed. More significantly, if the device is multi-format capable,
 	the device is placed into multi-format mode, and the channel format is changed (without changing any other channels).
--	<b>Frame Buffer Format</b> -- If selected, pops up a sub-menu of frame buffer formats supported by the device.
+-	<b>Frame Buffer Format</b> — If selected, pops up a sub-menu of frame buffer formats supported by the device.
 	Clicking on one of those formats changes the frame buffer format for that channel. Note that NTV2 device frame buffer formats are
 	always independently configurable for each channel.
--	<b>Test Pattern</b> -- If selected, pops up a sub-menu of test patterns that can be written into the Frame Store's on-device memory.
-	Clicking on one of those patterns writes the pattern into the Frame Store's memory (in the Frame Store's current frame buffer format).
+-	<b>Test Pattern</b> — If selected, pops up a sub-menu of test patterns that can be written into the Frame Store’s on-device memory.
+	Clicking on one of those patterns writes the pattern into the Frame Store’s memory (in the Frame Store’s current frame buffer format).
 	DESCRIBE WHAT HAPPENS WITH MULTI-FORMAT MODE
--	<b>Test Pattern Alpha</b> -- If selected, pops up a sub-menu to choose what to put in the alpha channel of an RGB frame buffer.
-	Choose "Opaque" to make the alpha channel opaque. Choose "From Luma" to have the alpha values match the luminance values.
+-	<b>Test Pattern Alpha</b> — If selected, pops up a sub-menu to choose what to put in the alpha channel of an RGB frame buffer.
+	Choose “Opaque” to make the alpha channel opaque. Choose “From Luma” to have the alpha values match the luminance values.
 	DOES EITHER CHOICE IMMEDIATELY RE-WRITE THE TEST PATTERN INTO THE FRAME STORE? OR DO YOU HAVE TO CHOOSE ANOTHER TEST PATTERN?
--	<b>Mode</b> -- If selected, pops up a sub-menu to choose the Frame Store mode -- "Playback" or "Capture".
+-	<b>Mode</b> — If selected, pops up a sub-menu to choose the Frame Store mode — “Playback” or “Capture”.
 	Choosing either one will switch the Frame Store immediately to that chosen mode.
--	<b>Buffer Disable</b> -- If selected, pops up a sub-menu to disable ("On") or enable ("Off") the Frame Store. If a Frame Store is disabled, its memory won’t be read from or written into (which can reduce buffer memory contention within the device).
+-	<b>Buffer Disable</b> — If selected, pops up a sub-menu to disable (“On”) or enable (“Off”) the Frame Store.
+	If a Frame Store is disabled, its memory won’t be read from or written into (which can reduce buffer memory contention within the device).
 
-@par	Mixer/Keyer Widgets
+@subsection	cables-mixerkeyers	Mixer/Keyer Widgets
 
 @image	html	cables-mixerkeyerwidget.png
 
 Mixer/Keyer widgets have four input junctions and two output junctions.
 The top two inputs are foreground (video and alpha key); the bottom two are background (video and alpha).
 In order to operate correctly, the foreground and background input signals must be reasonably synchronized with each other.
-If they're not sufficiently synchronized, the widget turns red to indicate the sync failure:
+If they’re not sufficiently synchronized, the widget turns red to indicate the sync failure:
 @image	html	cables-mixernosync.png
 
 @note	The mixer/keyer widgets on modern AJA NTV2 devices do not perform chroma-keying.
@@ -231,57 +232,57 @@ The Mixer/Keyer provides a great deal of capabilities. For example, it can mix a
 such as a yellow rectangle having a left-to-right, opaque-to-transparent alpha gradient, which can be superimposed over live video.
 @image	html	cables-mixerexample-raster.png
 In this example, Frame Store 2 contains the yellow rectangle with the alpha gradient.
-The YUV and Alpha outputs of Frame Store 2 feed the Mixer/Keyer's foreground YUV \& Key inputs.
-The Mixer/Keyer's background input is fed live video from SDI In 1.
-The Mixer/Keyer's output is sent to SDI Out 3.
+The YUV and Alpha outputs of Frame Store 2 feed the Mixer/Keyer’s foreground YUV \& Key inputs.
+The Mixer/Keyer’s background input is fed live video from SDI In 1.
+The Mixer/Keyer’s output is sent to SDI Out 3.
 @image	html	cables-mixerexample-route.png
 
 The Mixer/Keyer’s settings are shown in its configuration dialog box, which can be opened by right-clicking on the Mixer/Keyer widget,
-and clicking "Configure Mixer/Keyer...":
+and clicking “Configure Mixer/Keyer…”:
 @image	html	cables-mixerexample-control.png
 
 The Video Processing Mode controls are:
--	<b>Foreground On</b> -- If selected, the foreground image or video, as determined by the Foreground Controls (see below),
+-	<b>Foreground On</b> — If selected, the foreground image or video, as determined by the Foreground Controls (see below),
 	are combined with the background image or video, as determined by the Background Controls (see below).
--	<b>Mix</b> -- If selected, a percentage of the foreground image or video, including alpha (if any),
+-	<b>Mix</b> — If selected, a percentage of the foreground image or video, including alpha (if any),
 	is mixed with the background image or video. The percentage is adjusted with the <b>Mix Position</b> control.
--	<b>Foreground Off</b> -- If selected, none of the foreground image or video will be used.
+-	<b>Foreground Off</b> — If selected, none of the foreground image or video will be used.
 
 The Foreground controls are:
--	<b>Full Raster</b> -- If selected, the entire foreground raster (and key) is used.
--	<b>Shaped</b> -- If selected, the applicable foreground raster is determined by the foreground alpha signal
-	(i.e., the "foreground key" input signal).
--	<b>Unshaped</b> -- If selected, the applicable foreground is determined by __DESCRIBE__.
+-	<b>Full Raster</b> — If selected, the entire foreground raster (and key) is used.
+-	<b>Shaped</b> — If selected, the applicable foreground raster is determined by the foreground alpha signal
+	(i.e., the “foreground key” input signal).
+-	<b>Unshaped</b> — If selected, the applicable foreground is determined by __DESCRIBE__.
 
 The Background controls are:
--	<b>Full Raster</b> -- If selected, the entire foreground raster (and key) is used.
--	<b>Shaped</b> -- If selected, the applicable foreground raster is determined by the background alpha signal
-	(i.e., the "background key" input signal).
--	<b>Unshaped</b> -- If selected, the applicable foreground is determined by __DESCRIBE__.
+-	<b>Full Raster</b> — If selected, the entire foreground raster (and key) is used.
+-	<b>Shaped</b> — If selected, the applicable foreground raster is determined by the background alpha signal
+	(i.e., the “background key” input signal).
+-	<b>Unshaped</b> — If selected, the applicable foreground is determined by __DESCRIBE__.
 
-The <b>Mix Position</b> slider is enabled only when the Mixer/Keyer's Video Processing Mode is set to "Mix".
+The <b>Mix Position</b> slider is enabled only when the Mixer/Keyer’s Video Processing Mode is set to “Mix”.
 The percentage is adjustable from zero to 100% in 65,536 incremental steps.
 
-@par	LUT Widgets
+@subsection	cables-luts	LUT Widgets
 
 @image	html	cables-lutwidget.png
 
 LUT widgets have one input junction and one output junction. They can be configured by right-clicking on the widget,
 and choosing a LUT configuration menu.
 
--	<b>LUT Type</b> -- pops up a submenu:
-	-	<b>Custom</b> -- If clicked, has the device use custom LUT values that were previously uploaded.
-	-	<b>Linear</b> -- If clicked, __DESCRIBE__.
-	-	<b>Gamma Rec601</b> -- If clicked, encodes/decodes 8/10-bit YCbCr SD video to raster __DESCRIBE__.
+-	<b>LUT Type</b> — pops up a submenu:
+	-	<b>Custom</b> — If clicked, has the device use custom LUT values that were previously uploaded.
+	-	<b>Linear</b> — If clicked, __DESCRIBE__.
+	-	<b>Gamma Rec601</b> — If clicked, encodes/decodes 8/10-bit YCbCr SD video to raster __DESCRIBE__.
 		This should only be used for SD video signals.
-	-	<b>Gamma Rec709</b> -- If clicked, <<DESCRIBE>>. This should not be used for SD video signals.
-	-	<b>Gamma Rec601 SMPTE</b> -- If clicked, <<DESCRIBE>>. This should only be used for SD video signals.
-	-	<b>Gamma Rec709 SMPTE</b> -- If clicked, <<DESCRIBE>>. This should not be used for SD video signals.
-	-	<b>RGB Full Range SMPTE</b> -- If clicked, uses the "full-range (0x004-0x3FB) to/from legal SMPTE range (0x010-0x0EB)"
+	-	<b>Gamma Rec709</b> — If clicked, <<DESCRIBE>>. This should not be used for SD video signals.
+	-	<b>Gamma Rec601 SMPTE</b> — If clicked, <<DESCRIBE>>. This should only be used for SD video signals.
+	-	<b>Gamma Rec709 SMPTE</b> — If clicked, <<DESCRIBE>>. This should not be used for SD video signals.
+	-	<b>RGB Full Range SMPTE</b> — If clicked, uses the “full-range (0x004-0x3FB) to/from legal SMPTE range (0x010-0x0EB)”
 		translation LUT. This is normally only used for RGB video signals.
--	<b>Bank</b> -- pops up a submenu:
-	-	<b>RGB-->YUV, SMPTE-->Full</b> -- If clicked, __DESCRIBE__.
+-	<b>Bank</b> — pops up a submenu:
+	-	<b>RGB—>YUV, SMPTE—>Full</b> — If clicked, __DESCRIBE__.
 		This should only be chosen if the LUT is being fed RGB video, and feeding YCbCr video downstream.
-	-	<b>YUV-->RGB, Full-->SMPTE</b> -- If clicked, __DESCRIBE__.
+	-	<b>YUV—>RGB, Full—>SMPTE</b> — If clicked, __DESCRIBE__.
 		This should only be chosen if the LUT is being fed YCbCr video, and feeding RGB video downstream.
 **/

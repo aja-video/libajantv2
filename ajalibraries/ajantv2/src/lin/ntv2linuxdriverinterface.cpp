@@ -2051,7 +2051,7 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 
 		switch (boardID)
 		{
-		case DEVICE_ID_LHI:
+		case DEVICE_ID_KONALHI:
 		case DEVICE_ID_IOXT:
 		case DEVICE_ID_CORVID22:
 		case DEVICE_ID_KONA3G:

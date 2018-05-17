@@ -90,10 +90,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IOEXPRESS:
 			pDeviceServices = new IoExpressServices();
 			break;
-		case DEVICE_ID_LHI:
+		case DEVICE_ID_KONALHI:
 			pDeviceServices = new KonaLHiServices();
 			break;
-		case DEVICE_ID_LHE_PLUS:
+		case DEVICE_ID_KONALHEPLUS:
 			pDeviceServices = new KonaLHePlusServices();
 			break;
 		case DEVICE_ID_IOXT:
@@ -394,13 +394,6 @@ void DeviceServices::ReadDriverState (void)
         {
             memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
             //printf("Failed to get 2110 Receive Audio params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kIpEnable2110, &m21110IpEnable, sizeof(IpEnable2110));
-        if (bOk == false)
-        {
-            memset(&m21110IpEnable, 0, sizeof(IpEnable2110));
-            //printf("Failed to get 2110 IP Enable params\n");
         }
     }
 }
@@ -834,7 +827,7 @@ NTV2VideoFormat DeviceServices::GetLockedInputVideoFormat()
 	const int32_t kLockSleepTimeMs	= 30;
 	
 	NTV2VideoFormat frameBufferVideoFormat;
-	mCard->GetVideoFormat(&frameBufferVideoFormat);
+	mCard->GetVideoFormat(frameBufferVideoFormat);
 	
 	// default output
 	NTV2VideoFormat outVideoFormat = frameBufferVideoFormat;
@@ -1974,11 +1967,11 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormat(int32_t index, NTV2VideoForm
 		
 		// switch to LevelA transport format, use 3Gb flag as LevelB indicator
 		if (sdiInFormat == NTV2_FORMAT_1080p_5000_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5000 : NTV2_FORMAT_1080p_5000_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5000_A : NTV2_FORMAT_1080p_5000_A;
 		else if (sdiInFormat == NTV2_FORMAT_1080p_5994_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5994 : NTV2_FORMAT_1080p_5994_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_5994_A : NTV2_FORMAT_1080p_5994_A;
 		else if (sdiInFormat == NTV2_FORMAT_1080p_6000_B)
-			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_6000 : NTV2_FORMAT_1080p_6000_A;
+			sdiInFormat = geometry == 8 ? NTV2_FORMAT_1080p_2K_6000_A : NTV2_FORMAT_1080p_6000_A;
 	}
 	
 	return sdiInFormat;
@@ -2417,7 +2410,6 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
 
 void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
-    printf("id           %d\n", m2110Network.id);
     PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
     PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
@@ -2940,7 +2932,7 @@ uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 	const uint32_t kBytesPerUnit = 512;		// each hardware click is 64 bytes
     
 	NTV2FrameRate rate =  NTV2_FRAMERATE_UNKNOWN;
-	mCard->GetFrameRate(&rate);
+	mCard->GetFrameRate(rate);
     
 	double frate		   = GetFramesPerSecond(rate);
 	double samplesPerFrame = 48000.0 / frate;
@@ -3020,11 +3012,11 @@ void DeviceServices::SetDeviceXPointCapture()
 			case NTV2_Input2Select:
 				switch(mDeviceID)
 				{
-				case DEVICE_ID_LHI:
+				case DEVICE_ID_KONALHI:
 				case DEVICE_ID_IOEXPRESS:
 					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
 					break;
-				case DEVICE_ID_LHE_PLUS:
+				case DEVICE_ID_KONALHEPLUS:
 					mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 					break;
 				case DEVICE_ID_KONAHDMI:
@@ -3038,7 +3030,7 @@ void DeviceServices::SetDeviceXPointCapture()
 				{
 					switch(mDeviceID)
 					{
-					case DEVICE_ID_LHI:
+					case DEVICE_ID_KONALHI:
 						mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
 						break;
 					case DEVICE_ID_KONAHDMI:
@@ -3218,11 +3210,11 @@ void DeviceServices::SetDeviceXPointPlayback()
                     case NTV2_Input2Select:
                         switch(mDeviceID)
                         {
-                        case DEVICE_ID_LHI:
+                        case DEVICE_ID_KONALHI:
                         case DEVICE_ID_IOEXPRESS:
                             mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
                             break;
-                        case DEVICE_ID_LHE_PLUS:
+                        case DEVICE_ID_KONALHEPLUS:
                             mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
                             break;
                         default:
@@ -3238,7 +3230,7 @@ void DeviceServices::SetDeviceXPointPlayback()
                         case DEVICE_ID_IO4KUFC:
                             mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT);
                             break;
-                        case DEVICE_ID_LHI:
+                        case DEVICE_ID_KONALHI:
                             mCard->SetReference(NTV2_REFERENCE_ANALOG_INPUT);
                             break;
                         }

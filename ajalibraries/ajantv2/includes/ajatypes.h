@@ -12,18 +12,16 @@
 #endif	//	if not MSWindows
 
 //	NOTE: Symbols/APIs within #ifdef blocks using these names aren't defined by default in this SDK:
-#define NTV2_DEPRECATE				//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-#define NTV2_DEPRECATE_12_5			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-#define NTV2_DEPRECATE_12_6			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-#define NTV2_DEPRECATE_12_7			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-
-#if 0	//	0	** MrBill **
-//	BEWARE: Symbols/APIs within #ifdef blocks using these names are still defined in this SDK, but will be deprecated by default in a future SDK:
+#define NTV2_DEPRECATE			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
+#define NTV2_DEPRECATE_12_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
+#define NTV2_DEPRECATE_12_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
+#define NTV2_DEPRECATE_12_7		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.7
 #define NTV2_DEPRECATE_13_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.0
 #define NTV2_DEPRECATE_13_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 13.1
 #define NTV2_DEPRECATE_14_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.0
-#define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2.  NOTE: 14.1 was never released.
-#endif	//	0	** MrBill **
+#define NTV2_DEPRECATE_14_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.1 (never released)
+#define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
+//#define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 14.3
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -110,16 +108,6 @@
 	typedef UINT_PTR	AJASocket;
 
 	#define AJATargetBigEndian  0
-	#if defined (NTV2_BUILDING_DRIVER)
-		#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-		#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-		#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
-		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
-		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_2         //  First deprecated in SDK 14.2
-	#endif
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////
@@ -157,16 +145,6 @@
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	#define POINTER_32
-	#if defined (NTV2_BUILDING_DRIVER)
-		#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-		#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-		#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
-		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
-		#define NTV2_DEPRECATE_14_0         //  First deprecated in SDK 14.0
-		#define NTV2_DEPRECATE_14_2         //  First deprecated in SDK 14.2
-	#endif
 
 										//////////////////////////////////////////////////////////////////
 #elif defined (AJALinux)				////////////////////////	LINUX	//////////////////////////////
@@ -231,20 +209,6 @@
 	#define WINAPI
 	#define POINTER_32
 	#define MAX_PATH	4096
-	#if defined (NTV2_BUILDING_DRIVER)
-		#define NTV2_DEPRECATE              //  If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
-		#define NTV2_DEPRECATE_12_5         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.5
-		#define NTV2_DEPRECATE_12_6         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.6
-		#define NTV2_DEPRECATE_12_7         //  If defined, excludes all symbols/APIs first deprecated in SDK 12.7
-		#define NTV2_DEPRECATE_13_0         //  First deprecated in SDK 13.0
-		#define NTV2_DEPRECATE_13_1         //  First deprecated in SDK 13.1
-		#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
-			#define NTV2_DEPRECATE_14_0     //  First deprecated in SDK 14.0
-		#endif
-		#if !defined(NTV2_DEPRECATE_14_2)	//	Linux driver Makefile usually defines this
-			#define NTV2_DEPRECATE_14_2     //  First deprecated in SDK 14.2
-		#endif
-	#endif
 
 										//////////////////////////////////////////////////////////////////
 #else									////////////////////////	(OTHER)		//////////////////////////
@@ -252,6 +216,37 @@
 	#error "IMPLEMENT OTHER PLATFORM"
 
 #endif	//	end OTHER PLATFORM
+
+#if defined (NTV2_BUILDING_DRIVER)
+	//	The AJA NTV2 driver is always built without any deprecated types or functions:
+	#if !defined(NTV2_DEPRECATE)
+		#define NTV2_DEPRECATE
+	#endif
+	#if !defined(NTV2_DEPRECATE_12_5)
+		#define NTV2_DEPRECATE_12_5
+	#endif
+	#if !defined(NTV2_DEPRECATE_12_6)
+		#define NTV2_DEPRECATE_12_6
+	#endif
+	#if !defined(NTV2_DEPRECATE_12_7)
+		#define NTV2_DEPRECATE_12_7
+	#endif
+	#if !defined(NTV2_DEPRECATE_13_0)
+		#define NTV2_DEPRECATE_13_0
+	#endif
+	#if !defined(NTV2_DEPRECATE_13_1)
+		#define NTV2_DEPRECATE_13_1
+	#endif
+	#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
+		#define NTV2_DEPRECATE_14_0
+	#endif
+	#if !defined(NTV2_DEPRECATE_14_1)	//	Linux driver Makefile usually defines this
+		#define NTV2_DEPRECATE_14_1		//	(never released)
+	#endif
+	#if !defined(NTV2_DEPRECATE_14_2)	//	Linux driver Makefile usually defines this
+		#define NTV2_DEPRECATE_14_2
+	#endif
+#endif
 
 
 //////////////////////////////////////////////////////////////////////
@@ -288,83 +283,48 @@
 #endif	//	if NTV2_ASSERT undefined
 
 
-//////////////////////////////////////////////////////////////////////////
-////////////////////////	NTV2_DEPRECATED		//////////////////////////
-//////////////////////////////////////////////////////////////////////////
-#define	NTV2_DEPRECATED
-#define	NTV2_DEPRECATED_INLINE
-#define	NTV2_DEPRECATED_FIELD
-#define	NTV2_DEPRECATED_VARIABLE
-#define	NTV2_DEPRECATED_TYPEDEF
-#define NTV2_DEPRECATED_CLASS
-#define NTV2_SHOULD_BE_DEPRECATED(__f__)		 __f__
+//////////////////////////////////////////////////////////////////////////////////
+////////////////////////	NTV2_DEPRECATED_ Macros		//////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//	These implement compile-time warnings for use of deprecated variables and functions
+#define	NTV2_DEPRECATED_INLINE						//	Just a marker/reminder
+#define	NTV2_DEPRECATED_FIELD						//	Just a marker/reminder
+#define	NTV2_DEPRECATED_VARIABLE					//	Just a marker/reminder
+#define	NTV2_DEPRECATED_TYPEDEF						//	Just a marker/reminder
+#define NTV2_DEPRECATED_CLASS						//	Just a marker/reminder
+#define NTV2_SHOULD_BE_DEPRECATED(__f__)			__f__
 #if defined(NTV2_BUILDING_DRIVER)
-	//	Driver builds -- no deprecate warnings
-	#define NTV2_DEPRECATED_f(__f__)			__f__
-	#define NTV2_DEPRECATED_v(__v__)			__v__
-	#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-	#define NTV2_DEPRECATED_12_5(__f__)			__f__
-	#define NTV2_DEPRECATED_12_6(__f__)			__f__
-	#define NTV2_DEPRECATED_13_0(__f__)			__f__
-	#define NTV2_DEPRECATED_13_1(__f__)			__f__
-	#define NTV2_DEPRECATED_14_0(__f__)			__f__
-	#define NTV2_DEPRECATED_14_1(__f__)			__f__
+	//	Disable deprecation warnings in driver builds
+	#define NTV2_DEPRECATED_f(__f__)				__f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(_MSC_VER) && _MSC_VER >= 1600
 	//	Use __declspec(deprecated) for MSVC
-	#define	NTV2_DEPRECATED_f(__f__)			__declspec(deprecated) __f__
-	#define NTV2_DEPRECATED_v(__v__)			__v__
-	#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-	#define	NTV2_DEPRECATED_12_5(__f__)			__declspec(deprecated) __f__
-	#define	NTV2_DEPRECATED_12_6(__f__)			__declspec(deprecated) __f__
-	#define	NTV2_DEPRECATED_13_0(__f__)			__declspec(deprecated) __f__
-	#define	NTV2_DEPRECATED_13_1(__f__)			__declspec(deprecated) __f__
-	#define	NTV2_DEPRECATED_14_0(__f__)			__declspec(deprecated) __f__
-	#define	NTV2_DEPRECATED_14_1(__f__)			__declspec(deprecated) __f__
+	#define	NTV2_DEPRECATED_f(__f__)				__declspec(deprecated) __f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(__clang__)
 	//	Use __attribute__((deprecated)) for LLVM/Clang
-	#define NTV2_DEPRECATED_f(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_v(__v__)			__v__
-	#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-	#define NTV2_DEPRECATED_12_5(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_12_6(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_13_0(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_13_1(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_14_0(__f__)			__f__  __attribute__((deprecated))
-	#define NTV2_DEPRECATED_14_1(__f__)			__f__  __attribute__((deprecated))
+	#define NTV2_DEPRECATED_f(__f__)				__f__  __attribute__((deprecated))
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(__GNUC__)
     #if __GNUC__ >= 4
 		//	Use __attribute__((deprecated)) for GCC 4 or later
 		#define NTV2_DEPRECATED_f(__f__)			__f__ __attribute__ ((deprecated))
 		#define NTV2_DEPRECATED_v(__v__)			__v__
 		#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-		#define NTV2_DEPRECATED_12_5(__f__)			__f__ __attribute__ ((deprecated))
-		#define NTV2_DEPRECATED_12_6(__f__)			__f__ __attribute__ ((deprecated))
-		#define NTV2_DEPRECATED_13_0(__f__)			__f__ __attribute__ ((deprecated))
-		#define NTV2_DEPRECATED_13_1(__f__)			__f__ __attribute__ ((deprecated))
-		#define NTV2_DEPRECATED_14_0(__f__)			__f__ __attribute__ ((deprecated))
-		#define NTV2_DEPRECATED_14_1(__f__)			__f__ __attribute__ ((deprecated))
 	#else
+		//	Disable deprecation warnings in GCC prior to GCC 4
 		#define NTV2_DEPRECATED_f(__f__)			__f__
 		#define NTV2_DEPRECATED_v(__v__)			__v__
 		#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-		#define NTV2_DEPRECATED_12_5(__f__)			__f__
-		#define NTV2_DEPRECATED_12_6(__f__)			__f__
-		#define NTV2_DEPRECATED_13_0(__f__)			__f__
-		#define NTV2_DEPRECATED_13_1(__f__)			__f__
-		#define NTV2_DEPRECATED_14_0(__f__)			__f__
-		#define NTV2_DEPRECATED_14_1(__f__)			__f__
     #endif
 #else
-	//	Disable deprecate warnings
-	#define NTV2_DEPRECATED_f(__f__)			__f__
-	#define NTV2_DEPRECATED_v(__v__)			__v__
-	#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-	#define NTV2_DEPRECATED_12_5(__f__)			__f__
-	#define NTV2_DEPRECATED_12_6(__f__)			__f__
-	#define NTV2_DEPRECATED_13_0(__f__)			__f__
-	#define NTV2_DEPRECATED_13_1(__f__)			__f__
-	#define NTV2_DEPRECATED_14_0(__f__)			__f__
-	#define NTV2_DEPRECATED_14_1(__f__)			__f__
+	//	Disable deprecation warnings
+	#define NTV2_DEPRECATED_f(__f__)				__f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #endif
 
 

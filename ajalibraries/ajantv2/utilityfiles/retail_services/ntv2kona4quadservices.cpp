@@ -52,7 +52,7 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
             
             // See if we need to translate this from a level B format to level A
             levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, &levelbtoaConvert);
+            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
             if (levelBInput && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
@@ -74,7 +74,7 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
             
             // See if we need to translate this from a level B format to level A
             levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, &levelbtoaConvert);
+            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
             if (levelBInput && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
@@ -3051,8 +3051,8 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 
-	mCard->GetStandard(&primaryStandard);
-	mCard->GetFrameGeometry(&primaryGeometry);
+	mCard->GetStandard(primaryStandard);
+	mCard->GetFrameGeometry(primaryGeometry);
 
 	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -3255,8 +3255,8 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
 			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
 
-			mCard->GetHDMIOutDownstreamColorSpace(&colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth(&bitDepth);
+			mCard->GetHDMIOutDownstreamColorSpace(colorSpace);
+			mCard->GetHDMIOutDownstreamBitDepth(bitDepth);
 
 			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;

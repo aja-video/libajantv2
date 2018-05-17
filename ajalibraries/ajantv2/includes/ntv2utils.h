@@ -155,24 +155,39 @@ AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixe
 AJAExport void Make10BitBlackLine (UWord * pLineData, const UWord inNumPixels = 1920);
 
 AJAExport void Make10BitWhiteLine(UWord* lineData,UWord numPixels=1920);
-AJAExport void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-										NTV2Standard standard,
-										NTV2FrameBufferFormat frameBufferFormat,
-										YCbCr10BitPixel color,
-										bool vancEnabled=false,
-										bool twoKby1080=false,
-							 bool wideVANC=false);
+#if !defined(NTV2_DEPRECATE_13_0)
+	AJAExport NTV2_DEPRECATED_f(void Fill10BitYCbCrVideoFrame (PULWord _baseVideoAddress,
+																const NTV2Standard inStandard,
+																const NTV2FrameBufferFormat inPixelFormat,
+																const YCbCr10BitPixel inPixelColor,
+																const bool inVancEnabled = false,
+																const bool in2Kx1080 = false,
+																const bool inWideVANC = false));	///< @deprecated	Use the identical function that accepts an \c NTV2VANCMode parameter instead of two booleans.
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+/**
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
+										 const NTV2Standard inStandard,
+										 const NTV2FrameBufferFormat inPixelFormat,
+										 const YCbCr10BitPixel inPixelColor,
+										 const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
+
 AJAExport void Make8BitBlackLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make8BitWhiteLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make10BitLine(UWord* lineData, UWord Y , UWord Cb , UWord Cr,UWord numPixels=1920);
 AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
-AJAExport void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-									   NTV2Standard standard,
-									   NTV2FrameBufferFormat frameBufferFormat,
-									   YCbCrPixel color,
-									   bool vancEnabled=false,
-									   bool twoKby1080=false,
-									   bool wideVANC=false);
+#if !defined(NTV2_DEPRECATE_13_0)
+	AJAExport NTV2_DEPRECATED_f(void Fill8BitYCbCrVideoFrame (PULWord _baseVideoAddress,
+																const NTV2Standard inStandard,
+																const NTV2FrameBufferFormat inFBF,
+																const YCbCrPixel inPixelColor,
+																const bool inVancEnabled = false,
+																const bool in2Kx1080 = false,
+																const bool inWideVanc = false));	///< @deprecated	Use the identical function that accepts an \c NTV2VANCMode parameter instead of two booleans.
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
+AJAExport bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
+										const YCbCrPixel inPixelColor,  const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 AJAExport void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 									   NTV2FrameBufferFormat frameBufferFormat,
 									   YCbCrPixel color,
@@ -283,12 +298,16 @@ AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat 
 	AJAExport NTV2V2Standard	GetHdmiV2StandardFromVideoFormat (NTV2VideoFormat videoFormat);
 #endif
 
-//#if !defined (NTV2_DEPRECATE_12_6)
-	AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
-										const bool inVANCenabled = false, const bool inWideVANC = false);
-	AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat,
-										const bool inVANCenabled, const bool inWideVANC);
-//#endif	//	NTV2_DEPRECATE_12_6
+#if !defined(NTV2_DEPRECATE_13_0)
+	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
+															const NTV2FrameBufferFormat inFBFormat,
+															const bool inVANCenabled,
+															const bool inWideVANC = false));	///< @deprecated	Use the same function that accepts an \c NTV2VANCMode instead of two booleans.
+	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
+															const NTV2FrameBufferFormat inFBFormat,
+															const bool inVANCenabled,
+															const bool inWideVANC));	///< @deprecated	Use the same function that accepts an \c NTV2VANCMode instead of two booleans.
+#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 /**
 	@return		The minimum number of bytes required to store a single frame of video in the given frame buffer format
@@ -310,7 +329,9 @@ AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
 	@param[in]	inFBFormat		Specifies the frame buffer format.
 	@param[in]	inVancMode		Optionally specifies the VANC mode. Defaults to OFF (no VANC lines).
 **/
-AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,  const NTV2FrameBufferFormat inFBFormat,  const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
+AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
+									const NTV2FrameBufferFormat inFBFormat,
+									const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
 AJAExport NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat);
 AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat);
