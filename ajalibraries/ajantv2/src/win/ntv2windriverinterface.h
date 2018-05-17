@@ -66,7 +66,7 @@ public:
 									  const ULWord inRegisterMask = 0xFFFFFFFF,
 									  const ULWord inRegisterShift = 0x0);
 #if !defined(NTV2_DEPRECATE_14_3)
-	virtual inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0))
+	virtual inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0))
 	{
 		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
 	}
