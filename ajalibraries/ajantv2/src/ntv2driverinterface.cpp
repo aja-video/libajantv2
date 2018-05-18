@@ -274,7 +274,7 @@ bool CNTV2DriverInterface::CloseRemote()
 CNTV2DriverInterface & CNTV2DriverInterface::operator = (const CNTV2DriverInterface & inRHS)
 {
 	(void) inRHS;
-	assert (false && "These are not assignable");
+	NTV2_ASSERT(false && "These are not assignable");
 	return *this;
 }	//	operator =
 
@@ -282,7 +282,7 @@ CNTV2DriverInterface & CNTV2DriverInterface::operator = (const CNTV2DriverInterf
 CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy)
 {
 	(void) inObjToCopy;
-	assert (false && "These are not copyable");
+	NTV2_ASSERT(false && "These are not copyable");
 }	//	copy constructor
 
 
@@ -291,7 +291,7 @@ CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjTo
 bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord & outRegisterValue, const ULWord inRegisterMask, const ULWord inRegisterShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2ReadRegisterRemote(_sockfd,
 								_remoteHandle,
@@ -365,7 +365,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2GetDriverVersionRemote(	_sockfd,
 										_remoteHandle,
@@ -383,7 +383,7 @@ bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
 bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2WriteRegisterRemote(_sockfd,
 								_remoteHandle,
@@ -406,7 +406,7 @@ bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord register
 bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2WaitForInterruptRemote(	_sockfd,
 										_remoteHandle,
@@ -425,7 +425,7 @@ bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord 
 bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	switch(autoCircData.eCommand)
 	{
@@ -451,7 +451,7 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo, NTV2BitFileType bitFileType)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	//assert( _remoteHandle != INVALID_NUB_HANDLE);
+	//NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		return ! NTV2DriverGetBitFileInformationRemote(	_sockfd,
