@@ -144,7 +144,7 @@ void PCIDeviceNotifierCallback  (unsigned long message, void *refcon)
 void FWDeviceNotifierCallback (unsigned long message, void *refcon)
 {
 	//printf ("FWDeviceNotifierCallback - message = %d\n", message);
-	
+
 	AJAPnpImpl* pnpObj = (AJAPnpImpl*) refcon;
 	if (pnpObj == NULL)
 	{

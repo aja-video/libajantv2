@@ -14,8 +14,6 @@
 
 #include "ajabase/common/common.h"
 
-//#include "IOKit/firewire/IOFireWireFamilyCommon.h"	//	No more FireWire support
-
 
 using namespace std;
 
@@ -24,55 +22,20 @@ static const char * GetKernErrStr (const kern_return_t inError);
 
 //	DeviceNotifier-specific Logging Macros
 
-#define	HEX2(__x__)				"0x" << hex << setw (2)  << setfill ('0') << (0xFF       & uint8_t (__x__)) << dec
-#define	HEX4(__x__)				"0x" << hex << setw (4)  << setfill ('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)				"0x" << hex << setw (8)  << setfill ('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)			"0x" << hex << setw (16) << setfill ('0') <<               uint64_t(__x__)  << dec
-#define KR(_kr_)				"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr (_kr_) << ")"
-#define INSTP(_p_)				" instance=" << HEX16(uint64_t(_p_))
+#define	HEX2(__x__)				"0x" << hex << setw(2)  << setfill('0') << (0x00FF     & uint16_t(__x__)) << dec
+#define	HEX4(__x__)				"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
+#define	HEX8(__x__)				"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define	HEX16(__x__)			"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define KR(_kr_)				"kernErr=" << HEX8(_kr_) << "(" << ::GetKernErrStr(_kr_) << ")"
+#define INST(__p__)				"Ins-" << hex << setw(16) << setfill('0') << uint64_t(__p__) << dec
+#define THRD(__t__)				"Thr-" << hex << setw(16) << setfill('0') << uint64_t(__t__) << dec
 
-#if defined (_DEBUG)
-	#define	DNDB(__lvl__, __x__)	do {																										\
-										ostringstream   oss;																					\
-										pthread_t		curThrdID	(::pthread_self ());														\
-										oss << "## " << __lvl__ << ":  " << HEX16(curThrdID) << ":  " << string(__func__) << ":  " << __x__;	\
-										cerr << oss.str () << endl;																				\
-									} while (false)
-#else
-	#define	DNDB(__lvl__, __x__)	do {																										\
-										ostringstream   oss;																					\
-										pthread_t		curThrdID	(::pthread_self ());														\
-										oss << "## " << __lvl__ << ":  " << HEX16(curThrdID) << ":  " << string(__func__) << ":  " << __x__;	\
-										syslog (3, "%s\n", oss.str ().c_str ());																\
-									} while (false)
-#endif
-
-#define	DNFAIL(__x__)			DNDB ("ERROR",		__x__)
-#define	DNWARN(__x__)			DNDB ("WARNING",	__x__)
-#define	DNNOTE(__x__)			DNDB ("NOTE",		__x__)
-#if defined (_DEBUG)
-	#define	DNDBG(__x__)		DNDB ("DEBUG",		__x__)
-#else
-	#define	DNDBG(__x__)
-#endif
-
-#define	DNFAILIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												DNFAIL(__x__);									\
-										} while (false)
-
-#define	DNWARNIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												DNWARN(__x__);									\
-										} while (false)
-
-#define	DNNOTEIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												DNNOTE(__x__);									\
-										} while (false)
-
-
-static uint64_t		gErrorLogging	(0x0000000000000000);	///	Log errors? (one flag bit per UserClientCommandCode)
+#define	DNDB(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	INST(this) << ": " << THRD(::pthread_self()) << ": " << __func__ << ": " << __x__)
+#define	DNFAIL(__x__)			DNDB(AJA_DebugSeverity_Error,	__x__)
+#define	DNWARN(__x__)			DNDB(AJA_DebugSeverity_Warning,	__x__)
+#define	DNNOTE(__x__)			DNDB(AJA_DebugSeverity_Notice,	__x__)
+#define	DNINFO(__x__)			DNDB(AJA_DebugSeverity_Info,	__x__)
+#define	DNDBG(__x__)			DNDB(AJA_DebugSeverity_Debug,	__x__)
 
 
 // MARK: DeviceNotifier
@@ -120,9 +83,7 @@ void DeviceNotifier::SetCallback (DeviceClientCallback callback, void *refcon)
 
 bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in, m_deviceInterestList.size()=" << m_deviceInterestList.size()
-												<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size()
-												<< ", matchingDictionary=" << HEX16(matchingDictionary));
+	DNDBG("On entry: deviceInterestList.size=" << m_deviceInterestList.size() << ", deviceMatchList.size=" << m_deviceMatchList.size());
 
 	m_matchingDictionary = matchingDictionary;
 	
@@ -135,7 +96,7 @@ bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	// check for NULL dictionary
 	if (m_matchingDictionary == NULL)
 	{
-		DNFAIL ("NULL matchingDictionary");
+		DNFAIL("NULL matchingDictionary");
 		return false;
 	}
 	
@@ -144,7 +105,7 @@ bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	IOReturn ioReturn = ::IOMasterPort (MACH_PORT_NULL, &masterPort);
 	if (kIOReturnSuccess != ioReturn)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOMasterPort failed");
+		DNFAIL(KR(ioReturn) << " -- IOMasterPort failed");
 		return false;
 	}
 
@@ -152,7 +113,7 @@ bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	m_notificationPort = ::IONotificationPortCreate (masterPort);
 	if (0 == m_notificationPort)
 	{
-		DNFAIL ("IONotificationPortCreate failed");
+		DNFAIL("IONotificationPortCreate failed");
 		return false;
 	}
 	
@@ -173,17 +134,16 @@ bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 												reinterpret_cast<IOServiceMatchingCallback>(DeviceAddedCallback), 
 												this, 
 												&iterator);
-
 	if (kIOReturnSuccess != ioReturn)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOServiceAddMatchingNotification failed");
+		DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification failed");
 		return false;
 	}
 	
 	DeviceAddedCallback (this, iterator);
 	m_deviceMatchList.push_back(iterator);
 
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out, m_deviceInterestList.size()=" << m_deviceInterestList.size() << ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
+	DNINFO("On exit: callback installed, deviceInterestList.size=" << m_deviceInterestList.size() << ", deviceMatchList.size=" << m_deviceMatchList.size());
 	return (m_deviceInterestList.size() > 0);
 }
 
@@ -193,8 +153,8 @@ bool DeviceNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::Uninstall ()
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in, m_deviceInterestList.size()=" << m_deviceInterestList.size()
-												<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
+	DNDBG("On entry: m_deviceInterestList.size()=" << m_deviceInterestList.size()
+			<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
 	//	Release device-matching list...
 	list<io_object_t>::iterator p;
     for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); ++p)
@@ -219,7 +179,7 @@ void DeviceNotifier::Uninstall ()
 		CFRelease (m_matchingDictionary);
 		m_matchingDictionary = NULL;
 	}
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out, m_deviceInterestList.size()=" << m_deviceInterestList.size() << ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
+	DNINFO("On exit: callback removed, m_deviceInterestList.size()=" << m_deviceInterestList.size() << ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
 }
 
 
@@ -236,7 +196,6 @@ CFMutableDictionaryRef DeviceNotifier::CreateMatchingDictionary (CFStringRef dev
 																			&kCFTypeDictionaryValueCallBacks);
 	// Specify class type
 	CFDictionaryAddValue (matchingDictionary, CFSTR("IOProviderClass"), deviceDriverName);
-	
 	return matchingDictionary;
 }
 
@@ -250,9 +209,7 @@ CFMutableDictionaryRef DeviceNotifier::CreateMatchingDictionary (CFStringRef dev
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceAddedCallback (DeviceNotifier* thisObject, io_iterator_t iterator)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in");
 	thisObject->DeviceAdded (iterator);
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -261,8 +218,6 @@ void DeviceNotifier::DeviceAddedCallback (DeviceNotifier* thisObject, io_iterato
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceAdded (io_iterator_t iterator)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in");
-
 	io_object_t	service;
 	bool deviceFound = false;
 	
@@ -275,10 +230,9 @@ void DeviceNotifier::DeviceAdded (io_iterator_t iterator)
 	}
 	
 	// now notify our callback
+	DNINFO("Device added, calling DeviceClientCallback " << INST(m_clientCallback));
 	if (deviceFound && m_clientCallback)
 		(*(m_clientCallback))(kAJADeviceInitialOpen, m_refcon);
-
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -288,9 +242,7 @@ void DeviceNotifier::DeviceAdded (io_iterator_t iterator)
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceRemovedCallback (DeviceNotifier* thisObject, io_iterator_t iterator)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in");
 	thisObject->DeviceRemoved (iterator);
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -299,8 +251,6 @@ void DeviceNotifier::DeviceRemovedCallback (DeviceNotifier* thisObject, io_itera
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceRemoved (io_iterator_t iterator)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in");
-
 	io_object_t	service;
 	bool deviceFound = false;
 	
@@ -310,10 +260,9 @@ void DeviceNotifier::DeviceRemoved (io_iterator_t iterator)
 		deviceFound = true;
 
 	// now notify our callback
+	DNINFO("Device removed, calling DeviceClientCallback " << INST(m_clientCallback));
 	if (deviceFound && m_clientCallback)
 		(*(m_clientCallback))(kAJADeviceTerminate, m_refcon);
-
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -335,7 +284,7 @@ void DeviceNotifier::AddGeneralInterest (io_object_t service)
 															&notifier);
 	if (kIOReturnSuccess != ioReturn)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOServiceAddInterestNotification failed");
+		DNFAIL(KR(ioReturn) << " -- IOServiceAddInterestNotification failed");
 		return;
 	}
 	m_deviceInterestList.push_back (notifier);
@@ -348,9 +297,7 @@ void DeviceNotifier::AddGeneralInterest (io_object_t service)
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_service_t unitService, natural_t messageType, void* message)
 {
-	//DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "in");
 	thisObject->DeviceChanged (unitService, messageType, message);
-	//DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -359,13 +306,11 @@ void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_servi
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceChanged (io_service_t unitService, natural_t messageType, void* message)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "messageType=" << MessageTypeToStr(messageType) << ", message=" << HEX16(message));
-    AJA_UNUSED(unitService);
-
+    (void) unitService;
+    (void) message;
+	DNINFO(MessageTypeToStr(messageType) << ", calling DeviceClientCallback " << INST(m_clientCallback));
 	if (m_clientCallback)
 		(*(m_clientCallback))(messageType, m_refcon);	// notify client
-
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "out");
 }
 
 
@@ -398,35 +343,25 @@ string DeviceNotifier::MessageTypeToStr (const natural_t messageType)
 		case kIOMessageSystemWillSleep:				oss << "kIOMessageSystemWillSleep";				break;
 		case kIOMessageSystemWillNotSleep:			oss << "kIOMessageSystemWillNotSleep";			break;
 		case kIOMessageSystemHasPoweredOn:			oss << "kIOMessageSystemHasPoweredOn";			break;
-	//	case kIOFWMessageServiceIsRequestingClose:	oss << "kIOFWMessageServiceIsRequestingClose";	break;	//	No more FireWire support
-	//	case kIOFWMessageTopologyChanged:			oss << "kIOFWMessageTopologyChanged";			break;	//	No more FireWire support
-		default:									oss << "0x" << hex << setw(4) << setfill('0') << messageType;	break;
+		default:									oss << "msgType=0x" << hex << setw(4) << setfill('0') << messageType;	break;
 	}
-	return oss.str ();
+	return oss.str();
 }
-
-
-void DeviceNotifier::SetDebugLogging (const uint64_t inWhichUserClientCommands)
-{
-	gErrorLogging = inWhichUserClientCommands;
-	cerr << "DeviceNotifier::SetDebugLogging 0x" << hex << gErrorLogging << dec << endl;
-}
-
 
 // MARK: KonaNotifier
 
 
 bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 {
-	DNNOTEIF (kMacDeviceDebugLog_EnterFunctions, "m_deviceInterestList.size()=" << m_deviceInterestList.size()
-												<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size()
-												<< ", matchingDictionary=" << HEX16(matchingDictionary) << " (unused)");
+	(void) matchingDictionary;
+	DNDBG("On entry: deviceInterestList.size=" << m_deviceInterestList.size() << ", deviceMatchList.size=" << m_deviceMatchList.size());
+
 	// Retrieve the IOKit's master port so a notification port can be created
 	mach_port_t masterPort;
 	IOReturn ioReturn = ::IOMasterPort (MACH_PORT_NULL, &masterPort);
 	if (kIOReturnSuccess != ioReturn)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOMasterPort failed");
+		DNFAIL(KR(ioReturn) << " -- IOMasterPort failed");
 		return false;
 	}
 
@@ -434,7 +369,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	m_notificationPort = ::IONotificationPortCreate (masterPort);
 	if (0 == m_notificationPort)
 	{
-		DNFAIL ("IONotificationPortCreate failed");
+		DNFAIL("IONotificationPortCreate failed");
 		return false;
 	}
 	
@@ -459,7 +394,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 
 	if (ioReturn != kIOReturnSuccess)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOMatchedNotification' failed");
+		DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOMatchedNotification' failed");
 		return false;
 	}
 
@@ -472,7 +407,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 													&notifyIterator_terminated);
 	if (ioReturn != kIOReturnSuccess)
 	{
-		DNFAIL (KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOTerminatedNotification' failed");
+		DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOTerminatedNotification' failed");
 		return false;
 	}
 
@@ -482,92 +417,68 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	DeviceRemovedCallback (this, notifyIterator_terminated);
 	m_deviceMatchList.push_back (notifyIterator_terminated);
 
-	DNNOTEIF (kMacDeviceDebugLog_ExitFunctions, "m_deviceInterestList.size()=" << m_deviceInterestList.size() << ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
+	DNINFO("On exit: callback installed, deviceInterestList.size=" << m_deviceInterestList.size() << ", deviceMatchList.size=" << m_deviceMatchList.size());
 	return m_deviceInterestList.size() > 0;	//	**MrBill**	SHOULDN'T THIS RETURN m_deviceMatchList.size() > 0	????
 
 }	//	KonaNotifier::Install
 
 
-//
-//	Device Notifier Environment Variable Reader:
-//
-class DNEnvVarReader
-{
-	public:
-		DNEnvVarReader ()
-		{
-			//	To allow some logging flexibility at runtime... set the 'NTV2DEVICENOTIFYLOG' environment variable to a
-			//	hex string value '0x0000000000000000' that will be interpreted as a uint64_t...
-			const char *	pVarName("NTV2DEVICENOTIFYLOG");
-			const string	sEnvLog	(::getenv (pVarName) ? ::getenv (pVarName) : "");
-			if (sEnvLog.length () == 18 && sEnvLog.find ("0x") == 0)
-			{
-				uint64_t			logMask (0);
-				std::stringstream	ss;
-				ss << hex << sEnvLog.substr (2, 16);
-				ss >> logMask;
-				DeviceNotifier::SetDebugLogging (logMask);
-			}
-		}
-};	//	DNEnvVarReader
-
-static DNEnvVarReader	gDNEnvVarReader;
-
 static const char * GetKernErrStr (const kern_return_t inError)
 {
 	switch (inError)
 	{
-		case kIOReturnError:			return "general error";
-		case kIOReturnNoMemory:			return "can't allocate memory";
-		case kIOReturnNoResources:		return "resource shortage";
-		case kIOReturnIPCError:			return "error during IPC";
-		case kIOReturnNoDevice:			return "no such device";
-		case kIOReturnNotPrivileged:	return "privilege violation";
-		case kIOReturnBadArgument:		return "invalid argument";
-		case kIOReturnLockedRead:		return "device read locked";
-		case kIOReturnLockedWrite:		return "device write locked";
-		case kIOReturnExclusiveAccess:	return "exclusive access and device already open";
-		case kIOReturnBadMessageID:		return "sent/received messages had different msg_id";
-		case kIOReturnUnsupported:		return "unsupported function";
-		case kIOReturnVMError:			return "misc. VM failure";
-		case kIOReturnInternalError:	return "internal error";
-		case kIOReturnIOError:			return "General I/O error";
-		case kIOReturnCannotLock:		return "can't acquire lock";
-		case kIOReturnNotOpen:			return "device not open";
-		case kIOReturnNotReadable:		return "read not supported";
-		case kIOReturnNotWritable:		return "write not supported";
-		case kIOReturnNotAligned:		return "alignment error";
-		case kIOReturnBadMedia:			return "Media Error";
-		case kIOReturnStillOpen:		return "device(s) still open";
-		case kIOReturnRLDError:			return "rld failure";
-		case kIOReturnDMAError:			return "DMA failure";
-		case kIOReturnBusy:				return "Device Busy";
-		case kIOReturnTimeout:			return "I/O Timeout";
-		case kIOReturnOffline:			return "device offline";
-		case kIOReturnNotReady:			return "not ready";
-		case kIOReturnNotAttached:		return "device not attached";
-		case kIOReturnNoChannels:		return "no DMA channels left";
-		case kIOReturnNoSpace:			return "no space for data";
-		case kIOReturnPortExists:		return "port already exists";
-		case kIOReturnCannotWire:		return "can't wire down physical memory";
-		case kIOReturnNoInterrupt:		return "no interrupt attached";
-		case kIOReturnNoFrames:			return "no DMA frames enqueued";
-		case kIOReturnMessageTooLarge:	return "oversized msg received on interrupt port";
-		case kIOReturnNotPermitted:		return "not permitted";
-		case kIOReturnNoPower:			return "no power to device";
-		case kIOReturnNoMedia:			return "media not present";
-		case kIOReturnUnformattedMedia:	return "media not formatted";
-		case kIOReturnUnsupportedMode:	return "no such mode";
-		case kIOReturnUnderrun:			return "data underrun";
-		case kIOReturnOverrun:			return "data overrun";
-		case kIOReturnDeviceError:		return "the device is not working properly!";
-		case kIOReturnNoCompletion:		return "a completion routine is required";
-		case kIOReturnAborted:			return "operation aborted";
-		case kIOReturnNoBandwidth:		return "bus bandwidth would be exceeded";
-		case kIOReturnNotResponding:	return "device not responding";
-		case kIOReturnIsoTooOld:		return "isochronous I/O request for distant past!";
-		case kIOReturnIsoTooNew:		return "isochronous I/O request for distant future";
-		case kIOReturnNotFound:			return "data was not found";
-		default:						return "";
+		case kIOReturnError:			return "kIOReturnError";
+		case kIOReturnNoMemory:			return "kIOReturnNoMemory";
+		case kIOReturnNoResources:		return "kIOReturnNoResources";
+		case kIOReturnIPCError:			return "kIOReturnIPCError";
+		case kIOReturnNoDevice:			return "kIOReturnNoDevice";
+		case kIOReturnNotPrivileged:	return "kIOReturnNotPrivileged";
+		case kIOReturnBadArgument:		return "kIOReturnBadArgument";
+		case kIOReturnLockedRead:		return "kIOReturnLockedRead";
+		case kIOReturnLockedWrite:		return "kIOReturnLockedWrite";
+		case kIOReturnExclusiveAccess:	return "kIOReturnExclusiveAccess";
+		case kIOReturnBadMessageID:		return "kIOReturnBadMessageID";
+		case kIOReturnUnsupported:		return "kIOReturnUnsupported";
+		case kIOReturnVMError:			return "kIOReturnVMError";
+		case kIOReturnInternalError:	return "kIOReturnInternalError";
+		case kIOReturnIOError:			return "kIOReturnIOError";
+		case kIOReturnCannotLock:		return "kIOReturnCannotLock";
+		case kIOReturnNotOpen:			return "kIOReturnNotOpen";
+		case kIOReturnNotReadable:		return "kIOReturnNotReadable";
+		case kIOReturnNotWritable:		return "kIOReturnNotWritable";
+		case kIOReturnNotAligned:		return "kIOReturnNotAligned";
+		case kIOReturnBadMedia:			return "kIOReturnBadMedia";
+		case kIOReturnStillOpen:		return "kIOReturnStillOpen";
+		case kIOReturnRLDError:			return "kIOReturnRLDError";
+		case kIOReturnDMAError:			return "kIOReturnDMAError";
+		case kIOReturnBusy:				return "kIOReturnBusy";
+		case kIOReturnTimeout:			return "kIOReturnTimeout";
+		case kIOReturnOffline:			return "kIOReturnOffline";
+		case kIOReturnNotReady:			return "kIOReturnNotReady";
+		case kIOReturnNotAttached:		return "kIOReturnNotAttached";
+		case kIOReturnNoChannels:		return "kIOReturnNoChannels";
+		case kIOReturnNoSpace:			return "kIOReturnNoSpace";
+		case kIOReturnPortExists:		return "kIOReturnPortExists";
+		case kIOReturnCannotWire:		return "kIOReturnCannotWire";
+		case kIOReturnNoInterrupt:		return "kIOReturnNoInterrupt";
+		case kIOReturnNoFrames:			return "kIOReturnNoFrames";
+		case kIOReturnMessageTooLarge:	return "kIOReturnMessageTooLarge";
+		case kIOReturnNotPermitted:		return "kIOReturnNotPermitted";
+		case kIOReturnNoPower:			return "kIOReturnNoPower";
+		case kIOReturnNoMedia:			return "kIOReturnNoMedia";
+		case kIOReturnUnformattedMedia:	return "kIOReturnUnformattedMedia";
+		case kIOReturnUnsupportedMode:	return "kIOReturnUnsupportedMode";
+		case kIOReturnUnderrun:			return "kIOReturnUnderrun";
+		case kIOReturnOverrun:			return "kIOReturnOverrun";
+		case kIOReturnDeviceError:		return "kIOReturnDeviceError";
+		case kIOReturnNoCompletion:		return "kIOReturnNoCompletion";
+		case kIOReturnAborted:			return "kIOReturnAborted";
+		case kIOReturnNoBandwidth:		return "kIOReturnNoBandwidth";
+		case kIOReturnNotResponding:	return "kIOReturnNotResponding";
+		case kIOReturnIsoTooOld:		return "kIOReturnIsoTooOld";
+		case kIOReturnIsoTooNew:		return "kIOReturnIsoTooNew";
+		case kIOReturnNotFound:			return "kIOReturnNotFound";
+		default:						break;
 	}
+	return "";
 }	//	GetKernErrStr
