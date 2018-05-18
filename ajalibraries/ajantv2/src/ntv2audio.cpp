@@ -1072,7 +1072,7 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 	else
 	{
 		ULWord	encoding	(0);
-		result = CNTV2DriverInterface::ReadRegister (kRegAudioOutputSourceMap, encoding, kRegMaskHDMIOutAudioSource, kRegShiftHDMIOutAudioSource);
+		result = ReadRegister (kRegAudioOutputSourceMap, encoding, kRegMaskHDMIOutAudioSource, kRegShiftHDMIOutAudioSource);
 		if (result)
 		{
 			if ((encoding & 0x3) == static_cast <ULWord> (NTV2_AudioChannel1_4))
