@@ -1620,6 +1620,38 @@ bool CNTV2Config2022::Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannel
     return true;
 }
 
+bool CNTV2Config2022::SetIPServicesControl(const bool enable, const bool forceReconfig)
+{
+    uint32_t val = 0;
+    if (enable)
+        val |= BIT(0);
+
+    if (forceReconfig)
+        val |= BIT(0);
+
+    mDevice.WriteRegister(SAREK_REGS + kRegSarekServices, val);
+
+    return true;
+}
+
+bool CNTV2Config2022::GetIPServicesControl(bool & enable, bool & forceReconfig)
+{
+    uint32_t val;
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekServices, val);
+
+    if (val & BIT(0))
+        enable = true;
+    else
+        enable = false;
+
+    if (val & BIT(1))
+        forceReconfig = true;
+    else
+        forceReconfig = false;
+
+    return true;
+}
+
 NTV2Stream CNTV2Config2022::VideoChannelToStream(const NTV2Channel channel)
 {
     NTV2Stream stream;
