@@ -9,6 +9,7 @@
 //	Includes
 #include "ajabase/common/types.h"
 #include "ajabase/common/options_popt.h"
+#include "ajabase/system/debug.h"
 #include "ntv2outputtestpattern.h"
 #include <iostream>
 #include <iomanip>
@@ -26,6 +27,7 @@ int main (int argc, const char ** argv)
 	uint32_t	channelNumber		(1);					//	Which channel to use
 	uint32_t	testPatternIndex	(0);					//	Which test pattern to display
 	poptContext	optionsContext;								//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption	userOptionsTable []	=

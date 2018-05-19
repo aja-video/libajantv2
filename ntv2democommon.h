@@ -13,6 +13,7 @@
 #include "stdint.h"
 #include "ntv2rp188.h"
 #include "ajabase/common/timecodeburn.h"
+#include "ajabase/system/debug.h"
 #include <algorithm>
 #include <string>
 

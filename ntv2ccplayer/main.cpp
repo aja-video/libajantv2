@@ -118,6 +118,7 @@ int main (int argc, const char ** argv)
 	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
 	StringList			pathList;							//	List of text files (paths) to "play"
 	poptContext			optionsContext; 					//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =

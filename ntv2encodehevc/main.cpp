@@ -168,7 +168,8 @@ int main (int argc, const char ** argv)
     bool                    tsiMode			(false);                            //  Two sample interleave mode
     poptContext             optionsContext;                                     //	Context for parsing command line arguments
     AVHevcStatus            inputStatus;
-	
+
+	AJADebug::Open();
     gNumCodecPresets = sizeof(kCodecPreset)/sizeof(M31VideoPreset);
     gNumCodecFormats = sizeof(kCodecFormat)/sizeof(NTV2FrameBufferFormat);
 

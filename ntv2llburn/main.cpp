@@ -133,6 +133,7 @@ int main (int argc, const char ** argv)
 	NTV2InputSource	vidSource		(NTV2_INPUTSOURCE_SDI1);	//	Video source
 	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);		//	Time code source
 	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =

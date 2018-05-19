@@ -12,6 +12,7 @@
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
 #include "ntv2enumerateboards.h"
+#include "ajabase/system/debug.h"
 #include <iostream>
 #include <iomanip>
 
@@ -25,6 +26,8 @@ int main (int argc, const char ** argv)
 {
 	(void) argc;
 	(void) argv;
+	AJADebug::Open();
+
 	//	Create an instance of a class that can scan the hardware for AJA devices...
 	NTV2EnumerateDevices	deviceEnumerator;
 	const size_t			deviceCount	(deviceEnumerator.GetDeviceCount ());

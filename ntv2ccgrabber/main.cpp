@@ -74,6 +74,7 @@ int main (int argc, const char ** argv)
 	int				bWithAudio		(0);					//	Grab audio?
 	char *			pCaptionChannel	(NULL);					//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
 	poptContext		optionsContext;							//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	::setlocale (LC_ALL, "");	//	Might have to emit UTF-8 Unicode
 

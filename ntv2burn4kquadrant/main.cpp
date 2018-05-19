@@ -37,6 +37,7 @@ int main (int argc, const char ** argv)
 	int			noAudio				(0);					//	Disable audio?
 	int			useRGB				(0);					//	Use 10-bit RGB instead of 8-bit YCbCr?
 	poptContext	optionsContext;								//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =

@@ -39,6 +39,7 @@ int main (int argc, const char ** argv)
 	int				doMultiFormat	(0);					//	Enable multi-format
 	int				doTsiRouting	(0);
 	poptContext		optionsContext; 						//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =

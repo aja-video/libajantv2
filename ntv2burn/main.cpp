@@ -147,6 +147,7 @@ int main (int argc, const char ** argv)
 	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
 	int				doAnc			(0);						//	Use the Anc Extractor/Inserter
 	poptContext		optionsContext;								//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =

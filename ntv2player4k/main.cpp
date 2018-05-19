@@ -42,6 +42,7 @@ int main (int argc, const char ** argv)
 	int				doTsiRouting	(0);				//  Route the output through the Tsi Muxes
 	int				hdrType			(0);
 	poptContext		optionsContext; 					//	Context for parsing command line arguments
+	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
