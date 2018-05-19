@@ -1140,126 +1140,70 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		if (config == NULL)
 		{
 			config = new CNTV2Config2022(*mCard);
+            config->SetIPServicesControl(true, false);
+
 		}
-		
-        // KonaIP network configuration
-        string hwIp,hwNet,hwGate;       // current hardware config
 
-		// On J2K IP we just use the top SFP 
-        rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
-        if (rv)
-        {
-            uint32_t ip, net, gate;
-            ip   = inet_addr(hwIp.c_str());
-            net  = inet_addr(hwNet.c_str());
-            gate = inet_addr(hwGate.c_str());
+        bool    ipServiceEnable;
+        bool    ipServiceForceConfig;
 
-            if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
+        config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+        if (ipServiceEnable)
+        {		
+            // KonaIP network configuration
+            string hwIp,hwNet,hwGate;       // current hardware config
+
+            // On J2K IP we just use the top SFP 
+            rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
+            if (rv)
             {
-                SetNetConfig(config, SFP_1);
-            }
-        }
-        else
-            printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
-		
-		// KonaIP input configurations
-		// Only config RX for devices that have RX channels
-		if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-			(mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
-		{
-            if (IsValidConfig(mRx2022Config1, false))
-            {
-                rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1, rxHwConfig);
-                rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1, enableChCard);
-                mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
-                if (rv && rv2)
+                uint32_t ip, net, gate;
+                ip   = inet_addr(hwIp.c_str());
+                net  = inet_addr(hwNet.c_str());
+                gate = inet_addr(hwGate.c_str());
+
+                if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
                 {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
+                    SetNetConfig(config, SFP_1);
+                }
+            }
+            else
+                printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
+            
+            // KonaIP input configurations
+            // Only config RX for devices that have RX channels
+            if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+                (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
+            {
+                if (IsValidConfig(mRx2022Config1, false))
+                {
+                    rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1, rxHwConfig);
+                    rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1, enableChCard);
+                    mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
+                    if (rv && rv2)
                     {
-                        config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                        
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetRxConfig(config, NTV2_CHANNEL1, false);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                // configure the decoder everytime we configure the RX channel
-                                printf("set j2kDecoder ch 1\n");
-                                mRx2022J2kConfig1.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
-                                mRx2022J2kConfig1.programNumber = 1;
-                                mRx2022J2kConfig1.programPID = 1;
-                                mRx2022J2kConfig1.audioNumber = 1;
-                                config->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
-                                
-                                // enable the channel
-                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                            
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(rxHwConfig, mRx2022Config1, false))
+                        // if the channel enable toggled
+                        if (enableChCard != (enableChServices ? true : false))
                         {
                             config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                            SetRxConfig(config, NTV2_CHANNEL1, false);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                // configure the decoder everytime we configure the RX channel
-                                printf("set j2kDecoder ch 1\n");
-                                mRx2022J2kConfig1.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
-                                mRx2022J2kConfig1.programNumber = 1;
-                                mRx2022J2kConfig1.programPID = 1;
-                                mRx2022J2kConfig1.audioNumber = 1;
-                                config->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
-                                
-                                // enable the channel
-                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                }
-                else printf("rxConfig ch 1 read failed\n");
-            }
-            else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
-
-
-			if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
-			{
-                if (IsValidConfig(mRx2022Config2, false))
-                {
-                    rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
-                    rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
-                    mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
-                    if (rv && rv2)
-                    {
-                        // if the channel enable toggled
-                        if (enableChCard != (enableChServices ? true : false))
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL2, false);
                             
                             // if the channel is enabled
                             if (enableChServices)
                             {
-                                SetRxConfig(config, NTV2_CHANNEL2, false);
-                                GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                                SetRxConfig(config, NTV2_CHANNEL1, false);
+                                GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
                                 if (!configErr)
                                 {
                                     // configure the decoder everytime we configure the RX channel
-                                    printf("set j2kDecoder ch 2\n");
-                                    mRx2022J2kConfig2.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
-                                    mRx2022J2kConfig2.programNumber = 1;
-                                    mRx2022J2kConfig2.programPID = 1;
-                                    mRx2022J2kConfig2.audioNumber = 1;
-                                    config->SetJ2KDecoderConfiguration(mRx2022J2kConfig2);
+                                    printf("set j2kDecoder ch 1\n");
+                                    mRx2022J2kConfig1.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
+                                    mRx2022J2kConfig1.programNumber = 1;
+                                    mRx2022J2kConfig1.programPID = 1;
+                                    mRx2022J2kConfig1.audioNumber = 1;
+                                    config->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
                                     
                                     // enable the channel
-                                    config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                                    config->SetRxChannelEnable(NTV2_CHANNEL1, true);
                                 }
                                 
                             }
@@ -1267,181 +1211,246 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
                         // if the channel is already enabled then check to see if a configuration has changed
                         else if (enableChServices)
                         {
-                            if (NotEqual(rxHwConfig, mRx2022Config2, false))
+                            if (NotEqual(rxHwConfig, mRx2022Config1, false))
+                            {
+                                config->SetRxChannelEnable(NTV2_CHANNEL1, false);
+                                SetRxConfig(config, NTV2_CHANNEL1, false);
+                                GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                                if (!configErr)
+                                {
+                                    // configure the decoder everytime we configure the RX channel
+                                    printf("set j2kDecoder ch 1\n");
+                                    mRx2022J2kConfig1.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
+                                    mRx2022J2kConfig1.programNumber = 1;
+                                    mRx2022J2kConfig1.programPID = 1;
+                                    mRx2022J2kConfig1.audioNumber = 1;
+                                    config->SetJ2KDecoderConfiguration(mRx2022J2kConfig1);
+                                    
+                                    // enable the channel
+                                    config->SetRxChannelEnable(NTV2_CHANNEL1, true);
+                                }
+                            }
+                        }
+                    }
+                    else printf("rxConfig ch 1 read failed\n");
+                }
+                else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
+
+
+                if (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K)
+                {
+                    if (IsValidConfig(mRx2022Config2, false))
+                    {
+                        rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
+                        rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
+                        mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
+                        if (rv && rv2)
+                        {
+                            // if the channel enable toggled
+                            if (enableChCard != (enableChServices ? true : false))
                             {
                                 config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                                SetRxConfig(config, NTV2_CHANNEL2, false);
-                                GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                                if (!configErr)
+                                
+                                // if the channel is enabled
+                                if (enableChServices)
                                 {
-                                    // configure the decoder everytime we configure the RX channel
-                                    printf("set j2kDecoder ch 2\n");
-                                    mRx2022J2kConfig2.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
-                                    mRx2022J2kConfig2.programNumber = 1;
-                                    mRx2022J2kConfig2.programPID = 1;
-                                    mRx2022J2kConfig2.audioNumber = 1;
-                                    config->SetJ2KDecoderConfiguration(mRx2022J2kConfig2);
+                                    SetRxConfig(config, NTV2_CHANNEL2, false);
+                                    GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                                    if (!configErr)
+                                    {
+                                        // configure the decoder everytime we configure the RX channel
+                                        printf("set j2kDecoder ch 2\n");
+                                        mRx2022J2kConfig2.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
+                                        mRx2022J2kConfig2.programNumber = 1;
+                                        mRx2022J2kConfig2.programPID = 1;
+                                        mRx2022J2kConfig2.audioNumber = 1;
+                                        config->SetJ2KDecoderConfiguration(mRx2022J2kConfig2);
+                                        
+                                        // enable the channel
+                                        config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                                    }
                                     
-                                    // enable the channel
-                                    config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                                }
+                            }
+                            // if the channel is already enabled then check to see if a configuration has changed
+                            else if (enableChServices)
+                            {
+                                if (NotEqual(rxHwConfig, mRx2022Config2, false))
+                                {
+                                    config->SetRxChannelEnable(NTV2_CHANNEL2, false);
+                                    SetRxConfig(config, NTV2_CHANNEL2, false);
+                                    GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                                    if (!configErr)
+                                    {
+                                        // configure the decoder everytime we configure the RX channel
+                                        printf("set j2kDecoder ch 2\n");
+                                        mRx2022J2kConfig2.selectionMode = j2kDecoderConfig::eProgSel_AutoFirstProg;
+                                        mRx2022J2kConfig2.programNumber = 1;
+                                        mRx2022J2kConfig2.programPID = 1;
+                                        mRx2022J2kConfig2.audioNumber = 1;
+                                        config->SetJ2KDecoderConfiguration(mRx2022J2kConfig2);
+                                        
+                                        // enable the channel
+                                        config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                                    }
                                 }
                             }
                         }
+                        else printf("rxConfig ch 2 read failed\n");
                     }
-                    else printf("rxConfig ch 2 read failed\n");
+                    else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
                 }
-                else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
             }
-		}
-		
-		// KonaIP output configurations
-		// Only config TX for devices that have TX channels
-		if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-			(mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
-		{
-            if (IsValidConfig(mTx2022Config3, false))
+            
+            // KonaIP output configurations
+            // Only config TX for devices that have TX channels
+            if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+                (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K))
             {
-                rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL1, txHwConfig);
-                rv2 = config->GetTxChannelEnable(NTV2_CHANNEL1, enableChCard);
-                GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
-                mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
-                if (rv && rv2)
+                if (IsValidConfig(mTx2022Config3, false))
                 {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
-                    {
-                        config->SetTxChannelEnable(NTV2_CHANNEL1, false);
-                        
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetTxConfig(config, NTV2_CHANNEL1, false);
-                            GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(txHwConfig, mTx2022Config3, false) || configErr)
-                        {
-                            config->SetTxChannelEnable(NTV2_CHANNEL1, false);
-                            SetTxConfig(config, NTV2_CHANNEL1, false);
-                            GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                }
-                else printf("txConfig ch 1 read failed\n");
-                
-                // Configure j2kEncoder for ch1
-                rv  = config->GetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderConfig);
-                if (rv)
-                {
-                    // current video format
-                    mTx2022J2kConfig1.videoFormat = mFb1VideoFormat;
-                    
-                    // current bit depth
-                    mTx2022J2kConfig1.bitDepth = 10;
-                    if (Is8BitFrameBufferFormat(mFb1Format))
-                    {
-                        mTx2022J2kConfig1.bitDepth = 8;
-                    }
-                    // Force this, other settings dont work
-                    mTx2022J2kConfig1.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
-                    
-                    
-                    //printf("j2kEncoder ch 1 config read\n");
-                    //PrintEncoderConfig(mTx2022J2kConfig1, encoderConfig);
-                    if (encoderConfig != mTx2022J2kConfig1)
-                    {
-                        printf("set j2kEncoder ch 1\n");
-                        //PrintEncoderConfig(mTx2022J2kConfig1, encoderConfig);
-                        config->SetJ2KEncoderConfiguration(NTV2_CHANNEL1, mTx2022J2kConfig1);
-                    }
-                }
-                else printf("j2kEncoder ch 1 read failed\n");
-            }
-            else SetIPError(NTV2_CHANNEL1,kErrTxConfig,NTV2IpErrInvalidConfig);
-
-			
-			if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
-			{
-                if (IsValidConfig(mTx2022Config4, false))
-                {
-                    rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL2, txHwConfig);
-                    rv2 = config->GetTxChannelEnable(NTV2_CHANNEL2, enableChCard);
-                    GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
-                    mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
+                    rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL1, txHwConfig);
+                    rv2 = config->GetTxChannelEnable(NTV2_CHANNEL1, enableChCard);
+                    GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
+                    mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
                     if (rv && rv2)
                     {
                         // if the channel enable toggled
                         if (enableChCard != (enableChServices ? true : false))
                         {
-                            config->SetTxChannelEnable(NTV2_CHANNEL2, false);
+                            config->SetTxChannelEnable(NTV2_CHANNEL1, false);
                             
                             // if the channel is enabled
                             if (enableChServices)
                             {
-                                SetTxConfig(config, NTV2_CHANNEL2, false);
-                                GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
+                                SetTxConfig(config, NTV2_CHANNEL1, false);
+                                GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
                                 if (!configErr)
                                 {
-                                    config->SetTxChannelEnable(NTV2_CHANNEL2, true);
+                                    config->SetTxChannelEnable(NTV2_CHANNEL1, true);
                                 }
                             }
                         }
                         // if the channel is already enabled then check to see if a configuration has changed
                         else if (enableChServices)
                         {
-                            if (NotEqual(txHwConfig, mTx2022Config4, false) || configErr)
+                            if (NotEqual(txHwConfig, mTx2022Config3, false) || configErr)
                             {
-                                config->SetTxChannelEnable(NTV2_CHANNEL2, false);
-                                SetTxConfig(config, NTV2_CHANNEL2, false);
-                                GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
+                                config->SetTxChannelEnable(NTV2_CHANNEL1, false);
+                                SetTxConfig(config, NTV2_CHANNEL1, false);
+                                GetIPError(NTV2_CHANNEL1,kErrTxConfig,configErr);
                                 if (!configErr)
                                 {
-                                    config->SetTxChannelEnable(NTV2_CHANNEL2, true);
+                                    config->SetTxChannelEnable(NTV2_CHANNEL1, true);
                                 }
                             }
                         }
                     }
-                    else printf("txConfig ch 2 read failed\n");
+                    else printf("txConfig ch 1 read failed\n");
                     
-                    // Configure j2kEncoder for ch2
-                    rv  = config->GetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderConfig);
+                    // Configure j2kEncoder for ch1
+                    rv  = config->GetJ2KEncoderConfiguration(NTV2_CHANNEL1, encoderConfig);
                     if (rv)
                     {
                         // current video format
-                        mTx2022J2kConfig2.videoFormat = mFb1VideoFormat;
+                        mTx2022J2kConfig1.videoFormat = mFb1VideoFormat;
                         
                         // current bit depth
-                        mTx2022J2kConfig2.bitDepth = 10;
+                        mTx2022J2kConfig1.bitDepth = 10;
                         if (Is8BitFrameBufferFormat(mFb1Format))
                         {
-                            mTx2022J2kConfig2.bitDepth = 8;
+                            mTx2022J2kConfig1.bitDepth = 8;
                         }
                         // Force this, other settings dont work
-                        mTx2022J2kConfig2.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
+                        mTx2022J2kConfig1.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
                         
-                        //printf("j2kEncoder ch 2 config read\n");
-                        //PrintEncoderConfig(mTx2022J2kConfig2, encoderConfig);
-                        if (encoderConfig != mTx2022J2kConfig2)
+                        
+                        //printf("j2kEncoder ch 1 config read\n");
+                        //PrintEncoderConfig(mTx2022J2kConfig1, encoderConfig);
+                        if (encoderConfig != mTx2022J2kConfig1)
                         {
-                            printf("set j2kEncoder ch 2\n");
-                            //PrintEncoderConfig(mTx2022J2kConfig2, encoderConfig);
-                            config->SetJ2KEncoderConfiguration(NTV2_CHANNEL2, mTx2022J2kConfig2);
+                            printf("set j2kEncoder ch 1\n");
+                            //PrintEncoderConfig(mTx2022J2kConfig1, encoderConfig);
+                            config->SetJ2KEncoderConfiguration(NTV2_CHANNEL1, mTx2022J2kConfig1);
                         }
                     }
-                    else printf("j2kEncoder ch 2 read failed\n");
+                    else printf("j2kEncoder ch 1 read failed\n");
                 }
-                else SetIPError(NTV2_CHANNEL2,kErrTxConfig,NTV2IpErrInvalidConfig);
+                else SetIPError(NTV2_CHANNEL1,kErrTxConfig,NTV2IpErrInvalidConfig);
+
+                
+                if (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K)
+                {
+                    if (IsValidConfig(mTx2022Config4, false))
+                    {
+                        rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL2, txHwConfig);
+                        rv2 = config->GetTxChannelEnable(NTV2_CHANNEL2, enableChCard);
+                        GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
+                        mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
+                        if (rv && rv2)
+                        {
+                            // if the channel enable toggled
+                            if (enableChCard != (enableChServices ? true : false))
+                            {
+                                config->SetTxChannelEnable(NTV2_CHANNEL2, false);
+                                
+                                // if the channel is enabled
+                                if (enableChServices)
+                                {
+                                    SetTxConfig(config, NTV2_CHANNEL2, false);
+                                    GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
+                                    if (!configErr)
+                                    {
+                                        config->SetTxChannelEnable(NTV2_CHANNEL2, true);
+                                    }
+                                }
+                            }
+                            // if the channel is already enabled then check to see if a configuration has changed
+                            else if (enableChServices)
+                            {
+                                if (NotEqual(txHwConfig, mTx2022Config4, false) || configErr)
+                                {
+                                    config->SetTxChannelEnable(NTV2_CHANNEL2, false);
+                                    SetTxConfig(config, NTV2_CHANNEL2, false);
+                                    GetIPError(NTV2_CHANNEL2,kErrTxConfig,configErr);
+                                    if (!configErr)
+                                    {
+                                        config->SetTxChannelEnable(NTV2_CHANNEL2, true);
+                                    }
+                                }
+                            }
+                        }
+                        else printf("txConfig ch 2 read failed\n");
+                        
+                        // Configure j2kEncoder for ch2
+                        rv  = config->GetJ2KEncoderConfiguration(NTV2_CHANNEL2, encoderConfig);
+                        if (rv)
+                        {
+                            // current video format
+                            mTx2022J2kConfig2.videoFormat = mFb1VideoFormat;
+                            
+                            // current bit depth
+                            mTx2022J2kConfig2.bitDepth = 10;
+                            if (Is8BitFrameBufferFormat(mFb1Format))
+                            {
+                                mTx2022J2kConfig2.bitDepth = 8;
+                            }
+                            // Force this, other settings dont work
+                            mTx2022J2kConfig2.chromaSubsamp =  kJ2KChromaSubSamp_422_Standard;
+                            
+                            //printf("j2kEncoder ch 2 config read\n");
+                            //PrintEncoderConfig(mTx2022J2kConfig2, encoderConfig);
+                            if (encoderConfig != mTx2022J2kConfig2)
+                            {
+                                printf("set j2kEncoder ch 2\n");
+                                //PrintEncoderConfig(mTx2022J2kConfig2, encoderConfig);
+                                config->SetJ2KEncoderConfiguration(NTV2_CHANNEL2, mTx2022J2kConfig2);
+                            }
+                        }
+                        else printf("j2kEncoder ch 2 read failed\n");
+                    }
+                    else SetIPError(NTV2_CHANNEL2,kErrTxConfig,NTV2IpErrInvalidConfig);
+                }
             }
 		}
     }
