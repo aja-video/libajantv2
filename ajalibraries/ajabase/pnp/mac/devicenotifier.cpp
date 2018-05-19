@@ -30,7 +30,7 @@ static const char * GetKernErrStr (const kern_return_t inError);
 #define INST(__p__)				"Ins-" << hex << setw(16) << setfill('0') << uint64_t(__p__) << dec
 #define THRD(__t__)				"Thr-" << hex << setw(16) << setfill('0') << uint64_t(__t__) << dec
 
-#define	DNDB(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	INST(this) << ": " << THRD(::pthread_self()) << ": " << __func__ << ": " << __x__)
+#define	DNDB(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	INST(this) << ": " << __func__ << ": " << __x__)
 #define	DNFAIL(__x__)			DNDB(AJA_DebugSeverity_Error,	__x__)
 #define	DNWARN(__x__)			DNDB(AJA_DebugSeverity_Warning,	__x__)
 #define	DNNOTE(__x__)			DNDB(AJA_DebugSeverity_Notice,	__x__)
