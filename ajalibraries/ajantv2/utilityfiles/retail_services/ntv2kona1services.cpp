@@ -438,6 +438,24 @@ void Kona1Services::SetDeviceXPointCapture ()
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputFormatSelect != NTV2_RGBSelect));
 
+    if(mCard->GetVPIDValidA(NTV2_CHANNEL1))
+    {
+        ULWord vpida = 0, vpidb	= 0;
+        mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+        //debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
+
+        CNTV2VPID parser;
+        parser.SetVPID(vpida);
+        VPIDSampling sample = parser.GetSampling();
+        if (sample == VPIDSampling_YUV_422)
+        {
+            inputFormatSelect = NTV2_YUVSelect;
+        }
+        else
+        {
+            inputFormatSelect = NTV2_RGBSelect;
+        }
+    }
 
 	// Dual Link In 1
 	if (inputFormatSelect == NTV2_RGBSelect)
