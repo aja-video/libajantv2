@@ -100,7 +100,7 @@ class DemoCommonInitializer
 						str.erase (str.length () - 1);		//	...lop off the "a"
 
 					if (str.find (".00") != string::npos)	//	If it ends in ".00"...
-						str.erase (str.find (".00"));		//	...lop off the ".00"
+						str.erase (str.find (".00"), 3);	//	...lop off the ".00" (but keep the "b", if any)
 
 					while (str.find (" ") != string::npos)
 						str.erase (str.find (" "), 1);		//	Remove all spaces

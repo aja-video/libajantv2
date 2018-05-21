@@ -339,6 +339,8 @@ class CNTV2DemoCommon
 		static const char *					GetGlobalMutexName (void);
 	///@}
 
+	//static bool		DoBFT(void);	//	Implementation is inside ntv2bft/main.cpp
+
 };	//	CNTV2DemoCommon
 
 
