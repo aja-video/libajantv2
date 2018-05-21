@@ -587,7 +587,7 @@ typedef enum _NTV2VideoFormat
         (__f__) >= NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT	&&		\
         (__f__) < NTV2_FORMAT_END_STANDARD_DEF_FORMATS )
 
-#define NTV2_IS_720P_VIDEO_FORMAT(__f__)									\
+#define NTV2_IS_720P_VIDEO_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_720p_2398	||						\
         (__f__) == NTV2_FORMAT_720p_2500	||						\
         (__f__) == NTV2_FORMAT_720p_5000	||						\
