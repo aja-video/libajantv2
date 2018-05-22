@@ -428,7 +428,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	//bool levelBInput = IsVideoFormatHfrB(inputFormat);
+	//bool inHfrB = IsVideoFormatHfrB(inputFormat);
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;

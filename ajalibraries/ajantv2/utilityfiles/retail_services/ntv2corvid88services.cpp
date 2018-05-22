@@ -1155,7 +1155,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	bool levelBInput = IsVideoFormatHfrB(inputFormat);
+	bool inHfrB = IsVideoFormatHfrB(inputFormat);
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1233,11 +1233,11 @@ void Corvid88Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);

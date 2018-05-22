@@ -1427,7 +1427,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	//printf("inputformat=%d mFb1VideoFormat=%d\n", inputFormat, mFb1VideoFormat);
-	bool levelBInput = IsVideoFormatHfrB(inputFormat);
+	bool inHfrB = IsVideoFormatHfrB(inputFormat);
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1505,11 +1505,11 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);

@@ -47,7 +47,7 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
                                                               NTV2VideoFormat fbVideoFormat,
                                                               NTV2SDIInputFormatSelect* inputFormatSelect)
 {
-    bool levelBInput;
+    bool inHfrB;
     bool levelbtoaConvert;
     NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
     if (inputFormatSelect)
@@ -60,9 +60,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = IsVideoFormatHfrB(inputFormat);
+            inHfrB = IsVideoFormatHfrB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
@@ -82,9 +82,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = IsVideoFormatHfrB(inputFormat);
+            inHfrB = IsVideoFormatHfrB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
@@ -1577,22 +1577,22 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
     
-    bool levelBInput = false;
+    bool inHfrB = false;
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
     
     // Now we need to figure if the signal coming in is level B or A
     if (mVirtualInputSelect == NTV2_Input1Select)
     {
-        levelBInput = IsVideoFormatHfrB(GetSdiInVideoFormat(0, mFb1VideoFormat));
+        inHfrB = IsVideoFormatHfrB(GetSdiInVideoFormat(0, mFb1VideoFormat));
     }
     else if (mVirtualInputSelect == NTV2_Input2Select)
     {
-        levelBInput = IsVideoFormatHfrB(GetSdiInVideoFormat(1, mFb1VideoFormat));
+        inHfrB = IsVideoFormatHfrB(GetSdiInVideoFormat(1, mFb1VideoFormat));
     }
     else
     {
-        levelBInput = IsVideoFormatHfrB(inputFormat);
+        inHfrB = IsVideoFormatHfrB(inputFormat);
     }
     
 	// input 1 select
@@ -1734,11 +1734,11 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && (mVirtualInputSelect==NTV2_Input1Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input1Select)));
 
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && (mVirtualInputSelect==NTV2_Input2Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input2Select)));
 
 
 	// SDI In 3

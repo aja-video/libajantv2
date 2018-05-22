@@ -38,7 +38,7 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
                                                               NTV2VideoFormat fbVideoFormat,
                                                               NTV2SDIInputFormatSelect* inputFormatSelect)
 {
-    bool levelBInput;
+    bool inHfrB;
     bool levelbtoaConvert;
     NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
     if (inputFormatSelect)
@@ -51,9 +51,9 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = IsVideoFormatHfrB(inputFormat);
+            inHfrB = IsVideoFormatHfrB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
@@ -73,9 +73,9 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = IsVideoFormatHfrB(inputFormat);
+            inHfrB = IsVideoFormatHfrB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
