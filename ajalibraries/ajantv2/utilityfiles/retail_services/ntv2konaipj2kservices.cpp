@@ -713,11 +713,13 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
+		(b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
+		(b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);

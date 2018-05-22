@@ -1228,16 +1228,17 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 	// select square division or 2 pixel interleave in frame buffer
 	mCard->SetTsiFrameEnable(b2piIn, NTV2_CHANNEL1);
-	
 
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
+		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
+		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input2Select)));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);

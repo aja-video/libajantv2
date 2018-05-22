@@ -1540,13 +1540,19 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
 	bool						b3GbInEnabled;
 	
+    // Figure out what our input format is based on what is selected
+    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	bool inHfrB = IsVideoFormatHfrB(inputFormat);
+	
 	// SDI In 1
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && (mVirtualInputSelect==NTV2_Input1Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
+    	(b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && inHfrB && (mVirtualInputSelect==NTV2_Input1Select)));
             
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && (mVirtualInputSelect==NTV2_Input2Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
+    	(b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && inHfrB && (mVirtualInputSelect==NTV2_Input2Select)));
 
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
@@ -1555,9 +1561,6 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	// SDI In 4
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
-    
-    // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
