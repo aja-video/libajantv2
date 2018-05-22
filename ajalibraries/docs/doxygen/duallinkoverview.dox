@@ -66,6 +66,81 @@
 			<b>AJA strongly recommends using 3G Level A video formats exclusively, and deprecate the use of 3G Level B video formats.</b>
 
 
+	@section		aja1080p5060	How to Capture 1080p50/60 Video
+
+	There are 3 ways to capture 1080p50/60 video on a modern AJA device (e.g., \ref corvid44):
+	-	SMPTE 372 dual-link 1.5G;
+	-	SMPTE 425 single-link 3G level A;
+	-	SMPTE 425 single-link 3G level B.
+
+	Dual-link mode requires two SDI connectors, where each looks like a 1080i signal.
+	These signals are partitioned in the source and merged in the destination as 1080p video.
+
+	The single-link 3Gb signal is the same idea, except instead of two wires, the two streams are multiplexed into a single 3Gbps signal.
+	The 3Ga signal is a single 3Gbps 1080p stream.
+
+	Unfortunately, because the NTV2 hardware and SDK evolved on the “bleeding edge” prior to ratification of the SMPTE standards,
+	it has made configuring these three different modes in the SDK somewhat confusing.
+
+
+	<b>Dual-Link 1.5Gbps SMPTE 372 Input</b>
+
+	-	Call CNTV2Card::SetVideoFormat with the appropriate “_B” format (e.g. ::NTV2_FORMAT_1080p_5000_B or ::NTV2_FORMAT_1080p_6000_B …)
+		to configure the device for dual-link 1.5G input.
+	-	Use separate Frame Stores for each 1.5Gbps signal.
+	-	Route signals from the two SDI inputs into the two Frame Stores separately.
+
+
+	<b>Single-Link 3G Level A Input</b>
+
+	-	Call CNTV2Card::SetVideoFormat with the appropriate “_A” format (e.g., ::NTV2_FORMAT_1080p_5000_A or ::NTV2_FORMAT_1080p_6000_A …).
+	-	Use a single Frame Store, and route its input from the output crosspoint of the one SDI input.
+
+
+	<b>Single-Link 3G Level B Input</b>
+
+	-	Call CNTV2Card::SetVideoFormat with the appropriate “_A” format (e.g., ::NTV2_FORMAT_1080p_5000_A or ::NTV2_FORMAT_1080p_6000_A …).
+	-	Use a single Frame Store, and route its input from the output crosspoint of the one SDI input.
+	-	Enable the 3Gb-to-3Ga converter in the SDI input using CNTV2Card::SetSDIInLevelBtoLevelAConversion.
+
+	@note	Don’t be surprised if, after configuring for 3Gb, this gets reported as a 1080i signal,
+			since it really does get transmitted as 2 × 1080i streams.
+			In 3Ga mode it should be reported as a 1080p stream.
+
+
+	<b>Code Example</b>
+
+	@code{.cpp}
+		//	This will work with devices that answer \c true for ::NTV2DeviceCanDo3GLevelConversion
+		bool	is3Gb(false);
+		mVideoFormat = mDevice.GetSDIInputVideoFormat (mInputChannel, false);
+		mDevice.GetSDIInput3GbPresent (is3Gb, mInputChannel);
+		if (is3Gb)
+		{
+			switch (mVideoFormat)
+			{
+				case NTV2_FORMAT_1080i_5000:
+					mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, true);
+					mVideoFormat = NTV2_FORMAT_1080p_5000_A;
+					break;
+				case NTV2_FORMAT_1080i_5994:
+					mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, true);
+					mVideoFormat = NTV2_FORMAT_1080p_5994_A;
+					break;
+				case NTV2_FORMAT_1080i_6000:
+					mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, true);
+					mVideoFormat = NTV2_FORMAT_1080p_6000_A;
+					break;
+				default:
+					mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, false);
+					break;
+			}
+		}
+		else
+			mDevice.SetSDIInLevelBtoLevelAConversion (mInputChannel, false);
+	@endcode
+
+
 	@section		aja6g12g	6G and 12G
 
 	Some newer AJA devices have SDI connectors that support 6G and 12G, which allows a single cable to carry 4K/UHD, even at high-frame-rates or bit depths.
