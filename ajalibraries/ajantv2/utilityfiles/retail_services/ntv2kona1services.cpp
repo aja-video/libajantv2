@@ -26,7 +26,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
 	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -414,7 +414,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	//bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	//bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	//bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	//bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
 	//bool						bStereoIn			= false;
 	//int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
@@ -428,7 +428,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	//bool levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+	//bool levelBInput = IsVideoFormatHfrB(inputFormat);
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;

@@ -36,7 +36,7 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	bool b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 
@@ -643,7 +643,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	bool						bEanbleConverter	= false;
@@ -1085,7 +1085,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
 	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-												  IsVideoFormatB(mFb1VideoFormat) ||
+												  IsVideoFormatHfrB(mFb1VideoFormat) ||
 												  bSdiOutRGB;
 											  
 	NTV2Standard			secondaryStandard = GetNTV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);

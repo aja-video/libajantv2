@@ -1937,7 +1937,7 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormat(int32_t index, NTV2VideoForm
 	// HACK NOTICE 3
 	// note: there is no enum for 2Kp60b et al
 	// we special case define 2Kp60b as 2Kp60a with 3Gb flag set
-	bool b1080pHfr = NTV2_IS_3Gb_FORMAT(sdiInFormat);		// i.e. 1080p60b hfrs
+	bool b1080pHfr = IsVideoFormatHfrB(sdiInFormat);		// i.e. 1080p60b hfrs
 	if (b1080pHfr && b4kHfr)
 	{
 		ULWord status;

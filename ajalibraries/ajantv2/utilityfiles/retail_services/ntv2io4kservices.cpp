@@ -54,7 +54,7 @@ NTV2VideoFormat Io4KServices::GetSelectedInputVideoFormat(
 			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 
 			// See if we need to translate this from a level B format to level A
-			levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+			levelBInput = IsVideoFormatHfrB(inputFormat);
 			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
 			if (levelBInput && levelbtoaConvert)
 			{
@@ -77,7 +77,7 @@ NTV2VideoFormat Io4KServices::GetSelectedInputVideoFormat(
 			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 
 			// See if we need to translate this from a level B format to level A
-			levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+			levelBInput = IsVideoFormatHfrB(inputFormat);
 			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
 			if (levelBInput && levelbtoaConvert)
 			{
@@ -125,7 +125,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -1524,7 +1524,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && 
 	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
 	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -2770,7 +2770,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
+	else if (IsVideoFormatHfrB(mFb1VideoFormat) ||											// Dual Stream - p60b
 			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||				// Stereo 3D
 			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -2847,7 +2847,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatB(mFb1VideoFormat) ||									// Dual Stream - p60b
+	else if (IsVideoFormatHfrB(mFb1VideoFormat) ||									// Dual Stream - p60b
 			 mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||			// Stereo 3D
 			 mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)			// Video + Key
 	{
@@ -3105,7 +3105,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 							 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
+							 (IsVideoFormatHfrB(mFb1VideoFormat) == true)  );
 
 	bool b2wire4kOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
 		                 || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
@@ -3344,13 +3344,13 @@ void Io4KServices::SetDeviceMiscRegisters ()
 			
 			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
 		}
 		else
 		{	
 			//mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			//mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			//mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
 		}
 		
 		// color space sample rate

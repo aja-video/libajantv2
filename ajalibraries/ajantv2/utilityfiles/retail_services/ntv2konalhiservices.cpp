@@ -59,7 +59,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
+	bool bDualStreamFB = IsVideoFormatHfrB(mFb1VideoFormat);
 
 	bool bFb1RGB = IsFormatRGB(mFb1Format);
 	bool bFb2RGB = IsFormatRGB(mFb2Format);
@@ -656,7 +656,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 	NTV2VideoFormat		inputFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2CrosspointID	inputSelectPrimary = NTV2_XptBlack; 
 	//NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
-	bool				bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
+	bool				bDualStreamFB = IsVideoFormatHfrB(mFb1VideoFormat);
 	bool 				bFb1RGB = IsFormatRGB(mFb1Format);
 	bool 				bFb1Compressed = IsFormatCompressed(mFb1Format);
 														
@@ -1022,7 +1022,7 @@ void KonaLHiServices::SetDeviceMiscRegisters ()
 	
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	NTV2FrameRate			secondardFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
-	bool					bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
+	bool					bDualStreamFB = IsVideoFormatHfrB(mFb1VideoFormat);
 	
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)

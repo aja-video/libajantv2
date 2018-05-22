@@ -4960,7 +4960,7 @@ AJAExport bool IsVideoFormatA (NTV2VideoFormat format)
 }
 
 
-AJAExport bool IsVideoFormatB(NTV2VideoFormat format)
+AJAExport bool IsVideoFormatHfrB(NTV2VideoFormat format)
 {
 	return NTV2_IS_3Gb_FORMAT (format);
 }
