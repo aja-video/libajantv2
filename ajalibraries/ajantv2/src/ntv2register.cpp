@@ -2227,13 +2227,7 @@ bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
 {
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
-	ULWord		value	(0);
-	const bool	result	(ReadRegister (gChannelToControlRegNum[inChannel], value, kRegMaskMode, kRegShiftMode));
-	CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskMode, kRegShiftMode);
-	NTV2_ASSERT(ULWord(outValue) == value);
-	if (result)
-		outValue = static_cast <NTV2Mode> (value);
-	return result;
+	return CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskMode, kRegShiftMode);
 }
 
 bool CNTV2Card::GetFrameInfo (const NTV2Channel inChannel, NTV2FrameGeometry & outGeometry, NTV2FrameBufferFormat & outFBF)
