@@ -27,7 +27,7 @@ class AJAPerformance
          *
          *  @param[in]  name The name for the performance object.
          *  @param[in]  precision The Precision units to use.
-         *  @param[in]  skipEntries The number of enrties to skip over before tracking performance,
+         *  @param[in]  skipEntries The number of entries to skip over before tracking performance,
          *                          the idea here is to skip over any "warm-up" period.
          */
         AJAPerformance(const std::string& name,
@@ -40,7 +40,7 @@ class AJAPerformance
          *  @param[in]  name The name for the performance object.
          *  @param[in]  values Extra values that can be stored along with performance info.
          *  @param[in]  precision The Precision units to use.
-         *  @param[in]  skipEntries The number of enrties to skip over before tracking performance,
+         *  @param[in]  skipEntries The number of entries to skip over before tracking performance,
          *                          the idea here is to skip over any "warm-up" period.
          */
         AJAPerformance(const std::string& name, const AJAPerformaceExtraMap& values,
@@ -51,7 +51,7 @@ class AJAPerformance
          *	Constructor
          *
          *  @param[in]  precision The Precision units to use.
-         *  @param[in]  skipEntries The number of enrties to skip over before tracking performance,
+         *  @param[in]  skipEntries The number of entries to skip over before tracking performance,
          *                          the idea here is to skip over any "warm-up" period.
          */
         AJAPerformance(AJATimerPrecision precision = AJATimerPrecisionMilliseconds,
