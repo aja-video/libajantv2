@@ -1635,7 +1635,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	// other bools
 	bStereoIn	= inputFormatSelect == NTV2_Stereo3DSelect;
 	b2pi		= b2piIn || (bHdmiIn && b4K);				
-	bInRGB		= (bHdmiIn == false && bInRGB == true) ||
+	bInRGB		= (bHdmiIn == false && inputFormatSelect == NTV2_RGBSelect) ||
 				  (bHdmiIn == true && bHdmiInRGB == true);
 	
 
