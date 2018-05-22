@@ -65,8 +65,8 @@
 
 	@par	Ancillary Data
 
-	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
+	-	\ref vancframegeometries
 
 	@par	Physical
 

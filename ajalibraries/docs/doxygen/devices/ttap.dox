@@ -36,7 +36,7 @@
 	-	RGB is not supported.
 
 	@par		Ancillary Data
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/144/25>

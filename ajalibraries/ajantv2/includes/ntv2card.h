@@ -642,7 +642,7 @@ public:
 										buffer contents.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
@@ -659,7 +659,7 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord			inFrameNumber,
@@ -677,7 +677,7 @@ public:
 										buffer, nor the device's frame buffer. Defaults to 2K.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
@@ -693,7 +693,7 @@ public:
 										buffer content.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the \c kVRegAncField1Offset and \c kVRegAncField2Offset virtual registers
+		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
 	**/
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
@@ -757,14 +757,14 @@ public:
 	/**
 		@brief		Configures the AJA device to handle a specific video format.
 		@param[in]	inVideoFormat			Specifies the desired video format for the given channel on the device.
-											It must be a valid NTV2VideoFormat constant.
+											It must be a valid ::NTV2VideoFormat constant.
 		@param[in]	inIsAJARetail			Specify 'true' to preserve the current horizontal and vertical timing settings.
 											Defaults to true on MacOS, false on other platforms.
 		@param[in]	inKeepVancSettings		If true, specifies that the device's current VANC settings are to be preserved;
 											otherwise, they will not be preserved. Defaults to false.
-		@param[in]	inChannel				Specifies the NTV2Channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel				Specifies the NTV2Channel of interest. Defaults to ::NTV2_CHANNEL1.
 											For UHD/4K video formats, specify NTV2_CHANNEL1 to configure quadrant channels 1-4,
-											or NTV2_CHANNEL5 to configure quadrant channels 5-8.
+											or ::NTV2_CHANNEL5 to configure quadrant channels 5-8.
 		@return		True if successful; otherwise false.
 		@details	This function changes the device configuration to a specific video standard (e.g., 525, 1080, etc.),
 					frame geometry (e.g., 1920x1080, 720x486, etc.) and frame rate (e.g., 59.94 fps, 29.97 fps, etc.),
@@ -774,9 +774,9 @@ public:
 
 	/**
 		@brief		Sets the frame geometry of the given channel.
-		@param[in]	inGeometry		Specifies the desired frame geometry. It must be a valid NTV2FrameGeometry value.
+		@param[in]	inGeometry		Specifies the desired frame geometry. It must be a valid ::NTV2FrameGeometry value.
 		@param[in]	inIsRetail		This parameter is ignored.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel		Specifies the ::NTV2Channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetFrameGeometry (NTV2FrameGeometry inGeometry, bool inIsRetail = AJA_RETAIL_DEFAULT, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -789,10 +789,9 @@ public:
 	/**
 		@brief		Sets the frame buffer format for the given frame store on the AJA device.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel			Specifies the frame store to be affected, which must be one of NTV2_CHANNEL1,
-									NTV2_CHANNEL2, NTV2_CHANNEL3, or NTV2_CHANNEL4.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inNewFormat		Specifies the desired frame buffer format.
-									This must be a valid NTV2FrameBufferFormat value.
+									This must be a valid ::NTV2FrameBufferFormat value.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
 									Defaults to false on all platforms other than MacOS, which defaults to true.
 		@details	This function allows client applications to control the format of frame data stored
@@ -811,7 +810,7 @@ public:
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
 		@return		True if successful; otherwise false.
-		@param[in]	inRefSource		Specifies the NTV2ReferenceSource to use.
+		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
 					
 	**/
 	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource);
@@ -819,7 +818,7 @@ public:
 	/**
 		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.
 		@return			True if successful; otherwise false.
-		@param[out]		outRefSource	Receives the NTV2ReferenceSource value.
+		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
 	**/
 	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 
@@ -827,7 +826,7 @@ public:
 		@brief		Retrieves the device's current "retail service" task mode. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[out]	outMode		Receives the device's current "every frame task mode" setting. If successful, the
-								variable will contain NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
+								variable will contain ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
 	**/
 	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
 
@@ -836,7 +835,7 @@ public:
 					the "retail mode" device configuration. See \ref devicesharing for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	mode		Specifies the "every frame task mode" the device is to assume,
-								and must be one of the following values: NTV2_DISABLE_TASKS, NTV2_STANDARD_TASKS, or NTV2_OEM_TASKS.
+								and must be one of the following values: ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
 	**/
 	AJA_VIRTUAL bool		SetEveryFrameServices (NTV2EveryFrameTaskMode mode);
 
@@ -846,9 +845,9 @@ public:
 	/**
 		@brief		Determines if a given frame store on the AJA device will be used to capture or playout video.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the FrameStore of interest as an NTV2Channel value.
-		@param[in]	inNewValue		Specifies the desired mode for the frame store, which must be either NTV2_MODE_DISPLAY
-									or NTV2_MODE_CAPTURE.
+		@param[in]	inChannel		Specifies the FrameStore of interest as an ::NTV2Channel value (a zero-based index number).
+		@param[in]	inNewValue		Specifies the desired mode for the frame store, which must be either ::NTV2_MODE_DISPLAY
+									or ::NTV2_MODE_CAPTURE.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration should be respected or not.
 									Defaults to false on all platforms other than MacOS.
 		@note		Applications that use AutoCirculate don't need to call this function, since AutoCirculate takes care of setting the mode.
@@ -857,9 +856,9 @@ public:
 
 	/**
 		@brief		Returns the current mode (capture or playout) of the given frame store on the AJA device.
-		@param[in]	inChannel	Specifies the FrameStore of interest as an NTV2Channel value.
+		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel value (a zero-based index number).
 		@param[out]	outValue	Receives the current mode for the channel. If the function result is true,
-								it will contain either NTV2_MODE_DISPLAY or NTV2_MODE_CAPTURE.
+								it will contain either ::NTV2_MODE_DISPLAY or ::NTV2_MODE_CAPTURE.
 		@details	A frame store can either be set to record/capture or display/playout.
 					This function allows client applications to determine a frame store's mode.
 		@return		True if successful; otherwise false.
@@ -871,9 +870,9 @@ public:
 	/**
 		@brief		Returns the current frame buffer format for the given frame store on the AJA device.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the frame store (channel) of interest.
+		@param[in]	inChannel		Specifies the frame store of interest as an ::NTV2Channel (a zero-based index number).
 		@param[out]	outValue		Receives the frame store's current pixel format. If the function result is true,
-									the variable will contain a valid NTV2FrameBufferFormat value.
+									the variable will contain a valid ::NTV2FrameBufferFormat value.
 		@details	This function allows client applications to inquire about the current format of frame data
 					stored in an AJA device's frame store. This is important because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
@@ -882,8 +881,8 @@ public:
 
 
 	/**
-		@brief		Returns a std::set of NTV2VideoFormat values that I support.
-		@param[out]	outFormats	Receives the set of NTV2VideoFormat values.
+		@brief		Returns a std::set of ::NTV2VideoFormat values that I support.
+		@param[out]	outFormats	Receives the set of ::NTV2VideoFormat values.
 								This will be empty if the function fails.
 		@return		True if successful;  otherwise false.
 	**/
@@ -929,9 +928,9 @@ public:
 	/**
 		@brief		Sets the AJA device's frame rate.
 		@return		True if successful; otherwise false.
-		@param[in]	inNewValue		Specifies the new NTV2FrameRate value the AJA device is to be configured with.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest.
-		@note		The frame rate setting for NTV2_CHANNEL1 dictates the device reference clock for both single
+		@param[in]	inNewValue		Specifies the new ::NTV2FrameRate value the AJA device is to be configured with.
+		@param[in]	inChannel		Specifies the ::NTV2Channel of interest.
+		@note		The frame rate setting for ::NTV2_CHANNEL1 dictates the device reference clock for both single
 					and multi-format mode (see \ref deviceclockingandsync).
 	**/
 	AJA_VIRTUAL bool	SetFrameRate (NTV2FrameRate inNewValue, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -939,9 +938,9 @@ public:
 	/**
 		@brief		Returns the AJA device's currently configured frame rate via its "value" parameter.
 		@return		True if successful; otherwise false.
-		@param[out]	outValue	Receives the device's current NTV2FrameRate value.
-		@param[in]	inChannel	Specifies the NTV2Channel of interest.
-		@note		The frame rate setting for NTV2_CHANNEL1 dictates the device reference clock for both single
+		@param[out]	outValue	Receives the device's current ::NTV2FrameRate value.
+		@param[in]	inChannel	Specifies the ::NTV2Channel of interest.
+		@note		The frame rate setting for ::NTV2_CHANNEL1 dictates the device reference clock for both single
 					and multi-format mode (see \ref deviceclockingandsync).
 	**/
 	AJA_VIRTUAL bool		GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -949,7 +948,7 @@ public:
 	/**
 		@brief		Enables or disables the device's SMPTE-372 (dual-link) mode (used for older 3G-levelB-capable devices).
 		@note		This allows older devices to handle 1080p60/1080p5994/1080p50 signals by "ganging" two 30Hz frame stores. See \ref duallinkoverview for more information.
-		@note		The enable bits work on channel pairs, thus a parameter of NTV2_CHANNEL1 or NTV2_CHANNEL2 refers to the same control bit.
+		@note		The enable bits work on channel pairs, thus a parameter of ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2 refers to the same control bit.
 		@return		True if successful; otherwise false.
 		@param[in]	inValue		Specify a non-zero value (true) to put the device into SMPTE 372 dual-link mode.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1.
@@ -960,7 +959,7 @@ public:
 
 	/**
 		@brief		Returns the device's current SMPTE-372 (dual-link) mode, whether it's enabled or not.
-		@note		The enable bits work on channel pairs, thus a parameter of NTV2_CHANNEL1 or NTV2_CHANNEL2 refers to the same control bit.
+		@note		The enable bits work on channel pairs, thus a parameter of ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2 refers to the same control bit.
 		@return		True if successful; otherwise false.
 		@param[in]	outValue	Receives 1 if the device is currently in dual-link mode;  otherwise receives 0.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1.
@@ -1000,8 +999,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inIsEnabled		Specify true to put the device's frame stores into "4K squares" (i.e., "2K quadrants") mode.
 									Specify false to put the device's frame stores into normal mode (if not currently running in quad frame mode), or the non-2K quadrants quad mode.
-		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than NTV2_CHANNEL5
-									will affect Frame Stores 1/2/3/4, while anything ordinally greater than NTV2_CHANNEL4 will
+		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
+									will affect Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									affect Frame Stores 5/6/7/8.
 		@note	Disabling 4K squares will implicitly set two-sample-interleave mode for the frame stores.
 	**/
@@ -1011,8 +1010,8 @@ public:
 		@brief	Returns the device frame store's current SMPTE 425 "2K quadrants" mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
 		@param[in]	outIsEnabled	Receives true if the device's frame stores are currently in "2K quadrants" mode; otherwise false.
-		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than NTV2_CHANNEL5
-									will report on Frame Stores 1/2/3/4, while anything ordinally greater than NTV2_CHANNEL4 will
+		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
+									will report on Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									report on Frame Stores 5/6/7/8.
 	**/
 	AJA_VIRTUAL bool		Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inChannel);
@@ -1022,8 +1021,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inIsEnabled		Specify true to put the device's frame stores into two-sample interleave (Tsi) mode.
 									Specify false to put the device's frame stores into non-Tsi mode.
-		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than NTV2_CHANNEL5
-									will affect Frame Stores 1/2/3/4, while anything ordinally greater than NTV2_CHANNEL4 will
+		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
+									will affect Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									affect Frame Stores 5/6/7/8.
 		@note	There is no need to call this function if Set4kSquaresEnable(false) was called.
 	**/
@@ -1034,8 +1033,8 @@ public:
 		@brief	Returns the current SMPTE 425 two-sample-interleave frame mode on the device, whether it's enabled or not.
 		@return		True if successful; otherwise false.
 		@param[in]	outIsEnabled	Receives true if the device's frame stores are currently in two-sample interleave (Tsi) mode; otherwise false.
-		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than NTV2_CHANNEL5
-									will report on Frame Stores 1/2/3/4, while anything ordinally greater than NTV2_CHANNEL4 will
+		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
+									will report on Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									report on Frame Stores 5/6/7/8.
 	**/
 	AJA_VIRTUAL bool		GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChannel);
@@ -1162,7 +1161,7 @@ public:
 		@brief		Retrieves the current VANC mode for the given channel.
 		@param[out]	outVancMode		Receives the current ::NTV2VANCMode setting.
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
-									Defaults to NTV2_CHANNEL1.
+									Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
@@ -1172,12 +1171,12 @@ public:
 		@brief		Enables or disables the "VANC Shift Mode" feature for the given channel.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 		@param[in]	inMode		Specifies the new data shift mode.
-								Use \c NTV2_VANCDATA_NORMAL to disable;  use \c NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+								Use ::NTV2_VANCDATA_NORMAL to disable;  use ::NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
 		@return		True if successful;  otherwise false.
 		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device Frame Store is configured as follows:
 					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
 					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
-					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+					-	VANC mode is set to ::NTV2_VANCMODE_TALL or ::NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
 		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
@@ -1186,13 +1185,13 @@ public:
 		@brief		Retrieves the current "VANC Shift Mode" feature for the given channel.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 		@param[out]	outValue	Receives the current ::NTV2VANCDataShiftMode setting.
-								If \c NTV2_VANCDATA_NORMAL, then bit shifting is disabled.
-								If \c NTV2_VANCDATA_8BITSHIFT_ENABLE, then it's enabled.
+								If ::NTV2_VANCDATA_NORMAL, then bit shifting is disabled.
+								If ::NTV2_VANCDATA_8BITSHIFT_ENABLE, then it's enabled.
 		@return		True if successful;  otherwise false.
 		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device Frame Store is configured as follows:
 					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
 					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
-					-	VANC mode is set to \c NTV2_VANCMODE_TALL or \c NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+					-	VANC mode is set to ::NTV2_VANCMODE_TALL or ::NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
 		@see		CNTV2Card::SetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
 	**/
 	AJA_VIRTUAL bool		GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue);
@@ -1822,7 +1821,7 @@ public:
 
 	/**
 		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder.
-		@param[in]	inChannel		Specifies the SDI output as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
+		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
@@ -1831,7 +1830,7 @@ public:
 
 	/**
 		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder.
-		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
+		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
@@ -1861,7 +1860,7 @@ public:
 
 	/**
 		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
-		@param[in]	inChannel		Specifies the SDI output as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
+		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
@@ -1870,7 +1869,7 @@ public:
 
 	/**
 		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
-		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel (e.g., NTV2_CHANNEL1 == SDIOut1, NTV2_CHANNEL2 == SDIOut2, etc.)
+		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
@@ -2366,7 +2365,7 @@ public:
 	/**
 		@brief		Allows the CNTV2Card instance to wait for and respond to vertical blanking interrupts
 					originating from the given output channel on the receiver's AJA device.
-		@param[in]	channel		Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	channel		Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableOutputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
@@ -2374,7 +2373,7 @@ public:
 	/**
 		@brief		Allows the CNTV2Card instance to wait for and respond to vertical blanking interrupts
 					originating from the given input channel on the receiver's AJA device.
-		@param[in]	channel		Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	channel		Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
@@ -2388,7 +2387,7 @@ public:
 	/**
 		@brief		Prevents the CNTV2Card instance from waiting for and responding to vertical blanking
 					interrupts originating from the given output channel on the device.
-		@param[in]	channel		Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	channel		Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DisableOutputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
@@ -2396,7 +2395,7 @@ public:
 	/**
 		@brief		Prevents the CNTV2Card instance from waiting for and responding to vertical blanking
 					interrupts originating from the given input channel on the device.
-		@param[in]	channel		Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	channel		Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
@@ -2424,7 +2423,7 @@ public:
 
 	/**
 		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel.
-		@param[in]	inChannel	Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -2442,7 +2441,7 @@ public:
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an output VBI is signaled on the given output channel.
-		@param[in]	inChannel	Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel	Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvent.
 	**/
@@ -2450,7 +2449,7 @@ public:
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel.
-		@param[in]	inChannel	Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvent.
 	**/
@@ -2463,7 +2462,7 @@ public:
 	/**
 		@brief		Answers with the number of output vertical interrupts handled by the driver for the given output channel.
 		@param[out]	outCount	Receives the number of output VBIs handled by the driver since it was loaded.
-		@param[in]	inChannel	Specifies the output channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel	Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetOutputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -2471,7 +2470,7 @@ public:
 	/**
 		@brief		Answers with the number of input vertical interrupts handled by the driver for the given input channel.
 		@param[out]	outCount	Receives the number of input VBIs handled by the driver since it was loaded.
-		@param[in]	inChannel	Specifies the input channel of interest. Defaults to NTV2_CHANNEL1.
+		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -2534,7 +2533,7 @@ public:
 		@brief		Efficiently sleeps the calling thread/process until the next one or more field (interlaced video)
 					or frame (progressive or interlaced video) VBIs occur for the specified output channel.
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
-									Defaults to NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
+									Defaults to ::NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
 									supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
 		@param[in]	inRepeatCount	Specifies the number of output VBIs to wait for until returning. Defaults to 1.
 		@return		True if successful; otherwise false.
@@ -2548,29 +2547,29 @@ public:
 					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
 					-	Call CNTV2Card::GetOutputVerticalInterruptCount before and after calling this function to verify
 						that an interrupt really occurred;
-					-	Call CNTV2WinDriverInterface::GetInterruptEvent to obtain the event \c HANDLE, and manually clear
-						it before calling this function.
+					-	Call CNTV2WinDriverInterface::GetInterruptEvent to obtain the Windows event \c HANDLE, and
+						manually clear it before calling this function.
 	**/
 	AJA_VIRTUAL bool	WaitForOutputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
 	/**
 		@brief		Efficiently sleeps the calling thread/process until the next output VBI for the given field and output
 					channel.
-		@param[in]	inFieldID	Specifies the field identifier of interest. Use \c NTV2_FIELD0 to wait for the frame
-								interrupt of progressive or interlaced video. Use \c NTV2_FIELD1 to wait for the field
+		@param[in]	inFieldID	Specifies the field identifier of interest. Use ::NTV2_FIELD0 to wait for the frame
+								interrupt of progressive or interlaced video. Use ::NTV2_FIELD1 to wait for the field
 								interrupt of interlaced video.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
-								Defaults to NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
+								Defaults to ::NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
 								supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
 		@return		True if successful; otherwise false.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 					See \ref deviceclockingandsync for more information.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
-					WaitForOutputFieldID. This is historically different from Linux and MacOS, where the event
+					CNTV2Card::WaitForOutputFieldID. This is historically different from Linux and MacOS, where the event
 					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
-					-	Call GetOutputVerticalInterruptCount before and after calling this function to verify that an
-						interrupt really occurred;
+					-	Call CNTV2Card::GetOutputVerticalInterruptCount before and after calling this function to verify
+						that an interrupt really occurred;
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
 	**/
@@ -2580,7 +2579,7 @@ public:
 		@brief		Efficiently sleeps the calling thread/process until the next one or more field (interlaced video)
 					or frame (progressive or interlaced video) VBIs occur for the specified input channel.
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
-									Defaults to NTV2_CHANNEL1.
+									Defaults to ::NTV2_CHANNEL1.
 		@param[in]	inRepeatCount	Specifies the number of input VBIs to wait for until returning. Defaults to 1.
 		@return		True if successful; otherwise false.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
@@ -2598,11 +2597,11 @@ public:
 	/**
 		@brief		Efficiently sleeps the calling thread/process until the next input VBI for the given field and input
 					channel.
-		@param[in]	inFieldID	Specifies the field identifier of interest. Use \c NTV2_FIELD0 to wait for the frame
-								interrupt of progressive or interlaced video. Use \c NTV2_FIELD1 to wait for the field
+		@param[in]	inFieldID	Specifies the field identifier of interest. Use ::NTV2_FIELD0 to wait for the frame
+								interrupt of progressive or interlaced video. Use ::NTV2_FIELD1 to wait for the field
 								interrupt of interlaced or Psf video.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
-								Defaults to NTV2_CHANNEL1.
+								Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
@@ -3363,7 +3362,7 @@ public:
 
 	/**
 		@brief		Answers with the frame size currently being used on the device.
-		@param[in]	inChannel	Currently ignored. Use NTV2_CHANNEL1.
+		@param[in]	inChannel	Currently ignored. Use ::NTV2_CHANNEL1.
 		@param[out]	outValue	Receives the device's current frame size.
 		@return		True if successful;  otherwise false.
 	**/
@@ -4632,7 +4631,7 @@ public:
 		@brief		Assuming the device has bi-directional SDI connectors, this function determines whether
 					a given SDI connector will behave as an input or an output.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the SDI connector to be affected.
+		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
 									If false, specifies it's to be used as an input.
 		@note		After switching a bidirectional SDI connector from output to input (i.e., inEnable = false),
@@ -4646,8 +4645,7 @@ public:
 		@brief		Assuming the device has bi-directional SDI connectors, this function answers if a given SDI
 					channel is currently acting as an input or an output.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the channel to be affected, which must be one of NTV2_CHANNEL1,
-									NTV2_CHANNEL2, NTV2_CHANNEL3, or NTV2_CHANNEL4.
+		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outEnabled		Receives true if the SDI channel connector is transmitting, or false if it's acting as an input.
 	**/
 	AJA_VIRTUAL bool		GetSDITransmitEnable (NTV2Channel inChannel, bool & outEnabled);
@@ -5020,7 +5018,7 @@ public:
 	/**
 		@brief		Sets the parity control on the RS422 port specified by inChannel.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be NTV2_CHANNEL1 or NTV2_CHANNEL2.
+		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
 		@param[in]	inRS422Parity	Specifies if parity should be used, and if so, whether it should be odd or even.
 	**/
 	AJA_VIRTUAL bool		SetRS422Parity  (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity);
@@ -5030,7 +5028,7 @@ public:
 	/**
 		@brief		Sets the baud rate the RS422 port specified by inChannel.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be NTV2_CHANNEL1 or NTV2_CHANNEL2.
+		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
 		@param[in]	inRS422BaudRate	Specifies the baud rate to be used for RS422 communications.
 	**/
 	AJA_VIRTUAL bool		SetRS422BaudRate  (const NTV2Channel inChannel, const NTV2_RS422_BAUD_RATE inRS422BaudRate);

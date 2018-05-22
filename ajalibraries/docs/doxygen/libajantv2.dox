@@ -7,15 +7,15 @@
 
     @par		The Principal Classes
 
-	- CNTV2DeviceScanner — enumerates attached devices
-	- CNTV2Card — queries and/or controls a device
-	- CNTV2SignalRouter — a collection of signal routes that can be applied to a device
+	- ::CNTV2DeviceScanner — enumerates attached devices
+	- ::CNTV2Card — queries and/or controls a device
+	- ::CNTV2SignalRouter — a collection of signal routes that can be applied to a device
 
 
 
 	@section	ntv2devicefeatures		Device Features API
 
-	The "NTV2Device..." functions describe AJA NTV2 device capabilities. All of the functions accept an \c NTV2DeviceID parameter,
+	The “NTV2Device…” functions describe AJA NTV2 device capabilities. All of the functions accept an ::NTV2DeviceID parameter,
 	which identifies the AJA device model of interest.
 
 	@note	A device need not be installed in or attached to the host to use these functions.
@@ -23,18 +23,18 @@
 	@par	‘CanDo’ Functions
 
 	These functions have names starting with “NTV2DeviceCanDo…” and return a \c bool value that answers Yes or No for a particular device capability.
-	Most of them accept a single \c NTV2DeviceID parameter, like \c NTV2DeviceCanDoAnalogAudio, which answers true if the device is capable of working
-	with analog audio.  A smaller set of functions accept two parameters:  the \c NTV2DeviceID parameter, and a second enumeration parameter, for determining
-	if a device is capable of working with a particular video format (e.g., \c NTV2DeviceCanDoVideoFormat) or frame buffer format (\c NTV2DeviceCanDoFrameBufferFormat), etc.
+	Most of them accept a single ::NTV2DeviceID parameter, like ::NTV2DeviceCanDoAnalogAudio, which answers true if the device is capable of working
+	with analog audio.  A smaller set of functions accept two parameters:  the ::NTV2DeviceID parameter, and a second enumeration parameter, for determining
+	if a device is capable of working with a particular video format (e.g., ::NTV2DeviceCanDoVideoFormat) or frame buffer format (::NTV2DeviceCanDoFrameBufferFormat), etc.
 
-	For example, to find out which Thunderbolt-connected devices support \c NTV2_FBF_10BIT_RGB, you can code the following:
+	For example, to find out which Thunderbolt-connected devices support ::NTV2_FBF_10BIT_RGB, you can code the following:
 
 	@code{.cpp}
-		const NTV2DeviceIDSet  supportedDeviceIDs (::NTV2GetSupportedDevices ());
+		const NTV2DeviceIDSet  supportedDeviceIDs (::NTV2GetSupportedDevices());
 		NTV2DeviceIDSet        deviceIDsWithThunderboltAndRGB10;
-		for (NTV2DeviceIDSetConstIter it (supportedDeviceIDs.begin ());  it != supportedDeviceIDs.end();  ++it)
+		for (NTV2DeviceIDSetConstIter it(supportedDeviceIDs.begin());  it != supportedDeviceIDs.end();  ++it)
 		{
-			if (::NTV2DeviceCanDoThunderbolt (*it)  &&  ::NTV2DeviceCanDoFrameBufferFormat (*it, NTV2_FBF_10BIT_RGB))
+			if (::NTV2DeviceCanDoThunderbolt(*it)  &&  ::NTV2DeviceCanDoFrameBufferFormat(*it, NTV2_FBF_10BIT_RGB))
 				deviceIDsWithThunderboltAndRGB10.push_back (*it);
 		}
 	@endcode
@@ -46,10 +46,10 @@
 
 	@code{.cpp}
 		CNTV2Card   theDevice;
-		NTV2Channel outputChannel (NTV2_CHANNEL2);
+		NTV2Channel outputChannel(NTV2_CHANNEL2);
 		. . .
-		if (::NTV2DeviceHasBiDirectionalSDI (theDevice.GetDeviceID ())
-			theDevice.SetSDITransmitEnable (outputChannel, true);
+		if (::NTV2DeviceHasBiDirectionalSDI(theDevice.GetDeviceID())
+			theDevice.SetSDITransmitEnable(outputChannel, true);
 	@endcode
 
 	@par	‘GetNum’ Functions
@@ -57,12 +57,12 @@
 	These functions return a count of a particular device feature. For example, to find out which devices have at least one HDMI output:
 
 	@code{.cpp}
-		const NTV2DeviceIDSet  supportedDeviceIDs (::NTV2GetSupportedDevices ());
+		const NTV2DeviceIDSet  supportedDeviceIDs(::NTV2GetSupportedDevices());
 		NTV2DeviceIDSet        deviceIDsWithHDMIOut;
-		for (NTV2DeviceIDSetConstIter it (supportedDeviceIDs.begin ());  it != supportedDeviceIDs.end();  ++it)
+		for (NTV2DeviceIDSetConstIter it(supportedDeviceIDs.begin());  it != supportedDeviceIDs.end();  ++it)
 		{
-			if (::NTV2DeviceGetNumHDMIVideoOutputs (*it) > 0)
-				deviceIDsWithHDMIOut.push_back (*it);
+			if (::NTV2DeviceGetNumHDMIVideoOutputs(*it) > 0)
+				deviceIDsWithHDMIOut.push_back(*it);
 		}
 	@endcode
 **/

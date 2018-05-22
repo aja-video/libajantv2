@@ -51,7 +51,7 @@
 	@par	Ancillary Data
 
 	-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	\ref vancframegeometries (S2022-6 only)
 
 	@par	Video Processing
 

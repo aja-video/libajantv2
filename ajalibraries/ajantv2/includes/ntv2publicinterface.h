@@ -5627,7 +5627,7 @@ typedef enum
 								. . .
 							}	//  The memory is freed automatically when foo goes out of scope
 						@endcode
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_POINTER)
 			NTV2_BEGIN_PRIVATE
@@ -6202,7 +6202,7 @@ typedef enum
 		/**
 			@brief	For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
 					this struct reports SDI input error status information.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SDIInputStatus)
 			UWord			mCRCTallyA;				///< @brief	The number of lines having a CRC error was detected in the "B" stream of the SDI link
@@ -6242,7 +6242,7 @@ typedef enum
 
 		/**
 			@brief	All new NTV2 structs start with this common header.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_HEADER)
 			NTV2_BEGIN_PRIVATE
@@ -6287,7 +6287,7 @@ typedef enum
 
 		/**
 			@brief	All new NTV2 structs end with this common trailer.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_TRAILER)
 				ULWord		fTrailerVersion;	///< @brief	Spare longwords reserved for future use
@@ -6307,19 +6307,23 @@ typedef enum
 		/**
 			@brief	This struct is used to augment the default full-frame AutoCirculate DMA transfer to accommodate multiple discontiguous
 					"segments" of a video frame. The \ref ntv2fieldburn demo app shows how this can be used. Other examples:
-					-		An in-host-memory frame has extra "padding" bytes at the end of each row. In this case, set \c acNumActiveBytesPerRow
-							to the number of active bytes per row, \c acNumSegments to the number of rows, \c acSegmentHostPitch to the number of
-							bytes from the beginning of one row to the next. In this example, \c acSegmentDevicePitch would equal \c acNumActiveBytesPerRow
-							(i.e. the frame is packed in device memory).
-					-		To DMA a sub-section of a frame, set \c acNumActiveBytesPerRow to the number of bytes that comprise one row of the
-							subsection, then \c acNumSegments to the number of rows in the subsection, \c acSegmentHostPitch to the rowBytes of the
-							entire frame in host memory, and \c acSegmentDevicePitch to the rowBytes of the entire frame in device memory.
-			@note	IMPORTANT:  For segmented DMAs, the AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment byte count (i.e.,
-								the number of bytes to transfer per segment.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
-			@todo	Create a new field in the NTV2SegmentedDMAInfo structure to eliminate the necessity of setting AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to
-					store the segmented transfer's bytes-per-segment value.
-			@note	Setting \c acNumSegments to 0 or 1 defaults to normal non-segmented DMA behavior (i.e. DMA one complete, packed frame).
+					-	An in-host-memory frame has extra "padding" bytes at the end of each row.
+						In this case, set NTV2SegmentedDMAInfo::acNumActiveBytesPerRow to the number of active bytes per row,
+						NTV2SegmentedDMAInfo::acNumSegments to the number of rows, NTV2SegmentedDMAInfo::acSegmentHostPitch
+						to the number of bytes from the beginning of one row to the next. In this example,
+						NTV2SegmentedDMAInfo::acSegmentDevicePitch would equal NTV2SegmentedDMAInfo::acNumActiveBytesPerRow
+						(i.e. the frame is packed in device memory).
+					-	To DMA a sub-section of a frame, set NTV2SegmentedDMAInfo::acNumActiveBytesPerRow to the number of bytes
+						that comprise one row of the subsection, then NTV2SegmentedDMAInfo::acNumSegments to the number of rows
+						in the subsection, NTV2SegmentedDMAInfo::acSegmentHostPitch to the rowBytes of the entire frame in host
+						memory, and NTV2SegmentedDMAInfo::acSegmentDevicePitch to the rowBytes of the entire frame in device memory.
+			@note	IMPORTANT:  For segmented DMAs, the AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment
+					byte count (i.e., the number of bytes to transfer per segment.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+			@todo	Create a new field in the ::NTV2SegmentedDMAInfo structure to eliminate the necessity of setting
+					AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to store the segmented transfer's bytes-per-segment value.
+			@note	Setting NTV2SegmentedDMAInfo::acNumSegments to 0 or 1 defaults to normal non-segmented DMA behavior
+					(i.e. DMA one complete, packed frame).
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SegmentedDMAInfo)
 				ULWord		acNumSegments;				///< @brief	Number of segments of size 'acInVideoByteCount' to DMA (i.e. numLines).
@@ -6375,7 +6379,7 @@ typedef enum
 
 		/**
 			@brief	Color correction data used with AUTOCIRCULATE_WITH_COLORCORRECT option.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2ColorCorrectionData)
 			NTV2ColorCorrectionMode		ccMode;					///< @brief	My mode (off, RGB, YCbCr, or 3-way)
@@ -6429,7 +6433,7 @@ typedef enum
 
 		/**
 			@brief	This is returned from the CNTV2Card::AutoCirculateGetStatus function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_STATUS)
 				NTV2_HEADER				acHeader;					///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6439,9 +6443,9 @@ typedef enum
 					LWord					acEndFrame;					///< @brief	Last frame to circulate.		FIXFIXFIX	Why is this signed?		CHANGE TO ULWord??
 					LWord					acActiveFrame;				///< @brief	Current frame actually being captured/played when CNTV2Card::AutoCirculateGetStatus called.	FIXFIXFIX	CHANGE TO ULWord??
 					ULWord64				acRDTSCStartTime;			///< @brief	Timestamp of the first VBI received after CNTV2Card::AutoCirculateStart called, using host OS system clock.
-					ULWord64				acAudioClockStartTime;		///< @brief	Timestamp of the first VBI received after CNTV2Card::AutoCirculateStart called, using "64-bit clean" value of the device's 48kHz audio clock (\c kRegAud1Counter register).
+					ULWord64				acAudioClockStartTime;		///< @brief	Timestamp of the first VBI received after CNTV2Card::AutoCirculateStart called, using "64-bit clean" value of the device's 48kHz audio clock (::kRegAud1Counter register).
 					ULWord64				acRDTSCCurrentTime;			///< @brief	Timestamp when CNTV2Card::AutoCirculateGetStatus called, using the host OS system clock.
-					ULWord64				acAudioClockCurrentTime;	///< @brief	Timestamp when CNTV2Card::AutoCirculateGetStatus called, using "64-bit clean" value of the device's 48kHz audio clock (\c kRegAud1Counter register).
+					ULWord64				acAudioClockCurrentTime;	///< @brief	Timestamp when CNTV2Card::AutoCirculateGetStatus called, using "64-bit clean" value of the device's 48kHz audio clock (::kRegAud1Counter register).
 					ULWord					acFramesProcessed;			///< @brief	Total number of frames successfully processed since CNTV2Card::AutoCirculateStart called.
 					ULWord					acFramesDropped;			///< @brief	Total number of frames dropped since CNTV2Card::AutoCirculateStart called
 					ULWord					acBufferLevel;				///< @brief	Number of buffered frames in driver ready to capture or play
@@ -6598,7 +6602,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::ReadRegisters function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadRegisters function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2GetRegisters)		//	AUTOCIRCULATE_TYPE_GETREGS
 			NTV2_BEGIN_PRIVATE
@@ -6677,7 +6681,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::WriteRegisters function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's WriteRegisters function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SetRegisters)		//	AUTOCIRCULATE_TYPE_SETREGS
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6730,7 +6734,7 @@ typedef enum
 
 		/**
 			@brief	This is used to atomically perform bank-selected register reads or writes.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6774,7 +6778,7 @@ typedef enum
 
         /**
             @brief	This is used to perform virtual data reads or writes.
-            @note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+            @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
         **/
         NTV2_STRUCT_BEGIN (NTV2VirtualData)
             NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
@@ -6809,7 +6813,7 @@ typedef enum
 		/**
 			@brief	This is used by the CNTV2Card::ReadSDIStatistics function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SDIInStatistics)		//	AUTOCIRCULATE_TYPE_SDISTATS
 			NTV2_BEGIN_PRIVATE
@@ -6851,15 +6855,15 @@ typedef enum
 
 		/**
 			@brief	This is returned by the CNTV2Card::AutoCirculateGetFrameStamp function, and is also embedded in the AUTOCIRCULATE_TRANSFER struct
-					returned from CNTV2Card::AutoCirculateTransfer. If used as its own NTV2Message (the new API version of the old \c GetFrameStamp call),
-					pass the NTV2Channel in the least significant byte of \c acFrameTime, and the requested frame in \c acRequestedFrame.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+					returned from CNTV2Card::AutoCirculateTransfer. If used as its own NTV2Message (the new API version of the old CNTV2Card::GetFrameStamp call),
+					pass the NTV2Channel in the least significant byte of FRAME_STAMP::acFrameTime, and the requested frame in FRAME_STAMP::acRequestedFrame.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (FRAME_STAMP)
 				NTV2_HEADER			acHeader;						///< @brief	The common structure header -- ALWAYS FIRST!
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
-																		///<		On entry, contains NTV2Channel of interest, but only for new API \c FRAME_STAMP message.
-					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (\c FRAME_STAMP message).
+																		///<		On entry, contains NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
+					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (::FRAME_STAMP message).
 					ULWord64			acAudioClockTimeStamp;			///< @brief	Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
 					ULWord				acAudioInStartAddress;			///< @brief	For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
@@ -6977,7 +6981,7 @@ typedef enum
 		/**
 			@brief	This object is embedded in the AUTOCIRCULATE_TRANSFER struct that's returned from the CNTV2Card::AutoCirculateTransfer function,
 					and contains status information about the transfer and the state of AutoCirculate.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)
 				NTV2_HEADER				acHeader;				///< @brief	The common structure header -- ALWAYS FIRST!
@@ -7023,7 +7027,7 @@ typedef enum
 			@brief	This object specifies the information that will be transferred to or from the AJA device in the CNTV2Card::AutoCirculateTransfer
 					function call. It will be used by the device driver only if the AUTOCIRCULATE_WITH_ANC option was used in the call to
 					CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
-			@note	This struct uses a constructor to properly initialize itself. Do not use \c memset or \c bzero to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)
 				NTV2_HEADER						acHeader;					///< @brief	The common structure header -- ALWAYS FIRST!

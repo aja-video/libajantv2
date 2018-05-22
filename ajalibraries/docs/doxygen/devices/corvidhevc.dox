@@ -46,8 +46,8 @@
 
 	@par		Ancillary Data
 
-	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
+	-	\ref vancframegeometries
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/172/25>

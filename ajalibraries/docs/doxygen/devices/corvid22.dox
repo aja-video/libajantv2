@@ -48,7 +48,7 @@
 
 	@par		Ancillary Data
 
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		External Connectivity
 
@@ -71,5 +71,5 @@
 
 	@par		Additional Topics
 
-	@subsubpage	aja102953
+	\ref aja102953
 **/

@@ -162,7 +162,7 @@ AJAExport void Make10BitWhiteLine(UWord* lineData,UWord numPixels=1920);
 																const YCbCr10BitPixel inPixelColor,
 																const bool inVancEnabled = false,
 																const bool in2Kx1080 = false,
-																const bool inWideVANC = false));	///< @deprecated	Use the identical function that accepts an \c NTV2VANCMode parameter instead of two booleans.
+																const bool inWideVANC = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 /**
 	@return		True if successful;  otherwise false.
@@ -184,7 +184,7 @@ AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWor
 																const YCbCrPixel inPixelColor,
 																const bool inVancEnabled = false,
 																const bool in2Kx1080 = false,
-																const bool inWideVanc = false));	///< @deprecated	Use the identical function that accepts an \c NTV2VANCMode parameter instead of two booleans.
+																const bool inWideVanc = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 AJAExport bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
 										const YCbCrPixel inPixelColor,  const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
@@ -302,11 +302,11 @@ AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat 
 	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
 															const NTV2FrameBufferFormat inFBFormat,
 															const bool inVANCenabled,
-															const bool inWideVANC = false));	///< @deprecated	Use the same function that accepts an \c NTV2VANCMode instead of two booleans.
+															const bool inWideVANC = false));	///< @deprecated	Use the same function that accepts an ::NTV2VANCMode instead of two booleans.
 	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
 															const NTV2FrameBufferFormat inFBFormat,
 															const bool inVANCenabled,
-															const bool inWideVANC));	///< @deprecated	Use the same function that accepts an \c NTV2VANCMode instead of two booleans.
+															const bool inWideVANC));	///< @deprecated	Use the same function that accepts an ::NTV2VANCMode instead of two booleans.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 /**
@@ -740,9 +740,9 @@ ULWord	AddAudioTestPattern (ULWord*             audioBuffer,
 											   NTV2Channel				channel,
 											   NTV2FrameBufferFormat	fbf,
 											   bool						convert,  // Turn on the conversion module
-											   bool						withKey,  // only supported for NTV2_CHANNEL1 for rgb formats with alpha
+											   bool						withKey,  // only supported for ::NTV2_CHANNEL1 for rgb formats with alpha
 											   bool						lut,	  // not supported
-											   bool						dualLink, // assume coming in RGB(only checked for NTV2_CHANNEL1
+											   bool						dualLink, // assume coming in RGB(only checked for ::NTV2_CHANNEL1
 											   bool						EtoE);
 
 	AJAExport bool BuildRoutingTableForInput (CNTV2SignalRouter &		outRouter,
@@ -750,9 +750,9 @@ ULWord	AddAudioTestPattern (ULWord*             audioBuffer,
 											   NTV2Channel				channel,
 											   NTV2FrameBufferFormat	fbf,
 											   bool						convert,  // Turn on the conversion module
-											   bool						withKey,  // only supported for NTV2_CHANNEL1 for rgb formats with alpha
+											   bool						withKey,  // only supported for ::NTV2_CHANNEL1 for rgb formats with alpha
 											   bool						lut,	  // not supported
-											   bool						dualLink, // assume coming in RGB(only checked for NTV2_CHANNEL1
+											   bool						dualLink, // assume coming in RGB(only checked for ::NTV2_CHANNEL1
 											   bool						EtoE);
 
 	AJAExport ULWord ConvertFusionAnalogToTempCentigrade (ULWord adc10BitValue);

@@ -26,11 +26,11 @@
 
 	@section		dualstream3g	Dual Stream 3G
 
-	In addition, since 3G could carry twice the information, it's also possible to combine two separate 1.5Gbps 4:2:2 image streams into a single 3G stream,
+	In addition, since 3G could carry twice the information, it’s also possible to combine two separate 1.5Gbps 4:2:2 image streams into a single 3G stream,
 	which is referred to as <b>Dual Stream 3G</b>. <b>Dual Stream 3G</b> is particularly useful in stereoscopic production where separate left and right eye
 	information is being captured.
 
-	It's important to note that <b>Dual Stream 3G</b> when used for stereoscopic is not the same as a "muxed" stereoscopic image.
+	It’s important to note that <b>Dual Stream 3G</b> when used for stereoscopic is not the same as a “muxed” stereoscopic image.
 	Stereoscopic muxing squeezes the left and right eye images into a single, standard video frame, potentially sacrificing the quality of the images.
 	<b>Dual Stream 3G</b> has the bandwidth to embed two complete 1.5 Gb image streams into a single 3G signal, which can then be extracted and used without compromise.
 
@@ -38,26 +38,26 @@
 	@section		ajalevelb	Newer AJA Devices Handle Level B Differently
 
 	On the wire, the speed of Level A and Level B are the same (148 MHz).
-	For Level A, the lines of the image are received at the AJA device's SDI input one at a time.
+	For Level A, the lines of the image are received at the AJA device’s SDI input one at a time.
 	The speed of the SDI input crosspoint is changed to 148 MHz so that the frame store can write the data into memory at the same rate it comes in.
 	For Level B, lines are received as an even/odd pair at a 74 MHz rate.
 	In this case it would be necessary to store one line temporarily while the other is being written into the frame store.
 	Older AJA devices (e.g., \ref kona3gufc, \ref kona3gquad, \ref corvid24, etc.), lack a FIFO to do this, so instead,
 	two frame stores are used to write both lines into memory simultaneously at a 74 MHz rate.
-	(This was how AJA engineers were able to graft the "new" Level B signals onto their existing designs.)
+	(This was how AJA engineers were able to graft the “new” Level B signals onto their existing designs.)
 	This is why you must use two frame stores for Level B signals on the \ref kona3gufc, \ref kona3gquad, \ref corvid24, and other devices of that era -- and must
-	also call the CNTV2Card::SetSmpte372 function to "gang" the frame stores.
+	also call the CNTV2Card::SetSmpte372 function to “gang” the frame stores.
 
 	Level B is handled much easier with newer AJA devices (e.g., \ref io4kquad, \ref io4kufc, \ref io4kquad, \ref io4kufc, \ref corvid44, \ref corvid88, etc.).
 	Simply route the SDI input directly to a single frame store, then configure the SDI input to <b>3G Level B</b>.
 
-	@note	<b>IMPORTANT:</b><br>When writing software to handle Level A and Level B formats, there's a difference between \c NTV2_FORMAT_1080p_6000
-			(which is synonymous with \c NTV2_FORMAT_1080p_6000_B), and \c NTV2_FORMAT_1080p_6000_A. The former was a way for AJA's older devices
+	@note	<b>IMPORTANT:</b><br>When writing software to handle Level A and Level B formats, there’s a difference between ::NTV2_FORMAT_1080p_6000
+			(which is synonymous with ::NTV2_FORMAT_1080p_6000_B), and ::NTV2_FORMAT_1080p_6000_A. The former was a way for AJA’s older devices
 			with slower FPGAs to process high frame rate progressive formats, which was done by using two Frame Stores, each running at 30 Hz, to
 			handle a 60 Hz signal.<br>
 			<br>
-			AJA's newer devices, including the \ref kona4quad, have faster FPGAs.
-			The recommended method is to use a video format of \c NTV2_FORMAT_1080p_6000_A.
+			AJA’s newer devices, including the \ref kona4quad, have faster FPGAs.
+			The recommended method is to use a video format of ::NTV2_FORMAT_1080p_6000_A.
 			The device then runs at a true 60 Hz frame rate, and only one Frame Store is required.<br>
 			<br>
 			To maintain consistent signal routing when working with 3G formats, 3G LevelB-to-LevelA SDI input converters were introduced for

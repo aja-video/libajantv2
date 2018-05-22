@@ -2439,8 +2439,8 @@ typedef enum NTV2InputCrosspointID
 
 /**
     @brief	Identifies firmware widgets that logically can have zero or more signal inputs
-            (identified by \c NTV2InputCrosspointID) and/or zero or more signal outputs
-            (identified by \c NTV2OutputCrosspointID).
+            (identified by ::NTV2InputCrosspointID) and/or zero or more signal outputs
+            (identified by ::NTV2OutputCrosspointID).
 **/
 #define NTV2_WIDGET_FIRST		0
 typedef enum
