@@ -148,7 +148,7 @@
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
 	However, dual-link RGB video to/from RGB frame buffers will work.
 
-	@note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceHasCustomAnc) will pass VANC.
+	@note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceCanDoCustomAnc) will pass VANC.
 			Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the Mixer is configured to pass foreground or background VANC.
 			Call CNTV2Card::SetMixerVancOutputFromForeground to change the setting.
 

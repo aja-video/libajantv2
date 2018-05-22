@@ -29,7 +29,7 @@
  *  @param[in]	_expression_	Boolean expression that should be true.
  */
 
-/** @def AJA_REPORT(_index_, _severity_, ...)
+/** @def AJA_REPORT(_index_, _severity_, _format_)
  *	Report debug messages to active destinations.  
  *	@hideinitializer
  *
@@ -37,7 +37,7 @@
  *  
  *  @param[in]	_index_		Send message to this destination index.
  *  @param[in]	_severity_	Severity (::AJA_DEBUG_SEVERITY) of the message to report.
- *  @param[in]	...			Format parameters passed to vsprintf. The first is the format itself.
+ *  @param[in]	_format_	Format parameters passed to vsprintf. The first is the format itself.
  */
 
 /**	@} */

@@ -34,7 +34,7 @@ whose URL is typically of the form:
 The documentation is fully cross-referenced, searchable, and includes collaboration diagrams and call graphs.
 
 
-<hr size="50px" />
+<hr size="50px">
 @section	gs-sdkcontents		SDK Contents
 
 This section explores the contents of the SDK, which is nearly identical on all three platforms.
@@ -90,7 +90,7 @@ They must be built using the provided Makefiles. Follow the instructions below (
 
 
 
-<hr size="50px" />
+hr size="50px">
 @section	gs-compatibility	SDK Forward and Backward Compatibility
 
 The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA.
@@ -227,7 +227,7 @@ page and/or the device firmware page in the <a href="https://sdksupport.aja.com/
 
 
 
-<hr size="50px" />
+hr size="50px">
 @section		gs-sdkbuild		Building the Libraries
 
 @subsection		gs-linuxsdkbuild	Building on Linux
@@ -339,7 +339,7 @@ Assuming <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</
 The built libraries will be in \c lib ; the built executables will be in \c bin (both are peers to \c ajalibraries).
 
 
-<hr size="50px" />
+hr size="50px">
 
 @section	gs-newprojects	Creating New Projects With the SDK
 

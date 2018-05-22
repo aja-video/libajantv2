@@ -57,6 +57,10 @@
 	-	Does not support DVCPro HD or HDV.
 	-	RGB on SDI inputs/outputs not supported.
 
+	@par		Ancillary Data
+
+	-	\ref vancframegeometries only
+
 	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats (Corvid 3G only).
 
 	@par		Firmware

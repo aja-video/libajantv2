@@ -52,7 +52,7 @@
 	-	Up/Down/Cross Converter
 
 	@par		Ancillary Data
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		External Connectivity
 	-	Optional \ref aja101884 provides access to other inputs and outputs
