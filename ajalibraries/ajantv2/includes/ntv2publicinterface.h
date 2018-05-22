@@ -4446,13 +4446,13 @@ typedef enum _AutoCircCommand_
 **/
 typedef enum
 {
-	NTV2_AUTOCIRCULATE_DISABLED	= 0,
-	NTV2_AUTOCIRCULATE_INIT,
-	NTV2_AUTOCIRCULATE_STARTING,
-	NTV2_AUTOCIRCULATE_PAUSED,
-	NTV2_AUTOCIRCULATE_STOPPING,
-	NTV2_AUTOCIRCULATE_RUNNING,
-	NTV2_AUTOCIRCULATE_STARTING_AT_TIME,
+	NTV2_AUTOCIRCULATE_DISABLED	= 0,		///< @brief	The AutoCirculate channel is stopped.
+	NTV2_AUTOCIRCULATE_INIT,				///< @brief	The AutoCirculate channel is initializing, waiting for CNTV2Card::AutoCirculateStart to be called.
+	NTV2_AUTOCIRCULATE_STARTING,			///< @brief	The AutoCirculate channel is starting, waiting for the first VBI and/or call to CNTV2Card::AutoCirculateTransfer.
+	NTV2_AUTOCIRCULATE_PAUSED,				///< @brief	The AutoCirculate channel is paused.
+	NTV2_AUTOCIRCULATE_STOPPING,			///< @brief	The AutoCirculate channel is stopping.
+	NTV2_AUTOCIRCULATE_RUNNING,				///< @brief	The AutoCirculate channel is running.
+	NTV2_AUTOCIRCULATE_STARTING_AT_TIME,	///< @brief	The AutoCirculate channel is starting, waiting for the start time specified in the call to CNTV2Card::AutoCirculateStart to arrive.
 	NTV2_AUTOCIRCULATE_INVALID
 } NTV2AutoCirculateState;
 
