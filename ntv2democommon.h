@@ -50,7 +50,8 @@ const unsigned int	CIRCULAR_BUFFER_SIZE	(10);		///< @brief	Specifies how many AV
 
 
 /**
-	@brief	A handy class that makes it easy to "bounce" an unsigned integer value between a minimum and maximum value.
+	@brief	A handy class that makes it easy to "bounce" an unsigned integer value between a minimum and maximum value
+			using sequential calls to its Next method.
 **/
 template <typename T> class Bouncer
 {
@@ -146,6 +147,11 @@ typedef enum _NTV2TCIndexKinds
 
 
 
+/**
+	@brief	A set of common convenience functions used by the NTV2 \ref demoapps.
+			Most are used for converting a command line argument into ::NTV2VideoFormat,
+			::NTV2FrameBufferFormat, etc. types.
+**/
 class CNTV2DemoCommon
 {
 	public:
@@ -155,7 +161,7 @@ class CNTV2DemoCommon
 	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
-			@return		The supported NTV2VideoFormatSet.
+			@return		The supported ::NTV2VideoFormatSet.
 		**/
 		static const NTV2VideoFormatSet &	GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
@@ -164,16 +170,18 @@ class CNTV2DemoCommon
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											warns if the video format is incompatible with that device.
 			@return		A string that can be printed to show the supported video formats.
+			@note		These video format strings are mere conveniences for specifying video formats in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief	Returns the NTV2VideoFormat that matches the given string.
-			@param[in]	inStr		Specifies the string to be converted to an NTV2VideoFormat.
+			@brief	Returns the ::NTV2VideoFormat that matches the given string.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2VideoFormat.
 			@param[in]	inKinds		Specifies which video format type is expected in "inStr", whether non-4K/UHD (the default),
 									exclusively 4K/UHD, or both/all.
-			@return		The given string converted to an NTV2VideoFormat, or NTV2_FORMAT_UNKNOWN if there's no match.
+			@return		The given string converted to an ::NTV2VideoFormat, or ::NTV2_FORMAT_UNKNOWN if there's no match.
 		**/
 		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
 
@@ -191,7 +199,7 @@ class CNTV2DemoCommon
 	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
-			@return		The supported NTV2PixelFormatSet.
+			@return		The supported ::NTV2PixelFormatSet.
 		**/
 		static NTV2FrameBufferFormatSet		GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
 
@@ -200,20 +208,22 @@ class CNTV2DemoCommon
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											warns if the pixel format is incompatible with that device.
 			@return		A string that can be printed to show the available pixel formats (or those that are supported by a given device).
+			@note		These pixel format strings are mere conveniences for specifying pixel formats in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief	Returns the NTV2FrameBufferFormat that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an NTV2FrameBufferFormat.
-			@return		The given string converted to an NTV2FrameBufferFormat, or NTV2_FBF_INVALID if there's no match.
+			@brief	Returns the ::NTV2FrameBufferFormat that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2FrameBufferFormat.
+			@return		The given string converted to an ::NTV2FrameBufferFormat, or ::NTV2_FBF_INVALID if there's no match.
 		**/
 		static NTV2FrameBufferFormat		GetPixelFormatFromString (const std::string & inStr);
 
 		/**
-			@return		The equivalent AJA_PixelFormat for the given NTV2FrameBufferFormat.
-			@param[in]	inFormat	Specifies the NTV2FrameBufferFormat to be converted into an equivalent AJA_PixelFormat.
+			@return		The equivalent ::AJA_PixelFormat for the given ::NTV2FrameBufferFormat.
+			@param[in]	inFormat	Specifies the ::NTV2FrameBufferFormat to be converted into an equivalent ::AJA_PixelFormat.
 		**/
 		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat);
 	///@}
@@ -224,7 +234,7 @@ class CNTV2DemoCommon
 	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
-			@return		The supported NTV2InputSourceSet.
+			@return		The supported ::NTV2InputSourceSet.
 		**/
 		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL);
 
@@ -233,14 +243,16 @@ class CNTV2DemoCommon
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											warns if the input source is incompatible with that device.
 			@return		A string that can be printed to show the available input sources (or those that are supported by a given device).
+			@note		These input source strings are mere conveniences for specifying input sources in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetInputSourceStrings (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief		Returns the NTV2InputSource that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an NTV2InputSource.
-			@return		The given string converted to an NTV2InputSource, or NTV2_INPUTSOURCE_INVALID if there's no match.
+			@brief		Returns the ::NTV2InputSource that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2InputSource.
+			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
 		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr);
 	///@}
@@ -251,7 +263,7 @@ class CNTV2DemoCommon
 	///@{
 		/**
 			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
-			@return		The supported NTV2TCIndexes set.
+			@return		The supported ::NTV2TCIndexes set.
 		**/
 		static const NTV2TCIndexes			GetSupportedTCIndexes (const NTV2TCIndexKinds inKinds);
 
@@ -260,14 +272,16 @@ class CNTV2DemoCommon
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											warns if the timecode index is incompatible with that device.
 			@return		A string that can be printed to show the available timecode indexes (or those that are supported by a given device).
+			@note		These timecode index strings are mere conveniences for specifying timecode indexes in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetTCIndexStrings (const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
 																const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief		Returns the NTV2TCIndex that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an NTV2TCIndex.
-			@return		The given string converted to an NTV2TCIndex, or NTV2_TCINDEX_INVALID if there's no match.
+			@brief		Returns the ::NTV2TCIndex that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TCIndex.
+			@return		The given string converted to an ::NTV2TCIndex, or ::NTV2_TCINDEX_INVALID if there's no match.
 		**/
 		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr);
 	///@}
@@ -280,13 +294,15 @@ class CNTV2DemoCommon
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											returns the audio systems that are compatible with that device.
 			@return		A string that can be printed to show the available audio systems that are supported by a given device.
+			@note		These audio system strings are mere conveniences for specifying audio systems in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetAudioSystemStrings (const std::string inDeviceSpecifier = std::string ());
 
 		/**
-			@brief	Returns the NTV2AudioSystem that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an NTV2AudioSystem.
-			@return		The given string converted to an NTV2AudioSystem, or NTV2_AUDIOSYSTEM_INVALID if there's no match.
+			@brief	Returns the ::NTV2AudioSystem that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2AudioSystem.
+			@return		The given string converted to an ::NTV2AudioSystem, or ::NTV2_AUDIOSYSTEM_INVALID if there's no match.
 		**/
 		static NTV2AudioSystem				GetAudioSystemFromString (const std::string & inStr);
 	///@}
