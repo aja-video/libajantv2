@@ -46,7 +46,7 @@
 
 	@par		Ancillary Data
 
-	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
+	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
 	-	VANC geometries
 
 	@par		Firmware

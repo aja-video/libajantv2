@@ -24,7 +24,7 @@ computer's file system.
 @section	devshareisinuse		Determining if an AJA Device is Being Used
 
 To determine if an AJA device is being used by another application, whether it be an OEM application, or one that uses the
-Control Panel services, application writers should call \c GetStreamingApplication.
+Control Panel services, application writers should call CNTV2Card::GetStreamingApplication.
 
 @code
 	CNTV2Card	theDevice;

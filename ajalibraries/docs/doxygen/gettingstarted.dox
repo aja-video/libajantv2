@@ -116,42 +116,42 @@ obsolete SDK functions, data types and constants under preprocessor \c #ifdef bl
 #endif  //  !defined(NTV2_DEPRECATE)
 @endcode
 
-This means that if the \c NTV2_DEPRECATE macro is undefined, then existing code that relies on the old APIs
-will continue to compile, link and run.  If the \c NTV2_DEPRECATE macro is defined, then the obsolete APIs
+This means that if the ::NTV2_DEPRECATE macro is undefined, then existing code that relies on the old APIs
+will continue to compile, link and run.  If the ::NTV2_DEPRECATE macro is defined, then the obsolete APIs
 disappear from the compilation, and build errors will result if they’re used.
 
 Deprecation history:
--	<b>SDK 11.3:</b> \c NTV2_DEPRECATE macro introduced (but not defined anywhere).
--	<b>SDKs 11.3 - 12.3:</b> Shipped libraries built with old APIs intact (i.e. \c NTV2_DEPRECATE undefined, by default).
--	<b>SDK 12.4:</b> \c NTV2_DEPRECATE macro first defined in <b>ajatypes.h</b> header file. This was the first SDK
+-	<b>SDK 11.3:</b> ::NTV2_DEPRECATE macro introduced (but not defined anywhere).
+-	<b>SDKs 11.3 - 12.3:</b> Shipped libraries built with old APIs intact (i.e. ::NTV2_DEPRECATE undefined, by default).
+-	<b>SDK 12.4:</b> ::NTV2_DEPRECATE macro first defined in <b>ajatypes.h</b> header file. This was the first SDK
 	that jettisoned the old APIs by default.
--	<b>SDK 12.5:</b> \c NTV2_DEPRECATE_12_5 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 12.5:</b> ::NTV2_DEPRECATE_12_5 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	CNTV2SignalRouter’s ‘addWithValue’ and ‘AddConnection’ methods that accepted NTV2RoutingEntry’s.
--	<b>SDK 12.6:</b> \c NTV2_DEPRECATE_12_6 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 12.6:</b> ::NTV2_DEPRECATE_12_6 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	The old AutoCirculate APIs (InitAutoCirculate, StartAutoCirculate, etc.)
 	-	Jettisoned some old NTV2DeviceID’s
 	-	GetFormatDescriptor global functions.
--	<b>SDK 12.7:</b> \c NTV2_DEPRECATE_12_7 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 12.7:</b> ::NTV2_DEPRECATE_12_7 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	CNTV2Card’s runtime bitfile-swapping functions.
 	-	CNTV2Card::DisplayNTV2Error.
 	-	The old virtual register constant names (to force use of new “kVReg…” names).
--	<b>SDK 13.0:</b> \c NTV2_DEPRECATE_13_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 13.0:</b> ::NTV2_DEPRECATE_13_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	NTV2FormatDescriptor constructors with bools for wide & tall VANC and 2Kx1080.
 	-	GetFormatDescriptor global functions.
-	-	\c kRegAuxInterruptDelay and \c kRegReserved89 registers got redeployed as \c kRegBitfileDate and \c kRegBitfileDate, respectively.
-	-	\c Fill8BitYCbCrVideoFrame and \c Fill10BitYCbCrVideoFrame utility functions.
-	-	\c GetVideoActiveSize and \c GetVideoWriteSize utility functions that accept bools for wide & tall VANC.
--	<b>SDK 13.1:</b> \c NTV2_DEPRECATE_13_1 macro defined in <b>ajatypes.h</b>.
--	<b>SDK 14.0:</b> \c NTV2_DEPRECATE_14_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
-	-	CNTV2Card’s RP188 functions that use RP188_STRUCT’s.
+	-	\c kRegAuxInterruptDelay and \c kRegReserved89 registers got redeployed as ::kRegBitfileDate and ::kRegBitfileDate, respectively.
+	-	::Fill8BitYCbCrVideoFrame and ::Fill10BitYCbCrVideoFrame utility functions.
+	-	CNTV2Card::GetVideoActiveSize and CNTV2Card::GetVideoWriteSize utility functions that accept bools for wide & tall VANC.
+-	<b>SDK 13.1:</b> ::NTV2_DEPRECATE_13_1 macro defined in <b>ajatypes.h</b>.
+-	<b>SDK 14.0:</b> ::NTV2_DEPRECATE_14_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	::CNTV2Card’s RP188 functions that use ::RP188_STRUCT’s.
 	-	Retired several mis-named NTV2DeviceID’s.
--	<b>SDK 14.1:</b> \c NTV2_DEPRECATE_14_1 macro defined in <b>ajatypes.h</b>.
--	<b>SDK 14.2:</b> \c NTV2_DEPRECATE_14_2 and \c NTV2_DEPRECATE_14_2 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 14.1:</b> ::NTV2_DEPRECATE_14_1 macro defined in <b>ajatypes.h</b>.
+-	<b>SDK 14.2:</b> ::NTV2_DEPRECATE_14_2 and ::NTV2_DEPRECATE_14_2 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	AJAAncillaryData::SetLocationVideoStream
 	-	The 3-parameter variant of AJAAncillaryList::AddVANCData.
 	-	AJA CC library’s caption logging control flags.
 
-To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define \c NTV2_DEPRECATE…
+To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
 line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
 
 
@@ -371,13 +371,13 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 -	Use the “Latest Mac OS X” SDK. (The SDK can be built against MacOS SDK 10.9 or later.)
 -	Use a “Mac OS X Deployment Target” of 10.9 (“Mountain Lion”) or later.
 -	Use \c x86_64 (64-bit) architecture.
--	Define both preprocessor macros \c AJAMac and \c AJA_MAC as \c 1.
+-	Define both preprocessor macros \c AJAMac and \c AJA_MAC.
 -	Add the following header search paths:
 	-	\c sdkdir/ajalibraries/ajantv2/includes
 	-	\c sdkdir/ajalibraries/ajantv2/src/mac
-	-	\c sdkdir/ajalibraries/ajabase (only if <b>ajabase</b> is needed)
-	-	\c sdkdir/ajalibraries/ajacc (only if the AJA Captioning Library is needed)
-	-	\c sdkdir/ajalibraries/ajaanc (only if the AJA ancillary data library is needed)
+	-	\c sdkdir/ajalibraries/ajabase (only if the \ref ajabase is needed)
+	-	\c sdkdir/ajalibraries/ajacc (only if the \ref ajacc is needed)
+	-	\c sdkdir/ajalibraries/ajaanc (only if the \ref ajaanc is needed)
 -	It is not necessary to always search “user” header paths.
 -	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	Add the following library search paths:

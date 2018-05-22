@@ -6,8 +6,10 @@
 	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
 
 	The purpose of the AJACCLib library is to enable third-parties to easily access and/or control the caption data entering or
-	leaving an AJA NTV2 device. The library currently is very focused on CEA-608. AJA is interested in learning from its OEM developers
-	what kind of captioning support they're interesting in having added to the library (e.g., “full/native” CEA-708, Teletext, OP-42/47, etc.).
+	leaving an AJA NTV2 device.
+
+	@note	The library currently is very focused on CEA-608. It does not support “full/native” CEA-708, Teletext, OP-42/47,
+			ARIB STD-B37, etc.
 
 	@par	Demonstration Applications
 	-	\ref ntv2ccgrabber
@@ -25,29 +27,44 @@
 	@par	Object Lifespan
 
 	Caption library class instances are provided using type-safe “smart” pointers, which helps to simplify memory management,
-	and eliminate leaks and double-free's. Client programs are freed from having to manually micromanage the lifespans of these
-	objects.
+	and eliminate leaks and double-free’s. Client programs need not micromanage the lifespans of these objects.
 
 	Client programs instantiate library objects using a <b>Create</b> class method, which always return a valid smart pointer if the
 	function result is true, an invalid one if the result is false, and never throw \c std::bad_alloc.
 
 	@code
+		class MyClass
 		{
-			{
-				XPtr	y;
+			private:
+				CNTV2CaptionDecoder608Ptr	m608Decoder;
+
+			public:
+				MyClass()
 				{
-					XPtr	x;
-					if (X::Create (x))
-					{
-						y = x;
-						x->DoSomething ();
-					}
+					CNTV2CaptionDecoder608::Create(m608Decoder);
+					//	You may consider throwing an exception here if Create returned false
 				}
-				assert (y);
-				(*y).DoSomething ();  //  The 'X' instance still exists
-			}
-			//  The 'X' instance has been freed
-		}
+
+				virtual ~MyClass()
+				{
+					//	The decoder instance is automatically freed
+				}
+
+				bool DoWork()
+				{
+					if (!m608Decoder)
+						return false;	//	Fail, no decoder instance
+
+					do
+					{
+						//	. . . processing loop . . .
+						m608Decoder->DoSomething();
+						. . .
+					} while (workStillToBeDone);
+
+					return true;
+				}
+		};
 	@endcode
 
 	@section	ajacc-decoding608	Decoding CEA-608 Captions
@@ -58,7 +75,7 @@
 	i.e., it decodes them all simultaneously.
 
 	For display purposes, the class provides CNTV2CaptionDecoder608::SetDisplayChannel to select the current displayed channel of interest.
-	However, since all channels are decoded simultaneously in parallel, the decoder's “display” channel can be changed at any
+	However, since all channels are decoded simultaneously in parallel, the decoder’s “display” channel can be changed at any
 	time, with the state of the newly-selected channel immediately seen without having to wait for the channel to receive
 	enough new data to get back in-sync.
 
@@ -66,7 +83,7 @@
 	CNTV2CaptionDecoder608::SetDisplayChannel to select the current displayed channel of interest (if any).
 	Clients should then call CNTV2CaptionDecoder608::ProcessNew608FrameData with the four bytes of CEA-608 CaptionData
 	that arrive every frame. If interlaced video is being decoded, 2 bytes of data are often arriving with each field.
-	The best thing to do is wait until the end of the frame and package both fields' data into the one call.
+	The best thing to do is wait until the end of the frame and package both fields’ data into the one call.
 
 	CNTV2CaptionDecoder608::ProcessNew608FrameData should be called every frame, even if the captioning data for that frame is all zeroes.
 	CEA-608 caption rules call for certain commands to be sent twice on adjacent frames. This means that there is a difference between
@@ -145,7 +162,7 @@
 	Once the decoder has the ancillary data, call its CNTV2CaptionDecoder708::ParseSMPTE334AncPacket method to have it parsed.
 
 	To obtain any embedded 608-style captions it was able to decode, call its CNTV2CaptionDecoder708::GetCC608CaptionData method,
-	then pass them into the CNTV2CaptionDecoder608 instance's CNTV2CaptionDecoder608::ProcessNew608FrameData function.
+	then pass them into the CNTV2CaptionDecoder608 instance’s CNTV2CaptionDecoder608::ProcessNew608FrameData function.
 
 	@note	This decoder does not currently decode “native” CEA-708 captions — i.e., service levels 2 and up, that make use of
 			windows of varying dimensions and transparency, fonts of varying sizes and styles, characters of varying colors and
@@ -182,11 +199,11 @@
 	-	NTV2_FBF_10BIT_DPX
 	-	NTV2_FBF_10BIT_RGB
 
-	It's easiest to use its class methods, which automatically take care of creating, opening and initializing the
+	It’s easiest to use its class methods, which automatically take care of creating, opening and initializing the
 	specific renderer instance for a given frame buffer format and frame geometry.
-	-	CNTV2CaptionRenderer::BurnChar, which "blits" a single CEA-608 character at a specific pixel position in the raster buffer;
-	-	CNTV2CaptionRenderer::BurnString "blits" a UTF-8-encoded string into a specific row/column position;
-	-	CNTV2CaptionRenderer::BurnStringAtXY "blits" a UTF-8-encoded string into a specific pixel position.
+	-	CNTV2CaptionRenderer::BurnChar, which “blits” a single CEA-608 character at a specific pixel position in the raster buffer;
+	-	CNTV2CaptionRenderer::BurnString “blits” a UTF-8-encoded string into a specific row/column position;
+	-	CNTV2CaptionRenderer::BurnStringAtXY “blits” a UTF-8-encoded string into a specific pixel position.
 
 	If more control is needed over when (and which) renderer instances get allocated or freed, use these class methods:
 	-	CNTV2CaptionRenderer::GetRenderer fetches the renderer for a given frame buffer format and frame geometry,

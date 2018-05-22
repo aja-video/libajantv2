@@ -205,9 +205,10 @@ activity.
 
 @subsection	autocirculatechannels	AutoCirculate Channels
 
-The \c NTV2Channel passed to CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AutoCirculateInitForOutput) identifies the
+The ::NTV2Channel passed to CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AutoCirculateInitForOutput) identifies the
 device \ref vidop-fs that is to be configured and operated by AutoCirculate in the device driver (i.e.
-\c NTV2_CHANNEL1 == 0 == FrameStore 1 == \c NTV2_WgtFrameBuffer1,  \c NTV2_CHANNEL2 == 1 == FrameStore 2 == \c NTV2_WgtFrameBuffer2, etc.).
+::NTV2_CHANNEL1 \c == 0 \c == FrameStore 1 \c == ::NTV2_WgtFrameBuffer1,
+::NTV2_CHANNEL2 \c == 1 \c == FrameStore 2 \c == ::NTV2_WgtFrameBuffer2, etc.).
 
 @image	html	ac-whichinterrupt.png
 

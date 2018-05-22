@@ -36,7 +36,7 @@
  *	In Windows, this macro will specify the file name and line number of the report.
  *  
  *  @param[in]	_index_		Send message to this destination index.
- *  @param[in]	_severity_	Severity (\c AJA_DEBUG_SEVERITY) of the message to report.
+ *  @param[in]	_severity_	Severity (::AJA_DEBUG_SEVERITY) of the message to report.
  *  @param[in]	...			Format parameters passed to vsprintf. The first is the format itself.
  */
 
@@ -250,7 +250,7 @@ public:
 	 *	Report debug message to the specified destination index.
 	 *
 	 *	@param[in]	index		Report the message to this destination index.
-	 *	@param[in]	severity	Severity (\c AJA_DEBUG_SEVERITY) of the message to report.
+	 *	@param[in]	severity	Severity (::AJA_DEBUG_SEVERITY) of the message to report.
 	 *	@param[in]	pFileName	The source filename reporting the message.
 	 *	@param[in]	lineNumber	The line number in the source file reporting the message.
 	 *  @param[in]	...			Format parameters to be passed to vsprintf. The first is the format itself.
@@ -261,7 +261,7 @@ public:
      *	Report debug message to the specified destination index.
      *
      *	@param[in]	index		Report the message to this destination index.
-     *	@param[in]	severity	Severity (\c AJA_DEBUG_SEVERITY) of the message to report.
+     *	@param[in]	severity	Severity (::AJA_DEBUG_SEVERITY) of the message to report.
      *	@param[in]	pFileName	The source filename reporting the message.
      *	@param[in]	lineNumber	The line number in the source file reporting the message.
      *  @param[in]	message		The message to report.
