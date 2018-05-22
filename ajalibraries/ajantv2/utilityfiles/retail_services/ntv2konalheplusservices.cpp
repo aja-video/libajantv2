@@ -66,7 +66,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 	
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
@@ -719,7 +719,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 	
 	bool					bDualStreamOut	= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-											  IsVideoFormatHfrB(mFb1VideoFormat);
+											  IsVideoFormatB(mFb1VideoFormat);
 	
 	// FrameBuffer 2: make sure formats matches FB1 for DualLink B mode (SMPTE 372)
 	if (bDualStreamOut)

@@ -115,7 +115,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -1522,7 +1522,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	//bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1562,7 +1562,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	bool inHfrB = IsVideoFormatHfrB(inputFormat);
+	bool inHfrB = IsVideoFormatB(inputFormat);
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
@@ -2768,7 +2768,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatHfrB(mFb1VideoFormat) ||											// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
 			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||				// Stereo 3D
 			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
@@ -2837,7 +2837,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatHfrB(mFb1VideoFormat) ||									// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||									// Dual Stream - p60b
 			 mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||			// Stereo 3D
 			 mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)			// Video + Key
 	{
@@ -3333,7 +3333,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 							 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-							 (IsVideoFormatHfrB(mFb1VideoFormat) == true)  );
+							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
 	bool b2xQuadOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
 		                 || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
@@ -3598,13 +3598,13 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 			
 			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
+			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{	
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
+			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		
 		// color space sample rate
@@ -3766,7 +3766,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 	{
 		if (bHfr)
 		{
-			sdi5_3GbTransportOut = IsVideoFormatHfrB(mFb1VideoFormat)
+			sdi5_3GbTransportOut = IsVideoFormatB(mFb1VideoFormat)
 				|| (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 		}
 		else

@@ -35,7 +35,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 		bDSKOn = false;
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbOut			= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);	
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
@@ -410,7 +410,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
-	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default

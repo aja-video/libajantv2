@@ -68,7 +68,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	DeviceServices::SetDeviceXPointPlayback();
 	
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
-	bool						b2FbLevelBHfr		= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
@@ -632,7 +632,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						b2FbLevelBHfr    	= IsVideoFormatHfrB(mFb1VideoFormat);
+	bool						b2FbLevelBHfr    	= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoIn   		= false;
 	int							bFb1Disable 		= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable 		= 1;		// Assume Channel 2 IS disabled by default
@@ -643,7 +643,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	bool inHfrB = IsVideoFormatHfrB(inputFormat);
+	bool inHfrB = IsVideoFormatB(inputFormat);
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1020,7 +1020,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 
 	// SDI Out 3 - acts like SDI 1
-	if(IsVideoFormatHfrB(mFb1VideoFormat) ||												// Dual Stream - p60b
+	if(IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
 		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
@@ -1055,7 +1055,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	}
 
 	// SDI Out 4 - acts like SDI 2
-	if (IsVideoFormatHfrB(mFb1VideoFormat) ||												// Dual Stream - p60b
+	if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
 		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
 		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
@@ -1472,7 +1472,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-		(IsVideoFormatHfrB(mFb1VideoFormat) == true));
+		(IsVideoFormatB(mFb1VideoFormat) == true));
 
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
@@ -1637,13 +1637,13 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 			}
 			mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
+			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatHfrB(mFb1VideoFormat));
+			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 
 		// color space sample rate
