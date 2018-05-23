@@ -184,31 +184,31 @@
 
 	@subsection	vidop-fs		Frame Store Operation
 
-	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that is associated with
-	several hardware Registers that monitor and control it. Some of the important properties
-	these Registers get and set are:
+	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that uses several
+	registers to monitor and control its principal properties:
 	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget will not access SDRAM.
 		Call CNTV2Card::IsChannelEnabled to determine if a Frame Store is enabled or not.
 		Calling CNTV2Card::EnableChannel or CNTV2Card::DisableChannel will change it.
 		Note that AutoCirculate sets this for you, but won’t “un-set” it.
-	-	<b>Mode</b> — This correlates to the NTV2Mode enumeration in the SDK.
+	-	<b>Mode</b> — This correlates to the ::NTV2Mode enumeration in the SDK.
 		In ::NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
 		in ::NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
-		to determine the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
+		to obtain the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
 		Note that AutoCirculate sets this for you, but doesn’t “un-set” it.
-	-	<b>Frame Buffer Format</b> — This coincides with the NTV2FrameBufferFormat enumeration
+	-	<b>Frame Buffer Format</b> — This coincides with the ::NTV2FrameBufferFormat enumeration
 		in the SDK. Call CNTV2Card::GetFrameBufferFormat to determine the current format;
 		calling CNTV2Card::SetFrameBufferFormat will change it. See \ref devicefbformats for details.
 		AutoCirculate users must set this.
-	-	<b>Video Format</b> — This correlates to the NTV2VideoFormat enumeration in the SDK,
-		and implies a Frame Geometry, Video Standard and Frame Rate. Call CNTV2Card::GetVideoFormat
-		to determine the current format; calling CNTV2Card::SetVideoFormat will set it.
+	-	<b>Video Format</b> — This correlates to the ::NTV2VideoFormat enumeration in the SDK,
+		and implies a ::NTV2FrameGeometry, ::NTV2Standard and ::NTV2FrameRate.
+		Call CNTV2Card::GetVideoFormat to determine the current format;
+		call CNTV2Card::SetVideoFormat to change it.
 		AutoCirculate users must set this.
 	-	<b>Input Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will be continually written with video frame data <b>if</b>…
 		-	the Frame Store is Enabled;
 		-	its Mode is Capture;
-		-	and a signal is routed to the Frame Store’s input.
+		-	and a signal is routed to its input crosspoint(s).
 	
 		Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		Call CNTV2Card::SetInputFrame to change it.
@@ -258,6 +258,37 @@
 	unsigned integer value, where zero corresponds to ::NTV2_CHANNEL1.
 	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
 	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
+
+
+	@subsection	independentmode		Multi-Format / “Independent” Mode
+
+	<b>Multi-Format Mode</b>, also known as “Independent” mode, is a device capability in which it can
+	simultaneously operate more than one stream, with each having a different video format.
+	Devices having this capability that are in this mode are able to use a different ::NTV2VideoFormat
+	on each Frame Store.
+
+	This differs from prior device capability. For example, assuming there was sufficient DMA and processor
+	bandwidth on the host, the \ref corvid24 could simultaneously ingest two video streams, and playout
+	another two video streams — but all four streams must have the identical ::NTV2VideoFormat.
+
+	In <b>Multi-Format Mode</b>, for example, assuming sufficient PCIe and host processor bandwidth,
+	the \ref corvid44 could simultaneously ingest ::NTV2_FORMAT_720p_5000 and ::NTV2_FORMAT_525_5994 while
+	playing ::NTV2_FORMAT_1080p_2997 and ::NTV2_FORMAT_720p_5994.
+
+	The relevant SDK calls:
+	-	Call ::NTV2DeviceCanDoMultiFormat to determine if a device is capable of simultaneously streaming
+		multiple, different video formats.
+	-	Call CNTV2Card::GetMultiFormatMode to find out if the device is currently operating in Multi-Format
+		Mode or not.
+	-	Call CNTV2Card::SetMultiFormatMode to change the mode.
+
+	@note	In <b>Multi-Format Mode</b>, because NTV2 devices only have one hardware clock for driving the
+			outputs, all playout video formats must be in the same clock family.
+			Call ::IsMultiFormatCompatible(const NTV2VideoFormat, const NTV2VideoFormat) to find out if two
+			video formats are multi-format compatible.
+			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
+			rates are multi-format compatible.
+			See \ref deviceclockingandsync for more details.
 
 
 	@subsection	vidop-fbaccess		Frame Buffer Access
@@ -529,11 +560,11 @@
 	-	3Gbps SDI inputs have two output crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
 		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used ::NTV2_WgtSDIIn2 for DS1 and ::NTV2_WgtSDIIn2 for DS2.
 	-	There are two ways to obtain an SDI input’s ::NTV2OutputCrosspointID …
-		-	Call ::GetSDIInputOutputXptFromChannel…
+		-	Call ::GetSDIInputOutputXptFromChannel …
 			-	Specify the SDI input connector by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for SDI In 3).
 			-	By default, it returns data stream 1’s crosspoint.
 				To obtain Data Stream 2’s crosspoint, specify \c true for \c inIsDS2.
-		-	Call ::GetInputSourceOutputXpt …
+		-	Or call ::GetInputSourceOutputXpt …
 			-	Specify the SDI input by passing it ::NTV2_INPUTSOURCE_SDI1, ::NTV2_INPUTSOURCE_SDI2, …etc.
 			-	By default, it returns Data Stream 1’s crosspoint.
 				For Data Stream 2’s crosspoint, specify \c true for \c inIsSDI_DS2.
@@ -543,7 +574,7 @@
 
 	An HDMI Input widget represents a physical HDMI input connector.
 	-	There is one of these widgets for each input HDMI connector.
-	-	Older devices with our 1st-generation HDMI chip use ::NTV2_WgtSDIHDMIIn1.
+	-	Older devices with our 1st-generation HDMI chip use ::NTV2_WgtHDMIIn1.
 	-	Devices that support our 2nd-generation HDMI chip use ::NTV2_WgtHDMIIn1v2.
 	-	Devices that support our 3rd-generation HDMI chip use ::NTV2_WgtHDMIIn1v3.
 	-	Devices that support our 4th-generation HDMI chip use ::NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
@@ -561,7 +592,7 @@
 	An Analog Video Input widget represents a physical analog video input connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
 	-	There is one of these widgets for devices that support analog video input — ::NTV2_WgtAnalogIn1.
-	-	To obtain its ::NTV2OutputCrosspointID…
+	-	To obtain its ::NTV2OutputCrosspointID …
 		-	Either use ::NTV2_XptAnalogIn directly;
 		-	Or call ::GetInputSourceOutputXpt with ::NTV2_INPUTSOURCE_ANALOG1.
 
@@ -603,7 +634,7 @@
 	An Analog Video Output widget represents a physical analog video output connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
 	-	There is one of these widgets for devices that support analog video output — ::NTV2_WgtAnalogOut1.
-	-	To obtain its ::NTV2InputCrosspointID…
+	-	To obtain its ::NTV2InputCrosspointID …
 		-	Use ::NTV2_XptAnalogOut
 		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
 
@@ -616,7 +647,7 @@
 	-	In <b>Capture Mode</b>…
 		-	The normal (“Level A”) input crosspoint is available and should be used for most applications.
 		-	There is a “Level B” input crosspoint that is available for dual-link applications.
-		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s ::NTV2InputCrosspointID…
+		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s ::NTV2InputCrosspointID …
 			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
 			-	By default, the function returns the normal “Level A” input crosspoint.
 				Specify \c true for \c inIsBInput for the “Level B” crosspoint.
@@ -627,7 +658,7 @@
 		-	If the Frame Store is configured for 4K/UHD Tsi (SMPTE 425 two-sample-interleave) mode:
 			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
 			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
-		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s ::NTV2OutputCrosspointID…
+		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s ::NTV2OutputCrosspointID …
 			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
 			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s ::NTV2FrameBufferFormat
 				is an RGB format, pass \c true for \c inIsRGB to obtain the RGB crosspoint.
