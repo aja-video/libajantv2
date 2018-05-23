@@ -767,7 +767,12 @@ bool CNTV2Config2022::SetRxChannelEnable(const NTV2Channel channel, bool enable)
 
     // always on
     rv = SelectRxChannel(channel, SFP_1, baseAddr);
-    WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x01);
+    // WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x01);
+	// Bit 0 = enable
+	// Bit 1 = ignore RTP timestamp
+	// Bit 1 is set because otherwise, we sometimes lock up on format
+	// change on incoming stream
+    WriteChannelRegister(kReg2022_6_rx_chan_enable + baseAddr, 0x03);
 
     return rv;
 }
