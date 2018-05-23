@@ -90,7 +90,7 @@ They must be built using the provided Makefiles. Follow the instructions below (
 
 
 
-hr size="50px">
+<hr size="50px">
 @section	gs-compatibility	SDK Forward and Backward Compatibility
 
 The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA.
@@ -227,7 +227,7 @@ page and/or the device firmware page in the <a href="https://sdksupport.aja.com/
 
 
 
-hr size="50px">
+<hr size="50px">
 @section		gs-sdkbuild		Building the Libraries
 
 @subsection		gs-linuxsdkbuild	Building on Linux
@@ -333,13 +333,13 @@ Assuming at least one version of <a href="https://doc.qt.io/" target="_qt">Qt</a
 Assuming <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a> is installed...
 
 -#	In the \c build folder, double-click <b>_ntv2demos.pro</b> (or open it from inside <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>).
--#	Assign it a kit.
+-#	<a href="https://doc.qt.io/qtcreator/creator-targets.html" target="_qtcreator">Assign it a kit</a>.
 -#	Build the project.
 
 The built libraries will be in \c lib ; the built executables will be in \c bin (both are peers to \c ajalibraries).
 
 
-hr size="50px">
+<hr size="50px">
 
 @section	gs-newprojects	Creating New Projects With the SDK
 

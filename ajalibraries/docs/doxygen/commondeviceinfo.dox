@@ -329,12 +329,6 @@
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
-	Traditionally, AJA’s NTV2 devices required all channels to have the same video standard,
-	frame rate, and frame geometry. AJA’s newer devices — e.g., \ref corvid44, \ref kona4quad,
-	\ref io4kquad, \ref corvid88, etc. — retain this default behavior, but can be switched into
-	“multi-format” mode that allows different channels to use different formats
-	(see ::NTV2DeviceCanDoMultiFormat and CNTV2Card::SetMultiFormatMode).
-
 	All SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different
 	clock sources:
 	-	the device’s on-board crystal oscillator (a.k.a. “free run”);
@@ -369,6 +363,7 @@
 	configured to sync its outputs to ::NTV2_REFERENCE_EXTERNAL, the device output will
 	internally revert to Free-Run if the reference signal disappears or is incompatible with
 	the output video format.
+
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
