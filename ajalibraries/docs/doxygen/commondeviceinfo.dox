@@ -435,7 +435,7 @@
 			device.SetReference(NTV2_REFERENCE_FREERUN);	//	Free run the outputs
 			device.EnableChannel(NTV2_CHANNEL2);	//	Enable FrameStore 2
 			device.SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);	//	Set FrameStore 2 to playout mode
-			device.SetInputFrame(NTV2_CHANNEL2, 0);	//	Read FrameStore 2 video from frame buffer 0
+			device.SetOutputFrame(NTV2_CHANNEL2, 0);	//	Read FrameStore 2 video from frame buffer 0
 			device.SetSDITransmitEnable(NTV2_CHANNEL3, true);	//	Set SDI connector 3 to output
 			device.Connect(NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer2YUV);	//	Connect FrameStore 2’s output to SDI Out 3
 		}

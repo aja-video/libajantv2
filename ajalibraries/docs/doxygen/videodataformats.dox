@@ -185,12 +185,14 @@ If the device can’t handle RGB over SDI, RGB data from the frame buffer must b
 Similarly, when an RGB frame buffer format is desired, the incoming YCbCr data must go through a color space converter
 <i>en route</i> to the frame buffer.
 
+
 @subsubsection		fbformat8bitycbcr		8-Bit YCbCr Format
 
 This format, identified by the ::NTV2_FBF_8BIT_YCBCR enumeration constant, is used by both Windows ('UYVY') and QuickTime
 ('2vuy') for 8-Bit YCbCr video. Here’s the memory layout of two pixels:
 
 @image	html	fbf-8bitycbcr-75.png
+
 
 @subsubsection		fbformat10bitycbcr	10-Bit YCbCr Format
 
@@ -205,6 +207,7 @@ Here are the four 32-bit words (six pixels) in increasing address order:
 Here are the same six pixels -- the four 32-bit little-endian words -- in decreasing address order:
 
 @image	html	fbf-10bitycbcr-75.png
+
 
 @subsubsection		fbformats8bitrgb		8-Bit ARGB, RGBA, ABGR Formats
 
@@ -224,6 +227,7 @@ to an SDI output for ARGB 4:4:4:4 over-the-wire):
 
 @image	html	fbf-8bitabgr-75.png
 
+
 @subsubsection		fbformats10bitrgb		10-Bit RGB Format
 
 This format is identified by the ::NTV2_FBF_10BIT_RGB enumeration constant. For playout, the AJA device firmware converts the 10-bit RGB video data
@@ -236,6 +240,7 @@ The most significant two bits of each 32-bit pixel contain its alpha information
 
 @image	html	fbf-10bitrgb-alpha-75.png
 
+
 @subsubsection		fbformats10bitrgbdpx	10-Bit RGB - DPX Format
 
 This format, identified by the ::NTV2_FBF_10BIT_DPX enumeration constant, is laid out as follows, before byte-swapping:
@@ -245,6 +250,7 @@ This format, identified by the ::NTV2_FBF_10BIT_DPX enumeration constant, is lai
 This is the memory layout after byte-swapping:
 
 @image	html	fbf-10bitrgbdpx-after-75.png
+
 
 @subsubsection		fbformats10bitycbcrdpx	10-Bit YCbCr - DPX Format
 
@@ -256,11 +262,13 @@ After byte-swapping:
 
 @image	html	fbf-10bitycbcrdpx-after-75.png
 
+
 @subsubsection		fbformats24bitrgb		24-Bit RGB
 
 This format, identified by the ::NTV2_FBF_24BIT_RGB enumeration constant, is laid out as follows:
 
 @image	html	fbf-24bitrgb-75.png
+
 
 @subsubsection		fbformats24bitbgr		24-Bit BGR
 
@@ -268,11 +276,13 @@ This format, identified by the ::NTV2_FBF_24BIT_BGR enumeration constant, has th
 
 @image	html	fbf-24bitbgr-75.png
 
+
 @subsubsection		fbformats10bitdpxle	10-Bit DPX Little-Endian
 
 This format, identified by the ::NTV2_FBF_10BIT_DPX_LITTLEENDIAN enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-10bitdpxle-75.png
+
 
 @subsubsection		fbformats48bitrgb		48-Bit RGB
 
@@ -282,19 +292,23 @@ This format, identified by the ::NTV2_FBF_48BIT_RGB enumeration constant, has th
 
 @note	The least-significant 4 bits of each color component in this format are zero or irrelevant.
 
+
 @subsubsection		fbformatsyuy2		Alternate 8-Bit YCbCr ('YUY2')
 
 This format, identified by the ::NTV2_FBF_8BIT_YCBCR_YUY2 enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-8bityuy2-75.png
 
+
 @subsubsection		fbformats8bitdvcpro	8-Bit DVCPro
 
 This format, identified by the ::NTV2_FBF_8BIT_DVCPRO enumeration constant, is a popular lossy 4:1:1 compression scheme.
 
+
 @subsubsection		fbformats8bithdv		8-Bit HDV
 
 This format, identified by the ::NTV2_FBF_8BIT_HDV enumeration constant, is a lossy H.262/MPEG-2 (video) and MPEG-1 Layer 2 (audio) compression scheme.
+
 
 @subsubsection		fbformats10bitcion	10-Bit Raw YCbCr (CION)
 

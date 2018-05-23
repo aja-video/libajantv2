@@ -64,38 +64,38 @@ typedef enum
 **/
 typedef enum
 {
-    DEVICE_ID_CORVID1					= 0x10244800,
-    DEVICE_ID_CORVID22					= 0x10293000,
-    DEVICE_ID_CORVID24					= 0x10402100,
-    DEVICE_ID_CORVID3G					= 0x10294900,
-    DEVICE_ID_CORVID44					= 0x10565400,
-    DEVICE_ID_CORVID88					= 0x10538200,
-    DEVICE_ID_CORVIDHBR					= 0x10668200,
-    DEVICE_ID_CORVIDHEVC				= 0x10634500,
-    DEVICE_ID_IO4K						= 0x10478300,
-	DEVICE_ID_IO4KPLUS					= 0x10710800,
-    DEVICE_ID_IO4KUFC					= 0x10478350,
-    DEVICE_ID_IOEXPRESS					= 0x10280300,
-    DEVICE_ID_IOIP_2022                 = 0x10710850,
-    DEVICE_ID_IOIP_2110                 = 0x10710851,
-    DEVICE_ID_IOXT						= 0x10378800,
-	DEVICE_ID_KONA1						= 0x10756600,
-    DEVICE_ID_KONA3G					= 0x10294700,
-    DEVICE_ID_KONA3GQUAD				= 0x10322950,
-    DEVICE_ID_KONA4						= 0X10518400,
-    DEVICE_ID_KONA4UFC					= 0X10518450,
-    DEVICE_ID_KONAHDMI                  = 0x10767400,
-    DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,
-	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
-    DEVICE_ID_KONAIP_2022               = 0x10646700,
-    DEVICE_ID_KONAIP_2110               = 0x10646706,
-	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,
-    DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,
-    DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,
-    DEVICE_ID_KONALHEPLUS				= 0x10352300,
-    DEVICE_ID_KONALHI					= 0x10266400,
-    DEVICE_ID_KONALHIDVI				= 0x10266401,
-    DEVICE_ID_TTAP						= 0x10416000,
+    DEVICE_ID_CORVID1					= 0x10244800,	///< @brief	\ref corvid1corvid3g
+    DEVICE_ID_CORVID22					= 0x10293000,	///< @brief	\ref corvid22
+    DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	\ref corvid24
+    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	\ref corvid3g
+    DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	\ref corvid44
+    DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	\ref corvid88
+    DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	\ref corvidhbr
+    DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	\ref corvidhevc
+    DEVICE_ID_IO4K						= 0x10478300,	///< @brief	\ref io4kquad , \ref io4kufc
+	DEVICE_ID_IO4KPLUS					= 0x10710800,	///< @brief	\ref io4kplus
+    DEVICE_ID_IO4KUFC					= 0x10478350,	///< @brief	\ref io4kufc
+    DEVICE_ID_IOEXPRESS					= 0x10280300,	///< @brief	\ref ioexpress
+    DEVICE_ID_IOIP_2022                 = 0x10710850,	///< @brief	\ref ioip
+    DEVICE_ID_IOIP_2110                 = 0x10710851,	///< @brief	\ref ioip
+    DEVICE_ID_IOXT						= 0x10378800,	///< @brief	\ref ioxt
+	DEVICE_ID_KONA1						= 0x10756600,	///< @brief	\ref kona1
+    DEVICE_ID_KONA3G					= 0x10294700,	///< @brief	\ref kona3gufc
+    DEVICE_ID_KONA3GQUAD				= 0x10322950,	///< @brief	\ref kona3gquad
+    DEVICE_ID_KONA4						= 0X10518400,	///< @brief	\ref kona4quad
+    DEVICE_ID_KONA4UFC					= 0X10518450,	///< @brief	\ref kona4ufc
+    DEVICE_ID_KONAHDMI                  = 0x10767400,	///< @brief	\ref konahdmi
+    DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	\ref konaip
+	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	\ref konaip
+    DEVICE_ID_KONAIP_2022               = 0x10646700,	///< @brief	\ref konaip
+    DEVICE_ID_KONAIP_2110               = 0x10646706,	///< @brief	\ref konaip
+	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,	///< @brief	\ref konaip
+    DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief	\ref konaip
+    DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief	\ref konaip
+    DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief	\ref konalheplus
+    DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	\ref konalhi
+    DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	\ref konalhi
+    DEVICE_ID_TTAP						= 0x10416000,	///< @brief	\ref ttap
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -196,39 +196,39 @@ typedef enum
 typedef enum
 {
 	NTV2_FBF_FIRST					= 0
-	,NTV2_FBF_10BIT_YCBCR			= NTV2_FBF_FIRST
-	,NTV2_FBF_8BIT_YCBCR
-	,NTV2_FBF_ARGB
-	,NTV2_FBF_RGBA
-	,NTV2_FBF_10BIT_RGB
-	,NTV2_FBF_8BIT_YCBCR_YUY2
-	,NTV2_FBF_ABGR
+	,NTV2_FBF_10BIT_YCBCR			= NTV2_FBF_FIRST	///< @brief	\ref fbformat10bitycbcr
+	,NTV2_FBF_8BIT_YCBCR								///< @brief	\ref fbformat8bitycbcr
+	,NTV2_FBF_ARGB										///< @brief	\ref fbformats8bitrgb
+	,NTV2_FBF_RGBA										///< @brief	\ref fbformats8bitrgb
+	,NTV2_FBF_10BIT_RGB									///< @brief	\ref fbformats10bitrgb
+	,NTV2_FBF_8BIT_YCBCR_YUY2							///< @brief	\ref fbformatsyuy2
+	,NTV2_FBF_ABGR										///< @brief	\ref fbformats8bitrgb
 	,NTV2_FBF_LAST_SD_FBF = NTV2_FBF_ABGR
-	,NTV2_FBF_10BIT_DPX
-	,NTV2_FBF_10BIT_YCBCR_DPX
-	,NTV2_FBF_8BIT_DVCPRO
-	,NTV2_FBF_8BIT_YCBCR_420PL3
-	,NTV2_FBF_8BIT_HDV
-	,NTV2_FBF_24BIT_RGB
-	,NTV2_FBF_24BIT_BGR
-	,NTV2_FBF_10BIT_YCBCRA
-	,NTV2_FBF_10BIT_DPX_LE
-	,NTV2_FBF_48BIT_RGB
-	,NTV2_FBF_PRORES
-	,NTV2_FBF_PRORES_DVCPRO
-	,NTV2_FBF_PRORES_HDV
-	,NTV2_FBF_10BIT_RGB_PACKED
-	,NTV2_FBF_10BIT_ARGB
-	,NTV2_FBF_16BIT_ARGB
-	,NTV2_FBF_8BIT_YCBCR_422PL3
-	,NTV2_FBF_10BIT_RAW_RGB
-	,NTV2_FBF_10BIT_RAW_YCBCR
-	,NTV2_FBF_10BIT_YCBCR_420PL3_LE
-	,NTV2_FBF_10BIT_YCBCR_422PL3_LE
-	,NTV2_FBF_10BIT_YCBCR_420PL2
-	,NTV2_FBF_10BIT_YCBCR_422PL2
-	,NTV2_FBF_8BIT_YCBCR_420PL2
-	,NTV2_FBF_8BIT_YCBCR_422PL2
+	,NTV2_FBF_10BIT_DPX									///< @brief	\ref fbformats10bitrgbdpx
+	,NTV2_FBF_10BIT_YCBCR_DPX							///< @brief	\ref fbformats10bitycbcrdpx
+	,NTV2_FBF_8BIT_DVCPRO								///< @brief	\ref fbformats8bitdvcpro
+	,NTV2_FBF_8BIT_YCBCR_420PL3							///< @brief	\ref fbformats8bitycbcrplanar3
+	,NTV2_FBF_8BIT_HDV									///< @brief	\ref fbformats8bithdv
+	,NTV2_FBF_24BIT_RGB									///< @brief	\ref fbformats24bitrgb
+	,NTV2_FBF_24BIT_BGR									///< @brief	\ref fbformats24bitbgr
+	,NTV2_FBF_10BIT_YCBCRA								///< @brief	10-Bit YCbCrA
+	,NTV2_FBF_10BIT_DPX_LE								///< @brief	10-Bit DPX Little-Endian
+	,NTV2_FBF_48BIT_RGB									///< @brief	\ref fbformats48bitrgb
+	,NTV2_FBF_PRORES									///< @brief	Apple ProRes
+	,NTV2_FBF_PRORES_DVCPRO								///< @brief	Apple ProRes DVC Pro
+	,NTV2_FBF_PRORES_HDV								///< @brief	Apple ProRes HDV
+	,NTV2_FBF_10BIT_RGB_PACKED							///< @brief	10-Bit Packed RGB
+	,NTV2_FBF_10BIT_ARGB								///< @brief	10-Bit ARGB
+	,NTV2_FBF_16BIT_ARGB								///< @brief	16-Bit ARGB
+	,NTV2_FBF_8BIT_YCBCR_422PL3							///< @brief	\ref fbformats8bitycbcr422pl3
+	,NTV2_FBF_10BIT_RAW_RGB								///< @brief	10-Bit Raw RGB
+	,NTV2_FBF_10BIT_RAW_YCBCR							///< @brief	\ref fbformats10bitcion
+	,NTV2_FBF_10BIT_YCBCR_420PL3_LE						///< @brief	\ref fbformats10bitycbcr420pl3
+	,NTV2_FBF_10BIT_YCBCR_422PL3_LE						///< @brief	\ref fbformats10bitycbcr422pl3
+	,NTV2_FBF_10BIT_YCBCR_420PL2						///< @brief	10-Bit 4:2:0 2-Plane YCbCr
+	,NTV2_FBF_10BIT_YCBCR_422PL2						///< @brief	10-Bit 4:2:2 2-Plane YCbCr
+	,NTV2_FBF_8BIT_YCBCR_420PL2							///< @brief	8-Bit 4:2:0 2-Plane YCbCr
+	,NTV2_FBF_8BIT_YCBCR_422PL2							///< @brief	8-Bit 4:2:2 2-Plane YCbCr
 	,NTV2_FBF_LAST
 	,NTV2_FBF_NUMFRAMEBUFFERFORMATS	= NTV2_FBF_LAST
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
@@ -313,24 +313,24 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 **/
 typedef enum
 {
-    NTV2_FG_1920x1080	= 0,	//	1080i, 1080p
-    NTV2_FG_1280x720	= 1,	//	720p
-    NTV2_FG_720x486		= 2,	//	ntsc 525i, 525p60
-    NTV2_FG_720x576		= 3,	//	pal 625i
-    NTV2_FG_1920x1114	= 4,	//	1920x1080 + taller vanc
-    NTV2_FG_2048x1114	= 5,	//	2048x1080 + taller vanc
-    NTV2_FG_720x508		= 6,	//	720x486 + tall vanc
-    NTV2_FG_720x598		= 7,	//	pal 625i + tall vanc
-    NTV2_FG_1920x1112	= 8,	//	1920x1080 + tall vanc
-    NTV2_FG_1280x740	= 9,	//	1280x720 + tall vanc
-    NTV2_FG_2048x1080	= 10,	//	2k1080p
-    NTV2_FG_2048x1556	= 11,	//	2k1556psf
-    NTV2_FG_2048x1588 	= 12,	//	2048x1556 + tall vanc
-    NTV2_FG_2048x1112 	= 13,	//	2048x1080 + tall vanc
-    NTV2_FG_720x514 	= 14,	//	720x486 + taller vanc (extra-wide ntsc)
-    NTV2_FG_720x612 	= 15,	//	720x576 + taller vanc (extra-wide pal)
-    NTV2_FG_4x1920x1080 = 16,	//	UHD
-    NTV2_FG_4x2048x1080 = 17,	//	4K
+    NTV2_FG_1920x1080	= 0,	///< @brief	1920x1080, for 1080i and 1080p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_1280x720	= 1,	///< @brief	1280x720, for 720p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_720x486		= 2,	///< @brief	720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_OFF
+    NTV2_FG_720x576		= 3,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_OFF
+    NTV2_FG_1920x1114	= 4,	///< @brief	1920x1080, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_2048x1114	= 5,	///< @brief	2048x1080, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_720x508		= 6,	///< @brief	720x486, for NTSC 525i, ::NTV2_VANCMODE_TALL
+    NTV2_FG_720x598		= 7,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_TALL
+    NTV2_FG_1920x1112	= 8,	///< @brief	1920x1080, for 1080i and 1080p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_1280x740	= 9,	///< @brief	1280x720, for 720p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_2048x1080	= 10,	///< @brief	2048x1080, for 2Kx1080p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_2048x1556	= 11,	///< @brief	2048x1556, for 2Kx1556psf film format, ::NTV2_VANCMODE_OFF
+    NTV2_FG_2048x1588 	= 12,	///< @brief	2048x1556, for 2Kx1556psf film format, ::NTV2_VANCMODE_TALL
+    NTV2_FG_2048x1112 	= 13,	///< @brief	2048x1080, for 2Kx1080p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_720x514 	= 14,	///< @brief	720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_720x612 	= 15,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_4x1920x1080 = 16,	///< @brief	3840x2160, for UHD, ::NTV2_VANCMODE_OFF
+    NTV2_FG_4x2048x1080 = 17,	///< @brief	4096x2160, for 4K, ::NTV2_VANCMODE_OFF
     NTV2_FG_NUMFRAMEGEOMETRIES,
     NTV2_FG_INVALID	= NTV2_FG_NUMFRAMEGEOMETRIES
 } NTV2FrameGeometry;
