@@ -2085,7 +2085,7 @@ typedef enum
 
 
 /**
-    @brief	Identifies a widget output, a signal source, that potentially can drive another widget's input (identified by NTV2InputCrosspointID).
+    @brief	Identifies a widget output, a signal source, that potentially can drive another widget's input (identified by ::NTV2InputCrosspointID).
 **/
 typedef enum NTV2OutputCrosspointID
 {
@@ -2286,13 +2286,13 @@ typedef enum NTV2OutputCrosspointID
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2OutputCrosspointID;
 
-typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use NTV2OutputCrosspointID instead.
+typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use ::NTV2OutputCrosspointID instead.
 
 #define	NTV2_IS_VALID_OutputCrosspointID(__s__)			((__s__) >= NTV2_XptBlack && (__s__) < NTV2_OUTPUT_CROSSPOINT_INVALID)
 
 
 /**
-    @brief	Identifies a widget input that potentially can accept a signal emitted from another widget's output (identified by NTV2OutputCrosspointID).
+    @brief	Identifies a widget input that potentially can accept a signal emitted from another widget's output (identified by ::NTV2OutputCrosspointID).
 **/
 typedef enum NTV2InputCrosspointID
 {
@@ -2576,6 +2576,9 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+    @brief	Identifies the \ref ntv2hwaccessories that may be attached to an AJA NTV2 device.
+**/
 typedef enum
 {
     NTV2_BreakoutNone,			///< @brief	No identifiable breakout hardware appears to be attached.
@@ -2613,6 +2616,10 @@ typedef enum
 
 #define	EXTENDED_AUDIO_SUPPORTED
 
+/**
+    @brief	Identifies a pair of audio channels.
+    @note	The audio channels in the pair are adjacent, and never span an audio group.
+**/
 typedef enum
 {
     NTV2_AudioChannel1_2,		///< @brief	This selects audio channels 1 and 2		(Group 1 channels 1 and 2)
@@ -2715,6 +2722,9 @@ typedef enum
 #define	NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) < NTV2_MAX_NUM_AudioMixerChannel)
 #define	NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) <= NTV2_AudioMixerChannel2)
 
+/**
+    @brief	Identifies a contiguous, adjacent group of four audio channels.
+**/
 typedef enum
 {
     NTV2_AudioChannel1_4,			///< @brief	This selects audio channels 1 thru 4
@@ -2760,6 +2770,9 @@ typedef NTV2Audio4ChannelSelect	NTV2AudioChannelQuad;
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_QUAD(__p__)			((__p__) >= NTV2_AudioChannel17_20	&& (__p__) < NTV2_MAX_NUM_Audio4ChannelSelect)
 
 
+/**
+    @brief	Identifies a contiguous, adjacent group of eight audio channels.
+**/
 typedef enum
 {
     NTV2_AudioChannel1_8,			///< @brief	This selects audio channels 1 thru 8

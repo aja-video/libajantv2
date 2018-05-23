@@ -1285,7 +1285,7 @@ public:
 		@brief		Sets the current mix coefficient of the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	inMixCoefficient	Specifies the new mix coefficient value.
+		@param[in]	inMixCoefficient	Specifies the new mix coefficient value, where \c 0x10000 is the maximum.
 	**/
 	AJA_VIRTUAL bool	SetMixerCoefficient (const UWord inWhichMixer, const ULWord inMixCoefficient);
 
@@ -1293,7 +1293,7 @@ public:
 		@brief		Returns the current mix coefficient the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outMixCoefficient	Receives the current mix coefficient value.
+		@param[in]	outMixCoefficient	Receives the current mix coefficient value, where \c 0x10000 is the maximum.
 	**/
 	AJA_VIRTUAL bool	GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient);
 

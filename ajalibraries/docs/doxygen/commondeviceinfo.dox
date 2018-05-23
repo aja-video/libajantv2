@@ -630,7 +630,7 @@
 	Pb/B/Y and Pr/R/C RCA connectors).
 	-	There is one of these widgets for devices that support analog video output — ::NTV2_WgtAnalogOut1.
 	-	To obtain its ::NTV2InputCrosspointID …
-		-	Use ::NTV2_XptAnalogOut
+		-	Use ::NTV2_XptAnalogOutInput
 		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
 
 

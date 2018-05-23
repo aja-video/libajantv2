@@ -361,7 +361,7 @@ Since all values are byte values, there are no endianness issues.
 
 @subsubsection		fbformats10bitycbcr420pl3	10-Bit YCbCr 4:2:0 Planar ('I420_10LE')
 
-This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL3_LE enumeration constant, is a popular planar video encoding format.
 
 @image	html	fbf-10bitycbcr420planar-75.png
 
@@ -377,7 +377,7 @@ Chroma values are 10-bit (0-1023) values, stored identically to the luma values,
 
 @subsubsection		fbformats10bitycbcr422pl3	10-Bit YCbCr 4:2:2 Planar ('I422_10LE')
 
-This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL3_LE enumeration constant, is a popular planar video encoding format.
 
 @image	html	fbf-10bitycbcr422planar-75.png
 
