@@ -580,7 +580,10 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         CHECK(strValue == "testing 1,2,3");
         CHECK(strcmp(blobValue,"blob test data")==0);
         CHECK(longStrValue == orgLongStrValue);
-        CHECK(hierarchyValue1 == 17);
+        // as of 12/06/2017 AJAPersistence was changed to not default to
+        // matching any device if exact or partial match not found
+        // if it is ever changed back hierarchyValue1 should be 17
+        CHECK(hierarchyValue1 == 0);
         CHECK(hierarchyValue2 == 23);
         CHECK(hierarchyValue3 == 27);
     }
