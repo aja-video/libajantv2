@@ -243,7 +243,7 @@ bool NTV2OglCapture::SetupInput()
 	mChannelSpec = inputSourceToChannelSpec[mInputSource];
 
 	// Check for bi-directional sdi, if so set it to capture.
-	if(NTV2BoardHasBiDirectionalSDI(mBoardID) && mInputSource != NTV2_INPUTSOURCE_HDMI && mInputSource != NTV2_INPUTSOURCE_ANALOG)
+	if(NTV2DeviceHasBiDirectionalSDI(mBoardID) && mInputSource != NTV2_INPUTSOURCE_HDMI && mInputSource != NTV2_INPUTSOURCE_ANALOG)
 	{
 		switch(mInputSource)
 		{

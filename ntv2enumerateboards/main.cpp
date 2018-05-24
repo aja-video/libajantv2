@@ -106,9 +106,9 @@ int main (int argc, const char ** argv)
 
 					#if defined (AJA_NTV2_SDK_VERSION_AT_LEAST)
 						#if AJA_NTV2_SDK_VERSION_AT_LEAST (11, 4)
-							cout << "This device " << (::NTV2BoardCanDoAudioDelay (deviceID) ? "can" : "cannot") << " delay audio" << endl;
+							cout << "This device " << (::NTV2DeviceCanDoAudioDelay(deviceID) ? "can" : "cannot") << " delay audio" << endl;
 						#else
-							cout << "This SDK does not support the NTV2BoardCanDoAudioDelay function call" << endl;
+							cout << "This SDK does not support the NTV2DeviceCanDoAudioDelay function call" << endl;
 						#endif
 					#endif	//	AJA_NTV2_SDK_VERSION_AT_LEAST
 					ntv2Card.Close ();

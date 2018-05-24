@@ -178,31 +178,31 @@ bool NTV2OglOutput::SetupOutput()
 
 	CNTV2SignalRouter	router;
 #if 1
-	if (NTV2BoardGetNumVideoChannels (mBoardID) <= 2)
+	if (::NTV2DeviceGetNumVideoChannels (mBoardID) <= 2)
 	{
 		if (IsRGBFormat (mFrameBufferFormat))
 		{
 			//	Add routes from the frame buffer to a color space converter to all outputs...
 			router.addWithValue (GetCSC2VidInputSelectEntry(), NTV2_XptFrameBuffer2RGB);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_Wgt3GSDIOut2) || NTV2BoardCanDoWidget (mBoardID, NTV2_WgtSDIOut2))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_Wgt3GSDIOut2) || NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtSDIOut2))
 				router.addWithValue (GetSDIOut2InputSelectEntry(), NTV2_XptCSC2VidYUV);
 			else
 				router.addWithValue (GetSDIOut1InputSelectEntry(), NTV2_XptCSC2VidYUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
 				router.addWithValue (GetHDMIOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
 				router.addWithValue (GetAnalogOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
 		}
 		else
 		{
 			//	Add the route from frame buffer 2 to output 2...
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_Wgt3GSDIOut2) || NTV2BoardCanDoWidget (mBoardID, NTV2_WgtSDIOut2))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_Wgt3GSDIOut2) || NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtSDIOut2))
 				router.addWithValue (GetSDIOut2InputSelectEntry(), NTV2_XptFrameBuffer2YUV);
 			else
 				router.addWithValue (GetSDIOut1InputSelectEntry(), NTV2_XptFrameBuffer2YUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
 				router.addWithValue (GetHDMIOutInputSelectEntry(), NTV2_XptFrameBuffer2YUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
 				router.addWithValue (GetAnalogOutInputSelectEntry(), NTV2_XptFrameBuffer2YUV);
 		}
 	}	//	if 1 or 2 channel board
@@ -214,9 +214,9 @@ bool NTV2OglOutput::SetupOutput()
 			router.addWithValue (GetCSC3VidInputSelectEntry(), NTV2_XptFrameBuffer3RGB);
 			router.addWithValue (GetSDIOut3InputSelectEntry(), NTV2_XptCSC3VidYUV);
 
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
 				router.addWithValue (GetHDMIOutInputSelectEntry(), NTV2_XptCSC3VidYUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
 				router.addWithValue (GetAnalogOutInputSelectEntry(), NTV2_XptCSC3VidYUV);
 		}
 		else
@@ -224,31 +224,19 @@ bool NTV2OglOutput::SetupOutput()
 			//	Add the route from frame buffer 3 to output 3...
 			router.addWithValue (GetSDIOut3InputSelectEntry(), NTV2_XptFrameBuffer3YUV);
 
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
 				router.addWithValue (GetHDMIOutInputSelectEntry(), NTV2_XptFrameBuffer3YUV);
-			if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
+			if (NTV2DeviceCanDoWidget (mBoardID, NTV2_WgtAnalogOut1))
 				router.addWithValue (GetAnalogOutInputSelectEntry(), NTV2_XptFrameBuffer3YUV);
 		}
 	}	//	else 4-channel board
 #endif
-	if (NTV2BoardHasBiDirectionalSDI (mBoardID))
+	if (NTV2DeviceHasBiDirectionalSDI (mBoardID))
 	{
 		mNTV2Card.SetSDITransmitEnable (NTV2_CHANNEL3, true);
 
 	}
 
-	#if defined (AJAMac)		//	Bug in Mac driver 10.4.5 or earlier necessitates this
-		if (NTV2BoardCanDoWidget (mBoardID, NTV2_WgtHDMIOut1))
-		{
-			NTV2FrameRate		frameRate		(NTV2_FRAMERATE_UNKNOWN);
-			const NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
-
-			//	HDMI needs a bit more set-up...
-			mNTV2Card.GetFrameRate (&frameRate);
-			mNTV2Card.SetHDMIOutVideoStandard (videoStandard);
-			mNTV2Card.SetHDMIOutVideoFPS (frameRate);
-		}
-	#endif	//	AJAMac
 	mNTV2Card.ApplySignalRoute (router);
 	return true;
 
@@ -258,7 +246,7 @@ void NTV2OglOutput::SetupAutoCirculate()
 	::memset (&mTransferStruct, 0x0, sizeof (mTransferStruct));
 	::memset (&mTransferStatusStruct, 0x0, sizeof (mTransferStatusStruct));
 
-	if (NTV2BoardGetNumVideoChannels (mBoardID) <= 2)
+	if (::NTV2DeviceGetNumVideoChannels (mBoardID) <= 2)
 	{
 		mTransferStruct.channelSpec = NTV2CROSSPOINT_CHANNEL2;
 		mNTV2Card.SetFrameBufferFormat(NTV2_CHANNEL2,mFrameBufferFormat);

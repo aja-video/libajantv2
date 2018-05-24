@@ -112,7 +112,7 @@ AJAStatus NTV2StereoCapture::Init (const CNTV2DeviceScanner & inBoardScanner, co
 AJAStatus NTV2StereoCapture::SetupVideo (void)
 {
 	//	Check for bi-directional sdi, if so set 1 and 2 to capture, 3 and 4 to display...
-	if (NTV2BoardHasBiDirectionalSDI (mBoardID))
+	if (NTV2DeviceHasBiDirectionalSDI (mBoardID))
 	{
 		mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, false);
 		mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, false);
@@ -125,10 +125,10 @@ AJAStatus NTV2StereoCapture::SetupVideo (void)
 
 	//	Set the video format to match the incomming video format.
 	//	First, check if the board supports this input...
-	if (!NTV2BoardCanDoInputSource (mBoardID, NTV2_INPUTSOURCE_SDI1))
+	if (!NTV2DeviceCanDoInputSource (mBoardID, NTV2_INPUTSOURCE_SDI1))
 		return AJA_STATUS_BAD_PARAM;
 
-	if (!NTV2BoardCanDoInputSource (mBoardID, NTV2_INPUTSOURCE_SDI2))
+	if (!NTV2DeviceCanDoInputSource (mBoardID, NTV2_INPUTSOURCE_SDI2))
 		return AJA_STATUS_BAD_PARAM;
 
     mVideoFormat = mDevice.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1);
@@ -141,11 +141,11 @@ AJAStatus NTV2StereoCapture::SetupVideo (void)
 
 	//	Set the frame buffer pixel format for all the channels on the board
 	//	if the board supports that pixel format; otherwise, use 8-bit YCbCr...
-	if (!NTV2BoardCanDoFrameBufferFormat (mBoardID, mPixelFormat))
+	if (!NTV2DeviceCanDoFrameBufferFormat (mBoardID, mPixelFormat))
 		return AJA_STATUS_BAD_PARAM;
 
 	//	How many frame buffers are there available?
-	const uint16_t	numFrameStores	(NTV2BoardGetNumFrameStores (mBoardID));
+	const uint16_t	numFrameStores	(NTV2DeviceGetNumFrameStores (mBoardID));
 	for (int i = 0; i < numFrameStores; i++)
 	{
 		if (i == 0)
@@ -201,7 +201,7 @@ void NTV2StereoCapture::RouteInputSignal()
 
 void NTV2StereoCapture::RouteOutputSignal (void)
 {
-	if (NTV2BoardHasBiDirectionalSDI (mBoardID))
+	if (NTV2DeviceHasBiDirectionalSDI (mBoardID))
 	{
 		//	Route FrameStore 3 to SDI Out 3 and HDMI Out if there is a HDMI Out...
         mDevice.SetXptCSC3VidInputSelect (NTV2_XptFrameBuffer3RGB);

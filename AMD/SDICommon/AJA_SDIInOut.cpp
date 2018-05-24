@@ -268,7 +268,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 				return false;
 
 			// cross point routing
-			if (NTV2BoardNeedsRoutingSetup(m_DeviceID))
+			if (::NTV2DeviceNeedsRoutingSetup(m_DeviceID))
 			{
 				if(isRGBFormat(FBFormat))
 				{
@@ -300,7 +300,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 			return false;
 
 		// cross point routing
-		if (NTV2BoardNeedsRoutingSetup(m_DeviceID))
+		if (::NTV2DeviceNeedsRoutingSetup(m_DeviceID))
 		{
 			if(isRGBFormat(FBFormat))
 			{
