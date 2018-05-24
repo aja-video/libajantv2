@@ -6106,20 +6106,9 @@ string NTV2EmbeddedAudioClockToString (const NTV2EmbeddedAudioClock	inValue, con
 
 string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect	inValue, const bool inForRetailDisplay)
 {
-	switch (inValue)
-	{
-		case NTV2_AudioMonitor1_2:				return inForRetailDisplay ? "1-2" : "NTV2_AudioMonitor1_2";
-		case NTV2_AudioMonitor3_4:				return inForRetailDisplay ? "3-4" : "NTV2_AudioMonitor3_4";
-		case NTV2_AudioMonitor5_6:				return inForRetailDisplay ? "5-6" : "NTV2_AudioMonitor5_6";
-		case NTV2_AudioMonitor7_8:				return inForRetailDisplay ? "7-8" : "NTV2_AudioMonitor7_8";
-		case NTV2_AudioMonitor9_10:				return inForRetailDisplay ? "9-10" : "NTV2_AudioMonitor9_10";
-		case NTV2_AudioMonitor11_12:			return inForRetailDisplay ? "11-12" : "NTV2_AudioMonitor11_12";
-		case NTV2_AudioMonitor13_14:			return inForRetailDisplay ? "13-14" : "NTV2_AudioMonitor13_14";
-		case NTV2_AudioMonitor15_16:			return inForRetailDisplay ? "15-16" : "NTV2_AudioMonitor15_16";
-
-		case NTV2_MAX_NUM_AudioMonitorSelect:	return inForRetailDisplay ? "???" : "NTV2_AUDIO_MONITOR_INVALID";
-	}
-	return "";
+	if (NTV2_IS_VALID_AUDIO_MONITOR(inValue))
+		return ::NTV2AudioChannelPairToString(inValue, inForRetailDisplay);
+	return inForRetailDisplay ? "???" : "NTV2_AUDIO_MONITOR_INVALID";
 }
 
 
