@@ -435,7 +435,7 @@ typedef enum
 //		Add a corresponding timing to NTV2KonaLHTiming in ntv2register.cpp
 //		Add a corresponding case to SetVPIDData in ntv2vpid.cpp
 //		Add a corresponding case to NTV2VideoFromatString in ntv2debug.cpp
-//		Add a corresponding case to NTV2BoardGetVideoFormatFromState_Ex in sdkgen/*.csv for ntv2devicefeatures.cpp
+//		Add a corresponding case to NTV2DeviceGetVideoFormatFromState_Ex in sdkgen/*.csv for ntv2devicefeatures.cpp
 //		Consider adding a new test case to commonapps/hi5_4k_diag/main.cpp
 //		Add a corresponding case to AJAVideoFormatNTV2Table in commonclasses/ntv2videoformataja.cpp
 //			(If the format is really new, videotypes.h in ajabase/common may need updating)

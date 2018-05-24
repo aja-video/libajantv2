@@ -2821,7 +2821,7 @@ bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileTyp
 	if (bitfile == NTV2_BITFILE_NO_CHANGE)
 		return true;
 
-	ULWord numRegisters = NTV2BoardGetNumberRegisters(boardID);
+	ULWord numRegisters = NTV2DeviceGetMaxRegisterNumber(boardID);
 	ULWord *regValues = new ULWord[numRegisters];
 
 	if (regValues == NULL)

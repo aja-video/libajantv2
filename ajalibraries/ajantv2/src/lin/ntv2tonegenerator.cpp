@@ -51,7 +51,7 @@ void CNTV2ToneGenerator::Loop()
 		}
 		#else	//	defined (NTV2_DEPRECATE)
 		_ntv2Card.SetAudioBufferSize(NTV2_AUDIO_BUFFER_BIG);
-		_ntv2Card.SetNumberAudioChannels(NTV2BoardGetMaxAudioChannels (_ntv2Card.GetDeviceID()), NTV2_AUDIOSYSTEM_1);
+		_ntv2Card.SetNumberAudioChannels(NTV2DeviceGetMaxAudioChannels(_ntv2Card.GetDeviceID()), NTV2_AUDIOSYSTEM_1);
 		#endif	//	defined (NTV2_DEPRECATE)
 
 		// reset audio and load up some tone and then let her go.
