@@ -23,8 +23,8 @@
 #include <clocale>
 #include <iostream>
 
-#if 0
-template
+/*
+//template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
 TEST_SUITE("filename -- functions in streams/common/filename.h");
 
@@ -33,8 +33,22 @@ TEST_SUITE("filename -- functions in streams/common/filename.h");
     }
 
 TEST_SUITE_END(); //filename
-#endif
+*/
 
+void types_marker() {}
+TEST_SUITE("types -- functions in ajabase/common/types.h");
+
+    TEST_CASE("AJA_FOURCC and AJA_FCC")
+    {
+        uint32_t ajaAsFourcc = 1634361632;
+
+        CHECK(AJA_FOURCC('a','j','a',' ') == ajaAsFourcc);
+        CHECK(AJA_FOURCC('A','J','A',' ') != ajaAsFourcc);
+        CHECK(AJA_FCC("aja ") == ajaAsFourcc);
+        CHECK(AJA_FCC("AJA ") != ajaAsFourcc);
+    }
+
+TEST_SUITE_END(); //types
 
 void common_marker() {}
 TEST_SUITE("common -- functions in ajabase/common/common.h");
