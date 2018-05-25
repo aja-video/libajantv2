@@ -6203,7 +6203,7 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 							kLSRegShiftVideoADCMode);
 		if (result)
 		{
-			if (::NTV2BoardCanDoProcAmp(GetDeviceID()))
+			if (NTV2BoardCanDoProcAmp(GetDeviceID()))
 			{
 				// The ADC chip is on an I2C bus; writing the ADC Mode to the FPGA Register
 				// results in the FPGA performing an I2C Write to the ADC chip.

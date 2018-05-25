@@ -451,20 +451,20 @@ public:
         @brief		Returns true if the supports the audio mixer.
         @return		True if the device supports the audio mixer.
 	**/
-	AJA_VIRTUAL bool	DeviceCanDoAudioMixer ();
+	AJA_VIRTUAL bool	DeviceCanDoAudioMixer (void);
 
     /**
         @brief		Returns true if the device can convert HDMI tsi to/from quad raster.
         @return		True if the device supports quad raster conversion.
     **/
-	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion ();
+	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion (void);
 
     /**
 		@brief		Returns true if the device having the given ID supports the audio mixer.
 		@return		True if the device supports the given input source.
 	**/
-	AJA_VIRTUAL bool	DeviceIsDNxIV ();
-	AJA_VIRTUAL bool	DeviceHasMicInput ();
+	AJA_VIRTUAL bool	DeviceIsDNxIV (void);
+	AJA_VIRTUAL bool	DeviceHasMicInput (void);
 
 	/**
 		@brief		Fetches the requested boolean value. Typically called to determine device features.
