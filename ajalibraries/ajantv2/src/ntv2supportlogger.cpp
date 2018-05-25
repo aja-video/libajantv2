@@ -266,13 +266,13 @@ AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2Suppo
 CNTV2SupportLogger::CNTV2SupportLogger(CNTV2Card& card, NTV2SupportLoggerSections sections)
     : mSections(sections)
 {
-    mDevice.Open(card.GetIndexNumber(), false, DEVICETYPE_NTV2);
+    mDevice.Open(card.GetIndexNumber());
 }
 
 CNTV2SupportLogger::CNTV2SupportLogger(int cardIndex, NTV2SupportLoggerSections sections)
     : mSections(sections)
 {
-    mDevice.Open(cardIndex, false, DEVICETYPE_NTV2);
+    mDevice.Open(cardIndex);
 }
 
 CNTV2SupportLogger::~CNTV2SupportLogger()
