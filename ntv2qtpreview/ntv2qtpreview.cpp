@@ -196,10 +196,10 @@ void NTV2QtPreview::checkFor4kChanged (int state)
 
 void NTV2QtPreview::updateInputs (void)
 {
-	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex (), false);
-	if (ntv2Card.IsOpen ())
+	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex());
+	if (ntv2Card.IsOpen())
 	{
-		const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID ());
+		const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID());
 
 		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
 		{
