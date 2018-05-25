@@ -92,16 +92,16 @@ int main (int argc, const char ** argv)
 				cout << "Using CNTV2Card:" << endl;
 
 				CNTV2Card	ntv2Card;
-				if (ntv2Card.Open (deviceInfo.deviceIndex, false))
+				if (ntv2Card.Open(deviceInfo.deviceIndex))
 				{
-					const NTV2DeviceID	deviceID		(ntv2Card.GetDeviceID ());
+					const NTV2DeviceID	deviceID		(ntv2Card.GetDeviceID());
 					NTV2VideoFormatSet	videoFormats;
 
-					cout	<< "This device still has " << ::NTV2DeviceGetNumVideoInputs (deviceID) << " SDI Input(s)" << endl
-							<< "This device still has " << ::NTV2DeviceGetNumVideoOutputs (deviceID) << " SDI Output(s)" << endl;
+					cout	<< "This device still has " << ::NTV2DeviceGetNumVideoInputs(deviceID) << " SDI Input(s)" << endl
+							<< "This device still has " << ::NTV2DeviceGetNumVideoOutputs(deviceID) << " SDI Output(s)" << endl;
 
 					//	What video formats does it support?
-					ntv2Card.GetSupportedVideoFormats (videoFormats);
+					ntv2Card.GetSupportedVideoFormats(videoFormats);
 					cout << endl << videoFormats << endl;
 
 					#if defined (AJA_NTV2_SDK_VERSION_AT_LEAST)

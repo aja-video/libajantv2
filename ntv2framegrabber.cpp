@@ -283,7 +283,7 @@ void NTV2FrameGrabber::run (void)
 	}
 
 	// Make sure all Bidirectionals are set to Inputs.
-	if (mNTV2Card.Open (mBoardNumber, false))
+	if (mNTV2Card.Open(mBoardNumber))
 	{
 		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
 		{
@@ -354,7 +354,7 @@ void NTV2FrameGrabber::run (void)
 				}
 			gMutex.unlock ();
 
-			if (mNTV2Card.Open (mBoardNumber, false))
+			if (mNTV2Card.Open(mBoardNumber))
 			{
 				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
 				{
