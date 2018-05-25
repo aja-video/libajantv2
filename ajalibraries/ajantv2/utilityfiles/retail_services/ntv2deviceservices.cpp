@@ -3817,6 +3817,9 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 		case NTV2_Input2Embedded1_8Select:		regValue = 0x00014321;  break;
 		case NTV2_Input2Embedded9_16Select:		regValue = 0x00018765;  break;
 		case NTV2_HDMISelect:					regValue = 0x0010000A;  break;
+		case NTV2_HDMI2Select:					regValue = 0x0011000A;  break;
+		case NTV2_HDMI3Select:					regValue = 0x0090000A;  break;
+		case NTV2_HDMI4Select:					regValue = 0x0091000A;  break;
 		case NTV2_MicInSelect:					regValue = 0x0010000B;	break;
 		case NTV2_AnalogSelect:					regValue = 0x00009999;  break;
 		case NTV2_AES_EBU_XLRSelect:

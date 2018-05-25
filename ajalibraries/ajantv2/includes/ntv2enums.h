@@ -1852,6 +1852,9 @@ typedef enum
     NTV2_HDMISelect,
     NTV2_AudioInputOther,
 	NTV2_MicInSelect,
+	NTV2_HDMI2Select,
+    NTV2_HDMI3Select,
+    NTV2_HDMI4Select,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
