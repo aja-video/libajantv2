@@ -2540,7 +2540,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 	}
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -2686,7 +2686,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -2850,7 +2850,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -2962,7 +2962,7 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -3105,7 +3105,7 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -3296,7 +3296,7 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -3427,7 +3427,7 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -3523,7 +3523,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 	}
 
 	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (NTV2BoardNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
@@ -4038,7 +4038,7 @@ void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 #ifndef AJAMac
 	NTV2BoardID boardID = GetBoardID();
-	if ( (NTV2BoardNeedsRoutingSetup(boardID)) && _autoRouteOnXena2)
+	if ( (::NTV2DeviceNeedsRoutingSetup(boardID)) && _autoRouteOnXena2)
 	{
 		CNTV2SignalRouter router;
 		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,false);

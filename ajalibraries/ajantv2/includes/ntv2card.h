@@ -396,10 +396,10 @@ public:
 											NTV2Standard		inStandard);
 	AJA_VIRTUAL bool	DeviceCanDo3GOut (UWord index0);
 	AJA_VIRTUAL bool	DeviceCanDoLTCEmbeddedN (UWord index0);
-	AJA_VIRTUAL ULWord	DeviceGetFrameBufferSize (void);		//	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);		//	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer (void);		//	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer2 (void);		//	Revisit for 2MB granularity
+	AJA_VIRTUAL ULWord	DeviceGetFrameBufferSize (void);
+	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);
+	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer (void);
+	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer2 (void);
 	AJA_VIRTUAL ULWord	DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
 	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
 	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
@@ -1325,8 +1325,8 @@ public:
 		@param[in]	inNumChannels		Specifies the number of audio channels the device will record or play to/from a
 										given Audio System. For most applications, this should always be set to the maximum
 										number of audio channels the device is capable of capturing or playing, which can
-										be obtained by calling the NTV2BoardGetMaxAudioChannels function (see ntv2devicefeatures.h).
-		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+										be obtained by calling the ::NTV2DeviceGetMaxAudioChannels function.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1336,7 +1336,7 @@ public:
 		@param[out]	outNumChannels		Receives the number of audio channels that the AJA device hardware is currently capturing
 										or playing for the given Audio System. If the function result is true, the variable's
 										contents will be valid, and for most AJA devices will be 6, 8, or 16.
-		@param[in]	inAudioSystem		Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem		Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@details	This function allows client applications to determine how many audio channels the AJA hardware is
 					currently capturing/playing into/from the given Audio System on the device.
 	**/
@@ -1349,8 +1349,8 @@ public:
 		@brief		Changes the size of the audio buffer that is used for a given Audio System in the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
-									All modern AJA devices use NTV2_AUDIO_BUFFER_BIG (4 MB).
-		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1358,14 +1358,14 @@ public:
 		@brief		Retrieves the size of the input or output audio buffer being used for a given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
 		@param[out]	outSize			Receives the size of the capture/playout audio buffer for the given Audio System on the AJA device.
-		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Enables or disables 20 bit mode for the Audio System.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem on the device to be affected.
 		@param[in]	inEnable		Specify 'true' to use 20-bit mode;  specify 'false' for normal (24-bit) mode.
 		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
@@ -1375,7 +1375,7 @@ public:
 		@brief		Answers whether or not the device's Audio System is currently operating in 20 bit
 					mode.  Normally the Audio System is in 24 bit mode.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System of interest.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@param[in]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
 									if audio is in 24 bit mode.
 		@note		This function is relevant only for the \ref konaip or \ref ioip.
@@ -1791,7 +1791,7 @@ public:
 	/**
 		@brief		Sets the audio source for the given Audio System on the device.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-										(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
+										(Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
 		@param[in]	inAudioSource		Specifies the audio source to use for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
 		@param[in]	inEmbeddedInput		If the audio source is set to NTV2_AUDIO_EMBEDDED, and the device has multiple SDI inputs, use inEmbeddedInput
 										to specify which NTV2EmbeddedAudioInput to use. This parameter is ignored if the inAudioSource is not NTV2_AUDIO_EMBEDDED.
@@ -1807,7 +1807,7 @@ public:
 	/**
 		@brief		Answers with the current audio source for the given Audio System on the device.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-									(Use the ::NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
+									(Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
 		@param[out]	outAudioSource	Receives the audio source that's currently being used for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
 		@param[out]	outEmbeddedSource	If the audio source is NTV2_AUDIO_EMBEDDED, outEmbeddedSource will be the SDI input it is configured for.
 		@return		True if successful; otherwise false.
@@ -1824,7 +1824,7 @@ public:
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
@@ -1833,7 +1833,7 @@ public:
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
 
@@ -1861,18 +1861,18 @@ public:
 	/**
 		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
 	/**
 		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the NTV2BoardGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
 

@@ -864,12 +864,18 @@ bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inC
 
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
-    return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
+	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
+	    return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
+	else
+		return NTV2_AUDIOSYSTEM_INVALID;
 }
 
 NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 {
-	return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID));
+	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
+		return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID));
+	else
+		return NTV2_AUDIOSYSTEM_INVALID;
 }
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
@@ -880,83 +886,10 @@ bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 		return false;
 }
 
-#if !defined (NTV2_DEPRECATE)
-	bool NTV2DeviceCanDoProAudio(NTV2DeviceID boardID)
+#if !defined (NTV2_DEPRECATE_14_3)
+	bool NTV2DeviceCanDoFreezeOutput (const NTV2DeviceID inDeviceID)
 	{
-		(void) boardID;
+		(void) inDeviceID;
 		return false;
 	}
-
-	bool NTV2DeviceCanDoUARTN (NTV2DeviceID boardID, UWord index0)
-	{
-		return NTV2DeviceCanDoRS422N (boardID, (NTV2Channel) index0);
-	}
-
-	bool NTV2BoardCanDoProcAmp(NTV2DeviceID boardID)
-	{
-		(void) boardID;
-		return false;
-	}
-
-	bool NTV2BoardCanDoBrightnessAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode)
-	{
-		(void) boardID;
-		(void) videoADCMode;
-		return false;
-	}
-
-	bool NTV2BoardCanDoContrastAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode)
-	{
-		(void) boardID;
-		(void) videoADCMode;
-		return false;
-	}
-
-	bool NTV2BoardCanDoSaturationAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode)
-	{
-		(void) boardID;
-		(void) videoADCMode;
-		return false;
-	}
-
-	bool NTV2BoardCanDoHueAdjustment(NTV2DeviceID boardID, NTV2LSVideoADCMode videoADCMode)
-	{
-		(void) boardID;
-		(void) videoADCMode;
-		return false;
-	}
-
-	bool NTV2BoardCanDoAudio		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 0);	}
-	bool NTV2BoardCanDoAudio2		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 1);	}
-	bool NTV2BoardCanDoAudio3		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 2);	}
-	bool NTV2BoardCanDoAudio4		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 3);	}
-	bool NTV2BoardCanDoAudio5		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 4);	}
-	bool NTV2BoardCanDoAudio6		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 5);	}
-	bool NTV2BoardCanDoAudio7		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 6);	}
-	bool NTV2BoardCanDoAudio8		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoAudioN		(boardID, 7);	}
-	bool NTV2BoardCanDoMixer2		(NTV2DeviceID boardID)		{	return NTV2DeviceGetNumMixers		(boardID) >= 2;	}
-	bool NTV2BoardCanDoMixer3		(NTV2DeviceID boardID)		{	return NTV2DeviceGetNumMixers		(boardID) >= 3;	}
-	bool NTV2BoardCanDoMixer4		(NTV2DeviceID boardID)		{	return NTV2DeviceGetNumMixers		(boardID) >= 4;	}
-	bool NTV2BoardCanDoUART			(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoUARTN			(boardID, 0);	}
-	bool NTV2BoardCanDoUART2		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoUARTN			(boardID, 1);	}
-	bool NTV2BoardCanDoLTCEmbedded	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 0);	}
-	bool NTV2BoardCanDoLTCEmbedded2	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 1);	}
-	bool NTV2BoardCanDoLTCEmbedded3	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 2);	}
-	bool NTV2BoardCanDoLTCEmbedded4	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 3);	}
-	bool NTV2BoardCanDoLTCEmbedded5	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 4);	}
-	bool NTV2BoardCanDoLTCEmbedded6	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 5);	}
-	bool NTV2BoardCanDoLTCEmbedded7	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 6);	}
-	bool NTV2BoardCanDoLTCEmbedded8	(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCEmbeddedN	(boardID, 7);	}
-	bool NTV2BoardCanDo3G			(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 0);	}
-	bool NTV2BoardCanDo3GOut2		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 1);	}
-	bool NTV2BoardCanDo3GOut3		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 2);	}
-	bool NTV2BoardCanDo3GOut4		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 3);	}
-	bool NTV2BoardCanDo3GOut5		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 4);	}
-	bool NTV2BoardCanDo3GOut6		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 5);	}
-	bool NTV2BoardCanDo3GOut7		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 6);	}
-	bool NTV2BoardCanDo3GOut8		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDo3GOut			(boardID, 7);	}
-	bool NTV2BoardCanDoLTCIn		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCInN		(boardID, 0);	}
-	bool NTV2BoardCanDoLTCIn2		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCInN		(boardID, 1);	}
-	bool NTV2BoardCanDoLTCOut		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCOutN		(boardID, 0);	}
-	bool NTV2BoardCanDoLTCOut2		(NTV2DeviceID boardID)		{	return NTV2DeviceCanDoLTCOutN		(boardID, 1);	}
-#endif	//	NTV2_DEPRECATE
+#endif	//	!defined (NTV2_DEPRECATE_14_3)

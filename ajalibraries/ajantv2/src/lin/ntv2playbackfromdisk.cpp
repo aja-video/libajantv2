@@ -74,7 +74,7 @@ void CNTV2PlaybackFromDisk::InitThread()
 		if ( !NTV2BoardCanDoAudio(_ntv2Card.GetBoardID()))
 			_bPlaybackAudio = false;
 
-		if ( !NTV2BoardCanDoDualLink(_ntv2Card.GetBoardID()))
+		if ( !NTV2DeviceCanDoDualLink(_ntv2Card.GetDeviceID()))
 			_bDualLinkOutput = false;
 
 		if ( !SetupDiskFiles() )
@@ -443,7 +443,7 @@ void CNTV2PlaybackFromDisk::SetupPlaybackVideo()
 		_ntv2Card.SetDualLinkOutputEnable(false);
 	}
 	
-	if( NTV2BoardNeedsRoutingSetup(_ntv2Card.GetBoardID() ))
+	if( ::NTV2DeviceNeedsRoutingSetup(_ntv2Card.GetDeviceID() ))
 	{
 		BuildRoutingTableForOutput(_xena2Router,_channel,_frameBufferFormat,false,false,_bDualLinkOutput);
 		if ( tenEightyP)
