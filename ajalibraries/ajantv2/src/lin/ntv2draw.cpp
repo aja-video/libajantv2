@@ -12,7 +12,7 @@
 #include "ntv2draw.h"
 
 CNTV2Draw::CNTV2Draw(UWord boardNumber, bool displayError, NTV2DeviceType boardType)
-	:   CNTV2Card(boardNumber, displayError, boardType) 
+	:   CNTV2Card(boardNumber) 
 {
 	if ( IsOpen() )
 	{

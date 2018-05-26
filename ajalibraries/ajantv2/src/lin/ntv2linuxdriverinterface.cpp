@@ -76,7 +76,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 		ostringstream	oss;
 		oss << "/dev/" << kAJANTV2 << inDeviceIndexNumber;
 		boardStr = oss.str();
-		_hDevice = open(boardStr,O_RDWR);
+		_hDevice = open(boardStr.c_str(),O_RDWR);
 	}
 
 	if (_hDevice == INVALID_HANDLE_VALUE && _remoteHandle == INVALID_NUB_HANDLE)
@@ -1325,14 +1325,16 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 
 	bool CNTV2LinuxDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	{
-		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-
 		if( !pInMessage )
-			return false;
+			return false;	//	NULL message pointer
 
-		if( ioctl( _hDevice,
-				   IOCTL_AJANTV2_MESSAGE,
-				   pInMessage) )
+		if (_remoteHandle != INVALID_NUB_HANDLE)
+		{
+			return false;	//	Implement NTV2Message on nub
+		}
+		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+
+		if( ioctl( _hDevice,  IOCTL_AJANTV2_MESSAGE,  pInMessage) )
 		{
 			DisplayNTV2Error("IOCTL_AJANTV2_MESSAGE failed\n");
 			return false;
