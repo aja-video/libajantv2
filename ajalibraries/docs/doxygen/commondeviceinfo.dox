@@ -843,7 +843,7 @@
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
 	explicitly configured to use the input signal by passing ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT to CNTV2Card::SetEmbeddedAudioClock.
 	If this wasn't done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
-	the audio would eventually drift from the video.
+	the audio would eventually drift from the video. (See also ::NTV2DeviceCanChangeEmbeddedAudioClock.)
 
 
 	<hr size="50px">
