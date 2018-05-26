@@ -34,7 +34,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		return ;
 	}
 
-	mBoard = new CNTV2Card((UWord)m_uiBoardNumber, true);
+	mBoard = new CNTV2Card((UWord)m_uiBoardNumber);
 
 	// Return if no board compatible board found or opened
 	if (!mBoard)
