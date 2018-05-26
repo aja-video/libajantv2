@@ -7,6 +7,7 @@
 
 	This page describes the KONA 4 capture/playout board in its 4-channel mode of operation.
 	It can be "flashed" with different firmware to become a 2-channel device (see \ref kona4ufc).
+	It’s identified by ::DEVICE_ID_KONA4.
 
 	@image	html	kona4.png
 

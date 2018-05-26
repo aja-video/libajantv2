@@ -6,6 +6,7 @@
 	@subsection		corvid22		Corvid 22
 
 	This page describes the <b>Corvid 22</b> capture/playout board.
+	It’s identified by ::DEVICE_ID_CORVID22.
 
 	@image	html	corvid22.png
 

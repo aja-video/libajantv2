@@ -6,6 +6,7 @@
 	@subsection		konalheplus		KONA LHe Plus
 
 	This page describes the KONA LHe Plus video capture/playout board.
+	It’s identified by ::DEVICE_ID_KONALHEPLUS.
 
 	@image	html	konalheplus.png
 

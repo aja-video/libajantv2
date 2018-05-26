@@ -6,6 +6,7 @@
 	@subsection		konalhi		KONA LHi
 
 	This page describes the KONA LHi video capture/playout board.
+	It’s identified by ::DEVICE_ID_KONALHI.
 
 	@image	html	konalhi.png
 

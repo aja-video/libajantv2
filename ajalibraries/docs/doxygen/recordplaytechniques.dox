@@ -67,7 +67,7 @@ The AutoCirculate API coordinates the transfer of video and audio data between t
 as the driver circulates through its designated frame set (which is a contiguous block of frames in device SDRAM).
 For recording, the driver cycles through its associated input frames, and on playback, the driver cycles through its
 associated output frames. For example, an AutoCirculate capture using 7 frames would record each incoming frame one at
-a time into device SDRAM in frames 0…6, 0…6, 0…6 <i>ad infinitum</i>, continually and repeatedly reusing those frame
+a time into device SDRAM in frames 0…6, 0…6, 0…6 <i>ad infínitum</i>, continually and repeatedly reusing those frame
 “slots” in its memory. The key is for the host application to continually transfer the captured frames from device memory
 into host memory fast enough to keep up with the incoming video being recorded on the device.
 
@@ -103,6 +103,13 @@ As long as the host application that’s transferring frames takes less than 33 
 consume each frame, all will be well. If the host takes longer than 33 milliseconds to consume a frame, the <b>Transfer Frame</b>
 will start to fall behind, and the <b>Buffer Level</b> will increase. If this is allowed to continue, the <b>Active Frame</b> will
 overtake the <b>Transfer Frame</b>, which will result in “dropped” frames that never get transferred to the host.
+
+When CNTV2Card::AutoCirculateInitForInput is called with a valid ::NTV2AudioSystem, and CNTV2Card::AutoCirculateStart is called,
+AutoCirculate will start and operate the <b>Audio System</b>, automatically transferring the correct number of newly-captured
+audio samples from the device Audio System’s <b>Input Buffer</b> that are associated with the video frame being transferred in each
+CNTV2Card::AutoCirculateTransfer call. AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount will return the exact number of transferred
+audio bytes for the current frame that was just transferred to the host.
+
 
 AutoCirculate capture demos:
 -	@subpage	ntv2capture

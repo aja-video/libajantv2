@@ -6,6 +6,7 @@
 	@subsection		ttap		T-Tap
 
 	This page describes the T-Tapvideo playout device.
+	It’s identified by ::DEVICE_ID_TTAP.
 
 	@image	html	ttap.png
 

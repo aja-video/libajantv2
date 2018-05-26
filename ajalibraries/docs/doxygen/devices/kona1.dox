@@ -6,6 +6,7 @@
 	@subsection		kona1		KONA 1
 
 	This page describes the KONA 1 capture/playout board.
+	It’s identified by ::DEVICE_ID_KONA1.
 
 	@image	html	kona1.png
 
