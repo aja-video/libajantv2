@@ -9,7 +9,9 @@
 #include "ajatypes.h"
 #include "ntv2enums.h"
 
+#if !defined(NTV2_DEPRECATE_14_3)
 AJAExport const char *	NTV2DeviceTypeString		(const NTV2DeviceType type);
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 AJAExport const char *	NTV2DeviceIDString			(const NTV2DeviceID id);
 AJAExport const char *	NTV2DeviceString			(const NTV2DeviceID id);
 AJAExport const char *	NTV2StandardString			(NTV2Standard std);

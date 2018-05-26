@@ -52,10 +52,14 @@ public:
 						CNTV2MacDriverInterface( void );
 	virtual 			~CNTV2MacDriverInterface( void );
 
-	virtual bool		Open (UWord inDeviceIndex = 0,
-							  bool displayError = false,
-							  NTV2DeviceType eDeviceType = DEVICETYPE_UNKNOWN,
-							  const char * hostName = NULL);   // Non-null: card on remote host
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual bool		Open (UWord inDeviceIndex,
+							  bool displayError,
+							  NTV2DeviceType eDeviceType,
+							  const char * hostName);
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
+	virtual bool		Open (const UWord inDeviceIndex = 0,
+							  const std::string & inHostName = std::string());
 	bool				TestOpen();
 	virtual bool		Close (void);
 	virtual ULWord		GetPCISlotNumber (void) const;

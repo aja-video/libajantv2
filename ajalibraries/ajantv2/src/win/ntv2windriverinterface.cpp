@@ -138,16 +138,14 @@ static const ULWord	gChannelToTSLastInputVertHi []		= {	kVRegTimeStampLastInput1
 //            defaults to FILE_SHARE_READ | FILE_SHARE_WRITE
 //            which allows multiple opens on the same device.
 // Output: bool - true if opened ok.
-bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char *hostname)
+bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
 {
 	// Check if already opened
 	if (IsOpen())
 	{
 		// Don't do anything if the requested board is the same as last opened, and
 		// the requested or last opened board aren't remote boards
-		if ( ( _boardNumber == boardNumber ) &&
-				((hostname == NULL) || (hostname[0] == '\0')) &&
-				 (_remoteHandle == INVALID_NUB_HANDLE ) )
+		if ( (_boardNumber == inDeviceIndexNumber) && hostName.empty() && (_remoteHandle == INVALID_NUB_HANDLE) )
 			return true;
 
 		Close();   // Close current board and open desired board
@@ -159,45 +157,27 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 	//eBoardType = _boardType;
 	ULWord deviceID = 0x0;
 
-	_displayErrorMessage = displayError;
 #define BOARDSTRMAX	32
 	char boardStr[BOARDSTRMAX];
-	if (_boardType != DEVICETYPE_NTV2)
+	if (!hostName.empty())	// Non-empty: card on remote host
 	{
-		if (_displayErrorMessage)	DisplayNTV2Error ("Open not called with BOARDTYPE_NTV2");
-		return false;
-	}
-
-	if (hostname && hostname[0] != '\0')	// Non-null: card on remote host
-	{
-		_snprintf_s(boardStr, BOARDSTRMAX - 1, "%s:ntv2%d", hostname, _boardNumber);
-
-		if ( !OpenRemote(boardNumber, displayError, _boardType, hostname))
+		ostringstream	oss;
+		oss << hostName << ":ntv2" << inDeviceIndexNumber;
+		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
 		{
 			DisplayNTV2Error("Failed to open board on remote host.");
 		}
 	}
 	else
 	{
-
-		switch (_boardType)
 		{
-		case DEVICETYPE_NTV2:
-			{
-				DEFINE_GUIDSTRUCT("844B39E5-C98E-45a1-84DE-3BAF3F4F9F14", AJAVIDEO_NTV2_PROPSET);
+			DEFINE_GUIDSTRUCT("844B39E5-C98E-45a1-84DE-3BAF3F4F9F14", AJAVIDEO_NTV2_PROPSET);
 #define AJAVIDEO_NTV2_PROPSET DEFINE_GUIDNAMED(AJAVIDEO_NTV2_PROPSET)
-				_GUID_PROPSET = AJAVIDEO_NTV2_PROPSET;
-			}
-			break;
-		case DEVICETYPE_UNKNOWN:
-			return false;
-
-		default: // if it's something we don't know about yet, don't open it
-			return false;
+			_GUID_PROPSET = AJAVIDEO_NTV2_PROPSET;
 		}
 
 		REFGUID refguid = _GUID_PROPSET;
-		_boardNumber = boardNumber;
+		_boardNumber = inDeviceIndexNumber;
 
 		DWORD dwShareMode;
 		if (_bOpenShared)
@@ -212,113 +192,108 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 			dwFlagsAndAttributes = 0x0;
 
 		dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED;
-		switch (_boardType)
+
+		DWORD dwReqSize=0;
+		SP_DEVICE_INTERFACE_DATA spDevIFaceData;
+		memset(&spDevIFaceData, 0, sizeof(SP_DEVICE_INTERFACE_DATA));
+		GUID myguid = refguid;  // an un-const guid for compiling with new Platform SDK!
+		_hDevInfoSet = SetupDiGetClassDevs(&myguid,NULL,NULL,DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+		if(_hDevInfoSet==INVALID_HANDLE_VALUE)
 		{
-		case DEVICETYPE_NTV2:
-			{
-				DWORD dwReqSize=0;
-				SP_DEVICE_INTERFACE_DATA spDevIFaceData;
-				memset(&spDevIFaceData, 0, sizeof(SP_DEVICE_INTERFACE_DATA));
-				GUID myguid = refguid;  // an un-const guid for compiling with new Platform SDK!
-				_hDevInfoSet = SetupDiGetClassDevs(&myguid,NULL,NULL,DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
-				if(_hDevInfoSet==INVALID_HANDLE_VALUE)
-				{
-					return false;
-				}
-				spDevIFaceData.cbSize=sizeof(SP_DEVICE_INTERFACE_DATA);
-				myguid = refguid;
-				if(!SetupDiEnumDeviceInterfaces(_hDevInfoSet,NULL,&myguid,_boardNumber,&spDevIFaceData))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false;
-				}
+			return false;
+		}
+		spDevIFaceData.cbSize=sizeof(SP_DEVICE_INTERFACE_DATA);
+		myguid = refguid;
+		if(!SetupDiEnumDeviceInterfaces(_hDevInfoSet,NULL,&myguid,_boardNumber,&spDevIFaceData))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false;
+		}
 
-				if(SetupDiGetDeviceInterfaceDetail(_hDevInfoSet,&spDevIFaceData,NULL,0,&dwReqSize,NULL))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; //should have failed!
-				}
-				if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER)
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false;
-				}
-				_pspDevIFaceDetailData=(PSP_DEVICE_INTERFACE_DETAIL_DATA) new BYTE[dwReqSize];
-				if(!(_pspDevIFaceDetailData))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; // out of memory
-				}
+		if(SetupDiGetDeviceInterfaceDetail(_hDevInfoSet,&spDevIFaceData,NULL,0,&dwReqSize,NULL))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; //should have failed!
+		}
+		if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER)
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false;
+		}
+		_pspDevIFaceDetailData=(PSP_DEVICE_INTERFACE_DETAIL_DATA) new BYTE[dwReqSize];
+		if(!(_pspDevIFaceDetailData))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; // out of memory
+		}
 
-				memset(&_spDevInfoData, 0, sizeof(SP_DEVINFO_DATA));
-				_spDevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-				_pspDevIFaceDetailData->cbSize=sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-				//now we are setup to get the info we want!
-				if(!SetupDiGetDeviceInterfaceDetail(_hDevInfoSet ,&spDevIFaceData,_pspDevIFaceDetailData, dwReqSize,NULL,&_spDevInfoData))
-				{
-					delete _pspDevIFaceDetailData;
-					_pspDevIFaceDetailData=NULL;
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; // out of memory
-				}
+		memset(&_spDevInfoData, 0, sizeof(SP_DEVINFO_DATA));
+		_spDevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+		_pspDevIFaceDetailData->cbSize=sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+		//now we are setup to get the info we want!
+		if(!SetupDiGetDeviceInterfaceDetail(_hDevInfoSet ,&spDevIFaceData,_pspDevIFaceDetailData, dwReqSize,NULL,&_spDevInfoData))
+		{
+			delete _pspDevIFaceDetailData;
+			_pspDevIFaceDetailData=NULL;
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; // out of memory
+		}
 
-				ULONG deviceInstanceSize = 0;
-				CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
-				char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
-				CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
-				string sDeviceInstance(deviceInstance);
-				delete deviceInstance;
-				if(sDeviceInstance.find("DB") != string::npos)
-				{
-					string sDeviceID = sDeviceInstance.substr(sDeviceInstance.find("DB"),4);
-					if(sDeviceID.compare("DB01") == 0)
-						deviceID = 0xDB01;
-					else if(sDeviceID.compare("DB02") == 0)
-						deviceID = 0xDB02;
-					else if(sDeviceID.compare("DB03") == 0)
-						deviceID = 0xDB03;
-					else if(sDeviceID.compare("DB04") == 0)
-						deviceID = 0xDB04;
-					else if(sDeviceID.compare("DB05") == 0)
-						deviceID = 0xDB05;
-					else if(sDeviceID.compare("DB06") == 0)
-						deviceID = 0xDB06;
-					else if(sDeviceID.compare("DB07") == 0)
-						deviceID = 0xDB07;
-					else if(sDeviceID.compare("DB08") == 0)
-						deviceID = 0xDB08;
-					else if(sDeviceID.compare("DB09") == 0)
-						deviceID = 0xDB09;
-					else if(sDeviceID.compare("DB10") == 0)
-						deviceID = 0xDB10;
-					else if(sDeviceID.compare("DB11") == 0)
-						deviceID = 0xDB11;
-					else
-						deviceID = 0x0;
-				}
-				else
-					deviceID = 0x0;
+		ULONG deviceInstanceSize = 0;
+		CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
+		char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
+		CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
+		string sDeviceInstance(deviceInstance);
+		delete deviceInstance;
+		if(sDeviceInstance.find("DB") != string::npos)
+		{
+			string sDeviceID = sDeviceInstance.substr(sDeviceInstance.find("DB"),4);
+			if(sDeviceID.compare("DB01") == 0)
+				deviceID = 0xDB01;
+			else if(sDeviceID.compare("DB02") == 0)
+				deviceID = 0xDB02;
+			else if(sDeviceID.compare("DB03") == 0)
+				deviceID = 0xDB03;
+			else if(sDeviceID.compare("DB04") == 0)
+				deviceID = 0xDB04;
+			else if(sDeviceID.compare("DB05") == 0)
+				deviceID = 0xDB05;
+			else if(sDeviceID.compare("DB06") == 0)
+				deviceID = 0xDB06;
+			else if(sDeviceID.compare("DB07") == 0)
+				deviceID = 0xDB07;
+			else if(sDeviceID.compare("DB08") == 0)
+				deviceID = 0xDB08;
+			else if(sDeviceID.compare("DB09") == 0)
+				deviceID = 0xDB09;
+			else if(sDeviceID.compare("DB10") == 0)
+				deviceID = 0xDB10;
+			else if(sDeviceID.compare("DB11") == 0)
+				deviceID = 0xDB11;
+			else
+				deviceID = 0x0;
+		}
+		else
+			deviceID = 0x0;
 
-				_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath,
-					GENERIC_READ | GENERIC_WRITE,
-					dwShareMode,
-					NULL,
-					OPEN_EXISTING,
-					dwFlagsAndAttributes,
-					NULL);
+		_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath,
+			GENERIC_READ | GENERIC_WRITE,
+			dwShareMode,
+			NULL,
+			OPEN_EXISTING,
+			dwFlagsAndAttributes,
+			NULL);
 
-				if(_hDevice == INVALID_HANDLE_VALUE)
-				{
-					delete _pspDevIFaceDetailData;
-					_pspDevIFaceDetailData=NULL;
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					_hDevInfoSet=NULL;
-					return false;
-				}
-			}
-			break;
+		if(_hDevice == INVALID_HANDLE_VALUE)
+		{
+			delete _pspDevIFaceDetailData;
+			_pspDevIFaceDetailData=NULL;
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			_hDevInfoSet=NULL;
+			return false;
 		}
 	}
+
 	_boardOpened = true;
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
@@ -336,6 +311,19 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 
 	return true;
 }
+
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool CNTV2LinuxDriverInterface::Open (	UWord			boardNumber,
+											bool			displayError,
+											NTV2DeviceType	eBoardType,
+											const char 	*	hostname)
+	{
+		(void) eBoardType;
+		const string host(hostname ? hostname : "");
+		_displayErrorMessage = displayError;
+		return Open(boardNumber, host);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 // Method:	SetShareMode
 // Input:	bool mode

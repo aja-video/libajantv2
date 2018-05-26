@@ -378,17 +378,13 @@ bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, c
 
 bool CNTV2Card::SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock inValue, const NTV2AudioSystem inAudioSystem)
 {
-	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum [inAudioSystem], inValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
+	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
 }
 
 
 bool CNTV2Card::GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem)
 {
-	ULWord		value	(0);
-	const bool	status	(ReadRegister (gAudioSystemToAudioSrcSelectRegNum [inAudioSystem], value, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock));
-	if (status)
-		outValue = static_cast <NTV2EmbeddedAudioClock> (value);
-	return status;
+	return CNTV2DriverInterface::ReadRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], outValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
 }
 
 

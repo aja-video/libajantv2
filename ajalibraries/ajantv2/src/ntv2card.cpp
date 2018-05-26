@@ -24,15 +24,12 @@ CNTV2Card::CNTV2Card ()
 	#endif	//	defined (NTV2_DEPRECATE)
 }
 
-// Constructor that Opens Board
-CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, const UWord ulBoardType, const char *hostname)
+CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
 {
 	_boardOpened = false;
-	const NTV2DeviceType	eUseBoardType	(static_cast <NTV2DeviceType> (ulBoardType));
-
-	if (Open (boardNumber, displayErrorMessage, eUseBoardType, hostname))
+	if (Open(inDeviceIndex, inHostName))
 	{
-		if (IsBufferSizeSetBySW ())
+		if (IsBufferSizeSetBySW())
 		{
 			NTV2Framesize fbSize;
 			GetFrameBufferSize (NTV2_CHANNEL1, fbSize);
@@ -51,21 +48,46 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 		}
 	}
 
-    #if defined (NTV2_DEPRECATE)
-        //InitNTV2ColorCorrection ();
-		InitNTV2TestPattern ();
-	#endif	//	defined (NTV2_DEPRECATE)
- }	//	constructor
+    #if defined(NTV2_DEPRECATE)
+		InitNTV2TestPattern();
+	#endif	//	defined(NTV2_DEPRECATE)
+}
 
+#if !defined(NTV2_DEPRECATE_14_3)
+CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, const UWord ulBoardType, const char *hostname)
+{
+	(void) displayErrorMessage;
+	(void) ulBoardType;
+	_boardOpened = false;
+	if (Open(boardNumber, string(hostname ? hostname : "")))
+	{
+		if (IsBufferSizeSetBySW())
+		{
+			NTV2Framesize fbSize;
+			GetFrameBufferSize (NTV2_CHANNEL1, fbSize);
+			SetFrameBufferSize (fbSize);
+		}
+		else
+		{
+			NTV2FrameGeometry fg;
+			NTV2FrameBufferFormat format;
+
+			GetFrameGeometry (fg);
+			GetFrameBufferFormat (NTV2_CHANNEL1, format);
+
+			_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize (GetDeviceID (), fg, format);
+			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);
+		}
+	}
+    #if defined(NTV2_DEPRECATE)
+		InitNTV2TestPattern();
+	#endif	//	defined(NTV2_DEPRECATE)
+}	//	constructor
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 // Destructor
 CNTV2Card::~CNTV2Card ()
 {
-#if 0
-	#if defined (NTV2_DEPRECATE)
-		FreeNTV2ColorCorrection ();
-	#endif	//	defined (NTV2_DEPRECATE)
-#endif
 	if (IsOpen ())
 		Close ();
 

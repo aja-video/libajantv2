@@ -59,13 +59,12 @@ class AJAExport CNTV2KonaFlashProgram : public CNTV2Card
 public:
 	CNTV2KonaFlashProgram();
 
-	CNTV2KonaFlashProgram (const UWord boardNumber, const bool displayErrorMessage = false,
-		const UWord ulBoardType = DEVICETYPE_NTV2);	//	 | BOARDTYPE_AJAXENA2);
+	CNTV2KonaFlashProgram (const UWord boardNumber);
 
 	virtual ~CNTV2KonaFlashProgram();
 
 public:
-	virtual bool	SetBoard (UWord boardNumber, NTV2DeviceType boardType = DEVICETYPE_NTV2, uint32_t index = 0);
+	virtual bool	SetBoard (UWord boardNumber, uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	void			SetBitFile (const char *bitFileName, FlashBlockID blockNumber = AUTO_FLASHBLOCK);
