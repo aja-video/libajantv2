@@ -98,7 +98,7 @@ For each video format and frame buffer (pixel) format, video is arranged differe
 This means that for each format, there’s a different number of bytes per horizontal line (or “line pitch”,
 in 32-bit words) for each standard.
 
-The ::NTV2FormatDescriptor class is used to inquire about rasters of any \ref NTV2Standard and \ref NTV2FrameBufferFormat.
+The ::NTV2FormatDescriptor class is used to inquire about rasters of any ::NTV2Standard and ::NTV2FrameBufferFormat.
 Once constructed, it can tell you the frame pixel dimensions (with or without VANC lines), the number of bytes per row,
 the byte count required to hold the frame, the byte offset to a particular line, etc.
 
