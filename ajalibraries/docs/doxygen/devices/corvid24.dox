@@ -8,6 +8,7 @@
 	This page describes the <b>Corvid 24</b> OEM capture/playout board, which features bypass relays on each SDI
 	connector that can operate under software control or hardware control (using the built-in "watchdog" timer).
 	Its four SDI connectors can programmatically be configured as inputs or outputs.
+	It’s identified by ::DEVICE_ID_CORVID24.
 
 	@image	html	corvid24.png
 

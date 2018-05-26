@@ -7,6 +7,7 @@
 
 	This page describes the <b>Corvid HEVC</b> OEM capture/playout board, which features four SDI inputs to support
 	real time, low-latency HEVC encoding up to 4Kp60.
+	It’s identified by ::DEVICE_ID_CORVIDHEVC.
 
 	@image	html	corvidhevc.png
 

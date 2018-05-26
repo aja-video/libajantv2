@@ -15,7 +15,7 @@
 	-	Mixer/Keyer widgets on older devices wouldn’t pass VANC.
 	-	There’s no HANC support.
 	-	The frame buffer geometry doesn’t match the video standard, which again, adds more code complexity.
-	-	Tall/taller-frame geometries are not (and never will be) supported for 4K or UHD video formats.
+	-	Tall/taller-frame geometries aren’t supported for 4K or UHD video formats.
 
 	Starting in SDK 12.3, AJA introduced a new way of handling ancillary data using Anc extractor/inserter widgets in device firmware.
 	During playout, an inserter widget inserts ancillary data into the outgoing SDI data stream from a separate host buffer in the
@@ -30,21 +30,29 @@
 		match the video standard.
 
 	@note	All NTV2 devices still support the "tall" and "taller" VANC geometries (see ::NTV2VANCMode).
+
 	@note	Neither ::NTV2_VANCMODE_TALL nor ::NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see ::NTV2_IS_4K_VIDEO_FORMAT macro).
-	@note	AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
+
+	@note	::AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
 			To use the latter, the ::AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
+
 	@note	In SDKs prior to 14.0, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
 			SDK 14.1 introduced a new API for operating the Anc inserter/extractor widgets without AutoCirculate.
-	@note	\ref ajaanc can make it easier to pack/unpack the data to/from the host Anc data buffer(s).
+
+	@note	\ref ajaanc can make it easier to pack/unpack data packets to/from the host Anc data buffer(s).
+			In SDK 14.1,\ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
 
 	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
 			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate ::NTV2_CHANNEL3.
 			This will be fixed in a future SDK/driver.
 
-	@bug	Custom HANC insertion on playout doesn't currently work (firmware issue).
+	@bug	Custom HANC insertion on playout is not supported (this is a difficult to resolve firmware issue).
+
 
 	@section	ancembeddedaudio	Embedded Audio
+
+	@subsection	ancembeddedaudiocapture		Audio Capture
 
 	To capture embedded audio from HANC into the audio input buffer, set the audio source select register, for the specific
 	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetAudioSystemInputSource) and start the audio system running.
@@ -55,7 +63,7 @@
 	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
 
 	SMPTE 12M specifies the transmission of timecode in the ancillary data space. Any RP-188 data in the input video with DBB-1
-	data matching the device's current RP-188 source select filter will be stuffed into the device's RP-188 registers, and can be
+	data matching the device's current RP-188 source select filter will be placed into the device's RP-188 registers, and can be
 	read using CNTV2Card::GetRP188Data. When RP-188 output is enabled for a video channel (by passing ::NTV2_RP188_OUTPUT into
 	CNTV2Card::SetRP188Mode), whatever RP-188 data is in the RP-188 registers (call CNTV2Card::SetRP188Data to set it) is inserted
 	into the HANC area of the output video on the appropriate line:

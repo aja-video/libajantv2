@@ -6,6 +6,7 @@
 	@subsection		ioexpress		Io Express
 
 	This page describes the IoExpress capture/playout device.
+	It’s identified by ::DEVICE_ID_IOEXPRESS.
 
 	@image	html	ioexpressfront.jpg
 	@image	html	ioexpressrear.jpg

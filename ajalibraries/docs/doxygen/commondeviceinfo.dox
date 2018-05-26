@@ -22,7 +22,7 @@
 	-	8-bit YCbCr or 10-bit YCbCr frame buffer formats.
 
 	Beyond these common characteristics, AJA devices fan out into a diverse array of capabilities to suit many different applications.
-	To determine the features of an AJA device, use the "Device Features" API. See \ref ntv2devicefeatures for examples of how to call these functions.
+	To determine the features of an AJA device, use the \ref ntv2devicefeatures.
 
 	Most devices can capture and play video, but some may only capture, while others may only playout.
 	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.
@@ -37,7 +37,7 @@
 	-	To determine the number of SDI input jacks the device has, call ::NTV2DeviceGetNumVideoInputs.
 	-	To determine the number of SDI output jacks the device has, call ::NTV2DeviceGetNumVideoOutputs.
 
-	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they're software-configurable.
+	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they’re software-configurable.
 	This means your application can, by calling a function in the NTV2 SDK, instruct the device to reconfigure one of its SDI jacks from an
 	input to an output (or vice-versa).
 	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
@@ -345,13 +345,13 @@
 	to an output, directly, or indirectly (e.g., through a Mixer/Keyer) without any mediation
 	through a pair of Frame Stores.
 
-	However, if two inputs are feeding the device, it's probably impossible to lock to both
+	However, if two inputs are feeding the device, it’s probably impossible to lock to both
 	sources. Unless the sources are synced to a common timebase (often called “house reference”),
 	then the two signals will drift over time with respect to each other. One channel may just
 	be starting a new frame, while the other is already half way through its frame. Since a
 	client application can’t lock to both signals at the same time, ::NTV2_REFERENCE_FREERUN
 	should be used, to clock the outputs from the device’s own internal clock source. Note that
-	even setting “free run” isn't technically necessary — the application would run just as
+	even setting “free run” isn’t technically necessary — the application would run just as
 	well locked to an input, with the only difference being when the signals would actually
 	come out of the BNC connectors.
 
@@ -634,7 +634,7 @@
 		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
 
 
-	@subsection	widget_framestore	Frame Stores
+	@subsection	widget_framestore	Frame Store
 
 	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
 	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
@@ -664,7 +664,7 @@
 	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
 
 
-	@subsection	widget_csc	ColorSpace Converters (CSCs)
+	@subsection	widget_csc	ColorSpace Converter (CSC)
 
 	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
 	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
@@ -690,7 +690,7 @@
 				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
 
-	@subsection	widget_mixkey	Mixer/Keyer Widgets
+	@subsection	widget_mixkey	Mixer/Keyer
 
 	@image	html	cables-mixerkeyerwidget.png
 
@@ -753,35 +753,38 @@
 	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
 	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
 
-	Each Audio System can accommodate at least 8 channels of audio.
-	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s Audio System(s) can handle.
-	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device Audio System is currently configured for.
+	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
+	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.
+	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device <b>Audio System</b> is currently configured for.
 	Modern AJA devices will accommodate up to 16 channels. Older AJA devices defaulted to 6 channels at power-up — these should be
 	configured to use 8 channels.
-	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device Audio System is configured to use.
+	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device <b>Audio System</b> is configured to use.
 
-	@note	It is recommended that the Audio System be configured to use the maximum number of audio channels the device is capable of.
+	@note	AJA recommendeds configuring the <b>Audio System</b> to use the maximum number of audio channels the device is capable of.
 
-	The audio sample rate on all AJA devices is fixed at 48 kHz.
+	The audio <b>Sample Rate</b> on all AJA devices is fixed at 48 kHz. All NTV2 devices implement a 48 kHz <b>Audio Clock</b> through the
+	::kRegAud1Counter register. This register is reset to zero at power-on and PCIe reset, and increments every 20.833… µs. It’s used
+	for precise timing purposes for AutoCirculate in FRAME_STAMP::acAudioClockTimeStamp, FRAME_STAMP::acAudioClockCurrentTime,
+	AUTOCIRCULATE_STATUS::acAudioClockStartTime and AUTOCIRCULATE_STATUS::acAudioClockCurrentTime.
 
-	Each Audio System uses an 8 MB contiguous block of memory located in the upper part of SDRAM:
+	Each <b>Audio System</b> uses an 8 MB contiguous block of memory located in the upper part of SDRAM:
 
 	@image	html	hwref-fig2-audiobuffers.png
 
-	An NTV2 device will use one of these two memory configurations for its Audio Systems’ buffers:
-	-	“Stacked” — The first Audio System’s 8 MB chunk starts at the very top of SDRAM,
-		such that the last byte of Audio System 1's input buffer coincides with the last addressable
+	An NTV2 device will use one of these two memory configurations for its <b>Audio System</b>s’ buffers:
+	-	“Stacked” — The first <b>Audio System</b>’s 8 MB chunk starts at the very top of SDRAM,
+		such that the last byte of <b>Audio System</b> 1’s <b>Input Buffer</b> coincides with the last addressable
 		byte of SDRAM. Subsequent Audio Systems’ buffers stack downward from there, 8 MB each.
 	-	“Non-stacked” — These devices use the last one or two video frames for audio storage.
-		The first byte of the last Audio System’s output buffer coincides with the first byte
-		of the last frame buffer in device memory. Previous Audio System buffers, if any, start
+		The first byte of the last <b>Audio System</b>’s <b>Output Buffer</b> coincides with the first byte
+		of the last frame buffer in device memory. Previous <b>Audio System</b> buffers, if any, start
 		at the next-lower 8MB frame buffer.
 	-	Call ::NTV2DeviceCanDoStackedAudio to determine if the device uses the “stacked” arrangement or not.
 
-	The first (lower address) and last (higher address) 4 MB of the Audio System’s 8 MB chunk is used
+	The first (lower address) and last (higher address) 4 MB of the <b>Audio System</b>’s 8 MB chunk is used
 	for <b>Audio Output</b> and <b>Audio Input</b>, respectively. Each Output or Input aspect of the
-	Audio System operate independently, each being in one of two states: <b>Running</b> or <b>Stopped</b>
-	(a.k.a. the “Reset” state). When the Input or Output of the Audio System is Running, eight or sixteen
+	<b>Audio System</b> operate independently, each being in one of two states: <b>Running</b> or <b>Stopped</b>
+	(a.k.a. the “Reset” state). When the Input or Output of the <b>Audio System</b> is Running, eight or sixteen
 	channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this memory,
 	regardless of whether all 8 or 16 channels are used.
 
@@ -799,74 +802,90 @@
 	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
 	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
 
-	When the Audio System is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
-	in the Audio Input Buffer in device memory at the address specified by the Audio System's Audio Input Last Address register (i.e.,
-	the <b>Record Head</b> or "write head"). Call CNTV2Card::ReadAudioLastIn to get the current Record Head position. Audio data continues to
-	be written into the input buffer until filled, whereupon the Record Head wraps back to the start of the buffer, where writing continues.
-	The least-significant byte of each 32-bit sample word in the Audio Input Buffer is always set to zero. (Note that for SD, because
+	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
+	in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input Last Address register (i.e.,
+	the <b>Record Head</b> or “write head”). Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to
+	be written into the <b>Input Buffer</b> until filled, whereupon the <b>Record Head</b> wraps back to the start of the buffer, where writing continues.
+	The least-significant byte of each 32-bit sample word in the <b>Audio Input Buffer</b> is always set to zero. (Note that for SD, because
 	extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
 
 	@image	html	hwref-fig3-audiorecordplay.png
 
-	Audio data can be transferred from the Audio Input Buffer in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
+	Audio data can be transferred from the <b>Audio Input Buffer</b> in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
 	While the offset to the Input portion of the device Audio Buffer is typically fixed at 4 MB, to be absolutely safe should this ever change,
 	call CNTV2Card::GetAudioReadOffset to obtain the actual offset being used by the driver and SDK.
 
-	Note that if AutoCirculate is used for capture, AutoCirculate completely and automatically manages the Audio System.
-	See \ref aboutautocirculate for more information.
+	If AutoCirculate is used for capture, AutoCirculate completely and automatically runs the <b>Audio System</b>.
+	When CNTV2Card::AutoCirculateInitForInput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart is called,
+	AutoCirculate starts the <b>Audio System</b>. CNTV2Card::AutoCirculateTransfer automatically transfers the correct number of captured
+	audio samples from the device Audio System’s <b>Input Buffer</b> that are associated with the video frame being transferred.
+	AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount will return the exact number of transferred audio bytes for the frame that was just
+	transferred to the host. See \ref autocirculatecapture for more information.
 
 	If the Embedded Audio Group packet (containing two audio channel pairs) is not present in the data stream, its samples in the buffer
 	will be set to zero (silence). The firmware notes which audio group packets are present and which are missing, and coalesces this
 	information into a hardware register. Client software can query this information by calling CNTV2Card::GetDetectedAudioChannelPairs.
 
 	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) via certain bits in the AES
-	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the Audio System's de-embedder makes this
+	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the <b>Audio System</b>’s de-embedder makes this
 	information available in a hardware register, and client software can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM
 	or CNTV2Card::InputAudioChannelPairHasPCM.
 
-	Generally, each Audio System's <b>Input Source</b> is selectable, to receive samples from any of the device's video (and possibly audio)
+	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
 	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
 	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+
+	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
+	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
+	to obtain the current delay value. Call CNTV2Card::SetAudioDelay to change it.
+
+	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
+	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
+	explicitly configured to use the input signal by passing ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT to CNTV2Card::SetEmbeddedAudioClock.
+	If this wasn't done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
+	the audio would eventually drift from the video.
 
 
 	<hr size="50px">
 	@subsection	audioplayout		Audio Playout
 
-	If the device supports SDI playout, each Audio System has an output embedder that generates audio packets (per SMPTE 299M for HD
+	If the device supports SDI playout, each <b>Audio System</b> has an output embedder that generates audio packets (per SMPTE 299M for HD
 	and SMPTE 272M for SD) and inserts them into the HANC area of the outgoing SDI data stream.
-	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
-	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
-	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
-	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
-	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
+	-	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
+	-	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
+	-	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
+	-	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
+	-	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
 	in a similar fashion.
+
 	There is currently no provision for enabling or disabling specific audio groups.
 
-	The output embedder always inserts audio packets unless it's been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
+	The SDI output embedder always inserts audio packets unless it’s been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
 
-	When the Audio System is stopped, the output embedder will either embed silence (zeroes) into the data stream, or, if <b>Loopback Mode</b>
-	is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder (see CNTV2Card::SetAudioLoopBack).
+	When the <b>Audio System</b> is stopped, the output embedder will either embed silence (zeroes) into the data stream, or,
+	if ::NTV2AudioLoopBack mode is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder
+	(see CNTV2Card::SetAudioLoopBack).
 
-	When the Audio System is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
+	When the <b>Audio System</b> is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
 	in the device audio buffer (the least-significant byte is ignored). Note, however, for SD, only the most-significant 20 bits are
 	used (since the embedder does not create extended audio packets).
 
-	During playout, the output embedder pulls audio samples from the Audio Output Buffer in device memory at the address specified by the
-	Audio System's Audio Output Last Address register (i.e., the <b>Play Head</b> or "read head"). Call CNTV2Card::ReadAudioLastOut to get the
-	current Play Head position. Audio data continues to be read from the output buffer until the end is reached, whereupon the Play Head wraps
-	back to the start of the buffer, where reading continues.
+	During playout, the output embedder pulls audio samples from the <b>Audio Output Buffer</b> in device memory at the address specified by the
+	<b>Audio System</b>’s <b>Audio Output Last Address</b> register (i.e., the <b>Play Head</b> or “read head”). Call CNTV2Card::ReadAudioLastOut to get the
+	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
+	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
-	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the Output Buffer memory immediately behind
-	the Play Head as it runs. If the host application fails to transfer new samples into the Audio Output Buffer, the buffer will eventually
+	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
+	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually
 	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
 	to configure this feature.
 
 	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
-	written into the Audio Output Buffer (via DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
-	If the output hardware "Play Head" pointer catches up to the Audio Output Last Address, the buffer will wrap, and audio/video
+	written into the <b>Audio Output Buffer</b> (via DMA) is latched and available for readback at <b>Audio Output Last Address</b> (within 256 bytes).
+	If the output hardware <b>Play Head</b> pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video
 	synchronization will be lost.
 
-	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the Audio System.
+	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the <b>Audio System</b>.
 	See \ref aboutautocirculate for more information.
 
 	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
@@ -877,7 +896,7 @@
 
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
-	single NTV2AudioChannelPair or an NTV2AudioChannelPairs set.
+	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
 
 
 	<hr size="50px">
@@ -943,7 +962,7 @@
 	-	<b>Auxiliary 1</b> input (2 audio channels only);
 	-	<b>Auxiliary 2</b> input (2 audio channels only).
 
-	Each of the three mixer inputs can be sourced from the output of any audio engine on the device by making these calls:
+	Each of the three mixer inputs can be sourced from the output of any <b>Audio System</b> on the device by making these calls:
 	-	CNTV2Card::SetAudioMixerMainInputAudioSystem (all audio channels)
 	-	CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (two audio channels only)
 	-	CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (two audio channels only)
@@ -953,7 +972,7 @@
 	-	CNTV2Card::SetAudioMixerAux1InputEnable
 	-	CNTV2Card::SetAudioMixerAux2InputEnable
 
-	Each mixer input has a separate gain control that's controlled from these functions:
+	Each mixer input has a separate gain control that’s controlled from these functions:
 	-	CNTV2Card::SetAudioMixerMainInputGain
 	-	CNTV2Card::SetAudioMixerAux1InputGain
 	-	CNTV2Card::SetAudioMixerAux2InputGain

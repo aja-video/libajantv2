@@ -8,6 +8,14 @@
 	This page describes the KONA IP board.
 	It can be "flashed" with different firmware to support one of many different video-over-IP standards.
 	It's a flexible hardware device that can support, via firmware upgrades, J2K (JPEG 2000) compression and other IP protocols including VSF TR-04, VSF TR-03 and more.
+	Currently supported firmware device identifiers:
+	-	::DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K
+	-	::DEVICE_ID_KONAIP_1RX_1TX_2110
+	-	::DEVICE_ID_KONAIP_2022
+	-	::DEVICE_ID_KONAIP_2110
+	-	::DEVICE_ID_KONAIP_2RX_1SFP_J2K
+	-	::DEVICE_ID_KONAIP_2TX_1SFP_J2K
+	-	::DEVICE_ID_KONAIP_4CH_2SFP
 
 	@note	Information on this page is subject to change without notice.
 

@@ -7,6 +7,7 @@
 
 	This page describes the <b>Corvid 44</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
 	configured as inputs or outputs.
+	It’s identified by ::DEVICE_ID_CORVID44.
 
 	@image	html	corvid44.png
 
