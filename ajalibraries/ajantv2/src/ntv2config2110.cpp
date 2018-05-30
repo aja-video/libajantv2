@@ -831,7 +831,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         case VPIDSampling_YUV_422:
             componentsPerPixel = 2;
             componentsPerUnit  = 4;
-
             vf = 2;
             break;
         }
@@ -839,15 +838,17 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         const int bitsPerComponent = 10;
         const int pixelsPerClock = 1;
-        int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
-        int activeLineLength   = activeLine_root/8;
-        int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-        int pixelGroupSize     = pixelGroup_root/8;
-        int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-        //      int bytesPerCycle      = bytesPerCycle_root/8;
-        int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
+        int activeLineLength    = (width * componentsPerPixel * bitsPerComponent)/8;
+
+        int pixelGroup_root     = LeastCommonMultiple((bitsPerComponent * componentsPerUnit), 8);
+        int pixelGroupSize      = pixelGroup_root/8;
+
+        int bytesPerCycle       = (pixelsPerClock * bitsPerComponent * componentsPerPixel)/8;
+
+        int lcm                = LeastCommonMultiple(pixelGroupSize,bytesPerCycle);
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
+
         float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
         int ipktsPerLine       = (int)ceil(pktsPerLine);
 
