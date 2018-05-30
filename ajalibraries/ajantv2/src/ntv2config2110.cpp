@@ -39,9 +39,6 @@ void tx_2110Config::init()
     }
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
-    payloadLen          = 0;
-    lastPayLoadLen      = 0;
-    pktsPerLine         = 0;
     ttl                 = 0x40;
     tos                 = 0x64;
     ssrc                = 1000;
@@ -86,9 +83,6 @@ void rx_2110Config::init()
     payload             = 0;
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
-    payloadLen          = 0;
-    lastPayloadLen      = 0;
-    pktsPerLine         = 0;
     numAudioChannels    = 2;
     audioPktInterval    = PACKET_INTERVAL_1mS;
 }
@@ -859,13 +853,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
-        if (txConfig.payloadLen != 0)
-            payloadLength       = txConfig.payloadLen;
-        if (txConfig.lastPayLoadLen != 0)
-            payloadLengthLast   = txConfig.lastPayLoadLen;
-        if (txConfig.pktsPerLine != 0)
-            ipktsPerLine        = txConfig.pktsPerLine;
-
         // pkts per line
         mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
 
@@ -993,29 +980,7 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
         // SSRC
         mDevice.ReadRegister(kReg4175_pkt_ssrc + baseAddrPacketizer, txConfig.ssrc);
 
-        uint32_t width;
-        mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
-
-        uint32_t height;
-        mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, height);
-
-        // pkts per line
-        mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer, txConfig.pktsPerLine);
-
-        // payload length
-        mDevice.ReadRegister(kReg4175_pkt_payload_len + baseAddrPacketizer, txConfig.payloadLen);
-
-        // payload length last
-        mDevice.ReadRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer, txConfig.lastPayLoadLen);
-
-        // pix per pkt
-        uint32_t ppp;
-        mDevice.ReadRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer, ppp);
-
-        // interlace
-        uint32_t  ilace;
-        mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer, ilace);
-
+        // Video format
         GetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
     }
     else
