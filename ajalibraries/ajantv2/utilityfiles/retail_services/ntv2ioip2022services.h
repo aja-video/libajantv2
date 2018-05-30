@@ -30,6 +30,8 @@ public:
     
 protected:
     CNTV2Config2022     * config;
+
+    NTV2VideoFormat         mFb1VideoFormatLast;
 };
 
 

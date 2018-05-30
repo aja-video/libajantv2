@@ -22,7 +22,9 @@ using namespace std;
 
 KonaIP22Services::KonaIP22Services()
 {
-   config = NULL;
+    config = NULL;
+
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
  KonaIP22Services::~KonaIP22Services()

@@ -14,6 +14,8 @@ KonaIP2110Services::KonaIP2110Services()
 {
     config2110 = NULL;
 
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
+
     memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
     memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
     memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));

@@ -23,6 +23,8 @@ using namespace std;
 IoIP2022Services::IoIP2022Services()
 {
     config = NULL;
+
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
 IoIP2022Services::~IoIP2022Services()
