@@ -1253,7 +1253,6 @@ void NTV2CCPlayer::PlayoutFrames (void)
 {
 	static const NTV2Line21Attributes		kBlueOnWhite	(NTV2_CC608_Blue,  NTV2_CC608_White,   NTV2_CC608_Opaque);
 	static const NTV2Line21Attributes		kRedOnYellow	(NTV2_CC608_Red,   NTV2_CC608_Yellow,  NTV2_CC608_Opaque);
-	static const AJAAncillaryDataLocation	kCEA708Location	(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  9);
 	static const uint32_t		AUDIOBYTES_MAX_48K	(201 * 1024);	//	Max audio bytes per frame (16 chls x 4 bytes x 67 msec/fr x 48000 Hz)
 	static const double			gAmplitudes [16]	= {	0.10,			0.15,			0.20,			0.25,			0.30,			0.35,			0.40,
 														0.45,			0.50,			0.55,			0.60,			0.65,			0.70,			0.75,
@@ -1264,16 +1263,18 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	static const uint16_t		kF1PktLineNumCEA608(12), kF2PktLineNumCEA608(kF1PktLineNumCEA608+1);
 	const TimecodeFormat		tcFormat			(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(mFrameRate));
 	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat(mVideoFormat));
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
+	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
+	static const AJAAncillaryDataLocation	kCEA708LocF1	(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  9);
+	static const AJAAncillaryDataLocation	kCEA708LocF2	(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  uint16_t(F2StartLine));
 	const NTV2FormatDescriptor	formatDesc			(mVideoFormat, mPixelFormat, mVancMode);
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
-	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const ULWord				vancLineNum			(CNTV2SMPTEAncData::GetVancLineOffset (formatDesc, smpteLineNumInfo,
 																							CNTV2SMPTEAncData::GetCaptionAncLineNumber(mVideoFormat)));
 	NTV2_POINTER				F1AncBuffer			(2048);	//	F1 Anc buffer
 	NTV2_POINTER				F2AncBuffer			(2048);	//	F2 Anc buffer
 	CNTV2Line21Captioner		F1Line21Encoder;	//	Used to encode Field 1 analog (line 21) waveform
 	CNTV2Line21Captioner		F2Line21Encoder;	//	Used to encode Field 2 analog (line 21) waveform
-	uint32_t					inF2StartLine		(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
 	CaptionData					captionData;		//	Current frame's 608 caption bytes (Fields 1 and 2)
 	ULWord						acOptionFlags		(0);
 	ULWord						currentSample		(0);
@@ -1394,8 +1395,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			else
 			{
 				m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
-
-				if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate F1's SMPTE-334 Anc data packet
+				if (m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field1))		//	Generate SMPTE-334 Anc data packet
 				{
 					if (mConfig.fForceVanc)		//	True if --vanc option set, or no Anc inserters
 						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mVideoBuffer.GetHostPointer(), mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
@@ -1403,24 +1403,9 @@ void NTV2CCPlayer::PlayoutFrames (void)
 					{
 						//uint32_t					pktSizeInBytes	(0);
 						AJAAncillaryData_Cea708		pkt;
-						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
+						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708LocF1);
 						//pkt.Calculate8BitChecksum ();
 						//pkt.GenerateTransmitData ((uint8_t *) F1AncBuffer.GetHostPointer(), F1AncBuffer.GetByteCount(), pktSizeInBytes);
-						packetList.AddAncillaryData(pkt);
-					}
-				}
-	
-				if (!IsProgressivePicture (mVideoFormat) && m708Encoder->MakeSMPTE334AncPacket (mFrameRate, NTV2_CC608_Field2))		//	Generate F2 Anc packet (interlace only)
-				{
-					if (mConfig.fForceVanc)	//	True if --vanc option set, or no Anc inserters
-						m708Encoder->InsertSMPTE334AncPacketInVideoFrame (mVideoBuffer.GetHostPointer(), mVideoFormat, mPixelFormat, vancLineNum);	//	Embed into FB VANC area
-					else
-					{
-						//uint32_t					pktSizeInBytes	(0);
-						AJAAncillaryData_Cea708		pkt;
-						pkt.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708Location);
-						//pkt.Calculate8BitChecksum ();
-						//pkt.GenerateTransmitData ((uint8_t *) F2AncBuffer.GetHostPointer(), F2AncBuffer.GetByteCount(), pktSizeInBytes);
 						packetList.AddAncillaryData(pkt);
 					}
 				}
@@ -1429,9 +1414,9 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			if (packetList.CountAncillaryData()  &&  !mConfig.fForceVanc)
 			{
 				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
-					packetList.GetIPTransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), inF2StartLine);
+					packetList.GetIPTransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), F2StartLine);
 				else
-					packetList.GetSDITransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), inF2StartLine);
+					packetList.GetSDITransmitData (F1AncBuffer, F2AncBuffer, IsProgressivePicture(mVideoFormat), F2StartLine);
 			}
 
 			if (!mConfig.fSuppressTimecode)
@@ -1463,7 +1448,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 					}
 					tcOK = xferInfo.SetOutputTimeCodes (timecodes);
 				}
-				::memcpy (tcString + colShift, rp188.GetRP188CString (), 11);
+				::memcpy (tcString + colShift, rp188.GetRP188CString(), 11);
 				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow,
 												formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
 												formatDesc.GetVisibleRasterDimensions(), mPixelFormat, bytesPerRow, 3, 1);
