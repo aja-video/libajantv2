@@ -19,6 +19,8 @@
 #include <math.h>
 #endif
 
+#define RESET_MILLISECONDS 5
+
 // Meta data not yet defined
 uint32_t CNTV2Config2110::packetizers[12] =     {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4,
                                                  SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
@@ -398,9 +400,9 @@ void  CNTV2Config2110::ResetPacketizerStream(const NTV2Stream stream)
 
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (50);
+            ::Sleep (RESET_MILLISECONDS);
         #else
-            usleep (50 * 1000);
+            usleep (RESET_MILLISECONDS * 1000);
         #endif
 
         // Unset reset bit
@@ -442,9 +444,9 @@ void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Stream stream)
 
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (50);
+            ::Sleep (RESET_MILLISECONDS);
         #else
-            usleep (50 * 1000);
+            usleep (RESET_MILLISECONDS * 1000);
         #endif
 
         // Unset reset bit
