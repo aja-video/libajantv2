@@ -19,6 +19,8 @@
 #include <math.h>
 #endif
 
+#define RESET_MILLISECONDS 5
+
 // Meta data not yet defined
 uint32_t CNTV2Config2110::packetizers[12] =     {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4,
                                                  SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
@@ -39,9 +41,6 @@ void tx_2110Config::init()
     }
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
-    payloadLen          = 0;
-    lastPayLoadLen      = 0;
-    pktsPerLine         = 0;
     ttl                 = 0x40;
     tos                 = 0x64;
     ssrc                = 1000;
@@ -86,9 +85,6 @@ void rx_2110Config::init()
     payload             = 0;
     videoFormat         = NTV2_FORMAT_UNKNOWN;
     videoSamples        = VPIDSampling_YUV_422;
-    payloadLen          = 0;
-    lastPayloadLen      = 0;
-    pktsPerLine         = 0;
     numAudioChannels    = 2;
     audioPktInterval    = PACKET_INTERVAL_1mS;
 }
@@ -404,9 +400,9 @@ void  CNTV2Config2110::ResetPacketizerStream(const NTV2Stream stream)
 
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (50);
+            ::Sleep (RESET_MILLISECONDS);
         #else
-            usleep (50 * 1000);
+            usleep (RESET_MILLISECONDS * 1000);
         #endif
 
         // Unset reset bit
@@ -448,9 +444,9 @@ void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Stream stream)
 
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (50);
+            ::Sleep (RESET_MILLISECONDS);
         #else
-            usleep (50 * 1000);
+            usleep (RESET_MILLISECONDS * 1000);
         #endif
 
         // Unset reset bit
@@ -837,7 +833,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         case VPIDSampling_YUV_422:
             componentsPerPixel = 2;
             componentsPerUnit  = 4;
-
             vf = 2;
             break;
         }
@@ -845,26 +840,21 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         const int bitsPerComponent = 10;
         const int pixelsPerClock = 1;
-        int activeLine_root    = width * componentsPerPixel * bitsPerComponent;
-        int activeLineLength   = activeLine_root/8;
-        int pixelGroup_root    = bitsPerComponent * componentsPerUnit;
-        int pixelGroupSize     = pixelGroup_root/8;
-        int bytesPerCycle_root = pixelsPerClock * bitsPerComponent * componentsPerPixel;
-        //      int bytesPerCycle      = bytesPerCycle_root/8;
-        int lcm                = LeastCommonMultiple(pixelGroup_root,bytesPerCycle_root)/8;
+        int activeLineLength    = (width * componentsPerPixel * bitsPerComponent)/8;
+
+        int pixelGroup_root     = LeastCommonMultiple((bitsPerComponent * componentsPerUnit), 8);
+        int pixelGroupSize      = pixelGroup_root/8;
+
+        int bytesPerCycle       = (pixelsPerClock * bitsPerComponent * componentsPerPixel)/8;
+
+        int lcm                = LeastCommonMultiple(pixelGroupSize,bytesPerCycle);
         int payloadLength_root =  min(activeLineLength,1376)/lcm;
         int payloadLength      = payloadLength_root * lcm;
+
         float pktsPerLine      = ((float)activeLineLength)/((float)payloadLength);
         int ipktsPerLine       = (int)ceil(pktsPerLine);
 
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
-
-        if (txConfig.payloadLen != 0)
-            payloadLength       = txConfig.payloadLen;
-        if (txConfig.lastPayLoadLen != 0)
-            payloadLengthLast   = txConfig.lastPayLoadLen;
-        if (txConfig.pktsPerLine != 0)
-            ipktsPerLine        = txConfig.pktsPerLine;
 
         // pkts per line
         mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
@@ -993,29 +983,7 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
         // SSRC
         mDevice.ReadRegister(kReg4175_pkt_ssrc + baseAddrPacketizer, txConfig.ssrc);
 
-        uint32_t width;
-        mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
-
-        uint32_t height;
-        mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, height);
-
-        // pkts per line
-        mDevice.ReadRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer, txConfig.pktsPerLine);
-
-        // payload length
-        mDevice.ReadRegister(kReg4175_pkt_payload_len + baseAddrPacketizer, txConfig.payloadLen);
-
-        // payload length last
-        mDevice.ReadRegister(kReg4175_pkt_payload_len_last + baseAddrPacketizer, txConfig.lastPayLoadLen);
-
-        // pix per pkt
-        uint32_t ppp;
-        mDevice.ReadRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer, ppp);
-
-        // interlace
-        uint32_t  ilace;
-        mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer, ilace);
-
+        // Video format
         GetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
     }
     else

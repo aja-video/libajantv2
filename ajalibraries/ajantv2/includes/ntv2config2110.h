@@ -184,9 +184,6 @@ public:
     NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
-    uint32_t            pktsPerLine;        // read-only
-    uint32_t            payloadLen;         // read-only
-    uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
     eNTV2PacketInterval audioPktInterval;
@@ -219,9 +216,6 @@ public:
     NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
-    uint32_t            payloadLen;
-    uint32_t            lastPayloadLen;
-    uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
     eNTV2PacketInterval audioPktInterval;
 };

@@ -14,6 +14,8 @@ KonaIP2110Services::KonaIP2110Services()
 {
     config2110 = NULL;
 
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
+
     memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
     memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
     memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
@@ -2469,11 +2471,10 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
             {
                 if (memcmp(&m2110TxVideoData.txVideoCh[i], &m2110TxVideoDataLast.txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
-                    mFb1VideoFormat != mFb1VideoFormatLast ||
+                    mFb1VideoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
                     m2110TxVideoDataLast.txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-                    mFb1VideoFormatLast = mFb1VideoFormat;
 
                     // Process the configuration
                     txConfig.init();
@@ -2523,7 +2524,9 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             // See if any transmit audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
             {
-                if (memcmp(&m2110TxAudioData.txAudioCh[i], &m2110TxAudioDataLast.txAudioCh[i], sizeof(TxAudioChData2110)) != 0 || ipServiceForceConfig)
+                if (memcmp(&m2110TxAudioData.txAudioCh[i], &m2110TxAudioDataLast.txAudioCh[i], sizeof(TxAudioChData2110)) != 0 ||
+                    mFb1VideoFormatLast != mFb1VideoFormat ||
+                    ipServiceForceConfig)
                 {
                     m2110TxAudioDataLast.txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
 
@@ -2573,6 +2576,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
                     }
                 }
             }
+            mFb1VideoFormatLast = mFb1VideoFormat;
 
             rx_2110Config rxConfig;
             eSFP sfp = SFP_1;
