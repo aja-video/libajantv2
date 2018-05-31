@@ -393,6 +393,13 @@ void DeviceServices::ReadDriverState (void)
             memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
             //printf("Failed to get 2110 Receive Audio params\n");
         }
+
+        bOk = mCard->ReadVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
+        if (bOk == false)
+        {
+            memset(&m2110IpStatusData, 0, sizeof(IpStatus2110));
+            //printf("Failed to get 2110 Ip status params\n");
+        }
     }
 }
 
