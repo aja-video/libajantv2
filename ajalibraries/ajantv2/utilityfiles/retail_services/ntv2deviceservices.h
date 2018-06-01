@@ -237,6 +237,7 @@ public:
     TransmitAudioData2110   m2110TxAudioData;
     ReceiveVideoData2110    m2110RxVideoData;
     ReceiveAudioData2110    m2110RxAudioData;
+    IpStatus2110            m2110IpStatusData;
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;

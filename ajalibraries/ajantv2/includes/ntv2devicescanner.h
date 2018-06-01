@@ -32,10 +32,7 @@ typedef NTV2AudioBitsPerSampleList::iterator			NTV2AudioBitsPerSampleListIter;
 
 
 /**
-	@brief	I'm a struct that contains a plethora of information about a discovered AJA device.
-	@note	This structure will likely be deprecated in a future SDK. To determine device capabilities,
-			please use the functions provided in 'ntv2devicefeatures.h' and 'ntv2devicefeatures.hh'
-			instead of this structure.
+	@deprecated	Please use the functions provided in 'ntv2devicefeatures.h' and 'ntv2devicefeatures.hh' instead.
 **/
 typedef struct NTV2DeviceInfo
 {
@@ -104,15 +101,8 @@ typedef struct NTV2DeviceInfo
 		ULWord			boardNumber;					///< @deprecated	Use deviceIndex instead
 	#endif	//	!defined (NTV2_DEPRECATE)
 
-	/**
-		@brief	Returns true if I'm equivalent to the specified NTV2DeviceInfo structure.
-	**/
-	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;
-
-	/**
-		@brief	Returns true if I differ from the specified NTV2DeviceInfo structure.
-	**/
-	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); }
+	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
+	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); }	///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
 
 } NTV2DeviceInfo;
 

@@ -290,22 +290,16 @@ CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjTo
 bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord & outRegisterValue, const ULWord inRegisterMask, const ULWord inRegisterShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
-
-	return !NTV2ReadRegisterRemote(_sockfd,
-								_remoteHandle,
-								_nubProtocolVersion,
-								inRegisterNumber,
-								&outRegisterValue,
-								inRegisterMask,
-								inRegisterShift);
+	if (_remoteHandle != INVALID_NUB_HANDLE)
+		return !NTV2ReadRegisterRemote (_sockfd, _remoteHandle, _nubProtocolVersion,
+										inRegisterNumber, &outRegisterValue, inRegisterMask, inRegisterShift);
 #else
 	(void) inRegisterNumber;
 	(void) outRegisterValue;
 	(void) inRegisterMask;
 	(void) inRegisterShift;
-	return false;
 #endif
+	return false;
 }
 
 
