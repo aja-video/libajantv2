@@ -1878,6 +1878,7 @@ typedef enum
 	NTV2_HDMI2Select,
     NTV2_HDMI3Select,
     NTV2_HDMI4Select,
+    NTV2_Auto,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
@@ -3196,8 +3197,11 @@ typedef enum
 {
     NTV2_HDMI8Bit,				//	8 bit
     NTV2_HDMI10Bit,				//	10 bit
-    NTV2_MAX_NUM_HDMIBitDepths
+    NTV2_MAX_NUM_HDMIBitDepths,
+    NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;
+
+#define	NTV2_IS_VALID_HDMI_BITDEPTH(__x__)	((__x__) < NTV2_MAX_NUM_HDMIBitDepths)
 
 
 // This specifies the range of levels for 10-bit RGB (aka DualLink)
