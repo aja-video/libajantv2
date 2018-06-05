@@ -3831,6 +3831,7 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 		case NTV2_AnalogSelect:					regValue = 0x00009999;  break;
 		case NTV2_AES_EBU_XLRSelect:
 		case NTV2_AES_EBU_BNCSelect:
+		case NTV2_Auto:
 		default:								regValue = 0x00000000;  break;
 	}
 
