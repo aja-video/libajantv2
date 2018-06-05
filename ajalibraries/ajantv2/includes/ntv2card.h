@@ -1123,12 +1123,12 @@ public:
 								into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
-					and in capture mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
+					and in ::NTV2_MODE_CAPTURE mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
 		@note		The new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
 					currently being written in device memory at the instant this function is called with frame 6,
 					video won't be written into frame 6 in device memory until the input VBI fires after the last line
 					of frame 5 has been written.
-		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
+		@see		CNTV2Card::GetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
