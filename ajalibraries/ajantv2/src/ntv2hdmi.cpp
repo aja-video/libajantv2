@@ -37,12 +37,12 @@ bool CNTV2Card::GetHDMIInputStatusRegister (ULWord & outValue, const NTV2Channel
 
 bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inChannel)
 {
-    ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
     if (numInputs < 1)
 		return false;
     if (numInputs == 1)
         return CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-	if (inChannel <= (NTV2Channel)numInputs)
+	if (inChannel <= NTV2Channel(numInputs))
 		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToInputStatusRegNum[inChannel], outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 	return false;
 }
@@ -50,22 +50,97 @@ bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2C
 // kRegHDMIInputControl
 bool CNTV2Card::SetHDMIInputRange (const NTV2HDMIRange inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
+			&& WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
 }
 
 bool CNTV2Card::GetHDMIInputRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel)
 {
-	return CNTV2DriverInterface::ReadRegister(kRegHDMIInputControl, outValue, kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
+			&& CNTV2DriverInterface::ReadRegister(kRegHDMIInputControl, outValue, kRegMaskHDMIInputRange, kRegShiftHDMIInputRange);
 }
 
 bool CNTV2Card::SetHDMIInColorSpace (const NTV2HDMIColorSpace inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
+			&& WriteRegister (kRegHDMIInputControl,	ULWord(inValue), kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
 }
 
 bool CNTV2Card::GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inChannel)
 {
-	return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
+			&& CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIColorSpace, kRegShiftHDMIColorSpace);
+}
+
+bool CNTV2Card::SetHDMIInBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2Channel inChannel)
+{
+    const UWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	if (numInputs <= UWord(inChannel))
+		return false;
+	if (NTV2_IS_VALID_HDMI_BITDEPTH(inNewValue))
+		return false;
+	//	FINISH THIS		MrBill
+	return true;
+}
+
+bool CNTV2Card::GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel)
+{
+	outValue = NTV2_INVALID_HDMIBitDepth;
+    const UWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+	if (numInputs <= UWord(inChannel))
+		return false;
+	if (::NTV2DeviceGetHDMIVersion(GetDeviceID()) < 4)
+		outValue = NTV2_HDMI8Bit;	//	FIX THIS	MrBill		Were old boards 8-bit only?
+	//	FINISH THIS		MrBill
+	return true;
+}
+
+bool CNTV2Card::SetHDMIInAudioSampleRateConverterEnable (const bool value, const NTV2Channel inChannel)
+{
+	const ULWord	tempVal	(!value);	// this is high to disable sample rate conversion
+	return inChannel == NTV2_CHANNEL1	//	FIX THIS	MrBill
+			&& WriteRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable);
+}
+
+
+bool CNTV2Card::GetHDMIInAudioSampleRateConverterEnable (bool & outEnabled, const NTV2Channel inChannel)
+{
+	if (inChannel != NTV2_CHANNEL1)
+		return false;	//	FIX THIS	MrBill
+	ULWord	tempVal	(0);
+	bool	retVal	(ReadRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable));
+	if (retVal)
+		outEnabled = !(static_cast <bool> (tempVal));		// this is high to disable sample rate conversion
+	return retVal;
+}
+
+
+bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inChannel)
+{
+	if (inChannel != NTV2_CHANNEL1)
+		return false;	//	FIX THIS	MrBill
+	ULWord	tempVal	(0);
+	outValue = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
+	if (!ReadRegister(kRegHDMIInputStatus, tempVal))
+		return false;
+	outValue = (tempVal & kLHIRegMaskHDMIInput2ChAudio) ? NTV2_HDMIAudio2Channels : NTV2_HDMIAudio8Channels;
+	return true;
 }
 
 // kRegHDMIOut3DControl

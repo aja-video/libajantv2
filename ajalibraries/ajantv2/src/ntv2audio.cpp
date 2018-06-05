@@ -938,33 +938,6 @@ ULWord CNTV2Card::GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inCha
 	return channelLevel;
 }
 
-bool CNTV2Card::SetHDMIInAudioSampleRateConverterEnable (const bool value, const NTV2Channel inChannel)
-{
-	const ULWord	tempVal	(!value);	// this is high to disable sample rate conversion
-	return WriteRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable);
-}
-
-
-bool CNTV2Card::GetHDMIInAudioSampleRateConverterEnable (bool & outEnabled, const NTV2Channel inChannel)
-{
-	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable));
-	if (retVal)
-		outEnabled = !(static_cast <bool> (tempVal));		// this is high to disable sample rate conversion
-	return retVal;
-}
-
-
-bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inChannel)
-{
-	ULWord	tempVal	(0);
-	outValue = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
-	if (!ReadRegister(kRegHDMIInputStatus, tempVal))
-		return false;
-	outValue = (tempVal & kLHIRegMaskHDMIInput2ChAudio) ? NTV2_HDMIAudio2Channels : NTV2_HDMIAudio8Channels;
-	return true;
-}
-
 
 bool CNTV2Card::SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels value)
 {
