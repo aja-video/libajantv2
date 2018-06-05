@@ -1600,7 +1600,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		}
 
 		// disable two sample interleave i/o
-		mCard->SetHDMIV2TsiIO(false);
+		mCard->SetHDMIOutTsiIO(false);
 
 		// set fps
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
@@ -1636,14 +1636,14 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 				break;
 			}
 			mCard->SetHDMIOutVideoFPS(tempRate);
-			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
-			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(IsVideoFormatB(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(false);
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 
 		// color space sample rate
@@ -1655,12 +1655,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		case NTV2_FRAMERATE_4800:
 		case NTV2_FRAMERATE_4795:
 			if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-				mCard->SetHDMISampleStructure(NTV2_HDMI_420);
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
 			else
-				mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 			break;
 		default:
-			mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 			break;
 		}
 

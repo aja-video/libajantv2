@@ -820,13 +820,17 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_5994_A ||                   \
         (__f__) == NTV2_FORMAT_1080p_2K_6000_A	)
 
+/**
+	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
+	@see		CNTV2Card::SetMode, CNTV2Card::GetMode, \ref vidop-fs
+**/
 typedef enum
 {
-    NTV2_MODE_DISPLAY,
-    NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,
-    NTV2_MODE_CAPTURE,
-    NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,
-    NTV2_MODE_INVALID
+    NTV2_MODE_DISPLAY,							///< @brief	Playout (output) mode
+    NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,	///< @brief	Output (playout, display) mode
+    NTV2_MODE_CAPTURE,							///< @brief	Capture (input) mode
+    NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,	///< @brief	Input (capture) mode
+    NTV2_MODE_INVALID							///< @brief	The invalid mode
 } NTV2Mode;
 
 #define	NTV2_IS_VALID_MODE(__mode__)			(((__mode__) >= NTV2_MODE_DISPLAY) && ((__mode__) < NTV2_MODE_INVALID))
@@ -854,20 +858,20 @@ typedef enum
 **/
 typedef enum
 {
-	 NTV2_INPUTSOURCE_ANALOG1	///< @brief	Identifies an analog video input (Analog In 1).
-	,NTV2_INPUTSOURCE_HDMI1		///< @brief	Identifies the first HDMI video input (HDMI In 1).
-	,NTV2_INPUTSOURCE_HDMI2		///< @brief	Identifies the 2nd HDMI video input (HDMI In 2).
-	,NTV2_INPUTSOURCE_HDMI3		///< @brief	Identifies the 3rd HDMI video input (HDMI In 3).
-	,NTV2_INPUTSOURCE_HDMI4		///< @brief	Identifies the 4th HDMI video input (HDMI In 4).
-	,NTV2_INPUTSOURCE_SDI1		///< @brief	Identifies the first SDI video input (SDI In 1).
-	,NTV2_INPUTSOURCE_SDI2		///< @brief	Identifies the 2nd SDI video input (SDI In 2).
-	,NTV2_INPUTSOURCE_SDI3		///< @brief	Identifies the 3rd SDI video input (SDI In 3).
-	,NTV2_INPUTSOURCE_SDI4		///< @brief	Identifies the 4th SDI video input (SDI In 4).
-	,NTV2_INPUTSOURCE_SDI5		///< @brief	Identifies the 5th SDI video input (SDI In 5).
-	,NTV2_INPUTSOURCE_SDI6		///< @brief	Identifies the 6th SDI video input (SDI In 6).
-	,NTV2_INPUTSOURCE_SDI7		///< @brief	Identifies the 7th SDI video input (SDI In 7).
-	,NTV2_INPUTSOURCE_SDI8		///< @brief	Identifies the 8th SDI video input (SDI In 8).
-	,NTV2_INPUTSOURCE_INVALID
+	 NTV2_INPUTSOURCE_ANALOG1	///< @brief	Identifies the first analog video input
+	,NTV2_INPUTSOURCE_HDMI1		///< @brief	Identifies the 1st HDMI video input
+	,NTV2_INPUTSOURCE_HDMI2		///< @brief	Identifies the 2nd HDMI video input
+	,NTV2_INPUTSOURCE_HDMI3		///< @brief	Identifies the 3rd HDMI video input
+	,NTV2_INPUTSOURCE_HDMI4		///< @brief	Identifies the 4th HDMI video input
+	,NTV2_INPUTSOURCE_SDI1		///< @brief	Identifies the 1st SDI video input
+	,NTV2_INPUTSOURCE_SDI2		///< @brief	Identifies the 2nd SDI video input
+	,NTV2_INPUTSOURCE_SDI3		///< @brief	Identifies the 3rd SDI video input
+	,NTV2_INPUTSOURCE_SDI4		///< @brief	Identifies the 4th SDI video input
+	,NTV2_INPUTSOURCE_SDI5		///< @brief	Identifies the 5th SDI video input
+	,NTV2_INPUTSOURCE_SDI6		///< @brief	Identifies the 6th SDI video input
+	,NTV2_INPUTSOURCE_SDI7		///< @brief	Identifies the 7th SDI video input
+	,NTV2_INPUTSOURCE_SDI8		///< @brief	Identifies the 8th SDI video input
+	,NTV2_INPUTSOURCE_INVALID	///< @brief	The invalid video input
 	,NTV2_NUM_INPUTSOURCES = NTV2_INPUTSOURCE_INVALID
 } NTV2InputSource;
 
@@ -1015,6 +1019,11 @@ typedef enum
 
 #define NTV2_IS_VALID_CHANNEL(__x__)					((__x__) >= NTV2_CHANNEL1 && (__x__) < NTV2_MAX_NUM_CHANNELS)
 
+
+/**
+	@brief		Identifies a specific IP-based data stream.
+	@warning	The ordinal values of the enum names may change in successive SDKs.
+**/
 typedef enum
 {
     NTV2_VIDEO1_STREAM      = 0,
@@ -1034,11 +1043,14 @@ typedef enum
 } NTV2Stream;
 
 
+/**
+	@brief		Identifies the kind of data that can be carried by an IP-based data stream.
+**/
 typedef enum
 {
-    VIDEO_STREAM,
-    AUDIO_STREAM,
-    METADATA_STREAM,
+    VIDEO_STREAM,		///< @brief	Video data
+    AUDIO_STREAM,		///< @brief	Audio data
+    METADATA_STREAM,	///< @brief	Metadata
     INVALID_STREAM
 } NTV2StreamType;
 
@@ -1049,6 +1061,8 @@ typedef enum
 /**
 	@brief		These enum values identify a specific source for the device's (output) reference clock.
 	@see		CNTV2Card::GetReference, CNTV2Card::SetReference, \ref deviceclockingandsync
+	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
+				can be introduced that require additional inputs.
 **/
 typedef enum
 {
@@ -1876,6 +1890,7 @@ typedef enum
 	NTV2_HDMI2Select,
     NTV2_HDMI3Select,
     NTV2_HDMI4Select,
+    NTV2_Auto,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
@@ -3203,8 +3218,11 @@ typedef enum
 {
     NTV2_HDMI8Bit,				//	8 bit
     NTV2_HDMI10Bit,				//	10 bit
-    NTV2_MAX_NUM_HDMIBitDepths
+    NTV2_MAX_NUM_HDMIBitDepths,
+    NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;
+
+#define	NTV2_IS_VALID_HDMI_BITDEPTH(__x__)	((__x__) < NTV2_MAX_NUM_HDMIBitDepths)
 
 
 // This specifies the range of levels for 10-bit RGB (aka DualLink)

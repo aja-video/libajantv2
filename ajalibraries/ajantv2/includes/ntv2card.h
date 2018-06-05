@@ -1035,12 +1035,12 @@ public:
 								into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
-					and in capture mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
+					and in ::NTV2_MODE_CAPTURE mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
 		@note		The new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
 					currently being written in device memory at the instant this function is called with frame 6,
 					video won't be written into frame 6 in device memory until the input VBI fires after the last line
 					of frame 5 has been written.
-		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
+		@see		CNTV2Card::GetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
@@ -4125,56 +4125,112 @@ public:
 		@name	HDMI
 	**/
 	///@{
+    AJA_VIRTUAL bool		GetHDMIInputStatusRegister (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the current colorspace for the given HDMI input.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2LHIHDMIColorSpace value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+    AJA_VIRTUAL bool		GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Sets the given HDMI input's input range.
+		@param[in]	inNewValue		Specifies the new ::NTV2HDMIRange value to be used.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetHDMIInputRange (const NTV2HDMIRange inNewValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the given HDMI input's current input range setting.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInputRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the current number of audio channels being received on the given HDMI input.
+		@param[in]	outValue		Receives the current ::NTV2HDMIAudioChannels value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Sets the given HDMI input's color space.
+		@param[in]	inNewValue		Specifies the new ::NTV2HDMIColorSpace value to be used.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetHDMIInColorSpace (const NTV2HDMIColorSpace inNewValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the given HDMI input's current color space setting.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIColorSpace value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	AJA_VIRTUAL bool		SetHDMIInAudioSampleRateConverterEnable (const bool inNewValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIInAudioSampleRateConverterEnable (bool & outIsEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Sets the given HDMI input's bit depth.
+		@param[in]	inNewValue		Specifies the new ::NTV2HDMIBitDepth value to be used.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetHDMIInBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the given HDMI input's current bit depth setting.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIBitDepth value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
 	AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
 	AJA_VIRTUAL bool		GetHDMIOut3DPresent (bool & outIs3DPresent);
 
 	AJA_VIRTUAL bool		SetHDMIOut3DMode (const NTV2HDMIOut3DMode inValue);
 	AJA_VIRTUAL bool		GetHDMIOut3DMode (NTV2HDMIOut3DMode & outValue);
 
-    AJA_VIRTUAL bool		GetHDMIInputStatusRegister (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetHDMIV2TxBypass (const bool inBypass);
 
-    AJA_VIRTUAL bool		GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	AJA_VIRTUAL bool		SetHDMIV2TxBypass (bool inBypass);
-
-	AJA_VIRTUAL bool		SetHDMIInputRange (NTV2HDMIRange inNewValue);
-	AJA_VIRTUAL bool		GetHDMIInputRange (NTV2HDMIRange & outValue);
-
-	AJA_VIRTUAL bool		SetHDMIOutVideoStandard (NTV2Standard inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutVideoStandard (const NTV2Standard inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutVideoStandard (NTV2Standard & outValue);
 
-	AJA_VIRTUAL bool		SetHDMISampleStructure (NTV2HDMISampleStructure inNewValue);
-	AJA_VIRTUAL bool		GetHDMISampleStructure (NTV2HDMISampleStructure & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue);
 
-	AJA_VIRTUAL bool		SetHDMIOutVideoFPS (NTV2FrameRate inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutVideoFPS (const NTV2FrameRate inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutVideoFPS (NTV2FrameRate & outValue);
 
-	AJA_VIRTUAL bool		SetHDMIOutRange (NTV2HDMIRange inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutRange (const NTV2HDMIRange inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue);
 
-	AJA_VIRTUAL bool		GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue);
-	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (NTV2HDMIAudioChannels inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue);
 
-	AJA_VIRTUAL bool		SetHDMIInColorSpace (const NTV2HDMIColorSpace inNewValue);
-	AJA_VIRTUAL bool		GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue);
 	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue);
-	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace inNewValue);
+	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (const NTV2LHIHDMIColorSpace inNewValue);
 	AJA_VIRTUAL bool		GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue);
 
-	AJA_VIRTUAL bool		SetHDMIOutBitDepth (NTV2HDMIBitDepth inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutBitDepth (const NTV2HDMIBitDepth inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue);
 
-	AJA_VIRTUAL bool		SetHDMIOutProtocol (NTV2HDMIProtocol inNewValue);
+	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue);
 
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue);
 
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue);
-
-	AJA_VIRTUAL bool		SetHDMIAudioSampleRateConverterEnable (bool inNewValue);
-	AJA_VIRTUAL bool		GetHDMIAudioSampleRateConverterEnable (bool & outIsEnabled);
 
 	/**
 		@brief						Sets the HDMI output's 2-channel audio source.
@@ -4234,7 +4290,67 @@ public:
 		@param[out]	outIsEnabled	Receives true if center cropping is enabled;  otherwise false.
 		@return						True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop(bool & outIsEnabled);
+	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop (bool & outIsEnabled);
+
+	/**
+		@brief		Enables or disables decimate mode on the device's HDMI rasterizer, which halves the
+					output frame rate when enabled. This allows a 60 Hz video stream to be displayed on
+					a 30 Hz HDMI monitor.
+		@return		True if successful; otherwise false.
+		@param[in]	inEnable		If true, enables decimation mode; otherwise disables decimation mode.
+	**/
+	AJA_VIRTUAL bool		SetHDMIOutDecimateMode (const bool inEnable);
+
+	AJA_VIRTUAL bool		GetHDMIOutDecimateMode (bool & outIsEnabled);
+
+	/**
+		@brief		Enables or disables two sample interleave I/O mode on the device's HDMI rasterizer.
+		@return		True if successful; otherwise false.
+		@param[in]	inTsiEnable		If true, enables two sample interleave I/O; otherwise disables two sample interleave I/O.
+	**/
+	AJA_VIRTUAL bool		SetHDMIOutTsiIO (const bool inTsiEnable);
+
+	AJA_VIRTUAL bool		GetHDMIOutTsiIO (bool & tsiEnabled);
+
+	/**
+		@brief		Enables or disables level-B mode on the device's HDMI rasterizer.
+		@return		True if successful; otherwise false.
+		@param[in]	inEnable		If true, enables level-B mode; otherwise disables level-B mode.
+	**/
+	AJA_VIRTUAL bool		SetHDMIOutLevelBMode (const bool inEnable);
+
+	AJA_VIRTUAL bool		GetHDMIOutLevelBMode (bool & outIsEnabled);
+
+	/**
+		@brief		Sets HDMI V2 mode for the device.
+		@return		True if successful; otherwise false.
+		@param[in]	inMode	Specifies the HDMI V2 operation mode for the device.
+							Use ::NTV2_HDMI_V2_HDSD_BIDIRECTIONAL for HD or SD capture and playback.
+							Use ::NTV2_HDMI_V2_4K_CAPTURE for 4K capture.
+							Use ::NTV2_HDMI_V2_4K_PLAYBACK for 4K playback.
+		@note		4K modes are exclusive.
+	**/
+	AJA_VIRTUAL bool		SetHDMIV2Mode (const NTV2HDMIV2Mode inMode);
+
+	/**
+		@brief		Answers with the current HDMI V2 mode of the device.
+		@return		True if successful; otherwise false.
+		@param[out]	outMode	Receives the current HDMI V2 operation mode for the device.
+	**/
+	AJA_VIRTUAL bool		GetHDMIV2Mode (NTV2HDMIV2Mode & outMode);
+
+	#if !defined(NTV2_DEPRECATE_14_3)
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMIAudioSampleRateConverterEnable	(const bool inEnable, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return SetHDMIInAudioSampleRateConverterEnable(inEnable, inChannel);}		///< @deprecated	Use CNTV2Card::SetHDMIInAudioSampleRateConverterEnable instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetHDMIAudioSampleRateConverterEnable	(bool & outIsEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return GetHDMIInAudioSampleRateConverterEnable(outIsEnabled, inChannel);}	///< @deprecated	Use CNTV2Card::GetHDMIInAudioSampleRateConverterEnable instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMISampleStructure	(const NTV2HDMISampleStructure inNewValue))	{return SetHDMIOutSampleStructure(inNewValue);}	///< @deprecated	Use CNTV2Card::SetHDMIOutSampleStructure instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMIV2DecimateMode	(const bool inEnable))	{return SetHDMIOutDecimateMode(inEnable);}		///< @deprecated	Use CNTV2Card::SetHDMIOutDecimateMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetHDMIV2DecimateMode	(bool & outIsEnabled))	{return GetHDMIOutDecimateMode(outIsEnabled);}	///< @deprecated	Use CNTV2Card::GetHDMIOutDecimateMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMIV2TsiIO		(const bool inEnable))	{return SetHDMIOutTsiIO(inEnable);}				///< @deprecated	Use CNTV2Card::SetHDMIOutTsiIO instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetHDMIV2TsiIO		(bool & outIsEnabled))	{return GetHDMIOutTsiIO(outIsEnabled);}			///< @deprecated	Use CNTV2Card::GetHDMIOutTsiIO instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMIV2LevelBMode	(const bool inEnable))	{return SetHDMIOutLevelBMode(inEnable);}		///< @deprecated	Use CNTV2Card::SetHDMIOutLevelBMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetHDMIV2LevelBMode	(bool & outIsEnabled))	{return GetHDMIOutLevelBMode(outIsEnabled);}	///< @deprecated	Use CNTV2Card::GetHDMIOutLevelBMode instead.
+	#endif	//	!defined(NTV2_DEPRECATE_14_3)
+	///@}
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		SetHDMIV2OutVideoStandard (NTV2V2Standard inNewValue));	///< @deprecated	Use GetHDMIOutVideoStandard instead.
@@ -4244,185 +4360,134 @@ public:
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2Channel & outChannel));				///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect * pOutValue, NTV2Channel * pOutChannel = NULL));	///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2Channel & outChannel));			///< @deprecated	Use the GetHDMIOutAudioSource8Channel function that has an NTV2AudioSystem reference.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
-	/**
-		@brief		Enables or disables decimate mode on the device's HDMI rasterizer, which halves the
-					output frame rate when enabled. This allows a 60 Hz video stream to be displayed on
-					a 30 Hz HDMI monitor.
-		@return		True if successful; otherwise false.
-		@param[in]	inEnable		If true, enables decimation mode; otherwise disables decimation mode.
-	**/
-	AJA_VIRTUAL bool		SetHDMIV2DecimateMode (bool inEnable);
-
-	AJA_VIRTUAL bool		GetHDMIV2DecimateMode (bool & outIsEnabled);
-
-	/**
-	@brief		Enables or disables two sample interleave I/O mode on the device's HDMI rasterizer.
-	@return		True if successful; otherwise false.
-	@param[in]	tsiEnable		If true, enables two sample interleave I/O; otherwise disables two sample interleave I/O.
-	**/
-	AJA_VIRTUAL bool		SetHDMIV2TsiIO (bool tsiEnable);
-
-	AJA_VIRTUAL bool		GetHDMIV2TsiIO (bool & tsiEnabled);
-
-
-
-	/**
-		@brief		Enables or disables level-B mode on the device's HDMI rasterizer.
-		@return		True if successful; otherwise false.
-		@param[in]	inEnable		If true, enables level-B mode; otherwise disables level-B mode.
-	**/
-	AJA_VIRTUAL bool		SetHDMIV2LevelBMode (bool inEnable);
-
-	AJA_VIRTUAL bool		GetHDMIV2LevelBMode (bool & outIsEnabled);
-
-	/**
-		@brief		Sets HDMI V2 mode for the device.
-		@return		True if successful; otherwise false.
-		@param[in]	inMode	Specifies the HDMI V2 operation mode for the device.
-							Use NTV2_HDMI_V2_HDSD_BIDIRECTIONAL for HD or SD capture and playback.
-							Use NTV2_HDMI_V2_4K_CAPTURE for 4K capture.
-							Use NTV2_HDMI_V2_4K_PLAYBACK for 4K playback.
-							Note that 4K modes are exclusive.
-	**/
-	AJA_VIRTUAL bool		SetHDMIV2Mode (NTV2HDMIV2Mode inMode);
-
-	/**
-		@brief		Answers with the current HDMI V2 mode of the device.
-		@return		True if successful; otherwise false.
-		@param[out]	outMode	Receives the current HDMI V2 operation mode for the device.
-	**/
-	AJA_VIRTUAL bool		GetHDMIV2Mode (NTV2HDMIV2Mode & outMode);
-	///@}
-
-	#if !defined (NTV2_DEPRECATE)		////	FS1		////////////////////////////////////////
+		////	FS1		////////////////////////////////////////
 		// Analog (FS1 / MOAB)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2VideoFormat GetFS1AnalogCompositeInputVideoFormat());						///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2VideoFormat GetFS1AnalogCompositeInputVideoFormat());						///< @deprecated	This SDK no longer supports the FS1.
 
 		// Reg 95 stuff
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1ReferenceSelect(NTV2FS1ReferenceSelect value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1ReferenceSelect(NTV2FS1ReferenceSelect *value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1ColorFIDSubcarrierReset(bool value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1ColorFIDSubcarrierReset(bool *value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1FreezeOutput(NTV2FS1FreezeOutput value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1FreezeOutput(NTV2FS1FreezeOutput *value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID value));				///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID *value));				///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID value));		///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID *value));		///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1ReferenceSelect(NTV2FS1ReferenceSelect value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1ReferenceSelect(NTV2FS1ReferenceSelect *value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1ColorFIDSubcarrierReset(bool value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1ColorFIDSubcarrierReset(bool *value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1FreezeOutput(NTV2FS1FreezeOutput value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1FreezeOutput(NTV2FS1FreezeOutput *value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID value));				///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1XptProcAmpInputSelect(NTV2OutputCrosspointID *value));			///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID value));		///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1XptSecondAnalogOutInputSelect(NTV2OutputCrosspointID *value));	///< @deprecated	This SDK no longer supports the FS1.
 
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioDelay(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioDelay(int *value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetLossOfInput(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioAnalogLevel(NTV2FS1AudioLevel value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioAnalogLevel(NTV2FS1AudioLevel *value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioTone(NTV2FS1AudioTone value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioTone(NTV2FS1AudioTone *value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1OutputTone(NTV2FS1OutputTone value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1OutputTone(NTV2FS1OutputTone *value));								///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioDelay(int value));											///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioDelay(int *value));											///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetLossOfInput(ULWord value));											///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioAnalogLevel(NTV2FS1AudioLevel value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioAnalogLevel(NTV2FS1AudioLevel *value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioTone(NTV2FS1AudioTone value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1AudioTone(NTV2FS1AudioTone *value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1OutputTone(NTV2FS1OutputTone value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1OutputTone(NTV2FS1OutputTone *value));							///< @deprecated	This SDK no longer supports the FS1.
 
 		// Audio Channel Mapping registers
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch1(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch2(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch3(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch4(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch5(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch6(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch7(int value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch8(int value));											///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch1(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch2(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch3(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch4(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch5(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch6(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch7(int value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioGain_Ch8(int value));										///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch1(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch2(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch3(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch4(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch5(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch6(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch7(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch8(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch1(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch2(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch3(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch4(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch5(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch6(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch7(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioPhase_Ch8(bool value));										///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch1(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch2(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch3(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch4(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch5(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch6(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch7(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch8(NTV2AudioChannelMapping value));					///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch1(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch2(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch3(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch4(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch5(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch6(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch7(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioSource_Ch8(NTV2AudioChannelMapping value));					///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch1(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch2(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch3(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch4(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch5(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch6(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch7(bool value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch8(bool value));										///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch1(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch2(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch3(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch4(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch5(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch6(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch7(bool value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1AudioMute_Ch8(bool value));										///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1VideoDAC2Mode (NTV2K2VideoDACMode value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1VideoDAC2Mode (NTV2K2VideoDACMode* value));						///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1VideoDAC2Mode (NTV2K2VideoDACMode value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1VideoDAC2Mode (NTV2K2VideoDACMode* value));						///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlWrite(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1ControlWrite(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlRead(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1ControlRead(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlBusy(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlError(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1Address(ULWord *value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1Address(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1SubAddress(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1SubAddress(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1Data(ULWord *value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1Data(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlWrite(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1ControlWrite(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlRead(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1ControlRead(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlBusy(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1ControlError(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1Address(ULWord *value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1Address(ULWord value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1SubAddress(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1SubAddress(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C1Data(ULWord *value));											///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C1Data(ULWord value));											///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlWrite(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2ControlWrite(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlRead(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2ControlRead(ULWord value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlBusy(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlError(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2Address(ULWord *value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2Address(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2SubAddress(ULWord *value));									///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2SubAddress(ULWord value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2Data(ULWord *value));											///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2Data(ULWord value));											///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlWrite(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2ControlWrite(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlRead(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2ControlRead(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlBusy(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2ControlError(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2Address(ULWord *value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2Address(ULWord value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2SubAddress(ULWord *value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2SubAddress(ULWord value));									///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1I2C2Data(ULWord *value));											///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1I2C2Data(ULWord value));											///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1DownConvertAFDAutoEnable(bool value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1DownConvertAFDAutoEnable(bool* value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1SecondDownConvertAFDAutoEnable(bool value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1SecondDownConvertAFDAutoEnable(bool* value));						///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1DownConvertAFDAutoEnable(bool value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1DownConvertAFDAutoEnable(bool* value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1SecondDownConvertAFDAutoEnable(bool value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1SecondDownConvertAFDAutoEnable(bool* value));						///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1DownConvertAFDDefaultHoldLast(bool value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1DownConvertAFDDefaultHoldLast(bool* value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1SecondDownConvertAFDDefaultHoldLast(bool value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1SecondDownConvertAFDDefaultHoldLast(bool* value));					///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1DownConvertAFDDefaultHoldLast(bool value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1DownConvertAFDDefaultHoldLast(bool* value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFS1SecondDownConvertAFDDefaultHoldLast(bool value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFS1SecondDownConvertAFDDefaultHoldLast(bool* value));				///< @deprecated	This SDK no longer supports the FS1.
 
 		// Received AFD (Read-only)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedCode(ULWord* value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedAR(ULWord* value));										///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedVANCPresent(bool* value));									///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedCode(ULWord* value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedAR(ULWord* value));										///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDReceivedVANCPresent(bool* value));								///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertMode_SDI1(NTV2AFDInsertMode value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertMode_SDI1(NTV2AFDInsertMode* value));						///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertMode_SDI2(NTV2AFDInsertMode value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertMode_SDI2(NTV2AFDInsertMode* value));						///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertMode_SDI1(NTV2AFDInsertMode value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertMode_SDI1(NTV2AFDInsertMode* value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertMode_SDI2(NTV2AFDInsertMode value));						///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertMode_SDI2(NTV2AFDInsertMode* value));						///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio* value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio value));					///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio* value));					///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertAR_SDI1(NTV2AFDInsertAspectRatio* value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio value));					///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertAR_SDI2(NTV2AFDInsertAspectRatio* value));					///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsert_SDI1(NTV2AFDInsertCode value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsert_SDI1(NTV2AFDInsertCode* value));							///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsert_SDI2(NTV2AFDInsertCode value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsert_SDI2(NTV2AFDInsertCode* value));							///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsert_SDI1(NTV2AFDInsertCode value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsert_SDI1(NTV2AFDInsertCode* value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsert_SDI2(NTV2AFDInsertCode value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsert_SDI2(NTV2AFDInsertCode* value));							///< @deprecated	This SDK no longer supports the FS1.
 
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertLineNumber_SDI1(ULWord value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertLineNumber_SDI1(ULWord* value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertLineNumber_SDI2(ULWord value));								///< @deprecated		This SDK no longer supports the FS1.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertLineNumber_SDI2(ULWord* value));								///< @deprecated		This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertLineNumber_SDI1(ULWord value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertLineNumber_SDI1(ULWord* value));							///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAFDInsertLineNumber_SDI2(ULWord value));								///< @deprecated	This SDK no longer supports the FS1.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAFDInsertLineNumber_SDI2(ULWord* value));							///< @deprecated	This SDK no longer supports the FS1.
 	#endif	//	!NTV2_DEPRECATE
 
 	AJA_VIRTUAL bool		SetLHIVideoDACStandard (const NTV2Standard inValue);
@@ -5570,6 +5635,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOut3DMode						(NTV2HDMIOut3DMode * pOutValue)					) {return pOutValue ? GetHDMIOut3DMode(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputRange						(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIInputRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutVideoStandard					(NTV2Standard * pOutValue)						) {return pOutValue ? GetHDMIOutVideoStandard(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMISampleStructure					(NTV2HDMISampleStructure & outValue)			) {return GetHDMIOutSampleStructure(outValue);}	///< @deprecated	Use CNTV2Card::GetHDMIOutSampleStructure instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMISampleStructure					(NTV2HDMISampleStructure * pOutValue)			) {return pOutValue ? GetHDMISampleStructure(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutVideoFPS						(NTV2FrameRate * pOutValue)						) {return pOutValue ? GetHDMIOutVideoFPS(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutRange							(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIOutRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
@@ -5581,10 +5647,10 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutProtocol						(NTV2HDMIProtocol * pOutValue)					) {return pOutValue ? GetHDMIOutProtocol(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutDownstreamBitDepth			(NTV2HDMIBitDepth * pOutValue)					) {return pOutValue ? GetHDMIOutDownstreamBitDepth(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutDownstreamColorSpace			(NTV2LHIHDMIColorSpace * pOutValue)				) {return pOutValue ? GetHDMIOutDownstreamColorSpace(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIAudioSampleRateConverterEnable	(bool* pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIAudioSampleRateConverterEnable(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2DecimateMode					(bool * pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIV2DecimateMode(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2TsiIO							(bool * pTsiEnabled)							) {return pTsiEnabled ? GetHDMIV2TsiIO(*pTsiEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2LevelBMode						(bool * pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIV2LevelBMode(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIAudioSampleRateConverterEnable	(bool* pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIInAudioSampleRateConverterEnable(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2DecimateMode					(bool * pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIOutDecimateMode(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2TsiIO							(bool * pTsiEnabled)							) {return pTsiEnabled ? GetHDMIOutTsiIO(*pTsiEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2LevelBMode						(bool * pOutIsEnabled)							) {return pOutIsEnabled ? GetHDMIOutLevelBMode(*pOutIsEnabled) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIV2Mode							(NTV2HDMIV2Mode * pOutMode)						) {return pOutMode ? GetHDMIV2Mode(*pOutMode) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLTCInputEnable						(bool * pOutValue)								) {return pOutValue ? GetLTCInputEnable(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLTCOnReference						(bool * pOutValue)								) {return pOutValue ? GetLTCOnReference(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
