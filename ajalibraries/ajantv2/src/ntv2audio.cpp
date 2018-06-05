@@ -938,14 +938,14 @@ ULWord CNTV2Card::GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inCha
 	return channelLevel;
 }
 
-bool CNTV2Card::SetHDMIAudioSampleRateConverterEnable (bool value)
+bool CNTV2Card::SetHDMIInAudioSampleRateConverterEnable (const bool value, const NTV2Channel inChannel)
 {
 	const ULWord	tempVal	(!value);	// this is high to disable sample rate conversion
 	return WriteRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable);
 }
 
 
-bool CNTV2Card::GetHDMIAudioSampleRateConverterEnable (bool & outEnabled)
+bool CNTV2Card::GetHDMIInAudioSampleRateConverterEnable (bool & outEnabled, const NTV2Channel inChannel)
 {
 	ULWord	tempVal	(0);
 	bool	retVal	(ReadRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable));
@@ -955,7 +955,7 @@ bool CNTV2Card::GetHDMIAudioSampleRateConverterEnable (bool & outEnabled)
 }
 
 
-bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue)
+bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inChannel)
 {
 	ULWord	tempVal	(0);
 	outValue = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
@@ -966,7 +966,7 @@ bool CNTV2Card::GetHDMIInputAudioChannels (NTV2HDMIAudioChannels & outValue)
 }
 
 
-bool CNTV2Card::SetHDMIOutAudioChannels (NTV2HDMIAudioChannels value)
+bool CNTV2Card::SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels value)
 {
 	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (value), kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
 }
