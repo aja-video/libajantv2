@@ -850,7 +850,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
         if (ROMHasBankSelect() && count % _bankSize == 0)
 		{
 			baseAddress = 0;
-			partitionOffset += count;
+            partitionOffset = count;
 			switch (partitionOffset)
 			{
 			default:
