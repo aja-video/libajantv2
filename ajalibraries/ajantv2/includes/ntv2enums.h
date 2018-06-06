@@ -3183,13 +3183,18 @@ typedef enum
 #define	NTV2_IS_VALID_LHI_HDMI_COLORSPACE(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
-// This specifies HDMI Protocol
+/**
+    @brief	This specifies the HDMI protocol to be used.
+**/
 typedef enum
 {
     NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
     NTV2_HDMIProtocolDVI,		//	DVI Protocol
-    NTV2_MAX_NUM_HDMIProtocols
+    NTV2_MAX_NUM_HDMIProtocols,
+    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
+
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
 // Bit depth on HDMI interface
