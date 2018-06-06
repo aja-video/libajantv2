@@ -2283,7 +2283,7 @@ private:
 				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl;
 			if (hdmiVers == 1 || hdmiVers == 2)
 				oss << "Video Standard: " << sStds[vidStd]									<< endl;
-			oss	<< "Receiving: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
+			oss	<< "Protocol: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
 				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}

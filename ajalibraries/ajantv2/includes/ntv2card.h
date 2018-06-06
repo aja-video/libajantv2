@@ -4125,8 +4125,6 @@ public:
 		@name	HDMI
 	**/
 	///@{
-    AJA_VIRTUAL bool		GetHDMIInputStatusRegister (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);
-
 	/**
 		@brief						Answers with the current colorspace for the given HDMI input.
 		@param[in]	outValue		Receives the HDMI input's current ::NTV2LHIHDMIColorSpace value.
@@ -4174,6 +4172,22 @@ public:
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers with the given HDMI input's protocol.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIProtocol value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInProtocol (NTV2HDMIProtocol & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief						Answers if the given HDMI input is genlocked or not.
+		@param[in]	outIsLocked		Receives \c true if the HDMI input is locked;  otherwise \c false.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInIsLocked (bool & outIsLocked, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool		SetHDMIInAudioSampleRateConverterEnable (const bool inNewValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetHDMIInAudioSampleRateConverterEnable (bool & outIsEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -4339,6 +4353,12 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIV2Mode (NTV2HDMIV2Mode & outMode);
 
+    //protected:	SHOULD BE PROTECTED/PRIVATE:
+		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);	///< @brief	Answers with the contents of the HDMI Input status register for the given HDMI input.
+    protected:
+		AJA_VIRTUAL bool	GetHDMIInputStatusRegNum (ULWord & outRegNum,  const NTV2Channel inChannel = NTV2_CHANNEL1);	///< @brief	Answers with the HDMI Input status register number for the given HDMI input.
+
+	public:
 	#if !defined(NTV2_DEPRECATE_14_3)
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetHDMIAudioSampleRateConverterEnable	(const bool inEnable, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return SetHDMIInAudioSampleRateConverterEnable(inEnable, inChannel);}		///< @deprecated	Use CNTV2Card::SetHDMIInAudioSampleRateConverterEnable instead.
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetHDMIAudioSampleRateConverterEnable	(bool & outIsEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return GetHDMIInAudioSampleRateConverterEnable(outIsEnabled, inChannel);}	///< @deprecated	Use CNTV2Card::GetHDMIInAudioSampleRateConverterEnable instead.
@@ -5743,7 +5763,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetColorSpaceCustomCoefficients			(ColorSpaceConverterCustomCoefficients * pOutValues,	const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValues ? GetColorSpaceCustomCoefficients(*pOutValues, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetColorSpaceCustomCoefficients12Bit	(ColorSpaceConverterCustomCoefficients * pOutValues,	const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValues ? GetColorSpaceCustomCoefficients12Bit(*pOutValues, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetColorCorrectionHostAccessBank		(NTV2ColorCorrectionHostAccessBank * pOutValue,			const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetColorCorrectionHostAccessBank(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-    AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputStatusRegister				(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputStatusRegister(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+    AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputStatusRegister				(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputStatus(*pOutValue, inChannel) : false;}	///< @deprecated	Use CNTV2Card::GetHDMIInputStatus instead.
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputColor						(NTV2LHIHDMIColorSpace * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputColor(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadOutputTimingControl					(ULWord * pOutValue,									const UWord inOutputSpigot = 0)					) {return pOutValue ? ReadOutputTimingControl(*pOutValue, inOutputSpigot) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 

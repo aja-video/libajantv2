@@ -23,16 +23,25 @@ static const ULWord gHDMIChannelToInputStatusRegNum [] =    { kRegHDMIInputStatu
 // HDMI
 
 // kRegHDMIInputStatus
-bool CNTV2Card::GetHDMIInputStatusRegister (ULWord & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inChannel)
 {
-    ULWord numInputs = NTV2DeviceGetNumHDMIVideoInputs(_boardID);
+    const ULWord	numInputs	(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	outRegNum = 0;
     if (numInputs < 1)
 		return false;
+	if (inChannel >= NTV2Channel(numInputs))
+		return false;
     if (numInputs == 1)
-        return ReadRegister  (kRegHDMIInputStatus, outValue);
-	if (inChannel < NTV2Channel(numInputs))
-		return ReadRegister  (gHDMIChannelToInputStatusRegNum[inChannel], outValue);
-	return false;
+        outRegNum = kRegHDMIInputStatus;
+	outRegNum = gHDMIChannelToInputStatusRegNum[inChannel];
+	return true;
+}
+bool CNTV2Card::GetHDMIInputStatus (ULWord & outValue, const NTV2Channel inChannel)
+{
+    ULWord regNum (0);
+    if (!GetHDMIInputStatusRegNum(regNum, inChannel))
+		return false;
+	return ReadRegister (regNum, outValue);
 }
 
 bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inChannel)
@@ -100,14 +109,33 @@ bool CNTV2Card::SetHDMIInBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2
 bool CNTV2Card::GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel)
 {
 	outValue = NTV2_INVALID_HDMIBitDepth;
-    const UWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
-    if (numInputs < 1)
+	ULWord status(0);
+	if (!GetHDMIInputStatus(status, inChannel))
 		return false;
-	if (numInputs <= UWord(inChannel))
+	outValue = NTV2HDMIBitDepth((status & kLHIRegMaskHDMIInputBitDepth) >> kLHIRegShiftHDMIInputBitDepth);
+	return NTV2_IS_VALID_HDMI_BITDEPTH(outValue);
+}
+
+bool CNTV2Card::GetHDMIInProtocol (NTV2HDMIProtocol & outValue, const NTV2Channel inChannel)
+{
+	outValue = NTV2_INVALID_HDMI_PROTOCOL;
+	ULWord status(0);
+	if (!GetHDMIInputStatus(status, inChannel))
 		return false;
-	if (::NTV2DeviceGetHDMIVersion(GetDeviceID()) < 4)
-		outValue = NTV2_HDMI8Bit;	//	FIX THIS	MrBill		Were old boards 8-bit only?
-	//	FINISH THIS		MrBill
+	outValue = NTV2HDMIProtocol((status & kLHIRegMaskHDMIInputProtocol) >> kLHIRegShiftHDMIInputProtocol);
+	return NTV2_IS_VALID_HDMI_PROTOCOL(outValue);
+}
+
+bool CNTV2Card::GetHDMIInIsLocked (bool & outIsLocked, const NTV2Channel inChannel)
+{
+	outIsLocked = false;
+	ULWord status(0);
+	if (!GetHDMIInputStatus(status, inChannel))
+		return false;
+	if (GetDeviceID() == DEVICE_ID_KONALHIDVI)
+		outIsLocked = (status & (BIT(0) | BIT(1))) == (BIT(0) | BIT(1));
+	else
+		outIsLocked = (status & kRegMaskInputStatusLock) ? true : false;
 	return true;
 }
 
