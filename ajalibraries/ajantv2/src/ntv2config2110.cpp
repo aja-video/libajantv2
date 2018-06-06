@@ -1219,10 +1219,10 @@ bool CNTV2Config2110::SetIPServicesControl(const bool enable, const bool forceRe
 {
     uint32_t val = 0;
     if (enable)
-        val |= BIT(0);
+        val = 1;
 
     if (forceReconfig)
-        val |= BIT(0);
+        val |= BIT(1);
 
     mDevice.WriteRegister(SAREK_REGS + kRegSarekServices, val);
 

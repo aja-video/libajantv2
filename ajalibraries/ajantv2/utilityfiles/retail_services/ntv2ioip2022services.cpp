@@ -3077,15 +3077,16 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
         bool    ipServiceForceConfig;
 
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+        ipServiceEnable = true;
         if (ipServiceEnable)
         {
             // Enable all RX channels always.
             mCard->WriteRegister(kVRegRxcEnable1, true);
             mCard->WriteRegister(kVRegRxcEnable2, true);
-            
+
             // KonaIP network configuration
             string hwIp,hwNet,hwGate;       // current hardware config
-            
+
             rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
             if (rv)
             {
@@ -3093,15 +3094,18 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                 ip   = inet_addr(hwIp.c_str());
                 net  = inet_addr(hwNet.c_str());
                 gate = inet_addr(hwGate.c_str());
-                
-                if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
+
+                if ((ip != mEth0.ipc_ip) ||
+                    (net != mEth0.ipc_subnet) ||
+                    (gate != mEth0.ipc_gateway) ||
+                    ipServiceForceConfig)
                 {
                     SetNetConfig(config, SFP_1);
                 }
             }
             else
                 printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
-            
+
             rv = config->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
             if (rv)
             {
@@ -3109,18 +3113,21 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                 ip   = inet_addr(hwIp.c_str());
                 net  = inet_addr(hwNet.c_str());
                 gate = inet_addr(hwGate.c_str());
-                
-                if ((ip != mEth1.ipc_ip) || (net != mEth1.ipc_subnet) || (gate != mEth1.ipc_gateway))
+
+                if ((ip != mEth1.ipc_ip) ||
+                    (net != mEth1.ipc_subnet) ||
+                    (gate != mEth1.ipc_gateway) ||
+                    ipServiceForceConfig)
                 {
                     SetNetConfig(config, SFP_2);
                 }
             }
             else
                 printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
-            
+
             // KonaIP look for changes in 2022-7 mode and NPD if enabled
             rv  = config->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-            
+
             if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
             {
                 printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
@@ -3135,7 +3142,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     SetIPError(NTV2_CHANNEL1, kErrRxConfig, config->getLastErrorCode());
                 }
             }
-            
+
             // KonaIP Input configurations
             if (IsValidConfig(mRx2022Config1, m2022_7Mode))
             {
@@ -3148,7 +3155,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -3179,7 +3186,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                 else printf("rxConfig ch 1 read failed\n");
             }
             else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
-            
+
             if (IsValidConfig(mRx2022Config2, m2022_7Mode))
             {
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
@@ -3191,7 +3198,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -3236,7 +3243,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -3271,7 +3278,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 
             if (IsValidConfig(mTx2022Config4, m2022_7Mode))
             {
-                
+
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
                 GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
@@ -3282,7 +3289,7 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -3313,7 +3320,10 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                 }
                 else printf("txConfig ch 4 read failed\n");
             }
-            else SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+            else
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+            
+            config->SetIPServicesControl(true, false);
         }
     }
     
