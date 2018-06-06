@@ -469,7 +469,7 @@ bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 
 	if (result)
 	{
-		if (inAudioSource == NTV2_AUDIO_EMBEDDED)
+        if ((inAudioSource == NTV2_AUDIO_EMBEDDED) || (inAudioSource == NTV2_AUDIO_HDMI))
 		{
 			//	For SDI, we go the extra mile...
 			if (SetEmbeddedAudioInput (inEmbeddedSource, inAudioSystem))	//	Use the specified input for grabbing embedded audio
