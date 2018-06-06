@@ -602,7 +602,8 @@ bool NTV2FrameGrabber::SetupInput (void)
             if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
             {
                 //	Set two sample interleave
-				mNTV2Card.SetTsiFrameEnable(true, NTV2_CHANNEL1);
+                mChannel = NTV2_CHANNEL1;
+                mNTV2Card.SetTsiFrameEnable(true, NTV2_CHANNEL1);
 
                 for (NTV2Channel channel (NTV2_CHANNEL1);  channel < NTV2_CHANNEL3;  channel = NTV2Channel(channel+1))
                 {
@@ -851,7 +852,7 @@ void NTV2FrameGrabber::SetupAudio (void)
 	//	Set up AJA device audio...
 	mNumAudioChannels = ::NTV2DeviceGetMaxAudioChannels (mDeviceID);
 	mAudioSystem = ::NTV2ChannelToAudioSystem (mChannel);
-	mNTV2Card.SetAudioSystemInputSource (mAudioSystem, audioSource, ::NTV2ChannelToEmbeddedAudioInput (mChannel));
+    mNTV2Card.SetAudioSystemInputSource (mAudioSystem, audioSource, ::NTV2InputSourceToEmbeddedAudioInput (mInputSource));
 	mNTV2Card.SetNumberAudioChannels (mNumAudioChannels, mAudioSystem);
 	mNTV2Card.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
 	mNTV2Card.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
