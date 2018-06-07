@@ -2471,6 +2471,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
         bool    ipServiceForceConfig;
 
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+        ipServiceEnable = true;
         if (ipServiceEnable)
         {
             // Enable all RX channels always.
@@ -2488,7 +2489,10 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                 net  = inet_addr(hwNet.c_str());
                 gate = inet_addr(hwGate.c_str());
 
-                if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
+                if ((ip != mEth0.ipc_ip) ||
+                    (net != mEth0.ipc_subnet) ||
+                    (gate != mEth0.ipc_gateway) ||
+                    ipServiceForceConfig)
                 {
                     SetNetConfig(config, SFP_1);
                 }
@@ -2504,7 +2508,10 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                 net  = inet_addr(hwNet.c_str());
                 gate = inet_addr(hwGate.c_str());
 
-                if ((ip != mEth1.ipc_ip) || (net != mEth1.ipc_subnet) || (gate != mEth1.ipc_gateway))
+                if ((ip != mEth1.ipc_ip) ||
+                    (net != mEth1.ipc_subnet) ||
+                    (gate != mEth1.ipc_gateway) ||
+                    ipServiceForceConfig)
                 {
                     SetNetConfig(config, SFP_2);
                 }
@@ -2707,7 +2714,10 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                 }
                 else printf("txConfig ch 4 read failed\n");
             }
-            else SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+            else
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+
+            config->SetIPServicesControl(true, false);
         }
     }
 

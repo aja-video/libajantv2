@@ -130,18 +130,18 @@ typedef enum
 **/
 typedef enum
 {
-    NTV2_STANDARD_1080,			// i/psf			SMPTE
-    NTV2_STANDARD_720,			//					SMPTE
-    NTV2_STANDARD_525,			// interlaced		SMPTE
-    NTV2_STANDARD_625,			// interlaced		SMPTE
-    NTV2_STANDARD_1080p,		//					SMPTE
-    NTV2_STANDARD_2K,			// 2048x1556psf		SMPTE
-    NTV2_STANDARD_2Kx1080p,		//					SMPTE
-    NTV2_STANDARD_2Kx1080i,		// psf only			SMPTE
-    NTV2_STANDARD_3840x2160p,
-    NTV2_STANDARD_4096x2160p,
-    NTV2_STANDARD_3840HFR,
-    NTV2_STANDARD_4096HFR,
+    NTV2_STANDARD_1080,			///< @brief	Identifies SMPTE HD 1080i or 1080psf
+    NTV2_STANDARD_720,			///< @brief	Identifies SMPTE HD 720p
+    NTV2_STANDARD_525,			///< @brief	Identifies SMPTE SD 525i
+    NTV2_STANDARD_625,			///< @brief	Identifies SMPTE SD 625i
+    NTV2_STANDARD_1080p,		///< @brief	Identifies SMPTE HD 1080p
+    NTV2_STANDARD_2K,			///< @brief	Identifies SMPTE HD 2048x1556psf (1.35 full-aperture film)
+    NTV2_STANDARD_2Kx1080p,		///< @brief	Identifies SMPTE HD 2K1080p
+    NTV2_STANDARD_2Kx1080i,		///< @brief	Identifies SMPTE HD 2K1080psf
+    NTV2_STANDARD_3840x2160p,	///< @brief	Identifies Ultra-High-Definition (UHD)
+    NTV2_STANDARD_4096x2160p,	///< @brief	Identifies 4K
+    NTV2_STANDARD_3840HFR,		///< @brief	Identifies high frame-rate UHD
+    NTV2_STANDARD_4096HFR,		///< @brief	Identifies high frame-rate 4K
     NTV2_NUM_STANDARDS,
     NTV2_STANDARD_UNDEFINED	= NTV2_NUM_STANDARDS,
     NTV2_STANDARD_INVALID	= NTV2_NUM_STANDARDS
@@ -3204,13 +3204,18 @@ typedef enum
 #define	NTV2_IS_VALID_LHI_HDMI_COLORSPACE(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
-// This specifies HDMI Protocol
+/**
+    @brief	This specifies the HDMI protocol to be used.
+**/
 typedef enum
 {
     NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
     NTV2_HDMIProtocolDVI,		//	DVI Protocol
-    NTV2_MAX_NUM_HDMIProtocols
+    NTV2_MAX_NUM_HDMIProtocols,
+    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
+
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
 // Bit depth on HDMI interface

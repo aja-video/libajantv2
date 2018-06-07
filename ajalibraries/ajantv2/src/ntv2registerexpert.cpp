@@ -510,7 +510,7 @@ private:
 	{
 		DefineRegister (kRegHDMIOutControl,							"",	mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (kRegHDMIInputStatus,						"",	mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
-		//DefineRegister (kRegHDMIInputControl,						"",	mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (kRegHDMIInputControl,						"",	mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 		DefineRegister (kRegHDMIHDRGreenPrimary,					"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
 		DefineRegister (kRegHDMIHDRBluePrimary,						"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
 		DefineRegister (kRegHDMIHDRRedPrimary,						"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
@@ -2283,13 +2283,47 @@ private:
 				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl;
 			if (hdmiVers == 1 || hdmiVers == 2)
 				oss << "Video Standard: " << sStds[vidStd]									<< endl;
-			oss	<< "Receiving: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
+			oss	<< "Protocol: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
 				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
 		virtual	~DecodeHDMIInputStatus()	{}
 	}	mDecodeHDMIInputStatus;
 	
+	struct DecodeHDMIInputControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;	(void) inDeviceID;
+			ostringstream	oss;
+			const UWord	chanPair	((inRegValue & (BIT(2) | BIT(3))) >> 2);
+			const UWord	txSrcSel	((inRegValue & (BIT(20)|BIT(21)|BIT(22)|BIT(23))) >> 20);
+			const UWord	txCh12Sel	((inRegValue & (BIT(29)|BIT(30))) >> 29);
+			static const NTV2AudioChannelPair pairs[] = {NTV2_AudioChannel1_2, NTV2_AudioChannel3_4, NTV2_AudioChannel5_6, NTV2_AudioChannel7_8};
+			oss	<< "HDMI In EDID Write-Enable: " << EnabDisab(inRegValue & BIT(0))							<< endl
+				<< "Force User Output Params: " << SetNotset(inRegValue & BIT(1))							<< endl
+				<< "HDMI In Audio Chan Select: " << ::NTV2AudioChannelPairToString(pairs[chanPair], true)	<< endl
+				<< "hdmi_rx_8ch_src_off: " << YesNo(inRegValue & BIT(4))									<< endl
+				<< "Swap HDMI In Audio Ch. 3/4: " << YesNo(inRegValue & BIT(5))								<< endl
+				<< "Swap HDMI Out Audio Ch. 3/4: " << YesNo(inRegValue & BIT(6))							<< endl
+				<< "hdmi_rx_spdif_err: " << SetNotset(inRegValue & BIT(8))									<< endl
+				<< "hdmi_rx_afifo_under: " << SetNotset(inRegValue & BIT(9))								<< endl
+				<< "hdmi_rx_afifo_empty: " << SetNotset(inRegValue & BIT(10))								<< endl
+				<< "H polarity: " << (inRegValue & BIT(16) ? "Inverted" : "Normal")							<< endl
+				<< "V polarity: " << (inRegValue & BIT(17) ? "Inverted" : "Normal")							<< endl
+				<< "F polarity: " << (inRegValue & BIT(18) ? "Inverted" : "Normal")							<< endl
+				<< "DE polarity: " << (inRegValue & BIT(19) ? "Inverted" : "Normal")						<< endl
+				<< "Tx Src Sel: " << DEC(txSrcSel) << " (" << xHEX0N(txSrcSel,4) << ")"						<< endl
+				<< "Tx Center Cut: " << SetNotset(inRegValue & BIT(24))										<< endl
+				<< "RGB Input Gamut: " << (inRegValue & BIT(28) ? "Full Range" : "Narrow Range (SMPTE)")	<< endl
+				<< "Tx_ch12_sel: " << DEC(txCh12Sel) << " (" << xHEX0N(txCh12Sel,4) << ")"					<< endl
+				<< "Input AVI Gamut: " << (inRegValue & BIT(31) ? "Full Range" : "Narrow Range (SMPTE)")	<< endl
+				<< "EDID: " << SetNotset(inRegValue & BIT(31));
+			return oss.str();
+		}
+		virtual	~DecodeHDMIInputControl()	{}
+	}	mDecodeHDMIInputControl;
+
 	struct DecodeHDMIOutHDRPrimary : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const

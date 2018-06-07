@@ -465,7 +465,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
     }
     else
     {
-        if (_spiDeviceID != 0x010220)
+        if (_deviceID != 0x010220 || !IsKonaIPDevice())
             return false;
 		uint32_t baseAddress = _mcsInfoOffset;
         SetFlashBlockIDBank(MCS_INFO_BLOCK);
@@ -848,7 +848,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
         if (ROMHasBankSelect() && count % _bankSize == 0)
 		{
 			baseAddress = 0;
-			partitionOffset += count;
+            partitionOffset = count;
 			switch (partitionOffset)
 			{
 			default:
