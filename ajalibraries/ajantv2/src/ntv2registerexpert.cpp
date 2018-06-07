@@ -2238,11 +2238,12 @@ private:
 			(void) inRegNum;
 			ostringstream	oss;
 			static const ULWord	sMasks[]		=	{	0,	kRegMaskHDMIOutVideoStd,	kRegMaskHDMIOutV2VideoStd,	kRegMaskHDMIOutV2VideoStd,	0};
-			static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
+
+            static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
 			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
 			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
-			const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID) & 0x00000003);
-			const ULWord	rawVideoStd		(inRegValue & sMasks[hdmiVers]);
+            const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID));
+            const ULWord	rawVideoStd		(inRegValue & kRegMaskHDMIOutV2VideoStd);
 			const string	hdmiVidStdStr	(hdmiVers > 1 ? sHDMIStdV2V3[rawVideoStd] : (hdmiVers == 1 ? sHDMIStdV1[rawVideoStd] : ""));
 			const string	vidStdStr		(::NTV2StandardToString (NTV2Standard(rawVideoStd), true));
 			oss << "Video Standard: " << hdmiVidStdStr;
