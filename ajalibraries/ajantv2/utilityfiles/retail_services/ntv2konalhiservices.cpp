@@ -61,8 +61,8 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 	
 	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
 
-	bool bFb1RGB = IsFormatRGB(mFb1Format);
-	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb1RGB = IsRGBFormat(mFb1Format);
+	bool bFb2RGB = IsRGBFormat(mFb2Format);
 	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
 		
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
@@ -657,7 +657,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID	inputSelectPrimary = NTV2_XptBlack; 
 	//NTV2CrosspointID	inputSelectSecondary = NTV2_XptBlack; 
 	bool				bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
-	bool 				bFb1RGB = IsFormatRGB(mFb1Format);
+	bool 				bFb1RGB = IsRGBFormat(mFb1Format);
 	bool 				bFb1Compressed = IsFormatCompressed(mFb1Format);
 														
 	// Figure out what our input format is based on what is selected 

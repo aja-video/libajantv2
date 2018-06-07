@@ -810,11 +810,11 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 			vpidSpec.pixelFormat = NTV2_FBF_48BIT_RGB;
 		
 		// Converted RGB -> YUV on wire
-		else if (vpidSpec.isRGBOnWire == false && IsFormatRGB(mFb1Format) == true)
+		else if (vpidSpec.isRGBOnWire == false && IsRGBFormat(mFb1Format) == true)
 			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Format) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
 		// Converted YUV -> RGB on wire
-		else if (vpidSpec.isRGBOnWire == true && IsFormatRGB(mFb1Format) == false)
+		else if (vpidSpec.isRGBOnWire == true && IsRGBFormat(mFb1Format) == false)
 			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
 	
 		// otherwise
@@ -978,23 +978,6 @@ bool DeviceServices::IsFormatCompressed(NTV2FrameBufferFormat fbFormat)
 		case NTV2_FBF_8BIT_DVCPRO:
 		//case NTV2_FBF_8BIT_QREZ:
 		case NTV2_FBF_8BIT_HDV:
-			return true;
-		default:
-			return false;
-	}
-}
-
-
-bool DeviceServices::IsFormatRGB(NTV2FrameBufferFormat fbFormat)
-{
-	switch (fbFormat)
-	{
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_DPX:
-        case NTV2_FBF_48BIT_RGB:
 			return true;
 		default:
 			return false;
@@ -2513,7 +2496,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
 	
-	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb1RGB = IsRGBFormat(mFb1Format);
 
 	// if the board doesn't have LUTs, bail
 	if ( !::NTV2DeviceCanDoColorCorrection(mDeviceID) )
@@ -3141,7 +3124,7 @@ void DeviceServices::SetDeviceXPointCapture()
 
 void DeviceServices::SetDeviceXPointPlayback()
 {
-	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb2RGB = IsRGBFormat(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;

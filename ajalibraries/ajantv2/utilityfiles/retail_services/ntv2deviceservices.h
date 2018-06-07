@@ -142,7 +142,6 @@ public:
 	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
 	bool IsFormatRaw(NTV2FrameBufferFormat fbFormat);
 	bool IsFormatCompressed(NTV2FrameBufferFormat fbFormat);
-	bool IsFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	NTV2RGB10Range GetCSCRange();

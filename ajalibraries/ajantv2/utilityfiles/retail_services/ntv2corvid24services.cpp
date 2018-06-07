@@ -27,7 +27,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	//	Corvid24 is similar to the Kona3GQuad
 	//
 	
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -40,7 +40,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
@@ -53,7 +53,7 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -922,7 +922,7 @@ void Corvid24Services::SetDeviceXPointCapture ()
 
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
