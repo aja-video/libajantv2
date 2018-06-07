@@ -5,6 +5,7 @@
 //
 
 #include "ntv2ioip2022services.h"
+#include "ajabase/system/systemtime.h"
 
 #if defined (AJALinux) || defined (AJAMac)
     #include <stdlib.h>
@@ -148,7 +149,11 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
-																																								
+
+    // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, false);
+    mCard->WriteRegister(kVRegRxcEnable2, false);
+
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
@@ -1561,6 +1566,10 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inHdRGB1;	
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
+
+    // Turn on RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -3065,25 +3074,26 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
     {
         rx_2022_channel		rxHwConfig;
         tx_2022_channel		txHwConfig, txHwConfig2;
+        bool                ipServiceEnable, ipServiceForceConfig;
 
         if (config == NULL)
         {
             config = new CNTV2Config2022(*mCard);
-            config->SetIPServicesControl(true, false);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config->SetIPServicesControl(true, false);
+                config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
             config->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 
-        bool    ipServiceEnable;
-        bool    ipServiceForceConfig;
-
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        ipServiceEnable = true;
         if (ipServiceEnable)
         {
-            // Enable all RX channels always.
-            mCard->WriteRegister(kVRegRxcEnable1, true);
-            mCard->WriteRegister(kVRegRxcEnable2, true);
-
             // KonaIP network configuration
             string hwIp,hwNet,hwGate;       // current hardware config
 
