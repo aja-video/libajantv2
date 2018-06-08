@@ -2547,6 +2547,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             // KonaIP Input configurations
             if (IsValidConfig(mRx2022Config1, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
@@ -2590,6 +2592,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
             if (IsValidConfig(mRx2022Config2, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
@@ -2634,6 +2638,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             // KonaIP output configurations
             if (IsValidConfig(mTx2022Config3, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
                 GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
@@ -2680,7 +2686,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
             if (IsValidConfig(mTx2022Config4, m2022_7Mode))
             {
-
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
                 GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
