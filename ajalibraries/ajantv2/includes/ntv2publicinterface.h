@@ -6862,7 +6862,7 @@ typedef enum
 		NTV2_STRUCT_BEGIN (FRAME_STAMP)
 				NTV2_HEADER			acHeader;						///< @brief	The common structure header -- ALWAYS FIRST!
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
-																		///<		On entry, contains NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
+																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
 					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (::FRAME_STAMP message).
 					ULWord64			acAudioClockTimeStamp;			///< @brief	Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
@@ -6882,26 +6882,26 @@ typedef enum
 					///@{
 
 					/**
-						@brief	Intended for capture, this is a sequence of NTV2_RP188 values received from the device (in NTV2TCIndex order).
-								If empty, no timecodes will be transferred. This field is ignored if AUTOCIRCULATE_WITH_RP188 option is not set.
+						@brief	Intended for capture, this is a sequence of ::NTV2_RP188 values received from the device (in ::NTV2TCIndex order).
+								If empty, no timecodes will be transferred. This field is ignored if ::AUTOCIRCULATE_WITH_RP188 option is not set.
 						@note	This field is owned by the SDK, which is responsible for allocating and/or freeing it.
-								Call GetInputTimeCodes or GetInputTimeCode to retrieve the timecodes stored in this field.
+								Call FRAME_STAMP::GetInputTimeCodes or FRAME_STAMP::GetInputTimeCode to retrieve the timecodes stored in this field.
 					**/
 					NTV2_POINTER		acTimeCodes;
 					LWord64				acCurrentTime;					///< @brief	Current processor time, derived from the finest-grained counter available on the host OS.
-																		///<		Granularity can vary depending on the HAL. acAudioClockCurrentTime is the recommended time-stamp to use instead of this.
-					ULWord				acCurrentFrame;					///< @brief	Last vertical blank frame for this autocirculate channel (when AutoCirculateGetFrameStamp was called)
+																		///<		Granularity can vary depending on the HAL. FRAME_STAMP::acAudioClockCurrentTime is the recommended time-stamp to use instead of this.
+					ULWord				acCurrentFrame;					///< @brief	Last vertical blank frame for this autocirculate channel (when CNTV2Card::AutoCirculateGetFrameStamp was called)
 					LWord64				acCurrentFrameTime;				///< @brief	Vertical blank start of current frame
 					ULWord64			acAudioClockCurrentTime;		///< @brief	Current time expressed as a count of 10MHz ticks, based on 48kHz clock (from register 28).
 					ULWord				acCurrentAudioExpectedAddress;	//	FIXFIXFIX	Document		What is this?!
 					ULWord				acCurrentAudioStartAddress;		///< @brief	As set by play
-					ULWord				acCurrentFieldCount;			///< @brief	As found by ISR at Call Field0 or Field1 _currently_ being OUTPUT (when AutoCirculateGetFrameStamp called)
+					ULWord				acCurrentFieldCount;			///< @brief	As found by ISR at Call Field0 or Field1 _currently_ being OUTPUT (when CNTV2Card::AutoCirculateGetFrameStamp was called)
 					ULWord				acCurrentLineCount;				///< @brief	At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 					ULWord				acCurrentReps;					///< @brief	Contains validCount (Playout:  on repeated frames, number of reps remaining; Record: drops on frame)
-					ULWord64			acCurrentUserCookie;			///< @brief	The frame's acInUserCookie value that was set at AutoCirculateTransfer time.
+					ULWord64			acCurrentUserCookie;			///< @brief	The frame's AUTOCIRCULATE_TRANSFER::acInUserCookie value that was set when CNTV2Card::AutoCirculateTransfer was called.
 																		///			This can tell clients which frame was on-air at the last VBI.
 					ULWord				acFrame;						///< @brief	Record/capture -- current frame number
-					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call GetInputTimeCode instead.
+					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call FRAME_STAMP::GetInputTimeCode instead.
 					///@}
 				NTV2_TRAILER		acTrailer;						///< @brief	The common structure trailer -- ALWAYS LAST!
 
