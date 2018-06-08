@@ -32,7 +32,10 @@ bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel 
 	if (inChannel >= NTV2Channel(numInputs))
 		return false;
     if (numInputs == 1)
+	{
         outRegNum = kRegHDMIInputStatus;
+		return true;
+	}
 	outRegNum = gHDMIChannelToInputStatusRegNum[inChannel];
 	return true;
 }
