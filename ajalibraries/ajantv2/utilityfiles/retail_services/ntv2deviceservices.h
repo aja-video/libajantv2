@@ -105,7 +105,7 @@ public:
     virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
     virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
-    virtual bool IsValidConfig(const rx2022Config & virtual_config, bool is2022_7);
+    virtual bool IsValidConfig(rx2022Config & virtual_config, bool is2022_7);
     virtual bool IsValidConfig(const tx2022Config & virtual_config, bool is2022_7);
     virtual bool NotEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config, bool is2022_7);
     virtual bool NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7);
