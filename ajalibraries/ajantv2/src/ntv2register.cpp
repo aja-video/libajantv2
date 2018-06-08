@@ -5709,7 +5709,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 {
 	NTV2VideoFormat format = NTV2_FORMAT_UNKNOWN;
 	ULWord status;
-    if (GetHDMIInputStatusRegister(status, inChannel))
+    if (GetHDMIInputStatus(status, inChannel))
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 		{
@@ -5717,7 +5717,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 			if(hdmiVersion == 1)
 			{
 				ULWord standard = ((status & kRegMaskInputStatusStd) >> kRegShiftInputStatusStd);
-				if(standard == 0x5)
+				if(standard == 0x5)	//	NTV2_STANDARD_2K (2048x1556psf) in HDMI is really SXGA!!
 				{
 					// We return 1080p60 for SXGA format
 					return NTV2_FORMAT_1080p_6000_A;

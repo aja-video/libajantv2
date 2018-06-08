@@ -142,7 +142,6 @@ public:
 	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
 	bool IsFormatRaw(NTV2FrameBufferFormat fbFormat);
 	bool IsFormatCompressed(NTV2FrameBufferFormat fbFormat);
-	bool IsFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	NTV2RGB10Range GetCSCRange();
@@ -155,7 +154,7 @@ public:
 	void EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toOutputWgt);
 	void DisableRP188EtoE(NTV2WidgetID toOutputWgt);
 
-	
+
 	bool GetExtFrameGeometry(NTV2FrameGeometry geometry, NTV2FrameGeometry* value);
 	NTV2LHIVideoDACMode GetLHIVideoDACMode(NTV2VideoFormat format, NTV2AnalogType type, NTV2AnalogBlackLevel blackLevel);
 	bool UpdateK2ColorSpaceMatrixSelect (NTV2VideoFormat currFormat, bool ajamac=true);
@@ -180,7 +179,7 @@ public:
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
 
 public:
-	CNTV2VidProc*			mCard;
+	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
@@ -293,10 +292,8 @@ public:
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
 
-
-	void SetCard (CNTV2VidProc* card)
+	void SetCard (CNTV2Card* card)
 		{ mCard = card; }
-	
 };
 
 #endif
