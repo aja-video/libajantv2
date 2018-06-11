@@ -65,8 +65,8 @@ NTV2LLBurn::~NTV2LLBurn ()
 	}
 
 	//	Don't leave the audio system active after we exit
-	mDevice.SetAudioInputReset	(mAudioSystem, true);
-	mDevice.SetAudioOutputReset	(mAudioSystem, true);
+	mDevice.StopAudioInput (mAudioSystem);
+	mDevice.StopAudioOutput (mAudioSystem);
 
 }	//	destructor
 
@@ -489,7 +489,7 @@ void NTV2LLBurn::ProcessFrames (void)
 	//	Wait until the hardware starts filling the new buffers, and then start audio
 	//	capture as soon as possible to match the video...
 	mDevice.WaitForInputFieldID (NTV2_FIELD0, mInputChannel);
-	mDevice.SetAudioInputReset	(mAudioSystem, false);
+	mDevice.StartAudioInput	(mAudioSystem);
 
 	mAudioInLastAddress		= audioReadOffset;
 	audioInWrapAddress		= audioOutWrapAddress + audioReadOffset;
@@ -514,8 +514,8 @@ void NTV2LLBurn::ProcessFrames (void)
 
 			if (audioIsReset && mAudioOutLastAddress)
 			{
-				//	Now that the audio system has some samples to play, playback can be taken out of reset...
-				mDevice.SetAudioOutputReset (mAudioSystem, false);
+				//	Now that the audio system has some samples to play, playback can be started...
+				mDevice.StartAudioOutput (mAudioSystem);
 				audioIsReset = false;
 			}
 
