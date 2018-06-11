@@ -317,8 +317,8 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 
 	//	Reset both the input and output sides of the audio system so that the buffer
 	//	pointers are reset to zero and inhibited from advancing.
-	mDevice.SetAudioOutputReset	(mAudioSystem, true);
-	mDevice.SetAudioInputReset	(mAudioSystem, true);
+	mDevice.StopAudioOutput	(mAudioSystem);
+	mDevice.StopAudioInput	(mAudioSystem);
 
 	//	Ensure that the audio system will capture samples when the reset is removed
 	mDevice.SetAudioCaptureEnable (mAudioSystem, true);
