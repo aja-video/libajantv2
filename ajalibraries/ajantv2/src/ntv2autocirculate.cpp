@@ -860,56 +860,47 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			inOutXferInfo.SetAllOutputTimeCodes (pArray [NTV2_TCINDEX_DEFAULT]);
 	}
 
-	//	Use the new A/C driver call...
+	//	Use the new NTV2Message driver call...
 	bool	result	(false);
 	inOutXferInfo.acCrosspoint = crosspoint;
 	result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&inOutXferInfo));
+
 	if (result  &&  taskMode == NTV2_STANDARD_TASKS  &&  NTV2_IS_INPUT_CROSSPOINT (crosspoint))
 	{
-		//	Hack for retail mode capture
+		//	After 12.? shipped, we discovered problems with timecode capture in our classic retail stuff.
+		//	The acTimeCodes[NTV2_TCINDEX_DEFAULT] was coming up empty.
+		//	Rather than fix all three drivers -- the Right, but Difficult Thing To Do --
+		//	we decided to do the Easy Thing, here, in user-space.
+
+		//	First, determine the ControlPanel's current Input source (SDIIn1/HDMIIn1 or SDIIn2/HDMIIn2)...
 		ULWord	inputSelect	(NTV2_Input1Select);
 		ReadRegister (kVRegInputSelect, inputSelect);
-		if (inputSelect == NTV2_Input2Select)
+
+		//	Next, determine the ControlPanel's current TimeCode source (LTC? VITC1? VITC2)...
+		RP188SourceSelect TimecodeSource;
+		CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
+
+		//	Now convert that into an NTV2TCIndex...
+		NTV2TCIndex TimecodeIndex = NTV2_TCINDEX_DEFAULT;
+		switch (TimecodeSource)
 		{
-			//	Copy input 2 tc into default location
-			RP188SourceSelect TimecodeSource;
-			CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
-			NTV2TCIndex TimecodeIndex = NTV2_TCINDEX_DEFAULT;
-			switch (TimecodeSource)
-			{
-				case kRP188SourceEmbeddedLTC:		TimecodeIndex = NTV2_TCINDEX_SDI2_LTC;		break;
-				case kRP188SourceEmbeddedVITC1:		TimecodeIndex = NTV2_TCINDEX_SDI2;			break;
-				case kRP188SourceEmbeddedVITC2:		TimecodeIndex = NTV2_TCINDEX_SDI2_2;		break;
-				case kRP188SourceLTCPort:			TimecodeIndex = NTV2_TCINDEX_LTC1;			break;
-				default:							TimecodeIndex = NTV2_TCINDEX_SDI2_LTC;		break;
-			}
-			NTV2_RP188	tcValue;
-			inOutXferInfo.GetInputTimeCode(tcValue, TimecodeIndex);
-			NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.GetHostPointer()));
-			if (pArray)
-				pArray [NTV2_TCINDEX_DEFAULT] = tcValue;
+			default:
+			case kRP188SourceEmbeddedLTC:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2_LTC	: NTV2_TCINDEX_SDI1_LTC;	break;
+			case kRP188SourceEmbeddedVITC1:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2		: NTV2_TCINDEX_SDI1;		break;
+			case kRP188SourceEmbeddedVITC2:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2_2	: NTV2_TCINDEX_SDI1_2;		break;
+			case kRP188SourceLTCPort:			TimecodeIndex = NTV2_TCINDEX_LTC1;																		break;
 		}
-		else
-		{
-			//	Copy input 2 tc into input 1...
-			RP188SourceSelect TimecodeSource;
-			CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
-			NTV2TCIndex TimecodeIndex = NTV2_TCINDEX_DEFAULT;
-			switch (TimecodeSource)
-			{
-				case kRP188SourceEmbeddedLTC:		TimecodeIndex = NTV2_TCINDEX_SDI1_LTC;		break;
-				case kRP188SourceEmbeddedVITC1:		TimecodeIndex = NTV2_TCINDEX_SDI1;			break;
-				case kRP188SourceEmbeddedVITC2:		TimecodeIndex = NTV2_TCINDEX_SDI1_2;		break;
-				case kRP188SourceLTCPort:			TimecodeIndex = NTV2_TCINDEX_LTC1;			break;
-				default:							TimecodeIndex = NTV2_TCINDEX_SDI1_LTC;		break;
-			}
-			NTV2_RP188	tcValue;
-			inOutXferInfo.GetInputTimeCode(tcValue, TimecodeIndex);
-			NTV2_RP188 *	pArray(reinterpret_cast <NTV2_RP188 *> (inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.GetHostPointer()));
-			if (pArray)
-				pArray[NTV2_TCINDEX_DEFAULT] = tcValue;
-		}
+
+		//	Fetch the TimeCode value that's in that NTV2TCIndex slot...
+		NTV2_RP188	tcValue;
+		inOutXferInfo.GetInputTimeCode(tcValue, TimecodeIndex);
+
+		//	Valid or not, stuff that TimeCode value into inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes[NTV2_TCINDEX_DEFAULT]...
+		NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.GetHostPointer()));
+		if (pArray)
+			pArray [NTV2_TCINDEX_DEFAULT] = tcValue;
 	}	//	if NTV2Message OK && retail mode && capturing
+
 	#if defined (AJA_NTV2_CLEAR_DEVICE_ANC_BUFFER_AFTER_CAPTURE_XFER)
 		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 		{
@@ -943,6 +934,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			}
 		}
 	#endif	//	AJA_NTV2_CLEAR_DEVICE_ANC_BUFFER_AFTER_CAPTURE_XFER
+
 	#if defined (AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER)
 		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 		{
