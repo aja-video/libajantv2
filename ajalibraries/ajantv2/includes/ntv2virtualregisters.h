@@ -473,7 +473,9 @@ typedef enum
 	kVRegDisableAutoVPID					= VIRTUALREG_START+525,
 	kVRegEnableBT2020						= VIRTUALREG_START+526,
 
-	kVRegLastAJA							= VIRTUALREG_START+527,		///< @brief	The last AJA virtual register slot
+    kVRegServicesForceInit                  = VIRTUALREG_START+527,		// set true when power state changes
+
+    kVRegLastAJA							= VIRTUALREG_START+528,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
