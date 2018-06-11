@@ -25,6 +25,7 @@ IoIP2022Services::IoIP2022Services()
 {
     config = NULL;
     mFb1ModeLast = NTV2_MODE_INVALID;
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
 IoIP2022Services::~IoIP2022Services()
@@ -3276,7 +3277,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                         if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
                             configErr ||
                             enable2022_7Card != m2022_7Mode ||
-                            mFb1ModeLast != mFb1Mode)
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL3, false);
                             SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
@@ -3324,7 +3326,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                         if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
                             configErr ||
                             enable2022_7Card != m2022_7Mode ||
-                            mFb1ModeLast != mFb1Mode)
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL4, false);
                             SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
@@ -3340,8 +3343,10 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             }
             else
                 SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
-
+            
             mFb1ModeLast = mFb1Mode;
+            mFb1VideoFormatLast = mFb1VideoFormatLast;
+            
             config->SetIPServicesControl(true, false);
         }
     }
