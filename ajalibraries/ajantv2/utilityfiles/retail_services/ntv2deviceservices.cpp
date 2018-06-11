@@ -3803,7 +3803,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 {
-	ULWord regValue 0;
+	ULWord regValue = 0;
 	// convert from enum to actual register bits
 	
     // special case for Auto (KONAHDMI only for now)
