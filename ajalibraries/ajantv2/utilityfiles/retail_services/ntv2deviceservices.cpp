@@ -3138,7 +3138,7 @@ void DeviceServices::SetDeviceXPointPlayback()
 	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
 	
-	if (mCard->DeviceCanDoAudioMixer())
+	//if (mCard->DeviceCanDoAudioMixer())
 	{
 		uint32_t audioInputSelect;
 		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
@@ -3803,8 +3803,22 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 {
-	ULWord regValue;
+	ULWord regValue 0;
 	// convert from enum to actual register bits
+	
+    // special case for Auto (KONAHDMI only for now)
+    if (input == NTV2_Auto && mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		switch (mVirtualInputSelect)
+		{
+			default:
+			case NTV2_Input1Select:	input = NTV2_HDMISelect; break;
+			case NTV2_Input2Select:	input = NTV2_HDMI2Select; break;
+			case NTV2_Input3Select:	input = NTV2_HDMI3Select; break;
+			case NTV2_Input4Select:	input = NTV2_HDMI4Select; break;
+		}
+	}
+	
 	switch (input)
 	{
 		case NTV2_Input1Embedded1_8Select:		regValue = 0x00004321;  break;
