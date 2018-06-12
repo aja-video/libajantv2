@@ -267,6 +267,7 @@ public:
 	HDMIOutStereoSelect		mHDMIOutStereoSelect;		// selection driven by user choice in CP
 	HDMIOutStereoSelect		mHDMIOutStereoCodecSelect;	// selection driver by codec settings
 	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
+	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
 	uint32_t				mRegResetCycleCount;		// reset cycle count (power-cycle, or sleep)

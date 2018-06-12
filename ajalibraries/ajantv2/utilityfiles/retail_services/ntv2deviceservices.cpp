@@ -4,6 +4,7 @@
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
+#include "retailsupport.h"
 #include "ntv2ioxtservices.h"
 #include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
@@ -1107,11 +1108,23 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 		{
 			// follow input RGB range
 			if (mSDIInput1FormatSelect == NTV2_RGBSelect)
-				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE; 
+			{
+				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
+			}
 			
 			// follow framebuffer RGB range
 			else									
 				cscRange = mRGB10Range; 
+		}
+	}
+	else if (mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		NTV2InputVideoType inType = RetailSupport::GetInputVideoTypeForIndex(mDeviceID, mVirtualInputSelect);
+		if (inType >= NTV2_InputSelectHDMI1 && inType <= NTV2_InputSelectHDMI4)
+		{
+			NTV2HDMIRange rgbRange = NTV2_HDMIRangeFull;
+			mCard->GetHDMIInputRange(rgbRange, NTV2_CHANNEL1);
+			cscRange = (rgbRange == NTV2_HDMIRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
 		}
 	}
 	
