@@ -2237,8 +2237,6 @@ private:
 		{
 			(void) inRegNum;
 			ostringstream	oss;
-			static const ULWord	sMasks[]		=	{	0,	kRegMaskHDMIOutVideoStd,	kRegMaskHDMIOutV2VideoStd,	kRegMaskHDMIOutV2VideoStd,	0};
-
             static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
 			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
 			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
