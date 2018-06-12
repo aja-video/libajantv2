@@ -2737,7 +2737,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                 SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
 
             mFb1ModeLast = mFb1Mode;
-            mFb1VideoFormatLast = mFb1VideoFormatLast;
+            mFb1VideoFormatLast = mFb1VideoFormat;
 
             config->SetIPServicesControl(true, false);
         }
