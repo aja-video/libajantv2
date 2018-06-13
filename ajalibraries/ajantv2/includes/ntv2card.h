@@ -1426,32 +1426,42 @@ public:
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Enables or disables the output of audio samples by the given Audio System, resetting
-					the playback position to the start of the audio output buffer.
+		@brief		Starts the playout side of the given ::NTV2AudioSystem, reading outgoing audio samples
+					from the Audio System's playout buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
-		@param[in]	inEnable		Specify 'true' to stop audio playout. (When stopped, the Audio System's output embedder,
-									if enabled, will emit silence.)
-									Specify 'false' to stop audio playout. (When started, the Audio System's output embedder
-									will continue to pull samples from the Audio Output Buffer as the "read head" moves forward
-									through the buffer.)
-		@note		Passing 'true' to this function has the side effect of resetting the current Audio Output Buffer Pointer ("read head")
-					pointer (as reported by CNTV2Card::ReadAudioLastOut) to zero. This can be useful for resynchronizing audio and video.
-					If it is desired to stop playout without resetting the pointer, use CNTV2Card::SetAudioOutputPause instead.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's playout side is already running.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers whether or not the specified Audio System is currently in "Reset" mode -- i.e., stopped --
-					and the audio buffer pointer ("Read Head") is zero.
+		@brief		Stops the playout side of the given ::NTV2AudioSystem, parking the "Read Head" at the start
+					of the playout buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	outEnable		Receives 'true' if the Audio System's playout engine is stopped (i.e.,
-									it's not currently producing output samples and the "Read Head" is parked
-									at zero). Receives 'false' if the Audio System's playout engine is currently
-									running.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's playout side is already stopped.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		StopAudioOutput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Answers whether or not the playout side of the given ::NTV2AudioSystem is currently running.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outIsRunning		Receives 'true' if the Audio System's playout side is currently running;
+										otherwise receives 'false'.
+		@see		CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, CNTV2Card::SetAudioOutputPause,
+					CNTV2Card::GetAudioOutputPause, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
 
 	/**
 		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
@@ -1477,29 +1487,42 @@ public:
 	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);
 
 	/**
-		@brief		Enables or disables the input of audio samples by the given Audio System, resetting
-					the playback position to the start of the audio buffer.
-		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
-		@param[in]	inEnable		If true,  audio samples will be captured by the Audio System.
-									If false, audio sample capture is inhibited.
-		@note		Calling this funcion with a true parameter has the side effect of resetting
-					the current audio buffer pointer (as reported by CNTV2Card::ReadAudioLastIn) to zero.
-					This can be useful for resynchronizing audio and video.
-	**/
-	AJA_VIRTUAL bool		SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
-
-	/**
-		@brief		Answers whether or not the device's Audio System is currently operating in the mode
-					in which it is not capturing audio output samples and the audio buffer pointer has
-					been reset to zero.
+		@brief		Starts the capture side of the given ::NTV2AudioSystem, writing incoming audio samples
+					into the Audio System's capture buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the Audio System
-										is not capturing output samples and the buffer pointer is zero,
-										or 'false' if the Audio System is operating normally.
+		@note		It is not an error to call this function when the Audio System's capture side is already running.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Stops the capture side of the given ::NTV2AudioSystem, and resets the capture position
+					(i.e. "Write Head") back to the start of the Audio System's capture buffer. This can be useful
+					for resynchronizing audio and video.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's capture side is already stopped.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		StopAudioInput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Answers whether or not the capture side of the given ::NTV2AudioSystem is currently running.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outIsRunning		Receives 'true' if the Audio System's capture side is currently running;
+										otherwise receives 'false'.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 
 	/**
 		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
@@ -1507,8 +1530,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inEnable		If true, the Audio System will capture samples into memory, if not currently reset.
 									If false, the Audio System will not capture samples.
-		@note		Applications that acquire exclusive use of the AJA device, set its "every frame services" mode
-					to NTV2_OEM_TASKS, and use AutoCirculate won't need to call this function, since AutoCirculate
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
 	**/
 	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
