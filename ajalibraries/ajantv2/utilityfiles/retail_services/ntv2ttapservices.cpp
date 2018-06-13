@@ -171,7 +171,7 @@ void TTapServices::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 				{
 					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);				
 				}
 				break;

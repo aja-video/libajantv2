@@ -5,6 +5,7 @@
 //
 
 #include "ntv2konaip22services.h"
+#include "ajabase/system/systemtime.h"
 
 #if defined (AJALinux) || defined (AJAMac)
     #include <stdlib.h>
@@ -22,7 +23,9 @@ using namespace std;
 
 KonaIP22Services::KonaIP22Services()
 {
-   config = NULL;
+    config = NULL;
+    mFb1ModeLast = NTV2_MODE_INVALID;
+    mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
  KonaIP22Services::~KonaIP22Services()
@@ -62,7 +65,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	// Kona4 Quad
 	//
 	
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -76,7 +79,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
@@ -87,12 +90,16 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
     bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
     bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
+    // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, false);
+    mCard->WriteRegister(kVRegRxcEnable2, false);
+
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1406,7 +1413,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1423,11 +1430,15 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 
+    // Turn on RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
+
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 	
 	//printf("inputformat=%d mFb1VideoFormat=%d\n", inputFormat, mFb1VideoFormat);
-	bool levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+	bool inHfrB = IsVideoFormatB(inputFormat);
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1505,11 +1516,13 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
+		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
 	
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && !b2FbLevelBHfr));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
+		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input2Select)));
 	
 	// SDI In 3
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
@@ -2431,8 +2444,6 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	}
 }
 
-#define WAIT_1 (50)
-
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
@@ -2453,250 +2464,283 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	
     if (mCard->IsDeviceReady(true) == true)
     {
-		rx_2022_channel		rxHwConfig;
-		tx_2022_channel		txHwConfig, txHwConfig2;
+        rx_2022_channel		rxHwConfig;
+        tx_2022_channel		txHwConfig, txHwConfig2;
+        bool                ipServiceEnable, ipServiceForceConfig;
 
         if (config == NULL)
         {
             config = new CNTV2Config2022(*mCard);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config->SetIPServicesControl(true, false);
+                config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
             config->SetBiDirectionalChannels(true);     // logically bidirectional
         }
-		
-		// Enable all RX channels always.
-		mCard->WriteRegister(kVRegRxcEnable1, true);
-		mCard->WriteRegister(kVRegRxcEnable2, true);
 
-        // KonaIP network configuration
-        string hwIp,hwNet,hwGate;       // current hardware config
-
-        rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
-        if (rv)
+        config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+        if (ipServiceEnable)
         {
-            uint32_t ip, net, gate;
-            ip   = inet_addr(hwIp.c_str());
-            net  = inet_addr(hwNet.c_str());
-            gate = inet_addr(hwGate.c_str());
+            // KonaIP network configuration
+            string hwIp,hwNet,hwGate;       // current hardware config
 
-            if ((ip != mEth0.ipc_ip) || (net != mEth0.ipc_subnet) || (gate != mEth0.ipc_gateway))
+            rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
+            if (rv)
             {
-                SetNetConfig(config, SFP_1);
-            }
-        }
-        else
-            printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
+                uint32_t ip, net, gate;
+                ip   = inet_addr(hwIp.c_str());
+                net  = inet_addr(hwNet.c_str());
+                gate = inet_addr(hwGate.c_str());
 
-        rv = config->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
-        if (rv)
-        {
-            uint32_t ip, net, gate;
-            ip   = inet_addr(hwIp.c_str());
-            net  = inet_addr(hwNet.c_str());
-            gate = inet_addr(hwGate.c_str());
-
-            if ((ip != mEth1.ipc_ip) || (net != mEth1.ipc_subnet) || (gate != mEth1.ipc_gateway))
-            {
-                SetNetConfig(config, SFP_2);
-            }
-        }
-        else
-            printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
-
-        // KonaIP look for changes in 2022-7 mode and NPD if enabled
-        rv  = config->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-        
-        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
-        {
-            printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
-            if (config->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
-            {
-                printf("Set 2022_7Mode OK\n");
-                SetIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
+                if ((ip != mEth0.ipc_ip) ||
+                    (net != mEth0.ipc_subnet) ||
+                    (gate != mEth0.ipc_gateway) ||
+                    ipServiceForceConfig)
+                {
+                    SetNetConfig(config, SFP_1);
+                }
             }
             else
-            {
-                printf("Set 2022_7Mode ERROR %s\n", config->getLastError().c_str());
-                SetIPError(NTV2_CHANNEL1, kErrRxConfig, config->getLastErrorCode());
-            }
-        }
-        
-        // KonaIP Input configurations
-        if (IsValidConfig(mRx2022Config1, m2022_7Mode))
-        {
-            rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
-            rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
-            mCard->ReadRegister(kVRegRxcEnable1, (ULWord*)&enableChServices);
-            if (rv && rv2)
-            {
-                // if the channel enable toggled
-                if (enableChCard != (enableChServices ? true : false))
-                {
-                    config->SetRxChannelEnable(NTV2_CHANNEL1, false);
+                printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
 
-                    // if the channel is enabled
-                    if (enableChServices)
-                    {
-                        SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                        if (!configErr)
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                        }
-                    }
-                }
-                // if the channel is already enabled then check to see if a configuration has changed
-                else if (enableChServices)
+            rv = config->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
+            if (rv)
+            {
+                uint32_t ip, net, gate;
+                ip   = inet_addr(hwIp.c_str());
+                net  = inet_addr(hwNet.c_str());
+                gate = inet_addr(hwGate.c_str());
+
+                if ((ip != mEth1.ipc_ip) ||
+                    (net != mEth1.ipc_subnet) ||
+                    (gate != mEth1.ipc_gateway) ||
+                    ipServiceForceConfig)
                 {
-                    if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
-                        enable2022_7Card != m2022_7Mode)
+                    SetNetConfig(config, SFP_2);
+                }
+            }
+            else
+                printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
+
+            // KonaIP look for changes in 2022-7 mode and NPD if enabled
+            rv  = config->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
+
+            if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
+            {
+                printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
+                if (config->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
+                {
+                    printf("Set 2022_7Mode OK\n");
+                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
+                }
+                else
+                {
+                    printf("Set 2022_7Mode ERROR %s\n", config->getLastError().c_str());
+                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, config->getLastErrorCode());
+                }
+            }
+
+            // KonaIP Input configurations
+            if (IsValidConfig(mRx2022Config1, m2022_7Mode))
+            {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
+                rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
+                rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
+                mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
+                if (rv && rv2)
+                {
+                    // if the channel enable toggled
+                    if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                        SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                        if (!configErr)
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                        }
-                    }
-                }
-            }
-            else printf("rxConfig ch 1 read failed\n");
-        }
-        else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
 
-        if (IsValidConfig(mRx2022Config2, m2022_7Mode))
-        {
-            rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
-            rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
-            mCard->ReadRegister(kVRegRxcEnable2, (ULWord*)&enableChServices);
-            if (rv && rv2)
-            {
-                // if the channel enable toggled
-                if (enableChCard != (enableChServices ? true : false))
-                {
-                    config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                    
-                    // if the channel is enabled
-                    if (enableChServices)
-                    {
-                        SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                        if (!configErr)
+                        // if the channel is enabled
+                        if (enableChServices)
                         {
-                            config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                            SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
+                            }
+                        }
+                    }
+                    // if the channel is already enabled then check to see if a configuration has changed
+                    else if (enableChServices)
+                    {
+                        if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
+                            enable2022_7Card != m2022_7Mode)
+                        {
+                            config->SetRxChannelEnable(NTV2_CHANNEL1, false);
+                            SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
+                            }
                         }
                     }
                 }
-                // if the channel is already enabled then check to see if a configuration has changed
-                else if (enableChServices)
+                else printf("rxConfig ch 1 read failed\n");
+            }
+            else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
+
+            if (IsValidConfig(mRx2022Config2, m2022_7Mode))
+            {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
+                rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
+                rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
+                mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
+                if (rv && rv2)
                 {
-                    if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
-                        enable2022_7Card != m2022_7Mode)
+                    // if the channel enable toggled
+                    if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                        SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                        if (!configErr)
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL2, true);
-                        }
-                    }
-                }
-            }
-            else printf("rxConfig ch 2 config read failed\n");
-        }
-        else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
 
-        // KonaIP output configurations
-        if (IsValidConfig(mTx2022Config3, m2022_7Mode))
-        {
-            rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
-            rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
-            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-            mCard->ReadRegister(kVRegTxcEnable3, (ULWord*)&enableChServices);
-            if (rv && rv2)
-            {
-                // if the channel enable toggled
-                if (enableChCard != (enableChServices ? true : false))
-                {
-                    config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                    
-                    // if the channel is enabled
-                    if (enableChServices)
-                    {
-                        SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                        if (!configErr)
+                        // if the channel is enabled
+                        if (enableChServices)
                         {
-                            config->SetTxChannelEnable(NTV2_CHANNEL3, true);
+                            SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                            }
+                        }
+                    }
+                    // if the channel is already enabled then check to see if a configuration has changed
+                    else if (enableChServices)
+                    {
+                        if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
+                            enable2022_7Card != m2022_7Mode)
+                        {
+                            config->SetRxChannelEnable(NTV2_CHANNEL2, false);
+                            SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                            }
                         }
                     }
                 }
-                // if the channel is already enabled then check to see if a configuration has changed
-                else if (enableChServices)
+                else printf("rxConfig ch 2 config read failed\n");
+            }
+            else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
+
+            // KonaIP output configurations
+            if (IsValidConfig(mTx2022Config3, m2022_7Mode))
+            {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
+                rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
+                rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
+                GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
+                if (rv && rv2)
                 {
-                    if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
-                        configErr ||
-                        enable2022_7Card != m2022_7Mode)
+                    // if the channel enable toggled
+                    if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                        SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                        if (!configErr)
+
+                        // if the channel is enabled
+                        if (enableChServices)
                         {
-                            config->SetTxChannelEnable(NTV2_CHANNEL3, true);
+                            SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetTxChannelEnable(NTV2_CHANNEL3, true);
+                            }
                         }
                     }
-                }
-            }
-            else printf("txConfig ch 3 read failed\n");
-        }
-        else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
-
-        if (IsValidConfig(mTx2022Config4, m2022_7Mode))
-        {
-
-            rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
-            rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
-            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-            mCard->ReadRegister(kVRegTxcEnable4, (ULWord*)&enableChServices);
-            if (rv && rv2)
-            {
-                // if the channel enable toggled
-                if (enableChCard != (enableChServices ? true : false))
-                {
-                    config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                    
-                    // if the channel is enabled
-                    if (enableChServices)
+                    // if the channel is already enabled then check to see if a configuration has changed
+                    else if (enableChServices)
                     {
-                        SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                        if (!configErr)
+                        if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
+                            configErr ||
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
-                            config->SetTxChannelEnable(NTV2_CHANNEL4, true);
+                            config->SetTxChannelEnable(NTV2_CHANNEL3, false);
+                            SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetTxChannelEnable(NTV2_CHANNEL3, true);
+                            }
                         }
                     }
                 }
-                // if the channel is already enabled then check to see if a configuration has changed
-                else if (enableChServices)
+                else printf("txConfig ch 3 read failed\n");
+            }
+            else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
+
+            if (IsValidConfig(mTx2022Config4, m2022_7Mode))
+            {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
+                rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
+                rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
+                GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
+                if (rv && rv2)
                 {
-                    if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
-                        configErr ||
-                        enable2022_7Card != m2022_7Mode)
+                    // if the channel enable toggled
+                    if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                        SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
-                        GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                        if (!configErr)
+
+                        // if the channel is enabled
+                        if (enableChServices)
                         {
-                            config->SetTxChannelEnable(NTV2_CHANNEL4, true);
+                            SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetTxChannelEnable(NTV2_CHANNEL4, true);
+                            }
+                        }
+                    }
+                    // if the channel is already enabled then check to see if a configuration has changed
+                    else if (enableChServices)
+                    {
+                        if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
+                            configErr ||
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
+                        {
+                            config->SetTxChannelEnable(NTV2_CHANNEL4, false);
+                            SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
+                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                            if (!configErr)
+                            {
+                                config->SetTxChannelEnable(NTV2_CHANNEL4, true);
+                            }
                         }
                     }
                 }
+                else printf("txConfig ch 4 read failed\n");
             }
-            else printf("txConfig ch 4 read failed\n");
+            else
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+
+            mFb1ModeLast = mFb1Mode;
+            mFb1VideoFormatLast = mFb1VideoFormat;
+
+            config->SetIPServicesControl(true, false);
         }
-        else SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
     }
 
 	// VPID
@@ -2874,13 +2918,13 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 		if (b2pi)
 		{
 			if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect || mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
-				mCard->SetHDMIV2TsiIO(true);
+				mCard->SetHDMIOutTsiIO(true);
 			else
-				mCard->SetHDMIV2TsiIO(false);
+				mCard->SetHDMIOutTsiIO(false);
 		}
 		else
 		{
-			mCard->SetHDMIV2TsiIO(false);
+			mCard->SetHDMIOutTsiIO(false);
 		}
 
 		// set fps
@@ -2917,14 +2961,14 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 				break;
 			}
 			mCard->SetHDMIOutVideoFPS(tempRate);
-			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
-			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(false);
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 
 		// color space sample rate
@@ -2936,12 +2980,12 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 		case NTV2_FRAMERATE_4800:
 		case NTV2_FRAMERATE_4795:
 			if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-				mCard->SetHDMISampleStructure(NTV2_HDMI_420);
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
 			else
-				mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 			break;
 		default:
-			mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 			break;
 		}
 
@@ -2994,7 +3038,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 		case kHDMIOutProtocolAutoDetect:
 		{
 			ULWord detectedProtocol;
-			mCard->ReadRegister(kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+			mCard->ReadRegister(kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 			mCard->WriteRegister(kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 		}
 		break;
@@ -3201,13 +3245,13 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 }

@@ -3,7 +3,7 @@
 #ifndef NTV2OutputAudio_H
 #define NTV2OutputAudio_H
 
-#include "ntv2status.h"
+#include "ntv2card.h"
 #if defined(MSWindows)
   #include "ntv2windriverinterface.h"
 #endif
@@ -12,12 +12,11 @@
   #include "ntv2linuxdriverinterface.h"
 #endif
 
-class CNTV2OutputAudio : public CNTV2Status 
+class CNTV2OutputAudio : public CNTV2Card 
 {
 public:  // Constructors
 	CNTV2OutputAudio() {};
-	CNTV2OutputAudio(UWord boardNumber, bool displayError = false, NTV2DeviceType boardType= DEVICETYPE_UNKNOWN);
-		
+	CNTV2OutputAudio(UWord boardNumber);
 	~CNTV2OutputAudio();
 
 	virtual bool Open(UWord boardNumber=0, bool displayError = false,
@@ -43,10 +42,6 @@ public:  // Methods
 	bool InitAudioBit();
 	bool DeinitAudioBit();
 
-
-	// void SetNumberAudioChannels(ULWord numChannels) in CNTV2Card class
-	// ULWord GetNumberAudioChannels() in CNTV2Card class
-
 protected:  // Methods
 	ULWord GetHardwareAudioOutputPointer();
 	ULWord GetCurrentHardwareAudioOutputPointer();
@@ -57,8 +52,6 @@ protected:  // Data
 	ULWord		  _audioWrapAddress;
 	ULWord		  _audioReadBufferOffset;
 	NTV2DMAEngine _dmaEngine;
-
 };
-
 
 #endif

@@ -6,6 +6,7 @@
 	@subsection		corvidhbr		Corvid HB-R
 
 	This page describes the <b>Corvid HB-R</b> OEM capture board.
+	It’s identified by ::DEVICE_ID_CORVIDHBR.
 
 	@image	html	corvidhbr.png
 

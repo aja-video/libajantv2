@@ -75,7 +75,7 @@ CNTV2Card::~CNTV2Card ()
 NTV2DeviceID CNTV2Card::GetDeviceID (void)
 {
 	ULWord	value	(0);
-	if (_boardOpened && ReadRegister (kRegBoardID, &value))
+	if (_boardOpened && ReadRegister (kRegBoardID, value))
 	{
 		const NTV2DeviceID	currentValue (static_cast <NTV2DeviceID> (value));
 		if (currentValue != _boardID)
@@ -91,7 +91,7 @@ NTV2DeviceID CNTV2Card::GetDeviceID (void)
 Word CNTV2Card::GetDeviceVersion (void)
 {
 	ULWord	status	(0);
-	return ReadRegister (kRegStatus, &status) ? (status & 0xF) : -1;
+	return ReadRegister (kRegStatus, status) ? (status & 0xF) : -1;
 }
 
 
@@ -129,7 +129,7 @@ string CNTV2Card::GetFPGAVersionString (const NTV2XilinxFPGA inFPGA)
 Word CNTV2Card::GetPCIFPGAVersion (void)
 {
 	ULWord	status	(0);
-	return ReadRegister (48, &status) ? ((status >> 8) & 0xFF) : -1;
+	return ReadRegister (48, status) ? ((status >> 8) & 0xFF) : -1;
 }
 
 
@@ -253,14 +253,14 @@ bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, 
 ULWord CNTV2Card::GetSerialNumberLow (void)
 {
 	ULWord	serialNum	(0);
-	return ReadRegister (54, &serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
+	return ReadRegister (54, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
 }
 
 
 ULWord CNTV2Card::GetSerialNumberHigh (void)
 {
 	ULWord	serialNum	(0);
-	return ReadRegister (55, &serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
+	return ReadRegister (55, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
 }
 
 
@@ -385,7 +385,7 @@ bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & out
 bool CNTV2Card::GetInput1Autotimed (void)
 {
 	ULWord	status	(0);
-	ReadRegister (kRegInputStatus, &status);
+	ReadRegister (kRegInputStatus, status);
 	return !(status & BIT_3);
 }
 
@@ -393,7 +393,7 @@ bool CNTV2Card::GetInput1Autotimed (void)
 bool CNTV2Card::GetInput2Autotimed (void)
 {
 	ULWord	status	(0);
-	ReadRegister (kRegInputStatus, &status);
+	ReadRegister (kRegInputStatus, status);
 	return !(status & BIT_11);
 }
 
@@ -401,7 +401,7 @@ bool CNTV2Card::GetInput2Autotimed (void)
 bool CNTV2Card::GetAnalogInputAutotimed (void)
 {
 	ULWord	value	(0);
-	ReadRegister (kRegAnalogInputStatus, &value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
+	ReadRegister (kRegAnalogInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
 	return value == 1;
 }
 
@@ -409,7 +409,7 @@ bool CNTV2Card::GetAnalogInputAutotimed (void)
 bool CNTV2Card::GetHDMIInputAutotimed (void)
 {
 	ULWord	value	(0);
-	ReadRegister (kRegHDMIInputStatus, &value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
+	ReadRegister (kRegHDMIInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
 	return value == 1;
 }
 
@@ -436,7 +436,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	NTV2BreakoutType	result		(NTV2_BreakoutNone);
 	ULWord				audioCtlReg	(0);	//	The Audio Control Register tells us what's connected
 
-	if (IsOpen ()  &&  ReadRegister (kRegAud1Control, &audioCtlReg))
+	if (IsOpen ()  &&  ReadRegister (kRegAud1Control, audioCtlReg))
 	{
 		const bool	bPhonyKBox	(false);	//	For debugging
 
@@ -568,7 +568,7 @@ bool CNTV2Card::DeviceCanDoInputSource (const NTV2InputSource inInputSource)
 bool CNTV2Card::DeviceCanDoAudioMixer ()
 {
 	ULWord isMixerSupported = 0;
-	ReadRegister(kRegGlobalControl2, &isMixerSupported, BIT(18), 18);
+	ReadRegister(kRegGlobalControl2, isMixerSupported, BIT(18), 18);
 	if(isMixerSupported == 1)
 		return true;
 	return false;
@@ -594,7 +594,7 @@ bool CNTV2Card::DeviceCanDoHDMIQuadRasterConversion ()
 bool CNTV2Card::DeviceIsDNxIV ()
 {
 	ULWord isMicSupported = 0;
-	ReadRegister(kRegGlobalControl2, &isMicSupported, BIT(19), 19);
+	ReadRegister(kRegGlobalControl2, isMicSupported, BIT(19), 19);
 	if(isMicSupported == 1)
 		return true;
 	return false;
@@ -603,7 +603,7 @@ bool CNTV2Card::DeviceIsDNxIV ()
 bool CNTV2Card::DeviceHasMicInput ()
 {
 	ULWord isMicSupported = 0;
-	ReadRegister(kRegGlobalControl2, &isMicSupported, BIT(19), 19);
+	ReadRegister(kRegGlobalControl2, isMicSupported, BIT(19), 19);
 	if(isMicSupported == 1)
 		return true;
 	return false;
@@ -617,7 +617,7 @@ bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 	outValue = false;
 	if (GetRegInfoForBoolParam (inParamID, regInfo))
 	{
-		if (!ReadRegister (regInfo.registerNumber, &regValue, regInfo.registerMask, regInfo.registerShift))
+		if (!ReadRegister (regInfo.registerNumber, regValue, regInfo.registerMask, regInfo.registerShift))
 			return false;
 		outValue = static_cast <bool> (regValue != 0);
 		return true;
@@ -720,7 +720,7 @@ bool CNTV2Card::GetNumericParam (const NTV2NumericParamID inParamID, uint32_t & 
 	outValue = false;
 	if (GetRegInfoForNumericParam (inParamID, regInfo))
 	{
-		if (!ReadRegister (regInfo.registerNumber, &regValue, regInfo.registerMask, regInfo.registerShift))
+		if (!ReadRegister (regInfo.registerNumber, regValue, regInfo.registerMask, regInfo.registerShift))
 			return false;
 		outValue = static_cast <bool> (regValue != 0);
 		return true;
@@ -866,7 +866,7 @@ bool CNTV2Card::GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRun
 		return false;
 
 	ULWord	value(0);
-	if (!ReadRegister(sAncExtCtrlRegNums[inSDIInput], &value))
+	if (!ReadRegister(sAncExtCtrlRegNums[inSDIInput], value))
 		return false;
 	outIsRunning = (value & BIT(28)) ? false : true;
 	return true;
@@ -883,7 +883,7 @@ bool CNTV2Card::GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRun
 		return false;
 
 	ULWord	value(0);
-	if (!ReadRegister(sAncInsCtrlRegNums[inSDIOutput], &value))
+	if (!ReadRegister(sAncInsCtrlRegNums[inSDIOutput], value))
 		return false;
 	outIsRunning = (value & BIT(28)) ? false : true;
 	return true;
@@ -904,7 +904,7 @@ bool CNTV2Card::GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & 
 	for (ULWord regNdx(0);  regNdx < kNumIgnoreDIDRegisters;  regNdx++)
 	{
 		ULWord	regValue	(0);
-		ReadRegister (firstIgnoreRegNum + regNdx,  &regValue);
+		ReadRegister (firstIgnoreRegNum + regNdx,  regValue);
 		for (unsigned regByte(0);  regByte < 4;  regByte++)
 		{
 			const NTV2DID	theDID	((regValue >> (regByte*8)) & 0x000000FF);

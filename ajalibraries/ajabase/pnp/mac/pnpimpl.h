@@ -15,22 +15,21 @@ class DeviceNotifier;
 class AJAPnpImpl
 {
 public:
-	AJAPnpImpl();
-	virtual ~AJAPnpImpl(void);
+							AJAPnpImpl();
+	virtual					~AJAPnpImpl(void);
 
-	AJAStatus Install(AJAPnpCallback callback, void* refCon, uint32_t devices);
-	AJAStatus Uninstall(void);
+	AJAStatus				Install (AJAPnpCallback callback, void* refCon, uint32_t devices);
+	AJAStatus				Uninstall (void);
 	
-	AJAPnpCallback GetCallback();
-	void* GetRefCon();
-	uint32_t GetPnpDevices();
+	inline AJAPnpCallback	GetCallback() const		{return mCallback;}
+	inline void *			GetRefCon() const		{return mRefCon;}
+	inline uint32_t			GetPnpDevices() const	{return mDevices;}
 
 private:
-	
 	void*				mRefCon;
 	AJAPnpCallback		mCallback;
 	uint32_t			mDevices;
-	
+
 	DeviceNotifier*		mPciDevices;
 };
 

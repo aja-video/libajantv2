@@ -3633,18 +3633,18 @@ AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS
 	"4x2048x1080p 48.00",		//	NTV2_FORMAT_4x2048x1080p_4800			//	107
 	"4x2048x1080p 119.88",		//	NTV2_FORMAT_4x2048x1080p_11988			//	108
 	"4x2048x1080p 120.00",		//	NTV2_FORMAT_4x2048x1080p_12000			//	109
-	"2048x1080p 60.00a",		//	NTV2_FORMAT_1080p_2K_6000_A				//	110
+	"2048x1080p 60.00a",		//	NTV2_FORMAT_1080p_2K_6000_A				//	110	//	NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2
 	"2048x1080p 59.94a",		//	NTV2_FORMAT_1080p_2K_5994_A				//	111
 	"2048x1080p 29.97",			//	NTV2_FORMAT_1080p_2K_2997				//	112
 	"2048x1080p 30.00",			//	NTV2_FORMAT_1080p_2K_3000				//	113
 	"2048x1080p 50.00a",		//	NTV2_FORMAT_1080p_2K_5000_A				//	114
 	"2048x1080p 47.95a",		//	NTV2_FORMAT_1080p_2K_4795_A				//	115
 	"2048x1080p 48.00a",		//	NTV2_FORMAT_1080p_2K_4800_A				//	116
-	"2048x1080p 60.00b",		// 	NTV2_FORMAT_1080p_2K_6000_B,			// 117
-	"2048x1080p 59.94b",		// 	NTV2_FORMAT_1080p_2K_5994_B,			// 118
+	"2048x1080p 47.95b",		// 	NTV2_FORMAT_1080p_2K_4795_B,			// 117
+	"2048x1080p 48.00b",		// 	NTV2_FORMAT_1080p_2K_4800_B,			// 118
 	"2048x1080p 50.00b",		// 	NTV2_FORMAT_1080p_2K_5000_B,			// 119
-	"2048x1080p 48.00b",		// 	NTV2_FORMAT_1080p_2K_4800_B,			// 120
-	"2048x1080p 47.95b",		// 	NTV2_FORMAT_1080p_2K_4795_B,			// 121
+	"2048x1080p 59.94b",		// 	NTV2_FORMAT_1080p_2K_5994_B,			// 120
+	"2048x1080p 60.00b",		// 	NTV2_FORMAT_1080p_2K_6000_B,			// 121
 };
 
 #if !defined (NTV2_DEPRECATE)
@@ -6106,20 +6106,9 @@ string NTV2EmbeddedAudioClockToString (const NTV2EmbeddedAudioClock	inValue, con
 
 string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect	inValue, const bool inForRetailDisplay)
 {
-	switch (inValue)
-	{
-		case NTV2_AudioMonitor1_2:				return inForRetailDisplay ? "1-2" : "NTV2_AudioMonitor1_2";
-		case NTV2_AudioMonitor3_4:				return inForRetailDisplay ? "3-4" : "NTV2_AudioMonitor3_4";
-		case NTV2_AudioMonitor5_6:				return inForRetailDisplay ? "5-6" : "NTV2_AudioMonitor5_6";
-		case NTV2_AudioMonitor7_8:				return inForRetailDisplay ? "7-8" : "NTV2_AudioMonitor7_8";
-		case NTV2_AudioMonitor9_10:				return inForRetailDisplay ? "9-10" : "NTV2_AudioMonitor9_10";
-		case NTV2_AudioMonitor11_12:			return inForRetailDisplay ? "11-12" : "NTV2_AudioMonitor11_12";
-		case NTV2_AudioMonitor13_14:			return inForRetailDisplay ? "13-14" : "NTV2_AudioMonitor13_14";
-		case NTV2_AudioMonitor15_16:			return inForRetailDisplay ? "15-16" : "NTV2_AudioMonitor15_16";
-
-		case NTV2_MAX_NUM_AudioMonitorSelect:	return inForRetailDisplay ? "???" : "NTV2_AUDIO_MONITOR_INVALID";
-	}
-	return "";
+	if (NTV2_IS_VALID_AUDIO_MONITOR(inValue))
+		return ::NTV2AudioChannelPairToString(inValue, inForRetailDisplay);
+	return inForRetailDisplay ? "???" : "NTV2_AUDIO_MONITOR_INVALID";
 }
 
 

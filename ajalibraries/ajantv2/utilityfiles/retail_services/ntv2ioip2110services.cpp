@@ -47,7 +47,7 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
                                                               NTV2VideoFormat fbVideoFormat,
                                                               NTV2SDIInputFormatSelect* inputFormatSelect)
 {
-    bool levelBInput;
+    bool inHfrB;
     bool levelbtoaConvert;
     NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
     if (inputFormatSelect)
@@ -60,9 +60,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+            inHfrB = IsVideoFormatB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
@@ -82,9 +82,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             
             // See if we need to translate this from a level B format to level A
-            levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+            inHfrB = IsVideoFormatB(inputFormat);
             mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-            if (levelBInput && levelbtoaConvert)
+            if (inHfrB && levelbtoaConvert)
             {
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
@@ -96,7 +96,7 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
         {
             // dynamically use input color space for
             ULWord colorSpace;
-            mCard->ReadRegister(kRegHDMIInputStatus, &colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+            mCard->ReadRegister(kRegHDMIInputStatus, colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
             
             inputFormat = mCard->GetHDMIInputVideoFormat();
             if (inputFormatSelect)
@@ -124,8 +124,8 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	// Io4K
 	//
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -162,7 +162,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 																																								
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kOutput, &selectSwapQuad);
+	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
 	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
 	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 
@@ -173,7 +173,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1530,7 +1530,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
@@ -1558,7 +1558,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, &selectSwapQuad);
+	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
 	
 	// SMPTE 425 (2pi)
@@ -1577,22 +1577,22 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
     
-    bool levelBInput = false;
+    bool inHfrB = false;
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
     
     // Now we need to figure if the signal coming in is level B or A
     if (mVirtualInputSelect == NTV2_Input1Select)
     {
-        levelBInput = NTV2_IS_3Gb_FORMAT(GetSdiInVideoFormat(0, mFb1VideoFormat));
+        inHfrB = IsVideoFormatB(GetSdiInVideoFormat(0, mFb1VideoFormat));
     }
     else if (mVirtualInputSelect == NTV2_Input2Select)
     {
-        levelBInput = NTV2_IS_3Gb_FORMAT(GetSdiInVideoFormat(1, mFb1VideoFormat));
+        inHfrB = IsVideoFormatB(GetSdiInVideoFormat(1, mFb1VideoFormat));
     }
     else
     {
-        levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+        inHfrB = IsVideoFormatB(inputFormat);
     }
     
 	// input 1 select
@@ -1629,7 +1629,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	if (bHdmiIn)
 	{
 		uint32_t valRgb = 0;
-		mCard->ReadRegister(kRegHDMIInputStatus, (ULWord*) &valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+		mCard->ReadRegister(kRegHDMIInputStatus, valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 		bHdmiInRGB = valRgb != 0;
 	}
 	
@@ -1734,11 +1734,11 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && (mVirtualInputSelect==NTV2_Input1Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input1Select)));
 
 	// SDI In 2
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && levelBInput && (mVirtualInputSelect==NTV2_Input2Select)));
+    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input2Select)));
 
 
 	// SDI In 3
@@ -3323,13 +3323,13 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 		if (b2pi)
 		{
 			if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect || mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
-				mCard->SetHDMIV2TsiIO(true);
+				mCard->SetHDMIOutTsiIO(true);
 			else
-				mCard->SetHDMIV2TsiIO(false);
+				mCard->SetHDMIOutTsiIO(false);
 		}
 		else
 		{
-			mCard->SetHDMIV2TsiIO(false);
+			mCard->SetHDMIOutTsiIO(false);
 		}
 		
 		// set fps
@@ -3367,14 +3367,14 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 			}
 			
 			//mCard->SetHDMIOutVideoFPS(tempRate);
-			mCard->SetHDMIV2DecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{	
 			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
-			mCard->SetHDMIV2DecimateMode(false);
-			mCard->SetHDMIV2LevelBMode(NTV2_IS_3Gb_FORMAT(mFb1VideoFormat));
+			mCard->SetHDMIOutDecimateMode(false);
+			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		
 		// color space sample rate
@@ -3386,12 +3386,12 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 			case NTV2_FRAMERATE_4800:
 			case NTV2_FRAMERATE_4795:
 			if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-					mCard->SetHDMISampleStructure(NTV2_HDMI_420);
+					mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
 				else
-					mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+					mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 				break;
 			default:
-				mCard->SetHDMISampleStructure(NTV2_HDMI_422);
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 				break;
 		}
 
@@ -3444,7 +3444,7 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 			{
 				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			}
 			break;
@@ -3579,17 +3579,17 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioInputDelay, &inputDelay);
+	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
 
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
-	mCard->ReadRegister(kVRegAudioOutputDelay, &outputDelay);
+	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
 	offset = AUDIO_DELAY_WRAPAROUND - GetAudioDelayOffset(outputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioOutDelay, kRegShiftAudioOutDelay);
 
 	//ULWord analogIOConfig = 0;
-	//mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, &analogIOConfig);
+	//mCard->ReadRegister(kVRegAnalogAudioIOConfiguration, analogIOConfig);
 	//mCard->SetAnalogAudioIOConfiguration(NTV2_AnalogAudioIO_4In_4Out);
 }

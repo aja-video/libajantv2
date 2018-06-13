@@ -209,7 +209,6 @@
 	#define WINAPI
 	#define POINTER_32
 	#define MAX_PATH	4096
-
 										//////////////////////////////////////////////////////////////////
 #else									////////////////////////	(OTHER)		//////////////////////////
 										//////////////////////////////////////////////////////////////////
@@ -237,14 +236,17 @@
 	#if !defined(NTV2_DEPRECATE_13_1)
 		#define NTV2_DEPRECATE_13_1
 	#endif
-	#if !defined(NTV2_DEPRECATE_14_0)	//	Linux driver Makefile usually defines this
+	#if !defined(NTV2_DEPRECATE_14_0)
 		#define NTV2_DEPRECATE_14_0
 	#endif
-	#if !defined(NTV2_DEPRECATE_14_1)	//	Linux driver Makefile usually defines this
+	#if !defined(NTV2_DEPRECATE_14_1)
 		#define NTV2_DEPRECATE_14_1		//	(never released)
 	#endif
-	#if !defined(NTV2_DEPRECATE_14_2)	//	Linux driver Makefile usually defines this
+	#if !defined(NTV2_DEPRECATE_14_2)
 		#define NTV2_DEPRECATE_14_2
+	#endif
+	#if !defined(NTV2_DEPRECATE_14_3)
+		#define NTV2_DEPRECATE_14_3		//	(future ready)
 	#endif
 #endif
 

@@ -27,9 +27,9 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 				I can be built from the ancillary data received by the hardware during one field/frame, and/or
 				built "from scratch" and used as the source of outgoing ancillary data to hardware.
 
-				By default, packets (AJAAncillaryData instances) remain in the order added to me.
-				Use my SortListByDID, SortListBySID or SortListByLocation methods to sort my packets by DID,
-				SDID or location.
+				By default, packets (::AJAAncillaryData instances) remain in the order added to me.
+				Use my AJAAncillaryList::SortListByDID, AJAAncillaryList::SortListBySID or AJAAncillaryList::SortListByLocation
+				methods to sort my packets by DID, SDID or location.
 
 	@warning	I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
 				methods from any other thread.
@@ -43,8 +43,8 @@ public:	//	CLASS METHODS
 		@param[in]	inFormatDesc		Describes the frame buffer (pixel format, video standard, etc.).
 		@param[out]	outPackets			Receives the packets found.
 		@return		AJA_STATUS_SUCCESS if successful.
-		@bug		The \c AJAAncillaryDataLink in the \c AJAAncillaryDataLocation in each of the returned packets
-					is currently \c AJAAncillaryDataLink_A, which will be incorrect if, for example, the FrameStore
+		@bug		The ::AJAAncillaryDataLink in the ::AJAAncillaryDataLocation in each of the returned packets
+					is currently ::AJAAncillaryDataLink_A, which will be incorrect if, for example, the FrameStore
 					that delivered the \c inFrameBuffer was sourced from the "B" link of a Dual-Link SDI source.
 	**/
 	static AJAStatus						SetFromVANCData (const NTV2_POINTER & inFrameBuffer,

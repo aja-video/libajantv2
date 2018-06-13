@@ -23,8 +23,8 @@
 #include <clocale>
 #include <iostream>
 
-#if 0
-template
+/*
+//template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
 TEST_SUITE("filename -- functions in streams/common/filename.h");
 
@@ -33,8 +33,22 @@ TEST_SUITE("filename -- functions in streams/common/filename.h");
     }
 
 TEST_SUITE_END(); //filename
-#endif
+*/
 
+void types_marker() {}
+TEST_SUITE("types -- functions in ajabase/common/types.h");
+
+    TEST_CASE("AJA_FOURCC and AJA_FCC")
+    {
+        uint32_t ajaAsFourcc = 1634361632;
+
+        CHECK(AJA_FOURCC('a','j','a',' ') == ajaAsFourcc);
+        CHECK(AJA_FOURCC('A','J','A',' ') != ajaAsFourcc);
+        CHECK(AJA_FCC("aja ") == ajaAsFourcc);
+        CHECK(AJA_FCC("AJA ") != ajaAsFourcc);
+    }
+
+TEST_SUITE_END(); //types
 
 void common_marker() {}
 TEST_SUITE("common -- functions in ajabase/common/common.h");
@@ -580,7 +594,10 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         CHECK(strValue == "testing 1,2,3");
         CHECK(strcmp(blobValue,"blob test data")==0);
         CHECK(longStrValue == orgLongStrValue);
-        CHECK(hierarchyValue1 == 17);
+        // as of 12/06/2017 AJAPersistence was changed to not default to
+        // matching any device if exact or partial match not found
+        // if it is ever changed back hierarchyValue1 should be 17
+        CHECK(hierarchyValue1 == 0);
         CHECK(hierarchyValue2 == 23);
         CHECK(hierarchyValue3 == 27);
     }

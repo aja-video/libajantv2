@@ -105,7 +105,7 @@ public:
     virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
     virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
-    virtual bool IsValidConfig(const rx2022Config & virtual_config, bool is2022_7);
+    virtual bool IsValidConfig(rx2022Config & virtual_config, bool is2022_7);
     virtual bool IsValidConfig(const tx2022Config & virtual_config, bool is2022_7);
     virtual bool NotEqual(const rx_2022_channel & hw_channel, const rx2022Config & virtual_config, bool is2022_7);
     virtual bool NotEqual(const tx_2022_channel & hw_channel, const tx2022Config & virtual_config, bool is2022_7);
@@ -142,7 +142,6 @@ public:
 	bool IsCompatibleWithReference(NTV2FrameRate fbRate, NTV2FrameRate inputRate);
 	bool IsFormatRaw(NTV2FrameBufferFormat fbFormat);
 	bool IsFormatCompressed(NTV2FrameBufferFormat fbFormat);
-	bool IsFormatRGB(NTV2FrameBufferFormat fbFormat);
 	void SetMacDebugOption(int item);
 	bool IsDeinterlacedMode(NTV2VideoFormat fmt1, NTV2VideoFormat fmt2);
 	NTV2RGB10Range GetCSCRange();
@@ -155,7 +154,7 @@ public:
 	void EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toOutputWgt);
 	void DisableRP188EtoE(NTV2WidgetID toOutputWgt);
 
-	
+
 	bool GetExtFrameGeometry(NTV2FrameGeometry geometry, NTV2FrameGeometry* value);
 	NTV2LHIVideoDACMode GetLHIVideoDACMode(NTV2VideoFormat format, NTV2AnalogType type, NTV2AnalogBlackLevel blackLevel);
 	bool UpdateK2ColorSpaceMatrixSelect (NTV2VideoFormat currFormat, bool ajamac=true);
@@ -180,7 +179,7 @@ public:
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
 
 public:
-	CNTV2VidProc*			mCard;
+	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
@@ -237,6 +236,7 @@ public:
     TransmitAudioData2110   m2110TxAudioData;
     ReceiveVideoData2110    m2110RxVideoData;
     ReceiveAudioData2110    m2110RxAudioData;
+    IpStatus2110            m2110IpStatusData;
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;
@@ -267,6 +267,7 @@ public:
 	HDMIOutStereoSelect		mHDMIOutStereoSelect;		// selection driven by user choice in CP
 	HDMIOutStereoSelect		mHDMIOutStereoCodecSelect;	// selection driver by codec settings
 	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
+	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
 	uint32_t				mRegResetCycleCount;		// reset cycle count (power-cycle, or sleep)
@@ -292,10 +293,8 @@ public:
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
 
-
-	void SetCard (CNTV2VidProc* card)
+	void SetCard (CNTV2Card* card)
 		{ mCard = card; }
-	
 };
 
 #endif

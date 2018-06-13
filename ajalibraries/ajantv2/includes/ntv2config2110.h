@@ -31,7 +31,7 @@ typedef enum
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
     kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','0'), // 4CC of metadata config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','0')  // 4CC of metadata config data
 } VirtualDataTag2110 ;
 
 typedef enum
@@ -184,9 +184,6 @@ public:
     NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
-    uint32_t            pktsPerLine;        // read-only
-    uint32_t            payloadLen;         // read-only
-    uint32_t            lastPayLoadLen;     // read-only
     uint8_t             numAudioChannels;
     uint8_t             firstAudioChannel;
     eNTV2PacketInterval audioPktInterval;
@@ -219,9 +216,6 @@ public:
     NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
-    uint32_t            payloadLen;
-    uint32_t            lastPayloadLen;
-    uint32_t            pktsPerLine;
     uint32_t            numAudioChannels;
     eNTV2PacketInterval audioPktInterval;
 };

@@ -22,13 +22,13 @@
 	-	8-bit YCbCr or 10-bit YCbCr frame buffer formats.
 
 	Beyond these common characteristics, AJA devices fan out into a diverse array of capabilities to suit many different applications.
-	To determine the features of an AJA device, use the "Device Features" API. See \ref ntv2devicefeatures for examples of how to call these functions.
+	To determine the features of an AJA device, use the \ref ntv2devicefeatures.
 
 	Most devices can capture and play video, but some may only capture, while others may only playout.
 	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.
 	-	To determine if a device can play video, call ::NTV2DeviceCanDoPlayback.
 
-	<hr size="50px" />
+	<hr size="50px">
 	@section	devicesignalinputsoutputs		Signal Inputs & Outputs
 
 	@par	SDI Connectors
@@ -37,7 +37,7 @@
 	-	To determine the number of SDI input jacks the device has, call ::NTV2DeviceGetNumVideoInputs.
 	-	To determine the number of SDI output jacks the device has, call ::NTV2DeviceGetNumVideoOutputs.
 
-	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they're software-configurable.
+	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they’re software-configurable.
 	This means your application can, by calling a function in the NTV2 SDK, instruct the device to reconfigure one of its SDI jacks from an
 	input to an output (or vice-versa).
 	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
@@ -177,38 +177,38 @@
 			and buffer formats are no longer supported.
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@section	videooperation		Video System Operation
 
 	This section describes how the Video System operates.
 
 	@subsection	vidop-fs		Frame Store Operation
 
-	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that is associated with
-	several hardware Registers that monitor and control it. Some of the important properties
-	these Registers get and set are:
+	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that uses several
+	registers to monitor and control its principal properties:
 	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget will not access SDRAM.
 		Call CNTV2Card::IsChannelEnabled to determine if a Frame Store is enabled or not.
 		Calling CNTV2Card::EnableChannel or CNTV2Card::DisableChannel will change it.
 		Note that AutoCirculate sets this for you, but won’t “un-set” it.
-	-	<b>Mode</b> — This correlates to the NTV2Mode enumeration in the SDK.
-		In \c NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
-		in \c NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
-		to determine the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
+	-	<b>Mode</b> — This correlates to the ::NTV2Mode enumeration in the SDK.
+		In ::NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
+		in ::NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
+		to obtain the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
 		Note that AutoCirculate sets this for you, but doesn’t “un-set” it.
-	-	<b>Frame Buffer Format</b> — This coincides with the NTV2FrameBufferFormat enumeration
+	-	<b>Frame Buffer Format</b> — This coincides with the ::NTV2FrameBufferFormat enumeration
 		in the SDK. Call CNTV2Card::GetFrameBufferFormat to determine the current format;
 		calling CNTV2Card::SetFrameBufferFormat will change it. See \ref devicefbformats for details.
 		AutoCirculate users must set this.
-	-	<b>Video Format</b> — This correlates to the NTV2VideoFormat enumeration in the SDK,
-		and implies a Frame Geometry, Video Standard and Frame Rate. Call CNTV2Card::GetVideoFormat
-		to determine the current format; calling CNTV2Card::SetVideoFormat will set it.
+	-	<b>Video Format</b> — This correlates to the ::NTV2VideoFormat enumeration in the SDK,
+		and implies a ::NTV2FrameGeometry, ::NTV2Standard and ::NTV2FrameRate.
+		Call CNTV2Card::GetVideoFormat to determine the current format;
+		call CNTV2Card::SetVideoFormat to change it.
 		AutoCirculate users must set this.
 	-	<b>Input Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will be continually written with video frame data <b>if</b>…
 		-	the Frame Store is Enabled;
 		-	its Mode is Capture;
-		-	and a signal is routed to the Frame Store’s input.
+		-	and a signal is routed to its input crosspoint(s).
 	
 		Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		Call CNTV2Card::SetInputFrame to change it.
@@ -260,6 +260,37 @@
 	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
 
 
+	@subsection	independentmode		Multi-Format / “Independent” Mode
+
+	<b>Multi-Format Mode</b>, also known as “Independent” mode, is a device capability in which it can
+	simultaneously operate more than one stream, with each having a different video format.
+	Devices having this capability that are in this mode are able to use a different ::NTV2VideoFormat
+	on each Frame Store.
+
+	This differs from prior device capability. For example, assuming there was sufficient DMA and processor
+	bandwidth on the host, the \ref corvid24 could simultaneously ingest two video streams, and playout
+	another two video streams — but all four streams must have the identical ::NTV2VideoFormat.
+
+	In <b>Multi-Format Mode</b>, for example, assuming sufficient PCIe and host processor bandwidth,
+	the \ref corvid44 could simultaneously ingest ::NTV2_FORMAT_720p_5000 and ::NTV2_FORMAT_525_5994 while
+	playing ::NTV2_FORMAT_1080p_2997 and ::NTV2_FORMAT_720p_5994.
+
+	The relevant SDK calls:
+	-	Call ::NTV2DeviceCanDoMultiFormat to determine if a device is capable of simultaneously streaming
+		multiple, different video formats.
+	-	Call CNTV2Card::GetMultiFormatMode to find out if the device is currently operating in Multi-Format
+		Mode or not.
+	-	Call CNTV2Card::SetMultiFormatMode to change the mode.
+
+	@note	In <b>Multi-Format Mode</b>, because NTV2 devices only have one hardware clock for driving the
+			outputs, all playout video formats must be in the same clock family.
+			Call ::IsMultiFormatCompatible(const NTV2VideoFormat, const NTV2VideoFormat) to find out if two
+			video formats are multi-format compatible.
+			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
+			rates are multi-format compatible.
+			See \ref deviceclockingandsync for more details.
+
+
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
 	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
@@ -298,12 +329,6 @@
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
-	Traditionally, AJA’s NTV2 devices required all channels to have the same video standard,
-	frame rate, and frame geometry. AJA’s newer devices — e.g., \ref corvid44, \ref kona4quad,
-	\ref io4kquad, \ref corvid88, etc. — retain this default behavior, but can be switched into
-	“multi-format” mode that allows different channels to use different formats
-	(see ::NTV2DeviceCanDoMultiFormat and CNTV2Card::SetMultiFormatMode).
-
 	All SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different
 	clock sources:
 	-	the device’s on-board crystal oscillator (a.k.a. “free run”);
@@ -312,7 +337,7 @@
 
 	The SDK’s CNTV2Card::SetReference function is used to specify which clock source should
 	be used to generate timing for the device’s outputs. When CNTV2Card::SetReference is called
-	with \c NTV2_REFERENCE_INPUT1, the device’s outputs will be locked to the same timebase as
+	with ::NTV2_REFERENCE_INPUT1, the device’s outputs will be locked to the same timebase as
 	that of input channel 1. Note that the actual output will be delayed a couple of lines due
 	to propagation delays through the device’s circuitry, but the important point is that the
 	phase relationship between the input and the output will be fixed and will not drift. This
@@ -320,24 +345,25 @@
 	to an output, directly, or indirectly (e.g., through a Mixer/Keyer) without any mediation
 	through a pair of Frame Stores.
 
-	However, if two inputs are feeding the device, it's probably impossible to lock to both
+	However, if two inputs are feeding the device, it’s probably impossible to lock to both
 	sources. Unless the sources are synced to a common timebase (often called “house reference”),
 	then the two signals will drift over time with respect to each other. One channel may just
 	be starting a new frame, while the other is already half way through its frame. Since a
-	client application can’t lock to both signals at the same time, \c NTV2_REFERENCE_FREERUN
+	client application can’t lock to both signals at the same time, ::NTV2_REFERENCE_FREERUN
 	should be used, to clock the outputs from the device’s own internal clock source. Note that
-	even setting “free run” isn't technically necessary — the application would run just as
+	even setting “free run” isn’t technically necessary — the application would run just as
 	well locked to an input, with the only difference being when the signals would actually
 	come out of the BNC connectors.
 
 	If the device’s output(s) must have a given timing (e.g., to feed a switcher), then
-	applications can pass \c NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will
+	applications can pass ::NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will
 	lock the device to an analog or tri-level sync signal connected to the device’s external
 	reference input. You can determine the video format of the signal being applied to the
 	reference input by calling CNTV2Card::GetReferenceVideoFormat. Note that even when
-	configured to sync its outputs to \c NTV2_REFERENCE_EXTERNAL, the device output will
+	configured to sync its outputs to ::NTV2_REFERENCE_EXTERNAL, the device output will
 	internally revert to Free-Run if the reference signal disappears or is incompatible with
 	the output video format.
+
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
@@ -409,7 +435,7 @@
 			device.SetReference(NTV2_REFERENCE_FREERUN);	//	Free run the outputs
 			device.EnableChannel(NTV2_CHANNEL2);	//	Enable FrameStore 2
 			device.SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);	//	Set FrameStore 2 to playout mode
-			device.SetInputFrame(NTV2_CHANNEL2, 0);	//	Read FrameStore 2 video from frame buffer 0
+			device.SetOutputFrame(NTV2_CHANNEL2, 0);	//	Read FrameStore 2 video from frame buffer 0
 			device.SetSDITransmitEnable(NTV2_CHANNEL3, true);	//	Set SDI connector 3 to output
 			device.Connect(NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer2YUV);	//	Connect FrameStore 2’s output to SDI Out 3
 		}
@@ -444,7 +470,7 @@
 
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@section	widgetsandrouting		Widgets and Signal Routing
 
 	NTV2 device FPGA firmware implements several types of “widgets“ for receiving, processing and transmitting video data.
@@ -470,26 +496,26 @@
 
 	Most widgets typically have associated registers for reporting status and/or controlling their operation.
 	Rather than calling CNTV2Card::ReadRegister or CNTV2Card::WriteRegister, client applications should use the
-	appropriate widget-related API calls in the \c CNTV2Card class to inquire about and/or control the widget of interest.
+	appropriate widget-related API calls in the ::CNTV2Card class to inquire about and/or control the widget of interest.
 
-	All widgets have a unique identifier in software expressed by the \c NTV2WidgetID enumeration.
+	All widgets have a unique identifier in software expressed by the ::NTV2WidgetID enumeration.
 	To determine if a device implements a particular widget, call ::NTV2DeviceCanDoWidget.
 
 	Video data paths between widgets are implemented using <b>crosspoints</b> in firmware.
-	-	Widget <b>inputs</b> are identified by \c NTV2InputCrosspointID.
-	-	Widget <b>outputs</b> are identified by \c NTV2OutputCrosspointID.
+	-	Widget <b>inputs</b> are identified by ::NTV2InputCrosspointID.
+	-	Widget <b>outputs</b> are identified by ::NTV2OutputCrosspointID.
 	-	<b>Input Widgets</b> only have <b>output</b> crosspoint connections.
 	-	<b>Output Widgets</b> only have <b>input</b> crosspoint connections.
 	-	<b>Processing Widgets</b> have both <b>input</b> and <b>output</b> crosspoint connections.
 
-	The \c CNTV2SignalRouter class has static methods that are useful for inquiring about device widgets and their input and output crosspoints:
-	-	CNTV2SignalRouter::GetWidgetIDs answers with an \c NTV2WidgetIDSet of all widgets supported by a given device.
-	-	CNTV2SignalRouter::GetWidgetForInput reports the widget (\c NTV2WidgetID) that’s associated with a given \c NTV2InputCrosspointID.
-	-	CNTV2SignalRouter::GetWidgetForOutput reports the widget (\c NTV2WidgetID) associated with a given \c NTV2OutputCrosspointID.
+	The ::CNTV2SignalRouter class has static methods that are useful for inquiring about device widgets and their input and output crosspoints:
+	-	CNTV2SignalRouter::GetWidgetIDs answers with an ::NTV2WidgetIDSet of all widgets supported by a given device.
+	-	CNTV2SignalRouter::GetWidgetForInput reports the widget (::NTV2WidgetID) that’s associated with a given ::NTV2InputCrosspointID.
+	-	CNTV2SignalRouter::GetWidgetForOutput reports the widget (::NTV2WidgetID) associated with a given ::NTV2OutputCrosspointID.
 	-	CNTV2SignalRouter::GetWidgetInputs reports all input crosspoints for a given widget.
 	-	CNTV2SignalRouter::GetWidgetOutputs reports all output crosspoints for a given widget.
 
-	A set of “crosspoint select” registers (e.g., \c kRegXptSelectGroup1, \c kRegXptSelectGroup2, etc.) determine which widget output
+	A set of “crosspoint select” registers (e.g., ::kRegXptSelectGroup1, ::kRegXptSelectGroup2, etc.) determine which widget output
 	will feed (source) each widget’s input.
 
 	@note	A widget’s output can source multiple widgets’ inputs,
@@ -499,7 +525,7 @@
 	@note	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented.
 
 	@note	Widget inputs that are left open — i.e., disconnected — i.e. aren’t connected to any other widget’s output — default
-			to the \c NTV2_XptBlack output crosspoint.
+			to the ::NTV2_XptBlack output crosspoint.
 
 	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
 	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
@@ -520,21 +546,21 @@
 	@subsection	widget_sdiin	SDI Input
 
 	An SDI Input widget represents a physical SDI input connector.
-	-	There is one of these widgets for each input SDI connector (e.g. \c NTV2_WgtSDIIn1, \c NTV2_WgtSDIIn2, …).
+	-	There is one of these widgets for each input SDI connector (e.g. ::NTV2_WgtSDIIn1, ::NTV2_WgtSDIIn2, …).
 	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
 		there will be one of these widgets for each <i>potential</i> SDI input connector.
-	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI input widgets — \c NTV2_WgtSDIIn1, \c NTV2_WgtSDIIn2, etc.
-	-	Devices that support 3Gbps SDI have “3G” SDI input widgets — \c NTV2_Wgt3GSDIIn1, \c NTV2_Wgt3GSDIIn2, etc.
-	-	Devices that support 6Gbps or higher SDI have “12G” SDI input widgets — \c NTV2_Wgt12GSDIIn1, \c NTV2_Wgt12GSDIIn2, etc.
+	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI input widgets — ::NTV2_WgtSDIIn1, ::NTV2_WgtSDIIn2, etc.
+	-	Devices that support 3Gbps SDI have “3G” SDI input widgets — ::NTV2_Wgt3GSDIIn1, ::NTV2_Wgt3GSDIIn2, etc.
+	-	Devices that support 6Gbps or higher SDI have “12G” SDI input widgets — ::NTV2_Wgt12GSDIIn1, ::NTV2_Wgt12GSDIIn2, etc.
 	-	3Gbps SDI inputs have two output crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
-		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used \c NTV2_WgtSDIIn2 for DS1 and \c NTV2_WgtSDIIn2 for DS2.
-	-	There are two ways to obtain an SDI input’s \c NTV2OutputCrosspointID …
-		-	Call ::GetSDIInputOutputXptFromChannel …
-			-	Specify the SDI input connector by ::NTV2Channel (e.g., use NTV2_CHANNEL3 for SDI In 3).
+		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used ::NTV2_WgtSDIIn2 for DS1 and ::NTV2_WgtSDIIn2 for DS2.
+	-	There are two ways to obtain an SDI input’s ::NTV2OutputCrosspointID …
+		-	Call ::GetSDIInputOutputXptFromChannel …
+			-	Specify the SDI input connector by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for SDI In 3).
 			-	By default, it returns data stream 1’s crosspoint.
 				To obtain Data Stream 2’s crosspoint, specify \c true for \c inIsDS2.
-		-	Call ::GetInputSourceOutputXpt …
-			-	Specify the SDI input by passing it \c NTV2_INPUTSOURCE_SDI1, \c NTV2_INPUTSOURCE_SDI2, …etc.
+		-	Or call ::GetInputSourceOutputXpt …
+			-	Specify the SDI input by passing it ::NTV2_INPUTSOURCE_SDI1, ::NTV2_INPUTSOURCE_SDI2, …etc.
 			-	By default, it returns Data Stream 1’s crosspoint.
 				For Data Stream 2’s crosspoint, specify \c true for \c inIsSDI_DS2.
 
@@ -543,13 +569,13 @@
 
 	An HDMI Input widget represents a physical HDMI input connector.
 	-	There is one of these widgets for each input HDMI connector.
-	-	Older devices with our 1st-generation HDMI chip use \c NTV2_WgtSDIHDMIIn1.
-	-	Devices that support our 2nd-generation HDMI chip use \c NTV2_WgtHDMIIn1v2.
-	-	Devices that support our 3rd-generation HDMI chip use \c NTV2_WgtHDMIIn1v3.
-	-	Devices that support our 4th-generation HDMI chip use \c NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
-	-	To obtain its \c NTV2OutputCrosspointID …
+	-	Older devices with our 1st-generation HDMI chip use ::NTV2_WgtHDMIIn1.
+	-	Devices that support our 2nd-generation HDMI chip use ::NTV2_WgtHDMIIn1v2.
+	-	Devices that support our 3rd-generation HDMI chip use ::NTV2_WgtHDMIIn1v3.
+	-	Devices that support our 4th-generation HDMI chip use ::NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
+	-	To obtain its ::NTV2OutputCrosspointID …
 		-	Call ::GetInputSourceOutputXpt …
-			-	Specify which HDMI input by passing it \c NTV2_INPUTSOURCE_HDMI1, \c NTV2_INPUTSOURCE_HDMI2, …etc.
+			-	Specify which HDMI input by passing it ::NTV2_INPUTSOURCE_HDMI1, ::NTV2_INPUTSOURCE_HDMI2, …etc.
 			-	For 4K/UHD applications, specify the appropriate quadrant number 0, 1, 2 or 3 in the \c inHDMI_Quadrant
 				parameter.
 			-	For the RGB output crosspoint instead of the default YUV one (4th-generation HDMI only), pass \c true
@@ -560,41 +586,41 @@
 
 	An Analog Video Input widget represents a physical analog video input connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
-	-	There is one of these widgets for devices that support analog video input — \c NTV2_WgtAnalogIn1.
-	-	To obtain its \c NTV2OutputCrosspointID…
-		-	Either use \c NTV2_XptAnalogIn directly;
-		-	Or call ::GetInputSourceOutputXpt with \c NTV2_INPUTSOURCE_ANALOG1.
+	-	There is one of these widgets for devices that support analog video input — ::NTV2_WgtAnalogIn1.
+	-	To obtain its ::NTV2OutputCrosspointID …
+		-	Either use ::NTV2_XptAnalogIn directly;
+		-	Or call ::GetInputSourceOutputXpt with ::NTV2_INPUTSOURCE_ANALOG1.
 
 
 	@subsection	widget_sdiout	SDI Output
 
 	An SDI Output widget represents one of the device’s physical SDI output connectors.
-	-	There is one of these widgets for each output SDI connector (e.g. \c NTV2_WgtSDIOut1, \c NTV2_WgtSDIOut2, …).
+	-	There is one of these widgets for each output SDI connector (e.g. ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, …).
 	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
 		there will be one of these widgets for each <i>potential</i> SDI output connector.
-	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI output widgets — \c NTV2_WgtSDIOut1, \c NTV2_WgtSDIOut2, etc.
-	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — \c NTV2_Wgt3GSDIOut1, \c NTV2_Wgt3GSDIOut2, etc.
-	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — \c NTV2_Wgt12GSDIOut1, \c NTV2_Wgt12GSDIOut2, etc.
+	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI output widgets — ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, etc.
+	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — ::NTV2_Wgt3GSDIOut1, ::NTV2_Wgt3GSDIOut2, etc.
+	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — ::NTV2_Wgt12GSDIOut1, ::NTV2_Wgt12GSDIOut2, etc.
 	-	3Gbps SDI outputs have two input crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
-	-	There are two ways to obtain an SDI output’s \c NTV2InputCrosspointID …
+	-	There are two ways to obtain an SDI output’s ::NTV2InputCrosspointID …
 		-	Call ::GetSDIOutputInputXpt …
-			-	Specify the SDI output connector by ::NTV2Channel (e.g. use \c NTV2_CHANNEL3 for SDI Out 3);
+			-	Specify the SDI output connector by ::NTV2Channel (e.g. use ::NTV2_CHANNEL3 for SDI Out 3);
 			-	For dual-link applications, pass \c true for \c inIsDS2 for the 2nd dual-link stream.
 		-	Or call ::GetOutputDestInputXpt …
-			-	Specify the SDI output connector using \c NTV2_OUTPUTDESTINATION_SDI1, \c NTV2_OUTPUTDESTINATION_SDI2, … etc.
+			-	Specify the SDI output connector using ::NTV2_OUTPUTDESTINATION_SDI1, ::NTV2_OUTPUTDESTINATION_SDI2, … etc.
 			-	For dual-link applications, pass \c true for \c inIsSDI_DS2 for the 2nd dual-link stream.
 
 
 	@subsection	widget_hdmiout	HDMI Output
 
 	An HDMI Output widget represents a physical HDMI output connector.
-	-	There is one of these widgets for the output HDMI connector — \c NTV2_WgtHDMIOut1.
-	-	Older devices use \c NTV2_WgtHDMIOut1.
-	-	Devices that support our 2nd-generation HDMI chip use \c NTV2_WgtHDMIOut1v2.
-	-	Devices that support our 3rd-generation HDMI chip use \c NTV2_WgtHDMIOut1v3.
-	-	Devices that support our 4th-generation HDMI chip use \c NTV2_WgtHDMIOut1v4.
+	-	There is one of these widgets for the output HDMI connector — ::NTV2_WgtHDMIOut1.
+	-	Older devices use ::NTV2_WgtHDMIOut1.
+	-	Devices that support our 2nd-generation HDMI chip use ::NTV2_WgtHDMIOut1v2.
+	-	Devices that support our 3rd-generation HDMI chip use ::NTV2_WgtHDMIOut1v3.
+	-	Devices that support our 4th-generation HDMI chip use ::NTV2_WgtHDMIOut1v4.
 	-	To obtain its output crosspoint(s)…
-		-	Call ::GetOutputDestInputXpt, passing it \c NTV2_OUTPUTDESTINATION_HDMI.
+		-	Call ::GetOutputDestInputXpt, passing it ::NTV2_OUTPUTDESTINATION_HDMI.
 			For 4K/UHD quadrants, you can specify a quadrant number (0, 1, 2 or 3).
 
 
@@ -602,34 +628,34 @@
 
 	An Analog Video Output widget represents a physical analog video output connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
-	-	There is one of these widgets for devices that support analog video output — \c NTV2_WgtAnalogOut1.
-	-	To obtain its \c NTV2InputCrosspointID…
-		-	Use \c NTV2_XptAnalogOut
-		-	Call ::GetOutputDestInputXpt with \c NTV2_OUTPUTDESTINATION_ANALOG.
+	-	There is one of these widgets for devices that support analog video output — ::NTV2_WgtAnalogOut1.
+	-	To obtain its ::NTV2InputCrosspointID …
+		-	Use ::NTV2_XptAnalogOutInput
+		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
 
 
-	@subsection	widget_framestore	Frame Stores
+	@subsection	widget_framestore	Frame Store
 
 	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
 	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
-	-	Frame Store widgets are identified by \c NTV2_WgtFrameBuffer1, \c NTV2_WgtFrameBuffer2, etc.
+	-	Frame Store widgets are identified by ::NTV2_WgtFrameBuffer1, ::NTV2_WgtFrameBuffer2, etc.
 	-	In <b>Capture Mode</b>…
 		-	The normal (“Level A”) input crosspoint is available and should be used for most applications.
 		-	There is a “Level B” input crosspoint that is available for dual-link applications.
-		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s \c NTV2InputCrosspointID…
+		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s ::NTV2InputCrosspointID …
 			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
 			-	By default, the function returns the normal “Level A” input crosspoint.
 				Specify \c true for \c inIsBInput for the “Level B” crosspoint.
 	-	In <b>Playout Mode</b>…
 		-	If the Frame Store is configured for SD, HD, or 4K/UHD Quads/Squares (i.e. non-Tsi) mode:
-			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr \c NTV2FrameBufferFormat.
-			-	Use the <b>RGB</b> output crosspoint when the FrameStore is using an RGB \c NTV2FrameBufferFormat.
+			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
+			-	Use the <b>RGB</b> output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
 		-	If the Frame Store is configured for 4K/UHD Tsi (SMPTE 425 two-sample-interleave) mode:
-			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr \c NTV2FrameBufferFormat.
-			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB \c NTV2FrameBufferFormat.
-		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s \c NTV2OutputCrosspointID…
+			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
+			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
+		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s ::NTV2OutputCrosspointID …
 			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
-			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s \c NTV2FrameBufferFormat
+			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s ::NTV2FrameBufferFormat
 				is an RGB format, pass \c true for \c inIsRGB to obtain the RGB crosspoint.
 			-	By default, the function will return a normal, non-SMPTE-425 (non-Tsi) output crosspoint.
 				If the Frame Store is configured for 4K/UHD and for two-sample-interleave, pass \c true for \c inIs425,
@@ -638,78 +664,78 @@
 	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
 
 
-	@subsection	widget_csc	ColorSpace Converters (CSCs)
+	@subsection	widget_csc	ColorSpace Converter (CSC)
 
 	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
 	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
-	-	CSC widgets are identified by \c NTV2_WgtCSC1, \c NTV2_WgtCSC2, etc.
+	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.
 	-	Each CSC has two input crosspoints:
 		-	<b>Video Input</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
 			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data on its RGBA output crosspoint.
 			-	RGB[A] video, then the CSC will produce valid YCbCr data on its YUV output crosspoint.
 		-	<b>Key Input</b>:  This supplies the alpha channel data for the CSC’s RGBA output.
-		-	Call ::GetCSCInputXptFromChannel to obtain the \c NTV2InputCrosspointID for a CSC:
-			-	Specify the CSC by ::NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
+		-	Call ::GetCSCInputXptFromChannel to obtain the ::NTV2InputCrosspointID for a CSC:
+			-	Specify the CSC by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for CSC 3).
 			-	By default, the function returns the video input crosspoint. To obtain the alpha/key input
 				crosspoint, pass \c true for \c inIsKeyInput.
 	-	Each CSC has 3 output crosspoints:
 		-	<b>YUV Video</b>:  This will produce valid YCbCr video data only when the CSC’s Video Input is receiving RGB[A] video data.
 		-	<b>RGB Video</b>:	This will produce valid RGB[A] video data only when the CSC’s Video Input is receiving YCbCr video data.
 		-	<b>Key YUV</b>:  This will produce valid YCbCr key data only when the CSC’s Video Input is receiving RGB[A] video data.
-		-	Call ::GetCSCOutputXptFromChannel to obtain one of the CSC’s \c NTV2OutputCrosspointID values:
-			-	Specify the CSC by ::NTV2Channel (e.g., use \c NTV2_CHANNEL3 for CSC 3).
+		-	Call ::GetCSCOutputXptFromChannel to obtain one of the CSC’s ::NTV2OutputCrosspointID values:
+			-	Specify the CSC by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for CSC 3).
 			-	By default, the function returns the video output crosspoint.
 				To obtain the <b>Key</b> crosspoint, pass \c true for \c inIsKey.
 			-	By default, the function returns the <b>YUV</b> output crosspoint.
 				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
 
-	@subsection	widget_mixkey	Mixer/Keyer Widgets
+	@subsection	widget_mixkey	Mixer/Keyer
 
 	@image	html	cables-mixerkeyerwidget.png
 
 	A <b>Mixer/Keyer</b> widget represents the firmware entity that can mix two YCbCr video sources into a single YCbCr
 	raster (and key).
 	-	::NTV2DeviceGetNumMixers reports the number of Mixer/Keyer widgets that are available on a given device.
-	-	Mixer/Keyer widgets are identified by \c NTV2_WgtMixer1, \c NTV2_WgtMixer2, etc.
+	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, etc.
 	-	Each Mixer/Keyer widget has four input crosspoints:
 		-	<b>Foreground Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
 				and should be routed to a widget that produces YCbCr video.
 			-	<b>Key</b>:  This determines the foreground key, and should be routed to another widget’s YCbCr output.
 				Note that only the Y component is used — the Cb and Cr components are ignored.
-			-	Call ::GetMixerFGInputXpt to obtain a foreground \c NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use NTV2_CHANNEL2 for Mixer/Keyer 2).
+			-	Call ::GetMixerFGInputXpt to obtain a foreground ::NTV2InputCrosspointID:
+				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 		-	<b>Background Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the background,
 				and should be routed to a widget that produces YCbCr video.
 			-	<b>Key</b>:  This determines the background key, and should be routed to another widget’s YCbCr output.
 				Note that only the Y component is used — the Cb and Cr components are ignored.
-			-	Call ::GetMixerBGInputXpt to obtain a background \c NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use NTV2_CHANNEL2 for Mixer/Keyer 2).
+			-	Call ::GetMixerBGInputXpt to obtain a background ::NTV2InputCrosspointID:
+				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 	-	Each Mixer/Keyer widget has two output crosspoints:
 		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
 		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
-		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s \c NTV2OutputCrosspointID:
-			-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use NTV2_CHANNEL2 for Mixer/Keyer 2).
+		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s ::NTV2OutputCrosspointID:
+			-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
-	-	The Mixer is controlled using \c CNTV2Card API calls:
+	-	The Mixer is controlled using ::CNTV2Card API calls:
 		-	<b>Mode</b>:
 			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
 			-	Call CNTV2Card::SetMixerMode to change the Mixer’s mode.
-			-	Use \c NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the foreground video and key to the Mixer output.
-			-	Use \c NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the background video and key to the Mixer output.
-			-	Use \c NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
+			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the foreground video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the background video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
 		-	<b>Input Controls</b>:
 			-	Call CNTV2Card::GetMixerFGInputControl to determine the Mixer’s current foreground control value;
 				call CNTV2Card::SetMixerFGInputControl to change it.
 			-	Call CNTV2Card::GetMixerBGInputControl to determine the Mixer’s current background control value;
 				call CNTV2Card::SetMixerBGInputControl to change it.
-			-	Use \c NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
-			-	Use \c NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
-			-	Use \c NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
+			-	Use ::NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
+			-	Use ::NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
+			-	Use ::NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
 		-	<b>Mix Coefficient</b>:
 			-	This is an unsigned 16-bit integer that determines the transparency of the foreground mask/key.
 			-	Call CNTV2Card::GetMixerCoefficient to determine the Mixer’s current mix coefficient;
@@ -721,41 +747,44 @@
 
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@section	audiooperation		Audio System Operation
 
 	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
 	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
 
-	Each Audio System can accommodate at least 8 channels of audio.
-	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s Audio System(s) can handle.
-	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device Audio System is currently configured for.
+	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
+	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.
+	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device <b>Audio System</b> is currently configured for.
 	Modern AJA devices will accommodate up to 16 channels. Older AJA devices defaulted to 6 channels at power-up — these should be
 	configured to use 8 channels.
-	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device Audio System is configured to use.
+	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device <b>Audio System</b> is configured to use.
 
-	@note	It is recommended that the Audio System be configured to use the maximum number of audio channels the device is capable of.
+	@note	AJA recommendeds configuring the <b>Audio System</b> to use the maximum number of audio channels the device is capable of.
 
-	The audio sample rate on all AJA devices is fixed at 48 kHz.
+	The audio <b>Sample Rate</b> on all AJA devices is fixed at 48 kHz. All NTV2 devices implement a 48 kHz <b>Audio Clock</b> through the
+	::kRegAud1Counter register. This register is reset to zero at power-on and PCIe reset, and increments every 20.833… µs. It’s used
+	for precise timing purposes for AutoCirculate in FRAME_STAMP::acAudioClockTimeStamp, FRAME_STAMP::acAudioClockCurrentTime,
+	AUTOCIRCULATE_STATUS::acAudioClockStartTime and AUTOCIRCULATE_STATUS::acAudioClockCurrentTime.
 
-	Each Audio System uses an 8 MB contiguous block of memory located in the upper part of SDRAM:
+	Each <b>Audio System</b> uses an 8 MB contiguous block of memory located in the upper part of SDRAM:
 
 	@image	html	hwref-fig2-audiobuffers.png
 
-	An NTV2 device will use one of these two memory configurations for its Audio Systems’ buffers:
-	-	“Stacked” — The first Audio System’s 8 MB chunk starts at the very top of SDRAM,
-		such that the last byte of Audio System 1's input buffer coincides with the last addressable
+	An NTV2 device will use one of these two memory configurations for its <b>Audio System</b>s’ buffers:
+	-	“Stacked” — The first <b>Audio System</b>’s 8 MB chunk starts at the very top of SDRAM,
+		such that the last byte of <b>Audio System</b> 1’s <b>Input Buffer</b> coincides with the last addressable
 		byte of SDRAM. Subsequent Audio Systems’ buffers stack downward from there, 8 MB each.
 	-	“Non-stacked” — These devices use the last one or two video frames for audio storage.
-		The first byte of the last Audio System’s output buffer coincides with the first byte
-		of the last frame buffer in device memory. Previous Audio System buffers, if any, start
+		The first byte of the last <b>Audio System</b>’s <b>Output Buffer</b> coincides with the first byte
+		of the last frame buffer in device memory. Previous <b>Audio System</b> buffers, if any, start
 		at the next-lower 8MB frame buffer.
 	-	Call ::NTV2DeviceCanDoStackedAudio to determine if the device uses the “stacked” arrangement or not.
 
-	The first (lower address) and last (higher address) 4 MB of the Audio System’s 8 MB chunk is used
+	The first (lower address) and last (higher address) 4 MB of the <b>Audio System</b>’s 8 MB chunk is used
 	for <b>Audio Output</b> and <b>Audio Input</b>, respectively. Each Output or Input aspect of the
-	Audio System operate independently, each being in one of two states: <b>Running</b> or <b>Stopped</b>
-	(a.k.a. the “Reset” state). When the Input or Output of the Audio System is Running, eight or sixteen
+	<b>Audio System</b> operate independently, each being in one of two states: <b>Running</b> or <b>Stopped</b>
+	(a.k.a. the “Reset” state). When the Input or Output of the <b>Audio System</b> is Running, eight or sixteen
 	channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this memory,
 	regardless of whether all 8 or 16 channels are used.
 
@@ -766,81 +795,97 @@
 				buffers used by your application never coincide with any of the audio buffers.
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@subsection	audiocapture		Audio Capture
 
 	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
 	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
 	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
 
-	When the Audio System is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
-	in the Audio Input Buffer in device memory at the address specified by the Audio System's Audio Input Last Address register (i.e.,
-	the <b>Record Head</b> or "write head"). Call CNTV2Card::ReadAudioLastIn to get the current Record Head position. Audio data continues to
-	be written into the input buffer until filled, whereupon the Record Head wraps back to the start of the buffer, where writing continues.
-	The least-significant byte of each 32-bit sample word in the Audio Input Buffer is always set to zero. (Note that for SD, because
+	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
+	in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input Last Address register (i.e.,
+	the <b>Record Head</b> or “write head”). Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to
+	be written into the <b>Input Buffer</b> until filled, whereupon the <b>Record Head</b> wraps back to the start of the buffer, where writing continues.
+	The least-significant byte of each 32-bit sample word in the <b>Audio Input Buffer</b> is always set to zero. (Note that for SD, because
 	extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
 
 	@image	html	hwref-fig3-audiorecordplay.png
 
-	Audio data can be transferred from the Audio Input Buffer in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
+	Audio data can be transferred from the <b>Audio Input Buffer</b> in device memory to a host audio buffer via DMA by calling CNTV2Card::DMAReadAudio.
 	While the offset to the Input portion of the device Audio Buffer is typically fixed at 4 MB, to be absolutely safe should this ever change,
 	call CNTV2Card::GetAudioReadOffset to obtain the actual offset being used by the driver and SDK.
 
-	Note that if AutoCirculate is used for capture, AutoCirculate completely and automatically manages the Audio System.
-	See \ref aboutautocirculate for more information.
+	If AutoCirculate is used for capture, AutoCirculate completely and automatically runs the <b>Audio System</b>.
+	When CNTV2Card::AutoCirculateInitForInput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart is called,
+	AutoCirculate starts the <b>Audio System</b>. CNTV2Card::AutoCirculateTransfer automatically transfers the correct number of captured
+	audio samples from the device Audio System’s <b>Input Buffer</b> that are associated with the video frame being transferred.
+	AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount will return the exact number of transferred audio bytes for the frame that was just
+	transferred to the host. See \ref autocirculatecapture for more information.
 
 	If the Embedded Audio Group packet (containing two audio channel pairs) is not present in the data stream, its samples in the buffer
 	will be set to zero (silence). The firmware notes which audio group packets are present and which are missing, and coalesces this
 	information into a hardware register. Client software can query this information by calling CNTV2Card::GetDetectedAudioChannelPairs.
 
 	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) via certain bits in the AES
-	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the Audio System's de-embedder makes this
+	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the <b>Audio System</b>’s de-embedder makes this
 	information available in a hardware register, and client software can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM
 	or CNTV2Card::InputAudioChannelPairHasPCM.
 
-	Generally, each Audio System's <b>Input Source</b> is selectable, to receive samples from any of the device's video (and possibly audio)
+	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
 	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
 	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
 
+	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
+	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
+	to obtain the current delay value. Call CNTV2Card::SetAudioDelay to change it.
 
-	<hr size="50px" />
+	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
+	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
+	explicitly configured to use the input signal by passing ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT to CNTV2Card::SetEmbeddedAudioClock.
+	If this wasn't done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
+	the audio would eventually drift from the video. (See also ::NTV2DeviceCanChangeEmbeddedAudioClock.)
+
+
+	<hr size="50px">
 	@subsection	audioplayout		Audio Playout
 
-	If the device supports SDI playout, each Audio System has an output embedder that generates audio packets (per SMPTE 299M for HD
+	If the device supports SDI playout, each <b>Audio System</b> has an output embedder that generates audio packets (per SMPTE 299M for HD
 	and SMPTE 272M for SD) and inserts them into the HANC area of the outgoing SDI data stream.
-	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
-	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
-	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
-	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
-	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
+	-	Audio channels 1 & 2 are transmitted on Embedded Group 1, channels 1 & 2.
+	-	Audio channels 3 & 4 are transmitted on Embedded Group 1, channels 3 & 4.
+	-	Audio channels 5 & 6 are transmitted on Embedded Group 2, channels 1 & 2.
+	-	Audio channels 7 & 8 are transmitted on Embedded Group 2, channels 3 & 4.
+	-	In 16-channel mode (see CNTV2Card::GetNumberAudioChannels), the remaining 8 channels are distributed in Embedded Groups 3 and 4
 	in a similar fashion.
+
 	There is currently no provision for enabling or disabling specific audio groups.
 
-	The output embedder always inserts audio packets unless it's been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
+	The SDI output embedder always inserts audio packets unless it’s been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
 
-	When the Audio System is stopped, the output embedder will either embed silence (zeroes) into the data stream, or, if <b>Loopback Mode</b>
-	is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder (see CNTV2Card::SetAudioLoopBack).
+	When the <b>Audio System</b> is stopped, the output embedder will either embed silence (zeroes) into the data stream, or,
+	if ::NTV2AudioLoopBack mode is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder
+	(see CNTV2Card::SetAudioLoopBack).
 
-	When the Audio System is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
+	When the <b>Audio System</b> is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
 	in the device audio buffer (the least-significant byte is ignored). Note, however, for SD, only the most-significant 20 bits are
 	used (since the embedder does not create extended audio packets).
 
-	During playout, the output embedder pulls audio samples from the Audio Output Buffer in device memory at the address specified by the
-	Audio System's Audio Output Last Address register (i.e., the <b>Play Head</b> or "read head"). Call CNTV2Card::ReadAudioLastOut to get the
-	current Play Head position. Audio data continues to be read from the output buffer until the end is reached, whereupon the Play Head wraps
-	back to the start of the buffer, where reading continues.
+	During playout, the output embedder pulls audio samples from the <b>Audio Output Buffer</b> in device memory at the address specified by the
+	<b>Audio System</b>’s <b>Audio Output Last Address</b> register (i.e., the <b>Play Head</b> or “read head”). Call CNTV2Card::ReadAudioLastOut to get the
+	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
+	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
-	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the Output Buffer memory immediately behind
-	the Play Head as it runs. If the host application fails to transfer new samples into the Audio Output Buffer, the buffer will eventually
+	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
+	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually
 	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
 	to configure this feature.
 
 	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
-	written into the Audio Output Buffer (via DMA) is latched and available for readback at "Audio Output Last Address" (within 256 bytes).
-	If the output hardware "Play Head" pointer catches up to the Audio Output Last Address, the buffer will wrap, and audio/video
+	written into the <b>Audio Output Buffer</b> (via DMA) is latched and available for readback at <b>Audio Output Last Address</b> (within 256 bytes).
+	If the output hardware <b>Play Head</b> pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video
 	synchronization will be lost.
 
-	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the Audio System.
+	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the <b>Audio System</b>.
 	See \ref aboutautocirculate for more information.
 
 	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
@@ -851,10 +896,10 @@
 
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
-	single NTV2AudioChannelPair or an NTV2AudioChannelPairs set.
+	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@subsection	audioclobber	Audio Buffer Corruption
 
 	It’s possible (and quite easy) to configure a FrameStore to write video into audio buffer memory.
@@ -905,7 +950,7 @@
 		buffer that starts 4MB into the frame.
 
 
-	<hr size="50px" />
+	<hr size="50px">
 	@subsection	audiomixer		Audio Mixer
 
 	Some newer NTV2 devices have firmware that implements a three-multichannel-input <b>Audio Mixer</b>.
@@ -917,7 +962,7 @@
 	-	<b>Auxiliary 1</b> input (2 audio channels only);
 	-	<b>Auxiliary 2</b> input (2 audio channels only).
 
-	Each of the three mixer inputs can be sourced from the output of any audio engine on the device by making these calls:
+	Each of the three mixer inputs can be sourced from the output of any <b>Audio System</b> on the device by making these calls:
 	-	CNTV2Card::SetAudioMixerMainInputAudioSystem (all audio channels)
 	-	CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (two audio channels only)
 	-	CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (two audio channels only)
@@ -927,7 +972,7 @@
 	-	CNTV2Card::SetAudioMixerAux1InputEnable
 	-	CNTV2Card::SetAudioMixerAux2InputEnable
 
-	Each mixer input has a separate gain control that's controlled from these functions:
+	Each mixer input has a separate gain control that’s controlled from these functions:
 	-	CNTV2Card::SetAudioMixerMainInputGain
 	-	CNTV2Card::SetAudioMixerAux1InputGain
 	-	CNTV2Card::SetAudioMixerAux2InputGain

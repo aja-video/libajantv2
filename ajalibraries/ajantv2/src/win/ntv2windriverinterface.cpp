@@ -320,16 +320,13 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 		}
 	}
 	_boardOpened = true;
-	ReadRegister(kRegBoardID, reinterpret_cast<ULWord*>(&_boardID));
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
-	ReadRegister (kRegGlobalControl,
-				  (ULWord*)&fg,
-				  kRegMaskGeometry,
-				  kRegShiftGeometry);
+	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
 
 	ULWord returnVal1,returnVal2;
-	ReadRegister (kRegCh1Control,&returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
-	ReadRegister (kRegCh1Control,&returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
+	ReadRegister (kRegCh1Control,returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
+	ReadRegister (kRegCh1Control,returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
 	NTV2FrameBufferFormat format = (NTV2FrameBufferFormat)((returnVal1&0x0f) | ((returnVal2&0x1)<<4));
 
 	// Write the device ID
@@ -511,8 +508,8 @@ bool CNTV2WinDriverInterface::CompleteMemoryForDMA (ULWord * pFrameBuffer)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *registerValue, ULWord registerMask,
-							   ULWord registerShift)
+bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord & registerValue, const ULWord registerMask,
+							   const ULWord registerShift)
 {
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
@@ -569,7 +566,7 @@ bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *regist
 		}
 		if (fRet)
 		{
-			*registerValue=propStruct.ulRegisterValue;
+			registerValue = propStruct.ulRegisterValue;
 			return true;
 		}
 		else
@@ -1082,7 +1079,7 @@ bool CNTV2WinDriverInterface::MapFrameBuffers (void)
 	if (fRet)
 	{
 		ULWord boardIDRegister;
-		ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+		ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
 		_pFrameBaseAddress = (ULWord *) propStruct.mapMemory.Address;
 		_pCh1FrameBaseAddress = _pFrameBaseAddress;
 		_pCh2FrameBaseAddress = _pFrameBaseAddress;
@@ -1119,7 +1116,7 @@ bool CNTV2WinDriverInterface::MapFrameBuffers (void)
 bool CNTV2WinDriverInterface::UnmapFrameBuffers (void)
 {
     ULWord boardIDRegister;
-    ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+    ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
     ULWord * pFrameBaseAddress;
     pFrameBaseAddress = _pFrameBaseAddress;
     if (pFrameBaseAddress == 0)
@@ -2620,7 +2617,7 @@ bool CNTV2WinDriverInterface::SetRelativeVideoPlaybackDelay(ULWord frameDelay)
 
 bool CNTV2WinDriverInterface::GetRelativeVideoPlaybackDelay(ULWord* frameDelay)
 {
-	return ReadRegister (kVRegRelativeVideoPlaybackDelay, frameDelay);
+	return frameDelay ? ReadRegister (kVRegRelativeVideoPlaybackDelay, *frameDelay) : false;
 }
 
 bool CNTV2WinDriverInterface::SetAudioRecordPinDelay(ULWord millisecondDelay)
@@ -2630,7 +2627,7 @@ bool CNTV2WinDriverInterface::SetAudioRecordPinDelay(ULWord millisecondDelay)
 
 bool CNTV2WinDriverInterface::GetStrictTiming(ULWord* strictTiming)
 {
-	return ReadRegister (kVRegStrictTiming, strictTiming);
+	return strictTiming ? ReadRegister (kVRegStrictTiming, *strictTiming) : false;
 }
 
 bool CNTV2WinDriverInterface::SetStrictTiming(ULWord strictTiming)
@@ -2641,12 +2638,12 @@ bool CNTV2WinDriverInterface::SetStrictTiming(ULWord strictTiming)
 
 bool CNTV2WinDriverInterface::GetAudioRecordPinDelay(ULWord* millisecondDelay)
 {
-	return ReadRegister (kVRegAudioRecordPinDelay, millisecondDelay);
+	return millisecondDelay ? ReadRegister (kVRegAudioRecordPinDelay, *millisecondDelay) : false;
 }
 
 bool CNTV2WinDriverInterface::GetDriverVersion(ULWord* driverVersion)
 {
-	return ReadRegister (kVRegDriverVersion, driverVersion);
+	return driverVersion ? ReadRegister (kVRegDriverVersion, *driverVersion) : false;
 }
 
 bool CNTV2WinDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode)
@@ -2656,7 +2653,7 @@ bool CNTV2WinDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mo
 
 bool CNTV2WinDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
 {
-	return ReadRegister(kVRegGlobalAudioPlaybackMode,(ULWord*)mode);
+	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
 
 bool CNTV2WinDriverInterface::DisplayNTV2Error (const char *str)
@@ -2824,7 +2821,7 @@ bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileTyp
 	if (bitfile == NTV2_BITFILE_NO_CHANGE)
 		return true;
 
-	ULWord numRegisters = NTV2BoardGetNumberRegisters(boardID);
+	ULWord numRegisters = NTV2DeviceGetMaxRegisterNumber(boardID);
 	ULWord *regValues = new ULWord[numRegisters];
 
 	if (regValues == NULL)
@@ -2835,7 +2832,7 @@ bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileTyp
 
 
 	for (ULWord i = 0; i < numRegisters; i ++)
-		ReadRegister(i, &regValues[i]);
+		ReadRegister(i, regValues[i]);
 
 	// Disable all interrupts.
 	for ( ULWord i=0; i<eNumInterruptTypes; i++)
@@ -2880,7 +2877,7 @@ bool CNTV2WinDriverInterface::RestoreHardwareProcampRegisters()
 PerfCounterTimestampMode CNTV2WinDriverInterface::GetPerfCounterTimestampMode()
 {
 	ULWord mode;
-	ReadRegister(kVRegTimeStampMode,&mode);
+	ReadRegister(kVRegTimeStampMode,mode);
 
 	return (PerfCounterTimestampMode)mode;
 }
@@ -2895,8 +2892,8 @@ LWord64 CNTV2WinDriverInterface::GetLastOutputVerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastOutputVerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastOutputVerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastOutputVerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastOutputVerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2907,8 +2904,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInput1VerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastInput1VerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastInput1VerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastInput1VerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastInput1VerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2919,8 +2916,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInput2VerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastInput2VerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastInput2VerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastInput2VerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastInput2VerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2931,8 +2928,8 @@ LWord64 CNTV2WinDriverInterface::GetLastOutputVerticalTimestamp(NTV2Channel chan
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(gChannelToTSLastOutputVertLo[channel],&loValue);
-	ReadRegister(gChannelToTSLastOutputVertHi[channel],&hiValue);
+	ReadRegister(gChannelToTSLastOutputVertLo[channel],loValue);
+	ReadRegister(gChannelToTSLastOutputVertHi[channel],hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2943,8 +2940,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInputVerticalTimestamp(NTV2Channel chann
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(gChannelToTSLastInputVertLo[channel],&loValue);
-	ReadRegister(gChannelToTSLastInputVertHi[channel],&hiValue);
+	ReadRegister(gChannelToTSLastInputVertLo[channel],loValue);
+	ReadRegister(gChannelToTSLastInputVertHi[channel],hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2989,15 +2986,15 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
 	ULWord dbbReg, msReg, lsReg;
 
-	ReadRegister(kRegBoardID, (ULWord *)&boardID);
-	ReadRegister(kVRegRP188SourceSelect, (ULWord *)&source);
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
+	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
 	bool bLTCPort = (source == kRP188SourceLTCPort);
 
 	// values come from LTC port registers
 	if (bLTCPort)
 	{
 		ULWord ltcPresent;
-		ReadRegister (kRegStatus, &ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 
 		// there is no equivalent DBB for LTC port - we synthesize it here
 		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
@@ -3016,7 +3013,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
 		{
 
-			ReadRegister (kVRegInputSelect, (ULWord *)&inputSelect);
+			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
 			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
 		}
 		else
@@ -3028,11 +3025,11 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		dbbReg = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1DBB : kRegRP188InOut2DBB);
 		//Check to see if TC is received
 		uint32_t tcReceived = 0;
-		ReadRegister(dbbReg, &tcReceived, BIT(16), 16);
+		ReadRegister(dbbReg, tcReceived, BIT(16), 16);
 		if(tcReceived == 0)
 			return false;//No TC recevied
 
-		ReadRegister (dbbReg, &rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
+		ReadRegister (dbbReg, rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
 		switch(rp188.DBB)//What do we have?
 		{
 		default:
@@ -3051,7 +3048,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 				{
 					//We want Embedded LTC, so we should check one other place
 					uint32_t ltcPresent = 0;
-					ReadRegister(dbbReg, &ltcPresent, BIT(18), 18);
+					ReadRegister(dbbReg, ltcPresent, BIT(18), 18);
 					if(ltcPresent == 1)
 					{
 						//Read LTC registers
@@ -3077,10 +3074,10 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 			}
 		}
 		//Re-Read the whole register just in case something is expecting other status values
-		ReadRegister (dbbReg, &rp188.DBB);
+		ReadRegister (dbbReg, rp188.DBB);
 	}
-	ReadRegister (msReg,  &rp188.Low );
-	ReadRegister (lsReg,  &rp188.High);
+	ReadRegister (msReg,  rp188.Low );
+	ReadRegister (lsReg,  rp188.High);
 
 	// register stability filter
 	do
@@ -3090,9 +3087,9 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 
 		// read again into local struct
 		if (!bLTCPort)
-			ReadRegister (dbbReg, &rp188.DBB );
-		ReadRegister (msReg,  &rp188.Low );
-		ReadRegister (lsReg,  &rp188.High);
+			ReadRegister (dbbReg, rp188.DBB );
+		ReadRegister (msReg,  rp188.Low );
+		ReadRegister (lsReg,  rp188.High);
 
 		// if the new read equals the previous read, consider it done
 		if ( (rp188.DBB  == pRP188Data->DBB) &&
@@ -3117,7 +3114,7 @@ bool CNTV2WinDriverInterface::SetOutputTimecodeOffset( ULWord frames )
 
 bool CNTV2WinDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
 {
-	return ReadRegister(kVRegOutputTimecodeOffset, pFrames);
+	return pFrames ? ReadRegister(kVRegOutputTimecodeOffset, *pFrames) : false;
 }
 
 bool CNTV2WinDriverInterface::SetOutputTimecodeType( ULWord type )
@@ -3127,7 +3124,7 @@ bool CNTV2WinDriverInterface::SetOutputTimecodeType( ULWord type )
 
 bool CNTV2WinDriverInterface::GetOutputTimecodeType( ULWord* pType )
 {
-	return ReadRegister(kVRegOutputTimecodeType, pType);
+	return pType ? ReadRegister(kVRegOutputTimecodeType, *pType) : false;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -3259,8 +3256,8 @@ bool CNTV2WinDriverInterface::LoadBitFile( void* dataPtr, uint32_t dataSize, NTV
 bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord appCode, int32_t pid )
 {
 	ULWord currentCode, currentPID;
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	HANDLE pH = OpenProcess(READ_CONTROL, false, (DWORD)currentPID);
 	if(INVALID_HANDLE_VALUE != pH && NULL != pH)
@@ -3272,8 +3269,8 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 		ReleaseStreamForApplication(currentCode, currentPID);
 	}
 
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	for(int count = 0; count < 20; count++)
 	{
@@ -3310,9 +3307,9 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 bool CNTV2WinDriverInterface::ReleaseStreamForApplicationWithReference( ULWord appCode, int32_t pid )
 {
 	ULWord currentCode, currentPID, currentCount;
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
-	ReadRegister(kVRegAcquireReferenceCount, &currentCount);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
+	ReadRegister(kVRegAcquireReferenceCount, currentCount);
 
 	if(currentCode == appCode && currentPID == (ULWord)pid)
 	{
@@ -3344,8 +3341,8 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 	}
 
 	ULWord currentAppCode, currentPID;
-	ReadRegister(kVRegApplicationCode, &currentAppCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentAppCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	HANDLE hProcess = OpenProcess(SYNCHRONIZE, false, DWORD(currentPID));
 	if (hProcess != NULL && hProcess != INVALID_HANDLE_VALUE)
@@ -3404,10 +3401,9 @@ bool CNTV2WinDriverInterface::SetStreamingApplication( ULWord appCode, int32_t p
 
 bool CNTV2WinDriverInterface::GetStreamingApplication( ULWord *appCode, int32_t  *pid )
 {
-	if(!ReadRegister(kVRegApplicationCode, appCode))
+	if(!(appCode && ReadRegister(kVRegApplicationCode, *appCode)))
 		return false;
-	else
-		 return ReadRegister(kVRegApplicationPID, (ULWord*)pid);
+	return pid && CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, *pid);
 }
 
 bool CNTV2WinDriverInterface::SetDefaultDeviceForPID( int32_t pid )
@@ -3424,8 +3420,8 @@ bool CNTV2WinDriverInterface::IsDefaultDeviceForPID( int32_t pid )
 
 bool CNTV2WinDriverInterface::SuspendAudio()
 {
-	ReadRegister(kRegAud1Control, &_previousAudioState);
-	ReadRegister(kRegAud1SourceSelect, &_previousAudioSelection);
+	ReadRegister(kRegAud1Control, _previousAudioState);
+	ReadRegister(kRegAud1SourceSelect, _previousAudioSelection);
 	return true;
 }
 

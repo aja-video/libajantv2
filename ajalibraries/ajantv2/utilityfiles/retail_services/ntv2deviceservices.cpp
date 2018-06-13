@@ -4,6 +4,7 @@
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
+#include "retailsupport.h"
 #include "ntv2ioxtservices.h"
 #include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
@@ -163,6 +164,8 @@ DeviceServices::DeviceServices()
 	mDefaultVideoFormat				= NTV2_FORMAT_UNKNOWN;
 }
 
+#define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
+
 //-------------------------------------------------------------------------------------------------------
 //	ReadDriverState
 //-------------------------------------------------------------------------------------------------------
@@ -171,53 +174,53 @@ void DeviceServices::ReadDriverState (void)
 {
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	
-	mCard->ReadRegister(kVRegDefaultVideoFormat, (ULWord*) &mDefaultVideoFormat);
-	mCard->ReadRegister(kVRegDefaultVideoOutMode, (ULWord*) &mDefaultVideoOutMode);
-	mCard->ReadRegister(kVRegFollowInputFormat, (ULWord *) &mFollowInputFormat);
-	mCard->ReadRegister(kVRegVANCMode, (ULWord *) &mVANCMode);
-	mCard->ReadRegister(kVRegDefaultInput, (ULWord *) &mDefaultInput);
-	mCard->ReadRegister(kVRegDualStreamTransportType, (ULWord *) &mDualStreamTransportType);
-	mCard->ReadRegister(kVRegDSKMode, (ULWord *) &mDSKMode);
-	mCard->ReadRegister(kVRegDigitalOutput1Select, (ULWord *) &mVirtualDigitalOutput1Select);
-	mCard->ReadRegister(kVRegDigitalOutput2Select, (ULWord *) &mVirtualDigitalOutput2Select);
-	mCard->ReadRegister(kVRegHDMIOutputSelect, (ULWord *) &mVirtualHDMIOutputSelect);
-	mCard->ReadRegister(kVRegAnalogOutputSelect, (ULWord *) &mVirtualAnalogOutputSelect);
-	mCard->ReadRegister(kVRegLUTType, (ULWord *) &mLUTType);
-	mCard->ReadRegister(kVRegInputSelect, (ULWord *) &mVirtualInputSelect);
-	mCard->ReadRegister(kVRegSecondaryFormatSelect, (ULWord *) &mVirtualSecondaryFormatSelect);
-	mCard->ReadRegister(kVRegIsoConvertEnable, (ULWord *) &mIsoConvertEnable);
-	mCard->ReadRegister(kVRegDSKAudioMode, (ULWord *) &mDSKAudioMode);
-	mCard->ReadRegister(kVRegDSKForegroundMode, (ULWord *) &mDSKForegroundMode);
-	mCard->ReadRegister(kVRegDSKForegroundFade, (ULWord *) &mDSKForegroundFade);
-	mCard->ReadRegister(kVRegCaptureReferenceSelect, (ULWord *) &mCaptureReferenceSelect);
-	mCard->ReadRegister(kVRegDisplayReferenceSelect, (ULWord *) &mDisplayReferenceSelect);
-	mCard->ReadRegister(kVRegGammaMode, (ULWord *) &mGammaMode);
-	mCard->ReadRegister(kVRegRGB10Range, (ULWord *) &mRGB10Range);
-	mCard->ReadRegister(kVRegColorSpaceMode, (ULWord *) &mColorSpaceMode);
-	mCard->ReadRegister(kVRegSDIOutput1RGBRange, (ULWord *) &mSDIOutput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoFormat, mDefaultVideoFormat);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoOutMode, mDefaultVideoOutMode);
+	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
+	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
+	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mDualStreamTransportType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSecondaryFormatSelect, mVirtualSecondaryFormatSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegIsoConvertEnable, mIsoConvertEnable);
+	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
+	mCard->ReadRegister(kVRegDSKForegroundMode, mDSKForegroundMode);
+	mCard->ReadRegister(kVRegDSKForegroundFade, mDSKForegroundFade);
+	AsDriverInterface(mCard)->ReadRegister(kVRegCaptureReferenceSelect, mCaptureReferenceSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDisplayReferenceSelect, mDisplayReferenceSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegGammaMode, mGammaMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
+	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
 	
-	mCard->ReadRegister(kVRegSDIInput1RGBRange, (ULWord *) &mSDIInput1RGBRange);
-	mCard->ReadRegister(kVRegSDIInput2RGBRange, (ULWord *) &mSDIInput2RGBRange);
-	mCard->ReadRegister(kVRegSDIInput1Stereo3DMode, (ULWord *) &mSDIInput1Stereo3DMode);
-	mCard->ReadRegister(kVRegFrameBuffer1RGBRange, (ULWord *) &mFrameBuffer1RGBRange);
-	mCard->ReadRegister(kVRegFrameBuffer1Stereo3DMode, (ULWord *) &mFrameBuffer1Stereo3DMode);
-	mCard->ReadRegister(kVRegAnalogOutBlackLevel, (ULWord *) &mVirtualAnalogOutBlackLevel);
-	mCard->ReadRegister(kVRegAnalogOutputType, (ULWord *) &mVirtualAnalogOutputType);
-	mCard->ReadRegister(kVRegAnalogInBlackLevel, (ULWord *) &mVirtualAnalogInBlackLevel);
-	mCard->ReadRegister(kVRegAnalogInputType, (ULWord *) &mVirtualAnalogInType);
-	mCard->ReadRegister(kVRegAnalogInStandard, (ULWord *) &mVirtualAnalogInStandard);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1Stereo3DMode, mSDIInput1Stereo3DMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1Stereo3DMode, mFrameBuffer1Stereo3DMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputType, mVirtualAnalogOutputType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInBlackLevel, mVirtualAnalogInBlackLevel);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInputType, mVirtualAnalogInType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInStandard, mVirtualAnalogInStandard);
 	
-	mCard->ReadRegister(kVRegHDMIOutColorSpaceModeCtrl, (ULWord *) &mHDMIOutColorSpaceModeCtrl);
-	mCard->ReadRegister(kVRegHDMIOutProtocolMode, (ULWord *) &mHDMIOutProtocolMode);
-	mCard->ReadRegister(kVRegHDMIOutStereoSelect, (ULWord *) &mHDMIOutStereoSelect);
-	mCard->ReadRegister(kVRegHDMIOutStereoCodecSelect, (ULWord *) &mHDMIOutStereoCodecSelect);
-	mCard->ReadRegister(kVRegHDMIOutAudioChannels, (ULWord *) &mHDMIOutAudioChannels);
-	mCard->ReadRegister(kVRegResetCycleCount, (ULWord *) &mRegResetCycleCount);
-	mCard->ReadRegister(kVRegFramesPerVertical, (ULWord *) &mRegFramesPerVertical);
-	mCard->ReadRegister(kVReg4kOutputTransportSelection, (ULWord *)&m4kTransportOutSelection);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutColorSpaceModeCtrl, mHDMIOutColorSpaceModeCtrl);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutProtocolMode, mHDMIOutProtocolMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoSelect, mHDMIOutStereoSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoCodecSelect, mHDMIOutStereoCodecSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
+	mCard->ReadRegister(kVRegResetCycleCount, mRegResetCycleCount);
+	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
+	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
-	mCard->ReadRegister(kVRegSDIInput1FormatSelect, (ULWord *) &mSDIInput1FormatSelect);
-	//mCard->ReadRegister(kVRegSDIInput2FormatSelect, (ULWord *) &mSDIInput2FormatSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1FormatSelect, mSDIInput1FormatSelect);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2FormatSelect, mSDIInput2FormatSelect);
 	mSDIInput2FormatSelect = mSDIInput1FormatSelect;	// for now
 	
 	// basic Ch1 HW registers 
@@ -232,20 +235,20 @@ void DeviceServices::ReadDriverState (void)
 	
     if (mCard->DeviceCanDoAudioMixer())
 	{
-		mCard->ReadRegister(kVRegAudioMixerOverrideState,    (ULWord *) &mAudioMixerOverrideState);
-		mCard->ReadRegister(kVRegAudioMixerSourceMainEnable, (ULWord *) &mAudioMixerSourceMainEnable);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux1Enable, (ULWord *) &mAudioMixerSourceAux1Enable);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux2Enable, (ULWord *) &mAudioMixerSourceAux2Enable);
-		mCard->ReadRegister(kVRegAudioMixerSourceMainGain,   (ULWord *) &mAudioMixerSourceMainGain);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux1Gain,   (ULWord *) &mAudioMixerSourceAux1Gain);
-		mCard->ReadRegister(kVRegAudioMixerSourceAux2Gain,   (ULWord *) &mAudioMixerSourceAux2Gain);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerOverrideState,    mAudioMixerOverrideState);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceMainEnable, mAudioMixerSourceMainEnable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceAux1Enable, mAudioMixerSourceAux1Enable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceAux2Enable, mAudioMixerSourceAux2Enable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceMainGain,   mAudioMixerSourceMainGain);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceAux1Gain,   mAudioMixerSourceAux1Gain);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerSourceAux2Gain,   mAudioMixerSourceAux2Gain);
 		
-		mCard->ReadRegister(kVRegAudioCapMixerSourceMainEnable, (ULWord *) &mAudioCapMixerSourceMainEnable);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Enable, (ULWord *) &mAudioCapMixerSourceAux1Enable);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Enable, (ULWord *) &mAudioCapMixerSourceAux2Enable);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceMainGain,   (ULWord *) &mAudioCapMixerSourceMainGain);
-		mCard->ReadRegister(kVRegAudioCapMixerSourceAux1Gain, (ULWord *) &mAudioCapMixerSourceAux1Gain);
-		//mCard->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, (ULWord *) &mAudioCapMixerSourceAux2Gain);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceMainEnable, mAudioCapMixerSourceMainEnable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceAux1Enable, mAudioCapMixerSourceAux1Enable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceAux2Enable, mAudioCapMixerSourceAux2Enable);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceMainGain,   mAudioCapMixerSourceMainGain);
+		AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceAux1Gain, mAudioCapMixerSourceAux1Gain);
+		//AsDriverInterface(mCard)->ReadRegister(kVRegAudioCapMixerSourceAux2Gain, mAudioCapMixerSourceAux2Gain);
 	}
 
     if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
@@ -254,103 +257,103 @@ void DeviceServices::ReadDriverState (void)
         (mDeviceID == DEVICE_ID_KONAIP_2022) ||
         (mDeviceID == DEVICE_ID_IOIP_2022))
     {
-        mCard->ReadRegister(kVReg2022_7Enable,              (ULWord*)&m2022_7Mode);
-        mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     (ULWord*)&mNetworkPathDiff);
+        AsDriverInterface(mCard)->ReadRegister(kVReg2022_7Enable,              m2022_7Mode);
+        mCard->ReadRegister(kVReg2022_7NetworkPathDiff,     mNetworkPathDiff);
 
-        mCard->ReadRegister(kVRegIPAddrEth0,                &mEth0.ipc_ip);
-        mCard->ReadRegister(kVRegSubnetEth0,                &mEth0.ipc_subnet);
-        mCard->ReadRegister(kVRegGatewayEth0,               &mEth0.ipc_gateway);
+        mCard->ReadRegister(kVRegIPAddrEth0,                mEth0.ipc_ip);
+        mCard->ReadRegister(kVRegSubnetEth0,                mEth0.ipc_subnet);
+        mCard->ReadRegister(kVRegGatewayEth0,               mEth0.ipc_gateway);
 
-        mCard->ReadRegister(kVRegIPAddrEth1,                &mEth1.ipc_ip);
-        mCard->ReadRegister(kVRegSubnetEth1,                &mEth1.ipc_subnet);
-        mCard->ReadRegister(kVRegGatewayEth1,               &mEth1.ipc_gateway);
+        mCard->ReadRegister(kVRegIPAddrEth1,                mEth1.ipc_ip);
+        mCard->ReadRegister(kVRegSubnetEth1,                mEth1.ipc_subnet);
+        mCard->ReadRegister(kVRegGatewayEth1,               mEth1.ipc_gateway);
 
-        mCard->ReadRegister(kVRegRxcEnable1,				&mRx2022Config1.rxc_enable32);
-        mCard->ReadRegister(kVRegRxcSfp1RxMatch1,           &mRx2022Config1.rxc_sfp1RxMatch);
-        mCard->ReadRegister(kVRegRxcSfp1SourceIp1,          &mRx2022Config1.rxc_sfp1SourceIp);
-        mCard->ReadRegister(kVRegRxcSfp1DestIp1,            &mRx2022Config1.rxc_sfp1DestIp);
-        mCard->ReadRegister(kVRegRxcSfp1SourcePort1,        &mRx2022Config1.rxc_sfp1SourcePort);
-        mCard->ReadRegister(kVRegRxcSfp1DestPort1,          &mRx2022Config1.rxc_sfp1DestPort);
-        mCard->ReadRegister(kVRegRxcSfp1Vlan1,              &mRx2022Config1.rxc_sfp1Vlan);
-        mCard->ReadRegister(kVRegRxcSfp2RxMatch1,           &mRx2022Config1.rxc_sfp2RxMatch);
-        mCard->ReadRegister(kVRegRxcSfp2SourceIp1,          &mRx2022Config1.rxc_sfp2SourceIp);
-        mCard->ReadRegister(kVRegRxcSfp2DestIp1,            &mRx2022Config1.rxc_sfp2DestIp);
-        mCard->ReadRegister(kVRegRxcSfp2SourcePort1,        &mRx2022Config1.rxc_sfp2SourcePort);
-        mCard->ReadRegister(kVRegRxcSfp2DestPort1,          &mRx2022Config1.rxc_sfp2DestPort);
-        mCard->ReadRegister(kVRegRxcSfp2Vlan1,              &mRx2022Config1.rxc_sfp2Vlan);
-        mCard->ReadRegister(kVRegRxcSsrc1,					&mRx2022Config1.rxc_ssrc);
-        mCard->ReadRegister(kVRegRxcPlayoutDelay1,			&mRx2022Config1.rxc_playoutDelay);
+        mCard->ReadRegister(kVRegRxcEnable1,				mRx2022Config1.rxc_enable32);
+        mCard->ReadRegister(kVRegRxcSfp1RxMatch1,           mRx2022Config1.rxc_sfp1RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp1SourceIp1,          mRx2022Config1.rxc_sfp1SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp1DestIp1,            mRx2022Config1.rxc_sfp1DestIp);
+        mCard->ReadRegister(kVRegRxcSfp1SourcePort1,        mRx2022Config1.rxc_sfp1SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp1DestPort1,          mRx2022Config1.rxc_sfp1DestPort);
+        mCard->ReadRegister(kVRegRxcSfp1Vlan1,              mRx2022Config1.rxc_sfp1Vlan);
+        mCard->ReadRegister(kVRegRxcSfp2RxMatch1,           mRx2022Config1.rxc_sfp2RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp2SourceIp1,          mRx2022Config1.rxc_sfp2SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp2DestIp1,            mRx2022Config1.rxc_sfp2DestIp);
+        mCard->ReadRegister(kVRegRxcSfp2SourcePort1,        mRx2022Config1.rxc_sfp2SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp2DestPort1,          mRx2022Config1.rxc_sfp2DestPort);
+        mCard->ReadRegister(kVRegRxcSfp2Vlan1,              mRx2022Config1.rxc_sfp2Vlan);
+        mCard->ReadRegister(kVRegRxcSsrc1,					mRx2022Config1.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcPlayoutDelay1,			mRx2022Config1.rxc_playoutDelay);
 
-        mCard->ReadRegister(kVRegRxcEnable2,				&mRx2022Config2.rxc_enable32);
-        mCard->ReadRegister(kVRegRxcSfp1RxMatch2,           &mRx2022Config2.rxc_sfp1RxMatch);
-        mCard->ReadRegister(kVRegRxcSfp1SourceIp2,          &mRx2022Config2.rxc_sfp1SourceIp);
-        mCard->ReadRegister(kVRegRxcSfp1DestIp2,            &mRx2022Config2.rxc_sfp1DestIp);
-        mCard->ReadRegister(kVRegRxcSfp1SourcePort2,        &mRx2022Config2.rxc_sfp1SourcePort);
-        mCard->ReadRegister(kVRegRxcSfp1DestPort2,          &mRx2022Config2.rxc_sfp1DestPort);
-        mCard->ReadRegister(kVRegRxcSfp1Vlan2,              &mRx2022Config2.rxc_sfp1Vlan);
-        mCard->ReadRegister(kVRegRxcSfp2RxMatch2,           &mRx2022Config2.rxc_sfp2RxMatch);
-        mCard->ReadRegister(kVRegRxcSfp2SourceIp2,          &mRx2022Config2.rxc_sfp2SourceIp);
-        mCard->ReadRegister(kVRegRxcSfp2DestIp2,            &mRx2022Config2.rxc_sfp2DestIp);
-        mCard->ReadRegister(kVRegRxcSfp2SourcePort2,        &mRx2022Config2.rxc_sfp2SourcePort);
-        mCard->ReadRegister(kVRegRxcSfp2DestPort2,          &mRx2022Config2.rxc_sfp2DestPort);
-        mCard->ReadRegister(kVRegRxcSfp2Vlan2,              &mRx2022Config2.rxc_sfp2Vlan);
-        mCard->ReadRegister(kVRegRxcSsrc2,					&mRx2022Config2.rxc_ssrc);
-        mCard->ReadRegister(kVRegRxcPlayoutDelay2,			&mRx2022Config2.rxc_playoutDelay);
+        mCard->ReadRegister(kVRegRxcEnable2,				mRx2022Config2.rxc_enable32);
+        mCard->ReadRegister(kVRegRxcSfp1RxMatch2,           mRx2022Config2.rxc_sfp1RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp1SourceIp2,          mRx2022Config2.rxc_sfp1SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp1DestIp2,            mRx2022Config2.rxc_sfp1DestIp);
+        mCard->ReadRegister(kVRegRxcSfp1SourcePort2,        mRx2022Config2.rxc_sfp1SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp1DestPort2,          mRx2022Config2.rxc_sfp1DestPort);
+        mCard->ReadRegister(kVRegRxcSfp1Vlan2,              mRx2022Config2.rxc_sfp1Vlan);
+        mCard->ReadRegister(kVRegRxcSfp2RxMatch2,           mRx2022Config2.rxc_sfp2RxMatch);
+        mCard->ReadRegister(kVRegRxcSfp2SourceIp2,          mRx2022Config2.rxc_sfp2SourceIp);
+        mCard->ReadRegister(kVRegRxcSfp2DestIp2,            mRx2022Config2.rxc_sfp2DestIp);
+        mCard->ReadRegister(kVRegRxcSfp2SourcePort2,        mRx2022Config2.rxc_sfp2SourcePort);
+        mCard->ReadRegister(kVRegRxcSfp2DestPort2,          mRx2022Config2.rxc_sfp2DestPort);
+        mCard->ReadRegister(kVRegRxcSfp2Vlan2,              mRx2022Config2.rxc_sfp2Vlan);
+        mCard->ReadRegister(kVRegRxcSsrc2,					mRx2022Config2.rxc_ssrc);
+        mCard->ReadRegister(kVRegRxcPlayoutDelay2,			mRx2022Config2.rxc_playoutDelay);
 
-        mCard->ReadRegister(kVRegTxcEnable3,				&mTx2022Config3.txc_enable32);
-        mCard->ReadRegister(kVRegTxcSfp1LocalPort3,         &mTx2022Config3.txc_sfp1LocalPort);
-        mCard->ReadRegister(kVRegTxcSfp1RemoteIp3,          &mTx2022Config3.txc_sfp1RemoteIp);
-        mCard->ReadRegister(kVRegTxcSfp1RemotePort3,		&mTx2022Config3.txc_sfp1RemotePort);
-        mCard->ReadRegister(kVRegTxcSfp2LocalPort3,         &mTx2022Config3.txc_sfp2LocalPort);
-        mCard->ReadRegister(kVRegTxcSfp2RemoteIp3,          &mTx2022Config3.txc_sfp2RemoteIp);
-        mCard->ReadRegister(kVRegTxcSfp2RemotePort3,        &mTx2022Config3.txc_sfp2RemotePort);
+        mCard->ReadRegister(kVRegTxcEnable3,				mTx2022Config3.txc_enable32);
+        mCard->ReadRegister(kVRegTxcSfp1LocalPort3,         mTx2022Config3.txc_sfp1LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp1RemoteIp3,          mTx2022Config3.txc_sfp1RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp1RemotePort3,		mTx2022Config3.txc_sfp1RemotePort);
+        mCard->ReadRegister(kVRegTxcSfp2LocalPort3,         mTx2022Config3.txc_sfp2LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp2RemoteIp3,          mTx2022Config3.txc_sfp2RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp2RemotePort3,        mTx2022Config3.txc_sfp2RemotePort);
 
-        mCard->ReadRegister(kVRegTxcEnable4,				&mTx2022Config4.txc_enable32);
-        mCard->ReadRegister(kVRegTxcSfp1LocalPort4,         &mTx2022Config4.txc_sfp1LocalPort);
-        mCard->ReadRegister(kVRegTxcSfp1RemoteIp4,          &mTx2022Config4.txc_sfp1RemoteIp);
-        mCard->ReadRegister(kVRegTxcSfp1RemotePort4,		&mTx2022Config4.txc_sfp1RemotePort);
-        mCard->ReadRegister(kVRegTxcSfp2LocalPort4,         &mTx2022Config4.txc_sfp2LocalPort);
-        mCard->ReadRegister(kVRegTxcSfp2RemoteIp4,          &mTx2022Config4.txc_sfp2RemoteIp);
-        mCard->ReadRegister(kVRegTxcSfp2RemotePort4,        &mTx2022Config4.txc_sfp2RemotePort);
+        mCard->ReadRegister(kVRegTxcEnable4,				mTx2022Config4.txc_enable32);
+        mCard->ReadRegister(kVRegTxcSfp1LocalPort4,         mTx2022Config4.txc_sfp1LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp1RemoteIp4,          mTx2022Config4.txc_sfp1RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp1RemotePort4,		mTx2022Config4.txc_sfp1RemotePort);
+        mCard->ReadRegister(kVRegTxcSfp2LocalPort4,         mTx2022Config4.txc_sfp2LocalPort);
+        mCard->ReadRegister(kVRegTxcSfp2RemoteIp4,          mTx2022Config4.txc_sfp2RemoteIp);
+        mCard->ReadRegister(kVRegTxcSfp2RemotePort4,        mTx2022Config4.txc_sfp2RemotePort);
     }
 
     if ((mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
         (mDeviceID == DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
         (mDeviceID == DEVICE_ID_KONAIP_2RX_1SFP_J2K))
     {
-        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	(ULWord*)&mRx2022J2kConfig1.selectionMode);
-        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	&mRx2022J2kConfig1.programNumber);
-        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	&mRx2022J2kConfig1.programPID);
-        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	&mRx2022J2kConfig1.audioNumber);
+        AsDriverInterface(mCard)->ReadRegister(kVRegRxc_2DecodeSelectionMode1,	mRx2022J2kConfig1.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber1,	mRx2022J2kConfig1.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID1,	mRx2022J2kConfig1.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber1,	mRx2022J2kConfig1.audioNumber);
 
-        mCard->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	(ULWord*)&mRx2022J2kConfig2.selectionMode);
-        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	&mRx2022J2kConfig2.programNumber);
-        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	&mRx2022J2kConfig2.programPID);
-        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	&mRx2022J2kConfig2.audioNumber);
+        AsDriverInterface(mCard)->ReadRegister(kVRegRxc_2DecodeSelectionMode2,	mRx2022J2kConfig2.selectionMode);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramNumber2,	mRx2022J2kConfig2.programNumber);
+        mCard->ReadRegister(kVRegRxc_2DecodeProgramPID2,	mRx2022J2kConfig2.programPID);
+        mCard->ReadRegister(kVRegRxc_2DecodeAudioNumber2,	mRx2022J2kConfig2.audioNumber);
 
-        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	(ULWord*)&mTx2022J2kConfig1.videoFormat);
-        mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		&mTx2022J2kConfig1.ullMode);
-        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		&mTx2022J2kConfig1.bitDepth);
-        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	(ULWord*)&mTx2022J2kConfig1.chromaSubsamp);
-        mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			&mTx2022J2kConfig1.mbps);
-        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, &mTx2022J2kConfig1.audioChannels);
-        mCard->ReadRegister(kVRegTxc_2EncodeStreamType1,	(ULWord*)&mTx2022J2kConfig1.streamType);
-        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	&mTx2022J2kConfig1.pmtPid);
-        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		&mTx2022J2kConfig1.videoPid);
-        mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		&mTx2022J2kConfig1.pcrPid);
-        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		&mTx2022J2kConfig1.audio1Pid);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeVideoFormat1,	mTx2022J2kConfig1.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode1,		mTx2022J2kConfig1.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth1,		mTx2022J2kConfig1.bitDepth);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeChromaSubSamp1,	mTx2022J2kConfig1.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps1,			mTx2022J2kConfig1.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels1, mTx2022J2kConfig1.audioChannels);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeStreamType1,	mTx2022J2kConfig1.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid1,	mTx2022J2kConfig1.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid1,		mTx2022J2kConfig1.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid1,		mTx2022J2kConfig1.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid1,		mTx2022J2kConfig1.audio1Pid);
 
-        mCard->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	(ULWord*)&mTx2022J2kConfig2.videoFormat);
-        mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		&mTx2022J2kConfig2.ullMode);
-        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		&mTx2022J2kConfig2.bitDepth);
-        mCard->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	(ULWord*)&mTx2022J2kConfig2.chromaSubsamp);
-        mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			&mTx2022J2kConfig2.mbps);
-        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, &mTx2022J2kConfig2.audioChannels);
-        mCard->ReadRegister(kVRegTxc_2EncodeStreamType2,	(ULWord*)&mTx2022J2kConfig2.streamType);
-        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	&mTx2022J2kConfig2.pmtPid);
-        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		&mTx2022J2kConfig2.videoPid);
-        mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		&mTx2022J2kConfig2.pcrPid);
-        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		&mTx2022J2kConfig2.audio1Pid);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeVideoFormat2,	mTx2022J2kConfig2.videoFormat);
+        mCard->ReadRegister(kVRegTxc_2EncodeUllMode2,		mTx2022J2kConfig2.ullMode);
+        mCard->ReadRegister(kVRegTxc_2EncodeBitDepth2,		mTx2022J2kConfig2.bitDepth);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeChromaSubSamp2,	mTx2022J2kConfig2.chromaSubsamp);
+        mCard->ReadRegister(kVRegTxc_2EncodeMbps2,			mTx2022J2kConfig2.mbps);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudioChannels2, mTx2022J2kConfig2.audioChannels);
+        AsDriverInterface(mCard)->ReadRegister(kVRegTxc_2EncodeStreamType2,	mTx2022J2kConfig2.streamType);
+        mCard->ReadRegister(kVRegTxc_2EncodeProgramPid2,	mTx2022J2kConfig2.pmtPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeVideoPid2,		mTx2022J2kConfig2.videoPid);
+        mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		mTx2022J2kConfig2.pcrPid);
+        mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		mTx2022J2kConfig2.audio1Pid);
     }
 
     if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
@@ -390,6 +393,13 @@ void DeviceServices::ReadDriverState (void)
         {
             memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
             //printf("Failed to get 2110 Receive Audio params\n");
+        }
+
+        bOk = mCard->ReadVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
+        if (bOk == false)
+        {
+            memset(&m2110IpStatusData, 0, sizeof(IpStatus2110));
+            //printf("Failed to get 2110 Ip status params\n");
         }
     }
 }
@@ -484,8 +494,8 @@ void DeviceServices::SetDeviceEveryFrameRegs ()
 	uint32_t virtualDebug1			= 0;
 	uint32_t everyFrameTaskFilter	= 0;
 	
-	mCard->ReadRegister (kVRegDebug1, (ULWord *) &virtualDebug1);
-	mCard->ReadRegister (kVRegEveryFrameTaskFilter, (ULWord *) &everyFrameTaskFilter);
+	mCard->ReadRegister (kVRegDebug1, virtualDebug1);
+	mCard->ReadRegister (kVRegEveryFrameTaskFilter, everyFrameTaskFilter);
 	
 	SetDeviceEveryFrameRegs (virtualDebug1, everyFrameTaskFilter);
 }
@@ -500,7 +510,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 	//	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
 	uint32_t	count	(0);
-	mCard->ReadRegister(kVRegAgentCheck, &count);
+	mCard->ReadRegister(kVRegAgentCheck, count);
 	count++;
 	mCard->WriteRegister(kVRegAgentCheck, count);
 
@@ -562,7 +572,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	//Setup the analog LTC stuff
 	RP188SourceSelect TimecodeSource;
-	mCard->ReadRegister(kVRegRP188SourceSelect, (ULWord*)&TimecodeSource);
+	AsDriverInterface(mCard)->ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
 	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && TimecodeSource == kRP188SourceLTCPort)
 	{
 		mCard->SetLTCInputEnable(true);
@@ -702,7 +712,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	// audio monitor
 	ULWord chSelect = NTV2_AudioMonitor1_2;
-	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, &chSelect);
+	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, chSelect);
 	if (mDeviceID == DEVICE_ID_IO4KPLUS || mDeviceID == DEVICE_ID_IO4K || 
 		mDeviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
 	{
@@ -801,11 +811,11 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 			vpidSpec.pixelFormat = NTV2_FBF_48BIT_RGB;
 		
 		// Converted RGB -> YUV on wire
-		else if (vpidSpec.isRGBOnWire == false && IsFormatRGB(mFb1Format) == true)
+		else if (vpidSpec.isRGBOnWire == false && IsRGBFormat(mFb1Format) == true)
 			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Format) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
 		// Converted YUV -> RGB on wire
-		else if (vpidSpec.isRGBOnWire == true && IsFormatRGB(mFb1Format) == false)
+		else if (vpidSpec.isRGBOnWire == true && IsRGBFormat(mFb1Format) == false)
 			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
 	
 		// otherwise
@@ -929,7 +939,7 @@ NTV2Mode DeviceServices::GetCh1Mode()
 {
 	uint32_t regValue;
 
-	mCard->ReadRegister(kRegCh1Control, &regValue, kRegMaskMode, kRegShiftMode);
+	mCard->ReadRegister(kRegCh1Control, regValue, kRegMaskMode, kRegShiftMode);
 	return (NTV2Mode)regValue;
 }
 
@@ -969,23 +979,6 @@ bool DeviceServices::IsFormatCompressed(NTV2FrameBufferFormat fbFormat)
 		case NTV2_FBF_8BIT_DVCPRO:
 		//case NTV2_FBF_8BIT_QREZ:
 		case NTV2_FBF_8BIT_HDV:
-			return true;
-		default:
-			return false;
-	}
-}
-
-
-bool DeviceServices::IsFormatRGB(NTV2FrameBufferFormat fbFormat)
-{
-	switch (fbFormat)
-	{
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_DPX:
-        case NTV2_FBF_48BIT_RGB:
 			return true;
 		default:
 			return false;
@@ -1051,7 +1044,7 @@ void DeviceServices::SetMacDebugOption(int item)
     if ( mCard->IsOpen() )
     {
 		ULWord regVal = 0;
-		mCard->ReadRegister( kVRegDebug1, &regVal );
+		mCard->ReadRegister( kVRegDebug1, regVal );
 		switch(item)
 		{
 			case 0:	// disable every frame
@@ -1115,11 +1108,23 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 		{
 			// follow input RGB range
 			if (mSDIInput1FormatSelect == NTV2_RGBSelect)
-				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE; 
+			{
+				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
+			}
 			
 			// follow framebuffer RGB range
 			else									
 				cscRange = mRGB10Range; 
+		}
+	}
+	else if (mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		NTV2InputVideoType inType = RetailSupport::GetInputVideoTypeForIndex(mDeviceID, mVirtualInputSelect);
+		if (inType >= NTV2_InputSelectHDMI1 && inType <= NTV2_InputSelectHDMI4)
+		{
+			NTV2HDMIRange rgbRange = NTV2_HDMIRangeFull;
+			mCard->GetHDMIInputRange(rgbRange, NTV2_CHANNEL1);
+			cscRange = (rgbRange == NTV2_HDMIRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
 		}
 	}
 	
@@ -1500,7 +1505,7 @@ NTV2Standard DeviceServices::GetAnalogInputVideoStandard()
 	NTV2Standard standard = NTV2_NUM_STANDARDS;
 	uint32_t status;
 	
-	if ( mCard->ReadRegister(kRegAnalogInputStatus, &status) == true )
+	if ( mCard->ReadRegister(kRegAnalogInputStatus, status) == true )
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 			standard =  (NTV2Standard) ((status & kRegMaskInputStatusStd) >> kRegShiftInputStatusStd);
@@ -1513,7 +1518,7 @@ NTV2FrameRate DeviceServices::GetAnalogInputVideoFrameRate()
 	NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
 	uint32_t status;
 	
-	if ( mCard->ReadRegister(kRegAnalogInputStatus, &status) == true )
+	if ( mCard->ReadRegister(kRegAnalogInputStatus, status) == true )
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 			frameRate =  (NTV2FrameRate) ((status & kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
@@ -1532,7 +1537,7 @@ bool DeviceServices::SetVideoADCMode (NTV2LSVideoADCMode value)
 NTV2LSVideoADCMode DeviceServices::GetVideoADCMode ()
 {
 	uint32_t value = (uint32_t) NTV2_480iADCSVideoUS;
-	mCard->ReadRegister (kRegAnalogInputControl, &value, kRegMaskAnalogInputADCMode, kRegShiftAnalogInputADCMode);
+	mCard->ReadRegister (kRegAnalogInputControl, value, kRegMaskAnalogInputADCMode, kRegShiftAnalogInputADCMode);
 	return (NTV2LSVideoADCMode) value;
 }
 
@@ -1935,7 +1940,7 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormat(int32_t index, NTV2VideoForm
 	// HACK NOTICE 3
 	// note: there is no enum for 2Kp60b et al
 	// we special case define 2Kp60b as 2Kp60a with 3Gb flag set
-	bool b1080pHfr = NTV2_IS_3Gb_FORMAT(sdiInFormat);		// i.e. 1080p60b hfrs
+	bool b1080pHfr = IsVideoFormatB(sdiInFormat);		// i.e. 1080p60b hfrs
 	if (b1080pHfr && b4kHfr)
 	{
 		ULWord status;
@@ -2058,7 +2063,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config2.rxc_sfp1SourceIp;
             chan.sfp1SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config2.rxc_sfp1DestIp;
-            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1DestIP         = inet_ntoa(addr);
             chan.sfp1RxMatch        = mRx2022Config2.rxc_sfp1RxMatch & 0x7fffffff;
             chan.sfp1SourcePort     = mRx2022Config2.rxc_sfp1SourcePort;
             chan.sfp1DestPort       = mRx2022Config2.rxc_sfp1DestPort;
@@ -2067,7 +2072,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config2.rxc_sfp2SourceIp;
             chan.sfp2SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config2.rxc_sfp2DestIp;
-            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2DestIP         = inet_ntoa(addr);
             chan.sfp2RxMatch        = mRx2022Config2.rxc_sfp2RxMatch & 0x7fffffff;
             chan.sfp2SourcePort     = mRx2022Config2.rxc_sfp2SourcePort;
             chan.sfp2DestPort       = mRx2022Config2.rxc_sfp2DestPort;
@@ -2082,7 +2087,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config1.rxc_sfp1SourceIp;
             chan.sfp1SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config1.rxc_sfp1DestIp;
-            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1DestIP         = inet_ntoa(addr);
             chan.sfp1RxMatch        = mRx2022Config1.rxc_sfp1RxMatch  & 0x7fffffff;
             chan.sfp1SourcePort     = mRx2022Config1.rxc_sfp1SourcePort;
             chan.sfp1DestPort       = mRx2022Config1.rxc_sfp1DestPort;
@@ -2091,7 +2096,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config1.rxc_sfp2SourceIp;
             chan.sfp2SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config1.rxc_sfp2DestIp;
-            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2DestIP         = inet_ntoa(addr);
             chan.sfp2RxMatch        = mRx2022Config1.rxc_sfp2RxMatch & 0x7fffffff;
             chan.sfp2SourcePort     = mRx2022Config1.rxc_sfp2SourcePort;
             chan.sfp2DestPort       = mRx2022Config1.rxc_sfp2DestPort;
@@ -2163,16 +2168,21 @@ void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, b
     }
 }
 
-bool DeviceServices::IsValidConfig(const rx2022Config & virtual_config, bool is2022_7)
+bool DeviceServices::IsValidConfig(rx2022Config & virtual_config, bool is2022_7)
 {
-    if (virtual_config.rxc_sfp1RxMatch == 0) return false;
     if (virtual_config.rxc_sfp1DestIp == 0) return false;
-    
+
+    // Insure the match is set to something.  At the very least have it match on dest IP if it is 0
+    if (virtual_config.rxc_sfp1RxMatch == 0)
+        virtual_config.rxc_sfp1RxMatch = 4;
+
     // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.rxc_sfp2RxMatch == 0) return false;
         if (virtual_config.rxc_sfp2DestIp == 0) return false;
+
+        if (virtual_config.rxc_sfp2RxMatch == 0)
+            virtual_config.rxc_sfp2RxMatch = 4;
     }
     return true;
 }
@@ -2273,7 +2283,7 @@ void DeviceServices::SetIPError(NTV2Channel channel, uint32_t configType, uint32
             break;
     }
     
-    mCard->ReadRegister(reg, &errCode);
+    mCard->ReadRegister(reg, errCode);
     
     switch( channel )
     {
@@ -2323,7 +2333,7 @@ void DeviceServices::GetIPError(NTV2Channel channel, uint32_t configType, uint32
             break;
     }
     
-    mCard->ReadRegister(reg, &errCode);
+    mCard->ReadRegister(reg, errCode);
     
     switch( channel )
     {
@@ -2504,7 +2514,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
 	
-	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb1RGB = IsRGBFormat(mFb1Format);
 
 	// if the board doesn't have LUTs, bail
 	if ( !::NTV2DeviceCanDoColorCorrection(mDeviceID) )
@@ -2566,13 +2576,13 @@ bool DeviceServices::UpdateK2LUTSelect()
 	
 	ULWord lut2Type = mLUTType, lut3Type = mLUTType, lut4Type = mLUTType, lut5Type = mLUTType;
 	if (bLut2)
-		mCard->ReadRegister(kVRegLUT2Type, &lut2Type);
+		mCard->ReadRegister(kVRegLUT2Type, lut2Type);
 	if (bLut3)
-		mCard->ReadRegister(kVRegLUT3Type, &lut3Type);
+		mCard->ReadRegister(kVRegLUT3Type, lut3Type);
 	if (bLut4)
-		mCard->ReadRegister(kVRegLUT4Type, &lut4Type);
+		mCard->ReadRegister(kVRegLUT4Type, lut4Type);
 	if (bLut5)
-		mCard->ReadRegister(kVRegLUT5Type, &lut5Type);
+		mCard->ReadRegister(kVRegLUT5Type, lut5Type);
 	
 	// test for special use of LUT2 for E-to-E rgb range conversion
 	bool bE2ERangeConversion = (bLut2 == true) &&  (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == false) && (mFb1Mode == NTV2_MODE_CAPTURE);
@@ -2646,7 +2656,7 @@ NTV2FrameRate DeviceServices::GetInput2VideoFrameRate()
 	ULWord status;
 	NTV2FrameRate result;
 	
-	mCard->ReadRegister(kRegInputStatus, &status);
+	mCard->ReadRegister(kRegInputStatus, status);
 
 	result = (NTV2FrameRate)( ((status >> 26) & BIT_3) | ((status >> 8) & 0x7) );
 	
@@ -2847,7 +2857,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 	{
 	case NTV2_WgtSDIOut1:
 	case NTV2_Wgt3GSDIOut1:
-		mCard->ReadRegister(kRegRP188InOut1DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut1DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister (kRegRP188InOut1DBB, 0x0, BIT(23), 23);
@@ -2856,7 +2866,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		break;
 	case NTV2_WgtSDIOut2:
 	case NTV2_Wgt3GSDIOut2:
-		mCard->ReadRegister(kRegRP188InOut2DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut2DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister (kRegRP188InOut2DBB, 0x0, BIT(23), 23);
@@ -2865,7 +2875,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		break;
 	case NTV2_WgtSDIOut3:
 	case NTV2_Wgt3GSDIOut3:
-		mCard->ReadRegister(kRegRP188InOut3DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut3DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut3DBB, 0x0, BIT(23), 23);
@@ -2874,7 +2884,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		break;
 	case NTV2_WgtSDIOut4:
 	case NTV2_Wgt3GSDIOut4:
-		mCard->ReadRegister(kRegRP188InOut4DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut4DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut4DBB, 0x0, BIT(23), 23);
@@ -2883,7 +2893,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		break;
 	case NTV2_Wgt3GSDIOut5:
 	case NTV2_WgtSDIMonOut1:
-		mCard->ReadRegister(kRegRP188InOut5DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut5DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut5DBB, 0x0, BIT(23), 23);
@@ -2891,7 +2901,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		}
 		break;
 	case NTV2_Wgt3GSDIOut6:
-		mCard->ReadRegister(kRegRP188InOut6DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut6DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut6DBB, 0x0, BIT(23), 23);
@@ -2899,7 +2909,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		}
 		break;
 	case NTV2_Wgt3GSDIOut7:
-		mCard->ReadRegister(kRegRP188InOut7DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut7DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut7DBB, 0x0, BIT(23), 23);
@@ -2907,7 +2917,7 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 		}
 		break;
 	case NTV2_Wgt3GSDIOut8:
-		mCard->ReadRegister(kRegRP188InOut8DBB, &passthrough, BIT(23), 23);
+		mCard->ReadRegister(kRegRP188InOut8DBB, passthrough, BIT(23), 23);
 		if (passthrough == 1)
 		{
 			mCard->WriteRegister(kRegRP188InOut8DBB, 0x0, BIT(23), 23);
@@ -2976,7 +2986,7 @@ void DeviceServices::SetDeviceXPointCapture()
 		(mDeviceID != DEVICE_ID_IOIP_2110))
 	{
 		uint32_t audioInputSelect;
-		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
+		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
@@ -3132,7 +3142,7 @@ void DeviceServices::SetDeviceXPointCapture()
 
 void DeviceServices::SetDeviceXPointPlayback()
 {
-	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb2RGB = IsRGBFormat(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;
@@ -3141,10 +3151,10 @@ void DeviceServices::SetDeviceXPointPlayback()
 	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
 	
-	if (mCard->DeviceCanDoAudioMixer())
+	//if (mCard->DeviceCanDoAudioMixer())
 	{
 		uint32_t audioInputSelect;
-		mCard->ReadRegister(kVRegAudioInputSelect, &audioInputSelect);
+		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
 		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
 	}
 
@@ -3806,8 +3816,22 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 {
-	ULWord regValue;
+	ULWord regValue = 0;
 	// convert from enum to actual register bits
+	
+    // special case for Auto (KONAHDMI only for now)
+    if (input == NTV2_Auto && mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		switch (mVirtualInputSelect)
+		{
+			default:
+			case NTV2_Input1Select:	input = NTV2_HDMISelect; break;
+			case NTV2_Input2Select:	input = NTV2_HDMI2Select; break;
+			case NTV2_Input3Select:	input = NTV2_HDMI3Select; break;
+			case NTV2_Input4Select:	input = NTV2_HDMI4Select; break;
+		}
+	}
+	
 	switch (input)
 	{
 		case NTV2_Input1Embedded1_8Select:		regValue = 0x00004321;  break;
@@ -3815,10 +3839,14 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 		case NTV2_Input2Embedded1_8Select:		regValue = 0x00014321;  break;
 		case NTV2_Input2Embedded9_16Select:		regValue = 0x00018765;  break;
 		case NTV2_HDMISelect:					regValue = 0x0010000A;  break;
+		case NTV2_HDMI2Select:					regValue = 0x0011000A;  break;
+		case NTV2_HDMI3Select:					regValue = 0x0090000A;  break;
+		case NTV2_HDMI4Select:					regValue = 0x0091000A;  break;
 		case NTV2_MicInSelect:					regValue = 0x0010000B;	break;
 		case NTV2_AnalogSelect:					regValue = 0x00009999;  break;
 		case NTV2_AES_EBU_XLRSelect:
 		case NTV2_AES_EBU_BNCSelect:
+		case NTV2_Auto:
 		default:								regValue = 0x00000000;  break;
 	}
 

@@ -134,7 +134,7 @@ CNTV2LinuxDriverInterface::Open(
 	}
 #endif
 
-	ReadRegister(kRegBoardID, reinterpret_cast<ULWord*>(&_boardID));
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	//Kludge Warning.....
 	//InitMemberVariablesOnOpen needs frame geometry to determine frame buffer
 	// size and number....
@@ -143,20 +143,17 @@ CNTV2LinuxDriverInterface::Open(
 	NTV2FrameBufferFormat format = NTV2_FBF_10BIT_YCBCR;
 
 	ULWord programFlashValue;
-	if(ReadRegister(kRegFlashProgramReg, &programFlashValue))
+	if(ReadRegister(kRegFlashProgramReg, programFlashValue))
 	{
 		if ((programFlashValue & BIT(9)) == BIT(9))
 		{
-			ReadRegister (kRegGlobalControl,
-						  (ULWord*)&fg,
-						  kRegMaskGeometry,
-						  kRegShiftGeometry);
+			CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
 
 			// More of the same Kludge... (from ntv2Register.cpp)
 			ULWord returnVal1,returnVal2;
-			ReadRegister (kRegCh1Control,&returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
-			ReadRegister (kRegCh1Control,&returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
-			format = (NTV2FrameBufferFormat)((returnVal1&0x0f) | ((returnVal2&0x1)<<4));
+			ReadRegister (kRegCh1Control,returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
+			ReadRegister (kRegCh1Control,returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
+			format = NTV2FrameBufferFormat((returnVal1&0x0f) | ((returnVal2&0x1)<<4));
 
 		}
 		else						// what's the right thing do do here?
@@ -228,10 +225,10 @@ CNTV2LinuxDriverInterface::Close()
 
 bool
 CNTV2LinuxDriverInterface::ReadRegister(
-	ULWord registerNumber,
-	ULWord *registerValue,
-	ULWord registerMask,
-	ULWord registerShift)
+	const ULWord registerNumber,
+	ULWord &     registerValue,
+	const ULWord registerMask,
+	const ULWord registerShift)
 {
 
 	if (_remoteHandle != INVALID_NUB_HANDLE)
@@ -246,32 +243,6 @@ CNTV2LinuxDriverInterface::ReadRegister(
 			return false;
 		}
 	}
-#ifdef BORG
-#ifndef KUMO //TODO: Resolve correct call to use for KUMO
-	else if ((_boardType == BOARDTYPE_BORG) && (registerNumber == 54)) // serial number low - see NTV2Status::GetSerialNumberString()
-	{
-		string serialNumber = SerialNumber_Borg::GetFormattedSerialNumber();
-		//string serialNumber = SerialNumber_Borg::FormatSerialNumber( SerialNumber_Borg::GetSerialNumber() );
-		char sn[8] = {0,0,0,0,0,0,0,0};
-		strncpy(sn,serialNumber.c_str(),8);
-		*registerValue = sn[0] | (sn[1]<<8) | (sn[2]<<16) | (sn[3]<<24);
-		*registerValue &= registerMask;
-		*registerValue >>= registerShift;
-	}
-
-	else if ((_boardType == BOARDTYPE_BORG) && (registerNumber == 55)) // serial number high - see NTV2Status::GetSerialNumberString()
-	{
-		string serialNumber = SerialNumber_Borg::GetFormattedSerialNumber();
-		//string serialNumber = SerialNumber_Borg::FormatSerialNumber( SerialNumber_Borg::GetSerialNumber() );
-		char sn[8] = {0,0,0,0,0,0,0,0};
-		strncpy(sn,serialNumber.c_str(),8);
-		*registerValue = sn[4] | (sn[5]<<8) | (sn[6]<<16) | (sn[7]<<24);
-		*registerValue &= registerMask;
-		*registerValue >>= registerShift;
-	}
-#endif
-#endif
-
 	else
 	{
 		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
@@ -290,7 +261,7 @@ CNTV2LinuxDriverInterface::ReadRegister(
 			return false;
 		}
 
-		*registerValue = ra.RegisterValue;
+		registerValue = ra.RegisterValue;
 	}
 
 	return true;
@@ -543,8 +514,8 @@ CNTV2LinuxDriverInterface::MapFrameBuffers (void)
 
 		// Set the CH1 and CH2 frame base addresses for cards that require them.
 		ULWord boardIDRegister;
-		ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
-		if ( ! ::NTV2DeviceIsDirectAddressable( (NTV2DeviceID)boardIDRegister ) )
+		ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+		if ( ! ::NTV2DeviceIsDirectAddressable(NTV2DeviceID(boardIDRegister)))
 			_pCh1FrameBaseAddress = _pFrameBaseAddress;
 	}
 
@@ -1414,50 +1385,48 @@ bool CNTV2LinuxDriverInterface::GetRelativeVideoPlaybackDelay(ULWord* frameDelay
 bool CNTV2LinuxDriverInterface::SetAudioRecordPinDelay(ULWord millisecondDelay)
 {
     (void)millisecondDelay;
-
 	return false;
 }
 
 bool CNTV2LinuxDriverInterface::GetAudioRecordPinDelay(ULWord* millisecondDelay)
 {
     (void)millisecondDelay;
-
 	return false;
 }
 
 bool CNTV2LinuxDriverInterface::GetDriverVersion(ULWord* driverVersion)
 {
-	return ReadRegister (kVRegLinuxDriverVersion, driverVersion);
+	return driverVersion ? ReadRegister (kVRegLinuxDriverVersion, *driverVersion) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetBA0MemorySize(ULWord* memSize)
 {
-	return ReadRegister (kVRegBA0MemorySize, memSize);
+	return memSize ? ReadRegister (kVRegBA0MemorySize, *memSize) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetBA1MemorySize(ULWord* memSize)
 {
-	return ReadRegister (kVRegBA1MemorySize, memSize);
+	return memSize ? ReadRegister (kVRegBA1MemorySize, *memSize) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetBA2MemorySize(ULWord* memSize)
 {
-	return ReadRegister (kVRegBA2MemorySize, memSize);
+	return memSize ? ReadRegister (kVRegBA2MemorySize, *memSize) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetBA4MemorySize(ULWord* memSize)
 {
-	return ReadRegister (kVRegBA4MemorySize, memSize);
+	return memSize ? ReadRegister (kVRegBA4MemorySize, *memSize) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetDMADriverBufferPhysicalAddress(ULWord* physAddr)
 {
-	return ReadRegister (kVRegDMADriverBufferPhysicalAddress, physAddr);
+	return physAddr ? ReadRegister (kVRegDMADriverBufferPhysicalAddress, *physAddr) : false;
 }
 
 bool CNTV2LinuxDriverInterface::GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers)
 {
-	return ReadRegister (kVRegNumDmaDriverBuffers, pNumDmaDriverBuffers);
+	return pNumDmaDriverBuffers ? ReadRegister (kVRegNumDmaDriverBuffers, *pNumDmaDriverBuffers) : false;
 }
 
 
@@ -1504,7 +1473,7 @@ bool CNTV2LinuxDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode 
 
 bool CNTV2LinuxDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
 {
-	return ReadRegister(kVRegGlobalAudioPlaybackMode,(ULWord*)mode);
+	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
 
 
@@ -2025,14 +1994,14 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
 	ULWord dbbReg, msReg, lsReg;
 
-	ReadRegister(kRegBoardID, (ULWord *)&boardID);
-	ReadRegister(kVRegRP188SourceSelect, (ULWord *)&source);
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
+	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
 	bool bLTCPort = (source == kRP188SourceLTCPort);
 	// values come from LTC port registers
 	if (bLTCPort)
 	{
 		ULWord ltcPresent;
-		ReadRegister (kRegStatus, &ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 
 		// there is no equivalent DBB for LTC port - we synthesize it here
 		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
@@ -2057,7 +2026,7 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 		case DEVICE_ID_KONA3G:
 		case DEVICE_ID_KONA3GQUAD:
 			//			case BOARD_ID_CORVID24:			//	** MrBill **	What about CORVID24?!
-			ReadRegister (kVRegInputSelect, (ULWord *)&inputSelect);
+			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
 			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
 			break;
 		case DEVICE_ID_IOEXPRESS:
@@ -2075,9 +2044,9 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 
 	// initialize values
 	if (!bLTCPort)
-		ReadRegister (dbbReg, &rp188.DBB );
-	ReadRegister (msReg,  &rp188.Low );
-	ReadRegister (lsReg,  &rp188.High);
+		ReadRegister (dbbReg, rp188.DBB );
+	ReadRegister (msReg,  rp188.Low );
+	ReadRegister (lsReg,  rp188.High);
 
 	// register stability filter
 	do
@@ -2087,9 +2056,9 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 
 		// read again into local struct
 		if (!bLTCPort)
-			ReadRegister (dbbReg, &rp188.DBB );
-		ReadRegister (msReg,  &rp188.Low );
-		ReadRegister (lsReg,  &rp188.High);
+			ReadRegister (dbbReg, rp188.DBB );
+		ReadRegister (msReg,  rp188.Low );
+		ReadRegister (lsReg,  rp188.High);
 
 		// if the new read equals the previous read, consider it done
 		if ( (rp188.DBB  == pRP188Data->DBB) &&
@@ -2114,7 +2083,7 @@ bool CNTV2LinuxDriverInterface::SetOutputTimecodeOffset( ULWord frames )
 
 bool CNTV2LinuxDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
 {
-	return ReadRegister(kVRegOutputTimecodeOffset, pFrames);
+	return pFrames ? ReadRegister(kVRegOutputTimecodeOffset, *pFrames) : false;
 }
 
 bool CNTV2LinuxDriverInterface::SetOutputTimecodeType( ULWord type )
@@ -2124,7 +2093,7 @@ bool CNTV2LinuxDriverInterface::SetOutputTimecodeType( ULWord type )
 
 bool CNTV2LinuxDriverInterface::GetOutputTimecodeType( ULWord* pType )
 {
-	return ReadRegister(kVRegOutputTimecodeType, pType);
+	return pType ? ReadRegister(kVRegOutputTimecodeType, *pType) : false;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -2293,9 +2262,9 @@ bool CNTV2LinuxDriverInterface::AcquireStreamForApplicationWithReference( ULWord
 	ULWord currentCode = 0;
 	ULWord currentPID  = 0;
 
-	if(!ReadRegister(kVRegApplicationCode, &currentCode))
+	if(!ReadRegister(kVRegApplicationCode, currentCode))
 		return false;
-	if(!ReadRegister(kVRegApplicationPID, &currentPID))
+	if(!ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
 
 	// Check if owner is deceased
@@ -2309,9 +2278,9 @@ bool CNTV2LinuxDriverInterface::AcquireStreamForApplicationWithReference( ULWord
 		ReleaseStreamForApplication( currentCode, currentPID );
 	}
 
-	if(!ReadRegister(kVRegApplicationCode, &currentCode))
+	if(!ReadRegister(kVRegApplicationCode, currentCode))
 		return false;
-	if(!ReadRegister(kVRegApplicationPID, &currentPID))
+	if(!ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
 
 	for( int count = 0; count < 20; count++ )
@@ -2352,11 +2321,11 @@ bool CNTV2LinuxDriverInterface::ReleaseStreamForApplicationWithReference( ULWord
 	ULWord currentPID = 0;
 	ULWord currentCount = 0;
 
-	if(!ReadRegister(kVRegApplicationCode, &currentCode))
+	if(!ReadRegister(kVRegApplicationCode, currentCode))
 		return false;
-	if(!ReadRegister(kVRegApplicationPID, &currentPID))
+	if(!ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
-	if(!ReadRegister(kVRegAcquireLinuxReferenceCount, &currentCount))
+	if(!ReadRegister(kVRegAcquireLinuxReferenceCount, currentCount))
 		return false;
 
 	if( currentCode == appCode && currentPID == (ULWord) pid )
@@ -2392,9 +2361,9 @@ bool CNTV2LinuxDriverInterface::AcquireStreamForApplication( ULWord appCode, int
 	// Get data about current owner
 	ULWord currentCode = 0;
 	ULWord currentPID  = 0;
-	if(!ReadRegister(kVRegApplicationCode, &currentCode))
+	if(!ReadRegister(kVRegApplicationCode, currentCode))
 		return false;
-	if(!ReadRegister(kVRegApplicationPID, &currentPID))
+	if(!ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
 
 	// Check if owner is deceased
@@ -2442,10 +2411,9 @@ bool CNTV2LinuxDriverInterface::SetStreamingApplication( ULWord appCode, int32_t
 
 bool CNTV2LinuxDriverInterface::GetStreamingApplication( ULWord *appCode, int32_t  *pid )
 {
-	if(!ReadRegister(kVRegApplicationCode, appCode))
+	if (!(appCode  &&  ReadRegister(kVRegApplicationCode, *appCode)))
 		return false;
-	else
-		 return ReadRegister(kVRegApplicationPID, (ULWord*)pid);
+	return pid  &&  CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, *pid);
 }
 
 bool CNTV2LinuxDriverInterface::SetDefaultDeviceForPID( int32_t pid )
@@ -2487,10 +2455,10 @@ bool CNTV2LinuxDriverInterface::GetLastOutputVerticalTimestamp (NTV2Channel chan
 	if(!pTimeStamp)
 		return false;
 
-	if(!ReadRegister(gChannelToTSLastOutputVertHi[channel], &highWord))
+	if(!ReadRegister(gChannelToTSLastOutputVertHi[channel], highWord))
 		return false;
 
-	if(!ReadRegister(gChannelToTSLastOutputVertLo[channel], &lowWord))
+	if(!ReadRegister(gChannelToTSLastOutputVertLo[channel], lowWord))
 		return false;
 
 	*pTimeStamp = (uint64_t)highWord | lowWord;
@@ -2506,10 +2474,10 @@ bool CNTV2LinuxDriverInterface::GetLastInputVerticalTimestamp (NTV2Channel chann
 	if(!pTimeStamp)
 		return false;
 
-	if(!ReadRegister(gChannelToTSLastInputVertHi[channel], &highWord))
+	if(!ReadRegister(gChannelToTSLastInputVertHi[channel], highWord))
 		return false;
 
-	if(!ReadRegister(gChannelToTSLastInputVertLo[channel], &lowWord))
+	if(!ReadRegister(gChannelToTSLastInputVertLo[channel], lowWord))
 		return false;
 
 	*pTimeStamp = (uint64_t)highWord | lowWord;

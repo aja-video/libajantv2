@@ -174,7 +174,7 @@ bool CNTV2MailBox::readMB(uint32_t & val, uint32_t timeout)
     bool rv = waitRxReady(timeout);
     if (rv)
     {
-         mDevice.ReadRegister(bOffset + MB_tRDDATA, &val);
+         mDevice.ReadRegister(bOffset + MB_tRDDATA, val);
     }
     return rv;
 }
@@ -229,7 +229,7 @@ bool CNTV2MailBox::waitTxReady(uint32_t timeout)
 uint32_t CNTV2MailBox::getStatus()
 {
     uint32_t val;
-    mDevice.ReadRegister(bOffset + MB_tSTATUS, &val);
+    mDevice.ReadRegister(bOffset + MB_tSTATUS, val);
     return val;
 }
 
@@ -405,7 +405,7 @@ uint64_t CNTV2MailBox::getSystemMilliseconds()
 uint32_t CNTV2MailBox::getFeatures()
 {
     uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, val);
     return val;
 }
 

@@ -7,6 +7,7 @@
 
 	This page describes the KONA 4 capture/playout board in its 2-channel mode of operation.
 	It can be "flashed" with different firmware to become a 4-channel device (see \ref kona4quad).
+	It’s identified by ::DEVICE_ID_KONA4UFC.
 
 	@image	html	kona4.png
 
@@ -54,7 +55,7 @@
 	@par	Ancillary Data
 
 	-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	\ref vancframegeometries
 
 	@par	Video Processing
 

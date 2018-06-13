@@ -8,28 +8,32 @@
 	The purpose of the library is to enable third-parties to easily access and/or control the ancillary data entering or leaving
 	an AJA NTV2 device. The library currently is very focused on CEA-608.
 
-	For examples on how to use this library, please see the \ref ntv2ccgrabber and \ref ntv2ccplayer demonstration applications.
+	@par	Demonstration Applications
+	-	\ref ntv2ccgrabber
+	-	\ref ntv2ccplayer
 
-	<b>Transmit/Playout:</b> (Encode my ancillary data packets into other buffer destinations)
+	@par	Transmit/Playout:
+	To encode my ancillary data packets into other buffer destinations:
 	-	Call AJAAncillaryList::AddAncillaryData for each packet to be added to me.
-	-	It's best to call AJAAncillaryList::SortListByLocation before transmitting.
-	-	For encoding into a "tall" or "taller" VANC frame buffer, call AJAAncillaryList::GetVANCTransmitData.
+	-	It’s best to call AJAAncillaryList::SortListByLocation before transmitting.
+	-	For encoding into a “tall” or “taller” VANC frame buffer, call AJAAncillaryList::GetVANCTransmitData.
 	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), to fill the buffer used in
 		the AUTOCIRCULATE_TRANSFER::SetAncBuffers function,
 		-	call AJAAncillaryList::GetSDITransmitData for SDI (see \ref ancgumpformat).
 		-	call AJAAncillaryList::GetIPTransmitData for IP/RTP (see \ref ancrtpformat).
 
-	<b>Receive/Capture:</b> (Decode other buffer sources into a list of ancillary data packets)
-	-	For decoding VANC lines from a "tall" or "taller" frame buffer, call the
-		AJAAncillaryList::SetFromVANCData class method, passing it an \c NTV2_POINTER that
-		references the frame buffer (or just the VANC portion of one), and an \c NTV2FormatDescriptor
+	@par	Receive/Capture:
+	To decode other buffer sources into a list of ancillary data packets:
+	-	For decoding VANC lines from a “tall” or “taller” frame buffer, call the
+		AJAAncillaryList::SetFromVANCData class method, passing it an ::NTV2_POINTER that
+		references the frame buffer (or just the VANC portion of one), and an ::NTV2FormatDescriptor
 		that describes the raster.
 	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), using the buffer(s) used
 		in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call...
 		-	call AJAAncillaryList::SetFromSDIAncData for SDI (see \ref ancgumpformat);
 		-	call AJAAncillaryList::SetFromIPAncData for IP/RTP (see \ref ancrtpformat).
 
-	<b>Principal Classes</b>
+	@par	Principal Classes:
 	- AJAAncillaryData:  Container that holds a single Anc packet (or raster line containing “analog” waveform data).
 		- AJAAncillaryData_Cea608:  A CEA-608 data packet.
 			- AJAAncillaryData_Cea608_Line21:  An “analog” CEA-608 data packet (decoded from or encoded to line 21).
@@ -42,4 +46,35 @@
 		- AJAAncillaryData_FrameStatusInfo5251:  A “5251” frame status info packet.
 	- AJAAncillaryDataFactory:  Provides AJAAncillaryDataFactory::Create and AJAAncillaryDataFactory::GuessAncillaryDataType class methods.
 	- AJAAncillaryList:  An ordered collection of AJAAncillaryData packets.
+
+	@dot
+		digraph AJAAncHierarchy
+		{
+			  size="14,7"
+			  node [shape=record, fontname=Helvetica, fontsize=11];
+			  edge[dir=back]
+			  ancl [ label="{AJAAncillaryList|- m_ancList}" URL="\ref AJAAncillaryList"];
+			  ancd [ label="{AJAAncillaryData|- m_DID\n- m_SID\n- m_checksum\n- m_location\n- m_coding\n- m_payload}" URL="\ref AJAAncillaryData"];
+			  ancd608 [ label="AJAAncillaryData_Cea608" URL="\ref AJAAncillaryData_Cea608"];
+			  ancd608l21 [ label="AJAAncillaryData_Cea608_Line21" URL="\ref AJAAncillaryData_Cea608_Line21"];
+			  ancd608v [ label="AJAAncillaryData_Cea608_Vanc" URL="\ref AJAAncillaryData_Cea608_Vanc"];
+			  ancd708 [ label="AJAAncillaryData_Cea708" URL="\ref AJAAncillaryData_Cea708"];
+			  ancdtc [ label="AJAAncillaryData_Timecode" URL="\ref AJAAncillaryData_Timecode"];
+			  ancdtcatc [ label="AJAAncillaryData_Timecode_ATC" URL="\ref AJAAncillaryData_Timecode_ATC"];
+			  ancdtcvitc [ label="AJAAncillaryData_Timecode_VITC" URL="\ref AJAAncillaryData_Timecode_VITC"];
+			  ancd524d [ label="AJAAncillaryData_FrameStatusInfo524D" URL="\ref AJAAncillaryData_FrameStatusInfo524D"];
+			  ancd5251 [ label="AJAAncillaryData_FrameStatusInfo5251" URL="\ref AJAAncillaryData_FrameStatusInfo5251"];
+			  ancdf [ label="AJAAncillaryDataFactory" URL="\ref AJAAncillaryDataFactory"];
+			  ancd -> ancl [constraint=false, arrowtail=diamond]
+			  ancd608l21 -> ancd608;
+			  ancd608v -> ancd608;
+			  ancd608 -> ancd;
+			  ancd708 -> ancd;
+			  ancdtc -> ancd;
+			  ancdtcatc -> ancdtc;
+			  ancdtcvitc -> ancdtc;
+			  ancd524d -> ancd;
+			  ancd5251 -> ancd;
+		}
+	@enddot
 **/
