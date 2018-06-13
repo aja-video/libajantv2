@@ -633,42 +633,6 @@ public:
 										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER);
 
 	/**
-		@brief		Transfers ancillary data from a given field/frame on the AJA device to the host.
-		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
-		@param		pOutAncBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the ancillary data.
-										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
-		@param[in]	inFieldID			Specifies the field of interest. Use NTV2_FIELD0 for progressive formats. Defaults to NTV2_FIELD0.
-		@param[in]	inByteCount			Specifies the number of bytes to transfer. Note that this value must not overrun the host
-										buffer, nor the device's frame buffer. Defaults to 2K.
-		@return		True if successful; otherwise false.
-		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
-					to determine the Anc data boundary locations within each frame buffer in device memory.
-	**/
-	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord			inFrameNumber,
-										UByte *					pOutAncBuffer,
-										const NTV2FieldID		inFieldID		= NTV2_FIELD0,
-										const ULWord			inByteCount		= 2048);
-
-	/**
-		@brief		Transfers ancillary data from a given host buffer to a specific field/frame buffer on the AJA device.
-		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be written on the device.
-		@param[in]	pInAncBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the ancillary data to
-										be written.
-		@param[in]	inFieldID			Specifies the field of interest. Use NTV2_FIELD0 for progressive formats. Defaults to NTV2_FIELD0.
-		@param[in]	inByteCount			Specifies the number of bytes to transfer. Note that this value must not overrun the host
-										buffer, nor the device's frame buffer. Defaults to 2K.
-		@return		True if successful; otherwise false.
-		@note		This function will block and not return until the transfer has finished or failed.
-		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
-					to determine the Anc data boundary locations within each frame buffer in device memory.
-	**/
-	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
-										const UByte *			pInAncBuffer,
-										const NTV2FieldID		inFieldID		= NTV2_FIELD0,
-										const ULWord			inByteCount		= 2048);
-
-	/**
 		@brief		Transfers the contents of the ancillary data buffer(s) from the host to a given frame on the AJA device.
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
 		@param[in]	inAncF1Buffer		Specifies the host buffer that is to supply the F1 ancillary data buffer content.
@@ -682,6 +646,58 @@ public:
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
 										const NTV2_POINTER &	inAncF1Buffer,
 										const NTV2_POINTER &	inAncF2Buffer	= NULL_POINTER);
+
+
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
+																UByte *				pOutAncBuffer,
+																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
+																const ULWord		inByteCount		= 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, NTV2_POINTER &, NTV2_POINTER &) instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAWriteAnc (	const ULWord		inFrameNumber,
+																const UByte *		pInAncBuffer,
+																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
+																const ULWord		inByteCount		= 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2_POINTER &, const NTV2_POINTER &) instead.
+	#if !defined (NTV2_DEPRECATE)
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMARead instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWrite instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAReadFrame instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWriteFrame instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+															const ULWord inOffsetBytes, const ULWord inByteCount,
+															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
+															const bool inSynchronous = true));	///< @deprecated	Use DMAReadSegments instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+															const ULWord inOffsetBytes, const ULWord inByteCount,
+															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
+															const bool inSynchronous = true));	///< @deprecated	Use DMAWriteSegments instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioRead (	const NTV2DMAEngine		inDMAEngine,
+															const NTV2AudioSystem	inAudioEngine,
+															ULWord *				pOutAudioBuffer,
+															const ULWord			inOffsetBytes,
+															const ULWord			inByteCount,
+															const bool				inSynchronous = true));	///< @deprecated	Use DMAReadAudio instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioWrite (	const NTV2DMAEngine		inDMAEngine,
+															const NTV2AudioSystem	inAudioEngine,
+															const ULWord *			pInAudioBuffer,
+															const ULWord			inOffsetBytes,
+															const ULWord			inByteCount,
+															const bool				inSynchronous = true));	///< @deprecated	Use DMAWriteAudio instead.
+
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
+											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
+											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
+	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 //
@@ -5647,7 +5663,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputRange						(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIInputRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutVideoStandard					(NTV2Standard * pOutValue)						) {return pOutValue ? GetHDMIOutVideoStandard(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMISampleStructure					(NTV2HDMISampleStructure & outValue)			) {return GetHDMIOutSampleStructure(outValue);}	///< @deprecated	Use CNTV2Card::GetHDMIOutSampleStructure instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMISampleStructure					(NTV2HDMISampleStructure * pOutValue)			) {return pOutValue ? GetHDMISampleStructure(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMISampleStructure					(NTV2HDMISampleStructure * pOutValue)			) {return pOutValue ? GetHDMIOutSampleStructure(*pOutValue) : false;}	///< @deprecated	Use CNTV2Card::GetHDMIOutSampleStructure instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutVideoFPS						(NTV2FrameRate * pOutValue)						) {return pOutValue ? GetHDMIOutVideoFPS(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutRange							(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIOutRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOutAudioChannels					(NTV2HDMIAudioChannels * pOutValue)				) {return pOutValue ? GetHDMIOutAudioChannels(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.

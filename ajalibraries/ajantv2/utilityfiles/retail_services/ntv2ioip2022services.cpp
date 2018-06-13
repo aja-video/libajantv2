@@ -5,6 +5,7 @@
 //
 
 #include "ntv2ioip2022services.h"
+#include "ajabase/system/systemtime.h"
 
 #if defined (AJALinux) || defined (AJAMac)
     #include <stdlib.h>
@@ -23,7 +24,7 @@ using namespace std;
 IoIP2022Services::IoIP2022Services()
 {
     config = NULL;
-
+    mFb1ModeLast = NTV2_MODE_INVALID;
     mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
@@ -113,8 +114,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	// IoIP
 	//
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -148,7 +149,11 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
-																																								
+
+    // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, false);
+    mCard->WriteRegister(kVRegRxcEnable2, false);
+
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
@@ -162,7 +167,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1515,7 +1520,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
@@ -1561,6 +1566,10 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inHdRGB1;	
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
+
+    // Turn on RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -3065,25 +3074,26 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
     {
         rx_2022_channel		rxHwConfig;
         tx_2022_channel		txHwConfig, txHwConfig2;
+        bool                ipServiceEnable, ipServiceForceConfig;
 
         if (config == NULL)
         {
             config = new CNTV2Config2022(*mCard);
-            config->SetIPServicesControl(true, false);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config->SetIPServicesControl(true, false);
+                config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
             config->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 
-        bool    ipServiceEnable;
-        bool    ipServiceForceConfig;
-
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        ipServiceEnable = true;
         if (ipServiceEnable)
         {
-            // Enable all RX channels always.
-            mCard->WriteRegister(kVRegRxcEnable1, true);
-            mCard->WriteRegister(kVRegRxcEnable2, true);
-
             // KonaIP network configuration
             string hwIp,hwNet,hwGate;       // current hardware config
 
@@ -3146,6 +3156,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             // KonaIP Input configurations
             if (IsValidConfig(mRx2022Config1, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
@@ -3189,6 +3201,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 
             if (IsValidConfig(mRx2022Config2, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
@@ -3233,6 +3247,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             // KonaIP output configurations
             if (IsValidConfig(mTx2022Config3, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
                 GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
@@ -3260,7 +3276,9 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     {
                         if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
                             configErr ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL3, false);
                             SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
@@ -3278,7 +3296,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 
             if (IsValidConfig(mTx2022Config4, m2022_7Mode))
             {
-
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
                 GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
@@ -3306,7 +3325,9 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
                     {
                         if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
                             configErr ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL4, false);
                             SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
@@ -3322,6 +3343,9 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
             }
             else
                 SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+            
+            mFb1ModeLast = mFb1Mode;
+            mFb1VideoFormatLast = mFb1VideoFormat;
             
             config->SetIPServicesControl(true, false);
         }

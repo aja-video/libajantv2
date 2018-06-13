@@ -127,8 +127,8 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 	// Io4K
 	//
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -175,7 +175,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1519,7 +1519,7 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
 	
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;

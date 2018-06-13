@@ -4,6 +4,7 @@
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
+#include "retailsupport.h"
 #include "ntv2ioxtservices.h"
 #include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
@@ -810,11 +811,11 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 			vpidSpec.pixelFormat = NTV2_FBF_48BIT_RGB;
 		
 		// Converted RGB -> YUV on wire
-		else if (vpidSpec.isRGBOnWire == false && IsFormatRGB(mFb1Format) == true)
+		else if (vpidSpec.isRGBOnWire == false && IsRGBFormat(mFb1Format) == true)
 			vpidSpec.pixelFormat = Is8BitFrameBufferFormat(mFb1Format) ? NTV2_FBF_8BIT_YCBCR : NTV2_FBF_INVALID;
 	
 		// Converted YUV -> RGB on wire
-		else if (vpidSpec.isRGBOnWire == true && IsFormatRGB(mFb1Format) == false)
+		else if (vpidSpec.isRGBOnWire == true && IsRGBFormat(mFb1Format) == false)
 			vpidSpec.pixelFormat = NTV2_FBF_INVALID;
 	
 		// otherwise
@@ -985,23 +986,6 @@ bool DeviceServices::IsFormatCompressed(NTV2FrameBufferFormat fbFormat)
 }
 
 
-bool DeviceServices::IsFormatRGB(NTV2FrameBufferFormat fbFormat)
-{
-	switch (fbFormat)
-	{
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_DPX:
-        case NTV2_FBF_48BIT_RGB:
-			return true;
-		default:
-			return false;
-	}
-}
-
-
 bool DeviceServices::IsCompatibleWithReference(NTV2VideoFormat fbFormat)
 {
 	// get reference frame rate
@@ -1124,11 +1108,23 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 		{
 			// follow input RGB range
 			if (mSDIInput1FormatSelect == NTV2_RGBSelect)
-				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE; 
+			{
+				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
+			}
 			
 			// follow framebuffer RGB range
 			else									
 				cscRange = mRGB10Range; 
+		}
+	}
+	else if (mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		NTV2InputVideoType inType = RetailSupport::GetInputVideoTypeForIndex(mDeviceID, mVirtualInputSelect);
+		if (inType >= NTV2_InputSelectHDMI1 && inType <= NTV2_InputSelectHDMI4)
+		{
+			NTV2HDMIRange rgbRange = NTV2_HDMIRangeFull;
+			mCard->GetHDMIInputRange(rgbRange, NTV2_CHANNEL1);
+			cscRange = (rgbRange == NTV2_HDMIRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
 		}
 	}
 	
@@ -2067,7 +2063,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config2.rxc_sfp1SourceIp;
             chan.sfp1SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config2.rxc_sfp1DestIp;
-            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1DestIP         = inet_ntoa(addr);
             chan.sfp1RxMatch        = mRx2022Config2.rxc_sfp1RxMatch & 0x7fffffff;
             chan.sfp1SourcePort     = mRx2022Config2.rxc_sfp1SourcePort;
             chan.sfp1DestPort       = mRx2022Config2.rxc_sfp1DestPort;
@@ -2076,7 +2072,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config2.rxc_sfp2SourceIp;
             chan.sfp2SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config2.rxc_sfp2DestIp;
-            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2DestIP         = inet_ntoa(addr);
             chan.sfp2RxMatch        = mRx2022Config2.rxc_sfp2RxMatch & 0x7fffffff;
             chan.sfp2SourcePort     = mRx2022Config2.rxc_sfp2SourcePort;
             chan.sfp2DestPort       = mRx2022Config2.rxc_sfp2DestPort;
@@ -2091,7 +2087,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config1.rxc_sfp1SourceIp;
             chan.sfp1SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config1.rxc_sfp1DestIp;
-            chan.sfp1DestIP         = inet_ntoa(addr);;
+            chan.sfp1DestIP         = inet_ntoa(addr);
             chan.sfp1RxMatch        = mRx2022Config1.rxc_sfp1RxMatch  & 0x7fffffff;
             chan.sfp1SourcePort     = mRx2022Config1.rxc_sfp1SourcePort;
             chan.sfp1DestPort       = mRx2022Config1.rxc_sfp1DestPort;
@@ -2100,7 +2096,7 @@ void DeviceServices::SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, b
             addr.s_addr             = mRx2022Config1.rxc_sfp2SourceIp;
             chan.sfp2SourceIP       = inet_ntoa(addr);
             addr.s_addr             = mRx2022Config1.rxc_sfp2DestIp;
-            chan.sfp2DestIP         = inet_ntoa(addr);;
+            chan.sfp2DestIP         = inet_ntoa(addr);
             chan.sfp2RxMatch        = mRx2022Config1.rxc_sfp2RxMatch & 0x7fffffff;
             chan.sfp2SourcePort     = mRx2022Config1.rxc_sfp2SourcePort;
             chan.sfp2DestPort       = mRx2022Config1.rxc_sfp2DestPort;
@@ -2172,16 +2168,21 @@ void DeviceServices::SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, b
     }
 }
 
-bool DeviceServices::IsValidConfig(const rx2022Config & virtual_config, bool is2022_7)
+bool DeviceServices::IsValidConfig(rx2022Config & virtual_config, bool is2022_7)
 {
-    if (virtual_config.rxc_sfp1RxMatch == 0) return false;
     if (virtual_config.rxc_sfp1DestIp == 0) return false;
-    
+
+    // Insure the match is set to something.  At the very least have it match on dest IP if it is 0
+    if (virtual_config.rxc_sfp1RxMatch == 0)
+        virtual_config.rxc_sfp1RxMatch = 4;
+
     // We only care about looking at sfp2 settings if we are doing 2022_7
     if (is2022_7)
     {
-        if (virtual_config.rxc_sfp2RxMatch == 0) return false;
         if (virtual_config.rxc_sfp2DestIp == 0) return false;
+
+        if (virtual_config.rxc_sfp2RxMatch == 0)
+            virtual_config.rxc_sfp2RxMatch = 4;
     }
     return true;
 }
@@ -2513,7 +2514,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 {
 	bool bResult = true;
 	
-	bool bFb1RGB = IsFormatRGB(mFb1Format);
+	bool bFb1RGB = IsRGBFormat(mFb1Format);
 
 	// if the board doesn't have LUTs, bail
 	if ( !::NTV2DeviceCanDoColorCorrection(mDeviceID) )
@@ -3141,7 +3142,7 @@ void DeviceServices::SetDeviceXPointCapture()
 
 void DeviceServices::SetDeviceXPointPlayback()
 {
-	bool bFb2RGB = IsFormatRGB(mFb2Format);
+	bool bFb2RGB = IsRGBFormat(mFb2Format);
 	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
 	bool bDSKNeedsInputRef = false;
@@ -3150,7 +3151,7 @@ void DeviceServices::SetDeviceXPointPlayback()
 	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
 	
-	if (mCard->DeviceCanDoAudioMixer())
+	//if (mCard->DeviceCanDoAudioMixer())
 	{
 		uint32_t audioInputSelect;
 		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
@@ -3815,8 +3816,22 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 {
-	ULWord regValue;
+	ULWord regValue = 0;
 	// convert from enum to actual register bits
+	
+    // special case for Auto (KONAHDMI only for now)
+    if (input == NTV2_Auto && mDeviceID == DEVICE_ID_KONAHDMI)
+	{
+		switch (mVirtualInputSelect)
+		{
+			default:
+			case NTV2_Input1Select:	input = NTV2_HDMISelect; break;
+			case NTV2_Input2Select:	input = NTV2_HDMI2Select; break;
+			case NTV2_Input3Select:	input = NTV2_HDMI3Select; break;
+			case NTV2_Input4Select:	input = NTV2_HDMI4Select; break;
+		}
+	}
+	
 	switch (input)
 	{
 		case NTV2_Input1Embedded1_8Select:		regValue = 0x00004321;  break;

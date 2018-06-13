@@ -5,6 +5,7 @@
 //
 
 #include "ntv2konaip22services.h"
+#include "ajabase/system/systemtime.h"
 
 #if defined (AJALinux) || defined (AJAMac)
     #include <stdlib.h>
@@ -23,7 +24,7 @@ using namespace std;
 KonaIP22Services::KonaIP22Services()
 {
     config = NULL;
-
+    mFb1ModeLast = NTV2_MODE_INVALID;
     mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 }
 
@@ -64,7 +65,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	// Kona4 Quad
 	//
 	
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -78,7 +79,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
@@ -89,12 +90,16 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
     bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
     bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
+    // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, false);
+    mCard->WriteRegister(kVRegRxcEnable2, false);
+
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 		
 		if (b4K)
 		{
@@ -1408,7 +1413,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1424,6 +1429,10 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+
+    // Turn on RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
@@ -2435,8 +2444,6 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	}
 }
 
-#define WAIT_1 (50)
-
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
 //-------------------------------------------------------------------------------------------------------
@@ -2457,27 +2464,28 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	
     if (mCard->IsDeviceReady(true) == true)
     {
-		rx_2022_channel		rxHwConfig;
-		tx_2022_channel		txHwConfig, txHwConfig2;
+        rx_2022_channel		rxHwConfig;
+        tx_2022_channel		txHwConfig, txHwConfig2;
+        bool                ipServiceEnable, ipServiceForceConfig;
 
         if (config == NULL)
         {
             config = new CNTV2Config2022(*mCard);
-            config->SetIPServicesControl(true, false);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config->SetIPServicesControl(true, false);
+                config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
             config->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 
-        bool    ipServiceEnable;
-        bool    ipServiceForceConfig;
-
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        ipServiceEnable = true;
         if (ipServiceEnable)
         {
-            // Enable all RX channels always.
-            mCard->WriteRegister(kVRegRxcEnable1, true);
-            mCard->WriteRegister(kVRegRxcEnable2, true);
-
             // KonaIP network configuration
             string hwIp,hwNet,hwGate;       // current hardware config
 
@@ -2521,7 +2529,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
             // KonaIP look for changes in 2022-7 mode and NPD if enabled
             rv  = config->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-            
+
             if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
             {
                 printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
@@ -2536,10 +2544,12 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     SetIPError(NTV2_CHANNEL1, kErrRxConfig, config->getLastErrorCode());
                 }
             }
-            
+
             // KonaIP Input configurations
             if (IsValidConfig(mRx2022Config1, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
@@ -2583,6 +2593,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
             if (IsValidConfig(mRx2022Config2, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
                 rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
                 rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
                 mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
@@ -2592,7 +2604,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -2627,6 +2639,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             // KonaIP output configurations
             if (IsValidConfig(mTx2022Config3, m2022_7Mode))
             {
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
                 GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
@@ -2637,7 +2651,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -2654,7 +2668,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     {
                         if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
                             configErr ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL3, false);
                             SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
@@ -2672,7 +2688,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
             if (IsValidConfig(mTx2022Config4, m2022_7Mode))
             {
-
+                // clear any previous error
+                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
                 rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
                 rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
                 GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
@@ -2683,7 +2700,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     if (enableChCard != (enableChServices ? true : false))
                     {
                         config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                        
+
                         // if the channel is enabled
                         if (enableChServices)
                         {
@@ -2700,7 +2717,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     {
                         if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
                             configErr ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetTxChannelEnable(NTV2_CHANNEL4, false);
                             SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
@@ -2716,6 +2735,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             }
             else
                 SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+
+            mFb1ModeLast = mFb1Mode;
+            mFb1VideoFormatLast = mFb1VideoFormat;
 
             config->SetIPServicesControl(true, false);
         }

@@ -67,7 +67,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
@@ -75,7 +75,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
@@ -87,7 +87,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-		bFb2RGB = IsFormatRGB(mFb1Format);
+		bFb2RGB = IsRGBFormat(mFb1Format);
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
@@ -630,7 +630,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 	NTV2VideoFormat				inputFormat      	= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2FbLevelBHfr    	= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoIn   		= false;

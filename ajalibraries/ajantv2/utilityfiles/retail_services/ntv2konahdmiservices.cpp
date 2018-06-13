@@ -90,7 +90,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	DeviceServices::SetDeviceXPointCapture();
 
 	//NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 
 	NTV2CrosspointID			inputXpt1		= NTV2_XptBlack;
