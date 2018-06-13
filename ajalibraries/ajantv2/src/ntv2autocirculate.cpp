@@ -894,6 +894,14 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		//	Fetch the TimeCode value that's in that NTV2TCIndex slot...
 		NTV2_RP188	tcValue;
 		inOutXferInfo.GetInputTimeCode(tcValue, TimecodeIndex);
+		if (TimecodeIndex == NTV2_TCINDEX_LTC1)
+		{	//	Special case for external LTC:
+			//	Our driver currently returns all-zero DBB values for external LTC.
+			//	It should probably at least set DBB BIT(17) "selected RP188 received" if external LTC is present.
+			//	Ticket 3367: Our QuickTime 'vdig' relies on DBB BIT(17) being set, or it assumes timecode is invalid
+			if (tcValue.fLo  &&  tcValue.fHi  &&  tcValue.fLo != 0xFFFFFFFF  &&  tcValue.fHi != 0xFFFFFFFF)
+				tcValue.fDBB |= 0x00020000;
+		}
 
 		//	Valid or not, stuff that TimeCode value into inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes[NTV2_TCINDEX_DEFAULT]...
 		NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.GetHostPointer()));
