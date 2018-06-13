@@ -159,6 +159,17 @@ typedef struct
 } MetadataVData2110;
 
 
+inline NTV2Stream ChToVideoStream(int ch)
+	{ return (NTV2Stream)(NTV2_VIDEO1_STREAM+ch); }
+inline int VideoStreamToCh(NTV2Stream s)
+	{ return (int)(s); }
+	
+inline NTV2Stream ChToAudioStream(int ch)
+	{ return (NTV2Stream)(NTV2_AUDIO1_STREAM+ch); }
+inline int AudioStreamToCh(NTV2Stream s)
+	{ return (int)(s >= NTV2_AUDIO1_STREAM ? s-NTV2_AUDIO1_STREAM : 0); }
+
+
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
