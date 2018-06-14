@@ -304,6 +304,7 @@ bool CNTV2Card::SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inAudioInput
 {
 	const ULWord	regAudSource	(gAudioSystemToAudioSrcSelectRegNum [inAudioSystem]);
 	const ULWord	numInputs		(::NTV2DeviceGetNumVideoInputs (_boardID));
+	const ULWord	numHDMI			(::NTV2DeviceGetNumHDMIVideoInputs (_boardID));
 	bool			status			(false);
 	ULWord			value1			(0);
 	ULWord			value2			(0);
@@ -322,7 +323,7 @@ bool CNTV2Card::SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inAudioInput
 	}
 
 	status = WriteRegister (regAudSource, value1, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput);
-	if (numInputs > 2 || inAudioInput > NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4)
+	if (numInputs > 2 || inAudioInput > NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4 || numHDMI > 1)
 		status = WriteRegister (regAudSource, value2, kRegMaskEmbeddedAudioInput2, kRegShiftEmbeddedAudioInput2);
 	return status;
 }
