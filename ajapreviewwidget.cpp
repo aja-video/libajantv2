@@ -71,7 +71,7 @@ void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
 
 void AJAPreviewWidget::updateFrame (const QImage &image, bool clear)
 {
-	qDebug() << "Update Frame";
+//	qDebug() << "Update Frame";
 	_unscaledImageSize.setHeight(image.height());
 	_unscaledImageSize.setWidth(image.width());
 	_image = image;
@@ -86,7 +86,7 @@ void AJAPreviewWidget::updateFrame (const QImage &image, bool clear)
 
 void AJAPreviewWidget::updateFrameWithStatus (const QImage &image, const QString& statusString, bool clear)
 {
-    qDebug() << "Update Frame With Status";
+//    qDebug() << "Update Frame With Status";
 
 	_statusString = statusString;
 	_unscaledImageSize.setHeight(image.height());
@@ -138,7 +138,7 @@ void AJAPreviewWidget::updateStatusString(const QString statusString)
 
 void AJAPreviewWidget::renderFrame ()
 {
-	qDebug() << "Render Frame";
+//	qDebug() << "Render Frame";
 
 	if (_image.width() > this->width())
 		_pixmap = QPixmap::fromImage(_image.scaledToWidth(this->width(), Qt::SmoothTransformation), 0);
@@ -154,7 +154,7 @@ void AJAPreviewWidget::renderFrame ()
 void AJAPreviewWidget::wheelEvent ( QWheelEvent * event )
 {
 	int delta = event->delta();
-	qDebug("wheel delta = %d",delta);
+//	qDebug("wheel delta = %d",delta);
 	emit wheelDelta(delta);
 }
 
@@ -243,7 +243,7 @@ void AJAPreviewWidget::dropEvent ( QDropEvent * ev )
 
 
 	updateFrame(previewImage,true);
-	qDebug("Time elapsed: %d ms", t.elapsed());
+//	qDebug("Time elapsed: %d ms", t.elapsed());
 
 	delete [] rgbBuffer; rgbBuffer = 0;
 	delete [] rawBuffer; rawBuffer = 0;
