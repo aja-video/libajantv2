@@ -23,6 +23,7 @@ enum AJAPersistenceType
 	AJAPersistenceTypeEnd
 };
 
+class AJAPersistenceDBImpl;
 
 /**
  * Class used to talk to the board in such a way as to maintain a persistant state 
@@ -58,6 +59,8 @@ private:
 	std::string				mstateKeyName;
 
     AJASystemInfo           mSysInfo;
+
+    AJAPersistenceDBImpl*   mDBImpl;
 };
 
 #endif	//	AJAPersistence_H
