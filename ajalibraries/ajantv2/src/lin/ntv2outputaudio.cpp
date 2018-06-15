@@ -32,9 +32,9 @@ CNTV2OutputAudio::~CNTV2OutputAudio()
 {
 }
 
-bool CNTV2OutputAudio::Open(UWord boardNumber, bool displayError, NTV2DeviceType eBoardType )
+bool CNTV2OutputAudio::Open(UWord boardNumber)
 {
-	CNTV2LinuxDriverInterface::Open(boardNumber,displayError,eBoardType);
+	CNTV2LinuxDriverInterface::Open(boardNumber);
 	return SetupAudio();
 }
 

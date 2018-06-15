@@ -31,93 +31,63 @@
 
 using namespace std;
 
+static const string	kAJANTV2("ajantv2");
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
 /////////////////////////////////////////////////////////////////////////////////////
-
-// Method: Open
-// Input:  UWord boardNumber(starts at 0)
-//         bool displayErrorMessage
-//         NTV2DeviceType eBoardType e.g. KSD, KHD, XENA2
-// Output: bool - true if opened ok.
 bool
-CNTV2LinuxDriverInterface::Open(
-	  UWord			boardNumber,
-	  bool			displayError,
-	  NTV2DeviceType	eBoardType,
-	  const char 	*hostname	// Non-null: card on remote host
-	  )
+CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostName)
 {
-	// Check if already opened
-	if (IsOpen())
+	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
-		// Don't do anything if the requested board is the same as last opened, and
-		// the requested or last opened board aren't remote boards
-		if ( ( _boardNumber == boardNumber ) &&
-				((hostname == NULL) || (hostname[0] == '\0')) &&
-				 (_remoteHandle == INVALID_NUB_HANDLE ) )
-			return true;
-
-		Close();   // Close current board and open desired board
-	}
-
-#if 0
-    _boardType = eBoardType;
-	if (_boardType == DEVICETYPE_UNKNOWN){
-		_boardType = GetCompileFlag ();
-	}
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+			return true;	//	Same local device requested, already open
+		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
+			return true;	//	Same remote device requested, already open
 #else
-    // All the old boards are now depricated. Open only with the ajantv2 driver.
-	_boardType = DEVICETYPE_NTV2;
+		return true;		//	Same local device requested, already open
 #endif
-
-	_boardNumber = boardNumber;
-	_displayErrorMessage = displayError;
-
-	// Got rid of stringstream stuff as it caused heaps of warnings under
-	// Redhat 7.2
-
-#define BOARDSTRMAX	32
-	char boardStr[BOARDSTRMAX];
-
-	const char *s = NULL;
-	switch  ( _boardType )
-	{
-	case DEVICETYPE_NTV2:
-        s = "ajantv2";
-		break;
-	case DEVICETYPE_UNKNOWN:
-		if ( _displayErrorMessage )
-		{
-			DisplayNTV2Error("Tried to call open with BOARDTYPE_UNKNOWN");
-		}
-		return false;
 	}
 
-	if (hostname && hostname[0] != '\0')	// Non-null: card on remote host
+	if (IsOpen())
+		Close();	//	Close if different device requested
+
+	string	boardStr;
+
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (!hostName.empty())	// Non-empty: card on remote host
 	{
-		snprintf(boardStr, BOARDSTRMAX - 1, "%s:%s%d", hostname, s, _boardNumber);
-		if ( !OpenRemote(boardNumber, displayError, eBoardType, hostname))
+		ostringstream	oss;
+		oss << hostName << ":" << kAJANTV2 << inDeviceIndexNumber;
+		boardStr = oss.str();
+		if (!OpenRemote(inDeviceIndexNumber, false, 256, hostName.c_str()))
 		{
 			DisplayNTV2Error("Failed to open board on remote host.");
 		}
 	}
 	else
+#else
+	(void) hostName;
+#endif
 	{
-		snprintf(boardStr, BOARDSTRMAX - 1, "/dev/%s%d", s, _boardNumber);
-		_hDevice = open(boardStr,O_RDWR);
+		ostringstream	oss;
+		oss << "/dev/" << kAJANTV2 << inDeviceIndexNumber;
+		boardStr = oss.str();
+		_hDevice = open(boardStr.c_str(),O_RDWR);
 	}
 
-	if ( _hDevice == INVALID_HANDLE_VALUE && _remoteHandle == INVALID_NUB_HANDLE)
+	if (_hDevice == INVALID_HANDLE_VALUE && _remoteHandle == INVALID_NUB_HANDLE)
 	{
-#define ERRSTRMAX 80
-		char buf[ERRSTRMAX];
-
-		snprintf(buf, ERRSTRMAX - 1, "Couldn't open %s\n", boardStr);
-		DisplayNTV2Error(buf);
+		ostringstream	oss;
+		oss << "Couldn't open " << boardStr << "\n";
+		DisplayNTV2Error(oss.str().c_str());
 		return false;
 	}
 
+	_boardNumber = inDeviceIndexNumber;
 	_boardOpened = true;
 
 	// Fail if running with an old driver
@@ -163,9 +133,21 @@ CNTV2LinuxDriverInterface::Open(
 	}
 
 	InitMemberVariablesOnOpen(fg, format);
-
 	return true;
 }
+
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool CNTV2LinuxDriverInterface::Open (	UWord			boardNumber,
+											bool			displayError,
+											NTV2DeviceType	eBoardType,
+											const char 	*	hostname)
+	{
+		(void) eBoardType;
+		_displayErrorMessage = displayError;
+		const string host(hostname ? hostname : "");
+		return Open(boardNumber, host);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 // Method:	SetOverlappedMode
 // Input:	bool mode
@@ -1343,14 +1325,16 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 
 	bool CNTV2LinuxDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	{
-		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-
 		if( !pInMessage )
-			return false;
+			return false;	//	NULL message pointer
 
-		if( ioctl( _hDevice,
-				   IOCTL_AJANTV2_MESSAGE,
-				   pInMessage) )
+		if (_remoteHandle != INVALID_NUB_HANDLE)
+		{
+			return false;	//	Implement NTV2Message on nub
+		}
+		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+
+		if( ioctl( _hDevice,  IOCTL_AJANTV2_MESSAGE,  pInMessage) )
 		{
 			DisplayNTV2Error("IOCTL_AJANTV2_MESSAGE failed\n");
 			return false;

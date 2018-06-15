@@ -268,37 +268,28 @@ public:
 										CNTV2Card ();
 
 	/**
-		@brief	Constructs me from the given parameters.
+		@brief	Constructor that opens the device.
 		@param[in]	inDeviceIndex	A zero-based index number that identifies which device to open,
-									which should be the number received from the NTV2DeviceScanner.
-		@param[in]	inDisplayError	If true, displays a message box if there's a failure while opening.
-									This parameter is obsolete and won't be available in the future.
-		@param[in]	inDeviceType	Specifies the NTV2DeviceType of the device to open.
-									This parameter is obsolete and won't be available in the future.
-		@param[in]	pInHostName		If non-NULL, must be a valid pointer to a character buffer that
-									contains the name of a host that has one or more AJA devices.
-									Defaults to NULL (the local host).
+									which should be the number received from the ::NTV2DeviceScanner.
+		@param[in]	inHostName		If non-empty, must contain the name of a host that has one or more
+									AJA devices. Defaults to empty string (the local host).
 		@nosubgrouping
 	**/
 	explicit							CNTV2Card ( const UWord		inDeviceIndex,
-													const bool		inDisplayError	= false,
-													const UWord		inDeviceType	= DEVICETYPE_NTV2,
-													const char *	pInHostName		= 0);
+													const std::string &	inHostName		= std::string());
+#if !defined(NTV2_DEPRECATE_14_3)
+	explicit NTV2_SHOULD_BE_DEPRECATED(CNTV2Card (	const UWord		inDeviceIndex,
+													const bool		inDisplayError,
+													const UWord		inDeviceType,
+													const char *	pInHostName));
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
+
 	/**
 		@brief	My destructor.
 	**/
 	virtual								~CNTV2Card();
 	///@}
 
-
-	/**
-		@name	Opening & Closing
-	**/
-	///@{
-	#if !defined (NTV2_DEPRECATE)
-		virtual NTV2_DEPRECATED_f(bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use CNTV2DeviceScanner or Open(deviceIndex) instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
-	///@}
 
 	/**
 		@name	Inquiry
@@ -376,14 +367,6 @@ public:
 		@return	My current breakout box hardware type, if any is attached.
 	**/
 	AJA_VIRTUAL NTV2BreakoutType	GetBreakoutHardware (void);
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2BoardID	GetBoardID (void))				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(UWord		GetBoardNumber (void) const)		{return GetIndexNumber ();}		///< @deprecated	Use GetIndexNumber instead.
-		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardType		GetBoardType (void) const);										///< @deprecated	NTV2BoardType is obsolete.
-		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardSubType	GetBoardSubType (void));											///< @deprecated	NTV2BoardSubType is obsolete.
-		static NTV2_DEPRECATED_f(UWord				GetNumNTV2Boards (void));										///< @deprecated	Use CNTV2DeviceScanner instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 
@@ -665,7 +648,6 @@ public:
 										const NTV2_POINTER &	inAncF2Buffer	= NULL_POINTER);
 
 
-
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
 																UByte *				pOutAncBuffer,
 																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
@@ -674,48 +656,6 @@ public:
 																const UByte *		pInAncBuffer,
 																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
 																const ULWord		inByteCount		= 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2_POINTER &, const NTV2_POINTER &) instead.
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMARead instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWrite instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAReadFrame instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWriteFrame instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-															const ULWord inOffsetBytes, const ULWord inByteCount,
-															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAReadSegments instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-															const ULWord inOffsetBytes, const ULWord inByteCount,
-															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAWriteSegments instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioRead (	const NTV2DMAEngine		inDMAEngine,
-															const NTV2AudioSystem	inAudioEngine,
-															ULWord *				pOutAudioBuffer,
-															const ULWord			inOffsetBytes,
-															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAReadAudio instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioWrite (	const NTV2DMAEngine		inDMAEngine,
-															const NTV2AudioSystem	inAudioEngine,
-															const ULWord *			pInAudioBuffer,
-															const ULWord			inOffsetBytes,
-															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAWriteAudio instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
-											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
-											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
-	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 //
@@ -754,11 +694,6 @@ public:
 	**/
 	AJA_VIRTUAL bool	SetFrameGeometry (NTV2FrameGeometry inGeometry, bool inIsRetail = AJA_RETAIL_DEFAULT, NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetReferenceSource (NTV2ReferenceSource value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	Use SetReference instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetReferenceSource (NTV2ReferenceSource* value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	Use GetReference instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
-
 	/**
 		@brief		Sets the frame buffer format for the given frame store on the AJA device.
 		@return		True if successful; otherwise false.
@@ -772,13 +707,6 @@ public:
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
 	AJA_VIRTUAL bool	SetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat inNewFormat, bool inIsAJARetail = AJA_RETAIL_DEFAULT);
-
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool			UpdateK2ColorSpaceMatrixSelect (NTV2VideoFormat currFormat = NTV2_FORMAT_UNKNOWN, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool			UpdateK2LUTSelect (NTV2VideoFormat currFormat = NTV2_FORMAT_UNKNOWN, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2BitfileType	BitfileSwitchNeeded (NTV2DeviceID deviceID, NTV2VideoFormat value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
@@ -867,9 +795,6 @@ public:
 
 	AJA_VIRTUAL bool				GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL NTV2FrameDimensions	GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1);
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFramebufferSize (SIZE * pOutFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use GetActiveFrameDimensions instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		Sets the frame buffer size on those boards that allow software to select a video buffer size.
@@ -892,11 +817,8 @@ public:
 	AJA_VIRTUAL bool		IsProgressiveStandard (bool & outIsProgressive, NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool		IsSDStandard (bool & outIsStandardDef, NTV2Channel inChannel = NTV2_CHANNEL1);
-	#if !defined (NTV2_DEPRECATE)
-		static NTV2_DEPRECATED_f(bool	IsSDVideoADCMode (NTV2LSVideoADCMode mode));			///< @deprecated	This function is obsolete.
-		static NTV2_DEPRECATED_f(bool	IsHDVideoADCMode (NTV2LSVideoADCMode mode));			///< @deprecated	This function is obsolete.
-	#endif	//	!defined (NTV2_DEPRECATE)
-	AJA_VIRTUAL bool	IsBufferSizeSetBySW();
+
+	AJA_VIRTUAL bool		IsBufferSizeSetBySW();
 
 	/**
 		@brief		Sets the AJA device's frame rate.
@@ -1012,15 +934,6 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChannel);
 #define Get425FrameEnable	GetTsiFrameEnable
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		SetReferenceVoltage (NTV2RefVoltage value));			///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		GetReferenceVoltage (NTV2RefVoltage* value));		///< @deprecated	This function is obsolete.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		SetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode inValue));		///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool		GetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode & outValue));		///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode * pOutValue))	{return pOutValue ? GetFrameBufferMode (inChannel, *pOutValue) : false;}	///< @deprecated	This function is obsolete.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL bool		SetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode inValue);
 	AJA_VIRTUAL bool		GetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode & outValue);
@@ -1280,10 +1193,6 @@ public:
 	AJA_VIRTUAL bool	GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK);
 
 	AJA_VIRTUAL bool	ReadLineCount (ULWord & outValue);
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WritePanControl (ULWord value));		///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadPanControl (ULWord *value));		///< @deprecated	This function is obsolete.
-	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 
@@ -1356,7 +1265,7 @@ public:
     AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
 	/**
-		@brief		Enables or disables "loopback" mode for the given ::NTV2AudioSystem.
+		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout engine
 									is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
@@ -1368,7 +1277,7 @@ public:
 	AJA_VIRTUAL bool	SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Answers if "loopback" mode is currently enabled or not for the given ::NTV2AudioSystem.
+		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@param[in]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
 									the Audio System's input de-embedder when the playout engine is stopped;
@@ -1384,9 +1293,23 @@ public:
 	AJA_VIRTUAL bool	GetAudioAnalogLevel (NTV2AudioLevel & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	SetEncodedAudioMode (const NTV2EncodedAudioMode value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 	AJA_VIRTUAL bool	GetEncodedAudioMode (NTV2EncodedAudioMode & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Sets the ::NTV2EmbeddedAudioClock setting for the given ::NTV2AudioSystem.
+		@return		True if successful; otherwise false.
+		@param[in]	inValue			Specifies the ::NTV2EmbeddedAudioClock setting to use.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@see		CNTV2Card::SetEmbeddedAudioClock, ::NTV2DeviceCanChangeEmbeddedAudioClock, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool	SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		For the given ::NTV2AudioSystem, answers with the current ::NTV2EmbeddedAudioClock setting.
+		@return		True if successful; otherwise false.
+		@param[out]	outValue		Receives the current ::NTV2EmbeddedAudioClock setting.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@see		CNTV2Card::SetEmbeddedAudioClock, ::NTV2DeviceCanChangeEmbeddedAudioClock, \ref audiocapture
+	**/
 	AJA_VIRTUAL bool	GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
@@ -1400,7 +1323,7 @@ public:
 									This is typically 16KB from the end of the buffer. If the current offset plus the audio bytes to be
 									written will go past this position, the caller should split the DMA transfer into two separate ones:
 									one to fill to the end of the buffer, and the remainder from the start of the buffer.
-		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1411,7 +1334,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out]	outReadOffset	Receives the offset to the audio capture buffer from the start of the audio buffer.
 									This will typically be 4MB.
-		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool	GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1424,31 +1347,6 @@ public:
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
 	**/
 	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset, const NTV2AudioSystem	inAudioSystem);
-
-	#if !defined (NTV2_DEPRECATE)
-		//	These functions dealt exclusively with Audio Systems, but unfortunately required channels to be passed into them.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetNumberAudioChannels(ULWord numChannels, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetNumberAudioChannels(ULWord *numChannels, NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioRate(NTV2AudioRate value, NTV2Channel channel));						///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioRate(NTV2AudioRate *value, NTV2Channel channel));					///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioBufferSize(NTV2AudioBufferSize value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioBufferSize(NTV2AudioBufferSize *value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioAnalogLevel(NTV2AudioLevel value, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioAnalogLevel(NTV2AudioLevel *value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioLoopBack(NTV2AudioLoopBack value, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioLoopBack(NTV2AudioLoopBack *value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEncodedAudioMode(NTV2EncodedAudioMode value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEncodedAudioMode(NTV2EncodedAudioMode *value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEmbeddedAudioInput(NTV2EmbeddedAudioInput value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEmbeddedAudioInput(NTV2EmbeddedAudioInput *value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEmbeddedAudioClock(NTV2EmbeddedAudioClock value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEmbeddedAudioClock(NTV2EmbeddedAudioClock *value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioWrapAddress(ULWord *wrapAddress, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioReadOffset(ULWord *readOffset, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAverageAudioLevelChan1_2(ULWord *value));									///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WriteAudioControl (ULWord inValue, NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadAudioControl (ULWord *value, NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		For the given Audio System, specifies the byte offset in the device's output audio buffer
@@ -1486,32 +1384,42 @@ public:
 	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Enables or disables the output of audio samples by the given Audio System, resetting
-					the playback position to the start of the audio output buffer.
+		@brief		Starts the playout side of the given ::NTV2AudioSystem, reading outgoing audio samples
+					from the Audio System's playout buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
-		@param[in]	inEnable		Specify 'true' to stop audio playout. (When stopped, the Audio System's output embedder,
-									if enabled, will emit silence.)
-									Specify 'false' to stop audio playout. (When started, the Audio System's output embedder
-									will continue to pull samples from the Audio Output Buffer as the "read head" moves forward
-									through the buffer.)
-		@note		Passing 'true' to this function has the side effect of resetting the current Audio Output Buffer Pointer ("read head")
-					pointer (as reported by CNTV2Card::ReadAudioLastOut) to zero. This can be useful for resynchronizing audio and video.
-					If it is desired to stop playout without resetting the pointer, use CNTV2Card::SetAudioOutputPause instead.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's playout side is already running.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers whether or not the specified Audio System is currently in "Reset" mode -- i.e., stopped --
-					and the audio buffer pointer ("Read Head") is zero.
+		@brief		Stops the playout side of the given ::NTV2AudioSystem, parking the "Read Head" at the start
+					of the playout buffer.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	outEnable		Receives 'true' if the Audio System's playout engine is stopped (i.e.,
-									it's not currently producing output samples and the "Read Head" is parked
-									at zero). Receives 'false' if the Audio System's playout engine is currently
-									running.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's playout side is already stopped.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		StopAudioOutput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Answers whether or not the playout side of the given ::NTV2AudioSystem is currently running.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outIsRunning		Receives 'true' if the Audio System's playout side is currently running;
+										otherwise receives 'false'.
+		@see		CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, CNTV2Card::SetAudioOutputPause,
+					CNTV2Card::GetAudioOutputPause, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
 
 	/**
 		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
@@ -1537,29 +1445,42 @@ public:
 	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);
 
 	/**
-		@brief		Enables or disables the input of audio samples by the given Audio System, resetting
-					the playback position to the start of the audio buffer.
-		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem	Specifies the Audio System on the device to be affected.
-		@param[in]	inEnable		If true,  audio samples will be captured by the Audio System.
-									If false, audio sample capture is inhibited.
-		@note		Calling this funcion with a true parameter has the side effect of resetting
-					the current audio buffer pointer (as reported by CNTV2Card::ReadAudioLastIn) to zero.
-					This can be useful for resynchronizing audio and video.
-	**/
-	AJA_VIRTUAL bool		SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inEnable);
-
-	/**
-		@brief		Answers whether or not the device's Audio System is currently operating in the mode
-					in which it is not capturing audio output samples and the audio buffer pointer has
-					been reset to zero.
+		@brief		Starts the capture side of the given ::NTV2AudioSystem, writing incoming audio samples
+					into the Audio System's capture buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the Audio System
-										is not capturing output samples and the buffer pointer is zero,
-										or 'false' if the Audio System is operating normally.
+		@note		It is not an error to call this function when the Audio System's capture side is already running.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Stops the capture side of the given ::NTV2AudioSystem, and resets the capture position
+					(i.e. "Write Head") back to the start of the Audio System's capture buffer. This can be useful
+					for resynchronizing audio and video.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@note		It is not an error to call this function when the Audio System's capture side is already stopped.
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
+					configures the Audio System automatically.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		StopAudioInput (const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Answers whether or not the capture side of the given ::NTV2AudioSystem is currently running.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	outIsRunning		Receives 'true' if the Audio System's capture side is currently running;
+										otherwise receives 'false'.
+		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 
 	/**
 		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
@@ -1567,8 +1488,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inEnable		If true, the Audio System will capture samples into memory, if not currently reset.
 									If false, the Audio System will not capture samples.
-		@note		Applications that acquire exclusive use of the AJA device, set its "every frame services" mode
-					to NTV2_OEM_TASKS, and use AutoCirculate won't need to call this function, since AutoCirculate
+		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
 	**/
 	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
@@ -1639,12 +1559,6 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable));		///< @deprecated	Use GetAudioPlayCaptureModeEnable(NTV2AudioSystem,bool&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioInputDelay (const NTV2AudioSystem inAudioSystem, ULWord * pOutDelay));		///< @deprecated	Use GetAudioInputDelay(NTV2AudioSystem,ULWord&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, ULWord * pOutDelay));		///< @deprecated	Use GetAudioOutputDelay(NTV2AudioSystem,ULWord&) instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		Answers with the audio output delay for the given Audio System on the device.
@@ -1723,10 +1637,10 @@ public:
 
 
 	/**
-		@brief		Answers which audio channel pairs being transmitted by the given Audio System are currently being flagged
-					as non-PCM.
-		@param[in]	inAudioSystem			Specifies the Audio System of interest.
-		@param[out]	outNonPCMChannelPairs	Receives the audio channel pairs that are currently being flagged as non-PCM.
+		@brief		Answers which ::NTV2AudioChannelPairs being transmitted by the given ::NTV2AudioSystem are currently
+					being flagged as non-PCM.
+		@param[in]	inAudioSystem			Specifies the ::NTV2AudioSystem of interest.
+		@param[out]	outNonPCMChannelPairs	Receives the ::NTV2AudioChannelPairs that are currently being flagged as non-PCM.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 	**/
@@ -1734,10 +1648,10 @@ public:
 
 
 	/**
-		@brief		Answers whether or not the given audio channel pair in the given Audio System on the device is present in the input signal.
-		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	inChannelPair	Specifies the channel pair of interest.
-		@param[out]	outIsPresent	Receives true if the channel pair is present;  otherwise false if it's not present.
+		@brief		Answers whether or not the given ::NTV2AudioChannelPair in the given ::NTV2AudioSystem on the device is present in the input signal.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
+		@param[in]	inChannelPair	Specifies the ::NTV2AudioChannelPair of interest.
+		@param[out]	outIsPresent	Receives true if the ::NTV2AudioChannelPair is present;  otherwise false if it's not present.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		IsAudioChannelPairPresent (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsPresent);
@@ -1745,8 +1659,8 @@ public:
 
 	/**
 		@brief		Answers which audio channel pairs are present in the given Audio System's input stream.
-		@param[in]	inAudioSystem				Specifies the Audio System of interest.
-		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in the Audio System's input stream.
+		@param[in]	inAudioSystem				Specifies the ::NTV2AudioSystem of interest.
+		@param[out]	outDetectedChannelPairs		Receives the ::NTV2AudioChannelPairs that are present in the Audio System's input stream.
 		@return		True if successful; otherwise false.
 		@note		NTV2 device firmware performs this detection using a simple method of detecting the presence of the Audio Group's data packet.
 					It does not perform detailed inspection of the packet -- i.e., checking bits b1/b2 of the AES sub-frame per SMPTE 272, nor
@@ -1764,81 +1678,85 @@ public:
 
 
 	/**
-		@brief		Sets the audio source for the given Audio System on the device.
-		@param[in]	inAudioSystem		Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-										(Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
-		@param[in]	inAudioSource		Specifies the audio source to use for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
-		@param[in]	inEmbeddedInput		If the audio source is set to NTV2_AUDIO_EMBEDDED, and the device has multiple SDI inputs, use inEmbeddedInput
-										to specify which NTV2EmbeddedAudioInput to use. This parameter is ignored if the inAudioSource is not NTV2_AUDIO_EMBEDDED.
+		@brief		Sets the audio source for the given ::NTV2AudioSystem on the device.
+		@param[in]	inAudioSystem		Specifies the ::NTV2AudioSystem of interest.
+		@param[in]	inAudioSource		Specifies the ::NTV2AudioSource to use for the given ::NTV2AudioSystem
+										e.g., ::NTV2_AUDIO_EMBEDDED, ::NTV2_AUDIO_AES, ::NTV2_AUDIO_ANALOG, etc.).
+		@param[in]	inEmbeddedInput		If the audio source is set to ::NTV2_AUDIO_EMBEDDED, and the device has multiple SDI inputs, use \c inEmbeddedInput
+										to specify which ::NTV2EmbeddedAudioInput to use. This parameter is ignored if \c inAudioSource is not ::NTV2_AUDIO_EMBEDDED.
 		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@see		CNTV2Card::GetAudioSystemInputSource, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedInput);
 
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2InputSource inInputSource));
-	#endif	//	!defined (NTV2_DEPRECATE)
-
 	/**
-		@brief		Answers with the current audio source for the given Audio System on the device.
-		@param[in]	inAudioSystem	Specifies the Audio System of interest on the device (e.g., NTV2_AUDIOSYSTEM_1, NTV2_AUDIOSYSTEM_2, etc.).
-									(Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.)
-		@param[out]	outAudioSource	Receives the audio source that's currently being used for the given Audio System (e.g., NTV2_AUDIO_EMBEDDED, NTV2_AUDIO_AES, NTV2_AUDIO_ANALOG, etc.).
-		@param[out]	outEmbeddedSource	If the audio source is NTV2_AUDIO_EMBEDDED, outEmbeddedSource will be the SDI input it is configured for.
+		@brief		Answers with the device's current ::NTV2AudioSource (and also possibly its ::NTV2EmbeddedAudioInput) for the given ::NTV2AudioSystem.
+		@param[in]	inAudioSystem		Specifies the ::NTV2AudioSystem of interest.
+		@param[out]	outAudioSource		Receives the ::NTV2AudioSource that's currently being used for the given ::NTV2AudioSystem
+										(e.g., ::NTV2_AUDIO_EMBEDDED, ::NTV2_AUDIO_AES, ::NTV2_AUDIO_ANALOG, etc.).
+		@param[out]	outEmbeddedSource	Receives the ::NTV2EmbeddedAudioInput.
+										Ignore this result if the audio source is not ::NTV2_AUDIO_EMBEDDED.
 		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@see		CNTV2Card::SetAudioSystemInputSource, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource, NTV2EmbeddedAudioInput & outEmbeddedSource);
 
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource * pOutAudioSource));
-	#endif	//	!defined (NTV2_DEPRECATE)
+	/**
+		@brief		Sets the embedded (SDI) audio source for the given ::NTV2AudioSystem on the device.
+		@param[in]	inEmbeddedSource	If the audio source is set to ::NTV2_AUDIO_EMBEDDED, and the device has multiple SDI inputs, use \c inEmbeddedInput
+										to specify which ::NTV2EmbeddedAudioInput to use. This parameter is ignored if \c inAudioSource is not ::NTV2_AUDIO_EMBEDDED.
+		@param[in]	inAudioSystem		Specifies the ::NTV2AudioSystem of interest.
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		This function will have no effect if the device's current ::NTV2AudioSource is something other than ::NTV2_AUDIO_EMBEDDED.
+					Usually it's best to call CNTV2Card::SetAudioSystemInputSource instead of this function.
+		@see		CNTV2Card::GetEmbeddedAudioInput, CNTV2Card::SetAudioSystemInputSource, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inEmbeddedSource, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder.
-		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@brief		Answers with the device's current embedded (SDI) audio source for the given ::NTV2AudioSystem.
+		@param[out]	outEmbeddedSource	Receives the ::NTV2EmbeddedAudioInput (SDI audio source).
+		@param[in]	inAudioSystem		Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		This function assumes the device's current ::NTV2AudioSource is ::NTV2_AUDIO_EMBEDDED.
+					Usually it's best to call CNTV2Card::GetAudioSystemInputSource instead of this function.
+		@see		CNTV2Card::SetEmbeddedAudioInput, CNTV2Card::GetAudioSystemInputSource, \ref audiocapture
+	**/
+	AJA_VIRTUAL bool		GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outEmbeddedSource, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI output's audio embedder.
+		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder.
+		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., NTV2_AUDIOSYSTEM_1).
+		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetSDIOutAudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetSDIOutAudioSource (ULWord & outValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
 
@@ -1847,30 +1765,10 @@ public:
 		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioStreams function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
-
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetSDIOutDS2AudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetSDIOutDS2AudioSource (ULWord & outValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), answers if the specified audio channel pair is currently PCM-encoded or not.
@@ -2049,6 +1947,123 @@ public:
 	AJA_VIRTUAL bool	ReadGlobalControl (ULWord *value);
 
 	#if !defined (NTV2_DEPRECATE)
+		virtual NTV2_DEPRECATED_f(bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use CNTV2DeviceScanner or Open(deviceIndex) instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2BoardID	GetBoardID (void))				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(UWord		GetBoardNumber (void) const)		{return GetIndexNumber ();}		///< @deprecated	Use GetIndexNumber instead.
+		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardType		GetBoardType (void) const);										///< @deprecated	NTV2BoardType is obsolete.
+		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardSubType	GetBoardSubType (void));											///< @deprecated	NTV2BoardSubType is obsolete.
+		static NTV2_DEPRECATED_f(UWord				GetNumNTV2Boards (void));										///< @deprecated	Use CNTV2DeviceScanner instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMARead instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWrite instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadFrame instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteFrame instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
+															const ULWord inOffsetBytes, const ULWord inByteCount,
+															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
+															const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadSegments instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
+															const ULWord inOffsetBytes, const ULWord inByteCount,
+															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
+															const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteSegments instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioRead (	const NTV2DMAEngine		inDMAEngine,
+															const NTV2AudioSystem	inAudioEngine,
+															ULWord *				pOutAudioBuffer,
+															const ULWord			inOffsetBytes,
+															const ULWord			inByteCount,
+															const bool				inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadAudio instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioWrite (	const NTV2DMAEngine		inDMAEngine,
+															const NTV2AudioSystem	inAudioEngine,
+															const ULWord *			pInAudioBuffer,
+															const ULWord			inOffsetBytes,
+															const ULWord			inByteCount,
+															const bool				inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteAudio instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
+											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
+											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetReferenceSource (NTV2ReferenceSource value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	Use SetReference instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetReferenceSource (NTV2ReferenceSource* value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	Use GetReference instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	UpdateK2ColorSpaceMatrixSelect (NTV2VideoFormat currFormat = NTV2_FORMAT_UNKNOWN, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	UpdateK2LUTSelect (NTV2VideoFormat currFormat = NTV2_FORMAT_UNKNOWN, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2BitfileType	BitfileSwitchNeeded (NTV2DeviceID deviceID, NTV2VideoFormat value, bool ajaRetail = AJA_RETAIL_DEFAULT));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFramebufferSize (SIZE * pOutFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use GetActiveFrameDimensions instead.
+		static NTV2_DEPRECATED_f(bool	IsSDVideoADCMode (NTV2LSVideoADCMode mode));			///< @deprecated	This function is obsolete.
+		static NTV2_DEPRECATED_f(bool	IsHDVideoADCMode (NTV2LSVideoADCMode mode));			///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetReferenceVoltage (NTV2RefVoltage value));			///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetReferenceVoltage (NTV2RefVoltage* value));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode inValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode & outValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameBufferMode (NTV2Channel inChannel, NTV2FrameBufferMode * pOutValue))	{return pOutValue ? GetFrameBufferMode (inChannel, *pOutValue) : false;}	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WritePanControl (ULWord value));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadPanControl (ULWord *value));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetNumberAudioChannels(ULWord numChannels, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetNumberAudioChannels(ULWord *numChannels, NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioRate(NTV2AudioRate value, NTV2Channel channel));						///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioRate(NTV2AudioRate *value, NTV2Channel channel));					///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioBufferSize(NTV2AudioBufferSize value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioBufferSize(NTV2AudioBufferSize *value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioAnalogLevel(NTV2AudioLevel value, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioAnalogLevel(NTV2AudioLevel *value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioLoopBack(NTV2AudioLoopBack value, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioLoopBack(NTV2AudioLoopBack *value, NTV2Channel channel));			///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEncodedAudioMode(NTV2EncodedAudioMode value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEncodedAudioMode(NTV2EncodedAudioMode *value, NTV2Channel channel));		///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEmbeddedAudioInput(NTV2EmbeddedAudioInput value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEmbeddedAudioInput(NTV2EmbeddedAudioInput *value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetEmbeddedAudioClock(NTV2EmbeddedAudioClock value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetEmbeddedAudioClock(NTV2EmbeddedAudioClock *value, NTV2Channel channel));	///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioWrapAddress(ULWord *wrapAddress, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioReadOffset(ULWord *readOffset, NTV2Channel channel));				///< @deprecated	Use the equivalent function that accepts an NTV2AudioSystem instead of an NTV2Channel.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAverageAudioLevelChan1_2(ULWord *value));									///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WriteAudioControl (ULWord inValue, NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadAudioControl (ULWord *value, NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable));		///< @deprecated	Use GetAudioPlayCaptureModeEnable(NTV2AudioSystem,bool&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioInputDelay (const NTV2AudioSystem inAudioSystem, ULWord * pOutDelay));		///< @deprecated	Use GetAudioInputDelay(NTV2AudioSystem,ULWord&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, ULWord * pOutDelay));		///< @deprecated	Use GetAudioOutputDelay(NTV2AudioSystem,ULWord&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource));	///< @deprecated	Call CNTV2Card::SetAudioSystemInputSource(const NTV2AudioSystem, const NTV2AudioSource, const NTV2EmbeddedAudioInput) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2InputSource inInputSource));	///< @deprecated	Call CNTV2Card::SetAudioSystemInputSource(const NTV2AudioSystem, const NTV2AudioSource, const NTV2EmbeddedAudioInput) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource & outAudioSource));	///< @deprecated	Call CNTV2Card::GetAudioSystemInputSource(const NTV2AudioSystem, NTV2AudioSource&, NTV2EmbeddedAudioInput&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, NTV2AudioSource * pOutAudioSource));	///< @deprecated	Call CNTV2Card::GetAudioSystemInputSource(const NTV2AudioSystem, NTV2AudioSource&, NTV2EmbeddedAudioInput&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetSDIOutAudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetSDIOutAudioSource (ULWord & outValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutAudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutAudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputAudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetSDIOutDS2AudioSource (const ULWord inValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetSDIOutDS2AudioSource (ULWord & outValue, const NTV2Channel channel = NTV2_CHANNEL1));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutDS2AudioSource(ULWord value));	///< @deprecated	Use SetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutDS2AudioSource(ULWord* value));	///< @deprecated	Use GetSDIOutputDS2AudioSystem(NTV2Channel,NTV2AudioSystem&) instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WriteCh1Control (ULWord value));			///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadCh1Control (ULWord *value));			///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	WriteCh1PCIAccessFrame (ULWord value));		///< @deprecated	This function is obsolete.
@@ -3087,7 +3102,7 @@ public:
 					In either mode, this function has no effect on the <b>Active Frame</b> (the frame currently being captured
 					or played by the device hardware at the moment the function was called).
 					The ::NTV2AutoCirculateState (::NTV2_AUTOCIRCULATE_RUNNING, etc.) for the given channel will remain unchanged.
-		@see		\ref aboutautocirculate
+		@see		See \ref aboutautocirculate
 	**/
     AJA_VIRTUAL bool	AutoCirculateFlush (const NTV2Channel inChannel, const bool inClearDropCount = false);
 
@@ -3105,7 +3120,7 @@ public:
 		@note		This method does nothing if the channel's state is not currently ::NTV2_AUTOCIRCULATE_STARTING,
 					::NTV2_AUTOCIRCULATE_RUNNING or ::NTV2_AUTOCIRCULATE_PAUSED, or if the channel was initialized by
 					CNTV2Card::AutoCirculateInitForInput.
-		@see		\ref autocirculateplayout
+		@see		See \ref autocirculateplayout
 	**/
 	AJA_VIRTUAL bool	AutoCirculatePreRoll (const NTV2Channel inChannel, const ULWord inPreRollFrames);
 
@@ -3118,7 +3133,7 @@ public:
 		@details	Clients can use the ::AUTOCIRCULATE_STATUS information to determine if there are sufficient readable frames
 					in the driver to safely support a DMA transfer to host memory (for capture);  or to determine if any frames
 					have been dropped.
-		@see		\ref aboutautocirculate
+		@see		See \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULATE_STATUS & outStatus);
 
@@ -3137,7 +3152,7 @@ public:
 					it's currently working on, which is intended to give enough information to determine if frames have been dropped
 					either on input or output. Moreover, it allows for synchronization of audio and video by time-stamping the audio
 					input address at the start and end of a video frame.
-		@see		\ref aboutautocirculate
+		@see		See \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateGetFrameStamp (const NTV2Channel inChannel, const ULWord inFrameNumber, FRAME_STAMP & outFrameInfo);
 
@@ -3154,7 +3169,7 @@ public:
 					that an outgoing frame won't suddenly change mid-frame.
 		@note		This method does nothing if the channel's AutoCirculate state is not currently ::NTV2_AUTOCIRCULATE_STARTING,
 					::NTV2_AUTOCIRCULATE_RUNNING or ::NTV2_AUTOCIRCULATE_PAUSED.
-		@see		\ref aboutautocirculate, \ref videooperation
+		@see		See \ref aboutautocirculate, \ref videooperation
 	**/
 	AJA_VIRTUAL bool	AutoCirculateSetActiveFrame (const NTV2Channel inChannel, const ULWord inNewActiveFrame);
 
@@ -3170,7 +3185,7 @@ public:
 					via the AUTOCIRCULATE_TRANSFER::SetBuffers function(s). Bad addresses and/or sizes can cause crashes.
 		@note		Do not call this method with an ::NTV2Channel that's in the ::NTV2_AUTOCIRCULATE_DISABLED state.
 		@note		The calling thread will block until the transfer completes (or fails).
-		@see		\ref aboutautocirculate, CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame
+		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & transferInfo);
 
@@ -3181,7 +3196,7 @@ public:
 		@param[out]	outStartFrameNumber		Receives the starting device frame buffer number.
 		@param[out]	outEndFrameNumber		Receives the ending device frame buffer number.
 		@return		True if successful; otherwise false.
-		@see		\ref aboutautocirculate
+		@see		See \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	FindUnallocatedFrames (const UByte inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);
 	///@}

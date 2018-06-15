@@ -49,7 +49,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 {
 }
 
-CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const bool displayErrorMessage, const UWord ulBoardType)
+CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 	:	CNTV2Card (boardNumber),
         _bitFileBuffer      (NULL),
         _customFileBuffer   (NULL),
@@ -75,8 +75,6 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const boo
         _mcsStep            (0),
         _spiFlash(NULL)
 {
-	(void) displayErrorMessage;	//	unused
-	(void) ulBoardType;			//	unused
 	SetDeviceProperties();
 }
 
@@ -99,9 +97,9 @@ void CNTV2KonaFlashProgram::SetQuietMode()
     }
 }
 
-bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
+bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
-	if (!Open (boardNumber, false, boardType))
+	if (!Open (boardNumber))
 		return false;
 
 	// if board is a sarek with microblaze - ensure access to flash

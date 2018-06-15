@@ -41,7 +41,7 @@ typedef struct
 
 
 /**
-	@brief	I'm the base class that undergirds the platform-specific derived classes (from which CNTV2Card is ultimately derived).
+	@brief	I'm the base class that undergirds the platform-specific derived classes (from which ::CNTV2Card is ultimately derived).
 **/
 class AJAExport CNTV2DriverInterface
 {
@@ -55,19 +55,17 @@ public:
 		@result		True if successful; otherwise false.
 		@param[in]	inDeviceIndex		Optionally specifies a zero-based index number of the AJA device to open.
 										Defaults to zero, which is the first AJA device found.
-		@param[in]	displayError		Optionally specifies if an alert dialog should be displayed if a failure occurs
-										when attempting to open the AJA device (on host platforms that support alert dialogs).
-										Defaults to false.
-		@param[in]	eDeviceType			Optionally specifies the type of AJA device to look for. This parameter is obsolete.
-		@param[in]	hostName			Optionally specifies the name of a host machine on the local area network that has
-										one or more AJA devices attached to it. Defaults to NULL, which attempts to open AJA
-										devices on the local host. If not NULL, must be a valid pointer to a buffer containing
-										a zero-terminated character string.
+		@param[in]	inHostName			Optionally specifies the name of a host machine on the local area network that has
+										one or more AJA devices attached to it. Defaults to the empty string, which attempts
+										to open AJA devices on the local host.
 	**/
-	virtual bool Open(UWord inDeviceIndex=0, bool displayError = false,
-					  NTV2DeviceType eDeviceType = DEVICETYPE_UNKNOWN,
-					  const char *hostName = 0) = 0;
-
+	virtual bool Open(const UWord inDeviceIndex = 0,
+					  const std::string & inHostName = std::string()) = 0;
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual bool Open(UWord inDeviceIndex, bool displayError,
+					  NTV2DeviceType eDeviceType,
+					  const char *hostName) = 0;
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 	// call this before Open to set the shareable feature of the Card
 	virtual bool SetShareMode (bool bShared) = 0;
@@ -330,7 +328,6 @@ protected:
 
     UWord					_boardNumber;			///< @brief	My device index number.
     bool					_boardOpened;			///< @brief	True if I'm open and connected to the device.
-    NTV2DeviceType			_boardType;				///< @brief	This is obsolete.
 	NTV2DeviceID			_boardID;				///< @brief	My cached device ID.
     bool					_displayErrorMessage;	///< @brief	This is obsolete.
 	ULWord					_pciSlot;				//	FIXFIXFIX	Replace this with a std::string that identifies my location in the host device tree.

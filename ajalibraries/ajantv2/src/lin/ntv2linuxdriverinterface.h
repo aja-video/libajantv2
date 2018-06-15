@@ -53,11 +53,15 @@ public:
 
 	bool SetOverlappedMode (bool bOverlapped);
 
-	bool Open(	UWord			boardNumber = 0,
-		  		bool			displayError = false,
-				NTV2DeviceType	eBoardType = DEVICETYPE_UNKNOWN,
-				const char 		*hostname = 0   // Non-null: card on remote host
-			);
+	bool Open (const UWord inDeviceIndex = 0,
+			  const std::string & inHostName = std::string());
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool Open(	UWord			boardNumber,
+		  		bool			displayError,
+				NTV2DeviceType	eBoardType,
+				const char 		*hostname);   // Non-null: card on remote host
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
+
 
 	bool Close();
 

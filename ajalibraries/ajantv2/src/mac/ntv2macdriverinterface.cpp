@@ -511,16 +511,15 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError, NTV2DeviceType eBoardType,	const char * pInHostName)
+bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
 {
 	if (inDeviceIndexNumber >= kMaxNumDevices)
 		return false;
 
-	const string	hostName	(pInHostName ? pInHostName : "");
-	if (IsOpen ()  &&  inDeviceIndexNumber == _boardNumber)
+	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty ()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
 			return true;	//	Same local device requested, already open
 		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
 			return true;	//	Same remote device requested, already open
@@ -529,17 +528,15 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 #endif
 	}
 
-	if (IsOpen ())
-		Close ();		//	Close if different device requested
+	if (IsOpen())
+		Close();	//	Close if different device requested
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (!hostName.empty())
-		_boardOpened = OpenRemote (inDeviceIndexNumber, displayError, eBoardType, pInHostName);	//	Remote host open
+		_boardOpened = OpenRemote (inDeviceIndexNumber, false, 256, hostName.c_str());	//	Remote host open
 	else
 #else
-	(void) pInHostName;
-	(void) eBoardType;
-	(void) displayError;
+	(void) hostName;
 #endif
 	{
 		// Local host open -- get a Mach connection
@@ -602,6 +599,16 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 	return IsOpen ();
 
 }	//	Open
+
+#if !defined(NTV2_DEPRECATE_14_3)
+bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError, NTV2DeviceType eBoardType, const char * pInHostName)
+{
+	(void) displayError;
+	(void) eBoardType;
+	const string host(pInHostName ? pInHostName : "");
+	return Open(inDeviceIndexNumber, host);
+}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 //--------------------------------------------------------------------------------------------------------------------
