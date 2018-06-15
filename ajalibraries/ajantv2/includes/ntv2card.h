@@ -656,48 +656,6 @@ public:
 																const UByte *		pInAncBuffer,
 																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
 																const ULWord		inByteCount		= 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2_POINTER &, const NTV2_POINTER &) instead.
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMARead instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWrite instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAReadFrame instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWriteFrame instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-															const ULWord inOffsetBytes, const ULWord inByteCount,
-															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAReadSegments instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-															const ULWord inOffsetBytes, const ULWord inByteCount,
-															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAWriteSegments instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioRead (	const NTV2DMAEngine		inDMAEngine,
-															const NTV2AudioSystem	inAudioEngine,
-															ULWord *				pOutAudioBuffer,
-															const ULWord			inOffsetBytes,
-															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAReadAudio instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioWrite (	const NTV2DMAEngine		inDMAEngine,
-															const NTV2AudioSystem	inAudioEngine,
-															const ULWord *			pInAudioBuffer,
-															const ULWord			inOffsetBytes,
-															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAWriteAudio instead.
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
-											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
-											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
-	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 //
@@ -1996,41 +1954,33 @@ public:
 		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardSubType	GetBoardSubType (void));											///< @deprecated	NTV2BoardSubType is obsolete.
 		static NTV2_DEPRECATED_f(UWord				GetNumNTV2Boards (void));										///< @deprecated	Use CNTV2DeviceScanner instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMARead instead.
-
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMARead instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWrite instead.
-
+														const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWrite instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAReadFrame instead.
-
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadFrame instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use DMAWriteFrame instead.
-
+															const ULWord inByteCount, const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteFrame instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
 															const ULWord inOffsetBytes, const ULWord inByteCount,
 															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAReadSegments instead.
-
+															const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadSegments instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
 															const ULWord inOffsetBytes, const ULWord inByteCount,
 															const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-															const bool inSynchronous = true));	///< @deprecated	Use DMAWriteSegments instead.
-
+															const bool inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteSegments instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioRead (	const NTV2DMAEngine		inDMAEngine,
 															const NTV2AudioSystem	inAudioEngine,
 															ULWord *				pOutAudioBuffer,
 															const ULWord			inOffsetBytes,
 															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAReadAudio instead.
-
+															const bool				inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAReadAudio instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaAudioWrite (	const NTV2DMAEngine		inDMAEngine,
 															const NTV2AudioSystem	inAudioEngine,
 															const ULWord *			pInAudioBuffer,
 															const ULWord			inOffsetBytes,
 															const ULWord			inByteCount,
-															const bool				inSynchronous = true));	///< @deprecated	Use DMAWriteAudio instead.
-
+															const bool				inSynchronous = true));	///< @deprecated	Use CNTV2Card::DMAWriteAudio instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
 											ULWord bytes, bool bSync = true));	///< @deprecated	This function is obsolete, as no current AJA devices use non-interleaved fields.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID, ULWord *pFrameBuffer,
