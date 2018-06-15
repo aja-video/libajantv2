@@ -542,6 +542,39 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         p.SetValue(keyName, &hierarchyValue3, AJAPersistenceTypeInt);
         hierarchyValue3 = 0;
 
+        // multiple
+        keyName = "UnitTestMultipleInt_1";
+        intValue = 10;
+        p.SetValue(keyName, &intValue, AJAPersistenceTypeInt);
+
+        keyName = "UnitTestMultipleInt_2";
+        intValue = 20;
+        p.SetValue(keyName, &intValue, AJAPersistenceTypeInt);
+
+        keyName = "UnitTestMultipleInt_3";
+        intValue = 30;
+        p.SetValue(keyName, &intValue, AJAPersistenceTypeInt);
+        intValue = 0;
+
+        keyName = "UnitTestMultipleBool_true";
+        trueValue = true;
+        p.SetValue(keyName, &trueValue, AJAPersistenceTypeBool);
+        trueValue = false;
+
+        keyName = "UnitTestMultipleBool_false";
+        falseValue = false;
+        p.SetValue(keyName, &falseValue, AJAPersistenceTypeBool);
+        falseValue = true;
+
+        keyName = "UnitTestMultipleDouble_e";
+        doubleValue = 2.71;
+        p.SetValue(keyName, &doubleValue, AJAPersistenceTypeDouble);
+
+        keyName = "UnitTestMultipleDouble_pi";
+        doubleValue = 3.14;
+        p.SetValue(keyName, &doubleValue, AJAPersistenceTypeDouble);
+        doubleValue = 0;
+
         // Read
         p.SetParams(appID, "", "", sharedPrefs);
 
@@ -586,6 +619,24 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         p.SetParams(appID, "device 2", "987654", sharedPrefs);
         isGood = p.GetValue(keyName, &hierarchyValue3, AJAPersistenceTypeInt);
 
+        //multiple
+        //the extra '_' is used in SQL syntax as a 1 character wildcard
+        keyName = "UnitTestMultipleInt__";
+        std::vector<std::string> intKeys;
+        std::vector<int> intValues;
+        isGood = p.GetValuesInt(keyName, intKeys, intValues);
+
+        //the extra '%' is used in SQL syntax as a character sequence wildcard
+        keyName = "UnitTestMultipleBool_%";
+        std::vector<std::string> boolKeys;
+        std::vector<bool> boolValues;
+        isGood = p.GetValuesBool(keyName, boolKeys, boolValues);
+
+        keyName = "UnitTestMultipleDouble_%";
+        std::vector<std::string> doubleKeys;
+        std::vector<double> doubleValues;
+        isGood = p.GetValuesDouble(keyName, doubleKeys, doubleValues);
+
         CHECK(isGood);
         CHECK(intValue == 42);
         CHECK(trueValue == true);
@@ -600,6 +651,29 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         CHECK(hierarchyValue1 == 0);
         CHECK(hierarchyValue2 == 23);
         CHECK(hierarchyValue3 == 27);
+
+        CHECK(intKeys.size() == 3);
+        CHECK(intValues.size() == 3);
+        CHECK(intKeys.at(0) == "UnitTestMultipleInt_1");
+        CHECK(intKeys.at(1) == "UnitTestMultipleInt_2");
+        CHECK(intKeys.at(2) == "UnitTestMultipleInt_3");
+        CHECK(intValues.at(0) == 10);
+        CHECK(intValues.at(1) == 20);
+        CHECK(intValues.at(2) == 30);
+
+        CHECK(boolKeys.size() == 2);
+        CHECK(boolValues.size() == 2);
+        CHECK(boolKeys.at(0) == "UnitTestMultipleBool_true");
+        CHECK(boolKeys.at(1) == "UnitTestMultipleBool_false");
+        CHECK(boolValues.at(0) == true);
+        CHECK(boolValues.at(1) == false);
+
+        CHECK(doubleKeys.size() == 2);
+        CHECK(doubleValues.size() == 2);
+        CHECK(doubleKeys.at(0) == "UnitTestMultipleDouble_e");
+        CHECK(doubleKeys.at(1) == "UnitTestMultipleDouble_pi");
+        CHECK(doubleValues.at(0) == 2.71);
+        CHECK(doubleValues.at(1) == 3.14);
     }
 
 TEST_SUITE_END(); //persistence
