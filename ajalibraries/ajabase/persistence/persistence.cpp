@@ -13,7 +13,7 @@
 #include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
 
-#define AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL   1
+#define AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL 1
 
 // Mac defines
 #if !defined(AJA_MAC) && defined(AJAMac)
@@ -527,6 +527,7 @@ private:
       AJAPersistenceDBImplStatement mGetAllValuesGenericStmt;
 };
 
+#if !defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
 //MARK: hidden helpers
 
 static std::string makeCreateTableString(const std::string& tableName,bool blobTable = false)
@@ -1217,6 +1218,7 @@ static bool PersistenceGetValueBlob(std::string keyRoot, std::string key, void *
 	
 	return isGood;
 }
+#endif // !defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
 
 //MARK: Start of Class
 
@@ -1234,7 +1236,7 @@ AJAPersistence::AJAPersistence(const std::string& appID, const std::string& devi
 
 AJAPersistence::~AJAPersistence()
 {
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     if (mDBImpl)
     {
         delete mDBImpl;
@@ -1261,7 +1263,7 @@ void AJAPersistence::SetParams(const std::string& appID, const std::string& devi
 
     mstateKeyName += appID;
 
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     if (mDBImpl)
     {
         delete mDBImpl;
@@ -1282,7 +1284,7 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 
 bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
 {
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
     {
@@ -1307,7 +1309,7 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 	if (FileExists() == false)
 		return false;
 
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
     {
@@ -1327,7 +1329,7 @@ bool AJAPersistence::GetValuesString(const std::string& key_query, std::vector<s
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
 		return false;
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
     {
@@ -1407,7 +1409,7 @@ bool AJAPersistence::DeletePrefFile()
 	bool bSuccess = true;
 	if (FileExists())
 	{
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
         if (mDBImpl)
         {
             delete mDBImpl;
@@ -1418,7 +1420,7 @@ bool AJAPersistence::DeletePrefFile()
 		int err = remove(mstateKeyName.c_str());
 		bSuccess = err != 0;
 
-#if AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
         mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
 #endif
 	}
